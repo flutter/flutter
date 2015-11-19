@@ -77,7 +77,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset);
   }
 }
 
@@ -501,10 +501,12 @@ class RenderOpacity extends RenderProxyBox {
       int a = _alpha;
       if (a == 0)
         return;
-      if (a == 255)
-        context.paintChild(child, offset.toPoint());
-      else
-        context.paintChildWithOpacity(child, offset.toPoint(), null, a);
+      if (a == 255) {
+        context.paintChild(child, offset);
+        return;
+      }
+      // TODO(abarth): We should pass bounds here.
+      context.pushOpacity(needsCompositing, offset, null, a, super.paint);
     }
   }
 
@@ -540,7 +542,7 @@ class RenderShaderMask extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChildWithShaderMask(child, offset.toPoint(), offset & size, _shaderCallback, _transferMode);
+      context.pushShaderMask(needsCompositing, offset, Point.origin & size, _shaderCallback, _transferMode, super.paint);
   }
 }
 
@@ -552,7 +554,7 @@ class RenderClipRect extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChildWithClipRect(child, offset.toPoint(), offset & size);
+      context.pushClipRect(needsCompositing, offset, Point.origin & size, super.paint);
   }
 }
 
@@ -598,9 +600,9 @@ class RenderClipRRect extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      Rect rect = offset & size;
+      Rect rect = Point.origin & size;
       ui.RRect rrect = new ui.RRect.fromRectXY(rect, xRadius, yRadius);
-      context.paintChildWithClipRRect(child, offset.toPoint(), rect, rrect);
+      context.pushClipRRect(needsCompositing, offset, rect, rrect, super.paint);
     }
   }
 }
@@ -615,7 +617,7 @@ class RenderClipOval extends RenderProxyBox {
   Rect _cachedRect;
   Path _cachedPath;
 
-  Path _getPath(Rect rect) {
+  Path _getClipPath(Rect rect) {
     if (rect != _cachedRect) {
       _cachedRect = rect;
       _cachedPath = new Path()..addOval(_cachedRect);
@@ -634,8 +636,8 @@ class RenderClipOval extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      Rect rect = offset & size;
-      context.paintChildWithClipPath(child, offset.toPoint(), rect, _getPath(rect));
+      Rect bounds = Point.origin & size;
+      context.pushClipPath(needsCompositing, offset, bounds, _getClipPath(bounds), super.paint);
     }
   }
 }
@@ -863,7 +865,7 @@ class RenderTransform extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChildWithTransform(child, offset.toPoint(), _effectiveTransform);
+      context.pushTransform(needsCompositing, offset, _effectiveTransform, super.paint);
   }
 
   void applyPaintTransform(Matrix4 transform) {

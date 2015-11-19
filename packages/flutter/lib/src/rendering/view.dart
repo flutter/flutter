@@ -110,7 +110,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.paintChild(child, offset.toPoint());
+      context.paintChild(child, offset);
   }
 
   /// Uploads the composited layer tree to the engine
