@@ -11,24 +11,44 @@ import 'fetch.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
 
-Future<ui.Image> _fetchImage(String url) async {
-  UrlResponse response = await fetchUrl(url);
-  if (response.statusCode >= 400) {
-    print("Failed (${response.statusCode}) to load image $url");
-    return null;
+/// Implements a way to retrieve an image, for example by fetching it from the network.
+/// Also used as a key in the image cache.
+abstract class ImageProvider {
+  Future<ui.Image> loadImage();
+}
+
+class _UrlFetcher implements ImageProvider {
+  final String _url;
+
+  _UrlFetcher(this._url);
+
+  Future<ui.Image> loadImage() async {
+    UrlResponse response = await fetchUrl(_url);
+    if (response.statusCode >= 400) {
+      print("Failed (${response.statusCode}) to load image $_url");
+      return null;
+    }
+    return await decodeImageFromDataPipe(response.body);
   }
-  return await decodeImageFromDataPipe(response.body);
+
+  bool operator ==(other) => other is _UrlFetcher && _url == other._url;
+  int get hashCode => _url.hashCode;
 }
 
 class _ImageCache {
   _ImageCache._();
 
-  final Map<String, ImageResource> _cache = new Map<String, ImageResource>();
+  final Map<ImageProvider, ImageResource> _cache =
+      new Map<ImageProvider, ImageResource>();
+
+  ImageResource loadProvider(ImageProvider provider) {
+    return _cache.putIfAbsent(provider, () {
+      return new ImageResource(provider.loadImage());
+    });
+  }
 
   ImageResource load(String url) {
-    return _cache.putIfAbsent(url, () {
-      return new ImageResource(_fetchImage(url));
-    });
+    return loadProvider(new _UrlFetcher(url));
   }
 }
 
