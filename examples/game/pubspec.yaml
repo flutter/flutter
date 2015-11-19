@@ -1,6 +1,0 @@
-name: asteroids
-dependencies:
-  flutter:
-    path: ../../packages/flutter
-  flutter_sprites:
-    path: ../../packages/flutter_sprites
