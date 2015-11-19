@@ -232,7 +232,7 @@ class _RenderTabBar extends RenderBox with
     RenderBox child = firstChild;
     while (child != null) {
       final _TabBarParentData childParentData = child.parentData;
-      context.paintChild(child, childParentData.position + offset);
+      context.paintChild(child, childParentData.offset + offset);
       if (index++ == selectedIndex)
         _paintIndicator(context.canvas, child, offset);
       child = childParentData.nextSibling;

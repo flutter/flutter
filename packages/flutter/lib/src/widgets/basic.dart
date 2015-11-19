@@ -1019,6 +1019,7 @@ class Image extends LeafRenderObjectWidget {
     this.height,
     this.colorFilter,
     this.fit,
+    this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice
   }) : super(key: key);
@@ -1028,6 +1029,7 @@ class Image extends LeafRenderObjectWidget {
   final double height;
   final ColorFilter colorFilter;
   final ImageFit fit;
+  final FractionalOffset alignment;
   final ImageRepeat repeat;
   final Rect centerSlice;
 
@@ -1037,6 +1039,7 @@ class Image extends LeafRenderObjectWidget {
     height: height,
     colorFilter: colorFilter,
     fit: fit,
+    alignment: alignment,
     repeat: repeat,
     centerSlice: centerSlice);
 
@@ -1045,6 +1048,7 @@ class Image extends LeafRenderObjectWidget {
     renderObject.width = width;
     renderObject.height = height;
     renderObject.colorFilter = colorFilter;
+    renderObject.alignment = alignment;
     renderObject.fit = fit;
     renderObject.repeat = repeat;
     renderObject.centerSlice = centerSlice;
@@ -1059,6 +1063,7 @@ class ImageListener extends StatefulComponent {
     this.height,
     this.colorFilter,
     this.fit,
+    this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice
   }) : super(key: key) {
@@ -1070,6 +1075,7 @@ class ImageListener extends StatefulComponent {
   final double height;
   final ColorFilter colorFilter;
   final ImageFit fit;
+  final FractionalOffset alignment;
   final ImageRepeat repeat;
   final Rect centerSlice;
 
@@ -1109,6 +1115,7 @@ class _ImageListenerState extends State<ImageListener> {
       height: config.height,
       colorFilter: config.colorFilter,
       fit: config.fit,
+      alignment: config.alignment,
       repeat: config.repeat,
       centerSlice: config.centerSlice
     );
@@ -1123,6 +1130,7 @@ class NetworkImage extends StatelessComponent {
     this.height,
     this.colorFilter,
     this.fit,
+    this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice
   }) : super(key: key);
@@ -1132,6 +1140,7 @@ class NetworkImage extends StatelessComponent {
   final double height;
   final ColorFilter colorFilter;
   final ImageFit fit;
+  final FractionalOffset alignment;
   final ImageRepeat repeat;
   final Rect centerSlice;
 
@@ -1142,6 +1151,7 @@ class NetworkImage extends StatelessComponent {
       height: height,
       colorFilter: colorFilter,
       fit: fit,
+      alignment: alignment,
       repeat: repeat,
       centerSlice: centerSlice
     );
@@ -1176,6 +1186,7 @@ class AsyncImage extends StatelessComponent {
     this.height,
     this.colorFilter,
     this.fit,
+    this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice
   }) : super(key: key);
@@ -1185,6 +1196,7 @@ class AsyncImage extends StatelessComponent {
   final double height;
   final ColorFilter colorFilter;
   final ImageFit fit;
+  final FractionalOffset alignment;
   final ImageRepeat repeat;
   final Rect centerSlice;
 
@@ -1195,6 +1207,7 @@ class AsyncImage extends StatelessComponent {
       height: height,
       colorFilter: colorFilter,
       fit: fit,
+      alignment: alignment,
       repeat: repeat,
       centerSlice: centerSlice
     );
@@ -1210,6 +1223,7 @@ class AssetImage extends StatelessComponent {
     this.height,
     this.colorFilter,
     this.fit,
+    this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice
   }) : super(key: key);
@@ -1220,6 +1234,7 @@ class AssetImage extends StatelessComponent {
   final double height;
   final ColorFilter colorFilter;
   final ImageFit fit;
+  final FractionalOffset alignment;
   final ImageRepeat repeat;
   final Rect centerSlice;
 
@@ -1230,6 +1245,7 @@ class AssetImage extends StatelessComponent {
       height: height,
       colorFilter: colorFilter,
       fit: fit,
+      alignment: alignment,
       repeat: repeat,
       centerSlice: centerSlice
     );
@@ -1318,9 +1334,9 @@ class Listener extends OneChildRenderObjectWidget {
   }
 }
 
-class ForcedLayer extends OneChildRenderObjectWidget {
-  ForcedLayer({ Key key, Widget child }) : super(key: key, child: child);
-  RenderForcedLayer createRenderObject() => new RenderForcedLayer();
+class RepaintBoundary extends OneChildRenderObjectWidget {
+  RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
+  RenderRepaintBoundary createRenderObject() => new RenderRepaintBoundary();
 }
 
 class IgnorePointer extends OneChildRenderObjectWidget {

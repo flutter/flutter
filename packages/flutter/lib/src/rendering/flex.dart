@@ -553,10 +553,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // We have overflow. Clip it.
-    context.canvas.save();
-    context.canvas.clipRect(offset & size);
-    defaultPaint(context, offset);
-    context.canvas.restore();
+    context.pushClipRect(needsCompositing, offset, Point.origin & size, defaultPaint);
+
     assert(() {
       // In debug mode, if you have overflow, we highlight where the
       // overflow would be by painting that area red. Since that is

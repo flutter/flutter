@@ -383,10 +383,7 @@ abstract class RenderStackBase extends RenderBox
 
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow) {
-      context.canvas.save();
-      context.canvas.clipRect(offset & size);
-      paintStack(context, offset);
-      context.canvas.restore();
+      context.pushClipRect(needsCompositing, offset, Point.origin & size, paintStack);
     } else {
       paintStack(context, offset);
     }
@@ -489,6 +486,6 @@ class RenderIndexedStack extends RenderStackBase {
       return;
     RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    context.paintChild(child, childParentData.position + offset);
+    context.paintChild(child, childParentData.offset + offset);
   }
 }

@@ -139,13 +139,9 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
   }
 
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow) {
-      context.canvas.save();
-      context.canvas.clipRect(offset & size);
+    if (_hasVisualOverflow)
+      context.pushClipRect(needsCompositing, offset, Point.origin & size, defaultPaint);
+    else
       defaultPaint(context, offset);
-      context.canvas.restore();
-    } else {
-      defaultPaint(context, offset);
-    }
   }
 }
