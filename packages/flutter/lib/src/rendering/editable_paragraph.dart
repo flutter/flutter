@@ -97,15 +97,7 @@ class RenderEditableParagraph extends RenderParagraph {
     }
   }
 
-  void paint(PaintingContext context, Offset offset) {
-    layoutText(_getTextContraints(constraints));
-
-    final bool needsClipping = (_contentSize.width > size.width);
-    if (needsClipping) {
-      context.canvas.save();
-      context.canvas.clipRect(offset & size);
-    }
-
+  void _paintContents(PaintingContext context, Offset offset) {
     textPainter.paint(context.canvas, offset - _scrollOffset);
 
     if (_showCursor) {
@@ -117,9 +109,15 @@ class RenderEditableParagraph extends RenderParagraph {
       );
       context.canvas.drawRect(cursorRect, new Paint()..color = _cursorColor);
     }
+  }
 
-    if (needsClipping)
-      context.canvas.restore();
+  void paint(PaintingContext context, Offset offset) {
+    layoutText(_getTextContraints(constraints));
+    final bool hasVisualOverflow = (_contentSize.width > size.width);
+    if (hasVisualOverflow)
+      context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
+    else
+      _paintContents(context, offset);
   }
 
 }

@@ -401,18 +401,17 @@ class RenderBlockViewport extends RenderBlockBase {
     super.performLayout();
   }
 
-  void paint(PaintingContext context, Offset offset) {
-    context.canvas.save();
-
-    context.canvas.clipRect(offset & size);
+  void _paintContents(PaintingContext context, Offset offset) {
     if (isVertical)
       defaultPaint(context, offset.translate(0.0, startOffset));
     else
       defaultPaint(context, offset.translate(startOffset, 0.0));
 
     overlayPainter?.paint(context, offset);
+  }
 
-    context.canvas.restore();
+  void paint(PaintingContext context, Offset offset) {
+    context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
   }
 
   void applyPaintTransform(Matrix4 transform) {

@@ -96,6 +96,7 @@ class PaintingContext {
   void _compositeChild(RenderObject child, Offset offset) {
     assert(!_isRecording);
     assert(child.hasLayer);
+    assert(_canvas == null || _canvas.getSaveCount() == 1);
 
     // Create a layer for our child, and paint the child into it.
     if (child.needsPaint) {
@@ -966,10 +967,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisPaint = true;
       debugLastActivePaint = _debugActivePaint;
       _debugActivePaint = this;
-      if (debugPaintBoundsEnabled) {
-        context.canvas.save();
-        context.canvas.clipRect(paintBounds.shift(offset));
-      }
       assert(!hasLayer || _layer != null);
       return true;
     });
@@ -983,8 +980,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
     assert(() {
       debugPaint(context, offset);
-      if (debugPaintBoundsEnabled)
-        context.canvas.restore();
       _debugActivePaint = debugLastActivePaint;
       _debugDoingThisPaint = false;
       return true;
