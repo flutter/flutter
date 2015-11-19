@@ -70,7 +70,8 @@ class RunMojoCommand extends FlutterCommand {
 
   BuildConfiguration _getCurrentHostConfig() {
     BuildConfiguration result;
-    TargetPlatform target = getCurrentHostPlatformAsTarget();
+    TargetPlatform target = argResults['android'] ?
+      TargetPlatform.android : getCurrentHostPlatformAsTarget();
     for (BuildConfiguration config in buildConfigurations) {
       if (config.targetPlatform == target) {
         result = config;
@@ -87,20 +88,25 @@ class RunMojoCommand extends FlutterCommand {
     final String command = useDevtools ? _getDevtoolsPath() : _getMojoShellPath();
     args.add(command);
 
+    BuildConfiguration config = _getCurrentHostConfig();
+
     if (argResults['android']) {
       args.add('--android');
-      final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('android-arm');
       final String appPath = _makePathAbsolute(bundlePath);
       final String appName = path.basename(appPath);
       final String appDir = path.dirname(appPath);
       args.add('http://app/$appName');
       args.add('--map-origin=http://app/=$appDir');
-      args.add('--map-origin=http://flutter/=$cloudStorageBaseUrl');
+      if (config == null || config.type == BuildType.prebuilt) {
+        final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('android-arm');
+        args.add('--map-origin=http://flutter/=$cloudStorageBaseUrl');
+      } else {
+        args.add('--map-origin=http://flutter/=${config.buildDir}');
+      }
       args.add('--url-mappings=mojo:flutter=http://flutter/flutter.mojo');
     } else {
       final String appPath = _makePathAbsolute(bundlePath);
       String flutterPath;
-      BuildConfiguration config = _getCurrentHostConfig();
       if (config == null || config.type == BuildType.prebuilt) {
         Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: TargetPlatform.linux);
         flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
