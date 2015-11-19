@@ -54,7 +54,6 @@ class FeedFragment extends StatefulComponent {
 }
 
 class FeedFragmentState extends State<FeedFragment> {
-  final GlobalKey<PlaceholderState> _snackBarPlaceholderKey = new GlobalKey<PlaceholderState>();
   FitnessMode _fitnessMode = FitnessMode.feed;
 
   void _handleFitnessModeChange(FitnessMode value) {
@@ -115,15 +114,14 @@ class FeedFragmentState extends State<FeedFragment> {
 
   void _handleItemDismissed(FitnessItem item) {
     config.onItemDeleted(item);
-    showSnackBar(
-      context: context,
-      placeholderKey: _snackBarPlaceholderKey,
+    Scaffold.of(context).showSnackBar(new SnackBar(
       content: new Text("Item deleted."),
-      actions: <SnackBarAction>[new SnackBarAction(label: "UNDO", onPressed: () {
-        config.onItemCreated(item);
-        Navigator.of(context).pop();
-      })]
-    );
+      actions: <SnackBarAction>[
+        new SnackBarAction(label: "UNDO", onPressed: () {
+          config.onItemCreated(item);
+        }),
+      ]
+    ));
   }
 
   Widget buildChart() {
@@ -212,7 +210,6 @@ class FeedFragmentState extends State<FeedFragment> {
     return new Scaffold(
       toolBar: buildToolBar(),
       body: buildBody(),
-      snackBar: new Placeholder(key: _snackBarPlaceholderKey),
       floatingActionButton: buildFloatingActionButton()
     );
   }

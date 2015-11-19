@@ -112,8 +112,6 @@ class MeasurementFragment extends StatefulComponent {
 }
 
 class MeasurementFragmentState extends State<MeasurementFragment> {
-  final GlobalKey<PlaceholderState> _snackBarPlaceholderKey = new GlobalKey<PlaceholderState>();
-
   String _weight = "";
   DateTime _when = new DateTime.now();
 
@@ -123,11 +121,9 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
       parsedWeight = double.parse(_weight);
     } on FormatException catch(e) {
       print("Exception $e");
-      showSnackBar(
-        context: context,
-        placeholderKey: _snackBarPlaceholderKey,
+      Scaffold.of(context).showSnackBar(new SnackBar(
         content: new Text('Save failed')
-      );
+      ));
     }
     config.onCreated(new Measurement(when: _when, weight: parsedWeight));
     Navigator.of(context).pop();
@@ -198,8 +194,7 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: buildToolBar(),
-      body: buildBody(context),
-      snackBar: new Placeholder(key: _snackBarPlaceholderKey)
+      body: buildBody(context)
     );
   }
 }

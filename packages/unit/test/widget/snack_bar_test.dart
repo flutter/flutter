@@ -7,60 +7,142 @@ import 'package:test/test.dart';
 
 import 'widget_tester.dart';
 
+class Builder extends StatelessComponent {
+  Builder({ this.builder });
+  final WidgetBuilder builder;
+  Widget build(BuildContext context) => builder(context);
+}
+
 void main() {
   test('SnackBar control test', () {
     testWidgets((WidgetTester tester) {
       String helloSnackBar = 'Hello SnackBar';
-      GlobalKey<PlaceholderState> placeholderKey = new GlobalKey<PlaceholderState>();
       Key tapTarget = new Key('tap-target');
-      BuildContext context;
-      bool showSnackBarThenCalled = false;
-
       tester.pumpWidget(new MaterialApp(
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) {
-            context = args.context;
-            return new GestureDetector(
-              onTap: () {
-                showSnackBar(
-                  context: args.context,
-                  placeholderKey: placeholderKey,
-                  content: new Text(helloSnackBar)
-                ).then((_) {
-                  showSnackBarThenCalled = true;
-                });
-              },
-              child: new Container(
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFF00FF00)
-                ),
-                child: new Center(
-                  key: tapTarget,
-                  child: new Placeholder(key: placeholderKey)
-                )
+            return new Scaffold(
+              body: new Builder(
+                builder: (BuildContext context) {
+                  return new GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                        content: new Text(helloSnackBar),
+                        duration: new Duration(seconds: 2)
+                      ));
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: new Container(
+                      height: 100.0,
+                      width: 100.0,
+                      key: tapTarget
+                    )
+                  );
+                }
               )
             );
           }
         }
       ));
-
-      // TODO(hansmuller): find a way to avoid calling pump over and over.
-      // https://github.com/flutter/flutter/issues/348
-
+      expect(tester.findText(helloSnackBar), isNull);
       tester.tap(tester.findElementByKey(tapTarget));
       expect(tester.findText(helloSnackBar), isNull);
-      tester.pump(new Duration(seconds: 1));
-      tester.pump(new Duration(seconds: 1));
+      tester.pump(); // schedule animation
       expect(tester.findText(helloSnackBar), isNotNull);
-
-      Navigator.of(context).pop();
+      tester.pump(); // begin animation
       expect(tester.findText(helloSnackBar), isNotNull);
-      tester.pump(new Duration(seconds: 1));
-      tester.pump(new Duration(seconds: 1));
-      tester.pump(new Duration(seconds: 1));
-      expect(showSnackBarThenCalled, isTrue);
+      tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      expect(tester.findText(helloSnackBar), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 1.50s
+      expect(tester.findText(helloSnackBar), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 2.25s 
+      expect(tester.findText(helloSnackBar), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+      tester.pump(); // begin animation
+      expect(tester.findText(helloSnackBar), isNotNull); // frame 0 of dismiss animation
+      tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
       expect(tester.findText(helloSnackBar), isNull);
-      expect(placeholderKey.currentState.child, isNull);
+    });
+  });
+
+  test('SnackBar twice test', () {
+    testWidgets((WidgetTester tester) {
+      int snackBarCount = 0;
+      Key tapTarget = new Key('tap-target');
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) {
+            return new Scaffold(
+              body: new Builder(
+                builder: (BuildContext context) {
+                  return new GestureDetector(
+                    onTap: () {
+                      snackBarCount += 1;
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                        content: new Text("bar$snackBarCount"),
+                        duration: new Duration(seconds: 2)
+                      ));
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: new Container(
+                      height: 100.0,
+                      width: 100.0,
+                      key: tapTarget
+                    )
+                  );
+                }
+              )
+            );
+          }
+        }
+      ));
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.tap(tester.findElementByKey(tapTarget)); // queue bar1
+      tester.tap(tester.findElementByKey(tapTarget)); // queue bar2
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(); // schedule animation for bar1
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 1.50s
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 2.25s 
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 4.50s // animation last frame; two second timer starts here
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 5.25s
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 6.00s 
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
     });
   });
 }

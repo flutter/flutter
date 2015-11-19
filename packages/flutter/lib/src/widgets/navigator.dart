@@ -109,13 +109,15 @@ class NavigatorState extends State<Navigator> {
   }
 
   void push(Route route, { Set<Key> mostValuableKeys }) {
-    _popAllEphemeralRoutes();
-    int index = _modal.length-1;
-    while (index >= 0 && _modal[index].willPushNext(route))
-      index -= 1;
-    route.didPush(overlay, _currentOverlay);
-    config.observer?.didPushModal(route, index >= 0 ? _modal[index] : null);
-    _modal.add(route);
+    setState(() {
+      _popAllEphemeralRoutes();
+      int index = _modal.length-1;
+      while (index >= 0 && _modal[index].willPushNext(route))
+        index -= 1;
+      route.didPush(overlay, _currentOverlay);
+      config.observer?.didPushModal(route, index >= 0 ? _modal[index] : null);
+      _modal.add(route);
+    });
   }
 
   void pushEphemeral(Route route) {
@@ -132,17 +134,22 @@ class NavigatorState extends State<Navigator> {
   }
 
   void pop([dynamic result]) {
-    if (_ephemeral.isNotEmpty) {
-      _ephemeral.removeLast().didPop(result);
-    } else {
-      assert(_modal.length > 1);
-      Route route = _modal.removeLast();
-      route.didPop(result);
-      int index = _modal.length-1;
-      while (index >= 0 && _modal[index].didPopNext(route))
-        index -= 1;
-      config.observer?.didPopModal(route, index >= 0 ? _modal[index] : null);
-    }
+    setState(() {
+      // We use setState to guarantee that we'll rebuild, since the routes can't
+      // do that for themselves, even if they have changed their own state (e.g.
+      // ModalScope.isCurrent).
+      if (_ephemeral.isNotEmpty) {
+        _ephemeral.removeLast().didPop(result);
+      } else {
+        assert(_modal.length > 1);
+        Route route = _modal.removeLast();
+        route.didPop(result);
+        int index = _modal.length-1;
+        while (index >= 0 && _modal[index].didPopNext(route))
+          index -= 1;
+        config.observer?.didPopModal(route, index >= 0 ? _modal[index] : null);
+      }
+    });
   }
 
   Widget build(BuildContext context) {

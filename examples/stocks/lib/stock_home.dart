@@ -19,7 +19,7 @@ class StockHome extends StatefulComponent {
 
 class StockHomeState extends State<StockHome> {
 
-  final GlobalKey<PlaceholderState> _snackBarPlaceholderKey = new GlobalKey<PlaceholderState>();
+  final GlobalKey scaffoldKey = new GlobalKey();
   final GlobalKey<PlaceholderState> _bottomSheetPlaceholderKey = new GlobalKey<PlaceholderState>();
   bool _isSearching = false;
   String _searchQuery;
@@ -179,19 +179,23 @@ class StockHomeState extends State<StockHome> {
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
 
+  void _buyStock(Stock stock, Key arrowKey) {
+    setState(() {
+      stock.percentChange = 100.0 * (1.0 / stock.lastSale);
+      stock.lastSale += 1.0;
+    });
+    scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text("Purchased ${stock.symbol} for ${stock.lastSale}"),
+      actions: <SnackBarAction>[
+        new SnackBarAction(label: "BUY MORE", onPressed: () { _buyStock(stock, arrowKey); })
+      ]
+    ));
+  }
+
   Widget buildStockList(BuildContext context, Iterable<Stock> stocks) {
     return new StockList(
       stocks: stocks.toList(),
-      onAction: (Stock stock, Key arrowKey) {
-        setState(() {
-          stock.percentChange = 100.0 * (1.0 / stock.lastSale);
-          stock.lastSale += 1.0;
-        });
-        showModalBottomSheet(
-          context: context,
-          child: new StockSymbolBottomSheet(stock: stock)
-        );
-      },
+      onAction: _buyStock,
       onOpen: (Stock stock, Key arrowKey) {
         Set<Key> mostValuableKeys = new Set<Key>();
         mostValuableKeys.add(arrowKey);
@@ -229,6 +233,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   static GlobalKey searchFieldKey = new GlobalKey();
+  static GlobalKey companyNameKey = new GlobalKey();
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
   Widget buildSearchBar() {
@@ -247,18 +252,16 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  void _handleUndo() {
-    Navigator.of(context).pop();
-  }
-
-  void _handleStockPurchased() {
-    showSnackBar(
+  void _handleCreateCompany() {
+    showModalBottomSheet(
+      // TODO(ianh): Fill this out.
       context: context,
-      placeholderKey: _snackBarPlaceholderKey,
-      content: new Text("Stock purchased!"),
-      actions: <SnackBarAction>[
-        new SnackBarAction(label: "UNDO", onPressed: _handleUndo)
-      ]
+      child: new Column([
+        new Input(
+          key: companyNameKey,
+          placeholder: 'Company Name'
+        ),
+      ])
     );
   }
 
@@ -266,15 +269,15 @@ class StockHomeState extends State<StockHome> {
     return new FloatingActionButton(
       child: new Icon(icon: 'content/add'),
       backgroundColor: Colors.redAccent[200],
-      onPressed: _handleStockPurchased
+      onPressed: _handleCreateCompany
     );
   }
 
   Widget build(BuildContext context) {
     return new Scaffold(
+      key: scaffoldKey,
       toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
       body: buildTabNavigator(),
-      snackBar: new Placeholder(key: _snackBarPlaceholderKey),
       bottomSheet: new Placeholder(key: _bottomSheetPlaceholderKey),
       floatingActionButton: buildFloatingActionButton()
     );

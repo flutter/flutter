@@ -31,7 +31,7 @@ class StateRoute extends Route {
   bool didPopNext(Route nextRoute) => true;
 }
 
-class OverlayRoute extends Route {
+abstract class OverlayRoute extends Route {
   List<WidgetBuilder> get builders => const <WidgetBuilder>[];
 
   List<OverlayEntry> get overlayEntries => _overlayEntries;
@@ -108,24 +108,56 @@ abstract class TransitionRoute extends OverlayRoute {
   String toString() => '$runtimeType(performance: $_performance)';
 }
 
+class _ModalScopeStatus extends InheritedWidget {
+  _ModalScopeStatus({
+    Key key,
+    this.current,
+    this.route,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(current != null);
+    assert(route != null);
+    assert(child != null);
+  }
+
+  final bool current;
+  final Route route;
+
+  bool updateShouldNotify(_ModalScopeStatus old) {
+    return current != old.current ||
+           route != old.route;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('${current ? "active" : "inactive"}');
+  }
+}
+
 class _ModalScope extends StatusTransitionComponent {
   _ModalScope({
     Key key,
     this.subtreeKey,
     this.storageBucket,
     PerformanceView performance,
+    this.current,
     this.route
   }) : super(key: key, performance: performance);
 
   final GlobalKey subtreeKey;
   final PageStorageBucket storageBucket;
+  final bool current;
   final ModalRoute route;
 
   Widget build(BuildContext context) {
     Widget contents = new PageStorage(
       key: subtreeKey,
       bucket: storageBucket,
-      child: route.buildPage(context)
+      child: new _ModalScopeStatus(
+        current: current,
+        route: route,
+        child: route.buildPage(context)
+      )
     );
     if (route.offstage) {
       contents = new OffStage(child: contents);
@@ -165,7 +197,17 @@ abstract class ModalRoute extends TransitionRoute {
     this.settings: const NamedRouteSettings()
   }) : super(completer: completer);
 
+  // The API for general users of this class
+
   final NamedRouteSettings settings;
+
+  static ModalRoute of(BuildContext context) {
+    _ModalScopeStatus widget = context.inheritFromWidgetOfType(_ModalScopeStatus);
+    return widget?.route;
+  }
+
+  bool get isCurrent => _isCurrent;
+  bool _isCurrent = false;
 
 
   // The API for subclasses to override - used by _ModalScope
@@ -204,6 +246,34 @@ abstract class ModalRoute extends TransitionRoute {
 
   // Internals
 
+  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
+    assert(!_isCurrent);
+    _isCurrent = true;
+    super.didPush(overlay, insertionPoint);
+  }
+
+  void didPop(dynamic result) {
+    assert(_isCurrent);
+    _isCurrent = false;
+    super.didPop(result);
+  }
+
+  bool willPushNext(Route nextRoute) {
+    if (nextRoute is ModalRoute) {
+      assert(_isCurrent);
+      _isCurrent = false;
+    }
+    return false;
+  }
+
+  bool didPopNext(Route nextRoute) {
+    if (nextRoute is ModalRoute) {
+      assert(!_isCurrent);
+      _isCurrent = true;
+    }
+    return false;
+  }
+
   final GlobalKey<StatusTransitionState> _scopeKey = new GlobalKey<StatusTransitionState>();
   final GlobalKey _subtreeKey = new GlobalKey();
   final PageStorageBucket _storageBucket = new PageStorageBucket();
@@ -222,6 +292,7 @@ abstract class ModalRoute extends TransitionRoute {
       subtreeKey: _subtreeKey,
       storageBucket: _storageBucket,
       performance: performance,
+      current: isCurrent,
       route: this
     );
   }
