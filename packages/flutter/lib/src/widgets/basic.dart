@@ -1337,9 +1337,9 @@ class Listener extends OneChildRenderObjectWidget {
   }
 }
 
-class ForcedLayer extends OneChildRenderObjectWidget {
-  ForcedLayer({ Key key, Widget child }) : super(key: key, child: child);
-  RenderForcedLayer createRenderObject() => new RenderForcedLayer();
+class RepaintBoundary extends OneChildRenderObjectWidget {
+  RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
+  RenderRepaintBoundary createRenderObject() => new RenderRepaintBoundary();
 }
 
 class IgnorePointer extends OneChildRenderObjectWidget {

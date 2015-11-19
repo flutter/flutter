@@ -62,25 +62,27 @@ class _DrawerRoute extends OverlayRoute {
   _DrawerState _state = _DrawerState.showing;
 
   Widget _build(BuildContext context) {
-    return new _DrawerController(
-      key: _drawerKey,
-      settleDuration: _kBaseSettleDuration,
-      onClosed: () {
-        _DrawerState previousState = _state;
-        _state = _DrawerState.closed;
-        switch (previousState) {
-          case _DrawerState.showing:
-            Navigator.of(context).pop();
-            break;
-          case _DrawerState.popped:
-            super.didPop(null);
-            break;
-          case _DrawerState.closed:
-            assert(false);
-            break;
-        }
-      },
-      child: new _Drawer(route: this)
+    return new RepaintBoundary(
+      child: new _DrawerController(
+        key: _drawerKey,
+        settleDuration: _kBaseSettleDuration,
+        onClosed: () {
+          _DrawerState previousState = _state;
+          _state = _DrawerState.closed;
+          switch (previousState) {
+            case _DrawerState.showing:
+              Navigator.of(context).pop();
+              break;
+            case _DrawerState.popped:
+              super.didPop(null);
+              break;
+            case _DrawerState.closed:
+              assert(false);
+              break;
+          }
+        },
+        child: new _Drawer(route: this)
+      )
     );
   }
 
@@ -202,7 +204,7 @@ class _DrawerControllerState extends State<_DrawerController> {
               widthFactor: _performance.progress,
               child: new SizeObserver(
                 onSizeChanged: _handleSizeChanged,
-                child: new ForcedLayer(
+                child: new RepaintBoundary(
                   child: config.child
                 )
               )

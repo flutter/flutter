@@ -1061,7 +1061,7 @@ class RenderPointerListener extends RenderProxyBox {
 /// previously. Similarly, when the child repaints but the surround tree does
 /// not, we can re-record its display list without re-recording the display list
 /// for the surround tree.
-class RenderForcedLayer extends RenderProxyBox {
+class RenderRepaintBoundary extends RenderProxyBox {
   bool get hasLayer => true;
 }
 
