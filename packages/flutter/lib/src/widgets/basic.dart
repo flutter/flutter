@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/services.dart';
 
 import 'framework.dart';
 
-export 'dart:typed_data' show Uint8List;
 export 'package:flutter/rendering.dart' show
     BackgroundImage,
     BlockDirection,
@@ -1180,10 +1178,10 @@ class DefaultAssetBundle extends InheritedWidget {
   bool updateShouldNotify(DefaultAssetBundle old) => bundle != old.bundle;
 }
 
-class RawImage extends StatelessComponent {
-  RawImage({
+class AsyncImage extends StatelessComponent {
+  AsyncImage({
     Key key,
-    this.bytes,
+    this.provider,
     this.width,
     this.height,
     this.colorFilter,
@@ -1193,7 +1191,7 @@ class RawImage extends StatelessComponent {
     this.centerSlice
   }) : super(key: key);
 
-  final Uint8List bytes;
+  final ImageProvider provider;
   final double width;
   final double height;
   final ColorFilter colorFilter;
@@ -1203,9 +1201,8 @@ class RawImage extends StatelessComponent {
   final Rect centerSlice;
 
   Widget build(BuildContext context) {
-    ImageResource image = new ImageResource(decodeImageFromList(bytes));
     return new ImageListener(
-      image: image,
+      image: imageCache.loadProvider(provider),
       width: width,
       height: height,
       colorFilter: colorFilter,
