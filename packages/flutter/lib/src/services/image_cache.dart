@@ -59,7 +59,7 @@ class _ImageCache {
   }
 
   ImageResource load(String url) {
-    return load(new _UrlFetcher(url));
+    return loadProvider(new _UrlFetcher(url));
   }
 }
 
