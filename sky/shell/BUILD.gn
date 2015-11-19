@@ -249,6 +249,7 @@ if (is_android) {
       "//sky/services/media",
       "//sky/services/ns_net",
       "//sky/services/vsync",
+      "//ui/gl",
       ":common",
       ":gpu_direct",
     ]
