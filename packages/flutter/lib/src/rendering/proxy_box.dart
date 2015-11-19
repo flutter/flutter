@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'object.dart';
 
 export 'package:flutter/src/painting/box_painter.dart';
@@ -875,10 +876,8 @@ class RenderTransform extends RenderProxyBox {
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
-    List<String> matrix = _transform.toString().split('\n').map((String s) => '  $s').toList();
-    matrix.removeLast();
     settings.add('transform matrix:');
-    settings.addAll(matrix);
+    settings.addAll(debugDescribeTransform(_transform));
     settings.add('origin: $origin');
     settings.add('alignment: $alignment');
   }

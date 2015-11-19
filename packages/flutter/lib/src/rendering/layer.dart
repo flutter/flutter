@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 export 'basic_types.dart';
 
@@ -66,6 +67,31 @@ abstract class Layer {
   /// The layerOffset is the accumulated offset of this layer's parent from the
   /// origin of the builder's coordinate system.
   void addToScene(ui.SceneBuilder builder, Offset layerOffset);
+
+  String toString() => '$runtimeType';
+
+  dynamic debugOwner;
+
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+    String result = '$prefixLineOne$this\n';
+    final String childrenDescription = debugDescribeChildren(prefixOtherLines);
+    final String settingsPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
+    List<String> settings = <String>[];
+    debugDescribeSettings(settings);
+    result += settings.map((String setting) => "$settingsPrefix$setting\n").join();
+    if (childrenDescription == '')
+      result += '$prefixOtherLines\n';
+    result += childrenDescription;
+    return result;
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    if (debugOwner != null)
+      settings.add('owner: $debugOwner');
+    settings.add('offset: $offset');
+  }
+
+  String debugDescribeChildren(String prefix) => '';
 }
 
 /// A composited layer containing a [Picture]
@@ -88,6 +114,10 @@ class PictureLayer extends Layer {
     builder.addPicture(offset + layerOffset, picture, paintBounds);
   }
 
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('paintBounds: $paintBounds');
+  }
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -113,7 +143,6 @@ class StatisticsLayer extends Layer {
     builder.addStatistics(optionsMask, paintBounds.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
   }
-
 }
 
 
@@ -210,6 +239,23 @@ class ContainerLayer extends Layer {
     }
   }
 
+  String debugDescribeChildren(String prefix) {
+    String result = '$prefix \u2502\n';
+    if (_firstChild != null) {
+      Layer child = _firstChild;
+      int count = 1;
+      while (child != _lastChild) {
+        result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
+        count += 1;
+        child = child._nextSibling;
+      }
+      if (child != null) {
+        assert(child == _lastChild);
+        result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
+      }
+    }
+    return result;
+  }
 }
 
 /// A composite layer that clips its children using a rectangle
@@ -227,6 +273,10 @@ class ClipRectLayer extends ContainerLayer {
     builder.pop();
   }
 
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('clipRect: $clipRect');
+  }
 }
 
 /// A composite layer that clips its children using a rounded rectangle
@@ -248,6 +298,11 @@ class ClipRRectLayer extends ContainerLayer {
     builder.pop();
   }
 
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('bounds: $bounds');
+    settings.add('clipRRect: $clipRRect');
+  }
 }
 
 /// A composite layer that clips its children using a path
@@ -269,6 +324,11 @@ class ClipPathLayer extends ContainerLayer {
     builder.pop();
   }
 
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('bounds: $bounds');
+    settings.add('clipPath: $clipPath');
+  }
 }
 
 /// A composited layer that applies a transformation matrix to its children
@@ -284,6 +344,12 @@ class TransformLayer extends ContainerLayer {
     builder.pushTransform((offsetTransform * transform).storage);
     addChildrenToScene(builder, Offset.zero);
     builder.pop();
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('transform:');
+    settings.addAll(debugDescribeTransform(transform));
   }
 }
 
@@ -305,5 +371,11 @@ class OpacityLayer extends ContainerLayer {
     builder.pushOpacity(alpha, bounds?.shift(layerOffset));
     addChildrenToScene(builder, offset + layerOffset);
     builder.pop();
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('bounds: $bounds');
+    settings.add('alpha: $alpha');
   }
 }
