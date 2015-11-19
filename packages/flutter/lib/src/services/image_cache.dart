@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:typed_data' show Uint8List;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 
@@ -51,13 +52,13 @@ class _ImageCache {
   final Map<ImageProvider, ImageResource> _cache =
       new Map<ImageProvider, ImageResource>();
 
-  ImageResource load(ImageProvider provider) {
+  ImageResource loadProvider(ImageProvider provider) {
     return _cache.putIfAbsent(provider, () {
       return new ImageResource(provider.loadImage());
     });
   }
 
-  ImageResource loadUrl(String url) {
+  ImageResource load(String url) {
     return load(new _UrlFetcher(url));
   }
 }

@@ -1138,7 +1138,7 @@ class NetworkImage extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new ImageListener(
-      image: imageCache.loadUrl(src),
+      image: imageCache.load(src),
       width: width,
       height: height,
       colorFilter: colorFilter,
@@ -1191,7 +1191,7 @@ class AsyncImage extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new ImageListener(
-      image: imageCache.load(provider),
+      image: imageCache.loadProvider(provider),
       width: width,
       height: height,
       colorFilter: colorFilter,
