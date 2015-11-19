@@ -19,7 +19,7 @@ class RRect {
 
   /// Returns a new RRect translated by the given offset.
   RRect shift(Offset offset) {
-    result = new RRect();
+    RRect result = new RRect();
     result._value
       ..[0] = _value[0] + offset.dx
       ..[1] = _value[1] + offset.dy
