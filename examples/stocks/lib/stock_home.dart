@@ -20,7 +20,6 @@ class StockHome extends StatefulComponent {
 class StockHomeState extends State<StockHome> {
 
   final GlobalKey scaffoldKey = new GlobalKey();
-  final GlobalKey<PlaceholderState> _bottomSheetPlaceholderKey = new GlobalKey<PlaceholderState>();
   bool _isSearching = false;
   String _searchQuery;
 
@@ -202,11 +201,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.of(context).pushNamed('/stock/${stock.symbol}', mostValuableKeys: mostValuableKeys);
       },
       onShow: (Stock stock, Key arrowKey) {
-        showBottomSheet(
-          placeholderKey: _bottomSheetPlaceholderKey,
-          context: context,
-          child: new StockSymbolBottomSheet(stock: stock)
-        );
+        scaffoldKey.currentState.showBottomSheet((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
       }
     );
   }
@@ -256,12 +251,14 @@ class StockHomeState extends State<StockHome> {
     showModalBottomSheet(
       // TODO(ianh): Fill this out.
       context: context,
-      child: new Column([
-        new Input(
-          key: companyNameKey,
-          placeholder: 'Company Name'
-        ),
-      ])
+      builder: (BuildContext context) {
+        return new Column([
+          new Input(
+            key: companyNameKey,
+            placeholder: 'Company Name'
+          ),
+        ]);
+      }
     );
   }
 
@@ -278,7 +275,6 @@ class StockHomeState extends State<StockHome> {
       key: scaffoldKey,
       toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
       body: buildTabNavigator(),
-      bottomSheet: new Placeholder(key: _bottomSheetPlaceholderKey),
       floatingActionButton: buildFloatingActionButton()
     );
   }

@@ -26,7 +26,10 @@ void main() {
       tester.pump();
       expect(tester.findText('BottomSheet'), isNull);
 
-      showModalBottomSheet(context: context, child: new Text('BottomSheet')).then((_) {
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) => new Text('BottomSheet')
+      ).then((_) {
         showBottomSheetThenCalled = true;
       });
 
@@ -42,7 +45,7 @@ void main() {
       expect(showBottomSheetThenCalled, isTrue);
       expect(tester.findText('BottomSheet'), isNull);
 
-      showModalBottomSheet(context: context, child: new Text('BottomSheet'));
+      showModalBottomSheet(context: context, builder: (BuildContext context) => new Text('BottomSheet'));
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester.findText('BottomSheet'), isNotNull);
@@ -58,45 +61,60 @@ void main() {
 
   test('Verify that a downwards fling dismisses a persistent BottomSheet', () {
     testWidgets((WidgetTester tester) {
-      GlobalKey<PlaceholderState> _bottomSheetPlaceholderKey = new GlobalKey<PlaceholderState>();
-      BuildContext context;
+      GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       bool showBottomSheetThenCalled = false;
 
       tester.pumpWidget(new MaterialApp(
           routes: <String, RouteBuilder>{
             '/': (RouteArguments args) {
-              context = args.context;
               return new Scaffold(
-                bottomSheet: new Placeholder(key: _bottomSheetPlaceholderKey),
+                key: scaffoldKey,
                 body: new Center(child: new Text('body'))
               );
             }
           }
       ));
 
-      tester.pump();
+      expect(showBottomSheetThenCalled, isFalse);
       expect(tester.findText('BottomSheet'), isNull);
 
-      showBottomSheet(
-        context: context,
-        child: new Container(child: new Text('BottomSheet'), margin: new EdgeDims.all(40.0)),
-        placeholderKey: _bottomSheetPlaceholderKey
-      ).then((_) {
+      scaffoldKey.currentState.showBottomSheet((BuildContext context) { 
+        return new Container(
+          margin: new EdgeDims.all(40.0),
+          child: new Text('BottomSheet')
+        );
+      }).closed.then((_) {
         showBottomSheetThenCalled = true;
       });
 
-      expect(_bottomSheetPlaceholderKey.currentState.child, isNotNull);
+      expect(showBottomSheetThenCalled, isFalse);
+      expect(tester.findText('BottomSheet'), isNull);
+
       tester.pump(); // bottom sheet show animation starts
+
+      expect(showBottomSheetThenCalled, isFalse);
+      expect(tester.findText('BottomSheet'), isNotNull);
+
       tester.pump(new Duration(seconds: 1)); // animation done
+
+      expect(showBottomSheetThenCalled, isFalse);
       expect(tester.findText('BottomSheet'), isNotNull);
 
       tester.fling(tester.findText('BottomSheet'), const Offset(0.0, 20.0), 1000.0);
+      tester.pump(); // drain the microtask queue (Future completion callback)
+
+      expect(showBottomSheetThenCalled, isTrue);
+      expect(tester.findText('BottomSheet'), isNotNull);
+
       tester.pump(); // bottom sheet dismiss animation starts
+
+      expect(showBottomSheetThenCalled, isTrue);
+      expect(tester.findText('BottomSheet'), isNotNull);
+
       tester.pump(new Duration(seconds: 1)); // animation done
-      tester.pump(new Duration(seconds: 1)); // rebuild frame without the bottom sheet
+
       expect(showBottomSheetThenCalled, isTrue);
       expect(tester.findText('BottomSheet'), isNull);
-      expect(_bottomSheetPlaceholderKey.currentState.child, isNull);
     });
   });
 

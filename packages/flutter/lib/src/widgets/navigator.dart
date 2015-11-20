@@ -133,6 +133,28 @@ class NavigatorState extends State<Navigator> {
     assert(_ephemeral.isEmpty);
   }
 
+  /// Pops the given route, if it's the current route. If it's not the current
+  /// route, removes it from the list of active routes without notifying any
+  /// observers or adjacent routes.
+  ///
+  /// Do not use this for ModalRoutes, or indeed anything other than
+  /// StateRoutes. Doing so would cause very odd results, e.g. ModalRoutes would
+  /// get confused about who is current.
+  void remove(Route route, [dynamic result]) {
+    assert(_modal.contains(route));
+    assert(route.overlayEntries.isEmpty);
+    if (_modal.last == route) {
+      pop(result);
+    } else {
+      setState(() {
+        _modal.remove(route);
+        route.didPop(result);
+      });
+    }
+  }
+
+  /// Removes the current route, notifying the observer (if any), and the
+  /// previous routes (using [Route.didPopNext]).
   void pop([dynamic result]) {
     setState(() {
       // We use setState to guarantee that we'll rebuild, since the routes can't

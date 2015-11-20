@@ -11,9 +11,10 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'bottom_sheet.dart';
 import 'material.dart';
-import 'tool_bar.dart';
 import 'snack_bar.dart';
+import 'tool_bar.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 
@@ -57,7 +58,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (isChild(_Child.bottomSheet)) {
       bottomSheetSize = layoutChild(_Child.bottomSheet, fullWidthConstraints);
-      positionChild(_Child.bottomSheet, new Point(0.0, size.height - bottomSheetSize.height));
+      positionChild(_Child.bottomSheet, new Point((size.width - bottomSheetSize.width) / 2.0, size.height - bottomSheetSize.height));
     }
 
     if (isChild(_Child.snackBar)) {
@@ -85,13 +86,11 @@ class Scaffold extends StatefulComponent {
     Key key,
     this.toolBar,
     this.body,
-    this.bottomSheet,
     this.floatingActionButton
   }) : super(key: key);
 
   final ToolBar toolBar;
   final Widget body;
-  final Widget bottomSheet; // this is for non-modal bottom sheets
   final Widget floatingActionButton;
 
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(ScaffoldState);
@@ -101,6 +100,8 @@ class Scaffold extends StatefulComponent {
 
 class ScaffoldState extends State<Scaffold> {
 
+  // SNACKBAR API
+
   Queue<SnackBar> _snackBars = new Queue<SnackBar>();
   Performance _snackBarPerformance;
   Timer _snackBarTimer;
@@ -108,6 +109,10 @@ class ScaffoldState extends State<Scaffold> {
   void showSnackBar(SnackBar snackbar) {
     _snackBarPerformance ??= SnackBar.createPerformance()
       ..addStatusListener(_handleSnackBarStatusChange);
+    if (_snackBars.isEmpty) {
+      assert(_snackBarPerformance.isDismissed);
+      _snackBarPerformance.forward();
+    }
     setState(() {
       _snackBars.addLast(snackbar.withPerformance(_snackBarPerformance));
     });
@@ -120,6 +125,8 @@ class ScaffoldState extends State<Scaffold> {
         setState(() {
           _snackBars.removeFirst();
         });
+        if (_snackBars.isNotEmpty)
+          _snackBarPerformance.forward();
         break;
       case PerformanceStatus.completed:
         setState(() {
@@ -137,6 +144,63 @@ class ScaffoldState extends State<Scaffold> {
     _snackBarPerformance.reverse();
     _snackBarTimer = null;
   }
+
+
+  // PERSISTENT BOTTOM SHEET API
+
+  List<Widget> _dismissedBottomSheets;
+  BottomSheetController _currentBottomSheet;
+
+  BottomSheetController showBottomSheet(WidgetBuilder builder) {
+    if (_currentBottomSheet != null) {
+      _currentBottomSheet.close();
+      assert(_currentBottomSheet == null);
+    }
+    Completer completer = new Completer();
+    GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
+    Performance performance = BottomSheet.createPerformance()
+      ..forward();
+    _PersistentBottomSheet bottomSheet;
+    Route route = new StateRoute(
+      onPop: () {
+        assert(_currentBottomSheet._widget == bottomSheet);
+        assert(bottomSheetKey.currentState != null);
+        bottomSheetKey.currentState.close();
+        _dismissedBottomSheets ??= <Widget>[];
+        _dismissedBottomSheets.add(bottomSheet);
+        _currentBottomSheet = null;
+        completer.complete();
+      }
+    );
+    bottomSheet = new _PersistentBottomSheet(
+      key: bottomSheetKey,
+      performance: performance,
+      onClosing: () {
+        assert(_currentBottomSheet._widget == bottomSheet);
+        Navigator.of(context).remove(route);
+      },
+      onDismissed: () {
+        assert(_dismissedBottomSheets != null);
+        setState(() {
+          _dismissedBottomSheets.remove(bottomSheet);
+        });
+      },
+      builder: builder
+    );
+    Navigator.of(context).push(route);
+    setState(() {
+      _currentBottomSheet = new BottomSheetController._(
+        bottomSheet,
+        completer.future,
+        () => Navigator.of(context).remove(route),
+        setState
+      );
+    });
+    return _currentBottomSheet;
+  }
+
+
+  // INTERNALS
 
   void dispose() {
     _snackBarPerformance?.stop();
@@ -156,8 +220,6 @@ class ScaffoldState extends State<Scaffold> {
     final Widget materialBody = config.body != null ? new Material(child: config.body) : null;
 
     if (_snackBars.length > 0) {
-      if (_snackBarPerformance.isDismissed)
-        _snackBarPerformance.forward();
       ModalRoute route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarPerformance.isCompleted && _snackBarTimer == null)
@@ -171,12 +233,105 @@ class ScaffoldState extends State<Scaffold> {
     final List<LayoutId>children = new List<LayoutId>();
     _addIfNonNull(children, materialBody, _Child.body);
     _addIfNonNull(children, paddedToolBar, _Child.toolBar);
-    _addIfNonNull(children, config.bottomSheet, _Child.bottomSheet);
+
+    if (_currentBottomSheet != null ||
+        (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)) {
+      List<Widget> bottomSheets = <Widget>[];
+      if (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)
+        bottomSheets.addAll(_dismissedBottomSheets);
+      if (_currentBottomSheet != null)
+        bottomSheets.add(_currentBottomSheet._widget);
+      Widget stack = new Stack(
+        bottomSheets,
+        alignment: const FractionalOffset(0.5, 1.0) // bottom-aligned, centered
+      );
+      _addIfNonNull(children, stack, _Child.bottomSheet);
+    }
+
     if (_snackBars.isNotEmpty)
       _addIfNonNull(children, _snackBars.first, _Child.snackBar);
+
     _addIfNonNull(children, config.floatingActionButton, _Child.floatingActionButton);
 
     return new CustomMultiChildLayout(children, delegate: _scaffoldLayout);
+  }
+
+}
+
+class BottomSheetController {
+  const BottomSheetController._(this._widget, this.closed, this.close, this.setState);
+  final Widget _widget;
+  final Future closed;
+  final VoidCallback close; // call this to close the bottom sheet
+  final StateSetter setState;
+}
+
+class _PersistentBottomSheet extends StatefulComponent {
+  _PersistentBottomSheet({
+    Key key,
+    this.performance,
+    this.onClosing,
+    this.onDismissed,
+    this.builder
+  }) : super(key: key);
+
+  final Performance performance;
+  final VoidCallback onClosing;
+  final VoidCallback onDismissed;
+  final WidgetBuilder builder;
+
+  _PersistentBottomSheetState createState() => new _PersistentBottomSheetState();
+}
+
+class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
+
+  // We take ownership of the performance given in the first configuration.
+  // We also share control of that performance with out BottomSheet widget.
+
+  void initState() {
+    super.initState();
+    assert(config.performance.status == PerformanceStatus.forward);
+    config.performance.addStatusListener(_handleStatusChange);
+  }
+
+  void didUpdateConfig(_PersistentBottomSheet oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    assert(config.performance == oldConfig.performance);
+  }
+
+  void dispose() {
+    config.performance.stop();
+    super.dispose();
+  }
+
+  void close() {
+    config.performance.reverse();
+  }
+
+  void _handleStatusChange(PerformanceStatus status) {
+    if (status == PerformanceStatus.dismissed && config.onDismissed != null)
+      config.onDismissed();
+  }
+
+  double _childHeight;
+  void _updateChildHeight(Size newSize) {
+    setState(() {
+      _childHeight = newSize.height;
+    });
+  }
+
+  Widget build(BuildContext context) {
+    return new AlignTransition(
+      performance: config.performance,
+      alignment: new AnimatedValue<FractionalOffset>(const FractionalOffset(0.0, 0.0)),
+      heightFactor: new AnimatedValue<double>(0.0, end: 1.0),
+      child: new BottomSheet(
+        performance: config.performance,
+        onClosing: config.onClosing,
+        childHeight: _childHeight,
+        builder: (BuildContext context) => new SizeObserver(child: config.builder(context), onSizeChanged: _updateChildHeight)
+      )
+    );
   }
 
 }

@@ -162,7 +162,7 @@ class WidgetTester {
     assert(velocity != 0.0);   // velocity is pixels/second
     final TestPointer p = new TestPointer(pointer);
     final HitTestResult result = _hitTest(startLocation);
-    final kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
+    const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
     final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
     double timeStamp = 0.0;
     _dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);

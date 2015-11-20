@@ -332,6 +332,9 @@ enum _StateLifecycle {
   defunct,
 }
 
+/// The signature of setState() methods.
+typedef void StateSetter(VoidCallback fn);
+
 /// The logic and internal state for a StatefulComponent.
 abstract class State<T extends StatefulComponent> {
   /// The current configuration (an instance of the corresponding
@@ -377,7 +380,7 @@ abstract class State<T extends StatefulComponent> {
   /// If you just change the state directly without calling setState(), then the
   /// component will not be scheduled for rebuilding, meaning that its rendering
   /// will not be updated.
-  void setState(void fn()) {
+  void setState(VoidCallback fn) {
     assert(_debugLifecycleState != _StateLifecycle.defunct);
     fn();
     _element.markNeedsBuild();
