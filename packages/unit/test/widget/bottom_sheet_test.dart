@@ -36,13 +36,14 @@ void main() {
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester.findText('BottomSheet'), isNotNull);
+      expect(showBottomSheetThenCalled, isFalse);
 
       // Tap on the the bottom sheet itself to dismiss it
       tester.tap(tester.findText('BottomSheet'));
       tester.pump(); // bottom sheet dismiss animation starts
+      expect(showBottomSheetThenCalled, isTrue);
       tester.pump(new Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
       tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
-      expect(showBottomSheetThenCalled, isTrue);
       expect(tester.findText('BottomSheet'), isNull);
 
       showModalBottomSheet(context: context, builder: (BuildContext context) => new Text('BottomSheet'));

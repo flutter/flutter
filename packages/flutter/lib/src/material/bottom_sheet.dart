@@ -153,16 +153,12 @@ class _ModalBottomSheetRoute extends OverlayRoute {
     super.didPush(overlay, insertionPoint);
   }
 
-  void _finish(dynamic result) {
-    super.didPop(result); // clear the overlay entries
-    completer.complete(result);
-  }
-
   void didPop(dynamic result) {
+    completer.complete(result);
     if (performance.isDismissed)
-      _finish(result);
+      finished();
     else
-      performance.reverse().then((_) { _finish(result); });
+      performance.reverse().then((_) { finished(); });
   }
 
   Widget _buildModalBarrier(BuildContext context) {
