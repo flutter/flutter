@@ -116,7 +116,7 @@ const String _kDefaultPrivateKeyPath = 'privatekey.der';
 
 class BuildCommand extends FlutterCommand {
   final String name = 'build';
-  final String description = 'Create a Flutter app.';
+  final String description = 'Packages your Flutter app into an FLX.';
 
   BuildCommand() {
     argParser.addFlag('precompiled', negatable: false);
