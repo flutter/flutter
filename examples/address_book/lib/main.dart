@@ -48,12 +48,12 @@ class AddressBookHome extends StatelessComponent {
     );
   }
 
-  static final GlobalKey nameKey = new GlobalKey(label: 'name field');
-  static final GlobalKey phoneKey = new GlobalKey(label: 'phone field');
-  static final GlobalKey emailKey = new GlobalKey(label: 'email field');
-  static final GlobalKey addressKey = new GlobalKey(label: 'address field');
-  static final GlobalKey ringtoneKey = new GlobalKey(label: 'ringtone field');
-  static final GlobalKey noteKey = new GlobalKey(label: 'note field');
+  static final GlobalKey nameKey = new GlobalKey(debugLabel: 'name field');
+  static final GlobalKey phoneKey = new GlobalKey(debugLabel: 'phone field');
+  static final GlobalKey emailKey = new GlobalKey(debugLabel: 'email field');
+  static final GlobalKey addressKey = new GlobalKey(debugLabel: 'address field');
+  static final GlobalKey ringtoneKey = new GlobalKey(debugLabel: 'ringtone field');
+  static final GlobalKey noteKey = new GlobalKey(debugLabel: 'note field');
 
   Widget buildBody(BuildContext context) {
     return new Block(<Widget>[

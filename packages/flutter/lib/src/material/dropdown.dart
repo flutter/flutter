@@ -239,7 +239,7 @@ class DropdownButton<T> extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    GlobalKey indexedStackKey = new GlobalKey(label: 'DropdownButton.IndexedStack');
+    GlobalKey indexedStackKey = new GlobalKey(debugLabel: 'DropdownButton.IndexedStack');
     int selectedIndex = 0;
     for (int itemIndex = 0; itemIndex < items.length; itemIndex++) {
       if (items[itemIndex].value == value) {
