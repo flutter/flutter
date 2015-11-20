@@ -145,4 +145,96 @@ void main() {
       expect(tester.findText('bar2'), isNull);
     });
   });
+
+  test('SnackBar cancel test', () {
+    testWidgets((WidgetTester tester) {
+      int snackBarCount = 0;
+      Key tapTarget = new Key('tap-target');
+      int time;
+      ScaffoldFeatureController<SnackBar> lastController;
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) {
+            return new Scaffold(
+              body: new Builder(
+                builder: (BuildContext context) {
+                  return new GestureDetector(
+                    onTap: () {
+                      snackBarCount += 1;
+                      lastController = Scaffold.of(context).showSnackBar(new SnackBar(
+                        content: new Text("bar$snackBarCount"),
+                        duration: new Duration(seconds: time)
+                      ));
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: new Container(
+                      height: 100.0,
+                      width: 100.0,
+                      key: tapTarget
+                    )
+                  );
+                }
+              )
+            );
+          }
+        }
+      ));
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
+      time = 1000;
+      tester.tap(tester.findElementByKey(tapTarget)); // queue bar1
+      ScaffoldFeatureController<SnackBar> firstController = lastController;
+      time = 2;
+      tester.tap(tester.findElementByKey(tapTarget)); // queue bar2
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(); // schedule animation for bar1
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 1.50s
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 2.25s 
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 10000)); // 12.25s 
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+
+      firstController.close(); // snackbar is manually dismissed
+
+      tester.pump(new Duration(milliseconds: 750)); // 13.00s // reverse animation is scheduled
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNotNull);
+      expect(tester.findText('bar2'), isNull);
+      tester.pump(new Duration(milliseconds: 750)); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 15.25s
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 16.00s 
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+      tester.pump(); // begin animation
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNotNull);
+      tester.pump(new Duration(milliseconds: 750)); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+      expect(tester.findText('bar1'), isNull);
+      expect(tester.findText('bar2'), isNull);
+    });
+  });
 }
