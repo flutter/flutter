@@ -66,18 +66,19 @@ void Paragraph::paint(Canvas* canvas, const Offset& offset)
 
     // Very simplified painting to allow painting an arbitrary (layer-less) subtree.
     RenderBox* box = firstChildBox();
-    GraphicsContext context(canvas->skCanvas());
+    SkCanvas* skCanvas = canvas->skCanvas();
+    skCanvas->translate(offset.sk_size.width(), offset.sk_size.height());
 
+    GraphicsContext context(skCanvas);
     Vector<RenderBox*> layers;
-    LayoutPoint paintOffset(offset.sk_size.width(), offset.sk_size.height());
     LayoutRect bounds = box->absoluteBoundingBoxRect();
     DCHECK(bounds.x() == 0 && bounds.y() == 0);
-    bounds.setLocation(paintOffset);
     PaintInfo paintInfo(&context, enclosingIntRect(bounds), box);
-    box->paint(paintInfo, paintOffset, layers);
-
+    box->paint(paintInfo, LayoutPoint(), layers);
     // Note we're ignoring any layers encountered.
     // TODO(abarth): Remove the concept of RenderLayers.
+
+    skCanvas->translate(-offset.sk_size.width(), -offset.sk_size.height());
 }
 
 } // namespace blink
