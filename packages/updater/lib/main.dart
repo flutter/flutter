@@ -83,7 +83,7 @@ class UpdateTask {
 
   Future<yaml.YamlMap> _fetchManifest() async {
     String manifestUrl = _currentManifest['update-url'] + '/' + kManifestFile;
-    String manifestData = await http.get(manifestUrl);
+    String manifestData = (await http.get(manifestUrl)).body;
     return yaml.loadYaml(manifestData, sourceUrl: manifestUrl);
   }
 

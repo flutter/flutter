@@ -96,6 +96,7 @@ class AnalyzeCommand extends FlutterCommand {
         pubSpecDirectories.add(flutterDir.path);
 
       // .../packages/*/bin/*.dart
+      // .../packages/*/lib/main.dart
       Directory packages = new Directory(path.join(ArtifactStore.flutterRoot, 'packages'));
       for (FileSystemEntity entry in packages.listSync()) {
         if (entry is Directory) {
@@ -108,6 +109,11 @@ class AnalyzeCommand extends FlutterCommand {
                 foundOne = true;
               }
             }
+          }
+          String mainPath = path.join(entry.path, 'lib', 'main.dart');
+          if (FileSystemEntity.isFileSync(mainPath)) {
+            dartFiles.add(mainPath);
+            foundOne = true;
           }
           if (foundOne)
             pubSpecDirectories.add(entry.path);

@@ -11,11 +11,11 @@ import 'package:mojo/core.dart';
 // Helper class to drain the contents of a mojo data pipe to a file.
 class PipeToFile {
   MojoDataPipeConsumer _consumer;
-  MojoEventStream _eventStream;
+  MojoEventSubscription _eventStream;
   IOSink _outputStream;
 
   PipeToFile(this._consumer, String outputPath) {
-    _eventStream = new MojoEventStream(_consumer.handle);
+    _eventStream = new MojoEventSubscription(_consumer.handle);
     _outputStream = new File(outputPath).openWrite();
   }
 
@@ -33,7 +33,7 @@ class PipeToFile {
   Future drain() async {
     Completer completer = new Completer();
     // TODO(mpcomplete): Is it legit to pass an async callback to listen?
-    _eventStream.listen((List<int> event) async {
+    _eventStream.subscribe((List<int> event) async {
       MojoHandleSignals mojoSignals = new MojoHandleSignals(event[1]);
       if (mojoSignals.isReadable) {
         MojoResult result = await _doRead();
