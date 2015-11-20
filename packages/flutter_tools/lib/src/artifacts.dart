@@ -53,6 +53,10 @@ enum ArtifactType {
   snapshot,
   shell,
   mojo,
+  androidClassesDex,
+  androidIcuData,
+  androidKeystore,
+  androidLibSkyShell,
 }
 
 class Artifact {
@@ -121,6 +125,30 @@ class ArtifactStore {
       fileName: 'flutter.mojo',
       type: ArtifactType.mojo,
       targetPlatform: TargetPlatform.linux
+    ),
+    const Artifact._(
+      name: 'Compiled Java code',
+      fileName: 'classes.dex',
+      type: ArtifactType.androidClassesDex,
+      targetPlatform: TargetPlatform.android
+    ),
+    const Artifact._(
+      name: 'ICU data table',
+      fileName: 'icudtl.dat',
+      type: ArtifactType.androidIcuData,
+      targetPlatform: TargetPlatform.android
+    ),
+    const Artifact._(
+      name: 'Key Store',
+      fileName: 'chromium-debug.keystore',
+      type: ArtifactType.androidKeystore,
+      targetPlatform: TargetPlatform.android
+    ),
+    const Artifact._(
+      name: 'Compiled C++ code',
+      fileName: 'libsky_shell.so',
+      type: ArtifactType.androidLibSkyShell,
+      targetPlatform: TargetPlatform.android
     ),
   ];
 

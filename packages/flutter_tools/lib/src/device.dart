@@ -580,6 +580,25 @@ class AndroidDevice extends Device {
     }
   }
 
+  static String getAndroidSdkPath() {
+    if (Platform.environment.containsKey('ANDROID_HOME')) {
+      String androidHomeDir = Platform.environment['ANDROID_HOME'];
+      if (FileSystemEntity.isDirectorySync(
+          path.join(androidHomeDir, 'platform-tools'))) {
+        return androidHomeDir;
+      } else if (FileSystemEntity.isDirectorySync(
+          path.join(androidHomeDir, 'sdk', 'platform-tools'))) {
+        return path.join(androidHomeDir, 'sdk');
+      } else {
+        _logging.warning('Android SDK not found at $androidHomeDir');
+        return null;
+      }
+    } else {
+      _logging.warning('Android SDK not found. The ANDROID_HOME variable must be set.');
+      return null;
+    }
+  }
+
   static String _getAdbPath() {
     if (Platform.environment.containsKey('ANDROID_HOME')) {
       String androidHomeDir = Platform.environment['ANDROID_HOME'];

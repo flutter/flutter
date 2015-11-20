@@ -8,7 +8,9 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
+import '../artifacts.dart';
 import '../build_configuration.dart';
+import '../device.dart';
 import '../file_system.dart';
 import 'build.dart';
 import 'flutter_command.dart';
@@ -18,6 +20,9 @@ const String _kDefaultAndroidManifestPath = 'apk/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
 const String _kKeystoreKeyName = "chromiumdebugkey";
 const String _kKeystorePassword = "chromium";
+
+const String _kAndroidPlatformVersion = '22';
+const String _kBuildToolsVersion = '22.0.1';
 
 final Logger _logging = new Logger('flutter_tools.apk');
 
@@ -43,9 +48,6 @@ class _AssetBuilder {
 
 /// Builds an APK package using Android SDK tools.
 class _ApkBuilder {
-  static const String _kAndroidPlatformVersion = '22';
-  static const String _kBuildToolsVersion = '22.0.1';
-
   final String androidSdk;
 
   File _androidJar;
@@ -60,6 +62,10 @@ class _ApkBuilder {
     _aapt = new File('$buildTools/aapt');
     _zipalign = new File('$buildTools/zipalign');
     _jarsigner = 'jarsigner';
+  }
+
+  bool checkSdkPath() {
+    return (_androidJar.existsSync() && _aapt.existsSync() && _zipalign.existsSync());
   }
 
   void package(File outputApk, File androidManifest, Directory assets, Directory artifacts) {
@@ -97,6 +103,15 @@ class _ApkBuilder {
   }
 }
 
+class _ApkComponents {
+  Directory androidSdk;
+  File manifest;
+  File icuData;
+  File classesDex;
+  File libSkyShell;
+  File keystore;
+}
+
 class ApkCommand extends FlutterCommand {
   final String name = 'apk';
   final String description = 'Build an Android APK package.';
@@ -120,41 +135,79 @@ class ApkCommand extends FlutterCommand {
         help: 'Path to the FLX file. If this is not provided, an FLX will be built.');
   }
 
-  int _buildApk(BuildConfiguration config, String flxPath) {
-    File androidManifest = new File(argResults['manifest']);
-    File icuData = new File('${runner.enginePath}/third_party/icu/android/icudtl.dat');
-    File classesDex = new File('${config.buildDir}/gen/sky/shell/shell/classes.dex');
-    File libSkyShell = new File('${config.buildDir}/gen/sky/shell/shell/shell/libs/armeabi-v7a/libsky_shell.so');
-    File keystore = new File('${runner.enginePath}/build/android/ant/chromium-debug.keystore');
+  Future<_ApkComponents> _findApkComponents(BuildConfiguration config) async {
+    String androidSdkPath;
+    List<String> artifactPaths;
+    if (runner.enginePath != null) {
+      androidSdkPath = '${runner.enginePath}/third_party/android_tools/sdk';
+      artifactPaths = [
+        '${runner.enginePath}/third_party/icu/android/icudtl.dat',
+        '${config.buildDir}/gen/sky/shell/shell/classes.dex',
+        '${config.buildDir}/gen/sky/shell/shell/shell/libs/armeabi-v7a/libsky_shell.so',
+        '${runner.enginePath}/build/android/ant/chromium-debug.keystore',
+      ];
+    } else {
+      androidSdkPath = AndroidDevice.getAndroidSdkPath();
+      if (androidSdkPath == null) {
+        return null;
+      }
+      List<ArtifactType> artifactTypes = <ArtifactType>[
+        ArtifactType.androidIcuData,
+        ArtifactType.androidClassesDex,
+        ArtifactType.androidLibSkyShell,
+        ArtifactType.androidKeystore,
+      ];
+      Iterable<Future<String>> pathFutures = artifactTypes.map(
+          (ArtifactType type) => ArtifactStore.getPath(ArtifactStore.getArtifact(
+              type: type, targetPlatform: TargetPlatform.android)));
+      artifactPaths = await Future.wait(pathFutures);
+    }
 
-    for (File f in [androidManifest, icuData, classesDex, libSkyShell, keystore]) {
+    _ApkComponents components = new _ApkComponents();
+    components.androidSdk = new Directory(androidSdkPath);
+    components.manifest = new File(argResults['manifest']);;
+    components.icuData = new File(artifactPaths[0]);
+    components.classesDex = new File(artifactPaths[1]);
+    components.libSkyShell = new File(artifactPaths[2]);
+    components.keystore = new File(artifactPaths[3]);
+
+    if (!components.androidSdk.existsSync()) {
+      _logging.severe('Can not locate Android SDK: ${androidSdkPath}');
+      return null;
+    }
+    if (!(new _ApkBuilder(components.androidSdk.path).checkSdkPath())) {
+      _logging.severe('Can not locate expected Android SDK tools at ${androidSdkPath}');
+      _logging.severe('You must install version $_kAndroidPlatformVersion of the SDK platform');
+      _logging.severe('and version $_kBuildToolsVersion of the build tools.');
+      return null;
+    }
+    for (File f in [components.manifest, components.icuData, components.classesDex,
+                    components.libSkyShell, components.keystore]) {
       if (!f.existsSync()) {
         _logging.severe('Can not locate file: ${f.path}');
-        return 1;
+        return null;
       }
     }
 
-    Directory androidSdk = new Directory('${runner.enginePath}/third_party/android_tools/sdk');
-    if (!androidSdk.existsSync()) {
-      _logging.severe('Can not locate Android SDK: ${androidSdk.path}');
-      return 1;
-    }
+    return components;
+  }
 
+  int _buildApk(_ApkComponents components, String flxPath) {
     Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
     try {
       _AssetBuilder assetBuilder = new _AssetBuilder(tempDir, 'assets');
-      assetBuilder.add(icuData, 'icudtl.dat');
+      assetBuilder.add(components.icuData, 'icudtl.dat');
       assetBuilder.add(new File(flxPath), 'app.flx');
 
       _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
-      artifactBuilder.add(classesDex, 'classes.dex');
-      artifactBuilder.add(libSkyShell, 'lib/armeabi-v7a/libsky_shell.so');
+      artifactBuilder.add(components.classesDex, 'classes.dex');
+      artifactBuilder.add(components.libSkyShell, 'lib/armeabi-v7a/libsky_shell.so');
 
-      _ApkBuilder builder = new _ApkBuilder(androidSdk.path);
+      _ApkBuilder builder = new _ApkBuilder(components.androidSdk.path);
       File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
-      builder.package(unalignedApk, androidManifest, assetBuilder.directory,
+      builder.package(unalignedApk, components.manifest, assetBuilder.directory,
                       artifactBuilder.directory);
-      builder.sign(keystore, _kKeystorePassword, _kKeystoreKeyName, unalignedApk);
+      builder.sign(components.keystore, _kKeystorePassword, _kKeystoreKeyName, unalignedApk);
 
       File finalApk = new File(argResults['output-file']);
       ensureDirectoryExists(finalApk.path);
@@ -168,14 +221,15 @@ class ApkCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    if (runner.enginePath == null) {
-      _logging.severe('Unable to locate the Flutter engine.  Use the --engine-src-path option.');
-      return 1;
-    }
-
     BuildConfiguration config = buildConfigurations.firstWhere(
         (BuildConfiguration bc) => bc.targetPlatform == TargetPlatform.android
     );
+
+    _ApkComponents components = await _findApkComponents(config);
+    if (components == null) {
+      _logging.severe('Unable to build APK.');
+      return 1;
+    }
 
     String flxPath = argResults['flx'];
 
@@ -185,7 +239,7 @@ class ApkCommand extends FlutterCommand {
         _logging.severe('(Omit the --flx option to build the FLX automatically)');
         return 1;
       }
-      return _buildApk(config, flxPath);
+      return _buildApk(components, flxPath);
     } else {
       await downloadToolchain();
 
@@ -199,7 +253,7 @@ class ApkCommand extends FlutterCommand {
       await builder.buildInTempDir(
         mainPath: mainPath,
         onBundleAvailable: (String localBundlePath) {
-          result = _buildApk(config, localBundlePath);
+          result = _buildApk(components, localBundlePath);
         }
       );
 
