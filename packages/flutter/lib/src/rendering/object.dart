@@ -167,6 +167,8 @@ class PaintingContext {
     if (!_isRecording)
       return;
     assert(() {
+      if (debugEnableRepaintRainbox)
+        canvas.drawRect(_paintBounds, new Paint()..color = debugCurrentRepaintColor.toColor());
       if (debugPaintLayerBordersEnabled) {
         Paint paint = new Paint()
           ..style = ui.PaintingStyle.stroke
