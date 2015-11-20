@@ -94,7 +94,7 @@ connected Android device, from that directory you would run:
  * `ninja -C out/Debug` to build a desktop Debug binary.
 
 To run the tests, you'll also need to clone [the main Flutter repository](https://github.com/flutter/flutter).
-See [the instructions for contributing](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md)
+See [the instructions for contributing](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 to the main Flutter repository for detailed instructions.
 
 Contributing code
