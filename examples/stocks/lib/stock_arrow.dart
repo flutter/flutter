@@ -4,6 +4,50 @@
 
 part of stocks;
 
+class StockArrowPainter extends CustomPainter {
+  StockArrowPainter({ this.color, this.percentChange });
+
+  final Color color;
+  final double percentChange;
+
+  void paint(PaintingCanvas canvas, Size size) {
+    Paint paint = new Paint()..color = color;
+    paint.strokeWidth = 1.0;
+    const double padding = 2.0;
+    assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
+    double r = (size - padding) / 2.0; // radius of the circle
+    double centerX = padding + r;
+    double centerY = padding + r;
+
+    // Draw the arrow.
+    double w = 8.0;
+    double h = 5.0;
+    double arrowY;
+    if (percentChange < 0.0) {
+      h = -h;
+      arrowY = centerX + 1.0;
+    } else {
+      arrowY = centerX - 1.0;
+    }
+    Path path = new Path();
+    path.moveTo(centerX, arrowY - h); // top of the arrow
+    path.lineTo(centerX + w, arrowY + h);
+    path.lineTo(centerX - w, arrowY + h);
+    path.close();
+    paint.style = ui.PaintingStyle.fill;
+    canvas.drawPath(path, paint);
+
+    // Draw a circle that circumscribes the arrow.
+    paint.style = ui.PaintingStyle.stroke;
+    canvas.drawCircle(new Point(centerX, centerY), r, paint);
+  }
+
+  bool shouldRepaint(StockArrowPainter oldPainter) {
+    return oldPainter.color != color
+        || oldPainter.percentChange != percentChange;
+  }
+}
+
 class StockArrow extends StatelessComponent {
   StockArrow({ Key key, this.percentChange }) : super(key: key);
 
@@ -22,46 +66,17 @@ class StockArrow extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    // TODO(jackson): This should change colors with the theme
-    Color color = _colorForPercentChange(percentChange);
-    const double kSize = 40.0;
-    var arrow = new CustomPaint(onPaint: (ui.Canvas canvas, Size size) {
-      Paint paint = new Paint()..color = color;
-      paint.strokeWidth = 1.0;
-      const double padding = 2.0;
-      assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
-      double r = (kSize - padding) / 2.0; // radius of the circle
-      double centerX = padding + r;
-      double centerY = padding + r;
-
-      // Draw the arrow.
-      double w = 8.0;
-      double h = 5.0;
-      double arrowY;
-      if (percentChange < 0.0) {
-        h = -h;
-        arrowY = centerX + 1.0;
-      } else {
-        arrowY = centerX - 1.0;
-      }
-      Path path = new Path();
-      path.moveTo(centerX, arrowY - h); // top of the arrow
-      path.lineTo(centerX + w, arrowY + h);
-      path.lineTo(centerX - w, arrowY + h);
-      path.close();
-      paint.style = ui.PaintingStyle.fill;
-      canvas.drawPath(path, paint);
-
-      // Draw a circle that circumscribes the arrow.
-      paint.style = ui.PaintingStyle.stroke;
-      canvas.drawCircle(new Point(centerX, centerY), r, paint);
-    });
-
     return new Container(
-      child: arrow,
-      width: kSize,
-      height: kSize,
-      margin: const EdgeDims.symmetric(horizontal: 5.0)
+      width: 40.0,
+      height: 40.0,
+      margin: const EdgeDims.symmetric(horizontal: 5.0),
+      child: new CustomPaint(
+        painter: new StockArrowPainter(
+          // TODO(jackson): This should change colors with the theme
+          color: _colorForPercentChange(percentChange),
+          percentChange: percentChange
+        )
+      )
     );
   }
 }

@@ -21,6 +21,7 @@ export 'package:flutter/rendering.dart' show
     Canvas,
     Color,
     ColorFilter,
+    CustomPainter,
     EdgeDims,
     FlexAlignItems,
     FlexDirection,
@@ -136,36 +137,21 @@ class DecoratedBox extends OneChildRenderObjectWidget {
 }
 
 class CustomPaint extends OneChildRenderObjectWidget {
-  CustomPaint({ Key key, this.onPaint, this.onHitTest, this.token, Widget child })
+  CustomPaint({ Key key, this.painter, Widget child })
     : super(key: key, child: child) {
-    assert(onPaint != null);
+    assert(painter != null);
   }
 
-  /// This widget repaints whenver you supply a new onPaint callback.
-  ///
-  /// If you use an anonymous closure for the onPaint callback, you'll trigger
-  /// a repaint every time you build this widget, which might not be what you
-  /// intend. Instead, consider passing a reference to a member function, which
-  /// has a more stable identity.
-  final CustomPaintCallback onPaint;
+  final CustomPainter painter;
 
-  final CustomHitTestCallback onHitTest;
-
-  /// This widget repaints whenever you supply a new token.
-  final Object token;
-
-  RenderCustomPaint createRenderObject() => new RenderCustomPaint(onPaint: onPaint, onHitTest: onHitTest);
+  RenderCustomPaint createRenderObject() => new RenderCustomPaint(painter: painter);
 
   void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
-    if (oldWidget.token != token)
-      renderObject.markNeedsPaint();
-    renderObject.onPaint = onPaint;
-    renderObject.onHitTest = onHitTest;
+    renderObject.painter = painter;
   }
 
   void didUnmountRenderObject(RenderCustomPaint renderObject) {
-    renderObject.onPaint = null;
-    renderObject.onHitTest = null;
+    renderObject.painter = null;
   }
 }
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
@@ -22,6 +21,38 @@ const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
 
+class _PopupMenuPainter extends CustomPainter {
+  const _PopupMenuPainter({
+    this.color,
+    this.elevation,
+    this.width,
+    this.height
+  });
+
+  final Color color;
+  final int elevation;
+  final double width;
+  final double height;
+
+  void paint(Canvas canvas, Size size) {
+    double widthValue = width * size.width;
+    double heightValue = height * size.height;
+    final BoxPainter painter = new BoxPainter(new BoxDecoration(
+      backgroundColor: color,
+      borderRadius: 2.0,
+      boxShadow: elevationToShadow[elevation]
+    ));
+    painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
+  }
+
+  bool shouldRepaint(_PopupMenuPainter oldPainter) {
+    return oldPainter.color != color
+        || oldPainter.elevation != elevation
+        || oldPainter.width != width
+        || oldPainter.height != height;
+  }
+}
+
 class _PopupMenu extends StatelessComponent {
   _PopupMenu({
     Key key,
@@ -31,12 +62,6 @@ class _PopupMenu extends StatelessComponent {
   final _MenuRoute route;
 
   Widget build(BuildContext context) {
-    final BoxPainter painter = new BoxPainter(new BoxDecoration(
-      backgroundColor: Theme.of(context).canvasColor,
-      borderRadius: 2.0,
-      boxShadow: elevationToShadow[route.elevation]
-    ));
-
     double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     List<Widget> children = <Widget>[];
 
@@ -64,11 +89,12 @@ class _PopupMenu extends StatelessComponent {
         return new Opacity(
           opacity: opacity.value,
           child: new CustomPaint(
-            onPaint: (ui.Canvas canvas, Size size) {
-              double widthValue = width.value * size.width;
-              double heightValue = height.value * size.height;
-              painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
-            },
+            painter: new _PopupMenuPainter(
+              color: Theme.of(context).canvasColor,
+              elevation: route.elevation,
+              width: width.value,
+              height: height.value
+            ),
             child: new ConstrainedBox(
               constraints: new BoxConstraints(
                 minWidth: _kMenuMinWidth,

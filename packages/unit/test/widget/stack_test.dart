@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 import 'widget_tester.dart';
+import '../rendering/rendering_tester.dart';
 
 void main() {
   test('Can construct an empty Stack', () {
@@ -150,7 +151,12 @@ void main() {
       Widget buildFrame(int index) {
         itemsPainted = <int>[];
         List<Widget> items = new List<Widget>.generate(itemCount, (i) {
-          return new CustomPaint(child: new Text('$i'), onPaint: (_, __) { itemsPainted.add(i); });
+          return new CustomPaint(
+            child: new Text('$i'),
+            painter: new TestCallbackPainter(
+              onPaint: () { itemsPainted.add(i); }
+            )
+          );
         });
         return new Center(child: new IndexedStack(items, index: index));
       }

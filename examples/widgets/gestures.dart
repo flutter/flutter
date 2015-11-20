@@ -9,42 +9,49 @@ class ScaleApp extends StatefulComponent {
   ScaleAppState createState() => new ScaleAppState();
 }
 
-class GesturesDemoPaintToken {
-  GesturesDemoPaintToken(this.zoom, this.offset, this.swatch, this.forward, this.flag1, this.flag2, this.flag3, this.flag4);
-  final Offset offset;
+class _GesturePainter extends CustomPainter {
+  const _GesturePainter({
+    this.zoom,
+    this.offset,
+    this.swatch,
+    this.forward,
+    this.scaleEnabled,
+    this.tapEnabled,
+    this.doubleTapEnabled,
+    this.longPressEnabled
+  });
+
   final double zoom;
+  final Offset offset;
   final Map<int, Color> swatch;
   final bool forward;
-  final bool flag1;
-  final bool flag2;
-  final bool flag3;
-  final bool flag4;
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! GesturesDemoPaintToken)
-      return false;
-    final GesturesDemoPaintToken typedOther = other;
-    return offset == typedOther.offset &&
-           zoom == typedOther.zoom &&
-           identical(swatch, typedOther.swatch) &&
-           forward == typedOther.forward &&
-           flag1 == typedOther.flag1 &&
-           flag2 == typedOther.flag2 &&
-           flag3 == typedOther.flag3 &&
-           flag4 == typedOther.flag4;
+  final bool scaleEnabled;
+  final bool tapEnabled;
+  final bool doubleTapEnabled;
+  final bool longPressEnabled;
+
+  void paint(PaintingCanvas canvas, Size size) {
+    Point center = (size.center(Point.origin).toOffset() * zoom + offset).toPoint();
+    double radius = size.width / 2.0 * zoom;
+    Gradient gradient = new RadialGradient(
+      center: center, radius: radius,
+      colors: forward ? <Color>[swatch[50], swatch[900]]
+                      : <Color>[swatch[900], swatch[50]]
+    );
+    Paint paint = new Paint()
+      ..shader = gradient.createShader();
+    canvas.drawCircle(center, radius, paint);
   }
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + offset.hashCode;
-    value = 37 * value + zoom.hashCode;
-    value = 37 * value + identityHashCode(swatch);
-    value = 37 * value + forward.hashCode;
-    value = 37 * value + flag1.hashCode;
-    value = 37 * value + flag2.hashCode;
-    value = 37 * value + flag3.hashCode;
-    value = 37 * value + flag4.hashCode;
-    return value;
+
+  bool shouldRepaint(_GesturePainter oldPainter) {
+    return oldPainter.zoom != zoom
+        || oldPainter.offset != offset
+        || oldPainter.swatch != swatch
+        || oldPainter.forward != forward
+        || oldPainter.scaleEnabled != scaleEnabled
+        || oldPainter.tapEnabled != tapEnabled
+        || oldPainter.doubleTapEnabled != doubleTapEnabled
+        || oldPainter.longPressEnabled != longPressEnabled;
   }
 }
 
@@ -124,18 +131,6 @@ class ScaleAppState extends State<ScaleApp> {
     });
   }
 
-  void paint(PaintingCanvas canvas, Size size) {
-    Point center = (size.center(Point.origin).toOffset() * _zoom + _offset).toPoint();
-    double radius = size.width / 2.0 * _zoom;
-    Gradient gradient = new RadialGradient(
-      center: center, radius: radius,
-      colors: _forward ? <Color>[_swatch[50], _swatch[900]]
-                       : <Color>[_swatch[900], _swatch[50]]
-    );
-    Paint paint = new Paint()
-      ..shader = gradient.createShader();
-    canvas.drawCircle(center, radius, paint);
-  }
 
   Widget build(BuildContext context) {
     return new Theme(
@@ -151,10 +146,16 @@ class ScaleAppState extends State<ScaleApp> {
             onDoubleTap: _doubleTapEnabled ? _handleScaleReset : null,
             onLongPress: _longPressEnabled ? _handleDirectionChange : null,
             child: new CustomPaint(
-              onPaint: paint,
-              token: new GesturesDemoPaintToken(_zoom, _offset, _swatch, _forward,
-                                                _scaleEnabled, _tapEnabled, _doubleTapEnabled,
-                                                _longPressEnabled)
+              painter: new _GesturePainter(
+                zoom: _zoom,
+                offset: _offset,
+                swatch: _swatch,
+                forward: _forward,
+                scaleEnabled: _scaleEnabled,
+                tapEnabled: _tapEnabled,
+                doubleTapEnabled: _doubleTapEnabled,
+                longPressEnabled: _longPressEnabled
+              )
             )
           ),
           new Positioned(

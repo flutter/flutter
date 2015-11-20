@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
@@ -20,6 +19,42 @@ const double _kMenuItemHeight = 48.0;
 const EdgeDims _kMenuHorizontalPadding = const EdgeDims.only(left: 36.0, right: 36.0);
 const double _kBaselineOffsetFromBottom = 20.0;
 const Border _kDropdownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
+
+class _DropdownMenuPainter extends CustomPainter {
+  const _DropdownMenuPainter({
+    this.color,
+    this.elevation,
+    this.menuTop,
+    this.menuBottom,
+    this.renderBox
+  });
+
+  final Color color;
+  final int elevation;
+  final double menuTop;
+  final double menuBottom;
+  final RenderBox renderBox;
+
+  void paint(Canvas canvas, Size size) {
+    final BoxPainter painter = new BoxPainter(new BoxDecoration(
+      backgroundColor: color,
+      borderRadius: 2.0,
+      boxShadow: elevationToShadow[elevation]
+    ));
+
+    double top = renderBox.globalToLocal(new Point(0.0, menuTop)).y;
+    double bottom = renderBox.globalToLocal(new Point(0.0, menuBottom)).y;
+    painter.paint(canvas, new Rect.fromLTRB(0.0, top, size.width, bottom));
+  }
+
+  bool shouldRepaint(_DropdownMenuPainter oldPainter) {
+    return oldPainter.color != color
+        || oldPainter.elevation != elevation
+        || oldPainter.menuTop != menuTop
+        || oldPainter.menuBottom != menuBottom
+        || oldPainter.renderBox != renderBox;
+  }
+}
 
 class _DropdownMenu extends StatusTransitionComponent {
   _DropdownMenu({
@@ -82,12 +117,6 @@ class _DropdownMenu extends StatusTransitionComponent {
       reverseCurve: const Interval(0.0, 0.001)
     );
 
-    final BoxPainter menuPainter = new BoxPainter(new BoxDecoration(
-      backgroundColor: Theme.of(context).canvasColor,
-      borderRadius: 2.0,
-      boxShadow: elevationToShadow[route.elevation]
-    ));
-
     final RenderBox renderBox = Navigator.of(context).context.findRenderObject();
     final Size navigatorSize = renderBox.size;
     final RelativeRect menuRect = new RelativeRect.fromSize(route.rect, navigatorSize);
@@ -105,14 +134,15 @@ class _DropdownMenu extends StatusTransitionComponent {
             performance: route.performance,
             variables: <AnimatedValue<double>>[menuTop, menuBottom],
             builder: (BuildContext context) {
-              RenderBox renderBox = context.findRenderObject();
               return new CustomPaint(
-                child: new Block(children),
-                onPaint: (ui.Canvas canvas, Size size) {
-                  double top = renderBox.globalToLocal(new Point(0.0, menuTop.value)).y;
-                  double bottom = renderBox.globalToLocal(new Point(0.0, menuBottom.value)).y;
-                  menuPainter.paint(canvas, new Rect.fromLTRB(0.0, top, size.width, bottom));
-                }
+                painter: new _DropdownMenuPainter(
+                  color: Theme.of(context).canvasColor,
+                  elevation: route.elevation,
+                  menuTop: menuTop.value,
+                  menuBottom: menuBottom.value,
+                  renderBox: context.findRenderObject()
+                ),
+                child: new Block(children)
               );
             }
           )

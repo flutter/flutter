@@ -12,10 +12,12 @@ void main() {
     root = new RenderPositionedBox(
       child: new RenderCustomPaint(
         child: child = text = new RenderParagraph(new PlainTextSpan('Hello World')),
-        onPaint: (PaintingCanvas canvas, Size size) {
-          baseline1 = child.getDistanceToBaseline(TextBaseline.alphabetic);
-          height1 = text.size.height;
-        }
+        painter: new TestCallbackPainter(
+          onPaint: () {
+            baseline1 = child.getDistanceToBaseline(TextBaseline.alphabetic);
+            height1 = text.size.height;
+          }
+        )
       )
     );
     layout(root, phase: EnginePhase.paint);
@@ -26,10 +28,12 @@ void main() {
           child: text = new RenderParagraph(new PlainTextSpan('Hello World')),
           maxHeight: height1 / 2.0
         ),
-        onPaint: (PaintingCanvas canvas, Size size) {
-          baseline2 = child.getDistanceToBaseline(TextBaseline.alphabetic);
-          height2 = text.size.height;
-        }
+        painter: new TestCallbackPainter(
+          onPaint: () {
+            baseline2 = child.getDistanceToBaseline(TextBaseline.alphabetic);
+            height2 = text.size.height;
+          }
+        )
       )
     );
     layout(root, phase: EnginePhase.paint);

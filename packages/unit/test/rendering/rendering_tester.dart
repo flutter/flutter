@@ -53,3 +53,15 @@ void pumpFrame({ EnginePhase phase: EnginePhase.layout }) {
     return;
   renderView.compositeFrame();
 }
+
+class TestCallbackPainter extends CustomPainter {
+  const TestCallbackPainter({ this.onPaint });
+
+  final VoidCallback onPaint;
+
+  void paint(Canvas canvas, Size size) {
+    onPaint();
+  }
+
+  bool shouldRepaint(TestCallbackPainter oldPainter) => true;
+}
