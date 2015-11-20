@@ -1,0 +1,3 @@
+analyzer:
+  language:
+    enableSuperMixins: true
