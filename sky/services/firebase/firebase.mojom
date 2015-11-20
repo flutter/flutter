@@ -1,0 +1,39 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="sky_services"]
+module firebase;
+
+enum EventType {
+  EventTypeChildAdded,    // 0, fired when a new child node is added to a location
+  EventTypeChildRemoved,  // 1, fired when a child node is removed from a location
+  EventTypeChildChanged,  // 2, fired when a child node at a location changes
+  EventTypeChildMoved,    // 3, fired when a child node moves relative to the other child nodes at a location
+  EventTypeValue          // 4, fired when any data changes at a location and, recursively, any children
+};
+
+struct DataSnapshot {
+  string key;
+  string value;           // TODO(jackson): Support more value types
+};
+
+struct Error {
+  int32 code;
+  string message;
+};
+
+struct AuthData {
+  string uid;
+  string provider;
+  string token;
+};
+
+[ServiceName="firebase::Firebase"]
+interface Firebase {
+  InitWithUrl(string url);
+  GetRoot(Firebase& root);
+  GetChild(string path, Firebase& child);
+  ObserveSingleEventOfType(EventType eventType) => (DataSnapshot snapshot);
+  AuthWithOAuthToken(string provider, string credentials) => (Error? error, AuthData? authData);
+};

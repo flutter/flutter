@@ -17,6 +17,7 @@ import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojom.activity.Activity;
 import org.chromium.mojom.activity.PathService;
+import org.chromium.mojom.firebase.Firebase;
 import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.sensors.SensorService;
