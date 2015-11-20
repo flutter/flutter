@@ -74,7 +74,7 @@ class _DrawerRoute extends OverlayRoute {
               Navigator.of(context).pop();
               break;
             case _DrawerState.popped:
-              super.didPop(null);
+              finished();
               break;
             case _DrawerState.closed:
               assert(false);
@@ -87,6 +87,8 @@ class _DrawerRoute extends OverlayRoute {
   }
 
   void didPop(dynamic result) {
+    // we don't call the superclass because we want to control the timing of the
+    // call to finished().
     switch (_state) {
       case _DrawerState.showing:
         _drawerKey.currentState?._close();
@@ -96,7 +98,7 @@ class _DrawerRoute extends OverlayRoute {
         assert(false);
         break;
       case _DrawerState.closed:
-        super.didPop(null);
+        finished();
         break;
     }
   }

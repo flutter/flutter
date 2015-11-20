@@ -45,7 +45,19 @@ abstract class OverlayRoute extends Route {
     }
   }
 
+  // Subclasses shouldn't call this if they want to delay the finished() call.
   void didPop(dynamic result) {
+    finished();
+  }
+
+  /// Clears out the overlay entries.
+  ///
+  /// This method is intended to be used by subclasses who don't call
+  /// super.didPop() because they want to have control over the timing of the
+  /// overlay removal.
+  ///
+  /// Do not call this method outside of this context.
+  void finished() {
     for (OverlayEntry entry in _overlayEntries)
       entry.remove();
     _overlayEntries.clear();
@@ -84,7 +96,7 @@ abstract class TransitionRoute extends OverlayRoute {
           overlayEntries.first.opaque = false;
         break;
       case PerformanceStatus.dismissed:
-        super.didPop(_result); // clear the overlays
+        super.finished(); // clear the overlays
         completer?.complete(_result);
         break;
     }
