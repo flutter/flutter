@@ -235,7 +235,6 @@
 				9E07CF981BE8280A00BCD8DE /* Resources */,
 				9E07CFB91BE82D2600BCD8DE /* Embed Frameworks */,
 				9E07CFBD1BE82E5900BCD8DE /* Copy Flutter Runner Executable And Resources */,
-				9E07CFC01BE82ECD00BCD8DE /* Remove Stub Runner */,
 			);
 			buildRules = (
 			);
@@ -304,21 +303,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		9E07CFC01BE82ECD00BCD8DE /* Remove Stub Runner */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Remove Stub Runner";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "rm ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Runner";
-			showEnvVarsInLog = 0;
-		};
 		9E07CFCD1BE98FCD00BCD8DE /* Generate Precompiled Snapshot */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
