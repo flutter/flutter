@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -13,9 +14,6 @@ import 'os_utils.dart';
 import 'process.dart';
 
 final Logger _logging = new Logger('flutter_tools.artifacts');
-
-const String _kShellCategory = 'shell';
-const String _kViewerCategory = 'viewer';
 
 String _getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
@@ -43,14 +41,12 @@ String _getNameForTargetPlatform(TargetPlatform platform) {
 
 // Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/release_engine.py
 // and https://github.com/flutter/buildbot/blob/master/travis/build.sh
-String _getCloudStorageBaseUrl({String category, String platform, String revision}) {
-  if (platform == 'darwin-x64') {
-    // In the fullness of time, we'll have a consistent URL pattern for all of
-    // our artifacts, but, for the time being, Mac OS X artifacts are stored in a
-    // different cloud storage bucket.
-    return 'https://storage.googleapis.com/mojo_infra/flutter/$platform/$revision/';
-  }
-  return 'https://storage.googleapis.com/mojo/sky/$category/$platform/$revision/';
+String _getCloudStorageBaseUrl({String platform, String revision}) {
+  // In the fullness of time, we'll have a consistent URL pattern for all of
+  // our artifacts, but, for the time being, Mac OS X artifacts are stored in a
+  // different cloud storage bucket.
+  String bucket = (platform == 'darwin-x64') ? "mojo_infra" : "mojo";
+  return 'https://storage.googleapis.com/$bucket/flutter/$revision/$platform/';
 }
 
 enum ArtifactType {
@@ -63,7 +59,6 @@ class Artifact {
   const Artifact._({
     this.name,
     this.fileName,
-    this.category,
     this.type,
     this.hostPlatform,
     this.targetPlatform
@@ -71,7 +66,6 @@ class Artifact {
 
   final String name;
   final String fileName;
-  final String category; // TODO(abarth): Remove categories.
   final ArtifactType type;
   final HostPlatform hostPlatform;
   final TargetPlatform targetPlatform;
@@ -87,7 +81,6 @@ class Artifact {
 
   String getUrl(String revision) {
     return _getCloudStorageBaseUrl(
-      category: category,
       platform: platform,
       revision: revision
     ) + fileName;
@@ -102,35 +95,30 @@ class ArtifactStore {
     const Artifact._(
       name: 'Sky Shell',
       fileName: 'SkyShell.apk',
-      category: _kShellCategory,
       type: ArtifactType.shell,
       targetPlatform: TargetPlatform.android
     ),
     const Artifact._(
       name: 'Sky Snapshot',
       fileName: 'sky_snapshot',
-      category: _kShellCategory,
       type: ArtifactType.snapshot,
       hostPlatform: HostPlatform.linux
     ),
     const Artifact._(
       name: 'Sky Snapshot',
       fileName: 'sky_snapshot',
-      category: _kShellCategory,
       type: ArtifactType.snapshot,
       hostPlatform: HostPlatform.mac
     ),
     const Artifact._(
       name: 'Flutter for Mojo',
       fileName: 'flutter.mojo',
-      category: _kShellCategory,
       type: ArtifactType.mojo,
       targetPlatform: TargetPlatform.android
     ),
     const Artifact._(
       name: 'Flutter for Mojo',
       fileName: 'flutter.mojo',
-      category: _kShellCategory,
       type: ArtifactType.mojo,
       targetPlatform: TargetPlatform.linux
     ),
@@ -192,27 +180,63 @@ class ArtifactStore {
     return _engineRevision;
   }
 
-  static String getCloudStorageBaseUrl(String category, String platform) {
+  static String getCloudStorageBaseUrl(String platform) {
     return _getCloudStorageBaseUrl(
-      category: category,
       platform: platform,
       revision: engineRevision
     );
   }
 
-  static Future _downloadFile(String url, File file) async {
-    _logging.info('Downloading $url to ${file.path}.');
+  /// Download the artifacts.zip archive for the given platform from GCS
+  /// and extract it to the local cache.
+  static Future _doDownloadArtifactsFromZip(String platform) async {
+    String url = getCloudStorageBaseUrl(platform) + 'artifacts.zip';
+    _logging.info('Downloading $url.');
+
     HttpClient httpClient = new HttpClient();
     HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
     HttpClientResponse response = await request.close();
     _logging.fine('Received response statusCode=${response.statusCode}');
     if (response.statusCode != 200)
       throw new Exception(response.reasonPhrase);
-    IOSink sink = file.openWrite();
-    await sink.addStream(response);
-    await sink.close();
-    _logging.fine('Wrote file');
+
+    BytesBuilder responseBody = new BytesBuilder(copy: false);
+    await for (List<int> chunk in response) {
+      responseBody.add(chunk);
+    }
+
+    Archive archive = new ZipDecoder().decodeBytes(responseBody.takeBytes());
+    Directory cacheDir = _getCacheDirForPlatform(platform);
+    for (ArchiveFile archiveFile in archive) {
+      File cacheFile = new File(path.join(cacheDir.path, archiveFile.name));
+      IOSink sink = cacheFile.openWrite();
+      sink.add(archiveFile.content);
+      await sink.close();
+    }
+
+    for (Artifact artifact in knownArtifacts) {
+      if (artifact.platform == platform && artifact.executable) {
+        ProcessResult result = osUtils.makeExecutable(
+            new File(path.join(cacheDir.path, artifact.fileName)));
+        if (result.exitCode != 0)
+          throw new Exception(result.stderr);
+      }
+    }
   }
+
+  /// A wrapper ensuring that a platform's ZIP is not downloaded multiple times
+  /// concurrently.
+  static Future _downloadArtifactsFromZip(String platform) {
+    if (_pendingZipDownloads.containsKey(platform)) {
+      return _pendingZipDownloads[platform];
+    }
+    print('Downloading $platform artifacts from the cloud, one moment please...');
+    Future future = _doDownloadArtifactsFromZip(platform);
+    _pendingZipDownloads[platform] = future;
+    return future.then((_) => _pendingZipDownloads.remove(platform));
+  }
+
+  static final Map<String, Future> _pendingZipDownloads = new Map<String, Future>();
 
   static Directory _getBaseCacheDir() {
     if (flutterRoot == null) {
@@ -225,27 +249,25 @@ class ArtifactStore {
     return cacheDir;
   }
 
-  static Directory _getCacheDirForArtifact(Artifact artifact) {
+  static Directory _getCacheDirForPlatform(String platform) {
     Directory baseDir = _getBaseCacheDir();
     // TODO(jamesr): Add support for more configurations.
     String config = 'Release';
     Directory artifactSpecificDir = new Directory(path.join(
-        baseDir.path, 'sky_engine', engineRevision, config, artifact.platform));
+        baseDir.path, 'sky_engine', engineRevision, config, platform));
     if (!artifactSpecificDir.existsSync())
       artifactSpecificDir.createSync(recursive: true);
     return artifactSpecificDir;
   }
 
   static Future<String> getPath(Artifact artifact) async {
-    Directory cacheDir = _getCacheDirForArtifact(artifact);
+    Directory cacheDir = _getCacheDirForPlatform(artifact.platform);
     File cachedFile = new File(path.join(cacheDir.path, artifact.fileName));
     if (!cachedFile.existsSync()) {
-      print('Downloading ${artifact.name} from the cloud, one moment please...');
-      await _downloadFile(artifact.getUrl(engineRevision), cachedFile);
-      if (artifact.executable) {
-        ProcessResult result = osUtils.makeExecutable(cachedFile);
-        if (result.exitCode != 0)
-          throw new Exception(result.stderr);
+      await _downloadArtifactsFromZip(artifact.platform);
+      if (!cachedFile.existsSync()) {
+        _logging.severe('File not found in the platform artifacts: ${cachedFile.path}');
+        throw new ProcessExit(2);
       }
     }
     return cachedFile.path;

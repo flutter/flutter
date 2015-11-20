@@ -7,6 +7,7 @@ import argparse
 import os
 import subprocess
 import sys
+import zipfile
 
 def download(base_url, out_dir, name):
     url = '%s/%s' % (base_url, name)
@@ -28,10 +29,12 @@ def main():
     with open(args.revision_file, 'r') as f:
         revision = f.read()
 
-    base_url = 'https://storage.googleapis.com/mojo/sky/shell/linux-x64/%s' % revision
-    download(base_url, out_dir, 'sky_shell')
-    download(base_url, out_dir, 'icudtl.dat')
-    download(base_url, out_dir, 'sky_snapshot')
+    base_url = 'https://storage.googleapis.com/mojo/flutter/%s/linux-x64' % revision
+    download(base_url, out_dir, 'artifacts.zip')
+
+    artifacts_zip = zipfile.ZipFile(os.path.join(out_dir, 'artifacts.zip'))
+    artifacts_zip.extractall(out_dir)
+    artifacts_zip.close()
 
     subprocess.call([ 'chmod', 'a+x', os.path.join(out_dir, 'sky_shell' )])
     subprocess.call([ 'chmod', 'a+x', os.path.join(out_dir, 'sky_snapshot' )])
