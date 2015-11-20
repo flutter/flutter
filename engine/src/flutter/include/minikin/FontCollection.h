@@ -40,6 +40,11 @@ public:
     void itemize(const uint16_t *string, size_t string_length, FontStyle style,
             std::vector<Run>* result) const;
 
+    // Returns true if there is a glyph for the code point and variation selector pair.
+    // Returns false if no fonts have a glyph for the code point and variation
+    // selector pair, or invalid variation selector is passed.
+    bool hasVariationSelector(uint32_t baseCodepoint, uint32_t variationSelector) const;
+
     // Get the base font for the given style, useful for font-wide metrics.
     MinikinFont* baseFont(FontStyle style);
 
