@@ -255,6 +255,7 @@ class RenderBlockViewport extends RenderBlockBase {
        super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
 
   bool _inCallback = false;
+  bool get hasLayer => true;
 
   /// Called during [layout] to determine the blocks children
   ///
