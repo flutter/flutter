@@ -75,7 +75,7 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
 
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
-  factory GlobalKey({ String label }) => new LabeledGlobalKey<T>(label); // the label is purely for debugging purposes and is otherwise ignored
+  factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel); // the label is purely for debugging purposes and is otherwise ignored
 
   static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
@@ -175,9 +175,9 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
 /// The optional label can be used for documentary purposes. It does not affect
 /// the key's identity.
 class LabeledGlobalKey<T extends State<StatefulComponent>> extends GlobalKey<T> {
-  const LabeledGlobalKey(this._label) : super.constructor();
-  final String _label;
-  String toString() => '[GlobalKey ${_label != null ? _label : hashCode}]';
+  const LabeledGlobalKey(this._debugLabel) : super.constructor();
+  final String _debugLabel;
+  String toString() => '[GlobalKey ${_debugLabel != null ? _debugLabel : hashCode}]';
 }
 
 /// A kind of [GlobalKey] that takes its identity from the object used as its value.
