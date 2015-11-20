@@ -7,6 +7,7 @@ module mojo;
 
 import "mojo/public/interfaces/application/service_provider.mojom";
 
+[ServiceName="mojo::ServiceRegistry"]
 interface ServiceRegistry {
   AddServices(array<string> interface_names,
               mojo.ServiceProvider service_provider);

@@ -28,6 +28,7 @@ struct ServicesData {
   mojo.ServiceProvider&? services_provided_to_embedder;
 };
 
+[ServiceName="sky::SkyEngine"]
 interface SkyEngine {
   SetServices(ServicesData services);
 

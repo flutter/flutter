@@ -5,6 +5,7 @@
 [DartPackage="sky_services"]
 module vsync;
 
+[ServiceName="vsync::VSyncProvider"]
 interface VSyncProvider {
   // Timebase is in MojoGetTimeTicksNow.
   // Only one callback can be parked at a given time.

@@ -48,6 +48,7 @@ struct PointerPacket {
   array<Pointer> pointers;
 };
 
+[ServiceName="pointer::PointerListener"]
 interface PointerListener {
   OnPointerPacket(PointerPacket packet);
 };

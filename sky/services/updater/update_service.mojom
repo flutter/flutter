@@ -5,6 +5,7 @@
 [DartPackage="sky_services"]
 module updater;
 
+[ServiceName="updater::UpdateService"]
 interface UpdateService {
   NotifyUpdateCheckComplete();
 };

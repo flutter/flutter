@@ -48,6 +48,7 @@ enum ScreenOrientation {
 //               have a higher-level abstraction here? Do we want a collection
 //               of services that only work on specific platforms? We need to
 //               figure out how to rationalize this interface across platforms.
+[ServiceName="activity::Activity"]
 interface Activity {
   GetUserFeedback(UserFeedback& user_feedback);
 
@@ -58,6 +59,7 @@ interface Activity {
   SetRequestedOrientation(ScreenOrientation orientation);
 };
 
+[ServiceName="activity::PathService"]
 interface PathService {
   // Where the application files are.
   GetAppDataDir() => (string path);
@@ -84,6 +86,7 @@ enum AuralFeedbackType {
   NAVIGATION_DOWN,
 };
 
+[ServiceName="activity::UserFeedback"]
 interface UserFeedback {
   PerformHapticFeedback(HapticFeedbackType type);
   PerformAuralFeedback(AuralFeedbackType type);

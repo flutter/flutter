@@ -5,6 +5,7 @@
 [DartPackage="sky_services"]
 module media;
 
+[ServiceName="media::MediaPlayer"]
 interface MediaPlayer {
   // ignored argument due to https://github.com/domokit/mojo/issues/282
   Prepare(handle<data_pipe_consumer> data_source) => (bool ignored);
@@ -13,6 +14,7 @@ interface MediaPlayer {
   SeekTo(uint32 msec);
 };
 
+[ServiceName="media::MediaService"]
 interface MediaService {
   CreatePlayer(MediaPlayer& player);
 };
