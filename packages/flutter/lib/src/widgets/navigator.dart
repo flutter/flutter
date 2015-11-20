@@ -5,10 +5,10 @@
 import 'framework.dart';
 import 'overlay.dart';
 
-abstract class Route {
+abstract class Route<T> {
   List<OverlayEntry> get overlayEntries;
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) { }
-  void didPop(dynamic result) { }
+  void didPop(T result) { }
 
   /// The given route has been pushed onto the navigator after this route.
   /// Return true if the route before this one should be notified also. The
@@ -140,6 +140,9 @@ class NavigatorState extends State<Navigator> {
   /// Do not use this for ModalRoutes, or indeed anything other than
   /// StateRoutes. Doing so would cause very odd results, e.g. ModalRoutes would
   /// get confused about who is current.
+  ///
+  /// The type of the result argument, if provided, must match the type argument
+  /// of the class of the given route. (In practice, this is usually "dynamic".)
   void remove(Route route, [dynamic result]) {
     assert(_modal.contains(route));
     assert(route.overlayEntries.isEmpty);
@@ -155,6 +158,10 @@ class NavigatorState extends State<Navigator> {
 
   /// Removes the current route, notifying the observer (if any), and the
   /// previous routes (using [Route.didPopNext]).
+  ///
+  /// The type of the result argument, if provided, must match the type argument
+  /// of the class of the current route. (In practice, this is usually
+  /// "dynamic".)
   void pop([dynamic result]) {
     setState(() {
       // We use setState to guarantee that we'll rebuild, since the routes can't
