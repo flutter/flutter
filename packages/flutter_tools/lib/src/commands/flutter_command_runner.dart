@@ -178,6 +178,12 @@ class FlutterCommandRunner extends CommandRunner {
     return 0;
   }
 
+  String _tryEnginePath(String enginePath) {
+    if (FileSystemEntity.isDirectorySync(path.join(enginePath, 'out')))
+      return enginePath;
+    return null;
+  }
+
   String _findEnginePath(ArgResults globalResults) {
     String engineSourcePath = globalResults['engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
     bool isDebug = globalResults['debug'];
@@ -194,14 +200,10 @@ class FlutterCommandRunner extends CommandRunner {
             engineSourcePath = null;
         } on FileSystemException { }
       }
-      if (engineSourcePath == null) {
-        String tryEnginePath(String enginePath) {
-          if (FileSystemEntity.isDirectorySync(path.join(enginePath, 'out')))
-            return enginePath;
-          return null;
-        }
-        engineSourcePath = tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
-      }
+
+      if (engineSourcePath == null)
+        engineSourcePath = _tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
+
       if (engineSourcePath == null) {
         stderr.writeln('Unable to detect local Flutter engine build directory.\n'
             'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and\n'
@@ -209,6 +211,13 @@ class FlutterCommandRunner extends CommandRunner {
             'use --engine-src-path to specify the path to the root of your flutter/engine repository.');
         throw new ProcessExit(2);
       }
+    }
+
+    if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
+      stderr.writeln('Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
+          'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that\n'
+          'you have compiled the engine in that directory, which should produce an \'out\' directory');
+      throw new ProcessExit(2);
     }
 
     return engineSourcePath;
