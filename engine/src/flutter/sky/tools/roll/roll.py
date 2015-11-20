@@ -152,13 +152,6 @@ def main():
   if args.mojo_dir:
       rev(os.path.abspath(args.mojo_dir), dest_dir, dirs_from_mojo, 'mojo')
 
-      try:
-          patch.patch_and_filter(dest_dir, os.path.join('patches', 'mojo'))
-      except subprocess.CalledProcessError:
-          print "ERROR: Roll failed due to a patch not applying"
-          print "Fix the patch to apply, commit the result, and re-run this script"
-          return 1
-
   if args.chromium_dir:
       rev(os.path.abspath(args.chromium_dir), dest_dir, dirs_from_chromium, 'chromium')
 
