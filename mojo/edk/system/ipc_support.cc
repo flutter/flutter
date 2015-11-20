@@ -5,6 +5,7 @@
 #include "mojo/edk/system/ipc_support.h"
 
 #include <type_traits>
+#include <utility>
 
 #include "base/logging.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
@@ -22,14 +23,14 @@ namespace system {
 IPCSupport::IPCSupport(
     embedder::PlatformSupport* platform_support,
     embedder::ProcessType process_type,
-    embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
+    RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
     embedder::ProcessDelegate* process_delegate,
-    embedder::PlatformTaskRunnerRefPtr io_thread_task_runner,
+    RefPtr<embedder::PlatformTaskRunner>&& io_thread_task_runner,
     embedder::ScopedPlatformHandle platform_handle)
     : process_type_(process_type),
-      delegate_thread_task_runner_(delegate_thread_task_runner.Pass()),
+      delegate_thread_task_runner_(std::move(delegate_thread_task_runner)),
       process_delegate_(process_delegate),
-      io_thread_task_runner_(io_thread_task_runner.Pass()) {
+      io_thread_task_runner_(std::move(io_thread_task_runner)) {
   DCHECK(delegate_thread_task_runner_);
   DCHECK(io_thread_task_runner_);
 
@@ -47,7 +48,7 @@ IPCSupport::IPCSupport(
           new system::MasterConnectionManager(platform_support));
       static_cast<system::MasterConnectionManager*>(connection_manager_.get())
           ->Init(
-              delegate_thread_task_runner_,
+              delegate_thread_task_runner_.Clone(),
               static_cast<embedder::MasterProcessDelegate*>(process_delegate_));
       break;
     case embedder::ProcessType::SLAVE:
@@ -55,14 +56,15 @@ IPCSupport::IPCSupport(
           new system::SlaveConnectionManager(platform_support));
       static_cast<system::SlaveConnectionManager*>(connection_manager_.get())
           ->Init(
-              delegate_thread_task_runner_,
+              delegate_thread_task_runner_.Clone(),
               static_cast<embedder::SlaveProcessDelegate*>(process_delegate_),
               platform_handle.Pass());
       break;
   }
 
-  channel_manager_.reset(new ChannelManager(
-      platform_support, io_thread_task_runner_, connection_manager_.get()));
+  channel_manager_.reset(new ChannelManager(platform_support,
+                                            io_thread_task_runner_.Clone(),
+                                            connection_manager_.get()));
 }
 
 IPCSupport::~IPCSupport() {
@@ -95,7 +97,7 @@ RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToSlave(
     embedder::SlaveInfo slave_info,
     embedder::ScopedPlatformHandle platform_handle,
     const base::Closure& callback,
-    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
+    RefPtr<embedder::PlatformTaskRunner>&& callback_thread_task_runner,
     ChannelId* channel_id) {
   DCHECK(channel_id);
 
@@ -108,13 +110,13 @@ RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToSlave(
                              channel_id);
   return channel_manager()->CreateChannel(
       *channel_id, platform_connection_handle.Pass(), callback,
-      callback_thread_task_runner);
+      std::move(callback_thread_task_runner));
 }
 
 RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToMaster(
     const ConnectionIdentifier& connection_id,
     const base::Closure& callback,
-    embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
+    RefPtr<embedder::PlatformTaskRunner>&& callback_thread_task_runner,
     ChannelId* channel_id) {
   DCHECK(channel_id);
 
@@ -125,7 +127,7 @@ RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToMaster(
   *channel_id = kMasterProcessIdentifier;
   return channel_manager()->CreateChannel(
       *channel_id, platform_connection_handle.Pass(), callback,
-      callback_thread_task_runner);
+      std::move(callback_thread_task_runner));
 }
 
 embedder::ScopedPlatformHandle IPCSupport::ConnectToSlaveInternal(

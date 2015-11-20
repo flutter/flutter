@@ -7,6 +7,7 @@ module mojo;
 
 // A service to expose device specific information.
 // All operations are stateless.
+[ServiceName="mojo::DeviceInfo"]
 interface DeviceInfo {
   // The device type this service is running on. It can be a function of things
   // like whether there's an attached screen and its size, etc.

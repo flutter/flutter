@@ -62,8 +62,6 @@ mojo_edk_source_set("platform") {
     "platform_shared_buffer.h",
     "platform_support.h",
     "platform_task_runner.h",
-    "platform_task_runner_impl.cc",
-    "platform_task_runner_impl.h",
     "scoped_platform_handle.h",
     "simple_platform_shared_buffer.cc",
     "simple_platform_shared_buffer.h",
@@ -115,6 +113,7 @@ mojo_edk_unittests("mojo_edk_embedder_unittests") {
   ]
 
   mojo_edk_deps = [
+    "mojo/edk/base_edk",
     "mojo/edk/test:test_support",
     "mojo/edk/system",
     "mojo/edk/system/test",

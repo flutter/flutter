@@ -14,6 +14,7 @@
 #include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/system/connection_manager.h"
 #include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -53,8 +54,9 @@ class MasterConnectionManager final : public ConnectionManager {
   // |delegate_thread_task_runner| should be the task runner for the "delegate
   // thread", on which |master_process_delegate|'s methods will be called. Both
   // must stay alive at least until after |Shutdown()| has been called.
-  void Init(embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
-            embedder::MasterProcessDelegate* master_process_delegate)
+  void Init(
+      util::RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
+      embedder::MasterProcessDelegate* master_process_delegate)
       MOJO_NOT_THREAD_SAFE;
 
   // Adds a slave process and sets up/tracks a connection to that slave (using
@@ -138,7 +140,7 @@ class MasterConnectionManager final : public ConnectionManager {
   // in |Shutdown()| after |private_thread_| is dead. Thus it's safe to "use" on
   // |private_thread_|. (Note that |master_process_delegate_| may only be called
   // from the delegate thread.)
-  embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner_;
+  util::RefPtr<embedder::PlatformTaskRunner> delegate_thread_task_runner_;
   embedder::MasterProcessDelegate* master_process_delegate_;
 
   // This is a private I/O thread on which this class does the bulk of its work.

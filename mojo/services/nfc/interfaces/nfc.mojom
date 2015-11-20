@@ -16,12 +16,14 @@ interface NfcTransmission {
 };
 
 // NfcReceivers can be registered with Nfc to receive nfc messages.
+[ServiceName="nfc::NfcReceiver"]
 interface NfcReceiver {
   OnReceivedNfcData(NfcData nfc_data);
 };
 
 // Nfc allows data to be sent to and received from other MojoShells on Android.
 // Received data is passed to all registered NfcReceivers.
+[ServiceName="nfc::Nfc"]
 interface Nfc {
   // Puts the MojoShell in a state where it will transmit |nfc_data| to the next
   // Android device to connect to this one via NFC.  This transmission state

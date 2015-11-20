@@ -33,6 +33,7 @@ union ResultOrError {
 // |SpeechRecognizerService| provides access to a speech recognition service.
 // It is responsible for reading microphone input, deciding when the user is
 // done speaking, and performing speech recognition on the result.
+[ServiceName="speech_recognizer::SpeechRecognizerService"]
 interface SpeechRecognizerService {
   // Starts listening to the user. When listening has finished or an error
   // occurs, returns |result_or_error|. Any call to Listen() made while another

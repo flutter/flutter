@@ -10,6 +10,7 @@ import "input_events/interfaces/input_events.mojom";
 
 // WindowManagerInternal is an interface provided by the WindowManager
 // exclusively to the ViewManager.
+[ServiceName="mojo::WindowManagerInternal"]
 interface WindowManagerInternal {
   // Creates a connection to the WindowManager specifically for a connection to
   // the ViewManager. |connection_id| is the id of the connection to the
@@ -24,6 +25,7 @@ interface WindowManagerInternal {
 // WindowManagerInternalClient is an interface provide by the ViewManager
 // exclusively to the WindowManager. It provides functionality only available
 // to the WindowManager.
+[ServiceName="mojo::WindowManagerInternalClient"]
 interface WindowManagerInternalClient {
   // Dispatches the specified input event to the specified view.
   DispatchInputEventToView(uint32 view_id, mojo.Event event);

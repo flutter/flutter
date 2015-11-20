@@ -11,6 +11,7 @@ import "files/interfaces/file.mojom";
 // terminal. (Once connected, such an application will be able to write to/read
 // from the terminal by performing the corresponding operations on the provided
 // "file".)
+[ServiceName="mojo::terminal::TerminalClient"]
 interface TerminalClient {
   ConnectToTerminal(mojo.files.File terminal);
 };

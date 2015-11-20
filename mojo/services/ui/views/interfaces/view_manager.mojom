@@ -13,6 +13,7 @@ import "mojo/services/ui/views/interfaces/view_trees.mojom";
 // Before a view can be added to the view tree, it must first be registered
 // with the view manager.  Once registered, the view receives a token as a
 // transferable reference to be provided to the view's intended container.
+[ServiceName="mojo::ui::ViewManager"]
 interface ViewManager {
   // Registers a view with the view manager.
   //

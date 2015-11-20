@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/slave_connection_manager.h"
 
+#include <utility>
+
 #include "base/bind.h"
 #include "base/bind_helpers.h"
 #include "base/location.h"
@@ -14,6 +16,7 @@
 #include "mojo/edk/util/make_unique.h"
 
 using mojo::util::MutexLocker;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -43,7 +46,7 @@ SlaveConnectionManager::~SlaveConnectionManager() {
 }
 
 void SlaveConnectionManager::Init(
-    embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
+    RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
     embedder::SlaveProcessDelegate* slave_process_delegate,
     embedder::ScopedPlatformHandle platform_handle) {
   DCHECK(delegate_thread_task_runner);
@@ -53,7 +56,7 @@ void SlaveConnectionManager::Init(
   DCHECK(!slave_process_delegate_);
   DCHECK(!private_thread_.message_loop());
 
-  delegate_thread_task_runner_ = delegate_thread_task_runner;
+  delegate_thread_task_runner_ = std::move(delegate_thread_task_runner);
   slave_process_delegate_ = slave_process_delegate;
   CHECK(private_thread_.StartWithOptions(
       base::Thread::Options(base::MessageLoop::TYPE_IO, 0)));
@@ -322,8 +325,7 @@ void SlaveConnectionManager::OnError(Error error) {
   raw_channel_.reset();
 
   DCHECK(slave_process_delegate_);
-  embedder::PlatformPostTask(
-      delegate_thread_task_runner_.get(),
+  delegate_thread_task_runner_->PostTask(
       base::Bind(&embedder::SlaveProcessDelegate::OnMasterDisconnect,
                  base::Unretained(slave_process_delegate_)));
 }

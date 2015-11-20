@@ -12,6 +12,7 @@ import "terminal/interfaces/terminal_client.mojom";
 // Interface for actual terminal programs, in particular, for a single terminal
 // display. For terminals that display output and are embeddable, this will
 // typically be a service provided by the |ViewManagerClient| (see |OnEmbed()|).
+[ServiceName="mojo::terminal::Terminal"]
 interface Terminal {
   // Connects to the terminal. If |force| is true, it will terminate any
   // existing connection. The reply is sent when |terminal| is no longer

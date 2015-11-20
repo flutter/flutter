@@ -15,6 +15,7 @@ struct PredictionInfo {
 	string current_word;
 };
 
+[ServiceName="prediction::PredictionService"]
 interface PredictionService {
   GetPredictionList(PredictionInfo prediction_info) => (array<string>? prediction_list);
 };

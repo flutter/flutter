@@ -62,12 +62,13 @@ class IPCSupport {
   // All the (pointer) arguments must remain alive (and, in the case of task
   // runners, continue to process tasks) until |ShutdownOnIOThread()| has been
   // called.
-  IPCSupport(embedder::PlatformSupport* platform_support,
-             embedder::ProcessType process_type,
-             embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
-             embedder::ProcessDelegate* process_delegate,
-             embedder::PlatformTaskRunnerRefPtr io_thread_task_runner,
-             embedder::ScopedPlatformHandle platform_handle);
+  IPCSupport(
+      embedder::PlatformSupport* platform_support,
+      embedder::ProcessType process_type,
+      util::RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
+      embedder::ProcessDelegate* process_delegate,
+      util::RefPtr<embedder::PlatformTaskRunner>&& io_thread_task_runner,
+      embedder::ScopedPlatformHandle platform_handle);
   // Note: This object must be shut down before destruction (see
   // |ShutdownOnIOThread()|).
   ~IPCSupport();
@@ -104,7 +105,7 @@ class IPCSupport {
       embedder::SlaveInfo slave_info,
       embedder::ScopedPlatformHandle platform_handle,
       const base::Closure& callback,
-      embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
+      util::RefPtr<embedder::PlatformTaskRunner>&& callback_thread_task_runner,
       ChannelId* channel_id);
 
   // Called in a slave process to connect it to the master process and thus the
@@ -118,7 +119,7 @@ class IPCSupport {
   util::RefPtr<MessagePipeDispatcher> ConnectToMaster(
       const ConnectionIdentifier& connection_id,
       const base::Closure& callback,
-      embedder::PlatformTaskRunnerRefPtr callback_thread_task_runner,
+      util::RefPtr<embedder::PlatformTaskRunner>&& callback_thread_task_runner,
       ChannelId* channel_id);
 
   embedder::ProcessType process_type() const { return process_type_; }
@@ -165,9 +166,9 @@ class IPCSupport {
 
   // These are all set on construction and reset by |ShutdownOnIOThread()|.
   embedder::ProcessType process_type_;
-  embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner_;
+  util::RefPtr<embedder::PlatformTaskRunner> delegate_thread_task_runner_;
   embedder::ProcessDelegate* process_delegate_;
-  embedder::PlatformTaskRunnerRefPtr io_thread_task_runner_;
+  util::RefPtr<embedder::PlatformTaskRunner> io_thread_task_runner_;
 
   std::unique_ptr<ConnectionManager> connection_manager_;
   std::unique_ptr<ChannelManager> channel_manager_;

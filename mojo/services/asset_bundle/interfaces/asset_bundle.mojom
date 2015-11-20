@@ -5,10 +5,12 @@
 [DartPackage="mojo_services"]
 module mojo.asset_bundle;
 
+[ServiceName="mojo::asset_bundle::AssetBundle"]
 interface AssetBundle {
   GetAsStream(string asset_name) => (handle<data_pipe_consumer> asset_data);
 };
 
+[ServiceName="mojo::asset_bundle::AssetUnpacker"]
 interface AssetUnpacker {
   UnpackZipStream(handle<data_pipe_consumer> zipped_assets, AssetBundle& asset_bundle);
 };

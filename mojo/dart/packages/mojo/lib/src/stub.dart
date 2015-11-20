@@ -69,7 +69,8 @@ abstract class Stub extends core.MojoEventHandler {
       // FailedPrecondition is only used to indicate that the other end of
       // the pipe has been closed. We can ignore the close here and wait for
       // the PeerClosed signal on the event stream.
-      assert(endpoint.status.isOk || endpoint.status.isFailedPrecondition);
+      assert((endpoint.status == core.MojoResult.kOk) ||
+          (endpoint.status == core.MojoResult.kFailedPrecondition));
       if (_isClosing && (_outstandingResponseFutures == 0)) {
         // This was the final response future for which we needed to send
         // a response. It is safe to close.

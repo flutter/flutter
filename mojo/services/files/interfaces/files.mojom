@@ -8,6 +8,7 @@ module mojo.files;
 import "files/interfaces/directory.mojom";
 import "files/interfaces/types.mojom";
 
+[ServiceName="mojo::files::Files"]
 interface Files {
   // Opens the root directory for the file system with the given name; null
   // yields the default file system, if any.

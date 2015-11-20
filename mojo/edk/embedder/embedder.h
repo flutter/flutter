@@ -87,11 +87,12 @@ MojoResult PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
 //     |platform_handle| should be connected to the handle passed to
 //     |ConnectToSlave()| (in the master process). For other processes,
 //     |platform_handle| is ignored (and should not be valid).
-void InitIPCSupport(ProcessType process_type,
-                    PlatformTaskRunnerRefPtr delegate_thread_task_runner,
-                    ProcessDelegate* process_delegate,
-                    PlatformTaskRunnerRefPtr io_thread_task_runner,
-                    ScopedPlatformHandle platform_handle);
+void InitIPCSupport(
+    ProcessType process_type,
+    util::RefPtr<PlatformTaskRunner>&& delegate_thread_task_runner,
+    ProcessDelegate* process_delegate,
+    util::RefPtr<PlatformTaskRunner>&& io_thread_task_runner,
+    ScopedPlatformHandle platform_handle);
 
 // Shuts down the subsystem initialized by |InitIPCSupport()|. This must be
 // called on the I/O thread (given to |InitIPCSupport()|). This completes
@@ -131,7 +132,7 @@ ScopedMessagePipeHandle ConnectToSlave(
     SlaveInfo slave_info,
     ScopedPlatformHandle platform_handle,
     const base::Closure& did_connect_to_slave_callback,
-    PlatformTaskRunnerRefPtr did_connect_to_slave_runner,
+    util::RefPtr<PlatformTaskRunner>&& did_connect_to_slave_runner,
     std::string* platform_connection_id,
     ChannelInfo** channel_info);
 
@@ -149,7 +150,7 @@ ScopedMessagePipeHandle ConnectToSlave(
 ScopedMessagePipeHandle ConnectToMaster(
     const std::string& platform_connection_id,
     const base::Closure& did_connect_to_master_callback,
-    PlatformTaskRunnerRefPtr did_connect_to_master_runner,
+    util::RefPtr<PlatformTaskRunner>&& did_connect_to_master_runner,
     ChannelInfo** channel_info);
 
 // A "channel" is a connection on top of an OS "pipe", on top of which Mojo
@@ -208,7 +209,7 @@ ScopedMessagePipeHandle CreateChannelOnIOThread(
 ScopedMessagePipeHandle CreateChannel(
     ScopedPlatformHandle platform_handle,
     const base::Callback<void(ChannelInfo*)>& did_create_channel_callback,
-    PlatformTaskRunnerRefPtr did_create_channel_runner);
+    util::RefPtr<PlatformTaskRunner>&& did_create_channel_runner);
 
 // Destroys a channel that was created using |ConnectToMaster()|,
 // |ConnectToSlave()|, |CreateChannel()|, or |CreateChannelOnIOThread()|; must
@@ -221,9 +222,10 @@ void DestroyChannelOnIOThread(ChannelInfo* channel_info);
 // if that is non-null, or otherwise it will be called on the "channel thread".
 // The "channel thread" must remain alive and continue to process tasks until
 // the callback has been executed.
-void DestroyChannel(ChannelInfo* channel_info,
-                    const base::Closure& did_destroy_channel_callback,
-                    PlatformTaskRunnerRefPtr did_destroy_channel_runner);
+void DestroyChannel(
+    ChannelInfo* channel_info,
+    const base::Closure& did_destroy_channel_callback,
+    util::RefPtr<PlatformTaskRunner>&& did_destroy_channel_runner);
 
 // Inform the channel that it will soon be destroyed (doing so is optional).
 // This may be called from any thread, but the caller must ensure that this is

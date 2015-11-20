@@ -47,13 +47,13 @@ void OutputStreamFile::Read(uint32_t num_bytes_to_read,
                             mojo::files::Whence whence,
                             const ReadCallback& callback) {
   if (is_closed_) {
-    callback.Run(mojo::files::Error::CLOSED, mojo::Array<uint8_t>());
+    callback.Run(mojo::files::Error::CLOSED, nullptr);
     return;
   }
 
   // TODO(vtl): Is this what we want? (Also is "unavailable" right? Maybe
   // unsupported/EINVAL is better.)
-  callback.Run(mojo::files::Error::UNAVAILABLE, mojo::Array<uint8_t>());
+  callback.Run(mojo::files::Error::UNAVAILABLE, nullptr);
 }
 
 void OutputStreamFile::Write(mojo::Array<uint8_t> bytes_to_write,
@@ -222,11 +222,11 @@ void OutputStreamFile::Ioctl(uint32_t request,
                              mojo::Array<uint32_t> in_values,
                              const IoctlCallback& callback) {
   if (is_closed_) {
-    callback.Run(mojo::files::Error::CLOSED, mojo::Array<uint32_t>());
+    callback.Run(mojo::files::Error::CLOSED, nullptr);
     return;
   }
 
-  callback.Run(mojo::files::Error::UNIMPLEMENTED, mojo::Array<uint32_t>());
+  callback.Run(mojo::files::Error::UNIMPLEMENTED, nullptr);
 }
 
 }  // namespace files_impl

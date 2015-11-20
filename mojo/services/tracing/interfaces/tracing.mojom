@@ -10,6 +10,7 @@ module tracing;
 // function is called collect tracing data and pass it back via the provided
 // TraceRecorder interface up until Stop() is called.
 
+[ServiceName="tracing::TraceProvider"]
 interface TraceProvider {
   // Categories can either be the empty string to mean the default set of
   // categories or a comma-delimited list of categories to trace.
@@ -21,6 +22,7 @@ interface TraceRecorder {
   Record(string json);
 };
 
+[ServiceName="tracing::TraceCollector"]
 interface TraceCollector {
   // Request tracing data from all connected providers to stream to
   // |stream|.

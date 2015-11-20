@@ -5,6 +5,7 @@
 library tracing;
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
@@ -112,7 +113,7 @@ class TracingHelper {
       {Map<String, String> args, int start, int duration}) {
     if (isActive()) {
       var time = (start != null) ? start : getTimeTicksNow();
-      var map = {};
+      var map = new HashMap();
       map["name"] = name;
       map["cat"] = categories;
       map["ph"] = phase;

@@ -38,6 +38,7 @@ interface SensorListener {
   OnSensorChanged(SensorData data);
 };
 
+[ServiceName="sensors::SensorService"]
 interface SensorService {
   AddListener(SensorType type, SensorListener listener);
 };

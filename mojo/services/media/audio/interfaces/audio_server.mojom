@@ -6,6 +6,7 @@ module mojo.media;
 
 import "mojo/services/media/audio/interfaces/audio_track.mojom";
 
+[ServiceName="mojo::media::AudioServer"]
 interface AudioServer {
   CreateTrack(AudioTrack& track);
 };

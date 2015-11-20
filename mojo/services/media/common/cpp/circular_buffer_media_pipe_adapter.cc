@@ -35,8 +35,8 @@ CircularBufferMediaPipeAdapter::PacketState::~PacketState() { }
 CircularBufferMediaPipeAdapter::CircularBufferMediaPipeAdapter(
     MediaPipePtr pipe)
   : pipe_(pipe.Pass()) {
-  MOJO_DCHECK(nullptr != pipe_);
-  MOJO_DCHECK(nullptr != RunLoop::current());
+  MOJO_DCHECK(pipe_);
+  MOJO_DCHECK(RunLoop::current());
 
   pipe_get_state_cbk_ = MediaPipe::GetStateCallback(
       [this] (MediaPipeStatePtr state) {
@@ -304,8 +304,8 @@ MediaResult CircularBufferMediaPipeAdapter::Flush() {
 }
 
 void CircularBufferMediaPipeAdapter::HandleGetState(MediaPipeStatePtr state) {
-  MOJO_DCHECK(nullptr != state);    // We must have a state structure.
-  MOJO_DCHECK(nullptr == buffer_);  // We must not have already mapped a buffer.
+  MOJO_DCHECK(state);     // We must have a state structure.
+  MOJO_DCHECK(!buffer_);  // We must not have already mapped a buffer.
   MOJO_DCHECK(get_state_in_progress_);  // We should be waiting for our cbk.
 
   std::lock_guard<std::mutex> lock(signal_lock_);

@@ -10,11 +10,11 @@ class MojoSharedBuffer {
   static const int MAP_FLAG_NONE = 0;
 
   MojoHandle handle;
-  MojoResult status;
   ByteData mapping;
+  int status;
 
   MojoSharedBuffer(this.handle,
-      [this.status = MojoResult.OK, this.mapping = null]);
+      [this.status = MojoResult.kOk, this.mapping = null]);
 
   factory MojoSharedBuffer.create(int numBytes, [int flags = 0]) {
     List result = MojoSharedBufferNatives.Create(numBytes, flags);
@@ -22,13 +22,12 @@ class MojoSharedBuffer {
       return null;
     }
     assert((result is List) && (result.length == 2));
-    var r = new MojoResult(result[0]);
-    if (!r.isOk) {
+    if (result[0] != MojoResult.kOk) {
       return null;
     }
 
     MojoSharedBuffer buf =
-        new MojoSharedBuffer(new MojoHandle(result[1]), r, null);
+        new MojoSharedBuffer(new MojoHandle(result[1]), result[0], null);
     return buf;
   }
 
@@ -38,47 +37,46 @@ class MojoSharedBuffer {
       return null;
     }
     assert((result is List) && (result.length == 2));
-    var r = new MojoResult(result[0]);
-    if (!r.isOk) {
+    if (result[0] != MojoResult.kOk) {
       return null;
     }
 
     MojoSharedBuffer dupe =
-        new MojoSharedBuffer(new MojoHandle(result[1]), r, null);
+        new MojoSharedBuffer(new MojoHandle(result[1]), result[0], null);
     return dupe;
   }
 
-  MojoResult close() {
+  int close() {
     if (handle == null) {
-      status = MojoResult.INVALID_ARGUMENT;
+      status = MojoResult.kInvalidArgument;
       return status;
     }
-    MojoResult r = handle.close();
+    int r = handle.close();
     status = r;
     mapping = null;
     return status;
   }
 
-  MojoResult map(int offset, int numBytes, [int flags = 0]) {
+  int map(int offset, int numBytes, [int flags = 0]) {
     if (handle == null) {
-      status = MojoResult.INVALID_ARGUMENT;
+      status = MojoResult.kInvalidArgument;
       return status;
     }
     List result =
         MojoSharedBufferNatives.Map(this, handle.h, offset, numBytes, flags);
     if (result == null) {
-      status = MojoResult.INVALID_ARGUMENT;
+      status = MojoResult.kInvalidArgument;
       return status;
     }
     assert((result is List) && (result.length == 2));
-    status = new MojoResult(result[0]);
+    status = result[0];
     mapping = result[1];
     return status;
   }
 
-  MojoResult unmap() {
+  int unmap() {
     int r = MojoSharedBufferNatives.Unmap(mapping);
-    status = new MojoResult(r);
+    status = r;
     mapping = null;
     return status;
   }

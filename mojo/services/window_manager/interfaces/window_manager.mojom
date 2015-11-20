@@ -8,6 +8,7 @@ module mojo;
 import "input_events/interfaces/input_events.mojom";
 import "mojo/public/interfaces/application/service_provider.mojom";
 
+[ServiceName="mojo::WindowManager"]
 interface WindowManager {
   // Requests the WindowManager to embed the app for |url| at an appropriate
   // View. See ViewMangerService::Embed() for details on |services| and

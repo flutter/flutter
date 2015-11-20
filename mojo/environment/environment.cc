@@ -35,6 +35,9 @@ const MojoLogger* Environment::GetDefaultLogger() {
 }
 
 // static
+void Environment::SetDefaultLogger(const MojoLogger* logger) {}
+
+// static
 void Environment::InstantiateDefaultRunLoop() {
   CHECK(!base::MessageLoop::current());
   // Not leaked: accessible from |base::MessageLoop::current()|.

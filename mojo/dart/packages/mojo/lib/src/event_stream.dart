@@ -17,19 +17,18 @@ class MojoEventSubscription {
   RawReceivePort _receivePort;
 
   // The signals on this handle that we're interested in.
-  MojoHandleSignals _signals;
+  int _signals;
 
   // Whether subscribe() has been called.
   bool _isSubscribed;
 
   MojoEventSubscription(MojoHandle handle,
-      [MojoHandleSignals signals = MojoHandleSignals.PEER_CLOSED_READABLE])
+      [int signals = MojoHandleSignals.kPeerClosedReadable])
       : _handle = handle,
         _signals = signals,
         _isSubscribed = false {
     if (!MojoHandle.registerFinalizer(this)) {
-      throw new MojoInternalError(
-          "Failed to register the MojoHandle.");
+      throw new MojoInternalError("Failed to register the MojoHandle.");
     }
   }
 
@@ -42,8 +41,8 @@ class MojoEventSubscription {
     _receivePort = new RawReceivePort(handler);
     _sendPort = _receivePort.sendPort;
 
-    if (_signals.value != MojoHandleSignals.kNone) {
-      int res = MojoHandleWatcher.add(_handle.h, _sendPort, _signals.value);
+    if (_signals != MojoHandleSignals.kNone) {
+      int res = MojoHandleWatcher.add(_handle.h, _sendPort, _signals);
       if (res != MojoResult.kOk) {
         throw new MojoInternalError("MojoHandleWatcher add failed: $res");
       }
@@ -52,26 +51,26 @@ class MojoEventSubscription {
     _isSubscribed = true;
   }
 
-  bool enableSignals(MojoHandleSignals signals) {
+  bool enableSignals(int signals) {
     _signals = signals;
     if (_isSubscribed) {
-      return MojoHandleWatcher.add(_handle.h, _sendPort, signals.value) ==
+      return MojoHandleWatcher.add(_handle.h, _sendPort, _signals) ==
           MojoResult.kOk;
     }
     return false;
   }
 
   bool enableReadEvents() =>
-      enableSignals(MojoHandleSignals.PEER_CLOSED_READABLE);
-  bool enableWriteEvents() => enableSignals(MojoHandleSignals.WRITABLE);
-  bool enableAllEvents() => enableSignals(MojoHandleSignals.READWRITE);
+      enableSignals(MojoHandleSignals.kPeerClosedReadable);
+  bool enableWriteEvents() => enableSignals(MojoHandleSignals.kWritable);
+  bool enableAllEvents() => enableSignals(MojoHandleSignals.kReadWrite);
 
   Future _close({bool immediate: false, bool local: false}) {
     if (_handle != null) {
       if (_isSubscribed && !local) {
         return _handleWatcherClose(immediate: immediate).then((result) {
           // If the handle watcher is gone, then close the handle ourselves.
-          if (!result.isOk) {
+          if (result != MojoResult.kOk) {
             _localClose();
           }
         });
@@ -90,7 +89,7 @@ class MojoEventSubscription {
         _receivePort.close();
         _receivePort = null;
       }
-      return new MojoResult(r);
+      return r;
     });
   }
 
@@ -105,7 +104,7 @@ class MojoEventSubscription {
 
   bool get readyRead => _handle.readyRead;
   bool get readyWrite => _handle.readyWrite;
-  MojoHandleSignals get signals => _signals;
+  int get signals => _signals;
 
   String toString() => "$_handle";
 }
@@ -127,9 +126,9 @@ class MojoEventHandler {
     beginHandlingEvents();
   }
 
-  MojoEventHandler.fromHandle(MojoHandle handle) {
-    _endpoint = new MojoMessagePipeEndpoint(handle);
-    _eventSubscription = new MojoEventSubscription(handle);
+  MojoEventHandler.fromHandle(MojoHandle handle)
+      : _endpoint = new MojoMessagePipeEndpoint(handle),
+        _eventSubscription = new MojoEventSubscription(handle) {
     beginHandlingEvents();
   }
 
@@ -196,18 +195,18 @@ class MojoEventHandler {
       // immediately.
       return;
     }
-    var signalsWatched = new MojoHandleSignals(event[0]);
-    var signalsReceived = new MojoHandleSignals(event[1]);
+    int signalsWatched = event[0];
+    int signalsReceived = event[1];
     _isInHandler = true;
-    if (signalsReceived.isReadable) {
+    if (MojoHandleSignals.isReadable(signalsReceived)) {
       assert(_eventSubscription.readyRead);
       handleRead();
     }
-    if (signalsReceived.isWritable) {
+    if (MojoHandleSignals.isWritable(signalsReceived)) {
       assert(_eventSubscription.readyWrite);
       handleWrite();
     }
-    _isPeerClosed = signalsReceived.isPeerClosed ||
+    _isPeerClosed = MojoHandleSignals.isPeerClosed(signalsReceived) ||
         !_eventSubscription.enableSignals(signalsWatched);
     _isInHandler = false;
     if (_isPeerClosed) {

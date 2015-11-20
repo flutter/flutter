@@ -5,6 +5,7 @@
 [DartPackage="mojo_services"]
 module mojo;
 
+[ServiceName="mojo::Clipboard"]
 interface Clipboard {
   enum Type {
     COPY_PASTE = 0,

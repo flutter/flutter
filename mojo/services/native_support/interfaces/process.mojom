@@ -9,14 +9,15 @@ import "files/interfaces/file.mojom";
 import "files/interfaces/types.mojom";
 
 // Interface for dealing with (e.g., starting) "native" processes.
+[ServiceName="native_support::Process"]
 interface Process {
   // Spawns a process, optionally redirecting stdin/stdout/stderr from/to the
   // corresponding |mojo.files.File| (if null, redirects from/to /dev/null).
   // |path| is the path to the binary to execute; |argv| is the argv to give to
   // the process (if null, it just takes |argv[0]| to be |path| with no other
   // arguments); |envp| is the environment to give to the process, consisting of
-  // an array of strings of the form "NAME=value" (if null, simply inherits the
-  // environment from the parent, whatever that is).
+  // an array of "strings" of the form "NAME=value" (if null, simply inherits
+  // the environment from the parent, whatever that is).
   // TODO(vtl): This should really take an array of |mojo.files.File|s (or maybe
   // two, one for input and the other for output), corresponding to FDs, but the
   // C++ bindings generator doesn't support arrays of interfaces yet
@@ -25,9 +26,9 @@ interface Process {
   // it in with |path|.
   // TODO(vtl): Inheriting |envp| from the parent is somewhat dubious, and
   // there's also no way to just specify modifications or limit inheritance.
-  Spawn(string path,
-        array<string>? argv,
-        array<string>? envp,
+  Spawn(array<uint8> path,
+        array<array<uint8>>? argv,
+        array<array<uint8>>? envp,
         mojo.files.File? stdin_file,
         mojo.files.File? stdout_file,
         mojo.files.File? stderr_file,
@@ -37,9 +38,9 @@ interface Process {
   // (i.e., one that behaves like one, including responding to the required
   // ioctls).
   SpawnWithTerminal(
-      string path,
-      array<string>? argv,
-      array<string>? envp,
+      array<uint8> path,
+      array<array<uint8>>? argv,
+      array<array<uint8>>? envp,
       mojo.files.File terminal_file,
       ProcessController& process_controller) => (mojo.files.Error error);
 };

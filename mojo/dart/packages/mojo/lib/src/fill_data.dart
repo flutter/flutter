@@ -8,19 +8,20 @@ class DataPipeFiller {
   final MojoDataPipeProducer _producer;
   final ByteData _data;
   MojoEventSubscription _eventSubscription;
-  int _dataPosition;
+  int _dataPosition = 0;
 
-  DataPipeFiller(this._producer, this._data) {
-    _eventSubscription = new MojoEventSubscription(_producer.handle);
-    _dataPosition = 0;
-  }
+  DataPipeFiller(MojoDataPipeProducer producer, ByteData data)
+      : _producer = producer,
+        _data = data,
+        _eventSubscription = new MojoEventSubscription(producer.handle);
 
-  MojoResult _doWrite() {
+  int _doWrite() {
     ByteData view = new ByteData.view(
         _data.buffer, _dataPosition, _data.lengthInBytes - _dataPosition);
     int written = _producer.write(view);
-    if (!_producer.status.isOk) {
-      throw 'Data pipe beginWrite failed: ${_producer.status}';
+    if (_producer.status != MojoResult.kOk) {
+      throw 'Data pipe beginWrite failed: '
+          '${MojoResult.string(_producer.status)}';
     }
     _dataPosition += written;
     return _producer.status;
@@ -29,18 +30,20 @@ class DataPipeFiller {
   void fill() {
     _eventSubscription.enableWriteEvents();
     _eventSubscription.subscribe((List<int> event) {
-      var mojoSignals = new MojoHandleSignals(event[1]);
-      if (mojoSignals.isWritable) {
-        MojoResult result = _doWrite();
-        if (_dataPosition >= _data.lengthInBytes || !result.isOk) {
+      int mojoSignals = event[1];
+      if (MojoHandleSignals.isWritable(mojoSignals)) {
+        int result = _doWrite();
+        if ((_dataPosition >= _data.lengthInBytes) ||
+            (result != MojoResult.kOk)) {
           _eventSubscription.close();
           _eventSubscription = null;
         }
-      } else if (mojoSignals.isPeerClosed) {
+      } else if (MojoHandleSignals.isPeerClosed(mojoSignals)) {
         _eventSubscription.close();
         _eventSubscription = null;
       } else {
-        throw 'Unexpected handle event: $mojoSignals';
+        String signals = MojoHandleSignals.string(mojoSignals);
+        throw 'Unexpected handle event: $signals';
       }
     });
   }

@@ -63,7 +63,7 @@ class LocalServiceProvider implements ServiceProvider {
 class ApplicationConnection {
   ServiceProviderProxy remoteServiceProvider;
   LocalServiceProvider _localServiceProvider;
-  final _nameToServiceFactory = new Map<String, ServiceFactory>();
+  final _nameToServiceFactory = new HashMap<String, ServiceFactory>();
   FallbackServiceFactory _fallbackServiceFactory;
   core.ErrorHandler onError;
 

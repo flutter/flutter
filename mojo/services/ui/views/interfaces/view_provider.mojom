@@ -12,6 +12,7 @@ import "mojo/services/ui/views/interfaces/views.mojom";
 //
 // Applications should implement and expose this service so that they can
 // expose views to be embedded into other applications.
+[ServiceName="mojo::ui::ViewProvider"]
 interface ViewProvider {
   // Creates and registers a view with the view manager and returns its
   // view token (as provided by |ViewManager.RegisterView()|).

@@ -7,6 +7,7 @@ module mojo;
 
 import "gpu/interfaces/command_buffer.mojom";
 
+[ServiceName="mojo::Gpu"]
 interface Gpu {
   // Creates a new offscreen OpenGL ES 2.0 context.
   CreateOffscreenGLES2Context(CommandBuffer& gles2_client);

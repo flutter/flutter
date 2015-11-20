@@ -12,6 +12,7 @@ struct Contact {
 };
 
 // Interface to query current user contacts.
+[ServiceName="contacts::ContactsService"]
 interface ContactsService {
 
   // Returns the number of contacts that match the given |filter|. |filter|

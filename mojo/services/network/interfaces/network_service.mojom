@@ -20,6 +20,7 @@ import "network/interfaces/web_socket.mojom";
 // TODO Darin suggests that this should probably be two classes. One for
 // high-level origin-build requests like WebSockets and HTTP, and the other for
 // non-origin-bound low-level stuff like DNS, UDP, and TCP.
+[ServiceName="mojo::NetworkService"]
 interface NetworkService {
   CreateURLLoader(URLLoader& loader);
 

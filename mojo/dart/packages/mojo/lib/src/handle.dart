@@ -19,11 +19,11 @@ class MojoHandle {
 
   MojoHandle.invalid() : this._internal(INVALID);
 
-  MojoResult close() {
+  int close() {
     MojoHandleNatives.removeOpenHandle(_h);
     int result = MojoHandleNatives.close(_h);
     _h = INVALID;
-    return new MojoResult(result);
+    return result;
   }
 
   MojoHandle pass() {
@@ -36,18 +36,18 @@ class MojoHandle {
     var state = result[1] != null
         ? new MojoHandleSignalsState(result[1][0], result[1][1])
         : null;
-    return new MojoWaitResult(new MojoResult(result[0]), state);
+    return new MojoWaitResult(result[0], state);
   }
 
-  bool _ready(MojoHandleSignals signal) {
-    MojoWaitResult mwr = wait(signal.value, 0);
+  bool _ready(int signal) {
+    MojoWaitResult mwr = wait(signal, 0);
     switch (mwr.result) {
-      case MojoResult.OK:
+      case MojoResult.kOk:
         return true;
-      case MojoResult.DEADLINE_EXCEEDED:
-      case MojoResult.CANCELLED:
-      case MojoResult.INVALID_ARGUMENT:
-      case MojoResult.FAILED_PRECONDITION:
+      case MojoResult.kDeadlineExceeded:
+      case MojoResult.kCancelled:
+      case MojoResult.kInvalidArgument:
+      case MojoResult.kFailedPrecondition:
         return false;
       default:
         // Should be unreachable.
@@ -55,8 +55,8 @@ class MojoHandle {
     }
   }
 
-  bool get readyRead => _ready(MojoHandleSignals.PEER_CLOSED_READABLE);
-  bool get readyWrite => _ready(MojoHandleSignals.WRITABLE);
+  bool get readyRead => _ready(MojoHandleSignals.kPeerClosedReadable);
+  bool get readyWrite => _ready(MojoHandleSignals.kWritable);
   bool get isValid => (_h != INVALID);
 
   String toString() {
@@ -77,12 +77,13 @@ class MojoHandle {
     List states = result[2] != null
         ? result[2].map((l) => new MojoHandleSignalsState(l[0], l[1])).toList()
         : null;
-    return new MojoWaitManyResult(new MojoResult(result[0]), result[1], states);
+    return new MojoWaitManyResult(result[0], result[1], states);
   }
 
   static bool registerFinalizer(MojoEventSubscription eventSubscription) {
     return MojoHandleNatives.registerFinalizer(
-        eventSubscription, eventSubscription._handle.h) == MojoResult.kOk;
+            eventSubscription, eventSubscription._handle.h) ==
+        MojoResult.kOk;
   }
 
   static bool reportLeakedHandles() => MojoHandleNatives.reportOpenHandles();

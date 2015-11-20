@@ -63,13 +63,13 @@ void InputStreamFile::Read(uint32_t num_bytes_to_read,
                            mojo::files::Whence whence,
                            const ReadCallback& callback) {
   if (is_closed_) {
-    callback.Run(mojo::files::Error::CLOSED, mojo::Array<uint8_t>());
+    callback.Run(mojo::files::Error::CLOSED, nullptr);
     return;
   }
 
   if (offset != 0 || whence != mojo::files::Whence::FROM_CURRENT) {
     // TODO(vtl): Is this the "right" behavior?
-    callback.Run(mojo::files::Error::INVALID_ARGUMENT, mojo::Array<uint8_t>());
+    callback.Run(mojo::files::Error::INVALID_ARGUMENT, nullptr);
     return;
   }
 
@@ -224,11 +224,11 @@ void InputStreamFile::Ioctl(uint32_t request,
                             mojo::Array<uint32_t> in_values,
                             const IoctlCallback& callback) {
   if (is_closed_) {
-    callback.Run(mojo::files::Error::CLOSED, mojo::Array<uint32_t>());
+    callback.Run(mojo::files::Error::CLOSED, nullptr);
     return;
   }
 
-  callback.Run(mojo::files::Error::UNIMPLEMENTED, mojo::Array<uint32_t>());
+  callback.Run(mojo::files::Error::UNIMPLEMENTED, nullptr);
 }
 
 void InputStreamFile::StartRead() {
@@ -239,7 +239,7 @@ void InputStreamFile::StartRead() {
     while (!pending_read_queue_.empty()) {
       // TODO(vtl): Is this what we want?
       pending_read_queue_.front().callback.Run(mojo::files::Error::UNAVAILABLE,
-                                               mojo::Array<uint8_t>());
+                                               nullptr);
       pending_read_queue_.pop_front();
     }
     return;
@@ -250,8 +250,7 @@ void InputStreamFile::StartRead() {
     // the queue. Note that we do this in FIFO order (thus couldn't have
     // completed them earlier).
     while (!pending_read_queue_.front().num_bytes) {
-      pending_read_queue_.front().callback.Run(mojo::files::Error::OK,
-                                               mojo::Array<uint8_t>());
+      pending_read_queue_.front().callback.Run(mojo::files::Error::OK, nullptr);
       pending_read_queue_.pop_front();
 
       if (pending_read_queue_.empty())
@@ -288,7 +287,7 @@ void InputStreamFile::CompleteRead(mojo::files::Error error,
   MOJO_CHECK(!pending_read_queue_.empty());
 
   if (error != mojo::files::Error::OK) {
-    pending_read_queue_.front().callback.Run(error, mojo::Array<uint8_t>());
+    pending_read_queue_.front().callback.Run(error, nullptr);
     pending_read_queue_.pop_front();
     return;
   }

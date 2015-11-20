@@ -7,7 +7,7 @@
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
 #include "base/run_loop.h"
-#include "base/thread_task_runner_handle.h"
+#include "mojo/edk/base_edk/platform_task_runner_impl.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
@@ -15,9 +15,11 @@
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/test/simple_test_thread.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -28,17 +30,21 @@ class ChannelManagerTest : public testing::Test {
  public:
   ChannelManagerTest()
       : message_loop_(base::MessageLoop::TYPE_IO),
-        channel_manager_(&platform_support_,
-                         message_loop_.task_runner(),
-                         nullptr) {}
+        task_runner_(MakeRefCounted<base_edk::PlatformTaskRunnerImpl>(
+            message_loop_.task_runner())),
+        channel_manager_(&platform_support_, task_runner_.Clone(), nullptr) {}
   ~ChannelManagerTest() override {}
 
  protected:
+  const RefPtr<embedder::PlatformTaskRunner>& task_runner() {
+    return task_runner_;
+  }
   ChannelManager& channel_manager() { return channel_manager_; }
 
  private:
   embedder::SimplePlatformSupport platform_support_;
   base::MessageLoop message_loop_;
+  RefPtr<embedder::PlatformTaskRunner> task_runner_;
   // Note: This should be *after* the above, since they must be initialized
   // before it (and should outlive it).
   ChannelManager channel_manager_;
@@ -105,11 +111,11 @@ class OtherThread : public test::SimpleTestThread {
  public:
   // Note: There should be no other refs to the channel identified by
   // |channel_id| outside the channel manager.
-  OtherThread(embedder::PlatformTaskRunnerRefPtr task_runner,
+  OtherThread(RefPtr<embedder::PlatformTaskRunner>&& task_runner,
               ChannelManager* channel_manager,
               ChannelId channel_id,
               const base::Closure& quit_closure)
-      : task_runner_(task_runner),
+      : task_runner_(std::move(task_runner)),
         channel_manager_(channel_manager),
         channel_id_(channel_id),
         quit_closure_(quit_closure) {}
@@ -132,15 +138,17 @@ class OtherThread : public test::SimpleTestThread {
     {
       base::MessageLoop message_loop;
       base::RunLoop run_loop;
-      channel_manager_->ShutdownChannel(channel_id_, run_loop.QuitClosure(),
-                                        message_loop.task_runner());
+      channel_manager_->ShutdownChannel(
+          channel_id_, run_loop.QuitClosure(),
+          MakeRefCounted<base_edk::PlatformTaskRunnerImpl>(
+              message_loop.task_runner()));
       run_loop.Run();
     }
 
-    embedder::PlatformPostTask(task_runner_.get(), quit_closure_);
+    task_runner_->PostTask(quit_closure_);
   }
 
-  const embedder::PlatformTaskRunnerRefPtr task_runner_;
+  const RefPtr<embedder::PlatformTaskRunner> task_runner_;
   ChannelManager* const channel_manager_;
   const ChannelId channel_id_;
   base::Closure quit_closure_;
@@ -156,8 +164,8 @@ TEST_F(ChannelManagerTest, CallsFromOtherThread) {
       id, channel_pair.PassServerHandle());
 
   base::RunLoop run_loop;
-  OtherThread thread(base::ThreadTaskRunnerHandle::Get(), &channel_manager(),
-                     id, run_loop.QuitClosure());
+  OtherThread thread(task_runner().Clone(), &channel_manager(), id,
+                     run_loop.QuitClosure());
   thread.Start();
   run_loop.Run();
   thread.Join();

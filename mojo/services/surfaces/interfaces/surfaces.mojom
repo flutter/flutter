@@ -55,6 +55,7 @@ interface ResourceReturner {
   ReturnResources(array<ReturnedResource> resources);
 };
 
+[ServiceName="mojo::Surface"]
 interface Surface {
   // Request the id namespace for this connection. Fully qualified surface ids
   // are the combination of the id_namespace for the connection that created the

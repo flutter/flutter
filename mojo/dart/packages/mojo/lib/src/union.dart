@@ -8,8 +8,7 @@ abstract class Union {
   void encode(Encoder encoder, int offset);
 }
 
-class UnionError {
-}
+class UnionError {}
 
 class UnsetUnionTagError extends UnionError {
   final curTag;
@@ -18,7 +17,7 @@ class UnsetUnionTagError extends UnionError {
   UnsetUnionTagError(this.curTag, this.requestedTag);
 
   String toString() {
-    return "Tried to read unset union member: {{requestedTag}} "
-      "current member: {{curTag}}.";
+    return "Tried to read unset union member: $requestedTag "
+        "current member: $curTag.";
   }
 }

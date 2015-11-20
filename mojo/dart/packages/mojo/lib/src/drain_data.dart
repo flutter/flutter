@@ -7,22 +7,20 @@ part of core;
 class DataPipeDrainer {
   MojoDataPipeConsumer _consumer;
   MojoEventSubscription _eventSubscription;
-  List<ByteData> _dataList;
-  int _dataSize;
+  List<ByteData> _dataList = new List<ByteData>();
+  int _dataSize = 0;
 
-  DataPipeDrainer(this._consumer) {
-    _eventSubscription = new MojoEventSubscription(_consumer.handle);
-    _dataList = new List();
-    _dataSize = 0;
-  }
+  DataPipeDrainer(MojoDataPipeConsumer consumer)
+      : _consumer = consumer,
+        _eventSubscription = new MojoEventSubscription(consumer.handle);
 
   ByteData _copy(ByteData byteData) => new ByteData.view(
       new Uint8List.fromList(byteData.buffer.asUint8List()).buffer);
 
-  MojoResult _doRead() {
+  int _doRead() {
     ByteData thisRead = _consumer.beginRead();
     if (thisRead == null) {
-      throw 'Data pipe beginRead failed: ${_consumer.status}';
+      throw 'Data pipe beginRead failed: ${_consumer}';
     }
     _dataList.add(_copy(thisRead));
     _dataSize += thisRead.lengthInBytes;
@@ -44,22 +42,23 @@ class DataPipeDrainer {
   Future<ByteData> drain() {
     var completer = new Completer();
     _eventSubscription.subscribe((List<int> event) {
-      var mojoSignals = new MojoHandleSignals(event[1]);
-      if (mojoSignals.isReadable) {
-        var result = _doRead();
-        if (!result.isOk) {
+      int mojoSignals = event[1];
+      if (MojoHandleSignals.isReadable(mojoSignals)) {
+        int result = _doRead();
+        if (result != MojoResult.kOk) {
           _eventSubscription.close();
           _eventSubscription = null;
           completer.complete(_concatData());
         } else {
           _eventSubscription.enableReadEvents();
         }
-      } else if (mojoSignals.isPeerClosed) {
+      } else if (MojoHandleSignals.isPeerClosed(mojoSignals)) {
         _eventSubscription.close();
         _eventSubscription = null;
         completer.complete(_concatData());
       } else {
-        throw 'Unexpected handle event: $mojoSignals';
+        String signals = MojoHandleSignals.string(mojoSignals);
+        throw 'Unexpected handle event: $signals';
       }
     });
     return completer.future;

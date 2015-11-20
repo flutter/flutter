@@ -27,6 +27,7 @@
 
 using mojo::util::AutoResetWaitableEvent;
 using mojo::util::MutexLocker;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -341,7 +342,7 @@ MasterConnectionManager::~MasterConnectionManager() {
 }
 
 void MasterConnectionManager::Init(
-    embedder::PlatformTaskRunnerRefPtr delegate_thread_task_runner,
+    RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
     embedder::MasterProcessDelegate* master_process_delegate) {
   DCHECK(delegate_thread_task_runner);
   DCHECK(master_process_delegate);
@@ -349,7 +350,7 @@ void MasterConnectionManager::Init(
   DCHECK(!master_process_delegate_);
   DCHECK(!private_thread_.message_loop());
 
-  delegate_thread_task_runner_ = delegate_thread_task_runner;
+  delegate_thread_task_runner_ = std::move(delegate_thread_task_runner);
   master_process_delegate_ = master_process_delegate;
   CHECK(private_thread_.StartWithOptions(
       base::Thread::Options(base::MessageLoop::TYPE_IO, 0)));
@@ -725,8 +726,7 @@ void MasterConnectionManager::CallOnSlaveDisconnect(
     embedder::SlaveInfo slave_info) {
   AssertOnPrivateThread();
   DCHECK(master_process_delegate_);
-  embedder::PlatformPostTask(
-      delegate_thread_task_runner_.get(),
+  delegate_thread_task_runner_->PostTask(
       base::Bind(&embedder::MasterProcessDelegate::OnSlaveDisconnect,
                  base::Unretained(master_process_delegate_),
                  base::Unretained(slave_info)));

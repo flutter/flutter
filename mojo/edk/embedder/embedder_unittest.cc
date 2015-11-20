@@ -20,6 +20,7 @@
 #include "mojo/edk/test/scoped_ipc_support.h"
 #include "mojo/edk/util/command_line.h"
 #include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/edk/util/waitable_event.h"
 #include "mojo/public/c/system/core.h"
@@ -32,6 +33,7 @@ using mojo::system::test::TestIOThread;
 using mojo::util::ManualResetWaitableEvent;
 using mojo::util::Mutex;
 using mojo::util::MutexLocker;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace embedder {
@@ -137,7 +139,7 @@ class EmbedderTest : public testing::Test {
 
  protected:
   TestIOThread& test_io_thread() { return test_io_thread_; }
-  PlatformTaskRunnerRefPtr test_io_task_runner() {
+  const RefPtr<PlatformTaskRunner>& test_io_task_runner() {
     return test_io_thread_.task_runner();
   }
 
@@ -152,7 +154,7 @@ class EmbedderTest : public testing::Test {
 };
 
 TEST_F(EmbedderTest, ChannelsBasic) {
-  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner());
+  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner().Clone());
 
   PlatformChannelPair channel_pair;
   ScopedTestChannel server_channel(channel_pair.PassServerHandle());
@@ -279,7 +281,7 @@ TEST_F(EmbedderTest, AsyncWait) {
 }
 
 TEST_F(EmbedderTest, ChannelsHandlePassing) {
-  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner());
+  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner().Clone());
 
   PlatformChannelPair channel_pair;
   ScopedTestChannel server_channel(channel_pair.PassServerHandle());
@@ -407,7 +409,7 @@ TEST_F(EmbedderTest, ChannelsHandlePassing) {
 #define MAYBE_MultiprocessMasterSlave MultiprocessMasterSlave
 #endif  // defined(OS_ANDROID)
 TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
-  mojo::test::ScopedMasterIPCSupport ipc_support(test_io_task_runner());
+  mojo::test::ScopedMasterIPCSupport ipc_support(test_io_task_runner().Clone());
 
   mojo::test::MultiprocessTestHelper multiprocess_test_helper;
   std::string connection_id;
@@ -452,7 +454,7 @@ TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
 
 TEST_F(EmbedderTest, ChannelShutdownRace_MessagePipeClose) {
   const size_t kIterations = 1000;
-  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner());
+  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner().Clone());
 
   for (size_t i = 0; i < kIterations; i++) {
     PlatformChannelPair channel_pair;
@@ -482,7 +484,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
 
   {
     mojo::test::ScopedSlaveIPCSupport ipc_support(
-        test_io_thread.task_runner(), client_platform_handle.Pass());
+        test_io_thread.task_runner().Clone(), client_platform_handle.Pass());
 
     std::string connection_id;
     ASSERT_TRUE(mojo::system::test::GetTestCommandLine()->GetOptionValue(
@@ -549,7 +551,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
 TEST_F(EmbedderTest, MAYBE_MultiprocessChannels) {
   // TODO(vtl): This should eventually initialize a master process instead,
   // probably.
-  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner());
+  mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner().Clone());
 
   mojo::test::MultiprocessTestHelper multiprocess_test_helper;
   multiprocess_test_helper.StartChild("MultiprocessChannelsClient");
@@ -675,7 +677,8 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessChannelsClient) {
   {
     // TODO(vtl): This should eventually initialize a slave process instead,
     // probably.
-    mojo::test::ScopedIPCSupport ipc_support(test_io_thread.task_runner());
+    mojo::test::ScopedIPCSupport ipc_support(
+        test_io_thread.task_runner().Clone());
 
     ScopedTestChannel client_channel(client_platform_handle.Pass());
     MojoHandle client_mp = client_channel.bootstrap_message_pipe();

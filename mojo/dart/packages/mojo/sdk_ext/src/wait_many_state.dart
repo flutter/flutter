@@ -16,13 +16,13 @@ class WaitManyState {
   List<SendPort> _ports;
 
   // A mapping from Mojo handles to their indices in _handles.
-  Map<int, int> _handleIndices;
+  HashMap<int, int> _handleIndices;
 
   int _occupied;
 
   WaitManyState() {
     _ports = [];
-    _handleIndices = new Map<int, int>();
+    _handleIndices = new HashMap<int, int>();
     _occupied = 0;
     _grow();
   }
@@ -31,7 +31,7 @@ class WaitManyState {
   Uint32List get handles => _handles;
   Uint32List get signals => _signals;
   List<SendPort> get ports => _ports;
-  Map<int, int> get handleIndices => _handleIndices;
+  HashMap<int, int> get handleIndices => _handleIndices;
 
   // Output of calls to waitMany.
   int mojoResult;

@@ -20,6 +20,7 @@ enum Target {
 };
 
 // Embedders that support navigation of implement this interface.
+[ServiceName="mojo::NavigatorHost"]
 interface NavigatorHost {
   RequestNavigate(Target target, URLRequest request);
   RequestNavigateHistory(int32 delta);

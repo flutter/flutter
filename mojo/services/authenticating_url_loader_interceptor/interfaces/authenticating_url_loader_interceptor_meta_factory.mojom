@@ -8,6 +8,7 @@ module mojo;
 import "authentication/interfaces/authentication.mojom";
 import "network/interfaces/url_loader_interceptor.mojom";
 
+[ServiceName="mojo::AuthenticatingURLLoaderInterceptorMetaFactory"]
 interface AuthenticatingURLLoaderInterceptorMetaFactory {
   // Creates a URLLoaderInterceptorFactory whose interceptors authenticate via
   // |authentication_service|. If the connection to |authentication_service| is

@@ -65,16 +65,16 @@ system::ChannelId MakeChannelId() {
 // Note: Called on the I/O thread.
 void ShutdownIPCSupportHelper() {
   // Save these before they get nuked by |ShutdownChannelOnIOThread()|.
-  PlatformTaskRunnerRefPtr delegate_thread_task_runner(
+  RefPtr<PlatformTaskRunner> delegate_thread_task_runner(
       internal::g_ipc_support->delegate_thread_task_runner());
   ProcessDelegate* process_delegate =
       internal::g_ipc_support->process_delegate();
 
   ShutdownIPCSupportOnIOThread();
 
-  PlatformPostTask(delegate_thread_task_runner.get(),
-                   base::Bind(&ProcessDelegate::OnShutdownComplete,
-                              base::Unretained(process_delegate)));
+  delegate_thread_task_runner->PostTask(
+      base::Bind(&ProcessDelegate::OnShutdownComplete,
+                 base::Unretained(process_delegate)));
 }
 
 }  // namespace
@@ -139,9 +139,9 @@ MojoResult PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
 }
 
 void InitIPCSupport(ProcessType process_type,
-                    PlatformTaskRunnerRefPtr delegate_thread_task_runner,
+                    RefPtr<PlatformTaskRunner>&& delegate_thread_task_runner,
                     ProcessDelegate* process_delegate,
-                    PlatformTaskRunnerRefPtr io_thread_task_runner,
+                    RefPtr<PlatformTaskRunner>&& io_thread_task_runner,
                     ScopedPlatformHandle platform_handle) {
   // |Init()| must have already been called.
   DCHECK(internal::g_core);
@@ -165,15 +165,15 @@ void ShutdownIPCSupportOnIOThread() {
 void ShutdownIPCSupport() {
   DCHECK(internal::g_ipc_support);
 
-  PlatformPostTask(internal::g_ipc_support->io_thread_task_runner(),
-                   base::Bind(&ShutdownIPCSupportHelper));
+  internal::g_ipc_support->io_thread_task_runner()->PostTask(
+      base::Bind(&ShutdownIPCSupportHelper));
 }
 
 ScopedMessagePipeHandle ConnectToSlave(
     SlaveInfo slave_info,
     ScopedPlatformHandle platform_handle,
     const base::Closure& did_connect_to_slave_callback,
-    PlatformTaskRunnerRefPtr did_connect_to_slave_runner,
+    RefPtr<PlatformTaskRunner>&& did_connect_to_slave_runner,
     std::string* platform_connection_id,
     ChannelInfo** channel_info) {
   DCHECK(platform_connection_id);
@@ -200,7 +200,7 @@ ScopedMessagePipeHandle ConnectToSlave(
 ScopedMessagePipeHandle ConnectToMaster(
     const std::string& platform_connection_id,
     const base::Closure& did_connect_to_master_callback,
-    PlatformTaskRunnerRefPtr did_connect_to_master_runner,
+    RefPtr<PlatformTaskRunner>&& did_connect_to_master_runner,
     ChannelInfo** channel_info) {
   DCHECK(channel_info);
   DCHECK(internal::g_ipc_support);
@@ -248,7 +248,7 @@ ScopedMessagePipeHandle CreateChannelOnIOThread(
 ScopedMessagePipeHandle CreateChannel(
     ScopedPlatformHandle platform_handle,
     const base::Callback<void(ChannelInfo*)>& did_create_channel_callback,
-    PlatformTaskRunnerRefPtr did_create_channel_runner) {
+    RefPtr<PlatformTaskRunner>&& did_create_channel_runner) {
   DCHECK(platform_handle.is_valid());
   DCHECK(!did_create_channel_callback.is_null());
   DCHECK(internal::g_ipc_support);
@@ -263,7 +263,7 @@ ScopedMessagePipeHandle CreateChannel(
           channel_id, platform_handle.Pass(),
           base::Bind(did_create_channel_callback,
                      base::Unretained(channel_info.release())),
-          did_create_channel_runner);
+          std::move(did_create_channel_runner));
 
   ScopedMessagePipeHandle rv(
       MessagePipeHandle(internal::g_core->AddDispatcher(dispatcher.get())));
@@ -286,7 +286,7 @@ void DestroyChannelOnIOThread(ChannelInfo* channel_info) {
 // TODO(vtl): Write tests for this.
 void DestroyChannel(ChannelInfo* channel_info,
                     const base::Closure& did_destroy_channel_callback,
-                    PlatformTaskRunnerRefPtr did_destroy_channel_runner) {
+                    RefPtr<PlatformTaskRunner>&& did_destroy_channel_runner) {
   DCHECK(channel_info);
   DCHECK(channel_info->channel_id);
   DCHECK(!did_destroy_channel_callback.is_null());
@@ -296,7 +296,7 @@ void DestroyChannel(ChannelInfo* channel_info,
       internal::g_ipc_support->channel_manager();
   channel_manager->ShutdownChannel(channel_info->channel_id,
                                    did_destroy_channel_callback,
-                                   did_destroy_channel_runner);
+                                   std::move(did_destroy_channel_runner));
   delete channel_info;
 }
 

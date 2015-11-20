@@ -15,6 +15,7 @@ import "mojo/public/interfaces/network/url_response.mojom";
 //            ETags, the entry will be invalidated. It should be extended to
 //            handle all the other http cache mechanisms for better performance
 //            with http servers that do not support ETags.
+[ServiceName="mojo::URLResponseDiskCache"]
 interface URLResponseDiskCache {
 
    // Given an URL, returns a tuple. If the |url| is not in the cache, all the

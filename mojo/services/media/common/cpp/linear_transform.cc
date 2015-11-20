@@ -306,8 +306,8 @@ bool LinearTransform::Ratio::Compose(const Ratio& a,
   MOJO_DCHECK(out);
   if (!out) { return false; }
 
-  int64_t  numerator = a.numerator * b.numerator;
-  uint64_t denominator = a.denominator * b.denominator;
+  int64_t  numerator   = static_cast<int64_t>(a.numerator) * b.numerator;
+  uint64_t denominator = static_cast<uint64_t>(a.denominator) * b.denominator;
 
   if (!numerator || !denominator) {
     out->numerator = numerator ? 1 : 0;

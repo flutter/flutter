@@ -13,6 +13,7 @@ import "location/interfaces/location.mojom";
 // Google Play Services Location API. If we ever want to expand this to multiple
 // platforms or if it starts growing in complexity, we should strongly consider
 // use of Chromium's geolocation code.
+[ServiceName="mojo::LocationService"]
 interface LocationService {
   enum UpdatePriority {
     // Use this setting to request location precision to within a city block.

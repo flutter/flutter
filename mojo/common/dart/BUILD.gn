@@ -12,6 +12,6 @@ dart_pkg("dart") {
   ]
   deps = [
     "//mojo/public/dart",
-    "//mojo/dart/mojo_services",
+    "//mojo/dart/packages",
   ]
 }

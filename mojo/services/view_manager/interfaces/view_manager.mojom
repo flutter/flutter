@@ -36,6 +36,7 @@ enum ErrorCode {
 // and the lower 16 the id assigned by the client.
 //
 // The root view is identified with a connection id of 0, and value of 1.
+[ServiceName="mojo::ViewManagerService"]
 interface ViewManagerService {
   // Creates a new view with the specified id. It is up to the client to ensure
   // the id is unique to the connection (the id need not be globally unique).
@@ -156,6 +157,7 @@ interface ViewManagerService {
 // Changes to views are not sent to the connection that originated the
 // change. For example, if connection 1 changes the bounds of a view by calling
 // SetBounds(), connection 1 does not receive OnViewBoundsChanged().
+[ServiceName="mojo::ViewManagerClient"]
 interface ViewManagerClient {
   // Invoked when the client application has been embedded at |root|.
   // See Embed() on ViewManagerService for more details. |view_manager_service|

@@ -5,6 +5,8 @@
 [DartPackage="mojo_services"]
 module keyboard;
 
+import "native_viewport/interfaces/native_viewport.mojom";
+
 struct CompletionData {
   int64 id;
   int32 position;
@@ -42,10 +44,18 @@ enum KeyboardType {
   DATETIME,
 };
 
+[ServiceName="keyboard::KeyboardService"]
 interface KeyboardService {
   Show(KeyboardClient client, KeyboardType type);
   ShowByRequest();
   Hide();
   SetText(string text);
   SetSelection(int32 start, int32 end);
+};
+
+[ServiceName="keyboard::KeyboardServiceFactory"]
+interface KeyboardServiceFactory {
+  CreateKeyboardService(
+      mojo.NativeViewportEventDispatcher& keyEventDispatcher,
+      KeyboardService& serviceRequest);
 };

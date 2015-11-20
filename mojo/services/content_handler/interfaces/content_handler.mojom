@@ -8,6 +8,7 @@ module mojo;
 import "mojo/public/interfaces/application/application.mojom";
 import "mojo/public/interfaces/network/url_response.mojom";
 
+[ServiceName="mojo::ContentHandler"]
 interface ContentHandler {
   StartApplication(Application& application, URLResponse response);
 };

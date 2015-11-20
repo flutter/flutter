@@ -23,6 +23,7 @@ interface Display {
 };
 
 // DisplayFactory creates new Display instances.
+[ServiceName="mojo::DisplayFactory"]
 interface DisplayFactory {
   // Create associates a Display that will draw to contexts produced by
   // |context_provider|. Any resources submitted to the display will be

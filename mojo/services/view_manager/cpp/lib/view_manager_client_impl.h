@@ -29,7 +29,7 @@ class ViewManagerClientImpl : public ViewManager,
                         bool delete_on_error);
   ~ViewManagerClientImpl() override;
 
-  bool connected() const { return service_; }
+  bool connected() const { return !!service_; }
   ConnectionSpecificId connection_id() const { return connection_id_; }
 
   // API exposed to the view implementations that pushes local changes to the

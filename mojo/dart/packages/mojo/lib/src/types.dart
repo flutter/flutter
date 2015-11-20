@@ -24,72 +24,9 @@ class MojoResult {
   static const int kBusy = 16;
   static const int kShouldWait = 17;
 
-  static const OK = const MojoResult._(kOk);
-  static const CANCELLED = const MojoResult._(kCancelled);
-  static const UNKNOWN = const MojoResult._(kUnknown);
-  static const INVALID_ARGUMENT = const MojoResult._(kInvalidArgument);
-  static const DEADLINE_EXCEEDED = const MojoResult._(kDeadlineExceeded);
-  static const NOT_FOUND = const MojoResult._(kNotFound);
-  static const ALREADY_EXISTS = const MojoResult._(kAlreadyExists);
-  static const PERMISSION_DENIED = const MojoResult._(kPermissionDenied);
-  static const RESOURCE_EXHAUSTED = const MojoResult._(kResourceExhausted);
-  static const FAILED_PRECONDITION = const MojoResult._(kFailedPrecondition);
-  static const ABORTED = const MojoResult._(kAborted);
-  static const OUT_OF_RANGE = const MojoResult._(kOutOfRange);
-  static const UNIMPLEMENTED = const MojoResult._(kUnimplemented);
-  static const INTERNAL = const MojoResult._(kInternal);
-  static const UNAVAILABLE = const MojoResult._(kUnavailable);
-  static const DATA_LOSS = const MojoResult._(kDataLoss);
-  static const BUSY = const MojoResult._(kBusy);
-  static const SHOULD_WAIT = const MojoResult._(kShouldWait);
+  MojoResult._();
 
-  static const _values = const <MojoResult>[
-    OK,
-    CANCELLED,
-    UNKNOWN,
-    INVALID_ARGUMENT,
-    DEADLINE_EXCEEDED,
-    NOT_FOUND,
-    ALREADY_EXISTS,
-    PERMISSION_DENIED,
-    RESOURCE_EXHAUSTED,
-    FAILED_PRECONDITION,
-    ABORTED,
-    OUT_OF_RANGE,
-    UNIMPLEMENTED,
-    INTERNAL,
-    UNAVAILABLE,
-    DATA_LOSS,
-    BUSY,
-    SHOULD_WAIT,
-  ];
-
-  final int value;
-
-  const MojoResult._(this.value);
-
-  factory MojoResult(int value) => _values[value];
-
-  bool get isOk => (this == OK);
-  bool get isCancelled => (this == CANCELLED);
-  bool get isUnknown => (this == UNKNOWN);
-  bool get isInvalidArgument => (this == INVALID_ARGUMENT);
-  bool get isDeadlineExceeded => (this == DEADLINE_EXCEEDED);
-  bool get isNotFound => (this == NOT_FOUND);
-  bool get isAlreadExists => (this == ALREADY_EXISTS);
-  bool get isPermissionDenied => (this == PERMISSION_DENIED);
-  bool get isResourceExhausted => (this == RESOURCE_EXHAUSTED);
-  bool get isFailedPrecondition => (this == FAILED_PRECONDITION);
-  bool get isAborted => (this == ABORTED);
-  bool get isOutOfRange => (this == OUT_OF_RANGE);
-  bool get isUnimplemented => (this == UNIMPLEMENTED);
-  bool get isInternal => (this == INTERNAL);
-  bool get isUnavailable => (this == UNAVAILABLE);
-  bool get isDataLoss => (this == DATA_LOSS);
-  bool get isBusy => (this == BUSY);
-  bool get isShouldWait => (this == SHOULD_WAIT);
-
-  String toString() {
+  static String string(int value) {
     switch (value) {
       case kOk:
         return "OK";
@@ -144,61 +81,31 @@ class MojoHandleSignals {
   static const int kAll = 0x7;
   static const int kBitfieldSize = 3;
 
-  static const NONE = const MojoHandleSignals._(kNone);
-  static const READABLE = const MojoHandleSignals._(kReadable);
-  static const WRITABLE = const MojoHandleSignals._(kWritable);
-  static const PEER_CLOSED = const MojoHandleSignals._(kPeerClosed);
-  static const PEER_CLOSED_READABLE =
-      const MojoHandleSignals._(kPeerClosedReadable);
-  static const READWRITE = const MojoHandleSignals._(kReadWrite);
-  static const PEER_CLOSED_WRITABLE =
-      const MojoHandleSignals._(kPeerClosedWritable);
-  static const ALL = const MojoHandleSignals._(kAll);
+  MojoHandleSignals._();
 
-  static const _values = const <MojoHandleSignals>[
-    NONE,  // 0
-    READABLE,  // 1
-    WRITABLE,  // 2
-    READWRITE, // 3
-    PEER_CLOSED,  // 4
-    PEER_CLOSED_READABLE,  // 5
-    PEER_CLOSED_WRITABLE,  // 6
-    ALL,  // 7
-  ];
+  static bool isNone(int v) => v == 0;
+  static bool isReadable(int v) => (v & kReadable) == kReadable;
+  static bool isWritable(int v) => (v & kWritable) == kWritable;
+  static bool isReadWrite(int v) => (v & kReadWrite) == kReadWrite;
+  static bool isPeerClosed(int v) => (v & kPeerClosed) == kPeerClosed;
+  static bool isPeerClosedReadable(int v) =>
+      (v & kPeerClosedReadable) == kPeerClosedReadable;
+  static bool isPeerClosedWritable(int v) =>
+      (v & kPeerClosedWritable) == kPeerClosedWritable;
+  static bool isAll(int v) => (v & kAll) == kAll;
+  static bool isValid(int v) => (v & kAll) == v;
 
-  final int value;
-
-  const MojoHandleSignals._(this.value);
-
-  factory MojoHandleSignals(int value) => _values[value];
-
-  bool get isNone => (this == NONE);
-  bool get isReadable => (value & kReadable) == kReadable;
-  bool get isWritable => (value & kWritable) == kWritable;
-  bool get isPeerClosed => (value & kPeerClosed) == kPeerClosed;
-  bool get isReadWrite => (value & kReadWrite) == kReadWrite;
-  bool get isAll => (this == ALL);
-  bool get isValid => (value & kAll) == value;
-
-  MojoHandleSignals operator +(MojoHandleSignals other) {
-    return new MojoHandleSignals(value | other.value);
-  }
-
-  MojoHandleSignals operator -(MojoHandleSignals other) {
-    return new MojoHandleSignals(value & ~other.value);
-  }
-
-  String toString() {
-    if (isNone) {
+  static String string(int value) {
+    if (value == kNone) {
       return "(None)";
     }
-    if (!isValid) {
+    if (!isValid(value)) {
       return "(INVALID)";
     }
     List<String> signals = [];
-    if (isReadable) signals.add("Readable");
-    if (isWritable) signals.add("Writable");
-    if (isPeerClosed) signals.add("PeerClosed");
+    if (value == kReadable) signals.add("Readable");
+    if (value == kWritable) signals.add("Writable");
+    if (value == kPeerClosed) signals.add("PeerClosed");
     return "(" + signals.join(", ") + ")";
   }
 }
@@ -207,25 +114,31 @@ class MojoHandleSignalsState {
   MojoHandleSignalsState(this.satisfied_signals, this.satisfiable_signals);
   final int satisfied_signals;
   final int satisfiable_signals;
-  String toString() => (new MojoHandleSignals(satisfied_signals)).toString();
+  String toString() => MojoHandleSignals.string(satisfied_signals);
 }
 
 class MojoWaitResult {
   MojoWaitResult(this.result, this.state);
-  final MojoResult result;
+  final int result;
   MojoHandleSignalsState state;
-  String toString() => "MojoWaitResult(result: $result, state: $state)";
+  String toString() {
+    String r = MojoResult.string(result);
+    return "MojoWaitResult(result: $r, state: $state)";
+  }
 }
 
 class MojoWaitManyResult {
   MojoWaitManyResult(this.result, this.index, this.states);
-  final MojoResult result;
+  final int result;
   final int index;
   List<MojoHandleSignalsState> states;
 
   bool get isIndexValid => (this.index != null);
   bool get areSignalStatesValid => (this.states != null);
 
-  String toString() =>
-      "MojoWaitManyResult(" "result: $result, idx: $index, state: ${states[index]})";
+  String toString() {
+    String r = MojoResult.string(result);
+    return "MojoWaitManyResult(result: $r, idx: $index, "
+        "state: ${states[index]})";
+  }
 }

@@ -5,6 +5,7 @@
 [DartPackage="mojo_services"]
 module icu_data;
 
+[ServiceName="icu_data::ICUData"]
 interface ICUData {
   Map(string sha1hash) => (handle<shared_buffer>? icu_data);
 };

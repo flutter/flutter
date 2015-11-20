@@ -8,6 +8,7 @@ module authentication;
 // Interface to handle user identity and authentication tokens.
 // TODO(qsr): This API only handles google accounts at this time. It will need
 //            to be extended to allow generic account manager on the platform.
+[ServiceName="authentication::AuthenticationService"]
 interface AuthenticationService {
   // Requests a Google account to use. In case of success, error will be null.
   // In case of error, username will be null and error will contain a

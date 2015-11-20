@@ -10,6 +10,18 @@ package_mojo_entrypoints = [
   "lib/core.dart",
 ]
 
+package_mojo_bindings = [
+  "lib/mojo/application_connector.mojom.dart",
+  "lib/mojo/interface_control_messages.mojom.dart",
+  "lib/mojo/shell.mojom.dart",
+  "lib/mojo/application.mojom.dart",
+  "lib/mojo/network_error.mojom.dart",
+  "lib/mojo/url_request.mojom.dart",
+  "lib/mojo/http_header.mojom.dart",
+  "lib/mojo/service_provider.mojom.dart",
+  "lib/mojo/url_response.mojom.dart",
+]
+
 package_mojo_sources = [
                          "lib/src/application_connection.dart",
                          "lib/src/application.dart",
@@ -30,4 +42,4 @@ package_mojo_sources = [
                          "lib/src/types.dart",
                          "lib/src/union.dart",
                          "lib/src/utils.dart",
-                       ] + package_mojo_entrypoints
+                       ] + package_mojo_entrypoints + package_mojo_bindings

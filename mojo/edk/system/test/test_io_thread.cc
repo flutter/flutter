@@ -8,6 +8,7 @@
 #include "mojo/edk/util/waitable_event.h"
 
 using mojo::util::AutoResetWaitableEvent;
+using mojo::util::MakeRefCounted;
 
 namespace mojo {
 namespace system {
@@ -44,6 +45,8 @@ void TestIOThread::Start() {
   io_thread_started_ = true;
   CHECK(io_thread_.StartWithOptions(
       base::Thread::Options(base::MessageLoop::TYPE_IO, 0)));
+  io_task_runner_ = MakeRefCounted<base_edk::PlatformTaskRunnerImpl>(
+      message_loop()->task_runner());
 }
 
 void TestIOThread::Stop() {
@@ -53,13 +56,12 @@ void TestIOThread::Stop() {
 }
 
 void TestIOThread::PostTask(const base::Closure& task) {
-  embedder::PlatformPostTask(task_runner().get(), task);
+  io_task_runner_->PostTask(task);
 }
 
 void TestIOThread::PostTaskAndWait(const base::Closure& task) {
   AutoResetWaitableEvent event;
-  embedder::PlatformPostTask(task_runner().get(),
-                             base::Bind(&PostTaskAndWaitHelper, &event, task));
+  io_task_runner_->PostTask(base::Bind(&PostTaskAndWaitHelper, &event, task));
   event.Wait();
 }
 

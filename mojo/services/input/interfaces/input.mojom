@@ -9,6 +9,7 @@ interface InputClient {
   OnBackButton() => ();
 };
 
+[ServiceName="input::InputService"]
 interface InputService {
   SetClient(InputClient client);
 };

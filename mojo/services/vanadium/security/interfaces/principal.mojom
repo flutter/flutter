@@ -35,6 +35,7 @@ struct User {
 // A service that binds user identities to an application instance running in
 // Mojo. An application instance may have multiple user identities with one of
 // them set as the current identity.
+[ServiceName="vanadium::PrincipalService"]
 interface PrincipalService {
   // Login is called by an application instance (requestor_url/qualifier) that
   // wants to get a new user identity. The service may obtain the user identity

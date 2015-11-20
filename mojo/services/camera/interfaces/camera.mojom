@@ -18,6 +18,7 @@ struct Photo {
 // The camera roll is exposed as a snapshot of all photos available as a list.
 // The head of the list (element with index 0) is a photo with the latest
 // timestamp and subsequent elements are in decreasing order of timestamp.
+[ServiceName="mojo::CameraRollService"]
 interface CameraRollService {
   // Updates the snapshot of all photos available. Photos might have been added
   // or removed after the service was started or |Update| was called.
@@ -30,6 +31,7 @@ interface CameraRollService {
 };
 
 // |CameraService| provides access to the device's camera video stream.
+[ServiceName="mojo::CameraService"]
 interface CameraService {
   // Returns the most recent frame captured by the device's camera
   // in preview mode.

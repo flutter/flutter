@@ -8,6 +8,7 @@ module http_server;
 import "http_server/interfaces/http_server.mojom";
 import "network/interfaces/net_address.mojom";
 
+[ServiceName="http_server::HttpServerFactory"]
 interface HttpServerFactory {
   // Creates an http server running on the specified local network address.  If
   // |local_address| is null, it will take the default value of 0.0.0.0 at a
