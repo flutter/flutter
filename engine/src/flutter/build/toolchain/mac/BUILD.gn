@@ -183,7 +183,7 @@ template("mac_toolchain") {
     tool("link") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = "$outfile.rsp"
-      command = "$ld $sysroot_flags $toolchain_flags {{ldflags}} -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      command = "$ld $sysroot_flags $toolchain_flags {{ldflags}} -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile.unstripped -Wl,-filelist,$rspfile {{solibs}} {{libs}}; strip $outfile.unstripped -o $outfile"
       description = "LINK $outfile"
       rspfile_content = "{{inputs_newline}}"
       outputs = [
