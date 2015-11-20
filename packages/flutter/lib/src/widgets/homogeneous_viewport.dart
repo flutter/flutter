@@ -148,7 +148,9 @@ class _HomogeneousViewportElement extends RenderObjectElement<HomogeneousViewpor
     assert(_layoutItemCount != null);
     List<Widget> newWidgets;
     if (_layoutItemCount > 0)
-      newWidgets = widget.builder(this, _layoutFirstIndex, _layoutItemCount);
+      newWidgets = widget.builder(this, _layoutFirstIndex, _layoutItemCount).map((Widget widget) {
+        return new RepaintBoundary(key: new ValueKey<Key>(widget.key), child: widget);
+      }).toList();
     else
       newWidgets = <Widget>[];
     _children = updateChildren(_children, newWidgets);
