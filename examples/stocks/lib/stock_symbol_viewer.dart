@@ -80,11 +80,11 @@ class StockSymbolBottomSheet extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Container(
-      child: new StockSymbolView(stock: stock),
       padding: new EdgeDims.all(10.0),
       decoration: new BoxDecoration(
         border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
-      )
+      ),
+      child: new StockSymbolView(stock: stock)
    );
   }
 }

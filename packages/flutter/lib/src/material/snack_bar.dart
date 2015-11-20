@@ -21,10 +21,10 @@ const Color _kSnackBackground = const Color(0xFF323232);
 
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
-const Duration kSnackBarTransitionDuration = const Duration(milliseconds: 250);
+const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
 const Duration kSnackBarShortDisplayDuration = const Duration(milliseconds: 1500);
 const Duration kSnackBarMediumDisplayDuration = const Duration(milliseconds: 2750);
-const Curve snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 class SnackBarAction extends StatelessComponent {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
@@ -91,7 +91,7 @@ class SnackBar extends StatelessComponent {
               style: new TextStyle(color: Theme.of(context).accentColor),
               child: new FadeTransition(
                 performance: performance,
-                opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: snackBarFadeCurve),
+                opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: _snackBarFadeCurve),
                 child: new Row(children)
               )
             )
@@ -105,7 +105,7 @@ class SnackBar extends StatelessComponent {
 
   static Performance createPerformance() {
     return new Performance(
-      duration: kSnackBarTransitionDuration,
+      duration: _kSnackBarTransitionDuration,
       debugLabel: 'SnackBar'
     );
   }
