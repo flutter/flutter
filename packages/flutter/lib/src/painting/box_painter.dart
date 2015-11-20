@@ -661,7 +661,8 @@ class BackgroundImage {
     this.fit,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
-    this.colorFilter
+    this.colorFilter,
+    this.alignment
   }) : _imageResource = image;
 
   /// How the background image should be inscribed into the box.
@@ -681,6 +682,9 @@ class BackgroundImage {
 
   /// A color filter to apply to the background image before painting it.
   final ColorFilter colorFilter;
+
+  /// How to align the image within its bounds.
+  final FractionalOffset alignment;
 
   /// The image to be painted into the background.
   ui.Image get image => _image;
@@ -730,6 +734,7 @@ class BackgroundImage {
            repeat == typedOther.repeat &&
            centerSlice == typedOther.centerSlice &&
            colorFilter == typedOther.colorFilter &&
+           alignment == typedOther.alignment &&
            _imageResource == typedOther._imageResource;
   }
 
@@ -739,6 +744,7 @@ class BackgroundImage {
     value = 37 * value + repeat.hashCode;
     value = 37 * value + centerSlice.hashCode;
     value = 37 * value + colorFilter.hashCode;
+    value = 37 * value + alignment.hashCode;
     value = 37 * value + _imageResource.hashCode;
     return value;
   }
@@ -988,6 +994,8 @@ class BoxPainter {
       rect: rect,
       image: image,
       colorFilter: backgroundImage.colorFilter,
+      alignX: backgroundImage.alignment?.x,
+      alignY: backgroundImage.alignment?.y,
       fit:  backgroundImage.fit,
       repeat: backgroundImage.repeat
     );
@@ -1092,4 +1100,37 @@ class BoxPainter {
     _paintBackgroundImage(canvas, rect);
     _paintBorder(canvas, rect);
   }
+}
+
+/// An offset that's expressed as a fraction of a Size.
+///
+/// FractionalOffset(1.0, 0.0) represents the top right of the Size,
+/// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
+class FractionalOffset {
+  const FractionalOffset(this.x, this.y);
+  final double x;
+  final double y;
+  bool operator ==(dynamic other) {
+    if (other is! FractionalOffset)
+      return false;
+    final FractionalOffset typedOther = other;
+    return x == typedOther.x &&
+           y == typedOther.y;
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + x.hashCode;
+    value = 37 * value + y.hashCode;
+    return value;
+  }
+  static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return new FractionalOffset(b.x * t, b.y * t);
+    if (b == null)
+      return new FractionalOffset(b.x * (1.0 - t), b.y * (1.0 - t));
+    return new FractionalOffset(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
+  }
+  String toString() => '$runtimeType($x, $y)';
 }
