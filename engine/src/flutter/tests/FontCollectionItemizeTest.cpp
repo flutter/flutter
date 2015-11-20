@@ -21,6 +21,7 @@
 #include "UnicodeUtils.h"
 
 using android::FontCollection;
+using android::FontFamily;
 using android::FontLanguage;
 using android::FontStyle;
 
@@ -614,3 +615,31 @@ TEST(FontCollectionItemizeTest, itemize_fakery) {
     EXPECT_TRUE(runs[0].fakedFont.fakery.isFakeItalic());
 }
 
+TEST(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
+    // kVSTestFont supports U+717D U+FE02 but doesn't support U+717D.
+    // kVSTestFont should be selected for U+717D U+FE02 even if it does not support the base code
+    // point.
+    const std::string kVSTestFont = kTestFontDir "VarioationSelectorTest-Regular.ttf";
+
+    std::vector<android::FontFamily*> families;
+    FontFamily* family1 = new FontFamily(FontLanguage(), android::VARIANT_DEFAULT);
+    family1->addFont(new MinikinFontForTest(kLatinFont));
+    families.push_back(family1);
+
+    FontFamily* family2 = new FontFamily(FontLanguage(), android::VARIANT_DEFAULT);
+    family2->addFont(new MinikinFontForTest(kVSTestFont));
+    families.push_back(family2);
+
+    FontCollection collection(families);
+
+    std::vector<FontCollection::Run> runs;
+
+    itemize(&collection, "U+717D U+FE02", FontStyle(), &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kVSTestFont, getFontPath(runs[0]));
+
+    family1->Unref();
+    family2->Unref();
+}

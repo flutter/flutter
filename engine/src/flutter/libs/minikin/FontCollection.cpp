@@ -112,14 +112,25 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
     if (ch >= mMaxChar) {
         return NULL;
     }
-    const Range& range = mRanges[ch >> kLogCharsPerPage];
+
+    // Even if the font supports variation sequence, mRanges isn't aware of the base character of
+    // the sequence. Search all FontFamilies if variation sequence is specified.
+    // TODO: Always use mRanges for font search.
+    const std::vector<FontFamily*>& familyVec = (vs == 0) ? mFamilyVec : mFamilies;
+    Range range;
+    if (vs == 0) {
+        range = mRanges[ch >> kLogCharsPerPage];
+    } else {
+        range = { 0, mFamilies.size() };
+    }
+
 #ifdef VERBOSE_DEBUG
     ALOGD("querying range %zd:%zd\n", range.start, range.end);
 #endif
     FontFamily* bestFamily = nullptr;
     int bestScore = -1;
     for (size_t i = range.start; i < range.end; i++) {
-        FontFamily* family = mFamilyVec[i];
+        FontFamily* family = familyVec[i];
         if (vs == 0 ? family->getCoverage()->get(ch) : family->hasVariationSelector(ch, vs)) {
             // First font family in collection always matches
             if (mFamilies[0] == family) {
