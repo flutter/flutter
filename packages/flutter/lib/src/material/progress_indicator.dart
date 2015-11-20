@@ -26,7 +26,6 @@ abstract class ProgressIndicator extends StatefulComponent {
 
   Color _getBackgroundColor(BuildContext context) => Theme.of(context).primarySwatch[200];
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
-  Object _getCustomPaintToken(double performanceValue) => value != null ? value : performanceValue;
 
   Widget _buildIndicator(BuildContext context, double performanceValue);
 
@@ -74,19 +73,26 @@ class _ProgressIndicatorState extends State<ProgressIndicator> {
   }
 }
 
-class LinearProgressIndicator extends ProgressIndicator {
-  LinearProgressIndicator({
-    Key key,
-    double value
-  }) : super(key: key, value: value);
+class _LinearProgressIndicatorPainter extends CustomPainter {
+  const _LinearProgressIndicatorPainter({
+    this.backgroundColor,
+    this.valueColor,
+    this.value,
+    this.performanceValue
+  });
 
-  void _paint(BuildContext context, double performanceValue, Canvas canvas, Size size) {
+  final Color backgroundColor;
+  final Color valueColor;
+  final double value;
+  final double performanceValue;
+
+  void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
-      ..color = _getBackgroundColor(context)
+      ..color = backgroundColor
       ..style = ui.PaintingStyle.fill;
     canvas.drawRect(Point.origin & size, paint);
 
-    paint.color = _getValueColor(context);
+    paint.color = valueColor;
     if (value != null) {
       double width = value.clamp(0.0, 1.0) * size.width;
       canvas.drawRect(Point.origin & new Size(width, size.height), paint);
@@ -99,6 +105,20 @@ class LinearProgressIndicator extends ProgressIndicator {
     }
   }
 
+  bool shouldRepaint(_LinearProgressIndicatorPainter oldPainter) {
+    return oldPainter.backgroundColor != backgroundColor
+        || oldPainter.valueColor != valueColor
+        || oldPainter.value != value
+        || oldPainter.performanceValue != performanceValue;
+  }
+}
+
+class LinearProgressIndicator extends ProgressIndicator {
+  LinearProgressIndicator({
+    Key key,
+    double value
+  }) : super(key: key, value: value);
+
   Widget _buildIndicator(BuildContext context, double performanceValue) {
     return new Container(
       constraints: new BoxConstraints.tightFor(
@@ -106,30 +126,37 @@ class LinearProgressIndicator extends ProgressIndicator {
         height: _kLinearProgressIndicatorHeight
       ),
       child: new CustomPaint(
-        token: _getCustomPaintToken(performanceValue),
-        onPaint: (Canvas canvas, Size size) {
-          _paint(context, performanceValue, canvas, size);
-        }
+        painter: new _LinearProgressIndicatorPainter(
+          backgroundColor: _getBackgroundColor(context),
+          valueColor: _getValueColor(context),
+          value: value,
+          performanceValue: performanceValue
+        )
       )
     );
   }
 }
 
-class CircularProgressIndicator extends ProgressIndicator {
+class _CircularProgressIndicatorPainter extends CustomPainter {
   static const _kTwoPI = math.PI * 2.0;
   static const _kEpsilon = .0000001;
   // Canavs.drawArc(r, 0, 2*PI) doesn't draw anything, so just get close.
   static const _kSweep = _kTwoPI - _kEpsilon;
   static const _kStartAngle = -math.PI / 2.0;
 
-  CircularProgressIndicator({
-    Key key,
-    double value
-  }) : super(key: key, value: value);
+  const _CircularProgressIndicatorPainter({
+    this.valueColor,
+    this.value,
+    this.performanceValue
+  });
 
-  void _paint(BuildContext context, double performanceValue, Canvas canvas, Size size) {
+  final Color valueColor;
+  final double value;
+  final double performanceValue;
+
+  void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
-      ..color = _getValueColor(context)
+      ..color = valueColor
       ..strokeWidth = _kCircularProgressIndicatorStrokeWidth
       ..style = ui.PaintingStyle.stroke;
 
@@ -149,6 +176,19 @@ class CircularProgressIndicator extends ProgressIndicator {
     }
   }
 
+  bool shouldRepaint(_LinearProgressIndicatorPainter oldPainter) {
+    return oldPainter.valueColor != valueColor
+        || oldPainter.value != value
+        || oldPainter.performanceValue != performanceValue;
+  }
+}
+
+class CircularProgressIndicator extends ProgressIndicator {
+  CircularProgressIndicator({
+    Key key,
+    double value
+  }) : super(key: key, value: value);
+
   Widget _buildIndicator(BuildContext context, double performanceValue) {
     return new Container(
       constraints: new BoxConstraints(
@@ -156,10 +196,11 @@ class CircularProgressIndicator extends ProgressIndicator {
         minHeight: _kMinCircularProgressIndicatorSize
       ),
       child: new CustomPaint(
-        token: _getCustomPaintToken(performanceValue),
-        onPaint: (Canvas canvas, Size size) {
-          _paint(context, performanceValue, canvas, size);
-        }
+        painter: new _CircularProgressIndicatorPainter(
+          valueColor: _getValueColor(context),
+          value: value,
+          performanceValue: performanceValue
+        )
       )
     );
   }

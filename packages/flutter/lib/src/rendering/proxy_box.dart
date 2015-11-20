@@ -913,9 +913,13 @@ class RenderSizeObserver extends RenderProxyBox {
   }
 }
 
-/// Called when its time to paint into the given canvas
-typedef void CustomPaintCallback(PaintingCanvas canvas, Size size);
-typedef bool CustomHitTestCallback(Point position);
+abstract class CustomPainter {
+  const CustomPainter();
+
+  void paint(PaintingCanvas canvas, Size size);
+  bool shouldRepaint(CustomPainter oldDelegate);
+  bool hitTest(Point position) => true;
+}
 
 /// Delegates its painting to [onPaint]
 ///
@@ -932,51 +936,47 @@ typedef bool CustomHitTestCallback(Point position);
 class RenderCustomPaint extends RenderProxyBox {
 
   RenderCustomPaint({
-    CustomPaintCallback onPaint,
-    this.onHitTest,
+    CustomPainter painter,
     RenderBox child
-  }) : super(child) {
-    assert(onPaint != null);
-    _onPaint = onPaint;
+  }) : _painter = painter, super(child) {
+    assert(painter != null);
   }
 
-  /// The callback to which this render object delegates its painting
-  ///
-  /// The callback must be non-null whenever the render object is attached to
-  /// the render tree.
-  CustomPaintCallback get onPaint => _onPaint;
-  CustomPaintCallback _onPaint;
-  void set onPaint (CustomPaintCallback newCallback) {
-    assert(newCallback != null || !attached);
-    if (_onPaint == newCallback)
+  CustomPainter get painter => _painter;
+  CustomPainter _painter;
+  void set painter (CustomPainter newPainter) {
+    assert(newPainter != null || !attached);
+    if (_painter == newPainter)
       return;
-    _onPaint = newCallback;
-    markNeedsPaint();
+    CustomPainter oldPainter = _painter;
+    _painter = newPainter;
+    if (newPainter == null)
+      return;
+    if (oldPainter == null
+        || newPainter.runtimeType != oldPainter.runtimeType
+        || newPainter.shouldRepaint(oldPainter))
+      markNeedsPaint();
   }
-
-  CustomHitTestCallback onHitTest;
 
   void attach() {
-    assert(_onPaint != null);
+    assert(_painter != null);
     super.attach();
   }
 
   bool hitTestSelf(Point position) {
-    return onHitTest == null || onHitTest(position);
+    return _painter.hitTest(position);
   }
 
   void paint(PaintingContext context, Offset offset) {
-    assert(_onPaint != null);
+    assert(_painter != null);
     context.canvas.translate(offset.dx, offset.dy);
-    _onPaint(context.canvas, size);
-    // TODO(abarth): We should translate back before calling super because in
-    // the future, super.paint might switch our compositing layer.
-    super.paint(context, Offset.zero);
+    _painter.paint(context.canvas, size);
     context.canvas.translate(-offset.dx, -offset.dy);
+    super.paint(context, offset);
   }
 }
 
-typedef void PointerEventListener(PointerInputEvent e);
+typedef void PointerEventListener(PointerInputEvent event);
 
 enum HitTestBehavior {
   deferToChild,

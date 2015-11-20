@@ -19,19 +19,16 @@ class CardModel {
 
 enum MarkerType { topLeft, bottomRight, touch }
 
-class Marker extends StatelessComponent {
-  Marker({
-    this.type: MarkerType.touch,
-    this.position,
-    this.size: 40.0,
-    Key key
-  }) : super(key: key);
+class _MarkerPainter extends CustomPainter {
+  const _MarkerPainter({
+    this.size,
+    this.type
+  });
 
-  final Point position;
   final double size;
   final MarkerType type;
 
-  void paintMarker(PaintingCanvas canvas, _) {
+  void paint(PaintingCanvas canvas, _) {
     Paint paint = new Paint()..color = const Color(0x8000FF00);
     double r = size / 2.0;
     canvas.drawCircle(new Point(r, r), r, paint);
@@ -50,6 +47,24 @@ class Marker extends StatelessComponent {
     }
   }
 
+  bool shouldRepaint(_MarkerPainter oldPainter) {
+    return oldPainter.size != size
+        || oldPainter.type != type;
+  }
+}
+
+class Marker extends StatelessComponent {
+  Marker({
+    this.type: MarkerType.touch,
+    this.position,
+    this.size: 40.0,
+    Key key
+  }) : super(key: key);
+
+  final Point position;
+  final double size;
+  final MarkerType type;
+
   Widget build(BuildContext context) {
     return new Positioned(
       left: position.x - size / 2.0,
@@ -57,7 +72,12 @@ class Marker extends StatelessComponent {
       width: size,
       height: size,
       child: new IgnorePointer(
-        child: new CustomPaint(onPaint: paintMarker)
+        child: new CustomPaint(
+          painter: new _MarkerPainter(
+            size: size,
+            type: type
+          )
+        )
       )
     );
   }

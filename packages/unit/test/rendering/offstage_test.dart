@@ -13,12 +13,12 @@ void main() {
     RenderBox root = new RenderViewport(
       child: new RenderOffStage(
         child: new RenderCustomPaint(
+          painter: new TestCallbackPainter(
+            onPaint: () { painted = true; }
+          ),
           child: child = new RenderConstrainedBox(
             additionalConstraints: new BoxConstraints.tightFor(height: 10.0, width: 10.0)
-          ),
-          onPaint: (PaintingCanvas canvas, Size size) {
-            painted = true;
-          }
+          )
         )
       )
     );

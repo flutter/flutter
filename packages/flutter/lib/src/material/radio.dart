@@ -9,6 +9,42 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
+const double _kDiameter = 16.0;
+const double _kOuterRadius = _kDiameter / 2.0;
+const double _kInnerRadius = 5.0;
+
+class _RadioPainter extends CustomPainter {
+  const _RadioPainter({
+    this.color,
+    this.selected
+  });
+
+  final Color color;
+  final bool selected;
+
+  void paint(Canvas canvas, Size size) {
+    // TODO(ianh): ink radial reaction
+
+    // Draw the outer circle
+    Paint paint = new Paint()
+      ..color = color
+      ..style = ui.PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawCircle(const Point(_kOuterRadius, _kOuterRadius), _kOuterRadius, paint);
+
+    // Draw the inner circle
+    if (selected) {
+      paint.style = ui.PaintingStyle.fill;
+      canvas.drawCircle(const Point(_kOuterRadius, _kOuterRadius), _kInnerRadius, paint);
+    }
+  }
+
+  bool shouldRepaint(_RadioPainter oldPainter) {
+    return oldPainter.color != color
+        || oldPainter.selected != selected;
+  }
+}
+
 class Radio<T> extends StatelessComponent {
   Radio({
     Key key,
@@ -33,34 +69,17 @@ class Radio<T> extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    const double kDiameter = 16.0;
-    const double kOuterRadius = kDiameter / 2;
-    const double kInnerRadius = 5.0;
     return new GestureDetector(
       onTap: enabled ? () => onChanged(value) : null,
       child: new Container(
         margin: const EdgeDims.symmetric(horizontal: 5.0),
-        width: kDiameter,
-        height: kDiameter,
+        width: _kDiameter,
+        height: _kDiameter,
         child: new CustomPaint(
-          onPaint: (Canvas canvas, Size size) {
-
-            // TODO(ianh): ink radial reaction
-
-            // Draw the outer circle
-            Paint paint = new Paint()
-              ..color = _getColor(context)
-              ..style = ui.PaintingStyle.stroke
-              ..strokeWidth = 2.0;
-            canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kOuterRadius, paint);
-
-            // Draw the inner circle
-            if (value == groupValue) {
-              paint.style = ui.PaintingStyle.fill;
-              canvas.drawCircle(const Point(kOuterRadius, kOuterRadius), kInnerRadius, paint);
-            }
-
-          }
+          painter: new _RadioPainter(
+            color: _getColor(context),
+            selected: value == groupValue
+          )
         )
       )
     );
