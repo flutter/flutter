@@ -130,7 +130,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       scene.dispose();
       assert(() {
         if (debugEnableRepaintRainbox)
-          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(debugCurrentRepaintColor.h + debugRepaintRainboxHueIncrement);
+          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(debugCurrentRepaintColor.hue + debugRepaintRainboxHueIncrement);
         return true;
       });
     } finally {
