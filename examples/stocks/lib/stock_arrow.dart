@@ -15,7 +15,7 @@ class StockArrowPainter extends CustomPainter {
     paint.strokeWidth = 1.0;
     const double padding = 2.0;
     assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
-    double r = (size - padding) / 2.0; // radius of the circle
+    double r = (size.shortestSide - padding) / 2.0; // radius of the circle
     double centerX = padding + r;
     double centerY = padding + r;
 
