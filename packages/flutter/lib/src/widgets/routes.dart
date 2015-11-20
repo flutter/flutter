@@ -23,6 +23,7 @@ class StateRoute extends Route {
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
 
   void didPop(dynamic result) {
+    assert(result == null);
     if (onPop != null)
       onPop();
   }
@@ -31,7 +32,7 @@ class StateRoute extends Route {
   bool didPopNext(Route nextRoute) => true;
 }
 
-abstract class OverlayRoute extends Route {
+abstract class OverlayRoute<T> extends Route<T> {
   List<WidgetBuilder> get builders => const <WidgetBuilder>[];
 
   List<OverlayEntry> get overlayEntries => _overlayEntries;
@@ -46,7 +47,7 @@ abstract class OverlayRoute extends Route {
   }
 
   // Subclasses shouldn't call this if they want to delay the finished() call.
-  void didPop(dynamic result) {
+  void didPop(T result) {
     finished();
   }
 
@@ -64,11 +65,15 @@ abstract class OverlayRoute extends Route {
   }
 }
 
-// TODO(abarth): Should we add a type for the result?
-abstract class TransitionRoute extends OverlayRoute {
-  TransitionRoute({ this.completer });
+abstract class TransitionRoute<T> extends OverlayRoute<T> {
+  TransitionRoute({
+    Completer<T> popCompleter,
+    Completer<T> transitionCompleter
+  }) : _popCompleter = popCompleter,
+       _transitionCompleter = transitionCompleter;
 
-  final Completer completer;
+  final Completer<T> _popCompleter;
+  final Completer<T> _transitionCompleter;
 
   Duration get transitionDuration;
   bool get opaque;
@@ -82,7 +87,7 @@ abstract class TransitionRoute extends OverlayRoute {
     return new Performance(duration: duration, debugLabel: debugLabel);
   }
 
-  dynamic _result;
+  T _result;
 
   void _handleStatusChanged(PerformanceStatus status) {
     switch (status) {
@@ -97,7 +102,6 @@ abstract class TransitionRoute extends OverlayRoute {
         break;
       case PerformanceStatus.dismissed:
         super.finished(); // clear the overlays
-        completer?.complete(_result);
         break;
     }
   }
@@ -109,9 +113,15 @@ abstract class TransitionRoute extends OverlayRoute {
     super.didPush(overlay, insertionPoint);
   }
 
-  void didPop(dynamic result) {
+  void didPop(T result) {
     _result = result;
     _performance.reverse();
+    _popCompleter?.complete(_result);
+  }
+
+  void finished() {
+    super.finished();
+    _transitionCompleter?.complete(_result);
   }
 
   String get debugLabel => '$runtimeType';
@@ -202,11 +212,11 @@ class ModalPosition {
   final double left;
 }
 
-abstract class ModalRoute extends TransitionRoute {
+abstract class ModalRoute<T> extends TransitionRoute<T> {
   ModalRoute({
-    Completer completer,
+    Completer<T> completer,
     this.settings: const NamedRouteSettings()
-  }) : super(completer: completer);
+  }) : super(popCompleter: completer);
 
   // The API for general users of this class
 
@@ -263,7 +273,7 @@ abstract class ModalRoute extends TransitionRoute {
     super.didPush(overlay, insertionPoint);
   }
 
-  void didPop(dynamic result) {
+  void didPop(T result) {
     assert(_isCurrent);
     _isCurrent = false;
     super.didPop(result);

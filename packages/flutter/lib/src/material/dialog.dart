@@ -115,8 +115,8 @@ class Dialog extends StatelessComponent {
   }
 }
 
-class _DialogRoute extends ModalRoute {
-  _DialogRoute({ Completer completer, this.child }) : super(completer: completer);
+class _DialogRoute<T> extends ModalRoute<T> {
+  _DialogRoute({ Completer<T> completer, this.child }) : super(completer: completer);
 
   final Widget child;
 

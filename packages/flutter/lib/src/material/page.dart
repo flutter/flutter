@@ -36,7 +36,7 @@ class _MaterialPageTransition extends TransitionWithChild {
   }
 }
 
-class MaterialPageRoute extends ModalRoute {
+class MaterialPageRoute<T> extends ModalRoute<T> {
   MaterialPageRoute({
     this.builder,
     NamedRouteSettings settings: const NamedRouteSettings()
