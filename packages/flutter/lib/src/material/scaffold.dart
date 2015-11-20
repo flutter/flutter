@@ -102,20 +102,31 @@ class ScaffoldState extends State<Scaffold> {
 
   // SNACKBAR API
 
-  Queue<SnackBar> _snackBars = new Queue<SnackBar>();
+  Queue<ScaffoldFeatureController<SnackBar>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar>>();
   Performance _snackBarPerformance;
   Timer _snackBarTimer;
 
-  void showSnackBar(SnackBar snackbar) {
+  ScaffoldFeatureController showSnackBar(SnackBar snackbar) {
     _snackBarPerformance ??= SnackBar.createPerformance()
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
       assert(_snackBarPerformance.isDismissed);
       _snackBarPerformance.forward();
     }
+    ScaffoldFeatureController<SnackBar> controller;
+    controller = new ScaffoldFeatureController<SnackBar>._(
+      snackbar.withPerformance(_snackBarPerformance),
+      new Completer(),
+      () {
+        assert(_snackBars.first == controller);
+        _hideSnackBar();
+      },
+      null // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
+    );
     setState(() {
-      _snackBars.addLast(snackbar.withPerformance(_snackBarPerformance));
+      _snackBars.addLast(controller);
     });
+    return controller;
   }
 
   void _handleSnackBarStatusChange(PerformanceStatus status) {
@@ -141,6 +152,9 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   void _hideSnackBar() {
+    assert(_snackBarPerformance.status == PerformanceStatus.forward ||
+           _snackBarPerformance.status == PerformanceStatus.completed);
+    _snackBars.first._completer.complete();
     _snackBarPerformance.reverse();
     _snackBarTimer = null;
   }
@@ -149,9 +163,9 @@ class ScaffoldState extends State<Scaffold> {
   // PERSISTENT BOTTOM SHEET API
 
   List<Widget> _dismissedBottomSheets;
-  BottomSheetController _currentBottomSheet;
+  ScaffoldFeatureController _currentBottomSheet;
 
-  BottomSheetController showBottomSheet(WidgetBuilder builder) {
+  ScaffoldFeatureController showBottomSheet(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
@@ -189,9 +203,9 @@ class ScaffoldState extends State<Scaffold> {
     );
     Navigator.of(context).push(route);
     setState(() {
-      _currentBottomSheet = new BottomSheetController._(
+      _currentBottomSheet = new ScaffoldFeatureController._(
         bottomSheet,
-        completer.future,
+        completer,
         () => Navigator.of(context).remove(route),
         setState
       );
@@ -223,7 +237,7 @@ class ScaffoldState extends State<Scaffold> {
       ModalRoute route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarPerformance.isCompleted && _snackBarTimer == null)
-          _snackBarTimer = new Timer(_snackBars.first.duration, _hideSnackBar);
+          _snackBarTimer = new Timer(_snackBars.first._widget.duration, _hideSnackBar);
       } else {
         _snackBarTimer?.cancel();
         _snackBarTimer = null;
@@ -249,7 +263,7 @@ class ScaffoldState extends State<Scaffold> {
     }
 
     if (_snackBars.isNotEmpty)
-      _addIfNonNull(children, _snackBars.first, _Child.snackBar);
+      _addIfNonNull(children, _snackBars.first._widget, _Child.snackBar);
 
     _addIfNonNull(children, config.floatingActionButton, _Child.floatingActionButton);
 
@@ -258,11 +272,12 @@ class ScaffoldState extends State<Scaffold> {
 
 }
 
-class BottomSheetController {
-  const BottomSheetController._(this._widget, this.closed, this.close, this.setState);
-  final Widget _widget;
-  final Future closed;
-  final VoidCallback close; // call this to close the bottom sheet
+class ScaffoldFeatureController<T extends Widget> {
+  const ScaffoldFeatureController._(this._widget, this._completer, this.close, this.setState);
+  final T _widget;
+  final Completer _completer;
+  Future get closed => _completer.future;
+  final VoidCallback close; // call this to close the bottom sheet or snack bar
   final StateSetter setState;
 }
 
