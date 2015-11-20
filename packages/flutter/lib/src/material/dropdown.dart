@@ -14,14 +14,14 @@ import 'ink_well.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-const Duration _kMenuDuration = const Duration(milliseconds: 300);
+const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const EdgeDims _kMenuHorizontalPadding = const EdgeDims.only(left: 36.0, right: 36.0);
 const double _kBaselineOffsetFromBottom = 20.0;
-const Border _kDropdownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
+const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
 
-class _DropdownMenuPainter extends CustomPainter {
-  const _DropdownMenuPainter({
+class _DropDownMenuPainter extends CustomPainter {
+  const _DropDownMenuPainter({
     this.color,
     this.elevation,
     this.menuTop,
@@ -47,7 +47,7 @@ class _DropdownMenuPainter extends CustomPainter {
     painter.paint(canvas, new Rect.fromLTRB(0.0, top, size.width, bottom));
   }
 
-  bool shouldRepaint(_DropdownMenuPainter oldPainter) {
+  bool shouldRepaint(_DropDownMenuPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.elevation != elevation
         || oldPainter.menuTop != menuTop
@@ -56,23 +56,23 @@ class _DropdownMenuPainter extends CustomPainter {
   }
 }
 
-class _DropdownMenu extends StatusTransitionComponent {
-  _DropdownMenu({
+class _DropDownMenu<T> extends StatusTransitionComponent {
+  _DropDownMenu({
     Key key,
-    _MenuRoute route
+    _DropDownRoute<T> route
   }) : route = route, super(key: key, performance: route.performance);
 
-  final _MenuRoute route;
+  final _DropDownRoute<T> route;
 
   Widget build(BuildContext context) {
     // The menu is shown in three stages (unit timing in brackets):
-    // [0 - 0.25] - Fade in a rect-sized menu container with the selected item.
-    // [0.25 - 0.5] - Grow the otherwise empty menu container from the center
+    // [0s - 0.25s] - Fade in a rect-sized menu container with the selected item.
+    // [0.25s - 0.5s] - Grow the otherwise empty menu container from the center
     //   until it's big enough for as many items as we're going to show.
-    // [0.5 - 1.0] Fade in the remaining visible items from top to bottom.
+    // [0.5s - 1.0s] Fade in the remaining visible items from top to bottom.
     //
     // When the menu is dismissed we just fade the entire thing out
-    // in the first 0.25.
+    // in the first 0.25s.
 
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
@@ -135,7 +135,7 @@ class _DropdownMenu extends StatusTransitionComponent {
             variables: <AnimatedValue<double>>[menuTop, menuBottom],
             builder: (BuildContext context) {
               return new CustomPaint(
-                painter: new _DropdownMenuPainter(
+                painter: new _DropDownMenuPainter(
                   color: Theme.of(context).canvasColor,
                   elevation: route.elevation,
                   menuTop: menuTop.value,
@@ -152,38 +152,29 @@ class _DropdownMenu extends StatusTransitionComponent {
   }
 }
 
-// TODO(abarth): This should use ModalRoute.
-class _MenuRoute extends TransitionRoute {
-  _MenuRoute({
-    this.completer,
+class _DropDownRoute<T> extends PopupRoute<T> {
+  _DropDownRoute({
+    Completer<T> completer,
     this.items,
     this.selectedIndex,
     this.rect,
     this.elevation: 8
-  });
+  }) : super(completer: completer);
 
-  final Completer completer;
-  final Rect rect;
-  final List<DropdownMenuItem> items;
-  final int elevation;
+  final List<DropDownMenuItem<T>> items;
   final int selectedIndex;
+  final Rect rect;
+  final int elevation;
 
-  bool get opaque => false;
-  Duration get transitionDuration => _kMenuDuration;
+  Duration get transitionDuration => _kDropDownMenuDuration;
+  bool get barrierDismissable => true;
+  Color get barrierColor => null;
 
-  Widget _buildModalBarrier(BuildContext context) => new ModalBarrier();
-  Widget _buildDropDownMenu(BuildContext context) => new _DropdownMenu(route: this);
-
-  List<WidgetBuilder> get builders => <WidgetBuilder>[ _buildModalBarrier, _buildDropDownMenu ];
-
-  void didPop([dynamic result]) {
-    completer.complete(result);
-    super.didPop(result);
-  }
+  Widget buildPage(BuildContext context) => new _DropDownMenu(route: this);
 }
 
-class DropdownMenuItem<T> extends StatelessComponent {
-  DropdownMenuItem({
+class DropDownMenuItem<T> extends StatelessComponent {
+  DropDownMenuItem({
     Key key,
     this.value,
     this.child
@@ -207,8 +198,8 @@ class DropdownMenuItem<T> extends StatelessComponent {
   }
 }
 
-class DropdownButton<T> extends StatelessComponent {
-  DropdownButton({
+class DropDownButton<T> extends StatelessComponent {
+  DropDownButton({
     Key key,
     this.items,
     this.value,
@@ -216,16 +207,16 @@ class DropdownButton<T> extends StatelessComponent {
     this.elevation: 8
   }) : super(key: key);
 
-  final List<DropdownMenuItem<T>> items;
+  final List<DropDownMenuItem<T>> items;
   final T value;
   final ValueChanged<T> onChanged;
   final int elevation;
 
-  void _showDropdown(BuildContext context, int selectedIndex, GlobalKey indexedStackKey) {
+  void _showDropDown(BuildContext context, int selectedIndex, GlobalKey indexedStackKey) {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
     final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
-    final Completer completer = new Completer();
-    Navigator.of(context).pushEphemeral(new _MenuRoute(
+    final Completer completer = new Completer<T>();
+    Navigator.of(context).push(new _DropDownRoute<T>(
       completer: completer,
       items: items,
       selectedIndex: selectedIndex,
@@ -239,7 +230,7 @@ class DropdownButton<T> extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    GlobalKey indexedStackKey = new GlobalKey(debugLabel: 'DropdownButton.IndexedStack');
+    GlobalKey indexedStackKey = new GlobalKey(debugLabel: 'DropDownButton.IndexedStack');
     int selectedIndex = 0;
     for (int itemIndex = 0; itemIndex < items.length; itemIndex++) {
       if (items[itemIndex].value == value) {
@@ -247,12 +238,12 @@ class DropdownButton<T> extends StatelessComponent {
         break;
       }
     }
-
     return new GestureDetector(
       child: new Container(
-        decoration: new BoxDecoration(border: _kDropdownUnderline),
+        decoration: new BoxDecoration(border: _kDropDownUnderline),
         child: new Row(<Widget>[
-          new IndexedStack(items,
+          new IndexedStack(
+            items,
             key: indexedStackKey,
             index: selectedIndex,
             alignment: const FractionalOffset(0.5, 0.0)
@@ -266,7 +257,7 @@ class DropdownButton<T> extends StatelessComponent {
         )
       ),
       onTap: () {
-        _showDropdown(context, selectedIndex, indexedStackKey);
+        _showDropDown(context, selectedIndex, indexedStackKey);
       }
     );
   }

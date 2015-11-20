@@ -140,55 +140,32 @@ class _ModalBottomSheetState extends State<_ModalBottomSheet> {
   }
 }
 
-class _ModalBottomSheetRoute extends OverlayRoute {
-  _ModalBottomSheetRoute({ this.completer, this.builder });
+class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
+  _ModalBottomSheetRoute({
+    Completer<T> completer,
+    this.builder
+  }) : super(completer: completer);
 
-  final Completer completer;
   final WidgetBuilder builder;
-  Performance performance;
 
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
-    performance = BottomSheet.createPerformance()
-      ..forward();
-    super.didPush(overlay, insertionPoint);
+  Duration get transitionDuration => _kBottomSheetDuration;
+  bool get barrierDismissable => true;
+  Color get barrierColor => Colors.black54;
+
+  Performance createPerformance() {
+    return BottomSheet.createPerformance();
   }
 
-  void didPop(dynamic result) {
-    completer.complete(result);
-    if (performance.isDismissed)
-      finished();
-    else
-      performance.reverse().then((_) { finished(); });
+  Widget buildPage(BuildContext context) {
+    return new _ModalBottomSheet(route: this);
   }
-
-  Widget _buildModalBarrier(BuildContext context) {
-    return new AnimatedModalBarrier(
-      color: new AnimatedColorValue(_kTransparent, end: _kBarrierColor, curve: Curves.ease),
-      performance: performance
-    );
-  }
-
-  Widget _buildBottomSheet(BuildContext context) {
-    return new Focus(
-      key: new GlobalObjectKey(this),
-      child: new _ModalBottomSheet(route: this)
-    );
-  }
-
-  List<WidgetBuilder> get builders => <WidgetBuilder>[
-    _buildModalBarrier,
-    _buildBottomSheet,
-  ];
-
-  String get debugLabel => '$runtimeType';
-  String toString() => '$runtimeType(performance: $performance)';
 }
 
 Future showModalBottomSheet({ BuildContext context, WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);
   final Completer completer = new Completer();
-  Navigator.of(context).pushEphemeral(new _ModalBottomSheetRoute(
+  Navigator.of(context).push(new _ModalBottomSheetRoute(
     completer: completer,
     builder: builder
   ));

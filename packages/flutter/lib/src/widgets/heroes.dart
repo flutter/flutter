@@ -12,7 +12,7 @@ import 'transitions.dart';
 // Heroes are the parts of an application's screen-to-screen transitions where a
 // component from one screen shifts to a position on the other. For example,
 // album art from a list of albums growing to become the centerpiece of the
-// album's details view. In this context, a screen is a navigator Route.
+// album's details view. In this context, a screen is a navigator ModalRoute.
 
 // To get this effect, all you have to do is wrap each hero on each route with a
 // Hero widget, and give each hero a tag. Tag must either be unique within the
@@ -50,7 +50,7 @@ import 'transitions.dart';
 // TODO(ianh): If the widgets use Inherited properties, they are taken from the
 // Navigator's position in the widget hierarchy, not the source or target. We
 // should interpolate the inherited properties from their value at the source to
-// their value at the target. See: https://github.com/flutter/engine/issues/1698
+// their value at the target. See: https://github.com/flutter/flutter/issues/213
 
 final Object centerOfAttentionHeroTag = new Object();
 

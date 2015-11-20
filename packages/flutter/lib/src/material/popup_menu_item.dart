@@ -9,7 +9,7 @@ import 'theme.dart';
 const double _kMenuItemHeight = 48.0;
 const double _kBaselineOffsetFromBottom = 20.0;
 
-class PopupMenuItem extends StatelessComponent {
+class PopupMenuItem<T> extends StatelessComponent {
   PopupMenuItem({
     Key key,
     this.value,
@@ -17,7 +17,7 @@ class PopupMenuItem extends StatelessComponent {
   }) : super(key: key);
 
   final Widget child;
-  final dynamic value;
+  final T value;
 
   Widget build(BuildContext context) {
     return new Container(

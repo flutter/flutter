@@ -15,6 +15,8 @@ import 'overlay.dart';
 import 'page_storage.dart';
 import 'status_transitions.dart';
 
+const _kTransparent = const Color(0x00000000);
+
 class StateRoute extends Route {
   StateRoute({ this.onPop });
 
@@ -72,7 +74,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }) : _popCompleter = popCompleter,
        _transitionCompleter = transitionCompleter;
 
+  /// This future completes once the animation has been dismissed. For
+  /// ModalRoutes, this will be after the completer that's passed in, since that
+  /// one completes before the animation even starts, as soon as the route is
+  /// popped.
+  Future<T> get popped => _popCompleter?.future;
   final Completer<T> _popCompleter;
+  Future<T> get completed => _transitionCompleter?.future;
   final Completer<T> _transitionCompleter;
 
   Duration get transitionDuration;
@@ -101,7 +109,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           overlayEntries.first.opaque = false;
         break;
       case PerformanceStatus.dismissed:
-        super.finished(); // clear the overlays
+        assert(!overlayEntries.first.opaque);
+        finished(); // clear the overlays
+        assert(overlayEntries.isEmpty);
         break;
     }
   }
@@ -239,9 +249,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> {
     return child;
   }
 
+
   // The API for subclasses to override - used by this class
 
-  Color get barrierColor => kTransparent;
+  /// Whether you can dismiss this route by tapping the modal barrier.
+  bool get barrierDismissable;
+  /// The color to use for the modal barrier. If this is null, the barrier will
+  /// be transparent.
+  Color get barrierColor;
 
 
   // The API for _ModalScope and HeroController
@@ -300,11 +315,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> {
   final PageStorageBucket _storageBucket = new PageStorageBucket();
 
   Widget _buildModalBarrier(BuildContext context) {
-    return new AnimatedModalBarrier(
-      color: new AnimatedColorValue(kTransparent, end: barrierColor, curve: Curves.ease),
-      performance: performance,
-      dismissable: false
-    );
+    if (barrierColor != null) {
+      assert(barrierColor != _kTransparent);
+      return new AnimatedModalBarrier(
+        color: new AnimatedColorValue(_kTransparent, end: barrierColor, curve: Curves.ease),
+        performance: performance,
+        dismissable: barrierDismissable
+      );
+    } else {
+      return new ModalBarrier(dismissable: barrierDismissable);
+    }
   }
 
   Widget _buildModalScope(BuildContext context) {
@@ -315,6 +335,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> {
       performance: performance,
       current: isCurrent,
       route: this
+      // calls buildTransition() and buildPage(), defined above
     );
   }
 
@@ -323,4 +344,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> {
     _buildModalScope
   ];
 
+}
+
+/// A modal route that overlays a widget over the current route.
+abstract class PopupRoute<T> extends ModalRoute<T> {
+  PopupRoute({ Completer<T> completer }) : super(completer: completer);
+  bool get opaque => false;
+}
+
+/// A modal route that replaces the entire screen.
+abstract class PageRoute<T> extends ModalRoute<T> {
+  PageRoute({
+    Completer<T> completer,
+    NamedRouteSettings settings: const NamedRouteSettings()
+  }) : super(completer: completer, settings: settings);
+  bool get opaque => true;
 }

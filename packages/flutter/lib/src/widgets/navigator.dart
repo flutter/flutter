@@ -61,7 +61,7 @@ class Navigator extends StatefulComponent {
 
 class NavigatorState extends State<Navigator> {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
-  final List<Route> _ephemeral = new List<Route>();
+  // TODO(ianh): Rename _modal to _history or some such
   final List<Route> _modal = new List<Route>();
 
   void initState() {
@@ -88,10 +88,6 @@ class NavigatorState extends State<Navigator> {
   OverlayState get overlay => _overlayKey.currentState;
 
   OverlayEntry get _currentOverlay {
-    for (Route route in _ephemeral.reversed) {
-      if (route.overlayEntries.isNotEmpty)
-        return route.overlayEntries.last;
-    }
     for (Route route in _modal.reversed) {
       if (route.overlayEntries.isNotEmpty)
         return route.overlayEntries.last;
@@ -110,7 +106,6 @@ class NavigatorState extends State<Navigator> {
 
   void push(Route route, { Set<Key> mostValuableKeys }) {
     setState(() {
-      _popAllEphemeralRoutes();
       int index = _modal.length-1;
       while (index >= 0 && _modal[index].willPushNext(route))
         index -= 1;
@@ -118,19 +113,6 @@ class NavigatorState extends State<Navigator> {
       config.observer?.didPushModal(route, index >= 0 ? _modal[index] : null);
       _modal.add(route);
     });
-  }
-
-  void pushEphemeral(Route route) {
-    route.didPush(overlay, _currentOverlay);
-    _ephemeral.add(route);
-  }
-
-  void _popAllEphemeralRoutes() {
-    List<Route> localEphemeral = new List<Route>.from(_ephemeral);
-    _ephemeral.clear();
-    for (Route route in localEphemeral)
-      route.didPop(null);
-    assert(_ephemeral.isEmpty);
   }
 
   /// Pops the given route, if it's the current route. If it's not the current
@@ -167,21 +149,18 @@ class NavigatorState extends State<Navigator> {
       // We use setState to guarantee that we'll rebuild, since the routes can't
       // do that for themselves, even if they have changed their own state (e.g.
       // ModalScope.isCurrent).
-      if (_ephemeral.isNotEmpty) {
-        _ephemeral.removeLast().didPop(result);
-      } else {
-        assert(_modal.length > 1);
-        Route route = _modal.removeLast();
-        route.didPop(result);
-        int index = _modal.length-1;
-        while (index >= 0 && _modal[index].didPopNext(route))
-          index -= 1;
-        config.observer?.didPopModal(route, index >= 0 ? _modal[index] : null);
-      }
+      assert(_modal.length > 1);
+      Route route = _modal.removeLast();
+      route.didPop(result);
+      int index = _modal.length-1;
+      while (index >= 0 && _modal[index].didPopNext(route))
+        index -= 1;
+      config.observer?.didPopModal(route, index >= 0 ? _modal[index] : null);
     });
   }
 
   Widget build(BuildContext context) {
+    assert(_modal.isNotEmpty);
     return new Overlay(
       key: _overlayKey,
       initialEntries: _modal.first.overlayEntries

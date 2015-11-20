@@ -115,13 +115,16 @@ class Dialog extends StatelessComponent {
   }
 }
 
-class _DialogRoute<T> extends ModalRoute<T> {
-  _DialogRoute({ Completer<T> completer, this.child }) : super(completer: completer);
+class _DialogRoute<T> extends PopupRoute<T> {
+  _DialogRoute({
+    Completer<T> completer,
+    this.child
+  }) : super(completer: completer);
 
   final Widget child;
 
-  bool get opaque => false;
   Duration get transitionDuration => const Duration(milliseconds: 150);
+  bool get barrierDismissable => true;
   Color get barrierColor => Colors.black54;
 
   Widget buildPage(BuildContext context) => child;
