@@ -41,11 +41,9 @@ abstract class OverlayRoute<T> extends Route<T> {
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
-    for (WidgetBuilder builder in builders) {
+    for (WidgetBuilder builder in builders)
       _overlayEntries.add(new OverlayEntry(builder: builder));
-      overlay?.insert(_overlayEntries.last, above: insertionPoint);
-      insertionPoint = _overlayEntries.last;
-    }
+    overlay?.insertAll(_overlayEntries, above: insertionPoint);
   }
 
   // Subclasses shouldn't call this if they want to delay the finished() call.
