@@ -9,8 +9,20 @@ final String binaryName = Platform.isWindows ? 'pub.bat' : 'pub';
 update(Directory directory) {
   for (FileSystemEntity dir in directory.listSync()) {
     if (dir is Directory) {
-      print("Updating ${dir.path}...");
-      Process.runSync(binaryName, ['get'], workingDirectory: dir.path);
+      stdout.write("Updating ${dir.path}...");
+      ProcessResult result = Process.runSync(
+        binaryName,
+        ['get', '-v'],
+        workingDirectory: dir.path);
+      if (result.exitCode != 0) {
+        print(" FAILED!");
+        print("---- Standard output: ----");
+        print(result.stdout);
+        print("---- Standard error: ----");
+        print(result.stderr);
+      } else {
+        print(" done.");
+      }
     }
   }
 }
