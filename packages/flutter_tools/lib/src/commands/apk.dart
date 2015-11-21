@@ -172,11 +172,11 @@ class ApkCommand extends FlutterCommand {
     components.keystore = new File(artifactPaths[3]);
 
     if (!components.androidSdk.existsSync()) {
-      _logging.severe('Can not locate Android SDK: ${androidSdkPath}');
+      _logging.severe('Can not locate Android SDK: $androidSdkPath');
       return null;
     }
     if (!(new _ApkBuilder(components.androidSdk.path).checkSdkPath())) {
-      _logging.severe('Can not locate expected Android SDK tools at ${androidSdkPath}');
+      _logging.severe('Can not locate expected Android SDK tools at $androidSdkPath');
       _logging.severe('You must install version $_kAndroidPlatformVersion of the SDK platform');
       _logging.severe('and version $_kBuildToolsVersion of the build tools.');
       return null;
