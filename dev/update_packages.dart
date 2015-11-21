@@ -10,7 +10,12 @@ update(Directory directory) {
   for (FileSystemEntity dir in directory.listSync()) {
     if (dir is Directory) {
       print("Updating ${dir.path}...");
-      Process.runSync(binaryName, ['get'], workingDirectory: dir.path);
+      ProcessResult result = Process.runSync(binaryName, ['get'], workingDirectory: dir.path);
+      if (result.exitCode != 0) {
+        print("... failed with exit code ${result.exitCode}.");
+        print(result.stdout);
+        print(result.stderr);
+      }
     }
   }
 }

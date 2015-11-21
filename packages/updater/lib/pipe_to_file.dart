@@ -11,15 +11,15 @@ import 'package:mojo/core.dart';
 // Helper class to drain the contents of a mojo data pipe to a file.
 class PipeToFile {
   MojoDataPipeConsumer _consumer;
-  MojoEventSubscription _eventStream;
+  MojoEventSubscription _events;
   IOSink _outputStream;
 
   PipeToFile(this._consumer, String outputPath) {
-    _eventStream = new MojoEventSubscription(_consumer.handle);
+    _events = new MojoEventSubscription(_consumer.handle);
     _outputStream = new File(outputPath).openWrite();
   }
 
-  Future<MojoResult> _doRead() async {
+  Future<int> _doRead() async {
     ByteData thisRead = _consumer.beginRead();
     if (thisRead == null) {
       throw 'Data pipe beginRead failed: ${_consumer.status}';
@@ -30,34 +30,34 @@ class PipeToFile {
     return _consumer.endRead(thisRead.lengthInBytes);
   }
 
-  Future drain() async {
-    Completer completer = new Completer();
-    // TODO(mpcomplete): Is it legit to pass an async callback to listen?
-    _eventStream.subscribe((List<int> event) async {
-      MojoHandleSignals mojoSignals = new MojoHandleSignals(event[1]);
-      if (mojoSignals.isReadable) {
-        MojoResult result = await _doRead();
-        if (!result.isOk) {
-          _eventStream.close();
-          _eventStream = null;
+  Future<int> drain() {
+    Completer<int> completer = new Completer();
+    // TODO(mpcomplete): Is it legit to pass an async callback to subscribe?
+    _events.subscribe((List<int> event) async {
+      int signal = event[1];
+      if (MojoHandleSignals.isReadable(signal)) {
+        int result = await _doRead();
+        if (result != MojoResult.kOk) {
+          _events.close();
+          _events = null;
           _outputStream.close();
           completer.complete(result);
         } else {
-          _eventStream.enableReadEvents();
+          _events.enableReadEvents();
         }
-      } else if (mojoSignals.isPeerClosed) {
-        _eventStream.close();
-        _eventStream = null;
+      } else if (MojoHandleSignals.isPeerClosed(signal)) {
+        _events.close();
+        _events = null;
         _outputStream.close();
-        completer.complete(MojoResult.OK);
+        completer.complete(MojoResult.kOk);
       } else {
-        throw 'Unexpected handle event: $mojoSignals';
+        throw 'Unexpected handle event: ${MojoHandleSignals.string(signal)}';
       }
     });
     return completer.future;
   }
 
-  static Future<MojoResult> copyToFile(MojoDataPipeConsumer consumer, String outputPath) {
+  static Future<int> copyToFile(MojoDataPipeConsumer consumer, String outputPath) {
     PipeToFile drainer = new PipeToFile(consumer, outputPath);
     return drainer.drain();
   }
