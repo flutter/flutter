@@ -213,14 +213,6 @@ hooks = [
                 '-s', 'src/buildtools/mac/clang-format.sha1',
     ],
   },
-  {
-    'name': 'material_design_icons',
-    'pattern': '.',
-    'action': [
-        'python',
-        'src/sky/tools/download_material_design_icons',
-    ],
-  },
   # Pull binutils for linux, enabled debug fission for faster linking /
   # debugging when used with clang on Ubuntu Precise.
   # https://code.google.com/p/chromium/issues/detail?id=352046
@@ -243,19 +235,6 @@ hooks = [
                 '--no_auth',
                 '--bucket', 'chromium-eu-strip',
                 '-s', 'src/build/linux/bin/eu-strip.sha1',
-    ],
-  },
-  # Run "pub get" on any directories with checked-in pubspec.yaml files
-  # (excluding sky/, whose pubspec.yaml files are not intended for supporting
-  # building in-place in the repo).
-  {
-    'name': 'run_dart_pub_get',
-    'pattern': '',
-    'action': [ 'python',
-                'src/sky/tools/dart_pub_get.py',
-                '--repository-root', '../..',
-                '--dart-sdk-directory',
-                '../../third_party/dart-sdk/dart-sdk'
     ],
   },
   {
