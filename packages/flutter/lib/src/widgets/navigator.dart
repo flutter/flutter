@@ -13,13 +13,13 @@ abstract class Route<T> {
   /// The given route has been pushed onto the navigator after this route.
   /// Return true if the route before this one should be notified also. The
   /// first route to return false will be the one passed to the
-  /// NavigatorObserver's didPushModal() as the previousRoute.
+  /// NavigatorObserver's didPush() as the previousRoute.
   bool willPushNext(Route nextRoute) => false;
 
   /// The given route, which came after this one, has been popped off the
   /// navigator. Return true if the route before this one should be notified
   /// also. The first route to return false will be the one passed to the
-  /// NavigatorObserver's didPushModal() as the previousRoute.
+  /// NavigatorObserver's didPush() as the previousRoute.
   bool didPopNext(Route nextRoute) => false;
 }
 
@@ -34,8 +34,8 @@ typedef Route RouteFactory(NamedRouteSettings settings);
 class NavigatorObserver {
   NavigatorState _navigator;
   NavigatorState get navigator => _navigator;
-  void didPushModal(Route route, Route previousRoute) { }
-  void didPopModal(Route route, Route previousRoute) { }
+  void didPush(Route route, Route previousRoute) { }
+  void didPop(Route route, Route previousRoute) { }
 }
 
 class Navigator extends StatefulComponent {
@@ -61,8 +61,7 @@ class Navigator extends StatefulComponent {
 
 class NavigatorState extends State<Navigator> {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
-  // TODO(ianh): Rename _modal to _history or some such
-  final List<Route> _modal = new List<Route>();
+  final List<Route> _history = new List<Route>();
 
   void initState() {
     super.initState();
@@ -84,11 +83,11 @@ class NavigatorState extends State<Navigator> {
     super.dispose();
   }
 
-  bool get hasPreviousRoute => _modal.length > 1;
+  bool get hasPreviousRoute => _history.length > 1;
   OverlayState get overlay => _overlayKey.currentState;
 
   OverlayEntry get _currentOverlay {
-    for (Route route in _modal.reversed) {
+    for (Route route in _history.reversed) {
       if (route.overlayEntries.isNotEmpty)
         return route.overlayEntries.last;
     }
@@ -106,12 +105,12 @@ class NavigatorState extends State<Navigator> {
 
   void push(Route route, { Set<Key> mostValuableKeys }) {
     setState(() {
-      int index = _modal.length-1;
-      while (index >= 0 && _modal[index].willPushNext(route))
+      int index = _history.length-1;
+      while (index >= 0 && _history[index].willPushNext(route))
         index -= 1;
       route.didPush(overlay, _currentOverlay);
-      config.observer?.didPushModal(route, index >= 0 ? _modal[index] : null);
-      _modal.add(route);
+      config.observer?.didPush(route, index >= 0 ? _history[index] : null);
+      _history.add(route);
     });
   }
 
@@ -126,13 +125,13 @@ class NavigatorState extends State<Navigator> {
   /// The type of the result argument, if provided, must match the type argument
   /// of the class of the given route. (In practice, this is usually "dynamic".)
   void remove(Route route, [dynamic result]) {
-    assert(_modal.contains(route));
+    assert(_history.contains(route));
     assert(route.overlayEntries.isEmpty);
-    if (_modal.last == route) {
+    if (_history.last == route) {
       pop(result);
     } else {
       setState(() {
-        _modal.remove(route);
+        _history.remove(route);
         route.didPop(result);
       });
     }
@@ -149,21 +148,21 @@ class NavigatorState extends State<Navigator> {
       // We use setState to guarantee that we'll rebuild, since the routes can't
       // do that for themselves, even if they have changed their own state (e.g.
       // ModalScope.isCurrent).
-      assert(_modal.length > 1);
-      Route route = _modal.removeLast();
+      assert(_history.length > 1);
+      Route route = _history.removeLast();
       route.didPop(result);
-      int index = _modal.length-1;
-      while (index >= 0 && _modal[index].didPopNext(route))
+      int index = _history.length-1;
+      while (index >= 0 && _history[index].didPopNext(route))
         index -= 1;
-      config.observer?.didPopModal(route, index >= 0 ? _modal[index] : null);
+      config.observer?.didPop(route, index >= 0 ? _history[index] : null);
     });
   }
 
   Widget build(BuildContext context) {
-    assert(_modal.isNotEmpty);
+    assert(_history.isNotEmpty);
     return new Overlay(
       key: _overlayKey,
-      initialEntries: _modal.first.overlayEntries
+      initialEntries: _history.first.overlayEntries
     );
   }
 }

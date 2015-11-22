@@ -24,7 +24,7 @@ class HeroController extends NavigatorObserver {
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
-  void didPushModal(Route route, Route previousRoute) {
+  void didPush(Route route, Route previousRoute) {
     assert(navigator != null);
     assert(route != null);
     if (route is ModalRoute) { // as opposed to StateRoute, say
@@ -37,7 +37,7 @@ class HeroController extends NavigatorObserver {
     }
   }
 
-  void didPopModal(Route route, Route previousRoute) {
+  void didPop(Route route, Route previousRoute) {
     assert(navigator != null);
     assert(route != null);
     if (route is ModalRoute) { // as opposed to StateRoute, say
