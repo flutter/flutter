@@ -66,6 +66,18 @@ class OverlayState extends State<Overlay> {
     });
   }
 
+  void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above }) {
+    assert(above == null || (above._state == this && _entries.contains(above)));
+    for (OverlayEntry entry in entries) {
+      assert(entry._state == null);
+      entry._state = this;
+    }
+    setState(() {
+      int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
+      _entries.insertAll(index, entries);
+    });
+  }
+
   void _remove(OverlayEntry entry) {
     setState(() {
       _entries.remove(entry);
