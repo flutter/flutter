@@ -350,6 +350,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> {
 abstract class PopupRoute<T> extends ModalRoute<T> {
   PopupRoute({ Completer<T> completer }) : super(completer: completer);
   bool get opaque => false;
+  bool willPushNext(Route nextRoute) {
+    assert(nextRoute is! PageRoute);
+    return super.willPushNext(nextRoute);
+  }
 }
 
 /// A modal route that replaces the entire screen.
