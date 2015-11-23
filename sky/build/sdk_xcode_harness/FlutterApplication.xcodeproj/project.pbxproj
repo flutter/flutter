@@ -16,9 +16,9 @@
 		9E07CFE81BEAA35200BCD8DE /* InstructionsSnapshot.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CFE51BEAA35200BCD8DE /* InstructionsSnapshot.S */; };
 		9E07CFE91BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CFE61BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c */; };
 		9E07CFEA1BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CFE71BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c */; };
-		9E07CFEE1BEAA45400BCD8DE /* FlutterRunner in Copy Flutter Runner Executable And Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFDE1BEAA08B00BCD8DE /* FlutterRunner */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		9E07CFEF1BEAA45400BCD8DE /* icudtl.dat in Copy Flutter Runner Executable And Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFDF1BEAA08B00BCD8DE /* icudtl.dat */; };
 		9E07CFF41BEAB58200BCD8DE /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFF31BEAB58200BCD8DE /* app.flx */; };
+		9E29675A1C03C1D200546454 /* FlutterRunner in Resources */ = {isa = PBXBuildFile; fileRef = 9E2967581C03C18700546454 /* FlutterRunner */; };
+		9E29675B1C03C1D200546454 /* icudtl.dat in Resources */ = {isa = PBXBuildFile; fileRef = 9E2967591C03C18700546454 /* icudtl.dat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,8 +49,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
-				9E07CFEE1BEAA45400BCD8DE /* FlutterRunner in Copy Flutter Runner Executable And Resources */,
-				9E07CFEF1BEAA45400BCD8DE /* icudtl.dat in Copy Flutter Runner Executable And Resources */,
 			);
 			name = "Copy Flutter Runner Executable And Resources";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -66,19 +64,17 @@
 		9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9E07CFAB1BE8280A00BCD8DE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9E07CFAD1BE8280A00BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9E07CFDE1BEAA08B00BCD8DE /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = FlutterRunner; path = RunnerResources/FlutterRunner; sourceTree = SOURCE_ROOT; };
-		9E07CFDF1BEAA08B00BCD8DE /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; name = icudtl.dat; path = RunnerResources/icudtl.dat; sourceTree = SOURCE_ROOT; };
-		9E07CFE11BEAA0F900BCD8DE /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmbedderEntryPoints; sourceTree = "<group>"; };
-		9E07CFE21BEAA0F900BCD8DE /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = PackagerInvoke; sourceTree = "<group>"; };
-		9E07CFE41BEAA0F900BCD8DE /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = SnapshotterInvoke; sourceTree = "<group>"; };
 		9E07CFE51BEAA35200BCD8DE /* InstructionsSnapshot.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = InstructionsSnapshot.S; path = Generated/InstructionsSnapshot.S; sourceTree = "<group>"; };
 		9E07CFE61BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kDartIsolateSnapshotBuffer.c; path = Generated/kDartIsolateSnapshotBuffer.c; sourceTree = "<group>"; };
 		9E07CFE71BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kDartVmIsolateSnapshotBuffer.c; path = Generated/kDartVmIsolateSnapshotBuffer.c; sourceTree = "<group>"; };
-		9E07CFEC1BEAA44D00BCD8DE /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
-		9E07CFED1BEAA44D00BCD8DE /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = icudtl.dat; sourceTree = "<group>"; };
-		9E07CFF01BEAB1BA00BCD8DE /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 		9E07CFF31BEAB58200BCD8DE /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
-		9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Runner.xcconfig; sourceTree = "<group>"; };
+		9E2967531C03C17300546454 /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; name = EmbedderEntryPoints; path = FlutterResources/EmbedderEntryPoints; sourceTree = SOURCE_ROOT; };
+		9E2967541C03C17300546454 /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = PackagerInvoke; path = FlutterResources/PackagerInvoke; sourceTree = SOURCE_ROOT; };
+		9E2967551C03C17300546454 /* Runner.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Runner.xcconfig; path = FlutterResources/Runner.xcconfig; sourceTree = SOURCE_ROOT; };
+		9E2967561C03C17300546454 /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = Snapshotter; path = FlutterResources/Snapshotter; sourceTree = SOURCE_ROOT; };
+		9E2967571C03C17300546454 /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = SnapshotterInvoke; path = FlutterResources/SnapshotterInvoke; sourceTree = SOURCE_ROOT; };
+		9E2967581C03C18700546454 /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = FlutterRunner; path = FlutterResources/FlutterRunner; sourceTree = SOURCE_ROOT; };
+		9E2967591C03C18700546454 /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; name = icudtl.dat; path = FlutterResources/icudtl.dat; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,8 +101,7 @@
 			children = (
 				9E07CF881BE7F4D200BCD8DE /* FlutterApplication */,
 				9E07CF9B1BE8280A00BCD8DE /* Runner */,
-				9E07CFEB1BEAA44D00BCD8DE /* RunnerResources */,
-				9E07CFE01BEAA0F900BCD8DE /* Tools */,
+				9E07CFEB1BEAA44D00BCD8DE /* FlutterResources */,
 				9E07CF871BE7F4D200BCD8DE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -133,7 +128,6 @@
 		9E07CF9B1BE8280A00BCD8DE /* Runner */ = {
 			isa = PBXGroup;
 			children = (
-				9E07CFDD1BEAA07E00BCD8DE /* Resources */,
 				9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */,
 				9E07CFAA1BE8280A00BCD8DE /* LaunchScreen.storyboard */,
 				9E07CFAD1BE8280A00BCD8DE /* Info.plist */,
@@ -161,33 +155,18 @@
 			name = Generated;
 			sourceTree = "<group>";
 		};
-		9E07CFDD1BEAA07E00BCD8DE /* Resources */ = {
+		9E07CFEB1BEAA44D00BCD8DE /* FlutterResources */ = {
 			isa = PBXGroup;
 			children = (
-				9E07CFDE1BEAA08B00BCD8DE /* FlutterRunner */,
-				9E07CFDF1BEAA08B00BCD8DE /* icudtl.dat */,
+				9E2967531C03C17300546454 /* EmbedderEntryPoints */,
+				9E2967541C03C17300546454 /* PackagerInvoke */,
+				9E2967551C03C17300546454 /* Runner.xcconfig */,
+				9E2967561C03C17300546454 /* Snapshotter */,
+				9E2967571C03C17300546454 /* SnapshotterInvoke */,
+				9E2967581C03C18700546454 /* FlutterRunner */,
+				9E2967591C03C18700546454 /* icudtl.dat */,
 			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
-		9E07CFE01BEAA0F900BCD8DE /* Tools */ = {
-			isa = PBXGroup;
-			children = (
-				9E07CFE11BEAA0F900BCD8DE /* EmbedderEntryPoints */,
-				9E07CFE21BEAA0F900BCD8DE /* PackagerInvoke */,
-				9E07CFF01BEAB1BA00BCD8DE /* Snapshotter */,
-				9E07CFE41BEAA0F900BCD8DE /* SnapshotterInvoke */,
-				9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */,
-			);
-			path = Tools;
-			sourceTree = "<group>";
-		};
-		9E07CFEB1BEAA44D00BCD8DE /* RunnerResources */ = {
-			isa = PBXGroup;
-			children = (
-				9E07CFEC1BEAA44D00BCD8DE /* FlutterRunner */,
-				9E07CFED1BEAA44D00BCD8DE /* icudtl.dat */,
-			);
+			name = FlutterResources;
 			path = RunnerResources;
 			sourceTree = "<group>";
 		};
@@ -297,6 +276,8 @@
 			files = (
 				9E07CFAC1BE8280A00BCD8DE /* LaunchScreen.storyboard in Resources */,
 				9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */,
+				9E29675B1C03C1D200546454 /* icudtl.dat in Resources */,
+				9E29675A1C03C1D200546454 /* FlutterRunner in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,7 +382,7 @@
 /* Begin XCBuildConfiguration section */
 		9E07CF8C1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
+			baseConfigurationReference = 9E2967551C03C17300546454 /* Runner.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(FLUTTER_TARGET_ARCH)";
@@ -450,7 +431,7 @@
 		};
 		9E07CF8D1BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
+			baseConfigurationReference = 9E2967551C03C17300546454 /* Runner.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(FLUTTER_TARGET_ARCH)";
@@ -494,7 +475,6 @@
 		};
 		9E07CF8F1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -514,7 +494,6 @@
 		};
 		9E07CF901BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -534,7 +513,6 @@
 		};
 		9E07CFAE1BE8280A00BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Runner/Info.plist;
@@ -547,7 +525,6 @@
 		};
 		9E07CFAF1BE8280A00BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E3326FD1BF144CB0034CBAB /* Runner.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Runner/Info.plist;
