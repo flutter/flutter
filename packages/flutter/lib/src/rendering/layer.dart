@@ -140,7 +140,7 @@ class StatisticsLayer extends Layer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
-    builder.addStatistics(optionsMask, paintBounds.shift(layerOffset));
+    builder.addStatistics(optionsMask, paintBounds.shift(offset + layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
   }
 }
@@ -231,10 +231,10 @@ class ContainerLayer extends Layer {
   }
 
   /// Uploads all of this layer's children to the engine
-  void addChildrenToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addChildrenToScene(ui.SceneBuilder builder, Offset childOffset) {
     Layer child = _firstChild;
     while (child != null) {
-      child.addToScene(builder, layerOffset);
+      child.addToScene(builder, childOffset);
       child = child.nextSibling;
     }
   }
@@ -268,8 +268,9 @@ class ClipRectLayer extends ContainerLayer {
   // instead of in the coordinate system of this layer?
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipRect(clipRect.shift(layerOffset));
-    addChildrenToScene(builder, offset + layerOffset);
+    Offset childOffset = offset + layerOffset;
+    builder.pushClipRect(clipRect.shift(childOffset));
+    addChildrenToScene(builder, childOffset);
     builder.pop();
   }
 
@@ -293,8 +294,9 @@ class ClipRRectLayer extends ContainerLayer {
   // instead of in the coordinate system of this layer?
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipRRect(clipRRect.shift(layerOffset), bounds.shift(layerOffset));
-    addChildrenToScene(builder, offset + layerOffset);
+    Offset childOffset = offset + layerOffset;
+    builder.pushClipRRect(clipRRect.shift(childOffset), bounds.shift(childOffset));
+    addChildrenToScene(builder, childOffset);
     builder.pop();
   }
 
@@ -319,8 +321,9 @@ class ClipPathLayer extends ContainerLayer {
   // in the coordinate system of this layer?
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipPath(clipPath.shift(layerOffset), bounds.shift(layerOffset));
-    addChildrenToScene(builder, offset + layerOffset);
+    Offset childOffset = offset + layerOffset;
+    builder.pushClipPath(clipPath.shift(childOffset), bounds.shift(childOffset));
+    addChildrenToScene(builder, childOffset);
     builder.pop();
   }
 
@@ -368,8 +371,9 @@ class OpacityLayer extends ContainerLayer {
   int alpha;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushOpacity(alpha, bounds?.shift(layerOffset));
-    addChildrenToScene(builder, offset + layerOffset);
+    Offset childOffset = offset + layerOffset;
+    builder.pushOpacity(alpha, bounds?.shift(childOffset));
+    addChildrenToScene(builder, childOffset);
     builder.pop();
   }
 
