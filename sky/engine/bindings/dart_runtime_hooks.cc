@@ -12,7 +12,9 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/time/time.h"
+#include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
+#include "dart/runtime/include/dart_tools_api.h"
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_api_scope.h"
@@ -151,6 +153,13 @@ void Logger_PrintString(Dart_NativeArguments args) {
 #elif __APPLE__
     syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);
 #endif
+  }
+  if (dart::bin::ShouldCaptureStdout()) {
+    // For now we report print output on the Stdout stream.
+    uint8_t newline[] = { '\n' };
+    Dart_ServiceSendDataEvent("Stdout", "WriteEvent", chars, length);
+    Dart_ServiceSendDataEvent("Stdout", "WriteEvent",
+                              newline, sizeof(newline));
   }
 }
 
