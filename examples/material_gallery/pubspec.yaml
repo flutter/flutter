@@ -1,0 +1,4 @@
+name: material_gallery
+dependencies:
+  flutter:
+    path: ../../packages/flutter
