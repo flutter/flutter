@@ -256,7 +256,7 @@ if (is_android) {
   }
 
   sky_precompilation_sdk("shell") {
-    sdk_name = "SkySDK"
+    sdk_name = "Flutter"
   }
 } else if (is_linux && !is_fnl) {
   executable("shell") {
