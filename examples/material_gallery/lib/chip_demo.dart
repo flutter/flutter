@@ -23,7 +23,11 @@ class _ChipDemoState extends State<ChipDemo> {
     List<Widget> chips = <Widget>[
       new Chip(
         label: new Text('Apple')
-      )
+      ),
+      new Chip(
+        avatar: new CircleAvatar(label: 'B'),
+        label: new Text('Blueberry')
+      ),
     ];
 
     if (_showBananas) {
