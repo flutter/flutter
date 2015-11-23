@@ -66,18 +66,10 @@ static inline UIKeyboardType ToUIKeyboardType(::keyboard::KeyboardType type) {
 }
 
 - (void)insertText:(NSString*)text {
-  if (_client == nullptr) {
-    return;
-  }
-
   _client->CommitText(text.UTF8String, text.length);
 }
 
 - (void)deleteBackward {
-  if (_client == nullptr) {
-    return;
-  }
-
   _client->DeleteSurroundingText(1, 0);
 }
 
