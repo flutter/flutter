@@ -4,11 +4,10 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
-
-import 'widget_tester.dart';
 
 ui.Shader createShader(Rect bounds) {
   return new LinearGradient(

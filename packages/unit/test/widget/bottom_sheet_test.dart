@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
-
-import 'widget_tester.dart';
 
 void main() {
   test('Verify that a tap dismisses a modal BottomSheet', () {
@@ -79,7 +78,7 @@ void main() {
       expect(showBottomSheetThenCalled, isFalse);
       expect(tester.findText('BottomSheet'), isNull);
 
-      scaffoldKey.currentState.showBottomSheet((BuildContext context) { 
+      scaffoldKey.currentState.showBottomSheet((BuildContext context) {
         return new Container(
           margin: new EdgeDims.all(40.0),
           child: new Text('BottomSheet')

@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
-import '../../test/widget/widget_tester.dart';
 
 const int _kNumberOfIterations = 50000;
 const bool _kRunForever = false;

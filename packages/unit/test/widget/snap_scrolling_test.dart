@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
-
-import 'widget_tester.dart';
 
 const double itemExtent = 200.0;
 ScrollDirection scrollDirection = ScrollDirection.vertical;

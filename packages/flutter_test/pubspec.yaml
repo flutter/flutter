@@ -1,0 +1,10 @@
+name: flutter_test
+dependencies:
+  test: ^0.12.5
+  quiver: ^0.21.4
+  flutter:
+    path: ../flutter
+
+  # So that the test harness is available when running the tests.
+  flutter_tools:
+    path: ../flutter_tools

@@ -1,9 +1,8 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
-
-import '../engine/mock_events.dart';
 
 void main() {
   test('Should recognize scale gestures', () {
