@@ -10,6 +10,7 @@ library material;
 export 'src/material/bottom_sheet.dart';
 export 'src/material/card.dart';
 export 'src/material/checkbox.dart';
+export 'src/material/chip.dart';
 export 'src/material/circle_avatar.dart';
 export 'src/material/colors.dart';
 export 'src/material/constants.dart';
