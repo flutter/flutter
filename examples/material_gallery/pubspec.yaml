@@ -1,4 +1,6 @@
 name: material_gallery
 dependencies:
+  intl: '>=0.12.4+2 <0.13.0'
+
   flutter:
     path: ../../packages/flutter

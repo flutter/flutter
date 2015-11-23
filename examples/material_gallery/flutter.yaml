@@ -1,3 +1,4 @@
 name: material_gallery
 material-design-icons:
   - name: navigation/cancel
+  - name: navigation/menu

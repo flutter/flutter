@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 
 class WidgetDemo {
-  WidgetDemo({ this.title, this.route, this.builder });
+  WidgetDemo({ this.title, this.routeName, this.builder });
 
   final String title;
-  final String route;
+  final String routeName;
   final WidgetBuilder builder;
 }

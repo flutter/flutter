@@ -54,55 +54,6 @@ class MeasurementRow extends FitnessItemRow {
   }
 }
 
-class MeasurementDateDialog extends StatefulComponent {
-  MeasurementDateDialog({ this.previousDate });
-
-  final DateTime previousDate;
-
-  MeasurementDateDialogState createState() => new MeasurementDateDialogState();
-}
-
-class MeasurementDateDialogState extends State<MeasurementDateDialog> {
-  @override
-  void initState() {
-    _selectedDate = config.previousDate;
-  }
-
-  DateTime _selectedDate;
-
-  void _handleDateChanged(DateTime value) {
-    setState(() {
-      _selectedDate = value;
-    });
-  }
-
-  Widget build(BuildContext context) {
-    return new Dialog(
-      content: new DatePicker(
-        selectedDate: _selectedDate,
-        firstDate: new DateTime(2015, 8),
-        lastDate: new DateTime(2101),
-        onChanged: _handleDateChanged
-      ),
-      contentPadding: EdgeDims.zero,
-      actions: <Widget>[
-        new FlatButton(
-          child: new Text('CANCEL'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          }
-        ),
-        new FlatButton(
-          child: new Text('OK'),
-          onPressed: () {
-            Navigator.of(context).pop(_selectedDate);
-          }
-        ),
-      ]
-    );
-  }
-}
-
 class MeasurementFragment extends StatefulComponent {
   MeasurementFragment({ this.onCreated });
 
@@ -154,11 +105,13 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
   static final GlobalKey weightKey = new GlobalKey();
 
   Future _handleDatePressed() async {
-    DateTime value = await showDialog(
+    DateTime value = await showDatePicker(
       context: context,
-      child: new MeasurementDateDialog(previousDate: _when)
+      initialDate: _when,
+      firstDate: new DateTime(2015, 8),
+      lastDate: new DateTime(2101)
     );
-    if (value != null) {
+    if (value != _when) {
       setState(() {
         _when = value;
       });

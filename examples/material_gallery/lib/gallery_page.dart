@@ -7,14 +7,48 @@ import 'package:flutter/material.dart';
 import 'widget_demo.dart';
 
 class GalleryPage extends StatelessComponent {
-  GalleryPage({ this.demo });
+  GalleryPage({ this.demos, this.active });
 
-  final WidgetDemo demo;
+  final List<WidgetDemo> demos;
+  final WidgetDemo active;
+
+  void _showDrawer(BuildContext context) {
+    List<Widget> items = <Widget>[
+      new DrawerHeader(child: new Text('Material demos')),
+    ];
+
+    for (WidgetDemo demo in demos) {
+      items.add(new DrawerItem(
+        onPressed: () {
+          Navigator.of(context).pushNamed(demo.routeName);
+        },
+        child: new Text(demo.title)
+      ));
+    }
+
+    showDrawer(context: context, child: new Block(items));
+  }
+
+  Widget _body(BuildContext context) {
+    if (active != null)
+      return active.builder(context);
+    return new Material(
+      child: new Center(
+        child: new Text('Select a demo from the drawer')
+      )
+    );
+  }
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text(demo.title)),
-      body: demo.builder(context)
+      toolBar: new ToolBar(
+        left: new IconButton(
+          icon: 'navigation/menu',
+          onPressed: () { _showDrawer(context); }
+        ),
+        center: new Text(active?.title ?? 'Material gallery')
+      ),
+      body: _body(context)
     );
   }
 }
