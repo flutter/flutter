@@ -50,8 +50,10 @@ abstract class FlutterCommand extends Command {
   Future<int> run() async {
     if (requiresProjectRoot) {
       if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-        stderr.writeln('No pubspec.yaml file found. '
-            'This command should be run from the root of a project.');
+        stderr.writeln('Error: No pubspec.yaml file found. '
+            'This command should be run from the root of your Flutter project. '
+            'Do not run this command from the root of your git clone '
+            'of Flutter.');
         return 1;
       }
     }
