@@ -98,7 +98,7 @@ SnapshotProject() {
   local main_path="${project_path}/lib/main.dart"
   AssertExists $main_path
 
-  local src_dir=${SOURCE_ROOT}/Tools
+  local src_dir=${SOURCE_ROOT}/FlutterResources
   local derived_dir=${SOURCE_ROOT}/FlutterApplication/Generated
 
   RunCommand mkdir -p $derived_dir
