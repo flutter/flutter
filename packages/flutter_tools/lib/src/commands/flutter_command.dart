@@ -19,6 +19,12 @@ abstract class FlutterCommand extends Command {
   /// Whether this command needs to be run from the root of a project.
   bool get requiresProjectRoot => true;
 
+  String get projectRootValidationErrorMessage {
+    return 'Error: No pubspec.yaml file found.\n'
+      'This command should be run from the root of your Flutter project. Do not run\n'
+      'this command from the root of your git clone of Flutter.';
+  }
+
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
   Future downloadApplicationPackages() async {
@@ -48,17 +54,17 @@ abstract class FlutterCommand extends Command {
   }
 
   Future<int> run() async {
-    if (requiresProjectRoot) {
-      if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-        stderr.writeln('Error: No pubspec.yaml file found. '
-            'This command should be run from the root of your Flutter project. '
-            'Do not run this command from the root of your git clone '
-            'of Flutter.');
-        return 1;
-      }
-    }
-
+    if (requiresProjectRoot && !validateProjectRoot())
+      return 1;
     return await runInProject();
+  }
+
+  bool validateProjectRoot() {
+    if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
+      stderr.writeln(projectRootValidationErrorMessage);
+      return false;
+    }
+    return true;
   }
 
   Future<int> runInProject();

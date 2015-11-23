@@ -83,15 +83,11 @@ class Artifact {
     return null;
   }
 
-  String getUrl(String revision) {
-    return _getCloudStorageBaseUrl(
-      platform: platform,
-      revision: revision
-    ) + fileName;
-  }
-
   // Whether the artifact needs to be marked as executable on disk.
-  bool get executable => type == ArtifactType.snapshot;
+  bool get executable {
+    return type == ArtifactType.snapshot ||
+      (type == ArtifactType.shell && targetPlatform == TargetPlatform.linux);
+  }
 }
 
 class ArtifactStore {
@@ -101,6 +97,12 @@ class ArtifactStore {
       fileName: 'SkyShell.apk',
       type: ArtifactType.shell,
       targetPlatform: TargetPlatform.android
+    ),
+    const Artifact._(
+      name: 'Sky Shell',
+      fileName: 'sky_shell',
+      type: ArtifactType.shell,
+      targetPlatform: TargetPlatform.linux
     ),
     const Artifact._(
       name: 'Sky Snapshot',
