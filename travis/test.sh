@@ -5,7 +5,7 @@ set -ex
 ./bin/flutter analyze --flutter-repo --no-current-directory --no-current-package --congratulate
 
 # flutter package tests
-./bin/flutter test --engine-src-path bin/cache/travis
+./bin/flutter test --flutter-repo --engine-src-path bin/cache/travis
 
 (cd packages/cassowary; pub run test -j1)
 # (cd packages/flutter_sprites; ) # No tests to run.
