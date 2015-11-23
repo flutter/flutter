@@ -11,24 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 
-import '../engine/mock_events.dart';
-
-class RootComponent extends StatefulComponent {
-  RootComponentState createState() => new RootComponentState();
-}
-
-class RootComponentState extends State<RootComponent> {
-  Widget _child = new DecoratedBox(decoration: new BoxDecoration());
-  Widget get child => _child;
-  void set child(Widget value) {
-    if (value != _child) {
-      setState(() {
-        _child = value;
-      });
-    }
-  }
-  Widget build(BuildContext context) => child;
-}
+import 'test_pointer.dart';
 
 typedef Point SizeToPointFunction(Size size);
 

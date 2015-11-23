@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
-
-import 'widget_tester.dart';
 
 class Builder extends StatelessComponent {
   Builder({ this.builder });
@@ -55,7 +54,7 @@ void main() {
       expect(tester.findText(helloSnackBar), isNotNull);
       tester.pump(new Duration(milliseconds: 750)); // 1.50s
       expect(tester.findText(helloSnackBar), isNotNull);
-      tester.pump(new Duration(milliseconds: 750)); // 2.25s 
+      tester.pump(new Duration(milliseconds: 750)); // 2.25s
       expect(tester.findText(helloSnackBar), isNotNull);
       tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
       tester.pump(); // begin animation
@@ -114,7 +113,7 @@ void main() {
       tester.pump(new Duration(milliseconds: 750)); // 1.50s
       expect(tester.findText('bar1'), isNotNull);
       expect(tester.findText('bar2'), isNull);
-      tester.pump(new Duration(milliseconds: 750)); // 2.25s 
+      tester.pump(new Duration(milliseconds: 750)); // 2.25s
       expect(tester.findText('bar1'), isNotNull);
       expect(tester.findText('bar2'), isNull);
       tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
@@ -133,7 +132,7 @@ void main() {
       tester.pump(new Duration(milliseconds: 750)); // 5.25s
       expect(tester.findText('bar1'), isNull);
       expect(tester.findText('bar2'), isNotNull);
-      tester.pump(new Duration(milliseconds: 750)); // 6.00s 
+      tester.pump(new Duration(milliseconds: 750)); // 6.00s
       expect(tester.findText('bar1'), isNull);
       expect(tester.findText('bar2'), isNotNull);
       tester.pump(new Duration(milliseconds: 750)); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
@@ -200,10 +199,10 @@ void main() {
       tester.pump(new Duration(milliseconds: 750)); // 1.50s
       expect(tester.findText('bar1'), isNotNull);
       expect(tester.findText('bar2'), isNull);
-      tester.pump(new Duration(milliseconds: 750)); // 2.25s 
+      tester.pump(new Duration(milliseconds: 750)); // 2.25s
       expect(tester.findText('bar1'), isNotNull);
       expect(tester.findText('bar2'), isNull);
-      tester.pump(new Duration(milliseconds: 10000)); // 12.25s 
+      tester.pump(new Duration(milliseconds: 10000)); // 12.25s
       expect(tester.findText('bar1'), isNotNull);
       expect(tester.findText('bar2'), isNull);
 
@@ -225,7 +224,7 @@ void main() {
       tester.pump(new Duration(milliseconds: 750)); // 15.25s
       expect(tester.findText('bar1'), isNull);
       expect(tester.findText('bar2'), isNotNull);
-      tester.pump(new Duration(milliseconds: 750)); // 16.00s 
+      tester.pump(new Duration(milliseconds: 750)); // 16.00s
       expect(tester.findText('bar1'), isNull);
       expect(tester.findText('bar2'), isNotNull);
       tester.pump(new Duration(milliseconds: 750)); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled

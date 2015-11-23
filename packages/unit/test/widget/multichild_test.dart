@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 import 'test_widgets.dart';
-import 'widget_tester.dart';
 
 void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   MultiChildRenderObjectElement element =
