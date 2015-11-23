@@ -194,6 +194,28 @@ Dart_Handle GetVMServiceAssetsArchiveCallback() {
       ::dart::observatory::observatory_assets_archive_len);
 }
 
+static const char kStdoutStreamId[] = "Stdout";
+static const char kStderrStreamId[] = "Stderr";
+
+static bool ServiceStreamListenCallback(const char* stream_id) {
+  if (strcmp(stream_id, kStdoutStreamId) == 0) {
+    dart::bin::SetCaptureStdout(true);
+    return true;
+  } else if (strcmp(stream_id, kStderrStreamId) == 0) {
+    dart::bin::SetCaptureStderr(true);
+    return true;
+  }
+  return false;
+}
+
+static void ServiceStreamCancelCallback(const char* stream_id) {
+  if (strcmp(stream_id, kStdoutStreamId) == 0) {
+    dart::bin::SetCaptureStdout(false);
+  } else if (strcmp(stream_id, kStderrStreamId) == 0) {
+    dart::bin::SetCaptureStderr(false);
+  }
+}
+
 }  // namespace
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
@@ -290,6 +312,11 @@ void InitDartVM() {
           nullptr,
           // VM service assets archive
           GetVMServiceAssetsArchiveCallback) == nullptr);
+
+  // Allow streaming of stdout and stderr by the Dart vm.
+  Dart_SetServiceStreamCallbacks(&ServiceStreamListenCallback,
+                                 &ServiceStreamCancelCallback);
+
   // Wait for load port- ensures handle watcher and service isolates are
   // running.
   Dart_ServiceWaitForLoadPort();
