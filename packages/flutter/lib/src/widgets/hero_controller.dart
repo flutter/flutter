@@ -27,9 +27,9 @@ class HeroController extends NavigatorObserver {
   void didPush(Route route, Route previousRoute) {
     assert(navigator != null);
     assert(route != null);
-    if (route is ModalRoute) { // as opposed to StateRoute, say
+    if (route is PageRoute) {
       assert(route.performance != null);
-      if (previousRoute is ModalRoute) // as opposed to the many other types of routes, or null
+      if (previousRoute is PageRoute) // could be null
         _from = previousRoute;
       _to = route;
       _performance = route.performance;
@@ -40,9 +40,9 @@ class HeroController extends NavigatorObserver {
   void didPop(Route route, Route previousRoute) {
     assert(navigator != null);
     assert(route != null);
-    if (route is ModalRoute) { // as opposed to StateRoute, say
+    if (route is PageRoute) {
       assert(route.performance != null);
-      if (previousRoute is ModalRoute) { // as opposed to the many other types of routes
+      if (previousRoute is PageRoute) {
         _to = previousRoute;
         _from = route;
         _performance = route.performance;

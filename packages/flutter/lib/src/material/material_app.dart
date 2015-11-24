@@ -84,9 +84,7 @@ class _MaterialAppState extends State<MaterialApp> {
     if (event.type == 'back') {
       NavigatorState navigator = _navigator.currentState;
       assert(navigator != null);
-      if (navigator.hasPreviousRoute)
-        navigator.pop();
-      else
+      if (!navigator.pop())
         activity.finishCurrentActivity();
     }
   }

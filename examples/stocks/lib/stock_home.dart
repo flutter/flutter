@@ -24,8 +24,8 @@ class StockHomeState extends State<StockHome> {
   String _searchQuery;
 
   void _handleSearchBegin() {
-    Navigator.of(context).push(new StateRoute(
-      onPop: () {
+    ModalRoute.of(context).addLocalHistoryEntry(new LocalHistoryEntry(
+      onRemove: () {
         setState(() {
           _isSearching = false;
           _searchQuery = null;

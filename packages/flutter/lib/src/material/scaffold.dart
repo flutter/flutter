@@ -175,8 +175,8 @@ class ScaffoldState extends State<Scaffold> {
     Performance performance = BottomSheet.createPerformance()
       ..forward();
     _PersistentBottomSheet bottomSheet;
-    Route route = new StateRoute(
-      onPop: () {
+    LocalHistoryEntry entry = new LocalHistoryEntry(
+      onRemove: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         assert(bottomSheetKey.currentState != null);
         bottomSheetKey.currentState.close();
@@ -191,7 +191,7 @@ class ScaffoldState extends State<Scaffold> {
       performance: performance,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
-        Navigator.of(context).remove(route);
+        entry.remove();
       },
       onDismissed: () {
         assert(_dismissedBottomSheets != null);
@@ -201,12 +201,12 @@ class ScaffoldState extends State<Scaffold> {
       },
       builder: builder
     );
-    Navigator.of(context).push(route);
+    ModalRoute.of(context).addLocalHistoryEntry(entry);
     setState(() {
       _currentBottomSheet = new ScaffoldFeatureController._(
         bottomSheet,
         completer,
-        () => Navigator.of(context).remove(route),
+        () => entry.remove(),
         setState
       );
     });

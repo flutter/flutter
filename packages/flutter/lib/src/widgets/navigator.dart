@@ -12,7 +12,12 @@ abstract class Route<T> {
 
   List<OverlayEntry> get overlayEntries;
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) { }
-  void didPop(T result) { }
+
+  /// A request was made to pop this route. If the route can handle it
+  /// internally (e.g. because it has its own stack of internal state) then
+  /// return false, otherwise return true. Returning false will prevent the
+  /// default behavior of NavigatorState.pop().
+  bool didPop(T result) => true;
 
   /// The given route has been pushed onto the navigator after this route.
   /// Return true if the route before this one should be notified also. The
@@ -88,7 +93,6 @@ class NavigatorState extends State<Navigator> {
     super.dispose();
   }
 
-  bool get hasPreviousRoute => _history.length > 1;
   OverlayState get overlay => _overlayKey.currentState;
 
   OverlayEntry get _currentOverlay {
@@ -128,58 +132,40 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
-  /// Pops the given route, if it's the current route. If it's not the current
-  /// route, removes it from the list of active routes without notifying any
-  /// observers or adjacent routes.
-  ///
-  /// Do not use this for ModalRoutes, or indeed anything other than
-  /// StateRoutes. Doing so would cause very odd results, e.g. ModalRoutes would
-  /// get confused about who is current.
-  ///
-  /// The type of the result argument, if provided, must match the type argument
-  /// of the class of the given route. (In practice, this is usually "dynamic".)
-  void remove(Route route, [dynamic result]) {
-    assert(!_debugLocked);
-    assert(_history.contains(route));
-    assert(route.overlayEntries.isEmpty);
-    if (_history.last == route) {
-      pop(result);
-    } else {
-      assert(() { _debugLocked = true; return true; });
-      assert(route._navigator == this);
-      setState(() {
-        _history.remove(route);
-        route.didPop(result);
-        route._navigator = null;
-      });
-      assert(() { _debugLocked = false; return true; });
-    }
-  }
-
   /// Removes the current route, notifying the observer (if any), and the
   /// previous routes (using [Route.didPopNext]).
   ///
   /// The type of the result argument, if provided, must match the type argument
   /// of the class of the current route. (In practice, this is usually
   /// "dynamic".)
-  void pop([dynamic result]) {
+  ///
+  /// Returns true if a route was popped; returns false if there are no further
+  /// previous routes.
+  bool pop([dynamic result]) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
-    setState(() {
-      // We use setState to guarantee that we'll rebuild, since the routes can't
-      // do that for themselves, even if they have changed their own state (e.g.
-      // ModalScope.isCurrent).
-      assert(_history.length > 1);
-      Route route = _history.removeLast();
-      assert(route._navigator == this);
-      route.didPop(result);
-      int index = _history.length-1;
-      while (index >= 0 && _history[index].didPopNext(route))
-        index -= 1;
-      config.observer?.didPop(route, index >= 0 ? _history[index] : null);
-      route._navigator = null;
-    });
+    Route route = _history.last;
+    assert(route._navigator == this);
+    if (route.didPop(result)) {
+      if (_history.length > 1) {
+        setState(() {
+          // We use setState to guarantee that we'll rebuild, since the routes can't
+          // do that for themselves, even if they have changed their own state (e.g.
+          // ModalScope.isCurrent).
+          _history.removeLast();
+          int index = _history.length-1;
+          while (index >= 0 && _history[index].didPopNext(route))
+            index -= 1;
+          config.observer?.didPop(route, index >= 0 ? _history[index] : null);
+          route._navigator = null;
+        });
+      } else {
+        assert(() { _debugLocked = false; return true; });
+        return false;
+      }
+    }
     assert(() { _debugLocked = false; return true; });
+    return true;
   }
 
   Widget build(BuildContext context) {
