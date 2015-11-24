@@ -17,20 +17,12 @@ import org.chromium.mojom.keyboard.KeyboardType;
  * Android implementation of Keyboard.
  */
 public class KeyboardServiceImpl implements KeyboardService {
-    // We have a unique ServiceImpl per connection.  However the state
-    // for the keyboard instance is per-view.  However we don't have the
-    // concept of per-view services, so we currently have a hack by which
-    // we set the "active view" and its associated per-view keyboard state.
-    private static KeyboardServiceState sViewState;
+    private KeyboardServiceState mViewState;
     private Context mContext;
 
-    public KeyboardServiceImpl(Context context) {
+    public KeyboardServiceImpl(Context context, KeyboardServiceState state) {
         mContext = context;
-    }
-
-    public static void setViewState(KeyboardServiceState state) {
-        if (sViewState != null) sViewState.close();
-        sViewState = state;
+        mViewState = state;
     }
 
     private static int inputTypeFromKeyboardType(int keyboardType) {
@@ -42,8 +34,7 @@ public class KeyboardServiceImpl implements KeyboardService {
 
     @Override
     public void close() {
-        if (sViewState == null) return;
-        sViewState.close();
+        mViewState.close();
     }
 
     @Override
@@ -51,41 +42,37 @@ public class KeyboardServiceImpl implements KeyboardService {
 
     @Override
     public void show(KeyboardClient client, int keyboardType) {
-        if (sViewState == null) return;
-        sViewState.setClient(client, inputTypeFromKeyboardType(keyboardType));
+        mViewState.setClient(client, inputTypeFromKeyboardType(keyboardType));
         InputMethodManager imm =
                 (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.restartInput(sViewState.getView());
-        imm.showSoftInput(sViewState.getView(), InputMethodManager.SHOW_IMPLICIT);
+        imm.restartInput(mViewState.getView());
+        imm.showSoftInput(mViewState.getView(), InputMethodManager.SHOW_IMPLICIT);
     }
 
     @Override
     public void showByRequest() {
-        if (sViewState == null) return;
         InputMethodManager imm =
                 (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(sViewState.getView(), 0);
+        imm.showSoftInput(mViewState.getView(), 0);
     }
 
     @Override
     public void hide() {
-        if (sViewState == null) return;
         InputMethodManager imm =
                 (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(sViewState.getView().getApplicationWindowToken(), 0);
+        imm.hideSoftInputFromWindow(mViewState.getView().getApplicationWindowToken(), 0);
         close();
     }
 
     @Override
     public void setText(String text) {
-        sViewState.setText(text);
         InputMethodManager imm =
                 (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.restartInput(sViewState.getView());
+        imm.restartInput(mViewState.getView());
     }
 
     @Override
     public void setSelection(int start, int end) {
-        sViewState.setSelection(start, end);
+        mViewState.setSelection(start, end);
     }
 }

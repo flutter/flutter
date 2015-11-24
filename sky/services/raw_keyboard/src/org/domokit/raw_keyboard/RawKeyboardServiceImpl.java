@@ -12,26 +12,20 @@ import org.chromium.mojom.raw_keyboard.RawKeyboardService;
  * Android implementation of Keyboard.
  */
 public class RawKeyboardServiceImpl implements RawKeyboardService {
-    // We have a unique ServiceImpl per connection.  However multiple views
-    // can be sending us key events simultaneously.
-    private static RawKeyboardServiceState sViewState;
+    private RawKeyboardServiceState mViewState;
 
-    public RawKeyboardServiceImpl() {
-    }
-
-    public static void setViewState(RawKeyboardServiceState state) {
-        if (sViewState != null) sViewState.close();
-        sViewState = state;
+    public RawKeyboardServiceImpl(RawKeyboardServiceState state) {
+        mViewState = state;
     }
 
     @Override
     public void addListener(RawKeyboardListener listener) {
-        sViewState.addListener(listener);
+        mViewState.addListener(listener);
     }
 
     @Override
     public void removeListener(RawKeyboardListener listener) {
-        sViewState.removeListener(listener);
+        mViewState.removeListener(listener);
     }
 
     @Override
@@ -39,7 +33,6 @@ public class RawKeyboardServiceImpl implements RawKeyboardService {
 
     @Override
     public void close() {
-        if (sViewState == null) return;
-        sViewState.close();
+        mViewState.close();
     }
 }

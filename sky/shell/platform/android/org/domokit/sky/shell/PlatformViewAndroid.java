@@ -20,12 +20,15 @@ import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.keyboard.KeyboardServiceImpl;
 import org.chromium.mojo.keyboard.KeyboardServiceState;
 import org.chromium.mojo.system.Core;
+import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
+import org.chromium.mojom.keyboard.KeyboardService;
 import org.chromium.mojom.pointer.Pointer;
 import org.chromium.mojom.pointer.PointerKind;
 import org.chromium.mojom.pointer.PointerPacket;
 import org.chromium.mojom.pointer.PointerType;
+import org.chromium.mojom.raw_keyboard.RawKeyboardService;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
 import org.chromium.mojom.sky.ServicesData;
@@ -105,12 +108,9 @@ public class PlatformViewAndroid extends SurfaceView {
         };
         getHolder().addCallback(mSurfaceCallback);
 
-        // TODO(eseidel): We need per-view services!
         mKeyboardState = new KeyboardServiceState(this);
-        KeyboardServiceImpl.setViewState(mKeyboardState);
 
         mRawKeyboardState = new RawKeyboardServiceState();
-        RawKeyboardServiceImpl.setViewState(mRawKeyboardState);
     }
 
     @Override
@@ -258,6 +258,22 @@ public class PlatformViewAndroid extends SurfaceView {
         return true;
     }
 
+    private void configureLocalServices(ServiceRegistry registry) {
+        registry.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                KeyboardService.MANAGER.bind(new KeyboardServiceImpl(context, mKeyboardState), pipe);
+            }
+        });
+
+        registry.register(RawKeyboardService.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                RawKeyboardService.MANAGER.bind(new RawKeyboardServiceImpl(mRawKeyboardState), pipe);
+            }
+        });
+    }
+
     private void attach() {
         Core core = CoreImpl.getInstance();
         Pair<SkyEngine.Proxy, InterfaceRequest<SkyEngine>> engine =
@@ -265,9 +281,12 @@ public class PlatformViewAndroid extends SurfaceView {
         mSkyEngine = engine.first;
         mNativePlatformView = nativeAttach(engine.second.passHandle().releaseNativeHandle());
 
+        ServiceRegistry localRegistry = new ServiceRegistry();
+        configureLocalServices(localRegistry);
+
         Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
-        mServiceProvider = new PlatformServiceProvider(core, getContext());
+        mServiceProvider = new PlatformServiceProvider(core, getContext(), localRegistry);
         ServiceProvider.MANAGER.bind(mServiceProvider, serviceProvider.second);
 
         ServicesData services = new ServicesData();
