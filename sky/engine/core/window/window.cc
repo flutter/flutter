@@ -66,16 +66,24 @@ void Window::UpdateWindowMetrics(const SkyDisplayMetrics& metrics) {
   });
 }
 
-void Window::DispatchEvent(const String& event_type, double time_stamp) {
+void Window::PushRoute(const std::string& route) {
   DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
   DartState::Scope scope(dart_state);
 
-  DartInvokeField(library_.value(), "_dispatchEvent", {
-    DartConverter<String>::ToDart(dart_state, event_type),
-    ToDart(time_stamp)
+  DartInvokeField(library_.value(), "_pushRoute", {
+    StdStringToDart(route),
   });
+}
+
+void Window::PopRoute() {
+  DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  DartState::Scope scope(dart_state);
+
+  DartInvokeField(library_.value(), "_popRoute", {});
 }
 
 void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {

@@ -31,9 +31,12 @@ class Window {
   WindowPadding _padding;
 
   _FrameCallback onBeginFrame;
-  _EventCallback onEvent;
+  _EventCallback onEvent; // TODO(abarth): Remove.
   _PointerPacketCallback onPointerPacket;
   VoidCallback onMetricsChanged;
+
+  String defaultRouteName;
+  VoidCallback onPopRoute;
 
   void scheduleFrame() native "Window_scheduleFrame";
   void render(Scene scene) native "Window_render";

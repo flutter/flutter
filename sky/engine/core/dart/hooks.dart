@@ -20,9 +20,19 @@ void _updateWindowMetrics(double devicePixelRatio,
     window.onMetricsChanged();
 }
 
-void _dispatchEvent(String eventType, double timeStamp) {
+void _pushRoute(String route) {
+  assert(window.defaultRouteName == null);
+  window.defaultRouteName = route;
+  // TODO(abarth): If we ever start calling _pushRoute other than before main,
+  // we should add a change notification callback.
+}
+
+void _popRoute() {
+  if (window.onPopRoute != null)
+    window.onPopRoute();
+  // TODO(abarth): Remove after engine roll.
   if (window.onEvent != null)
-    window.onEvent(eventType, timeStamp);
+    window.onEvent('back', 0.0);
 }
 
 void _dispatchPointerPacket(ByteData serializedPacket) {

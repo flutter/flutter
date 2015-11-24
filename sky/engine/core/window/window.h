@@ -33,9 +33,11 @@ class Window {
 
   void DidCreateIsolate();
   void UpdateWindowMetrics(const SkyDisplayMetrics& metrics);
-  void DispatchEvent(const String& event_type, double time_stamp);
   void DispatchPointerPacket(const pointer::PointerPacketPtr& packet);
   void BeginFrame(base::TimeTicks frameTime);
+
+  void PushRoute(const std::string& route);
+  void PopRoute();
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
