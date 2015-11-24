@@ -38,6 +38,8 @@ class SkyView : public WindowClient {
 
   const SkyDisplayMetrics& display_metrics() const { return display_metrics_; }
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
+  void PushRoute(const std::string& route);
+  void PopRoute();
 
   std::unique_ptr<sky::compositor::LayerTree> BeginFrame(
       base::TimeTicks frame_time);
@@ -50,7 +52,6 @@ class SkyView : public WindowClient {
   void RunFromSnapshot(const WebString& name,
                        mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  void HandleInputEvent(const WebInputEvent& event);
   void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
 
   void StartDartTracing();

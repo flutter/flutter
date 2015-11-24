@@ -33,6 +33,14 @@ void SkyView::SetDisplayMetrics(const SkyDisplayMetrics& metrics) {
   GetWindow()->UpdateWindowMetrics(display_metrics_);
 }
 
+void SkyView::PushRoute(const std::string& route) {
+  GetWindow()->PushRoute(route);
+}
+
+void SkyView::PopRoute() {
+  GetWindow()->PopRoute();
+}
+
 void SkyView::CreateView(const String& name) {
   DCHECK(!dart_controller_);
 
@@ -66,14 +74,6 @@ std::unique_ptr<sky::compositor::LayerTree> SkyView::BeginFrame(
     base::TimeTicks frame_time) {
   GetWindow()->BeginFrame(frame_time);
   return std::move(layer_tree_);
-}
-
-void SkyView::HandleInputEvent(const WebInputEvent& inputEvent) {
-  TRACE_EVENT0("input", "SkyView::HandleInputEvent");
-
-  if (inputEvent.type == WebInputEvent::Back) {
-    GetWindow()->DispatchEvent("back", inputEvent.timeStampMS);
-  }
 }
 
 void SkyView::HandlePointerPacket(const pointer::PointerPacketPtr& packet) {

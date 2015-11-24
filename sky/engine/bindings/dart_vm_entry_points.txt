@@ -1,13 +1,14 @@
 dart:io,::,_setupHooks
 dart:mojo.internal,MojoHandleWatcher,_start
 dart:ui,::,_beginFrame
-dart:ui,::,_dispatchEvent
 dart:ui,::,_dispatchPointerPacket
 dart:ui,::,_getCreateTimerClosure
 dart:ui,::,_getGetBaseURLClosure
 dart:ui,::,_getMainClosure
 dart:ui,::,_getPrintClosure
 dart:ui,::,_getScheduleMicrotaskClosure
+dart:ui,::,_popRoute
+dart:ui,::,_pushRoute
 dart:ui,::,_updateWindowMetrics
 dart:ui,Canvas,Canvas.
 dart:ui,Drawable,Drawable.

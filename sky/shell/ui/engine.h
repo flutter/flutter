@@ -61,7 +61,6 @@ class Engine : public UIDelegate,
   // SkyEngine implementation:
   void SetServices(ServicesDataPtr services) override;
   void OnViewportMetricsChanged(ViewportMetricsPtr metrics) override;
-  void OnInputEvent(InputEventPtr event) override;
   void OnPointerPacket(pointer::PointerPacketPtr packet) override;
 
   void RunFromFile(const mojo::String& main,
@@ -71,7 +70,8 @@ class Engine : public UIDelegate,
   void RunFromBundle(const mojo::String& path) override;
   void RunFromAssetBundle(const mojo::String& url,
                           mojo::asset_bundle::AssetBundlePtr bundle) override;
-
+  void PushRoute(const mojo::String& route) override;
+  void PopRoute() override;
   void OnActivityPaused() override;
   void OnActivityResumed() override;
 
@@ -96,6 +96,7 @@ class Engine : public UIDelegate,
   std::unique_ptr<blink::SkyView> sky_view_;
 
   gfx::Size physical_size_;
+  std::string initial_route_;
   blink::SkyDisplayMetrics display_metrics_;
   mojo::Binding<SkyEngine> binding_;
 

@@ -143,19 +143,6 @@ void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
     sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
-void Engine::OnInputEvent(InputEventPtr event) {
-  TRACE_EVENT0("flutter", "Engine::OnInputEvent");
-
-  if (event->type != EventType::BACK)
-    return;
-
-  scoped_ptr<blink::WebInputEvent> web_event(blink::WebInputEvent::create());
-  web_event->type = blink::WebInputEvent::Back;
-  web_event->timeStampMS = currentTimeMS();
-  if (sky_view_)
-    sky_view_->HandleInputEvent(*web_event);
-}
-
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
   TRACE_EVENT0("flutter", "Engine::OnPointerPacket");
 
@@ -175,6 +162,8 @@ void Engine::RunFromLibrary(const std::string& name) {
   sky_view_->RunFromLibrary(blink::WebString::fromUTF8(name),
                             dart_library_provider_.get());
   sky_view_->SetDisplayMetrics(display_metrics_);
+  if (!initial_route_.empty())
+    sky_view_->PushRoute(initial_route_);
 }
 
 void Engine::RunFromSnapshotStream(
@@ -184,6 +173,8 @@ void Engine::RunFromSnapshotStream(
   sky_view_->CreateView(blink::WebString::fromUTF8(name));
   sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(name), snapshot.Pass());
   sky_view_->SetDisplayMetrics(display_metrics_);
+  if (!initial_route_.empty())
+    sky_view_->PushRoute(initial_route_);
 }
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
@@ -196,6 +187,8 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   sky_view_->CreateView("http://localhost");
   sky_view_->RunFromPrecompiledSnapshot();
   sky_view_->SetDisplayMetrics(display_metrics_);
+  if (!initial_route_.empty())
+    sky_view_->PushRoute(initial_route_);
 }
 
 void Engine::RunFromFile(const mojo::String& main,
@@ -228,6 +221,18 @@ void Engine::RunFromAssetBundle(const mojo::String& url,
   root_bundle_->GetAsStream(kSnapshotKey,
                             base::Bind(&Engine::RunFromSnapshotStream,
                                        weak_factory_.GetWeakPtr(), url_str));
+}
+
+void Engine::PushRoute(const mojo::String& route) {
+  if (sky_view_)
+    sky_view_->PushRoute(route);
+  else
+    initial_route_ = route;
+}
+
+void Engine::PopRoute() {
+  if (sky_view_)
+    sky_view_->PopRoute();
 }
 
 void Engine::OnActivityPaused() {

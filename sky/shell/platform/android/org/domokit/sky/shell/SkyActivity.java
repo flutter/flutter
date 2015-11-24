@@ -81,9 +81,7 @@ public class SkyActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (mView != null) {
-            InputEvent event = new InputEvent();
-            event.type = EventType.BACK;
-            mView.getEngine().onInputEvent(event);
+            mView.getEngine().popRoute();
             return;
         }
         super.onBackPressed();
@@ -140,6 +138,9 @@ public class SkyActivity extends Activity {
 
         if (Intent.ACTION_RUN.equals(action)) {
             mView.getEngine().runFromBundle(intent.getDataString());
+            String route = intent.getStringExtra("route");
+            if (route != null)
+                mView.getEngine().pushRoute(route);
             return true;
         }
 

@@ -36,8 +36,10 @@ interface SkyEngine {
   OnActivityResumed();
 
   OnViewportMetricsChanged(ViewportMetrics metrics);
-  OnInputEvent(InputEvent event);
   OnPointerPacket(pointer.PointerPacket packet);
+
+  PushRoute(string route);
+  PopRoute();
 
   RunFromFile(string main, string package_root);
   RunFromPrecompiledSnapshot(string path);
