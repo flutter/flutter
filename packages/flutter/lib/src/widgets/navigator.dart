@@ -51,6 +51,7 @@ class NavigatorObserver {
 class Navigator extends StatefulComponent {
   Navigator({
     Key key,
+    this.initialRoute,
     this.onGenerateRoute,
     this.onUnknownRoute,
     this.observer
@@ -58,6 +59,7 @@ class Navigator extends StatefulComponent {
     assert(onGenerateRoute != null);
   }
 
+  final String initialRoute;
   final RouteFactory onGenerateRoute;
   final RouteFactory onUnknownRoute;
   final NavigatorObserver observer;
@@ -77,7 +79,9 @@ class NavigatorState extends State<Navigator> {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
-    push(config.onGenerateRoute(new NamedRouteSettings(name: Navigator.defaultRouteName)));
+    push(config.onGenerateRoute(new NamedRouteSettings(
+      name: config.initialRoute ?? Navigator.defaultRouteName
+    )));
   }
 
   void didUpdateConfig(Navigator oldConfig) {

@@ -59,7 +59,7 @@ class ListenCommand extends FlutterCommand {
             if (package == null || !device.isConnected())
               continue;
             if (device is AndroidDevice) {
-              device.startBundle(package, localBundlePath, true, argResults['checked']);
+              device.startBundle(package, localBundlePath, poke: true, checked: argResults['checked']);
             } else if (device is IOSDevice) {
               device.pushFile(package, localBundlePath, _remoteFlutterBundle);
             } else if (device is IOSSimulator) {
