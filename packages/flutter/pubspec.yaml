@@ -11,6 +11,9 @@ dependencies:
   sky_services: 0.0.62
   vector_math: '>=1.4.3 <2.0.0'
 
+  # To pin the transitive dependency through mojo_sdk.
+  test: 0.12.5+2
+
   cassowary:
     path: ../cassowary
   newton:
