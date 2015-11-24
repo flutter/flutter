@@ -11,7 +11,7 @@
 @interface URLLoaderConnectionDelegate : NSObject<NSURLConnectionDataDelegate>
 
 @property(nonatomic) mojo::URLLoaderImpl::StartCallback startCallback;
-@property(nonatomic, retain) NSURLRequest *originalRequest;
+@property(nonatomic, retain) NSURLRequest* originalRequest;
 
 @end
 
@@ -24,7 +24,7 @@
 @synthesize originalRequest = _originalRequest;
 
 - (void)connection:(NSURLConnection*)connection
-    didReceiveResponse:(NSHTTPURLResponse*)response {
+didReceiveResponse:(NSHTTPURLResponse*)response {
   _response = mojo::URLResponse::New();
   _response->status_code = response.statusCode;
   _response->url =
@@ -60,12 +60,12 @@
 }
 
 - (void)connection:(NSURLConnection*)connection
-    didFailWithError:(NSError*)error {
+  didFailWithError:(NSError*)error {
   if (!_startCallback.is_null()) {
     if (_response.is_null()) {
       _response = mojo::URLResponse::New();
-      _response->url = mojo::String(
-          self.originalRequest.URL.absoluteString.UTF8String);
+      _response->url =
+          mojo::String(self.originalRequest.URL.absoluteString.UTF8String);
     }
 
     _response->error = mojo::NetworkError::New();
@@ -98,6 +98,11 @@
   }
 }
 
+- (NSCachedURLResponse*)connection:(NSURLConnection*)connection
+                 willCacheResponse:(NSCachedURLResponse*)cachedResponse {
+  return nil;
+}
+
 - (void)dealloc {
   [_originalRequest release];
   DCHECK(_response.is_null());
@@ -111,16 +116,9 @@
 namespace mojo {
 
 URLLoaderImpl::URLLoaderImpl(InterfaceRequest<URLLoader> request)
-    : binding_(this, request.Pass()),
-      connection_delegate_(nullptr),
-      pending_connection_(nullptr) {
-  connection_delegate_ = [[URLLoaderConnectionDelegate alloc] init];
-}
+    : binding_(this, request.Pass()), pending_connection_(nullptr) {}
 
 URLLoaderImpl::~URLLoaderImpl() {
-  [(id)connection_delegate_ release];
-
-  [(id)pending_connection_ cancel];
   [(id)pending_connection_ release];
 }
 
@@ -134,23 +132,29 @@ void URLLoaderImpl::Start(URLRequestPtr request,
   req.HTTPMethod = @(request->method.data());
 
   for (const auto& header : request->headers) {
-    NSString *name = @(header->name.data());
-    NSString *value = @(header->value.data());
+    NSString* name = @(header->name.data());
+    NSString* value = @(header->value.data());
     [req addValue:value forHTTPHeaderField:name];
   };
 
   URLLoaderConnectionDelegate* delegate =
-      (URLLoaderConnectionDelegate*)connection_delegate_;
+      [[URLLoaderConnectionDelegate alloc] init];
 
   NSURLConnection* connection =
-      [NSURLConnection connectionWithRequest:req delegate:delegate];
+      [[NSURLConnection alloc] initWithRequest:req
+                                      delegate:delegate
+                              startImmediately:NO];
 
   delegate.startCallback = callback;
   delegate.originalRequest = req;
 
+  [delegate release];
+
+  [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
+                        forMode:NSRunLoopCommonModes];
   [connection start];
 
-  pending_connection_ = [connection retain];
+  pending_connection_ = connection;
 }
 
 void URLLoaderImpl::FollowRedirect(const FollowRedirectCallback& callback) {
