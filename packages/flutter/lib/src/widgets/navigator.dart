@@ -6,6 +6,10 @@ import 'framework.dart';
 import 'overlay.dart';
 
 abstract class Route<T> {
+  /// The navigator that the route is in, if any.
+  NavigatorState get navigator => _navigator;
+  NavigatorState _navigator;
+
   List<OverlayEntry> get overlayEntries;
   void didPush(OverlayState overlay, OverlayEntry insertionPoint) { }
   void didPop(T result) { }
@@ -32,8 +36,9 @@ class NamedRouteSettings {
 typedef Route RouteFactory(NamedRouteSettings settings);
 
 class NavigatorObserver {
-  NavigatorState _navigator;
+  /// The navigator that the observer is observing, if any.
   NavigatorState get navigator => _navigator;
+  NavigatorState _navigator;
   void didPush(Route route, Route previousRoute) { }
   void didPop(Route route, Route previousRoute) { }
 }
@@ -94,7 +99,10 @@ class NavigatorState extends State<Navigator> {
     return null;
   }
 
+  bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
+
   void pushNamed(String name, { Set<Key> mostValuableKeys }) {
+    assert(!_debugLocked);
     assert(name != null);
     NamedRouteSettings settings = new NamedRouteSettings(
       name: name,
@@ -104,14 +112,20 @@ class NavigatorState extends State<Navigator> {
   }
 
   void push(Route route, { Set<Key> mostValuableKeys }) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    assert(route != null);
+    assert(route._navigator == null);
     setState(() {
       int index = _history.length-1;
       while (index >= 0 && _history[index].willPushNext(route))
         index -= 1;
+      route._navigator = this;
       route.didPush(overlay, _currentOverlay);
       config.observer?.didPush(route, index >= 0 ? _history[index] : null);
       _history.add(route);
     });
+    assert(() { _debugLocked = false; return true; });
   }
 
   /// Pops the given route, if it's the current route. If it's not the current
@@ -125,15 +139,20 @@ class NavigatorState extends State<Navigator> {
   /// The type of the result argument, if provided, must match the type argument
   /// of the class of the given route. (In practice, this is usually "dynamic".)
   void remove(Route route, [dynamic result]) {
+    assert(!_debugLocked);
     assert(_history.contains(route));
     assert(route.overlayEntries.isEmpty);
     if (_history.last == route) {
       pop(result);
     } else {
+      assert(() { _debugLocked = true; return true; });
+      assert(route._navigator == this);
       setState(() {
         _history.remove(route);
         route.didPop(result);
+        route._navigator = null;
       });
+      assert(() { _debugLocked = false; return true; });
     }
   }
 
@@ -144,21 +163,27 @@ class NavigatorState extends State<Navigator> {
   /// of the class of the current route. (In practice, this is usually
   /// "dynamic".)
   void pop([dynamic result]) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
     setState(() {
       // We use setState to guarantee that we'll rebuild, since the routes can't
       // do that for themselves, even if they have changed their own state (e.g.
       // ModalScope.isCurrent).
       assert(_history.length > 1);
       Route route = _history.removeLast();
+      assert(route._navigator == this);
       route.didPop(result);
       int index = _history.length-1;
       while (index >= 0 && _history[index].didPopNext(route))
         index -= 1;
       config.observer?.didPop(route, index >= 0 ? _history[index] : null);
+      route._navigator = null;
     });
+    assert(() { _debugLocked = false; return true; });
   }
 
   Widget build(BuildContext context) {
+    assert(!_debugLocked);
     assert(_history.isNotEmpty);
     return new Overlay(
       key: _overlayKey,
