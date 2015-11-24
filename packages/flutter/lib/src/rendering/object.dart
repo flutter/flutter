@@ -300,6 +300,7 @@ class PaintingContext {
   /// This function will call painter synchronously with a painting context that
   /// will be blended with the given alpha value.
   void pushOpacity(bool needsCompositing, Offset offset, Rect bounds, int alpha, PaintingContextCallback painter) {
+    assert(bounds != null);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
       OpacityLayer opacityLayer = new OpacityLayer(bounds: bounds, alpha: alpha);
@@ -308,8 +309,7 @@ class PaintingContext {
       painter(childContext, Offset.zero);
       childContext._stopRecordingIfNeeded();
     } else {
-      // TODO(abarth): pushOpacity should require bounds.
-      canvas.saveLayer(bounds?.shift(offset), _getPaintForAlpha(alpha));
+      canvas.saveLayer(bounds.shift(offset), _getPaintForAlpha(alpha));
       painter(this, offset);
       canvas.restore();
     }
