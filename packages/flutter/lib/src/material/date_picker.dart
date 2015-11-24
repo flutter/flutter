@@ -107,9 +107,9 @@ class _DatePickerHeader extends StatelessComponent {
     assert(mode != null);
   }
 
-  DateTime selectedDate;
-  _DatePickerMode mode;
-  ValueChanged<_DatePickerMode> onModeChanged;
+  final DateTime selectedDate;
+  final _DatePickerMode mode;
+  final ValueChanged<_DatePickerMode> onModeChanged;
 
   void _handleChangeMode(_DatePickerMode value) {
     if (value != mode)
