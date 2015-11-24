@@ -86,7 +86,7 @@ class _DrawerRoute extends OverlayRoute {
     );
   }
 
-  void didPop(dynamic result) {
+  bool didPop(dynamic result) {
     // we don't call the superclass because we want to control the timing of the
     // call to finished().
     switch (_state) {
@@ -101,6 +101,7 @@ class _DrawerRoute extends OverlayRoute {
         finished();
         break;
     }
+    return true;
   }
 }
 

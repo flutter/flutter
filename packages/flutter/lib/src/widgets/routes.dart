@@ -17,23 +17,6 @@ import 'status_transitions.dart';
 
 const _kTransparent = const Color(0x00000000);
 
-class StateRoute extends Route {
-  StateRoute({ this.onPop });
-
-  final VoidCallback onPop;
-
-  List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
-
-  void didPop(dynamic result) {
-    assert(result == null);
-    if (onPop != null)
-      onPop();
-  }
-
-  bool willPushNext(Route nextRoute) => true;
-  bool didPopNext(Route nextRoute) => true;
-}
-
 abstract class OverlayRoute<T> extends Route<T> {
   List<WidgetBuilder> get builders => const <WidgetBuilder>[];
 
@@ -47,8 +30,9 @@ abstract class OverlayRoute<T> extends Route<T> {
   }
 
   // Subclasses shouldn't call this if they want to delay the finished() call.
-  void didPop(T result) {
+  bool didPop(T result) {
     finished();
+    return true;
   }
 
   /// Clears out the overlay entries.
@@ -121,10 +105,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didPush(overlay, insertionPoint);
   }
 
-  void didPop(T result) {
+  bool didPop(T result) {
     _result = result;
     _performance.reverse();
     _popCompleter?.complete(_result);
+    return true;
   }
 
   void finished() {
@@ -134,6 +119,55 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   String get debugLabel => '$runtimeType';
   String toString() => '$runtimeType(performance: $_performance)';
+}
+
+class LocalHistoryEntry {
+  LocalHistoryEntry({ this.onRemove });
+  final VoidCallback onRemove;
+  LocalHistoryRoute _owner;
+  void remove() {
+    _owner.removeLocalHistoryEntry(this);
+  }
+  void _notifyRemoved() {
+    if (onRemove != null)
+      onRemove();
+  }
+}
+
+abstract class LocalHistoryRoute<T> extends TransitionRoute<T> {
+  LocalHistoryRoute({
+    Completer<T> popCompleter,
+    Completer<T> transitionCompleter
+  }) : super(
+    popCompleter: popCompleter,
+    transitionCompleter: transitionCompleter
+  );
+
+  List<LocalHistoryEntry> _localHistory;
+  void addLocalHistoryEntry(LocalHistoryEntry entry) {
+    assert(entry._owner == null);
+    entry._owner = this;
+    _localHistory ??= <LocalHistoryEntry>[];
+    _localHistory.add(entry);
+  }
+  void removeLocalHistoryEntry(LocalHistoryEntry entry) {
+    assert(entry != null);
+    assert(entry._owner == this);
+    assert(_localHistory.contains(entry));
+    _localHistory.remove(entry);
+    entry._owner = null;
+    entry._notifyRemoved();
+  }
+  bool didPop(T result) {
+    if (_localHistory != null && _localHistory.length > 0) {
+      LocalHistoryEntry entry = _localHistory.removeLast();
+      assert(entry._owner == this);
+      entry._owner = null;
+      entry._notifyRemoved();
+      return false;
+    }
+    return super.didPop(result);
+  }
 }
 
 class _ModalScopeStatus extends InheritedWidget {
@@ -220,7 +254,7 @@ class ModalPosition {
   final double left;
 }
 
-abstract class ModalRoute<T> extends TransitionRoute<T> {
+abstract class ModalRoute<T> extends LocalHistoryRoute<T> {
   ModalRoute({
     Completer<T> completer,
     this.settings: const NamedRouteSettings()
@@ -286,25 +320,24 @@ abstract class ModalRoute<T> extends TransitionRoute<T> {
     super.didPush(overlay, insertionPoint);
   }
 
-  void didPop(T result) {
+  bool didPop(T result) {
     assert(_isCurrent);
-    _isCurrent = false;
-    super.didPop(result);
-  }
-
-  bool willPushNext(Route nextRoute) {
-    if (nextRoute is ModalRoute) {
-      assert(_isCurrent);
+    if (super.didPop(result)) {
       _isCurrent = false;
+      return true;
     }
     return false;
   }
 
+  bool willPushNext(Route nextRoute) {
+    assert(_isCurrent);
+    _isCurrent = false;
+    return false;
+  }
+
   bool didPopNext(Route nextRoute) {
-    if (nextRoute is ModalRoute) {
-      assert(!_isCurrent);
-      _isCurrent = true;
-    }
+    assert(!_isCurrent);
+    _isCurrent = true;
     return false;
   }
 
