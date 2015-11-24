@@ -18,12 +18,14 @@ import org.chromium.mojom.mojo.ServiceProvider;
 public class PlatformServiceProvider implements ServiceProvider {
     private Core mCore;
     private Context mContext;
+    private ServiceRegistry mLocalRegistry;
 
-    public PlatformServiceProvider(Core core, Context context) {
+    public PlatformServiceProvider(Core core, Context context, ServiceRegistry localRegistry) {
         assert core != null;
         assert context != null;
         mCore = core;
         mContext = context;
+        mLocalRegistry = localRegistry;
     }
 
     @Override
@@ -34,7 +36,10 @@ public class PlatformServiceProvider implements ServiceProvider {
 
     @Override
     public void connectToService(String interfaceName, MessagePipeHandle pipe) {
-        ServiceFactory factory = ServiceRegistry.SHARED.get(interfaceName);
+        ServiceFactory factory = mLocalRegistry.get(interfaceName);
+        if (factory == null) {
+            factory = ServiceRegistry.SHARED.get(interfaceName);
+        }
         if (factory == null) {
             pipe.close();
             return;

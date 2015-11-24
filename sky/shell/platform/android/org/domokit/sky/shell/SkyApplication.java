@@ -12,23 +12,19 @@ import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
 import org.chromium.base.PathUtils;
-import org.chromium.mojo.keyboard.KeyboardServiceImpl;
 import org.chromium.mojo.sensors.SensorServiceImpl;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojom.activity.Activity;
 import org.chromium.mojom.activity.PathService;
-import org.chromium.mojom.keyboard.KeyboardService;
 import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.mojo.NetworkService;
-import org.chromium.mojom.raw_keyboard.RawKeyboardService;
 import org.chromium.mojom.sensors.SensorService;
 import org.chromium.mojom.vsync.VSyncProvider;
 import org.domokit.activity.ActivityImpl;
 import org.domokit.activity.PathServiceImpl;
 import org.domokit.media.MediaServiceImpl;
 import org.domokit.oknet.NetworkServiceImpl;
-import org.domokit.raw_keyboard.RawKeyboardServiceImpl;
 import org.domokit.vsync.VSyncProviderImpl;
 
 /**
@@ -91,20 +87,6 @@ public class SkyApplication extends BaseChromiumApplication {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 PathService.MANAGER.bind(new PathServiceImpl(getApplicationContext()), pipe);
-            }
-        });
-
-        registry.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                KeyboardService.MANAGER.bind(new KeyboardServiceImpl(context), pipe);
-            }
-        });
-
-        registry.register(RawKeyboardService.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                RawKeyboardService.MANAGER.bind(new RawKeyboardServiceImpl(), pipe);
             }
         });
 

@@ -18,7 +18,9 @@ public class ServiceRegistry {
 
     public static final ServiceRegistry SHARED = new ServiceRegistry();
 
-    private ServiceRegistry() {
+    // In addition to the shared registry, there is a per-view registry
+    // maintained by the PlatformServiceProvider.
+    ServiceRegistry() {
         mRegistrations = new TreeMap<String, ServiceFactory>();
     }
 
