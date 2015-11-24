@@ -467,7 +467,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
 }
 
-/// Makes its child partially transparent
+/// Makes its child partially transparent.
 ///
 /// This class paints its child into an intermediate buffer and then blends the
 /// child back into the scene partially transparent.
@@ -475,12 +475,12 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 /// Note: This class is relatively expensive because it requires painting the
 /// child into an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
-  RenderOpacity({ RenderBox child, double opacity })
-    : this._opacity = opacity, super(child) {
+  RenderOpacity({ RenderBox child, double opacity, Rect bounds })
+    : _opacity = opacity, _bounds = bounds, super(child) {
     assert(opacity >= 0.0 && opacity <= 1.0);
   }
 
-  /// The fraction to scale the child's alpha value
+  /// The fraction to scale the child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
   /// (i.e., invisible).
@@ -495,6 +495,20 @@ class RenderOpacity extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The bounds within which painting will happen. The behaviour when drawing
+  /// outside these bounds is undefined; it might work, it might be clipped, it
+  /// might be drawn without opacity... It probably depends on the GPU.
+  ///
+  /// When the bounds are set to null, the size of the box will be used instead.
+  Rect get bounds => _bounds;
+  Rect _bounds;
+  void set bounds (Rect newBounds) {
+    if (_bounds == newBounds)
+      return;
+    _bounds = newBounds;
+    markNeedsPaint();
+  }
+
   int get _alpha => (_opacity * 255).round();
 
   void paint(PaintingContext context, Offset offset) {
@@ -506,14 +520,14 @@ class RenderOpacity extends RenderProxyBox {
         context.paintChild(child, offset);
         return;
       }
-      // TODO(abarth): We should pass bounds here.
-      context.pushOpacity(needsCompositing, offset, null, a, super.paint);
+      context.pushOpacity(needsCompositing, offset, bounds ?? Point.origin & size, a, super.paint);
     }
   }
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
     settings.add('opacity: ${opacity.toStringAsFixed(1)}');
+    settings.add('bounds: ${bounds ?? "box dimensions"}');
   }
 }
 
