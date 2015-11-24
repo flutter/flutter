@@ -50,6 +50,6 @@ class _ChipDemoState extends State<ChipDemo> {
 
 final WidgetDemo kChipDemo = new WidgetDemo(
   title: 'Chips',
-  route: '/',
+  routeName: '/chips',
   builder: (_) => new ChipDemo()
 );

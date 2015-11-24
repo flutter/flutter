@@ -6,16 +6,20 @@ import 'package:flutter/material.dart';
 
 import 'chip_demo.dart';
 import 'gallery_page.dart';
+import 'date_picker_demo.dart';
 import 'widget_demo.dart';
 
 final List<WidgetDemo> _kDemos = <WidgetDemo>[
-  kChipDemo
+  kChipDemo,
+  kDatePickerDemo,
 ];
 
 void main() {
   Map<String, RouteBuilder> routes = new Map<String, RouteBuilder>();
+  routes['/'] = (_) => new GalleryPage(demos: _kDemos);
+
   for (WidgetDemo demo in _kDemos)
-    routes[demo.route] = (_) => new GalleryPage(demo: demo);
+    routes[demo.routeName] = (_) => new GalleryPage(demos: _kDemos, active: demo);
 
   runApp(new MaterialApp(
     title: 'Material Gallery',
