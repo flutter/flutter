@@ -29,6 +29,12 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   TimeOfDay _selectedTime;
 
+  void _handleTimeChanged(TimeOfDay value) {
+    setState(() {
+      _selectedTime = value;
+    });
+  }
+
   void _handleCancel() {
     Navigator.of(context).pop();
   }
@@ -40,7 +46,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   Widget build(BuildContext context) {
     return new Dialog(
       content: new TimePicker(
-        selectedTime: _selectedTime
+        selectedTime: _selectedTime,
+        onChanged: _handleTimeChanged
       ),
       contentPadding: EdgeDims.zero,
       actions: <Widget>[
