@@ -32,7 +32,6 @@ didReceiveResponse:(NSHTTPURLResponse*)response {
   mojo::DataPipe pipe;
   _response->body = pipe.consumer_handle.Pass();
   _producer = pipe.producer_handle.Pass();
-  [self.class updateDelegate:self asPending:YES];
 }
 
 - (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)data {
@@ -56,7 +55,6 @@ didReceiveResponse:(NSHTTPURLResponse*)response {
   DCHECK(_response.is_null());
   DCHECK(_startCallback.is_null());
   _producer.reset();
-  [self.class updateDelegate:self asPending:NO];
 }
 
 - (void)connection:(NSURLConnection*)connection
@@ -78,24 +76,6 @@ didReceiveResponse:(NSHTTPURLResponse*)response {
 
   _response.reset();
   _producer.reset();
-  [self.class updateDelegate:self asPending:NO];
-}
-
-// Since the only reference to the producer end of a data pipe is held by the
-// delegate, which itself has no strong reference, we put the in-flight requests
-// in a collection that references these delegates while they are active.
-+ (void)updateDelegate:(URLLoaderConnectionDelegate*)delegate
-             asPending:(BOOL)pending {
-  static NSMutableSet* pendingConnections = nil;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    pendingConnections = [[NSMutableSet alloc] init];
-  });
-  if (pending) {
-    [pendingConnections addObject:delegate];
-  } else {
-    [pendingConnections removeObject:delegate];
-  }
 }
 
 - (NSCachedURLResponse*)connection:(NSURLConnection*)connection
