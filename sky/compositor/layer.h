@@ -37,14 +37,21 @@ class Layer {
 
   void set_parent(ContainerLayer* parent) { parent_ = parent; }
 
-  const SkRect& paint_bounds() const { return paint_bounds_; }
+  const bool has_paint_bounds() const { return has_paint_bounds_; }
+
+  const SkRect& paint_bounds() const {
+    ASSERT(has_paint_bounds_);
+    return paint_bounds_;
+  }
 
   void set_paint_bounds(const SkRect& paint_bounds) {
+    has_paint_bounds_ = true;
     paint_bounds_ = paint_bounds;
   }
 
  private:
   ContainerLayer* parent_;
+  bool has_paint_bounds_; // if false, paint_bounds_ is not valid
   SkRect paint_bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(Layer);

@@ -19,7 +19,7 @@ void ColorFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkPaint paint;
   paint.setColorFilter(color_filter.get());
   SkCanvas& canvas = frame.canvas();
-  canvas.saveLayer(&paint_bounds(), &paint);
+  canvas.saveLayer(has_paint_bounds() ? &paint_bounds() : nullptr, &paint);
   PaintChildren(frame);
   canvas.restore();
 }
