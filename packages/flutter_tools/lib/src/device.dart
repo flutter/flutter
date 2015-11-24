@@ -522,7 +522,7 @@ class AndroidDevice extends Device {
     // 0149947A0D01500C       device usb:340787200X
     RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
 
-    RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized$');
+    RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized\s+\S+$');
 
     // Skip first line, which is always 'List of devices attached'.
     for (String line in output.skip(1)) {
