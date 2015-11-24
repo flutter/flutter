@@ -50,6 +50,8 @@ export 'src/material/switch.dart';
 export 'src/material/tabs.dart';
 export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
+export 'src/material/time_picker.dart';
+export 'src/material/time_picker_dialog.dart';
 export 'src/material/title.dart';
 export 'src/material/tool_bar.dart';
 export 'src/material/typography.dart';
