@@ -14,9 +14,7 @@ import 'ink_well.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-enum DatePickerMode { day, year }
-
-typedef void DatePickerModeChanged(DatePickerMode value);
+enum _DatePickerMode { day, year }
 
 class DatePicker extends StatefulComponent {
   DatePicker({
@@ -39,9 +37,9 @@ class DatePicker extends StatefulComponent {
 }
 
 class _DatePickerState extends State<DatePicker> {
-  DatePickerMode _mode = DatePickerMode.day;
+  _DatePickerMode _mode = _DatePickerMode.day;
 
-  void _handleModeChanged(DatePickerMode mode) {
+  void _handleModeChanged(_DatePickerMode mode) {
     userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
     setState(() {
       _mode = mode;
@@ -51,7 +49,7 @@ class _DatePickerState extends State<DatePicker> {
   void _handleYearChanged(DateTime dateTime) {
     userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
     setState(() {
-      _mode = DatePickerMode.day;
+      _mode = _DatePickerMode.day;
     });
     if (config.onChanged != null)
       config.onChanged(dateTime);
@@ -73,7 +71,7 @@ class _DatePickerState extends State<DatePicker> {
     );
     Widget picker;
     switch (_mode) {
-      case DatePickerMode.day:
+      case _DatePickerMode.day:
         picker = new MonthPicker(
           selectedDate: config.selectedDate,
           onChanged: _handleDayChanged,
@@ -82,7 +80,7 @@ class _DatePickerState extends State<DatePicker> {
           itemExtent: _calendarHeight
         );
         break;
-      case DatePickerMode.year:
+      case _DatePickerMode.year:
         picker = new YearPicker(
           selectedDate: config.selectedDate,
           onChanged: _handleYearChanged,
@@ -110,10 +108,10 @@ class _DatePickerHeader extends StatelessComponent {
   }
 
   DateTime selectedDate;
-  DatePickerMode mode;
-  DatePickerModeChanged onModeChanged;
+  _DatePickerMode mode;
+  ValueChanged<_DatePickerMode> onModeChanged;
 
-  void _handleChangeMode(DatePickerMode value) {
+  void _handleChangeMode(_DatePickerMode value) {
     if (value != mode)
       onModeChanged(value);
   }
@@ -125,12 +123,12 @@ class _DatePickerHeader extends StatelessComponent {
     Color yearColor;
     switch(theme.primaryColorBrightness) {
       case ThemeBrightness.light:
-        dayColor = mode == DatePickerMode.day ? Colors.black87 : Colors.black54;
-        yearColor = mode == DatePickerMode.year ? Colors.black87 : Colors.black54;
+        dayColor = mode == _DatePickerMode.day ? Colors.black87 : Colors.black54;
+        yearColor = mode == _DatePickerMode.year ? Colors.black87 : Colors.black54;
         break;
       case ThemeBrightness.dark:
-        dayColor = mode == DatePickerMode.day ? Colors.white : Colors.white70;
-        yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
+        dayColor = mode == _DatePickerMode.day ? Colors.white : Colors.white70;
+        yearColor = mode == _DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
     TextStyle dayStyle = headerTheme.display3.copyWith(color: dayColor, height: 1.0, fontSize: 100.0);
@@ -142,15 +140,15 @@ class _DatePickerHeader extends StatelessComponent {
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
       child: new Column(<Widget>[
         new GestureDetector(
-          onTap: () => _handleChangeMode(DatePickerMode.day),
+          onTap: () => _handleChangeMode(_DatePickerMode.day),
           child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle)
         ),
         new GestureDetector(
-          onTap: () => _handleChangeMode(DatePickerMode.day),
+          onTap: () => _handleChangeMode(_DatePickerMode.day),
           child: new Text(new DateFormat("d").format(selectedDate), style: dayStyle)
         ),
         new GestureDetector(
-          onTap: () => _handleChangeMode(DatePickerMode.year),
+          onTap: () => _handleChangeMode(_DatePickerMode.year),
           child: new Text(new DateFormat("yyyy").format(selectedDate), style: yearStyle)
         )
       ])
