@@ -4,11 +4,13 @@
 
 import 'package:flutter/material.dart';
 
+import 'widget_demo.dart';
+
 class DropDownDemo extends StatefulComponent {
-  DropDownDemoState createState() => new DropDownDemoState();
+  _DropDownDemoState createState() => new _DropDownDemoState();
 }
 
-class DropDownDemoState extends State<DropDownDemo> {
+class _DropDownDemoState extends State<DropDownDemo> {
   String _value = "Free";
 
   List<DropDownMenuItem<String>> _buildItems() {
@@ -30,26 +32,12 @@ class DropDownDemoState extends State<DropDownDemo> {
       }
     );
 
-    return new Scaffold(
-      toolBar: new ToolBar(center: new Text('DropDownDemo Demo')),
-      body: new Container(
-        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
-        child: new Center(child: dropdown)
-      )
-    );
+    return new Center(child: dropdown);
   }
 }
 
-void main() {
-  runApp(new MaterialApp(
-    title: 'DropDownDemo',
-    theme: new ThemeData(
-      brightness: ThemeBrightness.light,
-      primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent[200]
-    ),
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new DropDownDemo(),
-    }
-  ));
-}
+final WidgetDemo kDropDownDemo = new WidgetDemo(
+  title: 'Drop Down Button',
+  routeName: '/dropdown',
+  builder: (_) => new DropDownDemo()
+);
