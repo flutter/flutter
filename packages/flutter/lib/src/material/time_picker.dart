@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -12,11 +13,27 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 import 'typography.dart';
+import 'constants.dart';
 
+const Duration _kDialAnimateDuration = const Duration(milliseconds: 200);
+const double _kTwoPi = 2 * math.PI;
+const int _kHoursPerDay = 24;
+const int _kHoursPerPeriod = 12;
+const int _kMinutesPerHour = 60;
+
+enum DayPeriod {
+  am,
+  pm,
+}
+
+/// A value representing a time during the day
 class TimeOfDay {
   const TimeOfDay({ this.hour, this.minute });
 
+  /// Returns a new TimeOfDay with the hour and/or minute replaced.
   TimeOfDay replacing({ int hour, int minute }) {
+    assert(hour == null || (hour >= 0 && hour < _kHoursPerDay));
+    assert(minute == null || (minute >= 0 && minute < _kMinutesPerHour));
     return new TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
   }
 
@@ -25,6 +42,39 @@ class TimeOfDay {
 
   /// The selected minute.
   final int minute;
+
+  /// Whether this time of day is before or after noon.
+  DayPeriod get period => hour < _kHoursPerPeriod ? DayPeriod.am : DayPeriod.pm;
+
+  /// Which hour of the current period (e.g., am or pm) this time is.
+  int get hourOfPeriod => hour - periodOffset;
+
+  String _addLeadingZeroIfNeeded(int value) {
+    if (value < 10)
+      return '0$value';
+    return value.toString();
+  }
+
+  /// A string representing the hour, in 24 hour time (e.g., '04' or '18').
+  String get hourLabel => _addLeadingZeroIfNeeded(hour);
+
+  /// A string representing the minute (e.g., '07').
+  String get minuteLabel => _addLeadingZeroIfNeeded(minute);
+
+  /// A string representing the hour of the current period (e.g., '4' or '6').
+  String get hourOfPeriodLabel {
+    // TODO(ianh): Localize.
+    final int hourOfPeriod = this.hourOfPeriod;
+    if (hourOfPeriod == 0)
+      return '12';
+    return hourOfPeriod.toString();
+  }
+
+  /// A string representing the current period (e.g., 'a.m.').
+  String get periodLabel => period == DayPeriod.am ? 'a.m.' : 'p.m.'; // TODO(ianh): Localize.
+
+  /// The hour at which the current period starts.
+  int get periodOffset => period == DayPeriod.am ? 0 : _kHoursPerPeriod;
 
   bool operator ==(dynamic other) {
     if (other is! TimeOfDay)
@@ -41,7 +91,8 @@ class TimeOfDay {
     return value;
   }
 
-  String toString() => 'TimeOfDay(hour: $hour, minute: $minute)';
+  // TODO(ianh): Localize.
+  String toString() => '$hourOfPeriodLabel:$minuteLabel $periodLabel';
 }
 
 enum _TimePickerMode { hour, minute }
@@ -74,7 +125,8 @@ class _TimePickerState extends State<TimePicker> {
     Widget header = new _TimePickerHeader(
       selectedTime: config.selectedTime,
       mode: _mode,
-      onModeChanged: _handleModeChanged
+      onModeChanged: _handleModeChanged,
+      onChanged: config.onChanged
     );
     return new Column(<Widget>[
       header,
@@ -93,9 +145,14 @@ class _TimePickerState extends State<TimePicker> {
   }
 }
 
-// Shows the selected date in large font and toggles between year and day mode
+// TODO(ianh): Localize!
 class _TimePickerHeader extends StatelessComponent {
-  _TimePickerHeader({ this.selectedTime, this.mode, this.onModeChanged }) {
+  _TimePickerHeader({
+    this.selectedTime,
+    this.mode,
+    this.onModeChanged,
+    this.onChanged
+  }) {
     assert(selectedTime != null);
     assert(mode != null);
   }
@@ -103,10 +160,16 @@ class _TimePickerHeader extends StatelessComponent {
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
   final ValueChanged<_TimePickerMode> onModeChanged;
+  final ValueChanged<TimeOfDay> onChanged;
 
   void _handleChangeMode(_TimePickerMode value) {
     if (value != mode)
       onModeChanged(value);
+  }
+
+  void _handleChangeDayPeriod() {
+    int newHour = (selectedTime.hour + _kHoursPerPeriod) % _kHoursPerDay;
+    onChanged(selectedTime.replacing(hour: newHour));
   }
 
   Widget build(BuildContext context) {
@@ -131,26 +194,44 @@ class _TimePickerHeader extends StatelessComponent {
     TextStyle hourStyle = mode == _TimePickerMode.hour ? activeStyle : inactiveStyle;
     TextStyle minuteStyle = mode == _TimePickerMode.minute ? activeStyle : inactiveStyle;
 
+    TextStyle amStyle = headerTheme.subhead.copyWith(
+      color: selectedTime.period == DayPeriod.am ? activeColor: inactiveColor
+    );
+    TextStyle pmStyle = headerTheme.subhead.copyWith(
+      color: selectedTime.period == DayPeriod.pm ? activeColor: inactiveColor
+    );
+
     return new Container(
-      padding: new EdgeDims.all(10.0),
+      padding: kDialogHeadingPadding,
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
       child: new Row(<Widget>[
         new GestureDetector(
           onTap: () => _handleChangeMode(_TimePickerMode.hour),
-          child: new Text(selectedTime.hour.toString(), style: hourStyle)
+          child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle)
         ),
         new Text(':', style: inactiveStyle),
         new GestureDetector(
           onTap: () => _handleChangeMode(_TimePickerMode.minute),
-          child: new Text(selectedTime.minute.toString(), style: minuteStyle)
+          child: new Text(selectedTime.minuteLabel, style: minuteStyle)
         ),
+        new GestureDetector(
+          onTap: _handleChangeDayPeriod,
+          behavior: HitTestBehavior.opaque,
+          child: new Container(
+            padding: const EdgeDims.only(left: 16.0, right: 24.0),
+            child: new Column([
+              new Text('AM', style: amStyle),
+              new Container(
+                padding: const EdgeDims.only(top: 4.0),
+                child: new Text('PM', style: pmStyle)
+              ),
+            ], justifyContent: FlexJustifyContent.end)
+          )
+        )
       ], justifyContent: FlexJustifyContent.end)
     );
   }
 }
-
-final List<TextPainter> _kHours = _initHours();
-final List<TextPainter> _kMinutes = _initMinutes();
 
 List<TextPainter> _initPainters(List<String> labels) {
   TextStyle style = Typography.black.subhead.copyWith(height: 1.0);
@@ -215,7 +296,7 @@ class _DialPainter extends CustomPainter {
     primaryPaint.strokeWidth = 2.0;
     canvas.drawLine(centerPoint, currentPoint, primaryPaint);
 
-    double labelThetaIncrement = -2 * math.PI / _kHours.length;
+    double labelThetaIncrement = -_kTwoPi / labels.length;
     double labelTheta = math.PI / 2.0;
 
     for (TextPainter label in labels) {
@@ -249,33 +330,54 @@ class _Dial extends StatefulComponent {
 }
 
 class _DialState extends State<_Dial> {
-  double _theta;
-
   void initState() {
     super.initState();
-    _theta = _getThetaForTime(config.selectedTime);
+    _theta = new ValuePerformance(
+      variable: new AnimatedValue<double>(_getThetaForTime(config.selectedTime), curve: Curves.ease),
+      duration: _kDialAnimateDuration
+    )..addListener(() => setState(() { }));
   }
 
   void didUpdateConfig(_Dial oldConfig) {
-    if (config.mode != oldConfig.mode)
-      _theta = _getThetaForTime(config.selectedTime);
+    if (config.mode != oldConfig.mode && !_dragging)
+      _animateTo(_getThetaForTime(config.selectedTime));
+  }
+
+  ValuePerformance<double> _theta;
+  bool _dragging = false;
+
+  static double _nearest(double target, double a, double b) {
+    return ((target - a).abs() < (target - b).abs()) ? a : b;
+  }
+
+  void _animateTo(double targetTheta) {
+    double currentTheta = _theta.value;
+    double beginTheta = _nearest(targetTheta, currentTheta, currentTheta + _kTwoPi);
+    beginTheta = _nearest(targetTheta, beginTheta, currentTheta - _kTwoPi);
+    _theta
+      ..variable.begin = beginTheta
+      ..variable.end = targetTheta
+      ..progress = 0.0
+      ..play();
   }
 
   double _getThetaForTime(TimeOfDay time) {
     double fraction = (config.mode == _TimePickerMode.hour) ?
-        (time.hour / 12) % 12 : (time.minute / 60) % 60;
-    return math.PI / 2.0 - fraction * 2 * math.PI;
+        (time.hour / _kHoursPerPeriod) % _kHoursPerPeriod :
+        (time.minute / _kMinutesPerHour) % _kMinutesPerHour;
+    return (math.PI / 2.0 - fraction * _kTwoPi) % _kTwoPi;
   }
 
   TimeOfDay _getTimeForTheta(double theta) {
-    double fraction = (0.25 - (theta % (2 * math.PI)) / (2 * math.PI)) % 1.0;
+    double fraction = (0.25 - (theta % _kTwoPi) / _kTwoPi) % 1.0;
     if (config.mode == _TimePickerMode.hour) {
+      int hourOfPeriod = (fraction * _kHoursPerPeriod).round() % _kHoursPerPeriod;
       return config.selectedTime.replacing(
-        hour: (fraction * 12).round()
+        hour: hourOfPeriod + config.selectedTime.periodOffset
       );
     } else {
       return config.selectedTime.replacing(
-        minute: (fraction * 60).round()
+        minute: (fraction * _kMinutesPerHour).round() % _kMinutesPerHour
       );
     }
   }
@@ -283,7 +385,7 @@ class _DialState extends State<_Dial> {
   void _notifyOnChangedIfNeeded() {
     if (config.onChanged == null)
       return;
-    TimeOfDay current = _getTimeForTheta(_theta);
+    TimeOfDay current = _getTimeForTheta(_theta.value);
     if (current != config.selectedTime)
       config.onChanged(current);
   }
@@ -291,7 +393,7 @@ class _DialState extends State<_Dial> {
   void _updateThetaForPan() {
     setState(() {
       Offset offset = _position - _center;
-      _theta = (math.atan2(offset.dx, offset.dy) - math.PI / 2.0) % (2 * math.PI);
+      _theta.variable.value = (math.atan2(offset.dx, offset.dy) - math.PI / 2.0) % _kTwoPi;
     });
   }
 
@@ -299,6 +401,8 @@ class _DialState extends State<_Dial> {
   Point _center;
 
   void _handlePanStart(Point globalPosition) {
+    assert(!_dragging);
+    _dragging = true;
     RenderBox box = context.findRenderObject();
     _position = box.globalToLocal(globalPosition);
     double radius = box.size.shortestSide / 2.0;
@@ -314,13 +418,15 @@ class _DialState extends State<_Dial> {
   }
 
   void _handlePanEnd(Offset velocity) {
+    assert(_dragging);
+    _dragging = false;
     _position = null;
     _center = null;
-    setState(() {
-      // TODO(abarth): Animate to the final value.
-      _theta = _getThetaForTime(config.selectedTime);
-    });
+    _animateTo(_getThetaForTime(config.selectedTime));
   }
+
+  final List<TextPainter> _hours = _initHours();
+  final List<TextPainter> _minutes = _initMinutes();
 
   Widget build(BuildContext context) {
     return new GestureDetector(
@@ -329,9 +435,9 @@ class _DialState extends State<_Dial> {
       onPanEnd: _handlePanEnd,
       child: new CustomPaint(
         painter: new _DialPainter(
-          labels: config.mode == _TimePickerMode.hour ? _kHours : _kMinutes,
+          labels: config.mode == _TimePickerMode.hour ? _hours : _minutes,
           primaryColor: Theme.of(context).primaryColor,
-          theta: _theta
+          theta: _theta.value
         )
       )
     );
