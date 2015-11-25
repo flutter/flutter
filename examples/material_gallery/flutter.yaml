@@ -1,4 +1,5 @@
 name: material_gallery
 material-design-icons:
+  - name: navigation/arrow_drop_down
   - name: navigation/cancel
   - name: navigation/menu
