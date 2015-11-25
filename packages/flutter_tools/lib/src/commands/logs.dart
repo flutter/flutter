@@ -22,6 +22,8 @@ class LogsCommand extends FlutterCommand {
         help: 'Clear log history before reading from logs (Android only).');
   }
 
+  bool get requiresProjectRoot => false;
+
   @override
   Future<int> runInProject() async {
     connectToDevices();
