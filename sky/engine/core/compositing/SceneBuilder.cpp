@@ -63,7 +63,8 @@ void SceneBuilder::pushClipPath(const CanvasPath* path, const Rect& bounds)
 void SceneBuilder::pushOpacity(int alpha, const Rect& bounds)
 {
     std::unique_ptr<sky::compositor::OpacityLayer> layer(new sky::compositor::OpacityLayer());
-    layer->set_paint_bounds(bounds.sk_rect);
+    if (!bounds.is_null)
+      layer->set_paint_bounds(bounds.sk_rect);
     layer->set_alpha(alpha);
     addLayer(std::move(layer));
 }
@@ -71,7 +72,8 @@ void SceneBuilder::pushOpacity(int alpha, const Rect& bounds)
 void SceneBuilder::pushColorFilter(SkColor color, SkXfermode::Mode transferMode, const Rect& bounds)
 {
     std::unique_ptr<sky::compositor::ColorFilterLayer> layer(new sky::compositor::ColorFilterLayer());
-    layer->set_paint_bounds(bounds.sk_rect);
+    if (!bounds.is_null)
+      layer->set_paint_bounds(bounds.sk_rect);
     layer->set_color(color);
     layer->set_transfer_mode(transferMode);
     addLayer(std::move(layer));
@@ -108,7 +110,8 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture, const Rect
     std::unique_ptr<sky::compositor::PictureLayer> layer(new sky::compositor::PictureLayer());
     layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
     layer->set_picture(picture->toSkia());
-    layer->set_paint_bounds(paintBounds.sk_rect);
+    if (!paintBounds.is_null)
+      layer->set_paint_bounds(paintBounds.sk_rect);
     m_currentLayer->Add(std::move(layer));
 }
 
@@ -117,7 +120,8 @@ void SceneBuilder::addStatistics(uint64_t enabledOptions, const Rect& bounds)
     if (!m_currentLayer)
         return;
     std::unique_ptr<sky::compositor::StatisticsLayer> layer(new sky::compositor::StatisticsLayer(enabledOptions));
-    layer->set_paint_bounds(bounds.sk_rect);
+    if (!bounds.is_null)
+      layer->set_paint_bounds(bounds.sk_rect);
     m_currentLayer->Add(std::move(layer));
 }
 

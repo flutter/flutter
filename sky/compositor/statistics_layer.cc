@@ -65,7 +65,7 @@ void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
 
   using Opt = CompositorOptions::Option;
 
-  SkScalar width = paint_bounds().width();
+  SkScalar width = has_paint_bounds() ? paint_bounds().width() : 0;
   SkAutoCanvasRestore save(&frame.canvas(), false);
 
   VisualizeStopWatch(frame.canvas(), frame.context().frame_time(), width,

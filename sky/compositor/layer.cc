@@ -9,7 +9,10 @@
 namespace sky {
 namespace compositor {
 
-Layer::Layer() {
+Layer::Layer()
+    : parent_(nullptr)
+    , has_paint_bounds_(false)
+    , paint_bounds_() {
 }
 
 Layer::~Layer() {
