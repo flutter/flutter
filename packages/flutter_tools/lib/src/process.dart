@@ -87,16 +87,14 @@ String _runWithLoggingSync(List<String> cmd, {
   if (results.exitCode != 0) {
     String errorDescription = 'Error code ${results.exitCode} '
         'returned when attempting to run command: ${cmd.join(' ')}';
-    _logging.fine(errorDescription);
-    if (results.stderr.length > 0) {
+    _logging.info(errorDescription);
+    if (results.stderr.length > 0)
       _logging.info('Errors logged: ${results.stderr.trim()}');
-    }
-
-    if (checked) {
+    if (checked)
       throw errorDescription;
-    }
   }
-  _logging.fine(results.stdout.trim());
+  if (results.stdout.trim().isNotEmpty)
+    _logging.fine(results.stdout.trim());
   return results.stdout;
 }
 

@@ -51,6 +51,8 @@ class StartCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    _logging.fine('downloading toolchain');
+
     await Future.wait([
       downloadToolchain(),
       downloadApplicationPackagesAndConnectToDevices(),
@@ -58,9 +60,13 @@ class StartCommand extends FlutterCommand {
 
     bool poke = argResults['poke'];
     if (!poke) {
+      _logging.fine('running stop command');
+
       StopCommand stopper = new StopCommand();
       stopper.inheritFromParent(this);
       stopper.stop();
+
+      _logging.fine('running install command');
 
       // Only install if the user did not specify a poke
       InstallCommand installer = new InstallCommand();
@@ -74,6 +80,7 @@ class StartCommand extends FlutterCommand {
       ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
       if (package == null || !device.isConnected())
         continue;
+
       if (device is AndroidDevice) {
         String mainPath = findMainDartFile(argResults['target']);
         if (!FileSystemEntity.isFileSync(mainPath)) {
@@ -84,11 +91,15 @@ class StartCommand extends FlutterCommand {
           continue;
         }
 
+        _logging.fine('running build command for $device');
+
         BuildCommand builder = new BuildCommand();
         builder.inheritFromParent(this);
         await builder.buildInTempDir(
           mainPath: mainPath,
           onBundleAvailable: (String localBundlePath) {
+            _logging.fine('running start bundle for $device');
+
             if (device.startBundle(package, localBundlePath,
                                    poke: poke,
                                    checked: argResults['checked'],
@@ -97,6 +108,8 @@ class StartCommand extends FlutterCommand {
           }
         );
       } else {
+        _logging.fine('running start command for $device');
+
         if (await device.startApp(package))
           startedSomething = true;
       }
@@ -109,6 +122,8 @@ class StartCommand extends FlutterCommand {
         _logging.severe('Unable to run application.');
       }
     }
+
+    _logging.fine('finished start command');
 
     return startedSomething ? 0 : 2;
   }
