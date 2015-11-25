@@ -40,6 +40,11 @@ class GalleryPage extends StatelessComponent {
     );
   }
 
+  Widget _tabBar(BuildContext context) {
+    final WidgetBuilder builder = active?.tabBarBuilder;
+    return builder != null ? builder(context) : null;
+  }
+
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
@@ -47,7 +52,8 @@ class GalleryPage extends StatelessComponent {
           icon: 'navigation/menu',
           onPressed: () { _showDrawer(context); }
         ),
-        center: new Text(active?.title ?? 'Material gallery')
+        center: new Text(active?.title ?? 'Material gallery'),
+        tabBar: _tabBar(context)
       ),
       body: _body(context)
     );

@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 
 class WidgetDemo {
-  WidgetDemo({ this.title, this.routeName, this.builder });
+  WidgetDemo({ this.title, this.routeName, this.tabBarBuilder, this.builder });
 
   final String title;
   final String routeName;
+  final WidgetBuilder tabBarBuilder;
   final WidgetBuilder builder;
 }
