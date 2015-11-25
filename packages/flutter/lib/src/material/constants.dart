@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Modeled after Android's ViewConfiguration:
-// https://github.com/android/platform_frameworks_base/blob/master/core/java/android/view/ViewConfiguration.java
+import 'package:flutter/widgets.dart';
 
 // TODO(ianh): Figure out actual specced height for status bar
 const double kStatusBarHeight = 50.0;
@@ -32,3 +31,5 @@ const Duration kScrollbarFadeDelay = const Duration(milliseconds: 300);
 const double kFadingEdgeLength = 12.0;
 const double kPressedStateDuration = 64.0; // units?
 const Duration kThemeChangeDuration = const Duration(milliseconds: 200);
+
+const EdgeDims kDialogHeadingPadding = const EdgeDims.TRBL(24.0, 24.0, 20.0, 24.0);
