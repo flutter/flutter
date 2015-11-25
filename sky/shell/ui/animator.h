@@ -6,7 +6,7 @@
 #define SKY_SHELL_UI_ANIMATOR_H_
 
 #include "base/memory/weak_ptr.h"
-#include "sky/services/vsync/vsync.mojom.h"
+#include "mojo/services/vsync/interfaces/vsync.mojom.h"
 #include "sky/shell/ui/engine.h"
 
 namespace sky {

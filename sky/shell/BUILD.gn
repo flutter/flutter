@@ -43,7 +43,7 @@ source_set("common") {
     "//mojo/services/asset_bundle/interfaces",
     "//mojo/services/keyboard/interfaces",
     "//mojo/services/navigation/interfaces",
-    "//mojo/services/network/interfaces",
+    "//mojo/services/vsync/interfaces",
     "//services/asset_bundle:lib",
     "//skia",
     "//sky/compositor",
@@ -52,7 +52,6 @@ source_set("common") {
     "//sky/engine/wtf",
     "//sky/services/engine:interfaces",
     "//sky/services/pointer:interfaces",
-    "//sky/services/vsync:interfaces",
     "//sky/shell/dart",
     "//ui/gfx",
     "//ui/gfx/geometry",
@@ -172,6 +171,7 @@ if (is_android) {
       "//mojo/services/keyboard/interfaces:interfaces_java",
       "//mojo/services/network/interfaces:interfaces_java",
       "//mojo/services/sensors/interfaces:interfaces_java",
+      "//mojo/services/vsync/interfaces:interfaces_java",
       "//services/keyboard",
       "//services/sensors:sensors_lib",
       "//sky/services/activity:activity_lib",
@@ -184,7 +184,6 @@ if (is_android) {
       "//sky/services/raw_keyboard:interfaces_java",
       "//sky/services/raw_keyboard:raw_keyboard_lib",
       "//sky/services/updater:interfaces_java",
-      "//sky/services/vsync:interfaces_java",
       "//sky/services/vsync:vsync_lib",
     ]
   }

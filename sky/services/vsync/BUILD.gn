@@ -5,19 +5,11 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("vsync") {
-  deps = [
-    ":interfaces",
-  ]
+  deps = []
 
   if (is_android || is_ios) {
     deps += [ ":vsync_lib" ]
   }
-}
-
-mojom("interfaces") {
-  sources = [
-    "vsync.mojom",
-  ]
 }
 
 if (is_android) {
@@ -31,7 +23,7 @@ if (is_android) {
       "//base:base_java",
       "//mojo/public/java:bindings",
       "//mojo/public/java:system",
-      ":interfaces_java",
+      "//mojo/services/vsync/interfaces:interfaces_java",
     ]
   }
 }
@@ -45,7 +37,7 @@ if (is_ios) {
     deps = [
       "//base:base",
       "//mojo/public/cpp/application",
-      ":interfaces",
+      "//mojo/services/vsync/interfaces",
     ]
   }
 }

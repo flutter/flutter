@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
-#include "sky/services/vsync/vsync.mojom.h"
+#include "mojo/services/vsync/interfaces/vsync.mojom.h"
 
 #if __OBJC__
 @class VSyncClient;
