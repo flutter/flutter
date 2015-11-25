@@ -33,6 +33,7 @@ class StartCommand extends FlutterCommand {
         defaultsTo: '',
         abbr: 't',
         help: 'Target app path or filename to start.');
+    argParser.addOption('route', help: 'Which route to load when starting the app.');
     argParser.addFlag('boot',
         help: 'Boot the iOS Simulator if it isn\'t already running.');
   }
@@ -88,7 +89,10 @@ class StartCommand extends FlutterCommand {
         await builder.buildInTempDir(
           mainPath: mainPath,
           onBundleAvailable: (String localBundlePath) {
-            if (device.startBundle(package, localBundlePath, poke, argResults['checked']))
+            if (device.startBundle(package, localBundlePath,
+                                   poke: poke,
+                                   checked: argResults['checked'],
+                                   route: argResults['route']))
               startedSomething = true;
           }
         );

@@ -132,6 +132,11 @@ class _PointerEventConverter {
   }
 }
 
+class BindingObserver {
+  bool didPopRoute() => false;
+  void didChangeSize(Size size) { }
+}
+
 /// The glue between the render tree and the Flutter engine
 class FlutterBinding extends HitTestTarget {
 
@@ -139,9 +144,9 @@ class FlutterBinding extends HitTestTarget {
     assert(_instance == null);
     _instance = this;
 
-    ui.window.onEvent = _handleEvent;
     ui.window.onPointerPacket = _handlePointerPacket;
     ui.window.onMetricsChanged = _handleMetricsChanged;
+    ui.window.onPopRoute = _handlePopRoute;
 
     if (renderViewOverride == null) {
       _renderView = new RenderView(child: root);
@@ -165,19 +170,16 @@ class FlutterBinding extends HitTestTarget {
   RenderView get renderView => _renderView;
   RenderView _renderView;
 
-  final List<MetricListener> _metricListeners = new List<MetricListener>();
+  final List<BindingObserver> _observers = new List<BindingObserver>();
 
-  /// Calls listener for every event that isn't localized to a given view coordinate
-  void addMetricListener(MetricListener listener) => _metricListeners.add(listener);
-
-  /// Stops calling listener for every event that isn't localized to a given view coordinate
-  bool removeMetricListener(MetricListener listener) => _metricListeners.remove(listener);
+  void addObserver(BindingObserver observer) => _observers.add(observer);
+  bool removeObserver(BindingObserver observer) => _observers.remove(observer);
 
   void _handleMetricsChanged() {
     Size size = ui.window.size;
     _renderView.rootConstraints = new ViewConstraints(size: size);
-    for (MetricListener listener in _metricListeners)
-      listener(size);
+    for (BindingObserver observer in _observers)
+      observer.didChangeSize(size);
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
@@ -192,23 +194,11 @@ class FlutterBinding extends HitTestTarget {
     _renderView.compositeFrame();
   }
 
-  final List<EventListener> _eventListeners = new List<EventListener>();
-
-  /// Calls listener for every event that isn't localized to a given view coordinate
-  void addEventListener(EventListener listener) => _eventListeners.add(listener);
-
-  /// Stops calling listener for every event that isn't localized to a given view coordinate
-  bool removeEventListener(EventListener listener) => _eventListeners.remove(listener);
-
-  // TODO(abarth): The engine should give us the timeStamp in Durations.
-  void _handleEvent(String eventType, double timeStamp) {
-    assert(eventType == 'back');
-    InputEvent ourEvent = new InputEvent(
-      type: eventType,
-      timeStamp: new Duration(microseconds: timeStamp.round())
-    );
-    for (EventListener listener in _eventListeners)
-      listener(ourEvent);
+  void _handlePopRoute() {
+    for (BindingObserver observer in _observers) {
+      if (observer.didPopRoute())
+        return;
+    }
   }
 
   void _handlePointerPacket(ByteData serializedPacket) {

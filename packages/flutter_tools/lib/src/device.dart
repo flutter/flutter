@@ -768,7 +768,11 @@ class AndroidDevice extends Device {
     runCheckedSync(adbCommandForDevice(['forward', portString, portString]));
   }
 
-  bool startBundle(AndroidApk apk, String bundlePath, bool poke, bool checked) {
+  bool startBundle(AndroidApk apk, String bundlePath, {
+    bool poke,
+    bool checked,
+    String route
+  }) {
     if (!FileSystemEntity.isFileSync(bundlePath)) {
       _logging.severe('Cannot find $bundlePath');
       return false;
@@ -786,6 +790,8 @@ class AndroidDevice extends Device {
     ]);
     if (checked)
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
+    if (route != null)
+      cmd.addAll(['--es', 'route', route]);
     cmd.add(apk.launchActivity);
     runCheckedSync(cmd);
     return true;
