@@ -59,7 +59,11 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 /// not hold a reference to the canvas across operations that might paint
 /// child render objects.
 class PaintingContext {
-  PaintingContext._(this._containerLayer, this._paintBounds);
+  PaintingContext._(this._containerLayer, this._paintBounds) {
+    assert(_containerLayer != null);
+    assert(_paintBounds != null);
+    assert(!_paintBounds.isEmpty);
+  }
 
   final ContainerLayer _containerLayer;
   final Rect _paintBounds;
@@ -304,7 +308,7 @@ class PaintingContext {
       _stopRecordingIfNeeded();
       OpacityLayer opacityLayer = new OpacityLayer(bounds: bounds, alpha: alpha);
       _appendLayer(opacityLayer, offset);
-      PaintingContext childContext = new PaintingContext._(opacityLayer, bounds);
+      PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
       painter(childContext, Offset.zero);
       childContext._stopRecordingIfNeeded();
     } else {
