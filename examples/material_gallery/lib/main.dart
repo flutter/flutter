@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 import 'chip_demo.dart';
 import 'date_picker_demo.dart';
+import 'drop_down_demo.dart';
 import 'gallery_page.dart';
 import 'time_picker_demo.dart';
 import 'widget_demo.dart';
-import 'drop_down_demo.dart';
 
 final List<WidgetDemo> _kDemos = <WidgetDemo>[
   kChipDemo,
