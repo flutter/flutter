@@ -31,6 +31,11 @@ class Size extends OffsetBase {
   Size operator ~/(double operand) => new Size((width ~/ operand).toDouble(), (height ~/ operand).toDouble());
   Size operator %(double operand) => new Size(width % operand, height % operand);
 
+  /// Whether this size encloses a non-zero area.
+  /// Negative areas are considered empty.
+  bool get isEmpty => width <= 0.0 || height <= 0.0;
+
+  /// The lesser of the width and the height.
   double get shortestSide {
     double w = width.abs();
     double h = height.abs();
