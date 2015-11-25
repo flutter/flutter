@@ -7,14 +7,17 @@
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
+#include "sky/services/rasterizer/rasterizer.mojom.h"
 
 namespace sky {
 namespace shell {
 
 const int kPipelineDepth = 3;
 
-Animator::Animator(const Engine::Config& config, Engine* engine)
+Animator::Animator(const Engine::Config& config,
+                   rasterizer::RasterizerPtr rasterizer, Engine* engine)
     : config_(config),
+      rasterizer_(rasterizer.Pass()),
       engine_(engine),
       outstanding_requests_(0),
       did_defer_frame_request_(false),
@@ -79,9 +82,7 @@ void Animator::BeginFrame(int64_t time_stamp) {
     return;
   }
 
-  config_.gpu_task_runner->PostTaskAndReply(
-      FROM_HERE,
-      base::Bind(config_.raster_callback, base::Passed(&layer_tree)),
+  rasterizer_->Draw(reinterpret_cast<uint64_t>(layer_tree.release()),
       base::Bind(&Animator::OnFrameComplete, weak_factory_.GetWeakPtr()));
 }
 

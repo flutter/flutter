@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "base/single_thread_task_runner.h"
+#include "sky/services/rasterizer/rasterizer.mojom.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/rasterizer.h"
 #include "sky/shell/shell.h"
@@ -40,8 +41,14 @@ ShellView::~ShellView() {
 void ShellView::CreateEngine() {
   Engine::Config config;
   config.gpu_task_runner = shell_.gpu_task_runner();
-  config.raster_callback = rasterizer_->GetRasterCallback();
-  engine_.reset(new Engine(config));
+  rasterizer::RasterizerPtr rasterizer;
+  mojo::InterfaceRequest<rasterizer::Rasterizer> request = mojo::GetProxy(
+      &rasterizer);
+  shell_.gpu_task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&Rasterizer::ConnectToRasterizer,
+                 rasterizer_->GetWeakRasterizerPtr(), base::Passed(&request)));
+  engine_.reset(new Engine(config, rasterizer.Pass()));
 }
 
 void ShellView::CreatePlatformView() {

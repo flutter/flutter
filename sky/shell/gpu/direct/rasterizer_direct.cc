@@ -29,7 +29,8 @@ scoped_ptr<Rasterizer> Rasterizer::Create() {
 }
 
 RasterizerDirect::RasterizerDirect()
-    : share_group_(new gfx::GLShareGroup()), weak_factory_(this) {
+    : share_group_(new gfx::GLShareGroup()), binding_(this),
+      weak_factory_(this) {
 }
 
 RasterizerDirect::~RasterizerDirect() {
@@ -39,8 +40,13 @@ base::WeakPtr<RasterizerDirect> RasterizerDirect::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-RasterCallback RasterizerDirect::GetRasterCallback() {
-  return base::Bind(&RasterizerDirect::Draw, weak_factory_.GetWeakPtr());
+base::WeakPtr<Rasterizer> RasterizerDirect::GetWeakRasterizerPtr() {
+  return GetWeakPtr();
+}
+
+void RasterizerDirect::ConnectToRasterizer(
+    mojo::InterfaceRequest<rasterizer::Rasterizer> request) {
+  binding_.Bind(request.Pass());
 }
 
 void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
@@ -49,11 +55,17 @@ void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widge
   CHECK(surface_) << "GLSurface required.";
 }
 
-void RasterizerDirect::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
+void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
+                            const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerDirect::Draw");
 
-  if (!surface_)
+  if (!surface_) {
+    callback.Run();
     return;
+  }
+
+  scoped_ptr<compositor::LayerTree> layer_tree(
+      reinterpret_cast<compositor::LayerTree*>(layer_tree_ptr));
 
   gfx::Size size(layer_tree->frame_size().width(),
                  layer_tree->frame_size().height());
@@ -98,6 +110,8 @@ void RasterizerDirect::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
         paint_context_.AcquireFrame(path.AsUTF8Unsafe(), size);
     layer_tree->root_layer()->Paint(to_file_frame);
   }
+
+  callback.Run();
 }
 
 void RasterizerDirect::OnOutputSurfaceDestroyed() {

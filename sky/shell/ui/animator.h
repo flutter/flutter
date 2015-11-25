@@ -14,7 +14,8 @@ namespace shell {
 
 class Animator {
  public:
-  explicit Animator(const Engine::Config& config, Engine* engine);
+  explicit Animator(const Engine::Config& config,
+                    rasterizer::RasterizerPtr rasterizer, Engine* engine);
   ~Animator();
 
   void RequestFrame();
@@ -32,6 +33,7 @@ class Animator {
   bool AwaitVSync();
 
   Engine::Config config_;
+  rasterizer::RasterizerPtr rasterizer_;
   Engine* engine_;
   vsync::VSyncProviderPtr vsync_provider_;
   int outstanding_requests_;

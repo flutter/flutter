@@ -9,17 +9,20 @@
 
 #include "base/callback.h"
 #include "base/memory/scoped_ptr.h"
+#include "base/memory/weak_ptr.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "sky/compositor/layer_tree.h"
+#include "sky/services/rasterizer/rasterizer.mojom.h"
 
 namespace sky {
 namespace shell {
 
-typedef base::Callback<void(scoped_ptr<compositor::LayerTree>)> RasterCallback;
-
-class Rasterizer {
+class Rasterizer : public rasterizer::Rasterizer {
  public:
-  virtual ~Rasterizer();
-  virtual RasterCallback GetRasterCallback() = 0;
+  ~Rasterizer() override;
+  virtual void ConnectToRasterizer(
+      mojo::InterfaceRequest<rasterizer::Rasterizer> request) = 0;
+  virtual base::WeakPtr<::sky::shell::Rasterizer> GetWeakRasterizerPtr() = 0;
 
   // Implemented by each GPU backend.
   static scoped_ptr<Rasterizer> Create();
