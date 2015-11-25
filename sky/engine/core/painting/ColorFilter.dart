@@ -9,5 +9,5 @@ class ColorFilter extends _ColorFilter {
   // This is the only ColorFilter type we need, but use a named constructor so
   // we can add more in the future.
   ColorFilter.mode(Color color, TransferMode transferMode)
-      : super(color, transferMode) {}
+    : super(color, transferMode);
 }
