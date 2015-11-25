@@ -32,14 +32,21 @@ import 'src/process.dart';
 ///
 /// This function is intended to be used from the [flutter] command line tool.
 Future main(List<String> args) async {
+  DateTime startTime = new DateTime.now();
+
   // This level can be adjusted by users through the `--verbose` option.
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((LogRecord record) {
+    String prefix = '';
+    if (Logger.root.level <= Level.FINE) {
+      Duration elapsed = record.time.difference(startTime);
+      prefix = '[${elapsed.inMilliseconds.toString().padLeft(4)} ms] ';
+    }
     String level = record.level.name.toLowerCase();
     if (record.level >= Level.WARNING) {
-      stderr.writeln('$level: ${record.message}');
+      stderr.writeln('$prefix$level: ${record.message}');
     } else {
-      print('$level: ${record.message}');
+      print('$prefix$level: ${record.message}');
     }
     if (record.error != null)
       stderr.writeln(record.error);

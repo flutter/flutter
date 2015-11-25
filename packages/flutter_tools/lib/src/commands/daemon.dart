@@ -25,8 +25,6 @@ final Logger _logging = new Logger('flutter_tools.daemon');
 // TODO: Create a `device` domain in order to list devices and fire events when
 // devices are added or removed.
 
-// TODO: Is this the best name? Server? Daemon?
-
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
 /// JSON-RPC based responses and events to stdout.

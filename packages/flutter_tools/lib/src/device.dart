@@ -43,6 +43,8 @@ abstract class Device {
 
   /// Stop an app package on the current device
   Future<bool> stopApp(ApplicationPackage app);
+
+  String toString() => '$runtimeType $id';
 }
 
 class IOSDevice extends Device {
@@ -773,6 +775,8 @@ class AndroidDevice extends Device {
     bool checked,
     String route
   }) {
+    _logging.fine('$this startBundle');
+
     if (!FileSystemEntity.isFileSync(bundlePath)) {
       _logging.severe('Cannot find $bundlePath');
       return false;
