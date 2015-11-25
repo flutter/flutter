@@ -76,7 +76,8 @@ class Rect {
   Size get size => new Size(width, height);
 
   /// Whether this rectangle encloses a non-zero area.
-  bool get isEmpty => r.left >= r.right || r.top >= r.bottom;
+  /// Negative areas are considered empty.
+  bool get isEmpty => left >= right || top >= bottom;
 
   /// The lesser of the width and the height of this rectangle.
   double get shortestSide {
