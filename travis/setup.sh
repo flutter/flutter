@@ -1,9 +1,12 @@
 #!/bin/bash
 set -ex
 
-./tools/dart/update.py
+(cd; git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git)
 
-(cd sky/unit; ../../third_party/dart-sdk/dart-sdk/bin/pub get)
-(cd sky/packages/sky; ../../../third_party/dart-sdk/dart-sdk/bin/pub get)
+cd ..
+mv engine src
+mkdir engine
+mv src engine
+cd engine/src
 
-./sky/tools/download_sky_shell.py sky/unit/packages/sky_engine/REVISION out
+mv travis/gclient ../.gclient

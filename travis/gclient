@@ -1,0 +1,8 @@
+solutions = [{
+  "name"        : "..",
+  "url"         : "https://github.com/flutter/engine.git",
+  "deps_file"   : "DEPS",
+  "managed"     : False,
+  "safesync_url": "",
+}]
+target_os = ['linux']
