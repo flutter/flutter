@@ -14,6 +14,10 @@ class _SliderDemoState extends State<SliderDemo> {
   double _value = 0.25;
 
   Widget build(BuildContext context) {
+    Widget label = new Container(
+      padding: const EdgeDims.symmetric(horizontal: 16.0),
+      child: new Text(_value.toStringAsFixed(2))
+    );
     return new Block([
       new Container(
         height: 100.0,
@@ -27,13 +31,21 @@ class _SliderDemoState extends State<SliderDemo> {
                 });
               }
             ),
-            new Container(
-              padding: const EdgeDims.symmetric(horizontal: 16.0),
-              child: new Text(_value.toStringAsFixed(2))
-            ),
+            label,
+          ], justifyContent: FlexJustifyContent.collapse)
+        )
+      ),
+      new Container(
+        height: 100.0,
+        child: new Center(
+          child:  new Row([
+            // Disabled, but tracking the slider above.
+            new Slider(value: _value),
+            label,
           ], justifyContent: FlexJustifyContent.collapse)
         )
       )
+
     ]);
   }
 }
