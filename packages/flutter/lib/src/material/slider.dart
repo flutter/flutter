@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -11,6 +12,7 @@ import 'colors.dart';
 import 'theme.dart';
 
 const double _kThumbRadius = 6.0;
+const double _kThumbRadiusDisabled = 3.0;
 const double _kReactionRadius = 16.0;
 const double _kTrackWidth = 144.0;
 const int _kReactionAlpha = 0x33;
@@ -54,6 +56,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
 
 final Color _kInactiveTrackColor = Colors.grey[400];
 final Color _kActiveTrackColor = Colors.grey[500];
+const Duration _kRadialReactionDuration = const Duration(milliseconds: 200);
 
 class _RenderSlider extends RenderConstrainedBox {
   _RenderSlider({
@@ -68,6 +71,10 @@ class _RenderSlider extends RenderConstrainedBox {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
+    _reaction = new ValuePerformance(
+      variable: new AnimatedValue<double>(_kThumbRadius, end: _kReactionRadius, curve: Curves.ease),
+      duration: _kRadialReactionDuration
+    )..addListener(markNeedsPaint);
   }
 
   double get value => _value;
@@ -92,6 +99,7 @@ class _RenderSlider extends RenderConstrainedBox {
   ValueChanged<double> onChanged;
 
   double get _trackLength => size.width - 2.0 * _kReactionRadius;
+  ValuePerformance<double> _reaction;
 
   HorizontalDragGestureRecognizer _drag;
   bool _active = false;
@@ -102,6 +110,7 @@ class _RenderSlider extends RenderConstrainedBox {
       _active = true;
       _currentDragValue = globalToLocal(globalPosition).x / _trackLength;
       onChanged(_currentDragValue.clamp(0.0, 1.0));
+      _reaction.forward();
       markNeedsPaint();
     }
   }
@@ -117,6 +126,7 @@ class _RenderSlider extends RenderConstrainedBox {
     if (_active) {
       _active = false;
       _currentDragValue = 0.0;
+      _reaction.reverse();
       markNeedsPaint();
     }
   }
@@ -132,6 +142,7 @@ class _RenderSlider extends RenderConstrainedBox {
     final Canvas canvas = context.canvas;
 
     final double trackLength = _trackLength;
+    final bool enabled = onChanged != null;
 
     double trackCenter = offset.dy + size.height / 2.0;
     double trackLeft = offset.dx + _kReactionRadius;
@@ -140,17 +151,20 @@ class _RenderSlider extends RenderConstrainedBox {
     double trackRight = trackLeft + trackLength;
     double trackActive = trackLeft + trackLength * value;
 
-    Paint primaryPaint = new Paint()..color = _primaryColor;
+    Paint primaryPaint = new Paint()..color = enabled ? _primaryColor : _kInactiveTrackColor;
     Paint trackPaint = new Paint()..color = _active ? _kActiveTrackColor : _kInactiveTrackColor;
 
+    double thumbRadius = enabled ? _kThumbRadius : _kThumbRadiusDisabled;
+
     canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackRight, trackBottom), trackPaint);
-    canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
+    if (_value > 0.0)
+      canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
 
     Point activeLocation = new Point(trackActive, trackCenter);
-    if (_active) {
+    if (_reaction.status != PerformanceStatus.dismissed) {
       Paint reactionPaint = new Paint()..color = _primaryColor.withAlpha(_kReactionAlpha);
-      canvas.drawCircle(activeLocation, _kReactionRadius, reactionPaint);
+      canvas.drawCircle(activeLocation, _reaction.value, reactionPaint);
     }
-    canvas.drawCircle(activeLocation, _kThumbRadius, trackPaint);
+    canvas.drawCircle(activeLocation, thumbRadius, primaryPaint);
   }
 }
