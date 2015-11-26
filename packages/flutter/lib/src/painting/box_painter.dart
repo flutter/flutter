@@ -1110,6 +1110,15 @@ class FractionalOffset {
   const FractionalOffset(this.x, this.y);
   final double x;
   final double y;
+  FractionalOffset operator -(FractionalOffset other) {
+    return new FractionalOffset(x - other.x, y - other.y);
+  }
+  FractionalOffset operator +(FractionalOffset other) {
+    return new FractionalOffset(x + other.x, y + other.y);
+  }
+  FractionalOffset operator *(double other) {
+    return new FractionalOffset(x * other, y * other);
+  }
   bool operator ==(dynamic other) {
     if (other is! FractionalOffset)
       return false;
