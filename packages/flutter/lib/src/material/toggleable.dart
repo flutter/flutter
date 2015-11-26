@@ -6,6 +6,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+import 'constants.dart';
+
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
 
 // RenderToggleable is a base class for material style toggleable controls with
@@ -16,13 +18,26 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   RenderToggleable({
     bool value,
     Size size,
-    this.onChanged
+    Color accentColor,
+    this.onChanged,
+    double minRadialReactionRadius: 0.0
   }) : _value = value,
+       _accentColor = accentColor,
        super(additionalConstraints: new BoxConstraints.tight(size)) {
-    _performance = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeIn, reverseCurve: Curves.easeOut),
+    _tap = new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
+      ..onTapDown = _handleTapDown
+      ..onTap = _handleTap
+      ..onTapUp = _handleTapUp
+      ..onTapCancel = _handleTapCancel;
+    _position = new ValuePerformance<double>(
+      variable: new AnimatedValue<double>(0.0, end: 1.0),
       duration: _kToggleDuration,
       progress: _value ? 1.0 : 0.0
+    )..addListener(markNeedsPaint)
+     ..addStatusListener(_handlePositionStateChanged);
+    _reaction = new ValuePerformance<double>(
+      variable: new AnimatedValue<double>(minRadialReactionRadius, end: kRadialReactionRadius, curve: Curves.ease),
+      duration: kRadialReactionDuration
     )..addListener(markNeedsPaint);
   }
 
@@ -32,41 +47,73 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
-    performance.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
+    _position.variable
+      ..curve = Curves.easeIn
+      ..reverseCurve = Curves.easeOut;
+    _position.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
   }
+
+  Color get accentColor => _accentColor;
+  Color _accentColor;
+  void set accentColor(Color value) {
+    if (value == _accentColor)
+      return;
+    _accentColor = value;
+    markNeedsPaint();
+  }
+
+  bool get isInteractive => onChanged != null;
 
   ValueChanged<bool> onChanged;
 
-  ValuePerformance<double> get performance => _performance;
-  ValuePerformance<double> _performance;
+  ValuePerformance<double> get position => _position;
+  ValuePerformance<double> _position;
 
-  double get position => _performance.value;
+  ValuePerformance<double> get reaction => _reaction;
+  ValuePerformance<double> _reaction;
 
   TapGestureRecognizer _tap;
 
-  void attach() {
-    super.attach();
-    _tap = new TapGestureRecognizer(
-      router: FlutterBinding.instance.pointerRouter,
-      onTap: _handleTap
-    );
+  void _handlePositionStateChanged(PerformanceStatus status) {
+    if (isInteractive) {
+      if (status == PerformanceStatus.completed && !_value)
+        onChanged(true);
+      else if (status == PerformanceStatus.dismissed && _value)
+        onChanged(false);
+    }
   }
 
-  void detach() {
-    _tap.dispose();
-    _tap = null;
-    super.detach();
-  }
-
-  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown' && onChanged != null)
-      _tap.addPointer(event);
+  void _handleTapDown(Point globalPosition) {
+    if (isInteractive)
+      _reaction.forward();
   }
 
   void _handleTap() {
-    if (onChanged != null)
+    if (isInteractive)
       onChanged(!_value);
   }
 
+  void _handleTapUp(Point globalPosition) {
+    if (isInteractive)
+      _reaction.reverse();
+  }
+
+  void _handleTapCancel() {
+    if (isInteractive)
+      _reaction.reverse();
+  }
+
   bool hitTestSelf(Point position) => true;
+
+  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
+    if (event.type == 'pointerdown' && isInteractive)
+      _tap.addPointer(event);
+  }
+
+  void paintRadialReaction(Canvas canvas, Offset offset) {
+    if (!reaction.isDismissed) {
+      Paint reactionPaint = new Paint()..color = accentColor.withAlpha(kRadialReactionAlpha);
+      canvas.drawCircle(offset.toPoint(), reaction.value, reactionPaint);
+    }
+  }
 }

@@ -33,3 +33,7 @@ const double kPressedStateDuration = 64.0; // units?
 const Duration kThemeChangeDuration = const Duration(milliseconds: 200);
 
 const EdgeDims kDialogHeadingPadding = const EdgeDims.TRBL(24.0, 24.0, 20.0, 24.0);
+
+const double kRadialReactionRadius = 24.0; // Pixels
+const Duration kRadialReactionDuration = const Duration(milliseconds: 200);
+const int kRadialReactionAlpha = 0x33;
