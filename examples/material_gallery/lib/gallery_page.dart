@@ -4,13 +4,14 @@
 
 import 'package:flutter/material.dart';
 
-import 'widget_demo.dart';
+import 'demo/widget_demo.dart';
 
 class GalleryPage extends StatelessComponent {
-  GalleryPage({ this.demos, this.active });
+  GalleryPage({ this.demos, this.active, this.onThemeChanged });
 
   final List<WidgetDemo> demos;
   final WidgetDemo active;
+  final ValueChanged<ThemeData> onThemeChanged;
 
   void _showDrawer(BuildContext context) {
     List<Widget> items = <Widget>[

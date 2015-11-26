@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import 'chip_demo.dart';
-import 'date_picker_demo.dart';
-import 'drop_down_demo.dart';
+import 'demo/chip_demo.dart';
+import 'demo/date_picker_demo.dart';
+import 'demo/drop_down_demo.dart';
+import 'demo/slider_demo.dart';
+import 'demo/time_picker_demo.dart';
+import 'demo/widget_demo.dart';
 import 'gallery_page.dart';
-import 'slider_demo.dart';
-import 'time_picker_demo.dart';
-import 'widget_demo.dart';
 
 final List<WidgetDemo> _kDemos = <WidgetDemo>[
   kChipDemo,
@@ -20,15 +20,47 @@ final List<WidgetDemo> _kDemos = <WidgetDemo>[
   kDropDownDemo,
 ];
 
+class _MaterialGallery extends StatefulComponent {
+  _MaterialGalleryState createState() => new _MaterialGalleryState();
+}
+
+class _MaterialGalleryState extends State<_MaterialGallery> {
+  final Map<String, RouteBuilder> _routes = new Map<String, RouteBuilder>();
+
+  void initState() {
+    super.initState();
+    _routes['/'] = (_) => new GalleryPage(
+      demos: _kDemos,
+      onThemeChanged: _handleThemeChanged
+    );
+    for (WidgetDemo demo in _kDemos) {
+      _routes[demo.routeName] = (_) {
+        return new GalleryPage(
+          demos: _kDemos,
+          active: demo,
+          onThemeChanged: _handleThemeChanged
+        );
+      };
+    }
+  }
+
+  ThemeData _theme;
+
+  void _handleThemeChanged(ThemeData newTheme) {
+    setState(() {
+      _theme = newTheme;
+    });
+  }
+
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: 'Material Gallery',
+      theme: _theme,
+      routes: _routes
+    );
+  }
+}
+
 void main() {
-  Map<String, RouteBuilder> routes = new Map<String, RouteBuilder>();
-  routes['/'] = (_) => new GalleryPage(demos: _kDemos);
-
-  for (WidgetDemo demo in _kDemos)
-    routes[demo.routeName] = (_) => new GalleryPage(demos: _kDemos, active: demo);
-
-  runApp(new MaterialApp(
-    title: 'Material Gallery',
-    routes: routes
-  ));
+  runApp(new _MaterialGallery());
 }
