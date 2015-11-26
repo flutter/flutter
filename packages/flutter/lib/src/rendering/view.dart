@@ -121,10 +121,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     Timeline.startSync('Composite');
     try {
-      (layer as TransformLayer).transform = _logicalToDeviceTransform;
+      final TransformLayer transformLayer = layer;
+      transformLayer.transform = _logicalToDeviceTransform;
       Rect bounds = Point.origin & (size * ui.window.devicePixelRatio);
       ui.SceneBuilder builder = new ui.SceneBuilder(bounds);
-      layer.addToScene(builder, Offset.zero);
+      transformLayer.addToScene(builder, Offset.zero);
+      assert(layer == transformLayer);
       ui.Scene scene = builder.build();
       ui.window.render(scene);
       scene.dispose();

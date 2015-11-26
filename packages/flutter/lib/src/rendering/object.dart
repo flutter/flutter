@@ -284,9 +284,9 @@ class PaintingContext {
       childContext._stopRecordingIfNeeded();
     } else {
       Matrix4 offsetMatrix = new Matrix4.translationValues(offset.dx, offset.dy, 0.0);
-      Matrix4 trasnformWithOffset = offsetMatrix * transform;
+      Matrix4 transformWithOffset = offsetMatrix * transform;
       canvas.save();
-      canvas.concat(trasnformWithOffset.storage);
+      canvas.concat(transformWithOffset.storage);
       painter(this, Offset.zero);
       canvas.restore();
     }
@@ -515,7 +515,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     while (node != _relayoutSubtreeRoot) {
       assert(node._relayoutSubtreeRoot == _relayoutSubtreeRoot);
       assert(node.parent != null);
-      node = node.parent as RenderObject;
+      node = node.parent;
       if ((!node._needsLayout) && (!node._debugDoingThisLayout))
         return false;
     }
@@ -1083,7 +1083,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       int count = 1;
       RenderObject target = parent;
       while (target != null && target != _relayoutSubtreeRoot) {
-        target = target.parent as RenderObject;
+        target = target.parent;
         count += 1;
       }
       header += ' relayoutSubtreeRoot=up$count';
