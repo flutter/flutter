@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'radial_reaction.dart';
 import 'shadows.dart';
 import 'theme.dart';
+import 'toggleable.dart';
 
 const Color _kThumbOffColor = const Color(0xFFFAFAFA);
 const Color _kTrackOffColor = const Color(0x42000000);

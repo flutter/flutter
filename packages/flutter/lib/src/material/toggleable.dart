@@ -4,13 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
-
-import 'binding.dart';
-import 'box.dart';
-import 'object.dart';
-import 'proxy_box.dart';
-
-typedef void ValueChanged<T>(T value);
+import 'package:flutter/rendering.dart';
 
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
 

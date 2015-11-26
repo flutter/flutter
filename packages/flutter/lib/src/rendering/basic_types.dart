@@ -14,3 +14,5 @@ export 'dart:ui' show
   Size,
   TransferMode,
   VoidCallback;
+
+typedef void ValueChanged<T>(T value);

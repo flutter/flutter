@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'theme.dart';
+import 'toggleable.dart';
 
 const double _kMidpoint = 0.5;
 const double _kEdgeSize = 18.0;
