@@ -61,6 +61,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }) : _popCompleter = popCompleter,
        _transitionCompleter = transitionCompleter;
 
+  TransitionRoute.explicit(
+    Completer<T> popCompleter,
+    Completer<T> transitionCompleter
+  ) : this(popCompleter: popCompleter, transitionCompleter: transitionCompleter);
+
   /// This future completes once the animation has been dismissed. For
   /// ModalRoutes, this will be after the completer that's passed in, since that
   /// one completes before the animation even starts, as soon as the route is
@@ -148,15 +153,7 @@ class LocalHistoryEntry {
   }
 }
 
-abstract class LocalHistoryRoute<T> extends TransitionRoute<T> {
-  LocalHistoryRoute({
-    Completer<T> popCompleter,
-    Completer<T> transitionCompleter
-  }) : super(
-    popCompleter: popCompleter,
-    transitionCompleter: transitionCompleter
-  );
-
+abstract class LocalHistoryRoute<T> extends Route<T> {
   List<LocalHistoryEntry> _localHistory;
   void addLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == null);
@@ -268,11 +265,11 @@ class ModalPosition {
   final double left;
 }
 
-abstract class ModalRoute<T> extends LocalHistoryRoute<T> {
+abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   ModalRoute({
     Completer<T> completer,
     this.settings: const NamedRouteSettings()
-  }) : super(popCompleter: completer);
+  }) : super.explicit(completer, null);
 
   // The API for general users of this class
 
