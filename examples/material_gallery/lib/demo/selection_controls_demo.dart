@@ -34,22 +34,22 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   }
 
   Widget build(BuildContext context) {
-    return new Column([
-      new Row([
+    return new Column(<Widget>[
+      new Row(<Widget>[
         new Checkbox(value: _checkboxValue, onChanged: _setCheckboxValue),
         new Checkbox(value: false), // Disabled
       ], justifyContent: FlexJustifyContent.spaceAround),
-      new Row([0, 1, 2].map((int i) {
+      new Row(<int>[0, 1, 2].map((int i) {
         return new Radio<int>(
           value: i,
           groupValue: _radioValue,
           onChanged: _setRadioValue
         );
       }).toList(), justifyContent: FlexJustifyContent.spaceAround),
-      new Row([0, 1].map((int i) {
+      new Row(<int>[0, 1].map((int i) {
         return new Radio<int>(value: i, groupValue: 0); // Disabled
       }).toList(), justifyContent: FlexJustifyContent.spaceAround),
-      new Row([
+      new Row(<Widget>[
         new Switch(value: _switchValue, onChanged: _setSwitchValue),
         new Switch(value: false), // Disabled
       ], justifyContent: FlexJustifyContent.spaceAround),
