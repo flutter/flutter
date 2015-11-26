@@ -4,12 +4,14 @@ update-url: http://localhost:9888/
 material-design-icons:
   - name: action/account_balance
   - name: action/assessment
+  - name: action/backup
   - name: action/help
   - name: action/search
   - name: action/settings
   - name: action/thumb_down
   - name: action/thumb_up
   - name: content/add
+  - name: device/dvr
   - name: navigation/arrow_back
   - name: navigation/menu
   - name: navigation/more_vert
