@@ -18,12 +18,13 @@ import 'status_transitions.dart';
 const _kTransparent = const Color(0x00000000);
 
 abstract class OverlayRoute<T> extends Route<T> {
-  List<WidgetBuilder> get builders => const <WidgetBuilder>[];
+  List<WidgetBuilder> get builders;
 
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
+  void install(OverlayState overlay, OverlayEntry insertionPoint) {
+    assert(_overlayEntries.isEmpty);
     for (WidgetBuilder builder in builders)
       _overlayEntries.add(new OverlayEntry(builder: builder));
     overlay?.insertAll(_overlayEntries, above: insertionPoint);
@@ -46,6 +47,10 @@ abstract class OverlayRoute<T> extends Route<T> {
     for (OverlayEntry entry in _overlayEntries)
       entry.remove();
     _overlayEntries.clear();
+  }
+
+  void dispose() {
+    finished();
   }
 }
 
@@ -79,7 +84,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   T _result;
 
-  void _handleStatusChanged(PerformanceStatus status) {
+  void handleStatusChanged(PerformanceStatus status) {
     switch (status) {
       case PerformanceStatus.completed:
         if (overlayEntries.isNotEmpty)
@@ -98,11 +103,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
-    _performance = createPerformance()
-      ..addStatusListener(_handleStatusChanged)
-      ..forward();
-    super.didPush(overlay, insertionPoint);
+  void install(OverlayState overlay, OverlayEntry insertionPoint) {
+    _performance = createPerformance();
+    super.install(overlay, insertionPoint);
+  }
+
+  void didPush() {
+    _performance.addStatusListener(handleStatusChanged);
+    _performance.forward();
+    super.didPush();
   }
 
   bool didPop(T result) {
@@ -115,6 +124,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void finished() {
     super.finished();
     _transitionCompleter?.complete(_result);
+  }
+
+  void dispose() {
+    _performance.stop();
+    super.dispose();
   }
 
   String get debugLabel => '$runtimeType';
@@ -269,9 +283,6 @@ abstract class ModalRoute<T> extends LocalHistoryRoute<T> {
     return widget?.route;
   }
 
-  bool get isCurrent => _isCurrent;
-  bool _isCurrent = false;
-
 
   // The API for subclasses to override - used by _ModalScope
 
@@ -314,33 +325,6 @@ abstract class ModalRoute<T> extends LocalHistoryRoute<T> {
 
   // Internals
 
-  void didPush(OverlayState overlay, OverlayEntry insertionPoint) {
-    assert(!_isCurrent);
-    _isCurrent = true;
-    super.didPush(overlay, insertionPoint);
-  }
-
-  bool didPop(T result) {
-    assert(_isCurrent);
-    if (super.didPop(result)) {
-      _isCurrent = false;
-      return true;
-    }
-    return false;
-  }
-
-  bool willPushNext(Route nextRoute) {
-    assert(_isCurrent);
-    _isCurrent = false;
-    return false;
-  }
-
-  bool didPopNext(Route nextRoute) {
-    assert(!_isCurrent);
-    _isCurrent = true;
-    return false;
-  }
-
   final GlobalKey<StatusTransitionState> _scopeKey = new GlobalKey<StatusTransitionState>();
   final GlobalKey _subtreeKey = new GlobalKey();
   final PageStorageBucket _storageBucket = new PageStorageBucket();
@@ -375,15 +359,16 @@ abstract class ModalRoute<T> extends LocalHistoryRoute<T> {
     _buildModalScope
   ];
 
+  String toString() => '$runtimeType($settings, performance: $_performance)';
 }
 
 /// A modal route that overlays a widget over the current route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
   PopupRoute({ Completer<T> completer }) : super(completer: completer);
   bool get opaque => false;
-  bool willPushNext(Route nextRoute) {
+  void didPushNext(Route nextRoute) {
     assert(nextRoute is! PageRoute);
-    return super.willPushNext(nextRoute);
+    super.didPushNext(nextRoute);
   }
 }
 

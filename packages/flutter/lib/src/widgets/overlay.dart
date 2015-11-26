@@ -52,8 +52,7 @@ class OverlayState extends State<Overlay> {
 
   void initState() {
     super.initState();
-    for (OverlayEntry entry in config.initialEntries)
-      insert(entry);
+    insertAll(config.initialEntries);
   }
 
   void insert(OverlayEntry entry, { OverlayEntry above }) {
