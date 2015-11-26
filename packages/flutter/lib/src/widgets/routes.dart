@@ -119,6 +119,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didPush();
   }
 
+  void didReplace(Route oldRoute) {
+    if (oldRoute is TransitionRoute)
+      _performance.progress = oldRoute._performance.progress;
+    _performance.addStatusListener(handleStatusChanged);
+    super.didReplace(oldRoute);
+  }
+
   bool didPop(T result) {
     _result = result;
     _performance.reverse();

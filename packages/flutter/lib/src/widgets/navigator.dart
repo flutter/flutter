@@ -13,11 +13,20 @@ abstract class Route<T> {
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
 
   /// Called when the route is inserted into the navigator.
-  /// Use this to install any overlays.
+  ///
+  /// Use this to populate overlayEntries and add them to the overlay.
+  /// (The reason the Route is responsible for doing this, rather than the
+  /// Navigator, is that the Route will be responsible for _removing_ the
+  /// entries and this way it's symmetric.
+  ///
+  /// The overlay argument will be null if this is the first route inserted.
   void install(OverlayState overlay, OverlayEntry insertionPoint) { }
 
   /// Called after install() when the route is pushed onto the navigator.
   void didPush() { }
+
+  /// Called after install() when the route replaced another in the navigator.
+  void didReplace(Route oldRoute) { }
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
@@ -34,6 +43,10 @@ abstract class Route<T> {
   /// The given route, which came after this one, has been popped off the
   /// navigator.
   void didPopNext(Route nextRoute) { }
+
+  /// The given old route, which was the route that came after this one, has
+  /// been replaced with the given new route.
+  void didReplaceNext(Route oldNextRoute, Route newNextRoute) { }
 
   /// The route should remove its overlays and free any other resources.
   ///
@@ -169,6 +182,44 @@ class NavigatorState extends State<Navigator> {
       if (oldRoute != null)
         oldRoute.didPushNext(route);
       config.observer?.didPush(route, oldRoute);
+    });
+    assert(() { _debugLocked = false; return true; });
+  }
+
+  /// Replaces one given route with another, but does not call didPush/didPop.
+  /// Instead, this calls install() on the new route, then didReplace() on the
+  /// new route passing the old route, then dispose() on the old route.
+  ///
+  /// The old route must have overlays, otherwise we won't know where to insert
+  /// the overlays of the new route. The old route must not be currently visible
+  /// (i.e. a later route have overlays that are currently opaque), otherwise
+  /// the replacement would have a jarring effect.
+  ///
+  /// It is safe to call this redundantly (replacing a route with itself). Such
+  /// calls are ignored.
+  void replace({ Route oldRoute, Route newRoute }) {
+    assert(!_debugLocked);
+    assert(oldRoute != null);
+    assert(newRoute != null);
+    if (oldRoute == newRoute)
+      return;
+    assert(() { _debugLocked = true; return true; });
+    assert(oldRoute._navigator == this);
+    assert(newRoute._navigator == null);
+    assert(oldRoute.overlayEntries.isNotEmpty);
+    assert(newRoute.overlayEntries.isEmpty);
+    assert(!overlay.debugIsVisible(oldRoute.overlayEntries.last));
+    setState(() {
+      int index = _history.indexOf(oldRoute);
+      assert(index >= 0);
+      newRoute._navigator = this;
+      newRoute.install(overlay, oldRoute.overlayEntries.last);
+      _history[index] = newRoute;
+      newRoute.didReplace(oldRoute);
+      if (index > 0)
+        _history[index - 1].didReplaceNext(oldRoute, newRoute);
+      oldRoute.dispose();
+      oldRoute._navigator = null;
     });
     assert(() { _debugLocked = false; return true; });
   }
