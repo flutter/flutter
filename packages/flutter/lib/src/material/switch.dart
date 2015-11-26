@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'shadows.dart';
 import 'theme.dart';
@@ -23,9 +24,28 @@ class Switch extends StatelessComponent {
   final ValueChanged<bool> onChanged;
 
   Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+    final isDark = themeData.brightness == ThemeBrightness.dark;
+
+    Color activeThumbColor = themeData.accentColor;
+    Color activeTrackColor = activeThumbColor.withAlpha(0x80);
+
+    Color inactiveThumbColor;
+    Color inactiveTrackColor;
+    if (onChanged != null) {
+      inactiveThumbColor = isDark ? Colors.grey[400] : Colors.grey[50];
+      inactiveTrackColor = isDark ? Colors.white30 : Colors.black26;
+    } else {
+      inactiveThumbColor = isDark ? Colors.grey[800] : Colors.grey[400];
+      inactiveTrackColor = isDark ? Colors.white10 : Colors.black12;
+    }
+
     return new _SwitchRenderObjectWidget(
       value: value,
-      accentColor: Theme.of(context).accentColor,
+      activeColor: activeThumbColor,
+      inactiveColor: inactiveThumbColor,
+      activeTrackColor: activeTrackColor,
+      inactiveTrackColor: inactiveTrackColor,
       onChanged: onChanged
     );
   }
@@ -35,53 +55,86 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   _SwitchRenderObjectWidget({
     Key key,
     this.value,
-    this.accentColor,
+    this.activeColor,
+    this.inactiveColor,
+    this.activeTrackColor,
+    this.inactiveTrackColor,
     this.onChanged
   }) : super(key: key);
 
   final bool value;
-  final Color accentColor;
+  final Color activeColor;
+  final Color inactiveColor;
+  final Color activeTrackColor;
+  final Color inactiveTrackColor;
   final ValueChanged<bool> onChanged;
 
   _RenderSwitch createRenderObject() => new _RenderSwitch(
     value: value,
-    accentColor: accentColor,
+    activeColor: activeColor,
+    inactiveColor: inactiveColor,
+    activeTrackColor: activeTrackColor,
+    inactiveTrackColor: inactiveTrackColor,
     onChanged: onChanged
   );
 
   void updateRenderObject(_RenderSwitch renderObject, _SwitchRenderObjectWidget oldWidget) {
     renderObject.value = value;
-    renderObject.accentColor = accentColor;
+    renderObject.activeColor = activeColor;
+    renderObject.inactiveColor = inactiveColor;
+    renderObject.activeTrackColor = activeTrackColor;
+    renderObject.inactiveTrackColor = inactiveTrackColor;
     renderObject.onChanged = onChanged;
   }
 }
 
-const Color _kThumbOffColor = const Color(0xFFFAFAFA);
-const Color _kTrackOffColor = const Color(0x42000000);
 const double _kTrackHeight = 14.0;
 const double _kTrackWidth = 29.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kThumbRadius = 10.0;
 const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + 2 * kRadialReactionRadius;
 const double _kSwitchHeight = 2 * kRadialReactionRadius;
-const int _kTrackAlpha = 0x80;
 
 class _RenderSwitch extends RenderToggleable {
   _RenderSwitch({
     bool value,
-    Color accentColor,
+    Color activeColor,
+    Color inactiveColor,
+    Color activeTrackColor,
+    Color inactiveTrackColor,
     ValueChanged<bool> onChanged
   }) : super(
-         value: value,
-         accentColor: accentColor,
-         onChanged: onChanged,
-         minRadialReactionRadius: _kThumbRadius,
-         size: const Size(_kSwitchWidth, _kSwitchHeight)
-       ) {
+     value: value,
+     activeColor: activeColor,
+     inactiveColor: inactiveColor,
+     onChanged: onChanged,
+     minRadialReactionRadius: _kThumbRadius,
+     size: const Size(_kSwitchWidth, _kSwitchHeight)
+   ) {
     _drag = new HorizontalDragGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
+  }
+
+  Color get activeTrackColor => _activeTrackColor;
+  Color _activeTrackColor;
+  void set activeTrackColor(Color value) {
+    assert(value != null);
+    if (value == _activeTrackColor)
+      return;
+    _activeTrackColor = value;
+    markNeedsPaint();
+  }
+
+  Color get inactiveTrackColor => _inactiveTrackColor;
+  Color _inactiveTrackColor;
+  void set inactiveTrackColor(Color value) {
+    assert(value != null);
+    if (value == _inactiveTrackColor)
+      return;
+    _inactiveTrackColor = value;
+    markNeedsPaint();
   }
 
   double get _trackInnerLength => size.width - 2.0 * kRadialReactionRadius;
@@ -121,13 +174,10 @@ class _RenderSwitch extends RenderToggleable {
   void paint(PaintingContext context, Offset offset) {
     final PaintingCanvas canvas = context.canvas;
 
-    Color thumbColor = _kThumbOffColor;
-    Color trackColor = _kTrackOffColor;
-    if (position.status == PerformanceStatus.forward
-        || position.status == PerformanceStatus.completed) {
-      thumbColor = accentColor;
-      trackColor = accentColor.withAlpha(_kTrackAlpha);
-    }
+    final bool isActive = onChanged != null;
+
+    Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, position.progress) : inactiveColor;
+    Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, position.progress) : inactiveTrackColor;
 
     // Paint the track
     Paint paint = new Paint()

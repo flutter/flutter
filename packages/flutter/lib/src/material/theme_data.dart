@@ -96,6 +96,18 @@ class ThemeData {
     return const IconThemeData(color: IconThemeColor.black);
   }
 
+  Color get unselectedColor {
+    if (brightness == ThemeBrightness.dark)
+      return Colors.white70;
+    return Colors.black54;
+  }
+
+  Color get disabledColor {
+    if (brightness == ThemeBrightness.dark)
+      return Colors.white30;
+    return Colors.black26;
+  }
+
   /// The foreground color for widgets (knobs, text, etc)
   Color get accentColor => _accentColor;
   Color _accentColor;

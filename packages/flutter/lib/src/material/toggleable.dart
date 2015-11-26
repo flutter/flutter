@@ -18,12 +18,17 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   RenderToggleable({
     bool value,
     Size size,
-    Color accentColor,
+    Color activeColor,
+    Color inactiveColor,
     this.onChanged,
     double minRadialReactionRadius: 0.0
   }) : _value = value,
-       _accentColor = accentColor,
+       _activeColor = activeColor,
+       _inactiveColor = inactiveColor,
        super(additionalConstraints: new BoxConstraints.tight(size)) {
+    assert(value != null);
+    assert(activeColor != null);
+    assert(inactiveColor != null);
     _tap = new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
@@ -44,6 +49,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   bool get value => _value;
   bool _value;
   void set value(bool value) {
+    assert(value != null);
     if (value == _value)
       return;
     _value = value;
@@ -53,12 +59,23 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     _position.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
   }
 
-  Color get accentColor => _accentColor;
-  Color _accentColor;
-  void set accentColor(Color value) {
-    if (value == _accentColor)
+  Color get activeColor => _activeColor;
+  Color _activeColor;
+  void set activeColor(Color value) {
+    assert(value != null);
+    if (value == _activeColor)
       return;
-    _accentColor = value;
+    _activeColor = value;
+    markNeedsPaint();
+  }
+
+  Color get inactiveColor => _inactiveColor;
+  Color _inactiveColor;
+  void set inactiveColor(Color value) {
+    assert(value != null);
+    if (value == _inactiveColor)
+      return;
+    _inactiveColor = value;
     markNeedsPaint();
   }
 
@@ -112,7 +129,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   void paintRadialReaction(Canvas canvas, Offset offset) {
     if (!reaction.isDismissed) {
-      Paint reactionPaint = new Paint()..color = accentColor.withAlpha(kRadialReactionAlpha);
+      // TODO(abarth): We should have a different reaction color when position is zero.
+      Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
       canvas.drawCircle(offset.toPoint(), reaction.value, reactionPaint);
     }
   }
