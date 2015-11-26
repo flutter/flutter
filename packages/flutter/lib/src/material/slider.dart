@@ -9,13 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
-
-const double _kThumbRadius = 6.0;
-const double _kThumbRadiusDisabled = 3.0;
-const double _kReactionRadius = 16.0;
-const double _kTrackWidth = 144.0;
-const int _kReactionAlpha = 0x33;
 
 class Slider extends StatelessComponent {
   Slider({ Key key, this.value, this.onChanged })
@@ -54,9 +49,12 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
+const double _kThumbRadius = 6.0;
+const double _kThumbRadiusDisabled = 3.0;
+const double _kReactionRadius = 16.0;
+const double _kTrackWidth = 144.0;
 final Color _kInactiveTrackColor = Colors.grey[400];
 final Color _kActiveTrackColor = Colors.grey[500];
-const Duration _kRadialReactionDuration = const Duration(milliseconds: 200);
 
 class _RenderSlider extends RenderConstrainedBox {
   _RenderSlider({
@@ -71,9 +69,9 @@ class _RenderSlider extends RenderConstrainedBox {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
-    _reaction = new ValuePerformance(
+    _reaction = new ValuePerformance<double>(
       variable: new AnimatedValue<double>(_kThumbRadius, end: _kReactionRadius, curve: Curves.ease),
-      duration: _kRadialReactionDuration
+      duration: kRadialReactionDuration
     )..addListener(markNeedsPaint);
   }
 
@@ -162,7 +160,7 @@ class _RenderSlider extends RenderConstrainedBox {
 
     Point activeLocation = new Point(trackActive, trackCenter);
     if (_reaction.status != PerformanceStatus.dismissed) {
-      Paint reactionPaint = new Paint()..color = _primaryColor.withAlpha(_kReactionAlpha);
+      Paint reactionPaint = new Paint()..color = _primaryColor.withAlpha(kRadialReactionAlpha);
       canvas.drawCircle(activeLocation, _reaction.value, reactionPaint);
     }
     canvas.drawCircle(activeLocation, thumbRadius, primaryPaint);

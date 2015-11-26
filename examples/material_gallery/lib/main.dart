@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'demo/chip_demo.dart';
 import 'demo/date_picker_demo.dart';
 import 'demo/drop_down_demo.dart';
+import 'demo/selection_controls_demo.dart';
 import 'demo/slider_demo.dart';
 import 'demo/time_picker_demo.dart';
 import 'demo/widget_demo.dart';
@@ -14,6 +15,7 @@ import 'gallery_page.dart';
 
 final List<WidgetDemo> _kDemos = <WidgetDemo>[
   kChipDemo,
+  kSelectionControlsDemo,
   kSliderDemo,
   kDatePickerDemo,
   kTimePickerDemo,
