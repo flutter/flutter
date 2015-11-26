@@ -27,7 +27,6 @@ export 'src/rendering/proxy_box.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/stack.dart';
 export 'src/rendering/statistics_box.dart';
-export 'src/rendering/toggleable.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport.dart';
 
