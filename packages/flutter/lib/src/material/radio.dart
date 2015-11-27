@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 import 'toggleable.dart';
@@ -31,9 +30,7 @@ class Radio<T> extends StatelessComponent {
   bool get _enabled => onChanged != null;
 
   Color _getInactiveColor(ThemeData themeData) {
-    if (!_enabled)
-      return themeData.brightness == ThemeBrightness.light ? Colors.black26 : Colors.white30;
-    return themeData.brightness == ThemeBrightness.light ? Colors.black54 : Colors.white70;
+    return _enabled ? themeData.unselectedColor : themeData.disabledColor;
   }
 
   void _handleChanged(bool selected) {
@@ -45,8 +42,8 @@ class Radio<T> extends StatelessComponent {
     ThemeData themeData = Theme.of(context);
     return new _RadioRenderObjectWidget(
       selected: value == groupValue,
+      activeColor: themeData.accentColor,
       inactiveColor: _getInactiveColor(themeData),
-      accentColor: themeData.accentColor,
       onChanged: _enabled ? _handleChanged : null
     );
   }
@@ -56,30 +53,31 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   _RadioRenderObjectWidget({
     Key key,
     this.selected,
+    this.activeColor,
     this.inactiveColor,
-    this.accentColor,
     this.onChanged
   }) : super(key: key) {
+    assert(selected != null);
+    assert(activeColor != null);
     assert(inactiveColor != null);
-    assert(accentColor != null);
   }
 
   final bool selected;
   final Color inactiveColor;
-  final Color accentColor;
+  final Color activeColor;
   final ValueChanged<bool> onChanged;
 
   _RenderRadio createRenderObject() => new _RenderRadio(
     value: selected,
-    accentColor: accentColor,
+    activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged
   );
 
   void updateRenderObject(_RenderRadio renderObject, _RadioRenderObjectWidget oldWidget) {
     renderObject.value = selected;
+    renderObject.activeColor = activeColor;
     renderObject.inactiveColor = inactiveColor;
-    renderObject.accentColor = accentColor;
     renderObject.onChanged = onChanged;
   }
 }
@@ -87,29 +85,16 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
 class _RenderRadio extends RenderToggleable {
   _RenderRadio({
     bool value,
+    Color activeColor,
     Color inactiveColor,
-    Color accentColor,
     ValueChanged<bool> onChanged
-  }): _inactiveColor = inactiveColor,
-      super(
-        value: value,
-        accentColor: accentColor,
-        onChanged: onChanged,
-        size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius)
-      ) {
-    assert(inactiveColor != null);
-    assert(accentColor != null);
-  }
-
-  Color get inactiveColor => _inactiveColor;
-  Color _inactiveColor;
-  void set inactiveColor(Color value) {
-    assert(value != null);
-    if (value == _inactiveColor)
-      return;
-    _inactiveColor = value;
-    markNeedsPaint();
-  }
+  }): super(
+    value: value,
+    activeColor: activeColor,
+    inactiveColor: inactiveColor,
+    onChanged: onChanged,
+    size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius)
+  );
 
   bool get isInteractive => super.isInteractive && !value;
 
@@ -119,11 +104,11 @@ class _RenderRadio extends RenderToggleable {
     paintRadialReaction(canvas, offset + const Offset(kRadialReactionRadius, kRadialReactionRadius));
 
     Point center = (offset & size).center;
-    Color activeColor = onChanged != null ? accentColor : inactiveColor;
+    Color radioColor = onChanged != null ? activeColor : inactiveColor;
 
     // Outer circle
     Paint paint = new Paint()
-      ..color = Color.lerp(inactiveColor, activeColor, position.value)
+      ..color = Color.lerp(inactiveColor, radioColor, position.value)
       ..style = ui.PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);

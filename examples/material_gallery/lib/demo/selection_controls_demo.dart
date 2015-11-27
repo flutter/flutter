@@ -38,6 +38,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
       new Row(<Widget>[
         new Checkbox(value: _checkboxValue, onChanged: _setCheckboxValue),
         new Checkbox(value: false), // Disabled
+        new Checkbox(value: true), // Disabled
       ], justifyContent: FlexJustifyContent.spaceAround),
       new Row(<int>[0, 1, 2].map((int i) {
         return new Radio<int>(
@@ -52,6 +53,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
       new Row(<Widget>[
         new Switch(value: _switchValue, onChanged: _setSwitchValue),
         new Switch(value: false), // Disabled
+        new Switch(value: true), // Disabled
       ], justifyContent: FlexJustifyContent.spaceAround),
     ], justifyContent: FlexJustifyContent.spaceAround);
   }
