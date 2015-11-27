@@ -10,7 +10,13 @@
 
 namespace blink {
 
-class TransferMode {};
+struct TransferMode {
+  SkXfermode::Mode mode;
+
+  TransferMode() : mode() { }
+  TransferMode(SkXfermode::Mode mode) : mode(mode) { }
+  operator SkXfermode::Mode() { return mode; }
+};
 
 template <>
 struct DartConverter<TransferMode>

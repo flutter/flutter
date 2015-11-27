@@ -6,8 +6,26 @@
 
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 
 namespace blink {
+namespace {
+
+void DisposeCallback(Dart_NativeArguments args) {
+  DartCall(&Scene::dispose, args);
+}
+
+}  // namespace
+
+IMPLEMENT_WRAPPERTYPEINFO(Scene);
+
+void Scene::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "Scene_dispose", DisposeCallback, 1, true },
+  });
+}
 
 PassRefPtr<Scene> Scene::create(
     std::unique_ptr<sky::compositor::Layer> rootLayer,

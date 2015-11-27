@@ -346,7 +346,7 @@ def pass_by_value_format(typename, null_check="{null_check}"):
 DART_TO_CPP_VALUE = {
     # Basic
     'Date': 'DartUtilities::dartToDate(args, {index}, exception)',
-    'DOMString': 'DartConverter<String>::FromArguments{null_check}(args, {index}, exception, {auto_scope})',
+    'DOMString': 'DartConverter<String>::FromArguments{null_check}(args, {index}, exception)',
     'ByteString': 'DartUtilities::dartToByteString{null_check}(args, {index}, exception, {auto_scope})',
     'ScalarValueString': 'DartUtilities::dartToScalarValueString{null_check}(args, {index}, exception, {auto_scope})',
     'boolean': 'DartConverter<bool>::FromArguments(args, {index}, exception)',

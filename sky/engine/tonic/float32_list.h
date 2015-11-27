@@ -19,6 +19,7 @@ class Float32List {
  public:
   explicit Float32List(Dart_Handle list);
   Float32List(Float32List&& other);
+  Float32List();
   ~Float32List();
 
   float& at(intptr_t i)
@@ -50,10 +51,14 @@ class Float32List {
 template <>
 struct DartConverter<Float32List> {
   static void SetReturnValue(Dart_NativeArguments args, Float32List val);
-
+  static Float32List FromArguments(Dart_NativeArguments args,
+                                   int index,
+                                   Dart_Handle& exception);
   static Float32List FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                                 int index,
-                                                Dart_Handle& exception);
+                                                Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
 };
 
 } // namespace blink

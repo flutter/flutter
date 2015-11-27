@@ -19,6 +19,7 @@ class Float64List {
  public:
   explicit Float64List(Dart_Handle list);
   Float64List(Float64List&& other);
+  Float64List();
   ~Float64List();
 
   double& at(intptr_t i)
@@ -50,10 +51,14 @@ class Float64List {
 template <>
 struct DartConverter<Float64List> {
   static void SetReturnValue(Dart_NativeArguments args, Float64List val);
-
+  static Float64List FromArguments(Dart_NativeArguments args,
+                                   int index,
+                                   Dart_Handle& exception);
   static Float64List FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                                 int index,
-                                                Dart_Handle& exception);
+                                                Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
 };
 
 } // namespace blink

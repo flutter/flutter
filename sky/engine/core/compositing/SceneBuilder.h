@@ -40,7 +40,7 @@ public:
     void pushClipRRect(const RRect& rrect, const Rect& bounds);
     void pushClipPath(const CanvasPath* path, const Rect& bounds);
     void pushOpacity(int alpha, const Rect& bounds);
-    void pushColorFilter(SkColor color, SkXfermode::Mode transferMode, const Rect& bounds);
+    void pushColorFilter(CanvasColor color, TransferMode transferMode, const Rect& bounds);
     void pop();
 
     void addPicture(const Offset& offset, Picture* picture, const Rect& bounds);
@@ -49,6 +49,8 @@ public:
     void setRasterizerTracingThreshold(uint32_t frameInterval);
 
     PassRefPtr<Scene> build();
+
+    static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
     explicit SceneBuilder(const Rect& bounds);

@@ -42,9 +42,9 @@ RRect DartConverter<RRect>::FromDart(Dart_Handle dart_rrect) {
   return result;
 }
 
-RRect DartConverter<RRect>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                       int index,
-                                                       Dart_Handle& exception) {
+RRect DartConverter<RRect>::FromArguments(Dart_NativeArguments args,
+                                          int index,
+                                          Dart_Handle& exception) {
   Dart_Handle dart_rrect = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(dart_rrect));
   return FromDart(dart_rrect);

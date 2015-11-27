@@ -22,7 +22,7 @@ SkColor DartConverter<CanvasColor>::FromDart(Dart_Handle dart_color) {
   return static_cast<SkColor>(color);
 }
 
-SkColor DartConverter<CanvasColor>::FromArgumentsWithNullCheck(
+SkColor DartConverter<CanvasColor>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

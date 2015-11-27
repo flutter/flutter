@@ -7,6 +7,9 @@
 
 namespace blink {
 
+Uint8List::Uint8List()
+    : data_(nullptr), num_elements_(0), dart_handle_(nullptr) {}
+
 Uint8List::Uint8List(Dart_Handle list)
     : data_(nullptr), num_elements_(0), dart_handle_(list) {
   if (Dart_IsNull(list))
@@ -32,7 +35,7 @@ Uint8List::~Uint8List() {
     Dart_TypedDataReleaseData(dart_handle_);
 }
 
-Uint8List DartConverter<Uint8List>::FromArgumentsWithNullCheck(
+Uint8List DartConverter<Uint8List>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

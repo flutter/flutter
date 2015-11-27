@@ -236,8 +236,6 @@ sky_core_files = [
 ]
 
 core_idl_files = get_path_info([
-                                 "compositing/Scene.idl",
-                                 "compositing/SceneBuilder.idl",
                                  "painting/Canvas.idl",
                                  "painting/ColorFilter.idl",
                                  "painting/Drawable.idl",
@@ -258,6 +256,7 @@ core_idl_files = get_path_info([
                                "abspath")
 
 core_dart_files = get_path_info([
+                                  "dart/compositing.dart",
                                   "dart/hash_codes.dart",
                                   "dart/hooks.dart",
                                   "dart/lerp.dart",
