@@ -15,6 +15,7 @@ import 'package:flutter/rendering.dart';
 
 import 'stock_data.dart';
 
+part 'global_settings.dart';
 part 'stock_arrow.dart';
 part 'stock_home.dart';
 part 'stock_list.dart';
@@ -22,7 +23,6 @@ part 'stock_menu.dart';
 part 'stock_row.dart';
 part 'stock_settings.dart';
 part 'stock_symbol_viewer.dart';
-part 'stock_types.dart';
 
 class StocksApp extends StatefulComponent {
   StocksAppState createState() => new StocksAppState();
@@ -35,6 +35,7 @@ class StocksAppState extends State<StocksApp> {
 
   void initState() {
     super.initState();
+    _settings = new GlobalSettings(onChanged: _handleSettingsChanged);
     new StockDataFetcher((StockData data) {
       setState(() {
         data.appendTo(_stocks, _symbols);
@@ -42,30 +43,19 @@ class StocksAppState extends State<StocksApp> {
     });
   }
 
-  StockMode _optimismSetting = StockMode.optimistic;
-  BackupMode _backupSetting = BackupMode.disabled;
-  void modeUpdater(StockMode optimism) {
-    setState(() {
-      _optimismSetting = optimism;
-    });
-  }
-  void settingsUpdater({ StockMode optimism, BackupMode backup }) {
-    setState(() {
-      if (optimism != null)
-        _optimismSetting = optimism;
-      if (backup != null)
-        _backupSetting = backup;
-    });
+  GlobalSettings _settings;
+  void _handleSettingsChanged() {
+    setState(() { });
   }
 
   ThemeData get theme {
-    switch (_optimismSetting) {
-      case StockMode.optimistic:
+    switch (_settings.optimism) {
+      case OptimismMode.optimistic:
         return new ThemeData(
           brightness: ThemeBrightness.light,
           primarySwatch: Colors.purple
         );
-      case StockMode.pessimistic:
+      case OptimismMode.pessimistic:
         return new ThemeData(
           brightness: ThemeBrightness.dark,
           accentColor: Colors.redAccent[200]
@@ -92,8 +82,8 @@ class StocksAppState extends State<StocksApp> {
       title: 'Stocks',
       theme: theme,
       routes: <String, RouteBuilder>{
-         '/':         (RouteArguments args) => new StockHome(_stocks, _symbols, _optimismSetting, modeUpdater),
-         '/settings': (RouteArguments args) => new StockSettings(_optimismSetting, _backupSetting, settingsUpdater)
+         '/':         (_) => new StockHome(_stocks, _symbols, _settings),
+         '/settings': (_) => new StockSettings(_settings)
       },
       onGenerateRoute: _getRoute
     );

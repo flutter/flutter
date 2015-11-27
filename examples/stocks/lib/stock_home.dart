@@ -4,20 +4,17 @@
 
 part of stocks;
 
-typedef void ModeUpdater(StockMode mode);
-
 class StockHome extends StatefulComponent {
-  StockHome(this.stocks, this.symbols, this.stockMode, this.modeUpdater);
+  StockHome(this.stocks, this.symbols, this.settings);
 
   final Map<String, Stock> stocks;
   final List<String> symbols;
-  final StockMode stockMode;
-  final ModeUpdater modeUpdater;
+  final GlobalSettings settings;
 
-  StockHomeState createState() => new StockHomeState();
+  _StockHomeState createState() => new _StockHomeState();
 }
 
-class StockHomeState extends State<StockHome> {
+class _StockHomeState extends State<StockHome> {
 
   final GlobalKey scaffoldKey = new GlobalKey();
   bool _isSearching = false;
@@ -54,9 +51,8 @@ class StockHomeState extends State<StockHome> {
     });
   }
 
-  void _handleStockModeChange(StockMode value) {
-    if (config.modeUpdater != null)
-      config.modeUpdater(value);
+  void _handleOptimismChanged(OptimismMode optimism) {
+    config.settings.optimism = optimism;
   }
 
   void _handleMenuShow() {
@@ -67,75 +63,72 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  void _showDrawer() {
-    showDrawer(
-      context: context,
-      child: new Block(<Widget>[
-        new DrawerHeader(child: new Text('Stocks')),
-        new DrawerItem(
-          icon: 'action/assessment',
-          selected: true,
-          child: new Text('Stock List')
-        ),
-        new DrawerItem(
-          icon: 'action/account_balance',
-          onPressed: () {
-            showDialog(
-              context: context,
-              child: new Dialog(
-                title: new Text('Not Implemented'),
-                content: new Text('This feature has not yet been implemented.'),
-                actions: <Widget>[
-                  new FlatButton(
-                    child: new Text('USE IT'),
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    }
-                  ),
-                  new FlatButton(
-                    child: new Text('OH WELL'),
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    }
-                  ),
-                ]
-              )
-            );
-          },
-          child: new Text('Account Balance')
-        ),
-        new DrawerItem(
-          icon: 'device/dvr',
-          onPressed: () { debugDumpApp(); debugDumpRenderTree(); debugDumpLayerTree(); },
-          child: new Text('Dump App to Console')
-        ),
-        new DrawerDivider(),
-        new DrawerItem(
-          icon: 'action/thumb_up',
-          onPressed: () => _handleStockModeChange(StockMode.optimistic),
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Optimistic')),
-            new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
-          ])
-        ),
-        new DrawerItem(
-          icon: 'action/thumb_down',
-          onPressed: () => _handleStockModeChange(StockMode.pessimistic),
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Pessimistic')),
-            new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
-          ])
-        ),
-        new DrawerDivider(),
-        new DrawerItem(
-          icon: 'action/settings',
-          onPressed: _handleShowSettings,
-          child: new Text('Settings')),
-        new DrawerItem(
-          icon: 'action/help',
-          child: new Text('Help & Feedback'))
-      ])
-    );
+  Widget _buildDrawer(BuildContext context) {
+    return new Block(<Widget>[
+      new DrawerHeader(child: new Text('Stocks')),
+      new DrawerItem(
+        icon: 'action/assessment',
+        selected: true,
+        child: new Text('Stock List')
+      ),
+      new DrawerItem(
+        icon: 'action/account_balance',
+        onPressed: () {
+          showDialog(
+            context: context,
+            child: new Dialog(
+              title: new Text('Not Implemented'),
+              content: new Text('This feature has not yet been implemented.'),
+              actions: <Widget>[
+                new FlatButton(
+                  child: new Text('USE IT'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  }
+                ),
+                new FlatButton(
+                  child: new Text('OH WELL'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  }
+                ),
+              ]
+            )
+          );
+        },
+        child: new Text('Account Balance')
+      ),
+      new DrawerItem(
+        icon: 'device/dvr',
+        onPressed: () { debugDumpApp(); debugDumpRenderTree(); debugDumpLayerTree(); },
+        child: new Text('Dump App to Console')
+      ),
+      new DrawerDivider(),
+      new DrawerItem(
+        icon: 'action/thumb_up',
+        onPressed: () => _handleOptimismChanged(OptimismMode.optimistic),
+        child: new Row(<Widget>[
+          new Flexible(child: new Text('Optimistic')),
+          new Radio<OptimismMode>(value: OptimismMode.optimistic, groupValue: config.settings.optimism, onChanged: _handleOptimismChanged)
+        ])
+      ),
+      new DrawerItem(
+        icon: 'action/thumb_down',
+        onPressed: () => _handleOptimismChanged(OptimismMode.pessimistic),
+        child: new Row(<Widget>[
+          new Flexible(child: new Text('Pessimistic')),
+          new Radio<OptimismMode>(value: OptimismMode.pessimistic, groupValue: config.settings.optimism, onChanged: _handleOptimismChanged)
+        ])
+      ),
+      new DrawerDivider(),
+      new DrawerItem(
+        icon: 'action/settings',
+        onPressed: _handleShowSettings,
+        child: new Text('Settings')),
+      new DrawerItem(
+        icon: 'action/help',
+        child: new Text('Help & Feedback'))
+    ]);
   }
 
   void _handleShowSettings() {
@@ -148,7 +141,7 @@ class StockHomeState extends State<StockHome> {
       elevation: 0,
       left: new IconButton(
         icon: "navigation/menu",
-        onPressed: _showDrawer
+        onPressed: () { showDrawer(context: context, builder: _buildDrawer ); }
       ),
       center: new Text('Stocks'),
       right: <Widget>[
