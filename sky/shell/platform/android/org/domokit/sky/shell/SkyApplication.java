@@ -32,13 +32,12 @@ import org.domokit.vsync.VSyncProviderImpl;
  * state and initializations.
  */
 public class SkyApplication extends BaseChromiumApplication {
-    static final String SNAPSHOT = "snapshot_blob.bin";
     static final String APP_BUNDLE = "app.flx";
     static final String MANIFEST = "flutter.yaml";
 
     private static final String TAG = "SkyApplication";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
-    private static final String[] SKY_RESOURCES = {"icudtl.dat", SNAPSHOT, APP_BUNDLE, MANIFEST};
+    private static final String[] SKY_RESOURCES = {"icudtl.dat", APP_BUNDLE, MANIFEST};
 
     private ResourceExtractor mResourceExtractor;
 
