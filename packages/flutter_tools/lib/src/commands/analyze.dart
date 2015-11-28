@@ -121,6 +121,8 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
+    bool foundAnyInCurrentDirectory = false;
+
     if (argResults['current-directory']) {
       // ./*.dart
       Directory currentDirectory = new Directory('.');
@@ -131,8 +133,10 @@ class AnalyzeCommand extends FlutterCommand {
           foundOne = true;
         }
       }
-      if (foundOne)
+      if (foundOne) {
         pubSpecDirectories.add('.');
+        foundAnyInCurrentDirectory = true;
+      }
     }
 
     if (argResults['current-package']) {
@@ -141,6 +145,7 @@ class AnalyzeCommand extends FlutterCommand {
       if (FileSystemEntity.isFileSync(mainPath)) {
         dartFiles.add(mainPath);
         pubSpecDirectories.add('.');
+        foundAnyInCurrentDirectory = true;
       }
     }
 
@@ -180,9 +185,9 @@ class AnalyzeCommand extends FlutterCommand {
     }
     if (hadInconsistentRequirements) {
       if (argResults['flutter-repo'])
-        _logging.warning('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))}".');
-      if (argResults['current-directory'] || argResults['current-package'])
-        _logging.warning('You may need to run "pub get".');
+        _logging.warning('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))} --upgrade".');
+      if (foundAnyInCurrentDirectory)
+        _logging.warning('You may need to run "pub upgrade".');
     }
 
     String buildDir = buildConfigurations.firstWhere((BuildConfiguration config) => config.testable, orElse: () => null)?.buildDir;
