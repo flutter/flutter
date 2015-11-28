@@ -24,7 +24,6 @@ class TestRunner {
   struct TestDescriptor {
     std::string path;
     std::string package_root;
-    bool is_snapshot = false;
   };
 
   void Run(const TestDescriptor& test);

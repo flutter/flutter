@@ -200,11 +200,6 @@ void Engine::RunFromFile(const mojo::String& main,
   RunFromLibrary(main);
 }
 
-void Engine::RunFromSnapshot(const mojo::String& path) {
-  std::string path_str = path;
-  RunFromSnapshotStream(path_str, Fetch(base::FilePath(path_str)));
-}
-
 void Engine::RunFromBundle(const mojo::String& path) {
   AssetUnpackerJob* unpacker = new AssetUnpackerJob(
       mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));

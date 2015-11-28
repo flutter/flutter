@@ -43,10 +43,7 @@ TestRunner& TestRunner::Shared() {
 }
 
 void TestRunner::Run(const TestDescriptor& test) {
-  if (test.is_snapshot)
-    sky_engine_->RunFromSnapshot(test.path);
-  else
-    sky_engine_->RunFromFile(test.path, test.package_root);
+  sky_engine_->RunFromFile(test.path, test.package_root);
 }
 
 }  // namespace shell

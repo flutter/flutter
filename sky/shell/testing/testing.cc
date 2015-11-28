@@ -19,16 +19,10 @@ bool InitForTesting() {
 
   TestRunner::TestDescriptor test;
   test.package_root = command_line.GetSwitchValueASCII(switches::kPackageRoot);
-
-  if (command_line.HasSwitch(switches::kSnapshot)) {
-    test.path = command_line.GetSwitchValueASCII(switches::kSnapshot);
-    test.is_snapshot = true;
-  } else {
-    auto args = command_line.GetArgs();
-    if (args.empty())
-      return false;
-    test.path = args[0];
-  }
+  auto args = command_line.GetArgs();
+  if (args.empty())
+    return false;
+  test.path = args[0];
 
   TestRunner::Shared().Run(test);
   return true;

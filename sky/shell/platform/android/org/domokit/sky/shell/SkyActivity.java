@@ -117,11 +117,6 @@ public class SkyActivity extends Activity {
             return;
         }
         File dataDir = new File(PathUtils.getDataDirectory(this));
-        File snapshot = new File(dataDir, SkyApplication.SNAPSHOT);
-        if (snapshot.exists()) {
-            mView.getEngine().runFromSnapshot(snapshot.getPath());
-            return;
-        }
         File appBundle = new File(dataDir, SkyApplication.APP_BUNDLE);
         if (appBundle.exists()) {
             mView.getEngine().runFromBundle(appBundle.getPath());

@@ -11,17 +11,17 @@ namespace shell {
 namespace switches {
 
 const char kEnableCheckedMode[] = "enable-checked-mode";
+const char kFLX[] = "flx";
 const char kHelp[] = "help";
 const char kNonInteractive[] = "non-interactive";
 const char kPackageRoot[] = "package-root";
-const char kSnapshot[] = "snapshot";
 
 void PrintUsage(const std::string& executable_name) {
   std::cerr << "Usage: " << executable_name
             << " --" << kEnableCheckedMode
             << " --" << kNonInteractive
+            << " --" << kFLX << "=FLX"
             << " --" << kPackageRoot << "=PACKAGE_ROOT"
-            << " --" << kSnapshot << "=SNAPSHOT"
             << " [ MAIN_DART ]" << std::endl;
 }
 

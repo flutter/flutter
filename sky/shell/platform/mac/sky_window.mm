@@ -87,9 +87,9 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  if (command_line.HasSwitch(sky::shell::switches::kSnapshot)) {
-    auto snapshot = command_line.GetSwitchValueASCII(sky::shell::switches::kSnapshot);
-    _sky_engine->RunFromSnapshot(snapshot);
+  std::string flx = command_line.GetSwitchValueASCII(sky::shell::switches::kFLX);
+  if (!flx.empty()) {
+    _sky_engine->RunFromBundle(flx);
     return;
   }
 
