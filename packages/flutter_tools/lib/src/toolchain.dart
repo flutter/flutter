@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 
 import 'artifacts.dart';
 import 'build_configuration.dart';
-import 'process.dart';
+import 'base/process.dart';
 
 class Compiler {
   Compiler(this._path);

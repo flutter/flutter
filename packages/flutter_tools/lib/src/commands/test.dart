@@ -5,16 +5,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable;
 
 import '../artifacts.dart';
+import '../base/logging.dart';
 import '../build_configuration.dart';
+import '../runner/flutter_command.dart';
 import '../test/loader.dart' as loader;
-import 'flutter_command.dart';
-
-final Logger _logging = new Logger('flutter_tools.test');
 
 class TestCommand extends FlutterCommand {
   String get name => 'test';
@@ -88,7 +86,7 @@ class TestCommand extends FlutterCommand {
       foundOne = true;
       loader.shellPath = path.join(Directory.current.path, getShellPath(config.targetPlatform, config.buildDir));
       if (!FileSystemEntity.isFileSync(loader.shellPath)) {
-          _logging.severe('Cannot find Flutter shell at ${loader.shellPath}');
+          logging.severe('Cannot find Flutter shell at ${loader.shellPath}');
         return 1;
       }
       await _runTests(testArgs, testDir);

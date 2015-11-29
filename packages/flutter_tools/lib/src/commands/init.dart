@@ -6,14 +6,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:logging/logging.dart';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../process.dart';
-
-final Logger _logging = new Logger('sky_tools.init');
+import '../base/logging.dart';
+import '../base/process.dart';
 
 class InitCommand extends Command {
   final String name = 'init';
@@ -82,7 +80,7 @@ class InitCommand extends Command {
     if (!pubSpecYaml.existsSync()) {
       if (skipIfAbsent)
         return 0;
-      _logging.severe('$directory: no pubspec.yaml found');
+      logging.severe('$directory: no pubspec.yaml found');
       return 1;
     }
 
@@ -101,7 +99,7 @@ class InitCommand extends Command {
         (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())))
       return 0;
 
-    _logging.severe('$directory: pubspec.yaml, pubspec.lock, and .packages are in an inconsistent state');
+    logging.severe('$directory: pubspec.yaml, pubspec.lock, and .packages are in an inconsistent state');
     return 1;
   }
 }

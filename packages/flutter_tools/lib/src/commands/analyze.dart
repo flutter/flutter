@@ -6,15 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
+import '../base/logging.dart';
+import '../base/process.dart';
 import '../build_configuration.dart';
-import '../process.dart';
-import 'flutter_command.dart';
-
-final Logger _logging = new Logger('sky_tools.analyze');
+import '../runner/flutter_command.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   String get name => 'analyze';
@@ -174,7 +172,7 @@ class AnalyzeCommand extends FlutterCommand {
         for (String package in dependencies.keys) {
           if (packages.containsKey(package)) {
             if (packages[package] != dependencies[package]) {
-              _logging.warning('Inconsistent requirements for $package; using ${packages[package]} (and not ${dependencies[package]}).');
+              logging.warning('Inconsistent requirements for $package; using ${packages[package]} (and not ${dependencies[package]}).');
               hadInconsistentRequirements = true;
             }
           } else {
@@ -185,9 +183,9 @@ class AnalyzeCommand extends FlutterCommand {
     }
     if (hadInconsistentRequirements) {
       if (argResults['flutter-repo'])
-        _logging.warning('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))} --upgrade".');
+        logging.warning('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))} --upgrade".');
       if (foundAnyInCurrentDirectory)
-        _logging.warning('You may need to run "pub upgrade".');
+        logging.warning('You may need to run "pub upgrade".');
     }
 
     String buildDir = buildConfigurations.firstWhere((BuildConfiguration config) => config.testable, orElse: () => null)?.buildDir;
@@ -222,7 +220,7 @@ class AnalyzeCommand extends FlutterCommand {
       mainFile.path
     ];
 
-    _logging.info(cmd.join(' '));
+    logging.info(cmd.join(' '));
     Process process = await Process.start(
       cmd[0],
       cmd.sublist(1),

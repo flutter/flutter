@@ -6,9 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
-
-final Logger _logging = new Logger('flutter_tools.process');
+import 'logging.dart';
 
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr.
@@ -17,7 +15,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   RegExp filter,
   String workingDirectory
 }) async {
-  _logging.info(cmd.join(' '));
+  logging.info(cmd.join(' '));
   Process process = await Process.start(
     cmd[0],
     cmd.sublist(1),
@@ -49,13 +47,13 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 Future runAndKill(List<String> cmd, Duration timeout) {
   Future<Process> proc = runDetached(cmd);
   return new Future.delayed(timeout, () async {
-    _logging.info('Intentionally killing ${cmd[0]}');
+    logging.info('Intentionally killing ${cmd[0]}');
     Process.killPid((await proc).pid);
   });
 }
 
 Future<Process> runDetached(List<String> cmd) {
-  _logging.info(cmd.join(' '));
+  logging.info(cmd.join(' '));
   Future<Process> proc = Process.start(
       cmd[0], cmd.getRange(1, cmd.length).toList(),
       mode: ProcessStartMode.DETACHED);
@@ -81,20 +79,20 @@ String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
   String workingDirectory
 }) {
-  _logging.info(cmd.join(' '));
+  logging.info(cmd.join(' '));
   ProcessResult results =
       Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList(), workingDirectory: workingDirectory);
   if (results.exitCode != 0) {
     String errorDescription = 'Error code ${results.exitCode} '
         'returned when attempting to run command: ${cmd.join(' ')}';
-    _logging.info(errorDescription);
+    logging.info(errorDescription);
     if (results.stderr.length > 0)
-      _logging.info('Errors logged: ${results.stderr.trim()}');
+      logging.info('Errors logged: ${results.stderr.trim()}');
     if (checked)
       throw errorDescription;
   }
   if (results.stdout.trim().isNotEmpty)
-    _logging.fine(results.stdout.trim());
+    logging.fine(results.stdout.trim());
   return results.stdout;
 }
 

@@ -6,14 +6,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'application_package.dart';
+import 'base/logging.dart';
+import 'base/process.dart';
 import 'build_configuration.dart';
-import 'process.dart';
-
-final Logger _logging = new Logger('flutter_tools.device');
 
 abstract class Device {
   final String id;
@@ -140,11 +138,11 @@ class IOSDevice extends Device {
         command = runCheckedSync(['which', command]).trim();
       } catch (e) {
         if (Platform.isMacOS) {
-          _logging.severe(macInstructions);
+          logging.severe(macInstructions);
         } else if (Platform.isLinux) {
-          _logging.severe(linuxInstructions);
+          logging.severe(linuxInstructions);
         } else {
-          _logging.severe('$command is not available on your platform.');
+          logging.severe('$command is not available on your platform.');
         }
       }
       return command;
@@ -204,7 +202,7 @@ class IOSDevice extends Device {
       (_) {
         return true;
       }, onError: (e) {
-        _logging.info('Failure running $debuggerPath: ', e);
+        logging.info('Failure running $debuggerPath: ', e);
         return false;
       }
     );
@@ -297,11 +295,11 @@ class IOSSimulator extends Device {
       // More than one simulator is listed as booted, which is not allowed but
       // sometimes happens erroneously.  Kill them all because we don't know
       // which one is actually running.
-      _logging.warning('Multiple running simulators were detected, '
+      logging.warning('Multiple running simulators were detected, '
           'which is not supposed to happen.');
       for (Match m in matches) {
         if (m.groupCount > 0) {
-          _logging.warning('Killing simulator ${m.group(1)}');
+          logging.warning('Killing simulator ${m.group(1)}');
           runSync([xcrunPath, 'simctl', 'shutdown', m.group(1)]);
         }
       }
@@ -312,7 +310,7 @@ class IOSSimulator extends Device {
     if (match != null && match.groupCount > 0) {
       return match.group(1);
     } else {
-      _logging.info('No running simulators found');
+      logging.info('No running simulators found');
       return null;
     }
   }
@@ -357,11 +355,11 @@ class IOSSimulator extends Device {
       runDetached([iOSSimPath]);
       Future<bool> checkConnection([int attempts = 20]) async {
         if (attempts == 0) {
-          _logging.info('Timed out waiting for iOS Simulator $id to boot.');
+          logging.info('Timed out waiting for iOS Simulator $id to boot.');
           return false;
         }
         if (!isConnected()) {
-          _logging.info('Waiting for iOS Simulator $id to boot...');
+          logging.info('Waiting for iOS Simulator $id to boot...');
           return await new Future.delayed(new Duration(milliseconds: 500),
               () => checkConnection(attempts - 1));
         }
@@ -372,7 +370,7 @@ class IOSSimulator extends Device {
       try {
         runCheckedSync([xcrunPath, 'simctl', 'boot', id]);
       } catch (e) {
-        _logging.warning('Unable to boot iOS Simulator $id: ', e);
+        logging.warning('Unable to boot iOS Simulator $id: ', e);
         return false;
       }
     }
@@ -511,7 +509,7 @@ class AndroidDevice extends Device {
     try {
       runCheckedSync([adbPath, 'version']);
     } catch (e) {
-      _logging.severe('Unable to find adb. Is "adb" in your path?');
+      logging.severe('Unable to find adb. Is "adb" in your path?');
       return devices;
     }
 
@@ -554,12 +552,12 @@ class AndroidDevice extends Device {
       } else if (unauthorizedRegex.hasMatch(line)) {
         Match match = unauthorizedRegex.firstMatch(line);
         String deviceID = match[1];
-        _logging.warning(
+        logging.warning(
           'Device $deviceID is not authorized.\n'
           'You might need to check your device for an authorization dialog.'
         );
       } else {
-        _logging.warning(
+        logging.warning(
           'Unexpected failure parsing device information from adb output:\n'
           '$line\n'
           'Please report a bug at https://github.com/flutter/flutter/issues/new');
@@ -578,7 +576,7 @@ class AndroidDevice extends Device {
     _hasValidAndroid = _checkForSupportedAndroidVersion();
 
     if (!_hasAdb || !_hasValidAndroid) {
-      _logging.warning('Unable to run on Android.');
+      logging.warning('Unable to run on Android.');
     }
   }
 
@@ -592,11 +590,11 @@ class AndroidDevice extends Device {
           path.join(androidHomeDir, 'sdk', 'platform-tools'))) {
         return path.join(androidHomeDir, 'sdk');
       } else {
-        _logging.warning('Android SDK not found at $androidHomeDir');
+        logging.warning('Android SDK not found at $androidHomeDir');
         return null;
       }
     } else {
-      _logging.warning('Android SDK not found. The ANDROID_HOME variable must be set.');
+      logging.warning('Android SDK not found. The ANDROID_HOME variable must be set.');
       return null;
     }
   }
@@ -612,7 +610,7 @@ class AndroidDevice extends Device {
       } else if (FileSystemEntity.isFileSync(adbPath2)) {
         return adbPath2;
       } else {
-        _logging.info('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
+        logging.info('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
             'using default path "$_ADB_PATH"');
         return _ADB_PATH;
       }
@@ -649,7 +647,7 @@ class AndroidDevice extends Device {
       }
       return false;
     }
-    _logging.warning(
+    logging.warning(
         'Unrecognized adb version string $adbVersion. Skipping version check.');
     return true;
   }
@@ -662,16 +660,16 @@ class AndroidDevice extends Device {
       }
 
       String locatedAdbPath = runCheckedSync(['which', 'adb']);
-      _logging.severe('"$locatedAdbPath" is too old. '
+      logging.severe('"$locatedAdbPath" is too old. '
           'Please install version 1.0.32 or later.\n'
           'Try setting ANDROID_HOME to the path to your Android SDK install. '
           'Android builds are unavailable.');
     } catch (e, stack) {
-      _logging.severe('"adb" not found in \$PATH. '
+      logging.severe('"adb" not found in \$PATH. '
           'Please install the Android SDK or set ANDROID_HOME '
           'to the path of your Android SDK install.');
-      _logging.info(e);
-      _logging.info(stack);
+      logging.info(e);
+      logging.info(stack);
     }
     return false;
   }
@@ -686,7 +684,7 @@ class AndroidDevice extends Device {
 
       String ready = runSync(adbCommandForDevice(['shell', 'echo', 'ready']));
       if (ready.trim() != 'ready') {
-        _logging.info('Android device not found.');
+        logging.info('Android device not found.');
         return false;
       }
 
@@ -698,17 +696,17 @@ class AndroidDevice extends Device {
       int sdkVersionParsed =
           int.parse(sdkVersion, onError: (String source) => null);
       if (sdkVersionParsed == null) {
-        _logging.severe('Unexpected response from getprop: "$sdkVersion"');
+        logging.severe('Unexpected response from getprop: "$sdkVersion"');
         return false;
       }
       if (sdkVersionParsed < 16) {
-        _logging.severe('The Android version ($sdkVersion) on the target device '
+        logging.severe('The Android version ($sdkVersion) on the target device '
             'is too old. Please use a Jelly Bean (version 16 / 4.1.x) device or later.');
         return false;
       }
       return true;
     } catch (e) {
-      _logging.severe('Unexpected failure from adb: ', e);
+      logging.severe('Unexpected failure from adb: ', e);
     }
     return false;
   }
@@ -735,12 +733,12 @@ class AndroidDevice extends Device {
     }
     if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])) ==
         '') {
-      _logging.info(
+      logging.info(
           'TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
       return false;
     }
     if (_getDeviceApkSha1(app) != _getSourceSha1(app)) {
-      _logging.info(
+      logging.info(
           'TODO(iansf): move this log to the caller. ${app.name} is out of date. Installing now...');
       return false;
     }
@@ -750,11 +748,11 @@ class AndroidDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     if (!isConnected()) {
-      _logging.info('Android device not connected. Not installing.');
+      logging.info('Android device not connected. Not installing.');
       return false;
     }
     if (!FileSystemEntity.isFileSync(app.localPath)) {
-      _logging.severe('"${app.localPath}" does not exist.');
+      logging.severe('"${app.localPath}" does not exist.');
       return false;
     }
 
@@ -775,10 +773,10 @@ class AndroidDevice extends Device {
     bool checked,
     String route
   }) {
-    _logging.fine('$this startBundle');
+    logging.fine('$this startBundle');
 
     if (!FileSystemEntity.isFileSync(bundlePath)) {
-      _logging.severe('Cannot find $bundlePath');
+      logging.severe('Cannot find $bundlePath');
       return false;
     }
 
@@ -882,7 +880,7 @@ class AndroidDevice extends Device {
       runSync(adbCommandForDevice(['shell', 'rm', tracePath]));
       return path.basename(tracePath);
     }
-    _logging.warning('No trace file detected. '
+    logging.warning('No trace file detected. '
         'Did you remember to start the trace before stopping it?');
     return null;
   }

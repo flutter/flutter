@@ -9,20 +9,18 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import '../file_system.dart';
+import '../base/file_system.dart';
+import '../base/logging.dart';
+import '../runner/flutter_command.dart';
 import '../toolchain.dart';
-import 'flutter_command.dart';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const List<String> _kDensities = const ['drawable-xxhdpi'];
 const List<String> _kThemes = const ['white', 'black'];
 const List<int> _kSizes = const [18, 24, 36, 48];
-
-final Logger _logging = new Logger('flutter_tools.build');
 
 class _Asset {
   final String base;
@@ -182,7 +180,7 @@ class BuildCommand extends FlutterCommand {
     String privateKeyPath: _kDefaultPrivateKeyPath,
     bool precompiledSnapshot: false
   }) async {
-    _logging.fine('Building $outputPath');
+    logging.fine('Building $outputPath');
 
     Map manifestDescriptor = _loadManifest(manifestPath);
 

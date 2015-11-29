@@ -5,15 +5,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
-
 import '../application_package.dart';
+import '../base/logging.dart';
+import '../base/process.dart';
 import '../device.dart';
-import '../process.dart';
+import '../runner/flutter_command.dart';
 import 'build.dart';
-import 'flutter_command.dart';
-
-final Logger _logging = new Logger('flutter_tools.listen');
 
 class ListenCommand extends FlutterCommand {
   final String name = 'listen';
@@ -48,7 +45,7 @@ class ListenCommand extends FlutterCommand {
     }
 
     while (true) {
-      _logging.info('Updating running Flutter apps...');
+      logging.info('Updating running Flutter apps...');
 
       BuildCommand builder = new BuildCommand();
       builder.inheritFromParent(this);
@@ -85,7 +82,7 @@ class ListenCommand extends FlutterCommand {
       try {
         runCheckedSync(['which', 'fswatch']);
       } catch (e) {
-        _logging.severe('"listen" command is only useful if you have installed '
+        logging.severe('"listen" command is only useful if you have installed '
             'fswatch on Mac.  Run "brew install fswatch" to install it with '
             'homebrew.');
         return null;
@@ -95,7 +92,7 @@ class ListenCommand extends FlutterCommand {
       try {
         runCheckedSync(['which', 'inotifywait']);
       } catch (e) {
-        _logging.severe('"listen" command is only useful if you have installed '
+        logging.severe('"listen" command is only useful if you have installed '
             'inotifywait on Linux.  Run "apt-get install inotify-tools" or '
             'equivalent to install it.');
         return null;
@@ -109,7 +106,7 @@ class ListenCommand extends FlutterCommand {
         'modify,close_write,move,create,delete',
       ]..addAll(directories);
     } else {
-      _logging.severe('"listen" command is only available on Mac and Linux.');
+      logging.severe('"listen" command is only available on Mac and Linux.');
     }
     return null;
   }
@@ -121,7 +118,7 @@ class ListenCommand extends FlutterCommand {
     try {
       runCheckedSync(watchCommand);
     } catch (e) {
-      _logging.warning('Watching directories failed.', e);
+      logging.warning('Watching directories failed.', e);
       return false;
     }
 
