@@ -4,13 +4,9 @@
 
 import 'dart:async';
 
-import 'package:logging/logging.dart';
-
 import '../artifacts.dart';
-import '../process.dart';
-import 'flutter_command.dart';
-
-final Logger _logging = new Logger('flutter_tools.upgrade');
+import '../base/process.dart';
+import '../runner/flutter_command.dart';
 
 class UpgradeCommand extends FlutterCommand {
   final String name = 'upgrade';

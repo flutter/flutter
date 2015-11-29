@@ -4,13 +4,10 @@
 
 import 'dart:async';
 
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'artifacts.dart';
 import 'build_configuration.dart';
-
-final Logger _logging = new Logger('flutter_tools.application_package');
 
 abstract class ApplicationPackage {
   /// Path to the actual apk or bundle.

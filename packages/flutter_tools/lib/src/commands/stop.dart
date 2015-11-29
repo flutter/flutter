@@ -4,13 +4,9 @@
 
 import 'dart:async';
 
-import 'package:logging/logging.dart';
-
 import '../application_package.dart';
 import '../device.dart';
-import 'flutter_command.dart';
-
-final Logger _logging = new Logger('flutter_tools.stop');
+import '../runner/flutter_command.dart';
 
 class StopCommand extends FlutterCommand {
   final String name = 'stop';

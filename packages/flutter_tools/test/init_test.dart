@@ -8,7 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/commands/init.dart';
-import 'package:flutter_tools/src/process.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();

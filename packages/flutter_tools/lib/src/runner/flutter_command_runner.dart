@@ -11,10 +11,10 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
+import '../base/logging.dart';
+import '../base/process.dart';
 import '../build_configuration.dart';
-import '../process.dart';
-
-final Logger _logging = new Logger('flutter_tools.flutter_command_runner');
+import 'version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -45,7 +45,7 @@ class FlutterCommandRunner extends CommandRunner {
         help: 'Path to your packages directory.$packagesHelp');
     argParser.addOption('flutter-root',
         help: 'The root directory of the Flutter repository. Defaults to \$$kFlutterRootEnvironmentVariableName if set,\n'
-              'otherwise defaults to a value derived from the location of this tool.', defaultsTo: defaultFlutterRoot);
+              'otherwise defaults to a value derived from the location of this tool.', defaultsTo: _defaultFlutterRoot);
 
     argParser.addOption('android-device-id',
         help: 'Serial number of the target Android device.');
@@ -128,10 +128,10 @@ class FlutterCommandRunner extends CommandRunner {
 
   ArgResults _globalResults;
 
-  String get defaultFlutterRoot {
-    String script = Platform.script.toFilePath();
+  String get _defaultFlutterRoot {
     if (Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
       return Platform.environment[kFlutterRootEnvironmentVariableName];
+    String script = Platform.script.toFilePath();
     if (path.basename(script) == kSnapshotFileName)
       return path.dirname(path.dirname(path.dirname(script)));
     if (path.basename(script) == kFlutterToolsScriptFileName)
@@ -151,31 +151,12 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults.wasParsed('package-root'))
       ArtifactStore.packageRoot = globalResults['package-root'];
 
-    if (globalResults['version'])
-      return _printVersion();
+    if (globalResults['version']) {
+      print(getVersion(ArtifactStore.flutterRoot));
+      return new Future<int>.value(0);
+    }
 
     return super.runCommand(globalResults);
-  }
-
-  Future<int> _printVersion() async {
-    String upstream = runSync([
-      'git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'
-    ], workingDirectory: ArtifactStore.flutterRoot).trim();
-    String repository = '<unknown>';
-    int slash = upstream.indexOf('/');
-    if (slash != -1) {
-      String remote = upstream.substring(0, slash);
-      repository = runSync([
-        'git', 'ls-remote', '--get-url', remote
-      ], workingDirectory: ArtifactStore.flutterRoot).trim();
-      upstream = upstream.substring(slash + 1);
-    }
-    String revision = runSync([
-      'git', 'log', '-n', '1', '--pretty=format:%H (%ar)'
-    ], workingDirectory: ArtifactStore.flutterRoot).trim();
-
-    print('Flutter\nRepository: $repository\nBranch: $upstream\nRevision: $revision');
-    return 0;
   }
 
   String _tryEnginePath(String enginePath) {
@@ -239,7 +220,7 @@ class FlutterCommandRunner extends CommandRunner {
       ));
     } else {
       if (!FileSystemEntity.isDirectorySync(enginePath))
-        _logging.warning('$enginePath is not a valid directory');
+        logging.warning('$enginePath is not a valid directory');
 
       if (!isDebug && !isRelease)
         isDebug = true;

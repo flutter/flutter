@@ -6,14 +6,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import 'build_configuration.dart';
-import 'os_utils.dart';
-import 'process.dart';
-
-final Logger _logging = new Logger('flutter_tools.artifacts');
+import 'base/os.dart';
+import 'base/process.dart';
+import 'base/logging.dart';
 
 String _getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {
@@ -221,12 +219,12 @@ class ArtifactStore {
   /// and extract it to the local cache.
   static Future _doDownloadArtifactsFromZip(String platform) async {
     String url = getCloudStorageBaseUrl(platform) + 'artifacts.zip';
-    _logging.info('Downloading $url.');
+    logging.info('Downloading $url.');
 
     HttpClient httpClient = new HttpClient();
     HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
     HttpClientResponse response = await request.close();
-    _logging.fine('Received response statusCode=${response.statusCode}');
+    logging.fine('Received response statusCode=${response.statusCode}');
     if (response.statusCode != 200)
       throw new Exception(response.reasonPhrase);
 
@@ -246,7 +244,7 @@ class ArtifactStore {
 
     for (Artifact artifact in knownArtifacts) {
       if (artifact.platform == platform && artifact.executable) {
-        ProcessResult result = osUtils.makeExecutable(
+        ProcessResult result = os.makeExecutable(
             new File(path.join(cacheDir.path, artifact.fileName)));
         if (result.exitCode != 0)
           throw new Exception(result.stderr);
@@ -270,7 +268,7 @@ class ArtifactStore {
 
   static Directory _getBaseCacheDir() {
     if (flutterRoot == null) {
-      _logging.severe('FLUTTER_ROOT not specified. Cannot find artifact cache.');
+      logging.severe('FLUTTER_ROOT not specified. Cannot find artifact cache.');
       throw new ProcessExit(2);
     }
     Directory cacheDir = new Directory(path.join(flutterRoot, 'bin', 'cache', 'artifacts'));
@@ -296,7 +294,7 @@ class ArtifactStore {
     if (!cachedFile.existsSync()) {
       await _downloadArtifactsFromZip(artifact.platform);
       if (!cachedFile.existsSync()) {
-        _logging.severe('File not found in the platform artifacts: ${cachedFile.path}');
+        logging.severe('File not found in the platform artifacts: ${cachedFile.path}');
         throw new ProcessExit(2);
       }
     }
@@ -305,7 +303,7 @@ class ArtifactStore {
 
   static void clear() {
     Directory cacheDir = _getBaseCacheDir();
-    _logging.fine('Clearing cache directory ${cacheDir.path}');
+    logging.fine('Clearing cache directory ${cacheDir.path}');
     cacheDir.deleteSync(recursive: true);
   }
 

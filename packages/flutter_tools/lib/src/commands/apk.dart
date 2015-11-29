@@ -5,15 +5,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
+import '../base/logging.dart';
 import '../build_configuration.dart';
 import '../device.dart';
-import '../file_system.dart';
+import '../runner/flutter_command.dart';
 import 'build.dart';
-import 'flutter_command.dart';
 import 'start.dart';
 
 const String _kDefaultAndroidManifestPath = 'apk/AndroidManifest.xml';
@@ -23,8 +23,6 @@ const String _kKeystorePassword = "chromium";
 
 const String _kAndroidPlatformVersion = '22';
 const String _kBuildToolsVersion = '22.0.1';
-
-final Logger _logging = new Logger('flutter_tools.apk');
 
 /// Copies files into a new directory structure.
 class _AssetBuilder {
@@ -172,19 +170,19 @@ class ApkCommand extends FlutterCommand {
     components.keystore = new File(artifactPaths[3]);
 
     if (!components.androidSdk.existsSync()) {
-      _logging.severe('Can not locate Android SDK: $androidSdkPath');
+      logging.severe('Can not locate Android SDK: $androidSdkPath');
       return null;
     }
     if (!(new _ApkBuilder(components.androidSdk.path).checkSdkPath())) {
-      _logging.severe('Can not locate expected Android SDK tools at $androidSdkPath');
-      _logging.severe('You must install version $_kAndroidPlatformVersion of the SDK platform');
-      _logging.severe('and version $_kBuildToolsVersion of the build tools.');
+      logging.severe('Can not locate expected Android SDK tools at $androidSdkPath');
+      logging.severe('You must install version $_kAndroidPlatformVersion of the SDK platform');
+      logging.severe('and version $_kBuildToolsVersion of the build tools.');
       return null;
     }
     for (File f in [components.manifest, components.icuData, components.classesDex,
                     components.libSkyShell, components.keystore]) {
       if (!f.existsSync()) {
-        _logging.severe('Can not locate file: ${f.path}');
+        logging.severe('Can not locate file: ${f.path}');
         return null;
       }
     }
@@ -227,7 +225,7 @@ class ApkCommand extends FlutterCommand {
 
     _ApkComponents components = await _findApkComponents(config);
     if (components == null) {
-      _logging.severe('Unable to build APK.');
+      logging.severe('Unable to build APK.');
       return 1;
     }
 
@@ -235,8 +233,8 @@ class ApkCommand extends FlutterCommand {
 
     if (!flxPath.isEmpty) {
       if (!FileSystemEntity.isFileSync(flxPath)) {
-        _logging.severe('FLX does not exist: $flxPath');
-        _logging.severe('(Omit the --flx option to build the FLX automatically)');
+        logging.severe('FLX does not exist: $flxPath');
+        logging.severe('(Omit the --flx option to build the FLX automatically)');
         return 1;
       }
       return _buildApk(components, flxPath);

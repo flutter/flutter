@@ -9,15 +9,14 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
+import '../base/logging.dart';
+import '../base/process.dart';
 import '../build_configuration.dart';
-import '../process.dart';
+import '../runner/flutter_command.dart';
 import 'build.dart';
-import 'flutter_command.dart';
 import 'start.dart';
 
 const String _kDefaultBundlePath = 'build/app.flx';
-
-final Logger _logging = new Logger('flutter_tools.run_mojo');
 
 class RunMojoCommand extends FlutterCommand {
   final String name = 'run_mojo';
@@ -121,9 +120,9 @@ class RunMojoCommand extends FlutterCommand {
     if (useDevtools) {
       final String buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
       args.add(buildFlag);
-      if (_logging.level <= Level.INFO) {
+      if (logging.level <= Level.INFO) {
         args.add('--verbose');
-        if (_logging.level <= Level.FINE) {
+        if (logging.level <= Level.FINE) {
           args.add('--verbose');
         }
       }
@@ -141,12 +140,12 @@ class RunMojoCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
-      _logging.severe('Must specify either --mojo-path or --devtools-path.');
+      logging.severe('Must specify either --mojo-path or --devtools-path.');
       return 1;
     }
 
     if (argResults['mojo-debug'] && argResults['mojo-release']) {
-      _logging.severe('Cannot specify both --mojo-debug and --mojo-release');
+      logging.severe('Cannot specify both --mojo-debug and --mojo-release');
       return 1;
     }
 

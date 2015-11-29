@@ -4,10 +4,9 @@
 
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-final Logger _logging = new Logger('flutter_tools.build_configuration');
+import 'base/logging.dart';
 
 enum BuildType {
   prebuilt,
@@ -33,7 +32,7 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.mac;
   if (Platform.isLinux)
     return HostPlatform.linux;
-  _logging.warning('Unsupported host platform, defaulting to Linux');
+  logging.warning('Unsupported host platform, defaulting to Linux');
   return HostPlatform.linux;
 }
 
@@ -42,7 +41,7 @@ TargetPlatform getCurrentHostPlatformAsTarget() {
     return TargetPlatform.mac;
   if (Platform.isLinux)
     return TargetPlatform.linux;
-  _logging.warning('Unsupported host platform, defaulting to Linux');
+  logging.warning('Unsupported host platform, defaulting to Linux');
   return TargetPlatform.linux;
 }
 

@@ -9,12 +9,12 @@ import 'package:args/command_runner.dart';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'src/base/process.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/apk.dart';
 import 'src/commands/build.dart';
 import 'src/commands/cache.dart';
 import 'src/commands/daemon.dart';
-import 'src/commands/flutter_command_runner.dart';
 import 'src/commands/init.dart';
 import 'src/commands/install.dart';
 import 'src/commands/list.dart';
@@ -26,7 +26,7 @@ import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/upgrade.dart';
-import 'src/process.dart';
+import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
 ///

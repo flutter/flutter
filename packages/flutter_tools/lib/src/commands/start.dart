@@ -5,17 +5,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
+import '../base/logging.dart';
 import '../device.dart';
+import '../runner/flutter_command.dart';
 import 'build.dart';
-import 'flutter_command.dart';
 import 'install.dart';
 import 'stop.dart';
-
-final Logger _logging = new Logger('flutter_tools.start');
 
 class StartCommand extends FlutterCommand {
   final String name = 'start';
@@ -51,7 +49,7 @@ class StartCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    _logging.fine('downloading toolchain');
+    logging.fine('downloading toolchain');
 
     await Future.wait([
       downloadToolchain(),
@@ -60,13 +58,13 @@ class StartCommand extends FlutterCommand {
 
     bool poke = argResults['poke'];
     if (!poke) {
-      _logging.fine('running stop command');
+      logging.fine('running stop command');
 
       StopCommand stopper = new StopCommand();
       stopper.inheritFromParent(this);
       stopper.stop();
 
-      _logging.fine('running install command');
+      logging.fine('running install command');
 
       // Only install if the user did not specify a poke
       InstallCommand installer = new InstallCommand();
@@ -91,14 +89,14 @@ class StartCommand extends FlutterCommand {
           continue;
         }
 
-        _logging.fine('running build command for $device');
+        logging.fine('running build command for $device');
 
         BuildCommand builder = new BuildCommand();
         builder.inheritFromParent(this);
         await builder.buildInTempDir(
           mainPath: mainPath,
           onBundleAvailable: (String localBundlePath) {
-            _logging.fine('running start bundle for $device');
+            logging.fine('running start bundle for $device');
 
             if (device.startBundle(package, localBundlePath,
                                    poke: poke,
@@ -108,7 +106,7 @@ class StartCommand extends FlutterCommand {
           }
         );
       } else {
-        _logging.fine('running start command for $device');
+        logging.fine('running start command for $device');
 
         if (await device.startApp(package))
           startedSomething = true;
@@ -117,13 +115,13 @@ class StartCommand extends FlutterCommand {
 
     if (!startedSomething) {
       if (!devices.all.any((device) => device.isConnected())) {
-        _logging.severe('Unable to run application - no connected devices.');
+        logging.severe('Unable to run application - no connected devices.');
       } else {
-        _logging.severe('Unable to run application.');
+        logging.severe('Unable to run application.');
       }
     }
 
-    _logging.fine('finished start command');
+    logging.fine('finished start command');
 
     return startedSomething ? 0 : 2;
   }

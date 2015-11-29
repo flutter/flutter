@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../device.dart';
-import 'flutter_command.dart';
+import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
   final String name = 'install';

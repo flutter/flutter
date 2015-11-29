@@ -4,11 +4,7 @@
 
 import 'dart:io';
 
-import 'package:logging/logging.dart';
-
-final OperatingSystemUtils osUtils = new OperatingSystemUtils._();
-
-final Logger _logging = new Logger('flutter_tools.os');
+final OperatingSystemUtils os = new OperatingSystemUtils._();
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils._() {

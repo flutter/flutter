@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_configuration.dart';
-import 'package:flutter_tools/src/commands/flutter_command.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/toolchain.dart';
+import 'package:mockito/mockito.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
