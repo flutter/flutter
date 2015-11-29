@@ -13,7 +13,7 @@ class GalleryPage extends StatelessComponent {
   final WidgetDemo active;
   final ValueChanged<ThemeData> onThemeChanged;
 
-  void _showDrawer(BuildContext context) {
+  Widget _buildDrawer(BuildContext context) {
     List<Widget> items = <Widget>[
       new DrawerHeader(child: new Text('Material demos')),
     ];
@@ -27,7 +27,7 @@ class GalleryPage extends StatelessComponent {
       ));
     }
 
-    showDrawer(context: context, child: new Block(items));
+    return new Block(items);
   }
 
   Widget _body(BuildContext context) {
@@ -45,7 +45,7 @@ class GalleryPage extends StatelessComponent {
       toolBar: new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu',
-          onPressed: () { _showDrawer(context); }
+          onPressed: () { showDrawer(context: context, builder: _buildDrawer); }
         ),
         center: new Text(active?.title ?? 'Material gallery')
       ),

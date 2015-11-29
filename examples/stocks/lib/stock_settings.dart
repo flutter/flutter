@@ -4,37 +4,31 @@
 
 part of stocks;
 
-typedef void SettingsUpdater({
-  StockMode optimism,
-  BackupMode backup
-});
-
 class StockSettings extends StatefulComponent {
-  const StockSettings(this.optimism, this.backup, this.updater);
+  const StockSettings(this.settings);
 
-  final StockMode optimism;
-  final BackupMode backup;
-  final SettingsUpdater updater;
+  final GlobalSettings settings;
 
-  StockSettingsState createState() => new StockSettingsState();
+  _StockSettingsState createState() => new _StockSettingsState();
 }
 
-class StockSettingsState extends State<StockSettings> {
+class _StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
     value ??= false;
-    sendUpdates(value ? StockMode.optimistic : StockMode.pessimistic, config.backup);
+    config.settings.optimism = value ? OptimismMode.optimistic : OptimismMode.pessimistic;
   }
 
   void _handleBackupChanged(bool value) {
-    sendUpdates(config.optimism, value ? BackupMode.enabled : BackupMode.disabled);
+    value ??= false;
+    config.settings.backup = value ? BackupMode.enabled : BackupMode.disabled;
   }
 
   void _confirmOptimismChange() {
     switch (config.optimism) {
-      case StockMode.optimistic:
+      case OptimismMode.optimistic:
         _handleOptimismChanged(false);
         break;
-      case StockMode.pessimistic:
+      case OptimismMode.pessimistic:
         showDialog(
           context: context,
           child: new Dialog(
@@ -60,14 +54,6 @@ class StockSettingsState extends State<StockSettings> {
     }
   }
 
-  void sendUpdates(StockMode optimism, BackupMode backup) {
-    if (config.updater != null)
-      config.updater(
-        optimism: optimism,
-        backup: backup
-      );
-  }
-
   Widget buildToolBar(BuildContext context) {
     return new ToolBar(
       left: new IconButton(
@@ -88,7 +74,7 @@ class StockSettingsState extends State<StockSettings> {
           child: new Row(<Widget>[
             new Flexible(child: new Text('Everything is awesome')),
             new Checkbox(
-              value: config.optimism == StockMode.optimistic,
+              value: config.optimism == OptimismMode.optimistic,
               onChanged: (bool value) => _confirmOptimismChange()
             ),
           ])

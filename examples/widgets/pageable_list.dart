@@ -83,37 +83,37 @@ class PageableListAppState extends State<PageableListApp> {
     });
   }
 
-  void _showDrawer() {
-    showDrawer(
-      context: context,
-      child: new Block(<Widget>[
-        new DrawerHeader(child: new Text('Options')),
-        new DrawerItem(
-          icon: 'navigation/more_horiz',
-          selected: scrollDirection == ScrollDirection.horizontal,
-          child: new Text('Horizontal Layout'),
-          onPressed: switchScrollDirection
-        ),
-        new DrawerItem(
-          icon: 'navigation/more_vert',
-          selected: scrollDirection == ScrollDirection.vertical,
-          child: new Text('Vertical Layout'),
-          onPressed: switchScrollDirection
-        ),
-        new DrawerItem(
-          onPressed: toggleItemsWrap,
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Scrolling wraps around')),
-            new Checkbox(value: itemsWrap)
-          ])
-        )
-      ])
-    );
+  Widget _buildDrawer(BuildContext context) {
+    return new Block(<Widget>[
+      new DrawerHeader(child: new Text('Options')),
+      new DrawerItem(
+        icon: 'navigation/more_horiz',
+        selected: scrollDirection == ScrollDirection.horizontal,
+        child: new Text('Horizontal Layout'),
+        onPressed: switchScrollDirection
+      ),
+      new DrawerItem(
+        icon: 'navigation/more_vert',
+        selected: scrollDirection == ScrollDirection.vertical,
+        child: new Text('Vertical Layout'),
+        onPressed: switchScrollDirection
+      ),
+      new DrawerItem(
+        onPressed: toggleItemsWrap,
+        child: new Row(<Widget>[
+          new Flexible(child: new Text('Scrolling wraps around')),
+          new Checkbox(value: itemsWrap)
+        ])
+      )
+    ]);
   }
 
   Widget buildToolBar() {
     return new ToolBar(
-      left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
+      left: new IconButton(
+        icon: "navigation/menu",
+        onPressed: () { showDrawer(context: context, builder: _buildDrawer); }
+      ),
       center: new Text('PageableList'),
       right: <Widget>[
         new Text(scrollDirection == ScrollDirection.horizontal ? "horizontal" : "vertical")

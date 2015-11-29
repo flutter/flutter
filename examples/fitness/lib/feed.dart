@@ -63,31 +63,28 @@ class FeedFragmentState extends State<FeedFragment> {
     Navigator.of(context).pop();
   }
 
-  void _showDrawer() {
-    showDrawer(
-      context: context,
-      child: new Block(<Widget>[
-        new DrawerHeader(child: new Text('Fitness')),
-        new DrawerItem(
-          icon: 'action/view_list',
-          onPressed: () => _handleFitnessModeChange(FitnessMode.feed),
-          selected: _fitnessMode == FitnessMode.feed,
-          child: new Text('Feed')),
-        new DrawerItem(
-          icon: 'action/assessment',
-          onPressed: () => _handleFitnessModeChange(FitnessMode.chart),
-          selected: _fitnessMode == FitnessMode.chart,
-          child: new Text('Chart')),
-        new DrawerDivider(),
-        new DrawerItem(
-          icon: 'action/settings',
-          onPressed: _handleShowSettings,
-          child: new Text('Settings')),
-        new DrawerItem(
-          icon: 'action/help',
-          child: new Text('Help & Feedback'))
-      ])
-    );
+  Widget _buildDrawer(BuildContext context) {
+    return new Block(<Widget>[
+      new DrawerHeader(child: new Text('Fitness')),
+      new DrawerItem(
+        icon: 'action/view_list',
+        onPressed: () => _handleFitnessModeChange(FitnessMode.feed),
+        selected: _fitnessMode == FitnessMode.feed,
+        child: new Text('Feed')),
+      new DrawerItem(
+        icon: 'action/assessment',
+        onPressed: () => _handleFitnessModeChange(FitnessMode.chart),
+        selected: _fitnessMode == FitnessMode.chart,
+        child: new Text('Chart')),
+      new DrawerDivider(),
+      new DrawerItem(
+        icon: 'action/settings',
+        onPressed: _handleShowSettings,
+        child: new Text('Settings')),
+      new DrawerItem(
+        icon: 'action/help',
+        child: new Text('Help & Feedback'))
+    ]);
   }
 
   void _handleShowSettings() {
@@ -107,7 +104,8 @@ class FeedFragmentState extends State<FeedFragment> {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/menu",
-        onPressed: _showDrawer),
+        onPressed: () { showDrawer(context: context, builder: _buildDrawer ); }
+      ),
       center: new Text(fitnessModeTitle)
     );
   }
