@@ -162,8 +162,8 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     double widthFactor,
     double heightFactor
   }) : _widthFactor = widthFactor, _heightFactor = heightFactor, super(child) {
-    assert(_widthFactor == null || _widthFactor > 0.0);
-    assert(_heightFactor == null || _heightFactor > 0.0);
+    assert(_widthFactor == null || _widthFactor >= 0.0);
+    assert(_heightFactor == null || _heightFactor >= 0.0);
   }
 
   /// The multiple to apply to the incoming maximum width constraint to use as
@@ -172,7 +172,7 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   double get widthFactor => _widthFactor;
   double _widthFactor;
   void set widthFactor (double value) {
-    assert(value == null || value > 0.0);
+    assert(value == null || value >= 0.0);
     if (_widthFactor == value)
       return;
     _widthFactor = value;
@@ -185,7 +185,7 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   double get heightFactor => _heightFactor;
   double _heightFactor;
   void set heightFactor (double value) {
-    assert(value == null || value > 0.0);
+    assert(value == null || value >= 0.0);
     if (_heightFactor == value)
       return;
     _heightFactor = value;
@@ -193,11 +193,25 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    double minWidth = constraints.minWidth;
+    double maxWidth = constraints.maxWidth;
+    if (_widthFactor != null) {
+      double width = maxWidth * _widthFactor;
+      minWidth = width;
+      maxWidth = width;
+    }
+    double minHeight = constraints.minHeight;
+    double maxHeight = constraints.maxHeight;
+    if (_heightFactor != null) {
+      double height = maxHeight * _heightFactor;
+      minHeight = height;
+      maxHeight = height;
+    }
     return new BoxConstraints(
-      minWidth: _widthFactor == null ? constraints.minWidth : constraints.maxWidth * _widthFactor,
-      maxWidth: _widthFactor == null ? constraints.maxWidth : constraints.maxWidth * _widthFactor,
-      minHeight: _heightFactor == null ? constraints.minHeight : constraints.maxHeight * _heightFactor,
-      maxHeight: _heightFactor == null ? constraints.maxHeight : constraints.maxHeight * _heightFactor
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight
     );
   }
 
