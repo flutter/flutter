@@ -5,13 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart';
+import 'material.dart';
 import 'popup_menu_item.dart';
-import 'shadows.dart';
-import 'theme.dart';
 
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
@@ -20,38 +18,6 @@ const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuVerticalPadding = 8.0;
-
-class _PopupMenuPainter extends CustomPainter {
-  const _PopupMenuPainter({
-    this.color,
-    this.elevation,
-    this.width,
-    this.height
-  });
-
-  final Color color;
-  final int elevation;
-  final double width;
-  final double height;
-
-  void paint(Canvas canvas, Size size) {
-    double widthValue = width * size.width;
-    double heightValue = height * size.height;
-    final BoxPainter painter = new BoxPainter(new BoxDecoration(
-      backgroundColor: color,
-      borderRadius: 2.0,
-      boxShadow: elevationToShadow[elevation]
-    ));
-    painter.paint(canvas, new Rect.fromLTWH(size.width - widthValue, 0.0, widthValue, heightValue));
-  }
-
-  bool shouldRepaint(_PopupMenuPainter oldPainter) {
-    return oldPainter.color != color
-        || oldPainter.elevation != elevation
-        || oldPainter.width != width
-        || oldPainter.height != height;
-  }
-}
 
 class _PopupMenu<T> extends StatelessComponent {
   _PopupMenu({
@@ -88,25 +54,26 @@ class _PopupMenu<T> extends StatelessComponent {
       builder: (BuildContext context) {
         return new Opacity(
           opacity: opacity.value,
-          child: new CustomPaint(
-            painter: new _PopupMenuPainter(
-              color: Theme.of(context).canvasColor,
-              elevation: route.elevation,
-              width: width.value,
-              height: height.value
-            ),
-            child: new ConstrainedBox(
-              constraints: new BoxConstraints(
-                minWidth: _kMenuMinWidth,
-                maxWidth: _kMenuMaxWidth
-              ),
-              child: new IntrinsicWidth(
-                stepWidth: _kMenuWidthStep,
-                child: new Block(
-                  children,
-                  padding: const EdgeDims.symmetric(
-                    horizontal: _kMenuHorizontalPadding,
-                    vertical: _kMenuVerticalPadding
+          child: new Material(
+            type: MaterialType.card,
+            elevation: route.elevation,
+            child: new Align(
+              alignment: const FractionalOffset(1.0, 0.0),
+              widthFactor: width.value,
+              heightFactor: height.value,
+              child: new ConstrainedBox(
+                constraints: new BoxConstraints(
+                  minWidth: _kMenuMinWidth,
+                  maxWidth: _kMenuMaxWidth
+                ),
+                child: new IntrinsicWidth(
+                  stepWidth: _kMenuWidthStep,
+                  child: new Block(
+                    children,
+                    padding: const EdgeDims.symmetric(
+                      horizontal: _kMenuHorizontalPadding,
+                      vertical: _kMenuVerticalPadding
+                    )
                   )
                 )
               )
