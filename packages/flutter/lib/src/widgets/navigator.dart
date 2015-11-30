@@ -224,6 +224,40 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
+  /// Like replace(), but affects the route before the given anchorRoute rather
+  /// than the anchorRoute itself.
+  ///
+  /// If newRoute is already the route before anchorRoute, then the call is
+  /// ignored.
+  ///
+  /// The conditions described for [replace()] apply; for instance, the route
+  /// before anchorRoute must have overlays.
+  void replaceRouteBefore({ Route anchorRoute, Route newRoute }) {
+    assert(anchorRoute != null);
+    assert(anchorRoute._navigator == this);
+    assert(_history.indexOf(anchorRoute) > 0);
+    replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
+  }
+ 
+  /// Removes the route prior to the given anchorRoute without notifying
+  /// neighbouring routes or the navigator observer, if any.
+  void removeRouteBefore(Route anchorRoute) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    assert(anchorRoute._navigator == this);
+    int index = _history.indexOf(anchorRoute) - 1;
+    assert(index >= 0);
+    Route targetRoute = _history[index];
+    assert(targetRoute._navigator == this);
+    assert(targetRoute.overlayEntries.isEmpty || !overlay.debugIsVisible(targetRoute.overlayEntries.last));
+    setState(() {
+      _history.removeAt(index);
+      targetRoute.dispose();
+      targetRoute._navigator = null;
+    });
+    assert(() { _debugLocked = false; return true; });
+  }
+
   /// Removes the current route, notifying the observer (if any), and the
   /// previous routes (using [Route.didPopNext]).
   ///
@@ -256,6 +290,14 @@ class NavigatorState extends State<Navigator> {
     }
     assert(() { _debugLocked = false; return true; });
     return true;
+  }
+
+  /// Calls pop() repeatedly until the given route is the current route.
+  /// If it is already the current route, nothing happens.
+  void popUntil(Route targetRoute) {
+    assert(_history.contains(targetRoute));
+    while (!targetRoute.isCurrent)
+      pop();
   }
 
   Widget build(BuildContext context) {
