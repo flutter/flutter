@@ -93,14 +93,16 @@ class _Entry {
 
 typedef Widget TransitionBuilderCallback(PerformanceView performance, Widget child);
 
+Widget _identityTransition(PerformanceView performance, Widget child) => child;
+
 class EnterExitTransition extends StatefulComponent {
   EnterExitTransition({
     Key key,
     this.child,
     this.duration,
     this.curve: Curves.linear,
-    this.onEnter,
-    this.onExit
+    this.onEnter: _identityTransition,
+    this.onExit: _identityTransition
   }) : super(key: key) {
     assert(child != null);
     assert(duration != null);
