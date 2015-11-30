@@ -38,7 +38,7 @@ class _PopupMenu<T> extends StatelessComponent {
         performance: route.performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end)),
         child: new InkWell(
-          onTap: () { Navigator.of(context).pop(route.items[i].value); },
+          onTap: () => Navigator.pop(context, route.items[i].value),
           child: route.items[i]
         ))
       );
@@ -114,7 +114,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
 Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int elevation: 8 }) {
   Completer completer = new Completer();
-  Navigator.of(context).push(new _PopupMenuRoute(
+  Navigator.push(context, new _PopupMenuRoute(
     completer: completer,
     position: position,
     items: items,

@@ -23,10 +23,9 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
             new Checkbox(
               value: autorefresh,
               onChanged: (bool value) {
-                Navigator.of(context).setState(() {
-                  autorefresh = value;
-                });
-                Navigator.of(context).pop(_MenuItems.autorefreshCheckbox);
+                // TODO(ianh): https://github.com/flutter/flutter/issues/187
+                autorefresh = value;
+                Navigator.pop(context, _MenuItems.autorefreshCheckbox);
               }
             )
           ]
@@ -43,9 +42,8 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
     ]
   )) {
     case _MenuItems.autorefresh:
-      Navigator.of(context).setState(() {
-        autorefresh = !autorefresh;
-      });
+      // TODO(ianh): https://github.com/flutter/flutter/issues/187
+      autorefresh = !autorefresh;
       continue autorefreshNotify;
     autorefreshNotify:
     case _MenuItems.autorefreshCheckbox:
@@ -75,7 +73,7 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
             new FlatButton(
               child: new Text('OH WELL'),
               onPressed: () {
-                Navigator.of(context).pop(false);
+                Navigator.pop(context, false);
               }
             ),
           ]

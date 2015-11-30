@@ -119,7 +119,7 @@ class _ModalBottomSheetState extends State<_ModalBottomSheet> {
 
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: () { Navigator.of(context).pop(); },
+      onTap: () => Navigator.pop(context),
       child: new BuilderTransition(
         performance: config.route.performance,
         variables: <AnimatedValue<double>>[_layout.childTop],
@@ -130,7 +130,7 @@ class _ModalBottomSheetState extends State<_ModalBottomSheet> {
               token: _layout.childTop.value,
               child: new BottomSheet(
                 performance: config.route.performance,
-                onClosing: () { Navigator.of(context).pop(); },
+                onClosing: () => Navigator.pop(context),
                 childHeight: _layout.childTop.end,
                 builder: config.route.builder
               )
@@ -167,7 +167,7 @@ Future showModalBottomSheet({ BuildContext context, WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);
   final Completer completer = new Completer();
-  Navigator.of(context).push(new _ModalBottomSheetRoute(
+  Navigator.push(context, new _ModalBottomSheetRoute(
     completer: completer,
     builder: builder
   ));

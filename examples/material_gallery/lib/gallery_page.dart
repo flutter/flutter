@@ -21,7 +21,7 @@ class GalleryPage extends StatelessComponent {
     for (WidgetDemo demo in demos) {
       items.add(new DrawerItem(
         onPressed: () {
-          Navigator.of(context).pushNamed(demo.routeName);
+          Navigator.pushNamed(context, demo.routeName);
         },
         child: new Text(demo.title)
       ));

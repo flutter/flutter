@@ -22,14 +22,14 @@ class TestRoute extends Route<String> {
     results.add('$name: $s');
   }
 
-  void install(OverlayState overlay, OverlayEntry insertionPoint) {
+  void install(OverlayEntry insertionPoint) {
     log('install');
     OverlayEntry entry = new OverlayEntry(
       builder: (BuildContext context) => new Container(),
       opaque: true
     );
     _entries.add(entry);
-    overlay?.insert(entry, above: insertionPoint);
+    navigator.overlay?.insert(entry, above: insertionPoint);
     routes.add(this);
   }
 
@@ -73,11 +73,11 @@ class TestRoute extends Route<String> {
 void runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
-  void test(NavigatorState transaction),
+  NavigatorTransactionCallback test,
   List<String> expectations
 ) {
   expect(host, isNotNull);
-  test(host);
+  host.openTransaction(test);
   expect(results, equals(expectations));
   results.clear();
   tester.pump();
@@ -95,7 +95,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
         },
         [
           'initial: install',
@@ -106,7 +106,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(second = new TestRoute('second'));
         },
         [
@@ -118,7 +118,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(new TestRoute('third'));
         },
         [
@@ -130,7 +130,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.replace(oldRoute: second, newRoute: new TestRoute('two'));
         },
         [
@@ -143,7 +143,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.pop('hello');
         },
         [
@@ -155,7 +155,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.pop('good bye');
         },
         [
@@ -182,7 +182,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
         },
         [
           'first: install',
@@ -193,7 +193,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(second = new TestRoute('second'));
         },
         [
@@ -205,7 +205,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(new TestRoute('third'));
         },
         [
@@ -217,7 +217,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.removeRouteBefore(second);
         },
         [
@@ -227,7 +227,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.pop('good bye');
         },
         [
@@ -239,7 +239,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(new TestRoute('three'));
         },
         [
@@ -252,7 +252,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(four = new TestRoute('four'));
         },
         [
@@ -264,7 +264,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.removeRouteBefore(four);
         },
         [
@@ -274,7 +274,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.pop('the end');
         },
         [
@@ -301,7 +301,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
         },
         [
           'A: install',
@@ -311,7 +311,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(new TestRoute('B'));
         },
         [
@@ -324,7 +324,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.push(routeC = new TestRoute('C'));
         },
         [
@@ -337,7 +337,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.replaceRouteBefore(anchorRoute: routeC, newRoute: routeB = new TestRoute('b'));
         },
         [
@@ -350,7 +350,7 @@ void main() {
       runNavigatorTest(
         tester,
         host,
-        (NavigatorState transaction) {
+        (NavigatorTransaction transaction) {
           transaction.popUntil(routeB);
         },
         [

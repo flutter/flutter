@@ -23,7 +23,7 @@ class ModalBarrier extends StatelessComponent {
     return new Listener(
       onPointerDown: (_) {
         if (dismissable)
-          Navigator.of(context).pop();
+          Navigator.pop(context);
       },
       behavior: HitTestBehavior.opaque,
       child: new ConstrainedBox(

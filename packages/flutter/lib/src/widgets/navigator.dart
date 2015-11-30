@@ -14,13 +14,13 @@ abstract class Route<T> {
 
   /// Called when the route is inserted into the navigator.
   ///
-  /// Use this to populate overlayEntries and add them to the overlay.
-  /// (The reason the Route is responsible for doing this, rather than the
-  /// Navigator, is that the Route will be responsible for _removing_ the
-  /// entries and this way it's symmetric.
+  /// Use this to populate overlayEntries and add them to the overlay
+  /// (accessible as navigator.overlay). (The reason the Route is responsible
+  /// for doing this, rather than the Navigator, is that the Route will be
+  /// responsible for _removing_ the entries and this way it's symmetric.)
   ///
   /// The overlay argument will be null if this is the first route inserted.
-  void install(OverlayState overlay, OverlayEntry insertionPoint) { }
+  void install(OverlayEntry insertionPoint) { }
 
   /// Called after install() when the route is pushed onto the navigator.
   void didPush() { }
@@ -81,6 +81,7 @@ class NamedRouteSettings {
 }
 
 typedef Route RouteFactory(NamedRouteSettings settings);
+typedef void NavigatorTransactionCallback(NavigatorTransaction transaction);
 
 class NavigatorObserver {
   /// The navigator that the observer is observing, if any.
@@ -108,7 +109,37 @@ class Navigator extends StatefulComponent {
 
   static const String defaultRouteName = '/';
 
-  static NavigatorState of(BuildContext context) => context.ancestorStateOfType(NavigatorState);
+  static void pushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
+    openTransaction(context, (NavigatorTransaction transaction) {
+      transaction.pushNamed(routeName, mostValuableKeys: mostValuableKeys);
+    });
+  }
+
+  static void push(BuildContext context, Route route, { Set<Key> mostValuableKeys }) {
+    openTransaction(context, (NavigatorTransaction transaction) {
+      transaction.push(route, mostValuableKeys: mostValuableKeys);
+    });
+  }
+
+  static bool pop(BuildContext context, [ dynamic result ]) {
+    bool returnValue;
+    openTransaction(context, (NavigatorTransaction transaction) {
+      returnValue = transaction.pop(result);
+    });
+    return returnValue;
+  }
+
+  static void popAndPushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
+    openTransaction(context, (NavigatorTransaction transaction) {
+      transaction.pop();
+      transaction.pushNamed(routeName, mostValuableKeys: mostValuableKeys);
+    });
+  }
+
+  static void openTransaction(BuildContext context, NavigatorTransactionCallback callback) {
+    NavigatorState navigator = context.ancestorStateOfType(NavigatorState);
+    navigator.openTransaction(callback);
+  }
 
   NavigatorState createState() => new NavigatorState();
 }
@@ -121,7 +152,7 @@ class NavigatorState extends State<Navigator> {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
-    push(config.onGenerateRoute(new NamedRouteSettings(
+    _push(config.onGenerateRoute(new NamedRouteSettings(
       name: config.initialRoute ?? Navigator.defaultRouteName
     )));
   }
@@ -146,9 +177,10 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
+  // Used by Routes and NavigatorObservers
   OverlayState get overlay => _overlayKey.currentState;
 
-  OverlayEntry get _currentOverlay {
+  OverlayEntry get _currentOverlayEntry {
     for (Route route in _history.reversed) {
       if (route.overlayEntries.isNotEmpty)
         return route.overlayEntries.last;
@@ -158,17 +190,17 @@ class NavigatorState extends State<Navigator> {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  void pushNamed(String name, { Set<Key> mostValuableKeys }) {
+  void _pushNamed(String name, { Set<Key> mostValuableKeys }) {
     assert(!_debugLocked);
     assert(name != null);
     NamedRouteSettings settings = new NamedRouteSettings(
       name: name,
       mostValuableKeys: mostValuableKeys
     );
-    push(config.onGenerateRoute(settings) ?? config.onUnknownRoute(settings));
+    _push(config.onGenerateRoute(settings) ?? config.onUnknownRoute(settings));
   }
 
-  void push(Route route, { Set<Key> mostValuableKeys }) {
+  void _push(Route route, { Set<Key> mostValuableKeys }) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(route != null);
@@ -176,7 +208,7 @@ class NavigatorState extends State<Navigator> {
     setState(() {
       Route oldRoute = _history.isNotEmpty ? _history.last : null;
       route._navigator = this;
-      route.install(overlay, _currentOverlay);
+      route.install(_currentOverlayEntry);
       _history.add(route);
       route.didPush();
       if (oldRoute != null)
@@ -186,18 +218,7 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
-  /// Replaces one given route with another, but does not call didPush/didPop.
-  /// Instead, this calls install() on the new route, then didReplace() on the
-  /// new route passing the old route, then dispose() on the old route.
-  ///
-  /// The old route must have overlays, otherwise we won't know where to insert
-  /// the overlays of the new route. The old route must not be currently visible
-  /// (i.e. a later route have overlays that are currently opaque), otherwise
-  /// the replacement would have a jarring effect.
-  ///
-  /// It is safe to call this redundantly (replacing a route with itself). Such
-  /// calls are ignored.
-  void replace({ Route oldRoute, Route newRoute }) {
+  void _replace({ Route oldRoute, Route newRoute }) {
     assert(!_debugLocked);
     assert(oldRoute != null);
     assert(newRoute != null);
@@ -213,7 +234,7 @@ class NavigatorState extends State<Navigator> {
       int index = _history.indexOf(oldRoute);
       assert(index >= 0);
       newRoute._navigator = this;
-      newRoute.install(overlay, oldRoute.overlayEntries.last);
+      newRoute.install(oldRoute.overlayEntries.last);
       _history[index] = newRoute;
       newRoute.didReplace(oldRoute);
       if (index > 0)
@@ -224,24 +245,14 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
-  /// Like replace(), but affects the route before the given anchorRoute rather
-  /// than the anchorRoute itself.
-  ///
-  /// If newRoute is already the route before anchorRoute, then the call is
-  /// ignored.
-  ///
-  /// The conditions described for [replace()] apply; for instance, the route
-  /// before anchorRoute must have overlays.
-  void replaceRouteBefore({ Route anchorRoute, Route newRoute }) {
+  void _replaceRouteBefore({ Route anchorRoute, Route newRoute }) {
     assert(anchorRoute != null);
     assert(anchorRoute._navigator == this);
     assert(_history.indexOf(anchorRoute) > 0);
-    replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
+    _replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
   }
  
-  /// Removes the route prior to the given anchorRoute without notifying
-  /// neighbouring routes or the navigator observer, if any.
-  void removeRouteBefore(Route anchorRoute) {
+  void _removeRouteBefore(Route anchorRoute) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(anchorRoute._navigator == this);
@@ -258,16 +269,7 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
-  /// Removes the current route, notifying the observer (if any), and the
-  /// previous routes (using [Route.didPopNext]).
-  ///
-  /// The type of the result argument, if provided, must match the type argument
-  /// of the class of the current route. (In practice, this is usually
-  /// "dynamic".)
-  ///
-  /// Returns true if a route was popped; returns false if there are no further
-  /// previous routes.
-  bool pop([dynamic result]) {
+  bool _pop([dynamic result]) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     Route route = _history.last;
@@ -292,20 +294,123 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
-  /// Calls pop() repeatedly until the given route is the current route.
-  /// If it is already the current route, nothing happens.
-  void popUntil(Route targetRoute) {
+  void _popUntil(Route targetRoute) {
     assert(_history.contains(targetRoute));
     while (!targetRoute.isCurrent)
-      pop();
+      _pop();
+  }
+
+  bool _hadTransaction = true;
+
+  bool openTransaction(NavigatorTransactionCallback callback) {
+    assert(callback != null);
+    if (_hadTransaction)
+      return false;
+    _hadTransaction = true;
+    NavigatorTransaction transaction = new NavigatorTransaction._(this);
+    setState(() {
+      callback(transaction);
+    });
+    assert(() { transaction._debugClose(); return true; });
+    return true;
   }
 
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
+    _hadTransaction = false;
     return new Overlay(
       key: _overlayKey,
       initialEntries: _history.first.overlayEntries
     );
+  }
+}
+
+class NavigatorTransaction {
+  NavigatorTransaction._(this._navigator) {
+    assert(_navigator != null);
+  }
+  NavigatorState _navigator;
+  bool _debugOpen = true;
+ 
+  /// Invokes the Navigator's onGenerateRoute callback to create a route with
+  /// the given name, then calls [push()] with that route.
+  void pushNamed(String name, { Set<Key> mostValuableKeys }) {
+    assert(_debugOpen);
+    _navigator._pushNamed(name, mostValuableKeys: mostValuableKeys);
+  }
+
+  /// Adds the given route to the Navigator's history, and transitions to it.
+  /// The route will have didPush() called on it; the previous route, if any,
+  /// will have didPushNext() called on it; and the Navigator observer, if any,
+  /// will have didPush() called on it.
+  void push(Route route, { Set<Key> mostValuableKeys }) {
+    assert(_debugOpen);
+    _navigator._push(route, mostValuableKeys: mostValuableKeys);
+  }
+
+  /// Replaces one given route with another, but does not call didPush/didPop.
+  /// Instead, this calls install() on the new route, then didReplace() on the
+  /// new route passing the old route, then dispose() on the old route. The
+  /// navigator is not informed of the replacement.
+  ///
+  /// The old route must have overlay entries, otherwise we won't know where to
+  /// insert the entries of the new route. The old route must not be currently
+  /// visible (i.e. a later route have overlay entries that are currently
+  /// opaque), otherwise the replacement would have a jarring effect.
+  ///
+  /// It is safe to call this redundantly (replacing a route with itself). Such
+  /// calls are ignored.
+  void replace({ Route oldRoute, Route newRoute }) {
+    assert(_debugOpen);
+    _navigator._replace(oldRoute: oldRoute, newRoute: newRoute);
+  }
+
+  /// Like replace(), but affects the route before the given anchorRoute rather
+  /// than the anchorRoute itself.
+  ///
+  /// If newRoute is already the route before anchorRoute, then the call is
+  /// ignored.
+  ///
+  /// The conditions described for [replace()] apply; for instance, the route
+  /// before anchorRoute must have overlay entries.
+  void replaceRouteBefore({ Route anchorRoute, Route newRoute }) {
+    assert(_debugOpen);
+    _navigator._replaceRouteBefore(anchorRoute: anchorRoute, newRoute: newRoute);
+  }
+
+  /// Removes the route prior to the given anchorRoute without notifying
+  /// neighbouring routes or the navigator observer, if any.
+  void removeRouteBefore(Route anchorRoute) {
+    assert(_debugOpen);
+    _navigator._removeRouteBefore(anchorRoute);
+  }
+
+  /// Tries to removes the current route, calling its didPop() method. If that
+  /// method returns false, then nothing else happens. Otherwise, the observer
+  /// (if any) is notified using its didPop() method, and the previous route is
+  /// notified using [Route.didPopNext].
+  ///
+  /// The type of the result argument, if provided, must match the type argument
+  /// of the class of the current route. (In practice, this is usually
+  /// "dynamic".)
+  ///
+  /// Returns true if a route was popped; returns false if there are no further
+  /// previous routes.
+  bool pop([dynamic result]) {
+    assert(_debugOpen);
+    return _navigator._pop(result);
+  }
+ 
+  /// Calls pop() repeatedly until the given route is the current route.
+  /// If it is already the current route, nothing happens.
+  void popUntil(Route targetRoute) {
+    assert(_debugOpen);
+    _navigator._popUntil(targetRoute);
+  }
+
+  void _debugClose() {
+    assert(_debugOpen);
+    _debugOpen = false;
   }
 }

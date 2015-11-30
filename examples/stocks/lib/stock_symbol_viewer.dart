@@ -58,7 +58,7 @@ class StockSymbolPage extends StatelessComponent {
         left: new IconButton(
           icon: 'navigation/arrow_back',
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.pop(context);
           }
         ),
         center: new Text(stock.name)

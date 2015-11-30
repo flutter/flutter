@@ -23,11 +23,11 @@ abstract class OverlayRoute<T> extends Route<T> {
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
-  void install(OverlayState overlay, OverlayEntry insertionPoint) {
+  void install(OverlayEntry insertionPoint) {
     assert(_overlayEntries.isEmpty);
     for (WidgetBuilder builder in builders)
       _overlayEntries.add(new OverlayEntry(builder: builder));
-    overlay?.insertAll(_overlayEntries, above: insertionPoint);
+    navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
   }
 
   // Subclasses shouldn't call this if they want to delay the finished() call.
@@ -108,9 +108,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
-  void install(OverlayState overlay, OverlayEntry insertionPoint) {
+  void install(OverlayEntry insertionPoint) {
     _performance = createPerformance();
-    super.install(overlay, insertionPoint);
+    super.install(insertionPoint);
   }
 
   void didPush() {

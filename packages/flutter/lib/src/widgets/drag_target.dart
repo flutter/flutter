@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
-import 'navigator.dart';
 import 'overlay.dart';
 
 typedef bool DragTargetWillAccept<T>(T data);
@@ -165,7 +164,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
     new _DragAvatar<T>(
       pointer: pointer,
       router: router,
-      overlay: Navigator.of(context).overlay,
+      overlay: Overlay.of(context),
       data: config.data,
       initialPosition: position,
       dragStartPoint: dragStartPoint,

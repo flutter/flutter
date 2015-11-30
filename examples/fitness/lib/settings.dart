@@ -28,7 +28,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/arrow_back",
-        onPressed: () => Navigator.of(context).pop()
+        onPressed: () => Navigator.pop(context)
       ),
       center: new Text('Settings')
     );
@@ -47,7 +47,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
   void _handleGoalWeightChanged(String goalWeight) {
     // TODO(jackson): Looking for null characters to detect enter key is a hack
     if (goalWeight.endsWith("\u{0}")) {
-      Navigator.of(context).pop(double.parse(goalWeight.replaceAll("\u{0}", "")));
+      Navigator.pop(context, double.parse(goalWeight.replaceAll("\u{0}", "")));
     } else {
       setState(() {
         try {
@@ -74,13 +74,13 @@ class SettingsFragmentState extends State<SettingsFragment> {
           new FlatButton(
             child: new Text('CANCEL'),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.pop(context);
             }
           ),
           new FlatButton(
             child: new Text('SAVE'),
             onPressed: () {
-              Navigator.of(context).pop(_goalWeight);
+              Navigator.pop(context, _goalWeight);
             }
           ),
         ]

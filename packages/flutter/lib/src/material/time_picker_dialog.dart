@@ -36,11 +36,11 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   }
 
   void _handleCancel() {
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   void _handleOk() {
-    Navigator.of(context).pop(_selectedTime);
+    Navigator.pop(context, _selectedTime);
   }
 
   Widget build(BuildContext context) {

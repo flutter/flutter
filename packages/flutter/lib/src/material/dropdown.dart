@@ -93,9 +93,7 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
             padding: _kMenuHorizontalPadding,
             child: route.items[itemIndex]
           ),
-          onTap: () {
-            Navigator.of(context).pop(route.items[itemIndex].value);
-          }
+          onTap: () => Navigator.pop(context, route.items[itemIndex].value)
         )
       ));
     }
@@ -117,7 +115,7 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
       reverseCurve: const Interval(0.0, 0.001)
     );
 
-    final RenderBox renderBox = Navigator.of(context).context.findRenderObject();
+    final RenderBox renderBox = route.navigator.context.findRenderObject();
     final Size navigatorSize = renderBox.size;
     final RelativeRect menuRect = new RelativeRect.fromSize(route.rect, navigatorSize);
 
@@ -216,7 +214,7 @@ class DropDownButton<T> extends StatelessComponent {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
     final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
     final Completer completer = new Completer<T>();
-    Navigator.of(context).push(new _DropDownRoute<T>(
+    Navigator.push(context, new _DropDownRoute<T>(
       completer: completer,
       items: items,
       selectedIndex: selectedIndex,

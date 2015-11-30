@@ -10,7 +10,7 @@ class FirstComponent extends StatelessComponent {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed('/second');
+        Navigator.pushNamed(context, '/second');
       },
       child: new Container(
         decoration: new BoxDecoration(
@@ -29,7 +29,7 @@ class SecondComponent extends StatefulComponent {
 class SecondComponentState extends State<SecondComponent> {
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: Navigator.of(context).pop,
+      onTap: () => Navigator.pop(context),
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: new Color(0xFFFF00FF)

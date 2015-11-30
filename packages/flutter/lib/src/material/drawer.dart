@@ -71,7 +71,7 @@ class _DrawerRoute extends OverlayRoute {
           _state = _DrawerState.closed;
           switch (previousState) {
             case _DrawerState.showing:
-              Navigator.of(context).pop();
+              Navigator.pop(context);
               break;
             case _DrawerState.popped:
               finished();
@@ -220,5 +220,5 @@ class _DrawerControllerState extends State<_DrawerController> {
 }
 
 void showDrawer({ BuildContext context, Widget child, int elevation: 16 }) {
-  Navigator.of(context).push(new _DrawerRoute(child: child, elevation: elevation));
+  Navigator.push(context, new _DrawerRoute(child: child, elevation: elevation));
 }

@@ -16,10 +16,11 @@ class TestOverlayRoute extends OverlayRoute {
 void main() {
   test('Check onstage/offstage handling around transitions', () {
     testWidgets((WidgetTester tester) {
-      GlobalKey containerKey = new GlobalKey();
+      GlobalKey containerKey1 = new GlobalKey();
+      GlobalKey containerKey2 = new GlobalKey();
       final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-        '/': (_) => new Container(key: containerKey, child: new Text('Home')),
-        '/settings': (_) => new Container(child: new Text('Settings')),
+        '/': (_) => new Container(key: containerKey1, child: new Text('Home')),
+        '/settings': (_) => new Container(key: containerKey2, child: new Text('Settings')),
       };
 
       tester.pumpWidget(new MaterialApp(routes: routes));
@@ -28,9 +29,7 @@ void main() {
       expect(tester.findText('Settings'), isNull);
       expect(tester.findText('Overlay'), isNull);
 
-      NavigatorState navigator = Navigator.of(containerKey.currentContext);
-
-      navigator.pushNamed('/settings');
+      Navigator.pushNamed(containerKey1.currentContext, '/settings');
 
       tester.pump();
 
@@ -50,7 +49,7 @@ void main() {
       expect(tester.findText('Settings'), isOnStage);
       expect(tester.findText('Overlay'), isNull);
 
-      navigator.push(new TestOverlayRoute());
+      Navigator.push(containerKey2.currentContext, new TestOverlayRoute());
 
       tester.pump();
 
@@ -64,7 +63,7 @@ void main() {
       expect(tester.findText('Settings'), isOnStage);
       expect(tester.findText('Overlay'), isOnStage);
 
-      navigator.pop();
+      Navigator.pop(containerKey2.currentContext);
       tester.pump();
 
       expect(tester.findText('Home'), isNull);
@@ -77,7 +76,7 @@ void main() {
       expect(tester.findText('Settings'), isOnStage);
       expect(tester.findText('Overlay'), isNull);
 
-      navigator.pop();
+      Navigator.pop(containerKey2.currentContext);
       tester.pump();
 
       expect(tester.findText('Home'), isOnStage);

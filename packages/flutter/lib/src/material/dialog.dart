@@ -140,6 +140,6 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
 Future showDialog({ BuildContext context, Widget child }) {
   Completer completer = new Completer();
-  Navigator.of(context).push(new _DialogRoute(completer: completer, child: child));
+  Navigator.push(context, new _DialogRoute(completer: completer, child: child));
   return completer.future;
 }

@@ -41,7 +41,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleSearchEnd() {
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   void _handleSearchQueryChanged(String query) {
@@ -92,13 +92,13 @@ class StockHomeState extends State<StockHome> {
                   new FlatButton(
                     child: new Text('USE IT'),
                     onPressed: () {
-                      Navigator.of(context).pop(false);
+                      Navigator.pop(context, false);
                     }
                   ),
                   new FlatButton(
                     child: new Text('OH WELL'),
                     onPressed: () {
-                      Navigator.of(context).pop(false);
+                      Navigator.pop(context, false);
                     }
                   ),
                 ]
@@ -142,8 +142,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleShowSettings() {
-    Navigator.of(context)..pop()
-                         ..pushNamed('/settings');
+    Navigator.popAndPushNamed(context, '/settings');
   }
 
   Widget buildToolBar() {
@@ -207,7 +206,7 @@ class StockHomeState extends State<StockHome> {
       onOpen: (Stock stock, Key arrowKey) {
         Set<Key> mostValuableKeys = new Set<Key>();
         mostValuableKeys.add(arrowKey);
-        Navigator.of(context).pushNamed('/stock/${stock.symbol}', mostValuableKeys: mostValuableKeys);
+        Navigator.pushNamed(context, '/stock/${stock.symbol}', mostValuableKeys: mostValuableKeys);
       },
       onShow: (Stock stock, Key arrowKey) {
         scaffoldKey.currentState.showBottomSheet((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
