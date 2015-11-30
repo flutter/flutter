@@ -40,11 +40,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   void _handleCancel() {
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   void _handleOk() {
-    Navigator.of(context).pop(_selectedDate);
+    Navigator.pop(context, _selectedDate);
   }
 
   Widget build(BuildContext context) {

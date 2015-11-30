@@ -29,7 +29,7 @@ void main() {
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester.findText('drawer'), isNotNull);
-      Navigator.of(context).pop();
+      Navigator.pop(context);
       tester.pump(); // drawer should be starting to animate away
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done

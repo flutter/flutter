@@ -44,6 +44,8 @@ class Overlay extends StatefulComponent {
 
   final List<OverlayEntry> initialEntries;
 
+  static OverlayState of(BuildContext context) => context.ancestorStateOfType(OverlayState);
+
   OverlayState createState() => new OverlayState();
 }
 

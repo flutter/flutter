@@ -60,7 +60,7 @@ class FeedFragmentState extends State<FeedFragment> {
     setState(() {
       _fitnessMode = value;
     });
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   void _showDrawer() {
@@ -91,8 +91,7 @@ class FeedFragmentState extends State<FeedFragment> {
   }
 
   void _handleShowSettings() {
-    Navigator.of(context)..pop()
-                         ..pushNamed('/settings');
+    Navigator.popAndPushNamed(context, '/settings');
   }
 
   // TODO(jackson): We should be localizing
@@ -190,7 +189,7 @@ class FeedFragmentState extends State<FeedFragment> {
   void _handleActionButtonPressed() {
     showDialog(context: context, child: new AddItemDialog()).then((routeName) {
       if (routeName != null)
-        Navigator.of(context).pushNamed(routeName);
+        Navigator.pushNamed(context, routeName);
     });
   }
 
@@ -249,13 +248,13 @@ class AddItemDialogState extends State<AddItemDialog> {
         new FlatButton(
           child: new Text('CANCEL'),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.pop(context);
           }
         ),
         new FlatButton(
           child: new Text('ADD'),
           onPressed: () {
-            Navigator.of(context).pop(_addItemRoute);
+            Navigator.pop(context, _addItemRoute);
           }
         ),
       ]

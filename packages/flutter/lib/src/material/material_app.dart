@@ -81,8 +81,10 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     assert(mounted);
     NavigatorState navigator = _navigator.currentState;
     assert(navigator != null);
-    if (!navigator.pop())
-      activity.finishCurrentActivity();
+    navigator.openTransaction((NavigatorTransaction transaction) {
+      if (!transaction.pop())
+        activity.finishCurrentActivity();
+    });
     return true;
   }
 

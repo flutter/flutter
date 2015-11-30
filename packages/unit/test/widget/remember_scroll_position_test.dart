@@ -74,7 +74,9 @@ void main() {
       expect(tester.findText('16'), isNull);
       expect(tester.findText('100'), isNull);
 
-      navigatorKey.currentState.pushNamed('/second');
+      navigatorKey.currentState.openTransaction(
+        (NavigatorTransaction transaction) => transaction.pushNamed('/second')
+      );
       tester.pump(); // navigating always takes two frames
       tester.pump(new Duration(seconds: 1));
 
@@ -89,7 +91,9 @@ void main() {
       expect(tester.findText('10'), isNull);
       expect(tester.findText('100'), isNull);
 
-      navigatorKey.currentState.pop();
+      navigatorKey.currentState.openTransaction(
+        (NavigatorTransaction transaction) => transaction.pop()
+      );
       tester.pump(); // navigating always takes two frames
       tester.pump(new Duration(seconds: 1));
 

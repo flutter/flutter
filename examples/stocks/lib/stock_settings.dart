@@ -44,13 +44,13 @@ class StockSettingsState extends State<StockSettings> {
               new FlatButton(
                 child: new Text('NO THANKS'),
                 onPressed: () {
-                  Navigator.of(context).pop(false);
+                  Navigator.pop(context, false);
                 }
               ),
               new FlatButton(
                 child: new Text('AGREE'),
                 onPressed: () {
-                  Navigator.of(context).pop(true);
+                  Navigator.pop(context, true);
                 }
               ),
             ]
@@ -72,7 +72,7 @@ class StockSettingsState extends State<StockSettings> {
     return new ToolBar(
       left: new IconButton(
         icon: 'navigation/arrow_back',
-        onPressed: () => Navigator.of(context).pop()
+        onPressed: () => Navigator.pop(context)
       ),
       center: new Text('Settings')
     );

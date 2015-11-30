@@ -77,14 +77,15 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
       ));
     }
     config.onCreated(new Measurement(when: _when, weight: parsedWeight));
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/close",
-        onPressed: Navigator.of(context).pop),
+        onPressed: () => Navigator.pop(context)
+      ),
       center: new Text('New Measurement'),
       right: <Widget>[
         // TODO(abarth): Should this be a FlatButton?

@@ -15,13 +15,13 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
     new Container(height: 100.0, width: 100.0),
     new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
     new Container(height: 100.0, width: 100.0),
-    new FlatButton(child: new Text('button'), onPressed: () => Navigator.of(args.context).pushNamed('/two')),
+    new FlatButton(child: new Text('button'), onPressed: () => Navigator.pushNamed(args.context, '/two')),
   ]),
   '/two': (RouteArguments args) => new Block([
     new Container(height: 150.0, width: 150.0),
     new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
     new Container(height: 150.0, width: 150.0),
-    new FlatButton(child: new Text('button'), onPressed: () => Navigator.of(args.context).pop()),
+    new FlatButton(child: new Text('button'), onPressed: () => Navigator.pop(args.context)),
   ]),
 };
 

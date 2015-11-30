@@ -15,11 +15,11 @@ class Home extends StatelessComponent {
             ),
             new RaisedButton(
               child: new Text('GO SHOPPING'),
-              onPressed: () => Navigator.of(context).pushNamed('/shopping')
+              onPressed: () => Navigator.pushNamed(context, '/shopping')
             ),
             new RaisedButton(
               child: new Text('START ADVENTURE'),
-              onPressed: () => Navigator.of(context).pushNamed('/adventure')
+              onPressed: () => Navigator.pushNamed(context, '/adventure')
             )
           ],
           padding: const EdgeDims.all(30.0)
@@ -41,11 +41,11 @@ class Shopping extends StatelessComponent {
             ),
             new RaisedButton(
               child: new Text('RETURN HOME'),
-              onPressed: () => Navigator.of(context).pop()
+              onPressed: () => Navigator.pop(context)
             ),
             new RaisedButton(
               child: new Text('GO TO DUNGEON'),
-              onPressed: () => Navigator.of(context).pushNamed('/adventure')
+              onPressed: () => Navigator.pushNamed(context, '/adventure')
             )
           ],
           padding: const EdgeDims.all(30.0)
@@ -67,7 +67,7 @@ class Adventure extends StatelessComponent {
             ),
             new RaisedButton(
               child: new Text('RUN!!!'),
-              onPressed: () => Navigator.of(context).pop()
+              onPressed: () => Navigator.pop(context)
             )
           ],
           padding: const EdgeDims.all(30.0)

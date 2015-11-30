@@ -55,14 +55,15 @@ class MealFragmentState extends State<MealFragment> {
 
   void _handleSave() {
     config.onCreated(new Meal(when: new DateTime.now(), description: _description));
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   Widget buildToolBar() {
     return new ToolBar(
       left: new IconButton(
         icon: "navigation/close",
-        onPressed: Navigator.of(context).pop),
+        onPressed: () => Navigator.pop(context)
+      ),
       center: new Text('New Meal'),
       right: <Widget>[
         // TODO(abarth): Should this be a FlatButton?
