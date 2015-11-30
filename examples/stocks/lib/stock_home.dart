@@ -6,6 +6,8 @@ part of stocks;
 
 typedef void ModeUpdater(StockMode mode);
 
+enum StockHomeTab { market, portfolio }
+
 class StockHome extends StatefulComponent {
   StockHome(this.stocks, this.symbols, this.stockMode, this.modeUpdater);
 
@@ -20,6 +22,7 @@ class StockHome extends StatefulComponent {
 class StockHomeState extends State<StockHome> {
 
   final GlobalKey scaffoldKey = new GlobalKey();
+  final TabBarSelection _tabBarSelection = new TabBarSelection();
   bool _isSearching = false;
   String _searchQuery;
 
@@ -160,7 +163,13 @@ class StockHomeState extends State<StockHome> {
           icon: "navigation/more_vert",
           onPressed: _handleMenuShow
         )
-      ]
+      ],
+      tabBar: new TabBar(
+        selection: _tabBarSelection,
+        labels: <TabLabel>[
+          const TabLabel(text: 'MARKET'),
+          const TabLabel(text: 'PORTFOLIO')]
+      )
     );
   }
 
@@ -208,25 +217,6 @@ class StockHomeState extends State<StockHome> {
 
   static const List<String> portfolioSymbols = const <String>["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
 
-  Widget buildTabNavigator() {
-    return new TabNavigator(
-      views: <TabNavigatorView>[
-        new TabNavigatorView(
-          label: const TabLabel(text: 'MARKET'),
-          builder: (BuildContext context) => buildStockList(context, _filterBySearchQuery(_getStockList(config.symbols)).toList())
-        ),
-        new TabNavigatorView(
-          label: const TabLabel(text: 'PORTFOLIO'),
-          builder: (BuildContext context) => buildStockList(context, _filterBySearchQuery(_getStockList(portfolioSymbols)).toList())
-        )
-      ],
-      selectedIndex: selectedTabIndex,
-      onChanged: (int tabIndex) {
-        setState(() { selectedTabIndex = tabIndex; } );
-      }
-    );
-  }
-
   static GlobalKey searchFieldKey = new GlobalKey();
   static GlobalKey companyNameKey = new GlobalKey();
 
@@ -270,12 +260,43 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
+  Widget buildStockTab(BuildContext context, StockHomeTab tab, List<String> stockSymbols) {
+    return new Container(
+      key: new ValueKey<StockHomeTab>(tab),
+      child: buildStockList(context, _filterBySearchQuery(_getStockList(stockSymbols)).toList())
+    );
+  }
+
+  double _viewWidth = 100.0;
+  void _handleSizeChanged(Size newSize) {
+    setState(() {
+      _viewWidth = newSize.width;
+    });
+  }
+
   Widget build(BuildContext context) {
     return new Scaffold(
       key: scaffoldKey,
       toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
-      body: buildTabNavigator(),
-      floatingActionButton: buildFloatingActionButton()
+      floatingActionButton: buildFloatingActionButton(),
+      body: new SizeObserver(
+        onSizeChanged: _handleSizeChanged,
+        child: new TabBarView<StockHomeTab>(
+          selection: _tabBarSelection,
+          items: [StockHomeTab.market, StockHomeTab.portfolio],
+          itemExtent: _viewWidth,
+          itemBuilder: (BuildContext context, StockHomeTab tab, _) {
+            switch (tab) {
+              case StockHomeTab.market:
+                return buildStockTab(context, tab, config.symbols);
+              case StockHomeTab.portfolio:
+                return buildStockTab(context, tab, portfolioSymbols);
+              default:
+                assert(false);
+            }
+          }
+        )
+      )
     );
   }
 }

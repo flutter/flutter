@@ -8,6 +8,7 @@ import 'constants.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'shadows.dart';
+import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -18,6 +19,7 @@ class ToolBar extends StatelessComponent {
     this.center,
     this.right,
     this.bottom,
+    this.tabBar,
     this.elevation: 4,
     this.backgroundColor,
     this.textTheme,
@@ -28,6 +30,7 @@ class ToolBar extends StatelessComponent {
   final Widget center;
   final List<Widget> right;
   final Widget bottom;
+  final TabBar tabBar;
   final int elevation;
   final Color backgroundColor;
   final TextTheme textTheme;
@@ -40,6 +43,7 @@ class ToolBar extends StatelessComponent {
       center: center,
       right: right,
       bottom: bottom,
+      tabBar: tabBar,
       elevation: elevation,
       backgroundColor: backgroundColor,
       textTheme: textTheme,
@@ -89,6 +93,9 @@ class ToolBar extends StatelessComponent {
         style: centerStyle,
         child: new Container(height: kExtendedToolBarHeight - kToolBarHeight, child: bottom)
       ));
+
+    if (tabBar != null)
+      columnChildren.add(tabBar);
 
     Widget content = new AnimatedContainer(
       duration: kThemeChangeDuration,

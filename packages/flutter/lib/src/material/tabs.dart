@@ -292,14 +292,12 @@ class TabLabel {
   }
 }
 
-class Tab extends StatelessComponent {
-  Tab({
+class _Tab extends StatelessComponent {
+  _Tab({
     Key key,
     this.onSelected,
     this.label,
-    this.color,
-    this.selected: false,
-    this.selectedColor
+    this.color
   }) : super(key: key) {
     assert(label.text != null || label.icon != null);
   }
@@ -307,19 +305,16 @@ class Tab extends StatelessComponent {
   final VoidCallback onSelected;
   final TabLabel label;
   final Color color;
-  final bool selected;
-  final Color selectedColor;
 
   Widget _buildLabelText() {
     assert(label.text != null);
-    TextStyle style = new TextStyle(color: selected ? selectedColor : color);
+    TextStyle style = new TextStyle(color: color);
     return new Text(label.text, style: style);
   }
 
   Widget _buildLabelIcon() {
     assert(label.icon != null);
-    Color iconColor = selected ? selectedColor : color;
-    ColorFilter filter = new ColorFilter.mode(iconColor, TransferMode.srcATop);
+    ColorFilter filter = new ColorFilter.mode(color, TransferMode.srcATop);
     return new Icon(icon: label.icon, colorFilter: filter);
   }
 
@@ -381,18 +376,46 @@ class _TabsScrollBehavior extends BoundedBehavior {
   }
 }
 
+class TabBarSelection {
+  TabBarSelection({ int index: 0, this.onChanged }) : _index = index;
+
+  final VoidCallback onChanged;
+
+  PerformanceView get performance => _performance.view;
+  final _performance = new Performance(duration: _kTabBarScroll, progress: 1.0);
+
+  int get index => _index;
+  int _index;
+  void set index(int value) {
+    if (value == _index)
+      return;
+    _previousIndex = _index;
+    _index = value;
+    _performance
+      ..progress = 0.0
+      ..play().then((_) {
+      if (onChanged != null)
+        onChanged();
+      });
+  }
+
+  int get previousIndex => _previousIndex;
+  int _previousIndex = 0;
+}
+
 class TabBar extends Scrollable {
   TabBar({
     Key key,
     this.labels,
-    this.selectedIndex: 0,
-    this.onChanged,
+    this.selection,
     this.isScrollable: false
-  }) : super(key: key, scrollDirection: ScrollDirection.horizontal);
+  }) : super(key: key, scrollDirection: ScrollDirection.horizontal) {
+    assert(labels != null);
+    assert(selection != null);
+  }
 
   final Iterable<TabLabel> labels;
-  final int selectedIndex;
-  final TabSelectedIndexChanged onChanged;
+  final TabBarSelection selection;
   final bool isScrollable;
 
   _TabBarState createState() => new _TabBarState();
@@ -401,36 +424,53 @@ class TabBar extends Scrollable {
 class _TabBarState extends ScrollableState<TabBar> {
   void initState() {
     super.initState();
-    _indicatorAnimation = new ValuePerformance<Rect>()
-      ..duration = _kTabBarScroll
-      ..variable = new AnimatedRectValue(null, curve: Curves.ease);
     scrollBehavior.isScrollable = config.isScrollable;
+    config.selection._performance
+      ..addStatusListener(_handleStatusChange)
+      ..addListener(_handleProgressChange);
   }
 
-  Size _tabBarSize;
+  void dispose() {
+    config.selection._performance
+      ..removeStatusListener(_handleStatusChange)
+      ..removeListener(_handleProgressChange)
+      ..stop();
+    super.dispose();
+  }
+
+  Performance get _performance => config.selection._performance;
+
+  bool _indicatorRectIsValid = false;
+
+  // The performance's status change is our indication that the selection index has
+  // changed. We don't start animating the _indicatorRect until after we've reset
+  // _indicatorRect here.
+  void _handleStatusChange(PerformanceStatus status) {
+    _indicatorRectIsValid = status == PerformanceStatus.forward;
+    if (status == PerformanceStatus.forward) {
+      if (config.isScrollable)
+        scrollTo(_centeredTabScrollOffset(config.selection.index), duration: _kTabBarScroll);
+      setState(() {
+        _indicatorRect
+          ..begin = _indicatorRect.value ?? _tabIndicatorRect(config.selection.previousIndex)
+          ..end = _tabIndicatorRect(config.selection.index);
+      });
+    }
+  }
+
+  void _handleProgressChange() {
+    // Performance listeners are notified before statusListeners.
+    if (_indicatorRectIsValid && _performance.status == PerformanceStatus.forward) {
+      setState(() {
+        _indicatorRect.setProgress(_performance.progress, AnimationDirection.forward);
+      });
+    }
+  }
+
   Size _viewportSize = Size.zero;
+  Size _tabBarSize;
   List<double> _tabWidths;
-  ValuePerformance<Rect> _indicatorAnimation;
-
-  void didUpdateConfig(TabBar oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (!config.isScrollable)
-      scrollTo(0.0);
-  }
-
-  AnimatedRectValue get _indicatorRect => _indicatorAnimation.variable;
-
-  void _startIndicatorAnimation(int fromTabIndex, int toTabIndex) {
-    _indicatorRect
-      ..begin = (_indicatorRect.value == null ? _tabIndicatorRect(fromTabIndex) : _indicatorRect.value)
-      ..end = _tabIndicatorRect(toTabIndex);
-    _indicatorAnimation
-      ..progress = 0.0
-      ..play();
-  }
-
-  ScrollBehavior createScrollBehavior() => new _TabsScrollBehavior();
-  _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
+  AnimatedRectValue _indicatorRect = new AnimatedRectValue(null, curve: Curves.ease);
 
   Rect _tabRect(int tabIndex) {
     assert(_tabBarSize != null);
@@ -450,31 +490,40 @@ class _TabBarState extends ScrollableState<TabBar> {
     return new Rect.fromLTRB(r.left, r.bottom, r.right, r.bottom + _kTabIndicatorHeight);
   }
 
+  void didUpdateConfig(TabBar oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    if (!config.isScrollable)
+      scrollTo(0.0);
+  }
+
+  ScrollBehavior createScrollBehavior() => new _TabsScrollBehavior();
+  _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
+
   double _centeredTabScrollOffset(int tabIndex) {
     double viewportWidth = scrollBehavior.containerExtent;
-    return (_tabRect(tabIndex).left + _tabWidths[tabIndex] / 2.0 - viewportWidth / 2.0)
+    Rect tabRect = _tabRect(tabIndex);
+    return (tabRect.left + tabRect.width / 2.0 - viewportWidth / 2.0)
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
   void _handleTabSelected(int tabIndex) {
-    if (tabIndex != config.selectedIndex) {
-      if (_tabWidths != null) {
-        if (config.isScrollable)
-          scrollTo(_centeredTabScrollOffset(tabIndex), duration: _kTabBarScroll);
-        _startIndicatorAnimation(config.selectedIndex, tabIndex);
-      }
-      if (config.onChanged != null)
-        config.onChanged(tabIndex);
-    }
+    if (tabIndex != config.selection.index)
+      setState(() {
+        config.selection.index = tabIndex;
+      });
   }
 
   Widget _toTab(TabLabel label, int tabIndex, Color color, Color selectedColor) {
-    return new Tab(
-      onSelected: () => _handleTabSelected(tabIndex),
+    Color labelColor = color;
+    if (tabIndex == config.selection.index)
+      labelColor = Color.lerp(color, selectedColor, _performance.progress);
+    else if (tabIndex == config.selection.previousIndex)
+      labelColor = Color.lerp(selectedColor, color, _performance.progress);
+
+    return new _Tab(
+      onSelected: () { _handleTabSelected(tabIndex); },
       label: label,
-      color: color,
-      selected: tabIndex == config.selectedIndex,
-      selectedColor: selectedColor
+      color: labelColor
     );
   }
 
@@ -496,6 +545,8 @@ class _TabBarState extends ScrollableState<TabBar> {
   void _handleViewportSizeChanged(Size newSize) {
     _viewportSize = newSize;
     _updateScrollBehavior();
+    if (config.isScrollable)
+      scrollTo(_centeredTabScrollOffset(config.selection.index), duration: _kTabBarScroll);
   }
 
   Widget buildContent(BuildContext context) {
@@ -526,11 +577,11 @@ class _TabBarState extends ScrollableState<TabBar> {
         style: textStyle,
         child: new BuilderTransition(
           variables: <AnimatedValue<Rect>>[_indicatorRect],
-          performance: _indicatorAnimation.view,
+          performance: config.selection.performance,
           builder: (BuildContext context) {
             return new _TabBarWrapper(
               children: tabs,
-              selectedIndex: config.selectedIndex,
+              selectedIndex: config.selection.index,
               indicatorColor: indicatorColor,
               indicatorRect: _indicatorRect.value,
               textAndIcons: textAndIcons,
@@ -563,46 +614,111 @@ class _TabBarState extends ScrollableState<TabBar> {
   }
 }
 
-class TabNavigatorView {
-  TabNavigatorView({ this.label, this.builder }) {
-    assert(builder != null);
+class TabBarView<T> extends ScrollableList<T> {
+  TabBarView({
+    Key key,
+    this.selection,
+    List<T> items,
+    ItemBuilder<T> itemBuilder,
+    double itemExtent
+  }) : super(
+    key: key,
+    scrollDirection: ScrollDirection.horizontal,
+    items: items,
+    itemBuilder: itemBuilder,
+    itemExtent: itemExtent,
+    itemsWrap: false
+  ) {
+    assert(selection != null);
   }
 
-  // this uses a builder for the contents, rather than a raw Widget child,
-  // because there might be many, many tabs and some might be relatively
-  // expensive to create up front. This way, the view is only created lazily.
+  final TabBarSelection selection;
 
-  final TabLabel label;
-  final WidgetBuilder builder;
+  _TabBarViewState createState() => new _TabBarViewState<T>();
 }
 
-class TabNavigator extends StatelessComponent {
-  TabNavigator({
-    Key key,
-    this.views,
-    this.selectedIndex: 0,
-    this.onChanged,
-    this.isScrollable: false
-  }) : super(key: key);
+// TODO(hansmuller): horizontal scrolling should drive the TabSelection's performance.
+class _NotScrollable extends BoundedBehavior {
+  bool get isScrollable => false;
+}
 
-  final List<TabNavigatorView> views;
-  final int selectedIndex;
-  final TabSelectedIndexChanged onChanged;
-  final bool isScrollable;
+class _TabBarViewState<T> extends ScrollableListState<T, TabBarView<T>> {
 
-  Widget build(BuildContext context) {
-    assert(views != null && views.isNotEmpty);
-    assert(selectedIndex >= 0 && selectedIndex < views.length);
-    return new Column(<Widget>[
-      new TabBar(
-        labels: views.map((TabNavigatorView view) => view.label),
-        onChanged: onChanged,
-        selectedIndex: selectedIndex,
-        isScrollable: isScrollable
-      ),
-      new Flexible(child: views[selectedIndex].builder(context))
-    ],
-      alignItems: FlexAlignItems.stretch
-    );
+  ScrollBehavior createScrollBehavior() => new _NotScrollable();
+
+  List<int> _itemIndices = [0, 1];
+  AnimationDirection _scrollDirection = AnimationDirection.forward;
+
+  void _initItemIndicesAndScrollPosition() {
+    final int selectedIndex = config.selection.index;
+
+    if (selectedIndex == 0) {
+      _itemIndices = <int>[0, 1];
+      scrollTo(0.0);
+    } else if (selectedIndex == config.items.length - 1) {
+      _itemIndices = <int>[selectedIndex - 1, selectedIndex];
+      scrollTo(config.itemExtent);
+    } else {
+      _itemIndices = <int>[selectedIndex - 1, selectedIndex, selectedIndex + 1];
+      scrollTo(config.itemExtent);
+    }
+  }
+
+  Performance get _performance => config.selection._performance;
+
+  void initState() {
+    super.initState();
+    _initItemIndicesAndScrollPosition();
+    _performance
+      ..addStatusListener(_handleStatusChange)
+      ..addListener(_handleProgressChange);
+  }
+
+  void dispose() {
+    _performance
+      ..removeStatusListener(_handleStatusChange)
+      ..removeListener(_handleProgressChange)
+      ..stop();
+    super.dispose();
+  }
+
+  void didUpdateConfig(TabBarView oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    if (oldConfig.itemExtent != config.itemExtent && !_performance.isAnimating)
+      _initItemIndicesAndScrollPosition();
+  }
+
+  void _handleStatusChange(PerformanceStatus status) {
+    final int selectedIndex = config.selection.index;
+    final int previousSelectedIndex = config.selection.previousIndex;
+
+    if (status == PerformanceStatus.forward) {
+      if (selectedIndex < previousSelectedIndex) {
+        _itemIndices = <int>[selectedIndex, previousSelectedIndex];
+        _scrollDirection = AnimationDirection.reverse;
+      } else {
+        _itemIndices = <int>[previousSelectedIndex, selectedIndex];
+        _scrollDirection = AnimationDirection.forward;
+      }
+    } else if (status == PerformanceStatus.completed) {
+      _initItemIndicesAndScrollPosition();
+    }
+  }
+
+  void _handleProgressChange() {
+    if (_scrollDirection == AnimationDirection.forward)
+      scrollTo(config.itemExtent * _performance.progress);
+    else
+      scrollTo(config.itemExtent * (1.0 - _performance.progress));
+  }
+
+  int get itemCount => _itemIndices.length;
+
+  List<Widget> buildItems(BuildContext context, int start, int count) {
+    return _itemIndices
+      .skip(start)
+      .take(count)
+      .map((int i) => config.itemBuilder(context, config.items[i], i))
+      .toList();
   }
 }
