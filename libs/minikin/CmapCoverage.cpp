@@ -29,11 +29,12 @@ namespace android {
 
 // These could perhaps be optimized to use __builtin_bswap16 and friends.
 static uint32_t readU16(const uint8_t* data, size_t offset) {
-    return data[offset] << 8 | data[offset + 1];
+    return ((uint32_t)data[offset]) << 8 | ((uint32_t)data[offset + 1]);
 }
 
 static uint32_t readU32(const uint8_t* data, size_t offset) {
-    return data[offset] << 24 | data[offset + 1] << 16 | data[offset + 2] << 8 | data[offset + 3];
+    return ((uint32_t)data[offset]) << 24 | ((uint32_t)data[offset + 1]) << 16 |
+        ((uint32_t)data[offset + 2]) << 8 | ((uint32_t)data[offset + 3]);
 }
 
 static void addRange(vector<uint32_t> &coverage, uint32_t start, uint32_t end) {
@@ -101,11 +102,13 @@ static bool getCoverageFormat12(vector<uint32_t>& coverage, const uint8_t* data,
     const size_t kGroupSize = 12;
     const size_t kStartCharCodeOffset = 0;
     const size_t kEndCharCodeOffset = 4;
+    const size_t kMaxNGroups = 0xfffffff0 / kGroupSize;  // protection against overflow
+    // For all values < kMaxNGroups, kFirstGroupOffset + nGroups * kGroupSize fits in 32 bits.
     if (kFirstGroupOffset > size) {
         return false;
     }
     uint32_t nGroups = readU32(data, kNGroupsOffset);
-    if (kFirstGroupOffset + nGroups * kGroupSize > size) {
+    if (nGroups >= kMaxNGroups || kFirstGroupOffset + nGroups * kGroupSize > size) {
         return false;
     }
     for (uint32_t i = 0; i < nGroups; i++) {
