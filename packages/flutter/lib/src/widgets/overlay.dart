@@ -83,6 +83,26 @@ class OverlayState extends State<Overlay> {
     });
   }
 
+  bool debugIsVisible(OverlayEntry entry) {
+    bool result = false;
+    assert(_entries.contains(entry));
+    assert(() {
+      // This is an O(N) algorithm, and should not be necessary except for debug asserts.
+      // To avoid people depending on it, we only implement it in checked mode.
+      for (int i = _entries.length - 1; i > 0; i -= 1) {
+        OverlayEntry candidate = _entries[i];
+        if (candidate == entry) {
+          result = true;
+          break;
+        }
+        if (entry.opaque)
+          break;
+      }
+      return true;
+    });
+    return result;
+  }
+
   Widget build(BuildContext context) {
     List<Widget> backwardsChildren = <Widget>[];
 
