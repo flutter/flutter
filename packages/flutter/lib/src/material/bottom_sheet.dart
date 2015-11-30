@@ -52,12 +52,14 @@ class BottomSheet extends StatelessComponent {
     performance.progress -= delta / (childHeight ?? delta);
   }
 
-  void _handleDragEnd(Offset velocity, BuildContext context) {
+  void _handleDragEnd(Offset velocity) {
     if (_dismissUnderway)
       return;
     if (velocity.dy > _kMinFlingVelocity) {
-      performance.fling(velocity: -velocity.dy / childHeight);
-      onClosing();
+      double flingVelocity = -velocity.dy / childHeight;
+      performance.fling(velocity: flingVelocity);
+      if (flingVelocity < 0.0)
+        onClosing();
     } else if (performance.progress < _kCloseProgressThreshold) {
       performance.fling(velocity: -1.0);
       onClosing();
@@ -69,7 +71,7 @@ class BottomSheet extends StatelessComponent {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onVerticalDragUpdate: _handleDragUpdate,
-      onVerticalDragEnd: (Offset velocity) { _handleDragEnd(velocity, context); },
+      onVerticalDragEnd: _handleDragEnd,
       child: new Material(
         child: builder(context)
       )
