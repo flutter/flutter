@@ -261,13 +261,5 @@ void Engine::ScheduleFrame() {
 void Engine::Render(std::unique_ptr<compositor::LayerTree> layer_tree) {
 }
 
-void Engine::StartDartTracing() {
-  sky_view_->StartDartTracing();
-}
-
-void Engine::StopDartTracing(mojo::ScopedDataPipeProducerHandle producer) {
-  sky_view_->StopDartTracing(producer.Pass());
-}
-
 }  // namespace shell
 }  // namespace sky

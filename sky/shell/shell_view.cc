@@ -22,14 +22,12 @@ void Drop(scoped_ptr<T> ptr) { }
 
 ShellView::ShellView(Shell& shell)
     : shell_(shell) {
-  shell_.tracing_controller().RegisterShellView(this);
   rasterizer_ = Rasterizer::Create();
   CreateEngine();
   CreatePlatformView();
 }
 
 ShellView::~ShellView() {
-  shell_.tracing_controller().UnregisterShellView(this);
   view_ = nullptr;
   shell_.gpu_task_runner()->PostTask(FROM_HERE,
       base::Bind(&Drop<Rasterizer>, base::Passed(&rasterizer_)));
@@ -50,18 +48,6 @@ void ShellView::CreatePlatformView() {
   config.ui_delegate = engine_->GetWeakPtr();
   config.rasterizer = rasterizer_.get();
   view_.reset(PlatformView::Create(config));
-}
-
-void ShellView::StartDartTracing() {
-  shell_.ui_task_runner()->PostTask(
-      FROM_HERE, base::Bind(&Engine::StartDartTracing, engine_->GetWeakPtr()));
-}
-
-void ShellView::StopDartTracing(
-    mojo::ScopedDataPipeProducerHandle producer) {
-  shell_.ui_task_runner()->PostTask(
-      FROM_HERE, base::Bind(&Engine::StopDartTracing, engine_->GetWeakPtr(),
-                            base::Passed(&producer)));
 }
 
 }  // namespace shell

@@ -93,12 +93,4 @@ void SkyView::Render(Scene* scene) {
   layer_tree_ = scene->takeLayerTree();
 }
 
-void SkyView::StartDartTracing() {
-  dart_controller_->StartTracing();
-}
-
-void SkyView::StopDartTracing(mojo::ScopedDataPipeProducerHandle producer) {
-  dart_controller_->StopTracing(producer.Pass());
-}
-
 } // namespace blink

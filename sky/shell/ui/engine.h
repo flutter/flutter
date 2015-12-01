@@ -49,9 +49,6 @@ class Engine : public UIDelegate,
 
   std::unique_ptr<compositor::LayerTree> BeginFrame(base::TimeTicks frame_time);
 
-  void StartDartTracing();
-  void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
-
  private:
   // UIDelegate implementation:
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;
