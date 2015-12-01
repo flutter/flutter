@@ -119,32 +119,24 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
     final Size navigatorSize = renderBox.size;
     final RelativeRect menuRect = new RelativeRect.fromSize(route.rect, navigatorSize);
 
-    return new Positioned(
-      top: menuRect.top - (route.selectedIndex * route.rect.height),
-      right: menuRect.right,
-      left: menuRect.left,
-      child: new Focus(
-        key: new GlobalObjectKey(route),
-        child: new FadeTransition(
-          performance: route.performance,
-          opacity: menuOpacity,
-          child: new BuilderTransition(
-            performance: route.performance,
-            variables: <AnimatedValue<double>>[menuTop, menuBottom],
-            builder: (BuildContext context) {
-              return new CustomPaint(
-                painter: new _DropDownMenuPainter(
-                  color: Theme.of(context).canvasColor,
-                  elevation: route.elevation,
-                  menuTop: menuTop.value,
-                  menuBottom: menuBottom.value,
-                  renderBox: context.findRenderObject()
-                ),
-                child: new Block(children)
-              );
-            }
-          )
-        )
+    return new FadeTransition(
+      performance: route.performance,
+      opacity: menuOpacity,
+      child: new BuilderTransition(
+        performance: route.performance,
+        variables: <AnimatedValue<double>>[menuTop, menuBottom],
+        builder: (BuildContext context) {
+          return new CustomPaint(
+            painter: new _DropDownMenuPainter(
+              color: Theme.of(context).canvasColor,
+              elevation: route.elevation,
+              menuTop: menuTop.value,
+              menuBottom: menuBottom.value,
+              renderBox: context.findRenderObject()
+            ),
+            child: new Column(children, justifyContent: FlexJustifyContent.collapse)
+          );
+        }
       )
     );
   }
@@ -153,12 +145,14 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
 class _DropDownRoute<T> extends PopupRoute<T> {
   _DropDownRoute({
     Completer<T> completer,
+    this.position,
     this.items,
     this.selectedIndex,
     this.rect,
     this.elevation: 8
   }) : super(completer: completer);
 
+  final ModalPosition position;
   final List<DropDownMenuItem<T>> items;
   final int selectedIndex;
   final Rect rect;
@@ -213,9 +207,18 @@ class DropDownButton<T> extends StatelessComponent {
   void _showDropDown(BuildContext context, int selectedIndex, GlobalKey indexedStackKey) {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
     final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
+    final NavigatorState navigator = Navigator.of(context);
+    final Size navigatorSize = navigator.context.findRenderObject().size;
+    final RelativeRect menuRect = new RelativeRect.fromSize(rect, navigatorSize);
+    final position = new ModalPosition(
+      top: menuRect.top - selectedIndex * rect.height,
+      left: menuRect.left
+    );
+
     final Completer completer = new Completer<T>();
     Navigator.push(context, new _DropDownRoute<T>(
       completer: completer,
+      position: position,
       items: items,
       selectedIndex: selectedIndex,
       rect: _kMenuHorizontalPadding.inflateRect(rect),
