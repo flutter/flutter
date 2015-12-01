@@ -48,7 +48,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       if (onTapCancel != null)
         onTapCancel();
       _reset();
-    }      
+    }
     super.resolve(disposition);
   }
 
