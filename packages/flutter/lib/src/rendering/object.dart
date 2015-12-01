@@ -62,7 +62,6 @@ class PaintingContext {
   PaintingContext._(this._containerLayer, this._paintBounds) {
     assert(_containerLayer != null);
     assert(_paintBounds != null);
-    assert(!_paintBounds.isEmpty);
   }
 
   final ContainerLayer _containerLayer;
