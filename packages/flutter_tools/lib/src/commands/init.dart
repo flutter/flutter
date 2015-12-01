@@ -141,6 +141,7 @@ class FlutterSimpleTemplate extends Template {
     files['pubspec.yaml'] = _pubspec;
     files['README.md'] = _readme;
     files['lib/main.dart'] = _libMain;
+    files['apk/AndroidManifest.xml'] = _apkManifest;
   }
 }
 
@@ -220,4 +221,26 @@ class FlutterDemo extends StatelessComponent {
     );
   }
 }
+''';
+
+const String _apkManifest = r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.{{projectName}}">
+
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application android:name="org.domokit.sky.shell.SkyApplication" android:label="{{projectName}}">
+        <activity android:name="org.domokit.sky.shell.SkyActivity"
+                  android:launchMode="singleTask"
+                  android:theme="@android:style/Theme.Black.NoTitleBar"
+                  android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+                  android:hardwareAccelerated="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
 ''';
