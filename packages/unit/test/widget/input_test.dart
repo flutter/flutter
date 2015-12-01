@@ -138,4 +138,27 @@ void main() {
       expect(input.editableValue.selection.start, equals(0));
     });
   });
+
+  test('hideText control test', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey inputKey = new GlobalKey();
+
+      Widget builder() {
+        return new Center(
+          child: new Input(
+            key: inputKey,
+            hideText: true,
+            placeholder: 'Placeholder'
+          )
+        );
+      }
+
+      tester.pumpWidget(builder());
+
+      const String testValue = 'ABC';
+      mockKeyboard.client.commitText(testValue, testValue.length);
+
+      tester.pump();
+    });
+  });
 }

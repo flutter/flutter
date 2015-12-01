@@ -21,6 +21,7 @@ class Input extends Scrollable {
     GlobalKey key,
     this.initialValue: '',
     this.placeholder,
+    this.hideText: false,
     this.onChanged,
     this.keyboardType: KeyboardType.TEXT,
     this.onSubmitted
@@ -33,6 +34,7 @@ class Input extends Scrollable {
   final String initialValue;
   final KeyboardType keyboardType;
   final String placeholder;
+  final bool hideText;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
 
@@ -110,6 +112,7 @@ class InputState extends ScrollableState<Input> {
       value: _editableValue,
       focused: focused,
       style: textStyle,
+      hideText: config.hideText,
       cursorColor: cursorColor,
       onContentSizeChanged: _handleContentSizeChanged,
       scrollOffset: scrollOffsetVector
