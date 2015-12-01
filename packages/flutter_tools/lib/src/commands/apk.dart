@@ -211,6 +211,8 @@ class ApkCommand extends FlutterCommand {
       ensureDirectoryExists(finalApk.path);
       builder.align(unalignedApk, finalApk);
 
+      print('APK generated: ${finalApk.path}');
+
       return 0;
     } finally {
       tempDir.deleteSync(recursive: true);
