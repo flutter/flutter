@@ -24,9 +24,6 @@ class ShellView {
 
   PlatformView* view() const { return view_.get(); }
 
-  void StartDartTracing();
-  void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
-
  private:
   void CreateEngine();
   void CreatePlatformView();

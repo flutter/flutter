@@ -51,7 +51,7 @@ void InitializeTracing() {
   DCHECK(result);
   sky::shell::Shell::Shared()
       .tracing_controller()
-      .set_picture_tracing_base_path(path);
+      .set_traces_base_path(path);
 }
 
 }  // namespace

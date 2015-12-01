@@ -54,9 +54,6 @@ class SkyView : public WindowClient {
 
   void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
 
-  void StartDartTracing();
-  void StopDartTracing(mojo::ScopedDataPipeProducerHandle producer);
-
  private:
   explicit SkyView(SkyViewClient* client);
 

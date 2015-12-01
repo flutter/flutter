@@ -163,47 +163,4 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
   Dart_ExitIsolate();
 }
 
-static void DartController_DartStreamConsumer(
-    Dart_StreamConsumer_State state,
-    const char* stream_name,
-    uint8_t* buffer,
-    intptr_t buffer_length,
-    mojo::ScopedDataPipeProducerHandle *handle) {
-
-  if (!handle->is_valid()) {
-    // Simple flush. Nothing to do.
-    return;
-  }
-
-  if (state == Dart_StreamConsumer_kData) {
-    // Trim trailing null characters.
-    if (buffer[buffer_length - 1] == 0)
-      --buffer_length;
-    if (buffer_length) {
-      const std::string data(reinterpret_cast<const char*>(buffer),
-                             buffer_length);
-      mojo::common::BlockingCopyFromString(data, *handle);
-    }
-  }
-}
-
-void DartController::StartTracing() {
-  DartIsolateScope isolate_scope(dart_state()->isolate());
-  DartApiScope dart_api_scope;
-
-  Dart_TimelineSetRecordedStreams(DART_TIMELINE_STREAM_ALL);
-}
-
-void DartController::StopTracing(
-    mojo::ScopedDataPipeProducerHandle producer) {
-  DartIsolateScope isolate_scope(dart_state()->isolate());
-  DartApiScope dart_api_scope;
-
-  Dart_TimelineSetRecordedStreams(DART_TIMELINE_STREAM_DISABLE);
-
-  auto callback =
-      reinterpret_cast<Dart_StreamConsumer>(&DartController_DartStreamConsumer);
-  Dart_TimelineGetTrace(callback, &producer);
-}
-
 } // namespace blink
