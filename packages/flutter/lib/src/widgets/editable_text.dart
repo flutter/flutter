@@ -144,6 +144,7 @@ class EditableText extends StatefulComponent {
     Key key,
     this.value,
     this.focused: false,
+    this.hideText: false,
     this.style,
     this.cursorColor,
     this.onContentSizeChanged,
@@ -152,6 +153,7 @@ class EditableText extends StatefulComponent {
 
   final EditableString value;
   final bool focused;
+  final bool hideText;
   final TextStyle style;
   final Color cursorColor;
   final SizeChangedCallback onContentSizeChanged;
@@ -216,6 +218,7 @@ class EditableTextState extends State<EditableText> {
         style: config.style,
         cursorColor: config.cursorColor,
         showCursor: _showCursor,
+        hideText: config.hideText,
         onContentSizeChanged: config.onContentSizeChanged,
         scrollOffset: config.scrollOffset
       )
@@ -232,6 +235,7 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
     this.style,
     this.cursorColor,
     this.showCursor,
+    this.hideText,
     this.onContentSizeChanged,
     this.scrollOffset
   }) : super(key: key);
@@ -240,6 +244,7 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
   final TextStyle style;
   final Color cursorColor;
   final bool showCursor;
+  final bool hideText;
   final SizeChangedCallback onContentSizeChanged;
   final Offset scrollOffset;
 
@@ -264,7 +269,7 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
 
   // Construct a TextSpan that renders the EditableString using the chosen style.
   TextSpan _buildTextSpan() {
-    if (value.composing.isValid) {
+    if (!hideText && value.composing.isValid) {
       TextStyle composingStyle = style.merge(
         const TextStyle(decoration: underline)
       );
@@ -279,6 +284,8 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
     }
 
     String text = value.text;
+    if (hideText)
+      text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
     return new StyledTextSpan(style, <TextSpan>[
       new PlainTextSpan(text.isEmpty ? _kZeroWidthSpace : text)
     ]);
