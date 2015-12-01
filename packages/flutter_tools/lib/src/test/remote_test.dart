@@ -9,6 +9,7 @@ import 'package:test/src/backend/live_test.dart';
 import 'package:test/src/backend/live_test_controller.dart';
 import 'package:test/src/backend/metadata.dart';
 import 'package:test/src/backend/operating_system.dart';
+import 'package:test/src/backend/group.dart';
 import 'package:test/src/backend/state.dart';
 import 'package:test/src/backend/suite.dart';
 import 'package:test/src/backend/test.dart';
@@ -25,7 +26,7 @@ class RemoteTest extends Test {
   final JSONSocket _socket;
   final int _index;
 
-  LiveTest load(Suite suite) {
+  LiveTest load(Suite suite, { Iterable<Group> groups }) {
     LiveTestController controller;
     StreamSubscription subscription;
 
@@ -70,7 +71,7 @@ class RemoteTest extends Test {
         subscription.cancel();
         subscription = null;
       }
-    });
+    }, groups: groups);
     return controller.liveTest;
   }
 
