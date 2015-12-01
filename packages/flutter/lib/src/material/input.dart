@@ -12,16 +12,13 @@ import 'theme.dart';
 export 'package:flutter/rendering.dart' show ValueChanged;
 export 'package:flutter/services.dart' show KeyboardType;
 
-// TODO(eseidel): This isn't right, it's 16px on the bottom:
-// http://www.google.com/design/spec/components/text-fields.html#text-fields-single-line-text-field
-const EdgeDims _kTextfieldPadding = const EdgeDims.symmetric(vertical: 8.0);
-
 class Input extends Scrollable {
   Input({
     GlobalKey key,
     this.initialValue: '',
     this.placeholder,
     this.hideText: false,
+    this.isDense: false,
     this.onChanged,
     this.keyboardType: KeyboardType.TEXT,
     this.onSubmitted
@@ -35,6 +32,7 @@ class Input extends Scrollable {
   final KeyboardType keyboardType;
   final String placeholder;
   final bool hideText;
+  final bool isDense;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
 
@@ -123,15 +121,21 @@ class InputState extends ScrollableState<Input> {
         onSizeChanged: _handleContainerSizeChanged,
         child: new Container(
           child: new Stack(textChildren),
-          padding: _kTextfieldPadding,
-          decoration: new BoxDecoration(border: new Border(
-            bottom: new BorderSide(
-              color: focusHighlightColor,
-              width: focused ? 2.0 : 1.0
+          margin: config.isDense ?
+            const EdgeDims.symmetric(vertical: 4.0) :
+            const EdgeDims.symmetric(vertical: 8.0),
+          padding: const EdgeDims.symmetric(vertical: 8.0),
+          decoration: new BoxDecoration(
+            border: new Border(
+              bottom: new BorderSide(
+                color: focusHighlightColor,
+                width: focused ? 2.0 : 1.0
+              )
             )
-          ))
+          )
         )
       ),
+      behavior: HitTestBehavior.opaque,
       onPointerDown: (_) {
         // TODO(ianh): https://github.com/flutter/engine/issues/1530
         if (Focus.at(context, config)) {
