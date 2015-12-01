@@ -734,6 +734,8 @@ class PageableList<T> extends ScrollableList<T> {
 }
 
 class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
+  int _currentPage = 0;
+
   double _snapScrollOffset(double newScrollOffset) {
     double scaledScrollOffset = newScrollOffset / config.itemExtent;
     double previousScrollOffset = scaledScrollOffset.floor() * config.itemExtent;
@@ -751,11 +753,19 @@ class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
     return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve).then(_notifyPageChanged);
   }
 
-  int get currentPage => (scrollOffset / config.itemExtent).floor() % itemCount;
+  int get currentPage => _currentPage;
 
   void _notifyPageChanged(_) {
+    _currentPage = (scrollOffset / config.itemExtent).floor() % itemCount;
     if (config.onPageChanged != null)
       config.onPageChanged(currentPage);
+  }
+
+  void _updateScrollBehavior() {
+    // Handle rotation/resizing
+    var newScrollOffset = config.itemExtent * _currentPage;
+    scrollTo(newScrollOffset, duration: null);
+    super._updateScrollBehavior();
   }
 
   Future settleScrollOffset() {
