@@ -66,6 +66,8 @@ template("mac_toolchain") {
       sysroot_flags = "-isysroot $sysroot $version_flags"
     }
 
+    strip = !is_debug
+
     toolchain_flags = ""
     if (invoker.toolchain_cpu == "i386") {
       toolchain_flags = "-m32"
@@ -183,7 +185,15 @@ template("mac_toolchain") {
     tool("link") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = "$outfile.rsp"
-      command = "$ld $sysroot_flags $toolchain_flags {{ldflags}} -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile.unstripped -Wl,-filelist,$rspfile {{solibs}} {{libs}}; strip $outfile.unstripped -o $outfile"
+
+      intermediate_outfile = outfile
+      strip_command =  ""
+      if (strip) {
+        intermediate_outfile = "$outfile.unstripped"
+        strip_command = "strip $intermediate_outfile -o $outfile"
+      }
+
+      command = "$ld $sysroot_flags $toolchain_flags {{ldflags}} -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $intermediate_outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}; $strip_command"
       description = "LINK $outfile"
       rspfile_content = "{{inputs_newline}}"
       outputs = [
