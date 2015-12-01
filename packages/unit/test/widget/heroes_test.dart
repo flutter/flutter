@@ -11,18 +11,22 @@ import 'test_matchers.dart';
 Key firstKey = new Key('first');
 Key secondKey = new Key('second');
 final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-  '/': (RouteArguments args) => new Block([
-    new Container(height: 100.0, width: 100.0),
-    new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
-    new Container(height: 100.0, width: 100.0),
-    new FlatButton(child: new Text('button'), onPressed: () => Navigator.pushNamed(args.context, '/two')),
-  ]),
-  '/two': (RouteArguments args) => new Block([
-    new Container(height: 150.0, width: 150.0),
-    new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
-    new Container(height: 150.0, width: 150.0),
-    new FlatButton(child: new Text('button'), onPressed: () => Navigator.pop(args.context)),
-  ]),
+  '/': (RouteArguments args) => new Material(
+    child: new Block([
+      new Container(height: 100.0, width: 100.0),
+      new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
+      new Container(height: 100.0, width: 100.0),
+      new FlatButton(child: new Text('button'), onPressed: () => Navigator.pushNamed(args.context, '/two')),
+    ])
+  ),
+  '/two': (RouteArguments args) => new Material(
+    child: new Block([
+      new Container(height: 150.0, width: 150.0),
+      new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
+      new Container(height: 150.0, width: 150.0),
+      new FlatButton(child: new Text('button'), onPressed: () => Navigator.pop(args.context)),
+    ])
+  ),
 };
 
 void main() {

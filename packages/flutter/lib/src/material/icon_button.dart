@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'icon.dart';
 import 'icon_theme_data.dart';
+import 'ink_well.dart';
 
 class IconButton extends StatelessComponent {
   const IconButton({
@@ -22,11 +23,8 @@ class IconButton extends StatelessComponent {
   final VoidCallback onPressed;
 
   Widget build(BuildContext context) {
-    // TODO(abarth): We should use a radial reaction here so you can hit the
-    // 8.0 pixel padding as well as the icon.
-    return new GestureDetector(
+    return new InkResponse(
       onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
       child: new Padding(
         padding: const EdgeDims.all(8.0),
         child: new Icon(

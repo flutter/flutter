@@ -5,14 +5,18 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'flat_button.dart';
 import 'material.dart';
+import 'material_button.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'typography.dart';
 
 // https://www.google.com/design/spec/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSideMargins = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
-const double _kMultiLineVerticalPadding = 24.0;
+const double _kMultiLineVerticalTopPadding = 24.0;
+const double _kMultiLineVerticalSpaceBetweenTextAndButtons = 10.0;
 const Color _kSnackBackground = const Color(0xFF323232);
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
@@ -35,11 +39,11 @@ class SnackBarAction extends StatelessComponent {
   final VoidCallback onPressed;
 
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTap: onPressed,
-      child: new Container(
-        margin: const EdgeDims.only(left: _kSideMargins),
-        padding: const EdgeDims.symmetric(vertical: _kSingleLineVerticalPadding),
+    return new Container(
+      margin: const EdgeDims.only(left: _kSideMargins),
+      child: new FlatButton(
+        onPressed: onPressed,
+        textTheme: ButtonColor.accent,
         child: new Text(label)
       )
     );
@@ -77,6 +81,7 @@ class SnackBar extends StatelessComponent {
     ];
     if (actions != null)
       children.addAll(actions);
+    ThemeData theme = Theme.of(context);
     return new ClipRect(
       child: new AlignTransition(
         performance: performance,
@@ -87,12 +92,20 @@ class SnackBar extends StatelessComponent {
           color: _kSnackBackground,
           child: new Container(
             margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
-            child: new DefaultTextStyle(
-              style: new TextStyle(color: Theme.of(context).accentColor),
+            child: new Theme(
+              data: new ThemeData(
+                brightness: ThemeBrightness.dark,
+                accentColor: theme.accentColor,
+                accentColorBrightness: theme.accentColorBrightness,
+                text: Typography.white
+              ),
               child: new FadeTransition(
                 performance: performance,
                 opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: _snackBarFadeCurve),
-                child: new Row(children)
+                child: new Row(
+                  children,
+                  alignItems: FlexAlignItems.center
+                )
               )
             )
           )
@@ -110,9 +123,9 @@ class SnackBar extends StatelessComponent {
     );
   }
 
-  SnackBar withPerformance(Performance newPerformance) {
+  SnackBar withPerformance(Performance newPerformance, { Key fallbackKey }) {
     return new SnackBar(
-      key: key,
+      key: key ?? fallbackKey,
       content: content,
       actions: actions,
       duration: duration,

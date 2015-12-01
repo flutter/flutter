@@ -2,331 +2,193 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
-import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-// This file has the following classes:
-//  InkWell - the widget for material-design-style inkly-reacting material, showing splashes and a highlight
-//  _InkWellState - InkWell's State class
-//  _InkSplash - tracks a single splash
-//  _RenderInkSplashes - a RenderBox that renders multiple _InkSplash objects and handles gesture recognition
-//  _InkSplashes - the RenderObjectWidget for _RenderInkSplashes used by InkWell to handle the splashes
+import 'material.dart';
+import 'theme.dart';
 
-const int _kSplashInitialOpacity = 0x30; // 0..255
-const double _kSplashCanceledVelocity = 0.7; // logical pixels per millisecond
-const double _kSplashConfirmedVelocity = 0.7; // logical pixels per millisecond
-const double _kSplashInitialSize = 0.0; // logical pixels
-const double _kSplashUnconfirmedVelocity = 0.2; // logical pixels per millisecond
-const Duration _kInkWellHighlightFadeDuration = const Duration(milliseconds: 100);
-
-class InkWell extends StatefulComponent {
-  InkWell({
+class InkResponse extends StatefulComponent {
+  InkResponse({
     Key key,
     this.child,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
-    this.onHighlightChanged,
-    this.defaultColor,
-    this.highlightColor
+    this.onHighlightChanged
   }) : super(key: key);
 
   final Widget child;
   final GestureTapCallback onTap;
   final GestureTapCallback onDoubleTap;
   final GestureLongPressCallback onLongPress;
-  final _HighlightChangedCallback onHighlightChanged;
-  final Color defaultColor;
-  final Color highlightColor;
+  final ValueChanged<bool> onHighlightChanged;
 
-  _InkWellState createState() => new _InkWellState();
+  _InkResponseState createState() => new _InkResponseState<InkResponse>();
 }
 
-class _InkWellState extends State<InkWell> {
-  bool _highlight = false;
+class _InkResponseState<T extends InkResponse> extends State<T> {
+
+  bool get containedInWell => false;
+
+  Set<InkSplash> _splashes;
+  InkSplash _currentSplash;
+
+  void _handleTapDown(Point position) {
+    RenderBox referenceBox = context.findRenderObject();
+    assert(Material.of(context) != null);
+    InkSplash splash;
+    splash = Material.of(context).splashAt(
+      referenceBox: referenceBox,
+      position: referenceBox.globalToLocal(position),
+      containedInWell: containedInWell,
+      onRemoved: () {
+        if (_splashes != null) {
+          assert(_splashes.contains(splash));
+          _splashes.remove(splash);
+          if (_currentSplash == splash)
+            _currentSplash = null;
+        } // else we're probably in deactivate()
+      }
+    );
+    _splashes ??= new Set<InkSplash>();
+    _splashes.add(splash);
+    _currentSplash = splash;
+  }
+
+  void _handleTap() {
+    _currentSplash?.confirm();
+    _currentSplash = null;
+    if (config.onTap != null)
+      config.onTap();
+  }
+
+  void _handleTapCancel() {
+    _currentSplash?.cancel();
+    _currentSplash = null;
+  }
+
+  void _handleDoubleTap() {
+    _currentSplash?.confirm();
+    _currentSplash = null;
+    if (config.onDoubleTap != null)
+      config.onDoubleTap();
+  }
+
+  void _handleLongPress() {
+    _currentSplash?.confirm();
+    _currentSplash = null;
+    if (config.onLongPress != null)
+      config.onLongPress();
+  }
+
+  void deactivate() {
+    if (_splashes != null) {
+      Set<InkSplash> splashes = _splashes;
+      _splashes = null;
+      for (InkSplash splash in splashes)
+        splash.dispose();
+      _currentSplash = null;
+    }
+    assert(_currentSplash == null);
+    super.deactivate();
+  }
+
   Widget build(BuildContext context) {
-    return new AnimatedContainer(
-      decoration: new BoxDecoration(
-        backgroundColor: _highlight ? config.highlightColor : config.defaultColor
-      ),
-      duration: _kInkWellHighlightFadeDuration,
-      child: new _InkSplashes(
-        onTap: config.onTap,
-        onDoubleTap: config.onDoubleTap,
-        onLongPress: config.onLongPress,
-        onHighlightChanged: (bool value) {
-          setState(() {
-            _highlight = value;
-          });
-          if (config.onHighlightChanged != null)
-            config.onHighlightChanged(value);
-        },
-        child: config.child
-      )
+    final bool enabled = config.onTap != null || config.onDoubleTap != null || config.onLongPress != null;
+    return new GestureDetector(
+      onTapDown: enabled ? _handleTapDown : null,
+      onTap: enabled ? _handleTap : null,
+      onTapCancel: enabled ? _handleTapCancel : null,
+      onDoubleTap: config.onDoubleTap != null ? _handleDoubleTap : null,
+      onLongPress: config.onLongPress != null ? _handleLongPress : null,
+      behavior: HitTestBehavior.opaque,
+      child: config.child
     );
   }
+
 }
 
-
-double _getSplashTargetSize(Size bounds, Point position) {
-  double d1 = (position - bounds.topLeft(Point.origin)).distance;
-  double d2 = (position - bounds.topRight(Point.origin)).distance;
-  double d3 = (position - bounds.bottomLeft(Point.origin)).distance;
-  double d4 = (position - bounds.bottomRight(Point.origin)).distance;
-  return math.max(math.max(d1, d2), math.max(d3, d4)).ceil().toDouble();
-}
-
-class _InkSplash {
-  _InkSplash(this.position, this.renderer) {
-    _targetRadius = _getSplashTargetSize(renderer.size, position);
-    _radius = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(
-        _kSplashInitialSize,
-        end: _targetRadius,
-        curve: Curves.easeOut
-      ),
-      duration: new Duration(milliseconds: (_targetRadius / _kSplashUnconfirmedVelocity).floor())
-    )..addListener(_handleRadiusChange)
-     ..play();
-  }
-
-  final Point position;
-  final _RenderInkSplashes renderer;
-
-  double _targetRadius;
-  double _pinnedRadius;
-  ValuePerformance<double> _radius;
-
-  void _updateVelocity(double velocity) {
-    int duration = (_targetRadius / velocity).floor();
-    _radius.duration = new Duration(milliseconds: duration);
-    _radius.play();
-  }
-
-  void confirm() {
-    _updateVelocity(_kSplashConfirmedVelocity);
-    _pinnedRadius = null;
-  }
-
-  void cancel() {
-    _updateVelocity(_kSplashCanceledVelocity);
-    _pinnedRadius = _radius.value;
-  }
-
-  void _handleRadiusChange() {
-    if (_radius.value == _targetRadius)
-      renderer._removeSplash(this);
-    renderer.markNeedsPaint();
-  }
-
-  void paint(PaintingCanvas canvas) {
-    int opacity = (_kSplashInitialOpacity * (1.1 - (_radius.value / _targetRadius))).floor();
-    Paint paint = new Paint()..color = new Color(opacity << 24);
-    double radius = _pinnedRadius == null ? _radius.value : _pinnedRadius;
-    canvas.drawCircle(position, radius, paint);
-  }
-}
-
-typedef _HighlightChangedCallback(bool value);
-
-class _RenderInkSplashes extends RenderProxyBox {
-  _RenderInkSplashes({
-    RenderBox child,
+/// An area of a Material that responds to touch.
+///
+/// Must have an ancestor Material widget in which to cause ink reactions.
+class InkWell extends InkResponse {
+  InkWell({
+    Key key,
+    Widget child,
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
     this.onHighlightChanged
-  }) : super(child) {
-    this.onTap = onTap;
-    this.onDoubleTap = onDoubleTap;
-    this.onLongPress = onLongPress;
-  }
+  }) : super(
+    key: key,
+    child: child,
+    onTap: onTap,
+    onDoubleTap: onDoubleTap,
+    onLongPress: onLongPress
+  );
 
-  GestureTapCallback get onTap => _onTap;
-  GestureTapCallback _onTap;
-  void set onTap (GestureTapCallback value) {
-    _onTap = value;
-    _syncTapRecognizer();
-  }
+  final ValueChanged<bool> onHighlightChanged;
 
-  GestureTapCallback get onDoubleTap => _onDoubleTap;
-  GestureTapCallback _onDoubleTap;
-  void set onDoubleTap (GestureTapCallback value) {
-    _onDoubleTap = value;
-    _syncDoubleTapRecognizer();
-  }
+  _InkWellState createState() => new _InkWellState();
+}
 
-  GestureTapCallback get onLongPress => _onLongPress;
-  GestureTapCallback _onLongPress;
-  void set onLongPress (GestureTapCallback value) {
-    _onLongPress = value;
-    _syncLongPressRecognizer();
-  }
+class _InkWellState extends _InkResponseState<InkWell> {
 
-  _HighlightChangedCallback onHighlightChanged;
+  bool get containedInWell => true;
 
-  final List<_InkSplash> _splashes = new List<_InkSplash>();
-  _InkSplash _lastSplash;
+  InkHighlight _lastHighlight;
 
-  TapGestureRecognizer _tap;
-  DoubleTapGestureRecognizer _doubleTap;
-  LongPressGestureRecognizer _longPress;
-
-  void _removeSplash(_InkSplash splash) {
-    _splashes.remove(splash);
-    if (_lastSplash == splash)
-      _lastSplash = null;
-  }
-
-  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown' && (onTap != null || onDoubleTap != null || onLongPress != null)) {
-      _tap?.addPointer(event);
-      _doubleTap?.addPointer(event);
-      _longPress?.addPointer(event);
-    }
-  }
-
-  void attach() {
-    super.attach();
-    _syncTapRecognizer();
-    _syncDoubleTapRecognizer();
-    _syncLongPressRecognizer();
-  }
-
-  void detach() {
-    _disposeTapRecognizer();
-    _disposeDoubleTapRecognizer();
-    _disposeLongPressRecognizer();
-    super.detach();
-  }
-
-  void _syncTapRecognizer() {
-    if (onTap == null && onDoubleTap == null && onLongPress == null) {
-      _disposeTapRecognizer();
+  void updateHighlight(bool value) {
+    if (value == (_lastHighlight != null && _lastHighlight.active))
+      return;
+    if (value) {
+      if (_lastHighlight == null) {
+        RenderBox referenceBox = context.findRenderObject();
+        assert(Material.of(context) != null);
+        _lastHighlight = Material.of(context).highlightRectAt(
+          referenceBox: referenceBox,
+          color: Theme.of(context).highlightColor,
+          onRemoved: () {
+            assert(_lastHighlight != null);
+            _lastHighlight = null;
+          }
+        );
+      } else {
+        _lastHighlight.activate();
+      }
     } else {
-      _tap ??= new TapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
-        ..onTapDown = _handleTapDown
-        ..onTap = _handleTap
-        ..onTapCancel = _handleTapCancel;
+      _lastHighlight.deactivate();
     }
-  }
-
-  void _disposeTapRecognizer() {
-    _tap?.dispose();
-    _tap = null;
-  }
-
-  void _syncDoubleTapRecognizer() {
-    if (onDoubleTap == null) {
-      _disposeDoubleTapRecognizer();
-    } else {
-      _doubleTap ??= new DoubleTapGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
-        ..onDoubleTap = _handleDoubleTap;
-    }
-  }
-
-  void _disposeDoubleTapRecognizer() {
-    _doubleTap?.dispose();
-    _doubleTap = null;
-  }
-
-  void _syncLongPressRecognizer() {
-    if (onLongPress == null) {
-      _disposeLongPressRecognizer();
-    } else {
-      _longPress ??= new LongPressGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
-        ..onLongPress = _handleLongPress;
-    }
-  }
-
-  void _disposeLongPressRecognizer() {
-    _longPress?.dispose();
-    _longPress = null;
+    if (config.onHighlightChanged != null)
+      config.onHighlightChanged(value != null);
   }
 
   void _handleTapDown(Point position) {
-    _lastSplash = new _InkSplash(globalToLocal(position), this);
-    _splashes.add(_lastSplash);
-    if (onHighlightChanged != null)
-      onHighlightChanged(true);
+    super._handleTapDown(position);
+    updateHighlight(true);
   }
 
   void _handleTap() {
-    _lastSplash?.confirm();
-    _lastSplash = null;
-    if (onHighlightChanged != null)
-      onHighlightChanged(false);
-    if (onTap != null)
-      onTap();
+    super._handleTap();
+    updateHighlight(false);
   }
 
   void _handleTapCancel() {
-    _lastSplash?.cancel();
-    _lastSplash = null;
-    if (onHighlightChanged != null)
-      onHighlightChanged(false);
+    super._handleTapCancel();
+    updateHighlight(false);
   }
 
-  void _handleDoubleTap() {
-    _lastSplash?.confirm();
-    _lastSplash = null;
-    if (onDoubleTap != null)
-      onDoubleTap();
+  void deactivate() {
+    _lastHighlight?.dispose();
+    _lastHighlight = null;
+    super.deactivate();
   }
 
-  void _handleLongPress() {
-    _lastSplash?.confirm();
-    _lastSplash = null;
-    if (onLongPress != null)
-      onLongPress();
+  void dependenciesChanged(Type affectedWidgetType) {
+    if (affectedWidgetType == Theme && _lastHighlight != null)
+      _lastHighlight.color = Theme.of(context).highlightColor;
   }
 
-  bool hitTestSelf(Point position) => true;
-
-  void paint(PaintingContext context, Offset offset) {
-    if (!_splashes.isEmpty) {
-      final PaintingCanvas canvas = context.canvas;
-      canvas.save();
-      canvas.translate(offset.dx, offset.dy);
-      canvas.clipRect(Point.origin & size);
-      for (_InkSplash splash in _splashes)
-        splash.paint(canvas);
-      canvas.restore();
-    }
-    super.paint(context, offset);
-  }
-}
-
-class _InkSplashes extends OneChildRenderObjectWidget {
-  _InkSplashes({
-    Key key,
-    Widget child,
-    this.onTap,
-    this.onDoubleTap,
-    this.onLongPress,
-    this.onHighlightChanged
-  }) : super(key: key, child: child);
-
-  final GestureTapCallback onTap;
-  final GestureTapCallback onDoubleTap;
-  final GestureLongPressCallback onLongPress;
-  final _HighlightChangedCallback onHighlightChanged;
-
-  _RenderInkSplashes createRenderObject() => new _RenderInkSplashes(
-    onTap: onTap,
-    onDoubleTap: onDoubleTap,
-    onLongPress: onLongPress,
-    onHighlightChanged: onHighlightChanged
-  );
-
-  void updateRenderObject(_RenderInkSplashes renderObject, _InkSplashes oldWidget) {
-    renderObject.onTap = onTap;
-    renderObject.onDoubleTap = onDoubleTap;
-    renderObject.onLongPress = onLongPress;
-    renderObject.onHighlightChanged = onHighlightChanged;
-  }
 }

@@ -115,7 +115,10 @@ class ScaffoldState extends State<Scaffold> {
     }
     ScaffoldFeatureController<SnackBar> controller;
     controller = new ScaffoldFeatureController<SnackBar>._(
-      snackbar.withPerformance(_snackBarPerformance),
+      // We provide a fallback key so that if back-to-back snackbars happen to
+      // match in structure, material ink splashes and highlights don't survive
+      // from one to the next.
+      snackbar.withPerformance(_snackBarPerformance, fallbackKey: new UniqueKey()),
       new Completer(),
       () {
         assert(_snackBars.first == controller);

@@ -2,6 +2,10 @@ import 'package:flutter/animation.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test("Check for a time dilation being in effect", () {
+    expect(timeDilation, equals(1.0));
+  });
+
   test("Can cancel queued callback", () {
     int secondId;
 

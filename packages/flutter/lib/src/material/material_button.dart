@@ -36,12 +36,16 @@ abstract class MaterialButton extends StatefulComponent {
   MaterialButton({
     Key key,
     this.child,
+    this.textTheme,
     this.textColor,
+    this.disabledTextColor,
     this.onPressed
   }) : super(key: key);
 
   final Widget child;
-  final ButtonColor textColor;
+  final ButtonColor textTheme;
+  final Color textColor;
+  final Color disabledTextColor;
   final VoidCallback onPressed;
 
   bool get enabled => onPressed != null;
@@ -57,12 +61,14 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
   bool highlight = false;
 
   int get elevation;
-  Color getColor(BuildContext context, { bool highlight });
+  Color getColor(BuildContext context);
   ThemeBrightness getColorBrightness(BuildContext context);
 
   Color getTextColor(BuildContext context) {
     if (config.enabled) {
-      switch (config.textColor ?? ButtonTheme.of(context)) {
+      if (config.textColor != null)
+        return config.textColor;
+      switch (config.textTheme ?? ButtonTheme.of(context)) {
         case ButtonColor.accent:
           return Theme.of(context).accentColor;
         case ButtonColor.normal:
@@ -74,6 +80,8 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
           }
       }
     }
+    if (config.disabledTextColor != null)
+      return config.disabledTextColor;
     switch (getColorBrightness(context)) {
       case ThemeBrightness.light:
         return Colors.black26;
@@ -84,34 +92,45 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
 
   void _handleHighlightChanged(bool value) {
     setState(() {
+      // mostly just used by the RaisedButton subclass to change the elevation
       highlight = value;
     });
   }
 
   Widget build(BuildContext context) {
-    Widget contents = new Container(
-      padding: new EdgeDims.symmetric(horizontal: 8.0),
-      child: new Center(
-        widthFactor: 1.0,
-        child: config.child
+    Widget contents = new InkWell(
+      onTap: config.onPressed,
+      onHighlightChanged: _handleHighlightChanged,
+      child: new Container(
+        padding: new EdgeDims.symmetric(horizontal: 8.0),
+        child: new Center(
+          widthFactor: 1.0,
+          child: config.child
+        )
       )
     );
+    TextStyle style = Theme.of(context).text.button.copyWith(color: getTextColor(context));
+    int elevation = this.elevation;
+    Color color = getColor(context);
+    if (elevation > 0 || color != null) {
+      contents = new Material(
+        type: MaterialType.button,
+        color: getColor(context),
+        elevation: elevation,
+        textStyle: style,
+        child: contents
+      );
+    } else {
+      contents = new DefaultTextStyle(
+        style: style,
+        child: contents
+      );
+    }
     return new Container(
       height: 36.0,
       constraints: new BoxConstraints(minWidth: 88.0),
       margin: new EdgeDims.all(8.0),
-      child: new Material(
-        type: MaterialType.button,
-        elevation: elevation,
-        textStyle: Theme.of(context).text.button.copyWith(color: getTextColor(context)),
-        child: new InkWell(
-          onTap: config.enabled ? config.onPressed : null,
-          defaultColor: getColor(context, highlight: false),
-          highlightColor: getColor(context, highlight: true),
-          onHighlightChanged: _handleHighlightChanged,
-          child: contents
-        )
-      )
+      child: contents
     );
   }
 }

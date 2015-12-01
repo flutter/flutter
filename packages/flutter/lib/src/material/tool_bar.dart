@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
-import 'shadows.dart';
+import 'material.dart';
 import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
@@ -36,9 +36,9 @@ class ToolBar extends StatelessComponent {
   final TextTheme textTheme;
   final EdgeDims padding;
 
-  ToolBar withPadding(EdgeDims newPadding) {
+  ToolBar withPadding(EdgeDims newPadding, { Key fallbackKey }) {
     return new ToolBar(
-      key: key,
+      key: key ?? fallbackKey,
       left: left,
       center: center,
       right: right,
@@ -67,52 +67,63 @@ class ToolBar extends StatelessComponent {
       sideStyle ??= primaryTextTheme.body2;
     }
 
-    List<Widget> children = new List<Widget>();
-
+    final List<Widget> firstRow = <Widget>[];
     if (left != null)
-      children.add(left);
-
-    children.add(
+      firstRow.add(left);
+    firstRow.add(
       new Flexible(
         child: new Padding(
-          child: center != null ? new DefaultTextStyle(child: center, style: centerStyle) : null,
-          padding: new EdgeDims.only(left: 24.0)
+          padding: new EdgeDims.only(left: 24.0),
+          child: center != null ? new DefaultTextStyle(style: centerStyle, child: center) : null
+        )
+      )
+    );
+    if (right != null)
+      firstRow.addAll(right);
+
+    final List<Widget> rows = <Widget>[
+      new Container(
+        height: kToolBarHeight,
+        child: new DefaultTextStyle(
+          style: sideStyle,
+          child: new Row(firstRow)
+        )
+      )
+    ];
+    if (bottom != null) {
+      rows.add(
+        new DefaultTextStyle(
+          style: centerStyle,
+          child: new Container(
+            height: kExtendedToolBarHeight - kToolBarHeight,
+            child: bottom
+          )
+        )
+      );
+    }
+    if (tabBar != null)
+      rows.add(tabBar);
+
+    EdgeDims combinedPadding = new EdgeDims.symmetric(horizontal: 8.0);
+    if (padding != null)
+      combinedPadding += padding;
+
+    Widget contents = new Material(
+      color: color,
+      elevation: elevation,
+      child: new Container(
+        padding: combinedPadding,
+        child: new Column(
+          rows,
+          justifyContent: FlexJustifyContent.collapse
         )
       )
     );
 
-    if (right != null)
-      children.addAll(right);
-
-    final List<Widget> columnChildren = <Widget>[
-      new Container(height: kToolBarHeight, child: new Row(children))
-    ];
-
-    if (bottom != null)
-      columnChildren.add(new DefaultTextStyle(
-        style: centerStyle,
-        child: new Container(height: kExtendedToolBarHeight - kToolBarHeight, child: bottom)
-      ));
-
-    if (tabBar != null)
-      columnChildren.add(tabBar);
-
-    Widget content = new AnimatedContainer(
-      duration: kThemeChangeDuration,
-      padding: new EdgeDims.symmetric(horizontal: 8.0),
-      decoration: new BoxDecoration(
-        backgroundColor: color,
-        boxShadow: elevationToShadow[elevation]
-      ),
-      child: new DefaultTextStyle(
-        style: sideStyle,
-        child: new Container(padding: padding, child: new Column(columnChildren, justifyContent: FlexJustifyContent.collapse))
-      )
-    );
-
     if (iconThemeData != null)
-      content = new IconTheme(data: iconThemeData, child: content);
-    return content;
+      contents = new IconTheme(data: iconThemeData, child: contents);
+
+    return contents;
   }
 
 }
