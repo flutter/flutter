@@ -26,6 +26,7 @@ class IconButton extends StatelessComponent {
     // 8.0 pixel padding as well as the icon.
     return new GestureDetector(
       onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
       child: new Padding(
         padding: const EdgeDims.all(8.0),
         child: new Icon(
