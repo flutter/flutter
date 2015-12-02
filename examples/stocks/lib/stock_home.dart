@@ -199,8 +199,9 @@ class StockHomeState extends State<StockHome> {
     ));
   }
 
-  Widget buildStockList(BuildContext context, Iterable<Stock> stocks) {
+  Widget _buildStockList(BuildContext context, Iterable<Stock> stocks, StockHomeTab tab) {
     return new StockList(
+      keySalt: tab,
       stocks: stocks.toList(),
       onAction: _buyStock,
       onOpen: (Stock stock, Key arrowKey) {
@@ -211,6 +212,13 @@ class StockHomeState extends State<StockHome> {
       onShow: (Stock stock, Key arrowKey) {
         scaffoldKey.currentState.showBottomSheet((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
       }
+    );
+  }
+
+  Widget _buildStockTab(BuildContext context, StockHomeTab tab, List<String> stockSymbols) {
+    return new Container(
+      key: new ValueKey<StockHomeTab>(tab),
+      child: _buildStockList(context, _filterBySearchQuery(_getStockList(stockSymbols)).toList(), tab)
     );
   }
 
@@ -259,13 +267,6 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  Widget buildStockTab(BuildContext context, StockHomeTab tab, List<String> stockSymbols) {
-    return new Container(
-      key: new ValueKey<StockHomeTab>(tab),
-      child: buildStockList(context, _filterBySearchQuery(_getStockList(stockSymbols)).toList())
-    );
-  }
-
   double _viewWidth = 100.0;
   void _handleSizeChanged(Size newSize) {
     setState(() {
@@ -282,14 +283,14 @@ class StockHomeState extends State<StockHome> {
         onSizeChanged: _handleSizeChanged,
         child: new TabBarView<StockHomeTab>(
           selection: _tabBarSelection,
-          items: [StockHomeTab.market, StockHomeTab.portfolio],
+          items: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
           itemExtent: _viewWidth,
           itemBuilder: (BuildContext context, StockHomeTab tab, _) {
             switch (tab) {
               case StockHomeTab.market:
-                return buildStockTab(context, tab, config.symbols);
+                return _buildStockTab(context, tab, config.symbols);
               case StockHomeTab.portfolio:
-                return buildStockTab(context, tab, portfolioSymbols);
+                return _buildStockTab(context, tab, portfolioSymbols);
               default:
                 assert(false);
             }

@@ -107,7 +107,19 @@ class Hero extends StatefulComponent {
         assert(tag != null);
         Key key = hero.widget.key;
         final Map<Key, HeroState> tagHeroes = heroes.putIfAbsent(tag, () => <Key, HeroState>{});
-        assert(!tagHeroes.containsKey(key));
+        assert(() {
+          if (tagHeroes.containsKey(key)) {
+            debugPrint('Tag: $tag   Key: $key');
+            assert(() {
+              'There are multiple heroes that share the same key within the same subtree.               '
+              'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
+              'either each Hero must have a unique tag, or, all the heroes with a particular tag must   '
+              'have different keys. The relevant tag and key were dumped above.                         ';
+              return false;
+            });
+          }
+          return true;
+        });
         tagHeroes[key] = hero.state;
       }
       element.visitChildren(visitor);
