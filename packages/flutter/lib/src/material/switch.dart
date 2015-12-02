@@ -110,6 +110,8 @@ class _RenderSwitch extends RenderToggleable {
      minRadialReactionRadius: _kThumbRadius,
      size: const Size(_kSwitchWidth, _kSwitchHeight)
    ) {
+    _activeTrackColor = activeTrackColor;
+    _inactiveTrackColor = inactiveTrackColor;
     _drag = new HorizontalDragGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
