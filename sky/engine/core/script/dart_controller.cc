@@ -88,6 +88,8 @@ void DartController::DidLoadMainLibrary(String name) {
 }
 
 void DartController::DidLoadSnapshot() {
+  TRACE_EVENT0("flutter", "DartController::DidLoadSnapshot");
+
   DCHECK(Dart_CurrentIsolate() == nullptr);
   snapshot_loader_ = nullptr;
 

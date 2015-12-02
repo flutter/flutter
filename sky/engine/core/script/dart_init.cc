@@ -281,6 +281,7 @@ bool IsRunningPrecompiledCode() {
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 void InitDartVM() {
+  TRACE_EVENT0("flutter", "InitDartVM");
   dart::bin::BootstrapDartIo();
 
   bool enable_checked_mode = RuntimeEnabledFeatures::dartCheckedModeEnabled();
