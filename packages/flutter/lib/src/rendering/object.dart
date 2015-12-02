@@ -6,8 +6,8 @@ import 'dart:developer';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
