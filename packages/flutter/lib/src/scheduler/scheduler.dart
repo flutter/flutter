@@ -3,16 +3,35 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show VoidCallback;
+import 'dart:developer';
+import 'dart:ui' as ui;
 
 import 'package:collection/priority_queue.dart';
 import 'package:flutter/animation.dart' as animation show scheduler;
+
+/// Slows down animations by this factor to help in development.
+double timeDilation = 1.0;
+
+/// A frame-related callback from the scheduler.
+///
+/// The timeStamp is the number of milliseconds since the beginning of the
+/// scheduler's epoch. Use timeStamp to determine how far to advance animation
+/// timelines so that all the animations in the system are synchronized to a
+/// common time base.
+typedef void SchedulerCallback(Duration timeStamp);
+
+typedef void SchedulerExceptionHandler(dynamic exception, StackTrace stack);
+/// This callback is invoked whenever an exception is caught by the scheduler.
+/// The 'exception' argument contains the object that was thrown, and the
+/// 'stack' argument contains the stack trace. If the callback is set, it is
+/// invoked instead of printing the information to the console.
+SchedulerExceptionHandler debugSchedulerExceptionHandler;
 
 /// An entry in the scheduler's priority queue.
 ///
 /// Combines the task and its priority.
 class _SchedulerEntry {
-  final VoidCallback task;
+  final ui.VoidCallback task;
   final int priority;
 
   const _SchedulerEntry(this.task, this.priority);
@@ -62,8 +81,11 @@ class Priority {
 /// the task should be run.
 ///
 /// Tasks always run in the idle time after a frame has been committed.
-class TaskScheduler {
-  TaskScheduler._();
+class Scheduler {
+  /// Requires clients to use the [scheduler] singleton
+  Scheduler._() {
+    ui.window.onBeginFrame = beginFrame;
+  }
 
   SchedulingStrategy schedulingStrategy = new DefaultSchedulingStrategy();
 
@@ -82,7 +104,7 @@ class TaskScheduler {
   bool _wakingNextFrame = false;
 
   /// Schedules the given [task] with the given [priority].
-  void schedule(VoidCallback task, Priority priority) {
+  void scheduleTask(ui.VoidCallback task, Priority priority) {
     bool isFirstTask = _queue.isEmpty;
     _queue.add(new _SchedulerEntry(task, priority._value));
     if (isFirstTask)
@@ -106,6 +128,110 @@ class TaskScheduler {
     }
   }
 
+  int _nextFrameCallbackId = 0; // positive
+  Map<int, SchedulerCallback> _transientCallbacks = <int, SchedulerCallback>{};
+  final Set<int> _removedIds = new Set<int>();
+
+  int get transientCallbackCount => _transientCallbacks.length;
+
+  /// Schedules the given frame callback.
+  int requestAnimationFrame(SchedulerCallback callback) {
+    _nextFrameCallbackId += 1;
+    _transientCallbacks[_nextFrameCallbackId] = callback;
+    _wakeNextFrame();
+    return _nextFrameCallbackId;
+  }
+
+  /// Cancels the callback of the given [id].
+  void cancelAnimationFrame(int id) {
+    assert(id > 0);
+    _transientCallbacks.remove(id);
+    _removedIds.add(id);
+  }
+
+  final List<SchedulerCallback> _persistentCallbacks = new List<SchedulerCallback>();
+
+  void addPersistentFrameCallback(SchedulerCallback callback) {
+    _persistentCallbacks.add(callback);
+  }
+
+  final List<SchedulerCallback> _postFrameCallbacks = new List<SchedulerCallback>();
+
+  /// Schedule a callback for the end of this frame.
+  ///
+  /// If a frame is in progress, the callback will be run just after the main
+  /// rendering pipeline has been flushed. In this case, order is preserved (the
+  /// callbacks are run in registration order).
+  ///
+  /// If no frame is in progress, it will be called at the start of the next
+  /// frame. In this case, the registration order is not preserved. Callbacks
+  /// are called in an arbitrary order.
+  void requestPostFrameCallback(SchedulerCallback callback) {
+    _postFrameCallbacks.add(callback);
+  }
+
+  bool _inFrame = false;
+
+  void _invokeAnimationCallbacks(Duration timeStamp) {
+    Timeline.startSync('Animate');
+    assert(_inFrame);
+    Map<int, SchedulerCallback> callbacks = _transientCallbacks;
+    _transientCallbacks = new Map<int, SchedulerCallback>();
+    callbacks.forEach((int id, SchedulerCallback callback) {
+      if (!_removedIds.contains(id))
+        invokeCallback(callback, timeStamp);
+    });
+    _removedIds.clear();
+    Timeline.finishSync();
+  }
+
+  /// Called by the engine to produce a new frame.
+  ///
+  /// This function first calls all the callbacks registered by
+  /// [requestAnimationFrame], then calls all the callbacks registered by
+  /// [addPersistentFrameCallback], which typically drive the rendering pipeline,
+  /// and finally calls the callbacks registered by [requestPostFrameCallback].
+  void beginFrame(Duration rawTimeStamp) {
+    Timeline.startSync('Begin frame');
+    assert(!_inFrame);
+    _inFrame = true;
+    Duration timeStamp = new Duration(
+        microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
+    _wakingNextFrame = false;
+    _invokeAnimationCallbacks(timeStamp);
+
+    for (SchedulerCallback callback in _persistentCallbacks)
+      invokeCallback(callback, timeStamp);
+
+    List<SchedulerCallback> localPostFrameCallbacks =
+        new List<SchedulerCallback>.from(_postFrameCallbacks);
+    _postFrameCallbacks.clear();
+    for (SchedulerCallback callback in localPostFrameCallbacks)
+      invokeCallback(callback, timeStamp);
+
+    _inFrame = false;
+    Timeline.finishSync();
+
+    // All frame-related callbacks have been executed. Run lower-priority tasks.
+    tick();
+  }
+
+  void invokeCallback(SchedulerCallback callback, Duration timeStamp) {
+    assert(callback != null);
+    try {
+      callback(timeStamp);
+    } catch (exception, stack) {
+      if (debugSchedulerExceptionHandler != null) {
+        debugSchedulerExceptionHandler(exception, stack);
+      } else {
+        print('-- EXCEPTION IN SCHEDULER CALLBACK --');
+        print('$exception');
+        print('Stack trace:');
+        print('$stack');
+      }
+    }
+  }
+
   /// Tells the system that the scheduler is awake and should be called as
   /// soon a there is time.
   void _wakeNow() {
@@ -118,23 +244,20 @@ class TaskScheduler {
     });
   }
 
-  /// Tells the system that the scheduler needs to run again (ideally next
-  /// frame).
+  void ensureVisualUpdate() {
+    _wakeNextFrame();
+  }
+
+  /// Schedules a new frame.
   void _wakeNextFrame() {
     if (_wakingNextFrame)
       return;
     _wakingNextFrame = true;
-    animation.scheduler.requestAnimationFrame((_) {
-      _wakingNextFrame = false;
-      // RequestAnimationFrame calls back at the beginning of a frame. We want
-      // to run in the idle-phase of an animation. We therefore request to be
-      // woken up as soon as possible.
-      _wakeNow();
-    });
+    ui.window.scheduleFrame();
   }
 }
 
-final TaskScheduler tasks = new TaskScheduler._();
+final Scheduler scheduler = new Scheduler._();
 
 abstract class SchedulingStrategy {
   bool shouldRunTaskWithPriority(int priority);
