@@ -55,7 +55,7 @@ class HeroController extends NavigatorObserver {
   void _checkForHeroQuest() {
     if (_from != null && _to != null && _from != _to) {
       _to.offstage = _to.performance.status != PerformanceStatus.completed;
-      scheduler.requestPostFrameCallback(_updateQuest);
+      scheduler.addPostFrameCallback(_updateQuest);
     }
   }
 

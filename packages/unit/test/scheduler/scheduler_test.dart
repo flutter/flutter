@@ -28,17 +28,17 @@ void main() {
       scheduleAddingTask(x);
     }
     strategy.allowedPriority = 100;
-    for (int i = 0; i < 3; i++) scheduler.tick();
+    for (int i = 0; i < 3; i++) scheduler.handleEventLoopCallback();
     expect(executedTasks.isEmpty, isTrue);
 
     strategy.allowedPriority = 50;
-    for (int i = 0; i < 3; i++) scheduler.tick();
+    for (int i = 0; i < 3; i++) scheduler.handleEventLoopCallback();
     expect(executedTasks.length, equals(1));
     expect(executedTasks.single, equals(80));
     executedTasks.clear();
 
     strategy.allowedPriority = 20;
-    for (int i = 0; i < 3; i++) scheduler.tick();
+    for (int i = 0; i < 3; i++) scheduler.handleEventLoopCallback();
     expect(executedTasks.length, equals(2));
     expect(executedTasks[0], equals(23));
     expect(executedTasks[1], equals(23));
@@ -48,21 +48,21 @@ void main() {
     scheduleAddingTask(19);
     scheduleAddingTask(5);
     scheduleAddingTask(97);
-    for (int i = 0; i < 3; i++) scheduler.tick();
+    for (int i = 0; i < 3; i++) scheduler.handleEventLoopCallback();
     expect(executedTasks.length, equals(2));
     expect(executedTasks[0], equals(99));
     expect(executedTasks[1], equals(97));
     executedTasks.clear();
 
     strategy.allowedPriority = 10;
-    for (int i = 0; i < 3; i++) scheduler.tick();
+    for (int i = 0; i < 3; i++) scheduler.handleEventLoopCallback();
     expect(executedTasks.length, equals(2));
     expect(executedTasks[0], equals(19));
     expect(executedTasks[1], equals(11));
     executedTasks.clear();
 
     strategy.allowedPriority = 1;
-    for (int i = 0; i < 4; i++) scheduler.tick();
+    for (int i = 0; i < 4; i++) scheduler.handleEventLoopCallback();
     expect(executedTasks.length, equals(3));
     expect(executedTasks[0], equals(5));
     expect(executedTasks[1], equals(3));
@@ -70,7 +70,7 @@ void main() {
     executedTasks.clear();
 
     strategy.allowedPriority = 0;
-    scheduler.tick();
+    scheduler.handleEventLoopCallback();
     expect(executedTasks.length, equals(1));
     expect(executedTasks[0], equals(0));
   });
