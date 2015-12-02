@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/task.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:test/test.dart';
 
 class TestStrategy implements SchedulingStrategy {

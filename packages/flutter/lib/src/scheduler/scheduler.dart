@@ -7,7 +7,6 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:collection/priority_queue.dart';
-import 'package:flutter/animation.dart' as animation show scheduler;
 
 /// Slows down animations by this factor to help in development.
 double timeDilation = 1.0;
@@ -268,7 +267,7 @@ class DefaultSchedulingStrategy implements SchedulingStrategy {
   // interesting to provide more info (like, how long the task ran the last
   // time).
   bool shouldRunTaskWithPriority(int priority) {
-    if (animation.scheduler.transientCallbackCount > 0)
+    if (scheduler.transientCallbackCount > 0)
       return priority >= Priority.animation._value;
     return true;
   }

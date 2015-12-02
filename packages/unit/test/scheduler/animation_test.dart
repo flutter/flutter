@@ -1,4 +1,4 @@
-import 'package:flutter/animation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:test/test.dart';
 
 void main() {

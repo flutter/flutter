@@ -4,9 +4,9 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'package:flutter_rendering_examples/solid_color_box.dart';
 
