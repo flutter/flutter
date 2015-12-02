@@ -875,8 +875,9 @@ class AndroidDevice extends Device {
     }
 
     if (tracePath != null) {
+      runCheckedSync(adbCommandForDevice(['root']));
       runSync(adbCommandForDevice(['shell', 'run-as', apk.id, 'chmod', '777', tracePath]));
-      runSync(adbCommandForDevice(['pull', tracePath]));
+      runCheckedSync(adbCommandForDevice(['pull', tracePath]));
       runSync(adbCommandForDevice(['shell', 'rm', tracePath]));
       return path.basename(tracePath);
     }
