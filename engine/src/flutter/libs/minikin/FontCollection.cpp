@@ -22,6 +22,7 @@
 #include "unicode/unistr.h"
 #include "unicode/unorm2.h"
 
+#include "FontLanguageListCache.h"
 #include "MinikinInternal.h"
 #include <minikin/FontCollection.h>
 
@@ -116,10 +117,14 @@ FontCollection::~FontCollection() {
 //    font, but not the whole variation sequence.
 // 8. Highest score wins, with ties resolved to the first font.
 FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
-            FontLanguage lang, int variant) const {
+            uint32_t langListId, int variant) const {
     if (ch >= mMaxChar) {
         return NULL;
     }
+
+    const FontLanguages& langList = FontLanguageListCache::getById(langListId);
+    // TODO: use all languages in langList.
+    const FontLanguage lang = (langList.size() == 0) ? FontLanguage() : langList[0];
 
     // Even if the font supports variation sequence, mRanges isn't aware of the base character of
     // the sequence. Search all FontFamilies if variation sequence is specified.
@@ -162,6 +167,12 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             }
         }
     }
+    if (bestFamily == nullptr && vs != 0) {
+        // If no fonts support the codepoint and variation selector pair,
+        // fallback to select a font family that supports just the base
+        // character, ignoring the variation selector.
+        return getFamilyForChar(ch, 0, langListId, variant);
+    }
     if (bestFamily == nullptr && !mFamilyVec.empty()) {
         UErrorCode errorCode = U_ZERO_ERROR;
         const UNormalizer2* normalizer = unorm2_getNFDInstance(&errorCode);
@@ -171,7 +182,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             if (U_SUCCESS(errorCode) && len > 0) {
                 int off = 0;
                 U16_NEXT_UNSAFE(decomposed, off, ch);
-                return getFamilyForChar(ch, vs, lang, variant);
+                return getFamilyForChar(ch, vs, langListId, variant);
             }
         }
         bestFamily = mFamilies[0];
@@ -222,7 +233,7 @@ bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
 
 void FontCollection::itemize(const uint16_t *string, size_t string_size, FontStyle style,
         vector<Run>* result) const {
-    FontLanguage lang = style.getLanguage();
+    const uint32_t langListId = style.getLanguageListId();
     int variant = style.getVariant();
     FontFamily* lastFamily = NULL;
     Run* run = NULL;
@@ -261,8 +272,8 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
         }
 
         if (!shouldContinueRun) {
-            FontFamily* family =
-                    getFamilyForChar(ch, isVariationSelector(nextCh) ? nextCh : 0, lang, variant);
+            FontFamily* family = getFamilyForChar(ch, isVariationSelector(nextCh) ? nextCh : 0,
+                    langListId, variant);
             if (utf16Pos == 0 || family != lastFamily) {
                 size_t start = utf16Pos;
                 // Workaround for Emoji keycap until we implement per-cluster font

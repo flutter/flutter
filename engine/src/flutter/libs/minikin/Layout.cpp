@@ -34,6 +34,7 @@
 #include <hb-icu.h>
 #include <hb-ot.h>
 
+#include "FontLanguageListCache.h"
 #include "LayoutUtils.h"
 #include "HbFaceCache.h"
 #include "MinikinInternal.h"
@@ -742,9 +743,11 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             hb_buffer_clear_contents(buffer);
             hb_buffer_set_script(buffer, script);
             hb_buffer_set_direction(buffer, isRtl? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
-            FontLanguage language = ctx->style.getLanguage();
-            if (language) {
-                string lang = language.getString();
+            const FontLanguages& langList =
+                    FontLanguageListCache::getById(ctx->style.getLanguageListId());
+            if (langList.size() != 0) {
+                // TODO: use all languages in langList.
+                string lang = langList[0].getString();
                 hb_buffer_set_language(buffer, hb_language_from_string(lang.c_str(), -1));
             }
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);

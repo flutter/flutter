@@ -42,6 +42,7 @@ LOCAL_SRC_FILES += \
     FontCollectionTest.cpp \
     FontCollectionItemizeTest.cpp \
     FontFamilyTest.cpp \
+    FontLanguageListCacheTest.cpp \
     FontTestUtils.cpp \
     MinikinFontForTest.cpp \
     GraphemeBreakTests.cpp \

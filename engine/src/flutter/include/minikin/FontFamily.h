@@ -87,35 +87,42 @@ private:
 };
 
 // FontStyle represents all style information needed to select an actual font
-// from a collection. The implementation is packed into a single 32-bit word
+// from a collection. The implementation is packed into two 32-bit words
 // so it can be efficiently copied, embedded in other objects, etc.
 class FontStyle {
 public:
-    FontStyle(int weight = 4, bool italic = false) {
-        bits = (weight & kWeightMask) | (italic ? kItalicMask : 0);
-    }
-    FontStyle(FontLanguage lang, int variant = 0, int weight = 4, bool italic = false) {
-        bits = (weight & kWeightMask) | (italic ? kItalicMask : 0)
-                | (variant << kVariantShift) | (lang.bits() << kLangShift);
-    }
-    FontStyle(FontLanguages langs, int variant = 0, int weight = 4, bool italic = false) :
-        // TODO: Use all the languages in langs
-        FontStyle(langs[0], variant, weight, italic) { }
+    FontStyle() : FontStyle(0 /* variant */, 4 /* weight */, false /* italic */) {}
+    FontStyle(int weight, bool italic) : FontStyle(0 /* variant */, weight, italic) {}
+    FontStyle(uint32_t langListId)
+            : FontStyle(langListId, 0 /* variant */, 4 /* weight */, false /* italic */) {}
+
+    FontStyle(int variant, int weight, bool italic);
+    FontStyle(uint32_t langListId, int variant, int weight, bool italic);
+
     int getWeight() const { return bits & kWeightMask; }
     bool getItalic() const { return (bits & kItalicMask) != 0; }
     int getVariant() const { return (bits >> kVariantShift) & kVariantMask; }
-    FontLanguage getLanguage() const { return FontLanguage(bits >> kLangShift); }
+    uint32_t getLanguageListId() const { return mLanguageListId; }
 
-    bool operator==(const FontStyle other) const { return bits == other.bits; }
+    bool operator==(const FontStyle other) const {
+          return bits == other.bits && mLanguageListId == other.mLanguageListId;
+    }
 
-    hash_t hash() const { return bits; }
+    hash_t hash() const;
+
+    // Looks up a language list from an internal cache and returns its ID.
+    // If the passed language list is not in the cache, registers it and returns newly assigned ID.
+    static uint32_t registerLanguageList(const std::string& languages);
 private:
     static const uint32_t kWeightMask = (1 << 4) - 1;
     static const uint32_t kItalicMask = 1 << 4;
     static const int kVariantShift = 5;
     static const uint32_t kVariantMask = (1 << 2) - 1;
-    static const int kLangShift = 7;
+
+    static uint32_t pack(int variant, int weight, bool italic);
+
     uint32_t bits;
+    uint32_t mLanguageListId;
 };
 
 enum FontVariant {

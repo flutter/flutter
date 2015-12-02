@@ -26,6 +26,9 @@
 #include <hb.h>
 #include <hb-ot.h>
 
+#include <utils/JenkinsHash.h>
+
+#include "FontLanguageListCache.h"
 #include "HbFaceCache.h"
 #include "MinikinInternal.h"
 #include <minikin/MinikinFont.h>
@@ -157,6 +160,31 @@ FontLanguages::FontLanguages(const char* buf, size_t size) {
         if (isLastLang) return;
         lastStart = commaLoc + 1;
     }
+}
+
+FontStyle::FontStyle(int variant, int weight, bool italic)
+        : FontStyle(FontLanguageListCache::kEmptyListId, variant, weight, italic) {
+}
+
+FontStyle::FontStyle(uint32_t languageListId, int variant, int weight, bool italic)
+        : bits(pack(variant, weight, italic)), mLanguageListId(languageListId) {
+}
+
+hash_t FontStyle::hash() const {
+    uint32_t hash = JenkinsHashMix(0, bits);
+    hash = JenkinsHashMix(hash, mLanguageListId);
+    return JenkinsHashWhiten(hash);
+}
+
+// static
+uint32_t FontStyle::registerLanguageList(const std::string& languages) {
+    AutoMutex _l(gMinikinLock);
+    return FontLanguageListCache::getId(languages);
+}
+
+// static
+uint32_t FontStyle::pack(int variant, int weight, bool italic) {
+    return (weight & kWeightMask) | (italic ? kItalicMask : 0) | (variant << kVariantShift);
 }
 
 FontFamily::~FontFamily() {
