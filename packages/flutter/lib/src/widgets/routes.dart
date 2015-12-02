@@ -72,6 +72,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// popped.
   Future<T> get popped => _popCompleter?.future;
   final Completer<T> _popCompleter;
+
+  /// This future completes only once the transition itself has finished, after
+  /// the overlay entries have been removed from the navigator's overlay.
   Future<T> get completed => _transitionCompleter?.future;
   final Completer<T> _transitionCompleter;
 
@@ -142,6 +145,52 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     _performance.stop();
     super.dispose();
   }
+
+  
+  final ProxyPerformance forwardPerformance = new ProxyPerformance();
+
+  void didPushNext(Route nextRoute) {
+    if (nextRoute is TransitionRoute) {
+      PerformanceView current = forwardPerformance.masterPerformance;
+      if (current != null) {
+        if (current is TrainHoppingPerformance) {
+          TrainHoppingPerformance newPerformance;
+          newPerformance = new TrainHoppingPerformance(
+            current.currentTrain,
+            nextRoute.performance,
+            onSwitchedTrain: () {
+              assert(forwardPerformance.masterPerformance == newPerformance);
+              assert(newPerformance.currentTrain == nextRoute.performance);
+              forwardPerformance.masterPerformance = newPerformance.currentTrain;
+              newPerformance.dispose();
+            }
+          );
+          forwardPerformance.masterPerformance = newPerformance;
+          current.dispose();
+        } else {
+          forwardPerformance.masterPerformance = new TrainHoppingPerformance(current, nextRoute.performance);
+        }
+      } else {
+        forwardPerformance.masterPerformance = nextRoute.performance;
+      }
+    }
+    super.didPushNext(nextRoute);
+  }
+
+  Widget wrapTransition(BuildContext context, Widget child) {
+    return buildForwardTransition(
+      context,
+      forwardPerformance,
+      buildTransition(
+        context,
+        performance, 
+        child
+      )
+    );
+  }
+
+  Widget buildTransition(BuildContext context, PerformanceView performance, Widget child) => child;
+  Widget buildForwardTransition(BuildContext context, PerformanceView performance, Widget child) => child;
 
   String get debugLabel => '$runtimeType';
   String toString() => '$runtimeType(performance: $_performance)';
@@ -246,7 +295,7 @@ class _ModalScope extends StatusTransitionComponent {
         key: new GlobalObjectKey(route),
         child: new IgnorePointer(
           ignoring: performance.status == PerformanceStatus.reverse,
-          child: route.buildTransition(context, performance, contents)
+          child: route.wrapTransition(context, contents)
         )
       );
     }
@@ -354,7 +403,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       performance: performance,
       current: isCurrent,
       route: this
-      // calls buildTransition() and buildPage(), defined above
+      // calls buildTransition()/buildForwardTransition() and buildPage(), defined above
     );
   }
 
