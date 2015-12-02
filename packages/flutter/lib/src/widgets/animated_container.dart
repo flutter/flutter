@@ -136,6 +136,8 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
   }
 
   bool _configVariable(AnimatedValue variable, dynamic targetValue) {
+    if (targetValue == variable.end)
+      return false;
     dynamic currentValue = variable.value;
     variable.end = targetValue;
     variable.begin = currentValue;
