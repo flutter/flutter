@@ -21,6 +21,7 @@ minikin_src_files := \
     CmapCoverage.cpp \
     FontCollection.cpp \
     FontFamily.cpp \
+    FontLanguageListCache.cpp \
     GraphemeBreak.cpp \
     HbFaceCache.cpp \
     Hyphenator.cpp \

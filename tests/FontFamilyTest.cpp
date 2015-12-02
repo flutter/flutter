@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <minikin/FontFamily.h>
+#include "FontLanguageListCache.h"
 #include "MinikinFontForTest.h"
 #include "MinikinInternal.h"
 
@@ -81,6 +82,27 @@ TEST(FontLanguagesTest, undEmojiTests) {
     FontLanguage undExample("und-example", 10);
     EXPECT_FALSE(undExample.hasEmojiFlag());
     EXPECT_FALSE(emoji == undExample);
+}
+
+TEST(FontLanguagesTest, registerLanguageListTest) {
+    EXPECT_EQ(0UL, FontStyle::registerLanguageList(""));
+    EXPECT_NE(0UL, FontStyle::registerLanguageList("en"));
+    EXPECT_NE(0UL, FontStyle::registerLanguageList("jp"));
+    EXPECT_NE(0UL, FontStyle::registerLanguageList("en,zh-Hans"));
+
+    EXPECT_EQ(FontStyle::registerLanguageList("en"), FontStyle::registerLanguageList("en"));
+    EXPECT_NE(FontStyle::registerLanguageList("en"), FontStyle::registerLanguageList("jp"));
+
+    EXPECT_EQ(FontStyle::registerLanguageList("en,zh-Hans"),
+              FontStyle::registerLanguageList("en,zh-Hans"));
+    EXPECT_NE(FontStyle::registerLanguageList("en,zh-Hans"),
+              FontStyle::registerLanguageList("zh-Hans,en"));
+    EXPECT_NE(FontStyle::registerLanguageList("en,zh-Hans"),
+              FontStyle::registerLanguageList("jp"));
+    EXPECT_NE(FontStyle::registerLanguageList("en,zh-Hans"),
+              FontStyle::registerLanguageList("en"));
+    EXPECT_NE(FontStyle::registerLanguageList("en,zh-Hans"),
+              FontStyle::registerLanguageList("en,zh-Hant"));
 }
 
 // The test font has following glyphs.

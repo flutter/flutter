@@ -65,7 +65,7 @@ private:
         size_t end;
     };
 
-    FontFamily* getFamilyForChar(uint32_t ch, uint32_t vs, FontLanguage lang, int variant) const;
+    FontFamily* getFamilyForChar(uint32_t ch, uint32_t vs, uint32_t langListId, int variant) const;
 
     // static for allocating unique id's
     static uint32_t sNextId;

@@ -197,9 +197,9 @@ TEST(FontCollectionItemizeTest, itemize_non_latin) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
-    FontStyle kJAStyle = FontStyle(FontLanguage("ja_JP", 5));
-    FontStyle kUSStyle = FontStyle(FontLanguage("en_US", 5));
-    FontStyle kZH_HansStyle = FontStyle(FontLanguage("zh_Hans", 7));
+    FontStyle kJAStyle = FontStyle(FontStyle::registerLanguageList("ja_JP"));
+    FontStyle kUSStyle = FontStyle(FontStyle::registerLanguageList("en_US"));
+    FontStyle kZH_HansStyle = FontStyle(FontStyle::registerLanguageList("zh_Hans"));
 
     // All Japanese Hiragana characters.
     itemize(collection.get(), "U+3042 U+3044 U+3046 U+3048 U+304A", kUSStyle, &runs);
@@ -275,7 +275,7 @@ TEST(FontCollectionItemizeTest, itemize_mixed) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
-    FontStyle kUSStyle = FontStyle(FontLanguage("en_US", 5));
+    FontStyle kUSStyle = FontStyle(FontStyle::registerLanguageList("en_US"));
 
     itemize(collection.get(), "'a' U+4F60 'b' U+4F60 'c'", kUSStyle, &runs);
     ASSERT_EQ(5U, runs.size());
@@ -318,8 +318,8 @@ TEST(FontCollectionItemizeTest, itemize_variationSelector) {
     // Chinese font. Also a glyph for U+242EE is provided by both Japanese and
     // Traditional Chinese font.  To avoid effects of device default locale,
     // explicitly specify the locale.
-    FontStyle kZH_HansStyle = FontStyle(FontLanguage("zh_Hans", 7));
-    FontStyle kZH_HantStyle = FontStyle(FontLanguage("zh_Hant", 7));
+    FontStyle kZH_HansStyle = FontStyle(FontStyle::registerLanguageList("zh_Hans"));
+    FontStyle kZH_HantStyle = FontStyle(FontStyle::registerLanguageList("zh_Hant"));
 
     // U+4FAE is available in both zh_Hans and ja font, but U+4FAE,U+FE00 is
     // only available in ja font.
@@ -457,8 +457,8 @@ TEST(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
     // Chinese font. Also a glyph for U+242EE is provided by both Japanese and
     // Traditional Chinese font.  To avoid effects of device default locale,
     // explicitly specify the locale.
-    FontStyle kZH_HansStyle = FontStyle(FontLanguage("zh_Hans", 7));
-    FontStyle kZH_HantStyle = FontStyle(FontLanguage("zh_Hant", 7));
+    FontStyle kZH_HansStyle = FontStyle(FontStyle::registerLanguageList("zh_Hans"));
+    FontStyle kZH_HantStyle = FontStyle(FontStyle::registerLanguageList("zh_Hant"));
 
     // U+845B is available in both zh_Hans and ja font, but U+845B,U+E0100 is
     // only available in ja font.
@@ -602,9 +602,10 @@ TEST(FontCollectionItemizeTest, itemize_fakery) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
-    FontStyle kJABoldStyle = FontStyle(FontLanguage("ja_JP", 5), 0, 7, false);
-    FontStyle kJAItalicStyle = FontStyle(FontLanguage("ja_JP", 5), 0, 5, true);
-    FontStyle kJABoldItalicStyle = FontStyle(FontLanguage("ja_JP", 5), 0, 7, true);
+    FontStyle kJABoldStyle = FontStyle(FontStyle::registerLanguageList("ja_JP"), 0, 7, false);
+    FontStyle kJAItalicStyle = FontStyle(FontStyle::registerLanguageList("ja_JP"), 0, 5, true);
+    FontStyle kJABoldItalicStyle =
+           FontStyle(FontStyle::registerLanguageList("ja_JP"), 0, 7, true);
 
     // Currently there is no italic or bold font for Japanese. FontFakery has
     // the differences between desired and actual font style.
