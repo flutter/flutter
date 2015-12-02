@@ -46,6 +46,7 @@
 #include "sky/engine/wtf/text/AtomicString.h"
 #include "sky/engine/wtf/text/TextEncoding.h"
 #include "sky/engine/wtf/WTF.h"
+#include "base/trace_event/trace_event.h"
 
 namespace blink {
 
@@ -115,6 +116,8 @@ static void cryptographicallyRandomValues(unsigned char* buffer, size_t length)
 
 void initialize(Platform* platform)
 {
+    TRACE_EVENT0("flutter", "blink::initialize");
+
     ASSERT(!s_webKitInitialized);
     s_webKitInitialized = true;
 

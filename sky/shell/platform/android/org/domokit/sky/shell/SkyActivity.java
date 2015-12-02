@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import org.chromium.base.PathUtils;
+import org.chromium.base.TraceEvent;
 import org.chromium.mojom.sky.EventType;
 import org.chromium.mojom.sky.InputEvent;
 
@@ -113,6 +114,8 @@ public class SkyActivity extends Activity {
       * Override this function to customize startup behavior.
       */
     protected void onSkyReady() {
+        TraceEvent.instant("SkyActivity.onSkyReady");
+
         if (loadIntent(getIntent())) {
             return;
         }

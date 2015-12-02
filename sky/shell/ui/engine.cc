@@ -170,6 +170,8 @@ void Engine::RunFromLibrary(const std::string& name) {
 void Engine::RunFromSnapshotStream(
     const std::string& name,
     mojo::ScopedDataPipeConsumerHandle snapshot) {
+  TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
+
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView(blink::WebString::fromUTF8(name));
   sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(name), snapshot.Pass());
@@ -201,6 +203,8 @@ void Engine::RunFromFile(const mojo::String& main,
 }
 
 void Engine::RunFromBundle(const mojo::String& path) {
+  TRACE_EVENT0("flutter", "Engine::RunFromBundle");
+
   AssetUnpackerJob* unpacker = new AssetUnpackerJob(
       mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));
   std::string path_str = path;
