@@ -176,7 +176,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     }
   }
 
-  bool shouldRepaint(_LinearProgressIndicatorPainter oldPainter) {
+  bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
     return oldPainter.valueColor != valueColor
         || oldPainter.value != value
         || oldPainter.performanceValue != performanceValue;
