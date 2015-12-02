@@ -88,6 +88,8 @@ class HeroController extends NavigatorObserver {
   }
 
   Set<Key> _getMostValuableKeys() {
+    assert(_from != null);
+    assert(_to != null);
     Set<Key> result = new Set<Key>();
     if (_from.settings.mostValuableKeys != null)
       result.addAll(_from.settings.mostValuableKeys);

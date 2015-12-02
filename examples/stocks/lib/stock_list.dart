@@ -5,8 +5,9 @@
 part of stocks;
 
 class StockList extends StatelessComponent {
-  StockList({ Key key, this.stocks, this.onOpen, this.onShow, this.onAction }) : super(key: key);
+  StockList({ Key key, this.keySalt, this.stocks, this.onOpen, this.onShow, this.onAction }) : super(key: key);
 
+  final Object keySalt;
   final List<Stock> stocks;
   final StockRowActionCallback onOpen;
   final StockRowActionCallback onShow;
@@ -18,6 +19,7 @@ class StockList extends StatelessComponent {
       itemExtent: StockRow.kHeight,
       itemBuilder: (BuildContext context, Stock stock, int index) {
         return new StockRow(
+          keySalt: keySalt,
           stock: stock,
           onPressed: onOpen,
           onDoubleTap: onShow,

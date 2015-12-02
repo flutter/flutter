@@ -7,18 +7,22 @@ part of stocks;
 enum StockRowPartKind { arrow }
 
 class StockRowPartKey extends Key {
-  const StockRowPartKey(this.stock, this.part) : super.constructor();
+  const StockRowPartKey(this.keySalt, this.stock, this.part) : super.constructor();
+  final Object keySalt;
   final Stock stock;
   final StockRowPartKind part;
   bool operator ==(dynamic other) {
-    if (other is! StockRowPartKey)
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
       return false;
     final StockRowPartKey typedOther = other;
-    return stock == typedOther.stock &&
-           part == typedOther.part;
+    return keySalt == typedOther.keySalt
+        && stock == typedOther.stock
+        && part == typedOther.part;
   }
-  int get hashCode => 37 * (37 * (373) + identityHashCode(stock)) + identityHashCode(part);
-  String toString() => '[StockRowPartKey ${stock.symbol}:${part.toString().split(".")[1]})]';
+  int get hashCode => 37 * (37 * (37 * (373) + identityHashCode(keySalt)) + identityHashCode(stock)) + identityHashCode(part);
+  String toString() => '[$runtimeType ${keySalt.toString().split(".")[1]}:${stock.symbol}:${part.toString().split(".")[1]}]';
 }
 
 typedef void StockRowActionCallback(Stock stock, Key arrowKey);
@@ -26,11 +30,12 @@ typedef void StockRowActionCallback(Stock stock, Key arrowKey);
 class StockRow extends StatelessComponent {
   StockRow({
     Stock stock,
+    Object keySalt,
     this.onPressed,
     this.onDoubleTap,
     this.onLongPressed
   }) : this.stock = stock,
-       _arrowKey = new StockRowPartKey(stock, StockRowPartKind.arrow),
+       _arrowKey = new StockRowPartKey(keySalt, stock, StockRowPartKind.arrow),
        super(key: new ObjectKey(stock));
 
   final Stock stock;
