@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "sky/services/vsync/ios/vsync_provider_impl.h"
+#include "base/trace_event/trace_event.h"
 
 #include <Foundation/Foundation.h>
 #include <QuartzCore/CADisplayLink.h>
@@ -25,6 +26,7 @@ static inline uint64_t CurrentTimeMicrosSeconds() {
 @implementation VSyncClient {
   CADisplayLink* _displayLink;
   ::vsync::VSyncProvider::AwaitVSyncCallback _pendingCallback;
+  BOOL _traceLevel;
 }
 
 - (instancetype)init {
@@ -48,6 +50,7 @@ static inline uint64_t CurrentTimeMicrosSeconds() {
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
+  TRACE_COUNTER1("vsync", "PlatformVSync", _traceLevel = !_traceLevel);
   _displayLink.paused = YES;
   _pendingCallback.Run(CurrentTimeMicrosSeconds());
 }
