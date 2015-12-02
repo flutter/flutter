@@ -81,6 +81,9 @@ void Shell::InitStandalone() {
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
   Init(settings);
+  if (command_line.HasSwitch(switches::kTraceStartup)) {
+    Shared().tracing_controller().StartTracing();
+  }
 }
 
 void Shell::Init(const Settings& settings) {

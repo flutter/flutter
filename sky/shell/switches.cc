@@ -15,6 +15,7 @@ const char kFLX[] = "flx";
 const char kHelp[] = "help";
 const char kNonInteractive[] = "non-interactive";
 const char kPackageRoot[] = "package-root";
+const char kTraceStartup[] = "trace-startup";
 
 void PrintUsage(const std::string& executable_name) {
   std::cerr << "Usage: " << executable_name
