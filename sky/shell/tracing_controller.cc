@@ -203,6 +203,8 @@ void TracingController::FinalizeTraceFile() {
     base::MessageLoop::current()->Quit();
     terminate_loop_on_write_ = false;
   }
+
+  LOG(INFO) << "Trace complete";
 }
 
 void TracingController::OnBaseTraceChunk(
