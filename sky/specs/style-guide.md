@@ -35,7 +35,7 @@ rules, so avoid using that for now.)
 
 Always use the Dart Analyzer. Avoid checking in code that increases
 the output of the analyzer unless you've filed a bug with the Dart
-team. (Use "skyanalyzer" to run the analyzer on Flutter code.)
+team. (Use `flutter analyze` to run the analyzer on Flutter code.)
 
 Use assert()s liberally to describe the contracts that you expect your
 code to follow.
