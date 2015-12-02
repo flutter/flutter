@@ -361,7 +361,7 @@ class SpriteBox extends RenderBox {
   // Updates
 
   void _scheduleTick() {
-    scheduler.requestAnimationFrame(_tick);
+    scheduler.scheduleFrameCallback(_tick);
   }
 
   void _tick(Duration timeStamp) {

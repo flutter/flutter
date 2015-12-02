@@ -17,7 +17,7 @@ double timeDilation = 1.0;
 /// scheduler's epoch. Use timeStamp to determine how far to advance animation
 /// timelines so that all the animations in the system are synchronized to a
 /// common time base.
-typedef void SchedulerCallback(Duration timeStamp);
+typedef void FrameCallback(Duration timeStamp);
 
 typedef void SchedulerExceptionHandler(dynamic exception, StackTrace stack);
 /// This callback is invoked whenever an exception is caught by the scheduler.
@@ -29,11 +29,11 @@ SchedulerExceptionHandler debugSchedulerExceptionHandler;
 /// An entry in the scheduler's priority queue.
 ///
 /// Combines the task and its priority.
-class _SchedulerEntry {
+class _TaskEntry {
   final ui.VoidCallback task;
   final int priority;
 
-  const _SchedulerEntry(this.task, this.priority);
+  const _TaskEntry(this.task, this.priority);
 }
 
 class Priority {
@@ -83,102 +83,138 @@ class Priority {
 class Scheduler {
   /// Requires clients to use the [scheduler] singleton
   Scheduler._() {
-    ui.window.onBeginFrame = beginFrame;
+    ui.window.onBeginFrame = handleBeginFrame;
   }
 
   SchedulingStrategy schedulingStrategy = new DefaultSchedulingStrategy();
 
-  final PriorityQueue _queue = new HeapPriorityQueue<_SchedulerEntry>(
-    (_SchedulerEntry e1, _SchedulerEntry e2) {
+  final PriorityQueue _taskQueue = new HeapPriorityQueue<_TaskEntry>(
+    (_TaskEntry e1, _TaskEntry e2) {
       // Note that we inverse the priority.
       return -e1.priority.compareTo(e2.priority);
     }
   );
 
-  /// Wether this scheduler already requested to be woken up as soon as
-  /// possible.
-  bool _wakingNow = false;
+  /// Whether this scheduler already requested to be called from the event loop.
+  bool _hasRequestedAnEventLoopCallback = false;
 
-  /// Wether this scheduler already requested to be woken up in the next frame.
-  bool _wakingNextFrame = false;
+  /// Whether this scheduler already requested to be called at the beginning of
+  /// the next frame.
+  bool _hasRequestedABeginFrameCallback = false;
 
   /// Schedules the given [task] with the given [priority].
   void scheduleTask(ui.VoidCallback task, Priority priority) {
-    bool isFirstTask = _queue.isEmpty;
-    _queue.add(new _SchedulerEntry(task, priority._value));
+    bool isFirstTask = _taskQueue.isEmpty;
+    _taskQueue.add(new _TaskEntry(task, priority._value));
     if (isFirstTask)
-      _wakeNow();
+      _ensureEventLoopCallback();
   }
 
   /// Invoked by the system when there is time to run tasks.
-  void tick() {
-    if (_queue.isEmpty)
+  void handleEventLoopCallback() {
+    _hasRequestedAnEventLoopCallback = false;
+    _runTasks();
+  }
+
+  void _runTasks() {
+    if (_taskQueue.isEmpty)
       return;
-    _SchedulerEntry entry = _queue.first;
+    _TaskEntry entry = _taskQueue.first;
     if (schedulingStrategy.shouldRunTaskWithPriority(entry.priority)) {
       try {
-        (_queue.removeFirst().task)();
+        (_taskQueue.removeFirst().task)();
       } finally {
-        if (_queue.isNotEmpty)
-          _wakeNow();
+        if (_taskQueue.isNotEmpty)
+          _ensureEventLoopCallback();
       }
     } else {
-      _wakeNextFrame();
+      // TODO(floitsch): we shouldn't need to request a frame. Just schedule
+      // an event-loop callback.
+      _ensureBeginFrameCallback();
     }
   }
 
   int _nextFrameCallbackId = 0; // positive
-  Map<int, SchedulerCallback> _transientCallbacks = <int, SchedulerCallback>{};
+  Map<int, FrameCallback> _transientCallbacks = <int, FrameCallback>{};
   final Set<int> _removedIds = new Set<int>();
 
   int get transientCallbackCount => _transientCallbacks.length;
 
   /// Schedules the given frame callback.
-  int requestAnimationFrame(SchedulerCallback callback) {
+  ///
+  /// Adds the given callback to the list of frame-callbacks and ensures that a
+  /// frame is scheduled.
+  int scheduleFrameCallback(FrameCallback callback) {
+    _ensureBeginFrameCallback();
+    return addFrameCallback(callback);
+  }
+
+  /// Adds a frame callback.
+  ///
+  /// Frame callbacks are executed at the beginning of a frame (see
+  /// [handleBeginFrame]).
+  ///
+  /// The registered callbacks are executed in the order in which they have been
+  /// registered.
+  int addFrameCallback(FrameCallback callback) {
     _nextFrameCallbackId += 1;
     _transientCallbacks[_nextFrameCallbackId] = callback;
-    _wakeNextFrame();
     return _nextFrameCallbackId;
   }
 
   /// Cancels the callback of the given [id].
-  void cancelAnimationFrame(int id) {
+  ///
+  /// Removes the given callback from the list of frame callbacks. If a frame
+  /// has been requested does *not* cancel that request.
+  void cancelFrameCallbackWithId(int id) {
     assert(id > 0);
     _transientCallbacks.remove(id);
     _removedIds.add(id);
   }
 
-  final List<SchedulerCallback> _persistentCallbacks = new List<SchedulerCallback>();
+  final List<FrameCallback> _persistentCallbacks = new List<FrameCallback>();
 
-  void addPersistentFrameCallback(SchedulerCallback callback) {
+  /// Adds a persistent frame callback.
+  ///
+  /// Persistent callbacks are invoked after transient (non-persistent) frame
+  /// callbacks.
+  ///
+  /// Does *not* request a new frame. Conceptually, persistent
+  /// frame-callbacks are thus observers of begin-frame events. Since they are
+  /// executed after the transient frame-callbacks they can drive the rendering
+  /// pipeline.
+  void addPersistentFrameCallback(FrameCallback callback) {
     _persistentCallbacks.add(callback);
   }
 
-  final List<SchedulerCallback> _postFrameCallbacks = new List<SchedulerCallback>();
+  final List<FrameCallback> _postFrameCallbacks = new List<FrameCallback>();
 
   /// Schedule a callback for the end of this frame.
   ///
-  /// If a frame is in progress, the callback will be run just after the main
-  /// rendering pipeline has been flushed. In this case, order is preserved (the
-  /// callbacks are run in registration order).
+  /// Does *not* request a new frame.
   ///
-  /// If no frame is in progress, it will be called at the start of the next
-  /// frame. In this case, the registration order is not preserved. Callbacks
-  /// are called in an arbitrary order.
-  void requestPostFrameCallback(SchedulerCallback callback) {
+  /// The callback is run just after the persistent frame-callbacks (which is
+  /// when the main rendering pipeline has been flushed). If a frame is
+  /// in progress, but post frame-callbacks haven't been executed yet, then the
+  /// registered callback is still executed during the frame. Otherwise,
+  /// the registered callback is executed during the next frame.
+  ///
+  /// The registered callbacks are executed in the order in which they have been
+  /// registered.
+  void addPostFrameCallback(FrameCallback callback) {
     _postFrameCallbacks.add(callback);
   }
 
-  bool _inFrame = false;
+  bool _isInFrame = false;
 
-  void _invokeAnimationCallbacks(Duration timeStamp) {
+  void _invokeTransientFrameCallbacks(Duration timeStamp) {
     Timeline.startSync('Animate');
-    assert(_inFrame);
-    Map<int, SchedulerCallback> callbacks = _transientCallbacks;
-    _transientCallbacks = new Map<int, SchedulerCallback>();
-    callbacks.forEach((int id, SchedulerCallback callback) {
+    assert(_isInFrame);
+    Map<int, FrameCallback> callbacks = _transientCallbacks;
+    _transientCallbacks = new Map<int, FrameCallback>();
+    callbacks.forEach((int id, FrameCallback callback) {
       if (!_removedIds.contains(id))
-        invokeCallback(callback, timeStamp);
+        invokeFrameCallback(callback, timeStamp);
     });
     _removedIds.clear();
     Timeline.finishSync();
@@ -187,35 +223,41 @@ class Scheduler {
   /// Called by the engine to produce a new frame.
   ///
   /// This function first calls all the callbacks registered by
-  /// [requestAnimationFrame], then calls all the callbacks registered by
-  /// [addPersistentFrameCallback], which typically drive the rendering pipeline,
-  /// and finally calls the callbacks registered by [requestPostFrameCallback].
-  void beginFrame(Duration rawTimeStamp) {
+  /// [scheduleFrameCallback]/[addFrameCallback], then calls all the callbacks
+  /// registered by [addPersistentFrameCallback], which typically drive the
+  /// rendering pipeline, and finally calls the callbacks registered by
+  /// [addPostFrameCallback].
+  void handleBeginFrame(Duration rawTimeStamp) {
     Timeline.startSync('Begin frame');
-    assert(!_inFrame);
-    _inFrame = true;
+    assert(!_isInFrame);
+    _isInFrame = true;
     Duration timeStamp = new Duration(
         microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
-    _wakingNextFrame = false;
-    _invokeAnimationCallbacks(timeStamp);
+    _hasRequestedABeginFrameCallback = false;
+    _invokeTransientFrameCallbacks(timeStamp);
 
-    for (SchedulerCallback callback in _persistentCallbacks)
-      invokeCallback(callback, timeStamp);
+    for (FrameCallback callback in _persistentCallbacks)
+      invokeFrameCallback(callback, timeStamp);
 
-    List<SchedulerCallback> localPostFrameCallbacks =
-        new List<SchedulerCallback>.from(_postFrameCallbacks);
+    List<FrameCallback> localPostFrameCallbacks =
+        new List<FrameCallback>.from(_postFrameCallbacks);
     _postFrameCallbacks.clear();
-    for (SchedulerCallback callback in localPostFrameCallbacks)
-      invokeCallback(callback, timeStamp);
+    for (FrameCallback callback in localPostFrameCallbacks)
+      invokeFrameCallback(callback, timeStamp);
 
-    _inFrame = false;
+    _isInFrame = false;
     Timeline.finishSync();
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
-    tick();
+    _runTasks();
   }
 
-  void invokeCallback(SchedulerCallback callback, Duration timeStamp) {
+  /// Invokes the given [callback] with [timestamp] as argument.
+  ///
+  /// Wraps the callback in a try/catch and forwards any error to
+  /// [debugSchedulerExceptionHandler], if set. If not set, then simply prints
+  /// the error.
+  void invokeFrameCallback(FrameCallback callback, Duration timeStamp) {
     assert(callback != null);
     try {
       callback(timeStamp);
@@ -231,28 +273,25 @@ class Scheduler {
     }
   }
 
-  /// Tells the system that the scheduler is awake and should be called as
-  /// soon a there is time.
-  void _wakeNow() {
-    if (_wakingNow)
+  /// Ensures that the scheduler is woken by the event loop.
+  void _ensureEventLoopCallback() {
+    if (_hasRequestedAnEventLoopCallback)
       return;
-    _wakingNow = true;
-    Timer.run(() {
-      _wakingNow = false;
-      tick();
-    });
+    Timer.run(handleEventLoopCallback);
+    _hasRequestedAnEventLoopCallback = true;
   }
 
+  // TODO(floitsch): "ensureVisualUpdate" doesn't really fit into the scheduler.
   void ensureVisualUpdate() {
-    _wakeNextFrame();
+    _ensureBeginFrameCallback();
   }
 
   /// Schedules a new frame.
-  void _wakeNextFrame() {
-    if (_wakingNextFrame)
+  void _ensureBeginFrameCallback() {
+    if (_hasRequestedABeginFrameCallback)
       return;
-    _wakingNextFrame = true;
     ui.window.scheduleFrame();
+    _hasRequestedABeginFrameCallback = true;
   }
 }
 

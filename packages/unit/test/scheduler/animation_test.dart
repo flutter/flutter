@@ -17,7 +17,7 @@ void main() {
       expect(secondCallbackRan, isFalse);
       expect(timeStamp.inMilliseconds, equals(16));
       firstCallbackRan = true;
-      scheduler.cancelAnimationFrame(secondId);
+      scheduler.cancelFrameCallbackWithId(secondId);
     }
 
     void secondCallback(Duration timeStamp) {
@@ -27,10 +27,10 @@ void main() {
       secondCallbackRan = true;
     }
 
-    scheduler.requestAnimationFrame(firstCallback);
-    secondId = scheduler.requestAnimationFrame(secondCallback);
+    scheduler.scheduleFrameCallback(firstCallback);
+    secondId = scheduler.scheduleFrameCallback(secondCallback);
 
-    scheduler.beginFrame(const Duration(milliseconds: 16));
+    scheduler.handleBeginFrame(const Duration(milliseconds: 16));
 
     expect(firstCallbackRan, isTrue);
     expect(secondCallbackRan, isFalse);
@@ -38,7 +38,7 @@ void main() {
     firstCallbackRan = false;
     secondCallbackRan = false;
 
-    scheduler.beginFrame(const Duration(milliseconds: 32));
+    scheduler.handleBeginFrame(const Duration(milliseconds: 32));
 
     expect(firstCallbackRan, isFalse);
     expect(secondCallbackRan, isFalse);

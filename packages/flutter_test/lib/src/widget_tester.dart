@@ -34,7 +34,8 @@ class WidgetTester {
   void pump([ Duration duration ]) {
     if (duration != null)
       async.elapse(duration);
-    scheduler.beginFrame(new Duration(milliseconds: clock.now().millisecondsSinceEpoch));
+    scheduler.handleBeginFrame(new Duration(
+        milliseconds: clock.now().millisecondsSinceEpoch));
     async.flushMicrotasks();
   }
 
