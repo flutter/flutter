@@ -354,16 +354,16 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
   void _handleViewportSizeChanged(Size newSize) {
     _viewportSize = config.scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
     setState(() {
-      _updateScrollBehaviour();
+      _updateScrollBehavior();
     });
   }
   void _handleChildSizeChanged(Size newSize) {
     _childSize = config.scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
     setState(() {
-      _updateScrollBehaviour();
+      _updateScrollBehavior();
     });
   }
-  void _updateScrollBehaviour() {
+  void _updateScrollBehavior() {
     // if you don't call this from build(), you must call it from setState().
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: _childSize,
