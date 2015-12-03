@@ -18,8 +18,26 @@ class Point {
   Point operator +(Offset other) => new Point(x + other.dx, y + other.dy);
   Rect operator &(Size other) => new Rect.fromLTWH(x, y, other.width, other.height);
 
+  Point operator *(double operand) => new Point(x * operand, y * operand);
+  Point operator /(double operand) => new Point(x / operand, y / operand);
+  Point operator ~/(double operand) => new Point((x ~/ operand).toDouble(), (y ~/ operand).toDouble());
+  Point operator %(double operand) => new Point(x % operand, y % operand);
+
   // does the equivalent of "return this - Point.origin"
   Offset toOffset() => new Offset(x, y);
+
+  /// Linearly interpolate between two points
+  ///
+  /// If either point is null, this function interpolates from [Point.origin].
+  static Point lerp(Point a, Point b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b * t;
+    if (b == null)
+      return a * (1.0 - t);
+    return new Point(lerpDouble(a.x, b.x, t), lerpDouble(a.y, b.y, t));
+  }
 
   bool operator ==(dynamic other) {
     if (other is! Point)
