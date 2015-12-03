@@ -219,6 +219,11 @@ config("compiler") {
         "//buildtools/third_party/libc++abi/trunk/include",
       ]
     }
+
+    if (is_fnl) {
+      # TODO(kulakowski) remove when fnl no longer uses gcc
+      cflags += [ "-Wno-maybe-uninitialized" ]
+    }
   }
 
   if (is_clang && is_debug) {
