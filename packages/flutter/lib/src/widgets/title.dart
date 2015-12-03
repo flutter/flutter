@@ -5,21 +5,21 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
-
 class Title extends StatelessComponent {
-  Title({ this.title, this.child });
+  Title({ this.title, this.child, this.color });
 
   final Widget child;
   final String title;
+  final Color color;
 
   Widget build(BuildContext context) {
-    updateTaskDescription(title, Theme.of(context).primaryColor);
+    updateTaskDescription(title, color);
     return child;
   }
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('"$title"');
+    description.add('color: $color');
   }
 }
