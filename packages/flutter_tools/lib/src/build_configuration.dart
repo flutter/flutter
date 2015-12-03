@@ -49,8 +49,9 @@ class BuildConfiguration {
   BuildConfiguration.prebuilt({
     this.hostPlatform,
     this.targetPlatform,
-    this.deviceId
-  }) : type = BuildType.prebuilt, buildDir = null, testable = false;
+    this.deviceId,
+    this.testable: false
+  }) : type = BuildType.prebuilt, buildDir = null;
 
   BuildConfiguration.local({
     this.type,

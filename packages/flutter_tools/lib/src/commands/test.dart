@@ -26,14 +26,20 @@ class TestCommand extends FlutterCommand {
       'any test paths. Otherwise, run this command from the root of your project.';
   }
 
-  String getShellPath(TargetPlatform platform, String buildPath) {
-    switch (platform) {
-      case TargetPlatform.linux:
-        return path.join(buildPath, 'sky_shell');
-      case TargetPlatform.mac:
-        return path.join(buildPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
-      default:
-        throw new Exception('Unsupported platform.');
+  Future<String> _getShellPath(BuildConfiguration config) async {
+    if (config.type == BuildType.prebuilt) {
+      Artifact artifact = ArtifactStore.getArtifact(
+        type: ArtifactType.shell, targetPlatform: config.targetPlatform);
+      return await ArtifactStore.getPath(artifact);
+    } else {
+      switch (config.targetPlatform) {
+        case TargetPlatform.linux:
+          return path.join(config.buildDir, 'sky_shell');
+        case TargetPlatform.mac:
+          return path.join(config.buildDir, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
+        default:
+          throw new Exception('Unsupported platform.');
+      }
     }
   }
 
@@ -69,6 +75,11 @@ class TestCommand extends FlutterCommand {
     if (!runFlutterTests && !validateProjectRoot())
       return 1;
 
+    // If we're running the flutter tests, we want to use the packages directory
+    // from the unit package in order to find the proper shell binary.
+    if (runFlutterTests && ArtifactStore.packageRoot == 'packages')
+      ArtifactStore.packageRoot = path.join(ArtifactStore.flutterRoot, 'packages', 'unit', 'packages');
+
     Directory testDir = runFlutterTests ? _flutterUnitTestDir : Directory.current;
 
     if (testArgs.isEmpty)
@@ -84,7 +95,7 @@ class TestCommand extends FlutterCommand {
       if (!config.testable)
         continue;
       foundOne = true;
-      loader.shellPath = path.join(Directory.current.path, getShellPath(config.targetPlatform, config.buildDir));
+      loader.shellPath = path.absolute(await _getShellPath(config));
       if (!FileSystemEntity.isFileSync(loader.shellPath)) {
           logging.severe('Cannot find Flutter shell at ${loader.shellPath}');
         return 1;
