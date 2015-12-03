@@ -41,6 +41,8 @@ class PageableListAppState extends State<PageableListApp> {
   ScrollDirection scrollDirection = ScrollDirection.horizontal;
   bool itemsWrap = false;
 
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   void updatePageSize(Size newSize) {
     setState(() {
       pageSize = newSize;
@@ -83,9 +85,8 @@ class PageableListAppState extends State<PageableListApp> {
     });
   }
 
-  void _showDrawer() {
-    showDrawer(
-      context: context,
+  Widget _buildDrawer() {
+    return new Drawer(
       child: new Block(<Widget>[
         new DrawerHeader(child: new Text('Options')),
         new DrawerItem(
@@ -111,9 +112,9 @@ class PageableListAppState extends State<PageableListApp> {
     );
   }
 
-  Widget buildToolBar() {
+  Widget _buildToolBar() {
     return new ToolBar(
-      left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
+      left: new IconButton(icon: "navigation/menu", onPressed: () => _scaffoldKey.currentState?.openDrawer()),
       center: new Text('PageableList'),
       right: <Widget>[
         new Text(scrollDirection == ScrollDirection.horizontal ? "horizontal" : "vertical")
@@ -121,7 +122,7 @@ class PageableListAppState extends State<PageableListApp> {
     );
   }
 
-  Widget buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     Widget list = new PageableList<CardModel>(
       items: cardModels,
       itemsWrap: itemsWrap,
@@ -141,8 +142,9 @@ class PageableListAppState extends State<PageableListApp> {
     return new IconTheme(
       data: const IconThemeData(color: IconThemeColor.white),
       child: new Scaffold(
-        toolBar: buildToolBar(),
-        body: buildBody(context)
+        toolBar: _buildToolBar(),
+        drawer: _buildDrawer(),
+        body: _buildBody(context)
       )
     );
   }

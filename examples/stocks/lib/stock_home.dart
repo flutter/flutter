@@ -21,7 +21,7 @@ class StockHome extends StatefulComponent {
 
 class StockHomeState extends State<StockHome> {
 
-  final GlobalKey scaffoldKey = new GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TabBarSelection _tabBarSelection = new TabBarSelection();
   bool _isSearching = false;
   String _searchQuery;
@@ -70,9 +70,8 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  void _showDrawer() {
-    showDrawer(
-      context: context,
+  Widget _buildDrawer(BuildContext context) {
+    return new Drawer(
       child: new Block(<Widget>[
         new DrawerHeader(child: new Text('Stocks')),
         new DrawerItem(
@@ -151,7 +150,7 @@ class StockHomeState extends State<StockHome> {
       elevation: 0,
       left: new IconButton(
         icon: "navigation/menu",
-        onPressed: _showDrawer
+        onPressed: () => _scaffoldKey.currentState?.openDrawer()
       ),
       center: new FadeTransition(
         opacity: new AnimatedValue<double>(
@@ -200,7 +199,7 @@ class StockHomeState extends State<StockHome> {
       stock.percentChange = 100.0 * (1.0 / stock.lastSale);
       stock.lastSale += 1.0;
     });
-    scaffoldKey.currentState.showSnackBar(new SnackBar(
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
       content: new Text("Purchased ${stock.symbol} for ${stock.lastSale}"),
       actions: <SnackBarAction>[
         new SnackBarAction(label: "BUY MORE", onPressed: () { _buyStock(stock, arrowKey); })
@@ -219,7 +218,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.pushNamed(context, '/stock/${stock.symbol}', mostValuableKeys: mostValuableKeys);
       },
       onShow: (Stock stock, Key arrowKey) {
-        scaffoldKey.currentState.showBottomSheet((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState.showBottomSheet((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
       }
     );
   }
@@ -285,9 +284,10 @@ class StockHomeState extends State<StockHome> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      key: scaffoldKey,
+      key: _scaffoldKey,
       toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
       floatingActionButton: buildFloatingActionButton(),
+      drawer: _buildDrawer(context),
       body: new SizeObserver(
         onSizeChanged: _handleSizeChanged,
         child: new TabBarView<StockHomeTab>(
