@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import 'page.dart';
 import 'theme.dart';
-import 'title.dart';
 
 const TextStyle _errorTextStyle = const TextStyle(
   color: const Color(0xD0FF0000),
@@ -107,16 +106,18 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
   }
 
   Widget build(BuildContext context) {
+    ThemeData theme = config.theme ?? new ThemeData.fallback();
     return new MediaQuery(
       data: new MediaQueryData(size: _size),
       child: new Theme(
-        data: config.theme ?? new ThemeData.fallback(),
+        data: theme,
         child: new DefaultTextStyle(
           style: _errorTextStyle,
           child: new DefaultAssetBundle(
             bundle: _defaultBundle,
             child: new Title(
               title: config.title,
+              color: theme.primaryColor,
               child: new Navigator(
                 key: _navigator,
                 initialRoute: ui.window.defaultRouteName,
