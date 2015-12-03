@@ -15,6 +15,8 @@
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/shell.h"
+#include "sky/shell/switches.h"
+#include "sky/shell/tracing_controller.h"
 #include "sky/shell/ui_delegate.h"
 #include "ui/gl/gl_surface.h"
 
@@ -52,6 +54,16 @@ int PlatformMacMain(int argc,
   DLOG_ASSERT(result);
 
   InitializeLogging();
+
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+  if (command_line.HasSwitch(sky::shell::switches::kTraceStartup)) {
+    // Usually, all tracing within flutter is managed via the tracing controller
+    // The tracing controller is accessed via the shell instance. This means
+    // that tracing can only be enabled once that instance is created. Traces
+    // early in startup are lost. This enables tracing only in base manually
+    // till the tracing controller takes over.
+    sky::shell::TracingController::StartBaseTracing();
+  }
 
   scoped_ptr<base::MessageLoopForUI> message_loop(new base::MessageLoopForUI());
 

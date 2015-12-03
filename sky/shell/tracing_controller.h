@@ -28,6 +28,12 @@ class TracingController {
   void StopTracing(const base::FilePath& path,
                    bool terminateLoopWhenDone = false);
 
+  // Enables tracing in base. Only use this if an instance of a tracing
+  // controller cannot be obtained (can happen early in the lifecycle of the
+  // process). In most cases, the |StartTracing| method on an instance of the
+  // tracing controller should be used.
+  static void StartBaseTracing();
+
   base::FilePath PictureTracingPathForCurrentTime() const;
   
   base::FilePath PictureTracingPathForCurrentTime(base::FilePath dir) const;
@@ -57,7 +63,6 @@ class TracingController {
   bool tracing_active_;
 
   void StartDartTracing();
-  void StartBaseTracing();
   void StopDartTracing();
   void StopBaseTracing();
   void FinalizeTraceFile();
