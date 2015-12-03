@@ -39,7 +39,6 @@ void InitDartVM();
 Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
                                   Dart_Handle library,
                                   Dart_Handle url);
-void EnsureHandleWatcherStarted();
 }  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_

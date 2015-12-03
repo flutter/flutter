@@ -6,12 +6,15 @@
 #define SKY_ENGINE_BINDINGS_DART_MOJO_INTERNAL_H_
 
 #include "base/macros.h"
+#include "mojo/public/cpp/system/core.h"
 
 namespace blink {
 
 class DartMojoInternal {
  public:
   static void InitForIsolate();
+
+  static void SetHandleWatcherProducerHandle(MojoHandle handle);
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(DartMojoInternal);

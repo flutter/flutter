@@ -7,14 +7,38 @@
 #include "dart/runtime/include/dart_api.h"
 #include "mojo/public/platform/dart/mojo_natives.h"
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_error.h"
 
 namespace blink {
+namespace {
+
+MojoHandle g_handle_watcher_producer_handle = MOJO_HANDLE_INVALID;
+
+void SetHandleWatcherControlHandle(Dart_Handle mojo_internal) {
+  CHECK(g_handle_watcher_producer_handle != MOJO_HANDLE_INVALID);
+  Dart_Handle handle_watcher_type = Dart_GetType(
+      mojo_internal, ToDart("MojoHandleWatcher"), 0, nullptr);
+  Dart_Handle field_name = ToDart("mojoControlHandle");
+  Dart_Handle control_port_value = ToDart(g_handle_watcher_producer_handle);
+  Dart_Handle result =
+      Dart_SetField(handle_watcher_type, field_name, control_port_value);
+  CHECK(!LogIfError(result));
+}
+
+}  // namespace
+
+void DartMojoInternal::SetHandleWatcherProducerHandle(MojoHandle handle) {
+  CHECK_EQ(g_handle_watcher_producer_handle, MOJO_HANDLE_INVALID);
+  g_handle_watcher_producer_handle = handle;
+}
 
 void DartMojoInternal::InitForIsolate() {
+  Dart_Handle mojo_internal = Dart_LookupLibrary(ToDart("dart:mojo.internal"));
   DART_CHECK_VALID(Dart_SetNativeResolver(
-      Dart_LookupLibrary(ToDart("dart:mojo.internal")),
+      mojo_internal,
       mojo::dart::MojoNativeLookup,
       mojo::dart::MojoNativeSymbol));
+  SetHandleWatcherControlHandle(mojo_internal);
 }
 
 }  // namespace blink

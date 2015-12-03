@@ -13,6 +13,7 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "gen/sky/platform/RuntimeEnabledFeatures.h"
+#include "mojo/public/platform/dart/dart_handle_watcher.h"
 #include "sky/engine/bindings/dart_mojo_internal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/bindings/dart_ui.h"
@@ -50,27 +51,6 @@ Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
                                   Dart_Handle library,
                                   Dart_Handle url) {
   return DartLibraryLoader::HandleLibraryTag(tag, library, url);
-}
-
-void EnsureHandleWatcherStarted() {
-  static bool handle_watcher_started = false;
-  if (handle_watcher_started)
-    return;
-
-  // TODO(dart): Call Dart_Cleanup (ensure the handle watcher isolate is closed)
-  // during shutdown.
-  Dart_Handle mojo_core_lib = Dart_LookupLibrary(ToDart("dart:mojo.internal"));
-  CHECK(!LogIfError((mojo_core_lib)));
-  Dart_Handle handle_watcher_type =
-      Dart_GetType(mojo_core_lib,
-                   Dart_NewStringFromCString("MojoHandleWatcher"), 0, nullptr);
-  CHECK(!LogIfError(handle_watcher_type));
-  CHECK(!LogIfError(Dart_Invoke(
-      handle_watcher_type, Dart_NewStringFromCString("_start"), 0, nullptr)));
-
-  // RunLoop until the handle watcher isolate is spun-up.
-  CHECK(!LogIfError(Dart_RunLoop()));
-  handle_watcher_started = true;
 }
 
 namespace {
@@ -145,9 +125,6 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       DartUI::InitForIsolate();
       DartMojoInternal::InitForIsolate();
       DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate);
-      // Start the handle watcher from the service isolate so it isn't available
-      // for debugging or general Observatory interaction.
-      EnsureHandleWatcherStarted();
       if (RuntimeEnabledFeatures::observatoryEnabled()) {
         std::string ip = "127.0.0.1";
         const intptr_t port = 8181;
@@ -283,6 +260,9 @@ bool IsRunningPrecompiledCode() {
 void InitDartVM() {
   TRACE_EVENT0("flutter", "InitDartVM");
   dart::bin::BootstrapDartIo();
+
+  DartMojoInternal::SetHandleWatcherProducerHandle(
+      mojo::dart::HandleWatcher::Start());
 
   bool enable_checked_mode = RuntimeEnabledFeatures::dartCheckedModeEnabled();
 #if ENABLE(DART_STRICT)

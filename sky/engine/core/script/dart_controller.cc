@@ -159,8 +159,6 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
 
     dart_state()->class_library().set_provider(
       WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:ui"));
-
-    EnsureHandleWatcherStarted();
   }
   Dart_ExitIsolate();
 }

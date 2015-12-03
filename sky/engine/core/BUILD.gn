@@ -18,6 +18,7 @@ source_set("libraries") {
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
     "//mojo/public/interfaces/application",
+    "//mojo/public/platform/dart:mojo_internal_impl",
     "//skia",
     "//sky/compositor",
     "//sky/engine/tonic:tonic",
