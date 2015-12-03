@@ -29,7 +29,9 @@ void main() {
       expect(tester.findText('Settings'), isNull);
       expect(tester.findText('Overlay'), isNull);
 
+      expect(Navigator.canPop(containerKey1.currentContext), isFalse);
       Navigator.pushNamed(containerKey1.currentContext, '/settings');
+      expect(Navigator.canPop(containerKey1.currentContext), isTrue);
 
       tester.pump();
 
@@ -63,6 +65,7 @@ void main() {
       expect(tester.findText('Settings'), isOnStage);
       expect(tester.findText('Overlay'), isOnStage);
 
+      expect(Navigator.canPop(containerKey2.currentContext), isTrue);
       Navigator.pop(containerKey2.currentContext);
       tester.pump();
 
@@ -76,6 +79,7 @@ void main() {
       expect(tester.findText('Settings'), isOnStage);
       expect(tester.findText('Overlay'), isNull);
 
+      expect(Navigator.canPop(containerKey2.currentContext), isTrue);
       Navigator.pop(containerKey2.currentContext);
       tester.pump();
 
@@ -88,6 +92,8 @@ void main() {
       expect(tester.findText('Home'), isOnStage);
       expect(tester.findText('Settings'), isNull);
       expect(tester.findText('Overlay'), isNull);
+
+      expect(Navigator.canPop(containerKey1.currentContext), isFalse);
 
     });
   });

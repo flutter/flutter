@@ -37,6 +37,9 @@ abstract class Route<T> {
   /// responsibility of the Route to later call dispose().
   bool didPop(T result) => true;
 
+  /// Whether calling didPop() would return false.
+  bool get willHandlePopInternally => false;
+
   /// The given route has been pushed onto the navigator after this route.
   void didPushNext(Route nextRoute) { }
 
@@ -127,6 +130,11 @@ class Navigator extends StatefulComponent {
       returnValue = transaction.pop(result);
     });
     return returnValue;
+  }
+
+  static bool canPop(BuildContext context) {
+    NavigatorState navigator = context.ancestorStateOfType(NavigatorState);
+    return navigator.canPop();
   }
 
   static void popAndPushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
@@ -280,7 +288,10 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = true; return true; });
     Route route = _history.last;
     assert(route._navigator == this);
+    bool debugPredictedWouldPop;
+    assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; });
     if (route.didPop(result)) {
+      assert(debugPredictedWouldPop);
       if (_history.length > 1) {
         setState(() {
           // We use setState to guarantee that we'll rebuild, since the routes
@@ -295,6 +306,8 @@ class NavigatorState extends State<Navigator> {
         assert(() { _debugLocked = false; return true; });
         return false;
       }
+    } else {
+      assert(!debugPredictedWouldPop);
     }
     assert(() { _debugLocked = false; return true; });
     return true;
@@ -304,6 +317,11 @@ class NavigatorState extends State<Navigator> {
     assert(_history.contains(targetRoute));
     while (!targetRoute.isCurrent)
       _pop();
+  }
+
+  bool canPop() {
+    assert(_history.length > 0);
+    return _history.length > 1 || _history[0].willHandlePopInternally;
   }
 
   bool _hadTransaction = true;
