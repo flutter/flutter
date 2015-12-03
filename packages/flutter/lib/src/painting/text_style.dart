@@ -30,6 +30,7 @@ class TextStyle {
     this.fontSize,
     this.fontWeight,
     this.fontStyle,
+    this.letterSpacing,
     this.textAlign,
     this.textBaseline,
     this.height,
@@ -41,48 +42,52 @@ class TextStyle {
   /// Whether null values are replaced with their value in an ancestor text style.
   final bool inherit;
 
-  /// The color to use when painting the text
+  /// The color to use when painting the text.
   final Color color;
 
-  /// The name of the font to use when painting the text
+  /// The name of the font to use when painting the text.
   final String fontFamily;
 
-  /// The size of gyphs (in logical pixels) to use when painting the text
+  /// The size of gyphs (in logical pixels) to use when painting the text.
   final double fontSize;
 
-  /// The font weight to use when painting the text
+  /// The font weight to use when painting the text.
   final FontWeight fontWeight;
 
-  /// The font style to use when painting the text
+  /// The font style to use when painting the text.
   final FontStyle fontStyle;
 
+  /// The amount of space to add between each letter.
+  final double letterSpacing;
+
   /// How the text should be aligned (applies only to the outermost
-  /// StyledTextSpan, which establishes the container for the text)
+  /// StyledTextSpan, which establishes the container for the text).
   final TextAlign textAlign;
 
-  /// The baseline to use for aligning the text
+  /// The baseline to use for aligning the text.
   final TextBaseline textBaseline;
 
-  /// The distance between the text baselines, as a multiple of the font size
+  /// The distance between the text baselines, as a multiple of the font size.
   final double height;
 
-  /// A list of decorations to paint near the text
+  /// A list of decorations to paint near the text.
   final List<TextDecoration> decoration; // TODO(ianh): Switch this to a Set<> once Dart supports constant Sets
 
-  /// The color in which to paint the text decorations
+  /// The color in which to paint the text decorations.
   final Color decorationColor;
 
-  /// The style in which to paint the text decorations
+  /// The style in which to paint the text decorations.
   final TextDecorationStyle decorationStyle;
 
   /// Returns a new text style that matches this text style but with the given
-  /// values replaced
+  /// values replaced.
   TextStyle copyWith({
     Color color,
     String fontFamily,
     double fontSize,
     FontWeight fontWeight,
     FontStyle fontStyle,
+    double letterSpacing,
     TextAlign textAlign,
     TextBaseline textBaseline,
     double height,
@@ -97,6 +102,7 @@ class TextStyle {
       fontSize: fontSize != null ? fontSize : this.fontSize,
       fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
       fontStyle: fontStyle != null ? fontStyle : this.fontStyle,
+      letterSpacing: letterSpacing != null ? letterSpacing : this.letterSpacing,
       textAlign: textAlign != null ? textAlign : this.textAlign,
       textBaseline: textBaseline != null ? textBaseline : this.textBaseline,
       height: height != null ? height : this.height,
@@ -119,6 +125,7 @@ class TextStyle {
       fontSize: other.fontSize,
       fontWeight: other.fontWeight,
       fontStyle: other.fontStyle,
+      letterSpacing: other.letterSpacing,
       textAlign: other.textAlign,
       textBaseline: other.textBaseline,
       height: other.height,
@@ -137,7 +144,8 @@ class TextStyle {
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
-      fontSize: fontSize
+      fontSize: fontSize,
+      letterSpacing: letterSpacing
     );
   }
 
@@ -161,6 +169,7 @@ class TextStyle {
            fontSize == typedOther.fontSize &&
            fontWeight == typedOther.fontWeight &&
            fontStyle == typedOther.fontStyle &&
+           letterSpacing == typedOther.letterSpacing &&
            textAlign == typedOther.textAlign &&
            textBaseline == typedOther.textBaseline &&
            decoration == typedOther.decoration &&
@@ -177,6 +186,7 @@ class TextStyle {
     value = 37 * value + fontSize.hashCode;
     value = 37 * value + fontWeight.hashCode;
     value = 37 * value + fontStyle.hashCode;
+    value = 37 * value + letterSpacing.hashCode;
     value = 37 * value + textAlign.hashCode;
     value = 37 * value + textBaseline.hashCode;
     value = 37 * value + decoration.hashCode;
@@ -235,6 +245,8 @@ class TextStyle {
           break;
       }
     }
+    if (letterSpacing != null)
+      result.add('${prefix}letterSpacing: $letterSpacing');
     if (textAlign != null) {
       switch (textAlign) {
         case TextAlign.left:
