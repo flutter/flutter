@@ -69,7 +69,7 @@ class DataPipeConsumerDispatcher final : public Dispatcher {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override
       MOJO_NOT_THREAD_SAFE;
   bool IsBusyNoLock() const override;
 

@@ -25,6 +25,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 using mojo::util::MakeRefCounted;
+using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -460,7 +461,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
     auto d = MakeRefCounted<MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters; i++) {
-      threads.push_back(util::MakeUnique<test::WaiterThread>(
+      threads.push_back(MakeUnique<test::WaiterThread>(
           d, MOJO_HANDLE_SIGNAL_READABLE, MOJO_DEADLINE_INDEFINITE, i,
           &did_wait[i], &result[i], &context[i], &hss[i]));
       threads.back()->Start();
@@ -483,13 +484,13 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
     auto d = MakeRefCounted<MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters / 2; i++) {
-      threads.push_back(util::MakeUnique<test::WaiterThread>(
+      threads.push_back(MakeUnique<test::WaiterThread>(
           d, MOJO_HANDLE_SIGNAL_READABLE, MOJO_DEADLINE_INDEFINITE, i,
           &did_wait[i], &result[i], &context[i], &hss[i]));
       threads.back()->Start();
     }
     for (uint32_t i = kNumWaiters / 2; i < kNumWaiters; i++) {
-      threads.push_back(util::MakeUnique<test::WaiterThread>(
+      threads.push_back(MakeUnique<test::WaiterThread>(
           d, MOJO_HANDLE_SIGNAL_WRITABLE, MOJO_DEADLINE_INDEFINITE, i,
           &did_wait[i], &result[i], &context[i], &hss[i]));
       threads.back()->Start();
@@ -520,13 +521,13 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
     auto d = MakeRefCounted<MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters / 2; i++) {
-      threads.push_back(util::MakeUnique<test::WaiterThread>(
+      threads.push_back(MakeUnique<test::WaiterThread>(
           d, MOJO_HANDLE_SIGNAL_READABLE, MOJO_DEADLINE_INDEFINITE, i,
           &did_wait[i], &result[i], &context[i], &hss[i]));
       threads.back()->Start();
     }
     for (uint32_t i = kNumWaiters / 2; i < kNumWaiters; i++) {
-      threads.push_back(util::MakeUnique<test::WaiterThread>(
+      threads.push_back(MakeUnique<test::WaiterThread>(
           d, MOJO_HANDLE_SIGNAL_WRITABLE, MOJO_DEADLINE_INDEFINITE, i,
           &did_wait[i], &result[i], &context[i], &hss[i]));
       threads.back()->Start();
@@ -558,13 +559,13 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
     auto d = MakeRefCounted<MockSimpleDispatcher>();
     std::vector<std::unique_ptr<test::WaiterThread>> threads;
     for (uint32_t i = 0; i < kNumWaiters / 2; i++) {
-      threads.push_back(util::MakeUnique<test::WaiterThread>(
+      threads.push_back(MakeUnique<test::WaiterThread>(
           d, MOJO_HANDLE_SIGNAL_READABLE, 3 * test::EpsilonTimeout(), i,
           &did_wait[i], &result[i], &context[i], &hss[i]));
       threads.back()->Start();
     }
     for (uint32_t i = kNumWaiters / 2; i < kNumWaiters; i++) {
-      threads.push_back(util::MakeUnique<test::WaiterThread>(
+      threads.push_back(MakeUnique<test::WaiterThread>(
           d, MOJO_HANDLE_SIGNAL_WRITABLE, 1 * test::EpsilonTimeout(), i,
           &did_wait[i], &result[i], &context[i], &hss[i]));
       threads.back()->Start();

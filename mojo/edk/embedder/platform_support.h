@@ -7,7 +7,7 @@
 
 #include <stddef.h>
 
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
@@ -47,7 +47,7 @@ class PlatformSupport {
       size_t num_bytes) = 0;
   virtual util::RefPtr<PlatformSharedBuffer> CreateSharedBufferFromHandle(
       size_t num_bytes,
-      ScopedPlatformHandle platform_handle) = 0;
+      platform::ScopedPlatformHandle platform_handle) = 0;
 
  protected:
   PlatformSupport() {}

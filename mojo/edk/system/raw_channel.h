@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "base/memory/weak_ptr.h"
-#include "mojo/edk/embedder/platform_handle_vector.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/util/mutex.h"
@@ -67,7 +67,8 @@ class RawChannel {
     // |Shutdown()| and then (if desired) destroy it.
     virtual void OnReadMessage(
         const MessageInTransit::View& message_view,
-        embedder::ScopedPlatformHandleVectorPtr platform_handles) = 0;
+        std::unique_ptr<std::vector<platform::ScopedPlatformHandle>>
+            platform_handles) = 0;
 
     // Called when there's a (fatal) error. This may call the |RawChannel|'s
     // |Shutdown()| and then (if desired) destroy it.
@@ -85,7 +86,7 @@ class RawChannel {
   // (platform-appropriate) bidirectional communication channel (e.g., a socket
   // on POSIX, a named pipe on Windows).
   static std::unique_ptr<RawChannel> Create(
-      embedder::ScopedPlatformHandle handle);
+      platform::ScopedPlatformHandle handle);
 
   // This must be called (on an I/O thread) before this object is used. Does
   // *not* take ownership of |delegate|. Both the I/O thread and |delegate| must
@@ -171,7 +172,7 @@ class RawChannel {
     // |PlatformHandle::CloseIfNecessary()| isn't const (and actually modifies
     // state).
     void GetPlatformHandlesToSend(size_t* num_platform_handles,
-                                  embedder::PlatformHandle** platform_handles,
+                                  platform::PlatformHandle** platform_handles,
                                   void** serialization_data);
 
     // Gets buffers to be written. These buffers will always come from the front
@@ -261,9 +262,10 @@ class RawChannel {
   // called when |num_platform_handles| is nonzero. Returns null if the
   // |num_platform_handles| handles are not available. Only called on the I/O
   // thread.
-  virtual embedder::ScopedPlatformHandleVectorPtr GetReadPlatformHandles(
-      size_t num_platform_handles,
-      const void* platform_handle_table) MOJO_LOCKS_EXCLUDED(write_mutex_) = 0;
+  virtual std::unique_ptr<std::vector<platform::ScopedPlatformHandle>>
+  GetReadPlatformHandles(size_t num_platform_handles,
+                         const void* platform_handle_table)
+      MOJO_LOCKS_EXCLUDED(write_mutex_) = 0;
 
   // Writes contents in |write_buffer_no_lock()|.
   // This class guarantees that:

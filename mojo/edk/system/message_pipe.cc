@@ -19,7 +19,9 @@
 #include "mojo/edk/system/proxy_message_pipe_endpoint.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MakeRefCounted;
+using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -160,7 +162,7 @@ MojoResult MessagePipe::WriteMessage(
   MutexLocker locker(&mutex_);
   return EnqueueMessageNoLock(
       GetPeerPort(port),
-      util::MakeUnique<MessageInTransit>(
+      MakeUnique<MessageInTransit>(
           MessageInTransit::Type::ENDPOINT_CLIENT,
           MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA, num_bytes, bytes),
       transports);
@@ -228,7 +230,7 @@ bool MessagePipe::EndSerialize(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* /*platform_handles*/) {
+    std::vector<ScopedPlatformHandle>* /*platform_handles*/) {
   DCHECK(port == 0 || port == 1);
 
   MutexLocker locker(&mutex_);

@@ -10,13 +10,11 @@
 #include <utility>
 #include <vector>
 
-#include "base/bind.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/platform_shared_buffer.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
@@ -37,6 +35,7 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
 
@@ -54,13 +53,11 @@ class RemoteMessagePipeTest : public testing::Test {
   ~RemoteMessagePipeTest() override {}
 
   void SetUp() override {
-    io_thread_.PostTaskAndWait(base::Bind(
-        &RemoteMessagePipeTest::SetUpOnIOThread, base::Unretained(this)));
+    io_thread_.PostTaskAndWait([this]() { SetUpOnIOThread(); });
   }
 
   void TearDown() override {
-    io_thread_.PostTaskAndWait(base::Bind(
-        &RemoteMessagePipeTest::TearDownOnIOThread, base::Unretained(this)));
+    io_thread_.PostTaskAndWait([this]() { TearDownOnIOThread(); });
   }
 
  protected:
@@ -69,10 +66,9 @@ class RemoteMessagePipeTest : public testing::Test {
   // hosted on the channel).
   void BootstrapChannelEndpoints(RefPtr<ChannelEndpoint>&& ep0,
                                  RefPtr<ChannelEndpoint>&& ep1) {
-    io_thread_.PostTaskAndWait(
-        base::Bind(&RemoteMessagePipeTest::BootstrapChannelEndpointsOnIOThread,
-                   base::Unretained(this), base::Passed(ep0),
-                   base::Passed(ep1)));
+    io_thread_.PostTaskAndWait([this, &ep0, &ep1]() {
+      BootstrapChannelEndpointsOnIOThread(std::move(ep0), std::move(ep1));
+    });
   }
 
   // This bootstraps |ep| on |channels_[channel_index]|. It assumes/requires
@@ -80,15 +76,15 @@ class RemoteMessagePipeTest : public testing::Test {
   // hosted on the channel). This returns *without* waiting.
   void BootstrapChannelEndpointNoWait(unsigned channel_index,
                                       RefPtr<ChannelEndpoint>&& ep) {
-    io_thread_.PostTask(
-        base::Bind(&RemoteMessagePipeTest::BootstrapChannelEndpointOnIOThread,
-                   base::Unretained(this), channel_index, base::Passed(&ep)));
+    // Note: We have to copy |ep| here, since we're not waiting for it.
+    // TODO(vtl): With C++14 lambda captures, we'll be able to move it.
+    io_thread_.PostTask([this, channel_index, ep]() mutable {
+      BootstrapChannelEndpointOnIOThread(channel_index, std::move(ep));
+    });
   }
 
   void RestoreInitialState() {
-    io_thread_.PostTaskAndWait(
-        base::Bind(&RemoteMessagePipeTest::RestoreInitialStateOnIOThread,
-                   base::Unretained(this)));
+    io_thread_.PostTaskAndWait([this]() { RestoreInitialStateOnIOThread(); });
   }
 
   embedder::PlatformSupport* platform_support() { return &platform_support_; }
@@ -99,7 +95,7 @@ class RemoteMessagePipeTest : public testing::Test {
 
  private:
   void SetUpOnIOThread() {
-    CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+    CHECK(io_thread()->IsCurrentAndRunning());
 
     embedder::PlatformChannelPair channel_pair;
     platform_handles_[0] = channel_pair.PassServerHandle();
@@ -107,7 +103,7 @@ class RemoteMessagePipeTest : public testing::Test {
   }
 
   void TearDownOnIOThread() {
-    CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+    CHECK(io_thread()->IsCurrentAndRunning());
 
     if (channels_[0]) {
       channels_[0]->Shutdown();
@@ -120,7 +116,7 @@ class RemoteMessagePipeTest : public testing::Test {
   }
 
   void CreateAndInitChannel(unsigned channel_index) {
-    CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+    CHECK(io_thread()->IsCurrentAndRunning());
     CHECK(channel_index == 0 || channel_index == 1);
     CHECK(!channels_[channel_index]);
 
@@ -129,11 +125,9 @@ class RemoteMessagePipeTest : public testing::Test {
         RawChannel::Create(platform_handles_[channel_index].Pass()));
   }
 
-  // TODO(vtl): The arguments should be rvalue references, but that doesn't
-  // currently work correctly with base::Bind.
-  void BootstrapChannelEndpointsOnIOThread(RefPtr<ChannelEndpoint> ep0,
-                                           RefPtr<ChannelEndpoint> ep1) {
-    CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+  void BootstrapChannelEndpointsOnIOThread(RefPtr<ChannelEndpoint>&& ep0,
+                                           RefPtr<ChannelEndpoint>&& ep1) {
+    CHECK(io_thread()->IsCurrentAndRunning());
 
     if (!channels_[0])
       CreateAndInitChannel(0);
@@ -144,11 +138,9 @@ class RemoteMessagePipeTest : public testing::Test {
     channels_[1]->SetBootstrapEndpoint(std::move(ep1));
   }
 
-  // TODO(vtl): |ep| should be an rvalue reference, but that doesn't currently
-  // work correctly with base::Bind.
   void BootstrapChannelEndpointOnIOThread(unsigned channel_index,
-                                          RefPtr<ChannelEndpoint> ep) {
-    CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+                                          RefPtr<ChannelEndpoint>&& ep) {
+    CHECK(io_thread()->IsCurrentAndRunning());
     CHECK(channel_index == 0 || channel_index == 1);
 
     CreateAndInitChannel(channel_index);
@@ -156,7 +148,7 @@ class RemoteMessagePipeTest : public testing::Test {
   }
 
   void RestoreInitialStateOnIOThread() {
-    CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+    CHECK(io_thread()->IsCurrentAndRunning());
 
     TearDownOnIOThread();
     SetUpOnIOThread();
@@ -164,7 +156,7 @@ class RemoteMessagePipeTest : public testing::Test {
 
   embedder::SimplePlatformSupport platform_support_;
   test::TestIOThread io_thread_;
-  embedder::ScopedPlatformHandle platform_handles_[2];
+  ScopedPlatformHandle platform_handles_[2];
   RefPtr<Channel> channels_[2];
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RemoteMessagePipeTest);
@@ -1094,7 +1086,7 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
   dispatcher = RefPtr<PlatformHandleDispatcher>(
       static_cast<PlatformHandleDispatcher*>(read_dispatchers[0].get()));
 
-  embedder::ScopedPlatformHandle h = dispatcher->PassPlatformHandle();
+  ScopedPlatformHandle h = dispatcher->PassPlatformHandle();
   EXPECT_TRUE(h.is_valid());
 
   fp = mojo::test::FILEFromPlatformHandle(h.Pass(), "rb");
@@ -1131,7 +1123,7 @@ TEST_F(RemoteMessagePipeTest, RacingClosesStress) {
     BootstrapChannelEndpointNoWait(1, std::move(ep1));
 
     if (i & 1u) {
-      io_thread()->PostTask(base::Bind(&test::Sleep, delay));
+      io_thread()->PostTask([delay]() { test::Sleep(delay); });
     }
     if (i & 2u)
       test::Sleep(delay);
@@ -1139,7 +1131,7 @@ TEST_F(RemoteMessagePipeTest, RacingClosesStress) {
     mp0->Close(0);
 
     if (i & 4u) {
-      io_thread()->PostTask(base::Bind(&test::Sleep, delay));
+      io_thread()->PostTask([delay]() { test::Sleep(delay); });
     }
     if (i & 8u)
       test::Sleep(delay);

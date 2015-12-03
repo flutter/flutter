@@ -5,7 +5,9 @@
 #ifndef MOJO_EDK_SYSTEM_PLATFORM_HANDLE_DISPATCHER_H_
 #define MOJO_EDK_SYSTEM_PLATFORM_HANDLE_DISPATCHER_H_
 
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include <vector>
+
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/simple_dispatcher.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
@@ -19,11 +21,11 @@ namespace system {
 class PlatformHandleDispatcher final : public SimpleDispatcher {
  public:
   static util::RefPtr<PlatformHandleDispatcher> Create(
-      embedder::ScopedPlatformHandle platform_handle) {
+      platform::ScopedPlatformHandle platform_handle) {
     return AdoptRef(new PlatformHandleDispatcher(platform_handle.Pass()));
   }
 
-  embedder::ScopedPlatformHandle PassPlatformHandle();
+  platform::ScopedPlatformHandle PassPlatformHandle();
 
   // |Dispatcher| public methods:
   Type GetType() const override;
@@ -34,11 +36,11 @@ class PlatformHandleDispatcher final : public SimpleDispatcher {
       Channel* channel,
       const void* source,
       size_t size,
-      embedder::PlatformHandleVector* platform_handles);
+      std::vector<platform::ScopedPlatformHandle>* platform_handles);
 
  private:
   explicit PlatformHandleDispatcher(
-      embedder::ScopedPlatformHandle platform_handle);
+      platform::ScopedPlatformHandle platform_handle);
   ~PlatformHandleDispatcher() override;
 
   // |Dispatcher| protected methods:
@@ -53,10 +55,10 @@ class PlatformHandleDispatcher final : public SimpleDispatcher {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override
       MOJO_NOT_THREAD_SAFE;
 
-  embedder::ScopedPlatformHandle platform_handle_ MOJO_GUARDED_BY(mutex());
+  platform::ScopedPlatformHandle platform_handle_ MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(PlatformHandleDispatcher);
 };

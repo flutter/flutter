@@ -6,6 +6,10 @@ import("../mojo_edk.gni")
 
 mojo_edk_source_set("base_edk") {
   sources = [
+    "platform_message_loop_for_io_impl.cc",
+    "platform_message_loop_for_io_impl.h",
+    "platform_message_loop_impl.cc",
+    "platform_message_loop_impl.h",
     "platform_task_runner_impl.cc",
     "platform_task_runner_impl.h",
   ]
@@ -14,5 +18,44 @@ mojo_edk_source_set("base_edk") {
     "//base",
   ]
 
-  mojo_edk_public_deps = [ "mojo/edk/system" ]
+  mojo_edk_public_deps = [ "mojo/edk/platform" ]
+}
+
+mojo_edk_source_set("test_base_edk") {
+  testonly = true
+
+  sources = [
+    "test_message_loops.cc",
+  ]
+
+  deps = [
+    ":base_edk",
+  ]
+
+  mojo_edk_public_deps = [
+    "mojo/edk/platform",
+    "mojo/edk/platform:test_platform",
+  ]
+}
+
+mojo_edk_unittests("mojo_edk_base_edk_unittests") {
+  sources = [
+    "message_loop_test_helper.cc",
+    "message_loop_test_helper.h",
+    "platform_message_loop_for_io_impl_unittest.cc",
+    "platform_message_loop_impl_unittest.cc",
+    "test_message_loops_unittest.cc",
+  ]
+
+  deps = [
+    ":base_edk",
+    ":test_base_edk",
+    "//base",
+    "//testing/gtest",
+  ]
+
+  mojo_edk_deps = [
+    "mojo/edk/platform",
+    "mojo/edk/util",
+  ]
 }

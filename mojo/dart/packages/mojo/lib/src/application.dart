@@ -22,6 +22,14 @@ class _ApplicationImpl implements application_mojom.Application {
     _stub.onError = ((_) => close());
   }
 
+  _ApplicationImpl.fromStub(Application application,
+      application_mojom.ApplicationStub applicationStub) {
+    _application = application;
+    _stub = applicationStub;
+    _stub.impl = this;
+    _stub.onError = ((_) => close());
+  }
+
   set onError(core.ErrorHandler f) {
     _stub.onError = f;
   }
@@ -69,6 +77,12 @@ abstract class Application implements bindings.ServiceConnector {
   Application.fromHandle(core.MojoHandle appHandle) {
     _applicationConnections = [];
     _applicationImpl = new _ApplicationImpl.fromHandle(this, appHandle);
+    _applicationImpl.onError = _errorHandler;
+  }
+
+  Application.fromStub(application_mojom.ApplicationStub appStub) {
+    _applicationConnections = [];
+    _applicationImpl = new _ApplicationImpl.fromStub(this, appStub);
     _applicationImpl.onError = _errorHandler;
   }
 

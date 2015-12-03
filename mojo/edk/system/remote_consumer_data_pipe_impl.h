@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/memory/aligned_memory.h"
+#include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe_impl.h"
 #include "mojo/edk/util/ref_ptr.h"
@@ -24,11 +24,10 @@ class RemoteConsumerDataPipeImpl final : public DataPipeImpl {
   // |buffer| is only required if |producer_two_phase_max_num_bytes_written()|
   // is nonzero (i.e., if we're in the middle of a two-phase write when the
   // consumer handle is transferred); |start_index| is ignored if it is zero.
-  RemoteConsumerDataPipeImpl(
-      util::RefPtr<ChannelEndpoint>&& channel_endpoint,
-      size_t consumer_num_bytes,
-      std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
-      size_t start_index);
+  RemoteConsumerDataPipeImpl(util::RefPtr<ChannelEndpoint>&& channel_endpoint,
+                             size_t consumer_num_bytes,
+                             platform::AlignedUniquePtr<char> buffer,
+                             size_t start_index);
   ~RemoteConsumerDataPipeImpl() override;
 
   // Processes messages that were received and queued by an |IncomingEndpoint|.
@@ -62,7 +61,7 @@ class RemoteConsumerDataPipeImpl final : public DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override;
   void ConsumerClose() override;
   MojoResult ConsumerReadData(UserPointer<void> elements,
                               UserPointer<uint32_t> num_bytes,
@@ -85,7 +84,7 @@ class RemoteConsumerDataPipeImpl final : public DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override;
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;
   void OnDetachFromChannel(unsigned port) override;
 
@@ -102,7 +101,7 @@ class RemoteConsumerDataPipeImpl final : public DataPipeImpl {
   size_t consumer_num_bytes_;
 
   // Used for two-phase writes.
-  std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;
+  platform::AlignedUniquePtr<char> buffer_;
   // This is nearly always zero, except when the two-phase write started on a
   // |LocalDataPipeImpl|.
   size_t start_index_;

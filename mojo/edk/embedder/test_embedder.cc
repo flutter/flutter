@@ -13,6 +13,8 @@
 #include "mojo/edk/system/handle_table.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::util::MakeUnique;
+
 namespace mojo {
 
 namespace system {
@@ -41,7 +43,7 @@ namespace embedder {
 namespace test {
 
 void InitWithSimplePlatformSupport() {
-  Init(util::MakeUnique<SimplePlatformSupport>());
+  Init(MakeUnique<SimplePlatformSupport>());
 }
 
 bool Shutdown() {

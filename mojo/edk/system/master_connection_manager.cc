@@ -7,6 +7,7 @@
 #include <memory>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "base/bind.h"
 #include "base/bind_helpers.h"
@@ -15,8 +16,8 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
-#include "mojo/edk/embedder/platform_handle.h"
-#include "mojo/edk/embedder/platform_handle_vector.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/raw_channel.h"
@@ -25,7 +26,11 @@
 #include "mojo/edk/util/waitable_event.h"
 #include "mojo/public/cpp/system/macros.h"
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::TaskRunner;
 using mojo::util::AutoResetWaitableEvent;
+using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -75,7 +80,7 @@ class MasterConnectionManager::Helper final : public RawChannel::Delegate {
   Helper(MasterConnectionManager* owner,
          ProcessIdentifier process_identifier,
          embedder::SlaveInfo slave_info,
-         embedder::ScopedPlatformHandle platform_handle);
+         ScopedPlatformHandle platform_handle);
   ~Helper() override;
 
   void Init();
@@ -83,9 +88,9 @@ class MasterConnectionManager::Helper final : public RawChannel::Delegate {
 
  private:
   // |RawChannel::Delegate| methods:
-  void OnReadMessage(
-      const MessageInTransit::View& message_view,
-      embedder::ScopedPlatformHandleVectorPtr platform_handles) override;
+  void OnReadMessage(const MessageInTransit::View& message_view,
+                     std::unique_ptr<std::vector<ScopedPlatformHandle>>
+                         platform_handles) override;
   void OnError(Error error) override;
 
   // Handles an error that's fatal to this object. Note that this probably
@@ -101,16 +106,14 @@ class MasterConnectionManager::Helper final : public RawChannel::Delegate {
   MOJO_DISALLOW_COPY_AND_ASSIGN(Helper);
 };
 
-MasterConnectionManager::Helper::Helper(
-    MasterConnectionManager* owner,
-    ProcessIdentifier process_identifier,
-    embedder::SlaveInfo slave_info,
-    embedder::ScopedPlatformHandle platform_handle)
+MasterConnectionManager::Helper::Helper(MasterConnectionManager* owner,
+                                        ProcessIdentifier process_identifier,
+                                        embedder::SlaveInfo slave_info,
+                                        ScopedPlatformHandle platform_handle)
     : owner_(owner),
       process_identifier_(process_identifier),
       slave_info_(slave_info),
-      raw_channel_(RawChannel::Create(platform_handle.Pass())) {
-}
+      raw_channel_(RawChannel::Create(platform_handle.Pass())) {}
 
 MasterConnectionManager::Helper::~Helper() {
   DCHECK(!raw_channel_);
@@ -128,7 +131,7 @@ embedder::SlaveInfo MasterConnectionManager::Helper::Shutdown() {
 
 void MasterConnectionManager::Helper::OnReadMessage(
     const MessageInTransit::View& message_view,
-    embedder::ScopedPlatformHandleVectorPtr platform_handles) {
+    std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles) {
   if (message_view.type() != MessageInTransit::Type::CONNECTION_MANAGER) {
     LOG(ERROR) << "Invalid message type " << message_view.type();
     FatalError();  // WARNING: This destroys us.
@@ -155,7 +158,7 @@ void MasterConnectionManager::Helper::OnReadMessage(
   // Note: It's important to fully zero-initialize |data|, including padding,
   // since it'll be sent to another process.
   ConnectionManagerAckSuccessConnectData data = {};
-  embedder::ScopedPlatformHandle platform_handle;
+  ScopedPlatformHandle platform_handle;
   uint32_t num_bytes = 0;
   const void* bytes = nullptr;
   switch (message_view.subtype()) {
@@ -198,10 +201,9 @@ void MasterConnectionManager::Helper::OnReadMessage(
     DCHECK_EQ(message_view.subtype(),
               MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT);
     DCHECK(platform_handle.is_valid());
-    embedder::ScopedPlatformHandleVectorPtr platform_handles(
-        new embedder::PlatformHandleVector());
-    platform_handles->push_back(platform_handle.release());
-    response->SetTransportData(util::MakeUnique<TransportData>(
+    auto platform_handles = MakeUnique<std::vector<ScopedPlatformHandle>>();
+    platform_handles->push_back(std::move(platform_handle));
+    response->SetTransportData(MakeUnique<TransportData>(
         std::move(platform_handles),
         raw_channel_->GetSerializedPlatformHandleSize()));
   } else {
@@ -281,7 +283,7 @@ class MasterConnectionManager::ProcessConnections {
   // case, this has the side effect of changing the state to |RUNNING|.
   ConnectionStatus GetConnectionStatus(
       ProcessIdentifier to_process_identifier,
-      embedder::ScopedPlatformHandle* pending_platform_handle) {
+      ScopedPlatformHandle* pending_platform_handle) {
     DCHECK(!pending_platform_handle || !pending_platform_handle->is_valid());
 
     auto it = process_connections_.find(to_process_identifier);
@@ -292,20 +294,20 @@ class MasterConnectionManager::ProcessConnections {
     // Pending:
     if (pending_platform_handle) {
       pending_platform_handle->reset(it->second);
-      it->second = embedder::PlatformHandle();
+      it->second = PlatformHandle();
     }
     return ConnectionStatus::PENDING;
   }
 
   void AddConnection(ProcessIdentifier to_process_identifier,
                      ConnectionStatus status,
-                     embedder::ScopedPlatformHandle pending_platform_handle) {
+                     ScopedPlatformHandle pending_platform_handle) {
     DCHECK(process_connections_.find(to_process_identifier) ==
            process_connections_.end());
 
     if (status == ConnectionStatus::RUNNING) {
       DCHECK(!pending_platform_handle.is_valid());
-      process_connections_[to_process_identifier] = embedder::PlatformHandle();
+      process_connections_[to_process_identifier] = PlatformHandle();
     } else if (status == ConnectionStatus::PENDING) {
       DCHECK(pending_platform_handle.is_valid());
       process_connections_[to_process_identifier] =
@@ -316,7 +318,8 @@ class MasterConnectionManager::ProcessConnections {
   }
 
  private:
-  std::unordered_map<ProcessIdentifier, embedder::PlatformHandle>
+  // TODO(vtl): Make |second| |ScopedPlatformHandle|s.
+  std::unordered_map<ProcessIdentifier, PlatformHandle>
       process_connections_;  // "Owns" any valid platform handles.
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ProcessConnections);
@@ -342,7 +345,7 @@ MasterConnectionManager::~MasterConnectionManager() {
 }
 
 void MasterConnectionManager::Init(
-    RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
+    RefPtr<TaskRunner>&& delegate_thread_task_runner,
     embedder::MasterProcessDelegate* master_process_delegate) {
   DCHECK(delegate_thread_task_runner);
   DCHECK(master_process_delegate);
@@ -358,7 +361,7 @@ void MasterConnectionManager::Init(
 
 ProcessIdentifier MasterConnectionManager::AddSlave(
     embedder::SlaveInfo slave_info,
-    embedder::ScopedPlatformHandle platform_handle) {
+    ScopedPlatformHandle platform_handle) {
   // We don't really care if |slave_info| is non-null or not.
   DCHECK(platform_handle.is_valid());
   AssertNotOnPrivateThread();
@@ -389,7 +392,7 @@ ProcessIdentifier MasterConnectionManager::AddSlave(
 
 ProcessIdentifier MasterConnectionManager::AddSlaveAndBootstrap(
     embedder::SlaveInfo slave_info,
-    embedder::ScopedPlatformHandle platform_handle,
+    ScopedPlatformHandle platform_handle,
     const ConnectionIdentifier& connection_id) {
   ProcessIdentifier slave_process_identifier =
       AddSlave(slave_info, platform_handle.Pass());
@@ -436,7 +439,7 @@ ConnectionManager::Result MasterConnectionManager::Connect(
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
     bool* is_first,
-    embedder::ScopedPlatformHandle* platform_handle) {
+    ScopedPlatformHandle* platform_handle) {
   return ConnectImpl(kMasterProcessIdentifier, connection_id,
                      peer_process_identifier, is_first, platform_handle);
 }
@@ -517,7 +520,7 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
     bool* is_first,
-    embedder::ScopedPlatformHandle* platform_handle) {
+    ScopedPlatformHandle* platform_handle) {
   DCHECK_NE(process_identifier, kInvalidProcessIdentifier);
   DCHECK(peer_process_identifier);
   DCHECK(is_first);
@@ -600,7 +603,7 @@ ConnectionManager::Result MasterConnectionManager::ConnectImpl(
 ConnectionManager::Result MasterConnectionManager::ConnectImplHelperNoLock(
     ProcessIdentifier process_identifier,
     ProcessIdentifier peer_process_identifier,
-    embedder::ScopedPlatformHandle* platform_handle) {
+    ScopedPlatformHandle* platform_handle) {
   if (process_identifier == peer_process_identifier) {
     platform_handle->reset();
     DVLOG(1) << "Connect: same process";
@@ -620,7 +623,7 @@ ConnectionManager::Result MasterConnectionManager::ConnectImplHelperNoLock(
       process_connections->AddConnection(
           peer_process_identifier,
           ProcessConnections::ConnectionStatus::RUNNING,
-          embedder::ScopedPlatformHandle());
+          ScopedPlatformHandle());
       embedder::PlatformChannelPair platform_channel_pair;
       *platform_handle = platform_channel_pair.PassServerHandle();
 
@@ -673,7 +676,7 @@ void MasterConnectionManager::ShutdownOnPrivateThread() {
 
 void MasterConnectionManager::AddSlaveOnPrivateThread(
     embedder::SlaveInfo slave_info,
-    embedder::ScopedPlatformHandle platform_handle,
+    ScopedPlatformHandle platform_handle,
     ProcessIdentifier slave_process_identifier,
     AutoResetWaitableEvent* event) {
   DCHECK(platform_handle.is_valid());

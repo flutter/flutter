@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file "provides" abstractions for "task runners" and posting tasks to
-// them. The embedder is required to actually declare/define them in
-// platform_task_runner_impl.h. See below for details.
+// This file provides an implementation of |mojo::platform::TaskRunner| that
+// wraps a |base::TaskRunner|.
 
 #ifndef MOJO_EDK_BASE_EDK_PLATFORM_TASK_RUNNER_IMPL_H_
 #define MOJO_EDK_BASE_EDK_PLATFORM_TASK_RUNNER_IMPL_H_
@@ -12,17 +11,18 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/task_runner.h"
-#include "mojo/edk/embedder/platform_task_runner.h"
+#include "mojo/edk/platform/task_runner.h"
 
 namespace base_edk {
 
-class PlatformTaskRunnerImpl : public mojo::embedder::PlatformTaskRunner {
+class PlatformTaskRunnerImpl : public mojo::platform::TaskRunner {
  public:
   explicit PlatformTaskRunnerImpl(
       scoped_refptr<base::TaskRunner>&& base_task_runner);
   ~PlatformTaskRunnerImpl() override;
 
-  // |mojo::embedder::PlatformTaskRunner| implementation:
+  // |mojo::platform::TaskRunner| implementation:
+  void PostTask(std::function<void()>&& task) override;
   void PostTask(const base::Closure& task) override;
   bool RunsTasksOnCurrentThread() const override;
 

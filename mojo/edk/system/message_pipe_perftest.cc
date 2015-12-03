@@ -7,10 +7,8 @@
 #include <string>
 #include <utility>
 
-#include "base/bind.h"
 #include "base/logging.h"
-#include "base/strings/stringprintf.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/local_message_pipe_endpoint.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/message_pipe_test_utils.h"
@@ -19,10 +17,13 @@
 #include "mojo/edk/system/test/stopwatch.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/string_printf.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
+using mojo::util::StringPrintf;
 
 namespace mojo {
 namespace system {
@@ -67,9 +68,8 @@ class MultiprocessMessagePipePerfTest
     // Have one ping-pong to ensure channel being established.
     WriteWaitThenRead(mp);
 
-    std::string test_name =
-        base::StringPrintf("IPC_Perf_%dx_%u", message_count_,
-                           static_cast<unsigned>(message_size_));
+    std::string test_name = StringPrintf("IPC_Perf_%dx_%u", message_count_,
+                                         static_cast<unsigned>(message_size_));
     test::Stopwatch stopwatch;
 
     stopwatch.Start();
@@ -94,7 +94,7 @@ class MultiprocessMessagePipePerfTest
 MOJO_MULTIPROCESS_TEST_CHILD_MAIN(PingPongClient) {
   embedder::SimplePlatformSupport platform_support;
   test::ChannelThread channel_thread(&platform_support);
-  embedder::ScopedPlatformHandle client_platform_handle =
+  ScopedPlatformHandle client_platform_handle =
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   CHECK(client_platform_handle.is_valid());
   RefPtr<ChannelEndpoint> ep;

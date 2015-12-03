@@ -13,6 +13,7 @@
 #include "mojo/edk/util/scoped_file.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -29,8 +30,7 @@ TEST(PlatformHandleDispatcherTest, Basic) {
   EXPECT_EQ(sizeof(kHelloWorld),
             fwrite(kHelloWorld, 1, sizeof(kHelloWorld), fp.get()));
 
-  embedder::ScopedPlatformHandle h(
-      mojo::test::PlatformHandleFromFILE(std::move(fp)));
+  ScopedPlatformHandle h(mojo::test::PlatformHandleFromFILE(std::move(fp)));
   EXPECT_FALSE(fp);
   ASSERT_TRUE(h.is_valid());
 

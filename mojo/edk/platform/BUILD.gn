@@ -1,0 +1,53 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../mojo_edk.gni")
+
+mojo_edk_source_set("platform") {
+  sources = [
+    "message_loop.h",
+    "message_loop_for_io.h",
+    "platform_handle.cc",
+    "platform_handle.h",
+    "scoped_platform_handle.h",
+    "task_runner.h",
+  ]
+
+  mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
+
+  mojo_edk_public_deps = [ "mojo/edk/util" ]
+
+  # TODO(vtl): Remove this dependency.
+  deps = [
+    "//base",
+  ]
+}
+
+mojo_edk_source_set("test_platform") {
+  testonly = true
+  sources = [
+    "test_message_loops.h",
+  ]
+
+  mojo_edk_public_deps = [ "mojo/edk/util" ]
+
+  public_deps = [
+    ":platform",
+  ]
+}
+
+# Note: This doesn't include tests of things that are to be implemented by the
+# embedder.
+mojo_edk_unittests("mojo_edk_platform_unittests") {
+  sources = [
+    "aligned_alloc_unittest.cc",
+  ]
+
+  deps = [
+    ":platform",
+    "//testing/gtest",
+  ]
+
+  mojo_sdk_deps = [ "mojo/public/cpp/system" ]
+}

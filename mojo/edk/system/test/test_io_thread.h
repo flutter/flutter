@@ -5,10 +5,12 @@
 #ifndef MOJO_EDK_SYSTEM_TEST_TEST_IO_THREAD_H_
 #define MOJO_EDK_SYSTEM_TEST_TEST_IO_THREAD_H_
 
+#include <functional>
+
 #include "base/callback_forward.h"
 #include "base/threading/thread.h"
 #include "mojo/edk/base_edk/platform_task_runner_impl.h"
-#include "mojo/edk/embedder/platform_task_runner.h"
+#include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -30,24 +32,32 @@ class TestIOThread final {
   void Start();
   void Stop();
 
+  // Returns true if called on the I/O thread with the message loop running.
+  // (This may be called on any thread.)
+  bool IsCurrentAndRunning() const;
+
   // Posts |task| to the I/O thread.
+  // TODO(vtl): Remove the |base::Closure| version.
+  void PostTask(std::function<void()>&& task);
   void PostTask(const base::Closure& task);
   // Posts |task| to the I/O thread, blocking the calling thread until the
   // posted task is executed (note the deadlock risk!).
+  // TODO(vtl): Remove the |base::Closure| version.
+  void PostTaskAndWait(std::function<void()>&& task);
   void PostTaskAndWait(const base::Closure& task);
 
   base::MessageLoopForIO* message_loop() {
     return static_cast<base::MessageLoopForIO*>(io_thread_.message_loop());
   }
 
-  const util::RefPtr<embedder::PlatformTaskRunner>& task_runner() {
+  const util::RefPtr<platform::TaskRunner>& task_runner() const {
     return io_task_runner_;
   }
 
  private:
   base::Thread io_thread_;
   bool io_thread_started_;
-  util::RefPtr<embedder::PlatformTaskRunner> io_task_runner_;
+  util::RefPtr<platform::TaskRunner> io_task_runner_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestIOThread);
 };

@@ -8,6 +8,7 @@
 # //mojo/services/X/public/interfaces to this list.
 
 mojo_services = [
+  "//mojo/services/android/interfaces",
   "//mojo/services/asset_bundle/interfaces",
   "//mojo/services/authenticating_url_loader_interceptor/interfaces",
   "//mojo/services/authentication/interfaces",
@@ -44,5 +45,6 @@ mojo_services = [
   "//mojo/services/url_response_disk_cache/interfaces",
   "//mojo/services/vanadium/security/interfaces",
   "//mojo/services/view_manager/interfaces",
+  "//mojo/services/vsync/interfaces",
   "//mojo/services/window_manager/interfaces",
 ]

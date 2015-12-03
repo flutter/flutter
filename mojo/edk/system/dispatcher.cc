@@ -12,6 +12,7 @@
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -63,7 +64,7 @@ bool Dispatcher::TransportDataAccess::EndSerializeAndClose(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   DCHECK(dispatcher);
   return dispatcher->EndSerializeAndClose(channel, destination, actual_size,
                                           platform_handles);
@@ -75,7 +76,7 @@ RefPtr<Dispatcher> Dispatcher::TransportDataAccess::Deserialize(
     int32_t type,
     const void* source,
     size_t size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   switch (static_cast<Dispatcher::Type>(type)) {
     case Type::UNKNOWN:
       DVLOG(2) << "Deserializing invalid handle";
@@ -412,7 +413,7 @@ bool Dispatcher::EndSerializeAndCloseImplNoLock(
     Channel* /*channel*/,
     void* /*destination*/,
     size_t* /*actual_size*/,
-    embedder::PlatformHandleVector* /*platform_handles*/) {
+    std::vector<ScopedPlatformHandle>* /*platform_handles*/) {
   AssertHasOneRef();  // Only one ref => no need to take the lock.
   DCHECK(is_closed_);
   // By default, serializing isn't supported, so just close.
@@ -461,7 +462,7 @@ bool Dispatcher::EndSerializeAndClose(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   DCHECK(channel);
   DCHECK(actual_size);
   AssertHasOneRef();  // Only one ref => no need to take the lock.

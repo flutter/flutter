@@ -10,8 +10,10 @@
 
 #include <algorithm>
 #include <deque>
+#include <iterator>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "base/bind.h"
 #include "base/location.h"
@@ -19,12 +21,15 @@
 #include "base/memory/weak_ptr.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_utils.h"
-#include "mojo/edk/embedder/platform_handle.h"
-#include "mojo/edk/embedder/platform_handle_vector.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/transport_data.h"
 #include "mojo/edk/util/make_unique.h"
 #include "mojo/public/cpp/system/macros.h"
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
+using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
 
 namespace mojo {
@@ -35,7 +40,7 @@ namespace {
 class RawChannelPosix final : public RawChannel,
                               public base::MessageLoopForIO::Watcher {
  public:
-  explicit RawChannelPosix(embedder::ScopedPlatformHandle handle);
+  explicit RawChannelPosix(ScopedPlatformHandle handle);
   ~RawChannelPosix() override;
 
   // |RawChannel| public methods:
@@ -52,7 +57,7 @@ class RawChannelPosix final : public RawChannel,
       const MessageInTransit::View& message_view) override;
   IOResult Read(size_t* bytes_read) override;
   IOResult ScheduleRead() override;
-  embedder::ScopedPlatformHandleVectorPtr GetReadPlatformHandles(
+  std::unique_ptr<std::vector<ScopedPlatformHandle>> GetReadPlatformHandles(
       size_t num_platform_handles,
       const void* platform_handle_table) override;
   IOResult WriteNoLock(size_t* platform_handles_written,
@@ -72,7 +77,7 @@ class RawChannelPosix final : public RawChannel,
   // Watches for |fd_| to become writable. Must be called on the I/O thread.
   void WaitToWrite();
 
-  embedder::ScopedPlatformHandle fd_;
+  ScopedPlatformHandle fd_;
 
   // The following members are only used on the I/O thread:
   std::unique_ptr<base::MessageLoopForIO::FileDescriptorWatcher> read_watcher_;
@@ -80,7 +85,7 @@ class RawChannelPosix final : public RawChannel,
 
   bool pending_read_;
 
-  std::deque<embedder::PlatformHandle> read_platform_handles_;
+  std::deque<ScopedPlatformHandle> read_platform_handles_;
 
   bool pending_write_ MOJO_GUARDED_BY(write_mutex());
 
@@ -92,7 +97,7 @@ class RawChannelPosix final : public RawChannel,
   MOJO_DISALLOW_COPY_AND_ASSIGN(RawChannelPosix);
 };
 
-RawChannelPosix::RawChannelPosix(embedder::ScopedPlatformHandle handle)
+RawChannelPosix::RawChannelPosix(ScopedPlatformHandle handle)
     : fd_(handle.Pass()),
       pending_read_(false),
       pending_write_(false),
@@ -112,8 +117,6 @@ RawChannelPosix::~RawChannelPosix() {
   // These must have been shut down/destroyed on the I/O thread.
   DCHECK(!read_watcher_);
   DCHECK(!write_watcher_);
-
-  embedder::CloseAllPlatformHandles(&read_platform_handles_);
 }
 
 size_t RawChannelPosix::GetSerializedPlatformHandleSize() const {
@@ -124,7 +127,7 @@ size_t RawChannelPosix::GetSerializedPlatformHandleSize() const {
 void RawChannelPosix::EnqueueMessageNoLock(
     std::unique_ptr<MessageInTransit> message) {
   if (message->transport_data()) {
-    embedder::PlatformHandleVector* const platform_handles =
+    std::vector<ScopedPlatformHandle>* const platform_handles =
         message->transport_data()->platform_handles();
     if (platform_handles &&
         platform_handles->size() > embedder::kPlatformChannelMaxNumHandles) {
@@ -139,12 +142,14 @@ void RawChannelPosix::EnqueueMessageNoLock(
             MessageInTransit::Type::RAW_CHANNEL,
             MessageInTransit::Subtype::RAW_CHANNEL_POSIX_EXTRA_PLATFORM_HANDLES,
             0, nullptr));
-        embedder::ScopedPlatformHandleVectorPtr fds(
-            new embedder::PlatformHandleVector(
-                platform_handles->begin() + i,
-                platform_handles->begin() + i +
-                    embedder::kPlatformChannelMaxNumHandles));
-        fd_message->SetTransportData(util::MakeUnique<TransportData>(
+        using IteratorType = std::vector<ScopedPlatformHandle>::iterator;
+        std::unique_ptr<std::vector<ScopedPlatformHandle>> fds(
+            MakeUnique<std::vector<ScopedPlatformHandle>>(
+                std::move_iterator<IteratorType>(platform_handles->begin() + i),
+                std::move_iterator<IteratorType>(
+                    platform_handles->begin() + i +
+                    embedder::kPlatformChannelMaxNumHandles)));
+        fd_message->SetTransportData(MakeUnique<TransportData>(
             std::move(fds), GetSerializedPlatformHandleSize()));
         RawChannel::EnqueueMessageNoLock(std::move(fd_message));
       }
@@ -193,21 +198,21 @@ RawChannel::IOResult RawChannelPosix::ScheduleRead() {
   return IO_PENDING;
 }
 
-embedder::ScopedPlatformHandleVectorPtr RawChannelPosix::GetReadPlatformHandles(
-    size_t num_platform_handles,
-    const void* /*platform_handle_table*/) {
+std::unique_ptr<std::vector<ScopedPlatformHandle>>
+RawChannelPosix::GetReadPlatformHandles(size_t num_platform_handles,
+                                        const void* /*platform_handle_table*/) {
   DCHECK_GT(num_platform_handles, 0u);
 
   if (read_platform_handles_.size() < num_platform_handles) {
-    embedder::CloseAllPlatformHandles(&read_platform_handles_);
     read_platform_handles_.clear();
-    return embedder::ScopedPlatformHandleVectorPtr();
+    return nullptr;
   }
 
-  embedder::ScopedPlatformHandleVectorPtr rv(
-      new embedder::PlatformHandleVector(num_platform_handles));
-  rv->assign(read_platform_handles_.begin(),
-             read_platform_handles_.begin() + num_platform_handles);
+  auto rv = MakeUnique<std::vector<ScopedPlatformHandle>>(num_platform_handles);
+  using IteratorType = std::deque<ScopedPlatformHandle>::iterator;
+  rv->assign(std::move_iterator<IteratorType>(read_platform_handles_.begin()),
+             std::move_iterator<IteratorType>(read_platform_handles_.begin() +
+                                              num_platform_handles));
   read_platform_handles_.erase(
       read_platform_handles_.begin(),
       read_platform_handles_.begin() + num_platform_handles);
@@ -224,7 +229,7 @@ RawChannel::IOResult RawChannelPosix::WriteNoLock(
   size_t num_platform_handles = 0;
   ssize_t write_result;
   if (write_buffer_no_lock()->HavePlatformHandlesToSend()) {
-    embedder::PlatformHandle* platform_handles;
+    PlatformHandle* platform_handles;
     void* serialization_data;  // Actually unused.
     write_buffer_no_lock()->GetPlatformHandlesToSend(
         &num_platform_handles, &platform_handles, &serialization_data);
@@ -422,7 +427,6 @@ RawChannel::IOResult RawChannelPosix::ReadImpl(size_t* bytes_read) {
         (TransportData::GetMaxPlatformHandles() +
          embedder::kPlatformChannelMaxNumHandles)) {
       LOG(ERROR) << "Received too many platform handles";
-      embedder::CloseAllPlatformHandles(&read_platform_handles_);
       read_platform_handles_.clear();
       return IO_FAILED_UNKNOWN;
     }
@@ -472,9 +476,8 @@ void RawChannelPosix::WaitToWrite() {
 
 // Static factory method declared in raw_channel.h.
 // static
-std::unique_ptr<RawChannel> RawChannel::Create(
-    embedder::ScopedPlatformHandle handle) {
-  return util::MakeUnique<RawChannelPosix>(handle.Pass());
+std::unique_ptr<RawChannel> RawChannel::Create(ScopedPlatformHandle handle) {
+  return MakeUnique<RawChannelPosix>(handle.Pass());
 }
 
 }  // namespace system

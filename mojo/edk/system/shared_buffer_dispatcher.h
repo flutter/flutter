@@ -59,7 +59,7 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
       Channel* channel,
       const void* source,
       size_t size,
-      embedder::PlatformHandleVector* platform_handles);
+      std::vector<platform::ScopedPlatformHandle>* platform_handles);
 
  private:
   static util::RefPtr<SharedBufferDispatcher> CreateInternal(
@@ -100,7 +100,7 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override
       MOJO_NOT_THREAD_SAFE;
 
   util::RefPtr<embedder::PlatformSharedBuffer> shared_buffer_

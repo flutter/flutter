@@ -11,6 +11,17 @@ struct NotificationData {
 
   // Text to be displayed along with the notification, if supported.
   string? text;
+
+  // Indicates if notification sound must be played when notification is shown.
+  bool play_sound;
+
+  // Indicates if the device should vibrate, if it supports vibration.
+  bool vibrate;
+
+  // Indicates if notification lights must be set so that the lights can blink
+  // till the notification is attended. Note this would depend on the device
+  // support for notification lights.
+  bool set_lights;
 };
 
 // Interaction with a posted notification will be communicated through the

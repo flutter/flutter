@@ -5,9 +5,11 @@
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "base/logging.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -24,7 +26,7 @@ struct SerializedPlatformHandleDispatcher {
 
 }  // namespace
 
-embedder::ScopedPlatformHandle PlatformHandleDispatcher::PassPlatformHandle() {
+ScopedPlatformHandle PlatformHandleDispatcher::PassPlatformHandle() {
   MutexLocker locker(&mutex());
   return platform_handle_.Pass();
 }
@@ -38,7 +40,7 @@ RefPtr<PlatformHandleDispatcher> PlatformHandleDispatcher::Deserialize(
     Channel* channel,
     const void* source,
     size_t size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   if (size != sizeof(SerializedPlatformHandleDispatcher)) {
     LOG(ERROR) << "Invalid serialized platform handle dispatcher (bad size)";
     return nullptr;
@@ -49,7 +51,7 @@ RefPtr<PlatformHandleDispatcher> PlatformHandleDispatcher::Deserialize(
   size_t platform_handle_index = serialization->platform_handle_index;
 
   // Starts off invalid, which is what we want.
-  embedder::PlatformHandle platform_handle;
+  ScopedPlatformHandle platform_handle;
 
   if (platform_handle_index != kInvalidPlatformHandleIndex) {
     if (!platform_handles ||
@@ -64,13 +66,12 @@ RefPtr<PlatformHandleDispatcher> PlatformHandleDispatcher::Deserialize(
     std::swap(platform_handle, (*platform_handles)[platform_handle_index]);
   }
 
-  return Create(embedder::ScopedPlatformHandle(platform_handle));
+  return Create(std::move(platform_handle));
 }
 
 PlatformHandleDispatcher::PlatformHandleDispatcher(
-    embedder::ScopedPlatformHandle platform_handle)
-    : platform_handle_(platform_handle.Pass()) {
-}
+    ScopedPlatformHandle platform_handle)
+    : platform_handle_(platform_handle.Pass()) {}
 
 PlatformHandleDispatcher::~PlatformHandleDispatcher() {
 }
@@ -99,14 +100,14 @@ bool PlatformHandleDispatcher::EndSerializeAndCloseImplNoLock(
     Channel* /*channel*/,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   SerializedPlatformHandleDispatcher* serialization =
       static_cast<SerializedPlatformHandleDispatcher*>(destination);
   if (platform_handle_.is_valid()) {
     serialization->platform_handle_index = platform_handles->size();
-    platform_handles->push_back(platform_handle_.release());
+    platform_handles->push_back(std::move(platform_handle_));
   } else {
     serialization->platform_handle_index = kInvalidPlatformHandleIndex;
   }

@@ -17,6 +17,7 @@
 #include "mojo/public/cpp/system/macros.h"
 
 using mojo::util::MakeRefCounted;
+using mojo::util::MakeUnique;
 using mojo::util::ManualResetWaitableEvent;
 using mojo::util::RefPtr;
 
@@ -32,10 +33,10 @@ class EndpointRelayerTest : public test::ChannelTestBase {
   void SetUp() override {
     test::ChannelTestBase::SetUp();
 
-    PostMethodToIOThreadAndWait(
-        &EndpointRelayerTest::CreateAndInitChannelOnIOThread, 0);
-    PostMethodToIOThreadAndWait(
-        &EndpointRelayerTest::CreateAndInitChannelOnIOThread, 1);
+    io_thread()->PostTaskAndWait([this]() {
+      CreateAndInitChannelOnIOThread(0);
+      CreateAndInitChannelOnIOThread(1);
+    });
 
     // The set up:
     // * Across the pair of channels, we'll have a pair of connections (call
@@ -66,10 +67,10 @@ class EndpointRelayerTest : public test::ChannelTestBase {
   }
 
   void TearDown() override {
-    PostMethodToIOThreadAndWait(&EndpointRelayerTest::ShutdownChannelOnIOThread,
-                                0);
-    PostMethodToIOThreadAndWait(&EndpointRelayerTest::ShutdownChannelOnIOThread,
-                                1);
+    io_thread()->PostTaskAndWait([this]() {
+      ShutdownChannelOnIOThread(0);
+      ShutdownChannelOnIOThread(1);
+    });
 
     test::ChannelTestBase::TearDown();
   }
@@ -191,7 +192,7 @@ class TestFilter : public EndpointRelayer::Filter {
 
 TEST_F(EndpointRelayerTest, Filter) {
   MessageInTransitQueue filtered_messages;
-  relayer()->SetFilter(util::MakeUnique<TestFilter>(&filtered_messages));
+  relayer()->SetFilter(MakeUnique<TestFilter>(&filtered_messages));
 
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(1)));
   EXPECT_TRUE(endpoint1a()->EnqueueMessage(test::MakeTestMessage(2)));

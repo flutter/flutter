@@ -11,9 +11,14 @@
 
 #include "base/logging.h"
 #include "base/posix/global_descriptors.h"
-#include "base/strings/string_number_conversions.h"
 #include "build/build_config.h"
-#include "mojo/edk/embedder/platform_handle.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/util/string_number_conversions.h"
+
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
+using mojo::util::NumberToString;
+using mojo::util::StringToNumberWithError;
 
 namespace mojo {
 namespace embedder {
@@ -75,7 +80,7 @@ ScopedPlatformHandle PlatformChannelPair::PassClientHandle() {
 ScopedPlatformHandle PlatformChannelPair::PassClientHandleFromParentProcess(
     const std::string& string_from_parent) {
   int client_fd = -1;
-  if (!base::StringToInt(string_from_parent, &client_fd)) {
+  if (!StringToNumberWithError<int>(string_from_parent, &client_fd)) {
     LOG(ERROR) << "Missing or invalid --" << kMojoPlatformChannelHandleSwitch;
     return ScopedPlatformHandle();
   }
@@ -103,7 +108,7 @@ void PlatformChannelPair::PrepareToPassClientHandleToChildProcess(
 
   handle_passing_info->push_back(
       std::pair<int, int>(client_handle_.get().fd, target_fd));
-  *string_for_child = base::IntToString(target_fd);
+  *string_for_child = NumberToString<int>(target_fd);
 }
 
 void PlatformChannelPair::ChildProcessLaunched() {

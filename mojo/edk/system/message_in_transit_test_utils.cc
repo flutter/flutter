@@ -7,12 +7,14 @@
 #include "mojo/edk/util/make_unique.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::util::MakeUnique;
+
 namespace mojo {
 namespace system {
 namespace test {
 
 std::unique_ptr<MessageInTransit> MakeTestMessage(unsigned id) {
-  return util::MakeUnique<MessageInTransit>(
+  return MakeUnique<MessageInTransit>(
       MessageInTransit::Type::ENDPOINT_CLIENT,
       MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
       static_cast<uint32_t>(sizeof(id)), &id);

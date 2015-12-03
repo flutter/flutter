@@ -92,17 +92,12 @@ class MojoHandleNatives {
 
 class MojoHandleWatcherNatives {
   static int sendControlData(
-      int controlHandle, int mojoHandle, SendPort port, int data)
+      int controlHandle,
+      int commandCode,
+      int handleOrDeadline,
+      SendPort port,
+      int data)
       native "MojoHandleWatcher_SendControlData";
-  static List recvControlData(int controlHandle)
-      native "MojoHandleWatcher_RecvControlData";
-  static int setControlHandle(int controlHandle)
-      native "MojoHandleWatcher_SetControlHandle";
-  static int getControlHandle() native "MojoHandleWatcher_GetControlHandle";
-  static List growStateArrays(int newLength)
-      native "MojoHandleWatcher_GrowStateArrays";
-  static int waitMany(int length, int deadline)
-      native "MojoHandleWatcher_WaitMany";
 }
 
 class MojoMessagePipeNatives {

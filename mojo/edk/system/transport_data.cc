@@ -13,6 +13,9 @@
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/message_in_transit.h"
 
+using mojo::platform::AlignedAlloc;
+using mojo::platform::ScopedPlatformHandle;
+
 namespace mojo {
 namespace system {
 
@@ -115,8 +118,8 @@ TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
     DCHECK_LE(estimated_size, GetMaxBufferSize());
   }
 
-  buffer_.reset(static_cast<char*>(
-      base::AlignedAlloc(estimated_size, MessageInTransit::kMessageAlignment)));
+  buffer_ =
+      AlignedAlloc<char>(MessageInTransit::kMessageAlignment, estimated_size);
   // Entirely clear out the secondary buffer, since then we won't have to worry
   // about clearing padding or unused space (e.g., if a dispatcher fails to
   // serialize).
@@ -124,7 +127,7 @@ TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
 
   if (estimated_num_platform_handles > 0) {
     DCHECK(!platform_handles_);
-    platform_handles_.reset(new embedder::PlatformHandleVector());
+    platform_handles_.reset(new std::vector<ScopedPlatformHandle>());
   }
 
   Header* header = reinterpret_cast<Header*>(buffer_.get());
@@ -194,14 +197,14 @@ TransportData::TransportData(std::unique_ptr<DispatcherVector> dispatchers,
 }
 
 TransportData::TransportData(
-    embedder::ScopedPlatformHandleVectorPtr platform_handles,
+    std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles,
     size_t serialized_platform_handle_size)
     : buffer_size_(), platform_handles_(std::move(platform_handles)) {
   buffer_size_ = MessageInTransit::RoundUpMessageAlignment(
       sizeof(Header) +
       platform_handles_->size() * serialized_platform_handle_size);
-  buffer_.reset(static_cast<char*>(
-      base::AlignedAlloc(buffer_size_, MessageInTransit::kMessageAlignment)));
+  buffer_ =
+      AlignedAlloc<char>(MessageInTransit::kMessageAlignment, buffer_size_);
   memset(buffer_.get(), 0, buffer_size_);
 
   Header* header = reinterpret_cast<Header*>(buffer_.get());
@@ -311,7 +314,7 @@ void TransportData::GetPlatformHandleTable(const void* transport_data_buffer,
 std::unique_ptr<DispatcherVector> TransportData::DeserializeDispatchers(
     const void* buffer,
     size_t buffer_size,
-    embedder::ScopedPlatformHandleVectorPtr platform_handles,
+    std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles,
     Channel* channel) {
   DCHECK(buffer);
   DCHECK_GT(buffer_size, 0u);

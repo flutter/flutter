@@ -4,13 +4,16 @@
 
 #include "mojo/edk/system/channel_manager.h"
 
+#include <memory>
+
 #include "base/callback.h"
-#include "base/message_loop/message_loop.h"
 #include "base/run_loop.h"
-#include "mojo/edk/base_edk/platform_task_runner_impl.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
-#include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "mojo/edk/platform/message_loop.h"
+#include "mojo/edk/platform/message_loop_for_io.h"
+#include "mojo/edk/platform/task_runner.h"
+#include "mojo/edk/platform/test_message_loops.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
@@ -19,7 +22,11 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
-using mojo::util::MakeRefCounted;
+using mojo::platform::MessageLoop;
+using mojo::platform::MessageLoopForIO;
+using mojo::platform::TaskRunner;
+using mojo::platform::test::CreateTestMessageLoop;
+using mojo::platform::test::CreateTestMessageLoopForIO;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -29,22 +36,21 @@ namespace {
 class ChannelManagerTest : public testing::Test {
  public:
   ChannelManagerTest()
-      : message_loop_(base::MessageLoop::TYPE_IO),
-        task_runner_(MakeRefCounted<base_edk::PlatformTaskRunnerImpl>(
-            message_loop_.task_runner())),
-        channel_manager_(&platform_support_, task_runner_.Clone(), nullptr) {}
+      : message_loop_(CreateTestMessageLoopForIO()),
+        channel_manager_(&platform_support_,
+                         message_loop_->GetTaskRunner().Clone(),
+                         nullptr) {}
   ~ChannelManagerTest() override {}
 
  protected:
-  const RefPtr<embedder::PlatformTaskRunner>& task_runner() {
-    return task_runner_;
+  const RefPtr<TaskRunner>& task_runner() {
+    return message_loop_->GetTaskRunner();
   }
   ChannelManager& channel_manager() { return channel_manager_; }
 
  private:
   embedder::SimplePlatformSupport platform_support_;
-  base::MessageLoop message_loop_;
-  RefPtr<embedder::PlatformTaskRunner> task_runner_;
+  std::unique_ptr<MessageLoopForIO> message_loop_;
   // Note: This should be *after* the above, since they must be initialized
   // before it (and should outlive it).
   ChannelManager channel_manager_;
@@ -111,7 +117,7 @@ class OtherThread : public test::SimpleTestThread {
  public:
   // Note: There should be no other refs to the channel identified by
   // |channel_id| outside the channel manager.
-  OtherThread(RefPtr<embedder::PlatformTaskRunner>&& task_runner,
+  OtherThread(RefPtr<TaskRunner>&& task_runner,
               ChannelManager* channel_manager,
               ChannelId channel_id,
               const base::Closure& quit_closure)
@@ -136,19 +142,18 @@ class OtherThread : public test::SimpleTestThread {
     EXPECT_FALSE(ch->HasOneRef());
 
     {
-      base::MessageLoop message_loop;
+      std::unique_ptr<MessageLoop> message_loop(CreateTestMessageLoop());
+      // TODO(vtl): Using |base::RunLoop| here is shady.
       base::RunLoop run_loop;
-      channel_manager_->ShutdownChannel(
-          channel_id_, run_loop.QuitClosure(),
-          MakeRefCounted<base_edk::PlatformTaskRunnerImpl>(
-              message_loop.task_runner()));
+      channel_manager_->ShutdownChannel(channel_id_, run_loop.QuitClosure(),
+                                        message_loop->GetTaskRunner().Clone());
       run_loop.Run();
     }
 
     task_runner_->PostTask(quit_closure_);
   }
 
-  const RefPtr<embedder::PlatformTaskRunner> task_runner_;
+  const RefPtr<TaskRunner> task_runner_;
   ChannelManager* const channel_manager_;
   const ChannelId channel_id_;
   base::Closure quit_closure_;
@@ -163,6 +168,7 @@ TEST_F(ChannelManagerTest, CallsFromOtherThread) {
   RefPtr<MessagePipeDispatcher> d = channel_manager().CreateChannelOnIOThread(
       id, channel_pair.PassServerHandle());
 
+  // TODO(vtl): Using |base::RunLoop| here is shady.
   base::RunLoop run_loop;
   OtherThread thread(task_runner().Clone(), &channel_manager(), id,
                      run_loop.QuitClosure());

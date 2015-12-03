@@ -4,10 +4,13 @@
 
 #include "mojo/edk/embedder/simple_platform_support.h"
 
+#include <utility>
+
 #include "base/rand_util.h"
 #include "base/time/time.h"
 #include "mojo/edk/embedder/simple_platform_shared_buffer.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -32,7 +35,7 @@ SimplePlatformSupport::CreateSharedBufferFromHandle(
     size_t num_bytes,
     ScopedPlatformHandle platform_handle) {
   return SimplePlatformSharedBuffer::CreateFromPlatformHandle(
-      num_bytes, platform_handle.Pass());
+      num_bytes, std::move(platform_handle));
 }
 
 }  // namespace embedder

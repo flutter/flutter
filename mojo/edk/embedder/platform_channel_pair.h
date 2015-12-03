@@ -8,7 +8,7 @@
 #include <string>
 
 #include "base/process/launch.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -43,10 +43,10 @@ class PlatformChannelPair {
   PlatformChannelPair();
   ~PlatformChannelPair();
 
-  ScopedPlatformHandle PassServerHandle();
+  platform::ScopedPlatformHandle PassServerHandle();
 
   // For in-process use (e.g., in tests or to pass over another channel).
-  ScopedPlatformHandle PassClientHandle();
+  platform::ScopedPlatformHandle PassClientHandle();
 
   // To be called in the child process, after the parent process called
   // |PrepareToPassClientHandleToChildProcess()| and launched the child (using
@@ -54,7 +54,7 @@ class PlatformChannelPair {
   // handle (in the parent process). |string_from_parent| should be the string
   // that was produced (in the parent process) by
   // |PrepareToPassClientHandleToChildProcess()|.
-  static ScopedPlatformHandle PassClientHandleFromParentProcess(
+  static platform::ScopedPlatformHandle PassClientHandleFromParentProcess(
       const std::string& string_from_parent);
 
   // Prepares to pass the client channel to a new child process, to be launched
@@ -73,8 +73,8 @@ class PlatformChannelPair {
  private:
   static const char kMojoPlatformChannelHandleSwitch[];
 
-  ScopedPlatformHandle server_handle_;
-  ScopedPlatformHandle client_handle_;
+  platform::ScopedPlatformHandle server_handle_;
+  platform::ScopedPlatformHandle client_handle_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(PlatformChannelPair);
 };

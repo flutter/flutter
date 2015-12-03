@@ -14,6 +14,7 @@
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
 
@@ -47,9 +48,11 @@ ChannelThread::~ChannelThread() {
   Stop();
 }
 
-void ChannelThread::Start(embedder::ScopedPlatformHandle platform_handle,
+void ChannelThread::Start(ScopedPlatformHandle platform_handle,
                           RefPtr<ChannelEndpoint>&& channel_endpoint) {
   test_io_thread_.Start();
+  // TODO(vtl): This is hard to convert to a lambda, since we really need to
+  // move |platform_handle|.
   test_io_thread_.PostTaskAndWait(
       base::Bind(&ChannelThread::InitChannelOnIOThread, base::Unretained(this),
                  base::Passed(&platform_handle),
@@ -64,16 +67,18 @@ void ChannelThread::Stop() {
     while (!channel_->IsWriteBufferEmpty())
       test::Sleep(test::EpsilonTimeout());
 
-    test_io_thread_.PostTaskAndWait(base::Bind(
-        &ChannelThread::ShutdownChannelOnIOThread, base::Unretained(this)));
+    test_io_thread_.PostTaskAndWait([this] {
+      channel_->Shutdown();
+      channel_ = nullptr;
+    });
   }
   test_io_thread_.Stop();
 }
 
 void ChannelThread::InitChannelOnIOThread(
-    embedder::ScopedPlatformHandle platform_handle,
+    ScopedPlatformHandle platform_handle,
     RefPtr<ChannelEndpoint> channel_endpoint) {
-  CHECK_EQ(base::MessageLoop::current(), test_io_thread_.message_loop());
+  CHECK(test_io_thread_.IsCurrentAndRunning());
   CHECK(platform_handle.is_valid());
 
   // Create and initialize |Channel|.
@@ -89,12 +94,6 @@ void ChannelThread::InitChannelOnIOThread(
   channel_->SetBootstrapEndpoint(std::move(channel_endpoint));
 }
 
-void ChannelThread::ShutdownChannelOnIOThread() {
-  CHECK(channel_);
-  channel_->Shutdown();
-  channel_ = nullptr;
-}
-
 #if !defined(OS_IOS)
 MultiprocessMessagePipeTestBase::MultiprocessMessagePipeTestBase()
     : channel_thread_(&platform_support_) {
@@ -106,7 +105,7 @@ MultiprocessMessagePipeTestBase::~MultiprocessMessagePipeTestBase() {
 void MultiprocessMessagePipeTestBase::Init(RefPtr<ChannelEndpoint>&& ep) {
   channel_thread_.Start(helper_.server_platform_handle.Pass(), std::move(ep));
 }
-#endif
+#endif  // !defined(OS_IOS)
 
 }  // namespace test
 }  // namespace system

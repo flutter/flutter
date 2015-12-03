@@ -16,6 +16,9 @@ namespace mojo {
 
 namespace embedder {
 class PlatformSupport;
+}  // namespace embedder
+
+namespace platform {
 class ScopedPlatformHandle;
 }  // namespace embedder
 
@@ -106,7 +109,7 @@ class ConnectionManager {
   virtual Result Connect(const ConnectionIdentifier& connection_id,
                          ProcessIdentifier* peer_process_identifier,
                          bool* is_first,
-                         embedder::ScopedPlatformHandle* platform_handle) = 0;
+                         platform::ScopedPlatformHandle* platform_handle) = 0;
 
  protected:
   // |platform_support| must be valid and remain alive until after |Shutdown()|

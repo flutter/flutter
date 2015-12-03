@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/memory/aligned_memory.h"
+#include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe_impl.h"
 #include "mojo/edk/util/ref_ptr.h"
@@ -25,11 +25,10 @@ class RemoteProducerDataPipeImpl final : public DataPipeImpl {
  public:
   explicit RemoteProducerDataPipeImpl(
       util::RefPtr<ChannelEndpoint>&& channel_endpoint);
-  RemoteProducerDataPipeImpl(
-      util::RefPtr<ChannelEndpoint>&& channel_endpoint,
-      std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
-      size_t start_index,
-      size_t current_num_bytes);
+  RemoteProducerDataPipeImpl(util::RefPtr<ChannelEndpoint>&& channel_endpoint,
+                             platform::AlignedUniquePtr<char> buffer,
+                             size_t start_index,
+                             size_t current_num_bytes);
   ~RemoteProducerDataPipeImpl() override;
 
   // Processes messages that were received and queued by an |IncomingEndpoint|.
@@ -39,7 +38,7 @@ class RemoteProducerDataPipeImpl final : public DataPipeImpl {
   static bool ProcessMessagesFromIncomingEndpoint(
       const MojoCreateDataPipeOptions& validated_options,
       MessageInTransitQueue* messages,
-      std::unique_ptr<char, base::AlignedFreeDeleter>* buffer,
+      platform::AlignedUniquePtr<char>* buffer,
       size_t* buffer_num_bytes);
 
  private:
@@ -63,7 +62,7 @@ class RemoteProducerDataPipeImpl final : public DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override;
   void ConsumerClose() override;
   MojoResult ConsumerReadData(UserPointer<void> elements,
                               UserPointer<uint32_t> num_bytes,
@@ -86,7 +85,7 @@ class RemoteProducerDataPipeImpl final : public DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override;
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;
   void OnDetachFromChannel(unsigned port) override;
 
@@ -108,7 +107,7 @@ class RemoteProducerDataPipeImpl final : public DataPipeImpl {
   // Should be valid if and only if |producer_open()| returns true.
   util::RefPtr<ChannelEndpoint> channel_endpoint_;
 
-  std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;
+  platform::AlignedUniquePtr<char> buffer_;
   // Circular buffer.
   size_t start_index_;
   size_t current_num_bytes_;

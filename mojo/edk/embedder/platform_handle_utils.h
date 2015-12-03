@@ -5,8 +5,8 @@
 #ifndef MOJO_EDK_EMBEDDER_PLATFORM_HANDLE_UTILS_H_
 #define MOJO_EDK_EMBEDDER_PLATFORM_HANDLE_UTILS_H_
 
-#include "mojo/edk/embedder/platform_handle.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 
 namespace mojo {
 namespace embedder {
@@ -22,7 +22,8 @@ inline void CloseAllPlatformHandles(PlatformHandleContainer* platform_handles) {
 
 // Duplicates the given |PlatformHandle| (which must be valid). (Returns an
 // invalid |ScopedPlatformHandle| on failure.)
-ScopedPlatformHandle DuplicatePlatformHandle(PlatformHandle platform_handle);
+platform::ScopedPlatformHandle DuplicatePlatformHandle(
+    platform::PlatformHandle platform_handle);
 
 }  // namespace embedder
 }  // namespace mojo

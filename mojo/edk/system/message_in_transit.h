@@ -12,7 +12,7 @@
 #include <ostream>
 #include <vector>
 
-#include "base/memory/aligned_memory.h"
+#include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/memory.h"
@@ -276,7 +276,7 @@ class MessageInTransit {
 
   const size_t main_buffer_size_;
   // Never null.
-  const std::unique_ptr<char, base::AlignedFreeDeleter> main_buffer_;
+  const platform::AlignedUniquePtr<char> main_buffer_;
 
   std::unique_ptr<TransportData> transport_data_;  // May be null.
 

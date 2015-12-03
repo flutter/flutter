@@ -9,6 +9,4 @@ dart_mojo_internal_sdk_sources = [
   "sdk_ext/internal.dart",
   "sdk_ext/src/handle_watcher.dart",
   "sdk_ext/src/natives.dart",
-  "sdk_ext/src/timer_queue.dart",
-  "sdk_ext/src/wait_many_state.dart",
 ]

@@ -16,6 +16,8 @@
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/transport_data.h"
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MutexLocker;
 
 namespace mojo {
@@ -58,7 +60,7 @@ bool RawChannel::WriteBuffer::HavePlatformHandlesToSend() const {
   if (!transport_data)
     return false;
 
-  const embedder::PlatformHandleVector* all_platform_handles =
+  const std::vector<ScopedPlatformHandle>* all_platform_handles =
       transport_data->platform_handles();
   if (!all_platform_handles) {
     DCHECK_EQ(platform_handles_offset_, 0u);
@@ -74,17 +76,18 @@ bool RawChannel::WriteBuffer::HavePlatformHandlesToSend() const {
 
 void RawChannel::WriteBuffer::GetPlatformHandlesToSend(
     size_t* num_platform_handles,
-    embedder::PlatformHandle** platform_handles,
+    PlatformHandle** platform_handles,
     void** serialization_data) {
   DCHECK(HavePlatformHandlesToSend());
 
   MessageInTransit* message = message_queue_.PeekMessage();
   TransportData* transport_data = message->transport_data();
-  embedder::PlatformHandleVector* all_platform_handles =
+  std::vector<ScopedPlatformHandle>* all_platform_handles =
       transport_data->platform_handles();
   *num_platform_handles =
       all_platform_handles->size() - platform_handles_offset_;
-  *platform_handles = &(*all_platform_handles)[platform_handles_offset_];
+  *platform_handles = reinterpret_cast<PlatformHandle*>(
+      &(*all_platform_handles)[platform_handles_offset_]);
 
   if (serialized_platform_handle_size_ > 0) {
     size_t serialization_data_offset =
@@ -326,7 +329,7 @@ void RawChannel::OnReadCompleted(IOResult io_result, size_t bytes_read) {
           return;  // |this| may have been destroyed in |CallOnError()|.
         }
       } else {
-        embedder::ScopedPlatformHandleVectorPtr platform_handles;
+        std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles;
         if (message_view.transport_data_buffer()) {
           size_t num_platform_handles;
           const void* platform_handle_table;

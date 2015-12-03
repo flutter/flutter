@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_EDK_EMBEDDER_PLATFORM_HANDLE_H_
-#define MOJO_EDK_EMBEDDER_PLATFORM_HANDLE_H_
+#ifndef MOJO_EDK_PLATFORM_PLATFORM_HANDLE_H_
+#define MOJO_EDK_PLATFORM_PLATFORM_HANDLE_H_
 
 namespace mojo {
-namespace embedder {
+namespace platform {
 
 // A |PlatformHandle| is just a file descriptor on POSIX.
 struct PlatformHandle {
@@ -20,7 +20,7 @@ struct PlatformHandle {
   int fd;
 };
 
-}  // namespace embedder
+}  // namespace platform
 }  // namespace mojo
 
-#endif  // MOJO_EDK_EMBEDDER_PLATFORM_HANDLE_H_
+#endif  // MOJO_EDK_PLATFORM_PLATFORM_HANDLE_H_

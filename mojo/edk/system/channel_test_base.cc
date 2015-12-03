@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/system/raw_channel.h"
 
@@ -24,18 +23,18 @@ ChannelTestBase::~ChannelTestBase() {
 }
 
 void ChannelTestBase::SetUp() {
-  PostMethodToIOThreadAndWait(&ChannelTestBase::SetUpOnIOThread);
+  io_thread_.PostTaskAndWait([this]() { SetUpOnIOThread(); });
 }
 
 void ChannelTestBase::CreateChannelOnIOThread(unsigned i) {
-  CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+  CHECK(io_thread()->IsCurrentAndRunning());
 
   CHECK(!channels_[i]);
   channels_[i] = MakeRefCounted<Channel>(&platform_support_);
 }
 
 void ChannelTestBase::InitChannelOnIOThread(unsigned i) {
-  CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+  CHECK(io_thread()->IsCurrentAndRunning());
 
   CHECK(raw_channels_[i]);
   CHECK(channels_[i]);
@@ -48,7 +47,7 @@ void ChannelTestBase::CreateAndInitChannelOnIOThread(unsigned i) {
 }
 
 void ChannelTestBase::ShutdownChannelOnIOThread(unsigned i) {
-  CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+  CHECK(io_thread()->IsCurrentAndRunning());
 
   CHECK(channels_[i]);
   channels_[i]->Shutdown();
@@ -60,7 +59,7 @@ void ChannelTestBase::ShutdownAndReleaseChannelOnIOThread(unsigned i) {
 }
 
 void ChannelTestBase::SetUpOnIOThread() {
-  CHECK_EQ(base::MessageLoop::current(), io_thread()->message_loop());
+  CHECK(io_thread()->IsCurrentAndRunning());
 
   embedder::PlatformChannelPair channel_pair;
   raw_channels_[0] = RawChannel::Create(channel_pair.PassServerHandle());

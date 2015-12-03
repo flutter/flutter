@@ -23,7 +23,7 @@ class SimplePlatformSharedBuffer final : public PlatformSharedBuffer {
 
   static util::RefPtr<SimplePlatformSharedBuffer> CreateFromPlatformHandle(
       size_t num_bytes,
-      ScopedPlatformHandle platform_handle);
+      platform::ScopedPlatformHandle platform_handle);
 
   // |PlatformSharedBuffer| implementation:
   size_t GetNumBytes() const override;
@@ -33,8 +33,8 @@ class SimplePlatformSharedBuffer final : public PlatformSharedBuffer {
   std::unique_ptr<PlatformSharedBufferMapping> MapNoCheck(
       size_t offset,
       size_t length) override;
-  ScopedPlatformHandle DuplicatePlatformHandle() override;
-  ScopedPlatformHandle PassPlatformHandle() override;
+  platform::ScopedPlatformHandle DuplicatePlatformHandle() override;
+  platform::ScopedPlatformHandle PassPlatformHandle() override;
 
  private:
   explicit SimplePlatformSharedBuffer(size_t num_bytes);
@@ -46,14 +46,14 @@ class SimplePlatformSharedBuffer final : public PlatformSharedBuffer {
   // This is like |Init()|, but for |CreateFromPlatformHandle()|. (Note: It
   // should verify that |platform_handle| is an appropriate handle for the
   // claimed |num_bytes_|.)
-  bool InitFromPlatformHandle(ScopedPlatformHandle platform_handle);
+  bool InitFromPlatformHandle(platform::ScopedPlatformHandle platform_handle);
 
   const size_t num_bytes_;
 
   // This is set in |Init()|/|InitFromPlatformHandle()| and never modified
   // (except by |PassPlatformHandle()|; see the comments above its declaration),
   // hence does not need to be protected by a lock.
-  ScopedPlatformHandle handle_;
+  platform::ScopedPlatformHandle handle_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(SimplePlatformSharedBuffer);
 };

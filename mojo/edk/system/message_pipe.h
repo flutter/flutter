@@ -11,7 +11,7 @@
 #include <memory>
 #include <vector>
 
-#include "mojo/edk/embedder/platform_handle_vector.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/handle_signals_state.h"
@@ -109,11 +109,12 @@ class MessagePipe final : public ChannelEndpointClient {
                       Channel* channel,
                       size_t* max_size,
                       size_t* max_platform_handles);
-  bool EndSerialize(unsigned port,
-                    Channel* channel,
-                    void* destination,
-                    size_t* actual_size,
-                    embedder::PlatformHandleVector* platform_handles);
+  bool EndSerialize(
+      unsigned port,
+      Channel* channel,
+      void* destination,
+      size_t* actual_size,
+      std::vector<platform::ScopedPlatformHandle>* platform_handles);
 
   // |ChannelEndpointClient| methods:
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;

@@ -29,6 +29,7 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::util::MakeUnique;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -638,15 +639,15 @@ TEST(MessagePipeDispatcherTest, Stress) {
     // Make writers.
     std::vector<std::unique_ptr<WriterThread>> writers;
     for (size_t i = 0; i < kNumWriters; i++) {
-      writers.push_back(util::MakeUnique<WriterThread>(
-          d_write, &messages_written[i], &bytes_written[i]));
+      writers.push_back(MakeUnique<WriterThread>(d_write, &messages_written[i],
+                                                 &bytes_written[i]));
     }
 
     // Make readers.
     std::vector<std::unique_ptr<ReaderThread>> readers;
     for (size_t i = 0; i < kNumReaders; i++) {
-      readers.push_back(util::MakeUnique<ReaderThread>(
-          d_read, &messages_read[i], &bytes_read[i]));
+      readers.push_back(
+          MakeUnique<ReaderThread>(d_read, &messages_read[i], &bytes_read[i]));
     }
 
     // Start writers.

@@ -26,6 +26,10 @@ level) and will evolve over time.
   the public API available to embedders. (The .cc files are private and mostly
   serve to bridge between the public API and the private API in
   [system](system).)
+* [//mojo/edk/platform](platform): This contains platform abstractions and
+  declarations of embedder-dependent things. Some of these must be provided by
+  the embedder, either by implementing an interface or by implementing a class
+  outright.
 * [//mojo/edk/system](system): This contains the bulk of the actual
   implementation, and is entirely private.
 * [//mojo/edk/system/test](system/test): This contains private test helpers used

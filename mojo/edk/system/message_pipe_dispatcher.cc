@@ -14,6 +14,7 @@
 #include "mojo/edk/system/options_validation.h"
 #include "mojo/edk/system/proxy_message_pipe_endpoint.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -204,7 +205,7 @@ bool MessagePipeDispatcher::EndSerializeAndCloseImplNoLock(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   bool rv = message_pipe_->EndSerialize(port_, channel, destination,

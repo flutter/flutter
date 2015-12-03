@@ -25,6 +25,9 @@
 #include "mojo/edk/system/remote_producer_data_pipe_impl.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::platform::AlignedAlloc;
+using mojo::platform::ScopedPlatformHandle;
+using mojo::util::MakeUnique;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -164,7 +167,7 @@ bool LocalDataPipeImpl::ProducerEndSerialize(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* /*platform_handles*/) {
   SerializedDataPipeProducerDispatcher* s =
       static_cast<SerializedDataPipeProducerDispatcher*>(destination);
   s->validated_options = validated_options();
@@ -190,7 +193,7 @@ bool LocalDataPipeImpl::ProducerEndSerialize(
   // Note: Keep |*this| alive until the end of this method, to make things
   // slightly easier on ourselves.
   std::unique_ptr<DataPipeImpl> self(
-      ReplaceImpl(util::MakeUnique<RemoteProducerDataPipeImpl>(
+      ReplaceImpl(MakeUnique<RemoteProducerDataPipeImpl>(
           std::move(channel_endpoint), std::move(buffer_), start_index_,
           current_num_bytes_)));
 
@@ -336,7 +339,7 @@ bool LocalDataPipeImpl::ConsumerEndSerialize(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* /*platform_handles*/) {
   SerializedDataPipeConsumerDispatcher* s =
       static_cast<SerializedDataPipeConsumerDispatcher*>(destination);
   s->validated_options = validated_options();
@@ -369,7 +372,7 @@ bool LocalDataPipeImpl::ConsumerEndSerialize(
   // Note: Keep |*this| alive until the end of this method, to make things
   // slightly easier on ourselves.
   std::unique_ptr<DataPipeImpl> self(
-      ReplaceImpl(util::MakeUnique<RemoteConsumerDataPipeImpl>(
+      ReplaceImpl(MakeUnique<RemoteConsumerDataPipeImpl>(
           std::move(channel_endpoint), old_num_bytes, std::move(buffer_),
           start_index_)));
   DestroyBuffer();
@@ -393,9 +396,9 @@ void LocalDataPipeImpl::EnsureBuffer() {
   DCHECK(producer_open());
   if (buffer_)
     return;
-  buffer_.reset(static_cast<char*>(
-      base::AlignedAlloc(capacity_num_bytes(),
-                         GetConfiguration().data_pipe_buffer_alignment_bytes)));
+  buffer_ =
+      AlignedAlloc<char>(GetConfiguration().data_pipe_buffer_alignment_bytes,
+                         capacity_num_bytes());
 }
 
 void LocalDataPipeImpl::DestroyBuffer() {

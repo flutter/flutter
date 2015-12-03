@@ -44,6 +44,7 @@ struct DisplaySnapshot {
   string string_representation;
 };
 
+[ServiceName="mojo::OzoneDrmGpu"]
 interface OzoneDrmGpu {
   AddGraphicsDevice(string file_path, int32 file_descriptor);
   CreateWindow(int64 widget);

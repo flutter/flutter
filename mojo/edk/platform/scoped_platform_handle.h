@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_EDK_EMBEDDER_SCOPED_PLATFORM_HANDLE_H_
-#define MOJO_EDK_EMBEDDER_SCOPED_PLATFORM_HANDLE_H_
+#ifndef MOJO_EDK_PLATFORM_SCOPED_PLATFORM_HANDLE_H_
+#define MOJO_EDK_PLATFORM_SCOPED_PLATFORM_HANDLE_H_
 
-#include "mojo/edk/embedder/platform_handle.h"
+#include "mojo/edk/platform/platform_handle.h"
 #include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
-namespace embedder {
+namespace platform {
 
 // Scoper for |PlatformHandle|s, which are just file descriptors.
 class ScopedPlatformHandle {
@@ -56,7 +56,7 @@ class ScopedPlatformHandle {
   MOJO_MOVE_ONLY_TYPE(ScopedPlatformHandle);
 };
 
-}  // namespace embedder
+}  // namespace platform
 }  // namespace mojo
 
-#endif  // MOJO_EDK_EMBEDDER_SCOPED_PLATFORM_HANDLE_H_
+#endif  // MOJO_EDK_PLATFORM_SCOPED_PLATFORM_HANDLE_H_

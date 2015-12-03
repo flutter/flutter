@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "base/bind.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/test/test_io_thread.h"
@@ -29,12 +28,6 @@ class ChannelTestBase : public testing::Test {
   ~ChannelTestBase() override;
 
   void SetUp() override;
-
-  template <typename Functor, typename... Args>
-  void PostMethodToIOThreadAndWait(Functor functor, const Args&... args) {
-    io_thread_.PostTaskAndWait(
-        base::Bind(functor, base::Unretained(this), args...));
-  }
 
   // These should only be called from |io_thread()|:
   void CreateChannelOnIOThread(unsigned i);

@@ -492,42 +492,107 @@ class Encoder {
         _utf8OfString(value), offset, nullability, kUnspecifiedArrayLength);
   }
 
-  void appendBytes(Uint8List value) {
-    _buffer.buffer.buffer.asUint8List().setRange(
-        _base + ArrayDataHeader.kHeaderSize,
-        _base + ArrayDataHeader.kHeaderSize + value.lengthInBytes,
-        value);
+  void appendInt8Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + value.length;
+    int idx = 0;
+    for (int i = start; i < end; i++) {
+      _buffer.buffer.setInt8(i, value[idx]);
+      idx++;
+    }
   }
 
-  void appendInt8Array(List<int> value) =>
-      appendBytes(new Uint8List.view(new Int8List.fromList(value).buffer));
+  void appendUint8Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + value.length;
+    int idx = 0;
+    for (int i = start; i < end; i++) {
+      _buffer.buffer.setUint8(i, value[idx]);
+      idx++;
+    }
+  }
 
-  void appendUint8Array(List<int> value) =>
-      appendBytes(new Uint8List.fromList(value));
+  void appendInt16Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 1);
+    int idx = 0;
+    for (int i = start; i < end; i += 2) {
+      _buffer.buffer.setInt16(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
 
-  void appendInt16Array(List<int> value) =>
-      appendBytes(new Uint8List.view(new Int16List.fromList(value).buffer));
+  void appendUint16Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 1);
+    int idx = 0;
+    for (int i = start; i < end; i += 2) {
+      _buffer.buffer.setUint16(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
 
-  void appendUint16Array(List<int> value) =>
-      appendBytes(new Uint8List.view(new Uint16List.fromList(value).buffer));
 
-  void appendInt32Array(List<int> value) =>
-      appendBytes(new Uint8List.view(new Int32List.fromList(value).buffer));
+  void appendInt32Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 2);
+    int idx = 0;
+    for (int i = start; i < end; i += 4) {
+      _buffer.buffer.setInt32(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
 
-  void appendUint32Array(List<int> value) =>
-      appendBytes(new Uint8List.view(new Uint32List.fromList(value).buffer));
+  void appendUint32Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 2);
+    int idx = 0;
+    for (int i = start; i < end; i += 4) {
+      _buffer.buffer.setUint32(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
 
-  void appendInt64Array(List<int> value) =>
-      appendBytes(new Uint8List.view(new Int64List.fromList(value).buffer));
 
-  void appendUint64Array(List<int> value) =>
-      appendBytes(new Uint8List.view(new Uint64List.fromList(value).buffer));
+  void appendInt64Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 3);
+    int idx = 0;
+    for (int i = start; i < end; i += 8) {
+      _buffer.buffer.setInt64(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
 
-  void appendFloatArray(List<double> value) =>
-      appendBytes(new Uint8List.view(new Float32List.fromList(value).buffer));
+  void appendUint64Array(List<int> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 3);
+    int idx = 0;
+    for (int i = start; i < end; i += 8) {
+      _buffer.buffer.setUint64(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
 
-  void appendDoubleArray(List<double> value) =>
-      appendBytes(new Uint8List.view(new Float64List.fromList(value).buffer));
+  void appendFloatArray(List<double> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 2);
+    int idx = 0;
+    for (int i = start; i < end; i += 4) {
+      _buffer.buffer.setFloat32(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
+
+  void appendDoubleArray(List<double> value) {
+    int start = _base + ArrayDataHeader.kHeaderSize;
+    int end = start + (value.length << 3);
+    int idx = 0;
+    for (int i = start; i < end; i += 8) {
+      _buffer.buffer.setFloat64(i, value[idx], Endianness.LITTLE_ENDIAN);
+      idx++;
+    }
+  }
 
   Encoder encoderForMap(int offset) {
     encodePointerToNextUnclaimed(offset);

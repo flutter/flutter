@@ -9,10 +9,10 @@
 
 #include "base/callback_forward.h"
 #include "base/gtest_prod_util.h"
-#include "mojo/edk/embedder/platform_task_runner.h"
 #include "mojo/edk/embedder/process_type.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
 #include "mojo/edk/embedder/slave_info.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/system/channel_id.h"
 #include "mojo/edk/system/connection_identifier.h"
 #include "mojo/edk/system/process_identifier.h"
@@ -62,13 +62,12 @@ class IPCSupport {
   // All the (pointer) arguments must remain alive (and, in the case of task
   // runners, continue to process tasks) until |ShutdownOnIOThread()| has been
   // called.
-  IPCSupport(
-      embedder::PlatformSupport* platform_support,
-      embedder::ProcessType process_type,
-      util::RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
-      embedder::ProcessDelegate* process_delegate,
-      util::RefPtr<embedder::PlatformTaskRunner>&& io_thread_task_runner,
-      embedder::ScopedPlatformHandle platform_handle);
+  IPCSupport(embedder::PlatformSupport* platform_support,
+             embedder::ProcessType process_type,
+             util::RefPtr<platform::TaskRunner>&& delegate_thread_task_runner,
+             embedder::ProcessDelegate* process_delegate,
+             util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
+             platform::ScopedPlatformHandle platform_handle);
   // Note: This object must be shut down before destruction (see
   // |ShutdownOnIOThread()|).
   ~IPCSupport();
@@ -103,9 +102,9 @@ class IPCSupport {
   util::RefPtr<MessagePipeDispatcher> ConnectToSlave(
       const ConnectionIdentifier& connection_id,
       embedder::SlaveInfo slave_info,
-      embedder::ScopedPlatformHandle platform_handle,
+      platform::ScopedPlatformHandle platform_handle,
       const base::Closure& callback,
-      util::RefPtr<embedder::PlatformTaskRunner>&& callback_thread_task_runner,
+      util::RefPtr<platform::TaskRunner>&& callback_thread_task_runner,
       ChannelId* channel_id);
 
   // Called in a slave process to connect it to the master process and thus the
@@ -119,18 +118,19 @@ class IPCSupport {
   util::RefPtr<MessagePipeDispatcher> ConnectToMaster(
       const ConnectionIdentifier& connection_id,
       const base::Closure& callback,
-      util::RefPtr<embedder::PlatformTaskRunner>&& callback_thread_task_runner,
+      util::RefPtr<platform::TaskRunner>&& callback_thread_task_runner,
       ChannelId* channel_id);
 
   embedder::ProcessType process_type() const { return process_type_; }
   embedder::ProcessDelegate* process_delegate() const {
     return process_delegate_;
   }
-  embedder::PlatformTaskRunner* delegate_thread_task_runner() const {
-    return delegate_thread_task_runner_.get();
+  const util::RefPtr<platform::TaskRunner>& delegate_thread_task_runner()
+      const {
+    return delegate_thread_task_runner_;
   }
-  embedder::PlatformTaskRunner* io_thread_task_runner() const {
-    return io_thread_task_runner_.get();
+  const util::RefPtr<platform::TaskRunner>& io_thread_task_runner() const {
+    return io_thread_task_runner_;
   }
   // TODO(vtl): The things that use the following should probably be moved into
   // this class.
@@ -147,17 +147,17 @@ class IPCSupport {
   // and slave) and creates a second OS "pipe" between the master and slave
   // (returning the master's handle). |*slave_process_identifier| will be set to
   // the process identifier assigned to the slave.
-  embedder::ScopedPlatformHandle ConnectToSlaveInternal(
+  platform::ScopedPlatformHandle ConnectToSlaveInternal(
       const ConnectionIdentifier& connection_id,
       embedder::SlaveInfo slave_info,
-      embedder::ScopedPlatformHandle platform_handle,
+      platform::ScopedPlatformHandle platform_handle,
       ProcessIdentifier* slave_process_identifier);
 
   // Helper for |ConnectToMaster()|. Connects (using the connection manager) to
   // the master (using the handle to the OS "pipe" that was given to
   // |SlaveConnectionManager::Init()|) and creates a second OS "pipe" between
   // the master and slave (returning the slave's handle).
-  embedder::ScopedPlatformHandle ConnectToMasterInternal(
+  platform::ScopedPlatformHandle ConnectToMasterInternal(
       const ConnectionIdentifier& connection_id);
 
   ConnectionManager* connection_manager() const {
@@ -166,9 +166,9 @@ class IPCSupport {
 
   // These are all set on construction and reset by |ShutdownOnIOThread()|.
   embedder::ProcessType process_type_;
-  util::RefPtr<embedder::PlatformTaskRunner> delegate_thread_task_runner_;
+  util::RefPtr<platform::TaskRunner> delegate_thread_task_runner_;
   embedder::ProcessDelegate* process_delegate_;
-  util::RefPtr<embedder::PlatformTaskRunner> io_thread_task_runner_;
+  util::RefPtr<platform::TaskRunner> io_thread_task_runner_;
 
   std::unique_ptr<ConnectionManager> connection_manager_;
   std::unique_ptr<ChannelManager> channel_manager_;

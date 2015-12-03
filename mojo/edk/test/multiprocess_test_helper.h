@@ -10,7 +10,7 @@
 
 #include "base/process/process.h"
 #include "base/test/multiprocess_test.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/multiprocess_func_list.h"
 
@@ -55,10 +55,10 @@ class MultiprocessTestHelper final {
   static void ChildSetup();
 
   // For use in the main process:
-  embedder::ScopedPlatformHandle server_platform_handle;
+  platform::ScopedPlatformHandle server_platform_handle;
 
   // For use (and only valid) in the child process:
-  static embedder::ScopedPlatformHandle client_platform_handle;
+  static platform::ScopedPlatformHandle client_platform_handle;
 
  private:
   std::unique_ptr<embedder::PlatformChannelPair> platform_channel_pair_;

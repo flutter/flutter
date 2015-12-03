@@ -8,8 +8,9 @@
 #include <stdint.h>
 
 #include <memory>
+#include <vector>
 
-#include "mojo/edk/embedder/platform_handle_vector.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
@@ -119,10 +120,11 @@ class DataPipe final : public ChannelEndpointClient {
   void ProducerStartSerialize(Channel* channel,
                               size_t* max_size,
                               size_t* max_platform_handles);
-  bool ProducerEndSerialize(Channel* channel,
-                            void* destination,
-                            size_t* actual_size,
-                            embedder::PlatformHandleVector* platform_handles);
+  bool ProducerEndSerialize(
+      Channel* channel,
+      void* destination,
+      size_t* actual_size,
+      std::vector<platform::ScopedPlatformHandle>* platform_handles);
   bool ProducerIsBusy() const;
 
   // These are called by the consumer dispatcher to implement its methods of
@@ -151,10 +153,11 @@ class DataPipe final : public ChannelEndpointClient {
   void ConsumerStartSerialize(Channel* channel,
                               size_t* max_size,
                               size_t* max_platform_handles);
-  bool ConsumerEndSerialize(Channel* channel,
-                            void* destination,
-                            size_t* actual_size,
-                            embedder::PlatformHandleVector* platform_handles);
+  bool ConsumerEndSerialize(
+      Channel* channel,
+      void* destination,
+      size_t* actual_size,
+      std::vector<platform::ScopedPlatformHandle>* platform_handles);
   bool ConsumerIsBusy() const;
 
   // The following are only to be used by |DataPipeImpl| (and its subclasses):

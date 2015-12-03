@@ -10,6 +10,7 @@
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/memory.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -161,7 +162,7 @@ bool DataPipeConsumerDispatcher::EndSerializeAndCloseImplNoLock(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   AssertHasOneRef();  // Only one ref => no need to take the lock.
 
   bool rv = data_pipe_->ConsumerEndSerialize(channel, destination, actual_size,

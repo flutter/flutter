@@ -7,16 +7,16 @@
 #include <algorithm>
 #include <utility>
 
-#include "base/bind.h"
 #include "base/logging.h"
-#include "base/strings/stringprintf.h"
-#include "mojo/edk/embedder/platform_handle_vector.h"
 #include "mojo/edk/system/endpoint_relayer.h"
 #include "mojo/edk/system/transport_data.h"
+#include "mojo/edk/util/string_printf.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MakeRefCounted;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
+using mojo::util::StringPrintf;
 
 namespace mojo {
 namespace system {
@@ -34,7 +34,9 @@ struct SerializedEndpoint {
 }  // namespace
 
 void Channel::Init(std::unique_ptr<RawChannel> raw_channel) {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
   DCHECK(raw_channel);
 
   // No need to take |mutex_|, since this must be called before this object
@@ -55,7 +57,9 @@ void Channel::SetChannelManager(ChannelManager* channel_manager) {
 }
 
 void Channel::Shutdown() {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
 
   IdToEndpointMap to_destroy;
   {
@@ -158,10 +162,10 @@ void Channel::DetachEndpoint(ChannelEndpoint* endpoint,
   if (!SendControlMessage(MessageInTransit::Subtype::CHANNEL_REMOVE_ENDPOINT,
                           local_id, remote_id, 0, nullptr)) {
     HandleLocalError(
-        base::StringPrintf("Failed to send message to remove remote endpoint "
-                           "(local ID %u, remote ID %u)",
-                           static_cast<unsigned>(local_id.value()),
-                           static_cast<unsigned>(remote_id.value()))
+        StringPrintf("Failed to send message to remove remote endpoint (local "
+                     "ID %u, remote ID %u)",
+                     static_cast<unsigned>(local_id.value()),
+                     static_cast<unsigned>(remote_id.value()))
             .c_str());
   }
 }
@@ -204,8 +208,8 @@ void Channel::SerializeEndpointWithRemotePeer(
   DCHECK(destination);
   DCHECK(peer_endpoint);
 
-  DLOG(WARNING) << "Direct message pipe passing across multiple channels not "
-                   "yet implemented; will proxy";
+  DVLOG(1) << "Direct message pipe passing across multiple channels not yet "
+              "implemented; will proxy";
   // Create and set up an |EndpointRelayer| to proxy.
   // TODO(vtl): If we were to own/track the relayer directly (rather than owning
   // it via its |ChannelEndpoint|s), then we might be able to make
@@ -291,8 +295,10 @@ bool Channel::DetachEndpointInternal(ChannelEndpoint* endpoint,
 
 void Channel::OnReadMessage(
     const MessageInTransit::View& message_view,
-    embedder::ScopedPlatformHandleVectorPtr platform_handles) {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+    std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles) {
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
 
   switch (message_view.type()) {
     case MessageInTransit::Type::ENDPOINT_CLIENT:
@@ -303,16 +309,17 @@ void Channel::OnReadMessage(
       OnReadMessageForChannel(message_view, std::move(platform_handles));
       break;
     default:
-      HandleRemoteError(
-          base::StringPrintf("Received message of invalid type %u",
-                             static_cast<unsigned>(message_view.type()))
-              .c_str());
+      HandleRemoteError(StringPrintf("Received message of invalid type %u",
+                                     static_cast<unsigned>(message_view.type()))
+                            .c_str());
       break;
   }
 }
 
 void Channel::OnError(Error error) {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
 
   switch (error) {
     case ERROR_READ_SHUTDOWN:
@@ -344,8 +351,10 @@ void Channel::OnError(Error error) {
 
 void Channel::OnReadMessageForEndpoint(
     const MessageInTransit::View& message_view,
-    embedder::ScopedPlatformHandleVectorPtr platform_handles) {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+    std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles) {
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
   DCHECK(message_view.type() == MessageInTransit::Type::ENDPOINT_CLIENT ||
          message_view.type() == MessageInTransit::Type::ENDPOINT);
 
@@ -380,9 +389,10 @@ void Channel::OnReadMessageForEndpoint(
   }
   if (!endpoint) {
     HandleRemoteError(
-        base::StringPrintf(
+        StringPrintf(
             "Received a message for nonexistent local destination ID %u",
-            static_cast<unsigned>(local_id.value())).c_str());
+            static_cast<unsigned>(local_id.value()))
+            .c_str());
     // This is strongly indicative of some problem. However, it's not a fatal
     // error, since it may indicate a buggy (or hostile) remote process. Don't
     // die even for Debug builds, since handling this properly needs to be
@@ -405,8 +415,10 @@ void Channel::OnReadMessageForEndpoint(
 
 void Channel::OnReadMessageForChannel(
     const MessageInTransit::View& message_view,
-    embedder::ScopedPlatformHandleVectorPtr platform_handles) {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+    std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles) {
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
   DCHECK_EQ(message_view.type(), MessageInTransit::Type::CHANNEL);
 
   // Currently, no channel messages take platform handles.
@@ -503,7 +515,9 @@ bool Channel::OnAttachAndRunEndpoint(ChannelEndpointId local_id,
 
 bool Channel::OnRemoveEndpoint(ChannelEndpointId local_id,
                                ChannelEndpointId remote_id) {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
 
   RefPtr<ChannelEndpoint> endpoint;
   {
@@ -530,18 +544,21 @@ bool Channel::OnRemoveEndpoint(ChannelEndpointId local_id,
   if (!SendControlMessage(
           MessageInTransit::Subtype::CHANNEL_REMOVE_ENDPOINT_ACK, local_id,
           remote_id, 0, nullptr)) {
-    HandleLocalError(base::StringPrintf(
-                         "Failed to send message to ack remove remote endpoint "
-                         "(local ID %u, remote ID %u)",
-                         static_cast<unsigned>(local_id.value()),
-                         static_cast<unsigned>(remote_id.value())).c_str());
+    HandleLocalError(
+        StringPrintf("Failed to send message to ack remove remote endpoint "
+                     "(local ID %u, remote ID %u)",
+                     static_cast<unsigned>(local_id.value()),
+                     static_cast<unsigned>(remote_id.value()))
+            .c_str());
   }
 
   return true;
 }
 
 bool Channel::OnRemoveEndpointAck(ChannelEndpointId local_id) {
-  DCHECK(creation_thread_checker_.CalledOnValidThread());
+#if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
+  DCHECK(thread_checker_.IsCreationThreadCurrent());
+#endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
 
   MutexLocker locker(&mutex_);
 
@@ -603,11 +620,12 @@ ChannelEndpointId Channel::AttachAndRunEndpoint(
   if (!SendControlMessage(
           MessageInTransit::Subtype::CHANNEL_ATTACH_AND_RUN_ENDPOINT, local_id,
           remote_id, 0, nullptr)) {
-    HandleLocalError(base::StringPrintf(
-                         "Failed to send message to run remote endpoint (local "
-                         "ID %u, remote ID %u)",
-                         static_cast<unsigned>(local_id.value()),
-                         static_cast<unsigned>(remote_id.value())).c_str());
+    HandleLocalError(
+        StringPrintf("Failed to send message to run remote endpoint (local "
+                     "ID %u, remote ID %u)",
+                     static_cast<unsigned>(local_id.value()),
+                     static_cast<unsigned>(remote_id.value()))
+            .c_str());
     // TODO(vtl): Should we continue on to |AttachAndRun()|?
   }
 

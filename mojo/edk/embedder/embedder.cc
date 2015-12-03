@@ -25,6 +25,8 @@
 #include "mojo/edk/system/raw_channel.h"
 #include "mojo/edk/util/ref_ptr.h"
 
+using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::TaskRunner;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -60,21 +62,6 @@ system::ChannelId MakeChannelId() {
   // "positive" "process identifiers" (see connection_manager.h) as IDs (and
   // they won't conflict).
   return static_cast<system::ChannelId>(-new_counter_value);
-}
-
-// Note: Called on the I/O thread.
-void ShutdownIPCSupportHelper() {
-  // Save these before they get nuked by |ShutdownChannelOnIOThread()|.
-  RefPtr<PlatformTaskRunner> delegate_thread_task_runner(
-      internal::g_ipc_support->delegate_thread_task_runner());
-  ProcessDelegate* process_delegate =
-      internal::g_ipc_support->process_delegate();
-
-  ShutdownIPCSupportOnIOThread();
-
-  delegate_thread_task_runner->PostTask(
-      base::Bind(&ProcessDelegate::OnShutdownComplete,
-                 base::Unretained(process_delegate)));
 }
 
 }  // namespace
@@ -139,9 +126,9 @@ MojoResult PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
 }
 
 void InitIPCSupport(ProcessType process_type,
-                    RefPtr<PlatformTaskRunner>&& delegate_thread_task_runner,
+                    RefPtr<TaskRunner>&& delegate_thread_task_runner,
                     ProcessDelegate* process_delegate,
-                    RefPtr<PlatformTaskRunner>&& io_thread_task_runner,
+                    RefPtr<TaskRunner>&& io_thread_task_runner,
                     ScopedPlatformHandle platform_handle) {
   // |Init()| must have already been called.
   DCHECK(internal::g_core);
@@ -165,15 +152,25 @@ void ShutdownIPCSupportOnIOThread() {
 void ShutdownIPCSupport() {
   DCHECK(internal::g_ipc_support);
 
-  internal::g_ipc_support->io_thread_task_runner()->PostTask(
-      base::Bind(&ShutdownIPCSupportHelper));
+  internal::g_ipc_support->io_thread_task_runner()->PostTask([]() {
+    // Save these before they get nuked by |ShutdownChannelOnIOThread()|.
+    RefPtr<TaskRunner> delegate_thread_task_runner(
+        internal::g_ipc_support->delegate_thread_task_runner());
+    ProcessDelegate* process_delegate =
+        internal::g_ipc_support->process_delegate();
+
+    ShutdownIPCSupportOnIOThread();
+
+    delegate_thread_task_runner->PostTask(
+        [process_delegate]() { process_delegate->OnShutdownComplete(); });
+  });
 }
 
 ScopedMessagePipeHandle ConnectToSlave(
     SlaveInfo slave_info,
     ScopedPlatformHandle platform_handle,
     const base::Closure& did_connect_to_slave_callback,
-    RefPtr<PlatformTaskRunner>&& did_connect_to_slave_runner,
+    RefPtr<TaskRunner>&& did_connect_to_slave_runner,
     std::string* platform_connection_id,
     ChannelInfo** channel_info) {
   DCHECK(platform_connection_id);
@@ -200,7 +197,7 @@ ScopedMessagePipeHandle ConnectToSlave(
 ScopedMessagePipeHandle ConnectToMaster(
     const std::string& platform_connection_id,
     const base::Closure& did_connect_to_master_callback,
-    RefPtr<PlatformTaskRunner>&& did_connect_to_master_runner,
+    RefPtr<TaskRunner>&& did_connect_to_master_runner,
     ChannelInfo** channel_info) {
   DCHECK(channel_info);
   DCHECK(internal::g_ipc_support);
@@ -248,7 +245,7 @@ ScopedMessagePipeHandle CreateChannelOnIOThread(
 ScopedMessagePipeHandle CreateChannel(
     ScopedPlatformHandle platform_handle,
     const base::Callback<void(ChannelInfo*)>& did_create_channel_callback,
-    RefPtr<PlatformTaskRunner>&& did_create_channel_runner) {
+    RefPtr<TaskRunner>&& did_create_channel_runner) {
   DCHECK(platform_handle.is_valid());
   DCHECK(!did_create_channel_callback.is_null());
   DCHECK(internal::g_ipc_support);
@@ -286,7 +283,7 @@ void DestroyChannelOnIOThread(ChannelInfo* channel_info) {
 // TODO(vtl): Write tests for this.
 void DestroyChannel(ChannelInfo* channel_info,
                     const base::Closure& did_destroy_channel_callback,
-                    RefPtr<PlatformTaskRunner>&& did_destroy_channel_runner) {
+                    RefPtr<TaskRunner>&& did_destroy_channel_runner) {
   DCHECK(channel_info);
   DCHECK(channel_info->channel_id);
   DCHECK(!did_destroy_channel_callback.is_null());

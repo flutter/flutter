@@ -20,6 +20,9 @@
 #include "mojo/edk/system/remote_consumer_data_pipe_impl.h"
 #include "mojo/edk/system/remote_data_pipe_ack.h"
 
+using mojo::platform::AlignedAlloc;
+using mojo::platform::AlignedUniquePtr;
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -71,7 +74,7 @@ RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
 
 RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
     RefPtr<ChannelEndpoint>&& channel_endpoint,
-    std::unique_ptr<char, base::AlignedFreeDeleter> buffer,
+    AlignedUniquePtr<char> buffer,
     size_t start_index,
     size_t current_num_bytes)
     : channel_endpoint_(std::move(channel_endpoint)),
@@ -85,16 +88,15 @@ RemoteProducerDataPipeImpl::RemoteProducerDataPipeImpl(
 bool RemoteProducerDataPipeImpl::ProcessMessagesFromIncomingEndpoint(
     const MojoCreateDataPipeOptions& validated_options,
     MessageInTransitQueue* messages,
-    std::unique_ptr<char, base::AlignedFreeDeleter>* buffer,
+    AlignedUniquePtr<char>* buffer,
     size_t* buffer_num_bytes) {
   DCHECK(!*buffer);  // Not wrong, but unlikely.
 
   const size_t element_num_bytes = validated_options.element_num_bytes;
   const size_t capacity_num_bytes = validated_options.capacity_num_bytes;
 
-  std::unique_ptr<char, base::AlignedFreeDeleter> new_buffer(static_cast<char*>(
-      base::AlignedAlloc(capacity_num_bytes,
-                         GetConfiguration().data_pipe_buffer_alignment_bytes)));
+  AlignedUniquePtr<char> new_buffer(AlignedAlloc<char>(
+      GetConfiguration().data_pipe_buffer_alignment_bytes, capacity_num_bytes));
 
   size_t current_num_bytes = 0;
   if (messages) {
@@ -162,7 +164,7 @@ bool RemoteProducerDataPipeImpl::ProducerEndSerialize(
     Channel* /*channel*/,
     void* /*destination*/,
     size_t* /*actual_size*/,
-    embedder::PlatformHandleVector* /*platform_handles*/) {
+    std::vector<ScopedPlatformHandle>* /*platform_handles*/) {
   NOTREACHED();
   return false;
 }
@@ -305,7 +307,7 @@ bool RemoteProducerDataPipeImpl::ConsumerEndSerialize(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* /*platform_handles*/) {
   SerializedDataPipeConsumerDispatcher* s =
       static_cast<SerializedDataPipeConsumerDispatcher*>(destination);
   s->validated_options = validated_options();
@@ -397,9 +399,9 @@ void RemoteProducerDataPipeImpl::EnsureBuffer() {
   DCHECK(producer_open());
   if (buffer_)
     return;
-  buffer_.reset(static_cast<char*>(
-      base::AlignedAlloc(capacity_num_bytes(),
-                         GetConfiguration().data_pipe_buffer_alignment_bytes)));
+  buffer_ =
+      AlignedAlloc<char>(GetConfiguration().data_pipe_buffer_alignment_bytes,
+                         capacity_num_bytes());
 }
 
 void RemoteProducerDataPipeImpl::DestroyBuffer() {

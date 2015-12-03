@@ -5,28 +5,30 @@
 // This file provides an interface for "task runners", which are used within the
 // EDK itself.
 
-#ifndef MOJO_EDK_EMBEDDER_PLATFORM_TASK_RUNNER_H_
-#define MOJO_EDK_EMBEDDER_PLATFORM_TASK_RUNNER_H_
+#ifndef MOJO_EDK_PLATFORM_TASK_RUNNER_H_
+#define MOJO_EDK_PLATFORM_TASK_RUNNER_H_
+
+#include <functional>
 
 #include "base/callback_forward.h"
 #include "mojo/edk/util/ref_counted.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
-namespace embedder {
+namespace platform {
 
 // Interface for "task runners", which can be used to schedule tasks to be run
 // asynchronously (possibly on a different thread). Implementations must be
 // thread-safe.
-class PlatformTaskRunner
-    : public util::RefCountedThreadSafe<PlatformTaskRunner> {
+class TaskRunner : public util::RefCountedThreadSafe<TaskRunner> {
  public:
-  virtual ~PlatformTaskRunner() {}
+  virtual ~TaskRunner() {}
 
   // Posts a task to this task runner (i.e., schedule the task). The task must
   // be run (insofar as this can be guaranteed). (This must not run the task
   // synchronously.)
-  // TODO(vtl): Replace the |base::Closure| with |std::function<void()>|.
+  // TODO(vtl): Remove the |base::Closure| version.
+  virtual void PostTask(std::function<void()>&& task) = 0;
   virtual void PostTask(const base::Closure& task) = 0;
 
   // Returns true if this task runner may run tasks on the current thread, false
@@ -35,13 +37,13 @@ class PlatformTaskRunner
   virtual bool RunsTasksOnCurrentThread() const = 0;
 
  protected:
-  PlatformTaskRunner() {}
+  TaskRunner() {}
 
  private:
-  MOJO_DISALLOW_COPY_AND_ASSIGN(PlatformTaskRunner);
+  MOJO_DISALLOW_COPY_AND_ASSIGN(TaskRunner);
 };
 
-}  // namespace embedder
+}  // namespace platform
 }  // namespace mojo
 
-#endif  // MOJO_EDK_EMBEDDER_PLATFORM_TASK_RUNNER_H_
+#endif  // MOJO_EDK_PLATFORM_TASK_RUNNER_H_

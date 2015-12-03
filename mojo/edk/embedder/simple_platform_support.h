@@ -27,7 +27,7 @@ class SimplePlatformSupport final : public PlatformSupport {
       size_t num_bytes) override;
   util::RefPtr<PlatformSharedBuffer> CreateSharedBufferFromHandle(
       size_t num_bytes,
-      ScopedPlatformHandle platform_handle) override;
+      platform::ScopedPlatformHandle platform_handle) override;
 
  private:
   MOJO_DISALLOW_COPY_AND_ASSIGN(SimplePlatformSupport);

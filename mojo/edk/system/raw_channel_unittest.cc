@@ -11,11 +11,10 @@
 #include <utility>
 #include <vector>
 
-#include "base/bind.h"
 #include "base/logging.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
-#include "mojo/edk/embedder/platform_handle.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/test/random.h"
 #include "mojo/edk/system/test/scoped_test_dir.h"
@@ -31,7 +30,10 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::AutoResetWaitableEvent;
+using mojo::util::MakeUnique;
 using mojo::util::Mutex;
 using mojo::util::MutexLocker;
 
@@ -43,7 +45,7 @@ std::unique_ptr<MessageInTransit> MakeTestMessage(uint32_t num_bytes) {
   std::vector<unsigned char> bytes(num_bytes, 0);
   for (size_t i = 0; i < num_bytes; i++)
     bytes[i] = static_cast<unsigned char>(i + num_bytes);
-  return util::MakeUnique<MessageInTransit>(
+  return MakeUnique<MessageInTransit>(
       MessageInTransit::Type::ENDPOINT_CLIENT,
       MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA, num_bytes,
       bytes.empty() ? nullptr : &bytes[0]);
@@ -58,11 +60,7 @@ bool CheckMessageData(const void* bytes, uint32_t num_bytes) {
   return true;
 }
 
-void InitOnIOThread(RawChannel* raw_channel, RawChannel::Delegate* delegate) {
-  raw_channel->Init(delegate);
-}
-
-bool WriteTestMessageToHandle(const embedder::PlatformHandle& handle,
+bool WriteTestMessageToHandle(const PlatformHandle& handle,
                               uint32_t num_bytes) {
   std::unique_ptr<MessageInTransit> message(MakeTestMessage(num_bytes));
 
@@ -95,7 +93,7 @@ class RawChannelTest : public testing::Test {
  protected:
   test::TestIOThread* io_thread() { return &io_thread_; }
 
-  embedder::ScopedPlatformHandle handles[2];
+  ScopedPlatformHandle handles[2];
 
  private:
   test::TestIOThread io_thread_;
@@ -111,9 +109,9 @@ class WriteOnlyRawChannelDelegate : public RawChannel::Delegate {
   ~WriteOnlyRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation:
-  void OnReadMessage(
-      const MessageInTransit::View& /*message_view*/,
-      embedder::ScopedPlatformHandleVectorPtr /*platform_handles*/) override {
+  void OnReadMessage(const MessageInTransit::View& /*message_view*/,
+                     std::unique_ptr<std::vector<ScopedPlatformHandle>>
+                     /*platform_handles*/) override {
     CHECK(false);  // Should not get called.
   }
   void OnError(Error error) override {
@@ -130,7 +128,7 @@ static const size_t kMessageReaderMaxPollIterations = 3000;
 
 class TestMessageReaderAndChecker {
  public:
-  explicit TestMessageReaderAndChecker(embedder::PlatformHandle handle)
+  explicit TestMessageReaderAndChecker(PlatformHandle handle)
       : handle_(handle) {}
   ~TestMessageReaderAndChecker() { CHECK(bytes_.empty()); }
 
@@ -184,7 +182,7 @@ class TestMessageReaderAndChecker {
   }
 
  private:
-  const embedder::PlatformHandle handle_;
+  const PlatformHandle handle_;
 
   // The start of the received data should always be on a message boundary.
   std::vector<unsigned char> bytes_;
@@ -197,8 +195,7 @@ TEST_F(RawChannelTest, WriteMessage) {
   WriteOnlyRawChannelDelegate delegate;
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   TestMessageReaderAndChecker checker(handles[1].get());
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   // Write and read, for a variety of sizes.
   for (uint32_t size = 1; size < 5 * 1000 * 1000; size += size / 2 + 1) {
@@ -212,8 +209,7 @@ TEST_F(RawChannelTest, WriteMessage) {
   for (uint32_t size = 1; size < 5 * 1000 * 1000; size += size / 2 + 1)
     EXPECT_TRUE(checker.ReadAndCheckNextMessage(size)) << size;
 
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(rc.get())));
+  io_thread()->PostTaskAndWait([&rc]() { rc->Shutdown(); });
 }
 
 // RawChannelTest.OnReadMessage ------------------------------------------------
@@ -224,9 +220,9 @@ class ReadCheckerRawChannelDelegate : public RawChannel::Delegate {
   ~ReadCheckerRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation (called on the I/O thread):
-  void OnReadMessage(
-      const MessageInTransit::View& message_view,
-      embedder::ScopedPlatformHandleVectorPtr platform_handles) override {
+  void OnReadMessage(const MessageInTransit::View& message_view,
+                     std::unique_ptr<std::vector<ScopedPlatformHandle>>
+                         platform_handles) override {
     EXPECT_FALSE(platform_handles);
 
     size_t position;
@@ -281,8 +277,7 @@ class ReadCheckerRawChannelDelegate : public RawChannel::Delegate {
 TEST_F(RawChannelTest, OnReadMessage) {
   ReadCheckerRawChannelDelegate delegate;
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   // Write and read, for a variety of sizes.
   for (uint32_t size = 1; size < 5 * 1000 * 1000; size += size / 2 + 1) {
@@ -303,8 +298,7 @@ TEST_F(RawChannelTest, OnReadMessage) {
     EXPECT_TRUE(WriteTestMessageToHandle(handles[1].get(), size));
   delegate.Wait();
 
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(rc.get())));
+  io_thread()->PostTaskAndWait([&rc]() { rc->Shutdown(); });
 }
 
 // RawChannelTest.WriteMessageAndOnReadMessage ---------------------------------
@@ -339,9 +333,9 @@ class ReadCountdownRawChannelDelegate : public RawChannel::Delegate {
   ~ReadCountdownRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation (called on the I/O thread):
-  void OnReadMessage(
-      const MessageInTransit::View& message_view,
-      embedder::ScopedPlatformHandleVectorPtr platform_handles) override {
+  void OnReadMessage(const MessageInTransit::View& message_view,
+                     std::unique_ptr<std::vector<ScopedPlatformHandle>>
+                         platform_handles) override {
     EXPECT_FALSE(platform_handles);
 
     EXPECT_LT(count_, expected_count_);
@@ -375,19 +369,19 @@ TEST_F(RawChannelTest, WriteMessageAndOnReadMessage) {
 
   WriteOnlyRawChannelDelegate writer_delegate;
   std::unique_ptr<RawChannel> writer_rc(RawChannel::Create(handles[0].Pass()));
-  io_thread()->PostTaskAndWait(base::Bind(&InitOnIOThread, writer_rc.get(),
-                                          base::Unretained(&writer_delegate)));
+  io_thread()->PostTaskAndWait(
+      [&writer_rc, &writer_delegate]() { writer_rc->Init(&writer_delegate); });
 
   ReadCountdownRawChannelDelegate reader_delegate(kNumWriterThreads *
                                                   kNumWriteMessagesPerThread);
   std::unique_ptr<RawChannel> reader_rc(RawChannel::Create(handles[1].Pass()));
-  io_thread()->PostTaskAndWait(base::Bind(&InitOnIOThread, reader_rc.get(),
-                                          base::Unretained(&reader_delegate)));
+  io_thread()->PostTaskAndWait(
+      [&reader_rc, &reader_delegate]() { reader_rc->Init(&reader_delegate); });
 
   {
     std::vector<std::unique_ptr<RawChannelWriterThread>> writer_threads;
     for (size_t i = 0; i < kNumWriterThreads; i++) {
-      writer_threads.push_back(util::MakeUnique<RawChannelWriterThread>(
+      writer_threads.push_back(MakeUnique<RawChannelWriterThread>(
           writer_rc.get(), kNumWriteMessagesPerThread));
     }
     for (size_t i = 0; i < writer_threads.size(); i++)
@@ -401,11 +395,9 @@ TEST_F(RawChannelTest, WriteMessageAndOnReadMessage) {
   // Wait for reading to finish.
   reader_delegate.Wait();
 
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(reader_rc.get())));
+  io_thread()->PostTaskAndWait([&reader_rc]() { reader_rc->Shutdown(); });
 
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(writer_rc.get())));
+  io_thread()->PostTaskAndWait([&writer_rc]() { writer_rc->Shutdown(); });
 }
 
 // RawChannelTest.OnError ------------------------------------------------------
@@ -466,8 +458,7 @@ class ErrorRecordingRawChannelDelegate
 TEST_F(RawChannelTest, OnError) {
   ErrorRecordingRawChannelDelegate delegate(0, true, true);
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   // Close the handle of the other end, which should make writing fail.
   handles[1].reset();
@@ -486,8 +477,7 @@ TEST_F(RawChannelTest, OnError) {
   // notification. (If we actually get another one, |OnError()| crashes.)
   test::SleepMilliseconds(20u);
 
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(rc.get())));
+  io_thread()->PostTaskAndWait([&rc]() { rc->Shutdown(); });
 }
 
 // RawChannelTest.ReadUnaffectedByWriteError -----------------------------------
@@ -508,8 +498,7 @@ TEST_F(RawChannelTest, ReadUnaffectedByWriteError) {
   // messages that were written.
   ErrorRecordingRawChannelDelegate delegate(kMessageCount, true, true);
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   EXPECT_FALSE(rc->WriteMessage(MakeTestMessage(1)));
 
@@ -522,8 +511,7 @@ TEST_F(RawChannelTest, ReadUnaffectedByWriteError) {
   // And then we should get a read error.
   delegate.WaitForReadError();
 
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(rc.get())));
+  io_thread()->PostTaskAndWait([&rc]() { rc->Shutdown(); });
 }
 
 // RawChannelTest.WriteMessageAfterShutdown ------------------------------------
@@ -533,10 +521,8 @@ TEST_F(RawChannelTest, ReadUnaffectedByWriteError) {
 TEST_F(RawChannelTest, WriteMessageAfterShutdown) {
   WriteOnlyRawChannelDelegate delegate;
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(rc.get())));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
+  io_thread()->PostTaskAndWait([&rc]() { rc->Shutdown(); });
 
   EXPECT_FALSE(rc->WriteMessage(MakeTestMessage(1)));
 }
@@ -553,9 +539,9 @@ class ShutdownOnReadMessageRawChannelDelegate : public RawChannel::Delegate {
   ~ShutdownOnReadMessageRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation (called on the I/O thread):
-  void OnReadMessage(
-      const MessageInTransit::View& message_view,
-      embedder::ScopedPlatformHandleVectorPtr platform_handles) override {
+  void OnReadMessage(const MessageInTransit::View& message_view,
+                     std::unique_ptr<std::vector<ScopedPlatformHandle>>
+                         platform_handles) override {
     EXPECT_FALSE(platform_handles);
     EXPECT_FALSE(did_shutdown_);
     EXPECT_TRUE(
@@ -592,8 +578,7 @@ TEST_F(RawChannelTest, ShutdownOnReadMessage) {
 
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   ShutdownOnReadMessageRawChannelDelegate delegate(rc.get(), false);
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   // Wait for the delegate, which will shut the |RawChannel| down.
   delegate.Wait();
@@ -606,8 +591,7 @@ TEST_F(RawChannelTest, ShutdownAndDestroyOnReadMessage) {
   // The delegate will destroy |rc|.
   RawChannel* rc = RawChannel::Create(handles[0].Pass()).release();
   ShutdownOnReadMessageRawChannelDelegate delegate(rc, true);
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc, base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   // Wait for the delegate, which will shut the |RawChannel| down.
   delegate.Wait();
@@ -629,7 +613,8 @@ class ShutdownOnErrorRawChannelDelegate : public RawChannel::Delegate {
   // |RawChannel::Delegate| implementation (called on the I/O thread):
   void OnReadMessage(
       const MessageInTransit::View& /*message_view*/,
-      embedder::ScopedPlatformHandleVectorPtr /*platform_handles*/) override {
+      std::unique_ptr<std::vector<ScopedPlatformHandle>> /*platform_handles*/)
+      override {
     CHECK(false);  // Should not get called.
   }
   void OnError(Error error) override {
@@ -663,8 +648,7 @@ TEST_F(RawChannelTest, ShutdownOnErrorRead) {
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   ShutdownOnErrorRawChannelDelegate delegate(
       rc.get(), false, RawChannel::Delegate::ERROR_READ_SHUTDOWN);
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   // Close the handle of the other end, which should stuff fail.
   handles[1].reset();
@@ -677,8 +661,7 @@ TEST_F(RawChannelTest, ShutdownAndDestroyOnErrorRead) {
   RawChannel* rc = RawChannel::Create(handles[0].Pass()).release();
   ShutdownOnErrorRawChannelDelegate delegate(
       rc, true, RawChannel::Delegate::ERROR_READ_SHUTDOWN);
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc, base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([rc, &delegate]() { rc->Init(&delegate); });
 
   // Close the handle of the other end, which should stuff fail.
   handles[1].reset();
@@ -691,8 +674,7 @@ TEST_F(RawChannelTest, ShutdownOnErrorWrite) {
   std::unique_ptr<RawChannel> rc(RawChannel::Create(handles[0].Pass()));
   ShutdownOnErrorRawChannelDelegate delegate(rc.get(), false,
                                              RawChannel::Delegate::ERROR_WRITE);
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc.get(), base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([&rc, &delegate]() { rc->Init(&delegate); });
 
   // Close the handle of the other end, which should stuff fail.
   handles[1].reset();
@@ -707,8 +689,7 @@ TEST_F(RawChannelTest, ShutdownAndDestroyOnErrorWrite) {
   RawChannel* rc = RawChannel::Create(handles[0].Pass()).release();
   ShutdownOnErrorRawChannelDelegate delegate(rc, true,
                                              RawChannel::Delegate::ERROR_WRITE);
-  io_thread()->PostTaskAndWait(
-      base::Bind(&InitOnIOThread, rc, base::Unretained(&delegate)));
+  io_thread()->PostTaskAndWait([rc, &delegate]() { rc->Init(&delegate); });
 
   // Close the handle of the other end, which should stuff fail.
   handles[1].reset();
@@ -728,9 +709,9 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
   ~ReadPlatformHandlesCheckerRawChannelDelegate() override {}
 
   // |RawChannel::Delegate| implementation (called on the I/O thread):
-  void OnReadMessage(
-      const MessageInTransit::View& message_view,
-      embedder::ScopedPlatformHandleVectorPtr platform_handles) override {
+  void OnReadMessage(const MessageInTransit::View& message_view,
+                     std::unique_ptr<std::vector<ScopedPlatformHandle>>
+                         platform_handles) override {
     const char kHello[] = "hello";
 
     EXPECT_EQ(sizeof(kHello), message_view.num_bytes());
@@ -738,9 +719,9 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
 
     ASSERT_TRUE(platform_handles);
     ASSERT_EQ(2u, platform_handles->size());
-    embedder::ScopedPlatformHandle h1(platform_handles->at(0));
+    ScopedPlatformHandle h1(std::move(platform_handles->at(0)));
     EXPECT_TRUE(h1.is_valid());
-    embedder::ScopedPlatformHandle h2(platform_handles->at(1));
+    ScopedPlatformHandle h2(std::move(platform_handles->at(1)));
     EXPECT_TRUE(h2.is_valid());
     platform_handles->clear();
 
@@ -783,13 +764,13 @@ TEST_F(RawChannelTest, ReadWritePlatformHandles) {
 
   WriteOnlyRawChannelDelegate write_delegate;
   std::unique_ptr<RawChannel> rc_write(RawChannel::Create(handles[0].Pass()));
-  io_thread()->PostTaskAndWait(base::Bind(&InitOnIOThread, rc_write.get(),
-                                          base::Unretained(&write_delegate)));
+  io_thread()->PostTaskAndWait(
+      [&rc_write, &write_delegate]() { rc_write->Init(&write_delegate); });
 
   ReadPlatformHandlesCheckerRawChannelDelegate read_delegate;
   std::unique_ptr<RawChannel> rc_read(RawChannel::Create(handles[1].Pass()));
-  io_thread()->PostTaskAndWait(base::Bind(&InitOnIOThread, rc_read.get(),
-                                          base::Unretained(&read_delegate)));
+  io_thread()->PostTaskAndWait(
+      [&rc_read, &read_delegate]() { rc_read->Init(&read_delegate); });
 
   util::ScopedFILE fp1(test_dir.CreateFile());
   EXPECT_EQ(1u, fwrite("1", 1, 1, fp1.get()));
@@ -798,29 +779,26 @@ TEST_F(RawChannelTest, ReadWritePlatformHandles) {
 
   {
     const char kHello[] = "hello";
-    embedder::ScopedPlatformHandleVectorPtr platform_handles(
-        new embedder::PlatformHandleVector());
+    auto platform_handles = MakeUnique<std::vector<ScopedPlatformHandle>>();
     platform_handles->push_back(
-        mojo::test::PlatformHandleFromFILE(std::move(fp1)).release());
+        mojo::test::PlatformHandleFromFILE(std::move(fp1)));
     platform_handles->push_back(
-        mojo::test::PlatformHandleFromFILE(std::move(fp2)).release());
+        mojo::test::PlatformHandleFromFILE(std::move(fp2)));
 
     std::unique_ptr<MessageInTransit> message(
         new MessageInTransit(MessageInTransit::Type::ENDPOINT_CLIENT,
                              MessageInTransit::Subtype::ENDPOINT_CLIENT_DATA,
                              sizeof(kHello), kHello));
-    message->SetTransportData(util::MakeUnique<TransportData>(
-        std::move(platform_handles),
-        rc_write->GetSerializedPlatformHandleSize()));
+    message->SetTransportData(
+        MakeUnique<TransportData>(std::move(platform_handles),
+                                  rc_write->GetSerializedPlatformHandleSize()));
     EXPECT_TRUE(rc_write->WriteMessage(std::move(message)));
   }
 
   read_delegate.Wait();
 
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(rc_read.get())));
-  io_thread()->PostTaskAndWait(
-      base::Bind(&RawChannel::Shutdown, base::Unretained(rc_write.get())));
+  io_thread()->PostTaskAndWait([&rc_read]() { rc_read->Shutdown(); });
+  io_thread()->PostTaskAndWait([&rc_write]() { rc_write->Shutdown(); });
 }
 
 }  // namespace

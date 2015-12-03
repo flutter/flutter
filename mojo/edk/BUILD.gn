@@ -5,7 +5,9 @@
 group("tests") {
   testonly = true
   deps = [
+    "base_edk:mojo_edk_base_edk_unittests",
     "embedder:mojo_edk_embedder_unittests",
+    "platform:mojo_edk_platform_unittests",
     "system:mojo_edk_system_perftests",
     "system:mojo_edk_system_unittests",
     "system/test:mojo_edk_system_test_unittests",

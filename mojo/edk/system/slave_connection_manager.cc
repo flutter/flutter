@@ -15,6 +15,9 @@
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::TaskRunner;
+using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -46,9 +49,9 @@ SlaveConnectionManager::~SlaveConnectionManager() {
 }
 
 void SlaveConnectionManager::Init(
-    RefPtr<embedder::PlatformTaskRunner>&& delegate_thread_task_runner,
+    RefPtr<TaskRunner>&& delegate_thread_task_runner,
     embedder::SlaveProcessDelegate* slave_process_delegate,
-    embedder::ScopedPlatformHandle platform_handle) {
+    ScopedPlatformHandle platform_handle) {
   DCHECK(delegate_thread_task_runner);
   DCHECK(slave_process_delegate);
   DCHECK(platform_handle.is_valid());
@@ -115,7 +118,7 @@ ConnectionManager::Result SlaveConnectionManager::Connect(
     const ConnectionIdentifier& connection_id,
     ProcessIdentifier* peer_process_identifier,
     bool* is_first,
-    embedder::ScopedPlatformHandle* platform_handle) {
+    ScopedPlatformHandle* platform_handle) {
   AssertNotOnPrivateThread();
   DCHECK(peer_process_identifier);
   DCHECK(is_first);
@@ -134,7 +137,7 @@ ConnectionManager::Result SlaveConnectionManager::Connect(
 }
 
 void SlaveConnectionManager::InitOnPrivateThread(
-    embedder::ScopedPlatformHandle platform_handle) {
+    ScopedPlatformHandle platform_handle) {
   AssertOnPrivateThread();
 
   raw_channel_ = RawChannel::Create(platform_handle.Pass());
@@ -164,7 +167,7 @@ void SlaveConnectionManager::AllowConnectOnPrivateThread(
 
   DVLOG(1) << "Sending AllowConnect: connection ID "
            << connection_id.ToString();
-  if (!raw_channel_->WriteMessage(util::MakeUnique<MessageInTransit>(
+  if (!raw_channel_->WriteMessage(MakeUnique<MessageInTransit>(
           MessageInTransit::Type::CONNECTION_MANAGER,
           MessageInTransit::Subtype::CONNECTION_MANAGER_ALLOW_CONNECT,
           sizeof(connection_id), &connection_id))) {
@@ -189,7 +192,7 @@ void SlaveConnectionManager::CancelConnectOnPrivateThread(
 
   DVLOG(1) << "Sending CancelConnect: connection ID "
            << connection_id.ToString();
-  if (!raw_channel_->WriteMessage(util::MakeUnique<MessageInTransit>(
+  if (!raw_channel_->WriteMessage(MakeUnique<MessageInTransit>(
           MessageInTransit::Type::CONNECTION_MANAGER,
           MessageInTransit::Subtype::CONNECTION_MANAGER_CANCEL_CONNECT,
           sizeof(connection_id), &connection_id))) {
@@ -207,7 +210,7 @@ void SlaveConnectionManager::ConnectOnPrivateThread(
     Result* result,
     ProcessIdentifier* peer_process_identifier,
     bool* is_first,
-    embedder::ScopedPlatformHandle* platform_handle) {
+    ScopedPlatformHandle* platform_handle) {
   DCHECK(result);
   AssertOnPrivateThread();
   // This should only posted (from another thread, to |private_thread_|) with
@@ -216,7 +219,7 @@ void SlaveConnectionManager::ConnectOnPrivateThread(
   DCHECK_EQ(awaiting_ack_type_, NOT_AWAITING_ACK);
 
   DVLOG(1) << "Sending Connect: connection ID " << connection_id.ToString();
-  if (!raw_channel_->WriteMessage(util::MakeUnique<MessageInTransit>(
+  if (!raw_channel_->WriteMessage(MakeUnique<MessageInTransit>(
           MessageInTransit::Type::CONNECTION_MANAGER,
           MessageInTransit::Subtype::CONNECTION_MANAGER_CONNECT,
           sizeof(connection_id), &connection_id))) {
@@ -235,7 +238,7 @@ void SlaveConnectionManager::ConnectOnPrivateThread(
 
 void SlaveConnectionManager::OnReadMessage(
     const MessageInTransit::View& message_view,
-    embedder::ScopedPlatformHandleVectorPtr platform_handles) {
+    std::unique_ptr<std::vector<ScopedPlatformHandle>> platform_handles) {
   AssertOnPrivateThread();
 
   // Set |*ack_result_| to failure by default.
@@ -291,8 +294,7 @@ void SlaveConnectionManager::OnReadMessage(
             CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_NEW_CONNECTION:
           CHECK_EQ(num_platform_handles, 1u);
           *ack_result_ = Result::SUCCESS_CONNECT_NEW_CONNECTION;
-          ack_platform_handle_->reset(platform_handles->at(0));
-          platform_handles->at(0) = embedder::PlatformHandle();
+          *ack_platform_handle_ = std::move(platform_handles->at(0));
           break;
         case MessageInTransit::Subtype::
             CONNECTION_MANAGER_ACK_SUCCESS_CONNECT_REUSE_CONNECTION:
@@ -325,9 +327,12 @@ void SlaveConnectionManager::OnError(Error error) {
   raw_channel_.reset();
 
   DCHECK(slave_process_delegate_);
-  delegate_thread_task_runner_->PostTask(
-      base::Bind(&embedder::SlaveProcessDelegate::OnMasterDisconnect,
-                 base::Unretained(slave_process_delegate_)));
+  // TODO(vtl): With C++14 lambda captures, we'll be able to avoid this
+  // nonsense.
+  auto slave_process_delegate = slave_process_delegate_;
+  delegate_thread_task_runner_->PostTask([slave_process_delegate]() {
+    slave_process_delegate->OnMasterDisconnect();
+  });
 }
 
 void SlaveConnectionManager::AssertNotOnPrivateThread() const {

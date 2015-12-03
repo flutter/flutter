@@ -9,32 +9,40 @@
 
 #include <stdint.h>
 
+#include <memory>
 #include <string>
 
-#include "base/message_loop/message_loop.h"
-#include "base/run_loop.h"
-#include "base/threading/thread_checker.h"
 #include "mojo/edk/base_edk/platform_task_runner_impl.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/embedder/slave_process_delegate.h"
+#include "mojo/edk/platform/message_loop.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/test_message_loops.h"
 #include "mojo/edk/system/master_connection_manager.h"
 #include "mojo/edk/system/slave_connection_manager.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/ref_ptr.h"
+#include "mojo/edk/util/thread_checker.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::MessageLoop;
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::TaskRunner;
+using mojo::platform::test::CreateTestMessageLoop;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
+using mojo::util::ThreadChecker;
 
 namespace mojo {
 namespace system {
 namespace {
 
-bool ArePlatformHandlesConnected(const embedder::PlatformHandle& h1,
-                                 const embedder::PlatformHandle& h2) {
+bool ArePlatformHandlesConnected(const PlatformHandle& h1,
+                                 const PlatformHandle& h2) {
   const uint32_t w1 = 0xdeadbeef;
   size_t num_bytes = 0;
   if (!mojo::test::BlockingWrite(h1, &w1, sizeof(w1), &num_bytes) ||
@@ -72,12 +80,12 @@ bool IsValidSlaveProcessIdentifier(ProcessIdentifier process_identifier) {
 class TestSlaveInfo {
  public:
   explicit TestSlaveInfo(const std::string& name) : name_(name) {}
-  ~TestSlaveInfo() { CHECK(thread_checker_.CalledOnValidThread()); }
+  ~TestSlaveInfo() { CHECK(thread_checker_.IsCreationThreadCurrent()); }
 
   const std::string& name() const { return name_; }
 
  private:
-  base::ThreadChecker thread_checker_;
+  ThreadChecker thread_checker_;
   std::string name_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestSlaveInfo);
@@ -86,15 +94,14 @@ class TestSlaveInfo {
 class MockMasterProcessDelegate : public embedder::MasterProcessDelegate {
  public:
   MockMasterProcessDelegate()
-      : current_run_loop_(), on_slave_disconnect_calls_(0) {}
+      : current_message_loop_(), on_slave_disconnect_calls_(0) {}
   ~MockMasterProcessDelegate() override {}
 
-  void RunUntilNotified() {
-    CHECK(!current_run_loop_);
-    base::RunLoop run_loop;
-    current_run_loop_ = &run_loop;
-    run_loop.Run();
-    current_run_loop_ = nullptr;
+  void RunUntilNotified(MessageLoop* message_loop) {
+    CHECK(!current_message_loop_);
+    current_message_loop_ = message_loop;
+    message_loop->Run();
+    current_message_loop_ = nullptr;
   }
 
   unsigned on_slave_disconnect_calls() const {
@@ -108,7 +115,7 @@ class MockMasterProcessDelegate : public embedder::MasterProcessDelegate {
   void OnShutdownComplete() override { NOTREACHED(); }
 
   void OnSlaveDisconnect(embedder::SlaveInfo slave_info) override {
-    CHECK(thread_checker_.CalledOnValidThread());
+    CHECK(thread_checker_.IsCreationThreadCurrent());
     on_slave_disconnect_calls_++;
     last_slave_disconnect_name_ =
         static_cast<TestSlaveInfo*>(slave_info)->name();
@@ -116,13 +123,13 @@ class MockMasterProcessDelegate : public embedder::MasterProcessDelegate {
              << last_slave_disconnect_name_;
     delete static_cast<TestSlaveInfo*>(slave_info);
 
-    if (current_run_loop_)
-      current_run_loop_->Quit();
+    if (current_message_loop_)
+      current_message_loop_->QuitNow();
   }
 
  private:
-  base::ThreadChecker thread_checker_;
-  base::RunLoop* current_run_loop_;
+  ThreadChecker thread_checker_;
+  MessageLoop* current_message_loop_;
 
   unsigned on_slave_disconnect_calls_;
   std::string last_slave_disconnect_name_;
@@ -133,15 +140,14 @@ class MockMasterProcessDelegate : public embedder::MasterProcessDelegate {
 class MockSlaveProcessDelegate : public embedder::SlaveProcessDelegate {
  public:
   MockSlaveProcessDelegate()
-      : current_run_loop_(), on_master_disconnect_calls_(0) {}
+      : current_message_loop_(), on_master_disconnect_calls_(0) {}
   ~MockSlaveProcessDelegate() override {}
 
-  void RunUntilNotified() {
-    CHECK(!current_run_loop_);
-    base::RunLoop run_loop;
-    current_run_loop_ = &run_loop;
-    run_loop.Run();
-    current_run_loop_ = nullptr;
+  void RunUntilNotified(MessageLoop* message_loop) {
+    CHECK(!current_message_loop_);
+    current_message_loop_ = message_loop;
+    message_loop->Run();
+    current_message_loop_ = nullptr;
   }
 
   unsigned on_master_disconnect_calls() const {
@@ -152,17 +158,17 @@ class MockSlaveProcessDelegate : public embedder::SlaveProcessDelegate {
   void OnShutdownComplete() override { NOTREACHED(); }
 
   void OnMasterDisconnect() override {
-    CHECK(thread_checker_.CalledOnValidThread());
+    CHECK(thread_checker_.IsCreationThreadCurrent());
     on_master_disconnect_calls_++;
     DVLOG(1) << "Disconnected from master process";
 
-    if (current_run_loop_)
-      current_run_loop_->Quit();
+    if (current_message_loop_)
+      current_message_loop_->QuitNow();
   }
 
  private:
-  base::ThreadChecker thread_checker_;
-  base::RunLoop* current_run_loop_;
+  ThreadChecker thread_checker_;
+  MessageLoop* current_message_loop_;
 
   unsigned on_master_disconnect_calls_;
 
@@ -171,14 +177,13 @@ class MockSlaveProcessDelegate : public embedder::SlaveProcessDelegate {
 
 class ConnectionManagerTest : public testing::Test {
  protected:
-  ConnectionManagerTest()
-      : task_runner_(MakeRefCounted<base_edk::PlatformTaskRunnerImpl>(
-            message_loop_.task_runner())) {}
+  ConnectionManagerTest() : message_loop_(CreateTestMessageLoop()) {}
   ~ConnectionManagerTest() override {}
 
   embedder::PlatformSupport* platform_support() { return &platform_support_; }
-  const RefPtr<embedder::PlatformTaskRunner>& task_runner() {
-    return task_runner_;
+  MessageLoop* message_loop() { return message_loop_.get(); }
+  const RefPtr<TaskRunner>& task_runner() {
+    return message_loop_->GetTaskRunner();
   }
   MockMasterProcessDelegate& master_process_delegate() {
     return master_process_delegate_;
@@ -196,15 +201,14 @@ class ConnectionManagerTest : public testing::Test {
     ProcessIdentifier slave_process_identifier =
         master->AddSlave(new TestSlaveInfo(slave_name),
                          platform_channel_pair.PassServerHandle());
-    slave->Init(task_runner_.Clone(), slave_process_delegate,
+    slave->Init(task_runner().Clone(), slave_process_delegate,
                 platform_channel_pair.PassClientHandle());
     return slave_process_identifier;
   }
 
  private:
   embedder::SimplePlatformSupport platform_support_;
-  base::MessageLoop message_loop_;
-  RefPtr<embedder::PlatformTaskRunner> task_runner_;
+  std::unique_ptr<MessageLoop> message_loop_;
   MockMasterProcessDelegate master_process_delegate_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ConnectionManagerTest);
@@ -235,14 +239,14 @@ TEST_F(ConnectionManagerTest, BasicConnectSlaves) {
 
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h1;
+  ScopedPlatformHandle h1;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave1.Connect(connection_id, &peer1, &is_first, &h1));
   EXPECT_EQ(slave2_id, peer1);
   EXPECT_TRUE(is_first);
   EXPECT_TRUE(h1.is_valid());
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave2.Connect(connection_id, &peer2, &is_first, &h2));
   EXPECT_EQ(slave1_id, peer2);
@@ -253,27 +257,27 @@ TEST_F(ConnectionManagerTest, BasicConnectSlaves) {
 
   // The process manager shouldn't have gotten any notifications yet. (Spin the
   // message loop to make sure none were enqueued.)
-  base::RunLoop().RunUntilIdle();
+  message_loop()->RunUntilIdle();
   EXPECT_EQ(0u, master_process_delegate().on_slave_disconnect_calls());
 
   slave1.Shutdown();
 
   // |OnSlaveDisconnect()| should be called once.
-  master_process_delegate().RunUntilNotified();
+  master_process_delegate().RunUntilNotified(message_loop());
   EXPECT_EQ(1u, master_process_delegate().on_slave_disconnect_calls());
   EXPECT_EQ("slave1", master_process_delegate().last_slave_disconnect_name());
 
   slave2.Shutdown();
 
   // |OnSlaveDisconnect()| should be called again.
-  master_process_delegate().RunUntilNotified();
+  master_process_delegate().RunUntilNotified(message_loop());
   EXPECT_EQ(2u, master_process_delegate().on_slave_disconnect_calls());
   EXPECT_EQ("slave2", master_process_delegate().last_slave_disconnect_name());
 
   master.Shutdown();
 
   // None of the above should result in |OnMasterDisconnect()| being called.
-  base::RunLoop().RunUntilIdle();
+  message_loop()->RunUntilIdle();
   EXPECT_EQ(0u, slave1_process_delegate.on_master_disconnect_calls());
   EXPECT_EQ(0u, slave2_process_delegate.on_master_disconnect_calls());
 }
@@ -290,18 +294,18 @@ TEST_F(ConnectionManagerTest, ShutdownMasterBeforeSlave) {
 
   // The process manager shouldn't have gotten any notifications yet. (Spin the
   // message loop to make sure none were enqueued.)
-  base::RunLoop().RunUntilIdle();
+  message_loop()->RunUntilIdle();
   EXPECT_EQ(0u, master_process_delegate().on_slave_disconnect_calls());
 
   master.Shutdown();
 
   // |OnSlaveDisconnect()| should be called.
-  master_process_delegate().RunUntilNotified();
+  master_process_delegate().RunUntilNotified(message_loop());
   EXPECT_EQ(1u, master_process_delegate().on_slave_disconnect_calls());
   EXPECT_EQ("slave", master_process_delegate().last_slave_disconnect_name());
 
   // |OnMasterDisconnect()| should also be (or have been) called.
-  slave_process_delegate.RunUntilNotified();
+  slave_process_delegate.RunUntilNotified(message_loop());
   EXPECT_EQ(1u, slave_process_delegate.on_master_disconnect_calls());
 
   slave.Shutdown();
@@ -331,7 +335,7 @@ TEST_F(ConnectionManagerTest, SlaveCancelConnect) {
   EXPECT_TRUE(slave1.CancelConnect(connection_id));
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::FAILURE,
             slave2.Connect(connection_id, &peer2, &is_first, &h2));
   EXPECT_EQ(kInvalidProcessIdentifier, peer2);
@@ -370,12 +374,12 @@ TEST_F(ConnectionManagerTest, ErrorRemovePending) {
   // |OnSlaveDisconnect()| should be called. After it's called, this means that
   // the disconnect has been detected and handled, including the removal of the
   // pending connection.
-  master_process_delegate().RunUntilNotified();
+  master_process_delegate().RunUntilNotified(message_loop());
   EXPECT_EQ(1u, master_process_delegate().on_slave_disconnect_calls());
 
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::FAILURE,
             slave2.Connect(connection_id, &peer2, &is_first, &h2));
   EXPECT_EQ(kInvalidProcessIdentifier, peer2);
@@ -402,14 +406,14 @@ TEST_F(ConnectionManagerTest, ConnectSlaveToSelf) {
 
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h1;
+  ScopedPlatformHandle h1;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
             slave.Connect(connection_id, &peer1, &is_first, &h1));
   EXPECT_EQ(slave_id, peer1);
   EXPECT_TRUE(is_first);
   EXPECT_FALSE(h1.is_valid());
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
             slave.Connect(connection_id, &peer2, &is_first, &h2));
   EXPECT_EQ(slave_id, peer2);
@@ -443,13 +447,13 @@ TEST_F(ConnectionManagerTest, ConnectSlavesTwice) {
 
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h1;
+  ScopedPlatformHandle h1;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave1.Connect(connection_id, &peer1, &is_first, &h1));
   EXPECT_EQ(slave2_id, peer1);
   EXPECT_TRUE(is_first);
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave2.Connect(connection_id, &peer2, &is_first, &h2));
   EXPECT_EQ(slave1_id, peer2);
@@ -513,13 +517,13 @@ TEST_F(ConnectionManagerTest, OverlappingSlaveConnects) {
 
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h1;
+  ScopedPlatformHandle h1;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave1.Connect(connection_id1, &peer1, &is_first, &h1));
   EXPECT_EQ(slave2_id, peer1);
   EXPECT_TRUE(is_first);
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave2.Connect(connection_id2, &peer2, &is_first, &h2));
   EXPECT_EQ(slave1_id, peer2);
@@ -563,14 +567,14 @@ TEST_F(ConnectionManagerTest, ConnectMasterToSlave) {
 
   ProcessIdentifier master_peer = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle master_h;
+  ScopedPlatformHandle master_h;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             master.Connect(connection_id, &master_peer, &is_first, &master_h));
   EXPECT_EQ(slave_id, master_peer);
   EXPECT_TRUE(is_first);
   EXPECT_TRUE(master_h.is_valid());
   ProcessIdentifier slave_peer = kInvalidProcessIdentifier;
-  embedder::ScopedPlatformHandle slave_h;
+  ScopedPlatformHandle slave_h;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave.Connect(connection_id, &slave_peer, &is_first, &slave_h));
   EXPECT_EQ(kMasterProcessIdentifier, slave_peer);
@@ -593,14 +597,14 @@ TEST_F(ConnectionManagerTest, ConnectMasterToSelf) {
 
   ProcessIdentifier peer1 = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h1;
+  ScopedPlatformHandle h1;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
             master.Connect(connection_id, &peer1, &is_first, &h1));
   EXPECT_EQ(kMasterProcessIdentifier, peer1);
   EXPECT_TRUE(is_first);
   EXPECT_FALSE(h1.is_valid());
   ProcessIdentifier peer2 = kInvalidProcessIdentifier;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_SAME_PROCESS,
             master.Connect(connection_id, &peer2, &is_first, &h2));
   EXPECT_EQ(kMasterProcessIdentifier, peer2);
@@ -629,7 +633,7 @@ TEST_F(ConnectionManagerTest, MasterCancelConnect) {
   EXPECT_TRUE(master.CancelConnect(connection_id));
   ProcessIdentifier peer = kInvalidProcessIdentifier;
   bool is_first = false;
-  embedder::ScopedPlatformHandle h;
+  ScopedPlatformHandle h;
   EXPECT_EQ(ConnectionManager::Result::FAILURE,
             slave.Connect(connection_id, &peer, &is_first, &h));
   EXPECT_EQ(kInvalidProcessIdentifier, peer);
@@ -665,7 +669,7 @@ TEST_F(ConnectionManagerTest, AddSlaveAndBootstrap) {
       connection_id);
   EXPECT_TRUE(IsValidSlaveProcessIdentifier(slave_id));
 
-  embedder::ScopedPlatformHandle h1;
+  ScopedPlatformHandle h1;
   ProcessIdentifier master_peer = kInvalidProcessIdentifier;
   bool is_first = false;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
@@ -681,7 +685,7 @@ TEST_F(ConnectionManagerTest, AddSlaveAndBootstrap) {
              platform_channel_pair.PassClientHandle());
 
   ProcessIdentifier slave_peer = kInvalidProcessIdentifier;
-  embedder::ScopedPlatformHandle h2;
+  ScopedPlatformHandle h2;
   EXPECT_EQ(ConnectionManager::Result::SUCCESS_CONNECT_NEW_CONNECTION,
             slave.Connect(connection_id, &slave_peer, &is_first, &h2));
   EXPECT_EQ(kMasterProcessIdentifier, slave_peer);

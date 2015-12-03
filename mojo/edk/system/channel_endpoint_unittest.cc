@@ -31,17 +31,17 @@ class ChannelEndpointTest : public test::ChannelTestBase {
   void SetUp() override {
     test::ChannelTestBase::SetUp();
 
-    PostMethodToIOThreadAndWait(
-        &ChannelEndpointTest::CreateAndInitChannelOnIOThread, 0);
-    PostMethodToIOThreadAndWait(
-        &ChannelEndpointTest::CreateAndInitChannelOnIOThread, 1);
+    io_thread()->PostTaskAndWait([this]() {
+      CreateAndInitChannelOnIOThread(0);
+      CreateAndInitChannelOnIOThread(1);
+    });
   }
 
   void TearDown() override {
-    PostMethodToIOThreadAndWait(&ChannelEndpointTest::ShutdownChannelOnIOThread,
-                                0);
-    PostMethodToIOThreadAndWait(&ChannelEndpointTest::ShutdownChannelOnIOThread,
-                                1);
+    io_thread()->PostTaskAndWait([this]() {
+      ShutdownChannelOnIOThread(0);
+      ShutdownChannelOnIOThread(1);
+    });
 
     test::ChannelTestBase::TearDown();
   }

@@ -4,7 +4,8 @@
 
 #include "mojo/edk/system/test/test_io_thread.h"
 
-#include "base/bind.h"
+#include <utility>
+
 #include "mojo/edk/util/waitable_event.h"
 
 using mojo::util::AutoResetWaitableEvent;
@@ -13,16 +14,6 @@ using mojo::util::MakeRefCounted;
 namespace mojo {
 namespace system {
 namespace test {
-
-namespace {
-
-void PostTaskAndWaitHelper(AutoResetWaitableEvent* event,
-                           const base::Closure& task) {
-  task.Run();
-  event->Signal();
-}
-
-}  // namespace
 
 TestIOThread::TestIOThread(StartMode start_mode)
     : io_thread_("test_io_thread"), io_thread_started_(false) {
@@ -55,14 +46,30 @@ void TestIOThread::Stop() {
   io_thread_started_ = false;
 }
 
+bool TestIOThread::IsCurrentAndRunning() const {
+  return base::MessageLoop::current() == io_thread_.message_loop() &&
+         io_thread_.message_loop()->is_running();
+}
+
+void TestIOThread::PostTask(std::function<void()>&& task) {
+  io_task_runner_->PostTask(std::move(task));
+}
+
 void TestIOThread::PostTask(const base::Closure& task) {
   io_task_runner_->PostTask(task);
 }
 
-void TestIOThread::PostTaskAndWait(const base::Closure& task) {
+void TestIOThread::PostTaskAndWait(std::function<void()>&& task) {
   AutoResetWaitableEvent event;
-  io_task_runner_->PostTask(base::Bind(&PostTaskAndWaitHelper, &event, task));
+  io_task_runner_->PostTask([&task, &event]() {
+    task();
+    event.Signal();
+  });
   event.Wait();
+}
+
+void TestIOThread::PostTaskAndWait(const base::Closure& task) {
+  PostTaskAndWait([&task]() { task.Run(); });
 }
 
 }  // namespace test

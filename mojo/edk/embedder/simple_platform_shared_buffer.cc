@@ -27,6 +27,8 @@
 #include "third_party/ashmem/ashmem.h"
 #endif  // defined(OS_ANDROID)
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
 // We assume that |size_t| and |off_t| (type for |ftruncate()|) fits in a

@@ -9,6 +9,8 @@
 #include "base/test/test_timeouts.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 
+using mojo::platform::ScopedPlatformHandle;
+
 namespace mojo {
 namespace test {
 
@@ -93,7 +95,7 @@ void MultiprocessTestHelper::ChildSetup() {
 }
 
 // static
-embedder::ScopedPlatformHandle MultiprocessTestHelper::client_platform_handle;
+ScopedPlatformHandle MultiprocessTestHelper::client_platform_handle;
 
 }  // namespace test
 }  // namespace mojo

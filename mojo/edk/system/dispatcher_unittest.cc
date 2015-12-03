@@ -19,6 +19,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 using mojo::util::MakeRefCounted;
+using mojo::util::MakeUnique;
 using mojo::util::ManualResetWaitableEvent;
 using mojo::util::RefPtr;
 
@@ -269,8 +270,7 @@ TEST(DispatcherTest, ThreadSafetyStress) {
         ThreadSafetyStressThread::DispatcherOp op =
             static_cast<ThreadSafetyStressThread::DispatcherOp>(
                 (i + j) % ThreadSafetyStressThread::DISPATCHER_OP_COUNT);
-        threads.push_back(
-            util::MakeUnique<ThreadSafetyStressThread>(&event, d, op));
+        threads.push_back(MakeUnique<ThreadSafetyStressThread>(&event, d, op));
         threads.back()->Start();
       }
       // Kicks off real work on the threads:
@@ -298,8 +298,7 @@ TEST(DispatcherTest, ThreadSafetyStressNoClose) {
             static_cast<ThreadSafetyStressThread::DispatcherOp>(
                 (i + j) % (ThreadSafetyStressThread::DISPATCHER_OP_COUNT - 1) +
                 1);
-        threads.push_back(
-            util::MakeUnique<ThreadSafetyStressThread>(&event, d, op));
+        threads.push_back(MakeUnique<ThreadSafetyStressThread>(&event, d, op));
         threads.back()->Start();
       }
       // Kicks off real work on the threads:

@@ -15,6 +15,7 @@
 #include "mojo/edk/system/options_validation.h"
 #include "mojo/public/c/system/macros.h"
 
+using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -98,7 +99,7 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Deserialize(
     Channel* channel,
     const void* source,
     size_t size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   DCHECK(channel);
 
   if (size != sizeof(SerializedSharedBufferDispatcher)) {
@@ -140,7 +141,7 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Deserialize(
   }
 
   // Starts off invalid, which is what we want.
-  embedder::PlatformHandle platform_handle;
+  ScopedPlatformHandle platform_handle;
   // We take ownership of the handle, so we have to invalidate the one in
   // |platform_handles|.
   std::swap(platform_handle, (*platform_handles)[platform_handle_index]);
@@ -149,7 +150,7 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Deserialize(
   // closed even if creation fails.
   auto shared_buffer =
       channel->platform_support()->CreateSharedBufferFromHandle(
-          num_bytes, embedder::ScopedPlatformHandle(platform_handle));
+          num_bytes, std::move(platform_handle));
   if (!shared_buffer) {
     LOG(ERROR)
         << "Invalid serialized shared buffer dispatcher (invalid num_bytes?)";
@@ -267,7 +268,7 @@ bool SharedBufferDispatcher::EndSerializeAndCloseImplNoLock(
     Channel* /*channel*/,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   AssertHasOneRef();  // Only one ref => no need to take the lock.
   DCHECK(shared_buffer_);
 
@@ -276,7 +277,7 @@ bool SharedBufferDispatcher::EndSerializeAndCloseImplNoLock(
   // If there's only one reference to |shared_buffer_|, then it's ours (and no
   // one else can make any more references to it), so we can just take its
   // handle.
-  embedder::ScopedPlatformHandle platform_handle(
+  ScopedPlatformHandle platform_handle(
       shared_buffer_->HasOneRef() ? shared_buffer_->PassPlatformHandle()
                                   : shared_buffer_->DuplicatePlatformHandle());
   if (!platform_handle.is_valid()) {
@@ -286,7 +287,7 @@ bool SharedBufferDispatcher::EndSerializeAndCloseImplNoLock(
 
   serialization->num_bytes = shared_buffer_->GetNumBytes();
   serialization->platform_handle_index = platform_handles->size();
-  platform_handles->push_back(platform_handle.release());
+  platform_handles->push_back(std::move(platform_handle));
   *actual_size = sizeof(SerializedSharedBufferDispatcher);
 
   shared_buffer_ = nullptr;

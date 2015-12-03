@@ -10,9 +10,8 @@
 #include <memory>
 #include <vector>
 
-#include "base/memory/aligned_memory.h"
-#include "mojo/edk/embedder/platform_handle.h"
-#include "mojo/edk/embedder/platform_handle_vector.h"
+#include "mojo/edk/platform/aligned_alloc.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -95,7 +94,8 @@ class TransportData {
   // |Dispatcher|s. (|Header| will be present, and zero except for
   // |num_platform_handles|, and |platform_handle_table_offset| if necessary.)
   explicit TransportData(
-      embedder::ScopedPlatformHandleVectorPtr platform_handles,
+      std::unique_ptr<std::vector<platform::ScopedPlatformHandle>>
+          platform_handles,
       size_t serialized_platform_handle_size);
 
   ~TransportData();
@@ -110,10 +110,10 @@ class TransportData {
 
   // Gets attached platform-specific handles; this may return null if there are
   // none. Note that the caller may mutate the set of platform-specific handles.
-  const embedder::PlatformHandleVector* platform_handles() const {
+  const std::vector<platform::ScopedPlatformHandle>* platform_handles() const {
     return platform_handles_.get();
   }
-  embedder::PlatformHandleVector* platform_handles() {
+  std::vector<platform::ScopedPlatformHandle>* platform_handles() {
     return platform_handles_.get();
   }
 
@@ -142,7 +142,8 @@ class TransportData {
   static std::unique_ptr<DispatcherVector> DeserializeDispatchers(
       const void* buffer,
       size_t buffer_size,
-      embedder::ScopedPlatformHandleVectorPtr platform_handles,
+      std::unique_ptr<std::vector<platform::ScopedPlatformHandle>>
+          platform_handles,
       Channel* channel);
 
  private:
@@ -173,13 +174,14 @@ class TransportData {
   }
 
   size_t buffer_size_;
-  std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;  // Never null.
+  platform::AlignedUniquePtr<char> buffer_;  // Never null.
 
   // Any platform-specific handles attached to this message (for inter-process
   // transport). The vector (if any) owns the handles that it contains (and is
   // responsible for closing them).
   // TODO(vtl): With C++11, change it to a vector of |ScopedPlatformHandle|s.
-  embedder::ScopedPlatformHandleVectorPtr platform_handles_;
+  std::unique_ptr<std::vector<platform::ScopedPlatformHandle>>
+      platform_handles_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TransportData);
 };

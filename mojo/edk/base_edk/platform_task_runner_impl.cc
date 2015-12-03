@@ -6,10 +6,18 @@
 
 #include <utility>
 
+#include "base/bind.h"
 #include "base/location.h"
 #include "base/logging.h"
 
 namespace base_edk {
+namespace {
+
+void RunFunction(const std::function<void()>& fn) {
+  fn();
+}
+
+}  // namespace
 
 PlatformTaskRunnerImpl::PlatformTaskRunnerImpl(
     scoped_refptr<base::TaskRunner>&& base_task_runner)
@@ -18,6 +26,12 @@ PlatformTaskRunnerImpl::PlatformTaskRunnerImpl(
 }
 
 PlatformTaskRunnerImpl::~PlatformTaskRunnerImpl() {}
+
+void PlatformTaskRunnerImpl::PostTask(std::function<void()>&& task) {
+  bool result = base_task_runner_->PostTask(tracked_objects::Location(),
+                                            base::Bind(&RunFunction, task));
+  DCHECK(result);
+}
 
 void PlatformTaskRunnerImpl::PostTask(const base::Closure& task) {
   bool result = base_task_runner_->PostTask(tracked_objects::Location(), task);

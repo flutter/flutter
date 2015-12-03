@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/util/ref_counted.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -56,13 +56,13 @@ class PlatformSharedBuffer
 
   // Duplicates the underlying platform handle and passes it to the caller.
   // TODO(vtl): On POSIX, we'll need two FDs to support sharing read-only.
-  virtual ScopedPlatformHandle DuplicatePlatformHandle() = 0;
+  virtual platform::ScopedPlatformHandle DuplicatePlatformHandle() = 0;
 
   // Passes the underlying platform handle to the caller. This should only be
   // called if there's a unique reference to this object (owned by the caller).
   // After calling this, this object should no longer be used, but should only
   // be disposed of.
-  virtual ScopedPlatformHandle PassPlatformHandle() = 0;
+  virtual platform::ScopedPlatformHandle PassPlatformHandle() = 0;
 
  protected:
   friend class util::RefCountedThreadSafe<PlatformSharedBuffer>;

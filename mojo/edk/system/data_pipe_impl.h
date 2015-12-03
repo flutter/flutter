@@ -8,8 +8,9 @@
 #include <stdint.h>
 
 #include <utility>
+#include <vector>
 
-#include "mojo/edk/embedder/platform_handle_vector.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/data_pipe.h"
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/memory.h"
@@ -75,7 +76,7 @@ class DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) = 0;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) = 0;
 
   virtual void ConsumerClose() = 0;
   // |num_bytes.Get()| will be a nonzero multiple of |element_num_bytes()|.
@@ -102,7 +103,7 @@ class DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) = 0;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) = 0;
 
   virtual bool OnReadMessage(unsigned port, MessageInTransit* message) = 0;
   virtual void OnDetachFromChannel(unsigned port) = 0;

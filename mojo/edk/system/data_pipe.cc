@@ -12,7 +12,7 @@
 #include <utility>
 
 #include "base/logging.h"
-#include "base/memory/aligned_memory.h"
+#include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/system/awakable_list.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/configuration.h"
@@ -25,6 +25,9 @@
 #include "mojo/edk/system/remote_producer_data_pipe_impl.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::platform::AlignedUniquePtr;
+using mojo::platform::ScopedPlatformHandle;
+using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -100,7 +103,7 @@ MojoResult DataPipe::ValidateCreateOptions(
 RefPtr<DataPipe> DataPipe::CreateLocal(
     const MojoCreateDataPipeOptions& validated_options) {
   return AdoptRef(new DataPipe(true, true, validated_options,
-                               util::MakeUnique<LocalDataPipeImpl>()));
+                               MakeUnique<LocalDataPipeImpl>()));
 }
 
 // static
@@ -108,7 +111,7 @@ RefPtr<DataPipe> DataPipe::CreateRemoteProducerFromExisting(
     const MojoCreateDataPipeOptions& validated_options,
     MessageInTransitQueue* message_queue,
     RefPtr<ChannelEndpoint>&& channel_endpoint) {
-  std::unique_ptr<char, base::AlignedFreeDeleter> buffer;
+  AlignedUniquePtr<char> buffer;
   size_t buffer_num_bytes = 0;
   if (!RemoteProducerDataPipeImpl::ProcessMessagesFromIncomingEndpoint(
           validated_options, message_queue, &buffer, &buffer_num_bytes))
@@ -123,7 +126,7 @@ RefPtr<DataPipe> DataPipe::CreateRemoteProducerFromExisting(
   // is called.
   RefPtr<DataPipe> data_pipe = AdoptRef(new DataPipe(
       false, true, validated_options,
-      util::MakeUnique<RemoteProducerDataPipeImpl>(
+      MakeUnique<RemoteProducerDataPipeImpl>(
           channel_endpoint.Clone(), std::move(buffer), 0, buffer_num_bytes)));
   if (channel_endpoint) {
     if (!channel_endpoint->ReplaceClient(data_pipe.Clone(), 0))
@@ -153,8 +156,8 @@ RefPtr<DataPipe> DataPipe::CreateRemoteConsumerFromExisting(
   // is called.
   RefPtr<DataPipe> data_pipe = AdoptRef(new DataPipe(
       true, false, validated_options,
-      util::MakeUnique<RemoteConsumerDataPipeImpl>(
-          channel_endpoint.Clone(), consumer_num_bytes, nullptr, 0)));
+      MakeUnique<RemoteConsumerDataPipeImpl>(channel_endpoint.Clone(),
+                                             consumer_num_bytes, nullptr, 0)));
   if (channel_endpoint) {
     if (!channel_endpoint->ReplaceClient(data_pipe.Clone(), 0))
       data_pipe->OnDetachFromChannel(0);
@@ -201,7 +204,7 @@ bool DataPipe::ProducerDeserialize(Channel* channel,
 
     *data_pipe = AdoptRef(new DataPipe(
         true, false, revalidated_options,
-        util::MakeUnique<RemoteConsumerDataPipeImpl>(nullptr, 0, nullptr, 0)));
+        MakeUnique<RemoteConsumerDataPipeImpl>(nullptr, 0, nullptr, 0)));
     (*data_pipe)->SetConsumerClosed();
 
     return true;
@@ -416,7 +419,7 @@ bool DataPipe::ProducerEndSerialize(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   MutexLocker locker(&mutex_);
   DCHECK(has_local_producer_no_lock());
   // Warning: After |ProducerEndSerialize()|, quite probably |impl_| has
@@ -625,7 +628,7 @@ bool DataPipe::ConsumerEndSerialize(
     Channel* channel,
     void* destination,
     size_t* actual_size,
-    embedder::PlatformHandleVector* platform_handles) {
+    std::vector<ScopedPlatformHandle>* platform_handles) {
   MutexLocker locker(&mutex_);
   DCHECK(has_local_consumer_no_lock());
   // Warning: After |ConsumerEndSerialize()|, quite probably |impl_| has

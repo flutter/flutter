@@ -12,6 +12,9 @@
 #include "base/posix/eintr_wrapper.h"
 #include "build/build_config.h"
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
+
 namespace mojo {
 namespace embedder {
 
@@ -104,45 +107,11 @@ ssize_t PlatformChannelSendmsgWithHandles(PlatformHandle h,
   return HANDLE_EINTR(sendmsg(h.fd, &msg, kSendFlags));
 }
 
-bool PlatformChannelSendHandles(PlatformHandle h,
-                                PlatformHandle* handles,
-                                size_t num_handles) {
-  DCHECK(handles);
-  DCHECK_GT(num_handles, 0u);
-  DCHECK_LE(num_handles, kPlatformChannelMaxNumHandles);
-
-  // Note: |sendmsg()| fails on Mac if we don't write at least one character.
-  struct iovec iov = {const_cast<char*>(""), 1};
-  char cmsg_buf[CMSG_SPACE(kPlatformChannelMaxNumHandles * sizeof(int))];
-  struct msghdr msg = {};
-  msg.msg_iov = &iov;
-  msg.msg_iovlen = 1;
-  msg.msg_control = cmsg_buf;
-  msg.msg_controllen = CMSG_LEN(num_handles * sizeof(int));
-  struct cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
-  cmsg->cmsg_level = SOL_SOCKET;
-  cmsg->cmsg_type = SCM_RIGHTS;
-  cmsg->cmsg_len = CMSG_LEN(num_handles * sizeof(int));
-  for (size_t i = 0; i < num_handles; i++) {
-    DCHECK(handles[i].is_valid());
-    reinterpret_cast<int*>(CMSG_DATA(cmsg))[i] = handles[i].fd;
-  }
-
-  ssize_t result = HANDLE_EINTR(sendmsg(h.fd, &msg, kSendFlags));
-  if (result < 1) {
-    DCHECK_EQ(result, -1);
-    return false;
-  }
-
-  for (size_t i = 0; i < num_handles; i++)
-    handles[i].CloseIfNecessary();
-  return true;
-}
-
-ssize_t PlatformChannelRecvmsg(PlatformHandle h,
-                               void* buf,
-                               size_t num_bytes,
-                               std::deque<PlatformHandle>* platform_handles) {
+ssize_t PlatformChannelRecvmsg(
+    PlatformHandle h,
+    void* buf,
+    size_t num_bytes,
+    std::deque<ScopedPlatformHandle>* platform_handles) {
   DCHECK(buf);
   DCHECK_GT(num_bytes, 0u);
   DCHECK(platform_handles);
@@ -173,7 +142,8 @@ ssize_t PlatformChannelRecvmsg(PlatformHandle h,
       size_t num_fds = payload_length / sizeof(int);
       const int* fds = reinterpret_cast<int*>(CMSG_DATA(cmsg));
       for (size_t i = 0; i < num_fds; i++) {
-        platform_handles->push_back(PlatformHandle(fds[i]));
+        platform_handles->push_back(
+            ScopedPlatformHandle(PlatformHandle(fds[i])));
         DCHECK(platform_handles->back().is_valid());
       }
     }

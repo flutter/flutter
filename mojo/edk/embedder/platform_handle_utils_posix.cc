@@ -8,6 +8,9 @@
 
 #include "base/logging.h"
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
+
 namespace mojo {
 namespace embedder {
 

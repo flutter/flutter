@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/memory/aligned_memory.h"
+#include "mojo/edk/platform/aligned_alloc.h"
 #include "mojo/edk/system/data_pipe_impl.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -43,7 +43,7 @@ class LocalDataPipeImpl final : public DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override;
   void ConsumerClose() override;
   MojoResult ConsumerReadData(UserPointer<void> elements,
                               UserPointer<uint32_t> num_bytes,
@@ -66,7 +66,7 @@ class LocalDataPipeImpl final : public DataPipeImpl {
       Channel* channel,
       void* destination,
       size_t* actual_size,
-      embedder::PlatformHandleVector* platform_handles) override;
+      std::vector<platform::ScopedPlatformHandle>* platform_handles) override;
   bool OnReadMessage(unsigned port, MessageInTransit* message) override;
   void OnDetachFromChannel(unsigned port) override;
 
@@ -82,7 +82,7 @@ class LocalDataPipeImpl final : public DataPipeImpl {
   // no greater than |current_num_bytes_|.
   void MarkDataAsConsumed(size_t num_bytes);
 
-  std::unique_ptr<char, base::AlignedFreeDeleter> buffer_;
+  platform::AlignedUniquePtr<char> buffer_;
   // Circular buffer.
   size_t start_index_;
   size_t current_num_bytes_;

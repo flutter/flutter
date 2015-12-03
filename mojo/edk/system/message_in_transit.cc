@@ -12,6 +12,8 @@
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/transport_data.h"
 
+using mojo::platform::AlignedAlloc;
+
 namespace mojo {
 namespace system {
 
@@ -73,8 +75,7 @@ MessageInTransit::MessageInTransit(Type type,
                                    uint32_t num_bytes,
                                    const void* bytes)
     : main_buffer_size_(RoundUpMessageAlignment(sizeof(Header) + num_bytes)),
-      main_buffer_(static_cast<char*>(
-          base::AlignedAlloc(main_buffer_size_, kMessageAlignment))) {
+      main_buffer_(AlignedAlloc<char>(kMessageAlignment, main_buffer_size_)) {
   ConstructorHelper(type, subtype, num_bytes);
   if (bytes) {
     memcpy(MessageInTransit::bytes(), bytes, num_bytes);
@@ -90,8 +91,7 @@ MessageInTransit::MessageInTransit(Type type,
                                    uint32_t num_bytes,
                                    UserPointer<const void> bytes)
     : main_buffer_size_(RoundUpMessageAlignment(sizeof(Header) + num_bytes)),
-      main_buffer_(static_cast<char*>(
-          base::AlignedAlloc(main_buffer_size_, kMessageAlignment))) {
+      main_buffer_(AlignedAlloc<char>(kMessageAlignment, main_buffer_size_)) {
   ConstructorHelper(type, subtype, num_bytes);
   bytes.GetArray(MessageInTransit::bytes(), num_bytes);
   memset(static_cast<char*>(MessageInTransit::bytes()) + num_bytes, 0,
@@ -100,8 +100,7 @@ MessageInTransit::MessageInTransit(Type type,
 
 MessageInTransit::MessageInTransit(const View& message_view)
     : main_buffer_size_(message_view.main_buffer_size()),
-      main_buffer_(static_cast<char*>(
-          base::AlignedAlloc(main_buffer_size_, kMessageAlignment))) {
+      main_buffer_(AlignedAlloc<char>(kMessageAlignment, main_buffer_size_)) {
   DCHECK_GE(main_buffer_size_, sizeof(Header));
   DCHECK_EQ(main_buffer_size_ % kMessageAlignment, 0u);
 

@@ -10,7 +10,8 @@
 
 #include <deque>
 
-#include "mojo/edk/embedder/platform_handle.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 
 struct iovec;  // Declared in <sys/uio.h>.
 
@@ -27,10 +28,10 @@ const size_t kPlatformChannelMaxNumHandles = 128;
 // equivalent). These are like |write()| and |writev()|, but handle |EINTR| and
 // never raise |SIGPIPE|. (Note: On Mac, the suppression of |SIGPIPE| is set up
 // by |PlatformChannelPair|.)
-ssize_t PlatformChannelWrite(PlatformHandle h,
+ssize_t PlatformChannelWrite(platform::PlatformHandle h,
                              const void* bytes,
                              size_t num_bytes);
-ssize_t PlatformChannelWritev(PlatformHandle h,
+ssize_t PlatformChannelWritev(platform::PlatformHandle h,
                               struct iovec* iov,
                               size_t num_iov);
 
@@ -42,31 +43,21 @@ ssize_t PlatformChannelWritev(PlatformHandle h,
 // bytes of data sent on success (note that this may not be all the data
 // specified by |iov|). (The handles are not closed, regardless of success or
 // failure.)
-ssize_t PlatformChannelSendmsgWithHandles(PlatformHandle h,
-                                          struct iovec* iov,
-                                          size_t num_iov,
-                                          PlatformHandle* platform_handles,
-                                          size_t num_platform_handles);
-
-// TODO(vtl): Remove this once I've switched things over to
-// |PlatformChannelSendmsgWithHandles()|.
-// Sends |PlatformHandle|s (i.e., file descriptors) over the Unix domain socket
-// (e.g., created using PlatformChannelPair|). (These will be sent in a single
-// message having one null byte of data and one control message header with all
-// the file descriptors.) All of the handles must be valid, and there must be at
-// most |kPlatformChannelMaxNumHandles| (and at least one handle). Returns true
-// on success, in which case it closes all the handles.
-bool PlatformChannelSendHandles(PlatformHandle h,
-                                PlatformHandle* handles,
-                                size_t num_handles);
+ssize_t PlatformChannelSendmsgWithHandles(
+    platform::PlatformHandle h,
+    struct iovec* iov,
+    size_t num_iov,
+    platform::PlatformHandle* platform_handles,
+    size_t num_platform_handles);
 
 // Wrapper around |recvmsg()|, which will extract any attached file descriptors
-// (in the control message) to |PlatformHandle|s (and append them to
+// (in the control message) to |ScopedPlatformHandle|s (and append them to
 // |platform_handles|). (This also handles |EINTR|.)
-ssize_t PlatformChannelRecvmsg(PlatformHandle h,
-                               void* buf,
-                               size_t num_bytes,
-                               std::deque<PlatformHandle>* platform_handles);
+ssize_t PlatformChannelRecvmsg(
+    platform::PlatformHandle h,
+    void* buf,
+    size_t num_bytes,
+    std::deque<platform::ScopedPlatformHandle>* platform_handles);
 
 }  // namespace embedder
 }  // namespace mojo

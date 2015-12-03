@@ -9,9 +9,7 @@
 
 #include <utility>
 
-#include "base/bind.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
@@ -50,16 +48,14 @@ class RemoteDataPipeImplTest : public testing::Test {
     message_pipes_[0] = MessagePipe::CreateLocalProxy(&ep[0]);
     message_pipes_[1] = MessagePipe::CreateLocalProxy(&ep[1]);
 
-    io_thread_.PostTaskAndWait(base::Bind(
-        &RemoteDataPipeImplTest::SetUpOnIOThread, base::Unretained(this),
-        base::Passed(&ep[0]), base::Passed(&ep[1])));
+    io_thread_.PostTaskAndWait(
+        [this, &ep]() { SetUpOnIOThread(std::move(ep[0]), std::move(ep[1])); });
   }
 
   void TearDown() override {
     EnsureMessagePipeClosed(0);
     EnsureMessagePipeClosed(1);
-    io_thread_.PostTaskAndWait(base::Bind(
-        &RemoteDataPipeImplTest::TearDownOnIOThread, base::Unretained(this)));
+    io_thread_.PostTaskAndWait([this]() { TearDownOnIOThread(); });
   }
 
  protected:
@@ -87,11 +83,9 @@ class RemoteDataPipeImplTest : public testing::Test {
   }
 
  private:
-  // TODO(vtl): The arguments should be rvalue references, but that doesn't
-  // currently work correctly with base::Bind.
-  void SetUpOnIOThread(RefPtr<ChannelEndpoint> ep0,
-                       RefPtr<ChannelEndpoint> ep1) {
-    CHECK_EQ(base::MessageLoop::current(), io_thread_.message_loop());
+  void SetUpOnIOThread(RefPtr<ChannelEndpoint>&& ep0,
+                       RefPtr<ChannelEndpoint>&& ep1) {
+    CHECK(io_thread_.IsCurrentAndRunning());
 
     embedder::PlatformChannelPair channel_pair;
     channels_[0] = MakeRefCounted<Channel>(&platform_support_);
@@ -103,7 +97,7 @@ class RemoteDataPipeImplTest : public testing::Test {
   }
 
   void TearDownOnIOThread() {
-    CHECK_EQ(base::MessageLoop::current(), io_thread_.message_loop());
+    CHECK(io_thread_.IsCurrentAndRunning());
 
     if (channels_[0]) {
       channels_[0]->Shutdown();

@@ -6,6 +6,7 @@
 #define MOJO_EDK_SYSTEM_MESSAGE_PIPE_TEST_UTILS_H_
 
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/test/multiprocess_test_helper.h"
@@ -30,16 +31,15 @@ class ChannelThread {
   explicit ChannelThread(embedder::PlatformSupport* platform_support);
   ~ChannelThread();
 
-  void Start(embedder::ScopedPlatformHandle platform_handle,
+  void Start(platform::ScopedPlatformHandle platform_handle,
              util::RefPtr<ChannelEndpoint>&& channel_endpoint);
   void Stop();
 
  private:
   // TODO(vtl): |channel_endpoint| should be an rvalue reference, but that
   // doesn't currently work correctly with base::Bind.
-  void InitChannelOnIOThread(embedder::ScopedPlatformHandle platform_handle,
+  void InitChannelOnIOThread(platform::ScopedPlatformHandle platform_handle,
                              util::RefPtr<ChannelEndpoint> channel_endpoint);
-  void ShutdownChannelOnIOThread();
 
   embedder::PlatformSupport* const platform_support_;
   TestIOThread test_io_thread_;

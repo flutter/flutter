@@ -8,25 +8,29 @@
 
 #include "base/logging.h"
 #include "build/build_config.h"
-#include "mojo/edk/embedder/scoped_platform_handle.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/test/test_utils.h"
 #include "testing/gtest/include/gtest/gtest.h"
+
+using mojo::platform::PlatformHandle;
+using mojo::platform::ScopedPlatformHandle;
 
 namespace mojo {
 namespace test {
 namespace {
 
-bool IsNonBlocking(const embedder::PlatformHandle& handle) {
+bool IsNonBlocking(const PlatformHandle& handle) {
   return fcntl(handle.fd, F_GETFL) & O_NONBLOCK;
 }
 
-bool WriteByte(const embedder::PlatformHandle& handle, char c) {
+bool WriteByte(const PlatformHandle& handle, char c) {
   size_t bytes_written = 0;
   BlockingWrite(handle, &c, 1, &bytes_written);
   return bytes_written == 1;
 }
 
-bool ReadByte(const embedder::PlatformHandle& handle, char* c) {
+bool ReadByte(const PlatformHandle& handle, char* c) {
   size_t bytes_read = 0;
   BlockingRead(handle, c, 1, &bytes_read);
   return bytes_read == 1;
@@ -78,7 +82,7 @@ TEST_F(MultiprocessTestHelperTest, MAYBE_PassedChannel) {
   helper.StartChild("PassedChannel");
 
   // Take ownership of the handle.
-  embedder::ScopedPlatformHandle handle = helper.server_platform_handle.Pass();
+  ScopedPlatformHandle handle = helper.server_platform_handle.Pass();
 
   // The handle should be non-blocking.
   EXPECT_TRUE(IsNonBlocking(handle.get()));
@@ -100,7 +104,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(PassedChannel) {
   CHECK(MultiprocessTestHelper::client_platform_handle.is_valid());
 
   // Take ownership of the handle.
-  embedder::ScopedPlatformHandle handle =
+  ScopedPlatformHandle handle =
       MultiprocessTestHelper::client_platform_handle.Pass();
 
   // The handle should be non-blocking.

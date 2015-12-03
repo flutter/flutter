@@ -7,6 +7,7 @@ module mojo;
 import "geometry/interfaces/geometry.mojom";
 import "ozone_drm_gpu/interfaces/ozone_drm_gpu.mojom";
 
+[ServiceName="mojo::OzoneDrmHost"]
 interface OzoneDrmHost {
   UpdateNativeDisplays(array<DisplaySnapshot> displays);
   DisplayConfigured(int64 id, bool result);
