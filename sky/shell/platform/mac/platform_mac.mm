@@ -12,9 +12,11 @@
 #include "base/logging.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/message_loop/message_loop.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "sky/shell/shell.h"
+#include "sky/shell/switches.h"
 #include "sky/shell/ui_delegate.h"
 #include "ui/gl/gl_surface.h"
 
@@ -52,6 +54,19 @@ int PlatformMacMain(int argc,
   DLOG_ASSERT(result);
 
   InitializeLogging();
+
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+  if (command_line.HasSwitch(sky::shell::switches::kTraceStartup)) {
+    // Usually, all tracing within flutter is managed via the tracing controller
+    // The tracing controller is accessed via the shell instance. This means
+    // that tracing can only be enabled once that instance is created. Traces
+    // early in startup are lost. This enables tracing in base manually till
+    // the tracing controller takes over.
+    base::trace_event::TraceLog::GetInstance()->SetEnabled(
+        base::trace_event::TraceConfig("*",
+                                       base::trace_event::RECORD_UNTIL_FULL),
+        base::trace_event::TraceLog::RECORDING_MODE);
+  }
 
   scoped_ptr<base::MessageLoopForUI> message_loop(new base::MessageLoopForUI());
 
