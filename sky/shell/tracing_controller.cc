@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "sky/shell/tracing_controller.h"
+
 #include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/trace_event/trace_config.h"
 #include "base/trace_event/trace_event.h"
-#include "sky/shell/shell.h"
-#include "sky/shell/tracing_controller.h"
 #include "dart/runtime/include/dart_tools_api.h"
+#include "sky/shell/shell.h"
 
 #include <string>
 #include <sstream>
@@ -41,46 +42,52 @@ static const char* ObservatoryInvoke(const char* method,
 
   if (strncmp(method, kObservatoryMethodStartTracing,
               sizeof(kObservatoryMethodStartTracing)) == 0) {
-    tracing_controller->StartTracing();
-    return strdup(kObservatoryResultOk);
+    if (!tracing_controller->tracing_active()) {
+      tracing_controller->StartTracing();
+      return strdup(kObservatoryResultOk);
+    }
   }
 
   if (strncmp(method, kObservatoryMethodStopTracing,
               sizeof(kObservatoryMethodStopTracing)) == 0) {
-    // Flushing the trace log requires an active message loop. However,
-    // observatory callbacks are made on a dart worker thread. We setup a
-    // message loop manually and tell the flush completion handler to terminate
-    // the loop when done
-    base::MessageLoop worker_thread_loop;
+    if (tracing_controller->tracing_active()) {
+      // Flushing the trace log requires an active message loop. However,
+      // observatory callbacks are made on a dart worker thread. We setup a
+      // message loop manually and tell the flush completion handler to
+      // terminate
+      // the loop when done
+      base::MessageLoop worker_thread_loop;
 
-    base::FilePath temp_dir;
-    bool temp_access = base::GetTempDir(&temp_dir);
-    DCHECK(temp_access) << "Must be able to access the temp directory";
+      base::FilePath temp_dir;
+      bool temp_access = base::GetTempDir(&temp_dir);
+      DCHECK(temp_access) << "Must be able to access the temp directory";
 
-    base::FilePath path = tracing_controller->TracePathForCurrentTime(temp_dir);
+      base::FilePath path =
+          tracing_controller->TracePathForCurrentTime(temp_dir);
 
-    tracing_controller->StopTracing(path, true);
+      tracing_controller->StopTracing(path, true);
 
-    // Run the loop till the flush callback terminates the activation
-    worker_thread_loop.Run();
+      // Run the loop till the flush callback terminates the activation
+      worker_thread_loop.Run();
 
-    base::File file(
-        path, base::File::Flags::FLAG_OPEN | base::File::Flags::FLAG_READ);
-    int64 length = file.GetLength();
+      base::File file(
+          path, base::File::Flags::FLAG_OPEN | base::File::Flags::FLAG_READ);
+      int64 length = file.GetLength();
 
-    if (length == 0) {
+      if (length == 0) {
+        base::DeleteFile(path, false);
+        return strdup(kObservatoryResultFail);
+      }
+
+      char* data = reinterpret_cast<char*>(malloc(length));
+      int length_read = file.Read(0, data, length);
+
+      DCHECK(length == length_read);
+
       base::DeleteFile(path, false);
-      return strdup(kObservatoryResultFail);
+
+      return data;
     }
-
-    char* data = reinterpret_cast<char*>(malloc(length));
-    int length_read = file.Read(0, data, length);
-
-    DCHECK(length == length_read);
-
-    base::DeleteFile(path, false);
-
-    return data;
   }
 
   return strdup(kObservatoryResultFail);
@@ -89,12 +96,26 @@ static const char* ObservatoryInvoke(const char* method,
 TracingController::TracingController()
     : picture_tracing_enabled_(false),
       terminate_loop_on_write_(false),
+      dart_initialized_(false),
+      tracing_active_(false),
       weak_factory_(this) {
   ManageObservatoryCallbacks(true);
 }
 
 TracingController::~TracingController() {
   ManageObservatoryCallbacks(false);
+}
+
+void TracingController::SetDartInitialized() {
+  DCHECK(!dart_initialized_);
+  dart_initialized_ = true;
+
+  // In case early lifecycle is being traced, base tracing has already begun
+  // but we have just been notified of initialization of the Dart VM. Start
+  // collecting traces in Dart.
+  if (tracing_active_) {
+    StartDartTracing();
+  }
 }
 
 void TracingController::ManageObservatoryCallbacks(bool add) {
@@ -106,7 +127,11 @@ void TracingController::ManageObservatoryCallbacks(bool add) {
 }
 
 void TracingController::StartTracing() {
+  DCHECK(!tracing_active_);
+
   LOG(INFO) << "Starting trace";
+
+  tracing_active_ = true;
 
   StartDartTracing();
   StartBaseTracing();
@@ -138,6 +163,10 @@ void TracingController::StopTracingAsync(const base::FilePath& path,
 }
 
 void TracingController::StartDartTracing() {
+  if (!dart_initialized_) {
+    return;
+  }
+
   Dart_GlobalTimelineSetRecordedStreams(~0);
 }
 
@@ -161,6 +190,13 @@ static void TracingController_DartStreamConsumer(
 }
 
 void TracingController::StopDartTracing() {
+  if (!dart_initialized_) {
+    // This is checking for the highly unlikely case where the user starts and
+    // stops tracing before the dart VM is initialized.
+    FinalizeTraceFile();
+    return;
+  }
+
   if (trace_file_){
     trace_file_->WriteAtCurrentPos(",", 1);
   }
@@ -203,6 +239,8 @@ void TracingController::FinalizeTraceFile() {
     base::MessageLoop::current()->Quit();
     terminate_loop_on_write_ = false;
   }
+
+  tracing_active_ = false;
 
   LOG(INFO) << "Trace complete";
 }

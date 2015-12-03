@@ -34,6 +34,10 @@ class TracingController {
 
   base::FilePath TracePathForCurrentTime(base::FilePath dir) const;
 
+  void SetDartInitialized();
+
+  bool tracing_active() const { return tracing_active_; }
+
   void set_traces_base_path(const base::FilePath& base_path) {
     traces_base_path_ = base_path;
   }
@@ -49,6 +53,8 @@ class TracingController {
   base::FilePath traces_base_path_;
   bool picture_tracing_enabled_;
   bool terminate_loop_on_write_;
+  bool dart_initialized_;
+  bool tracing_active_;
 
   void StartDartTracing();
   void StartBaseTracing();

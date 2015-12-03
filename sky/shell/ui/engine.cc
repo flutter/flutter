@@ -78,6 +78,7 @@ void Engine::Init() {
   DCHECK(!g_platform_impl);
   g_platform_impl = new PlatformImpl();
   blink::initialize(g_platform_impl);
+  Shell::Shared().tracing_controller().SetDartInitialized();
 }
 
 std::unique_ptr<compositor::LayerTree> Engine::BeginFrame(
