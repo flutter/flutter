@@ -146,7 +146,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.dispose();
   }
 
-  
+
   final ProxyPerformance forwardPerformance = new ProxyPerformance();
 
   void didPushNext(Route nextRoute) {
@@ -183,7 +183,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       forwardPerformance,
       buildTransition(
         context,
-        performance, 
+        performance,
         child
       )
     );
@@ -202,6 +202,7 @@ class LocalHistoryEntry {
   LocalHistoryRoute _owner;
   void remove() {
     _owner.removeLocalHistoryEntry(this);
+    assert(_owner == null);
   }
   void _notifyRemoved() {
     if (onRemove != null)

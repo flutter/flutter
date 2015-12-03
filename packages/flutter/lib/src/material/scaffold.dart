@@ -15,20 +15,30 @@ import 'bottom_sheet.dart';
 import 'material.dart';
 import 'snack_bar.dart';
 import 'tool_bar.dart';
+import 'drawer.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 
-enum _Child { body, toolBar, bottomSheet, snackBar, floatingActionButton }
+enum _Child {
+  body,
+  toolBar,
+  bottomSheet,
+  snackBar,
+  floatingActionButton,
+  drawer,
+}
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   void performLayout(Size size, BoxConstraints constraints) {
+
+    BoxConstraints looseConstraints = constraints.loosen();
 
     // This part of the layout has the same effect as putting the toolbar and
     // body in a column and making the body flexible. What's different is that
     // in this case the toolbar appears -after- the body in the stacking order,
     // so the toolbar's shadow is drawn on top of the body.
 
-    final BoxConstraints toolBarConstraints = constraints.loosen().tightenWidth(size.width);
+    final BoxConstraints toolBarConstraints = looseConstraints.tightenWidth(size.width);
     Size toolBarSize = Size.zero;
 
     if (isChild(_Child.toolBar)) {
@@ -52,7 +62,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // non-zero height then it's inset from the parent's right and bottom edges
     // by _kFloatingActionButtonMargin.
 
-    final BoxConstraints fullWidthConstraints = constraints.loosen().tightenWidth(size.width);
+    final BoxConstraints fullWidthConstraints = looseConstraints.tightenWidth(size.width);
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
@@ -67,7 +77,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (isChild(_Child.floatingActionButton)) {
-      final Size fabSize = layoutChild(_Child.floatingActionButton, constraints.loosen());
+      final Size fabSize = layoutChild(_Child.floatingActionButton, looseConstraints);
       final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
       double fabY = size.height - fabSize.height - _kFloatingActionButtonMargin;
       if (snackBarSize.height > 0.0)
@@ -75,6 +85,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (bottomSheetSize.height > 0.0)
         fabY = math.min(fabY, size.height - bottomSheetSize.height - fabSize.height / 2.0);
       positionChild(_Child.floatingActionButton, new Point(fabX, fabY));
+    }
+
+    if (isChild(_Child.drawer)) {
+      layoutChild(_Child.drawer, looseConstraints);
+      positionChild(_Child.drawer, Point.origin);
     }
   }
 }
@@ -86,12 +101,14 @@ class Scaffold extends StatefulComponent {
     Key key,
     this.toolBar,
     this.body,
-    this.floatingActionButton
+    this.floatingActionButton,
+    this.drawer
   }) : super(key: key);
 
   final ToolBar toolBar;
   final Widget body;
   final Widget floatingActionButton;
+  final Widget drawer;
 
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(ScaffoldState);
 
@@ -99,6 +116,14 @@ class Scaffold extends StatefulComponent {
 }
 
 class ScaffoldState extends State<Scaffold> {
+
+  // DRAWER API
+
+  final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
+
+  void openDrawer() {
+    _drawerKey.currentState.open();
+  }
 
   // SNACKBAR API
 
@@ -269,6 +294,16 @@ class ScaffoldState extends State<Scaffold> {
       _addIfNonNull(children, _snackBars.first._widget, _Child.snackBar);
 
     _addIfNonNull(children, config.floatingActionButton, _Child.floatingActionButton);
+
+    if (config.drawer != null) {
+      children.add(new LayoutId(
+        id: _Child.drawer,
+        child: new DrawerController(
+          key: _drawerKey,
+          child: config.drawer
+        )
+      ));
+    }
 
     return new CustomMultiChildLayout(children, delegate: _scaffoldLayout);
   }

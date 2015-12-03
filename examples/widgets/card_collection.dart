@@ -46,6 +46,8 @@ class CardCollectionState extends State<CardCollection> {
   InvalidatorCallback _invalidator;
   Size _cardCollectionSize = new Size(200.0, 200.0);
 
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   void _initVariableSizedCardModels() {
     List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -117,9 +119,8 @@ class CardCollectionState extends State<CardCollection> {
     }
   }
 
-  void _showDrawer() {
-    showDrawer(
-      context: context,
+  Widget _buildDrawer() {
+    return new Drawer(
       child: new IconTheme(
         data: const IconThemeData(color: IconThemeColor.black),
         child: new Block(<Widget>[
@@ -265,9 +266,9 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildToolBar() {
+  Widget _buildToolBar() {
     return new ToolBar(
-      left: new IconButton(icon: "navigation/menu", onPressed: _showDrawer),
+      left: new IconButton(icon: "navigation/menu", onPressed: () => _scaffoldKey.currentState?.openDrawer()),
       right: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ],
@@ -281,7 +282,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildCard(BuildContext context, int index) {
+  Widget _buildCard(BuildContext context, int index) {
     if (index >= _cardModels.length)
       return null;
 
@@ -393,19 +394,18 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget build(BuildContext context) {
-
     Widget cardCollection;
     if (_fixedSizeCards) {
       cardCollection = new ScrollableList<CardModel> (
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
         snapAlignmentOffset: _cardCollectionSize.height / 2.0,
         items: _cardModels,
-        itemBuilder: (BuildContext context, CardModel card, int index) => buildCard(context, card.value),
+        itemBuilder: (BuildContext context, CardModel card, int index) => _buildCard(context, card.value),
         itemExtent: _cardModels[0].height
       );
     } else {
       cardCollection = new ScrollableMixedWidgetList(
-        builder: buildCard,
+        builder: _buildCard,
         token: _cardModels.length,
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
         snapAlignmentOffset: _cardCollectionSize.height / 2.0,
@@ -446,7 +446,8 @@ class CardCollectionState extends State<CardCollection> {
         primarySwatch: _primaryColor
       ),
       child: new Scaffold(
-        toolBar: buildToolBar(),
+        toolBar: _buildToolBar(),
+        drawer: _buildDrawer(),
         body: body
       )
     );

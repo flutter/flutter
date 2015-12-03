@@ -11,20 +11,25 @@ void main() {
 
   test('Drawer control test', () {
     testWidgets((WidgetTester tester) {
+      GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       BuildContext context;
       tester.pumpWidget(
         new MaterialApp(
           routes: <String, RouteBuilder>{
             '/': (RouteArguments args) {
               context = args.context;
-              return new Container();
+              return new Scaffold(
+                key: scaffoldKey,
+                drawer: new Text('drawer'),
+                body: new Container()
+              );
             }
           }
         )
       );
       tester.pump(); // no effect
       expect(tester.findText('drawer'), isNull);
-      showDrawer(context: context, child: new Text('drawer'));
+      scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done
@@ -39,21 +44,24 @@ void main() {
 
   test('Drawer tap test', () {
     testWidgets((WidgetTester tester) {
-      BuildContext context;
+      GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
       tester.pumpWidget(new Container()); // throw away the old App and its Navigator
       tester.pumpWidget(
         new MaterialApp(
           routes: <String, RouteBuilder>{
             '/': (RouteArguments args) {
-              context = args.context;
-              return new Container();
+              return new Scaffold(
+                key: scaffoldKey,
+                drawer: new Text('drawer'),
+                body: new Container()
+              );
             }
           }
         )
       );
       tester.pump(); // no effect
       expect(tester.findText('drawer'), isNull);
-      showDrawer(context: context, child: new Text('drawer'));
+      scaffoldKey.currentState.openDrawer();
       tester.pump(); // drawer should be starting to animate in
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done
@@ -64,7 +72,9 @@ void main() {
       tester.pump(new Duration(seconds: 1)); // ditto
       expect(tester.findText('drawer'), isNotNull);
       tester.tapAt(const Point(750.0, 100.0)); // on the mask
-      tester.pump(); // drawer should be starting to animate away
+      tester.pump();
+      tester.pump(new Duration(milliseconds: 10));
+      // drawer should be starting to animate away
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester.findText('drawer'), isNull);

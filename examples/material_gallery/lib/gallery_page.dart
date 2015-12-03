@@ -6,19 +6,25 @@ import 'package:flutter/material.dart';
 
 import 'demo/widget_demo.dart';
 
-class GalleryPage extends StatelessComponent {
+class GalleryPage extends StatefulComponent {
   GalleryPage({ this.demos, this.active, this.onThemeChanged });
 
   final List<WidgetDemo> demos;
   final WidgetDemo active;
   final ValueChanged<ThemeData> onThemeChanged;
 
-  void _showDrawer(BuildContext context) {
+  _GalleryPageState createState() => new _GalleryPageState();
+}
+
+class _GalleryPageState extends State<GalleryPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  Widget _buildDrawer() {
     List<Widget> items = <Widget>[
       new DrawerHeader(child: new Text('Material demos')),
     ];
 
-    for (WidgetDemo demo in demos) {
+    for (WidgetDemo demo in config.demos) {
       items.add(new DrawerItem(
         onPressed: () {
           Navigator.pushNamed(context, demo.routeName);
@@ -27,12 +33,12 @@ class GalleryPage extends StatelessComponent {
       ));
     }
 
-    showDrawer(context: context, child: new Block(items));
+    return new Drawer(child: new Block(items));
   }
 
-  Widget _body(BuildContext context) {
-    if (active != null)
-      return active.builder(context);
+  Widget _buildBody() {
+    if (config.active != null)
+      return config.active.builder(context);
     return new Material(
       child: new Center(
         child: new Text('Select a demo from the drawer')
@@ -40,22 +46,24 @@ class GalleryPage extends StatelessComponent {
     );
   }
 
-  Widget _tabBar(BuildContext context) {
-    final WidgetBuilder builder = active?.tabBarBuilder;
+  Widget _buildTabBar() {
+    final WidgetBuilder builder = config.active?.tabBarBuilder;
     return builder != null ? builder(context) : null;
   }
 
   Widget build(BuildContext context) {
     return new Scaffold(
+      key: _scaffoldKey,
       toolBar: new ToolBar(
         left: new IconButton(
           icon: 'navigation/menu',
-          onPressed: () { _showDrawer(context); }
+          onPressed: () { _scaffoldKey.currentState?.openDrawer(); }
         ),
-        center: new Text(active?.title ?? 'Material gallery'),
-        tabBar: _tabBar(context)
+        center: new Text(config.active?.title ?? 'Material gallery'),
+        tabBar: _buildTabBar()
       ),
-      body: _body(context)
+      drawer: _buildDrawer(),
+      body: _buildBody()
     );
   }
 }
