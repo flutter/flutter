@@ -43,6 +43,7 @@ const int kFontWeightIndex = 5;
 const int kFontStyleIndex = 6;
 const int kFontFamilyIndex = 7;
 const int kFontSizeIndex = 8;
+const int kLetterSpacingIndex = 9;
 
 const int kColorMask = 1 << kColorIndex;
 const int kTextDecorationMask = 1 << kTextDecorationIndex;
@@ -52,6 +53,7 @@ const int kFontWeightMask = 1 << kFontWeightIndex;
 const int kFontStyleMask = 1 << kFontStyleIndex;
 const int kFontFamilyMask = 1 << kFontFamilyIndex;
 const int kFontSizeMask = 1 << kFontSizeIndex;
+const int kLetterSpacingMask = 1 << kLetterSpacingIndex;
 
 // ParagraphStyle
 
@@ -78,7 +80,7 @@ ParagraphBuilder::~ParagraphBuilder()
 {
 }
 
-void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, double fontSize)
+void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, double fontSize, double letterSpacing)
 {
     DCHECK(encoded.num_elements() == 7);
     RefPtr<RenderStyle> style = RenderStyle::create();
@@ -100,7 +102,7 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
     if (mask & kTextDecorationStyleMask)
       style->setTextDecorationStyle(static_cast<TextDecorationStyle>(encoded[kTextDecorationStyleIndex]));
 
-    if (mask & (kFontWeightMask | kFontStyleMask | kFontFamilyMask | kFontSizeMask)) {
+    if (mask & (kFontWeightMask | kFontStyleMask | kFontFamilyMask | kFontSizeMask | kLetterSpacingMask)) {
       FontDescription fontDescription = style->fontDescription();
 
       if (mask & kFontWeightMask)
@@ -115,11 +117,14 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
         fontDescription.setFamily(family);
       }
 
-      if (mask & kFontSizeMask)  {
+      if (mask & kFontSizeMask) {
         fontDescription.setSpecifiedSize(fontSize);
         fontDescription.setIsAbsoluteSize(true);
         fontDescription.setComputedSize(FontSize::getComputedSizeFromSpecifiedSize(true, fontSize));
       }
+
+      if (mask & kLetterSpacingMask)
+        fontDescription.setLetterSpacing(letterSpacing);
 
       style->setFontDescription(fontDescription);
       style->font().update(m_fontSelector);

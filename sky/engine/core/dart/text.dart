@@ -126,7 +126,8 @@ Int32List _encodeTextStyle(Color color,
                            FontWeight fontWeight,
                            FontStyle fontStyle,
                            String fontFamily,
-                           double fontSize) {
+                           double fontSize,
+                           double letterSpacing) {
   Int32List result = new Int32List(7);
   if (color != null) {
     result[0] |= 1 << 1;
@@ -164,6 +165,10 @@ Int32List _encodeTextStyle(Color color,
     result[0] |= 1 << 8;
     // Passed separately to native.
   }
+  if (letterSpacing != null) {
+    result[0] |= 1 << 9;
+    // Passed separately to native.
+  }
   return result;
 }
 
@@ -176,7 +181,8 @@ class TextStyle {
     FontWeight fontWeight,
     FontStyle fontStyle,
     String fontFamily,
-    double fontSize
+    double fontSize,
+    double letterSpacing
   }) : _encoded = _encodeTextStyle(color,
                                    decoration,
                                    decorationColor,
@@ -184,13 +190,16 @@ class TextStyle {
                                    fontWeight,
                                    fontStyle,
                                    fontFamily,
-                                   fontSize),
+                                   fontSize,
+                                   letterSpacing),
        _fontFamily = fontFamily ?? '',
-       _fontSize = fontSize;
+       _fontSize = fontSize,
+       _letterSpacing = letterSpacing;
 
   final Int32List _encoded;
   final String _fontFamily;
   final double _fontSize;
+  final double _letterSpacing;
 }
 
 // This encoding must match the C++ version ParagraphBuilder::build.
@@ -238,7 +247,7 @@ class ParagraphStyle {
 
 class ParagraphBuilder extends _ParagraphBuilder {
   void pushStyle(TextStyle style) {
-    _pushStyle(style._encoded, style._fontFamily, style._fontSize);
+    _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing);
   }
 
   void pop() => _pop();

@@ -24,7 +24,7 @@ public:
 
     ~ParagraphBuilder() override;
 
-    void pushStyle(Int32List& encoded, const String& fontFamily, double fontSize);
+    void pushStyle(Int32List& encoded, const String& fontFamily, double fontSize, double letterSpacing);
     void pop();
 
     void addText(const String& text);

@@ -6,7 +6,7 @@
   Constructor(),
   PrivateDart,
 ] interface ParagraphBuilder {
-  void pushStyle(Int32List encoded, DOMString fontFamily, double fontSize);
+  void pushStyle(Int32List encoded, DOMString fontFamily, double fontSize, double letterSpacing);
   void pop();
 
   void addText(DOMString text);
