@@ -43,9 +43,10 @@ void Animator::RequestFrame() {
   }
 
   if (!AwaitVSync()) {
-    base::MessageLoop::current()->PostTask(
+    base::MessageLoop::current()->PostDelayedTask(
         FROM_HERE,
-        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr(), 0));
+        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr(), 0),
+        base::TimeDelta::FromMilliseconds(16));
   }
 }
 
