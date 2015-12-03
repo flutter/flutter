@@ -18,6 +18,7 @@
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
+#include "sky/services/rasterizer/rasterizer.mojom.h"
 #include "sky/shell/rasterizer.h"
 #include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
@@ -36,11 +37,10 @@ class Engine : public UIDelegate,
     Config();
     ~Config();
 
-    RasterCallback raster_callback;
     scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
   };
 
-  explicit Engine(const Config& config);
+  explicit Engine(const Config& config, rasterizer::RasterizerPtr rasterizer);
   ~Engine() override;
 
   base::WeakPtr<Engine> GetWeakPtr();

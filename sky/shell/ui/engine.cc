@@ -53,9 +53,9 @@ Engine::Config::Config() {
 Engine::Config::~Config() {
 }
 
-Engine::Engine(const Config& config)
+Engine::Engine(const Config& config, rasterizer::RasterizerPtr rasterizer)
     : config_(config),
-      animator_(new Animator(config, this)),
+      animator_(new Animator(config, rasterizer.Pass(), this)),
       binding_(this),
       activity_running_(false),
       have_surface_(false),

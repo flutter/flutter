@@ -24,7 +24,7 @@ scoped_ptr<Rasterizer> Rasterizer::Create() {
   return make_scoped_ptr(new RasterizerMojo());
 }
 
-RasterizerMojo::RasterizerMojo() : weak_factory_(this) {
+RasterizerMojo::RasterizerMojo() : binding_(this), weak_factory_(this) {
 }
 
 RasterizerMojo::~RasterizerMojo() {
@@ -34,12 +34,22 @@ base::WeakPtr<RasterizerMojo> RasterizerMojo::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-RasterCallback RasterizerMojo::GetRasterCallback() {
-  return base::Bind(&RasterizerMojo::Draw, weak_factory_.GetWeakPtr());
+base::WeakPtr<Rasterizer> RasterizerMojo::GetWeakRasterizerPtr() {
+  return GetWeakPtr();
 }
 
-void RasterizerMojo::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
+void RasterizerMojo::ConnectToRasterizer (
+    mojo::InterfaceRequest<rasterizer::Rasterizer> request ) {
+  binding_.Bind(request.Pass());
+}
+
+void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
+                          const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerMojo::Draw");
+
+  scoped_ptr<compositor::LayerTree> layer_tree(
+      reinterpret_cast<compositor::LayerTree*>(layer_tree_ptr));
+
   MGLResizeSurface(layer_tree->frame_size().width(),
                    layer_tree->frame_size().height());
   SkCanvas* canvas = ganesh_canvas_.GetCanvas(0, layer_tree->frame_size());
@@ -49,6 +59,7 @@ void RasterizerMojo::Draw(scoped_ptr<compositor::LayerTree> layer_tree) {
   layer_tree->root_layer()->Paint(frame);
   canvas->flush();
   MGLSwapBuffers();
+  callback.Run();
 }
 
 void RasterizerMojo::OnContextProviderAvailable(

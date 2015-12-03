@@ -16,14 +16,17 @@
 namespace sky {
 namespace shell {
 
-class RasterizerMojo : public Rasterizer {
+class RasterizerMojo : public ::sky::shell::Rasterizer {
  public:
   explicit RasterizerMojo();
   ~RasterizerMojo() override;
 
   base::WeakPtr<RasterizerMojo> GetWeakPtr();
 
-  RasterCallback GetRasterCallback() override;
+  base::WeakPtr<::sky::shell::Rasterizer> GetWeakRasterizerPtr() override;
+
+  void ConnectToRasterizer(
+       mojo::InterfaceRequest<rasterizer::Rasterizer> request) override;
 
   void OnContextProviderAvailable(
       mojo::InterfacePtrInfo<mojo::ContextProvider> context_provder);
@@ -32,7 +35,8 @@ class RasterizerMojo : public Rasterizer {
 
  private:
   void OnContextCreated(mojo::CommandBufferPtr command_buffer);
-  void Draw(scoped_ptr<compositor::LayerTree> layer_tree);
+
+  void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
 
   mojo::ContextProviderPtr context_provider_;
   skia::RefPtr<GrGLInterface> gr_gl_interface_;
@@ -40,6 +44,8 @@ class RasterizerMojo : public Rasterizer {
   GaneshCanvas ganesh_canvas_;
 
   compositor::PaintContext paint_context_;
+
+  mojo::Binding<rasterizer::Rasterizer> binding_;
 
   base::WeakPtrFactory<RasterizerMojo> weak_factory_;
 

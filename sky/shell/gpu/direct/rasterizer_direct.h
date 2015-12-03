@@ -30,13 +30,18 @@ class RasterizerDirect : public Rasterizer {
   ~RasterizerDirect() override;
 
   base::WeakPtr<RasterizerDirect> GetWeakPtr();
-  RasterCallback GetRasterCallback() override;
+
+  base::WeakPtr<::sky::shell::Rasterizer> GetWeakRasterizerPtr() override;
+
+  void ConnectToRasterizer(
+      mojo::InterfaceRequest<rasterizer::Rasterizer> request) override;
 
   void OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget);
   void OnOutputSurfaceDestroyed();
 
  private:
-  void Draw(scoped_ptr<compositor::LayerTree> layer_tree);
+  void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
+
   void EnsureGLContext();
   void EnsureGaneshSurface(intptr_t window_fbo, const gfx::Size& size);
 
@@ -48,6 +53,8 @@ class RasterizerDirect : public Rasterizer {
   GaneshCanvas ganesh_canvas_;
 
   compositor::PaintContext paint_context_;
+
+  mojo::Binding<rasterizer::Rasterizer> binding_;
 
   base::WeakPtrFactory<RasterizerDirect> weak_factory_;
 
