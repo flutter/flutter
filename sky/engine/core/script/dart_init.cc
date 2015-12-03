@@ -109,6 +109,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    Dart_IsolateFlags* flags,
                                    void* callback_data,
                                    char** error) {
+  TRACE_EVENT0("flutter", __func__);
   if (IsServiceIsolateURL(script_uri)) {
     DartState* dart_state = new DartState();
     Dart_Isolate isolate = Dart_CreateIsolate(
@@ -206,6 +207,7 @@ const char* kDartApplicationLibraryPath =
 
 static void* DartLookupSymbolInLibrary(const char* symbol_name,
                                        const char* library) {
+  TRACE_EVENT0("flutter", __func__);
   if (symbol_name == nullptr) {
     return nullptr;
   }
@@ -219,6 +221,7 @@ static void* DartLookupSymbolInLibrary(const char* symbol_name,
 }
 
 void* _DartSymbolLookup(const char* symbol_name) {
+  TRACE_EVENT0("flutter", __func__);
   if (symbol_name == nullptr) {
     return nullptr;
   }
@@ -242,6 +245,7 @@ static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
 }
 
 bool IsRunningPrecompiledCode() {
+  TRACE_EVENT0("flutter", __func__);
   return PrecompiledInstructionsSymbolIfPresent() != nullptr;
 }
 
@@ -258,8 +262,12 @@ bool IsRunningPrecompiledCode() {
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 void InitDartVM() {
-  TRACE_EVENT0("flutter", "InitDartVM");
-  dart::bin::BootstrapDartIo();
+  TRACE_EVENT0("flutter", __func__);
+
+  {
+    TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
+    dart::bin::BootstrapDartIo();
+  }
 
   DartMojoInternal::SetHandleWatcherProducerHandle(
       mojo::dart::HandleWatcher::Start());
@@ -279,28 +287,32 @@ void InitDartVM() {
     args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
 
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
-  // This should be called before calling Dart_Initialize.
-  DartDebugger::InitDebugger();
-  CHECK(
-      Dart_Initialize(
-          reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
-          PrecompiledInstructionsSymbolIfPresent(), IsolateCreateCallback,
-          nullptr,  // Isolate interrupt callback.
-          UnhandledExceptionCallback, IsolateShutdownCallback,
-          // File IO callbacks.
-          nullptr, nullptr, nullptr, nullptr,
-          // Entroy source
-          nullptr,
-          // VM service assets archive
-          GetVMServiceAssetsArchiveCallback) == nullptr);
+
+  {
+    TRACE_EVENT0("flutter", "DartDebugger::InitDebugger");
+    // This should be called before calling Dart_Initialize.
+    DartDebugger::InitDebugger();
+  }
+
+  {
+    TRACE_EVENT0("flutter", "Dart_Initialize");
+    CHECK(Dart_Initialize(reinterpret_cast<uint8_t*>(
+                              DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
+                          PrecompiledInstructionsSymbolIfPresent(),
+                          IsolateCreateCallback,
+                          nullptr,  // Isolate interrupt callback.
+                          UnhandledExceptionCallback, IsolateShutdownCallback,
+                          // File IO callbacks.
+                          nullptr, nullptr, nullptr, nullptr,
+                          // Entroy source
+                          nullptr,
+                          // VM service assets archive
+                          GetVMServiceAssetsArchiveCallback) == nullptr);
+  }
 
   // Allow streaming of stdout and stderr by the Dart vm.
   Dart_SetServiceStreamCallbacks(&ServiceStreamListenCallback,
                                  &ServiceStreamCancelCallback);
-
-  // Wait for load port- ensures handle watcher and service isolates are
-  // running.
-  Dart_ServiceWaitForLoadPort();
 }
 
 }  // namespace blink
