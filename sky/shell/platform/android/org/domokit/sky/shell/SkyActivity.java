@@ -19,6 +19,7 @@ import org.chromium.mojom.sky.InputEvent;
 import org.domokit.activity.ActivityImpl;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Base class for activities that use Sky.
@@ -31,9 +32,16 @@ public class SkyActivity extends Activity {
         // Before adding more entries to this list, consider that arbitrary
         // Android applications can generate intents with extra data and that
         // there are many security-sensitive args in the binary.
+        ArrayList<String> args = new ArrayList<String>();
         if (intent.getBooleanExtra("enable-checked-mode", false)) {
-            String[] args = { "--enable-checked-mode"};
-            return args;
+            args.add("--enable-checked-mode");
+        }
+        if (intent.getBooleanExtra("trace-startup", false)) {
+            args.add("--trace-startup");
+        }
+        if (!args.isEmpty()) {
+            String[] argsArray = new String[args.size()];
+            return args.toArray(argsArray);
         }
         return null;
     }

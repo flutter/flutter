@@ -21,6 +21,7 @@ void PrintUsage(const std::string& executable_name) {
   std::cerr << "Usage: " << executable_name
             << " --" << kEnableCheckedMode
             << " --" << kNonInteractive
+            << " --" << kTraceStartup
             << " --" << kFLX << "=FLX"
             << " --" << kPackageRoot << "=PACKAGE_ROOT"
             << " [ MAIN_DART ]" << std::endl;
