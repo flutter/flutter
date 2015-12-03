@@ -38,6 +38,8 @@ class _MaterialPageTransition extends TransitionWithChild {
   }
 }
 
+const Duration kMaterialPageRouteTransitionDuration = const Duration(milliseconds: 150);
+
 class MaterialPageRoute<T> extends PageRoute<T> {
   MaterialPageRoute({
     this.builder,
@@ -49,7 +51,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   final WidgetBuilder builder;
 
-  Duration get transitionDuration => const Duration(milliseconds: 150);
+  Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
   bool get barrierDismissable => false;
   Color get barrierColor => Colors.black54;
 

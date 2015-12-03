@@ -109,12 +109,10 @@ class ReversePerformance extends PerformanceView {
 
   final List<PerformanceStatusListener> _statusListeners = new List<PerformanceStatusListener>();
 
-  /// Calls listener every time the status of this performance changes
   void addStatusListener(PerformanceStatusListener listener) {
     _statusListeners.add(listener);
   }
 
-  /// Stops calling the listener every time the status of this performance changes
   void removeStatusListener(PerformanceStatusListener listener) {
     _statusListeners.remove(listener);
   }
@@ -146,6 +144,217 @@ class ReversePerformance extends PerformanceView {
       case AnimationDirection.reverse: return AnimationDirection.forward;
     }
   }
+}
+
+enum _TrainHoppingMode { minimize, maximize }
+
+/// This performance starts by proxying one performance, but can be given a
+/// second performance. When their times cross (either because the second is
+/// going in the opposite direction, or because the one overtakes the other),
+/// the performance hops over to proxying the second performance, and the second
+/// performance becomes the new "first" performance.
+class TrainHoppingPerformance extends PerformanceView {
+  TrainHoppingPerformance(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
+    assert(_currentTrain != null);
+    if (_nextTrain != null) {
+      
+      if (_currentTrain.progress > _nextTrain.progress) {
+        _mode = _TrainHoppingMode.maximize;
+      } else {
+        _mode = _TrainHoppingMode.minimize;
+        if (_currentTrain.progress == _nextTrain.progress) {
+          _currentTrain = _nextTrain;
+          _nextTrain = null;
+        }
+      }
+    }
+    _currentTrain.addStatusListener(_statusChangeHandler);
+    _currentTrain.addListener(_valueChangeHandler);
+    if (_nextTrain != null)
+      _nextTrain.addListener(_valueChangeHandler);
+    assert(_mode != null);
+  }
+
+  PerformanceView get currentTrain => _currentTrain;
+  PerformanceView _currentTrain;
+  PerformanceView _nextTrain;
+  _TrainHoppingMode _mode;
+
+  VoidCallback onSwitchedTrain;
+
+  void updateVariable(Animatable variable) {
+    assert(_currentTrain != null);
+    variable.setProgress(progress, curveDirection);
+  }
+
+  final List<VoidCallback> _listeners = new List<VoidCallback>();
+
+  void addListener(VoidCallback listener) {
+    assert(_currentTrain != null);
+    _listeners.add(listener);
+  }
+
+  void removeListener(VoidCallback listener) {
+    assert(_currentTrain != null);
+    _listeners.remove(listener);
+  }
+
+  final List<PerformanceStatusListener> _statusListeners = new List<PerformanceStatusListener>();
+
+  void addStatusListener(PerformanceStatusListener listener) {
+    assert(_currentTrain != null);
+    _statusListeners.add(listener);
+  }
+
+  void removeStatusListener(PerformanceStatusListener listener) {
+    assert(_currentTrain != null);
+    _statusListeners.remove(listener);
+  }
+
+  PerformanceStatus _lastStatus;
+  void _statusChangeHandler(PerformanceStatus status) {
+    assert(_currentTrain != null);
+    if (status != _lastStatus) {
+      List<PerformanceStatusListener> localListeners = new List<PerformanceStatusListener>.from(_statusListeners);
+      for (PerformanceStatusListener listener in localListeners)
+        listener(status);
+      _lastStatus = status;
+    }
+    assert(_lastStatus != null);
+  }
+
+  PerformanceStatus get status => _currentTrain.status;
+  AnimationDirection get direction => _currentTrain.direction;
+  AnimationDirection get curveDirection => _currentTrain.curveDirection;
+
+  double _lastProgress;  
+  void _valueChangeHandler() {
+    assert(_currentTrain != null);
+    bool hop = false;
+    if (_nextTrain != null) {
+      switch (_mode) {
+        case _TrainHoppingMode.minimize:
+          hop = _nextTrain.progress <= _currentTrain.progress;
+          break;
+        case _TrainHoppingMode.maximize: 
+          hop = _nextTrain.progress >= _currentTrain.progress;
+          break;
+      }
+      if (hop) {
+        _currentTrain.removeStatusListener(_statusChangeHandler);
+        _currentTrain.removeListener(_valueChangeHandler);
+        _currentTrain = _nextTrain;
+        _nextTrain.addListener(_valueChangeHandler);
+        _statusChangeHandler(_nextTrain.status);
+      }
+    }
+    double newProgress = progress;
+    if (newProgress != _lastProgress) {
+      List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+      for (VoidCallback listener in localListeners)
+        listener();
+      _lastProgress = newProgress;
+    }
+    assert(_lastProgress != null);
+    if (hop && onSwitchedTrain != null)
+      onSwitchedTrain();
+  }
+
+  double get progress => _currentTrain.progress;
+
+  /// Frees all the resources used by this performance.
+  /// After this is called, this object is no longer usable.
+  void dispose() {
+    assert(_currentTrain != null);
+    _currentTrain.removeStatusListener(_statusChangeHandler);
+    _currentTrain.removeListener(_valueChangeHandler);
+    _currentTrain = null;
+    if (_nextTrain != null) {
+      _nextTrain.removeListener(_valueChangeHandler);
+      _nextTrain = null;
+    }
+  }
+}
+
+class ProxyPerformance extends PerformanceView {
+  ProxyPerformance([PerformanceView performance]) {
+    masterPerformance = performance;
+  }
+
+  PerformanceView get masterPerformance => _masterPerformance;
+  PerformanceView _masterPerformance;
+  void set masterPerformance(PerformanceView value) {
+    if (value == _masterPerformance)
+      return;
+    if (_masterPerformance != null) {
+      _masterPerformance.removeStatusListener(_statusChangeHandler);
+      _masterPerformance.removeListener(_valueChangeHandler);
+    }
+    _masterPerformance = value;
+    if (_masterPerformance != null) {
+      _masterPerformance.addListener(_valueChangeHandler);
+      _masterPerformance.addStatusListener(_statusChangeHandler);
+      _valueChangeHandler();
+      _statusChangeHandler(_masterPerformance.status);
+    }
+  }
+
+  void updateVariable(Animatable variable) {
+    variable.setProgress(progress, curveDirection);
+  }
+
+  final List<VoidCallback> _listeners = new List<VoidCallback>();
+
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+
+  final List<PerformanceStatusListener> _statusListeners = new List<PerformanceStatusListener>();
+
+  void addStatusListener(PerformanceStatusListener listener) {
+    _statusListeners.add(listener);
+  }
+
+  void removeStatusListener(PerformanceStatusListener listener) {
+    _statusListeners.remove(listener);
+  }
+
+  PerformanceStatus _status = PerformanceStatus.dismissed;
+  AnimationDirection _direction = AnimationDirection.forward;
+  AnimationDirection _curveDirection = AnimationDirection.forward;
+  void _statusChangeHandler(PerformanceStatus status) {
+    assert(_masterPerformance != null);
+    if (status != _status) {
+      _status = status;
+      _direction = _masterPerformance.direction;
+      List<PerformanceStatusListener> localListeners = new List<PerformanceStatusListener>.from(_statusListeners);
+      for (PerformanceStatusListener listener in localListeners)
+        listener(status);
+    }
+  }
+
+  PerformanceStatus get status => _status;
+  AnimationDirection get direction => _direction;
+  AnimationDirection get curveDirection => _curveDirection;
+
+  double _progress = 0.0;
+  void _valueChangeHandler() {
+    assert(_masterPerformance != null);
+    double newProgress = _masterPerformance.progress;
+    if (newProgress != _progress) {
+      _progress = newProgress;
+      _curveDirection = _masterPerformance.curveDirection;
+      List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+      for (VoidCallback listener in localListeners)
+        listener();
+    }
+  }
+
+  double get progress => _progress;
 }
 
 class _RepeatingSimulation extends Simulation {
@@ -280,12 +489,10 @@ class Performance extends PerformanceView {
 
   final List<VoidCallback> _listeners = new List<VoidCallback>();
 
-  /// Calls the listener every time the progress of this performance changes
   void addListener(VoidCallback listener) {
     _listeners.add(listener);
   }
 
-  /// Stop calling the listener every time the progress of this performance changes
   void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
   }
@@ -298,12 +505,10 @@ class Performance extends PerformanceView {
 
   final List<PerformanceStatusListener> _statusListeners = new List<PerformanceStatusListener>();
 
-  /// Calls listener every time the status of this performance changes
   void addStatusListener(PerformanceStatusListener listener) {
     _statusListeners.add(listener);
   }
 
-  /// Stops calling the listener every time the status of this performance changes
   void removeStatusListener(PerformanceStatusListener listener) {
     _statusListeners.remove(listener);
   }

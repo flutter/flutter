@@ -59,3 +59,10 @@ void flipStatefulComponent(WidgetTester tester) {
   FlipComponentState state = stateElement.state;
   state.flip();
 }
+
+
+class Builder extends StatelessComponent {
+  Builder({ Key key, this.builder }) : super(key: key);
+  final WidgetBuilder builder;
+  Widget build(BuildContext context) => builder(context);
+}

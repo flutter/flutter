@@ -27,6 +27,11 @@ abstract class TransitionComponent extends StatefulComponent {
   Widget build(BuildContext context);
 
   _TransitionState createState() => new _TransitionState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('performance: $performance');
+  }
 }
 
 class _TransitionState extends State<TransitionComponent> {

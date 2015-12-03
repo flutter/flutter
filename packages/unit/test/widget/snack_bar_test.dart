@@ -6,11 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
-class Builder extends StatelessComponent {
-  Builder({ this.builder });
-  final WidgetBuilder builder;
-  Widget build(BuildContext context) => builder(context);
-}
+import 'test_widgets.dart';
 
 void main() {
   test('SnackBar control test', () {
