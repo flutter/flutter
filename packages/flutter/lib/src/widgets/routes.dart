@@ -236,6 +236,9 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
     }
     return super.didPop(result);
   }
+  bool get willHandlePopInternally {
+    return _localHistory != null && _localHistory.length > 0;
+  }
 }
 
 class _ModalScopeStatus extends InheritedWidget {
