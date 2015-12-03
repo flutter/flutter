@@ -53,6 +53,11 @@ void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widge
   surface_ =
       gfx::GLSurface::CreateViewGLSurface(widget, gfx::SurfaceConfiguration());
   CHECK(surface_) << "GLSurface required.";
+  // Eagerly create the GL context. For a while after the accelerated widget
+  // is first available (after startup), the process is busy setting up dart
+  // isolates. During this time, we are free to create the context. Thus
+  // avoiding a delay when the first frame is painted.
+  EnsureGLContext();
 }
 
 void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
