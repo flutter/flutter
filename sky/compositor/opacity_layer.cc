@@ -14,11 +14,9 @@ OpacityLayer::~OpacityLayer() {
 }
 
 void OpacityLayer::Paint(PaintContext::ScopedFrame& frame) {
-  SkColor color = SkColorSetARGB(alpha_, 0, 0, 0);
-  RefPtr<SkColorFilter> colorFilter = adoptRef(
-      SkColorFilter::CreateModeFilter(color, SkXfermode::kSrcOver_Mode));
   SkPaint paint;
-  paint.setColorFilter(colorFilter.get());
+  paint.setColor(SkColorSetARGB(alpha_, 0, 0, 0));
+  paint.setXfermodeMode(SkXfermode::kSrcOver_Mode);
   SkCanvas& canvas = frame.canvas();
   canvas.saveLayer(has_paint_bounds() ? &paint_bounds() : nullptr, &paint);
   PaintChildren(frame);
