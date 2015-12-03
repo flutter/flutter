@@ -49,10 +49,10 @@ target_os = ["android"]
  * Add `.../engine/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
  * Add `.../engine/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
  * Make sure you are still in the `src` directory that the `gclient sync` step created earlier.
- * If you're on Linux, run `sudo ./build/install-build-deps-android.sh` .
- * If you're on Linux, run `sudo ./build/install-build-deps.sh` .
+ * If you're on Linux, run `sudo ./build/install-build-deps-android.sh` 
+ * If you're on Linux, run `sudo ./build/install-build-deps.sh` 
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
- * If you're on Mac, install `ant`: `brew install ant` .
+ * If you're on Mac, install `ant`: `brew install ant` 
 
 Building and running the code
 -----------------------------
