@@ -21,6 +21,7 @@ class WidgetTester {
       clock = async.getClock(new DateTime.utc(2015, 1, 1)) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
+    runApp(new ErrorWidget()); // flush out the last build entirely
   }
 
   final FakeAsync async;

@@ -65,14 +65,14 @@ void main() {
       bool showBottomSheetThenCalled = false;
 
       tester.pumpWidget(new MaterialApp(
-          routes: <String, RouteBuilder>{
-            '/': (RouteArguments args) {
-              return new Scaffold(
-                key: scaffoldKey,
-                body: new Center(child: new Text('body'))
-              );
-            }
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) {
+            return new Scaffold(
+              key: scaffoldKey,
+              body: new Center(child: new Text('body'))
+            );
           }
+        }
       ));
 
       expect(showBottomSheetThenCalled, isFalse);

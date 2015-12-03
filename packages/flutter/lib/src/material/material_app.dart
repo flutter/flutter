@@ -37,7 +37,6 @@ class RouteArguments {
   final BuildContext context;
 }
 typedef Widget RouteBuilder(RouteArguments args);
-typedef RouteBuilder RouteGenerator(String name);
 
 class MaterialApp extends StatefulComponent {
   MaterialApp({
@@ -54,7 +53,7 @@ class MaterialApp extends StatefulComponent {
   final String title;
   final ThemeData theme;
   final Map<String, RouteBuilder> routes;
-  final RouteGenerator onGenerateRoute;
+  final RouteFactory onGenerateRoute;
 
   _MaterialAppState createState() => new _MaterialAppState();
 }
@@ -93,13 +92,18 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
   final HeroController _heroController = new HeroController();
 
   Route _generateRoute(NamedRouteSettings settings) {
-    return new MaterialPageRoute(
-      builder: (BuildContext context) {
-        RouteBuilder builder = config.routes[settings.name] ?? config.onGenerateRoute(settings.name);
-        return builder(new RouteArguments(context: context));
-      },
-      settings: settings
-    );
+    RouteBuilder builder = config.routes[settings.name];
+    if (builder != null) {
+      return new MaterialPageRoute(
+        builder: (BuildContext context) {
+          return builder(new RouteArguments(context: context));
+        },
+        settings: settings
+      );
+    }
+    if (config.onGenerateRoute != null)
+      return config.onGenerateRoute(settings);
+    return null;
   }
 
   Widget build(BuildContext context) {

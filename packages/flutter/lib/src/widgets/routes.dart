@@ -433,4 +433,5 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     NamedRouteSettings settings: const NamedRouteSettings()
   }) : super(completer: completer, settings: settings);
   bool get opaque => true;
+  bool get barrierDismissable => false;
 }

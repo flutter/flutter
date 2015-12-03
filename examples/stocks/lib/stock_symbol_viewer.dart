@@ -5,7 +5,7 @@
 part of stocks;
 
 class StockSymbolView extends StatelessComponent {
-  StockSymbolView({ this.stock});
+  StockSymbolView({ this.stock });
 
   final Stock stock;
 
@@ -20,28 +20,28 @@ class StockSymbolView extends StatelessComponent {
       padding: new EdgeDims.all(20.0),
       child: new Column(<Widget>[
           new Row(<Widget>[
-            new Text(
-              '${stock.symbol}',
-              style: Theme.of(context).text.display2
-            ),
-            new Hero(
-              key: new ObjectKey(stock),
-              tag: StockRowPartKind.arrow,
-              turns: 2,
-              child: new StockArrow(percentChange: stock.percentChange)
-            ),
-          ],
-          justifyContent: FlexJustifyContent.spaceBetween
-        ),
-        new Text('Last Sale', style: headings),
-        new Text('$lastSale ($changeInPrice)'),
-        new Container(
-          height: 8.0
-        ),
-        new Text('Market Cap', style: headings),
-        new Text('${stock.marketCap}'),
-      ],
-         justifyContent: FlexJustifyContent.collapse
+              new Text(
+                '${stock.symbol}',
+                style: Theme.of(context).text.display2
+              ),
+              new Hero(
+                key: new ObjectKey(stock),
+                tag: StockRowPartKind.arrow,
+                turns: 2,
+                child: new StockArrow(percentChange: stock.percentChange)
+              ),
+            ],
+            justifyContent: FlexJustifyContent.spaceBetween
+          ),
+          new Text('Last Sale', style: headings),
+          new Text('$lastSale ($changeInPrice)'),
+          new Container(
+            height: 8.0
+          ),
+          new Text('Market Cap', style: headings),
+          new Text('${stock.marketCap}'),
+        ],
+        justifyContent: FlexJustifyContent.collapse
       )
     );
   }
@@ -53,7 +53,6 @@ class StockSymbolPage extends StatelessComponent {
   final Stock stock;
 
   Widget build(BuildContext context) {
-    PageRoute page = ModalRoute.of(context);
     return new Scaffold(
       toolBar: new ToolBar(
         left: new IconButton(
@@ -62,15 +61,7 @@ class StockSymbolPage extends StatelessComponent {
             Navigator.pop(context);
           }
         ),
-        center: new FadeTransition(
-          opacity: new AnimatedValue<double>(
-            0.0,
-            end: 1.0,
-            curve: const Interval(0.5, 1.0)
-          ),
-          performance: page.performance,
-          child: new Text(stock.name)
-        )
+        center: new Text(stock.name)
       ),
       body: new Block(<Widget>[
         new Container(
