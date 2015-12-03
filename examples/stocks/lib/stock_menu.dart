@@ -4,7 +4,7 @@
 
 part of stocks;
 
-enum _MenuItems { autorefresh, autorefreshCheckbox, add, remove }
+enum _MenuItems { autorefresh, autorefreshCheckbox, refresh, speedUp, speedDown }
 
 const double _kMenuMargin = 16.0; // 24.0 on tablet
 
@@ -32,12 +32,16 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
         )
       ),
       new PopupMenuItem(
-        value: _MenuItems.add,
-        child: new Text('Add stock')
+        value: _MenuItems.refresh,
+        child: new Text('Refresh')
       ),
       new PopupMenuItem(
-        value: _MenuItems.remove,
-        child: new Text('Remove stock')
+        value: _MenuItems.speedUp,
+        child: new Text('Increase animation speed')
+      ),
+      new PopupMenuItem(
+        value: _MenuItems.speedDown,
+        child: new Text('Decrease animation speed')
       ),
     ]
   )) {
@@ -49,8 +53,13 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
     case _MenuItems.autorefreshCheckbox:
       onAutorefreshChanged(autorefresh);
       break;
-    case _MenuItems.add:
-    case _MenuItems.remove:
+    case _MenuItems.speedUp:
+      timeDilation /= 5.0;
+      break;
+    case _MenuItems.speedDown:
+      timeDilation *= 5.0;
+      break;
+    case _MenuItems.refresh:
       await showDialog(
         context: context,
         child: new Dialog(
