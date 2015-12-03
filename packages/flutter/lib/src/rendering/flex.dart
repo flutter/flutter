@@ -466,14 +466,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         case FlexDirection.horizontal:
           size = constraints.constrain(new Size(_overflow, crossSize));
           crossSize = size.height;
-          assert(size.width >= _overflow);
-          remainingSpace = size.width - _overflow;
+          remainingSpace = math.max(0.0, size.width - _overflow);
           break;
         case FlexDirection.vertical:
           size = constraints.constrain(new Size(crossSize, _overflow));
           crossSize = size.width;
-          assert(size.height >= _overflow);
-          remainingSpace = size.height - _overflow;
+          remainingSpace = math.max(0.0, size.height - _overflow);
           break;
       }
       _overflow = 0.0;

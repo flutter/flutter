@@ -108,4 +108,46 @@ void main() {
       expect(renderBox.size.height, equals(250.0));
     });
   });
+
+  test('Can layout at zero size', () {
+    final Key childKey = new Key('childKey');
+
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Center(
+        child: new Container(
+          width: 0.0,
+          height: 0.0,
+          child:  new Column([
+            new Container(
+              key: childKey,
+              width: 100.0,
+              height: 100.0
+            )], justifyContent: FlexJustifyContent.collapse
+          )
+        )
+      ));
+
+      RenderBox renderBox = tester.findElementByKey(childKey).renderObject;
+      expect(renderBox.size.width, equals(0.0));
+      expect(renderBox.size.height, equals(100.0));
+
+      tester.pumpWidget(new Center(
+        child: new Container(
+          width: 0.0,
+          height: 0.0,
+          child:  new Row([
+            new Container(
+              key: childKey,
+              width: 100.0,
+              height: 100.0
+            )], justifyContent: FlexJustifyContent.collapse
+          )
+        )
+      ));
+
+      renderBox = tester.findElementByKey(childKey).renderObject;
+      expect(renderBox.size.width, equals(100.0));
+      expect(renderBox.size.height, equals(0.0));
+    });
+  });
 }
