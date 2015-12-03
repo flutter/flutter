@@ -853,7 +853,7 @@ class AndroidDevice extends Device {
     ]));
   }
 
-  String stopTracing(AndroidApk apk) {
+  String stopTracing(AndroidApk apk, { String outPath: null }) {
     clearLogs();
     runCheckedSync(adbCommandForDevice([
       'shell',
@@ -878,11 +878,12 @@ class AndroidDevice extends Device {
     }
 
     if (tracePath != null) {
+      String localPath = (outPath != null) ? outPath : path.basename(tracePath);
       runCheckedSync(adbCommandForDevice(['root']));
       runSync(adbCommandForDevice(['shell', 'run-as', apk.id, 'chmod', '777', tracePath]));
-      runCheckedSync(adbCommandForDevice(['pull', tracePath]));
+      runCheckedSync(adbCommandForDevice(['pull', tracePath, localPath]));
       runSync(adbCommandForDevice(['shell', 'rm', tracePath]));
-      return path.basename(tracePath);
+      return localPath;
     }
     logging.warning('No trace file detected. '
         'Did you remember to start the trace before stopping it?');

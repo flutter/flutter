@@ -20,6 +20,7 @@ class TraceCommand extends FlutterCommand {
   TraceCommand() {
     argParser.addFlag('start', negatable: false, help: 'Start tracing.');
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
+    argParser.addOption('out', help: 'Specify the path of the saved trace file.');
     argParser.addOption('duration',
         defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
   }
@@ -52,7 +53,7 @@ class TraceCommand extends FlutterCommand {
   }
 
   void _stopTracing(AndroidDevice android, AndroidApk androidApp) {
-    String tracePath = android.stopTracing(androidApp);
+    String tracePath = android.stopTracing(androidApp, outPath: argResults['out']);
     if (tracePath == null) {
       logging.warning('No trace file saved.');
     } else {
