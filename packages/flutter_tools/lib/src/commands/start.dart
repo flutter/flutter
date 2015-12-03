@@ -27,6 +27,10 @@ class StartCommand extends FlutterCommand {
         negatable: true,
         defaultsTo: true,
         help: 'Toggle Dart\'s checked mode.');
+    argParser.addFlag('trace-startup',
+        negatable: true,
+        defaultsTo: false,
+        help: 'Start tracing during startup.');
     argParser.addOption('target',
         defaultsTo: '',
         abbr: 't',
@@ -101,6 +105,7 @@ class StartCommand extends FlutterCommand {
             if (device.startBundle(package, localBundlePath,
                                    poke: poke,
                                    checked: argResults['checked'],
+                                   traceStartup: argResults['trace-startup'],
                                    route: argResults['route']))
               startedSomething = true;
           }

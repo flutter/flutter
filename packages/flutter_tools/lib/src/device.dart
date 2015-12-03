@@ -771,6 +771,7 @@ class AndroidDevice extends Device {
   bool startBundle(AndroidApk apk, String bundlePath, {
     bool poke,
     bool checked,
+    bool traceStartup,
     String route
   }) {
     logging.fine('$this startBundle');
@@ -792,6 +793,8 @@ class AndroidDevice extends Device {
     ]);
     if (checked)
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
+    if (traceStartup)
+        cmd.addAll(['--ez', 'trace-startup', 'true']);
     if (route != null)
       cmd.addAll(['--es', 'route', route]);
     cmd.add(apk.launchActivity);
