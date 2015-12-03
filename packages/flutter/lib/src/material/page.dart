@@ -52,7 +52,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;
 
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
-  bool get barrierDismissable => false;
   Color get barrierColor => Colors.black54;
 
   Widget buildPage(BuildContext context) {

@@ -145,22 +145,13 @@ class StockHomeState extends State<StockHome> {
   }
 
   Widget buildToolBar() {
-    PageRoute page = ModalRoute.of(context);
     return new ToolBar(
       elevation: 0,
       left: new IconButton(
         icon: "navigation/menu",
         onPressed: () => _scaffoldKey.currentState?.openDrawer()
       ),
-      center: new FadeTransition(
-        opacity: new AnimatedValue<double>(
-          1.0,
-          end: 0.0,
-          curve: const Interval(0.0, 0.5)
-        ),
-        performance: page.forwardPerformance,
-        child: new Text('Stocks')
-      ),
+      center: new Text('Stocks'),
       right: <Widget>[
         new IconButton(
           icon: "action/search",

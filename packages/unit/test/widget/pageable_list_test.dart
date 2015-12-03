@@ -50,9 +50,7 @@ void pageRight(WidgetTester tester) {
 }
 
 void main() {
-  // PageableList with itemsWrap: false
-
-  test('Scroll left from page 0 to page 1', () {
+  test('PageableList with itemsWrap: false', () {
     testWidgets((WidgetTester tester) {
       currentPage = null;
       itemsWrap = false;
@@ -60,32 +58,14 @@ void main() {
       expect(currentPage, isNull);
       pageLeft(tester);
       expect(currentPage, equals(1));
-    });
-  });
-
-  test('Scroll right from page 1 to page 0', () {
-    testWidgets((WidgetTester tester) {
-      itemsWrap = false;
-      tester.pumpWidget(buildFrame());
-      expect(currentPage, equals(1));
       pageRight(tester);
-      expect(currentPage, equals(0));
-    });
-  });
-
-  test('Scroll right from page 0 does nothing (underscroll)', () {
-    testWidgets((WidgetTester tester) {
-      itemsWrap = false;
-      tester.pumpWidget(buildFrame());
       expect(currentPage, equals(0));
       pageRight(tester);
       expect(currentPage, equals(0));
     });
   });
 
-  // PageableList with itemsWrap: true
-
-  test('Scroll left page 0 to page 1, itemsWrap: true', () {
+  test('PageableList with itemsWrap: true', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Container());
       currentPage = null;
@@ -94,21 +74,7 @@ void main() {
       expect(currentPage, isNull);
       pageLeft(tester);
       expect(currentPage, equals(1));
-    });
-  });
-
-  test('Scroll right from page 1 to page 0, itemsWrap: true', () {
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(buildFrame());
-      expect(currentPage, equals(1));
       pageRight(tester);
-      expect(currentPage, equals(0));
-    });
-  });
-
-  test('Scroll right from page 0 to page 5, itemsWrap: true (underscroll)', () {
-    testWidgets((WidgetTester tester) {
-      tester.pumpWidget(buildFrame());
       expect(currentPage, equals(0));
       pageRight(tester);
       expect(currentPage, equals(5));

@@ -197,7 +197,13 @@ class NavigatorState extends State<Navigator> {
       name: name,
       mostValuableKeys: mostValuableKeys
     );
-    _push(config.onGenerateRoute(settings) ?? config.onUnknownRoute(settings));
+    Route route = config.onGenerateRoute(settings);
+    if (route == null) {
+      assert(config.onUnknownRoute != null);
+      route = config.onUnknownRoute(settings);
+      assert(route != null);
+    }
+    _push(route);
   }
 
   void _push(Route route, { Set<Key> mostValuableKeys }) {

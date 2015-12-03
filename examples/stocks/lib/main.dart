@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -75,16 +74,19 @@ class StocksAppState extends State<StocksApp> {
     }
   }
 
-  RouteBuilder _getRoute(String name) {
-    List<String> path = name.split('/');
+  Route _getRoute(NamedRouteSettings settings) {
+    List<String> path = settings.name.split('/');
     if (path[0] != '')
       return null;
     if (path[1] == 'stock') {
       if (path.length != 3)
         return null;
-      if (_stocks.containsKey(path[2]))
-        return (RouteArguments args) => new StockSymbolPage(stock: _stocks[path[2]]);
-      return null;
+      if (_stocks.containsKey(path[2])) {
+        return new MaterialPageRoute(
+          settings: settings,
+          builder: (BuildContext context) => new StockSymbolPage(stock: _stocks[path[2]])
+        );
+      }
     }
     return null;
   }
