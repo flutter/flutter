@@ -1,0 +1,22 @@
+{
+  "title": "Stocks",
+  "@title": {
+    "description": "Title for the Stocks application",
+    "type": "text",
+    "placeholders": {}
+  },
+
+  "market": "MARKET",
+  "@market": {
+    "description": "Label for the Market tab",
+    "type": "text",
+    "placeholders": {}
+  },
+
+  "portfolio": "PORTFOLIO",
+  "@portfolio": {
+    "description": "Label for the Portfolio tab",
+    "type": "text",
+    "placeholders": {}
+  }
+}
