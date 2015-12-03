@@ -218,6 +218,14 @@ class FlutterCommandRunner extends CommandRunner {
         targetPlatform: TargetPlatform.android,
         deviceId: globalResults['android-device-id']
       ));
+
+      if (hostPlatform == HostPlatform.linux) {
+        configs.add(new BuildConfiguration.prebuilt(
+          hostPlatform: HostPlatform.linux,
+          targetPlatform: TargetPlatform.linux,
+          testable: true
+        ));
+      }
     } else {
       if (!FileSystemEntity.isDirectorySync(enginePath))
         logging.warning('$enginePath is not a valid directory');
