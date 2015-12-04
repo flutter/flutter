@@ -9,6 +9,7 @@
 #import <OpenGLES/EAGLDrawable.h>
 
 #include "base/time/time.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
@@ -100,6 +101,7 @@ static std::string TracesBasePath() {
 }
 
 - (instancetype)initWithShellView:(sky::shell::ShellView*)shellView {
+  TRACE_EVENT0("flutter", "initWithShellView");
   self = [super init];
   if (self) {
     base::FilePath tracesPath =
@@ -119,6 +121,7 @@ static std::string TracesBasePath() {
 }
 
 - (void)layoutSubviews {
+  TRACE_EVENT0("flutter", "layoutSubviews");
   [super layoutSubviews];
 
   [self configureLayerDefaults];
@@ -166,6 +169,7 @@ static std::string TracesBasePath() {
 }
 
 - (void)notifySurfaceCreation {
+  TRACE_EVENT0("flutter", "notifySurfaceCreation");
   self.platformView->SurfaceCreated(self.acceleratedWidget);
 }
 
@@ -185,6 +189,7 @@ static std::string TracesBasePath() {
 }
 
 - (void)connectToEngineAndLoad {
+  TRACE_EVENT0("flutter", "connectToEngineAndLoad");
   self.platformView->ConnectToEngine(mojo::GetProxy(&_sky_engine));
 
   mojo::ServiceProviderPtr service_provider;
@@ -198,6 +203,7 @@ static std::string TracesBasePath() {
 }
 
 - (void)notifySurfaceDestruction {
+  TRACE_EVENT0("flutter", "notifySurfaceDestruction");
   self.platformView->SurfaceDestroyed();
 }
 

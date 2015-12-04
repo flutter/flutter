@@ -4,11 +4,13 @@
 
 #import "sky_app_delegate.h"
 #import "sky_view_controller.h"
+#import "base/trace_event/trace_event.h"
 
 @implementation SkyAppDelegate
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  TRACE_EVENT0("flutter", "applicationDidFinishLaunchingWithOptions");
 
   CGRect frame = [UIScreen mainScreen].bounds;
   UIWindow* window = [[UIWindow alloc] initWithFrame:frame];
