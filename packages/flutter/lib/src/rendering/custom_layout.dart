@@ -11,6 +11,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
 
 abstract class MultiChildLayoutDelegate {
   Map<Object, RenderBox> _idToChild;
+  Set<RenderBox> _debugChildrenNeedingLayout;
 
   /// Returns the size of this object given the incomming constraints.
   /// The size cannot reflect the instrinsic sizes of the children.
@@ -26,6 +27,10 @@ abstract class MultiChildLayoutDelegate {
   Size layoutChild(Object childId, BoxConstraints constraints) {
     final RenderBox child = _idToChild[childId];
     assert(child != null);
+    assert(() {
+      'A MultiChildLayoutDelegate cannot layout the same child more than once.';
+      return _debugChildrenNeedingLayout.remove(child);
+    });
     child.layout(constraints, parentUsesSize: true);
     return child.size;
   }
@@ -40,6 +45,14 @@ abstract class MultiChildLayoutDelegate {
 
   void _callPerformLayout(Size size, BoxConstraints constraints, RenderBox firstChild) {
     final Map<Object, RenderBox> previousIdToChild = _idToChild;
+
+    Set<RenderBox> debugPreviousChildrenNeedingLayout;
+    assert(() {
+      debugPreviousChildrenNeedingLayout = _debugChildrenNeedingLayout;
+      _debugChildrenNeedingLayout = new Set<RenderBox>();
+      return true;
+    });
+
     try {
       _idToChild = new Map<Object, RenderBox>();
       RenderBox child = firstChild;
@@ -47,11 +60,23 @@ abstract class MultiChildLayoutDelegate {
         final MultiChildLayoutParentData childParentData = child.parentData;
         assert(childParentData.id != null);
         _idToChild[childParentData.id] = child;
+        assert(() {
+          _debugChildrenNeedingLayout.add(child);
+          return true;
+        });
         child = childParentData.nextSibling;
       }
       performLayout(size, constraints);
+      assert(() {
+        'A MultiChildLayoutDelegate needs to call layoutChild on every child.';
+        return _debugChildrenNeedingLayout.isEmpty;
+      });
     } finally {
       _idToChild = previousIdToChild;
+      assert(() {
+        _debugChildrenNeedingLayout = debugPreviousChildrenNeedingLayout;
+        return true;
+      });
     }
   }
 
