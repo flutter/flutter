@@ -31,9 +31,11 @@ namespace {
 const char kSnapshotKey[] = "snapshot_blob.bin";
 
 void Ignored(bool) {
+  TRACE_EVENT_ASYNC_END0("flutter", "AssetUnpackerJobFetch", 1);
 }
 
 mojo::ScopedDataPipeConsumerHandle Fetch(const base::FilePath& path) {
+  TRACE_EVENT_ASYNC_BEGIN0("flutter", "AssetUnpackerJobFetch", 1);
   mojo::DataPipe pipe;
   auto runner = base::WorkerPool::GetTaskRunner(true);
   mojo::common::CopyFromFile(base::FilePath(path), pipe.producer_handle.Pass(),
@@ -123,9 +125,11 @@ void Engine::SetServices(ServicesDataPtr services) {
 #if defined(OS_ANDROID) || defined(OS_IOS)
   vsync::VSyncProviderPtr vsync_provider;
   if (services_->shell) {
-    mojo::ConnectToService(services_->shell.get(), "mojo:vsync", &vsync_provider);
+    mojo::ConnectToService(services_->shell.get(), "mojo:vsync",
+                           &vsync_provider);
   } else {
-    mojo::ConnectToService(services_->services_provided_by_embedder.get(), &vsync_provider);
+    mojo::ConnectToService(services_->services_provided_by_embedder.get(),
+                           &vsync_provider);
   }
   animator_->set_vsync_provider(vsync_provider.Pass());
 #endif
@@ -159,6 +163,7 @@ void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
 }
 
 void Engine::RunFromLibrary(const std::string& name) {
+  TRACE_EVENT0("flutter", "Engine::RunFromLibrary");
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView(blink::WebString::fromUTF8(name));
   sky_view_->RunFromLibrary(blink::WebString::fromUTF8(name),
@@ -172,7 +177,6 @@ void Engine::RunFromSnapshotStream(
     const std::string& name,
     mojo::ScopedDataPipeConsumerHandle snapshot) {
   TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
-
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView(blink::WebString::fromUTF8(name));
   sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(name), snapshot.Pass());
@@ -182,6 +186,7 @@ void Engine::RunFromSnapshotStream(
 }
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
+  TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
   AssetUnpackerJob* unpacker = new AssetUnpackerJob(
       mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));
   std::string path_str = bundle_path;
@@ -197,6 +202,7 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
 
 void Engine::RunFromFile(const mojo::String& main,
                          const mojo::String& package_root) {
+  TRACE_EVENT0("flutter", "Engine::RunFromFile");
   std::string package_root_str = package_root;
   dart_library_provider_.reset(
       new DartLibraryProviderFiles(base::FilePath(package_root_str)));
@@ -205,7 +211,6 @@ void Engine::RunFromFile(const mojo::String& main,
 
 void Engine::RunFromBundle(const mojo::String& path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
-
   AssetUnpackerJob* unpacker = new AssetUnpackerJob(
       mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));
   std::string path_str = path;
@@ -217,6 +222,7 @@ void Engine::RunFromBundle(const mojo::String& path) {
 
 void Engine::RunFromAssetBundle(const mojo::String& url,
                                 mojo::asset_bundle::AssetBundlePtr bundle) {
+  TRACE_EVENT0("flutter", "Engine::RunFromAssetBundle");
   std::string url_str = url;
   root_bundle_ = bundle.Pass();
   root_bundle_->GetAsStream(kSnapshotKey,

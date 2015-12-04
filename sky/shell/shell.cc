@@ -13,9 +13,10 @@
 #include "base/memory/discardable_memory.h"
 #include "base/memory/discardable_memory_allocator.h"
 #include "base/single_thread_task_runner.h"
+#include "base/trace_event/trace_event.h"
 #include "mojo/message_pump/message_pump_mojo.h"
-#include "sky/shell/ui/engine.h"
 #include "sky/shell/switches.h"
+#include "sky/shell/ui/engine.h"
 
 namespace sky {
 namespace shell {
@@ -73,6 +74,7 @@ Shell::~Shell() {
 }
 
 void Shell::InitStandalone() {
+  TRACE_EVENT0("flutter", "Shell::InitStandalone");
   CHECK(base::i18n::InitializeICU());
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
