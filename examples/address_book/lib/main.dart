@@ -36,9 +36,8 @@ class Field extends StatelessComponent {
 class AddressBookHome extends StatelessComponent {
   Widget buildToolBar(BuildContext context) {
     return new ToolBar(
-        left: new IconButton(icon: "navigation/arrow_back"),
-        right: <Widget>[new IconButton(icon: "navigation/check")]
-      );
+      right: <Widget>[new IconButton(icon: "navigation/check")]
+    );
   }
 
   Widget buildFloatingActionButton(BuildContext context) {

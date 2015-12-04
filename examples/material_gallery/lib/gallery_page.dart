@@ -17,8 +17,6 @@ class GalleryPage extends StatefulComponent {
 }
 
 class _GalleryPageState extends State<GalleryPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   Widget _buildDrawer() {
     List<Widget> items = <Widget>[
       new DrawerHeader(child: new Text('Material demos')),
@@ -53,12 +51,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      key: _scaffoldKey,
       toolBar: new ToolBar(
-        left: new IconButton(
-          icon: 'navigation/menu',
-          onPressed: () { _scaffoldKey.currentState?.openDrawer(); }
-        ),
         center: new Text(config.active?.title ?? 'Material gallery'),
         tabBar: _buildTabBar()
       ),
