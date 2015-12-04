@@ -7,8 +7,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
-import 'test_widgets.dart';
-
 class TestTransition extends TransitionComponent {
   TestTransition({
     Key key,

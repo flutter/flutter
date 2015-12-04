@@ -9,6 +9,7 @@ enum _MenuItems { autorefresh, autorefreshCheckbox, refresh, speedUp, speedDown 
 const double _kMenuMargin = 16.0; // 24.0 on tablet
 
 Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool> onAutorefreshChanged }) async {
+  StateSetter autorefreshStateSetter;
   switch (await showMenu(
     context: context,
     position: new ModalPosition(
@@ -20,12 +21,18 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
         value: _MenuItems.autorefresh,
         child: new Row(<Widget>[
             new Flexible(child: new Text('Autorefresh')),
-            new Checkbox(
-              value: autorefresh,
-              onChanged: (bool value) {
-                // TODO(ianh): https://github.com/flutter/flutter/issues/187
-                autorefresh = value;
-                Navigator.pop(context, _MenuItems.autorefreshCheckbox);
+            new StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                autorefreshStateSetter = setState;
+                return new Checkbox(
+                  value: autorefresh,
+                  onChanged: (bool value) {
+                    setState(() {
+                      autorefresh = value;
+                    });
+                    Navigator.pop(context, _MenuItems.autorefreshCheckbox);
+                  }
+                );
               }
             )
           ]
@@ -46,8 +53,9 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
     ]
   )) {
     case _MenuItems.autorefresh:
-      // TODO(ianh): https://github.com/flutter/flutter/issues/187
-      autorefresh = !autorefresh;
+      autorefreshStateSetter(() {
+        autorefresh = !autorefresh;
+      });
       continue autorefreshNotify;
     autorefreshNotify:
     case _MenuItems.autorefreshCheckbox:

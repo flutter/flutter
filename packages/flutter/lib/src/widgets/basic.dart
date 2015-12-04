@@ -1367,3 +1367,19 @@ class KeyedSubtree extends StatelessComponent {
 
   Widget build(BuildContext context) => child;
 }
+
+class Builder extends StatelessComponent {
+  Builder({ Key key, this.builder }) : super(key: key);
+  final WidgetBuilder builder;
+  Widget build(BuildContext context) => builder(context);
+}
+
+typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
+class StatefulBuilder extends StatefulComponent {
+  StatefulBuilder({ Key key, this.builder }) : super(key: key);
+  final StatefulWidgetBuilder builder;
+  _StatefulBuilderState createState() => new _StatefulBuilderState();
+}
+class _StatefulBuilderState extends State<StatefulBuilder> {
+  Widget build(BuildContext context) => config.builder(context, setState);
+}
