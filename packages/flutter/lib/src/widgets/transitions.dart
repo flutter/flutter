@@ -259,7 +259,7 @@ typedef Widget BuilderFunction(BuildContext context);
 class BuilderTransition extends TransitionComponent {
   BuilderTransition({
     Key key,
-    this.variables,
+    this.variables: const <AnimatedValue>[],
     this.builder,
     PerformanceView performance
   }) : super(key: key,
