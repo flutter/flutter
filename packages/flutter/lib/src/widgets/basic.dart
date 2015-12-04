@@ -305,7 +305,9 @@ class LayoutId extends ParentDataWidget {
     Key key,
     Widget child,
     this.id
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    assert(child != null);
+  }
 
   final Object id;
 
