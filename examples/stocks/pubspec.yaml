@@ -2,3 +2,5 @@ name: stocks
 dependencies:
   flutter:
     path: ../../packages/flutter
+
+  intl: '>=0.12.4+2 <0.13.0'

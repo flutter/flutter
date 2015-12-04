@@ -13,8 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 
 import 'stock_data.dart';
+import 'i18n/stock_messages_all.dart';
 
 part 'stock_arrow.dart';
 part 'stock_home.dart';
@@ -22,6 +24,7 @@ part 'stock_list.dart';
 part 'stock_menu.dart';
 part 'stock_row.dart';
 part 'stock_settings.dart';
+part 'stock_strings.dart';
 part 'stock_symbol_viewer.dart';
 part 'stock_types.dart';
 
@@ -105,5 +108,7 @@ class StocksAppState extends State<StocksApp> {
 }
 
 void main() {
-  runApp(new StocksApp());
+  initializeMessages(Intl.defaultLocale).then((_) {
+    runApp(new StocksApp());
+  });
 }
