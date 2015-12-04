@@ -416,7 +416,7 @@ abstract class State<T extends StatefulComponent> {
 
   /// Called when an Inherited widget in the ancestor chain has changed. Usually
   /// there is nothing to do here; whenever this is called, build() is also
-  /// called. 
+  /// called.
   void dependenciesChanged(Type affectedWidgetType) { }
 
   String toString() {
@@ -1094,7 +1094,17 @@ abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
     Widget built;
     try {
       built = _builder(this);
-      assert(built != null);
+      assert(() {
+        if (built == null) {
+          debugPrint('Widget: $widget');
+          assert(() {
+            'A build function returned null. Build functions must never return null.'
+            'The offending widget is displayed above.';
+            return false;
+          });
+        }
+        return true;
+      });
     } catch (e, stack) {
       _debugReportException('building $_widget', e, stack);
       built = new ErrorWidget();
