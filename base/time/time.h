@@ -733,7 +733,7 @@ class BASE_EXPORT ThreadTicks : public time_internal::TimeBase<ThreadTicks> {
   // Returns true if ThreadTicks::Now() is supported on this system.
   static bool IsSupported() {
 #if (defined(_POSIX_THREAD_CPUTIME) && (_POSIX_THREAD_CPUTIME >= 0)) || \
-    (defined(OS_MACOSX) && !defined(OS_IOS)) || defined(OS_ANDROID)
+    defined(OS_MACOSX) || defined(OS_ANDROID)
     return true;
 #else
     return false;
