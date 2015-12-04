@@ -11,7 +11,6 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'pages.dart';
-import 'routes.dart';
 import 'transitions.dart';
 
 // Heroes are the parts of an application's screen-to-screen transitions where a
@@ -388,15 +387,13 @@ class HeroParty {
     _currentPerformance = null;
   }
 
-  Iterable<Widget> getWidgets(BuildContext context, PerformanceView performance) sync* {
+  void setPerformance(PerformanceView performance) {
     assert(performance != null || _heroes.length == 0);
     if (performance != _currentPerformance) {
       _clearCurrentPerformance();
       _currentPerformance = performance;
       _currentPerformance?.addStatusListener(_handleUpdate);
     }
-    for (_HeroQuestState hero in _heroes)
-      yield hero.build(context, performance);
   }
 
   void _handleUpdate(PerformanceStatus status) {
@@ -425,8 +422,8 @@ class HeroController extends NavigatorObserver {
 
   HeroParty _party;
   PerformanceView _performance;
-  ModalRoute _from;
-  ModalRoute _to;
+  PageRoute _from;
+  PageRoute _to;
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
@@ -484,12 +481,13 @@ class HeroController extends NavigatorObserver {
     _overlayEntries.clear();
   }
 
-  void _addHeroesToOverlay(Iterable<Widget> heroes, OverlayState overlay) {
-    for (Widget hero in heroes) {
-      OverlayEntry entry = new OverlayEntry(builder: (_) => hero);
-      overlay.insert(entry);
-      _overlayEntries.add(entry);
-    }
+  void _addHeroToOverlay(Widget hero, Object tag, OverlayState overlay) {
+    OverlayEntry entry = new OverlayEntry(builder: (_) => hero);
+    if (_performance.direction == AnimationDirection.forward)
+      _to.insertHeroOverlayEntry(entry, tag, overlay);
+    else
+      _from.insertHeroOverlayEntry(entry, tag, overlay);
+    _overlayEntries.add(entry);
   }
 
   Set<Key> _getMostValuableKeys() {
@@ -505,7 +503,6 @@ class HeroController extends NavigatorObserver {
 
   void _updateQuest(Duration timeStamp) {
     Set<Key> mostValuableKeys = _getMostValuableKeys();
-
     Map<Object, HeroHandle> heroesFrom = _party.isEmpty ?
         Hero.of(_from.subtreeContext, mostValuableKeys) : _party.getHeroesToAnimate();
 
@@ -521,7 +518,10 @@ class HeroController extends NavigatorObserver {
 
     _party.animate(heroesFrom, heroesTo, _getAnimationArea(navigator.context), curve);
     _removeHeroesFromOverlay();
-    Iterable<Widget> heroes = _party.getWidgets(navigator.context, performance);
-    _addHeroesToOverlay(heroes, navigator.overlay);
+    _party.setPerformance(performance);
+    for (_HeroQuestState hero in _party._heroes) {
+      Widget widget = hero.build(navigator.context, performance);
+      _addHeroToOverlay(widget, hero.tag, navigator.overlay);
+    }
   }
 }

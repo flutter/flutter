@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'heroes.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'routes.dart';
@@ -19,4 +18,9 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   bool get barrierDismissable => false;
   bool canTransitionTo(TransitionRoute nextRoute) => nextRoute is PageRoute;
   bool canTransitionFrom(TransitionRoute nextRoute) => nextRoute is PageRoute;
+
+  // Subclasses can override this method to customize way heroes are inserted
+  void insertHeroOverlayEntry(OverlayEntry entry, Object tag, OverlayState overlay) {
+    overlay.insert(entry);
+  }
 }
