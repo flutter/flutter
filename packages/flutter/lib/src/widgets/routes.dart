@@ -13,6 +13,7 @@ import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'page_storage.dart';
+import 'pages.dart';
 
 const _kTransparent = const Color(0x00000000);
 
@@ -457,16 +458,4 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
     assert(nextRoute is! PageRoute);
     super.didPushNext(nextRoute);
   }
-}
-
-/// A modal route that replaces the entire screen.
-abstract class PageRoute<T> extends ModalRoute<T> {
-  PageRoute({
-    Completer<T> completer,
-    NamedRouteSettings settings: const NamedRouteSettings()
-  }) : super(completer: completer, settings: settings);
-  bool get opaque => true;
-  bool get barrierDismissable => false;
-  bool canTransitionTo(TransitionRoute nextRoute) => nextRoute is PageRoute;
-  bool canTransitionFrom(TransitionRoute nextRoute) => nextRoute is PageRoute;
 }
