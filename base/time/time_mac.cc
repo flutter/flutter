@@ -69,10 +69,6 @@ int64_t ComputeCurrentTicks() {
 }
 
 int64_t ComputeThreadTicks() {
-#if defined(OS_IOS)
-  NOTREACHED();
-  return 0;
-#else
   base::mac::ScopedMachSendRight thread(mach_thread_self());
   mach_msg_type_number_t thread_info_count = THREAD_BASIC_INFO_COUNT;
   thread_basic_info_data_t thread_info_data;
@@ -94,7 +90,6 @@ int64_t ComputeThreadTicks() {
   absolute_micros *= base::Time::kMicrosecondsPerSecond;
   absolute_micros += thread_info_data.user_time.microseconds;
   return absolute_micros.ValueOrDie();
-#endif  // defined(OS_IOS)
 }
 
 }  // namespace
