@@ -109,7 +109,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   bool get barrierDismissable => true;
   Color get barrierColor => null;
 
-  Widget buildPage(BuildContext context) => new _PopupMenu(route: this);
+  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+    return new _PopupMenu(route: this);
+  }
 }
 
 Future showMenu({ BuildContext context, ModalPosition position, List<PopupMenuItem> items, int elevation: 8 }) {

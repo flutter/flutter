@@ -158,7 +158,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     return BottomSheet.createPerformance();
   }
 
-  Widget buildPage(BuildContext context) {
+  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
     return new _ModalBottomSheet(route: this);
   }
 }

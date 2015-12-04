@@ -30,7 +30,9 @@ class TestRoute<T> extends PageRoute<T> {
   final Widget child;
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
   Color get barrierColor => null;
-  Widget buildPage(BuildContext context) => child;
+  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+    return child;
+  }
 }
 
 void main() {

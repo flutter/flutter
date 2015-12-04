@@ -53,7 +53,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Color get barrierColor => null;
   bool canTransitionFrom(TransitionRoute nextRoute) => false;
 
-  Widget buildPage(BuildContext context) {
+  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
     Widget result = builder(context);
     assert(() {
       if (result == null)
@@ -64,7 +64,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
-  Widget buildTransition(BuildContext context, PerformanceView performance, Widget child) {
+  Widget buildTransitions(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance, Widget child) {
     return new _MaterialPageTransition(
       performance: performance,
       child: child
