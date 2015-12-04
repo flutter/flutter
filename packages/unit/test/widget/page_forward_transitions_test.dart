@@ -13,7 +13,9 @@ class TestTransition extends TransitionComponent {
     this.childFirstHalf,
     this.childSecondHalf,
     PerformanceView performance
-  }) : super(key: key, performance: performance);
+  }) : super(key: key, performance: performance) {
+    assert(performance != null);
+  }
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
