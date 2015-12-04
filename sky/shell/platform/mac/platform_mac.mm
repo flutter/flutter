@@ -44,6 +44,8 @@ int PlatformMacMain(int argc,
                     PlatformMacMainCallback callback) {
   base::mac::ScopedNSAutoreleasePool pool;
 
+  base::PlatformThread::SetName("platform_main");
+
   base::AtExitManager exit_manager;
 
   RedirectIOConnectionsToSyslog();
