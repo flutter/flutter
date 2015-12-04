@@ -19,6 +19,7 @@
 #include "sky/shell/tracing_controller.h"
 #include "sky/shell/ui_delegate.h"
 #include "ui/gl/gl_surface.h"
+#include "base/trace_event/trace_event.h"
 
 static void InitializeLogging() {
   logging::LoggingSettings settings;
@@ -66,6 +67,10 @@ int PlatformMacMain(int argc,
     // till the tracing controller takes over.
     sky::shell::TracingController::StartBaseTracing();
   }
+
+  // This is about as early as tracing of any kind can start. Add an instant
+  // marker that can be used as a reference for startup.
+  TRACE_EVENT_INSTANT0("flutter", "main", TRACE_EVENT_SCOPE_PROCESS);
 
   scoped_ptr<base::MessageLoopForUI> message_loop(new base::MessageLoopForUI());
 
