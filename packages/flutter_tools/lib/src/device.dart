@@ -853,8 +853,33 @@ class AndroidDevice extends Device {
     ]));
   }
 
+  static String _threeDigits(int n) {
+    if (n >= 100) return "$n";
+    if (n >= 10) return "0$n";
+    return "00$n";
+  }
+
+  static String _twoDigits(int n) {
+    if (n >= 10) return "$n";
+    return "0$n";
+  }
+
+  static String _logcatDateFormat(DateTime dt) {
+    // Doing this manually, instead of using package:intl for simplicity.
+    // adb logcat -T wants "%m-%d %H:%M:%S.%3q"
+    String m = _twoDigits(dt.month);
+    String d = _twoDigits(dt.day);
+    String H = _twoDigits(dt.hour);
+    String M = _twoDigits(dt.minute);
+    String S = _twoDigits(dt.second);
+    String q = _threeDigits(dt.millisecond);
+    return "$m-$d $H:$M:$S.$q";
+  }
+
   String stopTracing(AndroidApk apk, { String outPath: null }) {
-    clearLogs();
+    // Workaround for logcat -c not always working:
+    // http://stackoverflow.com/questions/25645012/logcat-on-android-l-not-clearing-after-unplugging-and-reconnecting
+    String beforeStop = _logcatDateFormat(new DateTime.now());
     runCheckedSync(adbCommandForDevice([
       'shell',
       'am',
@@ -869,9 +894,9 @@ class AndroidDevice extends Device {
     String tracePath = null;
     bool isComplete = false;
     while (!isComplete) {
-      String logs = runSync(adbCommandForDevice(['logcat', '-d']));
+      String logs = runCheckedSync(adbCommandForDevice(['logcat', '-d', '-T', beforeStop]));
       Match fileMatch = traceRegExp.firstMatch(logs);
-      if (fileMatch[1] != null) {
+      if (fileMatch != null && fileMatch[1] != null) {
         tracePath = fileMatch[1];
       }
       isComplete = completeRegExp.hasMatch(logs);
