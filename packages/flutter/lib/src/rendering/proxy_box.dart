@@ -938,61 +938,82 @@ abstract class CustomPainter {
 
   void paint(PaintingCanvas canvas, Size size);
   bool shouldRepaint(CustomPainter oldDelegate);
-  bool hitTest(Point position) => true;
+  bool hitTest(Point position) => null;
 }
 
-/// Delegates its painting to [onPaint]
+/// Delegates its painting
 ///
-/// When asked to paint, custom paint first calls its callback with the current
-/// canvas and then paints its children. The coodinate system of the canvas
-/// matches the coordinate system of the custom paint object. The callback is
-/// expected to paint with in a rectangle starting at the origin and
-/// encompassing a region of the given size. If the callback paints outside
+/// When asked to paint, custom paint first asks painter to paint with the
+/// current canvas and then paints its children. After painting its children,
+/// custom paint asks foregroundPainter to paint. The coodinate system of the
+/// canvas matches the coordinate system of the custom paint object. The
+/// painters are expected to paint with in a rectangle starting at the origin
+/// and encompassing a region of the given size. If the painters paints outside
 /// those bounds, there might be insufficient memory allocated to rasterize the
 /// painting commands and the resulting behavior is undefined.
 ///
-/// Note: Custom paint calls its callback during paint, which means you cannot
+/// Note: Custom paint calls its painters during paint, which means you cannot
 /// dirty layout or paint information during the callback.
 class RenderCustomPaint extends RenderProxyBox {
-
   RenderCustomPaint({
     CustomPainter painter,
+    CustomPainter foregroundPainter,
     RenderBox child
-  }) : _painter = painter, super(child) {
-    assert(painter != null);
-  }
+  }) : _painter = painter, _foregroundPainter = foregroundPainter, super(child);
 
   CustomPainter get painter => _painter;
   CustomPainter _painter;
   void set painter (CustomPainter newPainter) {
-    assert(newPainter != null || !attached);
     if (_painter == newPainter)
       return;
     CustomPainter oldPainter = _painter;
     _painter = newPainter;
-    if (newPainter == null)
-      return;
-    if (oldPainter == null
-        || newPainter.runtimeType != oldPainter.runtimeType
-        || newPainter.shouldRepaint(oldPainter))
-      markNeedsPaint();
+    _checkForRepaint(_painter, oldPainter);
   }
 
-  void attach() {
-    assert(_painter != null);
-    super.attach();
+  CustomPainter get foregroundPainter => _foregroundPainter;
+  CustomPainter _foregroundPainter;
+  void set foregroundPainter (CustomPainter newPainter) {
+    if (_foregroundPainter == newPainter)
+      return;
+    CustomPainter oldPainter = _foregroundPainter;
+    _foregroundPainter = newPainter;
+    _checkForRepaint(_foregroundPainter, oldPainter);
+  }
+
+  void _checkForRepaint(CustomPainter newPainter, CustomPainter oldPainter) {
+    if (newPainter == null) {
+      assert(oldPainter != null); // We should be called only for changes.
+      markNeedsPaint();
+    } else if (oldPainter == null ||
+        newPainter.runtimeType != oldPainter.runtimeType ||
+        newPainter.shouldRepaint(oldPainter)) {
+      markNeedsPaint();
+    }
+  }
+
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
+      return true;
+    return super.hitTestChildren(result, position: position);
   }
 
   bool hitTestSelf(Point position) {
-    return _painter.hitTest(position);
+    return _painter != null && (_painter.hitTest(position) ?? true);
+  }
+
+  void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
+    canvas.translate(offset.dx, offset.dy);
+    painter.paint(canvas, size);
+    canvas.translate(-offset.dx, -offset.dy);
   }
 
   void paint(PaintingContext context, Offset offset) {
-    assert(_painter != null);
-    context.canvas.translate(offset.dx, offset.dy);
-    _painter.paint(context.canvas, size);
-    context.canvas.translate(-offset.dx, -offset.dy);
+    if (_painter != null)
+      _paintWithPainter(context.canvas, offset, _painter);
     super.paint(context, offset);
+    if (_foregroundPainter != null)
+      _paintWithPainter(context.canvas, offset, _foregroundPainter);
   }
 }
 

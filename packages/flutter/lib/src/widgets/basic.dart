@@ -137,21 +137,25 @@ class DecoratedBox extends OneChildRenderObjectWidget {
 }
 
 class CustomPaint extends OneChildRenderObjectWidget {
-  CustomPaint({ Key key, this.painter, Widget child })
-    : super(key: key, child: child) {
-    assert(painter != null);
-  }
+  CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
+    : super(key: key, child: child);
 
   final CustomPainter painter;
+  final CustomPainter foregroundPainter;
 
-  RenderCustomPaint createRenderObject() => new RenderCustomPaint(painter: painter);
+  RenderCustomPaint createRenderObject() => new RenderCustomPaint(
+    painter: painter,
+    foregroundPainter: foregroundPainter
+  );
 
   void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
     renderObject.painter = painter;
+    renderObject.foregroundPainter = foregroundPainter;
   }
 
   void didUnmountRenderObject(RenderCustomPaint renderObject) {
     renderObject.painter = null;
+    renderObject.foregroundPainter = null;
   }
 }
 
