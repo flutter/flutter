@@ -46,8 +46,6 @@ class CardCollectionState extends State<CardCollection> {
   InvalidatorCallback _invalidator;
   Size _cardCollectionSize = new Size(200.0, 200.0);
 
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   void _initVariableSizedCardModels() {
     List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -268,7 +266,6 @@ class CardCollectionState extends State<CardCollection> {
 
   Widget _buildToolBar() {
     return new ToolBar(
-      left: new IconButton(icon: "navigation/menu", onPressed: () => _scaffoldKey.currentState?.openDrawer()),
       right: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ],

@@ -36,18 +36,28 @@ class ToolBar extends StatelessComponent {
   final TextTheme textTheme;
   final EdgeDims padding;
 
-  ToolBar withPadding(EdgeDims newPadding, { Key fallbackKey }) {
+  ToolBar copyWith({
+    Key key,
+    Widget left,
+    Widget center,
+    List<Widget> right,
+    Widget bottom,
+    int elevation,
+    Color backgroundColor,
+    TextTheme textTheme,
+    EdgeDims padding
+  }) {
     return new ToolBar(
-      key: key ?? fallbackKey,
-      left: left,
-      center: center,
-      right: right,
-      bottom: bottom,
-      tabBar: tabBar,
-      elevation: elevation,
-      backgroundColor: backgroundColor,
-      textTheme: textTheme,
-      padding: newPadding
+      key: key ?? this.key,
+      left: left ?? this.left,
+      center: center ?? this.center,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+      tabBar: tabBar ?? this.tabBar,
+      elevation: elevation ?? this.elevation,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      textTheme: textTheme ?? this.textTheme,
+      padding: padding ?? this.padding
     );
   }
 

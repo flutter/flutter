@@ -70,10 +70,6 @@ class StockSettingsState extends State<StockSettings> {
 
   Widget buildToolBar(BuildContext context) {
     return new ToolBar(
-      left: new IconButton(
-        icon: 'navigation/arrow_back',
-        onPressed: () => Navigator.pop(context)
-      ),
       center: new Text('Settings')
     );
   }

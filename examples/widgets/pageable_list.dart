@@ -41,8 +41,6 @@ class PageableListAppState extends State<PageableListApp> {
   ScrollDirection scrollDirection = ScrollDirection.horizontal;
   bool itemsWrap = false;
 
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   void updatePageSize(Size newSize) {
     setState(() {
       pageSize = newSize;
@@ -114,7 +112,6 @@ class PageableListAppState extends State<PageableListApp> {
 
   Widget _buildToolBar() {
     return new ToolBar(
-      left: new IconButton(icon: "navigation/menu", onPressed: () => _scaffoldKey.currentState?.openDrawer()),
       center: new Text('PageableList'),
       right: <Widget>[
         new Text(scrollDirection == ScrollDirection.horizontal ? "horizontal" : "vertical")

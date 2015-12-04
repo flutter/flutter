@@ -147,10 +147,6 @@ class StockHomeState extends State<StockHome> {
   Widget buildToolBar() {
     return new ToolBar(
       elevation: 0,
-      left: new IconButton(
-        icon: "navigation/menu",
-        onPressed: () => _scaffoldKey.currentState?.openDrawer()
-      ),
       center: new Text('Stocks'),
       right: <Widget>[
         new IconButton(
@@ -230,7 +226,7 @@ class StockHomeState extends State<StockHome> {
   Widget buildSearchBar() {
     return new ToolBar(
       left: new IconButton(
-        icon: "navigation/arrow_back",
+        icon: 'navigation/arrow_back',
         colorFilter: new ColorFilter.mode(Theme.of(context).accentColor, ui.TransferMode.srcATop),
         onPressed: _handleSearchEnd
       ),

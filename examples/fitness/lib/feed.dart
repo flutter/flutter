@@ -55,7 +55,6 @@ class FeedFragment extends StatefulComponent {
 
 class FeedFragmentState extends State<FeedFragment> {
   FitnessMode _fitnessMode = FitnessMode.feed;
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   void _handleFitnessModeChange(FitnessMode value) {
     setState(() {
@@ -104,9 +103,6 @@ class FeedFragmentState extends State<FeedFragment> {
 
   Widget buildToolBar() {
     return new ToolBar(
-      left: new IconButton(
-        icon: "navigation/menu",
-        onPressed: () => _scaffoldKey.currentState?.openDrawer()),
       center: new Text(fitnessModeTitle)
     );
   }
@@ -207,7 +203,6 @@ class FeedFragmentState extends State<FeedFragment> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      key: _scaffoldKey,
       toolBar: buildToolBar(),
       body: buildBody(),
       floatingActionButton: buildFloatingActionButton(),

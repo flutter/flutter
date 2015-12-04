@@ -55,12 +55,6 @@ class StockSymbolPage extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
-        left: new IconButton(
-          icon: 'navigation/arrow_back',
-          onPressed: () {
-            Navigator.pop(context);
-          }
-        ),
         center: new Text(stock.name)
       ),
       body: new Block(<Widget>[

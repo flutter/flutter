@@ -16,6 +16,7 @@ import 'material.dart';
 import 'snack_bar.dart';
 import 'tool_bar.dart';
 import 'drawer.dart';
+import 'icon_button.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 
@@ -257,8 +258,37 @@ class ScaffoldState extends State<Scaffold> {
       children.add(new LayoutId(child: child, id: childId));
   }
 
+  bool _shouldShowBackArrow;
+
+  Widget get _modifiedToolBar {
+    ToolBar toolBar = config.toolBar;
+    if (toolBar == null)
+      return null;
+    EdgeDims padding = new EdgeDims.only(top: ui.window.padding.top);
+    Widget left = toolBar.left;
+    if (left == null) {
+      if (config.drawer != null) {
+        left = new IconButton(
+          icon: 'navigation/menu',
+          onPressed: openDrawer
+        );
+      } else {
+        _shouldShowBackArrow ??= Navigator.canPop(context);
+        if (_shouldShowBackArrow) {
+          left = new IconButton(
+            icon: 'navigation/arrow_back',
+            onPressed: () => Navigator.pop(context)
+          );
+        }
+      }
+    }
+    return toolBar.copyWith(
+      padding: padding,
+      left: left
+    );
+  }
+
   Widget build(BuildContext context) {
-    final Widget paddedToolBar = config.toolBar?.withPadding(new EdgeDims.only(top: ui.window.padding.top));
     final Widget materialBody = config.body != null ? new Material(child: config.body) : null;
 
     if (_snackBars.length > 0) {
@@ -274,7 +304,7 @@ class ScaffoldState extends State<Scaffold> {
 
     final List<LayoutId>children = new List<LayoutId>();
     _addIfNonNull(children, materialBody, _Child.body);
-    _addIfNonNull(children, paddedToolBar, _Child.toolBar);
+    _addIfNonNull(children, _modifiedToolBar, _Child.toolBar);
 
     if (_currentBottomSheet != null ||
         (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)) {
