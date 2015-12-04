@@ -6,6 +6,7 @@ material-design-icons:
   - name: action/assessment
   - name: action/backup
   - name: action/help
+  - name: action/picture_in_picture
   - name: action/search
   - name: action/settings
   - name: action/thumb_down
