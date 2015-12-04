@@ -16,7 +16,9 @@ class InkResponse extends StatefulComponent {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
-    this.onHighlightChanged
+    this.onHighlightChanged,
+    this.containedInWell: false,
+    this.highlightShape: Shape.circle
   }) : super(key: key);
 
   final Widget child;
@@ -24,16 +26,44 @@ class InkResponse extends StatefulComponent {
   final GestureTapCallback onDoubleTap;
   final GestureLongPressCallback onLongPress;
   final ValueChanged<bool> onHighlightChanged;
+  final bool containedInWell;
+  final Shape highlightShape;
 
   _InkResponseState createState() => new _InkResponseState<InkResponse>();
 }
 
 class _InkResponseState<T extends InkResponse> extends State<T> {
 
-  bool get containedInWell => false;
-
   Set<InkSplash> _splashes;
   InkSplash _currentSplash;
+  InkHighlight _lastHighlight;
+
+  void updateHighlight(bool value) {
+    if (value == (_lastHighlight != null && _lastHighlight.active))
+      return;
+    if (value) {
+      if (_lastHighlight == null) {
+        RenderBox referenceBox = context.findRenderObject();
+        assert(Material.of(context) != null);
+        _lastHighlight = Material.of(context).highlightAt(
+          referenceBox: referenceBox,
+          color: Theme.of(context).highlightColor,
+          shape: config.highlightShape,
+          onRemoved: () {
+            assert(_lastHighlight != null);
+            _lastHighlight = null;
+          }
+        );
+      } else {
+        _lastHighlight.activate();
+      }
+    } else {
+      _lastHighlight.deactivate();
+    }
+    if (config.onHighlightChanged != null)
+      config.onHighlightChanged(value != null);
+  }
+
 
   void _handleTapDown(Point position) {
     RenderBox referenceBox = context.findRenderObject();
@@ -42,7 +72,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     splash = Material.of(context).splashAt(
       referenceBox: referenceBox,
       position: referenceBox.globalToLocal(position),
-      containedInWell: containedInWell,
+      color: Theme.of(context).splashColor,
+      containedInWell: config.containedInWell,
       onRemoved: () {
         if (_splashes != null) {
           assert(_splashes.contains(splash));
@@ -55,11 +86,13 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     _splashes ??= new Set<InkSplash>();
     _splashes.add(splash);
     _currentSplash = splash;
+    updateHighlight(true);
   }
 
   void _handleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
+    updateHighlight(false);
     if (config.onTap != null)
       config.onTap();
   }
@@ -67,6 +100,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   void _handleTapCancel() {
     _currentSplash?.cancel();
     _currentSplash = null;
+    updateHighlight(false);
   }
 
   void _handleDoubleTap() {
@@ -92,7 +126,14 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       _currentSplash = null;
     }
     assert(_currentSplash == null);
+    _lastHighlight?.dispose();
+    _lastHighlight = null;
     super.deactivate();
+  }
+
+  void dependenciesChanged(Type affectedWidgetType) {
+    if (affectedWidgetType == Theme && _lastHighlight != null)
+      _lastHighlight.color = Theme.of(context).highlightColor;
   }
 
   Widget build(BuildContext context) {
@@ -120,75 +161,15 @@ class InkWell extends InkResponse {
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
-    this.onHighlightChanged
+    ValueChanged<bool> onHighlightChanged
   }) : super(
     key: key,
     child: child,
     onTap: onTap,
     onDoubleTap: onDoubleTap,
-    onLongPress: onLongPress
+    onLongPress: onLongPress,
+    onHighlightChanged: onHighlightChanged,
+    containedInWell: true,
+    highlightShape: Shape.rectangle
   );
-
-  final ValueChanged<bool> onHighlightChanged;
-
-  _InkWellState createState() => new _InkWellState();
-}
-
-class _InkWellState extends _InkResponseState<InkWell> {
-
-  bool get containedInWell => true;
-
-  InkHighlight _lastHighlight;
-
-  void updateHighlight(bool value) {
-    if (value == (_lastHighlight != null && _lastHighlight.active))
-      return;
-    if (value) {
-      if (_lastHighlight == null) {
-        RenderBox referenceBox = context.findRenderObject();
-        assert(Material.of(context) != null);
-        _lastHighlight = Material.of(context).highlightRectAt(
-          referenceBox: referenceBox,
-          color: Theme.of(context).highlightColor,
-          onRemoved: () {
-            assert(_lastHighlight != null);
-            _lastHighlight = null;
-          }
-        );
-      } else {
-        _lastHighlight.activate();
-      }
-    } else {
-      _lastHighlight.deactivate();
-    }
-    if (config.onHighlightChanged != null)
-      config.onHighlightChanged(value != null);
-  }
-
-  void _handleTapDown(Point position) {
-    super._handleTapDown(position);
-    updateHighlight(true);
-  }
-
-  void _handleTap() {
-    super._handleTap();
-    updateHighlight(false);
-  }
-
-  void _handleTapCancel() {
-    super._handleTapCancel();
-    updateHighlight(false);
-  }
-
-  void deactivate() {
-    _lastHighlight?.dispose();
-    _lastHighlight = null;
-    super.deactivate();
-  }
-
-  void dependenciesChanged(Type affectedWidgetType) {
-    if (affectedWidgetType == Theme && _lastHighlight != null)
-      _lastHighlight.color = Theme.of(context).highlightColor;
-  }
-
 }

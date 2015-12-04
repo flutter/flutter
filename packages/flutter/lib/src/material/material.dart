@@ -58,10 +58,10 @@ abstract class MaterialInkController {
   /// If containedInWell is true, then the splash will be sized to fit
   /// the referenceBox, then clipped to it when drawn.
   /// When the splash is removed, onRemoved will be invoked.
-  InkSplash splashAt({ RenderBox referenceBox, Point position, bool containedInWell, VoidCallback onRemoved });
+  InkSplash splashAt({ RenderBox referenceBox, Point position, Color color, bool containedInWell, VoidCallback onRemoved });
 
   /// Begin a highlight, coincident with the referenceBox.
-  InkHighlight highlightRectAt({ RenderBox referenceBox, Color color, VoidCallback onRemoved });
+  InkHighlight highlightAt({ RenderBox referenceBox, Color color, Shape shape: Shape.rectangle, VoidCallback onRemoved });
 
   /// Add an arbitrary InkFeature to this InkController.
   void addInkFeature(InkFeature feature);
@@ -156,14 +156,12 @@ class _MaterialState extends State<Material> {
   }
 }
 
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 100);
+const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
+const Duration _kUnconfirmedSplashDuration = const Duration(seconds: 1);
 
 const double _kDefaultSplashRadius = 35.0; // logical pixels
-const int _kSplashInitialAlpha = 0x30; // 0..255
-const double _kSplashCanceledVelocity = 0.7; // logical pixels per millisecond
-const double _kSplashConfirmedVelocity = 0.7; // logical pixels per millisecond
+const double _kSplashConfirmedVelocity = 1.0; // logical pixels per millisecond
 const double _kSplashInitialSize = 0.0; // logical pixels
-const double _kSplashUnconfirmedVelocity = 0.2; // logical pixels per millisecond
 
 class RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
   RenderInkFeatures({ RenderBox child, this.color }) : super(child);
@@ -175,7 +173,13 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
 
   final List<InkFeature> _inkFeatures = <InkFeature>[];
 
-  InkSplash splashAt({ RenderBox referenceBox, Point position, bool containedInWell, VoidCallback onRemoved }) {
+  InkSplash splashAt({
+    RenderBox referenceBox,
+    Point position,
+    Color color,
+    bool containedInWell,
+    VoidCallback onRemoved
+  }) {
     double radius;
     if (containedInWell) {
       radius = _getSplashTargetSize(referenceBox.size, position);
@@ -186,8 +190,10 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
       renderer: this,
       referenceBox: referenceBox,
       position: position,
+      color: color,
       targetRadius: radius,
       clipToReferenceBox: containedInWell,
+      repositionToReferenceBox: !containedInWell,
       onRemoved: onRemoved
     );
     addInkFeature(splash);
@@ -202,11 +208,17 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
     return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
   }
 
-  InkHighlight highlightRectAt({ RenderBox referenceBox, Color color, VoidCallback onRemoved }) {
+  InkHighlight highlightAt({
+    RenderBox referenceBox,
+    Color color,
+    Shape shape: Shape.rectangle,
+    VoidCallback onRemoved
+  }) {
     _InkHighlight highlight = new _InkHighlight(
       renderer: this,
       referenceBox: referenceBox,
       color: color,
+      shape: shape,
       onRemoved: onRemoved
     );
     addInkFeature(highlight);
@@ -303,45 +315,45 @@ class _InkSplash extends InkFeature implements InkSplash {
     RenderInkFeatures renderer,
     RenderBox referenceBox,
     this.position,
+    this.color,
     this.targetRadius,
     this.clipToReferenceBox,
+    this.repositionToReferenceBox,
     VoidCallback onRemoved
   }) : super(renderer: renderer, referenceBox: referenceBox, onRemoved: onRemoved) {
     _radius = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(
-        _kSplashInitialSize,
-        end: targetRadius,
-        curve: Curves.easeOut
-      ),
-      duration: new Duration(milliseconds: (targetRadius / _kSplashUnconfirmedVelocity).floor())
-    )..addListener(_handleRadiusChange)
+      variable: new AnimatedValue<double>(_kSplashInitialSize, end: targetRadius),
+      duration: _kUnconfirmedSplashDuration
+    )..addListener(renderer.markNeedsPaint)
      ..play();
+    _alpha = new ValuePerformance<int>(
+      variable: new AnimatedIntValue(color.alpha, end: 0),
+      duration: _kHighlightFadeDuration
+    )..addListener(_handleAlphaChange);
   }
 
   final Point position;
+  final Color color;
   final double targetRadius;
   final bool clipToReferenceBox;
+  final bool repositionToReferenceBox;
 
-  double _pinnedRadius;
   ValuePerformance<double> _radius;
+  ValuePerformance<int> _alpha;
 
   void confirm() {
-    _updateVelocity(_kSplashConfirmedVelocity);
+    int duration = (targetRadius / _kSplashConfirmedVelocity).floor();
+    _radius.duration = new Duration(milliseconds: duration);
+    _radius.play();
+    _alpha.play();
   }
 
   void cancel() {
-    _updateVelocity(_kSplashCanceledVelocity);
-    _pinnedRadius = _radius.value;
+    _alpha.play();
   }
 
-  void _updateVelocity(double velocity) {
-    int duration = (targetRadius / velocity).floor();
-    _radius.duration = new Duration(milliseconds: duration);
-    _radius.play();
-  }
-
-  void _handleRadiusChange() {
-    if (_radius.value == targetRadius)
+  void _handleAlphaChange() {
+    if (_alpha.value == _alpha.variable.end)
       dispose();
     else
       renderer.markNeedsPaint();
@@ -349,27 +361,31 @@ class _InkSplash extends InkFeature implements InkSplash {
 
   void dispose() {
     _radius.stop();
+    _alpha.stop();
     super.dispose();
   }
 
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    int alpha = (_kSplashInitialAlpha * (1.1 - (_radius.value / targetRadius))).floor();
-    Paint paint = new Paint()..color = new Color(alpha << 24); // TODO(ianh): in dark theme, this isn't very visible
-    double radius = _pinnedRadius == null ? _radius.value : _pinnedRadius;
+    Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
+    Point center = position;
     Offset originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
       canvas.save();
       canvas.concat(transform.storage);
       if (clipToReferenceBox)
         canvas.clipRect(Point.origin & referenceBox.size);
-      canvas.drawCircle(position, radius, paint);
+      if (repositionToReferenceBox)
+        center = Point.lerp(center, Point.origin, _radius.progress);
+      canvas.drawCircle(center, _radius.value, paint);
       canvas.restore();
     } else {
       if (clipToReferenceBox) {
         canvas.save();
         canvas.clipRect(originOffset.toPoint() & referenceBox.size);
       }
-      canvas.drawCircle(position + originOffset, radius, paint);
+      if (repositionToReferenceBox)
+        center = Point.lerp(center, referenceBox.size.center(Point.origin), _radius.progress);
+      canvas.drawCircle(center + originOffset, _radius.value, paint);
       if (clipToReferenceBox)
         canvas.restore();
     }
@@ -381,15 +397,12 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     RenderInkFeatures renderer,
     RenderBox referenceBox,
     Color color,
+    this.shape,
     VoidCallback onRemoved
   }) : _color = color,
        super(renderer: renderer, referenceBox: referenceBox, onRemoved: onRemoved) {
     _alpha = new ValuePerformance<int>(
-      variable: new AnimatedIntValue(
-        0,
-        end: color.alpha,
-        curve: Curves.linear
-      ),
+      variable: new AnimatedIntValue(0, end: color.alpha),
       duration: _kHighlightFadeDuration
     )..addListener(_handleAlphaChange)
      ..play();
@@ -403,6 +416,8 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     _color = value;
     renderer.markNeedsPaint();
   }
+
+  final Shape shape;
 
   bool get active => _active;
   bool _active = true;
@@ -430,16 +445,23 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     super.dispose();
   }
 
+  void _paintHighlight(Canvas canvas, Rect rect, paint) {
+    if (shape == Shape.rectangle)
+      canvas.drawRect(rect, paint);
+    else
+      canvas.drawCircle(rect.center, _kDefaultSplashRadius, paint);
+  }
+
   void paintFeature(Canvas canvas, Matrix4 transform) {
     Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
     Offset originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
       canvas.save();
       canvas.concat(transform.storage);
-      canvas.drawRect(Point.origin & referenceBox.size, paint);
+      _paintHighlight(canvas, Point.origin & referenceBox.size, paint);
       canvas.restore();
     } else {
-      canvas.drawRect(originOffset.toPoint() & referenceBox.size, paint);
+      _paintHighlight(canvas, originOffset.toPoint() & referenceBox.size, paint);
     }
   }
 

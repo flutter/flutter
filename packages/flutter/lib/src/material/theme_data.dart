@@ -10,6 +10,23 @@ import 'typography.dart';
 
 enum ThemeBrightness { dark, light }
 
+// Deriving these values is black magic. The spec claims that pressed buttons
+// have a highlight of 0x66999999, but that's clearly wrong. The videos in the
+// spec show that buttons have a composited highlight of #E1E1E1 on a background
+// of #FAFAFA. Assuming that the highlight really has an opacity of 0x66, we can
+// solve for the actual color of the highlight:
+const Color _kLightThemeHighlightColor = const Color(0x66BCBCBC);
+
+// The same video shows the splash compositing to #D7D7D7 on a background of
+// #E1E1E1. Again, assuming the splash has an opacity of 0x66, we can solve for
+// the actual color of the splash:
+const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
+
+// Unfortunately, a similar video isn't available for the dark theme, which
+// means we assume the values in the spec are actually correct.
+const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
+const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
+
 class ThemeData {
 
   ThemeData({
@@ -27,7 +44,8 @@ class ThemeData {
       // Some users want the pre-multiplied color, others just want the opacity.
       hintColor = brightness == ThemeBrightness.dark ? const Color(0x42FFFFFF) : const Color(0x4C000000),
       hintOpacity = brightness == ThemeBrightness.dark ? 0.26 : 0.30,
-      highlightColor = brightness == ThemeBrightness.dark ? const Color(0x42FFFFFF) : const Color(0x1F000000),
+      highlightColor = brightness == ThemeBrightness.dark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor,
+      splashColor = brightness == ThemeBrightness.dark ? _kDarkThemeSplashColor : _kLightThemeSplashColor,
       text = brightness == ThemeBrightness.dark ? Typography.white : Typography.black {
     assert(brightness != null);
 
@@ -70,6 +88,7 @@ class ThemeData {
   final Color dividerColor;
   final Color hintColor;
   final Color highlightColor;
+  final Color splashColor;
   final double hintOpacity;
 
   /// Text with a color that contrasts with the card and canvas colors.
