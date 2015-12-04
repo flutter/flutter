@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
@@ -15,13 +13,13 @@ void main() {
       didStartPan = true;
     };
 
-    ui.Offset updatedScrollDelta;
-    pan.onUpdate = (ui.Offset offset) {
+    Offset updatedScrollDelta;
+    pan.onUpdate = (Offset offset) {
       updatedScrollDelta = offset;
     };
 
     bool didEndPan = false;
-    pan.onEnd = (ui.Offset velocity) {
+    pan.onEnd = (Offset velocity) {
       didEndPan = true;
     };
 
@@ -31,7 +29,7 @@ void main() {
     };
 
     TestPointer pointer = new TestPointer(5);
-    PointerInputEvent down = pointer.down(new Point(10.0, 10.0));
+    PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
     pan.addPointer(down);
     tap.addPointer(down);
     GestureArena.instance.close(5);
@@ -46,17 +44,17 @@ void main() {
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    router.route(pointer.move(new Point(20.0, 20.0)));
+    router.route(pointer.move(const Point(20.0, 20.0)));
     expect(didStartPan, isTrue);
     didStartPan = false;
-    expect(updatedScrollDelta, new ui.Offset(10.0, 10.0));
+    expect(updatedScrollDelta, const Offset(10.0, 10.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    router.route(pointer.move(new Point(20.0, 25.0)));
+    router.route(pointer.move(const Point(20.0, 25.0)));
     expect(didStartPan, isFalse);
-    expect(updatedScrollDelta, new ui.Offset(0.0, 5.0));
+    expect(updatedScrollDelta, const Offset(0.0, 5.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);

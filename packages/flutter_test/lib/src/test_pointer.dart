@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/gestures.dart';
 
 export 'dart:ui' show Point;
@@ -13,57 +11,48 @@ class TestPointer {
 
   int pointer;
   bool isDown = false;
-  ui.Point location;
+  Point location;
 
-  PointerInputEvent down(ui.Point newLocation, { Duration timeStamp: const Duration() }) {
+  PointerDownEvent down(Point newLocation, { Duration timeStamp: const Duration() }) {
     assert(!isDown);
     isDown = true;
     location = newLocation;
-    return new PointerInputEvent(
-      type: 'pointerdown',
+      return new PointerDownEvent(
+      timeStamp: timeStamp,
       pointer: pointer,
-      x: location.x,
-      y: location.y,
-      timeStamp: timeStamp
+      position: location
     );
   }
 
-  PointerInputEvent move(ui.Point newLocation, { Duration timeStamp: const Duration() }) {
+  PointerMoveEvent move(Point newLocation, { Duration timeStamp: const Duration() }) {
     assert(isDown);
-    ui.Offset delta = newLocation - location;
+    Offset delta = newLocation - location;
     location = newLocation;
-    return new PointerInputEvent(
-      type: 'pointermove',
+    return new PointerMoveEvent(
+      timeStamp: timeStamp,
       pointer: pointer,
-      x: newLocation.x,
-      y: newLocation.y,
-      dx: delta.dx,
-      dy: delta.dy,
-      timeStamp: timeStamp
+      position: newLocation,
+      delta: delta
     );
   }
 
-  PointerInputEvent up({ Duration timeStamp: const Duration() }) {
+  PointerUpEvent up({ Duration timeStamp: const Duration() }) {
     assert(isDown);
     isDown = false;
-    return new PointerInputEvent(
-      type: 'pointerup',
+    return new PointerUpEvent(
+      timeStamp: timeStamp,
       pointer: pointer,
-      x: location.x,
-      y: location.y,
-      timeStamp: timeStamp
+      position: location
     );
   }
 
-  PointerInputEvent cancel({ Duration timeStamp: const Duration() }) {
+  PointerCancelEvent cancel({ Duration timeStamp: const Duration() }) {
     assert(isDown);
     isDown = false;
-    return new PointerInputEvent(
-      type: 'pointercancel',
+    return new PointerCancelEvent(
+      timeStamp: timeStamp,
       pointer: pointer,
-      x: location.x,
-      y: location.y,
-      timeStamp: timeStamp
+      position: location
     );
   }
 

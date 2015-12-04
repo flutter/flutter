@@ -174,13 +174,13 @@ class WidgetTester {
     _dispatchEvent(p.up(), result);
   }
 
-  void dispatchEvent(InputEvent event, Point location) {
+  void dispatchEvent(PointerEvent event, Point location) {
     _dispatchEvent(event, _hitTest(location));
   }
 
   HitTestResult _hitTest(Point location) => WidgetFlutterBinding.instance.hitTest(location);
 
-  void _dispatchEvent(InputEvent event, HitTestResult result) {
+  void _dispatchEvent(PointerEvent event, HitTestResult result) {
     WidgetFlutterBinding.instance.dispatchEvent(event, result);
   }
 

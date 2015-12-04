@@ -23,8 +23,8 @@ class Dot {
 
   Dot({ Color color }) : _paint = new Paint()..color = color;
 
-  void update(PointerInputEvent event) {
-    position = new Point(event.x, event.y);
+  void update(PointerEvent event) {
+    position = event.position;
     radius = 5 + (95 * event.pressure);
   }
 
@@ -36,25 +36,20 @@ class Dot {
 class RenderTouchDemo extends RenderBox {
   final Map<int, Dot> dots = <int, Dot>{};
 
-  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event is PointerInputEvent) {
-      switch (event.type) {
-        case 'pointerdown':
-          Color color = kColors[event.pointer.remainder(kColors.length)];
-          dots[event.pointer] = new Dot(color: color)..update(event);
-          break;
-        case 'pointerup':
-          dots.remove(event.pointer);
-          break;
-        case 'pointercancel':
-          dots.clear();
-          break;
-        case 'pointermove':
-          dots[event.pointer].update(event);
-          break;
-      }
-      markNeedsPaint();
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent) {
+      Color color = kColors[event.pointer.remainder(kColors.length)];
+      dots[event.pointer] = new Dot(color: color)..update(event);
+    } else if (event is PointerUpEvent) {
+      dots.remove(event.pointer);
+    } else if (event is PointerCancelEvent) {
+      dots.clear();
+    } else if (event is PointerMoveEvent) {
+      dots[event.pointer].update(event);
+    } else {
+      return;
     }
+    markNeedsPaint();
   }
 
   void performLayout() {

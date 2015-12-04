@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'arena.dart';
 import 'recognizer.dart';
 import 'constants.dart';
@@ -16,8 +14,8 @@ enum ScaleState {
   started
 }
 
-typedef void GestureScaleStartCallback(ui.Point focalPoint);
-typedef void GestureScaleUpdateCallback(double scale, ui.Point focalPoint);
+typedef void GestureScaleStartCallback(Point focalPoint);
+typedef void GestureScaleUpdateCallback(double scale, Point focalPoint);
 typedef void GestureScaleEndCallback();
 
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
@@ -32,35 +30,31 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   double _initialSpan;
   double _currentSpan;
-  Map<int, ui.Point> _pointerLocations;
+  Map<int, Point> _pointerLocations;
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
-  void addPointer(PointerInputEvent event) {
+  void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     if (_state == ScaleState.ready) {
       _state = ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
-      _pointerLocations = new Map<int, ui.Point>();
+      _pointerLocations = new Map<int, Point>();
     }
   }
 
-  void handleEvent(PointerInputEvent event) {
+  void handleEvent(PointerEvent event) {
     assert(_state != ScaleState.ready);
     bool configChanged = false;
-    switch(event.type) {
-      case 'pointerup':
-        configChanged = true;
-        _pointerLocations.remove(event.pointer);
-        break;
-      case 'pointerdown':
-        configChanged = true;
-        _pointerLocations[event.pointer] = new ui.Point(event.x, event.y);
-        break;
-      case 'pointermove':
-        _pointerLocations[event.pointer] = new ui.Point(event.x, event.y);
-        break;
+    if (event is PointerMoveEvent) {
+      _pointerLocations[event.pointer] = event.position;
+    } else if (event is PointerDownEvent) {
+      configChanged = true;
+      _pointerLocations[event.pointer] = event.position;
+    } else if (event is PointerUpEvent) {
+      configChanged = true;
+      _pointerLocations.remove(event.pointer);
     }
 
     _update(configChanged);
@@ -72,10 +66,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     int count = _pointerLocations.keys.length;
 
     // Compute the focal point
-    ui.Point focalPoint = ui.Point.origin;
+    Point focalPoint = Point.origin;
     for (int pointer in _pointerLocations.keys)
       focalPoint += _pointerLocations[pointer].toOffset();
-    focalPoint = new ui.Point(focalPoint.x / count, focalPoint.y / count);
+    focalPoint = new Point(focalPoint.x / count, focalPoint.y / count);
 
     // Span is the average deviation from focal point
     double totalDeviation = 0.0;

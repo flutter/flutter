@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 /// An object that can handle events.
 abstract class HitTestTarget {
   /// Override this function to receive events.
-  void handleEvent(InputEvent event, HitTestEntry entry);
+  void handleEvent(PointerEvent event, HitTestEntry entry);
 }
 
 /// Data collected during a hit test about a specific [HitTestTarget].

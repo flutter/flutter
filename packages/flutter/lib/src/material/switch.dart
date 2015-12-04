@@ -164,8 +164,8 @@ class _RenderSwitch extends RenderToggleable {
     reaction.reverse();
   }
 
-  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown' && onChanged != null)
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent && onChanged != null)
       _drag.addPointer(event);
     super.handleEvent(event, entry);
   }
