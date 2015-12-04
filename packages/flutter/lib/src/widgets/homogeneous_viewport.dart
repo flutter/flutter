@@ -16,13 +16,14 @@ class HomogeneousViewport extends RenderObjectWidget {
     Key key,
     this.builder,
     this.itemsWrap: false,
-    this.itemExtent, // required
+    this.itemExtent, // required, must be non-zero
     this.itemCount, // optional, but you cannot shrink-wrap this class or otherwise use its intrinsic dimensions if you don't specify it
     this.direction: ScrollDirection.vertical,
     this.startOffset: 0.0,
     this.overlayPainter
   }) : super(key: key) {
     assert(itemExtent != null);
+    assert(itemExtent > 0);
   }
 
   final ListBuilder builder;
