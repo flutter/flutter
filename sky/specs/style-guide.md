@@ -267,7 +267,7 @@ If a package uses, as part of its exposed API, types that it imports from a lowe
 
 By convention, `dart:ui` is always imported using `import 'dart:ui' as ui;`. Other Flutter packages are imported undecorated.
 
-As a general rule, when you have a lot of constants, wrap them in a class. For examples of this, see [lib/src/material/colors.dart](https://github.com/flutter/engine/blob/master/sky/packages/sky/lib/src/material/colors.dart)
+As a general rule, when you have a lot of constants, wrap them in a class. For examples of this, see [lib/src/material/colors.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/colors.dart)
 
 
 C++
