@@ -83,6 +83,11 @@ main(List<String> args) async {
   String traces_dir = '/tmp';
 
   List<double> times = [];
+  print("Profiling startup using flutter start --trace-startup.");
+  print("Measuring from first trace event to completion of first frame upload.");
+  print("aka NativeViewGLSurfaceEGL:RealSwapBuffers.\n");
+  print("NOTE: If device is not on/unlocked tracing may fail.\n");
+
   print("$ITERATIONS runs using $projectPath:");
   for (var x = 0; x < ITERATIONS; x++) {
     int runNumber = x + 1;
