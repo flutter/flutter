@@ -4,9 +4,13 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'navigator.dart';
+import 'overlay.dart';
+import 'pages.dart';
 import 'transitions.dart';
 
 // Heroes are the parts of an application's screen-to-screen transitions where a
@@ -383,15 +387,13 @@ class HeroParty {
     _currentPerformance = null;
   }
 
-  Iterable<Widget> getWidgets(BuildContext context, PerformanceView performance) sync* {
+  void setPerformance(PerformanceView performance) {
     assert(performance != null || _heroes.length == 0);
     if (performance != _currentPerformance) {
       _clearCurrentPerformance();
       _currentPerformance = performance;
       _currentPerformance?.addStatusListener(_handleUpdate);
     }
-    for (_HeroQuestState hero in _heroes)
-      yield hero.build(context, performance);
   }
 
   void _handleUpdate(PerformanceStatus status) {
@@ -411,4 +413,115 @@ class HeroParty {
   }
 
   String toString() => '$_heroes';
+}
+
+class HeroController extends NavigatorObserver {
+  HeroController() {
+    _party = new HeroParty(onQuestFinished: _handleQuestFinished);
+  }
+
+  HeroParty _party;
+  PerformanceView _performance;
+  PageRoute _from;
+  PageRoute _to;
+
+  final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
+
+  void didPush(Route route, Route previousRoute) {
+    assert(navigator != null);
+    assert(route != null);
+    if (route is PageRoute) {
+      assert(route.performance != null);
+      if (previousRoute is PageRoute) // could be null
+        _from = previousRoute;
+      _to = route;
+      _performance = route.performance;
+      _checkForHeroQuest();
+    }
+  }
+
+  void didPop(Route route, Route previousRoute) {
+    assert(navigator != null);
+    assert(route != null);
+    if (route is PageRoute) {
+      assert(route.performance != null);
+      if (previousRoute is PageRoute) {
+        _to = previousRoute;
+        _from = route;
+        _performance = route.performance;
+        _checkForHeroQuest();
+      }
+    }
+  }
+
+  void _checkForHeroQuest() {
+    if (_from != null && _to != null && _from != _to) {
+      _to.offstage = _to.performance.status != PerformanceStatus.completed;
+      scheduler.addPostFrameCallback(_updateQuest);
+    }
+  }
+
+  void _handleQuestFinished() {
+    _removeHeroesFromOverlay();
+    _from = null;
+    _to = null;
+    _performance = null;
+  }
+
+  Rect _getAnimationArea(BuildContext context) {
+    RenderBox box = context.findRenderObject();
+    Point topLeft = box.localToGlobal(Point.origin);
+    Point bottomRight = box.localToGlobal(box.size.bottomRight(Point.origin));
+    return new Rect.fromLTRB(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+  }
+
+  void _removeHeroesFromOverlay() {
+    for (OverlayEntry entry in _overlayEntries)
+      entry.remove();
+    _overlayEntries.clear();
+  }
+
+  void _addHeroToOverlay(Widget hero, Object tag, OverlayState overlay) {
+    OverlayEntry entry = new OverlayEntry(builder: (_) => hero);
+    if (_performance.direction == AnimationDirection.forward)
+      _to.insertHeroOverlayEntry(entry, tag, overlay);
+    else
+      _from.insertHeroOverlayEntry(entry, tag, overlay);
+    _overlayEntries.add(entry);
+  }
+
+  Set<Key> _getMostValuableKeys() {
+    assert(_from != null);
+    assert(_to != null);
+    Set<Key> result = new Set<Key>();
+    if (_from.settings.mostValuableKeys != null)
+      result.addAll(_from.settings.mostValuableKeys);
+    if (_to.settings.mostValuableKeys != null)
+      result.addAll(_to.settings.mostValuableKeys);
+    return result;
+  }
+
+  void _updateQuest(Duration timeStamp) {
+    Set<Key> mostValuableKeys = _getMostValuableKeys();
+    Map<Object, HeroHandle> heroesFrom = _party.isEmpty ?
+        Hero.of(_from.subtreeContext, mostValuableKeys) : _party.getHeroesToAnimate();
+
+    Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext, mostValuableKeys);
+    _to.offstage = false;
+
+    PerformanceView performance = _performance;
+    Curve curve = Curves.ease;
+    if (performance.status == PerformanceStatus.reverse) {
+      performance = new ReversePerformance(performance);
+      curve = new Interval(performance.progress, 1.0, curve: curve);
+    }
+
+    _party.animate(heroesFrom, heroesTo, _getAnimationArea(navigator.context), curve);
+    _removeHeroesFromOverlay();
+    _party.setPerformance(performance);
+    for (_HeroQuestState hero in _party._heroes) {
+      Widget widget = hero.build(navigator.context, performance);
+      _addHeroToOverlay(widget, hero.tag, navigator.overlay);
+    }
+  }
 }
