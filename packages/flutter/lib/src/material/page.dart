@@ -5,8 +5,6 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-
 class _MaterialPageTransition extends TransitionWithChild {
   _MaterialPageTransition({
     Key key,
@@ -52,7 +50,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;
 
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
-  Color get barrierColor => Colors.black54;
+  Color get barrierColor => null;
+  bool canTransitionFrom(TransitionRoute nextRoute) => false;
 
   Widget buildPage(BuildContext context) {
     Widget result = builder(context);

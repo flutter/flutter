@@ -150,7 +150,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   final ProxyPerformance forwardPerformance = new ProxyPerformance();
 
   void didPushNext(Route nextRoute) {
-    if (nextRoute is TransitionRoute) {
+    if (nextRoute is TransitionRoute && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       PerformanceView current = forwardPerformance.masterPerformance;
       if (current != null) {
         if (current is TrainHoppingPerformance) {
@@ -176,6 +176,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
     super.didPushNext(nextRoute);
   }
+
+  bool canTransitionTo(TransitionRoute nextRoute) => true;
+  bool canTransitionFrom(TransitionRoute nextRoute) => true;
 
   Widget wrapTransition(BuildContext context, Widget child) {
     return buildForwardTransition(
@@ -437,4 +440,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   }) : super(completer: completer, settings: settings);
   bool get opaque => true;
   bool get barrierDismissable => false;
+  bool canTransitionTo(TransitionRoute nextRoute) => nextRoute is PageRoute;
+  bool canTransitionFrom(TransitionRoute nextRoute) => nextRoute is PageRoute;
 }

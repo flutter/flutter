@@ -27,6 +27,14 @@ class TestTransition extends TransitionComponent {
   }
 }
 
+class TestRoute<T> extends PageRoute<T> {
+  TestRoute(this.child);
+  final Widget child;
+  Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
+  Color get barrierColor => null;
+  Widget buildPage(BuildContext context) => child;
+}
+
 void main() {
   final Duration kTwoTenthsOfTheTransitionDuration = kMaterialPageRouteTransitionDuration * 0.2;
   final Duration kFourTenthsOfTheTransitionDuration = kMaterialPageRouteTransitionDuration * 0.4;
@@ -57,30 +65,33 @@ void main() {
 
       tester.pumpWidget(
         new MaterialApp(
-          routes: <String, RouteBuilder>{
-            '/': (RouteArguments args) {
-              return new Builder(
-                key: insideKey,
-                builder: (BuildContext context) {
-                  PageRoute route = ModalRoute.of(context);
-                  return new Column([
-                    new TestTransition(
-                      childFirstHalf: new Text('A'),
-                      childSecondHalf: new Text('B'),
-                      performance: route.performance
-                    ),
-                    new TestTransition(
-                      childFirstHalf: new Text('C'),
-                      childSecondHalf: new Text('D'),
-                      performance: route.forwardPerformance
-                    ),
-                  ]);
-                }
-              );
-            },
-            '/2': (RouteArguments args) => new Text('E'),
-            '/3': (RouteArguments args) => new Text('F'),
-            '/4': (RouteArguments args) => new Text('G'),
+          onGenerateRoute: (NamedRouteSettings settings) {
+            switch (settings.name) {
+              case '/':
+                return new TestRoute(
+                  new Builder(
+                    key: insideKey,
+                    builder: (BuildContext context) {
+                      PageRoute route = ModalRoute.of(context);
+                      return new Column([
+                        new TestTransition(
+                          childFirstHalf: new Text('A'),
+                          childSecondHalf: new Text('B'),
+                          performance: route.performance
+                        ),
+                        new TestTransition(
+                          childFirstHalf: new Text('C'),
+                          childSecondHalf: new Text('D'),
+                          performance: route.forwardPerformance
+                        ),
+                      ]);
+                    }
+                  )
+                );
+              case '/2': return new TestRoute(new Text('E'));
+              case '/3': return new TestRoute(new Text('F'));
+              case '/4': return new TestRoute(new Text('G'));
+            }
           }
         )
       );
