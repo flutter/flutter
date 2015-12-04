@@ -13,17 +13,34 @@ import 'constants.dart';
 import 'theme.dart';
 
 class Slider extends StatelessComponent {
-  Slider({ Key key, this.value, this.onChanged })
-      : super(key: key);
+  Slider({
+    Key key,
+    this.value,
+    this.min: 0.0,
+    this.max: 1.0,
+    this.onChanged
+  }) : super(key: key) {
+    assert(value != null);
+    assert(min != null);
+    assert(max != null);
+    assert(value >= min && value <= max);
+  }
 
   final double value;
+  final double min;
+  final double max;
   final ValueChanged<double> onChanged;
+
+  void _handleChanged(double value) {
+    assert(onChanged != null);
+    onChanged(value * (max - min) + min);
+  }
 
   Widget build(BuildContext context) {
     return new _SliderRenderObjectWidget(
-      value: value,
+      value: (value - min) / (max - min),
       primaryColor: Theme.of(context).accentColor,
-      onChanged: onChanged
+      onChanged: onChanged != null ? _handleChanged : null
     );
   }
 }
@@ -106,7 +123,7 @@ class _RenderSlider extends RenderConstrainedBox {
   void _handleDragStart(Point globalPosition) {
     if (onChanged != null) {
       _active = true;
-      _currentDragValue = globalToLocal(globalPosition).x / _trackLength;
+      _currentDragValue = (globalToLocal(globalPosition).x - _kReactionRadius) / _trackLength;
       onChanged(_currentDragValue.clamp(0.0, 1.0));
       _reaction.forward();
       markNeedsPaint();

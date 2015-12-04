@@ -11,13 +11,9 @@ class SliderDemo extends StatefulComponent {
 }
 
 class _SliderDemoState extends State<SliderDemo> {
-  double _value = 0.25;
+  double _value = 25.0;
 
   Widget build(BuildContext context) {
-    Widget label = new Container(
-      padding: const EdgeDims.symmetric(horizontal: 16.0),
-      child: new Text(_value.toStringAsFixed(2))
-    );
     return new Block([
       new Container(
         height: 100.0,
@@ -25,13 +21,18 @@ class _SliderDemoState extends State<SliderDemo> {
           child:  new Row([
             new Slider(
               value: _value,
+              min: 0.0,
+              max: 100.0,
               onChanged: (double value) {
                 setState(() {
                   _value = value;
                 });
               }
             ),
-            label,
+            new Container(
+              padding: const EdgeDims.symmetric(horizontal: 16.0),
+              child: new Text(_value.round().toString().padLeft(3, '0'))
+            ),
           ], justifyContent: FlexJustifyContent.collapse)
         )
       ),
@@ -40,8 +41,11 @@ class _SliderDemoState extends State<SliderDemo> {
         child: new Center(
           child:  new Row([
             // Disabled, but tracking the slider above.
-            new Slider(value: _value),
-            label,
+            new Slider(value: _value / 100.0),
+            new Container(
+              padding: const EdgeDims.symmetric(horizontal: 16.0),
+              child: new Text((_value / 100.0).toStringAsFixed(2))
+            ),
           ], justifyContent: FlexJustifyContent.collapse)
         )
       )
