@@ -68,9 +68,15 @@ abstract class Route<T> {
 }
 
 class NamedRouteSettings {
-  const NamedRouteSettings({ this.name, this.mostValuableKeys });
+  const NamedRouteSettings({
+    this.name,
+    this.mostValuableKeys,
+    this.isInitialRoute: false
+  });
+
   final String name;
   final Set<Key> mostValuableKeys;
+  final bool isInitialRoute;
 
   String toString() {
     String result = '"$name"';
@@ -161,7 +167,8 @@ class NavigatorState extends State<Navigator> {
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
     _push(config.onGenerateRoute(new NamedRouteSettings(
-      name: config.initialRoute ?? Navigator.defaultRouteName
+      name: config.initialRoute ?? Navigator.defaultRouteName,
+      isInitialRoute: true
     )));
   }
 
@@ -265,7 +272,7 @@ class NavigatorState extends State<Navigator> {
     assert(_history.indexOf(anchorRoute) > 0);
     _replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
   }
- 
+
   void _removeRouteBefore(Route anchorRoute) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
@@ -356,7 +363,7 @@ class NavigatorTransaction {
   }
   NavigatorState _navigator;
   bool _debugOpen = true;
- 
+
   /// Invokes the Navigator's onGenerateRoute callback to create a route with
   /// the given name, then calls [push()] with that route.
   void pushNamed(String name, { Set<Key> mostValuableKeys }) {
@@ -425,7 +432,7 @@ class NavigatorTransaction {
     assert(_debugOpen);
     return _navigator._pop(result);
   }
- 
+
   /// Calls pop() repeatedly until the given route is the current route.
   /// If it is already the current route, nothing happens.
   void popUntil(Route targetRoute) {
