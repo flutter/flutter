@@ -168,7 +168,9 @@ class _DropDownRoute<T> extends PopupRoute<T> {
   bool get barrierDismissable => true;
   Color get barrierColor => null;
 
-  Widget buildPage(BuildContext context) => new _DropDownMenu(route: this);
+  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+    return new _DropDownMenu(route: this);
+  }
 }
 
 class DropDownMenuItem<T> extends StatelessComponent {
