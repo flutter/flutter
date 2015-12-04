@@ -21,6 +21,7 @@ export 'package:flutter/rendering.dart' show
     Canvas,
     Color,
     ColorFilter,
+    CustomClipper,
     CustomPainter,
     EdgeDims,
     FlexAlignItems,
@@ -160,8 +161,19 @@ class CustomPaint extends OneChildRenderObjectWidget {
 }
 
 class ClipRect extends OneChildRenderObjectWidget {
-  ClipRect({ Key key, Widget child }) : super(key: key, child: child);
-  RenderClipRect createRenderObject() => new RenderClipRect();
+  ClipRect({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+
+  final CustomClipper<Rect> clipper;
+
+  RenderClipRect createRenderObject() => new RenderClipRect(clipper: clipper);
+
+  void updateRenderObject(RenderClipRect renderObject, ClipRect oldWidget) {
+    renderObject.clipper = clipper;
+  }
+
+  void didUnmountRenderObject(RenderClipRect renderObject) {
+    renderObject.clipper = null;
+  }
 }
 
 class ClipRRect extends OneChildRenderObjectWidget {
@@ -180,8 +192,19 @@ class ClipRRect extends OneChildRenderObjectWidget {
 }
 
 class ClipOval extends OneChildRenderObjectWidget {
-  ClipOval({ Key key, Widget child }) : super(key: key, child: child);
-  RenderClipOval createRenderObject() => new RenderClipOval();
+  ClipOval({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+
+  final CustomClipper<Rect> clipper;
+
+  RenderClipOval createRenderObject() => new RenderClipOval(clipper: clipper);
+
+  void updateRenderObject(RenderClipOval renderObject, ClipOval oldWidget) {
+    renderObject.clipper = clipper;
+  }
+
+  void didUnmountRenderObject(RenderClipOval renderObject) {
+    renderObject.clipper = null;
+  }
 }
 
 

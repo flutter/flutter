@@ -561,15 +561,61 @@ class RenderShaderMask extends RenderProxyBox {
   }
 }
 
+abstract class CustomClipper<T> {
+  T getClip(Size size);
+  bool shouldRepaint(CustomClipper oldClipper);
+}
+
+abstract class _RenderCustomClip<T> extends RenderProxyBox {
+  _RenderCustomClip({
+    RenderBox child,
+    CustomClipper<T> clipper
+  }) : _clipper = clipper, super(child);
+
+  CustomClipper<T> get clipper => _clipper;
+  CustomClipper<T> _clipper;
+  void set clipper (CustomClipper<T> newClipper) {
+    if (_clipper == newClipper)
+      return;
+    CustomClipper<T> oldClipper = _clipper;
+    _clipper = newClipper;
+    if (newClipper == null) {
+      assert(oldClipper != null);
+      markNeedsPaint();
+    } else if (oldClipper == null ||
+        oldClipper.runtimeType != oldClipper.runtimeType ||
+        newClipper.shouldRepaint(oldClipper)) {
+      markNeedsPaint();
+    }
+  }
+
+  T get _defaultClip;
+  T get _clip => _clipper?.getClip(size) ?? _defaultClip;
+}
+
 /// Clips its child using a rectangle
 ///
 /// Prevents its child from painting outside its bounds.
-class RenderClipRect extends RenderProxyBox {
-  RenderClipRect({ RenderBox child }) : super(child);
+class RenderClipRect extends _RenderCustomClip<Rect> {
+  RenderClipRect({
+    RenderBox child,
+    CustomClipper<Rect> clipper
+  }) : super(child: child, clipper: clipper);
+
+  Rect get _defaultClip => Point.origin & size;
+
+  bool hitTest(HitTestResult result, { Point position }) {
+    if (_clipper != null) {
+      Rect clipRect = _clip;
+      if (!clipRect.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
+  }
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, super.paint);
+      context.pushClipRect(needsCompositing, offset, _clip, super.paint);
   }
 }
 
@@ -579,8 +625,11 @@ class RenderClipRect extends RenderProxyBox {
 /// y radius values and prevents its child from painting outside that rounded
 /// rectangle.
 class RenderClipRRect extends RenderProxyBox {
-  RenderClipRRect({ RenderBox child, double xRadius, double yRadius })
-    : _xRadius = xRadius, _yRadius = yRadius, super(child) {
+  RenderClipRRect({
+    RenderBox child,
+    double xRadius,
+    double yRadius
+  }) : _xRadius = xRadius, _yRadius = yRadius, super(child) {
     assert(_xRadius != null);
     assert(_yRadius != null);
   }
@@ -626,8 +675,11 @@ class RenderClipRRect extends RenderProxyBox {
 ///
 /// Inscribes an oval into its layout dimensions and prevents its child from
 /// painting outside that oval.
-class RenderClipOval extends RenderProxyBox {
-  RenderClipOval({ RenderBox child }) : super(child);
+class RenderClipOval extends _RenderCustomClip<Rect> {
+  RenderClipOval({
+    RenderBox child,
+    CustomClipper<Rect> clipper
+  }) : super(child: child, clipper: clipper);
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -640,10 +692,13 @@ class RenderClipOval extends RenderProxyBox {
     return _cachedPath;
   }
 
+  Rect get _defaultClip => Point.origin & size;
+
   bool hitTest(HitTestResult result, { Point position }) {
-    Point center = size.center(Point.origin);
-    Offset offset = new Offset((position.x - center.x) / size.width,
-                               (position.y - center.y) / size.height);
+    Rect clipBounds = _clip;
+    Point center = clipBounds.center;
+    Offset offset = new Offset((position.x - center.x) / clipBounds.width,
+                               (position.y - center.y) / clipBounds.height);
     if (offset.distance > 0.5)
       return false;
     return super.hitTest(result, position: position);
@@ -651,8 +706,8 @@ class RenderClipOval extends RenderProxyBox {
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      Rect bounds = Point.origin & size;
-      context.pushClipPath(needsCompositing, offset, bounds, _getClipPath(bounds), super.paint);
+      Rect clipBounds = _clip;
+      context.pushClipPath(needsCompositing, offset, clipBounds, _getClipPath(clipBounds), super.paint);
     }
   }
 }
