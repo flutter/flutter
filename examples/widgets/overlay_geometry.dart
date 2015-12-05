@@ -28,7 +28,7 @@ class _MarkerPainter extends CustomPainter {
   final double size;
   final MarkerType type;
 
-  void paint(PaintingCanvas canvas, _) {
+  void paint(Canvas canvas, _) {
     Paint paint = new Paint()..color = const Color(0x8000FF00);
     double r = size / 2.0;
     canvas.drawCircle(new Point(r, r), r, paint);

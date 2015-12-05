@@ -38,12 +38,6 @@ class ParentData {
   String toString() => '<none>';
 }
 
-/// Obsolete class that will be removed eventually
-class PaintingCanvas extends Canvas {
-  PaintingCanvas(ui.PictureRecorder recorder, Rect bounds) : super(recorder, bounds);
-  // TODO(ianh): Just use ui.Canvas everywhere instead
-}
-
 typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 
 /// A place to paint.
@@ -145,14 +139,14 @@ class PaintingContext {
   // Recording state
   PictureLayer _currentLayer;
   ui.PictureRecorder _recorder;
-  PaintingCanvas _canvas;
+  Canvas _canvas;
 
   /// The canvas on which to paint.
   ///
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
-  PaintingCanvas get canvas {
+  Canvas get canvas {
     if (_canvas == null)
       _startRecording();
     return _canvas;
@@ -162,7 +156,7 @@ class PaintingContext {
     assert(!_isRecording);
     _currentLayer = new PictureLayer(paintBounds: _paintBounds);
     _recorder = new ui.PictureRecorder();
-    _canvas = new PaintingCanvas(_recorder, _paintBounds);
+    _canvas = new Canvas(_recorder, _paintBounds);
     _containerLayer.append(_currentLayer);
   }
 

@@ -30,7 +30,7 @@ class _GesturePainter extends CustomPainter {
   final bool doubleTapEnabled;
   final bool longPressEnabled;
 
-  void paint(PaintingCanvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) {
     Point center = (size.center(Point.origin).toOffset() * zoom + offset).toPoint();
     double radius = size.width / 2.0 * zoom;
     Gradient gradient = new RadialGradient(

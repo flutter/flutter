@@ -54,7 +54,7 @@ class VirtualJoystick extends NodeWithSize {
     return true;
   }
 
-  void paint(PaintingCanvas canvas) {
+  void paint(Canvas canvas) {
     applyTransformForPivot(canvas);
     canvas.drawCircle(_handlePos, 25.0, _paintHandle);
     canvas.drawCircle(_center, 40.0, _paintControl);

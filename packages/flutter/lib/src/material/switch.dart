@@ -173,7 +173,7 @@ class _RenderSwitch extends RenderToggleable {
   final BoxPainter _thumbPainter = new BoxPainter(const BoxDecoration());
 
   void paint(PaintingContext context, Offset offset) {
-    final PaintingCanvas canvas = context.canvas;
+    final Canvas canvas = context.canvas;
 
     final bool isActive = onChanged != null;
 

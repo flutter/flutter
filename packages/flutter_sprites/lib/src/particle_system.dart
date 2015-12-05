@@ -357,7 +357,7 @@ class ParticleSystem extends Node {
     _numEmittedParticles++;
   }
 
-  void paint(PaintingCanvas canvas) {
+  void paint(Canvas canvas) {
 
     List<ui.RSTransform> transforms = <ui.RSTransform>[];
     List<Rect> rects = <Rect>[];

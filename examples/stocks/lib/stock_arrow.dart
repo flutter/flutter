@@ -10,7 +10,7 @@ class StockArrowPainter extends CustomPainter {
   final Color color;
   final double percentChange;
 
-  void paint(PaintingCanvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()..color = color;
     paint.strokeWidth = 1.0;
     const double padding = 2.0;

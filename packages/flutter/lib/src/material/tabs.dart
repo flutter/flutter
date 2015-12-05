@@ -209,7 +209,7 @@ class _RenderTabBar extends RenderBox with
     return defaultHitTestChildren(result, position: position);
   }
 
-  void _paintIndicator(PaintingCanvas canvas, RenderBox selectedTab, Offset offset) {
+  void _paintIndicator(Canvas canvas, RenderBox selectedTab, Offset offset) {
     if (indicatorColor == null)
       return;
 

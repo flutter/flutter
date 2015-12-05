@@ -14,7 +14,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
 
   PhysicsWorld physicsWorld;
 
-  PaintingCanvas canvas;
+  Canvas canvas;
 
   void drawSegment(Vector2 p1, Vector2 p2, box2d.Color3i color) {
     Paint paint = new Paint()

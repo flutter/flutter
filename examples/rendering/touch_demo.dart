@@ -62,7 +62,7 @@ class RenderTouchDemo extends RenderBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    final PaintingCanvas canvas = context.canvas;
+    final Canvas canvas = context.canvas;
     Paint white = new Paint()
         ..color = const Color(0xFFFFFFFF);
     canvas.drawRect(offset & size, white);
