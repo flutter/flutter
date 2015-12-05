@@ -18,7 +18,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
   /// considered for this gesture. (It's the GestureRecognizer's responsibility
   /// to then add itself to the global pointer router to receive subsequent
   /// events for this pointer.)
-  void addPointer(PointerInputEvent event);
+  void addPointer(PointerDownEvent event);
 
   /// Release any resources used by the object. Called when the object is no
   /// longer needed (e.g. a gesture recogniser is being unregistered from a
@@ -34,10 +34,10 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 
   PointerRouter _router;
 
-  final List<GestureArenaEntry> _entries = new List<GestureArenaEntry>();
+  final List<GestureArenaEntry> _entries = <GestureArenaEntry>[];
   final Set<int> _trackedPointers = new Set<int>();
 
-  void handleEvent(PointerInputEvent event);
+  void handleEvent(PointerEvent event);
   void acceptGesture(int pointer) { }
   void rejectGesture(int pointer) { }
   void didStopTrackingLastPointer(int pointer);
@@ -71,8 +71,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
       didStopTrackingLastPointer(pointer);
   }
 
-  void stopTrackingIfPointerNoLongerDown(PointerInputEvent event) {
-    if (event.type == 'pointerup' || event.type == 'pointercancel')
+  void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
+    if (event is PointerUpEvent || event is PointerCancelEvent)
       stopTrackingPointer(event.pointer);
   }
 
@@ -95,7 +95,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   Point initialPosition;
   Timer _timer;
 
-  void addPointer(PointerInputEvent event) {
+  void addPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer);
     if (state == GestureRecognizerState.ready) {
       state = GestureRecognizerState.possible;
@@ -106,11 +106,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     }
   }
 
-  void handleEvent(PointerInputEvent event) {
+  void handleEvent(PointerEvent event) {
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       // TODO(abarth): Maybe factor the slop handling out into a separate class?
-      if (event.type == 'pointermove' && _getDistance(event) > kTouchSlop) {
+      if (event is PointerMoveEvent && _getDistance(event) > kTouchSlop) {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else {
@@ -121,7 +121,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   /// Override to provide behavior for the primary pointer when the gesture is still possible.
-  void handlePrimaryPointer(PointerInputEvent event);
+  void handlePrimaryPointer(PointerEvent event);
 
   /// Override to be notified with [deadline] is exceeded.
   ///
@@ -154,7 +154,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     }
   }
 
-  double _getDistance(PointerInputEvent event) {
+  double _getDistance(PointerEvent event) {
     Offset offset = event.position - initialPosition;
     return offset.distance;
   }

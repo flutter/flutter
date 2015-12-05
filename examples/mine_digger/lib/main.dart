@@ -84,8 +84,8 @@ class MineDiggerState extends State<MineDigger> {
     }
   }
 
-  PointerEventListener _pointerDownHandlerFor(int posX, int posY) {
-    return (PointerInputEvent event) {
+  PointerDownEventListener _pointerDownHandlerFor(int posX, int posY) {
+    return (PointerDownEvent event) {
       if (event.buttons == 1) {
         probe(posX, posY);
       } else if (event.buttons == 2) {
@@ -190,7 +190,7 @@ class MineDiggerState extends State<MineDigger> {
     );
   }
 
-  void handleToolbarPointerDown(PointerInputEvent event) {
+  void handleToolbarPointerDown(PointerDownEvent event) {
     setState(() {
       resetGame();
     });

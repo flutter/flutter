@@ -22,11 +22,9 @@ typedef void GestureMultiTapCancelCallback(int pointer);
 /// larger gesture.
 class _TapTracker {
 
-  _TapTracker({ PointerInputEvent event, this.entry })
+  _TapTracker({ PointerDownEvent event, this.entry })
     : pointer = event.pointer,
-      _initialPosition = event.position {
-    assert(event.type == 'pointerdown');
-  }
+      _initialPosition = event.position;
 
   final int pointer;
   final GestureArenaEntry entry;
@@ -48,7 +46,7 @@ class _TapTracker {
     }
   }
 
-  bool isWithinTolerance(PointerInputEvent event, double tolerance) {
+  bool isWithinTolerance(PointerEvent event, double tolerance) {
     Offset offset = event.position - _initialPosition;
     return offset.distance <= tolerance;
   }
@@ -92,7 +90,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   _TapTracker _firstTap;
   final Map<int, _TapTracker> _trackers = new Map<int, _TapTracker>();
 
-  void addPointer(PointerInputEvent event) {
+  void addPointer(PointerEvent event) {
     // Ignore out-of-bounds second taps
     if (_firstTap != null &&
         !_firstTap.isWithinTolerance(event, kDoubleTapSlop))
@@ -106,23 +104,19 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     tracker.startTrackingPointer(_router, handleEvent);
   }
 
-  void handleEvent(PointerInputEvent event) {
+  void handleEvent(PointerEvent event) {
     _TapTracker tracker = _trackers[event.pointer];
     assert(tracker != null);
-    switch (event.type) {
-      case 'pointerup':
-        if (_firstTap == null)
-          _registerFirstTap(tracker);
-        else
-          _registerSecondTap(tracker);
-        break;
-      case 'pointermove':
-        if (!tracker.isWithinTolerance(event, kDoubleTapTouchSlop))
-          _reject(tracker);
-        break;
-      case 'pointercancel':
+    if (event is PointerUpEvent) {
+      if (_firstTap == null)
+        _registerFirstTap(tracker);
+      else
+        _registerSecondTap(tracker);
+    } else if (event is PointerMoveEvent) {
+      if (!tracker.isWithinTolerance(event, kDoubleTapTouchSlop))
         _reject(tracker);
-        break;
+    } else if (event is PointerCancelEvent) {
+      _reject(tracker);
     }
   }
 
@@ -228,7 +222,7 @@ class _TapGesture extends _TapTracker {
 
   _TapGesture({
     MultiTapGestureRecognizer gestureRecognizer,
-    PointerInputEvent event,
+    PointerEvent event,
     Duration longTapDelay
   }) : gestureRecognizer = gestureRecognizer,
        _lastPosition = event.position,
@@ -250,16 +244,16 @@ class _TapGesture extends _TapTracker {
   Point _lastPosition;
   Point _finalPosition;
 
-  void handleEvent(PointerInputEvent event) {
+  void handleEvent(PointerEvent event) {
     assert(event.pointer == pointer);
-    if (event.type == 'pointermove') {
+    if (event is PointerMoveEvent) {
       if (!isWithinTolerance(event, kTouchSlop))
         cancel();
       else
         _lastPosition = event.position;
-    } else if (event.type == 'pointercancel') {
+    } else if (event is PointerCancelEvent) {
       cancel();
-    } else if (event.type == 'pointerup') {
+    } else if (event is PointerUpEvent) {
       stopTrackingPointer(gestureRecognizer.router, handleEvent);
       _finalPosition = event.position;
       _check();
@@ -326,7 +320,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
 
   final Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
 
-  void addPointer(PointerInputEvent event) {
+  void addPointer(PointerEvent event) {
     assert(!_gestureMap.containsKey(event.pointer));
     _gestureMap[event.pointer] = new _TapGesture(
       gestureRecognizer: this,

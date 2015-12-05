@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -121,9 +122,9 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handlePointerDown(GlobalKey target, PointerInputEvent event) {
+  void handlePointerDown(GlobalKey target, PointerDownEvent event) {
     setState(() {
-      markers[MarkerType.touch] = new Point(event.x, event.y);
+      markers[MarkerType.touch] = event.position;
       final RenderBox box = target.currentContext.findRenderObject();
       markers[MarkerType.topLeft] = box.localToGlobal(new Point(0.0, 0.0));
       final Size size = box.size;
@@ -139,7 +140,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     CardModel cardModel = cardModels[index];
     return new Listener(
       key: cardModel.key,
-      onPointerDown: (PointerInputEvent e) { return handlePointerDown(cardModel.targetKey, e); },
+      onPointerDown: (PointerDownEvent event) { return handlePointerDown(cardModel.targetKey, event); },
       child: new Card(
         key: cardModel.targetKey,
         color: cardModel.color,

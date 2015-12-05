@@ -1,2144 +1,1534 @@
-final List<Map> velocityEventData = [
-  {
-    "type":"pointerdown",
-    "timeStamp":216690896.0,
-    "pointer":1,
-    "x":270.0,
-    "y":538.2857055664062
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690906.0,
-    "pointer":1,
-    "x":270.0,
-    "y":538.2857055664062
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690951.0,
-    "pointer":1,
-    "x":270.0,
-    "y":530.8571166992188
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690959.0,
-    "pointer":1,
-    "x":270.0,
-    "y":526.8571166992188
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690967.0,
-    "pointer":1,
-    "x":270.0,
-    "y":521.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690975.0,
-    "pointer":1,
-    "x":270.0,
-    "y":515.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690983.0,
-    "pointer":1,
-    "x":270.0,
-    "y":506.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690991.0,
-    "pointer":1,
-    "x":268.8571472167969,
-    "y":496.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216690998.0,
-    "pointer":1,
-    "x":267.4285583496094,
-    "y":483.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691006.0,
-    "pointer":1,
-    "x":266.28570556640625,
-    "y":469.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691014.0,
-    "pointer":1,
-    "x":265.4285583496094,
-    "y":456.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691021.0,
-    "pointer":1,
-    "x":264.28570556640625,
-    "y":443.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691029.0,
-    "pointer":1,
-    "x":264.0,
-    "y":431.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691036.0,
-    "pointer":1,
-    "x":263.4285583496094,
-    "y":421.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691044.0,
-    "pointer":1,
-    "x":263.4285583496094,
-    "y":412.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691052.0,
-    "pointer":1,
-    "x":263.4285583496094,
-    "y":404.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691060.0,
-    "pointer":1,
-    "x":263.4285583496094,
-    "y":396.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691068.0,
-    "pointer":1,
-    "x":264.5714416503906,
-    "y":390.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691075.0,
-    "pointer":1,
-    "x":265.1428527832031,
-    "y":384.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691083.0,
-    "pointer":1,
-    "x":266.0,
-    "y":380.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691091.0,
-    "pointer":1,
-    "x":266.5714416503906,
-    "y":376.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691098.0,
-    "pointer":1,
-    "x":267.1428527832031,
-    "y":373.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691106.0,
-    "pointer":1,
-    "x":267.71429443359375,
-    "y":370.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691114.0,
-    "pointer":1,
-    "x":268.28570556640625,
-    "y":367.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691121.0,
-    "pointer":1,
-    "x":268.5714416503906,
-    "y":366.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691130.0,
-    "pointer":1,
-    "x":268.8571472167969,
-    "y":364.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691137.0,
-    "pointer":1,
-    "x":269.1428527832031,
-    "y":363.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691145.0,
-    "pointer":1,
-    "x":269.1428527832031,
-    "y":362.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691153.0,
-    "pointer":1,
-    "x":269.4285583496094,
-    "y":362.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691168.0,
-    "pointer":1,
-    "x":268.5714416503906,
-    "y":365.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691176.0,
-    "pointer":1,
-    "x":267.1428527832031,
-    "y":370.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691183.0,
-    "pointer":1,
-    "x":265.4285583496094,
-    "y":376.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691191.0,
-    "pointer":1,
-    "x":263.1428527832031,
-    "y":385.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691199.0,
-    "pointer":1,
-    "x":261.4285583496094,
-    "y":396.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691207.0,
-    "pointer":1,
-    "x":259.71429443359375,
-    "y":408.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691215.0,
-    "pointer":1,
-    "x":258.28570556640625,
-    "y":419.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691222.0,
-    "pointer":1,
-    "x":257.4285583496094,
-    "y":428.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691230.0,
-    "pointer":1,
-    "x":256.28570556640625,
-    "y":436.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691238.0,
-    "pointer":1,
-    "x":255.7142791748047,
-    "y":442.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691245.0,
-    "pointer":1,
-    "x":255.14285278320312,
-    "y":447.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691253.0,
-    "pointer":1,
-    "x":254.85714721679688,
-    "y":453.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691261.0,
-    "pointer":1,
-    "x":254.57142639160156,
-    "y":458.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691268.0,
-    "pointer":1,
-    "x":254.2857208251953,
-    "y":463.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691276.0,
-    "pointer":1,
-    "x":254.2857208251953,
-    "y":470.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691284.0,
-    "pointer":1,
-    "x":254.2857208251953,
-    "y":477.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691292.0,
-    "pointer":1,
-    "x":255.7142791748047,
-    "y":487.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691300.0,
-    "pointer":1,
-    "x":256.8571472167969,
-    "y":498.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691307.0,
-    "pointer":1,
-    "x":258.28570556640625,
-    "y":507.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691315.0,
-    "pointer":1,
-    "x":259.4285583496094,
-    "y":516.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691323.0,
-    "pointer":1,
-    "x":260.28570556640625,
-    "y":521.7142944335938
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216691338.0,
-    "pointer":1,
-    "x":260.28570556640625,
-    "y":521.7142944335938
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216691573.0,
-    "pointer":2,
-    "x":266.0,
-    "y":327.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691588.0,
-    "pointer":2,
-    "x":266.0,
-    "y":327.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691626.0,
-    "pointer":2,
-    "x":261.1428527832031,
-    "y":337.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691634.0,
-    "pointer":2,
-    "x":258.28570556640625,
-    "y":343.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691642.0,
-    "pointer":2,
-    "x":254.57142639160156,
-    "y":354.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691650.0,
-    "pointer":2,
-    "x":250.2857208251953,
-    "y":368.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691657.0,
-    "pointer":2,
-    "x":247.42857360839844,
-    "y":382.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691665.0,
-    "pointer":2,
-    "x":245.14285278320312,
-    "y":397.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691673.0,
-    "pointer":2,
-    "x":243.14285278320312,
-    "y":411.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691680.0,
-    "pointer":2,
-    "x":242.2857208251953,
-    "y":426.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691688.0,
-    "pointer":2,
-    "x":241.7142791748047,
-    "y":440.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691696.0,
-    "pointer":2,
-    "x":241.7142791748047,
-    "y":454.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691703.0,
-    "pointer":2,
-    "x":242.57142639160156,
-    "y":467.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691712.0,
-    "pointer":2,
-    "x":243.42857360839844,
-    "y":477.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691720.0,
-    "pointer":2,
-    "x":244.85714721679688,
-    "y":485.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691727.0,
-    "pointer":2,
-    "x":246.2857208251953,
-    "y":493.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216691735.0,
-    "pointer":2,
-    "x":248.0,
-    "y":499.71429443359375
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216691750.0,
-    "pointer":2,
-    "x":248.0,
-    "y":499.71429443359375
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216692255.0,
-    "pointer":3,
-    "x":249.42857360839844,
-    "y":351.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692270.0,
-    "pointer":3,
-    "x":249.42857360839844,
-    "y":351.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692309.0,
-    "pointer":3,
-    "x":246.2857208251953,
-    "y":361.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692317.0,
-    "pointer":3,
-    "x":244.0,
-    "y":368.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692325.0,
-    "pointer":3,
-    "x":241.42857360839844,
-    "y":377.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692333.0,
-    "pointer":3,
-    "x":237.7142791748047,
-    "y":391.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692340.0,
-    "pointer":3,
-    "x":235.14285278320312,
-    "y":406.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692348.0,
-    "pointer":3,
-    "x":232.57142639160156,
-    "y":421.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692356.0,
-    "pointer":3,
-    "x":230.2857208251953,
-    "y":436.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692363.0,
-    "pointer":3,
-    "x":228.2857208251953,
-    "y":451.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692371.0,
-    "pointer":3,
-    "x":227.42857360839844,
-    "y":466.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692378.0,
-    "pointer":3,
-    "x":226.2857208251953,
-    "y":479.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692387.0,
-    "pointer":3,
-    "x":225.7142791748047,
-    "y":491.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692395.0,
-    "pointer":3,
-    "x":225.14285278320312,
-    "y":501.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692402.0,
-    "pointer":3,
-    "x":224.85714721679688,
-    "y":509.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692410.0,
-    "pointer":3,
-    "x":224.57142639160156,
-    "y":514.8571166992188
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692418.0,
-    "pointer":3,
-    "x":224.2857208251953,
-    "y":519.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692425.0,
-    "pointer":3,
-    "x":224.0,
-    "y":523.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692433.0,
-    "pointer":3,
-    "x":224.0,
-    "y":527.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692441.0,
-    "pointer":3,
-    "x":224.0,
-    "y":530.5714111328125
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692448.0,
-    "pointer":3,
-    "x":224.0,
-    "y":533.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692456.0,
-    "pointer":3,
-    "x":224.0,
-    "y":535.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692464.0,
-    "pointer":3,
-    "x":223.7142791748047,
-    "y":536.8571166992188
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692472.0,
-    "pointer":3,
-    "x":223.7142791748047,
-    "y":538.2857055664062
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216692487.0,
-    "pointer":3,
-    "x":223.7142791748047,
-    "y":538.2857055664062
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216692678.0,
-    "pointer":4,
-    "x":221.42857360839844,
-    "y":526.2857055664062
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692701.0,
-    "pointer":4,
-    "x":220.57142639160156,
-    "y":514.8571166992188
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692708.0,
-    "pointer":4,
-    "x":220.2857208251953,
-    "y":508.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692716.0,
-    "pointer":4,
-    "x":220.2857208251953,
-    "y":498.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692724.0,
-    "pointer":4,
-    "x":221.14285278320312,
-    "y":484.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692732.0,
-    "pointer":4,
-    "x":221.7142791748047,
-    "y":469.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692740.0,
-    "pointer":4,
-    "x":223.42857360839844,
-    "y":453.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692748.0,
-    "pointer":4,
-    "x":225.7142791748047,
-    "y":436.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692755.0,
-    "pointer":4,
-    "x":229.14285278320312,
-    "y":418.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692763.0,
-    "pointer":4,
-    "x":232.85714721679688,
-    "y":400.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692770.0,
-    "pointer":4,
-    "x":236.85714721679688,
-    "y":382.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692778.0,
-    "pointer":4,
-    "x":241.14285278320312,
-    "y":366.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692786.0,
-    "pointer":4,
-    "x":244.85714721679688,
-    "y":350.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216692793.0,
-    "pointer":4,
-    "x":249.14285278320312,
-    "y":335.4285583496094
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216692809.0,
-    "pointer":4,
-    "x":249.14285278320312,
-    "y":335.4285583496094
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216693222.0,
-    "pointer":5,
-    "x":224.0,
-    "y":545.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693245.0,
-    "pointer":5,
-    "x":224.0,
-    "y":545.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693275.0,
-    "pointer":5,
-    "x":222.85714721679688,
-    "y":535.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693284.0,
-    "pointer":5,
-    "x":222.85714721679688,
-    "y":528.8571166992188
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693291.0,
-    "pointer":5,
-    "x":222.2857208251953,
-    "y":518.5714111328125
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693299.0,
-    "pointer":5,
-    "x":222.0,
-    "y":503.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693307.0,
-    "pointer":5,
-    "x":222.0,
-    "y":485.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693314.0,
-    "pointer":5,
-    "x":221.7142791748047,
-    "y":464.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216693322.0,
-    "pointer":5,
-    "x":222.2857208251953,
-    "y":440.28570556640625
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216693337.0,
-    "pointer":5,
-    "x":222.2857208251953,
-    "y":440.28570556640625
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216693985.0,
-    "pointer":6,
-    "x":208.0,
-    "y":544.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694047.0,
-    "pointer":6,
-    "x":208.57142639160156,
-    "y":532.2857055664062
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694054.0,
-    "pointer":6,
-    "x":208.85714721679688,
-    "y":525.7142944335938
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694062.0,
-    "pointer":6,
-    "x":208.85714721679688,
-    "y":515.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694070.0,
-    "pointer":6,
-    "x":208.0,
-    "y":501.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694077.0,
-    "pointer":6,
-    "x":207.42857360839844,
-    "y":487.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694085.0,
-    "pointer":6,
-    "x":206.57142639160156,
-    "y":472.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694092.0,
-    "pointer":6,
-    "x":206.57142639160156,
-    "y":458.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694100.0,
-    "pointer":6,
-    "x":206.57142639160156,
-    "y":446.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694108.0,
-    "pointer":6,
-    "x":206.57142639160156,
-    "y":434.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694116.0,
-    "pointer":6,
-    "x":207.14285278320312,
-    "y":423.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694124.0,
-    "pointer":6,
-    "x":208.57142639160156,
-    "y":412.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694131.0,
-    "pointer":6,
-    "x":209.7142791748047,
-    "y":402.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694139.0,
-    "pointer":6,
-    "x":211.7142791748047,
-    "y":393.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694147.0,
-    "pointer":6,
-    "x":213.42857360839844,
-    "y":385.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694154.0,
-    "pointer":6,
-    "x":215.42857360839844,
-    "y":378.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694162.0,
-    "pointer":6,
-    "x":217.42857360839844,
-    "y":371.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694169.0,
-    "pointer":6,
-    "x":219.42857360839844,
-    "y":366.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694177.0,
-    "pointer":6,
-    "x":221.42857360839844,
-    "y":360.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694185.0,
-    "pointer":6,
-    "x":223.42857360839844,
-    "y":356.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694193.0,
-    "pointer":6,
-    "x":225.14285278320312,
-    "y":352.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694201.0,
-    "pointer":6,
-    "x":226.85714721679688,
-    "y":348.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694209.0,
-    "pointer":6,
-    "x":228.2857208251953,
-    "y":346.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694216.0,
-    "pointer":6,
-    "x":229.14285278320312,
-    "y":343.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694224.0,
-    "pointer":6,
-    "x":230.0,
-    "y":342.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694232.0,
-    "pointer":6,
-    "x":230.57142639160156,
-    "y":340.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694239.0,
-    "pointer":6,
-    "x":230.85714721679688,
-    "y":339.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694247.0,
-    "pointer":6,
-    "x":230.85714721679688,
-    "y":339.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694262.0,
-    "pointer":6,
-    "x":230.2857208251953,
-    "y":342.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694270.0,
-    "pointer":6,
-    "x":228.85714721679688,
-    "y":346.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694278.0,
-    "pointer":6,
-    "x":227.14285278320312,
-    "y":352.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694286.0,
-    "pointer":6,
-    "x":225.42857360839844,
-    "y":359.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694294.0,
-    "pointer":6,
-    "x":223.7142791748047,
-    "y":367.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694301.0,
-    "pointer":6,
-    "x":222.57142639160156,
-    "y":376.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694309.0,
-    "pointer":6,
-    "x":221.42857360839844,
-    "y":384.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694317.0,
-    "pointer":6,
-    "x":220.85714721679688,
-    "y":392.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694324.0,
-    "pointer":6,
-    "x":220.0,
-    "y":400.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694332.0,
-    "pointer":6,
-    "x":219.14285278320312,
-    "y":409.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694339.0,
-    "pointer":6,
-    "x":218.85714721679688,
-    "y":419.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694348.0,
-    "pointer":6,
-    "x":218.2857208251953,
-    "y":428.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694356.0,
-    "pointer":6,
-    "x":218.2857208251953,
-    "y":438.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694363.0,
-    "pointer":6,
-    "x":218.2857208251953,
-    "y":447.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694371.0,
-    "pointer":6,
-    "x":218.2857208251953,
-    "y":455.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694379.0,
-    "pointer":6,
-    "x":219.14285278320312,
-    "y":462.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694386.0,
-    "pointer":6,
-    "x":220.0,
-    "y":469.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694394.0,
-    "pointer":6,
-    "x":221.14285278320312,
-    "y":475.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694401.0,
-    "pointer":6,
-    "x":222.0,
-    "y":480.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694409.0,
-    "pointer":6,
-    "x":222.85714721679688,
-    "y":485.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694417.0,
-    "pointer":6,
-    "x":224.0,
-    "y":489.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694425.0,
-    "pointer":6,
-    "x":224.85714721679688,
-    "y":492.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694433.0,
-    "pointer":6,
-    "x":225.42857360839844,
-    "y":495.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694440.0,
-    "pointer":6,
-    "x":226.0,
-    "y":497.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694448.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":498.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694456.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":498.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694471.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":498.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694479.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":496.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694486.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":493.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694494.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":490.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694502.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":486.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694510.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":480.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694518.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":475.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694525.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":468.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694533.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":461.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694541.0,
-    "pointer":6,
-    "x":226.2857208251953,
-    "y":452.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694548.0,
-    "pointer":6,
-    "x":226.57142639160156,
-    "y":442.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694556.0,
-    "pointer":6,
-    "x":226.57142639160156,
-    "y":432.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694564.0,
-    "pointer":6,
-    "x":226.85714721679688,
-    "y":423.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694571.0,
-    "pointer":6,
-    "x":227.42857360839844,
-    "y":416.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694580.0,
-    "pointer":6,
-    "x":227.7142791748047,
-    "y":410.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694587.0,
-    "pointer":6,
-    "x":228.2857208251953,
-    "y":404.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694595.0,
-    "pointer":6,
-    "x":228.85714721679688,
-    "y":399.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694603.0,
-    "pointer":6,
-    "x":229.14285278320312,
-    "y":395.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694610.0,
-    "pointer":6,
-    "x":229.42857360839844,
-    "y":392.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694618.0,
-    "pointer":6,
-    "x":229.7142791748047,
-    "y":390.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694625.0,
-    "pointer":6,
-    "x":229.7142791748047,
-    "y":388.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694633.0,
-    "pointer":6,
-    "x":229.7142791748047,
-    "y":386.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694641.0,
-    "pointer":6,
-    "x":229.7142791748047,
-    "y":386.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694648.0,
-    "pointer":6,
-    "x":229.7142791748047,
-    "y":386.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694657.0,
-    "pointer":6,
-    "x":228.85714721679688,
-    "y":386.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694665.0,
-    "pointer":6,
-    "x":228.0,
-    "y":388.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694672.0,
-    "pointer":6,
-    "x":226.0,
-    "y":392.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694680.0,
-    "pointer":6,
-    "x":224.0,
-    "y":397.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694688.0,
-    "pointer":6,
-    "x":222.0,
-    "y":404.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694695.0,
-    "pointer":6,
-    "x":219.7142791748047,
-    "y":411.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694703.0,
-    "pointer":6,
-    "x":218.2857208251953,
-    "y":418.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694710.0,
-    "pointer":6,
-    "x":217.14285278320312,
-    "y":425.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694718.0,
-    "pointer":6,
-    "x":215.7142791748047,
-    "y":433.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694726.0,
-    "pointer":6,
-    "x":214.85714721679688,
-    "y":442.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694734.0,
-    "pointer":6,
-    "x":214.0,
-    "y":454.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694742.0,
-    "pointer":6,
-    "x":214.0,
-    "y":469.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694749.0,
-    "pointer":6,
-    "x":215.42857360839844,
-    "y":485.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694757.0,
-    "pointer":6,
-    "x":217.7142791748047,
-    "y":502.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694765.0,
-    "pointer":6,
-    "x":221.14285278320312,
-    "y":521.4285888671875
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694772.0,
-    "pointer":6,
-    "x":224.57142639160156,
-    "y":541.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694780.0,
-    "pointer":6,
-    "x":229.14285278320312,
-    "y":561.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216694788.0,
-    "pointer":6,
-    "x":233.42857360839844,
-    "y":578.8571166992188
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216694802.0,
-    "pointer":6,
-    "x":233.42857360839844,
-    "y":578.8571166992188
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216695344.0,
-    "pointer":7,
-    "x":253.42857360839844,
-    "y":310.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695352.0,
-    "pointer":7,
-    "x":253.42857360839844,
-    "y":310.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695359.0,
-    "pointer":7,
-    "x":252.85714721679688,
-    "y":318.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695367.0,
-    "pointer":7,
-    "x":251.14285278320312,
-    "y":322.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695375.0,
-    "pointer":7,
-    "x":248.85714721679688,
-    "y":327.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695382.0,
-    "pointer":7,
-    "x":246.0,
-    "y":334.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695390.0,
-    "pointer":7,
-    "x":242.57142639160156,
-    "y":344.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695397.0,
-    "pointer":7,
-    "x":238.85714721679688,
-    "y":357.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695406.0,
-    "pointer":7,
-    "x":235.7142791748047,
-    "y":371.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695414.0,
-    "pointer":7,
-    "x":232.2857208251953,
-    "y":386.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695421.0,
-    "pointer":7,
-    "x":229.42857360839844,
-    "y":402.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695429.0,
-    "pointer":7,
-    "x":227.42857360839844,
-    "y":416.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695437.0,
-    "pointer":7,
-    "x":226.2857208251953,
-    "y":431.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695444.0,
-    "pointer":7,
-    "x":226.2857208251953,
-    "y":446.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695452.0,
-    "pointer":7,
-    "x":227.7142791748047,
-    "y":460.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695459.0,
-    "pointer":7,
-    "x":230.0,
-    "y":475.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695467.0,
-    "pointer":7,
-    "x":232.2857208251953,
-    "y":489.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695475.0,
-    "pointer":7,
-    "x":235.7142791748047,
-    "y":504.0
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216695490.0,
-    "pointer":7,
-    "x":235.7142791748047,
-    "y":504.0
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216695885.0,
-    "pointer":8,
-    "x":238.85714721679688,
-    "y":524.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695908.0,
-    "pointer":8,
-    "x":236.2857208251953,
-    "y":515.7142944335938
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695916.0,
-    "pointer":8,
-    "x":234.85714721679688,
-    "y":509.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695924.0,
-    "pointer":8,
-    "x":232.57142639160156,
-    "y":498.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695931.0,
-    "pointer":8,
-    "x":230.57142639160156,
-    "y":483.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695939.0,
-    "pointer":8,
-    "x":229.14285278320312,
-    "y":466.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695947.0,
-    "pointer":8,
-    "x":229.14285278320312,
-    "y":446.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695955.0,
-    "pointer":8,
-    "x":230.57142639160156,
-    "y":424.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695963.0,
-    "pointer":8,
-    "x":232.57142639160156,
-    "y":402.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695970.0,
-    "pointer":8,
-    "x":235.14285278320312,
-    "y":380.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216695978.0,
-    "pointer":8,
-    "x":238.57142639160156,
-    "y":359.4285583496094
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216695993.0,
-    "pointer":8,
-    "x":238.57142639160156,
-    "y":359.4285583496094
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216696429.0,
-    "pointer":9,
-    "x":238.2857208251953,
-    "y":568.5714111328125
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696459.0,
-    "pointer":9,
-    "x":234.0,
-    "y":560.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696467.0,
-    "pointer":9,
-    "x":231.42857360839844,
-    "y":553.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696475.0,
-    "pointer":9,
-    "x":228.2857208251953,
-    "y":543.1428833007812
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696483.0,
-    "pointer":9,
-    "x":225.42857360839844,
-    "y":528.8571166992188
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696491.0,
-    "pointer":9,
-    "x":223.14285278320312,
-    "y":512.2857055664062
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696498.0,
-    "pointer":9,
-    "x":222.0,
-    "y":495.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696506.0,
-    "pointer":9,
-    "x":221.7142791748047,
-    "y":477.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696514.0,
-    "pointer":9,
-    "x":221.7142791748047,
-    "y":458.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696521.0,
-    "pointer":9,
-    "x":223.14285278320312,
-    "y":438.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216696529.0,
-    "pointer":9,
-    "x":224.2857208251953,
-    "y":416.28570556640625
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216696544.0,
-    "pointer":9,
-    "x":224.2857208251953,
-    "y":416.28570556640625
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216696974.0,
-    "pointer":10,
-    "x":218.57142639160156,
-    "y":530.5714111328125
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697012.0,
-    "pointer":10,
-    "x":220.2857208251953,
-    "y":522.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697020.0,
-    "pointer":10,
-    "x":221.14285278320312,
-    "y":517.7142944335938
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697028.0,
-    "pointer":10,
-    "x":222.2857208251953,
-    "y":511.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697036.0,
-    "pointer":10,
-    "x":224.0,
-    "y":504.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697044.0,
-    "pointer":10,
-    "x":227.14285278320312,
-    "y":490.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697052.0,
-    "pointer":10,
-    "x":229.42857360839844,
-    "y":474.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697059.0,
-    "pointer":10,
-    "x":231.42857360839844,
-    "y":454.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697067.0,
-    "pointer":10,
-    "x":233.7142791748047,
-    "y":431.1428527832031
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216697082.0,
-    "pointer":10,
-    "x":233.7142791748047,
-    "y":431.1428527832031
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216697435.0,
-    "pointer":11,
-    "x":257.1428527832031,
-    "y":285.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697465.0,
-    "pointer":11,
-    "x":251.7142791748047,
-    "y":296.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697473.0,
-    "pointer":11,
-    "x":248.2857208251953,
-    "y":304.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697481.0,
-    "pointer":11,
-    "x":244.57142639160156,
-    "y":314.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697489.0,
-    "pointer":11,
-    "x":240.2857208251953,
-    "y":329.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697497.0,
-    "pointer":11,
-    "x":236.85714721679688,
-    "y":345.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697505.0,
-    "pointer":11,
-    "x":233.7142791748047,
-    "y":361.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697512.0,
-    "pointer":11,
-    "x":231.14285278320312,
-    "y":378.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697520.0,
-    "pointer":11,
-    "x":229.42857360839844,
-    "y":395.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697528.0,
-    "pointer":11,
-    "x":229.42857360839844,
-    "y":412.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697535.0,
-    "pointer":11,
-    "x":230.85714721679688,
-    "y":430.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697543.0,
-    "pointer":11,
-    "x":233.42857360839844,
-    "y":449.71429443359375
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216697558.0,
-    "pointer":11,
-    "x":233.42857360839844,
-    "y":449.71429443359375
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216697749.0,
-    "pointer":12,
-    "x":246.0,
-    "y":311.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697780.0,
-    "pointer":12,
-    "x":244.57142639160156,
-    "y":318.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697787.0,
-    "pointer":12,
-    "x":243.14285278320312,
-    "y":325.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697795.0,
-    "pointer":12,
-    "x":241.42857360839844,
-    "y":336.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697803.0,
-    "pointer":12,
-    "x":239.7142791748047,
-    "y":351.1428527832031
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697811.0,
-    "pointer":12,
-    "x":238.2857208251953,
-    "y":368.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697819.0,
-    "pointer":12,
-    "x":238.0,
-    "y":389.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697826.0,
-    "pointer":12,
-    "x":239.14285278320312,
-    "y":412.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697834.0,
-    "pointer":12,
-    "x":242.2857208251953,
-    "y":438.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697842.0,
-    "pointer":12,
-    "x":247.42857360839844,
-    "y":466.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216697849.0,
-    "pointer":12,
-    "x":254.2857208251953,
-    "y":497.71429443359375
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216697864.0,
-    "pointer":12,
-    "x":254.2857208251953,
-    "y":497.71429443359375
-  },
-  {
-    "type":"pointerdown",
-    "timeStamp":216698321.0,
-    "pointer":13,
-    "x":250.0,
-    "y":306.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698328.0,
-    "pointer":13,
-    "x":250.0,
-    "y":306.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698344.0,
-    "pointer":13,
-    "x":249.14285278320312,
-    "y":314.0
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698351.0,
-    "pointer":13,
-    "x":247.42857360839844,
-    "y":319.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698359.0,
-    "pointer":13,
-    "x":245.14285278320312,
-    "y":326.8571472167969
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698366.0,
-    "pointer":13,
-    "x":241.7142791748047,
-    "y":339.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698374.0,
-    "pointer":13,
-    "x":238.57142639160156,
-    "y":355.71429443359375
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698382.0,
-    "pointer":13,
-    "x":236.2857208251953,
-    "y":374.28570556640625
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698390.0,
-    "pointer":13,
-    "x":235.14285278320312,
-    "y":396.5714416503906
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698398.0,
-    "pointer":13,
-    "x":236.57142639160156,
-    "y":421.4285583496094
-  },
-  {
-    "type":"pointermove",
-    "timeStamp":216698406.0,
-    "pointer":13,
-    "x":241.14285278320312,
-    "y":451.4285583496094
-  },
-  {
-    "type":"pointerup",
-    "timeStamp":216698421.0,
-    "pointer":13,
-    "x":241.14285278320312,
-    "y":451.4285583496094
-  }
+import 'package:flutter/gestures.dart';
+
+final List<PointerEvent> velocityEventData = <PointerEvent>[
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216690896),
+    pointer: 1,
+    position: const Point(270.0, 538.2857055664062)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690906),
+    pointer: 1,
+    position: const Point(270.0, 538.2857055664062)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690951),
+    pointer: 1,
+    position: const Point(270.0, 530.8571166992188)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690959),
+    pointer: 1,
+    position: const Point(270.0, 526.8571166992188)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690967),
+    pointer: 1,
+    position: const Point(270.0, 521.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690975),
+    pointer: 1,
+    position: const Point(270.0, 515.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690983),
+    pointer: 1,
+    position: const Point(270.0, 506.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690991),
+    pointer: 1,
+    position: const Point(268.8571472167969, 496.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216690998),
+    pointer: 1,
+    position: const Point(267.4285583496094, 483.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691006),
+    pointer: 1,
+    position: const Point(266.28570556640625, 469.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691014),
+    pointer: 1,
+    position: const Point(265.4285583496094, 456.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691021),
+    pointer: 1,
+    position: const Point(264.28570556640625, 443.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691029),
+    pointer: 1,
+    position: const Point(264.0, 431.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691036),
+    pointer: 1,
+    position: const Point(263.4285583496094, 421.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691044),
+    pointer: 1,
+    position: const Point(263.4285583496094, 412.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691052),
+    pointer: 1,
+    position: const Point(263.4285583496094, 404.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691060),
+    pointer: 1,
+    position: const Point(263.4285583496094, 396.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691068),
+    pointer: 1,
+    position: const Point(264.5714416503906, 390.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691075),
+    pointer: 1,
+    position: const Point(265.1428527832031, 384.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691083),
+    pointer: 1,
+    position: const Point(266.0, 380.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691091),
+    pointer: 1,
+    position: const Point(266.5714416503906, 376.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691098),
+    pointer: 1,
+    position: const Point(267.1428527832031, 373.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691106),
+    pointer: 1,
+    position: const Point(267.71429443359375, 370.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691114),
+    pointer: 1,
+    position: const Point(268.28570556640625, 367.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691121),
+    pointer: 1,
+    position: const Point(268.5714416503906, 366.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691130),
+    pointer: 1,
+    position: const Point(268.8571472167969, 364.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691137),
+    pointer: 1,
+    position: const Point(269.1428527832031, 363.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691145),
+    pointer: 1,
+    position: const Point(269.1428527832031, 362.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691153),
+    pointer: 1,
+    position: const Point(269.4285583496094, 362.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691168),
+    pointer: 1,
+    position: const Point(268.5714416503906, 365.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691176),
+    pointer: 1,
+    position: const Point(267.1428527832031, 370.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691183),
+    pointer: 1,
+    position: const Point(265.4285583496094, 376.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691191),
+    pointer: 1,
+    position: const Point(263.1428527832031, 385.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691199),
+    pointer: 1,
+    position: const Point(261.4285583496094, 396.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691207),
+    pointer: 1,
+    position: const Point(259.71429443359375, 408.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691215),
+    pointer: 1,
+    position: const Point(258.28570556640625, 419.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691222),
+    pointer: 1,
+    position: const Point(257.4285583496094, 428.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691230),
+    pointer: 1,
+    position: const Point(256.28570556640625, 436.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691238),
+    pointer: 1,
+    position: const Point(255.7142791748047, 442.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691245),
+    pointer: 1,
+    position: const Point(255.14285278320312, 447.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691253),
+    pointer: 1,
+    position: const Point(254.85714721679688, 453.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691261),
+    pointer: 1,
+    position: const Point(254.57142639160156, 458.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691268),
+    pointer: 1,
+    position: const Point(254.2857208251953, 463.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691276),
+    pointer: 1,
+    position: const Point(254.2857208251953, 470.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691284),
+    pointer: 1,
+    position: const Point(254.2857208251953, 477.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691292),
+    pointer: 1,
+    position: const Point(255.7142791748047, 487.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691300),
+    pointer: 1,
+    position: const Point(256.8571472167969, 498.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691307),
+    pointer: 1,
+    position: const Point(258.28570556640625, 507.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691315),
+    pointer: 1,
+    position: const Point(259.4285583496094, 516.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691323),
+    pointer: 1,
+    position: const Point(260.28570556640625, 521.7142944335938)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216691338),
+    pointer: 1,
+    position: const Point(260.28570556640625, 521.7142944335938)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216691573),
+    pointer: 2,
+    position: const Point(266.0, 327.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691588),
+    pointer: 2,
+    position: const Point(266.0, 327.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691626),
+    pointer: 2,
+    position: const Point(261.1428527832031, 337.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691634),
+    pointer: 2,
+    position: const Point(258.28570556640625, 343.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691642),
+    pointer: 2,
+    position: const Point(254.57142639160156, 354.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691650),
+    pointer: 2,
+    position: const Point(250.2857208251953, 368.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691657),
+    pointer: 2,
+    position: const Point(247.42857360839844, 382.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691665),
+    pointer: 2,
+    position: const Point(245.14285278320312, 397.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691673),
+    pointer: 2,
+    position: const Point(243.14285278320312, 411.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691680),
+    pointer: 2,
+    position: const Point(242.2857208251953, 426.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691688),
+    pointer: 2,
+    position: const Point(241.7142791748047, 440.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691696),
+    pointer: 2,
+    position: const Point(241.7142791748047, 454.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691703),
+    pointer: 2,
+    position: const Point(242.57142639160156, 467.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691712),
+    pointer: 2,
+    position: const Point(243.42857360839844, 477.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691720),
+    pointer: 2,
+    position: const Point(244.85714721679688, 485.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691727),
+    pointer: 2,
+    position: const Point(246.2857208251953, 493.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216691735),
+    pointer: 2,
+    position: const Point(248.0, 499.71429443359375)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216691750),
+    pointer: 2,
+    position: const Point(248.0, 499.71429443359375)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216692255),
+    pointer: 3,
+    position: const Point(249.42857360839844, 351.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692270),
+    pointer: 3,
+    position: const Point(249.42857360839844, 351.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692309),
+    pointer: 3,
+    position: const Point(246.2857208251953, 361.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692317),
+    pointer: 3,
+    position: const Point(244.0, 368.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692325),
+    pointer: 3,
+    position: const Point(241.42857360839844, 377.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692333),
+    pointer: 3,
+    position: const Point(237.7142791748047, 391.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692340),
+    pointer: 3,
+    position: const Point(235.14285278320312, 406.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692348),
+    pointer: 3,
+    position: const Point(232.57142639160156, 421.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692356),
+    pointer: 3,
+    position: const Point(230.2857208251953, 436.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692363),
+    pointer: 3,
+    position: const Point(228.2857208251953, 451.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692371),
+    pointer: 3,
+    position: const Point(227.42857360839844, 466.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692378),
+    pointer: 3,
+    position: const Point(226.2857208251953, 479.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692387),
+    pointer: 3,
+    position: const Point(225.7142791748047, 491.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692395),
+    pointer: 3,
+    position: const Point(225.14285278320312, 501.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692402),
+    pointer: 3,
+    position: const Point(224.85714721679688, 509.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692410),
+    pointer: 3,
+    position: const Point(224.57142639160156, 514.8571166992188)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692418),
+    pointer: 3,
+    position: const Point(224.2857208251953, 519.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692425),
+    pointer: 3,
+    position: const Point(224.0, 523.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692433),
+    pointer: 3,
+    position: const Point(224.0, 527.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692441),
+    pointer: 3,
+    position: const Point(224.0, 530.5714111328125)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692448),
+    pointer: 3,
+    position: const Point(224.0, 533.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692456),
+    pointer: 3,
+    position: const Point(224.0, 535.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692464),
+    pointer: 3,
+    position: const Point(223.7142791748047, 536.8571166992188)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692472),
+    pointer: 3,
+    position: const Point(223.7142791748047, 538.2857055664062)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216692487),
+    pointer: 3,
+    position: const Point(223.7142791748047, 538.2857055664062)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216692678),
+    pointer: 4,
+    position: const Point(221.42857360839844, 526.2857055664062)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692701),
+    pointer: 4,
+    position: const Point(220.57142639160156, 514.8571166992188)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692708),
+    pointer: 4,
+    position: const Point(220.2857208251953, 508.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692716),
+    pointer: 4,
+    position: const Point(220.2857208251953, 498.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692724),
+    pointer: 4,
+    position: const Point(221.14285278320312, 484.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692732),
+    pointer: 4,
+    position: const Point(221.7142791748047, 469.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692740),
+    pointer: 4,
+    position: const Point(223.42857360839844, 453.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692748),
+    pointer: 4,
+    position: const Point(225.7142791748047, 436.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692755),
+    pointer: 4,
+    position: const Point(229.14285278320312, 418.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692763),
+    pointer: 4,
+    position: const Point(232.85714721679688, 400.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692770),
+    pointer: 4,
+    position: const Point(236.85714721679688, 382.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692778),
+    pointer: 4,
+    position: const Point(241.14285278320312, 366.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692786),
+    pointer: 4,
+    position: const Point(244.85714721679688, 350.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216692793),
+    pointer: 4,
+    position: const Point(249.14285278320312, 335.4285583496094)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216692809),
+    pointer: 4,
+    position: const Point(249.14285278320312, 335.4285583496094)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216693222),
+    pointer: 5,
+    position: const Point(224.0, 545.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693245),
+    pointer: 5,
+    position: const Point(224.0, 545.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693275),
+    pointer: 5,
+    position: const Point(222.85714721679688, 535.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693284),
+    pointer: 5,
+    position: const Point(222.85714721679688, 528.8571166992188)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693291),
+    pointer: 5,
+    position: const Point(222.2857208251953, 518.5714111328125)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693299),
+    pointer: 5,
+    position: const Point(222.0, 503.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693307),
+    pointer: 5,
+    position: const Point(222.0, 485.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693314),
+    pointer: 5,
+    position: const Point(221.7142791748047, 464.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216693322),
+    pointer: 5,
+    position: const Point(222.2857208251953, 440.28570556640625)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216693337),
+    pointer: 5,
+    position: const Point(222.2857208251953, 440.28570556640625)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216693985),
+    pointer: 6,
+    position: const Point(208.0, 544.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694047),
+    pointer: 6,
+    position: const Point(208.57142639160156, 532.2857055664062)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694054),
+    pointer: 6,
+    position: const Point(208.85714721679688, 525.7142944335938)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694062),
+    pointer: 6,
+    position: const Point(208.85714721679688, 515.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694070),
+    pointer: 6,
+    position: const Point(208.0, 501.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694077),
+    pointer: 6,
+    position: const Point(207.42857360839844, 487.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694085),
+    pointer: 6,
+    position: const Point(206.57142639160156, 472.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694092),
+    pointer: 6,
+    position: const Point(206.57142639160156, 458.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694100),
+    pointer: 6,
+    position: const Point(206.57142639160156, 446.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694108),
+    pointer: 6,
+    position: const Point(206.57142639160156, 434.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694116),
+    pointer: 6,
+    position: const Point(207.14285278320312, 423.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694124),
+    pointer: 6,
+    position: const Point(208.57142639160156, 412.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694131),
+    pointer: 6,
+    position: const Point(209.7142791748047, 402.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694139),
+    pointer: 6,
+    position: const Point(211.7142791748047, 393.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694147),
+    pointer: 6,
+    position: const Point(213.42857360839844, 385.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694154),
+    pointer: 6,
+    position: const Point(215.42857360839844, 378.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694162),
+    pointer: 6,
+    position: const Point(217.42857360839844, 371.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694169),
+    pointer: 6,
+    position: const Point(219.42857360839844, 366.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694177),
+    pointer: 6,
+    position: const Point(221.42857360839844, 360.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694185),
+    pointer: 6,
+    position: const Point(223.42857360839844, 356.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694193),
+    pointer: 6,
+    position: const Point(225.14285278320312, 352.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694201),
+    pointer: 6,
+    position: const Point(226.85714721679688, 348.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694209),
+    pointer: 6,
+    position: const Point(228.2857208251953, 346.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694216),
+    pointer: 6,
+    position: const Point(229.14285278320312, 343.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694224),
+    pointer: 6,
+    position: const Point(230.0, 342.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694232),
+    pointer: 6,
+    position: const Point(230.57142639160156, 340.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694239),
+    pointer: 6,
+    position: const Point(230.85714721679688, 339.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694247),
+    pointer: 6,
+    position: const Point(230.85714721679688, 339.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694262),
+    pointer: 6,
+    position: const Point(230.2857208251953, 342.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694270),
+    pointer: 6,
+    position: const Point(228.85714721679688, 346.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694278),
+    pointer: 6,
+    position: const Point(227.14285278320312, 352.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694286),
+    pointer: 6,
+    position: const Point(225.42857360839844, 359.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694294),
+    pointer: 6,
+    position: const Point(223.7142791748047, 367.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694301),
+    pointer: 6,
+    position: const Point(222.57142639160156, 376.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694309),
+    pointer: 6,
+    position: const Point(221.42857360839844, 384.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694317),
+    pointer: 6,
+    position: const Point(220.85714721679688, 392.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694324),
+    pointer: 6,
+    position: const Point(220.0, 400.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694332),
+    pointer: 6,
+    position: const Point(219.14285278320312, 409.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694339),
+    pointer: 6,
+    position: const Point(218.85714721679688, 419.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694348),
+    pointer: 6,
+    position: const Point(218.2857208251953, 428.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694356),
+    pointer: 6,
+    position: const Point(218.2857208251953, 438.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694363),
+    pointer: 6,
+    position: const Point(218.2857208251953, 447.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694371),
+    pointer: 6,
+    position: const Point(218.2857208251953, 455.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694379),
+    pointer: 6,
+    position: const Point(219.14285278320312, 462.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694386),
+    pointer: 6,
+    position: const Point(220.0, 469.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694394),
+    pointer: 6,
+    position: const Point(221.14285278320312, 475.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694401),
+    pointer: 6,
+    position: const Point(222.0, 480.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694409),
+    pointer: 6,
+    position: const Point(222.85714721679688, 485.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694417),
+    pointer: 6,
+    position: const Point(224.0, 489.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694425),
+    pointer: 6,
+    position: const Point(224.85714721679688, 492.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694433),
+    pointer: 6,
+    position: const Point(225.42857360839844, 495.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694440),
+    pointer: 6,
+    position: const Point(226.0, 497.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694448),
+    pointer: 6,
+    position: const Point(226.2857208251953, 498.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694456),
+    pointer: 6,
+    position: const Point(226.2857208251953, 498.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694471),
+    pointer: 6,
+    position: const Point(226.2857208251953, 498.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694479),
+    pointer: 6,
+    position: const Point(226.2857208251953, 496.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694486),
+    pointer: 6,
+    position: const Point(226.2857208251953, 493.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694494),
+    pointer: 6,
+    position: const Point(226.2857208251953, 490.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694502),
+    pointer: 6,
+    position: const Point(226.2857208251953, 486.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694510),
+    pointer: 6,
+    position: const Point(226.2857208251953, 480.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694518),
+    pointer: 6,
+    position: const Point(226.2857208251953, 475.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694525),
+    pointer: 6,
+    position: const Point(226.2857208251953, 468.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694533),
+    pointer: 6,
+    position: const Point(226.2857208251953, 461.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694541),
+    pointer: 6,
+    position: const Point(226.2857208251953, 452.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694548),
+    pointer: 6,
+    position: const Point(226.57142639160156, 442.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694556),
+    pointer: 6,
+    position: const Point(226.57142639160156, 432.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694564),
+    pointer: 6,
+    position: const Point(226.85714721679688, 423.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694571),
+    pointer: 6,
+    position: const Point(227.42857360839844, 416.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694580),
+    pointer: 6,
+    position: const Point(227.7142791748047, 410.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694587),
+    pointer: 6,
+    position: const Point(228.2857208251953, 404.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694595),
+    pointer: 6,
+    position: const Point(228.85714721679688, 399.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694603),
+    pointer: 6,
+    position: const Point(229.14285278320312, 395.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694610),
+    pointer: 6,
+    position: const Point(229.42857360839844, 392.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694618),
+    pointer: 6,
+    position: const Point(229.7142791748047, 390.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694625),
+    pointer: 6,
+    position: const Point(229.7142791748047, 388.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694633),
+    pointer: 6,
+    position: const Point(229.7142791748047, 386.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694641),
+    pointer: 6,
+    position: const Point(229.7142791748047, 386.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694648),
+    pointer: 6,
+    position: const Point(229.7142791748047, 386.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694657),
+    pointer: 6,
+    position: const Point(228.85714721679688, 386.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694665),
+    pointer: 6,
+    position: const Point(228.0, 388.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694672),
+    pointer: 6,
+    position: const Point(226.0, 392.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694680),
+    pointer: 6,
+    position: const Point(224.0, 397.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694688),
+    pointer: 6,
+    position: const Point(222.0, 404.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694695),
+    pointer: 6,
+    position: const Point(219.7142791748047, 411.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694703),
+    pointer: 6,
+    position: const Point(218.2857208251953, 418.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694710),
+    pointer: 6,
+    position: const Point(217.14285278320312, 425.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694718),
+    pointer: 6,
+    position: const Point(215.7142791748047, 433.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694726),
+    pointer: 6,
+    position: const Point(214.85714721679688, 442.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694734),
+    pointer: 6,
+    position: const Point(214.0, 454.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694742),
+    pointer: 6,
+    position: const Point(214.0, 469.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694749),
+    pointer: 6,
+    position: const Point(215.42857360839844, 485.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694757),
+    pointer: 6,
+    position: const Point(217.7142791748047, 502.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694765),
+    pointer: 6,
+    position: const Point(221.14285278320312, 521.4285888671875)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694772),
+    pointer: 6,
+    position: const Point(224.57142639160156, 541.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694780),
+    pointer: 6,
+    position: const Point(229.14285278320312, 561.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216694788),
+    pointer: 6,
+    position: const Point(233.42857360839844, 578.8571166992188)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216694802),
+    pointer: 6,
+    position: const Point(233.42857360839844, 578.8571166992188)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216695344),
+    pointer: 7,
+    position: const Point(253.42857360839844, 310.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695352),
+    pointer: 7,
+    position: const Point(253.42857360839844, 310.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695359),
+    pointer: 7,
+    position: const Point(252.85714721679688, 318.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695367),
+    pointer: 7,
+    position: const Point(251.14285278320312, 322.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695375),
+    pointer: 7,
+    position: const Point(248.85714721679688, 327.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695382),
+    pointer: 7,
+    position: const Point(246.0, 334.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695390),
+    pointer: 7,
+    position: const Point(242.57142639160156, 344.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695397),
+    pointer: 7,
+    position: const Point(238.85714721679688, 357.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695406),
+    pointer: 7,
+    position: const Point(235.7142791748047, 371.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695414),
+    pointer: 7,
+    position: const Point(232.2857208251953, 386.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695421),
+    pointer: 7,
+    position: const Point(229.42857360839844, 402.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695429),
+    pointer: 7,
+    position: const Point(227.42857360839844, 416.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695437),
+    pointer: 7,
+    position: const Point(226.2857208251953, 431.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695444),
+    pointer: 7,
+    position: const Point(226.2857208251953, 446.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695452),
+    pointer: 7,
+    position: const Point(227.7142791748047, 460.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695459),
+    pointer: 7,
+    position: const Point(230.0, 475.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695467),
+    pointer: 7,
+    position: const Point(232.2857208251953, 489.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695475),
+    pointer: 7,
+    position: const Point(235.7142791748047, 504.0)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216695490),
+    pointer: 7,
+    position: const Point(235.7142791748047, 504.0)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216695885),
+    pointer: 8,
+    position: const Point(238.85714721679688, 524.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695908),
+    pointer: 8,
+    position: const Point(236.2857208251953, 515.7142944335938)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695916),
+    pointer: 8,
+    position: const Point(234.85714721679688, 509.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695924),
+    pointer: 8,
+    position: const Point(232.57142639160156, 498.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695931),
+    pointer: 8,
+    position: const Point(230.57142639160156, 483.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695939),
+    pointer: 8,
+    position: const Point(229.14285278320312, 466.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695947),
+    pointer: 8,
+    position: const Point(229.14285278320312, 446.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695955),
+    pointer: 8,
+    position: const Point(230.57142639160156, 424.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695963),
+    pointer: 8,
+    position: const Point(232.57142639160156, 402.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695970),
+    pointer: 8,
+    position: const Point(235.14285278320312, 380.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216695978),
+    pointer: 8,
+    position: const Point(238.57142639160156, 359.4285583496094)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216695993),
+    pointer: 8,
+    position: const Point(238.57142639160156, 359.4285583496094)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216696429),
+    pointer: 9,
+    position: const Point(238.2857208251953, 568.5714111328125)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696459),
+    pointer: 9,
+    position: const Point(234.0, 560.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696467),
+    pointer: 9,
+    position: const Point(231.42857360839844, 553.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696475),
+    pointer: 9,
+    position: const Point(228.2857208251953, 543.1428833007812)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696483),
+    pointer: 9,
+    position: const Point(225.42857360839844, 528.8571166992188)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696491),
+    pointer: 9,
+    position: const Point(223.14285278320312, 512.2857055664062)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696498),
+    pointer: 9,
+    position: const Point(222.0, 495.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696506),
+    pointer: 9,
+    position: const Point(221.7142791748047, 477.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696514),
+    pointer: 9,
+    position: const Point(221.7142791748047, 458.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696521),
+    pointer: 9,
+    position: const Point(223.14285278320312, 438.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216696529),
+    pointer: 9,
+    position: const Point(224.2857208251953, 416.28570556640625)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216696544),
+    pointer: 9,
+    position: const Point(224.2857208251953, 416.28570556640625)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216696974),
+    pointer: 10,
+    position: const Point(218.57142639160156, 530.5714111328125)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697012),
+    pointer: 10,
+    position: const Point(220.2857208251953, 522.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697020),
+    pointer: 10,
+    position: const Point(221.14285278320312, 517.7142944335938)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697028),
+    pointer: 10,
+    position: const Point(222.2857208251953, 511.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697036),
+    pointer: 10,
+    position: const Point(224.0, 504.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697044),
+    pointer: 10,
+    position: const Point(227.14285278320312, 490.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697052),
+    pointer: 10,
+    position: const Point(229.42857360839844, 474.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697059),
+    pointer: 10,
+    position: const Point(231.42857360839844, 454.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697067),
+    pointer: 10,
+    position: const Point(233.7142791748047, 431.1428527832031)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216697082),
+    pointer: 10,
+    position: const Point(233.7142791748047, 431.1428527832031)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216697435),
+    pointer: 11,
+    position: const Point(257.1428527832031, 285.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697465),
+    pointer: 11,
+    position: const Point(251.7142791748047, 296.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697473),
+    pointer: 11,
+    position: const Point(248.2857208251953, 304.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697481),
+    pointer: 11,
+    position: const Point(244.57142639160156, 314.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697489),
+    pointer: 11,
+    position: const Point(240.2857208251953, 329.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697497),
+    pointer: 11,
+    position: const Point(236.85714721679688, 345.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697505),
+    pointer: 11,
+    position: const Point(233.7142791748047, 361.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697512),
+    pointer: 11,
+    position: const Point(231.14285278320312, 378.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697520),
+    pointer: 11,
+    position: const Point(229.42857360839844, 395.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697528),
+    pointer: 11,
+    position: const Point(229.42857360839844, 412.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697535),
+    pointer: 11,
+    position: const Point(230.85714721679688, 430.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697543),
+    pointer: 11,
+    position: const Point(233.42857360839844, 449.71429443359375)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216697558),
+    pointer: 11,
+    position: const Point(233.42857360839844, 449.71429443359375)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216697749),
+    pointer: 12,
+    position: const Point(246.0, 311.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697780),
+    pointer: 12,
+    position: const Point(244.57142639160156, 318.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697787),
+    pointer: 12,
+    position: const Point(243.14285278320312, 325.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697795),
+    pointer: 12,
+    position: const Point(241.42857360839844, 336.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697803),
+    pointer: 12,
+    position: const Point(239.7142791748047, 351.1428527832031)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697811),
+    pointer: 12,
+    position: const Point(238.2857208251953, 368.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697819),
+    pointer: 12,
+    position: const Point(238.0, 389.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697826),
+    pointer: 12,
+    position: const Point(239.14285278320312, 412.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697834),
+    pointer: 12,
+    position: const Point(242.2857208251953, 438.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697842),
+    pointer: 12,
+    position: const Point(247.42857360839844, 466.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216697849),
+    pointer: 12,
+    position: const Point(254.2857208251953, 497.71429443359375)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216697864),
+    pointer: 12,
+    position: const Point(254.2857208251953, 497.71429443359375)
+  ),
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216698321),
+    pointer: 13,
+    position: const Point(250.0, 306.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698328),
+    pointer: 13,
+    position: const Point(250.0, 306.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698344),
+    pointer: 13,
+    position: const Point(249.14285278320312, 314.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698351),
+    pointer: 13,
+    position: const Point(247.42857360839844, 319.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698359),
+    pointer: 13,
+    position: const Point(245.14285278320312, 326.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698366),
+    pointer: 13,
+    position: const Point(241.7142791748047, 339.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698374),
+    pointer: 13,
+    position: const Point(238.57142639160156, 355.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698382),
+    pointer: 13,
+    position: const Point(236.2857208251953, 374.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698390),
+    pointer: 13,
+    position: const Point(235.14285278320312, 396.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698398),
+    pointer: 13,
+    position: const Point(236.57142639160156, 421.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698406),
+    pointer: 13,
+    position: const Point(241.14285278320312, 451.4285583496094)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216698421),
+    pointer: 13,
+    position: const Point(241.14285278320312, 451.4285583496094)
+  ),
 ];

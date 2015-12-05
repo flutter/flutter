@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Point, Offset;
-
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -36,8 +34,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   bool _wonArena = false;
   Point _finalPosition;
 
-  void handlePrimaryPointer(PointerInputEvent event) {
-    if (event.type == 'pointerup') {
+  void handlePrimaryPointer(PointerEvent event) {
+    if (event is PointerUpEvent) {
       _finalPosition = event.position;
       _checkUp();
     }

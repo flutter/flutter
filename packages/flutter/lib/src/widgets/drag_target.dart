@@ -135,7 +135,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
   GestureRecognizer _recognizer;
   Map<int, GestureArenaEntry> _activePointers = <int, GestureArenaEntry>{};
 
-  void _routePointer(PointerInputEvent event) {
+  void _routePointer(PointerEvent event) {
     _activePointers[event.pointer] = GestureArena.instance.add(event.pointer, this);
     _recognizer.addPointer(event);
   }
@@ -284,18 +284,14 @@ class _DragAvatar<T> {
   Offset _lastOffset;
   OverlayEntry _entry;
 
-  void handleEvent(PointerInputEvent event) {
-    switch(event.type) {
-      case 'pointerup':
-        update(event.position);
-        finish(_DragEndKind.dropped);
-        break;
-      case 'pointercancel':
-        finish(_DragEndKind.canceled);
-        break;
-      case 'pointermove':
-        update(event.position);
-        break;
+  void handleEvent(PointerEvent event) {
+    if (event is PointerUpEvent) {
+      update(event.position);
+      finish(_DragEndKind.dropped);
+    } else if (event is PointerCancelEvent) {
+      finish(_DragEndKind.canceled);
+    } else if (event is PointerMoveEvent) {
+      update(event.position);
     }
   }
 

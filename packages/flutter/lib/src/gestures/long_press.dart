@@ -18,11 +18,12 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   void didExceedDeadline() {
     resolve(GestureDisposition.accepted);
-    onLongPress();
+    if (onLongPress != null)
+      onLongPress();
   }
 
-  void handlePrimaryPointer(PointerInputEvent event) {
-    if (event.type == 'pointerup')
+  void handlePrimaryPointer(PointerEvent event) {
+    if (event is PointerUpEvent)
       resolve(GestureDisposition.rejected);
   }
 }

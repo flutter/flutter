@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 import 'velocity_tracker_data.dart';
@@ -7,36 +11,16 @@ const int kBatchSize = 1000;
 const int kBatchOffset = 50;
 const int kNumMarks = 130;
 
-List<PointerInputEvent> _eventFromMap(List<Map> intermediate) {
-  List<PointerInputEvent> events = new List<PointerInputEvent>();
-  for (Map entry in intermediate)
-    events.add(_eventFor(entry));
-  return events;
-}
-
-PointerInputEvent _eventFor(Map entry) {
-  PointerInputEvent result = new PointerInputEvent(
-    type: entry['type'],
-    timeStamp: entry['timeStamp'],
-    pointer: entry['pointer'],
-    x: entry['x'],
-    y: entry['y']
-  );
-  return result;
-}
-
 void main() {
-  List<PointerInputEvent> events = _eventFromMap(velocityEventData);
-
   test('Dart velocity tracker performance', () {
     VelocityTracker tracker = new VelocityTracker();
     Stopwatch watch = new Stopwatch();
     watch.start();
     for (int i = 0; i < kNumIters; i++) {
-      for (PointerInputEvent event in events) {
-        if (event.type == 'pointerdown' || event.type == 'pointermove')
-          tracker.addPosition(event.timeStamp, event.x, event.y);
-        if (event.type == 'pointerup')
+      for (PointerEvent event in velocityEventData) {
+        if (event is PointerDownEvent || event is PointerMoveEvent)
+          tracker.addPosition(event.timeStamp, event.position);
+        if (event is PointerUpEvent)
           tracker.getVelocity();
       }
     }

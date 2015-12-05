@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -13,7 +12,7 @@ enum EventRecorderMode {
   record
 }
 
-typedef void EventsReadyCallback(List<PointerInputEvent> events);
+typedef void EventsReadyCallback(Iterable<PointerEvent> events);
 
 /// EventRecorder is a utility widget that allows input events occurring
 /// on the child to be recorded. The widget is initially in the "stop" state
@@ -38,11 +37,7 @@ class EventRecorder extends StatefulComponent {
 
 class _EventRecorderState extends State<EventRecorder> {
 
-  List<PointerInputEvent> _events = new List<PointerInputEvent>();
-
-  void initState() {
-    super.initState();
-  }
+  final List<PointerEvent> _events = <PointerEvent>[];
 
   void didUpdateConfig(EventRecorder oldConfig) {
     if (oldConfig.mode == EventRecorderMode.record &&
@@ -52,10 +47,9 @@ class _EventRecorderState extends State<EventRecorder> {
     }
   }
 
-  void _recordEvent(PointerInputEvent event) {
-    if (config.mode == EventRecorderMode.record) {
+  void _recordEvent(PointerEvent event) {
+    if (config.mode == EventRecorderMode.record)
       _events.add(event);
-    }
   }
 
   Widget build(BuildContext context) {

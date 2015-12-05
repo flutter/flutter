@@ -210,7 +210,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     return null;
   }
 
-  void _handlePointerDown(PointerInputEvent event) {
+  void _handlePointerDown(PointerDownEvent event) {
     if (_tap != null)
       _tap.addPointer(event);
     if (_doubleTap != null)

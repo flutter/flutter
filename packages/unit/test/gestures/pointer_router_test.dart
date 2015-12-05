@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 void main() {
   test('Should route pointers', () {
     bool callbackRan = false;
-    void callback(PointerInputEvent event) {
+    void callback(PointerEvent event) {
       callbackRan = true;
     }
 

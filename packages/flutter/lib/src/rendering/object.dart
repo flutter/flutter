@@ -1045,8 +1045,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // EVENTS
 
-  /// Override this function to handle events that hit this render object
-  void handleEvent(InputEvent event, HitTestEntry entry) { }
+  /// Override this function to handle pointer events that hit this render object.
+  void handleEvent(PointerEvent event, HitTestEntry entry) { }
 
 
   // HIT TESTING

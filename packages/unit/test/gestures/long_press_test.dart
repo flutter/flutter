@@ -2,18 +2,14 @@ import 'package:quiver/testing/async.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 
-final PointerInputEvent down = new PointerInputEvent(
+const PointerDownEvent down = const PointerDownEvent(
   pointer: 5,
-  type: 'pointerdown',
-  x: 10.0,
-  y: 10.0
+  position: const Point(10.0, 10.0)
 );
 
-final PointerInputEvent up = new PointerInputEvent(
+const PointerUpEvent up = const PointerUpEvent(
   pointer: 5,
-  type: 'pointerup',
-  x: 11.0,
-  y: 9.0
+  position: const Point(11.0, 9.0)
 );
 
 void main() {
@@ -32,9 +28,9 @@ void main() {
       expect(longPressRecognized, isFalse);
       router.route(down);
       expect(longPressRecognized, isFalse);
-      async.elapse(new Duration(milliseconds: 300));
+      async.elapse(const Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
-      async.elapse(new Duration(milliseconds: 700));
+      async.elapse(const Duration(milliseconds: 700));
       expect(longPressRecognized, isTrue);
     });
 
@@ -56,11 +52,11 @@ void main() {
       expect(longPressRecognized, isFalse);
       router.route(down);
       expect(longPressRecognized, isFalse);
-      async.elapse(new Duration(milliseconds: 300));
+      async.elapse(const Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
       router.route(up);
       expect(longPressRecognized, isFalse);
-      async.elapse(new Duration(seconds: 1));
+      async.elapse(const Duration(seconds: 1));
       expect(longPressRecognized, isFalse);
     });
 
@@ -91,10 +87,10 @@ void main() {
       router.route(down);
       expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
-      async.elapse(new Duration(milliseconds: 300));
+      async.elapse(const Duration(milliseconds: 300));
       expect(tapDownRecognized, isTrue);
       expect(longPressRecognized, isFalse);
-      async.elapse(new Duration(milliseconds: 700));
+      async.elapse(const Duration(milliseconds: 700));
       expect(tapDownRecognized, isTrue);
       expect(longPressRecognized, isTrue);
     });

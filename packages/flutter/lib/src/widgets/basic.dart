@@ -1299,10 +1299,10 @@ class Listener extends OneChildRenderObjectWidget {
     assert(behavior != null);
   }
 
-  final PointerEventListener onPointerDown;
-  final PointerEventListener onPointerMove;
-  final PointerEventListener onPointerUp;
-  final PointerEventListener onPointerCancel;
+  final PointerDownEventListener onPointerDown;
+  final PointerMoveEventListener onPointerMove;
+  final PointerUpEventListener onPointerUp;
+  final PointerCancelEventListener onPointerCancel;
   final HitTestBehavior behavior;
 
   RenderPointerListener createRenderObject() => new RenderPointerListener(

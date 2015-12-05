@@ -10,55 +10,41 @@ class TestGestureArenaMember extends GestureArenaMember {
 void main() {
 
   // Down/up pair 1: normal tap sequence
-  final PointerInputEvent down1 = new PointerInputEvent(
+  const PointerDownEvent down1 = const PointerDownEvent(
     pointer: 1,
-    type: 'pointerdown',
-    x: 10.0,
-    y: 10.0
+    position: const Point(10.0, 10.0)
   );
 
-  final PointerInputEvent up1 = new PointerInputEvent(
+  const PointerUpEvent up1 = const PointerUpEvent(
     pointer: 1,
-    type: 'pointerup',
-    x: 11.0,
-    y: 9.0
+    position: const Point(11.0, 9.0)
   );
 
   // Down/up pair 2: normal tap sequence far away from pair 1
-  final PointerInputEvent down2 = new PointerInputEvent(
+  const PointerDownEvent down2 = const PointerDownEvent(
     pointer: 2,
-    type: 'pointerdown',
-    x: 30.0,
-    y: 30.0
+    position: const Point(30.0, 30.0)
   );
 
-  final PointerInputEvent up2 = new PointerInputEvent(
+  const PointerUpEvent up2 = const PointerUpEvent(
     pointer: 2,
-    type: 'pointerup',
-    x: 31.0,
-    y: 29.0
+    position: const Point(31.0, 29.0)
   );
 
   // Down/move/up sequence 3: intervening motion
-  final PointerInputEvent down3 = new PointerInputEvent(
+  const PointerDownEvent down3 = const PointerDownEvent(
     pointer: 3,
-    type: 'pointerdown',
-    x: 10.0,
-    y: 10.0
+    position: const Point(10.0, 10.0)
   );
 
-  final PointerInputEvent move3 = new PointerInputEvent(
+  const PointerMoveEvent move3 = const PointerMoveEvent(
     pointer: 3,
-    type: 'pointermove',
-    x: 25.0,
-    y: 25.0
+    position: const Point(25.0, 25.0)
   );
 
-  final PointerInputEvent up3 = new PointerInputEvent(
+  const PointerUpEvent up3 = const PointerUpEvent(
     pointer: 3,
-    type: 'pointerup',
-    x: 25.0,
-    y: 25.0
+    position: const Point(25.0, 25.0)
   );
 
   test('Should recognize tap', () {

@@ -636,14 +636,15 @@ abstract class RenderBox extends RenderObject {
   Rect get paintBounds => Point.origin & size;
 
   int _debugActivePointers = 0;
-  void handleEvent(InputEvent event, HitTestEntry entry) {
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
     assert(() {
       if (debugPaintPointersEnabled) {
-        if (event.type == 'pointerdown')
+        if (event is PointerDownEvent) {
           _debugActivePointers += 1;
-        if (event.type == 'pointerup' || event.type == 'pointercancel')
+        } else if (event is PointerUpEvent || event is PointerCancelEvent) {
           _debugActivePointers -= 1;
+        }
         markNeedsPaint();
       }
       return true;

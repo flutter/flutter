@@ -41,10 +41,11 @@ class RenderSolidColorBox extends RenderDecoratedBox {
     size = constraints.constrain(desiredSize);
   }
 
-  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown')
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent) {
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
-    else if (event.type == 'pointerup')
+    } else if (event is PointerUpEvent) {
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
+    }
   }
 }

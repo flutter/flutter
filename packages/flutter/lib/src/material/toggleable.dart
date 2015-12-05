@@ -122,8 +122,8 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   bool hitTestSelf(Point position) => true;
 
-  void handleEvent(InputEvent event, BoxHitTestEntry entry) {
-    if (event.type == 'pointerdown' && isInteractive)
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent && isInteractive)
       _tap.addPointer(event);
   }
 

@@ -1072,7 +1072,10 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 }
 
-typedef void PointerEventListener(PointerInputEvent event);
+typedef void PointerDownEventListener(PointerDownEvent event);
+typedef void PointerMoveEventListener(PointerMoveEvent event);
+typedef void PointerUpEventListener(PointerUpEvent event);
+typedef void PointerCancelEventListener(PointerCancelEvent event);
 
 enum HitTestBehavior {
   deferToChild,
@@ -1091,10 +1094,10 @@ class RenderPointerListener extends RenderProxyBox {
     RenderBox child
   }) : super(child);
 
-  PointerEventListener onPointerDown;
-  PointerEventListener onPointerMove;
-  PointerEventListener onPointerUp;
-  PointerEventListener onPointerCancel;
+  PointerDownEventListener onPointerDown;
+  PointerMoveEventListener onPointerMove;
+  PointerUpEventListener onPointerUp;
+  PointerCancelEventListener onPointerCancel;
   HitTestBehavior behavior;
 
   bool hitTest(HitTestResult result, { Point position }) {
@@ -1110,14 +1113,14 @@ class RenderPointerListener extends RenderProxyBox {
 
   bool hitTestSelf(Point position) => behavior == HitTestBehavior.opaque;
 
-  void handleEvent(InputEvent event, HitTestEntry entry) {
-    if (onPointerDown != null && event.type == 'pointerdown')
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
-    if (onPointerMove != null && event.type == 'pointermove')
+    if (onPointerMove != null && event == PointerMoveEvent)
       return onPointerMove(event);
-    if (onPointerUp != null && event.type == 'pointerup')
+    if (onPointerUp != null && event == PointerUpEvent)
       return onPointerUp(event);
-    if (onPointerCancel != null && event.type == 'pointercancel')
+    if (onPointerCancel != null && event == PointerCancelEvent)
       return onPointerCancel(event);
   }
 
