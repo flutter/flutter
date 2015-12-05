@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -41,8 +43,9 @@ const Duration kMaterialPageRouteTransitionDuration = const Duration(millisecond
 class MaterialPageRoute<T> extends PageRoute<T> {
   MaterialPageRoute({
     this.builder,
+    Completer<T> completer,
     NamedRouteSettings settings: const NamedRouteSettings()
-  }) : super(settings: settings) {
+  }) : super(completer: completer, settings: settings) {
     assert(builder != null);
     assert(opaque);
   }
