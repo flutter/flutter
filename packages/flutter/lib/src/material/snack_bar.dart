@@ -116,7 +116,7 @@ class SnackBar extends StatelessComponent {
 
   // API for Scaffold.addSnackBar():
 
-  static Performance createPerformance() {
+  static Performance createPerformanceController() {
     return new Performance(
       duration: _kSnackBarTransitionDuration,
       debugLabel: 'SnackBar'

@@ -8,9 +8,10 @@ import 'dart:ui' show VoidCallback, lerpDouble;
 import 'package:newton/newton.dart';
 
 import 'animated_value.dart';
+import 'curves.dart';
 import 'forces.dart';
-import 'simulation_stepper.dart';
 import 'listener_helpers.dart';
+import 'simulation_stepper.dart';
 
 /// An interface that is implemented by [Performance] that exposes a
 /// read-only view of the underlying performance. This is used by classes that
@@ -425,6 +426,62 @@ class ProxyPerformance extends PerformanceView
   double get progress => _masterPerformance != null ? _masterPerformance.progress : _progress;
 }
 
+class CurvedPerformance extends PerformanceView {
+  CurvedPerformance(this._performance, { this.curve, this.reverseCurve });
+
+  final PerformanceView _performance;
+
+  /// The curve to use in the forward direction
+  Curve curve;
+
+  /// The curve to use in the reverse direction
+  ///
+  /// If this field is null, use [curve] in both directions.
+  Curve reverseCurve;
+
+  void addListener(VoidCallback listener) {
+    _performance.addListener(listener);
+  }
+  void removeListener(VoidCallback listener) {
+    _performance.removeListener(listener);
+  }
+
+  void addStatusListener(PerformanceStatusListener listener) {
+    _performance.addStatusListener(listener);
+  }
+  void removeStatusListener(PerformanceStatusListener listener) {
+    _performance.removeStatusListener(listener);
+  }
+
+  void updateVariable(Animatable variable) {
+    variable.setProgress(progress, curveDirection);
+  }
+
+  PerformanceStatus get status => _performance.status;
+  AnimationDirection get direction => _performance.direction;
+  AnimationDirection get curveDirection => _performance.curveDirection;
+  double get progress {
+    Curve activeCurve;
+    if (curveDirection == AnimationDirection.forward || reverseCurve == null)
+      activeCurve = curve;
+    else
+      activeCurve = reverseCurve;
+    if (activeCurve == null)
+      return _performance.progress;
+    if (_performance.status == PerformanceStatus.dismissed) {
+      assert(_performance.progress == 0.0);
+      assert(activeCurve.transform(0.0).roundToDouble() == 0.0);
+      return 0.0;
+    }
+    if (_performance.status == PerformanceStatus.completed) {
+      assert(_performance.progress == 1.0);
+      assert(activeCurve.transform(1.0).roundToDouble() == 1.0);
+      return 1.0;
+    }
+    return activeCurve.transform(_performance.progress);
+  }
+}
+
 /// A timeline that can be reversed and used to update [Animatable]s.
 ///
 /// For example, a performance may handle an animation of a menu opening by
@@ -459,9 +516,6 @@ class Performance extends PerformanceView
   AnimationDirection get curveDirection => _curveDirection;
   AnimationDirection _curveDirection;
 
-  /// If non-null, animate with this timing instead of a linear timing
-  AnimationTiming timing;
-
   /// The progress of this performance along the timeline
   ///
   /// Note: Setting this value stops the current animation.
@@ -470,10 +524,6 @@ class Performance extends PerformanceView
     stop();
     _timeline.value = t.clamp(0.0, 1.0);
     _checkStatusChanged();
-  }
-
-  double get _curvedProgress {
-    return timing != null ? timing.transform(progress, _curveDirection) : progress;
   }
 
   /// Whether this animation is currently animating in either the forward or reverse direction
@@ -491,7 +541,7 @@ class Performance extends PerformanceView
 
   /// Update the given varaible according to the current progress of this performance
   void updateVariable(Animatable variable) {
-    variable.setProgress(_curvedProgress, _curveDirection);
+    variable.setProgress(progress, _curveDirection);
   }
 
   /// Start running this animation forwards (towards the end)
@@ -591,7 +641,7 @@ class ValuePerformance<T> extends Performance {
 
   void didTick(double t) {
     if (variable != null)
-      variable.setProgress(_curvedProgress, _curveDirection);
+      variable.setProgress(progress, _curveDirection);
     super.didTick(t);
   }
 }

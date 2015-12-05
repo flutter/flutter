@@ -92,28 +92,40 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
   AnimatedValue<double> _width;
   AnimatedValue<double> _height;
 
-  Performance _performance;
+  Performance _performanceController;
+  PerformanceView _performance;
 
   void initState() {
     super.initState();
-    _performance = new Performance(duration: config.duration, debugLabel: '${config.toStringShort()}')
-      ..timing = new AnimationTiming(curve: config.curve)
-      ..addListener(_updateAllVariables);
+    _performanceController = new Performance(
+      duration: config.duration,
+      debugLabel: '${config.toStringShort()}'
+    );
+    _updateCurve();
     _configAllVariables();
   }
 
   void didUpdateConfig(AnimatedContainer oldConfig) {
-    _performance
-      ..duration = config.duration
-      ..timing.curve = config.curve;
+    if (config.curve != oldConfig.curve)
+      _updateCurve();
+    _performanceController.duration = config.duration;
     if (_configAllVariables()) {
-      _performance.progress = 0.0;
-      _performance.play();
+      _performanceController.progress = 0.0;
+      _performanceController.play();
     }
   }
 
+  void _updateCurve() {
+    _performance?.removeListener(_updateAllVariables);
+    if (config.curve != null)
+      _performance = new CurvedPerformance(_performanceController, curve: config.curve);
+    else
+      _performance = _performanceController;
+    _performance.addListener(_updateAllVariables);
+  }
+
   void dispose() {
-    _performance.stop();
+    _performanceController.stop();
     super.dispose();
   }
 

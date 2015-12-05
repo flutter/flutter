@@ -81,13 +81,25 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Duration get transitionDuration;
   bool get opaque;
 
-  PerformanceView get performance => _performance?.view;
-  Performance _performance;
+  PerformanceView get performance => _performance;
+  Performance _performanceController;
+  PerformanceView _performance;
 
-  Performance createPerformance() {
+  /// Called to create the Performance object that will drive the transitions to
+  /// this route from the previous one, and back to the previous route from this
+  /// one.
+  Performance createPerformanceController() {
     Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.ZERO);
     return new Performance(duration: duration, debugLabel: debugLabel);
+  }
+
+  /// Called to create the PerformanceView that exposes the current progress of
+  /// the transition controlled by the Performance object created by
+  /// [createPerformanceController()].
+  PerformanceView createPerformance() {
+    assert(_performanceController != null);
+    return _performanceController.view;
   }
 
   T _result;
@@ -112,26 +124,29 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   void install(OverlayEntry insertionPoint) {
+    _performanceController = createPerformanceController();
+    assert(_performanceController != null);
     _performance = createPerformance();
+    assert(_performance != null);
     super.install(insertionPoint);
   }
 
   void didPush() {
     _performance.addStatusListener(handleStatusChanged);
-    _performance.forward();
+    _performanceController.forward();
     super.didPush();
   }
 
   void didReplace(Route oldRoute) {
     if (oldRoute is TransitionRoute)
-      _performance.progress = oldRoute._performance.progress;
+      _performanceController.progress = oldRoute._performanceController.progress;
     _performance.addStatusListener(handleStatusChanged);
     super.didReplace(oldRoute);
   }
 
   bool didPop(T result) {
     _result = result;
-    _performance.reverse();
+    _performanceController.reverse();
     _popCompleter?.complete(_result);
     return true;
   }
@@ -142,7 +157,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   void dispose() {
-    _performance.stop();
+    _performanceController.stop();
     super.dispose();
   }
 
@@ -182,7 +197,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   bool canTransitionFrom(TransitionRoute nextRoute) => true;
 
   String get debugLabel => '$runtimeType';
-  String toString() => '$runtimeType(performance: $_performance)';
+  String toString() => '$runtimeType(performance: $_performanceController)';
 }
 
 class LocalHistoryEntry {

@@ -20,48 +20,14 @@ enum AnimationDirection {
 /// Animatable objects, by convention, must be cheap to create. This allows them
 /// to be used in build functions in Widgets.
 abstract class Animatable {
+  // TODO(ianh): replace mentions of this class with just mentioning AnimatedValue directly
   /// Update the variable to a given time in an animation that is running in the given direction
   void setProgress(double t, AnimationDirection direction);
-  String toString();
-}
-
-/// Used by [Performance] to convert the timing of a performance to a different timescale.
-/// For example, by setting different values for the interval and reverseInterval, a performance
-/// can be made to take longer in one direction that the other.
-class AnimationTiming {
-  AnimationTiming({ this.curve, this.reverseCurve });
-
-  /// The curve to use in the forward direction
-  Curve curve;
-
-  /// The curve to use in the reverse direction
-  ///
-  /// If this field is null, use [curve] in both directions.
-  Curve reverseCurve;
-
-  /// Applies this timing to the given animation clock value in the given direction
-  double transform(double t, AnimationDirection direction) {
-    Curve activeCurve = _getActiveCurve(direction);
-    if (activeCurve == null)
-      return t;
-    if (t == 0.0 || t == 1.0) {
-      assert(activeCurve.transform(t).round() == t);
-      return t;
-    }
-    return activeCurve.transform(t);
-  }
-
-  Curve _getActiveCurve(AnimationDirection direction) {
-    if (direction == AnimationDirection.forward || reverseCurve == null)
-      return curve;
-    return reverseCurve;
-  }
 }
 
 /// An animated variable with a concrete type.
-class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animatable {
-  AnimatedValue(this.begin, { this.end, Curve curve, Curve reverseCurve })
-    : super(curve: curve, reverseCurve: reverseCurve) {
+class AnimatedValue<T extends dynamic> implements Animatable {
+  AnimatedValue(this.begin, { this.end, this.curve, this.reverseCurve }) {
     value = begin;
   }
 
@@ -76,6 +42,32 @@ class AnimatedValue<T extends dynamic> extends AnimationTiming implements Animat
 
   /// Returns the value this variable has at the given animation clock value.
   T lerp(double t) => begin + (end - begin) * t;
+
+  /// The curve to use in the forward direction
+  Curve curve;
+
+  /// The curve to use in the reverse direction
+  ///
+  /// If this field is null, use [curve] in both directions.
+  Curve reverseCurve;
+
+  Curve _getActiveCurve(AnimationDirection direction) {
+    if (direction == AnimationDirection.forward || reverseCurve == null)
+      return curve;
+    return reverseCurve;
+  }
+
+  /// Applies this timing to the given animation clock value in the given direction
+  double transform(double t, AnimationDirection direction) {
+    Curve activeCurve = _getActiveCurve(direction);
+    if (activeCurve == null)
+      return t;
+    if (t == 0.0 || t == 1.0) {
+      assert(activeCurve.transform(t).round() == t);
+      return t;
+    }
+    return activeCurve.transform(t);
+  }
 
   /// Updates the value of this variable according to the given animation clock
   /// value and direction.
