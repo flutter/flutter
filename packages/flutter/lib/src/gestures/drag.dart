@@ -25,8 +25,7 @@ typedef void GesturePanEndCallback(Offset velocity);
 typedef void _GesturePolymorphicUpdateCallback<T>(T delta);
 
 bool _isFlingGesture(Offset velocity) {
-  if (velocity == null)
-    return false;
+  assert(velocity != null);
   double velocitySquared = velocity.dx * velocity.dx + velocity.dy * velocity.dy;
   return velocitySquared > kMinFlingVelocity * kMinFlingVelocity
       && velocitySquared < kMaxFlingVelocity * kMaxFlingVelocity;
