@@ -669,6 +669,11 @@ void paintImage({
     // as we apply a nine-patch stretch.
     assert(sourceSize == inputSize);
   }
+  if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
+    // There's no need to repeat the image because we're exactly filling the
+    // output rect with the image.
+    repeat = ImageRepeat.noRepeat;
+  }
   Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
@@ -676,6 +681,10 @@ void paintImage({
   double dy = (outputSize.height - destinationSize.height) * (alignY ?? 0.5);
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
   Rect destinationRect = destinationPosition & destinationSize;
+  if (repeat != ImageRepeat.noRepeat) {
+    canvas.save();
+    canvas.clipRect(rect);
+  }
   if (centerSlice == null) {
     Rect sourceRect = Point.origin & sourceSize;
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
@@ -684,6 +693,8 @@ void paintImage({
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
       canvas.drawImageNine(image, centerSlice, tileRect, paint);
   }
+  if (repeat != ImageRepeat.noRepeat)
+    canvas.restore();
 }
 
 /// A background image for a box.
