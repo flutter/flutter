@@ -573,6 +573,35 @@ enum ImageRepeat {
   noRepeat
 }
 
+Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {
+  if (repeat == ImageRepeat.noRepeat) {
+    yield fundamentalRect;
+    return;
+  }
+
+  int startX = 0;
+  int startY = 0;
+  int stopX = 0;
+  int stopY = 0;
+  double strideX = fundamentalRect.width;
+  double strideY = fundamentalRect.height;
+
+  if (repeat == ImageRepeat.repeat || repeat == ImageRepeat.repeatX) {
+    startX = ((outputRect.left - fundamentalRect.left) / strideX).floor();
+    stopX = ((outputRect.right - fundamentalRect.right) / strideX).ceil();
+  }
+
+  if (repeat == ImageRepeat.repeat || repeat == ImageRepeat.repeatY) {
+    startY = ((outputRect.top - fundamentalRect.top) / strideY).floor();
+    stopY = ((outputRect.bottom - fundamentalRect.bottom) / strideY).ceil();
+  }
+
+  for (int i = startX; i <= stopX; ++i) {
+    for (int j = startY; j <= stopY; ++j)
+      yield fundamentalRect.shift(new Offset(i * strideX, j * strideY));
+  }
+}
+
 /// Paint an image into the given rectangle in the canvas
 void paintImage({
   Canvas canvas,
@@ -580,7 +609,7 @@ void paintImage({
   ui.Image image,
   ColorFilter colorFilter,
   ImageFit fit,
-  repeat: ImageRepeat.noRepeat,
+  ImageRepeat repeat: ImageRepeat.noRepeat,
   Rect centerSlice,
   double alignX,
   double alignY
@@ -640,7 +669,6 @@ void paintImage({
     // as we apply a nine-patch stretch.
     assert(sourceSize == inputSize);
   }
-  // TODO(abarth): Implement |repeat|.
   Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
@@ -648,10 +676,14 @@ void paintImage({
   double dy = (outputSize.height - destinationSize.height) * (alignY ?? 0.5);
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
   Rect destinationRect = destinationPosition & destinationSize;
-  if (centerSlice == null)
-    canvas.drawImageRect(image, Point.origin & sourceSize, destinationRect, paint);
-  else
-    canvas.drawImageNine(image, centerSlice, destinationRect, paint);
+  if (centerSlice == null) {
+    Rect sourceRect = Point.origin & sourceSize;
+    for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      canvas.drawImageRect(image, sourceRect, tileRect, paint);
+  } else {
+    for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      canvas.drawImageNine(image, centerSlice, tileRect, paint);
+  }
 }
 
 /// A background image for a box.

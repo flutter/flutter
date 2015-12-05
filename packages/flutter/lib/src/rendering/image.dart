@@ -25,7 +25,7 @@ class RenderImage extends RenderBox {
     ColorFilter colorFilter,
     ImageFit fit,
     FractionalOffset alignment,
-    repeat: ImageRepeat.noRepeat,
+    ImageRepeat repeat: ImageRepeat.noRepeat,
     Rect centerSlice
   }) : _image = image,
       _width = width,
