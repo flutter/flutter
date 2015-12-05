@@ -31,18 +31,18 @@ class VirtualJoystick extends NodeWithSize {
   Paint _paintControl;
 
   bool handleEvent(SpriteBoxEvent event) {
-    if (event.type == "pointerdown") {
+    if (event.type == PointerDownEvent) {
       _pointerDownAt = event.boxPosition;
       actions.stopAll();
       _isDown = true;
     }
-    else if (event.type == "pointerup" || event.type == "pointercancel") {
+    else if (event.type == PointerUpEvent || event.type == PointerCancelEvent) {
       _pointerDownAt = null;
       _value = Point.origin;
       ActionTween moveToCenter = new ActionTween((a) => _handlePos = a, _handlePos, _center, 0.4, Curves.elasticOut);
       actions.run(moveToCenter);
       _isDown = false;
-    } else if (event.type == "pointermove") {
+    } else if (event.type == PointerMoveEvent) {
       Offset movedDist = event.boxPosition - _pointerDownAt;
 
       _value = new Point(

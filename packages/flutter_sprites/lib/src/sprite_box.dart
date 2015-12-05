@@ -187,56 +187,52 @@ class SpriteBox extends RenderBox {
     }
   }
 
-  void handleEvent(InputEvent event, _SpriteBoxHitTestEntry entry) {
+  void handleEvent(PointerEvent event, _SpriteBoxHitTestEntry entry) {
     if (!attached)
       return;
 
-    if (event is PointerInputEvent) {
+    if (event is PointerDownEvent) {
+      // Build list of event targets
+      if (_eventTargets == null) {
+        _eventTargets = <Node>[];
+        _addEventTargets(_rootNode, _eventTargets);
+      }
 
-      if (event.type == 'pointerdown') {
-        // Build list of event targets
-        if (_eventTargets == null) {
-          _eventTargets = <Node>[];
-          _addEventTargets(_rootNode, _eventTargets);
-        }
+      // Find the once that are hit by the pointer
+      List<Node> nodeTargets = <Node>[];
+      for (int i = _eventTargets.length - 1; i >= 0; i--) {
+        Node node = _eventTargets[i];
 
-        // Find the once that are hit by the pointer
-        List<Node> nodeTargets = <Node>[];
-        for (int i = _eventTargets.length - 1; i >= 0; i--) {
-          Node node = _eventTargets[i];
-
-          // Check if the node is ready to handle a pointer
-          if (node.handleMultiplePointers || node._handlingPointer == null) {
-            // Do the hit test
-            Point posInNodeSpace = node.convertPointToNodeSpace(entry.localPosition);
-            if (node.isPointInside(posInNodeSpace)) {
-              nodeTargets.add(node);
-              node._handlingPointer = event.pointer;
-            }
+        // Check if the node is ready to handle a pointer
+        if (node.handleMultiplePointers || node._handlingPointer == null) {
+          // Do the hit test
+          Point posInNodeSpace = node.convertPointToNodeSpace(entry.localPosition);
+          if (node.isPointInside(posInNodeSpace)) {
+            nodeTargets.add(node);
+            node._handlingPointer = event.pointer;
           }
         }
-
-        entry.nodeTargets = nodeTargets;
       }
 
-      // Pass the event down to nodes that were hit by the pointerdown
-      List<Node> targets = entry.nodeTargets;
-      for (Node node in targets) {
-        // Check if this event should be dispatched
-        if (node.handleMultiplePointers || event.pointer == node._handlingPointer) {
-          // Dispatch event
-          bool consumedEvent = node.handleEvent(new SpriteBoxEvent(new Point(event.x, event.y), event.type, event.pointer));
-          if (consumedEvent == null || consumedEvent)
-            break;
-        }
-      }
+      entry.nodeTargets = nodeTargets;
+    }
 
-      // De-register pointer for nodes that doesn't handle multiple pointers
-      for (Node node in targets) {
-        if (event.type == 'pointerup' || event.type == 'pointercancel') {
-          node._handlingPointer = null;
-        }
+    // Pass the event down to nodes that were hit by the pointerdown
+    List<Node> targets = entry.nodeTargets;
+    for (Node node in targets) {
+      // Check if this event should be dispatched
+      if (node.handleMultiplePointers || event.pointer == node._handlingPointer) {
+        // Dispatch event
+        bool consumedEvent = node.handleEvent(new SpriteBoxEvent(new Point(event.x, event.y), event.runtimeType, event.pointer));
+        if (consumedEvent == null || consumedEvent)
+          break;
       }
+    }
+
+    // De-register pointer for nodes that doesn't handle multiple pointers
+    for (Node node in targets) {
+      if (event is PointerUpEvent || event is PointerCancelEvent)
+        node._handlingPointer = null;
     }
   }
 
@@ -531,13 +527,13 @@ class SpriteBoxEvent {
   ///     }
   final Point boxPosition;
 
-  /// The type of event, there are currently four valid types, 'pointerdown', 'pointermoved', 'pointerup', and
-  /// 'pointercancel'.
+  /// The type of event, there are currently four valid types, PointerDownEvent, PointerMoveEvent, PointerUpEvent, and
+  /// PointerCancelEvent.
   ///
-  ///     if (event.type == 'pointerdown') {
+  ///     if (event.type == PointerDownEvent) {
   ///       // Do something!
   ///     }
-  final String type;
+  final Type type;
 
   /// The id of the pointer. Each pointer on the screen will have a unique pointer id.
   ///

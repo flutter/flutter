@@ -769,10 +769,10 @@ class Node {
   ///       }
   ///
   ///       bool handleEvent(SpriteBoxEvent event) {
-  ///         if (event.type == 'pointerdown) {
+  ///         if (event.type == PointerDownEvent) {
   ///           opacity = 0.5;
   ///         }
-  ///         else if (event.type == 'pointerup') {
+  ///         else if (event.type == PointerUpEvent) {
   ///           opacity = 1.0;
   ///         }
   ///         return true;
