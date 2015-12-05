@@ -133,7 +133,7 @@ class ScaffoldState extends State<Scaffold> {
   Timer _snackBarTimer;
 
   ScaffoldFeatureController showSnackBar(SnackBar snackbar) {
-    _snackBarPerformance ??= SnackBar.createPerformance()
+    _snackBarPerformance ??= SnackBar.createPerformanceController()
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
       assert(_snackBarPerformance.isDismissed);
@@ -201,7 +201,7 @@ class ScaffoldState extends State<Scaffold> {
     }
     Completer completer = new Completer();
     GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
-    Performance performance = BottomSheet.createPerformance()
+    Performance performance = BottomSheet.createPerformanceController()
       ..forward();
     _PersistentBottomSheet bottomSheet;
     LocalHistoryEntry entry = new LocalHistoryEntry(

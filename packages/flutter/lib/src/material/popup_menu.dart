@@ -97,12 +97,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final List<PopupMenuItem<T>> items;
   final int elevation;
 
-  Performance createPerformance() {
-    Performance result = super.createPerformance();
-    AnimationTiming timing = new AnimationTiming();
-    timing.reverseCurve = new Interval(0.0, _kMenuCloseIntervalEnd);
-    result.timing = timing;
-    return result;
+  PerformanceView createPerformance() {
+    return new CurvedPerformance(
+      super.createPerformance(),
+      reverseCurve: new Interval(0.0, _kMenuCloseIntervalEnd)
+     );
   }
 
   Duration get transitionDuration => _kMenuDuration;
