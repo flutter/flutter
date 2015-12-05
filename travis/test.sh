@@ -16,7 +16,7 @@ set -ex
 # (cd packages/updater; ) # No tests to run.
 
 if [ $TRAVIS_PULL_REQUEST = "false" ]; then
-  if [ $TRAVIS_BRANCH = "master"]; then
+  if [ $TRAVIS_BRANCH = "master" ]; then
     (cd packages/flutter; dartdoc)
 
     GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
