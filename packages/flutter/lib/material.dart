@@ -37,7 +37,6 @@ export 'src/material/material_button.dart';
 export 'src/material/material_list.dart';
 export 'src/material/page.dart';
 export 'src/material/popup_menu.dart';
-export 'src/material/popup_menu_item.dart';
 export 'src/material/progress_indicator.dart';
 export 'src/material/radio.dart';
 export 'src/material/raised_button.dart';
