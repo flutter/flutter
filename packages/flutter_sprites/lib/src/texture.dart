@@ -73,7 +73,7 @@ class Texture {
     return new Texture._fromSpriteFrame(image, name, rect.size, false, false, srcFrame, dstFrame, new Point(0.5, 0.5));
   }
 
-  void drawTexture(PaintingCanvas canvas, Point position, Paint paint) {
+  void drawTexture(Canvas canvas, Point position, Paint paint) {
     // Get drawing position
     double x = position.x;
     double y = position.y;

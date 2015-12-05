@@ -7,7 +7,7 @@ class TexturedLine extends Node {
 
   TexturedLinePainter painter;
 
-  void paint(PaintingCanvas canvas) {
+  void paint(Canvas canvas) {
     painter.paint(canvas);
   }
 }
@@ -81,7 +81,7 @@ class TexturedLinePainter {
 
   Paint _cachedPaint = new Paint();
 
-  void paint(PaintingCanvas canvas) {
+  void paint(Canvas canvas) {
     // Check input values
     assert(_points != null);
     if (_points.length < 2) return;

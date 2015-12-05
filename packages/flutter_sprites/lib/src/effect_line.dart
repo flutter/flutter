@@ -121,7 +121,7 @@ class EffectLine extends Node {
     }
   }
 
-  void paint(PaintingCanvas canvas) {
+  void paint(Canvas canvas) {
     if (points.length < 2) return;
 
     _painter.points = points;

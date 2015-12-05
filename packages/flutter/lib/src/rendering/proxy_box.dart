@@ -991,7 +991,7 @@ class RenderSizeObserver extends RenderProxyBox {
 abstract class CustomPainter {
   const CustomPainter();
 
-  void paint(PaintingCanvas canvas, Size size);
+  void paint(Canvas canvas, Size size);
   bool shouldRepaint(CustomPainter oldDelegate);
   bool hitTest(Point position) => null;
 }

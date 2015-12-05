@@ -336,7 +336,7 @@ class SpriteBox extends RenderBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    final PaintingCanvas canvas = context.canvas;
+    final Canvas canvas = context.canvas;
     canvas.save();
 
     // Move to correct coordinate space before drawing

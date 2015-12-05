@@ -267,7 +267,7 @@ class PhysicsWorld extends Node {
     _contactHandler.addContactCallback(callback, tagA, tagB, type);
   }
 
-  void paint(PaintingCanvas canvas) {
+  void paint(Canvas canvas) {
     if (drawDebug) {
       _debugDrawTransform = new Matrix4.fromFloat64List(canvas.getTotalMatrix());
     }
@@ -276,7 +276,7 @@ class PhysicsWorld extends Node {
 
   /// Draws the debug data of the physics world, normally this method isn't
   /// invoked directly. Instead, set the [drawDebug] property to true.
-  void paintDebug(PaintingCanvas canvas) {
+  void paintDebug(Canvas canvas) {
     _debugDraw.canvas = canvas;
     b2World.drawDebugData();
   }

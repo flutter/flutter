@@ -44,7 +44,7 @@ class Sprite extends NodeWithSize with SpritePaint {
     pivot = new Point(0.5, 0.5);
   }
 
-  void paint(PaintingCanvas canvas) {
+  void paint(Canvas canvas) {
     // Account for pivot point
     applyTransformForPivot(canvas);
 
