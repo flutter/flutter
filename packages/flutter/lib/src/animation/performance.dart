@@ -126,6 +126,129 @@ class ReversePerformance extends PerformanceView
   }
 }
 
+class MeanPerformance extends PerformanceView
+  with LazyListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
+  MeanPerformance(this._performances) {
+    assert(_performances != null);
+  }
+
+  // This list is intended to be immutable. Behavior is undefined if you mutate it.
+  final List<PerformanceView> _performances;
+
+  void didStartListening() {
+    for (PerformanceView performance in _performances) {
+      performance.addListener(notifyListeners);
+      performance.addStatusListener(notifyStatusListeners);
+    }
+  }
+
+  void didStopListening() {
+    for (PerformanceView performance in _performances) {
+      performance.removeListener(notifyListeners);
+      performance.removeStatusListener(notifyStatusListeners);
+    }
+  }
+
+  void updateVariable(Animatable variable) {
+    variable.setProgress(progress, curveDirection);
+  }
+
+  PerformanceStatus get status {
+    bool dismissed = true;
+    bool completed = true;
+    int direction = 0;
+    for (PerformanceView performance in _performances) {
+      switch (performance.status) {
+        case PerformanceStatus.dismissed:
+          completed = false;
+          break;
+        case PerformanceStatus.completed:
+          dismissed = false;
+          break;
+        case PerformanceStatus.forward:
+          dismissed = false;
+          completed = false;
+          direction += 1;
+          break;
+        case PerformanceStatus.reverse:
+          dismissed = false;
+          completed = false;
+          direction -= 1;
+          break;
+      }
+    }
+    if (direction > 1)
+      return PerformanceStatus.forward;
+    if (direction < 1)
+      return PerformanceStatus.reverse;
+    if (dismissed)
+      return PerformanceStatus.dismissed; // all performances were dismissed, or we had none
+    if (completed)
+      return PerformanceStatus.completed; // all performances were completed
+    // Performances were conflicted.
+    // Either we had an equal non-zero number of forwards and reverse
+    // transitions, or we had both completed and dismissed transitions.
+    // We default to whatever our first performance was.
+    assert(_performances.isNotEmpty);
+    return _performances[0].status;
+  }
+
+  AnimationDirection get direction {
+    if (_performances.isEmpty)
+      return AnimationDirection.forward;
+    int direction = 0;
+    for (PerformanceView performance in _performances) {
+      switch (performance.direction) {
+        case AnimationDirection.forward:
+          direction += 1;
+          break;
+        case AnimationDirection.reverse:
+          direction -= 1;
+          break;
+      }
+    }
+    if (direction > 1)
+      return AnimationDirection.forward;
+    if (direction < 1)
+      return AnimationDirection.reverse;
+    // We had an equal (non-zero) number of forwards and reverse transitions.
+    // Default to the first one.
+    return _performances[0].direction;
+  }
+
+  AnimationDirection get curveDirection {
+    if (_performances.isEmpty)
+      return AnimationDirection.forward;
+    int curveDirection = 0;
+    for (PerformanceView performance in _performances) {
+      switch (performance.curveDirection) {
+        case AnimationDirection.forward:
+          curveDirection += 1;
+          break;
+        case AnimationDirection.reverse:
+          curveDirection -= 1;
+          break;
+      }
+    }
+    if (curveDirection > 1)
+      return AnimationDirection.forward;
+    if (curveDirection < 1)
+      return AnimationDirection.reverse;
+    // We had an equal (non-zero) number of forwards and reverse transitions.
+    // Default to the first one.
+    return _performances[0].curveDirection;
+  }
+
+  double get progress {
+    if (_performances.isEmpty)
+      return 0.0;
+    double result = 0.0;
+    for (PerformanceView performance in _performances)
+      result += performance.progress;
+    return result / _performances.length;
+  }
+}
+
 enum _TrainHoppingMode { minimize, maximize }
 
 /// This performance starts by proxying one performance, but can be given a
@@ -280,24 +403,16 @@ class ProxyPerformance extends PerformanceView
 
   void didStartListening() {
     if (_masterPerformance != null) {
-      _masterPerformance.addListener(_valueChangeHandler);
-      _masterPerformance.addStatusListener(_statusChangeHandler);
+      _masterPerformance.addListener(notifyListeners);
+      _masterPerformance.addStatusListener(notifyStatusListeners);
     }
   }
 
   void didStopListening() {
     if (_masterPerformance != null) {
-      _masterPerformance.removeListener(_valueChangeHandler);
-      _masterPerformance.removeStatusListener(_statusChangeHandler);
+      _masterPerformance.removeListener(notifyListeners);
+      _masterPerformance.removeStatusListener(notifyStatusListeners);
     }
-  }
-
-  void _valueChangeHandler() {
-    notifyListeners();
-  }
-
-  void _statusChangeHandler(PerformanceStatus status) {
-    notifyStatusListeners(status);
   }
 
   void updateVariable(Animatable variable) {
