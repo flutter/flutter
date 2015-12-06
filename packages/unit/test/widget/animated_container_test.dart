@@ -21,6 +21,8 @@ void main() {
         backgroundColor: new Color(0xFF0000FF)
       );
 
+      BoxDecoration actualDecoration;
+
       tester.pumpWidget(
         new AnimatedContainer(
           key: key,
@@ -30,7 +32,8 @@ void main() {
       );
 
       RenderDecoratedBox box = key.currentState.context.findRenderObject();
-      expect(box.decoration.backgroundColor, equals(decorationA.backgroundColor));
+      actualDecoration = box.decoration;
+      expect(actualDecoration.backgroundColor, equals(decorationA.backgroundColor));
 
       tester.pumpWidget(
         new AnimatedContainer(
@@ -41,11 +44,13 @@ void main() {
       );
 
       expect(key.currentState.context.findRenderObject(), equals(box));
-      expect(box.decoration.backgroundColor, equals(decorationA.backgroundColor));
+      actualDecoration = box.decoration;
+      expect(actualDecoration.backgroundColor, equals(decorationA.backgroundColor));
 
       tester.pump(const Duration(seconds: 1));
 
-      expect(box.decoration.backgroundColor, equals(decorationB.backgroundColor));
+      actualDecoration = box.decoration;
+      expect(actualDecoration.backgroundColor, equals(decorationB.backgroundColor));
 
     });
   });

@@ -35,7 +35,7 @@ class CircleAvatar extends StatelessComponent {
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
         backgroundColor: color,
-        shape: Shape.circle
+        shape: BoxShape.circle
       ),
       width: 40.0,
       height: 40.0,

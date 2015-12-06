@@ -27,7 +27,7 @@ void main() {
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       RenderDecoratedBox renderObject = element.renderObject;
       expect(renderObject.decoration, equals(kBoxDecorationA));
-      expect(renderObject.position, equals(BoxDecorationPosition.background));
+      expect(renderObject.position, equals(DecorationPosition.background));
 
       tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationB));
       element = tester.findElement((Element element) => element is OneChildRenderObjectElement);
@@ -35,7 +35,7 @@ void main() {
       expect(element.renderObject is RenderDecoratedBox, isTrue);
       renderObject = element.renderObject;
       expect(renderObject.decoration, equals(kBoxDecorationB));
-      expect(renderObject.position, equals(BoxDecorationPosition.background));
+      expect(renderObject.position, equals(DecorationPosition.background));
     });
   });
 
@@ -49,12 +49,12 @@ void main() {
         expect(element.renderObject is RenderDecoratedBox, isTrue);
         RenderDecoratedBox renderObject = element.renderObject;
         expect(renderObject.decoration, equals(kBoxDecorationA));
-        expect(renderObject.position, equals(BoxDecorationPosition.background));
+        expect(renderObject.position, equals(DecorationPosition.background));
         expect(renderObject.child, isNotNull);
         expect(renderObject.child is RenderDecoratedBox, isTrue);
         RenderDecoratedBox child = renderObject.child;
         expect(child.decoration, equals(kBoxDecorationB));
-        expect(child.position, equals(BoxDecorationPosition.background));
+        expect(child.position, equals(DecorationPosition.background));
         expect(child.child, isNull);
       }
 
@@ -65,7 +65,7 @@ void main() {
         expect(element.renderObject is RenderDecoratedBox, isTrue);
         RenderDecoratedBox renderObject = element.renderObject;
         expect(renderObject.decoration, equals(kBoxDecorationA));
-        expect(renderObject.position, equals(BoxDecorationPosition.background));
+        expect(renderObject.position, equals(DecorationPosition.background));
         expect(renderObject.child, isNull);
       }
 

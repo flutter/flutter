@@ -37,11 +37,11 @@ class _DropDownMenuPainter extends CustomPainter {
   final RenderBox renderBox;
 
   void paint(Canvas canvas, Size size) {
-    final BoxPainter painter = new BoxPainter(new BoxDecoration(
+    final BoxPainter painter = new BoxDecoration(
       backgroundColor: color,
       borderRadius: 2.0,
       boxShadow: elevationToShadow[elevation]
-    ));
+    ).createBoxPainter();
 
     double top = renderBox.globalToLocal(new Point(0.0, menuTop)).y;
     double bottom = renderBox.globalToLocal(new Point(0.0, menuBottom)).y;

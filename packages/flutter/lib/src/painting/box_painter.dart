@@ -8,150 +8,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'decoration.dart';
+import 'edge_dims.dart';
 
-/// An immutable set of offsets in each of the four cardinal directions.
-///
-/// Typically used for an offset from each of the four sides of a box. For
-/// example, the padding inside a box can be represented using this class.
-class EdgeDims {
-  /// Constructs an EdgeDims from offsets from the top, right, bottom and left.
-  const EdgeDims.TRBL(this.top, this.right, this.bottom, this.left);
-
-  /// Constructs an EdgeDims where all the offsets are value.
-  const EdgeDims.all(double value)
-      : top = value, right = value, bottom = value, left = value;
-
-  /// Constructs an EdgeDims with only the given values non-zero.
-  const EdgeDims.only({ this.top: 0.0,
-                        this.right: 0.0,
-                        this.bottom: 0.0,
-                        this.left: 0.0 });
-
-  /// Constructs an EdgeDims with symmetrical vertical and horizontal offsets.
-  const EdgeDims.symmetric({ double vertical: 0.0,
-                             double horizontal: 0.0 })
-    : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
-
-  /// The offset from the top.
-  final double top;
-
-  /// The offset from the right.
-  final double right;
-
-  /// The offset from the bottom.
-  final double bottom;
-
-  /// The offset from the left.
-  final double left;
-
-  /// Whether every dimension is non-negative.
-  bool get isNonNegative => top >= 0.0 && right >= 0.0 && bottom >= 0.0 && left >= 0.0;
-
-  /// The size that this edge dims would occupy with an empty interior.
-  Size get collapsedSize => new Size(left + right, top + bottom);
-
-  Rect inflateRect(Rect rect) {
-    return new Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
-  }
-
-  EdgeDims operator -(EdgeDims other) {
-    return new EdgeDims.TRBL(
-      top - other.top,
-      right - other.right,
-      bottom - other.bottom,
-      left - other.left
-    );
-  }
-
-  EdgeDims operator +(EdgeDims other) {
-    return new EdgeDims.TRBL(
-      top + other.top,
-      right + other.right,
-      bottom + other.bottom,
-      left + other.left
-    );
-  }
-
-  EdgeDims operator *(double other) {
-    return new EdgeDims.TRBL(
-      top * other,
-      right * other,
-      bottom * other,
-      left * other
-    );
-  }
-
-  EdgeDims operator /(double other) {
-    return new EdgeDims.TRBL(
-      top / other,
-      right / other,
-      bottom / other,
-      left / other
-    );
-  }
-
-  EdgeDims operator ~/(double other) {
-    return new EdgeDims.TRBL(
-      (top ~/ other).toDouble(),
-      (right ~/ other).toDouble(),
-      (bottom ~/ other).toDouble(),
-      (left ~/ other).toDouble()
-    );
-  }
-
-  EdgeDims operator %(double other) {
-    return new EdgeDims.TRBL(
-      top % other,
-      right % other,
-      bottom % other,
-      left % other
-    );
-  }
-
-  /// Linearly interpolate between two EdgeDims.
-  ///
-  /// If either is null, this function interpolates from [EdgeDims.zero].
-  static EdgeDims lerp(EdgeDims a, EdgeDims b, double t) {
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b * t;
-    if (b == null)
-      return a * (1.0 - t);
-    return new EdgeDims.TRBL(
-      ui.lerpDouble(a.top, b.top, t),
-      ui.lerpDouble(a.right, b.right, t),
-      ui.lerpDouble(a.bottom, b.bottom, t),
-      ui.lerpDouble(a.left, b.left, t)
-    );
-  }
-
-  /// An EdgeDims with zero offsets in each direction.
-  static const EdgeDims zero = const EdgeDims.TRBL(0.0, 0.0, 0.0, 0.0);
-
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! EdgeDims)
-      return false;
-    final EdgeDims typedOther = other;
-    return top == typedOther.top &&
-           right == typedOther.right &&
-           bottom == typedOther.bottom &&
-           left == typedOther.left;
-  }
-
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + top.hashCode;
-    value = 37 * value + left.hashCode;
-    value = 37 * value + bottom.hashCode;
-    value = 37 * value + right.hashCode;
-    return value;
-  }
-
-  String toString() => "EdgeDims($top, $right, $bottom, $left)";
-}
+export 'edge_dims.dart' show EdgeDims;
 
 /// A side of a border of a box
 class BorderSide {
@@ -602,7 +462,7 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   }
 }
 
-/// Paint an image into the given rectangle in the canvas
+/// Paint an image into the given rectangle in the canvas.
 void paintImage({
   Canvas canvas,
   Rect rect,
@@ -697,6 +557,48 @@ void paintImage({
     canvas.restore();
 }
 
+/// An offset that's expressed as a fraction of a Size.
+///
+/// FractionalOffset(1.0, 0.0) represents the top right of the Size,
+/// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
+class FractionalOffset {
+  const FractionalOffset(this.x, this.y);
+  final double x;
+  final double y;
+  FractionalOffset operator -(FractionalOffset other) {
+    return new FractionalOffset(x - other.x, y - other.y);
+  }
+  FractionalOffset operator +(FractionalOffset other) {
+    return new FractionalOffset(x + other.x, y + other.y);
+  }
+  FractionalOffset operator *(double other) {
+    return new FractionalOffset(x * other, y * other);
+  }
+  bool operator ==(dynamic other) {
+    if (other is! FractionalOffset)
+      return false;
+    final FractionalOffset typedOther = other;
+    return x == typedOther.x &&
+           y == typedOther.y;
+  }
+  int get hashCode {
+    int value = 373;
+    value = 37 * value + x.hashCode;
+    value = 37 * value + y.hashCode;
+    return value;
+  }
+  static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return new FractionalOffset(b.x * t, b.y * t);
+    if (b == null)
+      return new FractionalOffset(b.x * (1.0 - t), b.y * (1.0 - t));
+    return new FractionalOffset(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
+  }
+  String toString() => '$runtimeType($x, $y)';
+}
+
 /// A background image for a box.
 class BackgroundImage {
   BackgroundImage({
@@ -735,11 +637,10 @@ class BackgroundImage {
 
   final ImageResource _imageResource;
 
-  final List<VoidCallback> _listeners =
-    new List<VoidCallback>();
+  final List<VoidCallback> _listeners = <VoidCallback>[];
 
   /// Call listener when the background images changes (e.g., arrives from the network).
-  void addChangeListener(VoidCallback listener) {
+  void _addChangeListener(VoidCallback listener) {
     // We add the listener to the _imageResource first so that the first change
     // listener doesn't get callback synchronously if the image resource is
     // already resolved.
@@ -749,7 +650,7 @@ class BackgroundImage {
   }
 
   /// No longer call listener when the background image changes.
-  void removeChangeListener(VoidCallback listener) {
+  void _removeChangeListener(VoidCallback listener) {
     _listeners.remove(listener);
     // We need to remove ourselves as listeners from the _imageResource so that
     // we're not kept alive by the image_cache.
@@ -795,18 +696,22 @@ class BackgroundImage {
   String toString() => 'BackgroundImage($fit, $repeat)';
 }
 
-// TODO(abarth): Rename to BoxShape?
-/// A 2D geometrical shape
-enum Shape {
-  /// An axis-aligned, 2D rectangle
+/// The shape to use when rendering a BoxDecoration.
+enum BoxShape {
+  /// An axis-aligned, 2D rectangle. May have rounded corners. The edges of the
+  /// rectangle will match the edges of the box into which the BoxDecoration is
+  /// painted.
   rectangle,
 
-  /// A 2D locus of points equidistant from a single point
+  /// A circle centered in the middle of the box into which the BoxDecoration is
+  /// painted. The diameter of the circle is the shortest dimension of the box,
+  /// either the width of the height, such that the circle touches the edges of
+  /// the box.
   circle
 }
 
 /// An immutable description of how to paint a box
-class BoxDecoration {
+class BoxDecoration extends Decoration {
   const BoxDecoration({
     this.backgroundColor, // null = don't draw background color
     this.backgroundImage, // null = don't draw background image
@@ -814,8 +719,14 @@ class BoxDecoration {
     this.borderRadius, // null = use more efficient background drawing; note that this must be null for circles
     this.boxShadow, // null = don't draw shadows
     this.gradient, // null = don't allocate gradient objects
-    this.shape: Shape.rectangle
+    this.shape: BoxShape.rectangle
   });
+
+  bool debugAssertValid() {
+    assert(shape != BoxShape.circle ||
+           borderRadius == null); // can't have a border radius if you're a circle
+    return super.debugAssertValid();
+  }
 
   /// The color to fill in the background of the box
   ///
@@ -841,9 +752,9 @@ class BoxDecoration {
   final Gradient gradient;
 
   /// The shape to fill the background color into and to cast as a shadow
-  final Shape shape;
+  final BoxShape shape;
 
-  /// Returns a new box decoration that is scalled by the given factor
+  /// Returns a new box decoration that is scaled by the given factor
   BoxDecoration scale(double factor) {
     // TODO(abarth): Scale ALL the things.
     return new BoxDecoration(
@@ -857,7 +768,33 @@ class BoxDecoration {
     );
   }
 
-  /// Linearly interpolate between two box decorations
+  double getEffectiveBorderRadius(Rect rect) {
+    double shortestSide = rect.shortestSide;
+    // In principle, we should use shortestSide / 2.0, but we don't want to
+    // run into floating point rounding errors. Instead, we just use
+    // shortestSide and let ui.Canvas do any remaining clamping.
+    return borderRadius > shortestSide ? shortestSide : borderRadius;
+  }
+
+  bool hitTest(Size size, Point position) {
+    assert(shape != null);
+    assert((Point.origin & size).contains(position));
+    switch (shape) {
+      case BoxShape.rectangle:
+        if (borderRadius != null) {
+          ui.RRect bounds = new ui.RRect.fromRectXY(Point.origin & size, borderRadius, borderRadius);
+          return bounds.contains(position);
+        }
+        return true;
+      case BoxShape.circle:
+        // Circles are inscribed into our smallest dimension.
+        Point center = size.center(Point.origin);
+        double distance = (position - center).distance;
+        return distance <= math.min(size.width, size.height) / 2.0;
+    }
+  }
+
+  /// Linearly interpolate between two box decorations.
   ///
   /// Interpolates each parameter of the box decoration separately.
   static BoxDecoration lerp(BoxDecoration a, BoxDecoration b, double t) {
@@ -877,6 +814,18 @@ class BoxDecoration {
       gradient: b.gradient,
       shape: b.shape
     );
+  }
+
+  BoxDecoration lerpFrom(Decoration a, double t) {
+    if (a is! BoxDecoration)
+      return BoxDecoration.lerp(null, this, t);
+    return BoxDecoration.lerp(a, this, t);
+  }
+
+  BoxDecoration lerpTo(Decoration b, double t) {
+    if (b is! BoxDecoration)
+      return BoxDecoration.lerp(this, null, t);
+    return BoxDecoration.lerp(this, b, t);
   }
 
   bool operator ==(dynamic other) {
@@ -920,30 +869,32 @@ class BoxDecoration {
       result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString())}');
     if (gradient != null)
       result.add('${prefix}gradient: $gradient');
-    if (shape != Shape.rectangle)
+    if (shape != BoxShape.rectangle)
       result.add('${prefix}shape: $shape');
     if (result.isEmpty)
       return '$prefix<no decorations specified>';
     return result.join('\n');
   }
+
+  bool get needsListeners => backgroundImage != null;
+
+  void addChangeListener(VoidCallback listener) {
+    backgroundImage?._addChangeListener(listener);
+  }
+  void removeChangeListener(VoidCallback listener) {
+    backgroundImage?._removeChangeListener(listener);
+  }
+
+  _BoxDecorationPainter createBoxPainter() => new _BoxDecorationPainter(this);
 }
 
 /// An object that paints a [BoxDecoration] into a canvas
-class BoxPainter {
-  BoxPainter(BoxDecoration decoration) : _decoration = decoration {
-    assert(decoration != null);
+class _BoxDecorationPainter extends BoxPainter {
+  _BoxDecorationPainter(this._decoration) {
+    assert(_decoration != null);
   }
 
-  BoxDecoration _decoration;
-  /// The box decoration to paint
-  BoxDecoration get decoration => _decoration;
-  void set decoration (BoxDecoration value) {
-    assert(value != null);
-    if (value == _decoration)
-      return;
-    _decoration = value;
-    _cachedBackgroundPaint = null;
-  }
+  final BoxDecoration _decoration;
 
   Paint _cachedBackgroundPaint;
   Paint get _backgroundPaint {
@@ -981,27 +932,19 @@ class BoxPainter {
     return hasUniformWidth;
   }
 
-  double _getEffectiveBorderRadius(Rect rect) {
-    double shortestSide = rect.shortestSide;
-    // In principle, we should use shortestSide / 2.0, but we don't want to
-    // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let ui.Canvas do any remaining clamping.
-    return _decoration.borderRadius > shortestSide ? shortestSide : _decoration.borderRadius;
-  }
-
   void _paintBox(ui.Canvas canvas, Rect rect, Paint paint) {
     switch (_decoration.shape) {
-      case Shape.circle:
+      case BoxShape.circle:
         assert(_decoration.borderRadius == null);
         Point center = rect.center;
         double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
         break;
-      case Shape.rectangle:
+      case BoxShape.rectangle:
         if (_decoration.borderRadius == null) {
           canvas.drawRect(rect, paint);
         } else {
-          double radius = _getEffectiveBorderRadius(rect);
+          double radius = _decoration.getEffectiveBorderRadius(rect);
           canvas.drawRRect(new ui.RRect.fromRectXY(rect, radius, radius), paint);
         }
         break;
@@ -1053,14 +996,14 @@ class BoxPainter {
         _paintBorderWithRadius(canvas, rect);
         return;
       }
-      if (_decoration.shape == Shape.circle) {
+      if (_decoration.shape == BoxShape.circle) {
         _paintBorderWithCircle(canvas, rect);
         return;
       }
     }
 
     assert(_decoration.borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
-    assert(_decoration.shape == Shape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
+    assert(_decoration.shape == BoxShape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
 
     assert(_decoration.border.top != null);
     assert(_decoration.border.right != null);
@@ -1109,10 +1052,10 @@ class BoxPainter {
 
   void _paintBorderWithRadius(ui.Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
-    assert(_decoration.shape == Shape.rectangle);
+    assert(_decoration.shape == BoxShape.rectangle);
     Color color = _decoration.border.top.color;
     double width = _decoration.border.top.width;
-    double radius = _getEffectiveBorderRadius(rect);
+    double radius = _decoration.getEffectiveBorderRadius(rect);
 
     ui.RRect outer = new ui.RRect.fromRectXY(rect, radius, radius);
     ui.RRect inner = new ui.RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
@@ -1121,12 +1064,11 @@ class BoxPainter {
 
   void _paintBorderWithCircle(ui.Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
-    assert(_decoration.shape == Shape.circle);
+    assert(_decoration.shape == BoxShape.circle);
     assert(_decoration.borderRadius == null);
     double width = _decoration.border.top.width;
-    if (width <= 0.0) {
+    if (width <= 0.0)
       return;
-    }
     Paint paint = new Paint()
       ..color = _decoration.border.top.color
       ..strokeWidth = width
@@ -1143,46 +1085,4 @@ class BoxPainter {
     _paintBackgroundImage(canvas, rect);
     _paintBorder(canvas, rect);
   }
-}
-
-/// An offset that's expressed as a fraction of a Size.
-///
-/// FractionalOffset(1.0, 0.0) represents the top right of the Size,
-/// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
-class FractionalOffset {
-  const FractionalOffset(this.x, this.y);
-  final double x;
-  final double y;
-  FractionalOffset operator -(FractionalOffset other) {
-    return new FractionalOffset(x - other.x, y - other.y);
-  }
-  FractionalOffset operator +(FractionalOffset other) {
-    return new FractionalOffset(x + other.x, y + other.y);
-  }
-  FractionalOffset operator *(double other) {
-    return new FractionalOffset(x * other, y * other);
-  }
-  bool operator ==(dynamic other) {
-    if (other is! FractionalOffset)
-      return false;
-    final FractionalOffset typedOther = other;
-    return x == typedOther.x &&
-           y == typedOther.y;
-  }
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + x.hashCode;
-    value = 37 * value + y.hashCode;
-    return value;
-  }
-  static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return new FractionalOffset(b.x * t, b.y * t);
-    if (b == null)
-      return new FractionalOffset(b.x * (1.0 - t), b.y * (1.0 - t));
-    return new FractionalOffset(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
-  }
-  String toString() => '$runtimeType($x, $y)';
 }

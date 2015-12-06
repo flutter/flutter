@@ -14,7 +14,7 @@ class Circle extends StatelessComponent {
       width: 50.0,
       margin: margin + new EdgeDims.symmetric(horizontal: 2.0),
       decoration: new BoxDecoration(
-        shape: Shape.circle,
+        shape: BoxShape.circle,
         backgroundColor: const Color(0xFF00FF00)
       )
     );

@@ -16,11 +16,17 @@ class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
-class AnimatedBoxDecorationValue extends AnimatedValue<BoxDecoration> {
-  AnimatedBoxDecorationValue(BoxDecoration begin, { BoxDecoration end, Curve curve, Curve reverseCurve })
+class AnimatedDecorationValue extends AnimatedValue<Decoration> {
+  AnimatedDecorationValue(Decoration begin, { Decoration end, Curve curve, Curve reverseCurve })
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
-  BoxDecoration lerp(double t) => BoxDecoration.lerp(begin, end, t);
+  Decoration lerp(double t) {
+    if (begin == null && end == null)
+      return null;
+    if (end == null)
+      return begin.lerpTo(end, t);
+    return end.lerpFrom(begin, t);
+  }
 }
 
 class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
@@ -62,14 +68,14 @@ class AnimatedContainer extends StatefulComponent {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
     assert(curve != null);
-    assert(duration != null);
+    assert(duration != null || decoration.debugAssertValid());
   }
 
   final Widget child;
 
   final BoxConstraints constraints;
-  final BoxDecoration decoration;
-  final BoxDecoration foregroundDecoration;
+  final Decoration decoration;
+  final Decoration foregroundDecoration;
   final EdgeDims margin;
   final EdgeDims padding;
   final Matrix4 transform;
@@ -84,8 +90,8 @@ class AnimatedContainer extends StatefulComponent {
 
 class _AnimatedContainerState extends State<AnimatedContainer> {
   AnimatedBoxConstraintsValue _constraints;
-  AnimatedBoxDecorationValue _decoration;
-  AnimatedBoxDecorationValue _foregroundDecoration;
+  AnimatedDecorationValue _decoration;
+  AnimatedDecorationValue _foregroundDecoration;
   AnimatedEdgeDimsValue _margin;
   AnimatedEdgeDimsValue _padding;
   AnimatedMatrix4Value _transform;
@@ -167,7 +173,7 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
     }
 
     if (config.decoration != null) {
-      _decoration ??= new AnimatedBoxDecorationValue(config.decoration);
+      _decoration ??= new AnimatedDecorationValue(config.decoration);
       if (_configVariable(_decoration, config.decoration))
         needsAnimation = true;
     } else {
@@ -175,7 +181,7 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
     }
 
     if (config.foregroundDecoration != null) {
-      _foregroundDecoration ??= new AnimatedBoxDecorationValue(config.foregroundDecoration);
+      _foregroundDecoration ??= new AnimatedDecorationValue(config.foregroundDecoration);
       if (_configVariable(_foregroundDecoration, config.foregroundDecoration))
         needsAnimation = true;
     } else {
