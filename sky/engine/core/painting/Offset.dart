@@ -4,31 +4,34 @@
 
 part of dart_ui;
 
-/// An immutable 2D floating-point offset
+/// An immutable 2D floating-point offset.
 ///
 /// An Offset represents a vector from an unspecified point
 class Offset extends OffsetBase {
   const Offset(double dx, double dy) : super(dx, dy);
 
-  /// The x component of the offset
+  /// The x component of the offset.
   double get dx => _dx;
 
-  /// The y component of the offset
+  /// The y component of the offset.
   double get dy => _dy;
 
-  /// The magnitude of the offset
+  /// The magnitude of the offset.
   double get distance => math.sqrt(_dx * _dx + _dy * _dy);
 
-  /// An offset with zero magnitude
+  /// The square of the magnitude of the offset.
+  double get distanceSquared => _dx * _dx + _dy * _dy;
+
+  /// An offset with zero magnitude.
   static const Offset zero = const Offset(0.0, 0.0);
 
-  /// An offset with infinite x and y components
+  /// An offset with infinite x and y components.
   static const Offset infinite = const Offset(double.INFINITY, double.INFINITY);
 
-  /// Returns a new offset with the x component scaled by scaleX and the y component scaled by scaleY
+  /// Returns a new offset with the x component scaled by scaleX and the y component scaled by scaleY.
   Offset scale(double scaleX, double scaleY) => new Offset(dx * scaleX, dy * scaleY);
 
-  /// Returns a new offset with translateX added to the x component and translateY added to the y component
+  /// Returns a new offset with translateX added to the x component and translateY added to the y component.
   Offset translate(double translateX, double translateY) => new Offset(dx + translateX, dy + translateY);
 
   Offset operator -() => new Offset(-dx, -dy);
@@ -39,13 +42,13 @@ class Offset extends OffsetBase {
   Offset operator ~/(double operand) => new Offset((dx ~/ operand).toDouble(), (dy ~/ operand).toDouble());
   Offset operator %(double operand) => new Offset(dx % operand, dy % operand);
 
-  /// Returns a rect of the given size that starts at (0, 0) plus this offset
+  /// Returns a rect of the given size that starts at (0, 0) plus this offset.
   Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
 
   /// Returns the point at (0, 0) plus this offset.
   Point toPoint() => new Point(dx, dy);
 
-  /// Linearly interpolate between two offsets
+  /// Linearly interpolate between two offsets.
   ///
   /// If either offset is null, this function interpolates from [Offset.zero].
   static Offset lerp(Offset a, Offset b, double t) {
