@@ -1123,11 +1123,11 @@ class RenderPointerListener extends RenderProxyBox {
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
-    if (onPointerMove != null && event == PointerMoveEvent)
+    if (onPointerMove != null && event is PointerMoveEvent)
       return onPointerMove(event);
-    if (onPointerUp != null && event == PointerUpEvent)
+    if (onPointerUp != null && event is PointerUpEvent)
       return onPointerUp(event);
-    if (onPointerCancel != null && event == PointerCancelEvent)
+    if (onPointerCancel != null && event is PointerCancelEvent)
       return onPointerCancel(event);
   }
 
