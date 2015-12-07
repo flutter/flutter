@@ -7,9 +7,9 @@ part of dart_ui;
 /// An immutable 2D, axis-aligned, floating-point rectangle whose coordinates
 /// are relative to an origin point.
 class Rect {
-  Rect();
+  Rect._();
 
-  /// Construct a rectangle from left, top, right, and bottom edges.
+  /// Construct a rectangle from its left, top, right, and bottom edges.
   Rect.fromLTRB(double left, double top, double right, double bottom) {
     _value
       ..[0] = left
@@ -18,7 +18,7 @@ class Rect {
       ..[3] = bottom;
   }
 
-  /// Construct a rectangle from left, top edges and a width and height.
+  /// Construct a rectangle from its left and top edges, its width, and its height.
   Rect.fromLTWH(double left, double top, double width, double height) {
     _value
       ..[0] = left
@@ -27,7 +27,8 @@ class Rect {
       ..[3] = top + height;
   }
 
-  final Float32List _value = new Float32List(4);
+  static const int _kDataSize = 4;
+  final Float32List _value = new Float32List(_kDataSize);
 
   /// The offset of the left edge of this rectangle from the x axis.
   double get left => _value[0];
@@ -42,7 +43,7 @@ class Rect {
   double get bottom => _value[3];
 
   /// A rectangle with left, top, right, and bottom edges all at zero.
-  static final Rect zero = new Rect();
+  static final Rect zero = new Rect._();
 
   /// Returns a new rectangle translated by the given offset.
   Rect shift(Offset offset) {
@@ -79,7 +80,8 @@ class Rect {
   /// Negative areas are considered empty.
   bool get isEmpty => left >= right || top >= bottom;
 
-  /// The lesser of the width and the height of this rectangle.
+  /// The lesser of the magnitudes of the width and the height of this
+  /// rectangle.
   double get shortestSide {
     double w = width.abs();
     double h = height.abs();
@@ -110,7 +112,7 @@ class Rect {
 
   /// Linearly interpolate between two rectangles.
   ///
-  /// If either rect is null, this function interpolates from [Rect.zero].
+  /// If either rect is null, [Rect.zero] is used as a substitute.
   static Rect lerp(Rect a, Rect b, double t) {
     if (a == null && b == null)
       return null;
@@ -118,7 +120,7 @@ class Rect {
       return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
     if (b == null) {
       double k = 1.0 - t;
-      return new Rect.fromLTRB(b.left * k, b.top * k, b.right * k, b.bottom * k);
+      return new Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
     }
     return new Rect.fromLTRB(
       lerpDouble(a.left, b.left, t),
@@ -134,7 +136,7 @@ class Rect {
     if (other is! Rect)
       return false;
     final Rect typedOther = other;
-    for (var i = 0; i < 4; ++i) {
+    for (int i = 0; i < _kDataSize; i += 1) {
       if (_value[i] != typedOther._value[i])
         return false;
     }
