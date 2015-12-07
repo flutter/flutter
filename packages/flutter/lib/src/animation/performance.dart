@@ -112,6 +112,25 @@ class AlwaysCompletePerformance extends PerformanceView {
   double get progress => 1.0;
 }
 const AlwaysCompletePerformance alwaysCompletePerformance = const AlwaysCompletePerformance();
+ 
+class AlwaysDismissedPerformance extends PerformanceView {
+  const AlwaysDismissedPerformance();
+
+  void updateVariable(Animatable variable) {
+    variable.setProgress(0.0, AnimationDirection.forward);
+  }
+
+  // this performance never changes state
+  void addListener(VoidCallback listener) { }
+  void removeListener(VoidCallback listener) { }
+  void addStatusListener(PerformanceStatusListener listener) { }
+  void removeStatusListener(PerformanceStatusListener listener) { }
+  PerformanceStatus get status => PerformanceStatus.dismissed;
+  AnimationDirection get direction => AnimationDirection.forward;
+  AnimationDirection get curveDirection => AnimationDirection.forward;
+  double get progress => 0.0;
+}
+const AlwaysDismissedPerformance alwaysDismissedPerformance = const AlwaysDismissedPerformance();
 
 class ReversePerformance extends PerformanceView
   with LazyListenerMixin, LocalPerformanceStatusListenersMixin {
