@@ -6,6 +6,7 @@ import 'box.dart';
 import 'object.dart';
 
 class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
+  /// An object representing the identity of this child.
   Object id;
 
   void merge(MultiChildLayoutParentData other) {
@@ -17,6 +18,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
   String toString() => '${super.toString()}; id=$id';
 }
 
+/// A delegate that controls the layout of multiple children.
 abstract class MultiChildLayoutDelegate {
   Map<Object, RenderBox> _idToChild;
   Set<RenderBox> _debugChildrenNeedingLayout;
@@ -94,6 +96,12 @@ abstract class MultiChildLayoutDelegate {
   void performLayout(Size size, BoxConstraints constraints);
 }
 
+/// Defers the layout of multiple children to a delegate.
+///
+/// The delegate can determine the layout constraints for each child and can
+/// decide where to position each child. The delegate can also determine the
+/// size of the parent, but the size of the parent cannot depend on the sizes of
+/// the children.
 class RenderCustomMultiChildLayoutBox extends RenderBox
   with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
        RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
@@ -110,6 +118,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
       child.parentData = new MultiChildLayoutParentData();
   }
 
+  /// The delegate that controls the layout of the children.
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
   void set delegate (MultiChildLayoutDelegate newDelegate) {

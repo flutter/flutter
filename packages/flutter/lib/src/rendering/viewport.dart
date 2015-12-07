@@ -21,13 +21,15 @@ enum ScrollDirection {
   both
 }
 
-/// A render object that's bigger on the inside
+/// A render object that's bigger on the inside.
 ///
-/// A viewport is the core scrolling primitive in the render tree. The child of
-/// a viewport can layout to a larger size than the viewport itself. If that
-/// happens, only a portion of the child will be visible through the viewport.
-/// The portiion of the child that is visible is controlled by the scroll
-/// offset.
+/// The child of a viewport can layout to a larger size than the viewport
+/// itself. If that happens, only a portion of the child will be visible through
+/// the viewport. The portion of the child that is visible is controlled by the
+/// scroll offset.
+///
+/// Viewport is the core scrolling primitive in the system, but it can be used
+/// in other situations.
 class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
 
   RenderViewport({
@@ -51,7 +53,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
-  /// The offset at which to paint the child
+  /// The offset at which to paint the child.
   ///
   /// The offset can be non-zero only in the [scrollDirection].
   Offset get scrollOffset => _scrollOffset;
@@ -64,7 +66,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     markNeedsPaint();
   }
 
-  /// In which direction the child is permitted to be larger than the viewport
+  /// The direction in which the child is permitted to be larger than the viewport
   ///
   /// If the viewport is scrollable in a particular direction (e.g., vertically),
   /// the child is given layout constraints that are fully unconstrainted in

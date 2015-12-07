@@ -72,12 +72,23 @@ export 'package:flutter/rendering.dart' show
 
 // PAINTING NODES
 
+/// Makes its child partially transparent.
+///
+/// This class paints its child into an intermediate buffer and then blends the
+/// child back into the scene partially transparent.
+///
+/// This class is relatively expensive because it requires painting the child
+/// into an intermediate buffer.
 class Opacity extends OneChildRenderObjectWidget {
   Opacity({ Key key, this.opacity, Widget child })
     : super(key: key, child: child) {
     assert(opacity >= 0.0 && opacity <= 1.0);
   }
 
+  /// The fraction to scale the child's alpha value.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
   final double opacity;
 
   RenderOpacity createRenderObject() => new RenderOpacity(opacity: opacity);
@@ -119,6 +130,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
   }
 }
 
+/// Paints a [BoxDecoration] either before or after its child paints.
 class DecoratedBox extends OneChildRenderObjectWidget {
   DecoratedBox({
     Key key,
@@ -130,10 +142,13 @@ class DecoratedBox extends OneChildRenderObjectWidget {
     assert(position != null);
   }
 
+  /// What decoration to paint.
   final BoxDecoration decoration;
+
+  /// Where to paint the box decoration.
   final BoxDecorationPosition position;
 
-  RenderObject createRenderObject() => new RenderDecoratedBox(decoration: decoration, position: position);
+  RenderDecoratedBox createRenderObject() => new RenderDecoratedBox(decoration: decoration, position: position);
 
   void updateRenderObject(RenderDecoratedBox renderObject, DecoratedBox oldWidget) {
     renderObject.decoration = decoration;
@@ -141,11 +156,27 @@ class DecoratedBox extends OneChildRenderObjectWidget {
   }
 }
 
+/// Delegates its painting.
+///
+/// When asked to paint, custom paint first asks painter to paint with the
+/// current canvas and then paints its children. After painting its children,
+/// custom paint asks foregroundPainter to paint. The coodinate system of the
+/// canvas matches the coordinate system of the custom paint object. The
+/// painters are expected to paint within a rectangle starting at the origin
+/// and encompassing a region of the given size. If the painters paints outside
+/// those bounds, there might be insufficient memory allocated to rasterize the
+/// painting commands and the resulting behavior is undefined.
+///
+/// Because custom paint calls its painters during paint, you cannot dirty
+/// layout or paint information during the callback.
 class CustomPaint extends OneChildRenderObjectWidget {
   CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
     : super(key: key, child: child);
 
+  /// The painter that paints before the children.
   final CustomPainter painter;
+
+  /// The painter that paints after the children.
   final CustomPainter foregroundPainter;
 
   RenderCustomPaint createRenderObject() => new RenderCustomPaint(
@@ -164,9 +195,13 @@ class CustomPaint extends OneChildRenderObjectWidget {
   }
 }
 
+/// Clips its child using a rectangle.
+///
+/// Prevents its child from painting outside its bounds.
 class ClipRect extends OneChildRenderObjectWidget {
   ClipRect({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
 
+  /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
   RenderClipRect createRenderObject() => new RenderClipRect(clipper: clipper);
@@ -180,11 +215,25 @@ class ClipRect extends OneChildRenderObjectWidget {
   }
 }
 
+/// Clips its child using a rounded rectangle.
+///
+/// Creates a rounded rectangle from its layout dimensions and the given x and
+/// y radius values and prevents its child from painting outside that rounded
+/// rectangle.
 class ClipRRect extends OneChildRenderObjectWidget {
   ClipRRect({ Key key, this.xRadius, this.yRadius, Widget child })
     : super(key: key, child: child);
 
+  /// The radius of the rounded corners in the horizontal direction in logical pixels.
+  ///
+  /// Values are clamped to be between zero and half the width of the render
+  /// object.
   final double xRadius;
+
+  /// The radius of the rounded corners in the vertical direction in logical pixels.
+  ///
+  /// Values are clamped to be between zero and half the height of the render
+  /// object.
   final double yRadius;
 
   RenderClipRRect createRenderObject() => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
@@ -195,9 +244,14 @@ class ClipRRect extends OneChildRenderObjectWidget {
   }
 }
 
+/// Clips its child using an oval.
+///
+/// Inscribes an oval into its layout dimensions and prevents its child from
+/// painting outside that oval.
 class ClipOval extends OneChildRenderObjectWidget {
   ClipOval({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
 
+  /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
   RenderClipOval createRenderObject() => new RenderClipOval(clipper: clipper);
@@ -214,14 +268,27 @@ class ClipOval extends OneChildRenderObjectWidget {
 
 // POSITIONING AND SIZING NODES
 
+/// Applies a transformation before painting its child.
 class Transform extends OneChildRenderObjectWidget {
   Transform({ Key key, this.transform, this.origin, this.alignment, Widget child })
     : super(key: key, child: child) {
     assert(transform != null);
   }
 
+  /// The matrix to transform the child by during painting.
   final Matrix4 transform;
+
+  /// The origin of the coordinate system (relative to the upper left corder of
+  /// this render object) in which to apply the matrix.
+  ///
+  /// Setting an origin is equivalent to conjugating the transform matrix by a
+  /// translation. This property is provided just for convenience.
   final Offset origin;
+
+  /// The alignment of the origin, relative to the size of the box.
+  ///
+  /// This is equivalent to setting an origin based on the size of the box.
+  /// If it is specificed at the same time as an offset, both are applied.
   final FractionalOffset alignment;
 
   RenderTransform createRenderObject() => new RenderTransform(transform: transform, origin: origin, alignment: alignment);
@@ -233,12 +300,19 @@ class Transform extends OneChildRenderObjectWidget {
   }
 }
 
+/// Insets its child by the given padding.
+///
+/// When passing layout constraints to its child, padding shrinks the
+/// constraints by the given padding, causing the child to layout at a smaller
+/// size. Padding then sizes itself to its child's size, inflated by the
+/// padding, effectively creating empty space around the child.
 class Padding extends OneChildRenderObjectWidget {
   Padding({ Key key, this.padding, Widget child })
     : super(key: key, child: child) {
     assert(padding != null);
   }
 
+  /// The amount to pad the child in each dimension.
   final EdgeDims padding;
 
   RenderPadding createRenderObject() => new RenderPadding(padding: padding);
@@ -248,6 +322,11 @@ class Padding extends OneChildRenderObjectWidget {
   }
 }
 
+/// Aligns its child box within itself.
+///
+/// For example, to align a box at the bottom right, you would pass this box a
+/// tight constraint that is bigger than the child's natural size,
+/// with horizontal and vertical set to 1.0.
 class Align extends OneChildRenderObjectWidget {
   Align({
     Key key,
@@ -255,10 +334,31 @@ class Align extends OneChildRenderObjectWidget {
     this.widthFactor,
     this.heightFactor,
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    assert(alignment != null && alignment.x != null && alignment.y != null);
+    assert(widthFactor == null || widthFactor >= 0.0);
+    assert(heightFactor == null || heightFactor >= 0.0);
+  }
 
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
   final FractionalOffset alignment;
+
+  /// If non-null, sets its width to the child's width multipled by this factor.
+  ///
+  /// Can be both greater and less than 1.0 but must be positive.
   final double widthFactor;
+
+  /// If non-null, sets its height to the child's height multipled by this factor.
+  ///
+  /// Can be both greater and less than 1.0 but must be positive.
   final double heightFactor;
 
   RenderPositionedBox createRenderObject() => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
@@ -270,11 +370,18 @@ class Align extends OneChildRenderObjectWidget {
   }
 }
 
+/// Centers its child within itself.
 class Center extends Align {
   Center({ Key key, widthFactor, heightFactor, Widget child })
     : super(key: key, widthFactor: widthFactor, heightFactor: heightFactor, child: child);
 }
 
+/// Defers the layout of its single child to a delegate.
+///
+/// The delegate can determine the layout constraints for the child and can
+/// decide where to position the child. The delegate can also determine the size
+/// of the parent, but the size of the parent cannot depend on the size of the
+/// child.
 class CustomOneChildLayout extends OneChildRenderObjectWidget {
   CustomOneChildLayout({
     Key key,
@@ -304,6 +411,7 @@ class CustomOneChildLayout extends OneChildRenderObjectWidget {
   }
 }
 
+/// Metadata for identifying children in a [CustomMultiChildLayout].
 class LayoutId extends ParentDataWidget {
   LayoutId({
     Key key,
@@ -314,6 +422,7 @@ class LayoutId extends ParentDataWidget {
     assert(id != null);
   }
 
+  /// An object representing the identity of this child.
   final Object id;
 
   void debugValidateAncestor(Widget ancestor) {
@@ -340,6 +449,12 @@ class LayoutId extends ParentDataWidget {
   }
 }
 
+/// Defers the layout of multiple children to a delegate.
+///
+/// The delegate can determine the layout constraints for each child and can
+/// decide where to position each child. The delegate can also determine the
+/// size of the parent, but the size of the parent cannot depend on the sizes of
+/// the children.
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   CustomMultiChildLayout(List<Widget> children, {
     Key key,
@@ -349,6 +464,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
     assert(delegate != null);
   }
 
+  /// The delegate that controls the layout of the children.
   final MultiChildLayoutDelegate delegate;
   final Object token;
 
@@ -363,11 +479,18 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   }
 }
 
+/// A box with a specified size.
+///
+/// Forces its child to have a specific width and/or height and sizes itself to
+/// match the size of its child.
 class SizedBox extends OneChildRenderObjectWidget {
   SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
 
+  /// If non-null, requires the child to have exactly this width.
   final double width;
+
+  /// If non-null, requires the child to have exactly this height.
   final double height;
 
   RenderConstrainedBox createRenderObject() => new RenderConstrainedBox(
@@ -396,12 +519,18 @@ class SizedBox extends OneChildRenderObjectWidget {
   }
 }
 
+/// Imposes additional constraints on its child.
+///
+/// For example, if you wanted [child] to have a minimum height of 50.0 logical
+/// pixels, you could use `const BoxConstraints(minHeight: 50.0)`` as the
+/// [additionalConstraints].
 class ConstrainedBox extends OneChildRenderObjectWidget {
   ConstrainedBox({ Key key, this.constraints, Widget child })
     : super(key: key, child: child) {
     assert(constraints != null);
   }
 
+  /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
 
   RenderConstrainedBox createRenderObject() => new RenderConstrainedBox(additionalConstraints: constraints);
@@ -479,6 +608,9 @@ class SizedOverflowBox extends OneChildRenderObjectWidget {
   }
 }
 
+/// Lays the child out as if it was in the tree, but without painting anything,
+/// without making the child available for hit testing, and without taking any
+/// room in the parent.
 class OffStage extends OneChildRenderObjectWidget {
   OffStage({ Key key, Widget child })
     : super(key: key, child: child);
@@ -506,11 +638,26 @@ class AspectRatio extends OneChildRenderObjectWidget {
   }
 }
 
+/// Sizes its child to the child's intrinsic width.
+///
+/// Sizes its child's width to the child's maximum intrinsic width. If
+/// [stepWidth] is non-null, the child's width will be snapped to a multiple of
+/// the [stepWidth]. Similarly, if [stepHeight] is non-null, the child's height
+/// will be snapped to a multiple of the [stepHeight].
+///
+/// This class is useful, for example, when unlimited width is available and
+/// you would like a child that would otherwise attempt to expand infinitely to
+/// instead size itself to a more reasonable width.
+///
+/// This class is relatively expensive. Avoid using it where possible.
 class IntrinsicWidth extends OneChildRenderObjectWidget {
   IntrinsicWidth({ Key key, this.stepWidth, this.stepHeight, Widget child })
     : super(key: key, child: child);
 
+  /// If non-null, force the child's width to be a multiple of this value.
   final double stepWidth;
+
+  /// If non-null, force the child's height to be a multiple of this value.
   final double stepHeight;
 
   RenderIntrinsicWidth createRenderObject() => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
@@ -521,6 +668,13 @@ class IntrinsicWidth extends OneChildRenderObjectWidget {
   }
 }
 
+/// Sizes its child to the child's intrinsic height.
+///
+/// This class is useful, for example, when unlimited height is available and
+/// you would like a child that would otherwise attempt to expand infinitely to
+/// instead size itself to a more reasonable height.
+///
+/// This class is relatively expensive. Avoid using it where possible.
 class IntrinsicHeight extends OneChildRenderObjectWidget {
   IntrinsicHeight({ Key key, Widget child }) : super(key: key, child: child);
   RenderIntrinsicHeight createRenderObject() => new RenderIntrinsicHeight();
@@ -544,6 +698,15 @@ class Baseline extends OneChildRenderObjectWidget {
   }
 }
 
+/// A widget that's bigger on the inside.
+///
+/// The child of a viewport can layout to a larger size than the viewport
+/// itself. If that happens, only a portion of the child will be visible through
+/// the viewport. The portion of the child that is visible is controlled by the
+/// scroll offset.
+///
+/// Viewport is the core scrolling primitive in the system, but it can be used
+/// in other situations.
 class Viewport extends OneChildRenderObjectWidget {
   Viewport({
     Key key,
@@ -555,7 +718,16 @@ class Viewport extends OneChildRenderObjectWidget {
     assert(scrollOffset != null);
   }
 
+  /// The direction in which the child is permitted to be larger than the viewport
+  ///
+  /// If the viewport is scrollable in a particular direction (e.g., vertically),
+  /// the child is given layout constraints that are fully unconstrainted in
+  /// that direction (e.g., the child can be as tall as it wants).
   final ScrollDirection scrollDirection;
+
+  /// The offset at which to paint the child.
+  ///
+  /// The offset can be non-zero only in the [scrollDirection].
   final Offset scrollOffset;
 
   RenderViewport createRenderObject() => new RenderViewport(scrollDirection: scrollDirection, scrollOffset: scrollOffset);
@@ -567,12 +739,17 @@ class Viewport extends OneChildRenderObjectWidget {
   }
 }
 
+/// Calls [onSizeChanged] whenever the child's layout size changes
+///
+/// Because size observer calls its callback during layout, you cannot modify
+/// layout information during the callback.
 class SizeObserver extends OneChildRenderObjectWidget {
   SizeObserver({ Key key, this.onSizeChanged, Widget child })
     : super(key: key, child: child) {
     assert(onSizeChanged != null);
   }
 
+  /// The callback to call whenever the child's layout size changes
   final SizeChangedCallback onSizeChanged;
 
   RenderSizeObserver createRenderObject() => new RenderSizeObserver(onSizeChanged: onSizeChanged);

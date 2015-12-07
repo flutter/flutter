@@ -72,15 +72,24 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
 }
 
+/// Insets its child by the given padding.
+///
+/// When passing layout constraints to its child, padding shrinks the
+/// constraints by the given padding, causing the child to layout at a smaller
+/// size. Padding then sizes itself to its child's size, inflated by the
+/// padding, effectively creating empty space around the child.
 class RenderPadding extends RenderShiftedBox {
-
-  RenderPadding({ EdgeDims padding, RenderBox child }) : super(child) {
+  RenderPadding({
+    EdgeDims padding,
+    RenderBox child
+  }) : _padding = padding, super(child) {
     assert(padding != null);
-    this.padding = padding;
+    assert(padding.isNonNegative);
   }
 
-  EdgeDims _padding;
+  /// The amount to pad the child in each dimension.
   EdgeDims get padding => _padding;
+  EdgeDims _padding;
   void set padding (EdgeDims value) {
     assert(value != null);
     assert(value.isNonNegative);
@@ -143,14 +152,12 @@ class RenderPadding extends RenderShiftedBox {
   }
 }
 
+/// Aligns its child box within itself.
+///
+/// For example, to align a box at the bottom right, you would pass this box a
+/// tight constraint that is bigger than the child's natural size,
+/// with horizontal and vertical set to 1.0.
 class RenderPositionedBox extends RenderShiftedBox {
-
-  // This box aligns a child box within itself. It's only useful for
-  // children that don't always size to fit their parent. For example,
-  // to align a box at the bottom right, you would pass this box a
-  // tight constraint that is bigger than the child's natural size,
-  // with horizontal and vertical set to 1.0.
-
   RenderPositionedBox({
     RenderBox child,
     FractionalOffset alignment: const FractionalOffset(0.5, 0.5),
@@ -160,9 +167,20 @@ class RenderPositionedBox extends RenderShiftedBox {
        _widthFactor = widthFactor,
        _heightFactor = heightFactor,
        super(child) {
-    assert(alignment != null);
+    assert(alignment != null && alignment.x != null && alignment.y != null);
+    assert(widthFactor == null || widthFactor >= 0.0);
+    assert(heightFactor == null || heightFactor >= 0.0);
   }
 
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
   void set alignment (FractionalOffset newAlignment) {
@@ -173,18 +191,26 @@ class RenderPositionedBox extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  double _widthFactor;
+  /// If non-null, sets its width to the child's width multipled by this factor.
+  ///
+  /// Can be both greater and less than 1.0 but must be positive.
   double get widthFactor => _widthFactor;
+  double _widthFactor;
   void set widthFactor (double value) {
+    assert(value == null || value >= 0.0);
     if (_widthFactor == value)
       return;
     _widthFactor = value;
     markNeedsLayout();
   }
 
-  double _heightFactor;
+  /// If non-null, sets its height to the child's height multipled by this factor.
+  ///
+  /// Can be both greater and less than 1.0 but must be positive.
   double get heightFactor => _heightFactor;
+  double _heightFactor;
   void set heightFactor (double value) {
+    assert(value == null || value >= 0.0);
     if (_heightFactor == value)
       return;
     _heightFactor = value;
@@ -226,6 +252,12 @@ class OneChildLayoutDelegate {
   Point getPositionForChild(Size size, Size childSize) => Point.origin;
 }
 
+/// Defers the layout of its single child to a delegate.
+///
+/// The delegate can determine the layout constraints for the child and can
+/// decide where to position the child. The delegate can also determine the size
+/// of the parent, but the size of the parent cannot depend on the size of the
+/// child.
 class RenderCustomOneChildLayoutBox extends RenderShiftedBox {
   RenderCustomOneChildLayoutBox({
     RenderBox child,
@@ -234,6 +266,7 @@ class RenderCustomOneChildLayoutBox extends RenderShiftedBox {
     assert(delegate != null);
   }
 
+  /// A delegate that controls this object's layout.
   OneChildLayoutDelegate get delegate => _delegate;
   OneChildLayoutDelegate _delegate;
   void set delegate (OneChildLayoutDelegate newDelegate) {
