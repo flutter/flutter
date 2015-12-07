@@ -28,7 +28,7 @@ class TestTransition extends TransitionComponent {
 }
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute(this.child);
+  TestRoute({ this.child, NamedRouteSettings settings}) : super(settings: settings);
   final Widget child;
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
   Color get barrierColor => null;
@@ -71,7 +71,8 @@ void main() {
             switch (settings.name) {
               case '/':
                 return new TestRoute(
-                  new Builder(
+                  settings: settings,
+                  child: new Builder(
                     key: insideKey,
                     builder: (BuildContext context) {
                       PageRoute route = ModalRoute.of(context);
@@ -90,29 +91,17 @@ void main() {
                     }
                   )
                 );
-              case '/2': return new TestRoute(new Text('E'));
-              case '/3': return new TestRoute(new Text('F'));
-              case '/4': return new TestRoute(new Text('G'));
+              case '/2': return new TestRoute(settings: settings, child: new Text('E'));
+              case '/3': return new TestRoute(settings: settings, child: new Text('F'));
+              case '/4': return new TestRoute(settings: settings, child: new Text('G'));
             }
           }
         )
       );
 
-      // TODO(ianh): Remove the first part of this test once the first page doesn't animate in
-
       NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(NavigatorState);
 
-      expect(state(), equals('AC')); // transition ->1 is at 0.0
-
-      tester.pump(kFourTenthsOfTheTransitionDuration);
-      expect(state(), equals('AC')); // transition ->1 is at 0.4
-
-      tester.pump(kFourTenthsOfTheTransitionDuration);
-      expect(state(), equals('BC')); // transition ->1 is at 0.8
-
-      tester.pump(kFourTenthsOfTheTransitionDuration);
       expect(state(), equals('BC')); // transition ->1 is at 1.0
-
 
       navigator.openTransaction((NavigatorTransaction transaction) => transaction.pushNamed('/2'));
       expect(state(), equals('BC')); // transition 1->2 is not yet built
