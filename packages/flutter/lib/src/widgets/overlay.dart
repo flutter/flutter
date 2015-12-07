@@ -99,7 +99,7 @@ class OverlayState extends State<Overlay> {
           result = true;
           break;
         }
-        if (entry.opaque)
+        if (candidate.opaque)
           break;
       }
       return true;
