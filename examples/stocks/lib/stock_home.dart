@@ -147,7 +147,7 @@ class StockHomeState extends State<StockHome> {
   Widget buildToolBar() {
     return new ToolBar(
       elevation: 0,
-      center: new Text(StockStrings.title()),
+      center: new Text(StockStrings.of(context).title()),
       right: <Widget>[
         new IconButton(
           icon: "action/search",
@@ -161,8 +161,9 @@ class StockHomeState extends State<StockHome> {
       tabBar: new TabBar(
         selection: _tabBarSelection,
         labels: <TabLabel>[
-          new TabLabel(text: StockStrings.market()),
-          new TabLabel(text: StockStrings.portfolio())]
+          new TabLabel(text: StockStrings.of(context).market()),
+          new TabLabel(text: StockStrings.of(context).portfolio())
+        ]
       )
     );
   }
