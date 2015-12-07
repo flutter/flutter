@@ -7,7 +7,7 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
-const int ITERATIONS = 3;
+const int ITERATIONS = 5;
 
 String runWithLoggingSync(List<String> cmd, {
   bool checked: true,
@@ -46,6 +46,7 @@ Future<double> test(String tracesDir, String projectPath, int runNumber) async {
   runWithLoggingSync([
     'flutter',
     'start',
+    '--no-checked',
     '--trace-startup'
   ], workingDirectory: projectPath);
   await new Future.delayed(const Duration(seconds: 2), () => "");
