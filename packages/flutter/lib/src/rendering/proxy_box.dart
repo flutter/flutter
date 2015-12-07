@@ -14,7 +14,12 @@ import 'debug.dart';
 import 'object.dart';
 
 export 'package:flutter/src/painting/box_painter.dart';
-export 'package:flutter/gestures.dart' show InputEvent, PointerInputEvent;
+export 'package:flutter/gestures.dart' show
+  PointerEvent,
+  PointerDownEvent,
+  PointerMoveEvent,
+  PointerUpEvent,
+  PointerCancelEvent;
 
 /// A base class for render objects that resemble their children
 ///
