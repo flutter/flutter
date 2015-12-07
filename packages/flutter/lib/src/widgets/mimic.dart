@@ -59,6 +59,10 @@ class MimicOverlayEntry {
     return _performance.play();
   }
 
+  void markNeedsBuild() {
+   _overlayEntry?.markNeedsBuild();
+ }
+
   void dispose() {
     _targetKey = null;
     _curve = null;
