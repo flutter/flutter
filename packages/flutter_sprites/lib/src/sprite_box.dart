@@ -344,6 +344,9 @@ class SpriteBox extends RenderBox {
     _rootNode._visit(canvas, totalMatrix);
 
     // Draw physics debug
+    if (_physicsNodes == null)
+      _rebuildActionControllersAndPhysicsNodes();
+
     for (PhysicsWorld world in _physicsNodes) {
       if (world.drawDebug) {
         canvas.setMatrix(world._debugDrawTransform.storage);
