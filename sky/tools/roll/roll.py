@@ -84,7 +84,6 @@ dirs_from_mojo = [
     'mojo/message_pump',
     'mojo/services',
     'services/asset_bundle',
-    'services/keyboard',
     'services/sensors',
 ]
 
