@@ -366,12 +366,12 @@ class ModalPosition {
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   ModalRoute({
     Completer<T> completer,
-    this.settings: const NamedRouteSettings()
+    this.settings: const RouteSettings()
   }) : super.explicit(completer, null);
 
   // The API for general users of this class
 
-  final NamedRouteSettings settings;
+  final RouteSettings settings;
 
   static ModalRoute of(BuildContext context) {
     _ModalScopeStatus widget = context.inheritFromWidgetOfType(_ModalScopeStatus);

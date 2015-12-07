@@ -1038,7 +1038,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// If this render object applies a transform before painting, apply that
   /// transform to the given matrix
   ///
-  /// Used by coordinate conversion functions to translate coordiantes local to
+  /// Used by coordinate conversion functions to translate coordinates local to
   /// one render object into coordinates local to another render object.
   void applyPaintTransform(Matrix4 transform) { }
 

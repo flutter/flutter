@@ -44,7 +44,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   MaterialPageRoute({
     this.builder,
     Completer<T> completer,
-    NamedRouteSettings settings: const NamedRouteSettings()
+    RouteSettings settings: const RouteSettings()
   }) : super(completer: completer, settings: settings) {
     assert(builder != null);
     assert(opaque);

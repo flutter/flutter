@@ -106,7 +106,7 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
 
   final HeroController _heroController = new HeroController();
 
-  Route _generateRoute(NamedRouteSettings settings) {
+  Route _generateRoute(RouteSettings settings) {
     RouteBuilder builder = config.routes[settings.name];
     if (builder != null) {
       return new MaterialPageRoute(

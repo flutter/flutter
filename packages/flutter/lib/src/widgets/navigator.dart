@@ -66,8 +66,8 @@ abstract class Route<T> {
   }
 }
 
-class NamedRouteSettings {
-  const NamedRouteSettings({
+class RouteSettings {
+  const RouteSettings({
     this.name,
     this.mostValuableKeys,
     this.isInitialRoute: false
@@ -88,7 +88,7 @@ class NamedRouteSettings {
   }
 }
 
-typedef Route RouteFactory(NamedRouteSettings settings);
+typedef Route RouteFactory(RouteSettings settings);
 typedef void NavigatorTransactionCallback(NavigatorTransaction transaction);
 
 class NavigatorObserver {
@@ -123,9 +123,9 @@ class Navigator extends StatefulComponent {
     });
   }
 
-  static void push(BuildContext context, Route route, { Set<Key> mostValuableKeys }) {
+  static void push(BuildContext context, Route route) {
     openTransaction(context, (NavigatorTransaction transaction) {
-      transaction.push(route, mostValuableKeys: mostValuableKeys);
+      transaction.push(route);
     });
   }
 
@@ -136,7 +136,7 @@ class Navigator extends StatefulComponent {
     });
     return returnValue;
   }
- 
+
   static void popUntil(BuildContext context, Route targetRoute) {
     openTransaction(context, (NavigatorTransaction transaction) {
       transaction.popUntil(targetRoute);
@@ -171,7 +171,7 @@ class NavigatorState extends State<Navigator> {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
-    _push(config.onGenerateRoute(new NamedRouteSettings(
+    _push(config.onGenerateRoute(new RouteSettings(
       name: config.initialRoute ?? Navigator.defaultRouteName,
       isInitialRoute: true
     )));
@@ -213,7 +213,7 @@ class NavigatorState extends State<Navigator> {
   void _pushNamed(String name, { Set<Key> mostValuableKeys }) {
     assert(!_debugLocked);
     assert(name != null);
-    NamedRouteSettings settings = new NamedRouteSettings(
+    RouteSettings settings = new RouteSettings(
       name: name,
       mostValuableKeys: mostValuableKeys
     );
@@ -226,7 +226,7 @@ class NavigatorState extends State<Navigator> {
     _push(route);
   }
 
-  void _push(Route route, { Set<Key> mostValuableKeys }) {
+  void _push(Route route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(route != null);
@@ -388,9 +388,9 @@ class NavigatorTransaction {
   /// The route will have didPush() and didChangeNext() called on it; the
   /// previous route, if any, will have didChangeNext() called on it; and the
   /// Navigator observer, if any, will have didPush() called on it.
-  void push(Route route, { Set<Key> mostValuableKeys }) {
+  void push(Route route) {
     assert(_debugOpen);
-    _navigator._push(route, mostValuableKeys: mostValuableKeys);
+    _navigator._push(route);
   }
 
   /// Replaces one given route with another. Calls install(), didReplace(), and
