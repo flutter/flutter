@@ -209,7 +209,8 @@ class AlignTransition extends TransitionWithChild {
       alignment: alignment?.value,
       widthFactor: widthFactor?.value,
       heightFactor: heightFactor?.value,
-      child: child);
+      child: child
+    );
   }
 }
 
