@@ -53,6 +53,45 @@ abstract class PerformanceView {
 
   /// Whether this animation is stopped at the end
   bool get isCompleted => status == PerformanceStatus.completed;
+
+  String toString() {
+    return '$runtimeType(${toStringDetails()})';
+  }
+  String toStringDetails() {
+    assert(status != null);
+    assert(direction != null);
+    String icon;
+    switch (status) {
+      case PerformanceStatus.forward:
+        icon = '\u25B6'; // >
+        break;
+      case PerformanceStatus.reverse:
+        icon = '\u25C0'; // <
+        break;
+      case PerformanceStatus.completed:
+        switch (direction) {
+          case AnimationDirection.forward:
+            icon = '\u23ED'; // >>|
+            break;
+          case AnimationDirection.reverse:
+            icon = '\u29CF'; // <|
+            break;
+        }
+        break;
+      case PerformanceStatus.dismissed:
+        switch (direction) {
+          case AnimationDirection.forward:
+            icon = '\u29D0'; // |>
+            break;
+          case AnimationDirection.reverse:
+            icon = '\u23EE'; // |<<
+            break;
+        }
+        break;
+    }
+    assert(icon != null);
+    return '$icon ${progress.toStringAsFixed(3)}';
+  }
 }
 
 class AlwaysCompletePerformance extends PerformanceView {
@@ -512,9 +551,9 @@ class Performance extends PerformanceView
 
   SimulationStepper _timeline;
   AnimationDirection get direction => _direction;
-  AnimationDirection _direction;
+  AnimationDirection _direction = AnimationDirection.forward;
   AnimationDirection get curveDirection => _curveDirection;
-  AnimationDirection _curveDirection;
+  AnimationDirection _curveDirection = AnimationDirection.forward;
 
   /// The progress of this performance along the timeline
   ///
@@ -624,10 +663,11 @@ class Performance extends PerformanceView
     _checkStatusChanged();
   }
 
-  String toString() {
-    if (debugLabel != null)
-      return '$runtimeType at $progress for $debugLabel';
-    return '$runtimeType at $progress';
+  String toStringDetails() {    
+    String paused = _timeline.isAnimating ? '' : '; paused';
+    String label = debugLabel == null ? '' : '; for $debugLabel';
+    String more = super.toStringDetails();
+    return '$more$paused$label';
   }
 }
 

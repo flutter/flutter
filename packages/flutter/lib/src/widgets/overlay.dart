@@ -34,6 +34,8 @@ class OverlayEntry {
     // TODO(ianh): find a way to make this not rebuild the entire overlay
     _state?.setState(() {});
   }
+
+  String toString() => '$runtimeType@$hashCode(opaque: $opaque)';
 }
 
 class Overlay extends StatefulComponent {
@@ -119,5 +121,10 @@ class OverlayState extends State<Overlay> {
     }
 
     return new Stack(backwardsChildren.reversed.toList(growable: false));
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('entries: $_entries');
   }
 }
