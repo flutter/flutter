@@ -101,7 +101,7 @@ class _PointerEventConverter {
           // start sending us ADDED and REMOVED data points. In the meantime, we
           // only support "down" moves, and ignore spurious moves.
           // See also: https://github.com/flutter/flutter/issues/720
-          if (state != null)
+          if (state == null)
             break;
           assert(state.down);
           Offset offset = position - state.lastPosition;
