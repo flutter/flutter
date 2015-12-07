@@ -123,6 +123,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
+  PerformanceView get forwardPerformance => _forwardPerformance;
+  final ProxyPerformance _forwardPerformance = new ProxyPerformance(alwaysDismissedPerformance);
+
   void install(OverlayEntry insertionPoint) {
     _performanceController = createPerformanceController();
     assert(_performanceController != null);
@@ -151,21 +154,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     return true;
   }
 
-  void finished() {
-    super.finished();
-    _transitionCompleter?.complete(_result);
+  void didPopNext(Route nextRoute) {
+    _updateForwardPerformance(nextRoute);
+    super.didPopNext(nextRoute);
   }
 
-  void dispose() {
-    _performanceController.stop();
-    super.dispose();
+  void didChangeNext(Route nextRoute) {
+    _updateForwardPerformance(nextRoute);
+    super.didChangeNext(nextRoute);
   }
 
-
-  PerformanceView get forwardPerformance => _forwardPerformance;
-  final ProxyPerformance _forwardPerformance = new ProxyPerformance();
-
-  void didPushNext(Route nextRoute) {
+  void _updateForwardPerformance(Route nextRoute) {
     if (nextRoute is TransitionRoute && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       PerformanceView current = _forwardPerformance.masterPerformance;
       if (current != null) {
@@ -189,12 +188,23 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       } else {
         _forwardPerformance.masterPerformance = nextRoute.performance;
       }
+    } else {
+      _forwardPerformance.masterPerformance = alwaysDismissedPerformance;
     }
-    super.didPushNext(nextRoute);
   }
 
   bool canTransitionTo(TransitionRoute nextRoute) => true;
   bool canTransitionFrom(TransitionRoute nextRoute) => true;
+
+  void finished() {
+    super.finished();
+    _transitionCompleter?.complete(_result);
+  }
+
+  void dispose() {
+    _performanceController.stop();
+    super.dispose();
+  }
 
   String get debugLabel => '$runtimeType';
   String toString() => '$runtimeType(performance: $_performanceController)';
@@ -469,8 +479,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 abstract class PopupRoute<T> extends ModalRoute<T> {
   PopupRoute({ Completer<T> completer }) : super(completer: completer);
   bool get opaque => false;
-  void didPushNext(Route nextRoute) {
+  void didChangeNext(Route nextRoute) {
     assert(nextRoute is! PageRoute);
-    super.didPushNext(nextRoute);
+    super.didChangeNext(nextRoute);
   }
 }

@@ -49,16 +49,12 @@ class TestRoute extends Route<String> {
     return returnValue;
   }
 
-  void didPushNext(TestRoute nextRoute) {
-    log('didPushNext ${nextRoute.name}');
-  }
-
   void didPopNext(TestRoute nextRoute) {
     log('didPopNext ${nextRoute.name}');
   }
 
-  void didReplaceNext(TestRoute oldNextRoute, TestRoute newNextRoute) {
-    log('didReplaceNext ${oldNextRoute.name} ${newNextRoute.name}');
+  void didChangeNext(TestRoute nextRoute) {
+    log('didChangeNext ${nextRoute?.name}');
   }
 
   void dispose() {
@@ -100,6 +96,7 @@ void main() {
         [
           'initial: install',
           'initial: didPush',
+          'initial: didChangeNext null',
         ]
       );
       TestRoute second;
@@ -112,7 +109,8 @@ void main() {
         [
           'second: install',
           'second: didPush',
-          'initial: didPushNext second',
+          'second: didChangeNext null',
+          'initial: didChangeNext second',
         ]
       );
       runNavigatorTest(
@@ -124,7 +122,8 @@ void main() {
         [
           'third: install',
           'third: didPush',
-          'second: didPushNext third',
+          'third: didChangeNext null',
+          'second: didChangeNext third',
         ]
       );
       runNavigatorTest(
@@ -136,7 +135,8 @@ void main() {
         [
           'two: install',
           'two: didReplace second',
-          'initial: didReplaceNext second two',
+          'two: didChangeNext third',
+          'initial: didChangeNext two',
           'second: dispose',
         ]
       );
@@ -187,6 +187,7 @@ void main() {
         [
           'first: install',
           'first: didPush',
+          'first: didChangeNext null',
         ]
       );
       TestRoute second;
@@ -199,7 +200,8 @@ void main() {
         [
           'second: install',
           'second: didPush',
-          'first: didPushNext second',
+          'second: didChangeNext null',
+          'first: didChangeNext second',
         ]
       );
       runNavigatorTest(
@@ -211,7 +213,8 @@ void main() {
         [
           'third: install',
           'third: didPush',
-          'second: didPushNext third',
+          'third: didChangeNext null',
+          'second: didChangeNext third',
         ]
       );
       runNavigatorTest(
@@ -245,7 +248,8 @@ void main() {
         [
           'three: install',
           'three: didPush',
-          'second: didPushNext three',
+          'three: didChangeNext null',
+          'second: didChangeNext three',
         ]
       );
       TestRoute four;
@@ -258,7 +262,8 @@ void main() {
         [
           'four: install',
           'four: didPush',
-          'three: didPushNext four',
+          'four: didChangeNext null',
+          'three: didChangeNext four',
         ]
       );
       runNavigatorTest(
@@ -268,6 +273,7 @@ void main() {
           transaction.removeRouteBefore(four);
         },
         [
+          'second: didChangeNext four',
           'three: dispose',
         ]
       );
@@ -306,6 +312,7 @@ void main() {
         [
           'A: install',
           'A: didPush',
+          'A: didChangeNext null',
         ]
       );
       runNavigatorTest(
@@ -317,7 +324,8 @@ void main() {
         [
           'B: install',
           'B: didPush',
-          'A: didPushNext B',
+          'B: didChangeNext null',
+          'A: didChangeNext B',
         ]
       );
       TestRoute routeC;
@@ -330,7 +338,8 @@ void main() {
         [
           'C: install',
           'C: didPush',
-          'B: didPushNext C',
+          'C: didChangeNext null',
+          'B: didChangeNext C',
         ]
       );
       TestRoute routeB;
@@ -343,7 +352,8 @@ void main() {
         [
           'b: install',
           'b: didReplace B',
-          'A: didReplaceNext B b',
+          'b: didChangeNext C',
+          'A: didChangeNext b',
           'B: dispose',
         ]
       );
