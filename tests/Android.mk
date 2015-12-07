@@ -16,12 +16,49 @@
 
 LOCAL_PATH := $(call my-dir)
 
+data_root_for_test_zip := $(TARGET_OUT_DATA)/DATA/
+minikin_tests_subpath_from_data := nativetest/minikin_tests
+minikin_tests_root_in_device := /data/$(minikin_tests_subpath_from_data)
+minikin_tests_root_for_test_zip := $(data_root_for_test_zip)/$(minikin_tests_subpath_from_data)
+
+define build-one-test-font-module
+$(eval include $(CLEAR_VARS))\
+$(eval LOCAL_MODULE := $(1))\
+$(eval LOCAL_SRC_FILES := $(1))\
+$(eval LOCAL_MODULE_CLASS := ETC)\
+$(eval LOCAL_MODULE_TAGS := tests)\
+$(eval LOCAL_MODULE_PATH := $(minikin_tests_root_for_test_zip))\
+$(eval include $(BUILD_PREBUILT))
+endef
+
+font_src_files := \
+    data/BoldItalic.ttf \
+    data/Bold.ttf \
+    data/ColorEmojiFont.ttf \
+    data/ColorTextMixedEmojiFont.ttf \
+    data/Emoji.ttf \
+    data/Italic.ttf \
+    data/Ja.ttf \
+    data/Ko.ttf \
+    data/NoGlyphFont.ttf \
+    data/Regular.ttf \
+    data/TextEmojiFont.ttf \
+    data/VarioationSelectorTest-Regular.ttf \
+    data/ZhHans.ttf \
+    data/ZhHant.ttf \
+    data/itemize.xml \
+    data/emoji.xml
+
+$(foreach f, $(font_src_files), $(call build-one-test-font-module, $(f)))
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := minikin_tests
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_STATIC_LIBRARIES := libminikin
+LOCAL_ADDITIONAL_DEPENDENCIES = $(font_src_files)
+LOCAL_PICKUP_FILES := $(data_root_for_test_zip)
 
 # Shared libraries which are dependencies of minikin; these are not automatically
 # pulled in by the build system (and thus sadly must be repeated).
@@ -56,6 +93,7 @@ LOCAL_C_INCLUDES := \
     external/libxml2/include \
     external/skia/src/core
 
-LOCAL_CPPFLAGS += -Werror -Wall -Wextra
+LOCAL_CPPFLAGS += -Werror -Wall -Wextra \
+    -DkTestFontDir="\"$(minikin_tests_root_in_device)/data/\""
 
 include $(BUILD_NATIVE_TEST)
