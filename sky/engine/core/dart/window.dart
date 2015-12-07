@@ -18,6 +18,15 @@ class WindowPadding {
   final double left;
 }
 
+class Locale {
+  Locale(this.languageCode, this.countryCode);
+
+  final String languageCode;
+  final String countryCode;
+
+  String toString() => '${languageCode}_$countryCode';
+}
+
 class Window {
   Window._();
 
@@ -30,10 +39,14 @@ class Window {
   WindowPadding get padding => _padding;
   WindowPadding _padding;
 
+  Locale get locale => _locale;
+  Locale _locale;
+
   _FrameCallback onBeginFrame;
   _EventCallback onEvent; // TODO(abarth): Remove.
   _PointerPacketCallback onPointerPacket;
   VoidCallback onMetricsChanged;
+  VoidCallback onLocaleChanged;
 
   String defaultRouteName;
   VoidCallback onPopRoute;

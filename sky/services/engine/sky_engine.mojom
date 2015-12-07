@@ -36,6 +36,7 @@ interface SkyEngine {
   OnActivityResumed();
 
   OnViewportMetricsChanged(ViewportMetrics metrics);
+  OnLocaleChanged(string language_code, string country_code);
   OnPointerPacket(pointer.PointerPacket packet);
 
   PushRoute(string route);

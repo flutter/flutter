@@ -58,6 +58,8 @@ class Engine : public UIDelegate,
   // SkyEngine implementation:
   void SetServices(ServicesDataPtr services) override;
   void OnViewportMetricsChanged(ViewportMetricsPtr metrics) override;
+  void OnLocaleChanged(const mojo::String& language_code,
+		       const mojo::String& country_code) override;
   void OnPointerPacket(pointer::PointerPacketPtr packet) override;
 
   void RunFromFile(const mojo::String& main,
@@ -94,6 +96,8 @@ class Engine : public UIDelegate,
   gfx::Size physical_size_;
   std::string initial_route_;
   blink::SkyDisplayMetrics display_metrics_;
+  std::string language_code_;
+  std::string country_code_;
   mojo::Binding<SkyEngine> binding_;
 
   // TODO(eseidel): This should move into an AnimatorStateMachine.

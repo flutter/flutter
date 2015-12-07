@@ -6,6 +6,7 @@ package org.domokit.sky.shell;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +21,8 @@ import org.domokit.activity.ActivityImpl;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
+
 
 /**
  * Base class for activities that use Sky.
@@ -124,6 +127,10 @@ public class SkyActivity extends Activity {
     protected void onSkyReady() {
         TraceEvent.instant("SkyActivity.onSkyReady");
 
+        Locale locale = getResources().getConfiguration().locale;
+        mView.getEngine().onLocaleChanged(locale.getLanguage(),
+                                          locale.getCountry());
+
         if (loadIntent(getIntent())) {
             return;
         }
@@ -161,5 +168,13 @@ public class SkyActivity extends Activity {
         }
         mView.getEngine().runFromBundle(bundle.getPath());
         return true;
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+	super.onConfigurationChanged(newConfig);
+
+        Locale locale = getResources().getConfiguration().locale;
+        mView.getEngine().onLocaleChanged(locale.getLanguage(),
+                                          locale.getCountry());
     }
 }

@@ -38,6 +38,8 @@ class SkyView : public WindowClient {
 
   const SkyDisplayMetrics& display_metrics() const { return display_metrics_; }
   void SetDisplayMetrics(const SkyDisplayMetrics& metrics);
+  void SetLocale(const std::string& language_code,
+		 const std::string& country_code);
   void PushRoute(const std::string& route);
   void PopRoute();
 
@@ -64,6 +66,8 @@ class SkyView : public WindowClient {
 
   SkyViewClient* client_;
   SkyDisplayMetrics display_metrics_;
+  std::string language_code_;
+  std::string country_code_;
   std::unique_ptr<DartController> dart_controller_;
   std::unique_ptr<sky::compositor::LayerTree> layer_tree_;
 
