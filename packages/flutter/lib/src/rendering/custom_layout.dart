@@ -7,6 +7,14 @@ import 'object.dart';
 
 class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
   Object id;
+
+  void merge(MultiChildLayoutParentData other) {
+    if (other.id != null)
+      id = other.id;
+    super.merge(other);
+  }
+
+  String toString() => '${super.toString()}; id=$id';
 }
 
 abstract class MultiChildLayoutDelegate {

@@ -192,7 +192,7 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// children in the stack.
   bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
 
-  String toString() => '${super.toString()}; top=$top; right=$right; bottom=$bottom, left=$left';
+  String toString() => '${super.toString()}; top=$top; right=$right; bottom=$bottom; left=$left; width=$width; height=$height';
 }
 
 abstract class RenderStackBase extends RenderBox
