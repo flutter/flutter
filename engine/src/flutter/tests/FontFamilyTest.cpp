@@ -120,7 +120,7 @@ TEST(FontLanguagesTest, registerLanguageListTest) {
 // U+717D U+FE02 (VS3)
 // U+717D U+E0102 (VS19)
 // U+717D U+E0103 (VS20)
-const char kVsTestFont[] = "/data/minikin/test/data/VarioationSelectorTest-Regular.ttf";
+const char kVsTestFont[] = kTestFontDir "VarioationSelectorTest-Regular.ttf";
 
 class FontFamilyTest : public testing::Test {
 public:

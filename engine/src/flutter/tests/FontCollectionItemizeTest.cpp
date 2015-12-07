@@ -25,8 +25,6 @@ using android::FontFamily;
 using android::FontLanguage;
 using android::FontStyle;
 
-#define kTestFontDir "/data/minikin/test/data/"
-
 const char kItemizeFontXml[] = kTestFontDir "itemize.xml";
 const char kEmojiFont[] = kTestFontDir "Emoji.ttf";
 const char kJAFont[] = kTestFontDir "Ja.ttf";
