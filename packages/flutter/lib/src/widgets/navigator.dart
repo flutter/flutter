@@ -137,6 +137,12 @@ class Navigator extends StatefulComponent {
     });
     return returnValue;
   }
+ 
+  static void popUntil(BuildContext context, Route targetRoute) {
+    openTransaction(context, (NavigatorTransaction transaction) {
+      transaction.popUntil(targetRoute);
+    });
+  }
 
   static bool canPop(BuildContext context) {
     NavigatorState navigator = context.ancestorStateOfType(NavigatorState);
