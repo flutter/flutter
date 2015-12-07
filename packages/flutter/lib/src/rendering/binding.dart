@@ -97,11 +97,12 @@ class _PointerEventConverter {
           break;
         case PointerType.MOVE:
           _PointerState state = _pointers[datum.pointer];
-          // If the service starts supporting hover pointers, then it must
-          // also start sending us ADDED and REMOVED data points.
-          // In the meantime, we only support "down" moves.
+          // If the service starts supporting hover pointers, then it must also
+          // start sending us ADDED and REMOVED data points. In the meantime, we
+          // only support "down" moves, and ignore spurious moves.
           // See also: https://github.com/flutter/flutter/issues/720
-          assert(state != null);
+          if (state != null)
+            break;
           assert(state.down);
           Offset offset = position - state.lastPosition;
           state.lastPosition = position;
