@@ -40,11 +40,7 @@ String _getNameForTargetPlatform(TargetPlatform platform) {
 // Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/release_engine.py
 // and https://github.com/flutter/buildbot/blob/master/travis/build.sh
 String _getCloudStorageBaseUrl({String platform, String revision}) {
-  // In the fullness of time, we'll have a consistent URL pattern for all of
-  // our artifacts, but, for the time being, Mac OS X artifacts are stored in a
-  // different cloud storage bucket.
-  String bucket = (platform == 'darwin-x64') ? "mojo_infra" : "mojo";
-  return 'https://storage.googleapis.com/$bucket/flutter/$revision/$platform/';
+  return 'https://storage.googleapis.com/mojo_infra/flutter/$revision/$platform/';
 }
 
 enum ArtifactType {

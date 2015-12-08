@@ -88,31 +88,30 @@ class RunMojoCommand extends FlutterCommand {
     args.add(command);
 
     BuildConfiguration config = _getCurrentHostConfig();
+    final String appPath = _makePathAbsolute(bundlePath);
+
+    String flutterPath;
+    if (config == null || config.type == BuildType.prebuilt) {
+      TargetPlatform targetPlatform = argResults['android'] ? TargetPlatform.android : TargetPlatform.linux;
+      Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: targetPlatform);
+      flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+    } else {
+      String localPath = path.join(config.buildDir, 'flutter.mojo');
+      flutterPath = _makePathAbsolute(localPath);
+    }
 
     if (argResults['android']) {
       args.add('--android');
-      final String appPath = _makePathAbsolute(bundlePath);
       final String appName = path.basename(appPath);
       final String appDir = path.dirname(appPath);
       args.add('http://app/$appName');
       args.add('--map-origin=http://app/=$appDir');
-      if (config == null || config.type == BuildType.prebuilt) {
-        final String cloudStorageBaseUrl = ArtifactStore.getCloudStorageBaseUrl('android-arm');
-        args.add('--map-origin=http://flutter/=$cloudStorageBaseUrl');
-      } else {
-        args.add('--map-origin=http://flutter/=${config.buildDir}');
-      }
-      args.add('--url-mappings=mojo:flutter=http://flutter/flutter.mojo');
+
+      final String flutterName = path.basename(flutterPath);
+      final String flutterDir = path.dirname(flutterPath);
+      args.add('--map-origin=http://flutter/=$flutterDir');
+      args.add('--url-mappings=mojo:flutter=http://flutter/$flutterName');
     } else {
-      final String appPath = _makePathAbsolute(bundlePath);
-      String flutterPath;
-      if (config == null || config.type == BuildType.prebuilt) {
-        Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: TargetPlatform.linux);
-        flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
-      } else {
-        String localPath = path.join(config.buildDir, 'flutter.mojo');
-        flutterPath = _makePathAbsolute(localPath);
-      }
       args.add('file://$appPath');
       args.add('--url-mappings=mojo:flutter=file://$flutterPath');
     }
