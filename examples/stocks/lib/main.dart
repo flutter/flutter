@@ -94,12 +94,11 @@ class StocksAppState extends State<StocksApp> {
     return null;
   }
 
-  Future<LocaleQueryData> _onLocaleChanged(ui.Locale locale) {
+  Future<LocaleQueryData> _onLocaleChanged(ui.Locale locale) async {
     String localeString = locale.toString();
-    return initializeMessages(localeString).then((_) {
-      Intl.defaultLocale = localeString;
-      return StockStrings.instance;
-    });
+    await initializeMessages(localeString);
+    Intl.defaultLocale = localeString;
+    return StockStrings.instance;
   }
 
   Widget build(BuildContext context) {
