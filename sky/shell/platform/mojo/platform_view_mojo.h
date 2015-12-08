@@ -37,6 +37,8 @@ class PlatformViewMojo : public PlatformView,
   void OnEvent(mojo::EventPtr event,
                const mojo::Callback<void()>& callback) override;
 
+  pointer::PointerPtr CreateEvent(pointer::PointerType type, mojo::Event* event, mojo::PointerData* data);
+
   // |mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker>| implementation:
   void Create(
       mojo::ApplicationConnection* connection,
@@ -52,6 +54,8 @@ class PlatformViewMojo : public PlatformView,
   mojo::ServiceProviderImpl service_provider_;
 
   mojo::NativeViewportEventDispatcherPtr key_event_dispatcher_;
+
+  std::map<int, std::pair<float, float>> pointer_positions_;
 
   DISALLOW_COPY_AND_ASSIGN(PlatformViewMojo);
 };

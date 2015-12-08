@@ -130,22 +130,33 @@ void PlatformViewMojo::OnEvent(mojo::EventPtr event,
       mojo::PointerDataPtr data = event->pointer_data.Pass();
       if (!data)
         break;
-      pointer::PointerPtr pointer = pointer::Pointer::New();
-      pointer->time_stamp = event->time_stamp;
-      pointer->pointer = data->pointer_id;
-      pointer->type = GetTypeFromAction(event->action);
-      pointer->kind = GetKindFromKind(data->kind);
-      pointer->x = data->x;
-      pointer->y = data->y;
-      pointer->buttons = static_cast<int32_t>(event->flags);
-      pointer->pressure = data->pressure;
-      pointer->radius_major = data->radius_major;
-      pointer->radius_minor = data->radius_minor;
-      pointer->orientation = data->orientation;
-
-      pointer::PointerPacketPtr packet = pointer::PointerPacket::New();
-      packet->pointers = mojo::Array<pointer::PointerPtr>::New(1);
-      packet->pointers[0] = pointer.Pass();
+      pointer::PointerPacketPtr packet;
+      int packetIndex = 0;
+      if (pointer_positions_.count(data->pointer_id) > 0) {
+        if (event->action == mojo::EventType::POINTER_UP ||
+            event->action == mojo::EventType::POINTER_CANCEL) {
+          std::pair<float, float> last_position = pointer_positions_[data->pointer_id];
+          if (last_position.first != data->x || last_position.second != data->y) {
+            packet = pointer::PointerPacket::New();
+            packet->pointers = mojo::Array<pointer::PointerPtr>::New(2);
+            packet->pointers[packetIndex] = CreateEvent(pointer::PointerType::MOVE, event.get(), data.get());
+            packetIndex += 1;
+          }
+          pointer_positions_.erase(data->pointer_id);
+        }
+      } else {
+        // We don't currently support hover moves.
+        // If we want to support those, we have to first implement
+        // added/removed events for pointers.
+        // See: https://github.com/flutter/flutter/issues/720
+        if (event->action != mojo::EventType::POINTER_DOWN)
+          break;
+      }
+      if (packetIndex == 0) {
+        packet = pointer::PointerPacket::New();
+        packet->pointers = mojo::Array<pointer::PointerPtr>::New(1);
+      }
+      packet->pointers[packetIndex] = CreateEvent(GetTypeFromAction(event->action), event.get(), data.get());
       sky_engine_->OnPointerPacket(packet.Pass());
       break;
     }
@@ -160,6 +171,26 @@ void PlatformViewMojo::OnEvent(mojo::EventPtr event,
   }
 
   callback.Run();
+}
+
+pointer::PointerPtr PlatformViewMojo::CreateEvent(pointer::PointerType type, mojo::Event* event, mojo::PointerData* data) {
+  DCHECK(data);
+  pointer::PointerPtr pointer = pointer::Pointer::New();
+  pointer->time_stamp = event->time_stamp;
+  pointer->pointer = data->pointer_id;
+  pointer->type = type;
+  pointer->kind = GetKindFromKind(data->kind);
+  pointer->x = data->x;
+  pointer->y = data->y;
+  pointer->buttons = static_cast<int32_t>(event->flags);
+  pointer->pressure = data->pressure;
+  pointer->radius_major = data->radius_major;
+  pointer->radius_minor = data->radius_minor;
+  pointer->orientation = data->orientation;
+  if (event->action != mojo::EventType::POINTER_UP ||
+      event->action != mojo::EventType::POINTER_CANCEL)
+    pointer_positions_[data->pointer_id] = { data->x, data->y };
+  return pointer.Pass();
 }
 
 void PlatformViewMojo::Create(
