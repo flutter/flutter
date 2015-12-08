@@ -28,7 +28,7 @@ class TestTransition extends TransitionComponent {
 }
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({ this.child, NamedRouteSettings settings}) : super(settings: settings);
+  TestRoute({ this.child, RouteSettings settings}) : super(settings: settings);
   final Widget child;
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
   Color get barrierColor => null;
@@ -67,7 +67,7 @@ void main() {
 
       tester.pumpWidget(
         new MaterialApp(
-          onGenerateRoute: (NamedRouteSettings settings) {
+          onGenerateRoute: (RouteSettings settings) {
             switch (settings.name) {
               case '/':
                 return new TestRoute(

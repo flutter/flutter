@@ -14,7 +14,7 @@ import 'routes.dart';
 abstract class PageRoute<T> extends ModalRoute<T> {
   PageRoute({
     Completer<T> completer,
-    NamedRouteSettings settings: const NamedRouteSettings()
+    RouteSettings settings: const RouteSettings()
   }) : super(completer: completer, settings: settings);
   bool get opaque => true;
   bool get barrierDismissable => false;

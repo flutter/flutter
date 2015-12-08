@@ -77,7 +77,7 @@ class StocksAppState extends State<StocksApp> {
     }
   }
 
-  Route _getRoute(NamedRouteSettings settings) {
+  Route _getRoute(RouteSettings settings) {
     List<String> path = settings.name.split('/');
     if (path[0] != '')
       return null;
