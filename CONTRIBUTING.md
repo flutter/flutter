@@ -92,7 +92,7 @@ Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree
 
 `flutter test --flutter-repo` is a shortcut for those working on the flutter repository itself which finds and runs all tests inside the flutter repository regardless of the current working directory.
 
-If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--engine-src-path` to change what flutter shell `flutter test` uses.
+If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--debug` or `--release` to change what flutter shell `flutter test` uses.
 
 Note: Flutter tests are headless, you won't see any UI. You can use
 `print` to generate console output or you can interact with the DartVM
