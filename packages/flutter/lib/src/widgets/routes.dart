@@ -258,45 +258,35 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 class _ModalScopeStatus extends InheritedWidget {
   _ModalScopeStatus({
     Key key,
-    this.current,
+    this.isCurrent,
     this.route,
     Widget child
   }) : super(key: key, child: child) {
-    assert(current != null);
+    assert(isCurrent != null);
     assert(route != null);
     assert(child != null);
   }
 
-  final bool current;
+  final bool isCurrent;
   final Route route;
 
   bool updateShouldNotify(_ModalScopeStatus old) {
-    return current != old.current ||
+    return isCurrent != old.isCurrent ||
            route != old.route;
   }
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('${current ? "active" : "inactive"}');
+    description.add('${isCurrent ? "active" : "inactive"}');
   }
 }
 
 class _ModalScope extends StatefulComponent {
   _ModalScope({
     Key key,
-    this.subtreeKey,
-    this.storageBucket,
-    this.performance,
-    this.forwardPerformance,
-    this.current,
     this.route
   }) : super(key: key);
 
-  final GlobalKey subtreeKey;
-  final PageStorageBucket storageBucket;
-  final PerformanceView performance;
-  final PerformanceView forwardPerformance;
-  final bool current;
   final ModalRoute route;
 
   _ModalScopeState createState() => new _ModalScopeState();
@@ -305,24 +295,17 @@ class _ModalScope extends StatefulComponent {
 class _ModalScopeState extends State<_ModalScope> {
   void initState() {
     super.initState();
-    config.performance?.addStatusListener(_performanceStatusChanged);
-    config.forwardPerformance?.addStatusListener(_performanceStatusChanged);
+    config.route.performance?.addStatusListener(_performanceStatusChanged);
+    config.route.forwardPerformance?.addStatusListener(_performanceStatusChanged);
   }
 
   void didUpdateConfig(_ModalScope oldConfig) {
-    if (config.performance != oldConfig.performance) {
-      oldConfig.performance?.removeStatusListener(_performanceStatusChanged);
-      config.performance?.addStatusListener(_performanceStatusChanged);
-    }
-    if (config.forwardPerformance != oldConfig.forwardPerformance) {
-      oldConfig.forwardPerformance?.removeStatusListener(_performanceStatusChanged);
-      config.forwardPerformance?.addStatusListener(_performanceStatusChanged);
-    }
+    assert(config.route == oldConfig.route);
   }
 
   void dispose() {
-    config.performance?.removeStatusListener(_performanceStatusChanged);
-    config.forwardPerformance?.removeStatusListener(_performanceStatusChanged);
+    config.route.performance?.removeStatusListener(_performanceStatusChanged);
+    config.route.forwardPerformance?.removeStatusListener(_performanceStatusChanged);
     super.dispose();
   }
 
@@ -334,12 +317,12 @@ class _ModalScopeState extends State<_ModalScope> {
 
   Widget build(BuildContext context) {
     Widget contents = new PageStorage(
-      key: config.subtreeKey,
-      bucket: config.storageBucket,
+      key: config.route._subtreeKey,
+      bucket: config.route._storageBucket,
       child: new _ModalScopeStatus(
-        current: config.current,
         route: config.route,
-        child: config.route.buildPage(context, config.performance, config.forwardPerformance)
+        isCurrent: config.route.isCurrent,
+        child: config.route.buildPage(context, config.route.performance, config.route.forwardPerformance)
       )
     );
     if (config.route.offstage) {
@@ -348,11 +331,11 @@ class _ModalScopeState extends State<_ModalScope> {
       contents = new Focus(
         key: new GlobalObjectKey(config.route),
         child: new IgnorePointer(
-          ignoring: config.performance?.status == PerformanceStatus.reverse,
+          ignoring: config.route.performance?.status == PerformanceStatus.reverse,
           child: config.route.buildTransitions(
             context,
-            config.performance,
-            config.forwardPerformance,
+            config.route.performance,
+            config.route.forwardPerformance,
             contents
           )
         )
@@ -457,11 +440,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Widget _buildModalScope(BuildContext context) {
     return new _ModalScope(
       key: _scopeKey,
-      subtreeKey: _subtreeKey,
-      storageBucket: _storageBucket,
-      performance: performance,
-      forwardPerformance: forwardPerformance,
-      current: isCurrent,
       route: this
       // calls buildTransitions() and buildPage(), defined above
     );
