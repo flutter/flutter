@@ -46,6 +46,10 @@ void RasterizerMojo::ConnectToRasterizer (
 void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
                           const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerMojo::Draw");
+  if (!context_) {
+    callback.Run();
+    return;
+  }
 
   scoped_ptr<compositor::LayerTree> layer_tree(
       reinterpret_cast<compositor::LayerTree*>(layer_tree_ptr));
