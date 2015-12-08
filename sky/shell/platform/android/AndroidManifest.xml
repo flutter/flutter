@@ -11,7 +11,7 @@
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
     <application android:label="Sky Shell" android:name="SkyApplication" android:debuggable="true">
-        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
                   android:hardwareAccelerated="true"
                   android:launchMode="standard"
                   android:name="SkyActivity"

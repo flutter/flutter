@@ -33,6 +33,8 @@ class Window {
 
   void DidCreateIsolate();
   void UpdateWindowMetrics(const SkyDisplayMetrics& metrics);
+  void UpdateLocale(const std::string& language_code,
+                    const std::string& country_code);
   void DispatchPointerPacket(const pointer::PointerPacketPtr& packet);
   void BeginFrame(base::TimeTicks frameTime);
 

@@ -149,6 +149,14 @@ void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
     sky_view_->SetDisplayMetrics(display_metrics_);
 }
 
+void Engine::OnLocaleChanged(const mojo::String& language_code,
+			     const mojo::String& country_code) {
+  language_code_ = language_code;
+  country_code_ = country_code;
+  if (sky_view_)
+    sky_view_->SetLocale(language_code_, country_code_);
+}
+
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
   TRACE_EVENT0("flutter", "Engine::OnPointerPacket");
 
@@ -169,6 +177,7 @@ void Engine::RunFromLibrary(const std::string& name) {
   sky_view_->RunFromLibrary(blink::WebString::fromUTF8(name),
                             dart_library_provider_.get());
   sky_view_->SetDisplayMetrics(display_metrics_);
+  sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
     sky_view_->PushRoute(initial_route_);
 }
@@ -181,6 +190,7 @@ void Engine::RunFromSnapshotStream(
   sky_view_->CreateView(blink::WebString::fromUTF8(name));
   sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(name), snapshot.Pass());
   sky_view_->SetDisplayMetrics(display_metrics_);
+  sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
     sky_view_->PushRoute(initial_route_);
 }
@@ -196,6 +206,7 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   sky_view_->CreateView("http://localhost");
   sky_view_->RunFromPrecompiledSnapshot();
   sky_view_->SetDisplayMetrics(display_metrics_);
+  sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
     sky_view_->PushRoute(initial_route_);
 }

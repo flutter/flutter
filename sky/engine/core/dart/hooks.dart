@@ -20,6 +20,12 @@ void _updateWindowMetrics(double devicePixelRatio,
     window.onMetricsChanged();
 }
 
+void _updateLocale(String languageCode, String countryCode) {
+  window._locale = new Locale(languageCode, countryCode);
+  if (window.onLocaleChanged != null)
+    window.onLocaleChanged();
+}
+
 void _pushRoute(String route) {
   assert(window.defaultRouteName == null);
   window.defaultRouteName = route;

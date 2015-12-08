@@ -66,6 +66,19 @@ void Window::UpdateWindowMetrics(const SkyDisplayMetrics& metrics) {
   });
 }
 
+void Window::UpdateLocale(const std::string& language_code,
+                          const std::string& country_code) {
+  DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  DartState::Scope scope(dart_state);
+
+  DartInvokeField(library_.value(), "_updateLocale", {
+    StdStringToDart(language_code),
+    StdStringToDart(country_code),
+  });
+}
+
 void Window::PushRoute(const std::string& route) {
   DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
