@@ -76,6 +76,7 @@ class WidgetFlutterBinding extends FlutterBinding {
   void _runApp(Widget app) {
     _renderViewElement = new RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
+      debugShortDescription: '[root]',
       child: app
     ).attachToRenderTree(_renderViewElement);
     beginFrame();
@@ -102,11 +103,15 @@ void debugDumpApp() {
 /// RenderObjectWithChildMixin protocol. The type argument T is the kind of
 /// RenderObject that the container expects as its child.
 class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
-  RenderObjectToWidgetAdapter({ this.child, RenderObjectWithChildMixin<T> container })
-    : container = container, super(key: new GlobalObjectKey(container));
+  RenderObjectToWidgetAdapter({
+    this.child,
+    RenderObjectWithChildMixin<T> container,
+    this.debugShortDescription
+  }) : container = container, super(key: new GlobalObjectKey(container));
 
   final Widget child;
   final RenderObjectWithChildMixin<T> container;
+  final String debugShortDescription;
 
   RenderObjectToWidgetElement<T> createElement() => new RenderObjectToWidgetElement<T>(this);
 
@@ -125,6 +130,8 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
     }, building: true);
     return element;
   }
+
+  String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
 /// This element class is the instantiation of a [RenderObjectToWidgetAdapter].

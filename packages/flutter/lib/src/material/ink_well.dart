@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -137,6 +138,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     final bool enabled = config.onTap != null || config.onDoubleTap != null || config.onLongPress != null;
     return new GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,

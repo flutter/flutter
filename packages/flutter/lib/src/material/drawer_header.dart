@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'debug.dart';
 import 'theme.dart';
 
 // TODO(jackson): This class should usually render the user's
@@ -16,6 +17,7 @@ class DrawerHeader extends StatelessComponent {
   final Widget child;
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     return new Container(
       height: kStatusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(

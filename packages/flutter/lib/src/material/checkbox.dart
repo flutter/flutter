@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'debug.dart';
 import 'theme.dart';
 import 'toggleable.dart';
 
@@ -35,6 +36,7 @@ class Checkbox extends StatelessComponent {
   final ValueChanged<bool> onChanged;
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     return new _CheckboxRenderObjectWidget(
       value: value,
