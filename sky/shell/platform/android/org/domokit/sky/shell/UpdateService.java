@@ -24,8 +24,6 @@ import org.chromium.mojo.system.MojoException;
 public class UpdateService extends Service {
     private static final String TAG = "UpdateService";
     private static final int REQUEST_CODE = 0;  // Not sure why this is needed.
-    private static final boolean ENABLED = false;
-    private static final boolean TESTING = false;
 
     private long mNativePtr = 0;
 
@@ -40,23 +38,22 @@ public class UpdateService extends Service {
 
       @Override
       public void notifyUpdateCheckComplete() {
-        if (sCurrentUpdateService != null)
-          sCurrentUpdateService.stopSelf();
+          if (sCurrentUpdateService != null)
+              sCurrentUpdateService.stopSelf();
       }
     }
 
     public static void init(Context context) {
-        if (ENABLED || TESTING)
-            maybeScheduleUpdateCheck(context);
+        maybeScheduleUpdateCheck(context);
     }
 
     private static void maybeScheduleUpdateCheck(Context context) {
         Intent alarm = new Intent(context, UpdateService.class);
         PendingIntent existingIntent = PendingIntent.getService(
                 context, REQUEST_CODE, alarm, PendingIntent.FLAG_NO_CREATE);
-        if (existingIntent != null && !TESTING) {
-          Log.i(TAG, "Update alarm exists: " + PathUtils.getDataDirectory(context));
-          return;
+        if (existingIntent != null) {
+            Log.i(TAG, "Update alarm exists: " + PathUtils.getDataDirectory(context));
+            return;
         }
 
         PendingIntent pendingIntent = PendingIntent.getService(
