@@ -25,7 +25,10 @@ enum MaterialType {
   circle,
 
   /// Rounded edges, no color by default (used for MaterialButton buttons).
-  button
+  button,
+
+  /// A transparent piece of material that draws ink splashes and highlights.
+  transparency
 }
 
 const Map<MaterialType, double> kMaterialEdges = const <MaterialType, double>{
@@ -33,6 +36,7 @@ const Map<MaterialType, double> kMaterialEdges = const <MaterialType, double>{
   MaterialType.card: 2.0,
   MaterialType.circle: null,
   MaterialType.button: 2.0,
+  MaterialType.transparency: null,
 };
 
 abstract class InkSplash {
@@ -141,17 +145,19 @@ class _MaterialState extends State<Material> {
         child: contents
       );
     }
-    contents = new AnimatedContainer(
-      curve: Curves.ease,
-      duration: kThemeChangeDuration,
-      decoration: new BoxDecoration(
-        backgroundColor: backgroundColor,
-        borderRadius: kMaterialEdges[config.type],
-        boxShadow: config.elevation == 0 ? null : elevationToShadow[config.elevation],
-        shape: config.type == MaterialType.circle ? Shape.circle : Shape.rectangle
-      ),
-      child: contents
-    );
+    if (config.type != MaterialType.transparency) {
+      contents = new AnimatedContainer(
+        curve: Curves.ease,
+        duration: kThemeChangeDuration,
+        decoration: new BoxDecoration(
+          backgroundColor: backgroundColor,
+          borderRadius: kMaterialEdges[config.type],
+          boxShadow: config.elevation == 0 ? null : elevationToShadow[config.elevation],
+          shape: config.type == MaterialType.circle ? Shape.circle : Shape.rectangle
+        ),
+        child: contents
+      );
+    }
     return contents;
   }
 }

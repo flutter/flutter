@@ -13,6 +13,7 @@ import 'icon.dart';
 import 'ink_well.dart';
 import 'shadows.dart';
 import 'theme.dart';
+import 'material.dart';
 
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
@@ -100,51 +101,42 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
 
     final AnimatedValue<double> menuOpacity = new AnimatedValue<double>(0.0,
       end: 1.0,
-      curve: new Interval(0.0, 0.25),
-      reverseCurve: new Interval(0.75, 1.0)
+      curve: const Interval(0.0, 0.25),
+      reverseCurve: const Interval(0.75, 1.0)
     );
 
     final AnimatedValue<double> menuTop = new AnimatedValue<double>(route.rect.top,
       end: route.rect.top - route.selectedIndex * route.rect.height,
-      curve: new Interval(0.25, 0.5),
+      curve: const Interval(0.25, 0.5),
       reverseCurve: const Interval(0.0, 0.001)
     );
     final AnimatedValue<double> menuBottom = new AnimatedValue<double>(route.rect.bottom,
       end: menuTop.end + route.items.length * route.rect.height,
-      curve: new Interval(0.25, 0.5),
+      curve: const Interval(0.25, 0.5),
       reverseCurve: const Interval(0.0, 0.001)
     );
 
-    final RenderBox renderBox = route.navigator.context.findRenderObject();
-    final Size navigatorSize = renderBox.size;
-    final RelativeRect menuRect = new RelativeRect.fromSize(route.rect, navigatorSize);
-
-    return new Positioned(
-      top: menuRect.top - (route.selectedIndex * route.rect.height),
-      right: menuRect.right,
-      left: menuRect.left,
-      child: new Focus(
-        key: new GlobalObjectKey(route),
-        child: new FadeTransition(
-          performance: route.performance,
-          opacity: menuOpacity,
-          child: new BuilderTransition(
-            performance: route.performance,
-            variables: <AnimatedValue<double>>[menuTop, menuBottom],
-            builder: (BuildContext context) {
-              return new CustomPaint(
-                painter: new _DropDownMenuPainter(
-                  color: Theme.of(context).canvasColor,
-                  elevation: route.elevation,
-                  menuTop: menuTop.value,
-                  menuBottom: menuBottom.value,
-                  renderBox: context.findRenderObject()
-                ),
-                child: new Block(children)
-              );
-            }
-          )
-        )
+    return new FadeTransition(
+      performance: route.performance,
+      opacity: menuOpacity,
+      child: new BuilderTransition(
+        performance: route.performance,
+        variables: <AnimatedValue<double>>[menuTop, menuBottom],
+        builder: (BuildContext context) {
+          return new CustomPaint(
+            painter: new _DropDownMenuPainter(
+              color: Theme.of(context).canvasColor,
+              elevation: route.elevation,
+              menuTop: menuTop.value,
+              menuBottom: menuBottom.value,
+              renderBox: context.findRenderObject()
+            ),
+            child: new Material(
+              type: MaterialType.transparency,
+              child: new Block(children)
+            )
+          );
+        }
       )
     );
   }
@@ -167,6 +159,17 @@ class _DropDownRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kDropDownMenuDuration;
   bool get barrierDismissable => true;
   Color get barrierColor => null;
+
+  ModalPosition getPosition(BuildContext context) {
+    RenderBox overlayBox = Overlay.of(context).context.findRenderObject();
+    Size overlaySize = overlayBox.size;
+    RelativeRect menuRect = new RelativeRect.fromSize(rect, overlaySize);
+    return new ModalPosition(
+      top: menuRect.top - selectedIndex * rect.height,
+      left: menuRect.left,
+      right: menuRect.right
+    );
+  }
 
   Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
     return new _DropDownMenu(route: this);
@@ -198,7 +201,7 @@ class DropDownMenuItem<T> extends StatelessComponent {
   }
 }
 
-class DropDownButton<T> extends StatelessComponent {
+class DropDownButton<T> extends StatefulComponent {
   DropDownButton({
     Key key,
     this.items,
@@ -212,40 +215,62 @@ class DropDownButton<T> extends StatelessComponent {
   final ValueChanged<T> onChanged;
   final int elevation;
 
-  void _showDropDown(BuildContext context, int selectedIndex, GlobalKey indexedStackKey) {
+  _DropDownButtonState<T> createState() => new _DropDownButtonState<T>();
+}
+
+class _DropDownButtonState<T> extends State<DropDownButton<T>> {
+  final GlobalKey indexedStackKey = new GlobalKey(debugLabel: 'DropDownButton.IndexedStack');
+
+  void initState() {
+    super.initState();
+    _updateSelectedIndex();
+  }
+
+  void didUpdateConfig(DropDownButton<T> oldConfig) {
+    if (config.items[_selectedIndex].value != config.value)
+      _updateSelectedIndex();
+  }
+
+  int _selectedIndex;
+
+  void _updateSelectedIndex() {
+    for (int itemIndex = 0; itemIndex < config.items.length; itemIndex++) {
+      if (config.items[itemIndex].value == config.value) {
+        _selectedIndex = itemIndex;
+        return;
+      }
+    }
+  }
+
+  void _handleTap() {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
     final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
     final Completer completer = new Completer<T>();
     Navigator.push(context, new _DropDownRoute<T>(
       completer: completer,
-      items: items,
-      selectedIndex: selectedIndex,
+      items: config.items,
+      selectedIndex: _selectedIndex,
       rect: _kMenuHorizontalPadding.inflateRect(rect),
-      elevation: elevation
+      elevation: config.elevation
     ));
     completer.future.then((T newValue) {
-      if (onChanged != null)
-        onChanged(newValue);
+      if (!mounted)
+        return;
+      if (config.onChanged != null)
+        config.onChanged(newValue);
     });
   }
 
   Widget build(BuildContext context) {
-    GlobalKey indexedStackKey = new GlobalKey(debugLabel: 'DropDownButton.IndexedStack');
-    int selectedIndex = 0;
-    for (int itemIndex = 0; itemIndex < items.length; itemIndex++) {
-      if (items[itemIndex].value == value) {
-        selectedIndex = itemIndex;
-        break;
-      }
-    }
     return new GestureDetector(
+      onTap: _handleTap,
       child: new Container(
         decoration: new BoxDecoration(border: _kDropDownUnderline),
         child: new Row(<Widget>[
           new IndexedStack(
-            items,
+            config.items,
             key: indexedStackKey,
-            index: selectedIndex,
+            index: _selectedIndex,
             alignment: const FractionalOffset(0.5, 0.0)
           ),
           new Container(
@@ -255,10 +280,7 @@ class DropDownButton<T> extends StatelessComponent {
         ],
           justifyContent: FlexJustifyContent.collapse
         )
-      ),
-      onTap: () {
-        _showDropDown(context, selectedIndex, indexedStackKey);
-      }
+      )
     );
   }
 }

@@ -359,7 +359,7 @@ class _ModalScopeState extends State<_ModalScope> {
       );
     }
     contents = new RepaintBoundary(child: contents);
-    ModalPosition position = config.route.position;
+    ModalPosition position = config.route.getPosition(context);
     if (position == null)
       return contents;
     return new Positioned(
@@ -398,7 +398,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // The API for subclasses to override - used by _ModalScope
 
-  ModalPosition get position => null;
+  ModalPosition getPosition(BuildContext context) => null;
   Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance);
   Widget buildTransitions(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance, Widget child) {
     return child;

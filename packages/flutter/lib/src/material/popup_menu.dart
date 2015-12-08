@@ -123,6 +123,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final List<PopupMenuItem<T>> items;
   final int elevation;
 
+  ModalPosition getPosition(BuildContext context) {
+    return position;
+  }
+
   PerformanceView createPerformance() {
     return new CurvedPerformance(
       super.createPerformance(),
