@@ -105,7 +105,8 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
       Offset velocity = tracker.getVelocity();
       if (velocity != null && _isFlingGesture(velocity))
         onEnd(velocity);
-      onEnd(Offset.zero);
+      else
+        onEnd(Offset.zero);
     }
     _velocityTrackers.clear();
   }

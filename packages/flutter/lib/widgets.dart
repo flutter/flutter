@@ -28,6 +28,7 @@ export 'src/widgets/notification_listener.dart';
 export 'src/widgets/overlay.dart';
 export 'src/widgets/page_storage.dart';
 export 'src/widgets/pages.dart';
+export 'src/widgets/pageable_list.dart';
 export 'src/widgets/placeholder.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/scrollable.dart';

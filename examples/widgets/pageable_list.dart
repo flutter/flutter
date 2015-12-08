@@ -120,18 +120,11 @@ class PageableListAppState extends State<PageableListApp> {
   }
 
   Widget _buildBody(BuildContext context) {
-    Widget list = new PageableList<CardModel>(
+    return new PageableList<CardModel>(
       items: cardModels,
       itemsWrap: itemsWrap,
       itemBuilder: buildCard,
-      scrollDirection: scrollDirection,
-      itemExtent: (scrollDirection == ScrollDirection.vertical)
-          ? pageSize.height
-          : pageSize.width
-    );
-    return new SizeObserver(
-      onSizeChanged: updatePageSize,
-      child: list
+      scrollDirection: scrollDirection
     );
   }
 
