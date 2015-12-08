@@ -14,7 +14,7 @@ void main() {
         new Container(
           padding: new EdgeDims.all(50.0),
           decoration: new BoxDecoration(
-            shape: Shape.circle,
+            shape: BoxShape.circle,
             border: new Border.all(width: 10.0, color: const Color(0x80FF00FF)),
             backgroundColor: Colors.teal[600]
           )

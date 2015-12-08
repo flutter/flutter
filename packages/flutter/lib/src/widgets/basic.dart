@@ -16,13 +16,15 @@ export 'package:flutter/rendering.dart' show
     BorderSide,
     BoxConstraints,
     BoxDecoration,
-    BoxDecorationPosition,
     BoxShadow,
+    BoxShape,
     Canvas,
     Color,
     ColorFilter,
     CustomClipper,
     CustomPainter,
+    Decoration,
+    DecorationPosition,
     EdgeDims,
     FlexAlignItems,
     FlexDirection,
@@ -51,7 +53,6 @@ export 'package:flutter/rendering.dart' show
     RadialGradient,
     Rect,
     ScrollDirection,
-    Shape,
     Size,
     StyledTextSpan,
     TextAlign,
@@ -135,7 +136,7 @@ class DecoratedBox extends OneChildRenderObjectWidget {
   DecoratedBox({
     Key key,
     this.decoration,
-    this.position: BoxDecorationPosition.background,
+    this.position: DecorationPosition.background,
     Widget child
   }) : super(key: key, child: child) {
     assert(decoration != null);
@@ -143,10 +144,10 @@ class DecoratedBox extends OneChildRenderObjectWidget {
   }
 
   /// What decoration to paint.
-  final BoxDecoration decoration;
+  final Decoration decoration;
 
   /// Where to paint the box decoration.
-  final BoxDecorationPosition position;
+  final DecorationPosition position;
 
   RenderDecoratedBox createRenderObject() => new RenderDecoratedBox(decoration: decoration, position: position);
 
@@ -782,26 +783,26 @@ class Container extends StatelessComponent {
   }) : super(key: key) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
-    assert(decoration == null || decoration.shape != Shape.circle || decoration.borderRadius == null); // can't have a border radius if you're a circle
+    assert(decoration == null || decoration.debugAssertValid());
   }
 
   final Widget child;
   final BoxConstraints constraints;
-  final BoxDecoration decoration;
-  final BoxDecoration foregroundDecoration;
+  final Decoration decoration;
+  final Decoration foregroundDecoration;
   final EdgeDims margin;
   final EdgeDims padding;
   final Matrix4 transform;
   final double width;
   final double height;
 
-  EdgeDims get _paddingIncludingBorder {
-    if (decoration == null || decoration.border == null)
+  EdgeDims get _paddingIncludingDecoration {
+    if (decoration == null || decoration.padding == null)
       return padding;
-    EdgeDims borderPadding = decoration.border.dimensions;
+    EdgeDims decorationPadding = decoration.padding;
     if (padding == null)
-      return borderPadding;
-    return padding + borderPadding;
+      return decorationPadding;
+    return padding + decorationPadding;
   }
 
   Widget build(BuildContext context) {
@@ -810,7 +811,7 @@ class Container extends StatelessComponent {
     if (child == null && (width == null || height == null))
       current = new ConstrainedBox(constraints: const BoxConstraints.expand());
 
-    EdgeDims effectivePadding = _paddingIncludingBorder;
+    EdgeDims effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = new Padding(padding: effectivePadding, child: current);
 
@@ -820,7 +821,7 @@ class Container extends StatelessComponent {
     if (foregroundDecoration != null) {
       current = new DecoratedBox(
         decoration: foregroundDecoration,
-        position: BoxDecorationPosition.foreground,
+        position: DecorationPosition.foreground,
         child: current
       );
     }

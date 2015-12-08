@@ -170,7 +170,8 @@ class _RenderSwitch extends RenderToggleable {
     super.handleEvent(event, entry);
   }
 
-  final BoxPainter _thumbPainter = new BoxPainter(const BoxDecoration());
+  Color _cachedThumbColor;
+  BoxPainter _thumbPainter;
 
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
@@ -200,11 +201,14 @@ class _RenderSwitch extends RenderToggleable {
 
     paintRadialReaction(canvas, thumbOffset);
 
-    _thumbPainter.decoration = new BoxDecoration(
-      backgroundColor: thumbColor,
-      shape: Shape.circle,
-      boxShadow: elevationToShadow[1]
-    );
+    if (_cachedThumbColor != thumbColor) {
+      _thumbPainter = new BoxDecoration(
+        backgroundColor: thumbColor,
+        shape: BoxShape.circle,
+        boxShadow: elevationToShadow[1]
+      ).createBoxPainter();
+      _cachedThumbColor = thumbColor;
+    }
 
     // The thumb contracts slightly during the animation
     double inset = 2.0 - (position.value - 0.5).abs() * 2.0;

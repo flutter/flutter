@@ -226,7 +226,7 @@ class DayPicker extends StatelessComponent {
             selectedDate.day == day)
           decoration = new BoxDecoration(
             backgroundColor: theme.primarySwatch[100],
-            shape: Shape.circle
+            shape: BoxShape.circle
           );
 
         // Use a different font color for the current day
@@ -377,7 +377,7 @@ class _YearPickerState extends ScrollableWidgetListState<YearPicker> {
           height: config.itemExtent,
           decoration: year == config.selectedDate.year ? new BoxDecoration(
             backgroundColor: Theme.of(context).primarySwatch[100],
-            shape: Shape.circle
+            shape: BoxShape.circle
           ) : null,
           child: new Center(
             child: new Text(label, style: style)

@@ -50,7 +50,7 @@ class Dot extends StatelessComponent {
       height: size,
       decoration: new BoxDecoration(
         backgroundColor: color,
-        shape: Shape.circle
+        shape: BoxShape.circle
       ),
       child: child
     );

@@ -13,7 +13,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'debug.dart';
 import 'object.dart';
 
-export 'package:flutter/painting.dart' show FractionalOffset, TextBaseline;
+export 'package:flutter/painting.dart' show EdgeDims, FractionalOffset, TextBaseline;
 
 // This class should only be used in debug builds
 class _DebugSize extends Size {

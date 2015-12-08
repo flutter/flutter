@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
@@ -13,13 +12,13 @@ import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 
-export 'package:flutter/src/painting/box_painter.dart';
 export 'package:flutter/gestures.dart' show
   PointerEvent,
   PointerDownEvent,
   PointerMoveEvent,
   PointerUpEvent,
   PointerCancelEvent;
+export 'package:flutter/painting.dart' show Decoration, BoxDecoration;
 
 /// A base class for render objects that resemble their children.
 ///
@@ -704,9 +703,11 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   bool hitTest(HitTestResult result, { Point position }) {
     Rect clipBounds = _clip;
     Point center = clipBounds.center;
+    // convert the position to an offset from the center of the unit circle
     Offset offset = new Offset((position.x - center.x) / clipBounds.width,
                                (position.y - center.y) / clipBounds.height);
-    if (offset.distance > 0.5)
+    // check if the point is outside the unit circle
+    if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
     return super.hitTest(result, position: position);
   }
@@ -720,7 +721,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
 }
 
 /// Where to paint a box decoration.
-enum BoxDecorationPosition {
+enum DecorationPosition {
   /// Paint the box decoration behind the children.
   background,
 
@@ -728,97 +729,90 @@ enum BoxDecorationPosition {
   foreground,
 }
 
-/// Paints a [BoxDecoration] either before or after its child paints.
+/// Paints a [Decoration] either before or after its child paints.
 class RenderDecoratedBox extends RenderProxyBox {
 
   RenderDecoratedBox({
-    BoxDecoration decoration,
-    RenderBox child,
-    BoxDecorationPosition position: BoxDecorationPosition.background
-  }) : _painter = new BoxPainter(decoration),
+    Decoration decoration,
+    DecorationPosition position: DecorationPosition.background,
+    RenderBox child
+  }) : _decoration = decoration,
        _position = position,
        super(child) {
     assert(decoration != null);
     assert(position != null);
   }
 
+  BoxPainter _painter;
+
+  /// What decoration to paint.
+  Decoration get decoration => _decoration;
+  Decoration _decoration;
+  void set decoration (Decoration newDecoration) {
+    assert(newDecoration != null);
+    if (newDecoration == _decoration)
+      return;
+    _removeListenerIfNeeded();
+    _painter = null;
+    _decoration = newDecoration;
+    _addListenerIfNeeded();
+    markNeedsPaint();
+  }
+
   /// Where to paint the box decoration.
-  BoxDecorationPosition get position => _position;
-  BoxDecorationPosition _position;
-  void set position (BoxDecorationPosition newPosition) {
+  DecorationPosition get position => _position;
+  DecorationPosition _position;
+  void set position (DecorationPosition newPosition) {
     assert(newPosition != null);
     if (newPosition == _position)
       return;
+    _position = newPosition;
     markNeedsPaint();
   }
 
-  /// What decoration to paint.
-  BoxDecoration get decoration => _painter.decoration;
-  void set decoration (BoxDecoration newDecoration) {
-    assert(newDecoration != null);
-    if (newDecoration == _painter.decoration)
-      return;
-    _removeBackgroundImageListenerIfNeeded();
-    _painter.decoration = newDecoration;
-    _addBackgroundImageListenerIfNeeded();
-    markNeedsPaint();
+  bool get _needsListeners {
+    return attached && _decoration.needsListeners;
   }
 
-  final BoxPainter _painter;
-
-  bool get _needsBackgroundImageListener {
-    return attached &&
-        _painter.decoration != null &&
-        _painter.decoration.backgroundImage != null;
+  void _addListenerIfNeeded() {
+    if (_needsListeners)
+      _decoration.addChangeListener(markNeedsPaint);
   }
 
-  void _addBackgroundImageListenerIfNeeded() {
-    if (_needsBackgroundImageListener)
-      _painter.decoration.backgroundImage.addChangeListener(markNeedsPaint);
-  }
-
-  void _removeBackgroundImageListenerIfNeeded() {
-    if (_needsBackgroundImageListener)
-      _painter.decoration.backgroundImage.removeChangeListener(markNeedsPaint);
+  void _removeListenerIfNeeded() {
+    if (_needsListeners)
+      _decoration.removeChangeListener(markNeedsPaint);
   }
 
   void attach() {
     super.attach();
-    _addBackgroundImageListenerIfNeeded();
+    _addListenerIfNeeded();
   }
 
   void detach() {
-    _removeBackgroundImageListenerIfNeeded();
+    _removeListenerIfNeeded();
     super.detach();
   }
 
   bool hitTestSelf(Point position) {
-    switch (_painter.decoration.shape) {
-      case Shape.rectangle:
-        // TODO(abarth): We should check the border radius.
-        return true;
-      case Shape.circle:
-        // Circles are inscribed into our smallest dimension.
-        Point center = size.center(Point.origin);
-        double distance = (position - center).distance;
-        return distance <= math.min(size.width, size.height) / 2.0;
-    }
+    return _decoration.hitTest(size, position);
   }
 
   void paint(PaintingContext context, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
-    if (position == BoxDecorationPosition.background)
+    _painter ??= _decoration.createBoxPainter();
+    if (position == DecorationPosition.background)
       _painter.paint(context.canvas, offset & size);
     super.paint(context, offset);
-    if (position == BoxDecorationPosition.foreground)
+    if (position == DecorationPosition.foreground)
       _painter.paint(context.canvas, offset & size);
   }
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
     settings.add('decoration:');
-    settings.addAll(_painter.decoration.toString("  ").split('\n'));
+    settings.addAll(_decoration.toString("  ").split('\n'));
   }
 }
 

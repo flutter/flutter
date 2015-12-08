@@ -18,7 +18,7 @@ class InkResponse extends StatefulComponent {
     this.onLongPress,
     this.onHighlightChanged,
     this.containedInWell: false,
-    this.highlightShape: Shape.circle
+    this.highlightShape: BoxShape.circle
   }) : super(key: key);
 
   final Widget child;
@@ -27,7 +27,7 @@ class InkResponse extends StatefulComponent {
   final GestureLongPressCallback onLongPress;
   final ValueChanged<bool> onHighlightChanged;
   final bool containedInWell;
-  final Shape highlightShape;
+  final BoxShape highlightShape;
 
   _InkResponseState createState() => new _InkResponseState<InkResponse>();
 }
@@ -170,6 +170,6 @@ class InkWell extends InkResponse {
     onLongPress: onLongPress,
     onHighlightChanged: onHighlightChanged,
     containedInWell: true,
-    highlightShape: Shape.rectangle
+    highlightShape: BoxShape.rectangle
   );
 }
