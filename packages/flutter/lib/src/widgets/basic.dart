@@ -1413,7 +1413,7 @@ class AsyncImage extends StatelessComponent {
 }
 
 class AssetImage extends StatelessComponent {
-  AssetImage({
+  const AssetImage({
     Key key,
     this.name,
     this.bundle,
