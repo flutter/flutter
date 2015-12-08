@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -37,13 +38,16 @@ class RouteArguments {
 }
 typedef Widget RouteBuilder(RouteArguments args);
 
+typedef Future<LocaleQueryData> LocaleChangedCallback(ui.Locale locale);
+
 class MaterialApp extends StatefulComponent {
   MaterialApp({
     Key key,
     this.title,
     this.theme,
     this.routes: const <String, RouteBuilder>{},
-    this.onGenerateRoute
+    this.onGenerateRoute,
+    this.onLocaleChanged
   }) : super(key: key) {
     assert(routes != null);
     assert(routes.containsKey(Navigator.defaultRouteName) || onGenerateRoute != null);
@@ -53,6 +57,7 @@ class MaterialApp extends StatefulComponent {
   final ThemeData theme;
   final Map<String, RouteBuilder> routes;
   final RouteFactory onGenerateRoute;
+  final LocaleChangedCallback onLocaleChanged;
 
   _MaterialAppState createState() => new _MaterialAppState();
 }
@@ -62,11 +67,13 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
   GlobalObjectKey _navigator;
 
   Size _size;
+  LocaleQueryData _localeData;
 
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
     _size = ui.window.size;
+    didChangeLocale(ui.window.locale);
     FlutterBinding.instance.addObserver(this);
   }
 
@@ -88,6 +95,15 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
 
   void didChangeSize(Size size) => setState(() { _size = size; });
 
+  void didChangeLocale(ui.Locale locale) {
+    if (config.onLocaleChanged != null) {
+      config.onLocaleChanged(locale).then((LocaleQueryData data) {
+        if (mounted)
+          setState(() { _localeData = data; });
+      });
+    }
+  }
+
   final HeroController _heroController = new HeroController();
 
   Route _generateRoute(NamedRouteSettings settings) {
@@ -106,23 +122,32 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
   }
 
   Widget build(BuildContext context) {
+    if (config.onLocaleChanged != null && _localeData == null) {
+      // If the app expects a locale but we don't yet know the locale, then
+      // don't build the widgets now.
+      return new Container();
+    }
+
     ThemeData theme = config.theme ?? new ThemeData.fallback();
     return new MediaQuery(
       data: new MediaQueryData(size: _size),
-      child: new Theme(
-        data: theme,
-        child: new DefaultTextStyle(
-          style: _errorTextStyle,
-          child: new DefaultAssetBundle(
-            bundle: _defaultBundle,
-            child: new Title(
-              title: config.title,
-              color: theme.primaryColor,
-              child: new Navigator(
-                key: _navigator,
-                initialRoute: ui.window.defaultRouteName,
-                onGenerateRoute: _generateRoute,
-                observer: _heroController
+      child: new LocaleQuery(
+        data: _localeData,
+        child: new Theme(
+          data: theme,
+          child: new DefaultTextStyle(
+            style: _errorTextStyle,
+            child: new DefaultAssetBundle(
+              bundle: _defaultBundle,
+              child: new Title(
+                title: config.title,
+                color: theme.primaryColor,
+                child: new Navigator(
+                  key: _navigator,
+                  initialRoute: ui.window.defaultRouteName,
+                  onGenerateRoute: _generateRoute,
+                  observer: _heroController
+                )
               )
             )
           )

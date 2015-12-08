@@ -19,6 +19,7 @@ export 'src/widgets/gesture_detector.dart';
 export 'src/widgets/gridpaper.dart';
 export 'src/widgets/heroes.dart';
 export 'src/widgets/homogeneous_viewport.dart';
+export 'src/widgets/locale_query.dart';
 export 'src/widgets/media_query.dart';
 export 'src/widgets/mimic.dart';
 export 'src/widgets/mixed_viewport.dart';

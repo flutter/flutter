@@ -8,20 +8,26 @@ part of stocks;
 // To generate the stock_messages_*.dart files from the ARB files, run:
 //   pub run intl:generate_from_arb --output-dir=lib/i18n --generated-file-prefix=stock_ --no-use-deferred-loading lib/stock_strings.dart lib/i18n/stocks_*.arb
 
-class StockStrings {
-  static String title() => Intl.message(
+class StockStrings extends LocaleQueryData {
+  static StockStrings of(BuildContext context) {
+    return LocaleQuery.of(context);
+  }
+
+  static final StockStrings instance = new StockStrings();
+
+  String title() => Intl.message(
     'Stocks',
     name: 'title',
     desc: 'Title for the Stocks application'
   );
 
-  static String market() => Intl.message(
+  String market() => Intl.message(
     'MARKET',
     name: 'market',
     desc: 'Label for the Market tab'
   );
 
-  static String portfolio() => Intl.message(
+  String portfolio() => Intl.message(
     'PORTFOLIO',
     name: 'portfolio',
     desc: 'Label for the Portfolio tab'

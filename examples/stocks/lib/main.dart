@@ -94,6 +94,14 @@ class StocksAppState extends State<StocksApp> {
     return null;
   }
 
+  Future<LocaleQueryData> _onLocaleChanged(ui.Locale locale) {
+    String localeString = locale.toString();
+    return initializeMessages(localeString).then((_) {
+      Intl.defaultLocale = localeString;
+      return StockStrings.instance;
+    });
+  }
+
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Stocks',
@@ -102,13 +110,12 @@ class StocksAppState extends State<StocksApp> {
          '/':         (RouteArguments args) => new StockHome(_stocks, _symbols, _optimismSetting, modeUpdater),
          '/settings': (RouteArguments args) => new StockSettings(_optimismSetting, _backupSetting, settingsUpdater)
       },
-      onGenerateRoute: _getRoute
+      onGenerateRoute: _getRoute,
+      onLocaleChanged: _onLocaleChanged
     );
   }
 }
 
 void main() {
-  initializeMessages(Intl.defaultLocale).then((_) {
-    runApp(new StocksApp());
-  });
+  runApp(new StocksApp());
 }
