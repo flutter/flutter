@@ -875,6 +875,18 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(false);
   }
 
+  String debugGetOwnershipChain(int limit) {
+    List<String> chain = <String>[];
+    Element node = this;
+    while (chain.length < limit && node != null) {
+      chain.add(node.toStringShort());
+      node = node._parent;
+    }
+    if (node != null)
+      chain.add('\u22EF');
+    return chain.join(' \u2190 ');
+  }
+
   String toStringShort() {
     return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
   }
@@ -1354,15 +1366,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
   }
 
   void debugUpdateRenderObjectOwner() {
-    List<String> chain = <String>[];
-    Element node = this;
-    while (chain.length < 4 && node != null) {
-      chain.add(node.toStringShort());
-      node = node._parent;
-    }
-    if (node != null)
-      chain.add('\u22EF');
-    _renderObject.debugOwner = chain.join(' \u2190 ');
+    _renderObject.debugOwner = debugGetOwnershipChain(4);
   }
 
   void performRebuild() {

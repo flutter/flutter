@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -98,6 +99,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     Widget contents = new InkWell(
       onTap: config.onPressed,
       onHighlightChanged: _handleHighlightChanged,

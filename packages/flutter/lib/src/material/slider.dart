@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
+import 'debug.dart';
 import 'theme.dart';
 
 class Slider extends StatelessComponent {
@@ -37,6 +38,7 @@ class Slider extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     return new _SliderRenderObjectWidget(
       value: (value - min) / (max - min),
       primaryColor: Theme.of(context).accentColor,

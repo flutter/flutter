@@ -9,6 +9,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'icon.dart';
 import 'ink_well.dart';
 import 'shadows.dart';
@@ -262,6 +263,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     return new GestureDetector(
       onTap: _handleTap,
       child: new Container(

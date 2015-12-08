@@ -38,10 +38,12 @@ void main() {
 
       Widget builder() {
         return new Center(
-          child: new Input(
-            key: inputKey,
-            placeholder: 'Placeholder',
-            onChanged: (String value) { inputValue = value; }
+          child: new Material(
+            child: new Input(
+              key: inputKey,
+              placeholder: 'Placeholder',
+              onChanged: (String value) { inputValue = value; }
+            )
           )
         );
       }
@@ -72,9 +74,11 @@ void main() {
 
       Widget builder() {
         return new Center(
-          child: new Input(
-            key: inputKey,
-            placeholder: 'Placeholder'
+          child: new Material(
+            child: new Input(
+              key: inputKey,
+              placeholder: 'Placeholder'
+            )
           )
         );
       }
@@ -112,9 +116,11 @@ void main() {
 
       Widget builder() {
         return new Center(
-          child: new Input(
-            key: inputKey,
-            placeholder: 'Placeholder'
+          child: new Material(
+            child: new Input(
+              key: inputKey,
+              placeholder: 'Placeholder'
+            )
           )
         );
       }
@@ -145,10 +151,12 @@ void main() {
 
       Widget builder() {
         return new Center(
-          child: new Input(
-            key: inputKey,
-            hideText: true,
-            placeholder: 'Placeholder'
+          child: new Material(
+            child: new Input(
+              key: inputKey,
+              hideText: true,
+              placeholder: 'Placeholder'
+            )
           )
         );
       }

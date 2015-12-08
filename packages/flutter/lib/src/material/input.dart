@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'theme.dart';
 
 export 'package:flutter/rendering.dart' show ValueChanged;
@@ -75,6 +76,7 @@ class InputState extends ScrollableState<Input> {
   }
 
   Widget buildContent(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     bool focused = Focus.at(context, config);
 

@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'icon.dart';
 
 const double _kChipHeight = 32.0;
@@ -34,6 +35,7 @@ class Chip extends StatelessComponent {
   final VoidCallback onDeleted;
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     final bool deletable = onDeleted != null;
     double leftPadding = 12.0;
     double rightPadding = 12.0;

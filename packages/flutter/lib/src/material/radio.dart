@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'debug.dart';
 import 'theme.dart';
 import 'toggleable.dart';
 
@@ -39,6 +40,7 @@ class Radio<T> extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     return new _RadioRenderObjectWidget(
       selected: value == groupValue,
