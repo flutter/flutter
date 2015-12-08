@@ -54,6 +54,11 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   scoped_ptr<compositor::LayerTree> layer_tree(
       reinterpret_cast<compositor::LayerTree*>(layer_tree_ptr));
 
+  if (layer_tree->frame_size().isEmpty()) {
+    callback.Run();
+    return;
+  }
+
   MGLResizeSurface(layer_tree->frame_size().width(),
                    layer_tree->frame_size().height());
   SkCanvas* canvas = ganesh_canvas_.GetCanvas(0, layer_tree->frame_size());
