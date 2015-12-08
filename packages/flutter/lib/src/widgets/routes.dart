@@ -425,16 +425,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final PageStorageBucket _storageBucket = new PageStorageBucket();
 
   Widget _buildModalBarrier(BuildContext context) {
+    Widget barrier;
     if (barrierColor != null) {
       assert(barrierColor != _kTransparent);
-      return new AnimatedModalBarrier(
+      barrier = new AnimatedModalBarrier(
         color: new AnimatedColorValue(_kTransparent, end: barrierColor, curve: Curves.ease),
         performance: performance,
         dismissable: barrierDismissable
       );
     } else {
-      return new ModalBarrier(dismissable: barrierDismissable);
+      barrier = new ModalBarrier(dismissable: barrierDismissable);
     }
+    assert(performance.status != PerformanceStatus.dismissed);
+    return new IgnorePointer(
+      ignoring: performance.status == PerformanceStatus.reverse,
+      child: barrier
+    );
   }
 
   Widget _buildModalScope(BuildContext context) {
