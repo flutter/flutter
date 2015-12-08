@@ -46,7 +46,7 @@ void RasterizerMojo::ConnectToRasterizer (
 void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
                           const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerMojo::Draw");
-  if (!context_) {
+  if (!MGLGetCurrentContext()) {
     callback.Run();
     return;
   }
