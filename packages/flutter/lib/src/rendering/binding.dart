@@ -56,10 +56,12 @@ class _PointerEventConverter {
       PointerDeviceKind kind = _pointerKindMap[datum.kind];
       switch (datum.type) {
         case PointerType.DOWN:
+          assert(!_pointers.containsKey(datum.pointer));
           _PointerState state = _pointers.putIfAbsent(
             datum.pointer,
             () => new _PointerState(position)
           );
+          assert(state.lastPosition == position);
           state.startNewPointer();
           state.setDown();
           yield new PointerAddedEvent(
@@ -96,13 +98,11 @@ class _PointerEventConverter {
           );
           break;
         case PointerType.MOVE:
-          _PointerState state = _pointers[datum.pointer];
           // If the service starts supporting hover pointers, then it must also
-          // start sending us ADDED and REMOVED data points. In the meantime, we
-          // only support "down" moves, and ignore spurious moves.
+          // start sending us ADDED and REMOVED data points.
           // See also: https://github.com/flutter/flutter/issues/720
-          if (state == null)
-            break;
+          assert(_pointers.containsKey(datum.pointer));
+          _PointerState state = _pointers[datum.pointer];
           assert(state.down);
           Offset offset = position - state.lastPosition;
           state.lastPosition = position;
@@ -129,8 +129,9 @@ class _PointerEventConverter {
           break;
         case PointerType.UP:
         case PointerType.CANCEL:
+          assert(_pointers.containsKey(datum.pointer));
           _PointerState state = _pointers[datum.pointer];
-          assert(state != null);
+          assert(state.down);
           assert(position == state.lastPosition);
           state.setUp();
           if (datum.type == PointerType.UP) {
