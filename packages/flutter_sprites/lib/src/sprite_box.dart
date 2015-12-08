@@ -223,7 +223,7 @@ class SpriteBox extends RenderBox {
       // Check if this event should be dispatched
       if (node.handleMultiplePointers || event.pointer == node._handlingPointer) {
         // Dispatch event
-        bool consumedEvent = node.handleEvent(new SpriteBoxEvent(new Point(event.x, event.y), event.runtimeType, event.pointer));
+        bool consumedEvent = node.handleEvent(new SpriteBoxEvent(event.position, event.runtimeType, event.pointer));
         if (consumedEvent == null || consumedEvent)
           break;
       }
