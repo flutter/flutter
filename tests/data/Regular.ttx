@@ -27,6 +27,7 @@
     <GlyphID id="7" name="-"/>
     <GlyphID id="8" name="!"/>
     <GlyphID id="9" name="U+0301"/>
+    <GlyphID id="10" name="U+203C"/>
   </GlyphOrder>
 
   <head>
@@ -153,6 +154,7 @@
     <mtx name="-" width="500" lsb="93"/>
     <mtx name="!" width="500" lsb="93"/>
     <mtx name="U+0301" width="500" lsb="93"/>
+    <mtx name="U+203C" width="500" lsb="93"/>
   </hmtx>
 
   <cmap>
@@ -167,7 +169,11 @@
       <map code="0x002D" name="-" />
       <map code="0x0021" name="!" />
       <map code="0x0301" name="U+0301" />
+      <map code="0x203C" name="U+203C" />
     </cmap_format_4>
+    <cmap_format_14 format="14" platformID="0" platEncID="5" length="29" numVarSelectorRecords="1">
+      <map uvs="0xFE0E" uv="0x203C" name="None" />
+    </cmap_format_14>
   </cmap>
 
   <loca>
@@ -208,6 +214,9 @@
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
     <TTGlyph name="U+0301" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="U+203C" xMin="0" yMin="0" xMax="0" yMax="0">
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
   </glyf>

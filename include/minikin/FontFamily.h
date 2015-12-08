@@ -48,6 +48,7 @@ public:
     operator bool() const { return mBits != 0; }
 
     bool isUnsupported() const { return mBits == kUnsupportedLanguage; }
+    bool hasEmojiFlag() const { return isUnsupported() ? false : (mBits & kEmojiFlag); }
 
     std::string getString() const;
 
@@ -61,9 +62,10 @@ private:
 
     static const uint32_t kUnsupportedLanguage = 0xFFFFFFFFu;
     static const uint32_t kBaseLangMask = 0xFFFFFFu;
-    static const uint32_t kScriptMask = (1u << 26) - (1u << 24);
     static const uint32_t kHansFlag = 1u << 24;
     static const uint32_t kHantFlag = 1u << 25;
+    static const uint32_t kEmojiFlag = 1u << 26;
+    static const uint32_t kScriptMask = kHansFlag | kHantFlag | kEmojiFlag;
     uint32_t mBits;
 };
 

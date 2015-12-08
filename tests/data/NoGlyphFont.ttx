@@ -18,12 +18,6 @@
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
     <GlyphID id="0" name=".notdef"/>
-    <GlyphID id="1" name="U+1F469"/>
-    <GlyphID id="2" name="U+1F467"/>
-    <GlyphID id="3" name="U+20E3"/>
-    <GlyphID id="4" name="0"/>
-    <GlyphID id="5" name="U+1F470"/>
-    <GlyphID id="6" name="U+203C_VS16"/>
   </GlyphOrder>
 
   <head>
@@ -141,26 +135,12 @@
 
   <hmtx>
     <mtx name=".notdef" width="500" lsb="93"/>
-    <mtx name="U+1F469" width="500" lsb="93"/>
-    <mtx name="U+1F467" width="500" lsb="93"/>
-    <mtx name="U+20E3" width="500" lsb="93"/>
-    <mtx name="0" width="500" lsb="93"/>
-    <mtx name="U+1F470" width="500" lsb="93"/>
-    <mtx name="U+203C_VS16" width="500" lsb="93"/>
   </hmtx>
 
   <cmap>
     <tableVersion version="0"/>
-    <cmap_format_12 format="12" reserved="0" length="3" nGroups="1" platformID="3" platEncID="1" language="0">
-      <map code="0x1F469" name="U+1F469" />
-      <map code="0x1F467" name="U+1F467" />
-      <map code="0x20E3" name="U+20E3" />
-      <map code="0x0030" name="0" />
-      <map code="0x1F470" name="U+1F470" />
-    </cmap_format_12>
-    <cmap_format_14 format="14" platformID="0" platEncID="5" length="30" numVarSelectorRecords="1">
-      <map uvs="0xFE0F" uv="0x203C" name="U+203C_VS16" />
-    </cmap_format_14>
+    <cmap_format_4 platformID="3" platEncID="10" language="0">
+    </cmap_format_4>
   </cmap>
 
   <loca>
@@ -175,51 +155,32 @@
     <TTGlyph name=".notdef" xMin="0" yMin="0" xMax="0" yMax="0">
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
-
-    <TTGlyph name="U+1F469" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="U+1F467" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="U+20E3" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="0" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="U+1F470" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
-    <TTGlyph name="U+203C_VS16" xMin="0" yMin="0" xMax="0" yMax="0">
-      <contour></contour><instructions><assembly></assembly></instructions>
-    </TTGlyph>
   </glyf>
 
   <name>
     <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      EmojiFont Test
+      EmptyFont Test
     </namerecord>
     <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
       Regular
     </namerecord>
     <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      EmojiFont Test
+      EmptyFont Test
     </namerecord>
     <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      EmojiFontTest-Regular
+      EmptyFontTest-Regular
     </namerecord>
     <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
-      EmojiFont Test
+      EmptyFont Test
     </namerecord>
     <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
       Regular
     </namerecord>
     <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
-      EmojiFont Test
+      EmptyFont Test
     </namerecord>
     <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
-      EmojiFontTest-Regular
+      EmptyFontTest-Regular
     </namerecord>
   </name>
 

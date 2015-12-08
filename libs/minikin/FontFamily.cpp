@@ -62,11 +62,15 @@ FontLanguage::FontLanguage(const char* buf, size_t size) {
             uint16_t c = buf[next];
             if (c == '-' || c == '_') break;
         }
-        if (next - i == 4 && buf[i] == 'H' && buf[i+1] == 'a' && buf[i+2] == 'n') {
-            if (buf[i+3] == 's') {
-                bits |= kHansFlag;
-            } else if (buf[i+3] == 't') {
-                bits |= kHantFlag;
+        if (next - i == 4) {
+            if (buf[i] == 'H' && buf[i+1] == 'a' && buf[i+2] == 'n') {
+                if (buf[i+3] == 's') {
+                    bits |= kHansFlag;
+                } else if (buf[i+3] == 't') {
+                    bits |= kHantFlag;
+                }
+            } else if (buf[i] == 'Q' && buf[i+1] == 'a' && buf[i+2] == 'a'&& buf[i+3] == 'e') {
+                bits |= kEmojiFlag;
             }
         }
         // TODO: this might be a good place to infer script from country (zh_TW -> Hant),
@@ -96,10 +100,17 @@ std::string FontLanguage::getString() const {
             buf[i++] = 'd';
         }
         buf[i++] = '-';
-        buf[i++] = 'H';
-        buf[i++] = 'a';
-        buf[i++] = 'n';
-        buf[i++] = (mBits & kHansFlag) ? 's' : 't';
+        if (mBits & kEmojiFlag) {
+            buf[i++] = 'Q';
+            buf[i++] = 'a';
+            buf[i++] = 'a';
+            buf[i++] = 'e';
+        } else {
+            buf[i++] = 'H';
+            buf[i++] = 'a';
+            buf[i++] = 'n';
+            buf[i++] = (mBits & kHansFlag) ? 's' : 't';
+        }
     }
     return std::string(buf, i);
 }
