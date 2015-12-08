@@ -1413,7 +1413,9 @@ class AsyncImage extends StatelessComponent {
 }
 
 class AssetImage extends StatelessComponent {
-  AssetImage({
+  // Don't add asserts here unless absolutely necessary, since it will
+  // require removing the const constructor, which is an API change.
+  const AssetImage({
     Key key,
     this.name,
     this.bundle,
