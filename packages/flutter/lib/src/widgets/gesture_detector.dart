@@ -54,20 +54,51 @@ class GestureDetector extends StatefulComponent {
 
   final Widget child;
 
+  /// A pointer that might cause a tap has contacted the screen at a particular
+  /// location.
   final GestureTapDownCallback onTapDown;
+
+  /// A pointer that will trigger a tap has stopped contacting the screen at a
+  /// particular location.
   final GestureTapDownCallback onTapUp;
+
+  /// A tap has occurred.
   final GestureTapCallback onTap;
+
+  /// The pointer that previously triggered the [onTapDown] will not end up
+  /// causing a tap.
   final GestureTapCancelCallback onTapCancel;
+
+  /// The user has tapped the screen at the same location twice in quick
+  /// succession.
   final GestureTapCallback onDoubleTap;
 
+  /// A pointer has remained in contact with the screen at the same location for
+  /// a long period of time.
   final GestureLongPressCallback onLongPress;
 
+  /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragStartCallback onVerticalDragStart;
+
+  /// A pointer that is in contact with the screen and moving vertically has
+  /// moved in the vertical direction.
   final GestureDragUpdateCallback onVerticalDragUpdate;
+
+  /// A pointer that was previously in contact with the screen and moving
+  /// vertically is no longer in contact with the screen and was moving at a
+  /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onVerticalDragEnd;
 
+  /// A pointer has contacted the screen and might begin to move horizontally.
   final GestureDragStartCallback onHorizontalDragStart;
+
+  /// A pointer that is in contact with the screen and moving horizontally has
+  /// moved in the horizontal direction.
   final GestureDragUpdateCallback onHorizontalDragUpdate;
+
+  /// A pointer that was previously in contact with the screen and moving
+  /// horizontally is no longer in contact with the screen and was moving at a
+  /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onHorizontalDragEnd;
 
   final GesturePanStartCallback onPanStart;
