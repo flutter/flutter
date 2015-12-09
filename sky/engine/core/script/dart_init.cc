@@ -86,10 +86,6 @@ static const char* kDartCheckedModeArgs[] = {
     "--error_on_bad_override",
 };
 
-void UnhandledExceptionCallback(Dart_Handle error) {
-  LOG(ERROR) << Dart_GetError(error);
-}
-
 void IsolateShutdownCallback(void* callback_data) {
   // TODO(dart)
 }
@@ -301,7 +297,7 @@ void InitDartVM() {
                           PrecompiledInstructionsSymbolIfPresent(),
                           IsolateCreateCallback,
                           nullptr,  // Isolate interrupt callback.
-                          UnhandledExceptionCallback, IsolateShutdownCallback,
+                          nullptr, IsolateShutdownCallback,
                           // File IO callbacks.
                           nullptr, nullptr, nullptr, nullptr,
                           // Entroy source
