@@ -34,18 +34,22 @@ class RenderStatisticsBox extends RenderBox {
   bool get sizedByParent => true;
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.minWidth;
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.maxWidth;
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.minHeight;
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.maxHeight;
   }
 

@@ -60,6 +60,7 @@ class RenderEditableParagraph extends RenderParagraph {
   }
 
   BoxConstraints _getTextContraints(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return new BoxConstraints(
       minWidth: 0.0,
       maxWidth: double.INFINITY,

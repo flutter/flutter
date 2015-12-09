@@ -167,6 +167,7 @@ class RenderBlock extends RenderBlockBase {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (isVertical) {
       return _getIntrinsicCrossAxis(
         constraints,
@@ -177,6 +178,7 @@ class RenderBlock extends RenderBlockBase {
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (isVertical) {
       return _getIntrinsicCrossAxis(
         constraints,
@@ -187,6 +189,7 @@ class RenderBlock extends RenderBlockBase {
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (isVertical)
       return _getIntrinsicMainAxis(constraints);
     return _getIntrinsicCrossAxis(
@@ -196,6 +199,7 @@ class RenderBlock extends RenderBlockBase {
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (isVertical)
       return _getIntrinsicMainAxis(constraints);
     return _getIntrinsicCrossAxis(
@@ -361,24 +365,28 @@ class RenderBlockViewport extends RenderBlockBase {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (isVertical)
       return _getIntrinsicDimension(constraints, minCrossAxisExtentCallback, constraints.constrainWidth);
     return constraints.constrainWidth(minExtent);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (isVertical)
       return _getIntrinsicDimension(constraints, maxCrossAxisExtentCallback, constraints.constrainWidth);
     return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minWidth: minExtent).enforce(constraints).constrainWidth);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (!isVertical)
       return _getIntrinsicDimension(constraints, minCrossAxisExtentCallback, constraints.constrainHeight);
     return constraints.constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (!isVertical)
       return _getIntrinsicDimension(constraints, maxCrossAxisExtentCallback, constraints.constrainHeight);
     return _getIntrinsicDimension(constraints, totalExtentCallback, new BoxConstraints(minHeight: minExtent).enforce(constraints).constrainHeight);

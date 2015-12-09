@@ -38,24 +38,28 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMinIntrinsicWidth(constraints);
     return super.getMinIntrinsicWidth(constraints);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMaxIntrinsicWidth(constraints);
     return super.getMaxIntrinsicWidth(constraints);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMinIntrinsicHeight(constraints);
     return super.getMinIntrinsicHeight(constraints);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMaxIntrinsicHeight(constraints);
     return super.getMaxIntrinsicHeight(constraints);
@@ -102,6 +106,7 @@ class RenderConstrainedBox extends RenderProxyBox {
     BoxConstraints additionalConstraints
   }) : _additionalConstraints = additionalConstraints, super(child) {
     assert(additionalConstraints != null);
+    assert(additionalConstraints.isNormalized);
   }
 
   /// Additional constraints to apply to [child] during layout
@@ -109,6 +114,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   BoxConstraints _additionalConstraints;
   void set additionalConstraints (BoxConstraints newConstraints) {
     assert(newConstraints != null);
+    assert(newConstraints.isNormalized);
     if (_additionalConstraints == newConstraints)
       return;
     _additionalConstraints = newConstraints;
@@ -116,24 +122,28 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMinIntrinsicWidth(_additionalConstraints.enforce(constraints));
     return _additionalConstraints.enforce(constraints).constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMaxIntrinsicWidth(_additionalConstraints.enforce(constraints));
     return _additionalConstraints.enforce(constraints).constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMinIntrinsicHeight(_additionalConstraints.enforce(constraints));
     return _additionalConstraints.enforce(constraints).constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMaxIntrinsicHeight(_additionalConstraints.enforce(constraints));
     return _additionalConstraints.enforce(constraints).constrainHeight(0.0);
@@ -221,24 +231,28 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
     return _getInnerConstraints(constraints).constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
     return _getInnerConstraints(constraints).constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
     return _getInnerConstraints(constraints).constrainHeight(0.0);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child != null)
       return child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
     return _getInnerConstraints(constraints).constrainHeight(0.0);
@@ -307,6 +321,7 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   Size _applyAspectRatio(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     double width = constraints.constrainWidth();
     double height = constraints.constrainHeight(width / _aspectRatio);
     return new Size(width, height);
@@ -385,10 +400,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return getMaxIntrinsicWidth(constraints);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child == null)
       return constraints.constrainWidth(0.0);
     double childResult = child.getMaxIntrinsicWidth(constraints);
@@ -396,6 +413,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child == null)
       return constraints.constrainHeight(0.0);
     double childResult = child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
@@ -403,6 +421,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child == null)
       return constraints.constrainHeight(0.0);
     double childResult = child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
@@ -451,22 +470,26 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child == null)
       return constraints.constrainWidth(0.0);
     return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child == null)
       return constraints.constrainWidth(0.0);
     return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return getMaxIntrinsicHeight(constraints);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     if (child == null)
       return constraints.constrainHeight(0.0);
     return child.getMaxIntrinsicHeight(constraints);

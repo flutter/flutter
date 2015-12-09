@@ -148,6 +148,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _getIntrinsicSize({ BoxConstraints constraints,
                              FlexDirection sizingDirection,
                              _ChildSizingFunction childSize }) {
+    assert(constraints.isNormalized);
     // http://www.w3.org/TR/2015/WD-css-flexbox-1-20150514/#intrinsic-sizes
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE

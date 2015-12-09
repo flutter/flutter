@@ -8,7 +8,7 @@ void main() {
     RenderDecoratedBox box = new RenderDecoratedBox(decoration: new BoxDecoration());
     RenderFlex flex = new RenderFlex(children: <RenderBox>[box]);
     layout(flex, constraints: const BoxConstraints(
-      minWidth: 200.0, maxWidth: 100.0, minHeight: 200.0, maxHeight: 100.0)
+      minWidth: 200.0, maxWidth: 200.0, minHeight: 200.0, maxHeight: 200.0)
     );
 
     expect(flex.size.width, equals(200.0), reason: "flex width");

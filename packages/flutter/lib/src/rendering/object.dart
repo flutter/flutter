@@ -366,6 +366,9 @@ abstract class Constraints {
 
   /// Whether there is exactly one size possible given these constraints
   bool get isTight;
+
+  /// Whether the constraint is expressed in a consistent manner.
+  bool get isNormalized;
 }
 
 typedef void RenderObjectVisitor(RenderObject child);
@@ -657,6 +660,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
+    assert(constraints.isNormalized);
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final RenderObject parent = this.parent;

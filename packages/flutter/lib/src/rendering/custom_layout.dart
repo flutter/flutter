@@ -41,6 +41,7 @@ abstract class MultiChildLayoutDelegate {
       'A MultiChildLayoutDelegate cannot layout the same child more than once.';
       return _debugChildrenNeedingLayout.remove(child);
     });
+    assert(constraints.isNormalized);
     child.layout(constraints, parentUsesSize: true);
     return child.size;
   }
@@ -130,6 +131,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   Size _getSize(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrain(_delegate.getSize(constraints));
   }
 
