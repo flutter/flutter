@@ -39,9 +39,9 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 
   final TextStyle daveStyle = new TextStyle(color: Colors.indigo[400], height: 1.8);
   final TextStyle halStyle = new TextStyle(color: Colors.red[400], fontFamily: "monospace");
-  final TextStyle boldStyle = const TextStyle(fontWeight: bold);
+  final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
   final TextStyle underlineStyle = const TextStyle(
-    decoration: underline,
+    decoration: TextDecoration.underline,
     decorationColor: const Color(0xFF000000),
     decorationStyle: TextDecorationStyle.wavy
   );

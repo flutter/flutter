@@ -20,7 +20,7 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
   }
 
   List<PopupMenuItem> _buildMenu() {
-    TextStyle style = const TextStyle(fontSize: 18.0, fontWeight: bold);
+    TextStyle style = const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold);
     String pad = '';
     return new List<PopupMenuItem>.generate(_itemCount, (int i) {
       pad += '-';

@@ -6,21 +6,6 @@ import 'dart:ui' as ui;
 
 import 'basic_types.dart';
 
-/// A normal font weight
-const normal = FontWeight.w400;
-
-/// A bold font weight
-const bold = FontWeight.w700;
-
-/// Draw a line underneath each line of text
-const underline = const <TextDecoration>[TextDecoration.underline];
-
-/// Draw a line above each line of text
-const overline = const <TextDecoration>[TextDecoration.overline];
-
-/// Draw a line through each line of text
-const lineThrough = const <TextDecoration>[TextDecoration.lineThrough];
-
 /// An immutable style in which paint text
 class TextStyle {
   const TextStyle({
@@ -70,8 +55,8 @@ class TextStyle {
   /// The distance between the text baselines, as a multiple of the font size.
   final double height;
 
-  /// A list of decorations to paint near the text.
-  final List<TextDecoration> decoration; // TODO(ianh): Switch this to a Set<> once Dart supports constant Sets
+  /// The decorations to paint near the text.
+  final TextDecoration decoration;
 
   /// The color in which to paint the text decorations.
   final Color decorationColor;
@@ -91,7 +76,7 @@ class TextStyle {
     TextAlign textAlign,
     TextBaseline textBaseline,
     double height,
-    List<TextDecoration> decoration,
+    TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle
   }) {
@@ -302,26 +287,7 @@ class TextStyle {
       if (decoration != null) {
         if (haveDecorationDescription)
           decorationDescription += ' ';
-        bool multipleDecorations = false;
-        for (TextDecoration value in decoration) {
-          if (multipleDecorations)
-            decorationDescription += '+';
-          switch (value) {
-            case TextDecoration.none:
-              decorationDescription += 'none';
-              break;
-            case TextDecoration.underline:
-              decorationDescription += 'underline';
-              break;
-            case TextDecoration.overline:
-              decorationDescription += 'overline';
-              break;
-            case TextDecoration.lineThrough:
-              decorationDescription += 'line-through';
-              break;
-          }
-          multipleDecorations = true;
-        }
+        decorationDescription += '$decoration';
         haveDecorationDescription = true;
       }
       assert(haveDecorationDescription);

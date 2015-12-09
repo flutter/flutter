@@ -63,12 +63,7 @@ export 'package:flutter/rendering.dart' show
     TextStyle,
     TransferMode,
     ValueChanged,
-    VoidCallback,
-    bold,
-    normal,
-    underline,
-    overline,
-    lineThrough;
+    VoidCallback;
 
 
 // PAINTING NODES

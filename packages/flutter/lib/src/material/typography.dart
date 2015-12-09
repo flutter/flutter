@@ -71,7 +71,7 @@ class Typography {
     fontSize: 48.0,
     fontWeight: FontWeight.w900,
     textAlign: TextAlign.right,
-    decoration: underline,
+    decoration: TextDecoration.underline,
     decorationColor: const Color(0xFFFF00),
     decorationStyle: TextDecorationStyle.double
   );

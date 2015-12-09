@@ -34,7 +34,7 @@ class PageableListAppState extends State<PageableListApp> {
   }
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
+    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   List<CardModel> cardModels;
   Size pageSize = new Size(200.0, 200.0);

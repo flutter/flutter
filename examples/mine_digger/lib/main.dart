@@ -31,7 +31,7 @@ const List<Color> textColors = const <Color>[
 ];
 
 final List<TextStyle> textStyles = textColors.map((Color color) {
-  return new TextStyle(color: color, fontWeight: bold, textAlign: TextAlign.center);
+  return new TextStyle(color: color, fontWeight: FontWeight.bold, textAlign: TextAlign.center);
 }).toList();
 
 enum CellState { covered, exploded, cleared, flagged, shown }
