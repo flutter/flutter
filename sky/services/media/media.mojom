@@ -14,7 +14,23 @@ interface MediaPlayer {
   SeekTo(uint32 msec);
 };
 
+[ServiceName="media::SoundPool"]
+interface SoundPool {
+  Load(handle<data_pipe_consumer> data_source) => (bool success, int32 sound_id);
+  Play(int32 sound_id, float left_volume, float right_volume, bool loop, float rate) =>
+      (bool success, int32 stream_id);
+  Stop(int32 stream_id);
+  Pause(int32 stream_id);
+  Resume(int32 stream_id);
+  SetRate(int32 stream_id, float rate);
+  SetVolume(int32 stream_id, float left_volume, float right_volume);
+
+  PauseAll();
+  ResumeAll();
+};
+
 [ServiceName="media::MediaService"]
 interface MediaService {
   CreatePlayer(MediaPlayer& player);
+  CreateSoundPool(SoundPool& pool, int32 max_streams);
 };
