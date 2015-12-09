@@ -24,11 +24,11 @@
     <family lang="zh-Hans">
         <font weight="400" style="normal">ZhHans.ttf</font>
     </family>
-    <family lang="zh-Hant">
-        <font weight="400" style="normal">ZhHant.ttf</font>
-    </family>
     <family lang="ja">
         <font weight="400" style="normal">Ja.ttf</font>
+    </family>
+    <family lang="zh-Hant">
+        <font weight="400" style="normal">ZhHant.ttf</font>
     </family>
     <family lang="ko">
         <font weight="400" style="normal">Ko.ttf</font>

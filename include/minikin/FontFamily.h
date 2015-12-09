@@ -52,7 +52,7 @@ public:
 
     std::string getString() const;
 
-    // 0 = no match, 1 = language matches, 2 = language and script match
+    // 0 = no match, 1 = language matches
     int match(const FontLanguage other) const;
 
 private:

@@ -164,7 +164,7 @@ TEST(FontCollectionItemizeTest, itemize_emoji) {
     ASSERT_EQ(2U, runs.size());
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(2, runs[0].end);
-    EXPECT_EQ(kZH_HantFont, getFontPath(runs[0]));
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeBold());
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
 
@@ -265,6 +265,17 @@ TEST(FontCollectionItemizeTest, itemize_non_latin) {
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(2, runs[0].end);
     EXPECT_EQ(kZH_HansFont, getFontPath(runs[0]));
+    EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeBold());
+    EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
+
+    // Both zh-Hant and ja fonts support U+242EE, but zh-Hans doesn't.
+    // Here, ja and zh-Hant font should have the same score but ja should be selected since it is
+    // listed before zh-Hant.
+    itemize(collection.get(), "U+242EE", kZH_HansStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kJAFont, getFontPath(runs[0]));
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeBold());
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
 }
