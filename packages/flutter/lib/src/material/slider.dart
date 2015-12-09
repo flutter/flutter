@@ -19,6 +19,7 @@ class Slider extends StatelessComponent {
     this.value,
     this.min: 0.0,
     this.max: 1.0,
+    this.activeColor,
     this.onChanged
   }) : super(key: key) {
     assert(value != null);
@@ -30,6 +31,7 @@ class Slider extends StatelessComponent {
   final double value;
   final double min;
   final double max;
+  final Color activeColor;
   final ValueChanged<double> onChanged;
 
   void _handleChanged(double value) {
@@ -41,29 +43,29 @@ class Slider extends StatelessComponent {
     assert(debugCheckHasMaterial(context));
     return new _SliderRenderObjectWidget(
       value: (value - min) / (max - min),
-      primaryColor: Theme.of(context).accentColor,
+      activeColor: activeColor ?? Theme.of(context).accentColor,
       onChanged: onChanged != null ? _handleChanged : null
     );
   }
 }
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
-  _SliderRenderObjectWidget({ Key key, this.value, this.primaryColor, this.onChanged })
+  _SliderRenderObjectWidget({ Key key, this.value, this.activeColor, this.onChanged })
       : super(key: key);
 
   final double value;
-  final Color primaryColor;
+  final Color activeColor;
   final ValueChanged<double> onChanged;
 
   _RenderSlider createRenderObject() => new _RenderSlider(
     value: value,
-    primaryColor: primaryColor,
+    activeColor: activeColor,
     onChanged: onChanged
   );
 
   void updateRenderObject(_RenderSlider renderObject, _SliderRenderObjectWidget oldWidget) {
     renderObject.value = value;
-    renderObject.primaryColor = primaryColor;
+    renderObject.activeColor = activeColor;
     renderObject.onChanged = onChanged;
   }
 }
@@ -78,10 +80,10 @@ final Color _kActiveTrackColor = Colors.grey[500];
 class _RenderSlider extends RenderConstrainedBox {
   _RenderSlider({
     double value,
-    Color primaryColor,
+    Color activeColor,
     this.onChanged
   }) : _value = value,
-       _primaryColor = primaryColor,
+       _activeColor = activeColor,
         super(additionalConstraints: const BoxConstraints.tightFor(width: _kTrackWidth + 2 * _kReactionRadius, height: 2 * _kReactionRadius)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
     _drag = new HorizontalDragGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
@@ -104,12 +106,12 @@ class _RenderSlider extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  Color get primaryColor => _primaryColor;
-  Color _primaryColor;
-  void set primaryColor(Color value) {
-    if (value == _primaryColor)
+  Color get activeColor => _activeColor;
+  Color _activeColor;
+  void set activeColor(Color value) {
+    if (value == _activeColor)
       return;
-    _primaryColor = value;
+    _activeColor = value;
     markNeedsPaint();
   }
 
@@ -168,7 +170,7 @@ class _RenderSlider extends RenderConstrainedBox {
     double trackRight = trackLeft + trackLength;
     double trackActive = trackLeft + trackLength * value;
 
-    Paint primaryPaint = new Paint()..color = enabled ? _primaryColor : _kInactiveTrackColor;
+    Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _kInactiveTrackColor;
     Paint trackPaint = new Paint()..color = _active ? _kActiveTrackColor : _kInactiveTrackColor;
 
     double thumbRadius = enabled ? _kThumbRadius : _kThumbRadiusDisabled;
@@ -179,7 +181,7 @@ class _RenderSlider extends RenderConstrainedBox {
 
     Point activeLocation = new Point(trackActive, trackCenter);
     if (_reaction.status != PerformanceStatus.dismissed) {
-      Paint reactionPaint = new Paint()..color = _primaryColor.withAlpha(kRadialReactionAlpha);
+      Paint reactionPaint = new Paint()..color = _activeColor.withAlpha(kRadialReactionAlpha);
       canvas.drawCircle(activeLocation, _reaction.value, reactionPaint);
     }
     canvas.drawCircle(activeLocation, thumbRadius, primaryPaint);

@@ -29,10 +29,12 @@ class Checkbox extends StatelessComponent {
   const Checkbox({
     Key key,
     this.value,
+    this.activeColor,
     this.onChanged
   }) : super(key: key);
 
   final bool value;
+  final Color activeColor;
   final ValueChanged<bool> onChanged;
 
   Widget build(BuildContext context) {
@@ -40,7 +42,7 @@ class Checkbox extends StatelessComponent {
     ThemeData themeData = Theme.of(context);
     return new _CheckboxRenderObjectWidget(
       value: value,
-      activeColor: themeData.accentColor,
+      activeColor: activeColor ?? themeData.accentColor,
       inactiveColor: onChanged != null ? themeData.unselectedColor : themeData.disabledColor,
       onChanged: onChanged
     );

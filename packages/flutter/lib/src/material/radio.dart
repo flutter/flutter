@@ -21,11 +21,13 @@ class Radio<T> extends StatelessComponent {
     Key key,
     this.value,
     this.groupValue,
+    this.activeColor,
     this.onChanged
   }) : super(key: key);
 
   final T value;
   final T groupValue;
+  final Color activeColor;
   final ValueChanged<T> onChanged;
 
   bool get _enabled => onChanged != null;
@@ -44,7 +46,7 @@ class Radio<T> extends StatelessComponent {
     ThemeData themeData = Theme.of(context);
     return new _RadioRenderObjectWidget(
       selected: value == groupValue,
-      activeColor: themeData.accentColor,
+      activeColor: activeColor ?? themeData.accentColor,
       inactiveColor: _getInactiveColor(themeData),
       onChanged: _enabled ? _handleChanged : null
     );
