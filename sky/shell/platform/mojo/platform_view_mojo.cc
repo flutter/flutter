@@ -187,7 +187,7 @@ pointer::PointerPtr PlatformViewMojo::CreateEvent(pointer::PointerType type, moj
   pointer->radius_major = data->radius_major;
   pointer->radius_minor = data->radius_minor;
   pointer->orientation = data->orientation;
-  if (event->action != mojo::EventType::POINTER_UP ||
+  if (event->action != mojo::EventType::POINTER_UP &&
       event->action != mojo::EventType::POINTER_CANCEL)
     pointer_positions_[data->pointer_id] = { data->x, data->y };
   return pointer.Pass();
