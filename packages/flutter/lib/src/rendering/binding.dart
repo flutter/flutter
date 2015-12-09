@@ -29,7 +29,7 @@ class _PointerState {
     _pointerCount += 1;
     _pointer = _pointerCount;
   }
-  
+
   bool get down => _down;
   bool _down = false;
   void setDown() {
@@ -248,8 +248,12 @@ class FlutterBinding extends HitTestTarget {
   }
 
   void _handleLocaleChanged() {
+    dispatchLocaleChanged(ui.window.locale);
+  }
+
+  void dispatchLocaleChanged(ui.Locale locale) {
     for (BindingObserver observer in _observers)
-      observer.didChangeLocale(ui.window.locale);
+      observer.didChangeLocale(locale);
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
