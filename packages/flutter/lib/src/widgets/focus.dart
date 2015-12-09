@@ -4,8 +4,6 @@
 
 import 'framework.dart';
 
-typedef void FocusChanged(GlobalKey key);
-
 // _noFocusedScope is used by Focus to track the case where none of the Focus
 // component's subscopes (e.g. dialogs) are focused. This is distinct from the
 // focused scope being null, which means that we haven't yet decided which scope

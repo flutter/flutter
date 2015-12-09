@@ -194,10 +194,10 @@ class DragTarget<T> extends StatefulComponent {
   final DragTargetWillAccept<T> onWillAccept;
   final DragTargetAccept<T> onAccept;
 
-  DragTargetState<T> createState() => new DragTargetState<T>();
+  _DragTargetState<T> createState() => new _DragTargetState<T>();
 }
 
-class DragTargetState<T> extends State<DragTarget<T>> {
+class _DragTargetState<T> extends State<DragTarget<T>> {
   final List<T> _candidateData = new List<T>();
   final List<dynamic> _rejectedData = new List<dynamic>();
 
@@ -279,7 +279,7 @@ class _DragAvatar<T> {
   final Widget feedback;
   final Offset feedbackOffset;
 
-  DragTargetState _activeTarget;
+  _DragTargetState _activeTarget;
   bool _activeTargetWillAcceptDrop = false;
   Offset _lastOffset;
   OverlayEntry _entry;
@@ -299,7 +299,7 @@ class _DragAvatar<T> {
     _lastOffset = globalPosition - dragStartPoint;
     _entry.markNeedsBuild();
     HitTestResult result = WidgetFlutterBinding.instance.hitTest(globalPosition + feedbackOffset);
-    DragTargetState target = _getDragTarget(result.path);
+    _DragTargetState target = _getDragTarget(result.path);
     if (target == _activeTarget)
       return;
     if (_activeTarget != null)
@@ -308,13 +308,13 @@ class _DragAvatar<T> {
     _activeTargetWillAcceptDrop = _activeTarget != null && _activeTarget.didEnter(data);
   }
 
-  DragTargetState _getDragTarget(List<HitTestEntry> path) {
+  _DragTargetState _getDragTarget(List<HitTestEntry> path) {
     // Look for the RenderBox that corresponds to the hit target (the hit target
     // widget builds a RenderMetadata box for us for this purpose).
     for (HitTestEntry entry in path) {
       if (entry.target is RenderMetaData) {
         RenderMetaData renderMetaData = entry.target;
-        if (renderMetaData.metaData is DragTargetState)
+        if (renderMetaData.metaData is _DragTargetState)
           return renderMetaData.metaData;
       }
     }

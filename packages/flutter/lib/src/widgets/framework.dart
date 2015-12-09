@@ -335,7 +335,7 @@ enum _StateLifecycle {
 /// The signature of setState() methods.
 typedef void StateSetter(VoidCallback fn);
 
-/// The logic and internal state for a StatefulComponent.
+/// The logic and internal state for a [StatefulComponent].
 abstract class State<T extends StatefulComponent> {
   /// The current configuration (an instance of the corresponding
   /// StatefulComponent class).
@@ -439,13 +439,13 @@ abstract class State<T extends StatefulComponent> {
   }
 }
 
-abstract class ProxyComponent extends Widget {
-  const ProxyComponent({ Key key, this.child }) : super(key: key);
+abstract class _ProxyComponent extends Widget {
+  const _ProxyComponent({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 }
 
-abstract class ParentDataWidget extends ProxyComponent {
+abstract class ParentDataWidget extends _ProxyComponent {
   const ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -460,7 +460,7 @@ abstract class ParentDataWidget extends ProxyComponent {
   void applyParentData(RenderObject renderObject);
 }
 
-abstract class InheritedWidget extends ProxyComponent {
+abstract class InheritedWidget extends _ProxyComponent {
   const InheritedWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -1248,8 +1248,8 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
   }
 }
 
-abstract class ProxyElement<T extends ProxyComponent> extends ComponentElement<T> {
-  ProxyElement(T widget) : super(widget) {
+abstract class _ProxyElement<T extends _ProxyComponent> extends ComponentElement<T> {
+  _ProxyElement(T widget) : super(widget) {
     _builder = (BuildContext context) => this.widget.child;
   }
 
@@ -1267,7 +1267,7 @@ abstract class ProxyElement<T extends ProxyComponent> extends ComponentElement<T
   void notifyDescendants(T oldWidget);
 }
 
-class ParentDataElement extends ProxyElement<ParentDataWidget> {
+class ParentDataElement extends _ProxyElement<ParentDataWidget> {
   ParentDataElement(ParentDataWidget widget) : super(widget);
 
   void mount(Element parent, dynamic slot) {
@@ -1300,7 +1300,7 @@ class ParentDataElement extends ProxyElement<ParentDataWidget> {
 
 
 
-class InheritedElement extends ProxyElement<InheritedWidget> {
+class InheritedElement extends _ProxyElement<InheritedWidget> {
   InheritedElement(InheritedWidget widget) : super(widget);
 
   void notifyDescendants(InheritedWidget oldWidget) {
