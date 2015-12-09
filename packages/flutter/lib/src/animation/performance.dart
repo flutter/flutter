@@ -13,22 +13,25 @@ import 'forces.dart';
 import 'listener_helpers.dart';
 import 'simulation_stepper.dart';
 
-/// An interface that is implemented by [Performance] that exposes a
-/// read-only view of the underlying performance. This is used by classes that
+/// A read-only view of a [Performance].
+///
+/// This interface is implemented by [Performance].
+///
+/// Read-only access to [Performance] is used by classes that
 /// want to watch a performance but should not be able to change the
 /// performance's state.
 abstract class PerformanceView {
   const PerformanceView();
 
-  /// Update the given variable according to the current progress of the performance
+  /// Update the given variable according to the current progress of the performance.
   void updateVariable(Animatable variable);
-  /// Calls the listener every time the progress of the performance changes
+  /// Calls the listener every time the progress of the performance changes.
   void addListener(VoidCallback listener);
-  /// Stop calling the listener every time the progress of the performance changes
+  /// Stop calling the listener every time the progress of the performance changes.
   void removeListener(VoidCallback listener);
-  /// Calls listener every time the status of the performance changes
+  /// Calls listener every time the status of the performance changes.
   void addStatusListener(PerformanceStatusListener listener);
-  /// Stops calling the listener every time the status of the performance changes
+  /// Stops calling the listener every time the status of the performance changes.
   void removeStatusListener(PerformanceStatusListener listener);
 
   /// The current status of this animation.
@@ -45,13 +48,15 @@ abstract class PerformanceView {
   AnimationDirection get curveDirection;
 
   /// The current progress of this animation (a value from 0.0 to 1.0).
-  /// This is the value that is used to update any variables when using updateVariable().
+  ///
+  /// This is the value that is used to update any variables when using
+  /// [updateVariable].
   double get progress;
 
-  /// Whether this animation is stopped at the beginning
+  /// Whether this animation is stopped at the beginning.
   bool get isDismissed => status == PerformanceStatus.dismissed;
 
-  /// Whether this animation is stopped at the end
+  /// Whether this animation is stopped at the end.
   bool get isCompleted => status == PerformanceStatus.completed;
 
   String toString() {
@@ -556,7 +561,7 @@ class Performance extends PerformanceView
       _timeline.value = progress.clamp(0.0, 1.0);
   }
 
-  /// A label that is used in the toString() output. Intended to aid with
+  /// A label that is used in the [toString] output. Intended to aid with
   /// identifying performance instances in debug output.
   final String debugLabel;
 
@@ -565,7 +570,7 @@ class Performance extends PerformanceView
   /// allowing users of that pointer to mutate the Performance state.
   PerformanceView get view => this;
 
-  /// The length of time this performance should last
+  /// The length of time this performance should last.
   Duration duration;
 
   SimulationStepper _timeline;
@@ -574,7 +579,7 @@ class Performance extends PerformanceView
   AnimationDirection get curveDirection => _curveDirection;
   AnimationDirection _curveDirection = AnimationDirection.forward;
 
-  /// The progress of this performance along the timeline
+  /// The progress of this performance along the timeline.
   ///
   /// Note: Setting this value stops the current animation.
   double get progress => _timeline.value.clamp(0.0, 1.0);
@@ -584,7 +589,7 @@ class Performance extends PerformanceView
     _checkStatusChanged();
   }
 
-  /// Whether this animation is currently animating in either the forward or reverse direction
+  /// Whether this animation is currently animating in either the forward or reverse direction.
   bool get isAnimating => _timeline.isAnimating;
 
   PerformanceStatus get status {
@@ -597,55 +602,52 @@ class Performance extends PerformanceView
         PerformanceStatus.reverse;
   }
 
-  /// Update the given varaible according to the current progress of this performance
+  /// Updates the given variable according to the current progress of this performance.
   void updateVariable(Animatable variable) {
     variable.setProgress(progress, _curveDirection);
   }
 
-  /// Start running this animation forwards (towards the end)
+  /// Starts running this animation forwards (towards the end).
   Future forward() => play(AnimationDirection.forward);
 
-  /// Start running this animation in reverse (towards the beginning)
+  /// Starts running this animation in reverse (towards the beginning).
   Future reverse() => play(AnimationDirection.reverse);
 
-  /// Start running this animation in the given direction
+  /// Starts running this animation in the given direction.
   Future play([AnimationDirection direction = AnimationDirection.forward]) {
     _direction = direction;
     return resume();
   }
 
-  /// Start running this animation in the most recent direction
+  /// Resumes this animation in the most recent direction.
   Future resume() {
     return _animateTo(_direction == AnimationDirection.forward ? 1.0 : 0.0);
   }
 
-  /// Stop running this animation.
+  /// Stops running this animation.
   void stop() {
     _timeline.stop();
   }
 
-  /// Release any resources used by this object.
+  /// Releases any resources used by this object.
   ///
   /// Same as stop().
   void dispose() {
     stop();
   }
 
-  /// Start running this animation according to the given physical parameters
   ///
   /// Flings the timeline with an optional force (defaults to a critically
   /// damped spring) and initial velocity. If velocity is positive, the
   /// animation will complete, otherwise it will dismiss.
   Future fling({double velocity: 1.0, Force force}) {
-    if (force == null)
-      force = kDefaultSpringForce;
+    force ??= kDefaultSpringForce;
     _direction = velocity < 0.0 ? AnimationDirection.reverse : AnimationDirection.forward;
     return _timeline.animateWith(force.release(progress, velocity));
   }
 
   Future repeat({ double min: 0.0, double max: 1.0, Duration period }) {
-    if (period == null)
-      period = duration;
+    period ??= duration;
     return _timeline.animateWith(new _RepeatingSimulation(min, max, period));
   }
 
@@ -690,7 +692,7 @@ class Performance extends PerformanceView
   }
 }
 
-/// An animation performance with an animated variable with a concrete type
+/// An animation performance with an animated variable with a concrete type.
 class ValuePerformance<T> extends Performance {
   ValuePerformance({ this.variable, Duration duration, double progress }) :
     super(duration: duration, progress: progress);
@@ -707,7 +709,7 @@ class ValuePerformance<T> extends Performance {
 
 class _RepeatingSimulation extends Simulation {
   _RepeatingSimulation(this.min, this.max, Duration period)
-    : _periodInSeconds = period.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND {
+    : _periodInSeconds = period.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
     assert(_periodInSeconds > 0.0);
   }
 

@@ -101,12 +101,12 @@ class LeastSquaresSolver {
   final List<double> w;
 
   PolynomialFit solve(int degree) {
-    if (degree > x.length) // not enough data to fit a curve
+    if (degree > x.length) // Not enough data to fit a curve.
       return null;
 
     PolynomialFit result = new PolynomialFit(degree);
 
-    // Shorthands for the purpose of notation equivalence to original C++ code
+    // Shorthands for the purpose of notation equivalence to original C++ code.
     final int m = x.length;
     final int n = degree + 1;
 
@@ -135,7 +135,7 @@ class LeastSquaresSolver {
 
       double norm = q.getRow(j).norm();
       if (norm < 0.000001) {
-        // vectors are linearly dependent or zero so no solution
+        // Vectors are linearly dependent or zero so no solution.
         return null;
       }
 

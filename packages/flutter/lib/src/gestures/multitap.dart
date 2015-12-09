@@ -91,7 +91,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   final Map<int, _TapTracker> _trackers = new Map<int, _TapTracker>();
 
   void addPointer(PointerEvent event) {
-    // Ignore out-of-bounds second taps
+    // Ignore out-of-bounds second taps.
     if (_firstTap != null &&
         !_firstTap.isWithinTolerance(event, kDoubleTapSlop))
       return;
@@ -155,7 +155,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _stopDoubleTapTimer();
     if (_firstTap != null) {
       // Note, order is important below in order for the resolve -> reject logic
-      // to work properly
+      // to work properly.
       _TapTracker tracker = _firstTap;
       _firstTap = null;
       _reject(tracker);

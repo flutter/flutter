@@ -34,7 +34,7 @@ class PointerRouter {
       _routeMap.remove(pointer);
   }
 
-  /// Call the routes registed for this pointer event.
+  /// Calls the routes registed for this pointer event.
   ///
   /// Calls the routes in the order in which they were added to the route.
   void route(PointerEvent event) {

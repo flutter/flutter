@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 class ShadowDrawLooperBuilder {
   ui.LayerDrawLooperBuilder _builder = new ui.LayerDrawLooperBuilder();
 
-  /// Add a shadow with the given parameters
+  /// Adds a shadow with the given parameters.
   void addShadow(ui.Offset offset, ui.Color color, double blur) {
     _builder.addLayerOnTop(
       new ui.DrawLooperLayerInfo()

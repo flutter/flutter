@@ -16,7 +16,7 @@ import 'package:mojo/mojo/http_header.mojom.dart' as mojo;
 
 import 'response.dart';
 
-/// A `mojo`-based HTTP client
+/// A `mojo`-based HTTP client.
 class MojoClient {
 
   Future<Response> head(url, {Map<String, String> headers}) =>

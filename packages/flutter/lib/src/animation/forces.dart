@@ -4,27 +4,27 @@
 
 import 'package:newton/newton.dart';
 
-/// A factory for simulations
+/// A factory for simulations.
 abstract class Force {
   const Force();
 
   Simulation release(double position, double velocity);
 }
 
-/// A factory for spring-based physics simulations
+/// A factory for spring-based physics simulations.
 class SpringForce extends Force {
   const SpringForce(this.spring, { this.left: 0.0, this.right: 1.0 });
 
-  /// The description of the spring to be used in the created simulations
+  /// The description of the spring to be used in the created simulations.
   final SpringDescription spring;
 
-  /// Where to put the spring's resting point when releasing left
+  /// Where to put the spring's resting point when releasing left.
   final double left;
 
-  /// Where to put the spring's resting point when releasing right
+  /// Where to put the spring's resting point when releasing right.
   final double right;
 
-  /// How pricely to terminate the simulation
+  /// How pricely to terminate the simulation.
   ///
   /// We overshoot the target by this distance, but stop the simulation when
   /// the spring gets within this distance (regardless of how fast it's moving).
@@ -48,5 +48,5 @@ final SpringDescription _kDefaultSpringDesc = new SpringDescription.withDampingR
   ratio: 1.0
 );
 
-/// A spring force with reasonable default values
+/// A spring force with reasonable default values.
 final SpringForce kDefaultSpringForce = new SpringForce(_kDefaultSpringDesc);
