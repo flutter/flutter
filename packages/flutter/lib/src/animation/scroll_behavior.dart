@@ -10,6 +10,12 @@ import 'package:newton/newton.dart';
 const double _kSecondsPerMillisecond = 1000.0;
 const double _kScrollDrag = 0.025;
 
+// TODO(abarth): These values won't work well if there's a scale transform.
+final Tolerance _kDefaultScrollTolerance = new Tolerance(
+  velocity: 1.0 / (0.050 * ui.window.devicePixelRatio),  // logical pixels per second
+  distance: 1.0 / ui.window.devicePixelRatio  // logical pixels
+);
+
 /// An interface for controlling the behavior of scrollable widgets
 abstract class ScrollBehavior {
   /// Called when a drag gesture ends. Returns a simulation that
@@ -102,29 +108,19 @@ class UnboundedBehavior extends ExtentScrollBehavior {
   }
 }
 
-Simulation _createFlingScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
+Simulation _createFlingScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset, Tolerance tolerance) {
   double startVelocity = velocity * _kSecondsPerMillisecond;
-
-  // Assume that we're rendering at atleast 15 FPS. Stop when we're
-  // scrolling less than one logical pixel per frame. We're essentially
-  // normalizing by the devicePixelRatio so that the threshold has the
-  // same effect independent of the device's pixel density.
-  double endVelocity = 15.0 * ui.window.devicePixelRatio;
-
-  // Similar to endVelocity. Stop scrolling when we're this close to
-  // destiniation scroll offset.
-  double endDistance = 0.5 * ui.window.devicePixelRatio;
 
   SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
   ScrollSimulation simulation =
       new ScrollSimulation(position, startVelocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag)
-    ..tolerance = new Tolerance(velocity: endVelocity.abs(), distance: endDistance);
+    ..tolerance = tolerance ?? _kDefaultScrollTolerance;
   return simulation;
 }
 
 Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
   double startVelocity = velocity * _kSecondsPerMillisecond;
-  double endVelocity = 15.0 * ui.window.devicePixelRatio * velocity.sign;
+  double endVelocity = velocity.sign * _kDefaultScrollTolerance.velocity;
   return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
 }
 
@@ -133,8 +129,8 @@ class OverscrollBehavior extends BoundedBehavior {
   OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
-  Simulation createFlingScrollSimulation(double position, double velocity) {
-    return _createFlingScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
+  Simulation createFlingScrollSimulation(double position, double velocity, { Tolerance tolerance }) {
+    return _createFlingScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, tolerance);
   }
 
   Simulation createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
@@ -162,9 +158,9 @@ class OverscrollBehavior extends BoundedBehavior {
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
   bool get isScrollable => contentExtent > containerExtent;
 
-  Simulation createFlingScrollSimulation(double position, double velocity) {
+  Simulation createFlingScrollSimulation(double position, double velocity, { Tolerance tolerance }) {
     if (isScrollable || position < minScrollOffset || position > maxScrollOffset)
-      return super.createFlingScrollSimulation(position, velocity);
+      return super.createFlingScrollSimulation(position, velocity, tolerance: tolerance);
     return null;
   }
 
