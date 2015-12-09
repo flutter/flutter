@@ -17,10 +17,11 @@ import 'theme.dart';
 import 'toggleable.dart';
 
 class Switch extends StatelessComponent {
-  Switch({ Key key, this.value, this.onChanged })
+  Switch({ Key key, this.value, this.activeColor, this.onChanged })
       : super(key: key);
 
   final bool value;
+  final Color activeColor;
   final ValueChanged<bool> onChanged;
 
   Widget build(BuildContext context) {
@@ -28,7 +29,7 @@ class Switch extends StatelessComponent {
     ThemeData themeData = Theme.of(context);
     final isDark = themeData.brightness == ThemeBrightness.dark;
 
-    Color activeThumbColor = themeData.accentColor;
+    Color activeThumbColor = activeColor ?? themeData.accentColor;
     Color activeTrackColor = activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
