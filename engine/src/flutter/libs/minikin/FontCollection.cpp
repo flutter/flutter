@@ -104,18 +104,17 @@ FontCollection::~FontCollection() {
 
 // Implement heuristic for choosing best-match font. Here are the rules:
 // 1. If first font in the collection has the character, it wins.
-// 2. If a font matches both language and script, it gets a score of 4.
-// 3. If a font matches just language, it gets a score of 2.
-// 4. Matching the "compact" or "elegant" variant adds one to the score.
-// 5. If there is a variation selector and a font supports the complete variation sequence, we add
-//    12 to the score.
-// 6. If there is a color variation selector (U+FE0F), we add 6 to the score if the font is an emoji
-//    font. This additional score of 6 is only given if the base character is supported in the font,
+// 2. If a font matches language, it gets a score of 2.
+// 3. Matching the "compact" or "elegant" variant adds one to the score.
+// 4. If there is a variation selector and a font supports the complete variation sequence, we add
+//    8 to the score.
+// 5. If there is a color variation selector (U+FE0F), we add 4 to the score if the font is an emoji
+//    font. This additional score of 4 is only given if the base character is supported in the font,
 //    but not the whole variation sequence.
-// 7. If there is a text variation selector (U+FE0E), we add 6 to the score if the font is not an
-//    emoji font. This additional score of 6 is only given if the base character is supported in the
+// 6. If there is a text variation selector (U+FE0E), we add 4 to the score if the font is not an
+//    emoji font. This additional score of 4 is only given if the base character is supported in the
 //    font, but not the whole variation sequence.
-// 8. Highest score wins, with ties resolved to the first font.
+// 7. Highest score wins, with ties resolved to the first font.
 FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             uint32_t langListId, int variant) const {
     if (ch >= mMaxChar) {
@@ -156,10 +155,10 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
                 score++;
             }
             if (hasVSGlyph) {
-                score += 12;
+                score += 8;
             } else if (((vs == 0xFE0F) && family->lang().hasEmojiFlag()) ||
                     ((vs == 0xFE0E) && !family->lang().hasEmojiFlag())) {
-                score += 6;
+                score += 4;
             }
             if (score > bestScore) {
                 bestScore = score;

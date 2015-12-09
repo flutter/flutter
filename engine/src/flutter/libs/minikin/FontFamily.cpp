@@ -119,17 +119,7 @@ std::string FontLanguage::getString() const {
 }
 
 int FontLanguage::match(const FontLanguage other) const {
-    if (mBits == kUnsupportedLanguage || other.mBits == kUnsupportedLanguage)
-        return 0;
-
-    int result = 0;
-    if ((mBits & kBaseLangMask) == (other.mBits & kBaseLangMask)) {
-        result++;
-        if ((mBits & kScriptMask) != 0 && (mBits & kScriptMask) == (other.mBits & kScriptMask)) {
-            result++;
-        }
-    }
-    return result;
+    return *this == other;
 }
 
 FontLanguages::FontLanguages(const char* buf, size_t size) {
