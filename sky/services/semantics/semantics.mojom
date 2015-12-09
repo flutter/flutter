@@ -38,6 +38,7 @@ struct SemanticGeometry {
   // root node) to this SemanticsNode's coordinate space, described as
   // a 4x4 matrix, with values in column-major order. The array must
   // have exactly 16 values.
+  // This can be left unset to imply the identity matrix.
   array<float> transform;
 
   // The position and size of the potentially interactive rectangle in the
