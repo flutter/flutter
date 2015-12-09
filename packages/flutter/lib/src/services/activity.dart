@@ -22,7 +22,7 @@ const int MULTIPLE_TASK = 0x08000000;
 
 ActivityProxy _initActivityProxy() {
   ActivityProxy activity = new ActivityProxy.unbound();
-  shell.connectToService(null, activity);
+  shell.connectToService("mojo:android", activity);
   return activity;
 }
 
