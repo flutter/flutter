@@ -334,7 +334,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\npushd ${FLUTTER_APPLICATION_PATH}\npub get\npopd\n";
+			shellScript = "set -e\npushd ${FLUTTER_APPLICATION_PATH}\n${DART_SDK_PATH}/bin/pub get\npopd\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -476,6 +476,7 @@
 		9E07CF8F1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DART_SDK_PATH = dart/sdk/path;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -495,6 +496,7 @@
 		9E07CF901BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DART_SDK_PATH = dart/sdk/path;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;

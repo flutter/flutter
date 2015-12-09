@@ -28,13 +28,8 @@ PackageProject() {
     exit -1
   fi
 
-  # Check if pub exists
-  RunCommand which pub
-  if [[ $? -ne 0 ]]; then
-    EchoError "Could not find 'pub'."
-    EchoError "Did you install the Dart SDK?"
-    exit -1
-  fi
+  # The 'flutter' command assumes the 'dart' binary is in $PATH
+  RunCommand export PATH=${PATH}:${DART_SDK_PATH}/bin
 
   AssertExists $1
   local project_path=$1
