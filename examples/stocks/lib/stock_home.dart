@@ -22,9 +22,18 @@ class StockHome extends StatefulComponent {
 class StockHomeState extends State<StockHome> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final TabBarSelection _tabBarSelection = new TabBarSelection();
   bool _isSearching = false;
   String _searchQuery;
+  TabBarSelection _tabBarSelection;
+
+  void initState() {
+    super.initState();
+    _tabBarSelection = PageStorage.of(context)?.readState(context);
+    if (_tabBarSelection == null) {
+      _tabBarSelection = new TabBarSelection();
+      PageStorage.of(context)?.writeState(context, _tabBarSelection);
+    }
+  }
 
   void _handleSearchBegin() {
     ModalRoute.of(context).addLocalHistoryEntry(new LocalHistoryEntry(
