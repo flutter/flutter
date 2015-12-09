@@ -1103,15 +1103,16 @@ typedef void PointerCancelEventListener(PointerCancelEvent event);
 
 /// How to behave during hit tests.
 enum HitTestBehavior {
-  /// Consider this target hit if, and only if, its child was hit.
+  /// Targets that defer to their children receive events within their bounds
+  /// only if one of their children is hit by the hit test.
   deferToChild,
 
-  /// Consider this target hit whenever the position being hit tested is within its bounds.
+  /// Opaque targets can be hit by hit tests, causing them to both receive
+  /// events within their bounds and prevent targets visually behind them from
+  /// also receiving events.
   opaque,
 
-  /// Never consider this target hit but always add the target to the event path anyway.
-  ///
-  /// Translucent targets both receive events at a given location and permit
+  /// Translucent targets both receive events within their bounds and permit
   /// targets visually behind them to also receive events.
   translucent,
 }

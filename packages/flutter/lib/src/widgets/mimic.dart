@@ -49,7 +49,7 @@ class MimicOverlayEntry {
   /// The animation will take place over the given duration and will apply the
   /// given curve.
   ///
-  /// Currently we don't support calling this function more than once per overlay entry.
+  /// This function can only be called once per overlay entry.
   Future animateTo({
     GlobalKey targetKey,
     Duration duration,

@@ -24,6 +24,12 @@ class WidgetFlutterBinding extends FlutterBinding {
   }
 
   /// The one static instance of this class.
+  ///
+  /// Only valid after ensureInitialized() (or the WidgetFlutterBinding
+  /// constructor) has been called.  If another FlutterBinding subclass is
+  /// instantiated before this one (e.g. bindings from other frameworks based on
+  /// the Flutter "rendering" library), then WidgetFlutterBinding.instance will
+  /// not be valid (and will throw in checked mode).
   static WidgetFlutterBinding get instance => FlutterBinding.instance;
 
   void beginFrame() {
