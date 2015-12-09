@@ -14,33 +14,58 @@ enum FontStyle {
 }
 
 /// The thickness of the glyphs used to draw the text
-enum FontWeight {
+class FontWeight {
+  const FontWeight._(this.index);
+
+  final int index;
+
   /// Thin, the least thick
-  w100,
+  static const w100 = const FontWeight._(0);
 
   /// Extra-light
-  w200,
+  static const w200 = const FontWeight._(1);
 
   /// Light
-  w300,
+  static const w300 = const FontWeight._(2);
 
   /// Normal / regular / plain
-  w400,
+  static const w400 = const FontWeight._(3);
 
   /// Medium
-  w500,
+  static const w500 = const FontWeight._(4);
 
   /// Semi-bold
-  w600,
+  static const w600 = const FontWeight._(5);
 
   /// Bold
-  w700,
+  static const w700 = const FontWeight._(6);
 
   /// Extra-bold
-  w800,
+  static const w800 = const FontWeight._(7);
 
   /// Black, the most thick
-  w900
+  static const w900 = const FontWeight._(8);
+
+  static const normal = w400;
+  static const bold = w700;
+
+  static const List<FontWeight> values = const [
+    w100, w200, w300, w400, w500, w600, w700, w800, w900
+  ];
+
+  String toString() {
+    return const {
+      0: FontWeight.w100,
+      1: FontWeight.w200,
+      2: FontWeight.w300,
+      3: FontWeight.w400,
+      4: FontWeight.w500,
+      5: FontWeight.w600,
+      6: FontWeight.w700,
+      7: FontWeight.w800,
+      8: FontWeight.w900,
+    }[index];
+  }
 }
 
 /// Whether to align text horizontally
@@ -65,18 +90,61 @@ enum TextBaseline {
 }
 
 /// A linear decoration to draw near the text
-enum TextDecoration {
+class TextDecoration {
+  const TextDecoration._(this._mask);
+
+  /// Constructs a decoration that paints the union of all the given decorations.
+  factory TextDecoration.combine(List<TextDecoration> decorations) {
+    int mask = 0;
+    for (TextDecoration decoration in decorations)
+      mask |= decoration._mask;
+    return new TextDecoration._(mask);
+  }
+
+  final int _mask;
+
+  /// Whether this decoration will paint at least as much decoration as the given decoration.
+  bool contains(TextDecoration other) {
+    return (_mask | other._mask) == _mask;
+  }
+
   /// Do not draw a decoration
-  none,
+  static const TextDecoration none = const TextDecoration._(0x0);
 
   /// Draw a line underneath each line of text
-  underline,
+  static const TextDecoration underline = const TextDecoration._(0x1);
 
   /// Draw a line above each line of text
-  overline,
+  static const TextDecoration overline = const TextDecoration._(0x2);
 
   /// Draw a line through each line of text
-  lineThrough
+  static const TextDecoration lineThrough = const TextDecoration._(0x4);
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! TextDecoration)
+      return false;
+    final TextDecoration typedOther = other;
+    return _mask == typedOther._mask;
+  }
+
+  int get hashCode => _mask.hashCode;
+
+  String toString() {
+    if (_mask == 0)
+      return 'TextDecoration.none';
+    List<String> values = <String>[];
+    if (_mask & underline._mask != 0)
+      values.add('underline');
+    if (_mask & overline._mask != 0)
+      values.add('overline');
+    if (_mask & lineThrough._mask != 0)
+      values.add('lineThrough');
+    if (values.length == 1)
+      return 'TextDecoration.${values[0]}';
+    return 'TextDecoration.combine([${values.join(", ")}])';
+  }
 }
 
 /// The style in which to draw a text decoration
@@ -120,7 +188,7 @@ enum TextDecorationStyle {
 //  - Element 6: The enum index of the |fontStyle|.
 //
 Int32List _encodeTextStyle(Color color,
-                           List<TextDecoration> decoration,
+                           TextDecoration decoration,
                            Color decorationColor,
                            TextDecorationStyle decorationStyle,
                            FontWeight fontWeight,
@@ -135,11 +203,7 @@ Int32List _encodeTextStyle(Color color,
   }
   if (decoration != null) {
     result[0] |= 1 << 2;
-    for (TextDecoration value in decoration) {
-      int shift = value.index - 1;
-      if (shift != 0)
-        result[2] |= 1 << shift;
-    }
+    result[2] = decoration._mask;
   }
   if (decorationColor != null) {
     result[0] |= 1 << 3;
@@ -175,7 +239,7 @@ Int32List _encodeTextStyle(Color color,
 class TextStyle {
   TextStyle({
     Color color,
-    List<TextDecoration> decoration,
+    TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     FontWeight fontWeight,
