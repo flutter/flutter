@@ -5,6 +5,7 @@
 import 'basic.dart';
 import 'framework.dart';
 
+/// A widget whose child can be mutated.
 class Placeholder extends StatefulComponent {
   Placeholder({ Key key }) : super(key: key);
 
@@ -12,6 +13,9 @@ class Placeholder extends StatefulComponent {
 }
 
 class PlaceholderState extends State<Placeholder> {
+  /// The child that this widget builds.
+  ///
+  /// Mutating this field will cause this widget to rebuild with the new child.
   Widget get child => _child;
   Widget _child;
   void set child(Widget child) {

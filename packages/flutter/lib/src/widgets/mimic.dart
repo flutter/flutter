@@ -12,18 +12,22 @@ import 'basic.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
-class MimicableKey {
-  MimicableKey._(this._state);
+/// An opaque reference to a widget that can be mimicked.
+class MimicableHandle {
+  MimicableHandle._(this._state);
 
   final MimicableState _state;
 
+  /// The size and position of the original widget in global coordinates.
   Rect get globalBounds => _state._globalBounds;
 
+  /// Stop the mimicking process, restoring the widget to its original location in the tree.
   void stopMimic() {
     _state._stopMimic();
   }
 }
 
+/// An overlay entry that is mimicking another widget.
 class MimicOverlayEntry {
   MimicOverlayEntry._(this._key) {
     _overlayEntry = new OverlayEntry(builder: _build);
@@ -32,7 +36,7 @@ class MimicOverlayEntry {
 
   Rect _initialGlobalBounds;
 
-  MimicableKey _key;
+  MimicableHandle _key;
   OverlayEntry _overlayEntry;
 
   // Animation state
@@ -40,6 +44,12 @@ class MimicOverlayEntry {
   Curve _curve;
   Performance _performance;
 
+  /// Animate the entry to the location of the widget that has the given target key.
+  ///
+  /// The animation will take place over the given duration and will apply the
+  /// given curve.
+  ///
+  /// Currently we don't support calling this function more than once per overlay entry.
   Future animateTo({
     GlobalKey targetKey,
     Duration duration,
@@ -59,10 +69,18 @@ class MimicOverlayEntry {
     return _performance.play();
   }
 
+  /// Cause the overlay entry to rebuild during the next pipeline flush.
+  ///
+  /// You need to call this function if you rebuild the widget that this entry
+  /// is mimicking in order for the overlay entry to pick up the changes that
+  /// you've made to the [Mimicable].
   void markNeedsBuild() {
    _overlayEntry?.markNeedsBuild();
  }
 
+  /// Remove this entry from the overlay and restore the widget to its original place in the tree.
+  ///
+  /// Once removed, the overlay entry cannot be used further.
   void dispose() {
     _targetKey = null;
     _curve = null;
@@ -106,10 +124,12 @@ class MimicOverlayEntry {
   }
 }
 
+/// A widget that copies the appearance of another widget.
 class Mimic extends StatelessComponent {
   Mimic({ Key key, this.original }) : super(key: key);
 
-  final MimicableKey original;
+  /// A handle to the widget that this widget should copy.
+  final MimicableHandle original;
 
   Widget build(BuildContext context) {
     if (original != null && original._state._beingMimicked)
@@ -118,6 +138,7 @@ class Mimic extends StatelessComponent {
   }
 }
 
+/// A widget that can be copied by a [Mimic].
 class Mimicable extends StatefulComponent {
   Mimicable({ Key key, this.child }) : super(key: key);
 
@@ -130,15 +151,26 @@ class MimicableState extends State<Mimicable> {
   Size _size;
   bool _beingMimicked = false;
 
-  MimicableKey startMimic() {
+  /// Start the mimicking process.
+  ///
+  /// The child of this object will no longer be built at this location in the
+  /// tree.  Instead, this widget will build a transparent placeholder with the
+  /// same dimensions as the widget had when the mimicking process started.
+  MimicableHandle startMimic() {
     assert(!_beingMimicked);
     assert(_size != null);
     setState(() {
       _beingMimicked = true;
     });
-    return new MimicableKey._(this);
+    return new MimicableHandle._(this);
   }
 
+  /// Mimic this object in the enclosing overlay.
+  ///
+  /// The child of this object will no longer be built at this location in the
+  /// tree.  Instead, (1) this widget will build a transparent placeholder with
+  /// the same dimensions as the widget had when the mimicking process started
+  /// and (2) the child will be placed in the enclosing overlay.
   MimicOverlayEntry liftToOverlay() {
     OverlayState overlay = Overlay.of(context);
     assert(overlay != null); // You need an overlay to lift into.

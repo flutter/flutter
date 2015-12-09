@@ -9,6 +9,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'framework.dart';
 
+/// The glue that binds the widget framework to the Flutter engine.
 class WidgetFlutterBinding extends FlutterBinding {
 
   WidgetFlutterBinding() {
@@ -22,6 +23,7 @@ class WidgetFlutterBinding extends FlutterBinding {
     assert(FlutterBinding.instance is WidgetFlutterBinding);
   }
 
+  /// The one static instance of this class.
   static WidgetFlutterBinding get instance => FlutterBinding.instance;
 
   void beginFrame() {
@@ -83,11 +85,13 @@ class WidgetFlutterBinding extends FlutterBinding {
   }
 }
 
+/// Inflate the given widget and attach it to the screen.
 void runApp(Widget app) {
   WidgetFlutterBinding.ensureInitialized();
   WidgetFlutterBinding.instance._runApp(app);
 }
 
+/// Print a string representation of the currently running app.
 void debugDumpApp() {
   assert(WidgetFlutterBinding.instance != null);
   assert(WidgetFlutterBinding.instance.renderViewElement != null);

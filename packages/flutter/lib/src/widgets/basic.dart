@@ -786,14 +786,33 @@ class Container extends StatelessComponent {
     assert(decoration == null || decoration.debugAssertValid());
   }
 
+  /// The child to contain in the container.
+  ///
+  /// If null, the container will expand to fill all available space in its parent.
   final Widget child;
+
+  /// Additional constraints to apply to the child.
   final BoxConstraints constraints;
+
+  /// The decoration to paint behind the child.
   final Decoration decoration;
+
+  /// The decoration to paint in front of the child.
   final Decoration foregroundDecoration;
+
+  /// Empty space to surround the decoration.
   final EdgeDims margin;
+
+  /// Empty space to inscribe inside the decoration.
   final EdgeDims padding;
+
+  /// The tranformation matrix to apply before painting the container.
   final Matrix4 transform;
+
+  /// If non-null, requires the decoration to have this width.
   final double width;
+
+  /// If non-null, requires the decoration to have this height.
   final double height;
 
   EdgeDims get _paddingIncludingDecoration {

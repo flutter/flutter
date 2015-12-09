@@ -28,7 +28,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     return performance;
   }
 
-  // Subclasses can override this method to customize way heroes are inserted
+  /// Subclasses can override this method to customize way heroes are inserted
   void insertHeroOverlayEntry(OverlayEntry entry, Object tag, OverlayState overlay) {
     overlay.insert(entry);
   }

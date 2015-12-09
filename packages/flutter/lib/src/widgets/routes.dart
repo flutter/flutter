@@ -17,9 +17,12 @@ import 'pages.dart';
 
 const _kTransparent = const Color(0x00000000);
 
+/// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
+  /// Subclasses should override this getter to return the builders for the overlay.
   List<WidgetBuilder> get builders;
 
+  /// The entries this route has placed in the overlay.
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
@@ -30,7 +33,7 @@ abstract class OverlayRoute<T> extends Route<T> {
     navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
   }
 
-  // Subclasses shouldn't call this if they want to delay the finished() call.
+  /// Subclasses shouldn't call this if they want to delay the finished() call.
   bool didPop(T result) {
     finished();
     return true;

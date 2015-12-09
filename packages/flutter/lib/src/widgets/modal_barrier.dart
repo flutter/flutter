@@ -9,6 +9,7 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
+/// Prevents the user from interacting with widgets behind itself.
 class ModalBarrier extends StatelessComponent {
   ModalBarrier({
     Key key,
@@ -16,7 +17,10 @@ class ModalBarrier extends StatelessComponent {
     this.dismissable: true
   }) : super(key: key);
 
+  /// If non-null, fill the barrier with this color.
   final Color color;
+
+  /// Whether touching the barrier will pop the current route off the [Navigator].
   final bool dismissable;
 
   Widget build(BuildContext context) {
@@ -38,6 +42,7 @@ class ModalBarrier extends StatelessComponent {
   }
 }
 
+/// Prevents the user from interacting with widgets behind itself.
 class AnimatedModalBarrier extends StatelessComponent {
   AnimatedModalBarrier({
     Key key,
@@ -46,8 +51,15 @@ class AnimatedModalBarrier extends StatelessComponent {
     this.dismissable: true
   }) : super(key: key);
 
+  /// If non-null, fill the barrier with this color.
+  ///
+  /// The barrier will animate this color according to the given [performance].
   final AnimatedColorValue color;
+
+  /// The performance to use when animating the given [color].
   final PerformanceView performance;
+
+  /// Whether touching the barrier will pop the current route off the [Navigator].
   final bool dismissable;
 
   Widget build(BuildContext context) {

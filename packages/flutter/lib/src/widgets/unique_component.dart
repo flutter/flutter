@@ -4,6 +4,7 @@
 
 import 'framework.dart';
 
+/// A widget that has exactly one inflated instance in the tree.
 abstract class UniqueComponent<T extends State> extends StatefulComponent {
   UniqueComponent({ GlobalKey key }) : super(key: key) {
     assert(key != null);
@@ -11,6 +12,7 @@ abstract class UniqueComponent<T extends State> extends StatefulComponent {
 
   T createState();
 
+  /// The state for the unique inflated instance of this widget.
   T get currentState {
     GlobalKey globalKey = key;
     return globalKey.currentState;
