@@ -197,18 +197,6 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Simulation _createFlingSimulation(double velocity) {
-    /*
-    // Assume that we're rendering at atleast 15 FPS. Stop when we're
-    // scrolling less than one logical pixel per frame. We're essentially
-    // normalizing by the devicePixelRatio so that the threshold has the
-    // same effect independent of the device's pixel density.
-    double endVelocity = pixelToScrollOffset(15.0 * ui.window.devicePixelRatio);
-
-    // Similar to endVelocity. Stop scrolling when we're this close to
-    // destiniation scroll offset.
-    double endDistance = pixelToScrollOffset(0.5 * ui.window.devicePixelRatio);
-    */
-
     final double endVelocity = pixelToScrollOffset(kPixelScrollTolerance.velocity);
     final double endDistance = pixelToScrollOffset(kPixelScrollTolerance.distance);
     return scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity)

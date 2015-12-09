@@ -131,11 +131,19 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
     );
   }
 
-  ScrollBehavior createScrollBehavior() {
-    return config.itemsWrap ? new UnboundedBehavior() : new OverscrollBehavior();
+  UnboundedBehavior _unboundedBehavior;
+  OverscrollBehavior _overscrollBehavior;
+
+  ExtentScrollBehavior get scrollBehavior {
+    if (config.itemsWrap) {
+      _unboundedBehavior ??= new UnboundedBehavior();
+      return _unboundedBehavior;
+    }
+    _overscrollBehavior ??= new OverscrollBehavior();
+    return _overscrollBehavior;
   }
 
-  ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
+  ScrollBehavior createScrollBehavior() => scrollBehavior;
 
   bool get snapScrollOffsetChanges => config.itemsSnapAlignment == ItemsSnapAlignment.item;
 
