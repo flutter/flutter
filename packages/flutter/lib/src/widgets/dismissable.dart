@@ -19,15 +19,33 @@ const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissCardThreshold = 0.4;
 
+/// The direction in which a [Dismissable] can be dismissed.
 enum DismissDirection {
+  /// The [Dismissable] can be dismissed by dragging either up or down.
   vertical,
+
+  /// The [Dismissable] can be dismissed by dragging either left or right.
   horizontal,
+
+  /// The [Dismissable] can be dismissed by dragging left only.
   left,
+
+  /// The [Dismissable] can be dismissed by dragging right only.
   right,
+
+  /// The [Dismissable] can be dismissed by dragging up only.
   up,
+
+  /// The [Dismissable] can be dismissed by dragging down only.
   down
 }
 
+/// Can be dismissed by dragging in one or more directions.
+///
+/// The child is draggable in the indicated direction(s). When released (or
+/// flung), the child disappears off the edge and the dismissable widget
+/// animates its height (or width, whichever is perpendicular to the dismiss
+/// direction) to zero.
 class Dismissable extends StatefulComponent {
   Dismissable({
     Key key,
@@ -38,8 +56,14 @@ class Dismissable extends StatefulComponent {
   }) : super(key: key);
 
   final Widget child;
+
+  /// Called when the widget changes size (i.e., when contracting after being dismissed).
   final VoidCallback onResized;
+
+  /// Called when the widget has been dismissed.
   final VoidCallback onDismissed;
+
+  /// The direction in which the widget can be dismissed.
   final DismissDirection direction;
 
   _DismissableState createState() => new _DismissableState();
