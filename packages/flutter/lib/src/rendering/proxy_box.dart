@@ -1101,9 +1101,18 @@ typedef void PointerMoveEventListener(PointerMoveEvent event);
 typedef void PointerUpEventListener(PointerUpEvent event);
 typedef void PointerCancelEventListener(PointerCancelEvent event);
 
+/// How to behave during hit tests.
 enum HitTestBehavior {
+  /// Consider this target hit if, and only if, its child was hit.
   deferToChild,
+
+  /// Consider this target hit whenever the position being hit tested is within its bounds.
   opaque,
+
+  /// Never consider this target hit but always add the target to the event path anyway.
+  ///
+  /// Translucent targets both receive events at a given location and permit
+  /// targets visually behind them to also receive events.
   translucent,
 }
 

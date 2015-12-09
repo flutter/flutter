@@ -9,6 +9,7 @@ import 'framework.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+/// An animated value that interpolates [BoxConstraint]s.
 class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
   AnimatedBoxConstraintsValue(BoxConstraints begin, { BoxConstraints end, Curve curve, Curve reverseCurve })
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
@@ -16,6 +17,7 @@ class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
+/// An animated value that interpolates [Decoration]s.
 class AnimatedDecorationValue extends AnimatedValue<Decoration> {
   AnimatedDecorationValue(Decoration begin, { Decoration end, Curve curve, Curve reverseCurve })
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
@@ -29,6 +31,7 @@ class AnimatedDecorationValue extends AnimatedValue<Decoration> {
   }
 }
 
+/// An animated value that interpolates [EdgeDims].
 class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
   AnimatedEdgeDimsValue(EdgeDims begin, { EdgeDims end, Curve curve, Curve reverseCurve })
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
@@ -36,6 +39,9 @@ class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
   EdgeDims lerp(double t) => EdgeDims.lerp(begin, end, t);
 }
 
+/// An animated value that interpolates [Matrix4]s.
+///
+/// Currently this class works only for translations.
 class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
   AnimatedMatrix4Value(Matrix4 begin, { Matrix4 end, Curve curve, Curve reverseCurve })
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
@@ -50,6 +56,12 @@ class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
   }
 }
 
+/// A container that gradually changes its values over a period of time.
+///
+/// This class is useful for generating simple implicit transitions between
+/// different parameters to [Container]. For more complex animations, you'll
+/// likely want to use a subclass of [Transition] or control a [Performance]
+/// yourself.
 class AnimatedContainer extends StatefulComponent {
   AnimatedContainer({
     Key key,
@@ -73,16 +85,34 @@ class AnimatedContainer extends StatefulComponent {
 
   final Widget child;
 
+  /// Additional constraints to apply to the child.
   final BoxConstraints constraints;
+
+  /// The decoration to paint behind the child.
   final Decoration decoration;
+
+  /// The decoration to paint in front of the child.
   final Decoration foregroundDecoration;
+
+  /// Empty space to surround the decoration.
   final EdgeDims margin;
+
+  /// Empty space to inscribe inside the decoration.
   final EdgeDims padding;
+
+  /// The tranformation matrix to apply before painting the container.
   final Matrix4 transform;
+
+  /// If non-null, requires the decoration to have this width.
   final double width;
+
+  /// If non-null, requires the decoration to have this height.
   final double height;
 
+  /// The curve to apply when animating the parameters of this container.
   final Curve curve;
+
+  /// The duration over which to animate the parameters of this container.
   final Duration duration;
 
   _AnimatedContainerState createState() => new _AnimatedContainerState();

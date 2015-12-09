@@ -5,14 +5,23 @@
 import 'basic.dart';
 import 'framework.dart';
 
-enum Orientation { portrait, landscape }
+/// Whether in portrait or landscape.
+enum Orientation {
+  /// Taller than wide.
+  portrait,
 
+  /// Wider than tall.
+  landscape
+}
+
+/// The result of a media query.
 class MediaQueryData {
-
   const MediaQueryData({ this.size });
 
+  /// The size of the media (e.g, the size of the screen).
   final Size size;
 
+  /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
@@ -29,6 +38,7 @@ class MediaQueryData {
   String toString() => '$runtimeType($size, $orientation)';
 }
 
+/// Establishes a subtree in which media queries resolve to the given data.
 class MediaQuery extends InheritedWidget {
   MediaQuery({
     Key key,
@@ -39,8 +49,10 @@ class MediaQuery extends InheritedWidget {
     assert(data != null);
   }
 
+  /// The result of media queries in this subtree.
   final MediaQueryData data;
 
+  /// Queries the current media for the given context.
   static MediaQueryData of(BuildContext context) {
     MediaQuery query = context.inheritFromWidgetOfType(MediaQuery);
     return query == null ? null : query.data;

@@ -36,6 +36,7 @@ enum StatisticsOption {
   visualizeEngineStatistics,
 }
 
+/// Displays performance statistics.
 class StatisticsOverlay extends LeafRenderObjectWidget {
 
   /// Create a statistics overlay that only displays specific statistics. The

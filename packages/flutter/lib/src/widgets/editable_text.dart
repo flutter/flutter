@@ -12,8 +12,9 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-const _kCursorBlinkHalfPeriod = 500; // milliseconds
+const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
+/// A range of characters in a string of tet.
 class TextRange {
   const TextRange({ this.start, this.end });
   const TextRange.collapsed(int position)
@@ -173,7 +174,7 @@ class EditableTextState extends State<EditableText> {
   /// The cursor blink interval (the amount of time the cursor is in the "on"
   /// state or the "off" state). A complete cursor blink period is twice this
   /// value (half on, half off).
-  Duration get cursorBlinkInterval => new Duration(milliseconds: _kCursorBlinkHalfPeriod);
+  Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
 
   void _cursorTick(Timer timer) {
     setState(() {
@@ -183,10 +184,7 @@ class EditableTextState extends State<EditableText> {
 
   void _startCursorTimer() {
     _showCursor = true;
-    _cursorTimer = new Timer.periodic(
-      new Duration(milliseconds: _kCursorBlinkHalfPeriod),
-      _cursorTick
-    );
+    _cursorTimer = new Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
   void dispose() {

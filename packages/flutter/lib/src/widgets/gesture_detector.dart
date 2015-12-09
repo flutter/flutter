@@ -27,6 +27,11 @@ export 'package:flutter/gestures.dart' show
   GestureScaleUpdateCallback,
   GestureScaleEndCallback;
 
+/// A widget that detects gestures.
+///
+/// Attempts to recognize gestures that coorespond to its non-null callbacks.
+///
+/// See http://flutter.io/gestures/ for additional information.
 class GestureDetector extends StatefulComponent {
   const GestureDetector({
     Key key,
@@ -109,6 +114,7 @@ class GestureDetector extends StatefulComponent {
   final GestureScaleUpdateCallback onScaleUpdate;
   final GestureScaleEndCallback onScaleEnd;
 
+  /// How this gesture detector should behave during hit testing.
   final HitTestBehavior behavior;
 
   _GestureDetectorState createState() => new _GestureDetectorState();

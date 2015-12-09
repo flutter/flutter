@@ -5,14 +5,20 @@
 import 'basic.dart';
 import 'framework.dart';
 
+/// A place in the overlay that can contain a widget.
 class OverlayEntry {
   OverlayEntry({
     this.builder,
     bool opaque: false
   }) : _opaque = opaque;
 
+  /// This entry will include the widget built by this builder in the overlay at the entry's position.
   final WidgetBuilder builder;
 
+  /// Whether this entry occludes the entire overlay.
+  ///
+  /// If an entry claims to be opaque, the overlay will skip building all the
+  /// entries below that entry for efficiency.
   bool get opaque => _opaque;
   bool _opaque;
   void set opaque (bool value) {
@@ -24,12 +30,15 @@ class OverlayEntry {
 
   OverlayState _state;
 
-  /// Remove the entry from the overlay.
+  /// Remove this entry from the overlay.
   void remove() {
     _state?._remove(this);
     _state = null;
   }
 
+  /// Cause this entry to rebuild during the next pipeline flush.
+  ///
+  /// You need to call this function if the output of [builder] has changed.
   void markNeedsBuild() {
     // TODO(ianh): find a way to make this not rebuild the entire overlay
     _state?.setState(() {});
@@ -38,19 +47,23 @@ class OverlayEntry {
   String toString() => '$runtimeType@$hashCode(opaque: $opaque)';
 }
 
+/// A [Stack] of entries that can be managed independently.
 class Overlay extends StatefulComponent {
   Overlay({
     Key key,
     this.initialEntries
   }) : super(key: key);
 
+  /// The entries to include in the overlay initially.
   final List<OverlayEntry> initialEntries;
 
+  /// The closest enclosing overlay of the given context.
   static OverlayState of(BuildContext context) => context.ancestorStateOfType(OverlayState);
 
   OverlayState createState() => new OverlayState();
 }
 
+/// The current state of an [Overlay].
 class OverlayState extends State<Overlay> {
   final List<OverlayEntry> _entries = new List<OverlayEntry>();
 
@@ -59,6 +72,10 @@ class OverlayState extends State<Overlay> {
     insertAll(config.initialEntries);
   }
 
+  /// Insert the given entry into the overlay.
+  ///
+  /// If [above] is non-null, the entry is inserted just above [above].
+  /// Otherwise, the entry is inserted on top.
   void insert(OverlayEntry entry, { OverlayEntry above }) {
     assert(entry._state == null);
     assert(above == null || (above._state == this && _entries.contains(above)));
@@ -69,6 +86,10 @@ class OverlayState extends State<Overlay> {
     });
   }
 
+  /// Insert all the entries in the given iterable.
+  ///
+  /// If [above] is non-null, the entries are inserted just above [above].
+  /// Otherwise, the entries are inserted on top.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above }) {
     assert(above == null || (above._state == this && _entries.contains(above)));
     for (OverlayEntry entry in entries) {
@@ -87,12 +108,14 @@ class OverlayState extends State<Overlay> {
     });
   }
 
+  /// (DEBUG ONLY) Check whether a given entry is visible (i.e., not behind an opaque entry).
+  ///
+  /// This is an O(N) algorithm, and should not be necessary except for debug asserts.
+  /// To avoid people depending on it, we only implement it in checked mode.
   bool debugIsVisible(OverlayEntry entry) {
     bool result = false;
     assert(_entries.contains(entry));
     assert(() {
-      // This is an O(N) algorithm, and should not be necessary except for debug asserts.
-      // To avoid people depending on it, we only implement it in checked mode.
       for (int i = _entries.length - 1; i > 0; i -= 1) {
         OverlayEntry candidate = _entries[i];
         if (candidate == entry) {

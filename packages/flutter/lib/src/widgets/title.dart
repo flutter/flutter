@@ -5,11 +5,16 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+/// Controls the description of this app in the operating system.
 class Title extends StatelessComponent {
   Title({ this.title, this.child, this.color });
 
   final Widget child;
+
+  /// A one-line description of this app for use in the window manager.
   final String title;
+
+  /// A color that the window manager should use to identify this app.
   final Color color;
 
   Widget build(BuildContext context) {

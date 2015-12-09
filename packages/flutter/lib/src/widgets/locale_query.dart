@@ -4,7 +4,7 @@
 
 import 'framework.dart';
 
-// Superclass for locale-specific data provided by the application.
+/// Superclass for locale-specific data provided by the application.
 class LocaleQueryData { }
 
 class LocaleQuery<T extends LocaleQueryData> extends InheritedWidget {
