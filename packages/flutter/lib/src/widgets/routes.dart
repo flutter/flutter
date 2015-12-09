@@ -33,6 +33,14 @@ abstract class OverlayRoute<T> extends Route<T> {
     navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
   }
 
+  /// A request was made to pop this route. If the route can handle it
+  /// internally (e.g. because it has its own stack of internal state) then
+  /// return false, otherwise return true. Returning false will prevent the
+  /// default behavior of NavigatorState.pop().
+  ///
+  /// If this is called, the Navigator will not call dispose(). It is the
+  /// responsibility of the Route to later call dispose().
+  ///
   /// Subclasses shouldn't call this if they want to delay the finished() call.
   bool didPop(T result) {
     finished();

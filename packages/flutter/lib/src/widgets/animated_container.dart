@@ -100,7 +100,7 @@ class AnimatedContainer extends StatefulComponent {
   /// Empty space to inscribe inside the decoration.
   final EdgeDims padding;
 
-  /// The tranformation matrix to apply before painting the container.
+  /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
   /// If non-null, requires the decoration to have this width.

@@ -110,8 +110,9 @@ class OverlayState extends State<Overlay> {
 
   /// (DEBUG ONLY) Check whether a given entry is visible (i.e., not behind an opaque entry).
   ///
-  /// This is an O(N) algorithm, and should not be necessary except for debug asserts.
-  /// To avoid people depending on it, we only implement it in checked mode.
+  /// This is an O(N) algorithm, and should not be necessary except for debug
+  /// asserts. To avoid people depending on it, this function is implemented
+  /// only in checked mode.
   bool debugIsVisible(OverlayEntry entry) {
     bool result = false;
     assert(_entries.contains(entry));

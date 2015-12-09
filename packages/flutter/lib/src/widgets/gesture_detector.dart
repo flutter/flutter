@@ -29,7 +29,7 @@ export 'package:flutter/gestures.dart' show
 
 /// A widget that detects gestures.
 ///
-/// Attempts to recognize gestures that coorespond to its non-null callbacks.
+/// Attempts to recognize gestures that correspond to its non-null callbacks.
 ///
 /// See http://flutter.io/gestures/ for additional information.
 class GestureDetector extends StatefulComponent {

@@ -38,6 +38,8 @@ enum StatisticsOption {
 
 /// Displays performance statistics.
 class StatisticsOverlay extends LeafRenderObjectWidget {
+  // TODO(abarth): We should have a page on the web site with a screenshot and
+  // an explanation of all the various readouts.
 
   /// Create a statistics overlay that only displays specific statistics. The
   /// mask is created by shifting 1 by the index of the specific StatisticOption
