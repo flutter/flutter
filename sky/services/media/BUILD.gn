@@ -28,6 +28,7 @@ if (is_android) {
     java_files = [
       "src/org/domokit/media/MediaPlayerImpl.java",
       "src/org/domokit/media/MediaServiceImpl.java",
+      "src/org/domokit/media/SoundPoolImpl.java",
     ]
 
     deps = [

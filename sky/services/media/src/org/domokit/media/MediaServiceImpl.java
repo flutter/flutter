@@ -11,6 +11,7 @@ import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.media.MediaPlayer;
 import org.chromium.mojom.media.MediaService;
+import org.chromium.mojom.media.SoundPool;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,5 +45,10 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public void createPlayer(InterfaceRequest<MediaPlayer> player) {
         MediaPlayer.MANAGER.bind(new MediaPlayerImpl(mCore, mContext, sThreadPool), player);
+    }
+
+    @Override
+    public void createSoundPool(InterfaceRequest<SoundPool> pool, int maxStreams) {
+        SoundPool.MANAGER.bind(new SoundPoolImpl(mCore, mContext, sThreadPool, maxStreams), pool);
     }
 }
