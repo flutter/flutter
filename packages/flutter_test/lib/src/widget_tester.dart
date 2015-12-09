@@ -32,6 +32,12 @@ class WidgetTester {
     pump(duration);
   }
 
+  void setLocale(String languageCode, String countryCode) {
+    ui.Locale locale = new ui.Locale(languageCode, countryCode);
+    FlutterBinding.instance.dispatchLocaleChanged(locale);
+    async.flushMicrotasks();
+  }
+
   void pump([ Duration duration ]) {
     if (duration != null)
       async.elapse(duration);

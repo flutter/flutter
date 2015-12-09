@@ -1,11 +1,13 @@
 #!/bin/bash
 set -ex
 
+export PATH="$PWD/bin:$PATH"
+
 # analyze all the Dart code in the repo
-./bin/flutter analyze --flutter-repo --no-current-directory --no-current-package --congratulate
+flutter analyze --flutter-repo --no-current-directory --no-current-package --congratulate
 
 # flutter package tests
-./bin/flutter test --flutter-repo
+flutter test --flutter-repo
 
 (cd packages/cassowary; pub run test -j1)
 # (cd packages/flutter_sprites; ) # No tests to run.
@@ -14,6 +16,8 @@ set -ex
 (cd packages/newton; pub run test -j1)
 # (cd packages/playfair; ) # No tests to run.
 # (cd packages/updater; ) # No tests to run.
+
+(cd examples/stocks; flutter test)
 
 if [ $TRAVIS_PULL_REQUEST = "false" ]; then
   if [ $TRAVIS_BRANCH = "master" ]; then
