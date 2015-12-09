@@ -27,7 +27,6 @@ Widget buildFrame() {
     items: pages,
     itemBuilder: buildPage,
     itemsWrap: itemsWrap,
-    itemExtent: pageSize.width,
     scrollDirection: ScrollDirection.horizontal,
     onPageChanged: (int page) { currentPage = page; }
   );

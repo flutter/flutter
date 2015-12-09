@@ -57,7 +57,7 @@ Future fling(double velocity) {
 }
 
 void main() {
-  test('ScrollableList snap scrolling, fling(-800)', () {
+  test('ScrollableList snap scrolling, fling(-0.8)', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(buildFrame());
 
@@ -67,7 +67,7 @@ void main() {
 
       Duration dt = const Duration(seconds: 2);
 
-      fling(-800.0);
+      fling(-0.8);
       tester.pump(); // Start the scheduler at 0.0
       tester.pump(dt);
       expect(scrollOffset, closeTo(200.0, 1.0));
@@ -76,7 +76,7 @@ void main() {
       tester.pump();
       expect(scrollOffset, 0.0);
 
-      fling(-2000.0);
+      fling(-2.0);
       tester.pump();
       tester.pump(dt);
       expect(scrollOffset, closeTo(400.0, 1.0));
@@ -85,7 +85,7 @@ void main() {
       tester.pump();
       expect(scrollOffset, 400.0);
 
-      fling(800.0);
+      fling(0.8);
       tester.pump();
       tester.pump(dt);
       expect(scrollOffset, closeTo(0.0, 1.0));
@@ -94,7 +94,7 @@ void main() {
       tester.pump();
       expect(scrollOffset, 800.0);
 
-      fling(2000.0);
+      fling(2.0);
       tester.pump();
       tester.pump(dt);
       expect(scrollOffset, closeTo(200.0, 1.0));
@@ -104,7 +104,7 @@ void main() {
       expect(scrollOffset, 800.0);
 
       bool completed = false;
-      fling(2000.0).then((_) {
+      fling(2.0).then((_) {
         completed = true;
         expect(scrollOffset, closeTo(200.0, 1.0));
       });

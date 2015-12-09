@@ -24,6 +24,11 @@ const double _kMillisecondsPerSecond = 1000.0;
 const double _kMinFlingVelocity = -kMaxFlingVelocity * _kMillisecondsPerSecond;
 const double _kMaxFlingVelocity = kMaxFlingVelocity * _kMillisecondsPerSecond;
 
+final Tolerance kPixelScrollTolerance = new Tolerance(
+  velocity: 1.0 / (0.050 * ui.window.devicePixelRatio),  // logical pixels per second
+  distance: 1.0 / ui.window.devicePixelRatio  // logical pixels
+);
+
 typedef void ScrollListener(double scrollOffset);
 typedef double SnapOffsetCallback(double scrollOffset);
 
@@ -122,6 +127,18 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return new Offset(0.0, scrollOffset);
   }
 
+  /// Convert a position or velocity measured in terms of pixels to a scrollOffset.
+  /// Scrollable gesture handlers convert their incoming values with this method.
+  /// Subclasses that define scrollOffset in units other than pixels must
+  /// override this method.
+  double pixelToScrollOffset(double pixelValue) => pixelValue;
+
+  double scrollDirectionVelocity(Offset scrollVelocity) {
+    return config.scrollDirection == ScrollDirection.horizontal
+      ? -scrollVelocity.dx
+      : -scrollVelocity.dy;
+  }
+
   ScrollBehavior _scrollBehavior;
   ScrollBehavior createScrollBehavior();
   ScrollBehavior get scrollBehavior {
@@ -180,11 +197,32 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Simulation _createFlingSimulation(double velocity) {
-    return scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity);
+    /*
+    // Assume that we're rendering at atleast 15 FPS. Stop when we're
+    // scrolling less than one logical pixel per frame. We're essentially
+    // normalizing by the devicePixelRatio so that the threshold has the
+    // same effect independent of the device's pixel density.
+    double endVelocity = pixelToScrollOffset(15.0 * ui.window.devicePixelRatio);
+
+    // Similar to endVelocity. Stop scrolling when we're this close to
+    // destiniation scroll offset.
+    double endDistance = pixelToScrollOffset(0.5 * ui.window.devicePixelRatio);
+    */
+
+    final double endVelocity = pixelToScrollOffset(kPixelScrollTolerance.velocity);
+    final double endDistance = pixelToScrollOffset(kPixelScrollTolerance.distance);
+    return scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity)
+      ..tolerance = new Tolerance(velocity: endVelocity.abs(), distance: endDistance);
   }
 
+  double snapScrollOffset(double value) {
+    return config.snapOffsetCallback == null ? value : config.snapOffsetCallback(value);
+  }
+
+  bool get snapScrollOffsetChanges => config.snapOffsetCallback != null;
+
   Simulation _createSnapSimulation(double velocity) {
-    if (velocity == null || config.snapOffsetCallback == null || !_scrollOffsetIsInBounds(scrollOffset))
+    if (!snapScrollOffsetChanges || velocity == 0.0 || !_scrollOffsetIsInBounds(scrollOffset))
       return null;
 
     Simulation simulation = _createFlingSimulation(velocity);
@@ -195,14 +233,15 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     if (endScrollOffset.isNaN)
       return null;
 
-    double snappedScrollOffset = config.snapOffsetCallback(endScrollOffset + config.snapAlignmentOffset);
+    double snappedScrollOffset = snapScrollOffset(endScrollOffset + config.snapAlignmentOffset);
     double alignedScrollOffset = snappedScrollOffset - config.snapAlignmentOffset;
     if (!_scrollOffsetIsInBounds(alignedScrollOffset))
       return null;
 
     double snapVelocity = velocity.abs() * (alignedScrollOffset - scrollOffset).sign;
+    double endVelocity = pixelToScrollOffset(kPixelScrollTolerance.velocity * velocity.sign);
     Simulation toSnapSimulation =
-      scrollBehavior.createSnapScrollSimulation(scrollOffset, alignedScrollOffset, snapVelocity);
+      scrollBehavior.createSnapScrollSimulation(scrollOffset, alignedScrollOffset, snapVelocity, endVelocity);
     if (toSnapSimulation == null)
       return null;
 
@@ -211,10 +250,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return new ClampedSimulation(toSnapSimulation, xMin: offsetMin, xMax: offsetMax);
   }
 
-  Future _startToEndAnimation({ double velocity }) {
+  Future _startToEndAnimation(Offset scrollVelocity) {
+    double velocity = scrollDirectionVelocity(scrollVelocity);
     _animation.stop();
-    Simulation simulation =
-      _createSnapSimulation(velocity) ?? _createFlingSimulation(velocity ?? 0.0);
+    Simulation simulation = _createSnapSimulation(velocity) ?? _createFlingSimulation(velocity);
     if (simulation == null)
       return new Future.value();
     return _animation.animateWith(simulation);
@@ -254,16 +293,16 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return scrollTo(newScrollOffset, duration: duration, curve: curve);
   }
 
-  Future fling(Offset velocity) {
-    if (velocity != Offset.zero)
-      return _startToEndAnimation(velocity: _scrollVelocity(velocity));
+  Future fling(Offset scrollVelocity) {
+    if (scrollVelocity != Offset.zero)
+      return _startToEndAnimation(scrollVelocity);
     if (!_animation.isAnimating)
       return settleScrollOffset();
     return new Future.value();
   }
 
   Future settleScrollOffset() {
-    return _startToEndAnimation();
+    return _startToEndAnimation(Offset.zero);
   }
 
   void dispatchOnScrollStart() {
@@ -282,13 +321,6 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       config.onScrollEnd(_scrollOffset);
   }
 
-  double _scrollVelocity(ui.Offset velocity) {
-    double scrollVelocity = config.scrollDirection == ScrollDirection.horizontal
-      ? -velocity.dx
-      : -velocity.dy;
-    return scrollVelocity.clamp(_kMinFlingVelocity, _kMaxFlingVelocity) / _kMillisecondsPerSecond;
-  }
-
   void _handlePointerDown(_) {
     _animation.stop();
   }
@@ -300,11 +332,16 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   void _handleDragUpdate(double delta) {
     // We negate the delta here because a positive scroll offset moves the
     // the content up (or to the left) rather than down (or the right).
-    scrollBy(-delta);
+    scrollBy(pixelToScrollOffset(-delta));
   }
 
-  Future _handleDragEnd(Offset velocity) {
-    return fling(velocity).then((_) {
+  double _toScrollVelocity(double velocity) {
+    return pixelToScrollOffset(velocity.clamp(_kMinFlingVelocity, _kMaxFlingVelocity) / _kMillisecondsPerSecond);
+  }
+
+  Future _handleDragEnd(Offset pixelScrollVelocity) {
+    final Offset scrollVelocity = new Offset(_toScrollVelocity(pixelScrollVelocity.dx), _toScrollVelocity(pixelScrollVelocity.dy));
+    return fling(scrollVelocity).then((_) {
         dispatchOnScrollEnd();
     });
   }
@@ -687,71 +724,6 @@ class ScrollableListState<T, Config extends ScrollableList<T>> extends Scrollabl
     for (int i = begin; i < end; ++i)
       result.add(config.itemBuilder(context, config.items[i % itemCount], i));
     return result;
-  }
-}
-
-typedef void PageChangedCallback(int newPage);
-
-class PageableList<T> extends ScrollableList<T> {
-  PageableList({
-    Key key,
-    int initialPage,
-    ScrollDirection scrollDirection: ScrollDirection.horizontal,
-    ScrollListener onScroll,
-    List<T> items,
-    ItemBuilder<T> itemBuilder,
-    bool itemsWrap: false,
-    double itemExtent,
-    this.onPageChanged,
-    EdgeDims padding,
-    this.duration: const Duration(milliseconds: 200),
-    this.curve: Curves.ease
-  }) : super(
-    key: key,
-    initialScrollOffset: initialPage == null ? null : initialPage * itemExtent,
-    scrollDirection: scrollDirection,
-    onScroll: onScroll,
-    items: items,
-    itemBuilder: itemBuilder,
-    itemsWrap: itemsWrap,
-    itemExtent: itemExtent,
-    padding: padding
-  );
-
-  final Duration duration;
-  final Curve curve;
-  final PageChangedCallback onPageChanged;
-
-  PageableListState<T> createState() => new PageableListState<T>();
-}
-
-class PageableListState<T> extends ScrollableListState<T, PageableList<T>> {
-  double _snapScrollOffset(double newScrollOffset) {
-    double scaledScrollOffset = newScrollOffset / config.itemExtent;
-    double previousScrollOffset = scaledScrollOffset.floor() * config.itemExtent;
-    double nextScrollOffset = scaledScrollOffset.ceil() * config.itemExtent;
-    double delta = newScrollOffset - previousScrollOffset;
-    return (delta < config.itemExtent / 2.0 ? previousScrollOffset : nextScrollOffset)
-      .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
-  }
-
-  Future fling(ui.Offset velocity) {
-    double scrollVelocity = _scrollVelocity(velocity);
-    double newScrollOffset = _snapScrollOffset(scrollOffset + scrollVelocity.sign * config.itemExtent)
-      .clamp(_snapScrollOffset(scrollOffset - config.itemExtent / 2.0),
-             _snapScrollOffset(scrollOffset + config.itemExtent / 2.0));
-    return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve).then(_notifyPageChanged);
-  }
-
-  int get currentPage => (scrollOffset / config.itemExtent).floor() % itemCount;
-
-  void _notifyPageChanged(_) {
-    if (config.onPageChanged != null)
-      config.onPageChanged(currentPage);
-  }
-
-  Future settleScrollOffset() {
-    return scrollTo(_snapScrollOffset(scrollOffset), duration: config.duration, curve: config.curve).then(_notifyPageChanged);
   }
 }
 

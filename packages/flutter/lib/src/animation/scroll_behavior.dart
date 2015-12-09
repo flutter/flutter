@@ -3,20 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:newton/newton.dart';
 
 const double _kSecondsPerMillisecond = 1000.0;
 const double _kScrollDrag = 0.025;
 
-// TODO(abarth): These values won't work well if there's a scale transform.
-final Tolerance _kDefaultScrollTolerance = new Tolerance(
-  velocity: 1.0 / (0.050 * ui.window.devicePixelRatio),  // logical pixels per second
-  distance: 1.0 / ui.window.devicePixelRatio  // logical pixels
-);
-
-/// An interface for controlling the behavior of scrollable widgets
+/// An interface for controlling the behavior of scrollable widgets.
 abstract class ScrollBehavior {
   /// Called when a drag gesture ends. Returns a simulation that
   /// propels the scrollOffset.
@@ -24,10 +17,10 @@ abstract class ScrollBehavior {
 
   /// Called when a drag gesture ends and toSnapOffset is specified.
   /// Returns an animation that ends at the snap offset.
-  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double velocity) => null;
+  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) => null;
 
   /// Return the scroll offset to use when the user attempts to scroll
-  /// from the given offset by the given delta
+  /// from the given offset by the given delta.
   double applyCurve(double scrollOffset, double scrollDelta);
 
   /// Whether this scroll behavior currently permits scrolling
@@ -39,11 +32,11 @@ abstract class ExtentScrollBehavior extends ScrollBehavior {
   ExtentScrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : _contentExtent = contentExtent, _containerExtent = containerExtent;
 
-  /// The linear extent of the content inside the scrollable widget
+  /// The linear extent of the content inside the scrollable widget.
   double get contentExtent => _contentExtent;
   double _contentExtent;
 
-  /// The linear extent of the exterior of the scrollable widget
+  /// The linear extent of the exterior of the scrollable widget.
   double get containerExtent => _containerExtent;
   double _containerExtent;
 
@@ -64,14 +57,14 @@ abstract class ExtentScrollBehavior extends ScrollBehavior {
     return scrollOffset.clamp(minScrollOffset, maxScrollOffset);
   }
 
-  /// The minimum value the scroll offset can obtain
+  /// The minimum value the scroll offset can obtain.
   double get minScrollOffset;
 
-  /// The maximum value the scroll offset can obatin
+  /// The maximum value the scroll offset can obtain.
   double get maxScrollOffset;
 }
 
-/// A scroll behavior that prevents the user from exeeding scroll bounds
+/// A scroll behavior that prevents the user from exeeding scroll bounds.
 class BoundedBehavior extends ExtentScrollBehavior {
   BoundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
@@ -84,7 +77,18 @@ class BoundedBehavior extends ExtentScrollBehavior {
   }
 }
 
-/// A scroll behavior that does not prevent the user from exeeding scroll bounds
+Simulation _createFlingScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
+  final double startVelocity = velocity * _kSecondsPerMillisecond;
+  final SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
+  return new ScrollSimulation(position, startVelocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag);
+}
+
+Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
+  final double velocity = startVelocity * _kSecondsPerMillisecond;
+  return new FrictionSimulation.through(startOffset, endOffset, velocity, endVelocity);
+}
+
+/// A scroll behavior that does not prevent the user from exeeding scroll bounds.
 class UnboundedBehavior extends ExtentScrollBehavior {
   UnboundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
@@ -96,8 +100,8 @@ class UnboundedBehavior extends ExtentScrollBehavior {
     );
   }
 
-  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
-    return _createSnapScrollSimulation(startOffset, endOffset, velocity);
+  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
+    return _createSnapScrollSimulation(startOffset, endOffset, startVelocity, endVelocity);
   }
 
   double get minScrollOffset => double.NEGATIVE_INFINITY;
@@ -108,33 +112,17 @@ class UnboundedBehavior extends ExtentScrollBehavior {
   }
 }
 
-Simulation _createFlingScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset, Tolerance tolerance) {
-  double startVelocity = velocity * _kSecondsPerMillisecond;
-
-  SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
-  ScrollSimulation simulation =
-      new ScrollSimulation(position, startVelocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag)
-    ..tolerance = tolerance ?? _kDefaultScrollTolerance;
-  return simulation;
-}
-
-Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
-  double startVelocity = velocity * _kSecondsPerMillisecond;
-  double endVelocity = velocity.sign * _kDefaultScrollTolerance.velocity;
-  return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
-}
-
-/// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance
+/// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance.
 class OverscrollBehavior extends BoundedBehavior {
   OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
-  Simulation createFlingScrollSimulation(double position, double velocity, { Tolerance tolerance }) {
-    return _createFlingScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, tolerance);
+  Simulation createFlingScrollSimulation(double position, double velocity) {
+    return _createFlingScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
   }
 
-  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double velocity) {
-    return _createSnapScrollSimulation(startOffset, endOffset, velocity);
+  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
+    return _createSnapScrollSimulation(startOffset, endOffset, startVelocity, endVelocity);
   }
 
   double applyCurve(double scrollOffset, double scrollDelta) {
@@ -154,13 +142,13 @@ class OverscrollBehavior extends BoundedBehavior {
   }
 }
 
-/// A scroll behavior that lets the user scroll beyond the scroll bounds only when the bounds are disjoint
+/// A scroll behavior that lets the user scroll beyond the scroll bounds only when the bounds are disjoint.
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
   bool get isScrollable => contentExtent > containerExtent;
 
-  Simulation createFlingScrollSimulation(double position, double velocity, { Tolerance tolerance }) {
+  Simulation createFlingScrollSimulation(double position, double velocity) {
     if (isScrollable || position < minScrollOffset || position > maxScrollOffset)
-      return super.createFlingScrollSimulation(position, velocity, tolerance: tolerance);
+      return super.createFlingScrollSimulation(position, velocity);
     return null;
   }
 
