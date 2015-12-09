@@ -91,7 +91,7 @@ class OverlayGeometryApp extends StatefulComponent {
 class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: bold);
+    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   List<CardModel> cardModels;
   Map<MarkerType, Point> markers = new Map<MarkerType, Point>();

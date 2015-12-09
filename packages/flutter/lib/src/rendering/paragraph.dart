@@ -17,12 +17,7 @@ export 'package:flutter/painting.dart' show
   TextDecoration,
   TextDecorationStyle,
   TextSpan,
-  TextStyle,
-  normal,
-  bold,
-  underline,
-  overline,
-  lineThrough;
+  TextStyle;
 
 /// A render object that displays a paragraph of text
 class RenderParagraph extends RenderBox {

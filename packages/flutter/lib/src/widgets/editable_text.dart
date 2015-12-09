@@ -269,7 +269,7 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
   TextSpan _buildTextSpan() {
     if (!hideText && value.composing.isValid) {
       TextStyle composingStyle = style.merge(
-        const TextStyle(decoration: underline)
+        const TextStyle(decoration: TextDecoration.underline)
       );
 
       return new StyledTextSpan(style, <TextSpan>[
