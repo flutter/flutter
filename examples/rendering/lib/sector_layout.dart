@@ -37,6 +37,8 @@ class SectorConstraints extends Constraints {
   }
 
   bool get isTight => minDeltaTheta >= maxDeltaTheta && minDeltaTheta >= maxDeltaTheta;
+
+  bool get isNormalized => minDeltaRadius <= maxDeltaRadius && minDeltaTheta <= maxDeltaTheta;
 }
 
 class SectorDimensions {

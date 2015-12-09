@@ -49,6 +49,7 @@ class RenderParagraph extends RenderBox {
 
   void layoutText(BoxConstraints constraints) {
     assert(constraints != null);
+    assert(constraints.isNormalized);
     if (_constraintsForCurrentLayout == constraints)
       return; // already cached this layout
     textPainter.maxWidth = constraints.maxWidth;
@@ -80,10 +81,12 @@ class RenderParagraph extends RenderBox {
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return _getIntrinsicHeight(constraints);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return _getIntrinsicHeight(constraints);
   }
 

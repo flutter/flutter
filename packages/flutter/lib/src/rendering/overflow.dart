@@ -93,18 +93,22 @@ class RenderOverflowBox extends RenderBox with RenderObjectWithChildMixin<Render
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth();
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth();
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainHeight();
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainHeight();
   }
 
@@ -165,18 +169,22 @@ class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<R
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth(_requestedSize.width);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth(_requestedSize.width);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth(_requestedSize.height);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth(_requestedSize.height);
   }
 

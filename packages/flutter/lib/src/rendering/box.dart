@@ -88,6 +88,7 @@ class BoxConstraints extends Constraints {
   /// Returns new box constraints that are smaller by the given edge dimensions
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
+    assert(isNormalized);
     double horizontal = edges.left + edges.right;
     double vertical = edges.top + edges.bottom;
     double deflatedMinWidth = math.max(0.0, minWidth - horizontal);
@@ -102,6 +103,7 @@ class BoxConstraints extends Constraints {
 
   /// Returns new box constraints that remove the minimum width and height requirements
   BoxConstraints loosen() {
+    assert(isNormalized);
     return new BoxConstraints(
       minWidth: 0.0,
       maxWidth: maxWidth,
@@ -144,19 +146,24 @@ class BoxConstraints extends Constraints {
 
   /// Returns the width that both satisfies the constraints and is as close as possible to the given width
   double constrainWidth([double width = double.INFINITY]) {
+    assert(isNormalized);
     return clamp(min: minWidth, max: maxWidth, value: width);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as possible to the given height
   double constrainHeight([double height = double.INFINITY]) {
+    assert(isNormalized);
     return clamp(min: minHeight, max: maxHeight, value: height);
   }
 
   /// Returns the size that both satisfies the constraints and is as close as possible to the given size
   Size constrain(Size size) {
     Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
-    if (size is _DebugSize)
-      result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
+    assert(() {
+      if (size is _DebugSize)
+        result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
+      return true;
+    });
     return result;
   }
 
@@ -177,8 +184,9 @@ class BoxConstraints extends Constraints {
 
   /// Whether the given size satisfies the constraints
   bool isSatisfiedBy(Size size) {
-    return (minWidth <= size.width) && (size.width <= math.max(minWidth, maxWidth)) &&
-           (minHeight <= size.height) && (size.height <= math.max(minHeight, maxHeight));
+    assert(isNormalized);
+    return (minWidth <= size.width) && (size.width <= maxWidth) &&
+           (minHeight <= size.height) && (size.height <= maxHeight);
   }
 
   BoxConstraints operator*(double other) {
@@ -227,6 +235,8 @@ class BoxConstraints extends Constraints {
       return b * t;
     if (b == null)
       return a * (1.0 - t);
+    assert(a.isNormalized);
+    assert(b.isNormalized);
     return new BoxConstraints(
       minWidth: ui.lerpDouble(a.minWidth, b.minWidth, t),
       maxWidth: ui.lerpDouble(a.maxWidth, b.maxWidth, t),
@@ -235,12 +245,25 @@ class BoxConstraints extends Constraints {
     );
   }
 
+  bool get isNormalized => minWidth <= maxWidth && minHeight <= maxHeight;
+
+  BoxConstraints normalize() {
+    return new BoxConstraints(
+      minWidth: minWidth,
+      maxWidth: minWidth > maxWidth ? minWidth : maxWidth,
+      minHeight: minHeight,
+      maxHeight: minHeight > maxHeight ? minHeight : maxHeight
+    );
+  }
+
   bool operator ==(dynamic other) {
+    assert(isNormalized);
     if (identical(this, other))
       return true;
     if (other is! BoxConstraints)
       return false;
     final BoxConstraints typedOther = other;
+    assert(typedOther.isNormalized);
     return minWidth == typedOther.minWidth &&
            maxWidth == typedOther.maxWidth &&
            minHeight == typedOther.minHeight &&
@@ -248,6 +271,7 @@ class BoxConstraints extends Constraints {
   }
 
   int get hashCode {
+    assert(isNormalized);
     int value = 373;
     value = 37 * value + minWidth.hashCode;
     value = 37 * value + maxWidth.hashCode;
@@ -257,11 +281,12 @@ class BoxConstraints extends Constraints {
   }
 
   String toString() {
+    String annotation = isNormalized ? '' : '; NOT NORMALIZED';
     if (minWidth == double.INFINITY && minHeight == double.INFINITY)
-      return 'BoxConstraints(biggest)';
+      return 'BoxConstraints(biggest$annotation)';
     if (minWidth == 0 && maxWidth == double.INFINITY &&
         minHeight == 0 && maxHeight == double.INFINITY)
-      return 'BoxConstraints(unconstrained)';
+      return 'BoxConstraints(unconstrained$annotation)';
     String describe(double min, double max, String dim) {
       if (min == max)
         return '$dim=${min.toStringAsFixed(1)}';
@@ -269,7 +294,7 @@ class BoxConstraints extends Constraints {
     }
     final String width = describe(minWidth, maxWidth, 'w');
     final String height = describe(minHeight, maxHeight, 'h');
-    return 'BoxConstraints($width, $height)';
+    return 'BoxConstraints($width, $height$annotation)';
   }
 }
 
@@ -334,6 +359,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth(0.0);
   }
 
@@ -342,6 +368,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainWidth(0.0);
   }
 
@@ -350,6 +377,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainHeight(0.0);
   }
 
@@ -362,6 +390,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return constraints.constrainHeight(0.0);
   }
 

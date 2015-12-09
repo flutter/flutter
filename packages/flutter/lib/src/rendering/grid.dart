@@ -74,21 +74,25 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     // We can render at any width.
     return constraints.constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     double maxWidth = childCount * _maxChildExtent;
     return constraints.constrainWidth(maxWidth);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     double desiredHeight = _computeMetrics().size.height;
     return constraints.constrainHeight(desiredHeight);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
     return getMinIntrinsicHeight(constraints);
   }
 
