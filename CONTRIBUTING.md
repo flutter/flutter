@@ -78,12 +78,21 @@ Running the tests
 
 To automatically find all files named `_test.dart` inside a package and run them inside the flutter shell as a test use the `flutter test` command, e.g:
 
- * `cd packages/newton`
+ * `cd examples/stocks`
  * `flutter test`
+
+Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.dart`
 
 Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test) which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
 
-`flutter test --flutter-repo` is a shortcut for those working on the flutter package itself which finds and runs all tests inside the flutter repository regardless of the current working directory.
+`flutter test` runs tests inside the flutter shell.  Some packages inside the flutter repository can be run inside the dart command line VM as well as the flutter shell, `packages/newton` and `packages/flutter_tools` are two such examples:
+
+ * `cd packages/newton`
+ * `pub run test`
+
+`flutter test --flutter-repo` is a shortcut for those working on the flutter repository itself which finds and runs all tests inside the flutter repository regardless of the current working directory.
+
+If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--debug` or `--release` to change what flutter shell `flutter test` uses.
 
 Note: Flutter tests are headless, you won't see any UI. You can use
 `print` to generate console output or you can interact with the DartVM
