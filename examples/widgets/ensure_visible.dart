@@ -85,7 +85,7 @@ class EnsureVisibleAppState extends State<EnsureVisibleApp> {
       cardModel: cardModels[index],
       selected: index == selectedCardIndex,
       onTap: (BuildContext context) {
-        ensureWidgetIsVisible(context, duration: const Duration(milliseconds: 200))
+        Scrollable.ensureVisible(context, duration: const Duration(milliseconds: 200))
         .then((_) {
           setState(() { selectedCardIndex = index; });
         });

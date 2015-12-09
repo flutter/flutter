@@ -56,8 +56,6 @@ import 'transitions.dart';
 // should interpolate the inherited properties from their value at the source to
 // their value at the target. See: https://github.com/flutter/flutter/issues/213
 
-final Object centerOfAttentionHeroTag = new Object();
-
 class _HeroManifest {
   const _HeroManifest({
     this.key,
