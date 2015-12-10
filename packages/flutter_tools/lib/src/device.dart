@@ -521,8 +521,8 @@ class AndroidDevice extends Device {
 
     // 0149947A0D01500C       device usb:340787200X
     RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
-
     RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized\s+\S+$');
+    RegExp offlineRegex = new RegExp(r'^(\S+)\s+offline\s+\S+$');
 
     // Skip first line, which is always 'List of devices attached'.
     for (String line in output.skip(1)) {
@@ -556,6 +556,10 @@ class AndroidDevice extends Device {
           'Device $deviceID is not authorized.\n'
           'You might need to check your device for an authorization dialog.'
         );
+      } else if (offlineRegex.hasMatch(line)) {
+        Match match = offlineRegex.firstMatch(line);
+        String deviceID = match[1];
+        logging.warning('Device $deviceID is offline.');
       } else {
         logging.warning(
           'Unexpected failure parsing device information from adb output:\n'
