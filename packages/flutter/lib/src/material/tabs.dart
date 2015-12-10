@@ -28,7 +28,7 @@ const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
 const double _kTabBarScrollDrag = 0.025;
-const Duration _kTabBarScroll = const Duration(milliseconds: 800);
+const Duration _kTabBarScroll = const Duration(milliseconds: 300);
 
 class _TabBarParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
