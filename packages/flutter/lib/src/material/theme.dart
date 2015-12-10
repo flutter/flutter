@@ -22,9 +22,12 @@ class Theme extends InheritedWidget {
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
+  /// The data from the closest instance of this class that encloses the given context.
+  ///
+  /// Defaults to the fallback theme data if none exists.
   static ThemeData of(BuildContext context) {
     Theme theme = context.inheritFromWidgetOfType(Theme);
-    return theme == null ? _kFallbackTheme : theme.data;
+    return theme?.data ?? _kFallbackTheme;
   }
 
   bool updateShouldNotify(Theme old) => data != old.data;

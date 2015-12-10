@@ -57,7 +57,7 @@ abstract class Scrollable extends StatefulComponent {
   final SnapOffsetCallback snapOffsetCallback;
   final double snapAlignmentOffset;
 
-  /// Returns the closest enclosing scrollable for the given context.
+  /// The state from the closest instance of this class that encloses the given context.
   static ScrollableState of(BuildContext context) {
     return context.ancestorStateOfType(ScrollableState);
   }

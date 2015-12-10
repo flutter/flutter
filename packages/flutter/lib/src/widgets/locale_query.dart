@@ -18,6 +18,7 @@ class LocaleQuery<T extends LocaleQueryData> extends InheritedWidget {
 
   final T data;
 
+  /// The data from the closest instance of this class that encloses the given context.
   static LocaleQueryData of(BuildContext context) {
     LocaleQuery query = context.inheritFromWidgetOfType(LocaleQuery);
     return query == null ? null : query.data;

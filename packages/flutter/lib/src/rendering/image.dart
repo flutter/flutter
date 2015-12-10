@@ -49,6 +49,9 @@ class RenderImage extends RenderBox {
   }
 
   /// If non-null, requires the image to have this width.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   double get width => _width;
   double _width;
   void set width (double value) {
@@ -58,7 +61,10 @@ class RenderImage extends RenderBox {
     markNeedsLayout();
   }
 
-  /// If non-null, requires the image to have this height.
+  /// If non-null, require the image to have this height.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   double get height => _height;
   double _height;
   void set height (double value) {
@@ -98,7 +104,7 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
-  /// Not yet implemented.
+  /// How to repeat this image if it doesn't fill its layout bounds.
   ImageRepeat get repeat => _repeat;
   ImageRepeat _repeat;
   void set repeat (ImageRepeat value) {

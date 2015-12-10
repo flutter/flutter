@@ -23,6 +23,9 @@ class ButtonTheme extends InheritedWidget {
 
   final ButtonColor color;
 
+  /// The color from the closest instance of this class that encloses the given context.
+  ///
+  /// Defaults to [ButtonColor.normal] if none exists.
   static ButtonColor of(BuildContext context) {
     ButtonTheme result = context.inheritFromWidgetOfType(ButtonTheme);
     return result?.color ?? ButtonColor.normal;
