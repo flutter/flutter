@@ -41,12 +41,6 @@ class PageableListAppState extends State<PageableListApp> {
   ScrollDirection scrollDirection = ScrollDirection.horizontal;
   bool itemsWrap = false;
 
-  void updatePageSize(Size newSize) {
-    setState(() {
-      pageSize = newSize;
-    });
-  }
-
   Widget buildCard(BuildContext context, CardModel cardModel, int index) {
     Widget card = new Card(
       color: cardModel.color,
