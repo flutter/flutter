@@ -46,10 +46,8 @@ void beginFrame(Duration timeStamp) {
   ui.window.render(scene);
 }
 
-void handleEvent(String eventType, double timeStamp) {
-  if (eventType == 'back') {
-    print('Pressed back button.');
-  }
+void handlePopRoute() {
+  print('Pressed back button.');
 }
 
 void handlePointerPacket(ByteData serializedPacket) {
@@ -73,7 +71,7 @@ void main() {
   print('Hello, world');
   color = new ui.Color.fromARGB(255, 0, 255, 0);
   ui.window.onBeginFrame = beginFrame;
-  ui.window.onEvent = handleEvent;
+  ui.window.onPopRoute = handlePopRoute;
   ui.window.onPointerPacket = handlePointerPacket;
   ui.window.scheduleFrame();
 }
