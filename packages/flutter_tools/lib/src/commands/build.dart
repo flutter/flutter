@@ -164,7 +164,8 @@ class BuildCommand extends FlutterCommand {
         outputPath: localBundlePath,
         mainPath: mainPath
       );
-      onBundleAvailable(localBundlePath);
+      if (result == 0)
+        onBundleAvailable(localBundlePath);
     } finally {
       tempDir.deleteSync(recursive: true);
     }
@@ -195,8 +196,10 @@ class BuildCommand extends FlutterCommand {
       // In a precompiled snapshot, the instruction buffer contains script
       // content equivalents
       int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath);
-      if (result != 0)
+      if (result != 0) {
+        logging.severe('Failed to run the Flutter compiler. Exit code: $result');
         return result;
+      }
 
       archive.addFile(_createSnapshotFile(snapshotPath));
     }
