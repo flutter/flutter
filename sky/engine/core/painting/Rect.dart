@@ -143,7 +143,7 @@ class Rect {
     return true;
   }
 
-  int get hashCode => _value.fold(373, (value, item) => (37 * value + item.hashCode));
+  int get hashCode => hashList(_value);
 
   String toString() => "Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})";
 }

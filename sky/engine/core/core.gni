@@ -258,9 +258,10 @@ core_idl_files = get_path_info([
                                "abspath")
 
 core_dart_files = get_path_info([
+                                  "dart/hash_codes.dart",
                                   "dart/hooks.dart",
-                                  "dart/natives.dart",
                                   "dart/lerp.dart",
+                                  "dart/natives.dart",
                                   "dart/painting.dart",
                                   "dart/text.dart",
                                   "dart/window.dart",
@@ -276,9 +277,9 @@ core_dart_files = get_path_info([
                                   "painting/Paint.dart",
                                   "painting/PaintingStyle.dart",
                                   "painting/Point.dart",
-                                  "painting/Rect.dart",
                                   "painting/RRect.dart",
                                   "painting/RSTransform.dart",
+                                  "painting/Rect.dart",
                                   "painting/Size.dart",
                                   "painting/TransferMode.dart",
                                   "painting/VertexMode.dart",

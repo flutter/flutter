@@ -25,10 +25,5 @@ abstract class OffsetBase {
            _dy == typedOther._dy;
   }
 
-  int get hashCode {
-    int result = 373;
-    result = 37 * result + _dx.hashCode;
-    result = 37 * result + _dy.hashCode;
-    return result;
-  }
+  int get hashCode => hashValues(_dx, _dy);
 }
