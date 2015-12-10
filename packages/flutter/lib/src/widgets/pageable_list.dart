@@ -14,7 +14,11 @@ import 'framework.dart';
 import 'homogeneous_viewport.dart';
 import 'scrollable.dart';
 
-enum ItemsSnapAlignment { item, adjacentItem }
+/// Controls what alignment items use when settling.
+enum ItemsSnapAlignment {
+  item,
+  adjacentItem
+}
 
 typedef void PageChangedCallback(int newPage);
 

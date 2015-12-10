@@ -249,10 +249,10 @@ class RenderPositionedBox extends RenderShiftedBox {
 
 /// A delegate for computing the layout of a render object with a single child.
 class OneChildLayoutDelegate {
-  /// Returns the size of this object given the incomming constraints.
+  /// Returns the size of this object given the incoming constraints.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
-  /// Returns the box constraints for the child given the incomming constraints.
+  /// Returns the box constraints for the child given the incoming constraints.
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints;
 
   /// Returns the position where the child should be placed given the size of this object and the size of the child.
@@ -325,6 +325,7 @@ class RenderCustomOneChildLayoutBox extends RenderShiftedBox {
   }
 }
 
+/// Positions its child vertically according to the child's baseline.
 class RenderBaseline extends RenderShiftedBox {
 
   RenderBaseline({
@@ -338,8 +339,10 @@ class RenderBaseline extends RenderShiftedBox {
     assert(baselineType != null);
   }
 
-  double _baseline;
+  /// The number of logical pixels from the top of this box at which to position
+  /// the child's baseline.
   double get baseline => _baseline;
+  double _baseline;
   void set baseline (double value) {
     assert(value != null);
     if (_baseline == value)
@@ -348,8 +351,9 @@ class RenderBaseline extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  TextBaseline _baselineType;
+  /// The type of baseline to use for positioning the child.
   TextBaseline get baselineType => _baselineType;
+  TextBaseline _baselineType;
   void set baselineType (TextBaseline value) {
     assert(value != null);
     if (_baselineType == value)

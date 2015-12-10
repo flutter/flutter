@@ -126,7 +126,9 @@ class ShaderMask extends OneChildRenderObjectWidget {
   }
 }
 
-/// Paints a [BoxDecoration] either before or after its child paints.
+/// Paints a [Decoration] either before or after its child paints.
+///
+/// Commonly used with [BoxDecoration].
 class DecoratedBox extends OneChildRenderObjectWidget {
   DecoratedBox({
     Key key,
@@ -139,6 +141,8 @@ class DecoratedBox extends OneChildRenderObjectWidget {
   }
 
   /// What decoration to paint.
+  ///
+  /// Commonly a [BoxDecoration].
   final Decoration decoration;
 
   /// Where to paint the box decoration.
@@ -541,11 +545,23 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
   }
 }
 
+/// Sizes itself to a fraction of the total available space.
+///
+/// See [RenderFractionallySizedBox] for details.
 class FractionallySizedBox extends OneChildRenderObjectWidget {
   FractionallySizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
 
+  /// If non-null, the factor of the incoming width to use.
+  ///
+  /// If non-null, the child is given a tight width constraint that is the max
+  /// incoming width constraint multipled by this factor.
   final double width;
+
+  /// If non-null, the factor of the incoming height to use.
+  ///
+  /// If non-null, the child is given a tight height constraint that is the max
+  /// incoming height constraint multipled by this factor.
   final double height;
 
   RenderFractionallySizedBox createRenderObject() => new RenderFractionallySizedBox(
@@ -567,13 +583,28 @@ class FractionallySizedBox extends OneChildRenderObjectWidget {
   }
 }
 
+/// A render object that imposes different constraints on its child than it gets
+/// from its parent, possibly allowing the child to overflow the parent.
+///
+/// See [RenderOverflowBox] for details.
 class OverflowBox extends OneChildRenderObjectWidget {
   OverflowBox({ Key key, this.minWidth, this.maxWidth, this.minHeight, this.maxHeight, Widget child })
     : super(key: key, child: child);
 
+  /// The minimum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
   final double minWidth;
+
+  /// The maximum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
   final double maxWidth;
+
+  /// The minimum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
   final double minHeight;
+
+  /// The maximum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
   final double maxHeight;
 
   RenderOverflowBox createRenderObject() => new RenderOverflowBox(
@@ -614,12 +645,19 @@ class OffStage extends OneChildRenderObjectWidget {
   RenderOffStage createRenderObject() => new RenderOffStage();
 }
 
+/// Forces child to layout at a specific aspect ratio.
+///
+/// See [RenderAspectRatio] for details.
 class AspectRatio extends OneChildRenderObjectWidget {
   AspectRatio({ Key key, this.aspectRatio, Widget child })
     : super(key: key, child: child) {
     assert(aspectRatio != null);
   }
 
+  /// The aspect ratio to use when computing the height from the width.
+  ///
+  /// The aspect ratio is expressed as a ratio of width to height. For example,
+  /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
   final double aspectRatio;
 
   RenderAspectRatio createRenderObject() => new RenderAspectRatio(aspectRatio: aspectRatio);
@@ -676,6 +714,7 @@ class IntrinsicHeight extends OneChildRenderObjectWidget {
   RenderIntrinsicHeight createRenderObject() => new RenderIntrinsicHeight();
 }
 
+/// Positions its child vertically according to the child's baseline.
 class Baseline extends OneChildRenderObjectWidget {
   Baseline({ Key key, this.baseline, this.baselineType: TextBaseline.alphabetic, Widget child })
     : super(key: key, child: child) {
@@ -683,7 +722,11 @@ class Baseline extends OneChildRenderObjectWidget {
     assert(baselineType != null);
   }
 
-  final double baseline; // in pixels
+  /// The number of logical pixels from the top of this box at which to position
+  /// the child's baseline.
+  final double baseline;
+
+  /// The type of baseline to use for positioning the child.
   final TextBaseline baselineType;
 
   RenderBaseline createRenderObject() => new RenderBaseline(baseline: baseline, baselineType: baselineType);
@@ -760,10 +803,10 @@ class SizeObserver extends OneChildRenderObjectWidget {
 }
 
 
-// CONVENIENCE CLASS TO COMBINE COMMON PAINTING, POSITIONING, AND SIZING NODES
+// CONTAINER
 
+/// A convenience widget that combines common painting, positioning, and sizing widgets.
 class Container extends StatelessComponent {
-
   Container({
     Key key,
     this.child,
@@ -879,12 +922,17 @@ class Container extends StatelessComponent {
     if (height != null)
       description.add('height: $height');
   }
-
 }
 
 
 // LAYOUT NODES
 
+/// Uses the block layout algorithm for its children.
+///
+/// This widget is rarely used directly. Instead, consider using [Block], which
+/// combines the block layout algorithm with scrolling behavior.
+///
+/// For details about the block layout algorithm, see [RenderBlockBase].
 class BlockBody extends MultiChildRenderObjectWidget {
   BlockBody(List<Widget> children, {
     Key key,
@@ -893,6 +941,7 @@ class BlockBody extends MultiChildRenderObjectWidget {
     assert(direction != null);
   }
 
+  /// The direction to use as the main axis.
   final BlockDirection direction;
 
   RenderBlock createRenderObject() => new RenderBlock(direction: direction);
@@ -1183,8 +1232,12 @@ class Flexible extends ParentDataWidget {
   }
 }
 
-class Paragraph extends LeafRenderObjectWidget {
-  Paragraph({ Key key, this.text }) : super(key: key) {
+/// A raw paragraph of text.
+///
+/// This class is rarely used directly. Instead, consider using [Text], which
+/// integrates with [DefaultTextStyle].
+class RawText extends LeafRenderObjectWidget {
+  RawText({ Key key, this.text }) : super(key: key) {
     assert(text != null);
   }
 
@@ -1192,19 +1245,26 @@ class Paragraph extends LeafRenderObjectWidget {
 
   RenderParagraph createRenderObject() => new RenderParagraph(text);
 
-  void updateRenderObject(RenderParagraph renderObject, Paragraph oldWidget) {
+  void updateRenderObject(RenderParagraph renderObject, RawText oldWidget) {
     renderObject.text = text;
   }
 }
 
+/// A convience widget for paragraphs of text with heterogeneous style.
+///
+/// The elements paramter is a recusrive list of lists that matches the
+/// following grammar:
+///
+///   `elements ::= "string" | [<text-style> <elements>*]``
+///
+/// Where "string" is text to display and text-style is an instance of
+/// TextStyle. The text-style applies to all of the elements that follow.
 class StyledText extends StatelessComponent {
-  // elements ::= "string" | [<text-style> <elements>*]
-  // Where "string" is text to display and text-style is an instance of
-  // TextStyle. The text-style applies to all of the elements that follow.
   StyledText({ this.elements, Key key }) : super(key: key) {
     assert(_toSpan(elements) != null);
   }
 
+  /// The recursive list of lists that describes the text and style to paint.
   final dynamic elements;
 
   TextSpan _toSpan(dynamic element) {
@@ -1220,10 +1280,11 @@ class StyledText extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    return new Paragraph(text: _toSpan(elements));
+    return new RawText(text: _toSpan(elements));
   }
 }
 
+/// The text style to apply to descendant [Text] widgets without explicit style.
 class DefaultTextStyle extends InheritedWidget {
   DefaultTextStyle({
     Key key,
@@ -1234,8 +1295,10 @@ class DefaultTextStyle extends InheritedWidget {
     assert(child != null);
   }
 
+  /// The text style to apply.
   final TextStyle style;
 
+  /// The closest instance of this class that encloses the given context.
   static TextStyle of(BuildContext context) {
     DefaultTextStyle result = context.inheritFromWidgetOfType(DefaultTextStyle);
     return result?.style;
@@ -1249,12 +1312,23 @@ class DefaultTextStyle extends InheritedWidget {
   }
 }
 
+/// A run of text.
+///
+/// By default, the text will be styled using the closest enclosing
+/// [DefaultTextStyle].
 class Text extends StatelessComponent {
   Text(this.data, { Key key, this.style }) : super(key: key) {
     assert(data != null);
   }
 
+  /// The text to display.
   final String data;
+
+  /// If non-null, the style to use for this text.
+  ///
+  /// If the style's "inherit" property is true, the style will be merged with
+  /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
+  /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
 
   Widget build(BuildContext context) {
@@ -1267,7 +1341,7 @@ class Text extends StatelessComponent {
     }
     if (combinedStyle != null)
       text = new StyledTextSpan(combinedStyle, <TextSpan>[text]);
-    return new Paragraph(text: text);
+    return new RawText(text: text);
   }
 
   void debugFillDescription(List<String> description) {

@@ -164,13 +164,15 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 }
 
-/// A render object that, for both width and height, imposes a tight constraint
-/// on its child that is a multiple (typically less than 1.0) of the maximum
-/// constraint it received from its parent on that axis. If the factor for a
-/// given axis is null, then the constraints from the parent are just passed
-/// through instead.
+/// Sizes itself to a fraction of the total available space.
 ///
-/// It then tries to size itself the size of its child.
+/// For both its width and width height, this render object imposes a tight
+/// constraint on its child that is a multiple (typically less than 1.0) of the
+/// maximum constraint it received from its parent on that axis. If the factor
+/// for a given axis is null, then the constraints from the parent are just
+/// passed through instead.
+///
+/// It then tries to size itself t the size of its child.
 class RenderFractionallySizedBox extends RenderProxyBox {
   RenderFractionallySizedBox({
     RenderBox child,
@@ -181,9 +183,11 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     assert(_heightFactor == null || _heightFactor >= 0.0);
   }
 
-  /// The multiple to apply to the incoming maximum width constraint to use as
-  /// the tight width constraint for the child, or null to pass through the
-  /// constraints given by the parent.
+  /// If non-null, the factor of the incoming width to use.
+  ///
+  /// If non-null, the child is given a tight width constraint that is the max
+  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// given the incoming width constraings.
   double get widthFactor => _widthFactor;
   double _widthFactor;
   void set widthFactor (double value) {
@@ -194,9 +198,11 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  /// The multiple to apply to the incoming maximum height constraint to use as
-  /// the tight height constraint for the child, or null to pass through the
-  /// constraints given by the parent.
+  /// If non-null, the factor of the incoming height to use.
+  ///
+  /// If non-null, the child is given a tight height constraint that is the max
+  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// given the incoming width constraings.
   double get heightFactor => _heightFactor;
   double _heightFactor;
   void set heightFactor (double value) {

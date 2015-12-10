@@ -23,7 +23,7 @@ abstract class MultiChildLayoutDelegate {
   Map<Object, RenderBox> _idToChild;
   Set<RenderBox> _debugChildrenNeedingLayout;
 
-  /// Returns the size of this object given the incomming constraints.
+  /// Returns the size of this object given the incoming constraints.
   /// The size cannot reflect the instrinsic sizes of the children.
   /// If this layout has a fixed width or height the returned size
   /// can reflect that.
