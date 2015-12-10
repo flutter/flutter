@@ -27,8 +27,8 @@ void _updateLocale(String languageCode, String countryCode) {
 }
 
 void _pushRoute(String route) {
-  assert(window.defaultRouteName == null);
-  window.defaultRouteName = route;
+  assert(window._defaultRouteName == null);
+  window._defaultRouteName = route;
   // TODO(abarth): If we ever start calling _pushRoute other than before main,
   // we should add a change notification callback.
 }
