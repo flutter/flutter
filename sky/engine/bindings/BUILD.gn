@@ -43,10 +43,11 @@ source_set("bindings") {
     ":generated_bindings",
   ]
 
-  # On iOS, precompiled snapshots contain the instruction buffer. Generation
-  # of the same requires all application specific script code to be specified
-  # up front. In such cases, there can be no updater or generic snapshotter
-  if (!is_ios) {
+  # On iOS (device), precompiled snapshots contain the instruction buffer.
+  # Generation of the same requires all application specific script code to be
+  # specified up front. In such cases, there can be no updater or generic
+  # snapshotter.
+  if (!is_ios || use_ios_simulator) {
     deps += [
       ":snapshot_cc",
     ]
