@@ -72,7 +72,9 @@ class Window {
 
   /// The number of pixels on each side of the display rectangle into which the
   /// application can render, but over which the operating system will likely
-  /// place system UI (such as the Android system notification area).
+  /// place system UI (such as the Android system notification area), or which
+  /// might be rendered outside of the physical display (e.g. overscan regions
+  /// on television screens).
   WindowPadding get padding => _padding;
   WindowPadding _padding;
 
@@ -103,7 +105,8 @@ class Window {
 
   /// The route or path that the operating system requested when the application
   /// was launched.
-  String defaultRouteName;
+  String get defaultRouteName => _defaultRouteName;
+  String _defaultRouteName;
 
   /// A callback that is invoked when the operating system requests that the
   /// application goes "back" one step in its history. For example, on Android
