@@ -148,15 +148,15 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
   bool get snapScrollOffsetChanges => config.itemsSnapAlignment == ItemsSnapAlignment.item;
 
   double snapScrollOffset(double newScrollOffset) {
-    double previousItemOffset = newScrollOffset.floorToDouble();
-    double nextItemOffset = newScrollOffset.ceilToDouble();
+    final double previousItemOffset = newScrollOffset.floorToDouble();
+    final double nextItemOffset = newScrollOffset.ceilToDouble();
     return (newScrollOffset - previousItemOffset < 0.5 ? previousItemOffset : nextItemOffset)
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
   Future _flingToAdjacentItem(Offset velocity) {
-    double scrollVelocity = scrollDirectionVelocity(velocity);
-    double newScrollOffset = snapScrollOffset(scrollOffset + scrollVelocity.sign)
+    final double scrollVelocity = scrollDirectionVelocity(velocity);
+    final double newScrollOffset = snapScrollOffset(scrollOffset + scrollVelocity.sign)
       .clamp(snapScrollOffset(scrollOffset - 0.5), snapScrollOffset(scrollOffset + 0.5));
     return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve)
       .then(_notifyPageChanged);
@@ -177,9 +177,9 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
   }
 
   List<Widget> buildItems(BuildContext context, int start, int count) {
-    List<Widget> result = new List<Widget>();
-    int begin = config.itemsWrap ? start : math.max(0, start);
-    int end = config.itemsWrap ? begin + count : math.min(begin + count, config.items.length);
+    final List<Widget> result = new List<Widget>();
+    final int begin = config.itemsWrap ? start : math.max(0, start);
+    final int end = config.itemsWrap ? begin + count : math.min(begin + count, itemCount);
     for (int i = begin; i < end; ++i)
       result.add(config.itemBuilder(context, config.items[i % itemCount], i));
     assert(result.every((Widget item) => item.key != null));
