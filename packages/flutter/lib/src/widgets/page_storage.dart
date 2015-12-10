@@ -30,16 +30,7 @@ class _StorageEntryIdentifier {
     }
     return true;
   }
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + clientType.hashCode;
-    value = 37 * value + scopeKey.hashCode;
-    if (keys != null) {
-      for (Key key in keys)
-        value = 37 * value + key.hashCode;
-    }
-    return value;
-  }
+  int get hashCode => hashValues(clientType, scopeKey, hashList(keys));
 }
 
 class PageStorageBucket {

@@ -78,13 +78,7 @@ class StyledTextSpan extends TextSpan {
     return true;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + style.hashCode;
-    for (TextSpan child in children)
-      value = 37 * value + child.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(style, hashList(children));
 
   String toString([String prefix = '']) {
     List<String> result = <String>[];

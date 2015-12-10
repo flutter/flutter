@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color;
+import 'dart:ui' show Color, hashValues;
 
 import 'colors.dart';
 import 'icon_theme_data.dart';
@@ -153,19 +153,19 @@ class ThemeData {
            (otherData.accentColorBrightness == accentColorBrightness);
   }
   int get hashCode {
-    int value = 373;
-    value = 37 * value + brightness.hashCode;
-    value = 37 * value + primarySwatch.hashCode;
-    value = 37 * value + canvasColor.hashCode;
-    value = 37 * value + cardColor.hashCode;
-    value = 37 * value + dividerColor.hashCode;
-    value = 37 * value + hintColor.hashCode;
-    value = 37 * value + highlightColor.hashCode;
-    value = 37 * value + hintOpacity.hashCode;
-    value = 37 * value + text.hashCode;
-    value = 37 * value + primaryColorBrightness.hashCode;
-    value = 37 * value + accentColorBrightness.hashCode;
-    return value;
+    return hashValues(
+      brightness,
+      primarySwatch,
+      canvasColor,
+      cardColor,
+      dividerColor,
+      hintColor,
+      highlightColor,
+      hintOpacity,
+      text,
+      primaryColorBrightness,
+      accentColorBrightness
+    );
   }
 
   String toString() => '$primaryColor $brightness etc...';

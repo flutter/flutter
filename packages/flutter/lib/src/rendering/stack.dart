@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show lerpDouble, hashValues;
 
 import 'box.dart';
 import 'object.dart';
@@ -123,14 +123,7 @@ class RelativeRect {
            bottom == typedOther.bottom;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + left.hashCode;
-    value = 37 * value + top.hashCode;
-    value = 37 * value + right.hashCode;
-    value = 37 * value + bottom.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(left, top, right, bottom);
 
   String toString() => "RelativeRect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})";
 }

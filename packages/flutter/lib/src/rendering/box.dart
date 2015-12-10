@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -272,12 +273,7 @@ class BoxConstraints extends Constraints {
 
   int get hashCode {
     assert(isNormalized);
-    int value = 373;
-    value = 37 * value + minWidth.hashCode;
-    value = 37 * value + maxWidth.hashCode;
-    value = 37 * value + minHeight.hashCode;
-    value = 37 * value + maxHeight.hashCode;
-    return value;
+    return hashValues(minWidth, maxWidth, minHeight, maxHeight);
   }
 
   String toString() {

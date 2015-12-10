@@ -84,12 +84,7 @@ class TimeOfDay {
         && typedOther.minute == minute;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + hour.hashCode;
-    value = 37 * value + minute.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(hour, minute);
 
   // TODO(ianh): Localize.
   String toString() => '$hourOfPeriodLabel:$minuteLabel $periodLabel';

@@ -18,4 +18,6 @@ export 'dart:ui' show
   TextBaseline,
   TextDecoration,
   TextDecorationStyle,
-  VoidCallback;
+  VoidCallback,
+  hashValues,
+  hashList;

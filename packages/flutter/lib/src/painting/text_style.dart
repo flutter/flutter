@@ -163,21 +163,20 @@ class TextStyle {
   }
 
   int get hashCode {
-    // Use Quiver: https://github.com/domokit/mojo/issues/236
-    int value = 373;
-    value = 37 * value + inherit.hashCode;
-    value = 37 * value + color.hashCode;
-    value = 37 * value + fontFamily.hashCode;
-    value = 37 * value + fontSize.hashCode;
-    value = 37 * value + fontWeight.hashCode;
-    value = 37 * value + fontStyle.hashCode;
-    value = 37 * value + letterSpacing.hashCode;
-    value = 37 * value + textAlign.hashCode;
-    value = 37 * value + textBaseline.hashCode;
-    value = 37 * value + decoration.hashCode;
-    value = 37 * value + decorationColor.hashCode;
-    value = 37 * value + decorationStyle.hashCode;
-    return value;
+    return hashValues(
+      super.hashCode,
+      color,
+      fontFamily,
+      fontSize,
+      fontWeight,
+      fontStyle,
+      letterSpacing,
+      textAlign,
+      textBaseline,
+      decoration,
+      decorationColor,
+      decorationStyle
+    );
   }
 
   String toString([String prefix = '']) {
