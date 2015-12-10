@@ -37,9 +37,8 @@ class RenderImageGrow extends RenderImage {
 
 RenderImageGrow image;
 
-void handleEvent(String eventType, double timeStamp) {
-  if (eventType == "back")
-    activity.finishCurrentActivity();
+void handlePopRoute() {
+  activity.finishCurrentActivity();
 }
 
 final Map<int, Touch> touches = <int, Touch>{};
@@ -116,6 +115,6 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
 
   updateTaskDescription('Interactive Flex', topColor);
   new FlutterBinding(root: root);
-  ui.window.onEvent = handleEvent;
+  ui.window.onPopRoute = handlePopRoute;
   ui.window.onPointerPacket = handlePointerPacket;
 }
