@@ -20,7 +20,6 @@
 #include "base/posix/eintr_wrapper.h"
 #include "base/threading/thread_restrictions.h"
 #include "build/build_config.h"
-#include "mojo/edk/embedder/platform_handle_utils.h"
 #include "mojo/edk/util/scoped_file.h"
 
 #if defined(OS_ANDROID)
@@ -124,7 +123,7 @@ SimplePlatformSharedBuffer::MapNoCheck(size_t offset, size_t length) {
 }
 
 ScopedPlatformHandle SimplePlatformSharedBuffer::DuplicatePlatformHandle() {
-  return mojo::embedder::DuplicatePlatformHandle(handle_.get());
+  return handle_.Duplicate();
 }
 
 ScopedPlatformHandle SimplePlatformSharedBuffer::PassPlatformHandle() {

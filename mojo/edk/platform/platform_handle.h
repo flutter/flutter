@@ -8,16 +8,26 @@
 namespace mojo {
 namespace platform {
 
-// A |PlatformHandle| is just a file descriptor on POSIX.
+class ScopedPlatformHandle;
+
+// A thin wrapper for an OS handle (just a file descriptor on POSIX) on any
+// given platform.
 struct PlatformHandle {
   PlatformHandle() : fd(-1) {}
   explicit PlatformHandle(int fd) : fd(fd) {}
 
+  // Closes this handle if it's valid (and sets it to be invalid).
   void CloseIfNecessary();
 
   bool is_valid() const { return fd != -1; }
 
+  // Creates a duplicate of this handle. On failure, or if this is an invalid
+  // handle, this returns an invalid handle.
+  ScopedPlatformHandle Duplicate() const;
+
   int fd;
+
+  // Copy and assignment allowed.
 };
 
 }  // namespace platform

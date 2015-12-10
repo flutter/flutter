@@ -6,6 +6,7 @@ import("../mojo_edk.gni")
 
 mojo_edk_source_set("test_support") {
   testonly = true
+
   sources = [
     "multiprocess_test_helper.cc",
     "multiprocess_test_helper.h",
@@ -31,6 +32,7 @@ mojo_edk_source_set("test_support") {
 
 mojo_edk_source_set("run_all_unittests") {
   testonly = true
+
   sources = [
     "run_all_unittests.cc",
   ]
@@ -42,26 +44,38 @@ mojo_edk_source_set("run_all_unittests") {
     "//testing/gtest",
   ]
 
-  mojo_edk_deps = [ "mojo/edk/system" ]
+  mojo_edk_deps = [
+    "mojo/edk/base_edk",
+    "mojo/edk/system",
+  ]
 }
 
 mojo_edk_source_set("run_all_perftests") {
   testonly = true
+
+  sources = [
+    "run_all_perftests.cc",
+  ]
+
   deps = [
     ":test_support_impl",
     "//base",
     "//base/test:test_support",
   ]
 
-  mojo_edk_deps = [ "mojo/edk/system" ]
-
-  sources = [
-    "run_all_perftests.cc",
+  mojo_edk_deps = [
+    "mojo/edk/base_edk",
+    "mojo/edk/system",
   ]
 }
 
 mojo_edk_source_set("test_support_impl") {
   testonly = true
+
+  sources = [
+    "test_support_impl.cc",
+  ]
+
   deps = [
     "//base",
     "//base/test:test_support",
@@ -70,10 +84,6 @@ mojo_edk_source_set("test_support_impl") {
   mojo_sdk_deps = [ "mojo/public/cpp/test_support" ]
 
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
-
-  sources = [
-    "test_support_impl.cc",
-  ]
 
   visibility = [
     ":run_all_unittests",

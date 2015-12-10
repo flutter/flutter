@@ -162,9 +162,7 @@ class ShellCreateApplicationConnectorParams extends bindings.Struct {
 
 const int kShell_connectToApplication_name = 0;
 const int kShell_createApplicationConnector_name = 1;
-
-const String ShellName =
-      'mojo::Shell';
+const String ShellName = null;
 
 abstract class Shell {
   void connectToApplication(String applicationUrl, Object services, Object exposedServices);
@@ -261,9 +259,9 @@ class ShellProxy implements bindings.ProxyBase {
   }
 
   factory ShellProxy.connectToService(
-      bindings.ServiceConnector s, String url) {
+      bindings.ServiceConnector s, String url, [String serviceName]) {
     ShellProxy p = new ShellProxy.unbound();
-    s.connectToService(url, p);
+    s.connectToService(url, p, serviceName);
     return p;
   }
 

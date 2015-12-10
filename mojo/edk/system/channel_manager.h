@@ -7,9 +7,9 @@
 
 #include <stdint.h>
 
+#include <functional>
 #include <unordered_map>
 
-#include "base/callback_forward.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/system/channel_id.h"
@@ -64,7 +64,7 @@ class ChannelManager {
   // TODO(vtl): Consider if this is really necessary, since it only has one use
   // (in tests).
   void Shutdown(
-      const base::Closure& callback,
+      std::function<void()>&& callback,
       util::RefPtr<platform::TaskRunner>&& callback_thread_task_runner);
 
   // Creates a |Channel| and adds it to the set of channels managed by this
@@ -91,7 +91,7 @@ class ChannelManager {
   util::RefPtr<MessagePipeDispatcher> CreateChannel(
       ChannelId channel_id,
       platform::ScopedPlatformHandle platform_handle,
-      const base::Closure& callback,
+      std::function<void()>&& callback,
       util::RefPtr<platform::TaskRunner>&& callback_thread_task_runner);
 
   // Gets the |Channel| with the given ID (which must exist).
@@ -116,30 +116,19 @@ class ChannelManager {
   // |callback_thread_task_runner| is null) on completion.
   void ShutdownChannel(
       ChannelId channel_id,
-      const base::Closure& callback,
+      std::function<void()>&& callback,
       util::RefPtr<platform::TaskRunner>&& callback_thread_task_runner);
 
   ConnectionManager* connection_manager() const { return connection_manager_; }
 
  private:
-  // Used by |CreateChannelOnIOThread()| and |CreateChannelHelper()|. Called on
-  // the I/O thread. |bootstrap_channel_endpoint| is optional and may be null.
+  // Used by |CreateChannelOnIOThread()| and |CreateChannel()|. Called on the
+  // I/O thread. |bootstrap_channel_endpoint| is optional and may be null.
   // Returns the newly-created |Channel|.
   util::RefPtr<Channel> CreateChannelOnIOThreadHelper(
       ChannelId channel_id,
       platform::ScopedPlatformHandle platform_handle,
       util::RefPtr<ChannelEndpoint>&& bootstrap_channel_endpoint);
-
-  // Used by |CreateChannel()|. Called on the I/O thread.
-  // TODO(vtl): |bootstrap_channel_endpoint| and |callback_thread_task_runner|
-  // should be rvalue references, but that doesn't currently work correctly with
-  // base::Bind.
-  void CreateChannelHelper(
-      ChannelId channel_id,
-      platform::ScopedPlatformHandle platform_handle,
-      util::RefPtr<ChannelEndpoint> bootstrap_channel_endpoint,
-      const base::Closure& callback,
-      util::RefPtr<platform::TaskRunner> callback_thread_task_runner);
 
   // Note: These must not be used after shutdown.
   embedder::PlatformSupport* const platform_support_;

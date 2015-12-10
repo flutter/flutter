@@ -9,6 +9,8 @@
 
 #include "mojo/edk/platform/test_message_loops.h"
 
+#include <utility>
+
 #include "mojo/edk/base_edk/platform_message_loop_for_io_impl.h"
 #include "mojo/edk/base_edk/platform_message_loop_impl.h"
 #include "mojo/edk/util/make_unique.h"
@@ -23,8 +25,11 @@ std::unique_ptr<MessageLoop> CreateTestMessageLoop() {
   return MakeUnique<base_edk::PlatformMessageLoopImpl>();
 }
 
-std::unique_ptr<MessageLoopForIO> CreateTestMessageLoopForIO() {
-  return MakeUnique<base_edk::PlatformMessageLoopForIOImpl>();
+std::unique_ptr<MessageLoop> CreateTestMessageLoopForIO(
+    PlatformHandleWatcher** platform_handle_watcher) {
+  auto rv = MakeUnique<base_edk::PlatformMessageLoopForIOImpl>();
+  *platform_handle_watcher = &rv->platform_handle_watcher();
+  return std::move(rv);
 }
 
 }  // namespace test

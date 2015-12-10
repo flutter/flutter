@@ -55,10 +55,6 @@ void TestIOThread::PostTask(std::function<void()>&& task) {
   io_task_runner_->PostTask(std::move(task));
 }
 
-void TestIOThread::PostTask(const base::Closure& task) {
-  io_task_runner_->PostTask(task);
-}
-
 void TestIOThread::PostTaskAndWait(std::function<void()>&& task) {
   AutoResetWaitableEvent event;
   io_task_runner_->PostTask([&task, &event]() {
@@ -66,10 +62,6 @@ void TestIOThread::PostTaskAndWait(std::function<void()>&& task) {
     event.Signal();
   });
   event.Wait();
-}
-
-void TestIOThread::PostTaskAndWait(const base::Closure& task) {
-  PostTaskAndWait([&task]() { task.Run(); });
 }
 
 }  // namespace test

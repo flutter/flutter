@@ -10,7 +10,6 @@
 
 #include <functional>
 
-#include "base/callback_forward.h"
 #include "mojo/edk/util/ref_counted.h"
 #include "mojo/public/cpp/system/macros.h"
 
@@ -27,9 +26,7 @@ class TaskRunner : public util::RefCountedThreadSafe<TaskRunner> {
   // Posts a task to this task runner (i.e., schedule the task). The task must
   // be run (insofar as this can be guaranteed). (This must not run the task
   // synchronously.)
-  // TODO(vtl): Remove the |base::Closure| version.
   virtual void PostTask(std::function<void()>&& task) = 0;
-  virtual void PostTask(const base::Closure& task) = 0;
 
   // Returns true if this task runner may run tasks on the current thread, false
   // otherwise (e.g., if this task runner only runs tasks on a different

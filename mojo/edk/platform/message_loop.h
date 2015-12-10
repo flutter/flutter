@@ -18,8 +18,8 @@ class TaskRunner;
 
 // Interface for "message loops", which receives and executes tasks. In general,
 // a |MessageLoop| need not be thread-safe: except as otherwise noted, its
-// methods may only be called on the thread it was created on (the |MessageLoop|
-// is said to "belong to" that thread).
+// methods may only be called on a designated thread, typically the one is was
+// created on ((the |MessageLoop| is said to "belong to" that thread).
 //
 // In general, the result of running a |MessageLoop| "inside" a |MessageLoop|
 // (whether the same one -- the classic "nested message loop" case -- or a

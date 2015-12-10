@@ -7,8 +7,6 @@
 #include <utility>
 
 #include "base/atomicops.h"
-#include "base/bind.h"
-#include "base/bind_helpers.h"
 #include "base/logging.h"
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
@@ -169,7 +167,7 @@ void ShutdownIPCSupport() {
 ScopedMessagePipeHandle ConnectToSlave(
     SlaveInfo slave_info,
     ScopedPlatformHandle platform_handle,
-    const base::Closure& did_connect_to_slave_callback,
+    std::function<void()>&& did_connect_to_slave_callback,
     RefPtr<TaskRunner>&& did_connect_to_slave_runner,
     std::string* platform_connection_id,
     ChannelInfo** channel_info) {
@@ -184,8 +182,8 @@ ScopedMessagePipeHandle ConnectToSlave(
   RefPtr<system::MessagePipeDispatcher> dispatcher =
       internal::g_ipc_support->ConnectToSlave(
           connection_id, slave_info, platform_handle.Pass(),
-          did_connect_to_slave_callback, std::move(did_connect_to_slave_runner),
-          &channel_id);
+          std::move(did_connect_to_slave_callback),
+          std::move(did_connect_to_slave_runner), &channel_id);
   *channel_info = new ChannelInfo(channel_id);
 
   ScopedMessagePipeHandle rv(
@@ -196,7 +194,7 @@ ScopedMessagePipeHandle ConnectToSlave(
 
 ScopedMessagePipeHandle ConnectToMaster(
     const std::string& platform_connection_id,
-    const base::Closure& did_connect_to_master_callback,
+    std::function<void()>&& did_connect_to_master_callback,
     RefPtr<TaskRunner>&& did_connect_to_master_runner,
     ChannelInfo** channel_info) {
   DCHECK(channel_info);
@@ -210,7 +208,7 @@ ScopedMessagePipeHandle ConnectToMaster(
   system::ChannelId channel_id = system::kInvalidChannelId;
   RefPtr<system::MessagePipeDispatcher> dispatcher =
       internal::g_ipc_support->ConnectToMaster(
-          connection_id, did_connect_to_master_callback,
+          connection_id, std::move(did_connect_to_master_callback),
           std::move(did_connect_to_master_runner), &channel_id);
   *channel_info = new ChannelInfo(channel_id);
 
@@ -244,22 +242,24 @@ ScopedMessagePipeHandle CreateChannelOnIOThread(
 
 ScopedMessagePipeHandle CreateChannel(
     ScopedPlatformHandle platform_handle,
-    const base::Callback<void(ChannelInfo*)>& did_create_channel_callback,
+    std::function<void(ChannelInfo*)>&& did_create_channel_callback,
     RefPtr<TaskRunner>&& did_create_channel_runner) {
   DCHECK(platform_handle.is_valid());
-  DCHECK(!did_create_channel_callback.is_null());
+  DCHECK(did_create_channel_callback);
   DCHECK(internal::g_ipc_support);
 
   system::ChannelManager* channel_manager =
       internal::g_ipc_support->channel_manager();
 
   system::ChannelId channel_id = MakeChannelId();
-  std::unique_ptr<ChannelInfo> channel_info(new ChannelInfo(channel_id));
+  // Ownership gets passed back to the caller via |did_create_channel_callback|.
+  ChannelInfo* channel_info = new ChannelInfo(channel_id);
   RefPtr<system::MessagePipeDispatcher> dispatcher =
       channel_manager->CreateChannel(
           channel_id, platform_handle.Pass(),
-          base::Bind(did_create_channel_callback,
-                     base::Unretained(channel_info.release())),
+          [did_create_channel_callback, channel_info]() {
+            did_create_channel_callback(channel_info);
+          },
           std::move(did_create_channel_runner));
 
   ScopedMessagePipeHandle rv(
@@ -282,17 +282,17 @@ void DestroyChannelOnIOThread(ChannelInfo* channel_info) {
 
 // TODO(vtl): Write tests for this.
 void DestroyChannel(ChannelInfo* channel_info,
-                    const base::Closure& did_destroy_channel_callback,
+                    std::function<void()>&& did_destroy_channel_callback,
                     RefPtr<TaskRunner>&& did_destroy_channel_runner) {
   DCHECK(channel_info);
   DCHECK(channel_info->channel_id);
-  DCHECK(!did_destroy_channel_callback.is_null());
+  DCHECK(did_destroy_channel_callback);
   DCHECK(internal::g_ipc_support);
 
   system::ChannelManager* channel_manager =
       internal::g_ipc_support->channel_manager();
   channel_manager->ShutdownChannel(channel_info->channel_id,
-                                   did_destroy_channel_callback,
+                                   std::move(did_destroy_channel_callback),
                                    std::move(did_destroy_channel_runner));
   delete channel_info;
 }

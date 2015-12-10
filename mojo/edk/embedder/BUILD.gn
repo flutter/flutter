@@ -56,8 +56,6 @@ mojo_edk_source_set("platform") {
     "platform_channel_pair.h",
     "platform_channel_utils.cc",
     "platform_channel_utils.h",
-    "platform_handle_utils.h",
-    "platform_handle_utils_posix.cc",
     "platform_shared_buffer.h",
     "platform_support.h",
     "simple_platform_shared_buffer.cc",

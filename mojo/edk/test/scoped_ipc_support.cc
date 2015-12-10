@@ -4,7 +4,8 @@
 
 #include "mojo/edk/test/scoped_ipc_support.h"
 
-#include "base/message_loop/message_loop.h"
+#include <utility>
+
 #include "mojo/edk/embedder/embedder.h"
 
 using mojo::platform::ScopedPlatformHandle;
@@ -64,8 +65,8 @@ ScopedMasterIPCSupport::ScopedMasterIPCSupport(
 
 ScopedMasterIPCSupport::ScopedMasterIPCSupport(
     RefPtr<TaskRunner>&& io_thread_task_runner,
-    base::Callback<void(embedder::SlaveInfo slave_info)> on_slave_disconnect)
-    : on_slave_disconnect_(on_slave_disconnect) {
+    std::function<void(embedder::SlaveInfo slave_info)>&& on_slave_disconnect)
+    : on_slave_disconnect_(std::move(on_slave_disconnect)) {
   helper_.Init(embedder::ProcessType::MASTER, this,
                std::move(io_thread_task_runner), ScopedPlatformHandle());
 }
@@ -78,8 +79,8 @@ void ScopedMasterIPCSupport::OnShutdownComplete() {
 }
 
 void ScopedMasterIPCSupport::OnSlaveDisconnect(embedder::SlaveInfo slave_info) {
-  if (!on_slave_disconnect_.is_null())
-    on_slave_disconnect_.Run(slave_info);
+  if (on_slave_disconnect_)
+    on_slave_disconnect_(slave_info);
 }
 
 ScopedSlaveIPCSupport::ScopedSlaveIPCSupport(
@@ -92,8 +93,8 @@ ScopedSlaveIPCSupport::ScopedSlaveIPCSupport(
 ScopedSlaveIPCSupport::ScopedSlaveIPCSupport(
     RefPtr<TaskRunner>&& io_thread_task_runner,
     ScopedPlatformHandle platform_handle,
-    base::Closure on_master_disconnect)
-    : on_master_disconnect_(on_master_disconnect) {
+    std::function<void()>&& on_master_disconnect)
+    : on_master_disconnect_(std::move(on_master_disconnect)) {
   helper_.Init(embedder::ProcessType::SLAVE, this,
                std::move(io_thread_task_runner), platform_handle.Pass());
 }
@@ -106,8 +107,8 @@ void ScopedSlaveIPCSupport::OnShutdownComplete() {
 }
 
 void ScopedSlaveIPCSupport::OnMasterDisconnect() {
-  if (!on_master_disconnect_.is_null())
-    on_master_disconnect_.Run();
+  if (on_master_disconnect_)
+    on_master_disconnect_();
 }
 
 }  // namespace test

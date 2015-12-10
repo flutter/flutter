@@ -85,9 +85,7 @@ class ServiceProviderConnectToServiceParams extends bindings.Struct {
 }
 
 const int kServiceProvider_connectToService_name = 0;
-
-const String ServiceProviderName =
-      'mojo::ServiceProvider';
+const String ServiceProviderName = null;
 
 abstract class ServiceProvider {
   void connectToService(String interfaceName, core.MojoMessagePipeEndpoint pipe);
@@ -172,9 +170,9 @@ class ServiceProviderProxy implements bindings.ProxyBase {
   }
 
   factory ServiceProviderProxy.connectToService(
-      bindings.ServiceConnector s, String url) {
+      bindings.ServiceConnector s, String url, [String serviceName]) {
     ServiceProviderProxy p = new ServiceProviderProxy.unbound();
-    s.connectToService(url, p);
+    s.connectToService(url, p, serviceName);
     return p;
   }
 

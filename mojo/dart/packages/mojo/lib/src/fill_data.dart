@@ -29,8 +29,7 @@ class DataPipeFiller {
 
   void fill() {
     _eventSubscription.enableWriteEvents();
-    _eventSubscription.subscribe((List<int> event) {
-      int mojoSignals = event[1];
+    _eventSubscription.subscribe((int mojoSignals) {
       if (MojoHandleSignals.isWritable(mojoSignals)) {
         int result = _doWrite();
         if ((_dataPosition >= _data.lengthInBytes) ||

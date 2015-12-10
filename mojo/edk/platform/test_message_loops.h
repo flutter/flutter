@@ -14,17 +14,20 @@ namespace mojo {
 namespace platform {
 
 class MessageLoop;
-class MessageLoopForIO;
+class PlatformHandleWatcher;
 
 namespace test {
 
-// Creates a basic |platform::MessageLoop|, to be used by tests. This must be
-// implemented by the embedder (if building tests that require it).
+// Creates a basic |MessageLoop|, to be used by tests. This must be implemented
+// by the embedder (if building tests that require it).
 std::unique_ptr<MessageLoop> CreateTestMessageLoop();
 
-// Creates a basic |platform::MessageLoopForIO|, to be used by tests. This must
-// be implemented by the embedder (if building tests that require it).
-std::unique_ptr<MessageLoopForIO> CreateTestMessageLoopForIO();
+// Creates a basic |MessageLoop| that supports watching |PlatformHandle|s, to be
+// used by tests. This must be implemented by the embedder (if building tests
+// that require it). The "out" |PlatformHandleWatcher| is valid while the
+// returned |MessageLoop| is alive (and will watch handles while it is running).
+std::unique_ptr<MessageLoop> CreateTestMessageLoopForIO(
+    PlatformHandleWatcher** platform_handle_watcher);
 
 }  // namespace test
 }  // namespace platform

@@ -14,6 +14,8 @@ mojom("interfaces") {
     "views.mojom",
   ]
 
+  mojo_sdk_deps = [ "mojo/public/interfaces/application" ]
+
   deps = [
     "../../../geometry/interfaces",
     "../../../surfaces/interfaces:surface_id",

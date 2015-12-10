@@ -5,7 +5,8 @@
 #ifndef MOJO_EDK_TEST_SCOPED_IPC_SUPPORT_H_
 #define MOJO_EDK_TEST_SCOPED_IPC_SUPPORT_H_
 
-#include "base/callback.h"
+#include <functional>
+
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/process_delegate.h"
 #include "mojo/edk/embedder/process_type.h"
@@ -72,7 +73,8 @@ class ScopedMasterIPCSupport final : public embedder::MasterProcessDelegate {
       util::RefPtr<platform::TaskRunner>&& io_thread_task_runner);
   ScopedMasterIPCSupport(
       util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
-      base::Callback<void(embedder::SlaveInfo slave_info)> on_slave_disconnect);
+      std::function<void(embedder::SlaveInfo slave_info)>&&
+          on_slave_disconnect);
   ~ScopedMasterIPCSupport() override;
 
  private:
@@ -82,7 +84,7 @@ class ScopedMasterIPCSupport final : public embedder::MasterProcessDelegate {
   void OnSlaveDisconnect(embedder::SlaveInfo slave_info) override;
 
   internal::ScopedIPCSupportHelper helper_;
-  base::Callback<void(embedder::SlaveInfo slave_info)> on_slave_disconnect_;
+  std::function<void(embedder::SlaveInfo slave_info)> on_slave_disconnect_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ScopedMasterIPCSupport);
 };
@@ -97,7 +99,7 @@ class ScopedSlaveIPCSupport final : public embedder::SlaveProcessDelegate {
   ScopedSlaveIPCSupport(
       util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
       platform::ScopedPlatformHandle platform_handle,
-      base::Closure on_master_disconnect);
+      std::function<void()>&& on_master_disconnect);
   ~ScopedSlaveIPCSupport() override;
 
  private:
@@ -107,7 +109,7 @@ class ScopedSlaveIPCSupport final : public embedder::SlaveProcessDelegate {
   void OnMasterDisconnect() override;
 
   internal::ScopedIPCSupportHelper helper_;
-  base::Closure on_master_disconnect_;
+  std::function<void()> on_master_disconnect_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(ScopedSlaveIPCSupport);
 };

@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "mojo/edk/platform/scoped_platform_handle.h"
+
 namespace mojo {
 namespace platform {
 
@@ -24,6 +26,16 @@ void PlatformHandle::CloseIfNecessary() {
     assert(errno == EINTR || errno == EIO);
   }
   fd = -1;
+}
+
+ScopedPlatformHandle PlatformHandle::Duplicate() const {
+  // This is slightly redundant, but it's good to be safe (and avoid the system
+  // call and resulting EBADF).
+  if (!is_valid())
+    return ScopedPlatformHandle();
+  // Note that |dup()| returns -1 on error (which is exactly the value we use
+  // for invalid |PlatformHandle| FDs).
+  return ScopedPlatformHandle(PlatformHandle(dup(fd)));
 }
 
 }  // namespace embedder
