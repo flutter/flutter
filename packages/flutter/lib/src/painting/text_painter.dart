@@ -7,21 +7,21 @@ import 'dart:ui' as ui;
 import 'basic_types.dart';
 import 'text_style.dart';
 
-/// An immutable span of text
+/// An immutable span of text.
 abstract class TextSpan {
-  // This class must be immutable, because we won't notice when it changes
+  // This class must be immutable, because we won't notice when it changes.
   String toString([String prefix = '']);
   void build(ui.ParagraphBuilder builder);
   ui.ParagraphStyle get paragraphStyle => null;
 }
 
-/// An immutable span of unstyled text
+/// An immutable span of unstyled text.
 class PlainTextSpan extends TextSpan {
   PlainTextSpan(this.text) {
     assert(text != null);
   }
 
-  /// The text contained in the span
+  /// The text contained in the span.
   final String text;
 
   void build(ui.ParagraphBuilder builder) {
@@ -40,17 +40,17 @@ class PlainTextSpan extends TextSpan {
   String toString([String prefix = '']) => '$prefix$runtimeType: "$text"';
 }
 
-/// An immutable text span that applies a style to a list of children
+/// An immutable text span that applies a style to a list of children.
 class StyledTextSpan extends TextSpan {
   StyledTextSpan(this.style, this.children) {
     assert(style != null);
     assert(children != null);
   }
 
-  /// The style to apply to the children
+  /// The style to apply to the children.
   final TextStyle style;
 
-  /// The children to which the style is applied
+  /// The children to which the style is applied.
   final List<TextSpan> children;
 
   void build(ui.ParagraphBuilder builder) {
@@ -97,7 +97,7 @@ class StyledTextSpan extends TextSpan {
   }
 }
 
-/// An object that paints a [TextSpan] into a canvas
+/// An object that paints a [TextSpan] into a canvas.
 class TextPainter {
   TextPainter(TextSpan text) {
     this.text = text;
@@ -107,7 +107,7 @@ class TextPainter {
   bool _needsLayout = true;
 
   TextSpan _text;
-  /// The (potentially styled) text to paint
+  /// The (potentially styled) text to paint.
   TextSpan get text => _text;
   void set text(TextSpan value) {
     if (_text == value)
@@ -119,7 +119,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// The minimum width at which to layout the text
+  /// The minimum width at which to layout the text.
   double get minWidth => _paragraph.minWidth;
   void set minWidth(value) {
     if (_paragraph.minWidth == value)
@@ -128,7 +128,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// The maximum width at which to layout the text
+  /// The maximum width at which to layout the text.
   double get maxWidth => _paragraph.maxWidth;
   void set maxWidth(value) {
     if (_paragraph.maxWidth == value)
@@ -137,7 +137,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// The minimum height at which to layout the text
+  /// The minimum height at which to layout the text.
   double get minHeight => _paragraph.minHeight;
   void set minHeight(value) {
     if (_paragraph.minHeight == value)
@@ -146,7 +146,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// The maximum height at which to layout the text
+  /// The maximum height at which to layout the text.
   double get maxHeight => _paragraph.maxHeight;
   void set maxHeight(value) {
     if (_paragraph.maxHeight == value)
@@ -165,13 +165,13 @@ class TextPainter {
     return layoutValue.ceilToDouble();
   }
 
-  /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds
+  /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds.
   double get minIntrinsicWidth {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.minIntrinsicWidth);
   }
 
-  /// The width at which increasing the width of the text no longer decreases the height
+  /// The width at which increasing the width of the text no longer decreases the height.
   double get maxIntrinsicWidth {
     assert(!_needsLayout);
     return _applyFloatingPointHack(_paragraph.maxIntrinsicWidth);
@@ -192,7 +192,7 @@ class TextPainter {
     return new Size(width, height);
   }
 
-  /// The distance from the top of the text to the first baseline of the given type
+  /// Returns the distance from the top of the text to the first baseline of the given type.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!_needsLayout);
     switch (baseline) {
@@ -203,7 +203,7 @@ class TextPainter {
     }
   }
 
-  /// Compute the visual position of the glyphs for painting the text
+  /// Computes the visual position of the glyphs for painting the text.
   void layout() {
     if (!_needsLayout)
       return;
@@ -211,7 +211,7 @@ class TextPainter {
     _needsLayout = false;
   }
 
-  /// Paint the text onto the given canvas at the given offset
+  /// Paints the text onto the given canvas at the given offset.
   void paint(ui.Canvas canvas, ui.Offset offset) {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
     _paragraph.paint(canvas, offset);

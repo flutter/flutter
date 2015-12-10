@@ -2,9 +2,10 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-/// A [Future]-based library for making HTTP requests. It's based on
-/// Dart's `http` package, but we've removed the dependency on mirrors
-/// and added a `mojo`-based HTTP client.
+/// A [Future]-based library for making HTTP requests.
+///
+/// Let library is based on Dart's `http` package, but we have removed the
+/// dependency on mirrors and added a `mojo`-based HTTP client.
 library http;
 
 import 'dart:async';

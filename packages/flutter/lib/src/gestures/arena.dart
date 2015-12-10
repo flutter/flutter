@@ -23,7 +23,7 @@ abstract class GestureArenaMember {
   void rejectGesture(Object key);
 }
 
-/// An interface to information to an arena
+/// An interface to information to an arena.
 ///
 /// A given [GestureArenaMember] can have multiple entries in multiple arenas
 /// with different keys.
@@ -80,7 +80,7 @@ class GestureArena {
     _tryToResolveArena(key, state);
   }
 
-  /// Force resolution on this arena, giving the win to the first member
+  /// Forces resolution on this arena, giving the win to the first member.
   void sweep(Object key) {
     _GestureArenaState state = _arenas[key];
     if (state == null)
@@ -100,7 +100,7 @@ class GestureArena {
     }
   }
 
-  /// Prevent the arena from being swept
+  /// Prevents the arena from being swept.
   void hold(Object key) {
     _GestureArenaState state = _arenas[key];
     if (state == null)
@@ -108,9 +108,10 @@ class GestureArena {
     state.isHeld = true;
   }
 
-  /// Release a hold, allowing the arena to be swept
+  /// Releases a hold, allowing the arena to be swept.
+  ///
   /// If a sweep was attempted on a held arena, the sweep will be done
-  /// on release
+  /// on release.
   void release(Object key) {
     _GestureArenaState state = _arenas[key];
     if (state == null)

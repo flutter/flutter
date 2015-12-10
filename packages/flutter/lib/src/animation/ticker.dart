@@ -8,7 +8,7 @@ import 'scheduler.dart';
 
 typedef TickerCallback(Duration elapsed);
 
-/// Calls its callback once per animation frame
+/// Calls its callback once per animation frame.
 class Ticker {
   /// Constructs a ticker that will call onTick once per frame while running
   Ticker(TickerCallback onTick) : _onTick = onTick;
@@ -19,7 +19,7 @@ class Ticker {
   int _animationId;
   Duration _startTime;
 
-  /// Start calling onTick once per animation frame
+  /// Starts calling onTick once per animation frame.
   ///
   /// The returned future resolves once the ticker stops ticking.
   Future start() {
@@ -30,7 +30,7 @@ class Ticker {
     return _completer.future;
   }
 
-  /// Stop calling onTick
+  /// Stops calling onTick.
   ///
   /// Causes the future returned by [start] to resolve.
   void stop() {

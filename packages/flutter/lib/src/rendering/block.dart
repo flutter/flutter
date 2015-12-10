@@ -9,21 +9,21 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'object.dart';
 
-/// Parent data for use with [RenderBlockBase]
+/// Parent data for use with [RenderBlockBase].
 class BlockParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
-/// The direction in which the block should lay out
+/// The direction in which the block should lay out.
 enum BlockDirection {
-  /// Children are arranged horizontally, from left to right
+  /// Children are arranged horizontally, from left to right.
   horizontal,
-  /// Children are arranged vertically, from top to bottom
+  /// Children are arranged vertically, from top to bottom.
   vertical
 }
 
 typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints);
 typedef double _Constrainer(double value);
 
-/// Implements the block layout algorithm
+/// Implements the block layout algorithm.
 ///
 /// In block layout, children are arranged linearly along the main axis (either
 /// horizontally or vertically). In the cross axis, children are stretched to
@@ -49,7 +49,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
       child.parentData = new BlockParentData();
   }
 
-  /// The direction to use as the main axis
+  /// The direction to use as the main axis.
   BlockDirection get direction => _direction;
   BlockDirection _direction;
   void set direction (BlockDirection value) {
@@ -59,7 +59,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     }
   }
 
-  /// If non-null, forces children to be exactly this large in the main axis
+  /// If non-null, forces children to be exactly this large in the main axis.
   double get itemExtent => _itemExtent;
   double _itemExtent;
   void set itemExtent(double value) {
@@ -69,7 +69,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     }
   }
 
-  /// Forces the block to be at least this large in the main-axis
+  /// Forces the block to be at least this large in the main-axis.
   double get minExtent => _minExtent;
   double _minExtent;
   void set minExtent(double value) {
@@ -79,7 +79,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     }
   }
 
-  /// Whether the main axis is vertical
+  /// Whether the main axis is vertical.
   bool get isVertical => _direction == BlockDirection.vertical;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
@@ -124,7 +124,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
   }
 }
 
-/// A block layout with a concrete set of children
+/// A block layout with a concrete set of children.
 class RenderBlock extends RenderBlockBase {
 
   RenderBlock({
@@ -214,7 +214,7 @@ class RenderBlock extends RenderBlockBase {
 
   void performLayout() {
     assert((isVertical ? constraints.maxHeight >= double.INFINITY : constraints.maxWidth >= double.INFINITY) &&
-           'RenderBlock does not clip or resize its children, so it must be placed in a parent that does not constrain ' +
+           'RenderBlock does not clip or resize its children, so it must be placed in a parent that does not constrain '
            'the block\'s main direction. You probably want to put the RenderBlock inside a RenderViewport.' is String);
     super.performLayout();
   }
@@ -229,7 +229,7 @@ class RenderBlock extends RenderBlockBase {
 
 }
 
-/// A block layout whose children depend on its layout
+/// A block layout whose children depend on its layout.
 ///
 /// This class invokes a callbacks for layout and intrinsic dimensions. The main
 /// [callback] (constructor argument and property) is expected to modify the
@@ -261,7 +261,7 @@ class RenderBlockViewport extends RenderBlockBase {
   bool _inCallback = false;
   bool get hasLayer => true;
 
-  /// Called during [layout] to determine the blocks children
+  /// Called during [layout] to determine the blocks children.
   ///
   /// Typically the callback will mutate the child list appropriately, for
   /// example so the child list contains only visible children.
@@ -275,7 +275,7 @@ class RenderBlockViewport extends RenderBlockBase {
     markNeedsLayout();
   }
 
-  /// Returns the total main-axis extent of all the children that could be included by [callback] in one go
+  /// Returns the total main-axis extent of all the children that could be included by [callback] in one go.
   ExtentCallback get totalExtentCallback => _totalExtentCallback;
   ExtentCallback _totalExtentCallback;
   void set totalExtentCallback(ExtentCallback value) {
@@ -286,7 +286,7 @@ class RenderBlockViewport extends RenderBlockBase {
     markNeedsLayout();
   }
 
-  /// Returns the minimum cross-axis extent across all the children that could be included by [callback] in one go
+  /// Returns the minimum cross-axis extent across all the children that could be included by [callback] in one go.
   ExtentCallback get minCrossAxisExtentCallback => _minCrossAxisExtentCallback;
   ExtentCallback _minCrossAxisExtentCallback;
   void set minCrossAxisExtentCallback(ExtentCallback value) {
@@ -297,7 +297,7 @@ class RenderBlockViewport extends RenderBlockBase {
     markNeedsLayout();
   }
 
-  /// Returns the maximum cross-axis extent across all the children that could be included by [callback] in one go
+  /// Returns the maximum cross-axis extent across all the children that could be included by [callback] in one go.
   ExtentCallback get maxCrossAxisExtentCallback => _maxCrossAxisExtentCallback;
   ExtentCallback _maxCrossAxisExtentCallback;
   void set maxCrossAxisExtentCallback(ExtentCallback value) {
@@ -329,7 +329,7 @@ class RenderBlockViewport extends RenderBlockBase {
     _overlayPainter?.detach();
   }
 
-  /// The offset at which to paint the first child
+  /// The offset at which to paint the first child.
   ///
   /// Note: you can modify this property from within [callback], if necessary.
   double get startOffset => _startOffset;
@@ -354,10 +354,7 @@ class RenderBlockViewport extends RenderBlockBase {
     try {
       _inCallback = true;
       result = intrinsicCallback(constraints);
-      if (result == null)
-        result = constrainer(0.0);
-      else
-        result = constrainer(result);
+      result = constrainer(result ?? 0.0);
     } finally {
       _inCallback = false;
     }

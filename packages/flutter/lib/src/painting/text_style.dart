@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 
 import 'basic_types.dart';
 
-/// An immutable style in which paint text
+/// An immutable style in which paint text.
 class TextStyle {
   const TextStyle({
     this.inherit: true,

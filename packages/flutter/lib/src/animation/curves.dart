@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 double _evaluateCubic(double a, double b, double m) {
-  // TODO(abarth): Would Math.pow be faster?
   return 3 * a * (1 - m) * (1 - m) * m + 3 * b * (1 - m) * m * m + m * m * m;
 }
 
@@ -15,29 +14,29 @@ const double _kCubicErrorBound = 0.001;
 ///
 /// A curve must map 0.0 to 0.0 and 1.0 to 1.0.
 abstract class Curve {
-  /// Return the value of the curve at point t
+  /// Returns the value of the curve at point [t].
   ///
-  /// The value of t must be between 0.0 and 1.0, inclusive.
+  /// The value of [t] must be between 0.0 and 1.0, inclusive.
   double transform(double t);
 }
 
-/// The identity map over the unit interval
+/// The identity map over the unit interval.
 class Linear implements Curve {
   const Linear();
   double transform(double t) => t;
 }
 
-/// A curve that is 0.0 until start, then curved from 0.0 to 1.0 at end, then 1.0
+/// A curve that is 0.0 until start, then curved from 0.0 to 1.0 at end, then 1.0.
 class Interval implements Curve {
   const Interval(this.start, this.end, { this.curve: Curves.linear });
 
-  /// The smallest value for which this interval is 0.0
+  /// The smallest value for which this interval is 0.0.
   final double start;
 
-  /// The smallest value for which this interval is 1.0
+  /// The smallest value for which this interval is 1.0.
   final double end;
 
-  /// The curve to apply between [start] and [end]
+  /// The curve to apply between [start] and [end].
   final Curve curve;
 
   double transform(double t) {
@@ -53,7 +52,7 @@ class Interval implements Curve {
   }
 }
 
-/// A cubic polynomial mapping of the unit interval
+/// A cubic polynomial mapping of the unit interval.
 class Cubic implements Curve {
   const Cubic(this.a, this.b, this.c, this.d);
 
@@ -92,7 +91,7 @@ double _bounce(double t) {
   return 7.5625 * t * t + 0.984375;
 }
 
-/// An oscillating curve that grows in magnitude
+/// An oscillating curve that grows in magnitude.
 class BounceInCurve implements Curve {
   const BounceInCurve();
   double transform(double t) {
@@ -100,7 +99,7 @@ class BounceInCurve implements Curve {
   }
 }
 
-/// An oscillating curve that shrink in magnitude
+/// An oscillating curve that shrink in magnitude.
 class BounceOutCurve implements Curve {
   const BounceOutCurve();
   double transform(double t) {
@@ -108,7 +107,7 @@ class BounceOutCurve implements Curve {
   }
 }
 
-/// An oscillating curve that first grows and then shrink in magnitude
+/// An oscillating curve that first grows and then shrink in magnitude.
 class BounceInOutCurve implements Curve {
   const BounceInOutCurve();
   double transform(double t) {
@@ -119,7 +118,7 @@ class BounceInOutCurve implements Curve {
   }
 }
 
-/// An oscillating curve that grows in magnitude while overshootings its bounds
+/// An oscillating curve that grows in magnitude while overshooting its bounds.
 class ElasticInCurve implements Curve {
   const ElasticInCurve([this.period = 0.4]);
   final double period;
@@ -130,7 +129,7 @@ class ElasticInCurve implements Curve {
   }
 }
 
-/// An oscillating curve that shrinks in magnitude while overshootings its bounds
+/// An oscillating curve that shrinks in magnitude while overshooting its bounds.
 class ElasticOutCurve implements Curve {
   const ElasticOutCurve([this.period = 0.4]);
   final double period;
@@ -140,7 +139,7 @@ class ElasticOutCurve implements Curve {
   }
 }
 
-/// An oscillating curve that grows and then shrinks in magnitude while overshootings its bounds
+/// An oscillating curve that grows and then shrinks in magnitude while overshooting its bounds.
 class ElasticInOutCurve implements Curve {
   const ElasticInOutCurve([this.period = 0.4]);
   final double period;
@@ -161,36 +160,40 @@ class Curves {
   /// A linear animation curve
   static const Linear linear = const Linear();
 
-  /// A cubic animation curve that speeds up quickly and ends slowly
+  /// A cubic animation curve that speeds up quickly and ends slowly.
   static const Cubic ease = const Cubic(0.25, 0.1, 0.25, 1.0);
 
-  /// A cubic animation curve that starts slowly and ends quickly
+  /// A cubic animation curve that starts slowly and ends quickly.
   static const Cubic easeIn = const Cubic(0.42, 0.0, 1.0, 1.0);
 
-  /// A cubic animation curve that starts quickly and ends slowly
+  /// A cubic animation curve that starts quickly and ends slowly.
   static const Cubic easeOut = const Cubic(0.0, 0.0, 0.58, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly
+  /// A cubic animation curve that starts slowly, speeds up, and then and ends slowly.
   static const Cubic easeInOut = const Cubic(0.42, 0.0, 0.58, 1.0);
 
-  /// An oscillating curve that grows in magnitude
+  /// An oscillating curve that grows in magnitude.
   static const BounceInCurve bounceIn = const BounceInCurve();
 
-  /// An oscillating curve that first grows and then shrink in magnitude
+  /// An oscillating curve that first grows and then shrink in magnitude.
   static const BounceOutCurve bounceOut = const BounceOutCurve();
 
-  /// An oscillating curve that first grows and then shrink in magnitude
+  /// An oscillating curve that first grows and then shrink in magnitude.
   static const BounceInOutCurve bounceInOut = const BounceInOutCurve();
 
-  /// An oscillating curve that grows in magnitude while overshootings its bounds
+  /// An oscillating curve that grows in magnitude while overshootings its bounds.
   static const ElasticInCurve elasticIn = const ElasticInCurve();
 
-  /// An oscillating curve that shrinks in magnitude while overshootings its bounds
+  /// An oscillating curve that shrinks in magnitude while overshootings its bounds.
   static const ElasticOutCurve elasticOut = const ElasticOutCurve();
 
-  /// An oscillating curve that grows and then shrinks in magnitude while overshootings its bounds
+  /// An oscillating curve that grows and then shrinks in magnitude while overshootings its bounds.
   static const ElasticInOutCurve elasticInOut = const ElasticInOutCurve();
 
-  /// A curve that starts quickly and eases into its final position. Over the course of the animation, the object spends more time near its final destination. As a result, the user isn’t left waiting for the animation to finish, and the negative effects of motion are minimized.
+  /// A curve that starts quickly and eases into its final position.
+  ///
+  /// Over the course of the animation, the object spends more time near its
+  /// final destination. As a result, the user isn’t left waiting for the
+  /// animation to finish, and the negative effects of motion are minimized.
   static const Curve fastOutSlowIn = const Cubic(0.4, 0.0, 0.2, 1.0);
 }

@@ -13,20 +13,20 @@ import 'edge_dims.dart';
 
 export 'edge_dims.dart' show EdgeDims;
 
-/// A side of a border of a box
+/// A side of a border of a box.
 class BorderSide {
   const BorderSide({
     this.color: const Color(0xFF000000),
     this.width: 1.0
   });
 
-  /// The color of this side of the border
+  /// The color of this side of the border.
   final Color color;
 
-  /// The width of this side of the border
+  /// The width of this side of the border.
   final double width;
 
-  /// A black border side of zero width
+  /// A black border side of zero width.
   static const none = const BorderSide(width: 0.0);
 
   bool operator ==(dynamic other) {
@@ -49,7 +49,7 @@ class BorderSide {
   String toString() => 'BorderSide($color, $width)';
 }
 
-/// A border of a box, comprised of four sides
+/// A border of a box, comprised of four sides.
 class Border {
   const Border({
     this.top: BorderSide.none,
@@ -58,7 +58,7 @@ class Border {
     this.left: BorderSide.none
   });
 
-  /// A uniform border with all sides the same color and width
+  /// A uniform border with all sides the same color and width.
   factory Border.all({
     Color color: const Color(0xFF000000),
     double width: 1.0
@@ -67,19 +67,19 @@ class Border {
     return new Border(top: side, right: side, bottom: side, left: side);
   }
 
-  /// The top side of this border
+  /// The top side of this border.
   final BorderSide top;
 
-  /// The right side of this border
+  /// The right side of this border.
   final BorderSide right;
 
-  /// The bottom side of this border
+  /// The bottom side of this border.
   final BorderSide bottom;
 
-  /// The left side of this border
+  /// The left side of this border.
   final BorderSide left;
 
-  /// The widths of the sides of this border represented as an EdgeDims
+  /// The widths of the sides of this border represented as an EdgeDims.
   EdgeDims get dimensions {
     return new EdgeDims.TRBL(top.width, right.width, bottom.width, left.width);
   }
@@ -108,7 +108,7 @@ class Border {
   String toString() => 'Border($top, $right, $bottom, $left)';
 }
 
-/// A shadow cast by a box
+/// A shadow cast by a box.
 ///
 /// Note: BoxShadow can cast non-rectangular shadows if the box is
 /// non-rectangular (e.g., has a border radius or a circular shape).
@@ -121,21 +121,22 @@ class BoxShadow {
     this.spreadRadius: 0.0
   });
 
-  /// The color of the shadow
+  /// The color of the shadow.
   final Color color;
 
-  /// The displacement of the shadow from the box
+  /// The displacement of the shadow from the box.
   final Offset offset;
 
-  /// The standard deviation of the Gaussian to convolve with the box's shape
+  /// The standard deviation of the Gaussian to convolve with the box's shape.
   final double blurRadius;
 
   final double spreadRadius;
 
-  // See SkBlurMask::ConvertRadiusToSigma()
+  // See SkBlurMask::ConvertRadiusToSigma().
+  // https://github.com/google/skia/blob/bb5b77db51d2e149ee66db284903572a5aac09be/src/effects/SkBlurMask.cpp#L23
   double get _blurSigma => blurRadius * 0.57735 + 0.5;
 
-  /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor
+  /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
   BoxShadow scale(double factor) {
     return new BoxShadow(
       color: color,
@@ -145,7 +146,7 @@ class BoxShadow {
     );
   }
 
-  /// Linearly interpolate between two box shadows
+  /// Linearly interpolate between two box shadows.
   ///
   /// If either box shadow is null, this function linearly interpolates from a
   /// a box shadow that matches the other box shadow in color but has a zero
@@ -165,7 +166,7 @@ class BoxShadow {
     );
   }
 
-  /// Linearly interpolate between two lists of box shadows
+  /// Linearly interpolate between two lists of box shadows.
   ///
   /// If the lists differ in length, excess items are lerped with null.
   static List<BoxShadow> lerpList(List<BoxShadow> a, List<BoxShadow> b, double t) {
@@ -210,13 +211,13 @@ class BoxShadow {
   String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
 }
 
-/// A 2D gradient
+/// A 2D gradient.
 abstract class Gradient {
   const Gradient();
   ui.Shader createShader();
 }
 
-/// A 2D linear gradient
+/// A 2D linear gradient.
 class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin,
@@ -226,24 +227,24 @@ class LinearGradient extends Gradient {
     this.tileMode: ui.TileMode.clamp
   });
 
-  /// The point at which stop 0.0 of the gradient is placed
+  /// The point at which stop 0.0 of the gradient is placed.
   final Point begin;
 
-  /// The point at which stop 1.0 of the gradient is placed
+  /// The point at which stop 1.0 of the gradient is placed.
   final Point end;
 
-  /// The colors the gradient should obtain at each of the stops
+  /// The colors the gradient should obtain at each of the stops.
   ///
   /// Note: This list must have the same length as [stops].
   final List<Color> colors;
 
-  /// A list of values from 0.0 to 1.0 that denote fractions of the vector from start to end
+  /// A list of values from 0.0 to 1.0 that denote fractions of the vector from start to end.
   ///
   /// Note: If specified, this list must have the same length as [colors]. Otherwise the colors
   /// are distributed evenly between [begin] and [end].
   final List<double> stops;
 
-  /// How this gradient should tile the plane
+  /// How this gradient should tile the plane.
   final ui.TileMode tileMode;
 
   ui.Shader createShader() {
@@ -306,7 +307,7 @@ class LinearGradient extends Gradient {
   }
 }
 
-/// A 2D radial gradient
+/// A 2D radial gradient.
 class RadialGradient extends Gradient {
   const RadialGradient({
     this.center,
@@ -316,18 +317,18 @@ class RadialGradient extends Gradient {
     this.tileMode: ui.TileMode.clamp
   });
 
-  /// The center of the gradient
+  /// The center of the gradient.
   final Point center;
 
-  /// The radius at which stop 1.0 is placed
+  /// The radius at which stop 1.0 is placed.
   final double radius;
 
-  /// The colors the gradient should obtain at each of the stops
+  /// The colors the gradient should obtain at each of the stops.
   ///
   /// Note: This list must have the same length as [stops].
   final List<Color> colors;
 
-  /// A list of values from 0.0 to 1.0 that denote concentric rings
+  /// A list of values from 0.0 to 1.0 that denote concentric rings.
   ///
   /// The rings are centered at [center] and have a radius equal to the value of
   /// the stop times [radius].
@@ -335,7 +336,7 @@ class RadialGradient extends Gradient {
   /// Note: This list must have the same length as [colors].
   final List<double> stops;
 
-  /// How this gradient should tile the plane
+  /// How this gradient should tile the plane.
   final ui.TileMode tileMode;
 
   ui.Shader createShader() {
@@ -398,38 +399,38 @@ class RadialGradient extends Gradient {
   }
 }
 
-/// How an image should be inscribed into a box
+/// How an image should be inscribed into a box.
 enum ImageFit {
-  /// Fill the box by distorting the image's aspect ratio
+  /// Fill the box by distorting the image's aspect ratio.
   fill,
 
-  /// As large as possible while still containing the image entirely within the box
+  /// As large as possible while still containing the image entirely within the box.
   contain,
 
-  /// As small as possible while still covering the entire box
+  /// As small as possible while still covering the entire box.
   cover,
 
   /// Center the image within the box and discard any portions of the image that
-  /// lie outside the box
+  /// lie outside the box.
   none,
 
   /// Center the image within the box and, if necessary, scale the image down to
-  /// ensure that the image fits within the box
+  /// ensure that the image fits within the box.
   scaleDown
 }
 
-/// How to paint any portions of a box not covered by an image
+/// How to paint any portions of a box not covered by an image.
 enum ImageRepeat {
-  /// Repeat the image in both the x and y directions until the box is filled
+  /// Repeat the image in both the x and y directions until the box is filled.
   repeat,
 
-  /// Repeat the image in the x direction until the box is filled horizontally
+  /// Repeat the image in the x direction until the box is filled horizontally.
   repeatX,
 
-  /// Repeat the image in the y direction until the box is filled vertically
+  /// Repeat the image in the y direction until the box is filled vertically.
   repeatY,
 
-  /// Leave uncovered poritions of the box transparent
+  /// Leave uncovered poritions of the box transparent.
   noRepeat
 }
 
@@ -462,7 +463,7 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   }
 }
 
-/// Paint an image into the given rectangle in the canvas.
+/// Paints an image into the given rectangle in the canvas.
 void paintImage({
   Canvas canvas,
   Rect rect,
@@ -639,7 +640,7 @@ class BackgroundImage {
 
   final List<VoidCallback> _listeners = <VoidCallback>[];
 
-  /// Call listener when the background images changes (e.g., arrives from the network).
+  /// Adds a listener for background-image changes (e.g., arrives from the network).
   void _addChangeListener(VoidCallback listener) {
     // We add the listener to the _imageResource first so that the first change
     // listener doesn't get callback synchronously if the image resource is
@@ -649,7 +650,7 @@ class BackgroundImage {
     _listeners.add(listener);
   }
 
-  /// No longer call listener when the background image changes.
+  /// Removes the listener for background-image changes.
   void _removeChangeListener(VoidCallback listener) {
     _listeners.remove(listener);
     // We need to remove ourselves as listeners from the _imageResource so that
@@ -710,7 +711,7 @@ enum BoxShape {
   circle
 }
 
-/// An immutable description of how to paint a box
+/// An immutable description of how to paint a box.
 class BoxDecoration extends Decoration {
   const BoxDecoration({
     this.backgroundColor, // null = don't draw background color
@@ -724,37 +725,37 @@ class BoxDecoration extends Decoration {
 
   bool debugAssertValid() {
     assert(shape != BoxShape.circle ||
-           borderRadius == null); // can't have a border radius if you're a circle
+           borderRadius == null); // Can't have a border radius if you're a circle.
     return super.debugAssertValid();
   }
 
-  /// The color to fill in the background of the box
+  /// The color to fill in the background of the box.
   ///
   /// The color is filled into the shape of the box (e.g., either a rectangle,
   /// potentially with a border radius, or a circle).
   final Color backgroundColor;
 
-  /// An image to paint above the background color
+  /// An image to paint above the background color.
   final BackgroundImage backgroundImage;
 
-  /// A border to draw above the background
+  /// A border to draw above the background.
   final Border border;
 
-  /// If non-null, the corners of this box are rounded by this radius
+  /// If non-null, the corners of this box are rounded by this radius.
   ///
   /// Applies only to boxes with rectangular shapes.
   final double borderRadius;
 
-  /// A list of shadows cast by this box behind the background
+  /// A list of shadows cast by this box behind the background.
   final List<BoxShadow> boxShadow;
 
-  /// A graident to use when filling the background
+  /// A gradient to use when filling the background.
   final Gradient gradient;
 
-  /// The shape to fill the background color into and to cast as a shadow
+  /// The shape to fill the background color into and to cast as a shadow.
   final BoxShape shape;
 
-  /// Returns a new box decoration that is scaled by the given factor
+  /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
     // TODO(abarth): Scale ALL the things.
     return new BoxDecoration(
@@ -888,7 +889,7 @@ class BoxDecoration extends Decoration {
   _BoxDecorationPainter createBoxPainter() => new _BoxDecorationPainter(this);
 }
 
-/// An object that paints a [BoxDecoration] into a canvas
+/// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
   _BoxDecorationPainter(this._decoration) {
     assert(_decoration != null);

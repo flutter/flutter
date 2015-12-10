@@ -9,13 +9,13 @@ import 'animated_value.dart';
 import 'curves.dart';
 import 'ticker.dart';
 
-/// A simulation that varies from [begin] to [end] over [duration] using [curve]
+/// A simulation that varies from [begin] to [end] over [duration] using [curve].
 ///
 /// This class is an adaptor between the Simulation interface and the
 /// AnimatedValue interface.
 class _TweenSimulation extends Simulation {
   _TweenSimulation(double begin, double end, Duration duration, Curve curve)
-    : _durationInSeconds = duration.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND,
+    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND,
       _tween = new AnimatedValue<double>(begin, end: end, curve: curve) {
     assert(_durationInSeconds > 0.0);
     assert(begin != null);
@@ -49,7 +49,7 @@ class SimulationStepper {
   Ticker _ticker;
   Simulation _simulation;
 
-  /// The current value of the timeline
+  /// The current value of the timeline.
   double get value => _value;
   double _value = 0.0;
   void set value(double newValue) {
@@ -59,10 +59,10 @@ class SimulationStepper {
     _onTick(_value);
   }
 
-  /// Whether the timeline is currently animating
+  /// Whether the timeline is currently animating.
   bool get isAnimating => _ticker.isTicking;
 
-  /// Animate value of the timeline to the given target over the given duration
+  /// Animates value of the timeline to the given target over the given duration.
   ///
   /// Returns a future that resolves when the timeline stops animating,
   /// typically when the timeline arives at the target value.
@@ -72,13 +72,13 @@ class SimulationStepper {
     return _start(new _TweenSimulation(value, target, duration, curve));
   }
 
-  /// Gives the given simulation control over the timeline
+  /// Gives the given simulation control over the timeline.
   Future animateWith(Simulation simulation) {
     stop();
     return _start(simulation);
   }
 
-  /// Start ticking the given simulation once per frame
+  /// Starts ticking the given simulation once per frame.
   ///
   /// Returns a future that resolves when the simulation stops ticking.
   Future _start(Simulation simulation) {
@@ -89,7 +89,7 @@ class SimulationStepper {
     return _ticker.start();
   }
 
-  /// Stop animating the timeline
+  /// Stops animating the timeline.
   void stop() {
     _simulation = null;
     _ticker.stop();

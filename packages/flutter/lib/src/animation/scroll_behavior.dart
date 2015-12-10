@@ -11,15 +11,18 @@ const double _kScrollDrag = 0.025;
 
 /// An interface for controlling the behavior of scrollable widgets.
 abstract class ScrollBehavior {
-  /// Called when a drag gesture ends. Returns a simulation that
-  /// propels the scrollOffset.
+  /// Returns a simulation that propels the scrollOffset.
+  ///
+  /// This function is called when a drag gesture ends.
   Simulation createFlingScrollSimulation(double position, double velocity) => null;
 
-  /// Called when a drag gesture ends and toSnapOffset is specified.
   /// Returns an animation that ends at the snap offset.
+  ///
+  /// This function is called when a drag gesture ends and toSnapOffset is specified.
   Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) => null;
 
-  /// Return the scroll offset to use when the user attempts to scroll
+
+  /// Returns the scroll offset to use when the user attempts to scroll
   /// from the given offset by the given delta.
   double applyCurve(double scrollOffset, double scrollDelta);
 
@@ -27,7 +30,7 @@ abstract class ScrollBehavior {
   bool get isScrollable => true;
 }
 
-/// A scroll behavior for a scrollable widget with linear extent
+/// A scroll behavior for a scrollable widget with linear extent.
 abstract class ExtentScrollBehavior extends ScrollBehavior {
   ExtentScrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : _contentExtent = contentExtent, _containerExtent = containerExtent;
@@ -40,10 +43,11 @@ abstract class ExtentScrollBehavior extends ScrollBehavior {
   double get containerExtent => _containerExtent;
   double _containerExtent;
 
-  /// Update either content or container extent (or both)
+  /// Updates either content or container extent (or both)
   ///
-  /// The scrollOffset parameter is the scroll offset of the widget before the
-  /// change in extent. Returns the new scroll offset of the widget after the
+  /// Returns the new scroll offset of the widget after the change in extent.
+  ///
+  /// The [scrollOffset] parameter is the scroll offset of the widget before the
   /// change in extent.
   double updateExtents({
     double contentExtent,
@@ -64,7 +68,7 @@ abstract class ExtentScrollBehavior extends ScrollBehavior {
   double get maxScrollOffset;
 }
 
-/// A scroll behavior that prevents the user from exeeding scroll bounds.
+/// A scroll behavior that prevents the user from exceeding scroll bounds.
 class BoundedBehavior extends ExtentScrollBehavior {
   BoundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);

@@ -6,12 +6,12 @@ import 'dart:ui' show Color, Size, Rect;
 
 import 'curves.dart';
 
-/// The direction in which an animation is running
+/// The direction in which an animation is running.
 enum AnimationDirection {
-  /// The animation is running from beginning to end
+  /// The animation is running from beginning to end.
   forward,
 
-  /// The animation is running backwards, from end to beginning
+  /// The animation is running backwards, from end to beginning.
   reverse
 }
 
@@ -43,12 +43,12 @@ class AnimatedValue<T extends dynamic> implements Animatable {
   /// Returns the value this variable has at the given animation clock value.
   T lerp(double t) => begin + (end - begin) * t;
 
-  /// The curve to use in the forward direction
+  /// The curve to use in the forward direction.
   Curve curve;
 
-  /// The curve to use in the reverse direction
+  /// The curve to use in the reverse direction.
   ///
-  /// If this field is null, use [curve] in both directions.
+  /// If this field is null, uses [curve] in both directions.
   Curve reverseCurve;
 
   Curve _getActiveCurve(AnimationDirection direction) {
@@ -57,7 +57,6 @@ class AnimatedValue<T extends dynamic> implements Animatable {
     return reverseCurve;
   }
 
-  /// Applies this timing to the given animation clock value in the given direction
   double transform(double t, AnimationDirection direction) {
     Curve activeCurve = _getActiveCurve(direction);
     if (activeCurve == null)
@@ -120,13 +119,11 @@ class AnimatedRectValue extends AnimatedValue<Rect> {
 }
 
 /// An animated variable containing a int.
-///
-/// The inherited lerp() function doesn't work with ints because it multiplies
-/// the begin and end types by a double, and int * double returns a double.
-/// This class overrides the lerp() function to round off the result to an int.
 class AnimatedIntValue extends AnimatedValue<int> {
   AnimatedIntValue(int begin, { int end, Curve curve, Curve reverseCurve })
     : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
 
+  // The inherited lerp() function doesn't work with ints because it multiplies
+  // the begin and end types by a double, and int * double returns a double.
   int lerp(double t) => (begin + (end - begin) * t).round();
 }

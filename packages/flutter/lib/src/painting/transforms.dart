@@ -11,13 +11,13 @@ import 'basic_types.dart';
 class MatrixUtils {
   MatrixUtils._();
 
-  /// If the given transform is nothing but a 2D translation, then returns that
-  /// translation as an Offset.
+  /// Returns the given [transform] matrix as Offset, if the matrix is nothing
+  /// but a 2D translation.
   ///
-  /// Otherwise, returns null.
+  /// Returns null, otherwise.
   static Offset getAsTranslation(Matrix4 transform) {
     Float64List values = transform.storage;
-    // values are stored in column-major order
+    // Values are stored in column-major order.
     if (values[0] == 1.0 &&
         values[1] == 0.0 &&
         values[2] == 0.0 &&

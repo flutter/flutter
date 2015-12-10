@@ -10,10 +10,10 @@ import 'object.dart';
 /// Hosts the edge parameters and vends useful methods to construct expressions
 /// for constraints. Also sets up and manages implicit constraints and edit
 /// variables. Used as a mixin by layout containers and parent data instances
-/// of render boxes taking part in auto layout
+/// of render boxes taking part in auto layout.
 abstract class _AutoLayoutParamMixin {
   // Ideally, the edges would all be final, but then they would have to be
-  // initialized before the constructor. Not sure how to do that using a Mixin
+  // initialized before the constructor. Not sure how to do that using a Mixin.
   al.Param _leftEdge;
   al.Param _rightEdge;
   al.Param _topEdge;
@@ -55,9 +55,11 @@ abstract class _AutoLayoutParamMixin {
     solver.suggestValueForVariable(_rightEdge.variable, size.width);
   }
 
-  /// Called when the solver has updated at least one of the layout parameters
-  /// of this object. The object is now responsible for applying this update to
-  /// it other properties (if necessary)
+  /// Applies the parameter updates.
+  ///
+  /// This method is called when the solver has updated at least one of the
+  /// layout parameters of this object. The object is now responsible for
+  /// applying this update to its other properties (if necessary).
   void _applyAutolayoutParameterUpdates();
 
   /// Returns the set of implicit constraints that need to be applied to all
@@ -139,7 +141,7 @@ class RenderAutoLayout extends RenderBox
   List<al.Constraint> _explicitConstraints = new List<al.Constraint>();
 
   /// Adds all the given constraints to the solver. Either all constraints are
-  /// added or none
+  /// added or none.
   al.Result addConstraints(List<al.Constraint> constraints) {
     al.Result result = _solver.addConstraints(constraints);
     if (result == al.Result.success) {
@@ -149,7 +151,7 @@ class RenderAutoLayout extends RenderBox
     return result;
   }
 
-  /// Add the given constraint to the solver.
+  /// Adds the given constraint to the solver.
   al.Result addConstraint(al.Constraint constraint) {
     al.Result result = _solver.addConstraint(constraint);
 

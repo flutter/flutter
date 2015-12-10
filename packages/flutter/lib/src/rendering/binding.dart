@@ -22,7 +22,7 @@ typedef void MetricListener(Size size);
 class _PointerState {
   _PointerState(this.lastPosition);
 
-  int get pointer => _pointer; // the identifier used in PointerEvent objects
+  int get pointer => _pointer; // The identifier used in PointerEvent objects.
   int _pointer;
   static int _pointerCount = 0;
   void startNewPointer() {
@@ -45,7 +45,7 @@ class _PointerState {
 }
 
 class _PointerEventConverter {
-  // map from platform pointer identifiers to PointerEvent pointer identifiers
+  // Map from platform pointer identifiers to PointerEvent pointer identifiers.
   static Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
   static Iterable<PointerEvent> expand(Iterable<Pointer> packet) sync* {
@@ -201,7 +201,7 @@ class BindingObserver {
   void didChangeLocale(ui.Locale locale) { }
 }
 
-/// The glue between the render tree and the Flutter engine
+/// The glue between the render tree and the Flutter engine.
 class FlutterBinding extends HitTestTarget {
 
   FlutterBinding({ RenderBox root: null, RenderView renderViewOverride }) {
@@ -227,11 +227,11 @@ class FlutterBinding extends HitTestTarget {
     assert(_instance == this);
   }
 
-  /// The singleton instance of the binding
+  /// The singleton instance of the binding.
   static FlutterBinding get instance => _instance;
   static FlutterBinding _instance;
 
-  /// The render tree that's attached to the output surface
+  /// The render tree that's attached to the output surface.
   RenderView get renderView => _renderView;
   RenderView _renderView;
 
@@ -260,7 +260,7 @@ class FlutterBinding extends HitTestTarget {
     beginFrame();
   }
 
-  /// Pump the rendering pipeline to generate a frame for the given time stamp
+  /// Pump the rendering pipeline to generate a frame for the given time stamp.
   void beginFrame() {
     RenderObject.flushLayout();
     _renderView.updateCompositingBits();
@@ -287,12 +287,13 @@ class FlutterBinding extends HitTestTarget {
       _handlePointerEvent(event);
   }
 
-  /// A router that routes all pointer events received from the engine
+  /// A router that routes all pointer events received from the engine.
   final PointerRouter pointerRouter = new PointerRouter();
 
   /// State for all pointers which are currently down.
+  ///
   /// The state of hovering pointers is not tracked because that would require
-  /// hit-testing on every fram.e
+  /// hit-testing on every frame.
   Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
   void _handlePointerEvent(PointerEvent event) {
@@ -312,7 +313,7 @@ class FlutterBinding extends HitTestTarget {
     }
   }
 
-  /// Determine which [HitTestTarget] objects are located at a given position
+  /// Determine which [HitTestTarget] objects are located at a given position.
   HitTestResult hitTest(Point position) {
     HitTestResult result = new HitTestResult();
     _renderView.hitTest(result, position: position);
@@ -337,12 +338,12 @@ class FlutterBinding extends HitTestTarget {
   }
 }
 
-/// Prints a textual representation of the entire render tree
+/// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
   debugPrint(FlutterBinding.instance.renderView.toStringDeep());
 }
 
-/// Prints a textual representation of the entire layer tree
+/// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
   debugPrint(FlutterBinding.instance.renderView.layer.toStringDeep());
 }
