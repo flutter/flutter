@@ -256,7 +256,6 @@ class _HomogeneousPageViewportElement extends _ViewportBaseElement<HomogeneousPa
     // doing our own layout.)
     BuildableElement.lockState(() {
       double itemExtent = widget.direction == ScrollDirection.vertical ? constraints.maxHeight : constraints.maxWidth;
-      double contentExtent = itemExtent * widget.itemCount;
       double offset;
       if (widget.startOffset <= 0.0 && !widget.itemsWrap) {
         _layoutFirstIndex = 0;
@@ -265,9 +264,10 @@ class _HomogeneousPageViewportElement extends _ViewportBaseElement<HomogeneousPa
         _layoutFirstIndex = widget.startOffset.floor();
         offset = -((widget.startOffset * itemExtent) % itemExtent);
       }
-      if (itemExtent < double.INFINITY) {
-        _layoutItemCount = ((contentExtent - offset) / contentExtent).ceil();
-        if (widget.itemCount != null && !widget.itemsWrap)
+      if (itemExtent < double.INFINITY && widget.itemCount != null) {
+        final double contentExtent = itemExtent * widget.itemCount;
+        _layoutItemCount = contentExtent == 0.0 ? 0 : ((contentExtent - offset) / contentExtent).ceil();
+        if (!widget.itemsWrap)
           _layoutItemCount = math.min(_layoutItemCount, widget.itemCount - _layoutFirstIndex);
       } else {
         assert(() {

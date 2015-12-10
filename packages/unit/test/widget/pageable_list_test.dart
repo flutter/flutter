@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 const Size pageSize = const Size(800.0, 600.0);
-const List<int> pages = const <int>[0, 1, 2, 3, 4, 5];
+const List<int> defaultPages = const <int>[0, 1, 2, 3, 4, 5];
 int currentPage = null;
 bool itemsWrap = false;
 
@@ -20,7 +20,7 @@ Widget buildPage(BuildContext context, int page, int index) {
   );
 }
 
-Widget buildFrame() {
+Widget buildFrame({ List<int> pages: defaultPages }) {
   // The test framework forces the frame (and so the PageableList)
   // to be 800x600. The pageSize constant reflects this.
   return new PageableList<int>(
@@ -66,7 +66,6 @@ void main() {
 
   test('PageableList with itemsWrap: true', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Container());
       currentPage = null;
       itemsWrap = true;
       tester.pumpWidget(buildFrame());
@@ -79,4 +78,44 @@ void main() {
       expect(currentPage, equals(5));
     });
   });
+
+  test('PageableList with two items', () {
+    testWidgets((WidgetTester tester) {
+      currentPage = null;
+      itemsWrap = true;
+      tester.pumpWidget(buildFrame(pages: <int>[0, 1]));
+      expect(currentPage, isNull);
+      pageLeft(tester);
+      expect(currentPage, equals(1));
+      pageRight(tester);
+      expect(currentPage, equals(0));
+      pageRight(tester);
+      expect(currentPage, equals(1));
+    });
+  });
+
+  test('PageableList with one item', () {
+    testWidgets((WidgetTester tester) {
+      currentPage = null;
+      itemsWrap = true;
+      tester.pumpWidget(buildFrame(pages: <int>[0]));
+      expect(currentPage, isNull);
+      pageLeft(tester);
+      expect(currentPage, equals(0));
+      pageRight(tester);
+      expect(currentPage, equals(0));
+      pageRight(tester);
+      expect(currentPage, equals(0));
+    });
+  });
+
+  test('PageableList with no items', () {
+    testWidgets((WidgetTester tester) {
+      currentPage = null;
+      itemsWrap = true;
+      tester.pumpWidget(buildFrame(pages: null));
+      expect(currentPage, isNull);
+    });
+  });
+
 }
