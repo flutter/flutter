@@ -22,31 +22,19 @@ class TabsDemo extends StatefulComponent {
 }
 
 class _TabsDemoState extends State<TabsDemo> {
-  double _viewWidth = 100.0;
-
-  void _handleSizeChanged(Size newSize) {
-    setState(() {
-      _viewWidth = newSize.width;
-    });
-  }
-
   Widget build(_) {
-    return new SizeObserver(
-      onSizeChanged: _handleSizeChanged,
-      child: new TabBarView<String>(
-        selection: _selection,
-        items: _iconNames,
-        itemExtent: _viewWidth,
-        itemBuilder: (BuildContext context, String iconName, int index) {
-          return new Container(
-            key: new ValueKey<String>(iconName),
-            padding: const EdgeDims.all(12.0),
-            child: new Card(
-              child: new Center(child: new Icon(icon: "action/$iconName", size:IconSize.s48))
-            )
-          );
-        }
-      )
+    return new TabBarView<String>(
+      selection: _selection,
+      items: _iconNames,
+      itemBuilder: (BuildContext context, String iconName, int index) {
+        return new Container(
+          key: new ValueKey<String>(iconName),
+          padding: const EdgeDims.all(12.0),
+          child: new Card(
+            child: new Center(child: new Icon(icon: "action/$iconName", size:IconSize.s48))
+          )
+        );
+      }
     );
   }
 }

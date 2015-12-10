@@ -28,7 +28,7 @@ const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
 const double _kTabBarScrollDrag = 0.025;
-const Duration _kTabBarScroll = const Duration(milliseconds: 200);
+const Duration _kTabBarScroll = const Duration(milliseconds: 300);
 
 class _TabBarParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
@@ -612,19 +612,17 @@ class _TabBarState extends ScrollableState<TabBar> {
   }
 }
 
-class TabBarView<T> extends ScrollableList<T> {
+class TabBarView<T> extends PageableList<T> {
   TabBarView({
     Key key,
     this.selection,
     List<T> items,
-    ItemBuilder<T> itemBuilder,
-    double itemExtent
+    ItemBuilder<T> itemBuilder
   }) : super(
     key: key,
     scrollDirection: ScrollDirection.horizontal,
     items: items,
     itemBuilder: itemBuilder,
-    itemExtent: itemExtent,
     itemsWrap: false
   ) {
     assert(selection != null);
@@ -640,9 +638,11 @@ class _NotScrollable extends BoundedBehavior {
   bool get isScrollable => false;
 }
 
-class _TabBarViewState<T> extends ScrollableListState<T, TabBarView<T>> {
+class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
 
-  ScrollBehavior createScrollBehavior() => new _NotScrollable();
+  final _NotScrollable _notScrollable = new _NotScrollable();
+  ScrollBehavior createScrollBehavior() => _notScrollable;
+  ExtentScrollBehavior get scrollBehavior => _notScrollable;
 
   List<int> _itemIndices = [0, 1];
   AnimationDirection _scrollDirection = AnimationDirection.forward;
@@ -655,10 +655,10 @@ class _TabBarViewState<T> extends ScrollableListState<T, TabBarView<T>> {
       scrollTo(0.0);
     } else if (selectedIndex == config.items.length - 1) {
       _itemIndices = <int>[selectedIndex - 1, selectedIndex];
-      scrollTo(config.itemExtent);
+      scrollTo(1.0);
     } else {
       _itemIndices = <int>[selectedIndex - 1, selectedIndex, selectedIndex + 1];
-      scrollTo(config.itemExtent);
+      scrollTo(1.0);
     }
   }
 
@@ -680,12 +680,6 @@ class _TabBarViewState<T> extends ScrollableListState<T, TabBarView<T>> {
     super.dispose();
   }
 
-  void didUpdateConfig(TabBarView oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (oldConfig.itemExtent != config.itemExtent && !_performance.isAnimating)
-      _initItemIndicesAndScrollPosition();
-  }
-
   void _handleStatusChange(PerformanceStatus status) {
     final int selectedIndex = config.selection.index;
     final int previousSelectedIndex = config.selection.previousIndex;
@@ -705,9 +699,9 @@ class _TabBarViewState<T> extends ScrollableListState<T, TabBarView<T>> {
 
   void _handleProgressChange() {
     if (_scrollDirection == AnimationDirection.forward)
-      scrollTo(config.itemExtent * _performance.progress);
+      scrollTo(_performance.progress);
     else
-      scrollTo(config.itemExtent * (1.0 - _performance.progress));
+      scrollTo(1.0 - _performance.progress);
   }
 
   int get itemCount => _itemIndices.length;
