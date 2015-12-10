@@ -564,10 +564,15 @@ abstract class RenderBox extends RenderObject {
     assert(!size.isInfinite);
   }
   void performLayout() {
-    // descendants have to either override performLayout() to set both
-    // width and height and lay out children, or, set sizedByParent to
-    // true so that performResize()'s logic above does its thing.
-    assert(sizedByParent);
+    assert(() {
+      if (!sizedByParent) {
+        debugPrint('$runtimeType needs to either override performLayout() to\n'
+          'set size and lay out children, or, set sizedByParent to true\n'
+          'so that performResize() sizes the render object.');
+        assert(sizedByParent);
+      }
+      return true;
+    });
   }
 
   /// Determines the set of render objects located at the given position
@@ -581,6 +586,7 @@ abstract class RenderBox extends RenderObject {
   /// whether the given position is within its bounds.
   bool hitTest(HitTestResult result, { Point position }) {
     assert(!needsLayout);
+    assert(_size != null && 'Missing size. Did you set a size during layout?' != null);
     if (position.x >= 0.0 && position.x < _size.width &&
         position.y >= 0.0 && position.y < _size.height) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
