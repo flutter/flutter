@@ -18,6 +18,7 @@ typedef void DragTargetAccept<T>(T data);
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 typedef void DragStartCallback(Point position, int pointer);
 
+/// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
   /// feedback is identical to the child, then this means the feedback will
@@ -37,6 +38,7 @@ enum DragAnchor {
   pointer,
 }
 
+/// Subclass this component to customize the gesture used to start a drag.
 abstract class DraggableBase<T> extends StatefulComponent {
   DraggableBase({
     Key key,
@@ -52,12 +54,16 @@ abstract class DraggableBase<T> extends StatefulComponent {
 
   final T data;
   final Widget child;
+
+  /// The widget to show when a drag is under way.
   final Widget feedback;
 
   /// The feedbackOffset can be used to set the hit test target point for the
   /// purposes of finding a drag target. It is especially useful if the feedback
   /// is transformed compared to the child.
   final Offset feedbackOffset;
+
+  /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
 
   /// Should return a GestureRecognizer instance that is configured to call the starter
@@ -69,6 +75,7 @@ abstract class DraggableBase<T> extends StatefulComponent {
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
 
+/// Makes its child draggable starting from tap down.
 class Draggable<T> extends DraggableBase<T> {
   Draggable({
     Key key,
@@ -94,6 +101,7 @@ class Draggable<T> extends DraggableBase<T> {
   }
 }
 
+/// Makes its child draggable starting from long press.
 class LongPressDraggable<T> extends DraggableBase<T> {
   LongPressDraggable({
     Key key,
@@ -181,7 +189,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
   }
 }
 
-
+/// Receives data when a [Draggable] widget is dropped.
 class DragTarget<T> extends StatefulComponent {
   const DragTarget({
     Key key,
@@ -190,8 +198,17 @@ class DragTarget<T> extends StatefulComponent {
     this.onAccept
   }) : super(key: key);
 
+  /// Called to build the contents of this widget.
+  ///
+  /// The builder can build different widgets depending on what is being dragged
+  /// into this drag target.
   final DragTargetBuilder<T> builder;
+
+  /// Called to determine whether this widget is interested in receiving a given
+  /// piece of data being dragged over this drag target.
   final DragTargetWillAccept<T> onWillAccept;
+
+  /// Called when an acceptable piece of data was dropped over this drag target.
   final DragTargetAccept<T> onAccept;
 
   _DragTargetState<T> createState() => new _DragTargetState<T>();

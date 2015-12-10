@@ -902,12 +902,17 @@ class BlockBody extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Uses the stack layout algorithm for its children.
+///
+/// For details about the stack layout algorithm, see [RenderStack]. To control
+/// the position of child widgets, see the [Positioned] widget.
 class Stack extends MultiChildRenderObjectWidget {
   Stack(List<Widget> children, {
     Key key,
     this.alignment: const FractionalOffset(0.0, 0.0)
   }) : super(key: key, children: children);
 
+  /// How to align the non-positioned children in the stack.
   final FractionalOffset alignment;
 
   RenderStack createRenderObject() => new RenderStack(alignment: alignment);
@@ -917,6 +922,7 @@ class Stack extends MultiChildRenderObjectWidget {
   }
 }
 
+/// A [Stack] that shows a single child at once.
 class IndexedStack extends MultiChildRenderObjectWidget {
   IndexedStack(List<Widget> children, {
     Key key,
@@ -924,7 +930,10 @@ class IndexedStack extends MultiChildRenderObjectWidget {
     this.index: 0
   }) : super(key: key, children: children);
 
+  /// The index of the child to show.
   final int index;
+
+  /// How to align the non-positioned children in the stack.
   final FractionalOffset alignment;
 
   RenderIndexedStack createRenderObject() => new RenderIndexedStack(index: index, alignment: alignment);
@@ -936,6 +945,11 @@ class IndexedStack extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Controls where a child of a [Stack] is positioned.
+///
+/// This widget must be a descendant of a [Stack], and the path from this widget
+/// to its enclosing [Stack] must contain only components (e.g., not other
+/// kinds of widgets, like [RenderObjectWidget]s).
 class Positioned extends ParentDataWidget {
   Positioned({
     Key key,
@@ -963,12 +977,26 @@ class Positioned extends ParentDataWidget {
        bottom = null,
        super(key: key, child: child);
 
+  /// The offset of the child's top edge from the top of the stack.
   final double top;
+
+  /// The offset of the child's right edge from the right of the stack.
   final double right;
+
+  /// The offset of the child's bottom edge from the bottom of the stack.
   final double bottom;
+
+  /// The offset of the child's left edge from the left of the stack.
   final double left;
 
+  /// The child's width.
+  ///
+  /// Ignored if both left and right are non-null.
   final double width;
+
+  /// The child's height.
+  ///
+  /// Ignored if both top and bottom are non-null.
   final double height;
 
   void debugValidateAncestor(Widget ancestor) {
@@ -1037,6 +1065,9 @@ class Positioned extends ParentDataWidget {
   }
 }
 
+/// Uses the grid layout algorithm for its children.
+///
+/// For details about the grid layout algorithm, see [RenderGrid].
 class Grid extends MultiChildRenderObjectWidget {
   Grid(List<Widget> children, { Key key, this.maxChildExtent })
     : super(key: key, children: children) {
@@ -1052,6 +1083,10 @@ class Grid extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Uses the flex layout algorithm for its children.
+///
+/// For details about the flex layout algorithm, see [RenderFlex]. To control
+/// the flex of child widgets, see the [Flexible] widget.
 class Flex extends MultiChildRenderObjectWidget {
   Flex(List<Widget> children, {
     Key key,
@@ -1080,6 +1115,10 @@ class Flex extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Lays out child elements in a row.
+///
+/// For details about the flex layout algorithm, see [RenderFlex]. To control
+/// the flex of child widgets, see the [Flexible] widget.
 class Row extends Flex {
   Row(List<Widget> children, {
     Key key,
@@ -1089,6 +1128,10 @@ class Row extends Flex {
   }) : super(children, key: key, direction: FlexDirection.horizontal, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 }
 
+/// Lays out child elements in a column.
+///
+/// For details about the flex layout algorithm, see [RenderFlex]. To control
+/// the flex of child widgets, see the [Flexible] widget.
 class Column extends Flex {
   Column(List<Widget> children, {
     Key key,
@@ -1098,10 +1141,22 @@ class Column extends Flex {
   }) : super(children, key: key, direction: FlexDirection.vertical, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 }
 
+/// Controls how a child of a [Flex], [Row], or [Column] flexes.
+///
+/// This widget must be a descendant of a [Flex], [Row], or [Column], and the
+/// path from this widget to its enclosing [Flex], [Row], or [Column] must
+/// contain only components (e.g., not other kinds of widgets, like
+/// [RenderObjectWidget]s).
 class Flexible extends ParentDataWidget {
   Flexible({ Key key, this.flex: 1, Widget child })
     : super(key: key, child: child);
 
+  /// The flex factor to use for this child
+  ///
+  /// If null, the child is inflexible and determines its own size. If non-null,
+  /// the child is flexible and its extent in the main axis is determined by
+  /// dividing the free space (after placing the inflexible children)
+  /// according to the flex factors of the flexible children.
   final int flex;
 
   void debugValidateAncestor(Widget ancestor) {
