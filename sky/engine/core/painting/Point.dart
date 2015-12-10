@@ -47,12 +47,7 @@ class Point {
            y == typedOther.y;
   }
 
-  int get hashCode {
-    int result = 373;
-    result = 37 * result + x.hashCode;
-    result = 37 * result + y.hashCode;
-    return result;
-  }
+  int get hashCode => hashValues(x, y);
 
   String toString() => "Point(${x.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})";
 }
