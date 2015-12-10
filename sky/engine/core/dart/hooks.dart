@@ -36,9 +36,6 @@ void _pushRoute(String route) {
 void _popRoute() {
   if (window.onPopRoute != null)
     window.onPopRoute();
-  // TODO(abarth): Remove after engine roll.
-  if (window.onEvent != null)
-    window.onEvent('back', 0.0);
 }
 
 void _dispatchPointerPacket(ByteData serializedPacket) {
