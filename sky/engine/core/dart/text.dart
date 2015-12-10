@@ -181,9 +181,9 @@ enum TextDecorationStyle {
 //
 //  - Element 3: The |decorationColor| in ARGB with 8 bits per channel.
 //
-//  - Element 4: The enum index of the |decorationStyle|.
+//  - Element 4: The bit field of the |decorationStyle|.
 //
-//  - Element 5: The enum index of the |fontWeight|.
+//  - Element 5: The index of the |fontWeight|.
 //
 //  - Element 6: The enum index of the |fontStyle|.
 //
