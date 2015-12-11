@@ -37,6 +37,7 @@ class SkyHeadless : public WindowClient {
 
  private:
   void ScheduleFrame() override;
+  void FlushRealTimeEvents() override;
   void Render(Scene* scene) override;
 
   std::unique_ptr<DartController> dart_controller_;

@@ -19,6 +19,7 @@ class Animator {
   ~Animator();
 
   void RequestFrame();
+  void FlushRealTimeEvents();
 
   void Start();
   void Stop();

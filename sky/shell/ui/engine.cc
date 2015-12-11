@@ -280,6 +280,10 @@ void Engine::ScheduleFrame() {
   animator_->RequestFrame();
 }
 
+void Engine::FlushRealTimeEvents() {
+  animator_->FlushRealTimeEvents();
+}
+
 void Engine::Render(std::unique_ptr<compositor::LayerTree> layer_tree) {
 }
 
