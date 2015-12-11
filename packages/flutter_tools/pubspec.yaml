@@ -15,7 +15,7 @@ dependencies:
   mustache4dart: ^1.0.0
   path: ^1.3.0
   stack_trace: ^1.4.0
-  test: 0.12.6
+  test: 0.12.6+1
   yaml: ^2.1.3
 
   flx:

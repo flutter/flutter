@@ -12,7 +12,7 @@ dependencies:
   vector_math: '>=1.4.3 <2.0.0'
 
   # To pin the transitive dependency through mojo_sdk.
-  test: 0.12.6
+  test: 0.12.6+1
 
   cassowary:
     path: ../cassowary

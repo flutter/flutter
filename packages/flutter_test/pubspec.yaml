@@ -1,6 +1,6 @@
 name: flutter_test
 dependencies:
-  test: 0.12.6
+  test: 0.12.6+1
   quiver: ^0.21.4
   flutter:
     path: ../flutter

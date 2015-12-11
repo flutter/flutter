@@ -6,6 +6,6 @@ homepage: https://github.com/flutter/flutter/tree/master/packages/cassowary
 environment:
   sdk: '>=1.0.0 <2.0.0'
 dev_dependencies:
-  test: 0.12.6
+  test: 0.12.6+1
   test_runner: '<=0.2.16'
   dart_coveralls: '<=0.3.0'
