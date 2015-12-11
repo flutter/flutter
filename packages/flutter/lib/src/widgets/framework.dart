@@ -773,6 +773,7 @@ abstract class Element<T extends Widget> implements BuildContext {
       Element newChild = _findAndActivateElement(key, newWidget);
       if (newChild != null) {
         assert(newChild._parent == null);
+        assert(() { _debugCheckForCycles(newChild); return true; });
         newChild._parent = this;
         newChild._updateDepth();
         newChild.attachRenderObject(newSlot);
@@ -782,9 +783,21 @@ abstract class Element<T extends Widget> implements BuildContext {
       }
     }
     Element newChild = newWidget.createElement();
+    assert(() { _debugCheckForCycles(newChild); return true; });
     newChild.mount(this, newSlot);
     assert(newChild._debugLifecycleState == _ElementLifecycle.active);
     return newChild;
+  }
+
+  void _debugCheckForCycles(Element newChild) {
+    assert(newChild._parent == null);
+    assert(() {
+      Element node = this;
+      while (node._parent != null)
+        node = node._parent;
+      assert(node != newChild); // indicates we are about to create a cycle
+      return true;
+    });
   }
 
   void _deactivateChild(Element child) {
