@@ -16,6 +16,5 @@ source_set("dart") {
     "//mojo/public/cpp/application",
     "//sky/engine/tonic",
     "//sky/engine/wtf",
-    "//url",
   ]
 }

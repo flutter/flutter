@@ -42,6 +42,5 @@ mojo_native_application("mojo") {
     "//sky/shell:common",
     "//sky/shell:gpu_mojo",
     "//third_party/icu",
-    "//url",
   ]
 }
