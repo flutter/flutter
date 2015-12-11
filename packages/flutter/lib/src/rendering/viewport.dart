@@ -164,9 +164,9 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
-  void applyPaintTransform(Matrix4 transform) {
-    super.applyPaintTransform(transform);
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.translate(-scrollOffset.dx, -scrollOffset.dy);
+    super.applyPaintTransform(child, transform);
   }
 
   bool hitTestChildren(HitTestResult result, { Point position }) {
