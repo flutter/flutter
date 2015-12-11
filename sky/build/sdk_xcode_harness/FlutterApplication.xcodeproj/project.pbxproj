@@ -18,8 +18,6 @@
 		9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */; };
 		9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */; };
 		9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */; };
-		9E29675A1C03C1D200546454 /* FlutterRunner in Resources */ = {isa = PBXBuildFile; fileRef = 9E2967581C03C18700546454 /* FlutterRunner */; };
-		9E29675B1C03C1D200546454 /* icudtl.dat in Resources */ = {isa = PBXBuildFile; fileRef = 9E2967591C03C18700546454 /* icudtl.dat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,13 +71,20 @@
 		9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = InstructionsSnapshotSource.S; sourceTree = "<group>"; };
 		9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
 		9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartVmIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
-		9E2967531C03C17300546454 /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; name = EmbedderEntryPoints; path = FlutterResources/EmbedderEntryPoints; sourceTree = SOURCE_ROOT; };
-		9E2967541C03C17300546454 /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = PackagerInvoke; path = FlutterResources/PackagerInvoke; sourceTree = SOURCE_ROOT; };
-		9E2967551C03C17300546454 /* Runner.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Runner.xcconfig; path = FlutterResources/Runner.xcconfig; sourceTree = SOURCE_ROOT; };
-		9E2967561C03C17300546454 /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = Snapshotter; path = FlutterResources/Snapshotter; sourceTree = SOURCE_ROOT; };
-		9E2967571C03C17300546454 /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = SnapshotterInvoke; path = FlutterResources/SnapshotterInvoke; sourceTree = SOURCE_ROOT; };
-		9E2967581C03C18700546454 /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = FlutterRunner; path = FlutterResources/FlutterRunner; sourceTree = SOURCE_ROOT; };
-		9E2967591C03C18700546454 /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; name = icudtl.dat; path = FlutterResources/icudtl.dat; sourceTree = SOURCE_ROOT; };
+		9E40462E1C1B617500A4B87C /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmbedderEntryPoints; sourceTree = "<group>"; };
+		9E40462F1C1B617500A4B87C /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = PackagerInvoke; sourceTree = "<group>"; };
+		9E4046301C1B617500A4B87C /* Runner.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Runner.xcconfig; sourceTree = "<group>"; };
+		9E4046311C1B617500A4B87C /* ScriptSnapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ScriptSnapshotter; sourceTree = "<group>"; };
+		9E4046321C1B617500A4B87C /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = SnapshotterInvoke; sourceTree = "<group>"; };
+		9E4046331C1B617500A4B87C /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = icudtl.dat; sourceTree = "<group>"; };
+		9E4046361C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
+		9E4046371C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
+		9E4046391C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
+		9E40463A1C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
+		9E40463D1C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
+		9E40463E1C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
+		9E4046401C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
+		9E4046411C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,7 +111,7 @@
 			children = (
 				9E07CF881BE7F4D200BCD8DE /* FlutterApplication */,
 				9E07CF9B1BE8280A00BCD8DE /* Runner */,
-				9E07CFEB1BEAA44D00BCD8DE /* FlutterResources */,
+				9E40462C1C1B617500A4B87C /* Tools */,
 				9E07CF871BE7F4D200BCD8DE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -164,19 +169,81 @@
 			name = Generated;
 			sourceTree = "<group>";
 		};
-		9E07CFEB1BEAA44D00BCD8DE /* FlutterResources */ = {
+		9E40462C1C1B617500A4B87C /* Tools */ = {
 			isa = PBXGroup;
 			children = (
-				9E2967531C03C17300546454 /* EmbedderEntryPoints */,
-				9E2967541C03C17300546454 /* PackagerInvoke */,
-				9E2967551C03C17300546454 /* Runner.xcconfig */,
-				9E2967561C03C17300546454 /* Snapshotter */,
-				9E2967571C03C17300546454 /* SnapshotterInvoke */,
-				9E2967581C03C18700546454 /* FlutterRunner */,
-				9E2967591C03C18700546454 /* icudtl.dat */,
+				9E40462D1C1B617500A4B87C /* Common */,
+				9E4046341C1B617500A4B87C /* Device */,
+				9E40463B1C1B617500A4B87C /* Simulator */,
 			);
-			name = FlutterResources;
-			path = RunnerResources;
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		9E40462D1C1B617500A4B87C /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				9E40462E1C1B617500A4B87C /* EmbedderEntryPoints */,
+				9E40462F1C1B617500A4B87C /* PackagerInvoke */,
+				9E4046301C1B617500A4B87C /* Runner.xcconfig */,
+				9E4046311C1B617500A4B87C /* ScriptSnapshotter */,
+				9E4046321C1B617500A4B87C /* SnapshotterInvoke */,
+				9E4046331C1B617500A4B87C /* icudtl.dat */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		9E4046341C1B617500A4B87C /* Device */ = {
+			isa = PBXGroup;
+			children = (
+				9E4046351C1B617500A4B87C /* Debug */,
+				9E4046381C1B617500A4B87C /* Release */,
+			);
+			path = Device;
+			sourceTree = "<group>";
+		};
+		9E4046351C1B617500A4B87C /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				9E4046361C1B617500A4B87C /* FlutterRunner */,
+				9E4046371C1B617500A4B87C /* Snapshotter */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		9E4046381C1B617500A4B87C /* Release */ = {
+			isa = PBXGroup;
+			children = (
+				9E4046391C1B617500A4B87C /* FlutterRunner */,
+				9E40463A1C1B617500A4B87C /* Snapshotter */,
+			);
+			path = Release;
+			sourceTree = "<group>";
+		};
+		9E40463B1C1B617500A4B87C /* Simulator */ = {
+			isa = PBXGroup;
+			children = (
+				9E40463C1C1B617500A4B87C /* Debug */,
+				9E40463F1C1B617500A4B87C /* Release */,
+			);
+			path = Simulator;
+			sourceTree = "<group>";
+		};
+		9E40463C1C1B617500A4B87C /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				9E40463D1C1B617500A4B87C /* FlutterRunner */,
+				9E40463E1C1B617500A4B87C /* Snapshotter */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		9E40463F1C1B617500A4B87C /* Release */ = {
+			isa = PBXGroup;
+			children = (
+				9E4046401C1B617500A4B87C /* FlutterRunner */,
+				9E4046411C1B617500A4B87C /* Snapshotter */,
+			);
+			path = Release;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -285,8 +352,6 @@
 			files = (
 				9E07CFAC1BE8280A00BCD8DE /* LaunchScreen.storyboard in Resources */,
 				9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */,
-				9E29675B1C03C1D200546454 /* icudtl.dat in Resources */,
-				9E29675A1C03C1D200546454 /* FlutterRunner in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,7 +457,6 @@
 /* Begin XCBuildConfiguration section */
 		9E07CF8C1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E2967551C03C17300546454 /* Runner.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(FLUTTER_TARGET_ARCH)";
@@ -442,7 +506,6 @@
 		};
 		9E07CF8D1BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9E2967551C03C17300546454 /* Runner.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(FLUTTER_TARGET_ARCH)";
