@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'scheduler.dart';
+import 'package:flutter/scheduler.dart';
 
 typedef TickerCallback(Duration elapsed);
 
