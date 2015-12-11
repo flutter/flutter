@@ -12,7 +12,15 @@ template("sky_precompilation_sdk") {
 
   sdk_name = invoker.sdk_name
   sdk_dir = "$root_out_dir/$sdk_name"
-  resources_dir = "FlutterResources"
+  tools_dir_name = "Tools"
+  tools_dir = "$tools_dir_name/common"
+
+  # The architecture specific suffixes are chosen to match the ${PLATFORM_NAME}
+  # used by the .xcconfig files
+  arch_tools_dir = "$tools_dir_name/iphoneos"
+  if (use_ios_simulator) {
+    arch_tools_dir = "$tools_dir_name/iphonesimulator"
+  }
 
   snapshotter_copy_gen_target_name = target_name + "_copy_snapshotter"
   copy(snapshotter_copy_gen_target_name) {
@@ -21,7 +29,7 @@ template("sky_precompilation_sdk") {
     snapshotter_name = get_label_info(snapshotter_target, "name")
 
     sources = [  "$snapshotter_directory/$snapshotter_name"  ]
-    outputs = [  "$sdk_dir/$resources_dir/Snapshotter"  ]
+    outputs = [  "$sdk_dir/$arch_tools_dir/Snapshotter"  ]
 
     deps = [  snapshotter_target  ]
   }
@@ -35,14 +43,14 @@ template("sky_precompilation_sdk") {
     script_snapshotter_name = get_label_info(script_snapshotter_target, "name")
 
     sources = [  "$script_snapshotter_directory/$script_snapshotter_name"  ]
-    outputs = [  "$sdk_dir/$resources_dir/ScriptSnapshotter"  ]
+    outputs = [  "$sdk_dir/$tools_dir/ScriptSnapshotter"  ]
 
     deps = [  script_snapshotter_target  ]
   }
 
   copy("embedder_entry_points") {
     sources = [ "//sky/engine/bindings/dart_vm_entry_points.txt" ]
-    outputs = [  "$sdk_dir/$resources_dir/EmbedderEntryPoints"  ]
+    outputs = [  "$sdk_dir/$tools_dir/EmbedderEntryPoints"  ]
   }
 
   copy("precompilation_xcode_scripts") {
@@ -50,13 +58,15 @@ template("sky_precompilation_sdk") {
       "//sky/build/SnapshotterInvoke",
       "//sky/build/PackagerInvoke",
     ]
-    outputs = [  "$sdk_dir/$resources_dir/{{source_file_part}}"  ]
+    outputs = [  "$sdk_dir/$tools_dir/{{source_file_part}}"  ]
   }
 
   copy("copy_sdk_xcode_harness") {
     sources = [
+      "//sky/build/sdk_xcode_harness/Flutter.xcconfig",
       "//sky/build/sdk_xcode_harness/FlutterApplication",
       "//sky/build/sdk_xcode_harness/FlutterApplication.xcodeproj",
+      "//sky/build/sdk_xcode_harness/Local.xcconfig",
       "//sky/build/sdk_xcode_harness/Runner",
     ]
     outputs = [  "$sdk_dir/{{source_file_part}}"  ]
@@ -76,7 +86,7 @@ template("sky_precompilation_sdk") {
   copy_runner_gen_target_name = target_name + "_copy_runner"
   copy(copy_runner_gen_target_name) {
     sources = [  "$root_out_dir/$executable_gen_target_name"  ]
-    outputs = [  "$sdk_dir/$resources_dir/FlutterRunner"  ]
+    outputs = [  "$sdk_dir/$arch_tools_dir/FlutterRunner"  ]
 
     deps = [  ":$executable_gen_target_name"  ]
   }
@@ -85,15 +95,8 @@ template("sky_precompilation_sdk") {
   copy(copy_data_gen_target_name) {
     set_sources_assignment_filter([])
     sources = [  "//third_party/icu/android/icudtl.dat"  ]
-    outputs = [  "$sdk_dir/$resources_dir/{{source_file_part}}"  ]
+    outputs = [  "$sdk_dir/$tools_dir/{{source_file_part}}"  ]
     set_sources_assignment_filter(sources_assignment_filter)
-  }
-
-  copy_config_gen_target_name = target_name + "_sdk_config"
-  file_template(copy_config_gen_target_name) {
-    input = "//sky/build/Runner.xcconfig.template"
-    output = "$sdk_dir/$resources_dir/Runner.xcconfig"
-    variables = "target_arch=$target_cpu"
   }
 
   group(target_name) {
@@ -105,7 +108,6 @@ template("sky_precompilation_sdk") {
       ":$copy_data_gen_target_name",
       ":precompilation_xcode_scripts",
       ":copy_sdk_xcode_harness",
-      ":$copy_config_gen_target_name",
     ]
   }
 }
