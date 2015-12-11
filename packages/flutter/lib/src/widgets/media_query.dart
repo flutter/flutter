@@ -52,7 +52,7 @@ class MediaQuery extends InheritedWidget {
   /// The result of media queries in this subtree.
   final MediaQueryData data;
 
-  /// Returns the media query data for the given context.
+  /// The data from the closest instance of this class that encloses the given context.
   ///
   /// You can use this function to query the size an orientation of the screen.
   /// When that information changes, your widget will be scheduled to be rebuilt,

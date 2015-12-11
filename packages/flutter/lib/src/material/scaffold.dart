@@ -111,6 +111,7 @@ class Scaffold extends StatefulComponent {
   final Widget floatingActionButton;
   final Widget drawer;
 
+  /// The state from the closest instance of this class that encloses the given context.
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(ScaffoldState);
 
   ScaffoldState createState() => new ScaffoldState();

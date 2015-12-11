@@ -630,6 +630,10 @@ class BackgroundImage {
   final ColorFilter colorFilter;
 
   /// How to align the image within its bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
+  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
+  /// of the right edge of its layout bounds.
   final FractionalOffset alignment;
 
   /// The image to be painted into the background.

@@ -18,6 +18,7 @@ class IconTheme extends InheritedWidget {
 
   final IconThemeData data;
 
+  /// The data from the closest instance of this class that encloses the given context.
   static IconThemeData of(BuildContext context) {
     IconTheme result = context.inheritFromWidgetOfType(IconTheme);
     return result?.data;

@@ -1298,7 +1298,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// The text style to apply.
   final TextStyle style;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The style from the closest instance of this class that encloses the given context.
   static TextStyle of(BuildContext context) {
     DefaultTextStyle result = context.inheritFromWidgetOfType(DefaultTextStyle);
     return result?.style;
@@ -1352,8 +1352,13 @@ class Text extends StatelessComponent {
   }
 }
 
-class Image extends LeafRenderObjectWidget {
-  Image({
+/// Displays a raw image.
+///
+/// This widget is rarely used directly. Instead, consider using [AssetImage] or
+/// [NetworkImage], depending on whather you wish to display an image from the
+/// assert bundle or from the network.
+class RawImage extends LeafRenderObjectWidget {
+  RawImage({
     Key key,
     this.image,
     this.width,
@@ -1365,13 +1370,44 @@ class Image extends LeafRenderObjectWidget {
     this.centerSlice
   }) : super(key: key);
 
+  /// The image to display.
   final ui.Image image;
+
+  /// If non-null, require the image to have this width.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double width;
+
+  /// If non-null, require the image to have this height.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double height;
+
+  /// If non-null, apply this color filter to the image before painint.
   final ColorFilter colorFilter;
+
+  /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
+
+  /// How to align the image within its bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
+  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
+  /// of the right edge of its layout bounds.
   final FractionalOffset alignment;
+
+  /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
+
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
   RenderImage createRenderObject() => new RenderImage(
@@ -1384,7 +1420,7 @@ class Image extends LeafRenderObjectWidget {
     repeat: repeat,
     centerSlice: centerSlice);
 
-  void updateRenderObject(RenderImage renderObject, Image oldWidget) {
+  void updateRenderObject(RenderImage renderObject, RawImage oldWidget) {
     renderObject.image = image;
     renderObject.width = width;
     renderObject.height = height;
@@ -1396,8 +1432,17 @@ class Image extends LeafRenderObjectWidget {
   }
 }
 
-class ImageListener extends StatefulComponent {
-  ImageListener({
+/// Displays an [ImageResource].
+///
+/// An image resource differs from an image in that it might yet let be loaded
+/// from the underlying storage (e.g., the asset bundle or the network) and it
+/// might change over time (e.g., an animated image).
+///
+/// This widget is rarely used directly. Instead, consider using [AssetImage] or
+/// [NetworkImage], depending on whather you wish to display an image from the
+/// assert bundle or from the network.
+class RawImageResource extends StatefulComponent {
+  RawImageResource({
     Key key,
     this.image,
     this.width,
@@ -1411,19 +1456,50 @@ class ImageListener extends StatefulComponent {
     assert(image != null);
   }
 
+  /// The image to display.
   final ImageResource image;
+
+  /// If non-null, require the image to have this width.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double width;
+
+  /// If non-null, require the image to have this height.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double height;
+
+  /// If non-null, apply this color filter to the image before painint.
   final ColorFilter colorFilter;
+
+  /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
+
+  /// How to align the image within its bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
+  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
+  /// of the right edge of its layout bounds.
   final FractionalOffset alignment;
+
+  /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
+
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
   _ImageListenerState createState() => new _ImageListenerState();
 }
 
-class _ImageListenerState extends State<ImageListener> {
+class _ImageListenerState extends State<RawImageResource> {
   void initState() {
     super.initState();
     config.image.addListener(_handleImageChanged);
@@ -1442,7 +1518,7 @@ class _ImageListenerState extends State<ImageListener> {
     super.dispose();
   }
 
-  void didUpdateConfig(ImageListener oldConfig) {
+  void didUpdateConfig(RawImageResource oldConfig) {
     if (config.image != oldConfig.image) {
       oldConfig.image.removeListener(_handleImageChanged);
       config.image.addListener(_handleImageChanged);
@@ -1450,7 +1526,7 @@ class _ImageListenerState extends State<ImageListener> {
   }
 
   Widget build(BuildContext context) {
-    return new Image(
+    return new RawImage(
       image: _resolvedImage,
       width: config.width,
       height: config.height,
@@ -1463,6 +1539,7 @@ class _ImageListenerState extends State<ImageListener> {
   }
 }
 
+/// Displays an image loaded from the network.
 class NetworkImage extends StatelessComponent {
   NetworkImage({
     Key key,
@@ -1476,17 +1553,48 @@ class NetworkImage extends StatelessComponent {
     this.centerSlice
   }) : super(key: key);
 
+  /// The URL from which to load the image.
   final String src;
+
+  /// If non-null, require the image to have this width.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double width;
+
+  /// If non-null, require the image to have this height.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double height;
+
+  /// If non-null, apply this color filter to the image before painint.
   final ColorFilter colorFilter;
+
+  /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
+
+  /// How to align the image within its bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
+  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
+  /// of the right edge of its layout bounds.
   final FractionalOffset alignment;
+
+  /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
+
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
   Widget build(BuildContext context) {
-    return new ImageListener(
+    return new RawImageResource(
       image: imageCache.load(src),
       width: width,
       height: height,
@@ -1499,6 +1607,10 @@ class NetworkImage extends StatelessComponent {
   }
 }
 
+/// Sets a default asset bundle for its descendants.
+///
+/// For example, used by [AssetImage] to determine which bundle to use if no
+/// bundle is specified explicitly.
 class DefaultAssetBundle extends InheritedWidget {
   DefaultAssetBundle({
     Key key,
@@ -1509,8 +1621,10 @@ class DefaultAssetBundle extends InheritedWidget {
     assert(child != null);
   }
 
+  /// The bundle to use as a default.
   final AssetBundle bundle;
 
+  /// The bundle from the closest instance of this class that encloses the given context.
   static AssetBundle of(BuildContext context) {
     DefaultAssetBundle result = context.inheritFromWidgetOfType(DefaultAssetBundle);
     return result?.bundle;
@@ -1519,6 +1633,11 @@ class DefaultAssetBundle extends InheritedWidget {
   bool updateShouldNotify(DefaultAssetBundle old) => bundle != old.bundle;
 }
 
+/// Displays an image provided by an [ImageProvider].
+///
+/// This widget lets you customize how images are loaded by supplying your own
+/// image provider. Internally, [NetworkImage] uses an [ImageProvider] that
+/// loads the image from the network.
 class AsyncImage extends StatelessComponent {
   AsyncImage({
     Key key,
@@ -1532,17 +1651,48 @@ class AsyncImage extends StatelessComponent {
     this.centerSlice
   }) : super(key: key);
 
+  /// The object that will provide the image.
   final ImageProvider provider;
+
+  /// If non-null, require the image to have this width.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double width;
+
+  /// If non-null, require the image to have this height.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double height;
+
+  /// If non-null, apply this color filter to the image before painint.
   final ColorFilter colorFilter;
+
+  /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
+
+  /// How to align the image within its bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
+  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
+  /// of the right edge of its layout bounds.
   final FractionalOffset alignment;
+
+  /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
+
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
   Widget build(BuildContext context) {
-    return new ImageListener(
+    return new RawImageResource(
       image: imageCache.loadProvider(provider),
       width: width,
       height: height,
@@ -1555,6 +1705,10 @@ class AsyncImage extends StatelessComponent {
   }
 }
 
+/// Displays an image from an [AssetBundle].
+///
+/// By default, asset image will load the image from the cloest enclosing
+/// [DefaultAssetBundle].
 class AssetImage extends StatelessComponent {
   // Don't add asserts here unless absolutely necessary, since it will
   // require removing the const constructor, which is an API change.
@@ -1571,18 +1725,54 @@ class AssetImage extends StatelessComponent {
     this.centerSlice
   }) : super(key: key);
 
+  /// The name of the image in the assert bundle.
   final String name;
+
+  /// The bundle from which to load the image.
+  ///
+  /// If null, the image will be loaded from the closest enclosing
+  /// [DefaultAssetBundle].
   final AssetBundle bundle;
+
+  /// If non-null, require the image to have this width.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double width;
+
+  /// If non-null, require the image to have this height.
+  ///
+  /// If null, the image will pick a size that best preserves its intrinsic
+  /// aspect ratio.
   final double height;
+
+  /// If non-null, apply this color filter to the image before painint.
   final ColorFilter colorFilter;
+
+  /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
+
+  /// How to align the image within its bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
+  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
+  /// of the right edge of its layout bounds.
   final FractionalOffset alignment;
+
+  /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
+
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
   Widget build(BuildContext context) {
-    return new ImageListener(
+    return new RawImageResource(
       image: (bundle ?? DefaultAssetBundle.of(context)).loadImage(name),
       width: width,
       height: height,
@@ -1595,6 +1785,11 @@ class AssetImage extends StatelessComponent {
   }
 }
 
+/// An adapter for placing a specific [RenderBox] in the widget tree.
+///
+/// A given render object can be placed at most once in the widget tree. This
+/// widget enforces that restriction by keying itself using a [GlobalObjectKey]
+/// for the given render object.
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   WidgetToRenderBoxAdapter(RenderBox renderBox)
     : renderBox = renderBox,
@@ -1606,6 +1801,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
     assert(renderBox != null);
   }
 
+  /// The render box to place in the widget tree.
   final RenderBox renderBox;
 
   RenderBox createRenderObject() => renderBox;
