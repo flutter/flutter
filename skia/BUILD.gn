@@ -464,6 +464,7 @@ component("skia") {
     sources -= [
       "//third_party/skia/src/fonts/SkFontMgr_fontconfig.cpp",
       "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
+      "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
       "//third_party/skia/src/ports/SkFontHost_fontconfig.cpp",
     ]
   }
@@ -554,7 +555,7 @@ source_set("skia_opts") {
 
   if (current_cpu == "x86" || current_cpu == "x64") {
     sources = gypi_skia_opts.sse2_sources + gypi_skia_opts.ssse3_sources +
-              gypi_skia_opts.sse41_sources +
+              gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources +
               [
                 # Chrome-specific.
                 "ext/convolver_SSE2.cc",

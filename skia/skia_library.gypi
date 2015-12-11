@@ -30,6 +30,7 @@
     '../third_party/skia/src/images/SkScaledBitmapSampler.h',
 
     '../third_party/skia/src/ports/SkFontConfigInterface_direct.cpp',
+    '../third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp',
 
     '../third_party/skia/src/fonts/SkFontMgr_fontconfig.cpp',
     '../third_party/skia/src/ports/SkFontHost_fontconfig.cpp',
@@ -231,6 +232,7 @@
     [ 'OS=="win" or OS=="mac" or OS=="ios" or OS=="android"', {
       'sources!': [
         '../third_party/skia/src/ports/SkFontConfigInterface_direct.cpp',
+        '../third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp',
         '../third_party/skia/src/ports/SkFontHost_fontconfig.cpp',
         '../third_party/skia/src/fonts/SkFontMgr_fontconfig.cpp',
       ],

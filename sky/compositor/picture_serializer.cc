@@ -14,12 +14,12 @@ namespace sky {
 class PngPixelSerializer : public SkPixelSerializer {
  public:
   bool onUseEncodedData(const void*, size_t) override { return true; }
-  SkData* onEncodePixels(const SkImageInfo& info, const void* pixels,
-      size_t row_bytes) override {
+
+  SkData* onEncode(const SkPixmap& pixmap) override {
     std::vector<unsigned char> data;
 
     SkBitmap bm;
-    if (!bm.installPixels(info, const_cast<void*>(pixels), row_bytes))
+    if (!bm.installPixels(pixmap))
       return nullptr;
     if (!gfx::PNGCodec::EncodeBGRASkBitmap(bm, false, &data))
       return nullptr;
