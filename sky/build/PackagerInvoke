@@ -50,7 +50,7 @@ PackageProject() {
   # Remove old build artifacts
   RunCommand rm -f ${derived_dir}/app.flx
 
-  local src_dir=${SOURCE_ROOT}/FlutterResources
+  local src_dir=${SOURCE_ROOT}/Tools/common
   AssertExists $src_dir
 
   local precompilation_flag=""

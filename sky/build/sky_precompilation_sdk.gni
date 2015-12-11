@@ -13,16 +13,13 @@ template("sky_precompilation_sdk") {
   sdk_name = invoker.sdk_name
   sdk_dir = "$root_out_dir/$sdk_name"
   tools_dir_name = "Tools"
-  tools_dir = "$tools_dir_name/Common"
+  tools_dir = "$tools_dir_name/common"
 
-  arch_tools_dir = "$tools_dir_name/Device"
+  # The architecture specific suffixes are chosen to match the ${PLATFORM_NAME}
+  # used by the .xcconfig files
+  arch_tools_dir = "$tools_dir_name/iphoneos"
   if (use_ios_simulator) {
-    arch_tools_dir = "$tools_dir_name/Simulator"
-  }
-
-  arch_tools_dir = "$arch_tools_dir/Release"
-  if (is_debug) {
-    arch_tools_dir = "$arch_tools_dir/Debug"
+    arch_tools_dir = "$tools_dir_name/iphonesimulator"
   }
 
   snapshotter_copy_gen_target_name = target_name + "_copy_snapshotter"
@@ -66,8 +63,10 @@ template("sky_precompilation_sdk") {
 
   copy("copy_sdk_xcode_harness") {
     sources = [
+      "//sky/build/sdk_xcode_harness/Flutter.xcconfig",
       "//sky/build/sdk_xcode_harness/FlutterApplication",
       "//sky/build/sdk_xcode_harness/FlutterApplication.xcodeproj",
+      "//sky/build/sdk_xcode_harness/Local.xcconfig",
       "//sky/build/sdk_xcode_harness/Runner",
     ]
     outputs = [  "$sdk_dir/{{source_file_part}}"  ]
@@ -100,13 +99,6 @@ template("sky_precompilation_sdk") {
     set_sources_assignment_filter(sources_assignment_filter)
   }
 
-  copy_config_gen_target_name = target_name + "_sdk_config"
-  file_template(copy_config_gen_target_name) {
-    input = "//sky/build/Runner.xcconfig.template"
-    output = "$sdk_dir/$tools_dir/Runner.xcconfig"
-    variables = "target_arch=$target_cpu"
-  }
-
   group(target_name) {
     deps = [
       ":$snapshotter_copy_gen_target_name",
@@ -116,7 +108,6 @@ template("sky_precompilation_sdk") {
       ":$copy_data_gen_target_name",
       ":precompilation_xcode_scripts",
       ":copy_sdk_xcode_harness",
-      ":$copy_config_gen_target_name",
     ]
   }
 }

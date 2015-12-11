@@ -105,13 +105,14 @@ SnapshotProject() {
   local main_path="${project_path}/lib/main.dart"
   AssertExists $main_path
 
-  local src_dir=${SOURCE_ROOT}/FlutterResources
+  local src_dir=${SOURCE_ROOT}/Tools/common
   local derived_dir=${SOURCE_ROOT}/FlutterApplication/Generated
 
   RunCommand mkdir -p $derived_dir
 
   AssertExists $src_dir
   AssertExists $derived_dir
+  AssertExists ${FLUTTER_ARCH_TOOLS_PATH}
 
   # Remove old build artifacts
   RunCommand rm -f ${derived_dir}/kDartVmIsolateSnapshotBuffer.c
@@ -123,7 +124,7 @@ SnapshotProject() {
   # snapshot buffer and isolate snapshot buffer, we name the file to match
   # the name of the symbol the VM expects at runtime. On these binary files,
   # we invoke xxd.
-  RunCommand ${src_dir}/Snapshotter                                            \
+  RunCommand ${FLUTTER_ARCH_TOOLS_PATH}/Snapshotter                            \
       --vm_isolate_snapshot=${derived_dir}/kDartVmIsolateSnapshotBuffer        \
       --isolate_snapshot=${derived_dir}/kDartIsolateSnapshotBuffer             \
       --instructions_snapshot=${derived_dir}/InstructionsSnapshot.S            \

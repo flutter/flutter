@@ -17,6 +17,8 @@
 		9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */; };
 		9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */; };
 		9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */; };
+		9E40464E1C1B67AB00A4B87C /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E40464D1C1B67A300A4B87C /* app.flx */; };
+		9E40465D1C1B6E9200A4B87C /* icudtl.dat in Resources */ = {isa = PBXBuildFile; fileRef = 9E4046541C1B6A3600A4B87C /* icudtl.dat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,16 +43,6 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9E07CFBD1BE82E5900BCD8DE /* Copy Flutter Runner Executable And Resources */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-			);
-			name = "Copy Flutter Runner Executable And Resources";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -66,20 +58,18 @@
 		9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = InstructionsSnapshotSource.S; sourceTree = "<group>"; };
 		9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
 		9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartVmIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
-		9E40462E1C1B617500A4B87C /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmbedderEntryPoints; sourceTree = "<group>"; };
-		9E40462F1C1B617500A4B87C /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = PackagerInvoke; sourceTree = "<group>"; };
-		9E4046301C1B617500A4B87C /* Runner.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Runner.xcconfig; sourceTree = "<group>"; };
-		9E4046311C1B617500A4B87C /* ScriptSnapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ScriptSnapshotter; sourceTree = "<group>"; };
-		9E4046321C1B617500A4B87C /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = SnapshotterInvoke; sourceTree = "<group>"; };
-		9E4046331C1B617500A4B87C /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = icudtl.dat; sourceTree = "<group>"; };
-		9E4046361C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
-		9E4046371C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
-		9E4046391C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
-		9E40463A1C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
-		9E40463D1C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
-		9E40463E1C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
-		9E4046401C1B617500A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
-		9E4046411C1B617500A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
+		9E40464B1C1B64B500A4B87C /* Flutter.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter.xcconfig; sourceTree = "<group>"; };
+		9E40464D1C1B67A300A4B87C /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; path = app.flx; sourceTree = "<group>"; };
+		9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmbedderEntryPoints; sourceTree = "<group>"; };
+		9E4046511C1B6A3600A4B87C /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = PackagerInvoke; sourceTree = "<group>"; };
+		9E4046521C1B6A3600A4B87C /* ScriptSnapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ScriptSnapshotter; sourceTree = "<group>"; };
+		9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = SnapshotterInvoke; sourceTree = "<group>"; };
+		9E4046541C1B6A3600A4B87C /* icudtl.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = icudtl.dat; sourceTree = "<group>"; };
+		9E4046561C1B6A3600A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
+		9E4046571C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
+		9E4046591C1B6A3600A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
+		9E40465A1C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
+		9E40465E1C1B6F7900A4B87C /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +94,8 @@
 		9E07CF7C1BE7F4D200BCD8DE = {
 			isa = PBXGroup;
 			children = (
+				9E40465E1C1B6F7900A4B87C /* Local.xcconfig */,
+				9E40464B1C1B64B500A4B87C /* Flutter.xcconfig */,
 				9E07CF881BE7F4D200BCD8DE /* FlutterApplication */,
 				9E07CF9B1BE8280A00BCD8DE /* Runner */,
 				9E40462C1C1B617500A4B87C /* Tools */,
@@ -123,6 +115,7 @@
 		9E07CF881BE7F4D200BCD8DE /* FlutterApplication */ = {
 			isa = PBXGroup;
 			children = (
+				9E40464C1C1B67A300A4B87C /* Generated */,
 				9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */,
 				9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */,
 				9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */,
@@ -155,78 +148,49 @@
 		9E40462C1C1B617500A4B87C /* Tools */ = {
 			isa = PBXGroup;
 			children = (
-				9E40462D1C1B617500A4B87C /* Common */,
-				9E4046341C1B617500A4B87C /* Device */,
-				9E40463B1C1B617500A4B87C /* Simulator */,
+				9E40464F1C1B6A3600A4B87C /* common */,
+				9E4046551C1B6A3600A4B87C /* iphoneos */,
+				9E4046581C1B6A3600A4B87C /* iphonesimulator */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
 		};
-		9E40462D1C1B617500A4B87C /* Common */ = {
+		9E40464C1C1B67A300A4B87C /* Generated */ = {
 			isa = PBXGroup;
 			children = (
-				9E40462E1C1B617500A4B87C /* EmbedderEntryPoints */,
-				9E40462F1C1B617500A4B87C /* PackagerInvoke */,
-				9E4046301C1B617500A4B87C /* Runner.xcconfig */,
-				9E4046311C1B617500A4B87C /* ScriptSnapshotter */,
-				9E4046321C1B617500A4B87C /* SnapshotterInvoke */,
-				9E4046331C1B617500A4B87C /* icudtl.dat */,
+				9E40464D1C1B67A300A4B87C /* app.flx */,
 			);
-			path = Common;
+			path = Generated;
 			sourceTree = "<group>";
 		};
-		9E4046341C1B617500A4B87C /* Device */ = {
+		9E40464F1C1B6A3600A4B87C /* common */ = {
 			isa = PBXGroup;
 			children = (
-				9E4046351C1B617500A4B87C /* Debug */,
-				9E4046381C1B617500A4B87C /* Release */,
+				9E4046501C1B6A3600A4B87C /* EmbedderEntryPoints */,
+				9E4046511C1B6A3600A4B87C /* PackagerInvoke */,
+				9E4046521C1B6A3600A4B87C /* ScriptSnapshotter */,
+				9E4046531C1B6A3600A4B87C /* SnapshotterInvoke */,
+				9E4046541C1B6A3600A4B87C /* icudtl.dat */,
 			);
-			path = Device;
+			path = common;
 			sourceTree = "<group>";
 		};
-		9E4046351C1B617500A4B87C /* Debug */ = {
+		9E4046551C1B6A3600A4B87C /* iphoneos */ = {
 			isa = PBXGroup;
 			children = (
-				9E4046361C1B617500A4B87C /* FlutterRunner */,
-				9E4046371C1B617500A4B87C /* Snapshotter */,
+				9E4046561C1B6A3600A4B87C /* FlutterRunner */,
+				9E4046571C1B6A3600A4B87C /* Snapshotter */,
 			);
-			path = Debug;
+			path = iphoneos;
 			sourceTree = "<group>";
 		};
-		9E4046381C1B617500A4B87C /* Release */ = {
+		9E4046581C1B6A3600A4B87C /* iphonesimulator */ = {
 			isa = PBXGroup;
 			children = (
-				9E4046391C1B617500A4B87C /* FlutterRunner */,
-				9E40463A1C1B617500A4B87C /* Snapshotter */,
+				9E4046591C1B6A3600A4B87C /* FlutterRunner */,
+				9E40465A1C1B6A3600A4B87C /* Snapshotter */,
 			);
-			path = Release;
-			sourceTree = "<group>";
-		};
-		9E40463B1C1B617500A4B87C /* Simulator */ = {
-			isa = PBXGroup;
-			children = (
-				9E40463C1C1B617500A4B87C /* Debug */,
-				9E40463F1C1B617500A4B87C /* Release */,
-			);
-			path = Simulator;
-			sourceTree = "<group>";
-		};
-		9E40463C1C1B617500A4B87C /* Debug */ = {
-			isa = PBXGroup;
-			children = (
-				9E40463D1C1B617500A4B87C /* FlutterRunner */,
-				9E40463E1C1B617500A4B87C /* Snapshotter */,
-			);
-			path = Debug;
-			sourceTree = "<group>";
-		};
-		9E40463F1C1B617500A4B87C /* Release */ = {
-			isa = PBXGroup;
-			children = (
-				9E4046401C1B617500A4B87C /* FlutterRunner */,
-				9E4046411C1B617500A4B87C /* Snapshotter */,
-			);
-			path = Release;
+			path = iphonesimulator;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -272,7 +236,7 @@
 				9E07CF971BE8280A00BCD8DE /* Frameworks */,
 				9E07CF981BE8280A00BCD8DE /* Resources */,
 				9E07CFB91BE82D2600BCD8DE /* Embed Frameworks */,
-				9E07CFBD1BE82E5900BCD8DE /* Copy Flutter Runner Executable And Resources */,
+				9E40465C1C1B6DEC00A4B87C /* Copy Flutter Runner Executable And Resources */,
 			);
 			buildRules = (
 			);
@@ -325,6 +289,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E40464E1C1B67AB00A4B87C /* app.flx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,6 +297,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E40465D1C1B6E9200A4B87C /* icudtl.dat in Resources */,
 				9E07CFAC1BE8280A00BCD8DE /* LaunchScreen.storyboard in Resources */,
 				9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */,
 			);
@@ -357,7 +323,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SOURCE_ROOT}/FlutterResources/SnapshotterInvoke ${FLUTTER_APPLICATION_PATH}";
+			shellScript = "${SOURCE_ROOT}/Tools/common/SnapshotterInvoke ${FLUTTER_APPLICATION_PATH}";
 			showEnvVarsInLog = 0;
 		};
 		9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager + Optional Script Snapshotter */ = {
@@ -375,7 +341,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SOURCE_ROOT}/FlutterResources/PackagerInvoke ${FLUTTER_APPLICATION_PATH}";
+			shellScript = "${SOURCE_ROOT}/Tools/common/PackagerInvoke ${FLUTTER_APPLICATION_PATH}";
+			showEnvVarsInLog = 0;
+		};
+		9E40465C1C1B6DEC00A4B87C /* Copy Flutter Runner Executable And Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Flutter Runner Executable And Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp ${FLUTTER_ARCH_TOOLS_PATH}/FlutterRunner ${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/FlutterRunner";
 			showEnvVarsInLog = 0;
 		};
 		9EBB2F351BF675C200177634 /* Ensure `pub get` */ = {
@@ -391,7 +372,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\npushd ${FLUTTER_APPLICATION_PATH}\n${DART_SDK_PATH}/bin/pub get\npopd\n";
-			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -439,9 +419,9 @@
 /* Begin XCBuildConfiguration section */
 		9E07CF8C1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E40464B1C1B64B500A4B87C /* Flutter.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -480,7 +460,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -488,9 +467,9 @@
 		};
 		9E07CF8D1BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E40464B1C1B64B500A4B87C /* Flutter.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -524,7 +503,6 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
-				VALID_ARCHS = "$(FLUTTER_TARGET_ARCH)";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -533,13 +511,10 @@
 		9E07CF8F1BE7F4D200BCD8DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DART_SDK_PATH = dart/sdk/path;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FLUTTER_APPLICATION_PATH = path/to/application;
-				FLUTTER_ROOT = path/to/flutter/repo;
 				INFOPLIST_FILE = FlutterApplication/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -553,13 +528,10 @@
 		9E07CF901BE7F4D200BCD8DE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DART_SDK_PATH = dart/sdk/path;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FLUTTER_APPLICATION_PATH = path/to/application;
-				FLUTTER_ROOT = path/to/flutter/repo;
 				INFOPLIST_FILE = FlutterApplication/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
