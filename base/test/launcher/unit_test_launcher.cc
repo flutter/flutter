@@ -19,7 +19,6 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
 #include "base/sys_info.h"
-#include "base/test/gtest_xml_util.h"
 #include "base/test/launcher/test_launcher.h"
 #include "base/test/test_switches.h"
 #include "base/test/test_timeouts.h"
@@ -242,113 +241,25 @@ bool ProcessTestResults(
     bool was_timeout,
     std::vector<std::string>* tests_to_relaunch) {
   std::vector<TestResult> test_results;
-  bool crashed = false;
-  bool have_test_results =
-      ProcessGTestOutput(output_file, &test_results, &crashed);
-
   bool called_any_callback = false;
 
-  if (have_test_results) {
-    // TODO(phajdan.jr): Check for duplicates and mismatches between
-    // the results we got from XML file and tests we intended to run.
-    std::map<std::string, TestResult> results_map;
-    for (size_t i = 0; i < test_results.size(); i++)
-      results_map[test_results[i].full_name] = test_results[i];
+  fprintf(stdout,
+          "Failed to get out-of-band test success data, "
+          "dumping full stdio below:\n%s\n",
+          output.c_str());
+  fflush(stdout);
 
-    bool had_interrupted_test = false;
-
-    // Results to be reported back to the test launcher.
-    std::vector<TestResult> final_results;
-
-    for (size_t i = 0; i < test_names.size(); i++) {
-      if (ContainsKey(results_map, test_names[i])) {
-        TestResult test_result = results_map[test_names[i]];
-        if (test_result.status == TestResult::TEST_CRASH) {
-          had_interrupted_test = true;
-
-          if (was_timeout) {
-            // Fix up the test status: we forcibly kill the child process
-            // after the timeout, so from XML results it looks just like
-            // a crash.
-            test_result.status = TestResult::TEST_TIMEOUT;
-          }
-        } else if (test_result.status == TestResult::TEST_SUCCESS ||
-                   test_result.status == TestResult::TEST_FAILURE) {
-          // We run multiple tests in a batch with a timeout applied
-          // to the entire batch. It is possible that with other tests
-          // running quickly some tests take longer than the per-test timeout.
-          // For consistent handling of tests independent of order and other
-          // factors, mark them as timing out.
-          if (test_result.elapsed_time >
-              TestTimeouts::test_launcher_timeout()) {
-            test_result.status = TestResult::TEST_TIMEOUT;
-          }
-        }
-        test_result.output_snippet = GetTestOutputSnippet(test_result, output);
-        final_results.push_back(test_result);
-      } else if (had_interrupted_test) {
-        tests_to_relaunch->push_back(test_names[i]);
-      } else {
-        // TODO(phajdan.jr): Explicitly pass the info that the test didn't
-        // run for a mysterious reason.
-        LOG(ERROR) << "no test result for " << test_names[i];
-        TestResult test_result;
-        test_result.full_name = test_names[i];
-        test_result.status = TestResult::TEST_UNKNOWN;
-        test_result.output_snippet = GetTestOutputSnippet(test_result, output);
-        final_results.push_back(test_result);
-      }
-    }
-
-    // TODO(phajdan.jr): Handle the case where processing XML output
-    // indicates a crash but none of the test results is marked as crashing.
-
-    if (final_results.empty())
-      return false;
-
-    bool has_non_success_test = false;
-    for (size_t i = 0; i < final_results.size(); i++) {
-      if (final_results[i].status != TestResult::TEST_SUCCESS) {
-        has_non_success_test = true;
-        break;
-      }
-    }
-
-    if (!has_non_success_test && exit_code != 0) {
-      // This is a bit surprising case: all tests are marked as successful,
-      // but the exit code was not zero. This can happen e.g. under memory
-      // tools that report leaks this way. Mark all tests as a failure on exit,
-      // and for more precise info they'd need to be retried serially.
-      for (size_t i = 0; i < final_results.size(); i++)
-        final_results[i].status = TestResult::TEST_FAILURE_ON_EXIT;
-    }
-
-    for (size_t i = 0; i < final_results.size(); i++) {
-      // Fix the output snippet after possible changes to the test result.
-      final_results[i].output_snippet =
-          GetTestOutputSnippet(final_results[i], output);
-      test_launcher->OnTestFinished(final_results[i]);
-      called_any_callback = true;
-    }
-  } else {
-    fprintf(stdout,
-            "Failed to get out-of-band test success data, "
-            "dumping full stdio below:\n%s\n",
-            output.c_str());
-    fflush(stdout);
-
-    // We do not have reliable details about test results (parsing test
-    // stdout is known to be unreliable), apply the executable exit code
-    // to all tests.
-    // TODO(phajdan.jr): Be smarter about this, e.g. retry each test
-    // individually.
-    for (size_t i = 0; i < test_names.size(); i++) {
-      TestResult test_result;
-      test_result.full_name = test_names[i];
-      test_result.status = TestResult::TEST_UNKNOWN;
-      test_launcher->OnTestFinished(test_result);
-      called_any_callback = true;
-    }
+  // We do not have reliable details about test results (parsing test
+  // stdout is known to be unreliable), apply the executable exit code
+  // to all tests.
+  // TODO(phajdan.jr): Be smarter about this, e.g. retry each test
+  // individually.
+  for (size_t i = 0; i < test_names.size(); i++) {
+    TestResult test_result;
+    test_result.full_name = test_names[i];
+    test_result.status = TestResult::TEST_UNKNOWN;
+    test_launcher->OnTestFinished(test_result);
+    called_any_callback = true;
   }
 
   return called_any_callback;

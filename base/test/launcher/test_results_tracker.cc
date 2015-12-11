@@ -4,7 +4,6 @@
 
 #include "base/test/launcher/test_results_tracker.h"
 
-#include "base/base64.h"
 #include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
@@ -288,16 +287,6 @@ bool TestResultsTracker::SaveSummaryAsJSON(const FilePath& path) const {
         test_result_value->SetString("output_snippet",
                                      escaped_output_snippet);
         test_result_value->SetBoolean("losless_snippet", losless_snippet);
-
-        // Also include the raw version (base64-encoded so that it can be safely
-        // JSON-serialized - there are no guarantees about character encoding
-        // of the snippet). This can be very useful piece of information when
-        // debugging a test failure related to character encoding.
-        std::string base64_output_snippet;
-        Base64Encode(test_result.output_snippet, &base64_output_snippet);
-        test_result_value->SetString("output_snippet_base64",
-                                     base64_output_snippet);
-        test_results->Append(test_result_value.Pass());
       }
 
       current_iteration_data->SetWithoutPathExpansion(j->first,

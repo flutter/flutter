@@ -151,8 +151,6 @@ component("base") {
     "auto_reset.h",
     "barrier_closure.cc",
     "barrier_closure.h",
-    "base64.cc",
-    "base64.h",
     "base_export.h",
     "base_switches.h",
     "basictypes.h",
@@ -656,7 +654,6 @@ component("base") {
     ":base_static",
     "//base/allocator:allocator_extension_thunks",
     "//base/third_party/dynamic_annotations",
-    "//third_party/modp_b64",
   ]
 
   public_deps = [
@@ -1172,7 +1169,6 @@ test("base_unittests") {
     "at_exit_unittest.cc",
     "atomicops_unittest.cc",
     "barrier_closure_unittest.cc",
-    "base64_unittest.cc",
     "big_endian_unittest.cc",
     "bind_unittest.cc",
     "bind_unittest.nc",

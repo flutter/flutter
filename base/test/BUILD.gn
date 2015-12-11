@@ -35,8 +35,6 @@ source_set("test_support") {
     "gtest_util.h",
     "gtest_xml_unittest_result_printer.cc",
     "gtest_xml_unittest_result_printer.h",
-    "gtest_xml_util.cc",
-    "gtest_xml_util.h",
     "histogram_tester.cc",
     "histogram_tester.h",
     "launcher/test_launcher.cc",
@@ -144,7 +142,6 @@ source_set("test_support") {
     "//base/third_party/dynamic_annotations",
     "//testing/gmock",
     "//testing/gtest",
-    "//third_party/libxml",
     "//third_party/icu:icuuc",
   ]
 
