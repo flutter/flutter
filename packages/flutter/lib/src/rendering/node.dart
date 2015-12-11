@@ -90,6 +90,13 @@ class AbstractNode {
   void adoptChild(AbstractNode child) {
     assert(child != null);
     assert(child._parent == null);
+    assert(() {
+      AbstractNode node = this;
+      while (node.parent != null)
+        node = node.parent;
+      assert(node != child); // indicates we are about to create a cycle
+      return true;
+    });
     child._parent = this;
     if (attached)
       child.attach();

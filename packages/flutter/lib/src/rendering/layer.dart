@@ -52,6 +52,13 @@ abstract class Layer {
     newLayer._previousSibling = _previousSibling;
     if (_previousSibling != null)
       newLayer._previousSibling._nextSibling = newLayer;
+    assert(() {
+      Layer node = this;
+      while (node.parent != null)
+        node = node.parent;
+      assert(node != newLayer); // indicates we are about to create a cycle
+      return true;
+    });
     newLayer._parent = _parent;
     if (_parent._firstChild == this)
       _parent._firstChild = newLayer;
@@ -182,6 +189,13 @@ class ContainerLayer extends Layer {
     assert(child._parent == null);
     assert(child._nextSibling == null);
     assert(child._previousSibling == null);
+    assert(() {
+      Layer node = this;
+      while (node.parent != null)
+        node = node.parent;
+      assert(node != child); // indicates we are about to create a cycle
+      return true;
+    });
     child._parent = this;
     child._previousSibling = _lastChild;
     if (_lastChild != null)

@@ -403,6 +403,14 @@ class Node {
     assert(child._parent == null);
     assert(!(child is PhysicsGroup) || this is PhysicsGroup || this is PhysicsWorld);
 
+    assert(() {
+      Node node = this;
+      while (node.parent != null)
+        node = node.parent;
+      assert(node != child); // indicates we are about to create a cycle
+      return true;
+    });
+
     _childrenNeedSorting = true;
     _children.add(child);
     child._parent = this;
