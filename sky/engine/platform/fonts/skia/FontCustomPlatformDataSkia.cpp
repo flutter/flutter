@@ -36,7 +36,6 @@
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/fonts/FontPlatformData.h"
-#include "sky/engine/platform/fonts/opentype/OpenTypeSanitizer.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkTypeface.h"
@@ -62,12 +61,6 @@ PassOwnPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer* 
 {
     ASSERT_ARG(buffer, buffer);
 
-    OpenTypeSanitizer sanitizer(buffer);
-    RefPtr<SharedBuffer> transcodeBuffer = sanitizer.sanitize();
-    if (!transcodeBuffer)
-        return nullptr; // validation failed.
-    buffer = transcodeBuffer.get();
-
     SkMemoryStream* stream = new SkMemoryStream(buffer->getAsSkData().get());
     RefPtr<SkTypeface> typeface = adoptRef(SkTypeface::CreateFromStream(stream));
     if (!typeface)
@@ -78,7 +71,7 @@ PassOwnPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer* 
 
 bool FontCustomPlatformData::supportsFormat(const String& format)
 {
-    return equalIgnoringCase(format, "truetype") || equalIgnoringCase(format, "opentype") || OpenTypeSanitizer::supportsFormat(format);
+    return equalIgnoringCase(format, "truetype") || equalIgnoringCase(format, "opentype");
 }
 
 } // namespace blink

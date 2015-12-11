@@ -25,7 +25,6 @@ source_set("libraries") {
     "//sky/engine/wtf",
     "//third_party/iccjpeg",
     "//third_party/libpng",
-    "//third_party/ots",
     "//third_party/qcms",
     "//third_party/zlib",
     "//url",
