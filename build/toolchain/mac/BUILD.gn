@@ -66,7 +66,7 @@ template("mac_toolchain") {
       sysroot_flags = "-isysroot $sysroot $version_flags"
     }
 
-    strip = !is_debug
+    strip = !is_debug && !use_ios_simulator
 
     toolchain_flags = ""
     if (invoker.toolchain_cpu == "i386") {
