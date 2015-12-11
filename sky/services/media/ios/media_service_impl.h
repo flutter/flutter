@@ -23,6 +23,9 @@ class MediaServiceImpl : public ::media::MediaService {
   void CreatePlayer(
       mojo::InterfaceRequest<::media::MediaPlayer> player) override;
 
+  void CreateSoundPool(mojo::InterfaceRequest<::media::SoundPool> pool,
+                       int32_t max_streams) override;
+
  private:
   mojo::StrongBinding<::media::MediaService> binding_;
   MediaPlayerFactory media_player_;

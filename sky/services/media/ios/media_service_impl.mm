@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/logging.h"
 #include "sky/services/media/ios/media_service_impl.h"
 
 namespace sky {
@@ -17,6 +18,12 @@ MediaServiceImpl::~MediaServiceImpl() {}
 void MediaServiceImpl::CreatePlayer(
     mojo::InterfaceRequest<::media::MediaPlayer> player) {
   media_player_.Create(nullptr, player.Pass());
+}
+
+void MediaServiceImpl::CreateSoundPool(
+    mojo::InterfaceRequest<::media::SoundPool> pool,
+    int32_t max_streams) {
+  DCHECK(false);
 }
 
 void MediaServiceFactory::Create(
