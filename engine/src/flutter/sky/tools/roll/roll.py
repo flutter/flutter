@@ -36,10 +36,6 @@ _build_deps = [
     'tools/valgrind',
 ]
 
-_chromium_libs = [
-    'url',
-]
-
 _third_party_deps = [
     'third_party/android_platform',
     'third_party/apple_apsl',
@@ -62,7 +58,7 @@ _third_party_deps = [
     'third_party/zlib',
 ]
 
-dirs_from_chromium = _base_deps + _build_deps + _chromium_libs + _third_party_deps
+dirs_from_chromium = _base_deps + _build_deps + _third_party_deps
 
 dirs_from_mojo = [
     'mojo/android',
