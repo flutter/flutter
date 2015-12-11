@@ -19,8 +19,6 @@ _base_deps = [
     'testing',
     'third_party/ashmem',
     'third_party/libevent',
-    'third_party/libxml', # via //base/test
-    'third_party/modp_b64',
     'third_party/tcmalloc',
 ]
 
@@ -54,7 +52,6 @@ _third_party_deps = [
     'third_party/junit',
     'third_party/libjpeg',
     'third_party/libpng',
-    'third_party/libXNVCtrl',
     'third_party/markupsafe',
     'third_party/mesa',
     'third_party/mockito',
