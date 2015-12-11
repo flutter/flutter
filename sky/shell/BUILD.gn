@@ -56,7 +56,6 @@ source_set("common") {
     "//sky/shell/dart",
     "//ui/gfx",
     "//ui/gfx/geometry",
-    "//url",
   ]
 }
 

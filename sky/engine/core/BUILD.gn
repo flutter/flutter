@@ -27,7 +27,6 @@ source_set("libraries") {
     "//third_party/libpng",
     "//third_party/qcms",
     "//third_party/zlib",
-    "//url",
   ]
 }
 

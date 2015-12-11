@@ -517,7 +517,6 @@ source_set("platform") {
     "//third_party/libpng",
     "//third_party/qcms",
     "//third_party/libjpeg",
-    "//url",
   ]
 
   forward_dependent_configs_from = [
@@ -526,7 +525,6 @@ source_set("platform") {
     "//third_party/iccjpeg",
     "//third_party/libpng",
     "//third_party/qcms",
-    "//url",
   ]
 
   if (is_android) {
@@ -595,7 +593,6 @@ test("platform_unittests") {
     "//testing/gtest",
     "//sky/engine/wtf",
     "//sky/engine/wtf:test_support",
-    "//url",
   ]
 
   # TODO(abarth): This is a lie - this test is not embedded in an environment
