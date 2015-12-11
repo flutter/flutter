@@ -50,6 +50,14 @@ PackageProject() {
   # Remove old build artifacts
   RunCommand rm -f ${derived_dir}/app.flx
 
+  local src_dir=${SOURCE_ROOT}/FlutterResources
+  AssertExists $src_dir
+
+  local precompilation_flag=""
+  if [ $CURRENT_ARCH != "x86_64" ]; then
+    precompilation_flag="--precompiled"
+  fi
+
   # Generate the new FLX file. The pub command must be run from the directory
   # containing the pubspec
   RunCommand pushd ${project_path}
@@ -59,7 +67,8 @@ PackageProject() {
       --main ${dart_main}                                                      \
       --output-file ${derived_dir}/app.flx                                     \
       --package-root ${package_root}                                           \
-      --precompiled
+      --compiler ${src_dir}/ScriptSnapshotter                                  \
+      ${precompilation_flag}                                                   \
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package $1 ..."

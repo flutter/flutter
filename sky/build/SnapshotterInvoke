@@ -59,6 +59,13 @@ GenerateBinaryInclude() {
 }
 
 SnapshotProject() {
+  if [ $CURRENT_ARCH == "x86_64" ]; then
+    echo "Script snapshots are used on the simulator as the fully JIT enabled"
+    echo "Dart VM is available. There is no need to incur the cost of"
+    echo "precompilation. The packager has already done the heavy lifting."
+    return 0
+  fi
+
   # Check that the caller has provided a project path
   if [[ -z "$1" ]]; then
     EchoError "The path to the dart project must be specified"

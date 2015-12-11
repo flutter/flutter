@@ -199,7 +199,12 @@ static std::string TracesBasePath() {
   _sky_engine->SetServices(services.Pass());
 
   mojo::String bundle_path([self flxBundlePath]);
+
+#if TARGET_IPHONE_SIMULATOR
+  _sky_engine->RunFromBundle(bundle_path);
+#else
   _sky_engine->RunFromPrecompiledSnapshot(bundle_path);
+#endif
 }
 
 - (void)notifySurfaceDestruction {

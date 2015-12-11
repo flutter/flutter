@@ -13,10 +13,11 @@
 		9E07CFB51BE82D2600BCD8DE /* FlutterApplication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; };
 		9E07CFB61BE82D2600BCD8DE /* FlutterApplication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9E07CFBA1BE82DFF00BCD8DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CF9D1BE8280A00BCD8DE /* main.m */; };
-		9E07CFE81BEAA35200BCD8DE /* InstructionsSnapshot.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CFE51BEAA35200BCD8DE /* InstructionsSnapshot.S */; };
-		9E07CFE91BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CFE61BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c */; };
-		9E07CFEA1BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CFE71BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c */; };
 		9E07CFF41BEAB58200BCD8DE /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFF31BEAB58200BCD8DE /* app.flx */; };
+		9E0FB06C1C1A3F5600DDAEFA /* FlutterApplication.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */; };
+		9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */; };
+		9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */; };
+		9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */; };
 		9E29675A1C03C1D200546454 /* FlutterRunner in Resources */ = {isa = PBXBuildFile; fileRef = 9E2967581C03C18700546454 /* FlutterRunner */; };
 		9E29675B1C03C1D200546454 /* icudtl.dat in Resources */ = {isa = PBXBuildFile; fileRef = 9E2967591C03C18700546454 /* icudtl.dat */; };
 /* End PBXBuildFile section */
@@ -68,6 +69,10 @@
 		9E07CFE61BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kDartIsolateSnapshotBuffer.c; path = Generated/kDartIsolateSnapshotBuffer.c; sourceTree = "<group>"; };
 		9E07CFE71BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kDartVmIsolateSnapshotBuffer.c; path = Generated/kDartVmIsolateSnapshotBuffer.c; sourceTree = "<group>"; };
 		9E07CFF31BEAB58200BCD8DE /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
+		9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FlutterApplication.c; sourceTree = "<group>"; };
+		9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = InstructionsSnapshotSource.S; sourceTree = "<group>"; };
+		9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
+		9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartVmIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
 		9E2967531C03C17300546454 /* EmbedderEntryPoints */ = {isa = PBXFileReference; lastKnownFileType = text; name = EmbedderEntryPoints; path = FlutterResources/EmbedderEntryPoints; sourceTree = SOURCE_ROOT; };
 		9E2967541C03C17300546454 /* PackagerInvoke */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = PackagerInvoke; path = FlutterResources/PackagerInvoke; sourceTree = SOURCE_ROOT; };
 		9E2967551C03C17300546454 /* Runner.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Runner.xcconfig; path = FlutterResources/Runner.xcconfig; sourceTree = SOURCE_ROOT; };
@@ -120,6 +125,10 @@
 			children = (
 				9E07CFD61BE997D800BCD8DE /* Generated */,
 				9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */,
+				9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */,
+				9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */,
+				9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */,
+				9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */,
 				9E07CF8B1BE7F4D200BCD8DE /* Info.plist */,
 			);
 			path = FlutterApplication;
@@ -189,7 +198,7 @@
 			buildConfigurationList = 9E07CF8E1BE7F4D200BCD8DE /* Build configuration list for PBXNativeTarget "FlutterApplication" */;
 			buildPhases = (
 				9EBB2F351BF675C200177634 /* Ensure `pub get` */,
-				9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager */,
+				9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager + Optional Script Snapshotter */,
 				9E07CFCD1BE98FCD00BCD8DE /* Generate Precompiled Snapshot */,
 				9E07CF811BE7F4D200BCD8DE /* Sources */,
 				9E07CF821BE7F4D200BCD8DE /* Frameworks */,
@@ -304,7 +313,7 @@
 			shellScript = "${SOURCE_ROOT}/FlutterResources/SnapshotterInvoke ${FLUTTER_APPLICATION_PATH}";
 			showEnvVarsInLog = 0;
 		};
-		9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager */ = {
+		9E07CFF21BEAB2E800BCD8DE /* Run FLX Packager + Optional Script Snapshotter */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -313,7 +322,7 @@
 				"$(FLUTTER_APPLICATION_PATH)/flutter.yaml",
 				"$(SRCROOT)/FlutterResources/PackagerInvoke",
 			);
-			name = "Run FLX Packager";
+			name = "Run FLX Packager + Optional Script Snapshotter";
 			outputPaths = (
 				"${SRCROOT}/FlutterApplication/Generated/app.flx",
 			);
@@ -344,9 +353,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E07CFEA1BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c in Sources */,
-				9E07CFE91BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c in Sources */,
-				9E07CFE81BEAA35200BCD8DE /* InstructionsSnapshot.S in Sources */,
+				9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */,
+				9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */,
+				9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */,
+				9E0FB06C1C1A3F5600DDAEFA /* FlutterApplication.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -421,6 +431,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = "$(FLUTTER_TARGET_ARCH)";
@@ -464,6 +475,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
