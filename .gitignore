@@ -36,7 +36,6 @@ Thumbs.db
 /third_party/angle/
 /third_party/appurify-python/
 /third_party/boringssl/src/
-/third_party/brotli/src/
 /third_party/colorama/src/
 /third_party/dart-sdk/
 /third_party/dejavu-fonts-ttf-2.34/ttf/*.ttf

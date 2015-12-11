@@ -45,7 +45,6 @@ _chromium_libs = [
 _third_party_deps = [
     'third_party/android_platform',
     'third_party/apple_apsl',
-    'third_party/brotli',
     'third_party/expat',
     'third_party/freetype-android',
     'third_party/harfbuzz-ng',
@@ -59,7 +58,6 @@ _third_party_deps = [
     'third_party/markupsafe',
     'third_party/mesa',
     'third_party/mockito',
-    'third_party/ots',
     'third_party/ply',
     'third_party/qcms',
     'third_party/re2',
