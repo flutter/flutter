@@ -97,7 +97,7 @@ RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToSlave(
     const ConnectionIdentifier& connection_id,
     embedder::SlaveInfo slave_info,
     ScopedPlatformHandle platform_handle,
-    const base::Closure& callback,
+    std::function<void()>&& callback,
     RefPtr<TaskRunner>&& callback_thread_task_runner,
     ChannelId* channel_id) {
   DCHECK(channel_id);
@@ -109,13 +109,13 @@ RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToSlave(
   ScopedPlatformHandle platform_connection_handle = ConnectToSlaveInternal(
       connection_id, slave_info, platform_handle.Pass(), channel_id);
   return channel_manager()->CreateChannel(
-      *channel_id, platform_connection_handle.Pass(), callback,
+      *channel_id, platform_connection_handle.Pass(), std::move(callback),
       std::move(callback_thread_task_runner));
 }
 
 RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToMaster(
     const ConnectionIdentifier& connection_id,
-    const base::Closure& callback,
+    std::function<void()>&& callback,
     RefPtr<TaskRunner>&& callback_thread_task_runner,
     ChannelId* channel_id) {
   DCHECK(channel_id);
@@ -126,7 +126,7 @@ RefPtr<MessagePipeDispatcher> IPCSupport::ConnectToMaster(
       ConnectToMasterInternal(connection_id);
   *channel_id = kMasterProcessIdentifier;
   return channel_manager()->CreateChannel(
-      *channel_id, platform_connection_handle.Pass(), callback,
+      *channel_id, platform_connection_handle.Pass(), std::move(callback),
       std::move(callback_thread_task_runner));
 }
 

@@ -36,10 +36,8 @@ class ChannelThread {
   void Stop();
 
  private:
-  // TODO(vtl): |channel_endpoint| should be an rvalue reference, but that
-  // doesn't currently work correctly with base::Bind.
   void InitChannelOnIOThread(platform::ScopedPlatformHandle platform_handle,
-                             util::RefPtr<ChannelEndpoint> channel_endpoint);
+                             util::RefPtr<ChannelEndpoint>&& channel_endpoint);
 
   embedder::PlatformSupport* const platform_support_;
   TestIOThread test_io_thread_;

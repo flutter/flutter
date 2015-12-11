@@ -104,8 +104,9 @@ abstract class Application implements bindings.ServiceConnector {
     return connection;
   }
 
-  void connectToService(String url, bindings.ProxyBase proxy) {
-    connectToApplication(url).requestService(proxy);
+  void connectToService(
+      String url, bindings.ProxyBase proxy, [String serviceName]) {
+    connectToApplication(url).requestService(proxy, serviceName);
   }
 
   void requestQuit() {}

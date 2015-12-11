@@ -8,7 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include "base/bind.h"
 #include "base/logging.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
@@ -177,9 +176,7 @@ class TestSlaveConnection {
     // Note: |ChannelId|s and |ProcessIdentifier|s are interchangeable.
     RefPtr<MessagePipeDispatcher> mp = master_ipc_support_->ConnectToSlave(
         connection_id_, nullptr, channel_pair.PassServerHandle(),
-        base::Bind(&ManualResetWaitableEvent::Signal,
-                   base::Unretained(&event_)),
-        nullptr, &slave_id_);
+        [this]() { event_.Signal(); }, nullptr, &slave_id_);
     EXPECT_TRUE(mp);
     EXPECT_NE(slave_id_, kInvalidProcessIdentifier);
     EXPECT_NE(slave_id_, kMasterProcessIdentifier);
@@ -243,9 +240,7 @@ class TestSlave {
       const ConnectionIdentifier& connection_id) {
     ProcessIdentifier master_id = kInvalidProcessIdentifier;
     RefPtr<MessagePipeDispatcher> mp = slave_ipc_support_.ConnectToMaster(
-        connection_id, base::Bind(&ManualResetWaitableEvent::Signal,
-                                  base::Unretained(&event_)),
-        nullptr, &master_id);
+        connection_id, [this]() { event_.Signal(); }, nullptr, &master_id);
     EXPECT_TRUE(mp);
     EXPECT_EQ(kMasterProcessIdentifier, master_id);
     return mp;

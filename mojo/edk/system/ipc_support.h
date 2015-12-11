@@ -5,9 +5,9 @@
 #ifndef MOJO_EDK_SYSTEM_IPC_SUPPORT_H_
 #define MOJO_EDK_SYSTEM_IPC_SUPPORT_H_
 
+#include <functional>
 #include <memory>
 
-#include "base/callback_forward.h"
 #include "base/gtest_prod_util.h"
 #include "mojo/edk/embedder/process_type.h"
 #include "mojo/edk/embedder/slave_info.h"
@@ -103,7 +103,7 @@ class IPCSupport {
       const ConnectionIdentifier& connection_id,
       embedder::SlaveInfo slave_info,
       platform::ScopedPlatformHandle platform_handle,
-      const base::Closure& callback,
+      std::function<void()>&& callback,
       util::RefPtr<platform::TaskRunner>&& callback_thread_task_runner,
       ChannelId* channel_id);
 
@@ -117,7 +117,7 @@ class IPCSupport {
   // TODO(vtl): |ConnectToSlave()|'s channel management TODO also applies here.
   util::RefPtr<MessagePipeDispatcher> ConnectToMaster(
       const ConnectionIdentifier& connection_id,
-      const base::Closure& callback,
+      std::function<void()>&& callback,
       util::RefPtr<platform::TaskRunner>&& callback_thread_task_runner,
       ChannelId* channel_id);
 

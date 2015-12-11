@@ -6,7 +6,6 @@
 
 #include <utility>
 
-#include "base/bind.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe.h"
@@ -51,12 +50,14 @@ ChannelThread::~ChannelThread() {
 void ChannelThread::Start(ScopedPlatformHandle platform_handle,
                           RefPtr<ChannelEndpoint>&& channel_endpoint) {
   test_io_thread_.Start();
-  // TODO(vtl): This is hard to convert to a lambda, since we really need to
-  // move |platform_handle|.
+  // TODO(vtl): With C++11 lambda captures, we'll be able to move
+  // |platform_handle| (and |channel_endpoint|) instead.
+  auto raw_platform_handle = platform_handle.release();
   test_io_thread_.PostTaskAndWait(
-      base::Bind(&ChannelThread::InitChannelOnIOThread, base::Unretained(this),
-                 base::Passed(&platform_handle),
-                 base::Passed(&channel_endpoint)));
+      [this, raw_platform_handle, channel_endpoint]() mutable {
+        InitChannelOnIOThread(ScopedPlatformHandle(raw_platform_handle),
+                              std::move(channel_endpoint));
+      });
 }
 
 void ChannelThread::Stop() {
@@ -77,7 +78,7 @@ void ChannelThread::Stop() {
 
 void ChannelThread::InitChannelOnIOThread(
     ScopedPlatformHandle platform_handle,
-    RefPtr<ChannelEndpoint> channel_endpoint) {
+    RefPtr<ChannelEndpoint>&& channel_endpoint) {
   CHECK(test_io_thread_.IsCurrentAndRunning());
   CHECK(platform_handle.is_valid());
 

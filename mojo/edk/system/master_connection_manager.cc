@@ -9,15 +9,14 @@
 #include <utility>
 #include <vector>
 
-#include "base/bind.h"
-#include "base/bind_helpers.h"
-#include "base/location.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
+#include "mojo/edk/platform/io_thread.h"
 #include "mojo/edk/platform/platform_handle.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/edk/platform/task_runner.h"
+#include "mojo/edk/platform/thread.h"
 #include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/raw_channel.h"
@@ -27,8 +26,10 @@
 #include "mojo/public/cpp/system/macros.h"
 
 using mojo::platform::PlatformHandle;
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
+using mojo::platform::Thread;
 using mojo::util::AutoResetWaitableEvent;
 using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
@@ -331,7 +332,6 @@ MasterConnectionManager::MasterConnectionManager(
     embedder::PlatformSupport* platform_support)
     : ConnectionManager(platform_support),
       master_process_delegate_(),
-      private_thread_("MasterConnectionManagerPrivateThread"),
       next_process_identifier_(kFirstSlaveProcessIdentifier) {
   connections_[kMasterProcessIdentifier] = new ProcessConnections();
 }
@@ -339,7 +339,7 @@ MasterConnectionManager::MasterConnectionManager(
 MasterConnectionManager::~MasterConnectionManager() {
   DCHECK(!delegate_thread_task_runner_);
   DCHECK(!master_process_delegate_);
-  DCHECK(!private_thread_.message_loop());
+  DCHECK(!private_thread_);
   DCHECK(helpers_.empty());
   DCHECK(pending_connects_.empty());
 }
@@ -351,12 +351,14 @@ void MasterConnectionManager::Init(
   DCHECK(master_process_delegate);
   DCHECK(!delegate_thread_task_runner_);
   DCHECK(!master_process_delegate_);
-  DCHECK(!private_thread_.message_loop());
+  DCHECK(!private_thread_);
 
   delegate_thread_task_runner_ = std::move(delegate_thread_task_runner);
   master_process_delegate_ = master_process_delegate;
-  CHECK(private_thread_.StartWithOptions(
-      base::Thread::Options(base::MessageLoop::TYPE_IO, 0)));
+  // TODO(vtl): We'll need to plumb this in further.
+  PlatformHandleWatcher* platform_handle_watcher = nullptr;
+  private_thread_ = platform::CreateAndStartIOThread(
+      &private_thread_task_runner_, &platform_handle_watcher);
 }
 
 ProcessIdentifier MasterConnectionManager::AddSlave(
@@ -379,12 +381,15 @@ ProcessIdentifier MasterConnectionManager::AddSlave(
   // We have to wait for the task to be executed, in case someone calls
   // |AddSlave()| followed immediately by |Shutdown()|.
   AutoResetWaitableEvent event;
-  private_thread_.message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&MasterConnectionManager::AddSlaveOnPrivateThread,
-                 base::Unretained(this), base::Unretained(slave_info),
-                 base::Passed(&platform_handle), slave_process_identifier,
-                 base::Unretained(&event)));
+  // TODO(vtl): With C++14 lambda captures, we'll be able to move
+  // |platform_handle|.
+  auto raw_platform_handle = platform_handle.release();
+  private_thread_task_runner_->PostTask([this, slave_info, raw_platform_handle,
+                                         slave_process_identifier, &event]() {
+    AddSlaveOnPrivateThread(slave_info,
+                            ScopedPlatformHandle(raw_platform_handle),
+                            slave_process_identifier, &event);
+  });
   event.Wait();
 
   return slave_process_identifier;
@@ -410,13 +415,14 @@ ProcessIdentifier MasterConnectionManager::AddSlaveAndBootstrap(
 void MasterConnectionManager::Shutdown() {
   AssertNotOnPrivateThread();
   DCHECK(master_process_delegate_);
-  DCHECK(private_thread_.message_loop());
+  DCHECK(private_thread_);
 
   // The |Stop()| will actually finish all posted tasks.
-  private_thread_.message_loop()->PostTask(
-      FROM_HERE, base::Bind(&MasterConnectionManager::ShutdownOnPrivateThread,
-                            base::Unretained(this)));
-  private_thread_.Stop();
+  private_thread_task_runner_->PostTask(
+      [this]() { ShutdownOnPrivateThread(); });
+  private_thread_->Stop();
+  private_thread_.reset();
+  private_thread_task_runner_ = nullptr;
   DCHECK(helpers_.empty());
   DCHECK(pending_connects_.empty());
   master_process_delegate_ = nullptr;
@@ -729,24 +735,24 @@ void MasterConnectionManager::CallOnSlaveDisconnect(
     embedder::SlaveInfo slave_info) {
   AssertOnPrivateThread();
   DCHECK(master_process_delegate_);
+  // TODO(vtl): With C++14 lambda captures, this can be made less silly.
+  auto master_process_delegate = master_process_delegate_;
   delegate_thread_task_runner_->PostTask(
-      base::Bind(&embedder::MasterProcessDelegate::OnSlaveDisconnect,
-                 base::Unretained(master_process_delegate_),
-                 base::Unretained(slave_info)));
+      [master_process_delegate, slave_info]() {
+        master_process_delegate->OnSlaveDisconnect(slave_info);
+      });
 }
 
 void MasterConnectionManager::AssertNotOnPrivateThread() const {
   // This should only be called after |Init()| and before |Shutdown()|. (If not,
   // the subsequent |DCHECK_NE()| is invalid, since the current thread may not
   // have a message loop.)
-  DCHECK(private_thread_.message_loop());
-  DCHECK_NE(base::MessageLoop::current(), private_thread_.message_loop());
+  DCHECK(!private_thread_task_runner_->RunsTasksOnCurrentThread());
 }
 
 void MasterConnectionManager::AssertOnPrivateThread() const {
   // This should only be called after |Init()| and before |Shutdown()|.
-  DCHECK(private_thread_.message_loop());
-  DCHECK_EQ(base::MessageLoop::current(), private_thread_.message_loop());
+  DCHECK(private_thread_task_runner_->RunsTasksOnCurrentThread());
 }
 
 }  // namespace system

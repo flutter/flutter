@@ -8,7 +8,6 @@
 
 #include <memory>
 
-#include "base/bind.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
@@ -50,8 +49,6 @@ const MojoHandleSignals kSignalAll = MOJO_HANDLE_SIGNAL_READABLE |
 
 const char kConnectionIdFlag[] = "test-connection-id";
 
-void DoNothing() {}
-
 class ScopedTestChannel {
  public:
   // Creates a channel, which lives on the I/O thread given to
@@ -64,13 +61,16 @@ class ScopedTestChannel {
       : bootstrap_message_pipe_(MOJO_HANDLE_INVALID),
         channel_info_(nullptr),
         wait_on_shutdown_(true) {
-    bootstrap_message_pipe_ =
-        CreateChannel(platform_handle.Pass(),
-                      base::Bind(&ScopedTestChannel::DidCreateChannel,
-                                 base::Unretained(this)),
-                      nullptr)
-            .release()
-            .value();
+    bootstrap_message_pipe_ = CreateChannel(platform_handle.Pass(),
+                                            [this](ChannelInfo* channel_info) {
+                                              CHECK(channel_info);
+                                              CHECK(!channel_info_);
+                                              channel_info_ = channel_info;
+                                              event_.Signal();
+                                            },
+                                            nullptr)
+                                  .release()
+                                  .value();
     CHECK_NE(bootstrap_message_pipe_, MOJO_HANDLE_INVALID);
   }
 
@@ -81,13 +81,10 @@ class ScopedTestChannel {
     CHECK(event_.IsSignaledForTest());
     event_.Reset();
     if (wait_on_shutdown_) {
-      DestroyChannel(channel_info_,
-                     base::Bind(&ScopedTestChannel::DidDestroyChannel,
-                                base::Unretained(this)),
-                     nullptr);
+      DestroyChannel(channel_info_, [this]() { event_.Signal(); }, nullptr);
       event_.Wait();
     } else {
-      DestroyChannel(channel_info_, base::Bind(&DoNothing), nullptr);
+      DestroyChannel(channel_info_, []() {}, nullptr);
     }
   }
 
@@ -105,15 +102,6 @@ class ScopedTestChannel {
   void NoWaitOnShutdown() { wait_on_shutdown_ = false; }
 
  private:
-  void DidCreateChannel(ChannelInfo* channel_info) {
-    CHECK(channel_info);
-    CHECK(!channel_info_);
-    channel_info_ = channel_info;
-    event_.Signal();
-  }
-
-  void DidDestroyChannel() { event_.Signal(); }
-
   // Valid from creation until whenever it gets closed (by the "owner" of this
   // object).
   // Note: We don't want use the C++ wrappers here, since we want to test the
@@ -424,8 +412,7 @@ TEST_F(EmbedderTest, MAYBE_MultiprocessMasterSlave) {
   ChannelInfo* channel_info = nullptr;
   ScopedMessagePipeHandle mp = ConnectToSlave(
       nullptr, multiprocess_test_helper.server_platform_handle.Pass(),
-      base::Bind(&ManualResetWaitableEvent::Signal, base::Unretained(&event)),
-      nullptr, &connection_id, &channel_info);
+      [&event]() { event.Signal(); }, nullptr, &connection_id, &channel_info);
   ASSERT_TRUE(mp.is_valid());
   EXPECT_TRUE(channel_info);
   ASSERT_FALSE(connection_id.empty());
@@ -500,9 +487,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlave) {
     ManualResetWaitableEvent event;
     ChannelInfo* channel_info = nullptr;
     ScopedMessagePipeHandle mp = ConnectToMaster(
-        connection_id,
-        base::Bind(&ManualResetWaitableEvent::Signal, base::Unretained(&event)),
-        nullptr, &channel_info);
+        connection_id, [&event]() { event.Signal(); }, nullptr, &channel_info);
     ASSERT_TRUE(mp.is_valid());
     EXPECT_TRUE(channel_info);
 

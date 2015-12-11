@@ -295,9 +295,9 @@ class Encoder {
       encodeUint32(value.value, offset);
 
   void encodeNestedUnion(Union value, int offset, bool nullable) {
-    _buffer.claimMemory(align(kUnionSize));
     encodePointerToNextUnclaimed(offset);
     var encoder = new Encoder._fromBuffer(_buffer);
+    _buffer.claimMemory(align(kUnionSize));
     encoder.encodeUnion(value, 0, nullable);
   }
 
@@ -351,7 +351,7 @@ class Encoder {
     encoder.appendUint8Array(bytes);
   }
 
-  void encodeArray(Function arrayAppend, int elementBytes, List<int> value,
+  void encodeArray(Function arrayAppend, int elementBytes, List value,
       int offset, int nullability, int expectedLength) {
     if (value == null) {
       encodeNullPointer(offset, isArrayNullable(nullability));
@@ -403,12 +403,14 @@ class Encoder {
           nullability, expectedLength);
 
   void encodeFloatArray(
-          List<int> value, int offset, int nullability, int expectedLength) =>
+          List<double> value, int offset, int nullability,
+          int expectedLength) =>
       encodeArray((e, v) => e.appendFloatArray(v), 4, value, offset,
           nullability, expectedLength);
 
   void encodeDoubleArray(
-          List<int> value, int offset, int nullability, int expectedLength) =>
+          List<double> value, int offset, int nullability,
+          int expectedLength) =>
       encodeArray((e, v) => e.appendDoubleArray(v), 8, value, offset,
           nullability, expectedLength);
 

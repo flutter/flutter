@@ -9,7 +9,6 @@
 #include <memory>
 #include <string>
 
-#include "base/callback.h"
 #include "mojo/edk/embedder/channel_info_forward.h"
 #include "mojo/edk/embedder/process_type.h"
 #include "mojo/edk/embedder/slave_info.h"
@@ -132,7 +131,7 @@ void ShutdownIPCSupport();
 ScopedMessagePipeHandle ConnectToSlave(
     SlaveInfo slave_info,
     platform::ScopedPlatformHandle platform_handle,
-    const base::Closure& did_connect_to_slave_callback,
+    std::function<void()>&& did_connect_to_slave_callback,
     util::RefPtr<platform::TaskRunner>&& did_connect_to_slave_runner,
     std::string* platform_connection_id,
     ChannelInfo** channel_info);
@@ -150,7 +149,7 @@ ScopedMessagePipeHandle ConnectToSlave(
 // TODO(vtl): The API is a little crazy with respect to the |ChannelInfo*|.
 ScopedMessagePipeHandle ConnectToMaster(
     const std::string& platform_connection_id,
-    const base::Closure& did_connect_to_master_callback,
+    std::function<void()>&& did_connect_to_master_callback,
     util::RefPtr<platform::TaskRunner>&& did_connect_to_master_runner,
     ChannelInfo** channel_info);
 
@@ -209,7 +208,7 @@ ScopedMessagePipeHandle CreateChannelOnIOThread(
 // |ProcessType::NONE|. This function may be removed in the future.
 ScopedMessagePipeHandle CreateChannel(
     platform::ScopedPlatformHandle platform_handle,
-    const base::Callback<void(ChannelInfo*)>& did_create_channel_callback,
+    std::function<void(ChannelInfo*)>&& did_create_channel_callback,
     util::RefPtr<platform::TaskRunner>&& did_create_channel_runner);
 
 // Destroys a channel that was created using |ConnectToMaster()|,
@@ -225,7 +224,7 @@ void DestroyChannelOnIOThread(ChannelInfo* channel_info);
 // the callback has been executed.
 void DestroyChannel(
     ChannelInfo* channel_info,
-    const base::Closure& did_destroy_channel_callback,
+    std::function<void()>&& did_destroy_channel_callback,
     util::RefPtr<platform::TaskRunner>&& did_destroy_channel_runner);
 
 // Inform the channel that it will soon be destroyed (doing so is optional).

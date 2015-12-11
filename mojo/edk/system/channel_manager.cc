@@ -6,12 +6,12 @@
 
 #include <utility>
 
-#include "base/bind.h"
-#include "base/bind_helpers.h"
+#include "mojo/edk/platform/platform_handle.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 
+using mojo::platform::PlatformHandle;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
 using mojo::util::MakeRefCounted;
@@ -54,17 +54,17 @@ void ChannelManager::ShutdownOnIOThread() {
 }
 
 void ChannelManager::Shutdown(
-    const base::Closure& callback,
+    std::function<void()>&& callback,
     RefPtr<TaskRunner>&& callback_thread_task_runner) {
-  // TODO(vtl): With C++14 lambda captures, we'll be able to move
-  // |callback_thread_task_runner| instead of copying it.
+  // TODO(vtl): With C++14 lambda captures, we'll be able to move |callback| and
+  // |callback_thread_task_runner| instead of copying them.
   io_thread_task_runner_->PostTask(
-      [this, callback, callback_thread_task_runner]() {
+      [this, callback, callback_thread_task_runner]() mutable {
         ShutdownOnIOThread();
         if (callback_thread_task_runner)
-          callback_thread_task_runner->PostTask(callback);
+          callback_thread_task_runner->PostTask(std::move(callback));
         else
-          callback.Run();
+          callback();
       });
 }
 
@@ -89,23 +89,28 @@ RefPtr<Channel> ChannelManager::CreateChannelWithoutBootstrapOnIOThread(
 RefPtr<MessagePipeDispatcher> ChannelManager::CreateChannel(
     ChannelId channel_id,
     ScopedPlatformHandle platform_handle,
-    const base::Closure& callback,
+    std::function<void()>&& callback,
     RefPtr<TaskRunner>&& callback_thread_task_runner) {
-  DCHECK(!callback.is_null());
+  DCHECK(callback);
   // (|callback_thread_task_runner| may be null.)
 
   RefPtr<ChannelEndpoint> bootstrap_channel_endpoint;
   auto dispatcher = MessagePipeDispatcher::CreateRemoteMessagePipe(
       &bootstrap_channel_endpoint);
-  // TODO(vtl): This is needed, since |base::Passed()| doesn't work with an
-  // rvalue reference.
-  RefPtr<TaskRunner> cttr = std::move(callback_thread_task_runner);
-  // TODO(vtl): This is hard to convert to a lambda, since we really do need to
-  // move |platform_handle|. :-(
-  io_thread_task_runner_->PostTask(base::Bind(
-      &ChannelManager::CreateChannelHelper, base::Unretained(this), channel_id,
-      base::Passed(&platform_handle), base::Passed(&bootstrap_channel_endpoint),
-      callback, base::Passed(&cttr)));
+  // TODO(vtl): We have to copy or "unscope" various things due to C++11 lambda
+  // capture limitations.
+  PlatformHandle raw_platform_handle = platform_handle.release();
+  io_thread_task_runner_->PostTask([this, channel_id, raw_platform_handle,
+                                    bootstrap_channel_endpoint, callback,
+                                    callback_thread_task_runner]() mutable {
+    CreateChannelOnIOThreadHelper(channel_id,
+                                  ScopedPlatformHandle(raw_platform_handle),
+                                  std::move(bootstrap_channel_endpoint));
+    if (callback_thread_task_runner)
+      callback_thread_task_runner->PostTask(std::move(callback));
+    else
+      callback();
+  });
   return dispatcher;
 }
 
@@ -134,7 +139,7 @@ void ChannelManager::ShutdownChannelOnIOThread(ChannelId channel_id) {
 
 void ChannelManager::ShutdownChannel(
     ChannelId channel_id,
-    const base::Closure& callback,
+    std::function<void()>&& callback,
     RefPtr<TaskRunner>&& callback_thread_task_runner) {
   RefPtr<Channel> channel;
   {
@@ -148,12 +153,12 @@ void ChannelManager::ShutdownChannel(
   // TODO(vtl): With C++14 lambda captures, we'll be able to move stuff instead
   // of copying.
   io_thread_task_runner_->PostTask(
-      [channel, callback, callback_thread_task_runner]() {
+      [channel, callback, callback_thread_task_runner]() mutable {
         channel->Shutdown();
         if (callback_thread_task_runner)
-          callback_thread_task_runner->PostTask(callback);
+          callback_thread_task_runner->PostTask(std::move(callback));
         else
-          callback.Run();
+          callback();
       });
 }
 
@@ -177,20 +182,6 @@ RefPtr<Channel> ChannelManager::CreateChannelOnIOThreadHelper(
   }
   channel->SetChannelManager(this);
   return channel;
-}
-
-void ChannelManager::CreateChannelHelper(
-    ChannelId channel_id,
-    ScopedPlatformHandle platform_handle,
-    RefPtr<ChannelEndpoint> bootstrap_channel_endpoint,
-    const base::Closure& callback,
-    RefPtr<TaskRunner> callback_thread_task_runner) {
-  CreateChannelOnIOThreadHelper(channel_id, platform_handle.Pass(),
-                                std::move(bootstrap_channel_endpoint));
-  if (callback_thread_task_runner)
-    callback_thread_task_runner->PostTask(callback);
-  else
-    callback.Run();
 }
 
 }  // namespace system

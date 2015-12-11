@@ -80,20 +80,24 @@ class ApplicationConnection {
     _fallbackServiceFactory = f;
   }
 
-  bindings.ProxyBase requestService(bindings.ProxyBase proxy,
-      [String serviceName = null]) {
+  bindings.ProxyBase requestService(
+      bindings.ProxyBase proxy, [String serviceName]) {
     assert(!proxy.impl.isBound &&
         (remoteServiceProvider != null) &&
         remoteServiceProvider.impl.isBound);
+
+    var name = serviceName ?? proxy.name;
+    assert((name != null) && name.isNotEmpty);
+
     var pipe = new core.MojoMessagePipe();
     proxy.impl.bind(pipe.endpoints[0]);
-    remoteServiceProvider.ptr
-        .connectToService(serviceName ?? proxy.name, pipe.endpoints[1]);
+    remoteServiceProvider.ptr.connectToService(name, pipe.endpoints[1]);
     return proxy;
   }
 
   void provideService(String interfaceName, ServiceFactory factory) {
     assert(_localServiceProvider != null);
+    assert(interfaceName != null);
     _nameToServiceFactory[interfaceName] = factory;
   }
 

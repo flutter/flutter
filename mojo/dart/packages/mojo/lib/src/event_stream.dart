@@ -34,7 +34,7 @@ class MojoEventSubscription {
 
   Future close({bool immediate: false}) => _close(immediate: immediate);
 
-  void subscribe(void handler(List<int> event)) {
+  void subscribe(void handler(int event)) {
     if (_isSubscribed) {
       throw new MojoApiError("subscribe() has already been called: $this.");
     }
@@ -51,8 +51,10 @@ class MojoEventSubscription {
     _isSubscribed = true;
   }
 
-  bool enableSignals(int signals) {
-    _signals = signals;
+  bool enableSignals([int signals]) {
+    if (signals != null) {
+      _signals = signals;
+    }
     if (_isSubscribed) {
       return MojoHandleWatcher.add(_handle.h, _sendPort, _signals) ==
           MojoResult.kOk;
@@ -161,7 +163,7 @@ class MojoEventHandler {
       throw new MojoApiError("MojoEventHandler is unbound.");
     }
     _isOpen = true;
-    _eventSubscription.subscribe((List<int> event) {
+    _eventSubscription.subscribe((int event) {
       try {
         _handleEvent(event);
       } catch (e) {
@@ -188,15 +190,13 @@ class MojoEventHandler {
     return result != null ? result : new Future.value(null);
   }
 
-  void _handleEvent(List<int> event) {
+  void _handleEvent(int signalsReceived) {
     if (!_isOpen) {
       // The actual close of the underlying stream happens asynchronously
       // after the call to close. However, we start to ignore incoming events
       // immediately.
       return;
     }
-    int signalsWatched = event[0];
-    int signalsReceived = event[1];
     _isInHandler = true;
     if (MojoHandleSignals.isReadable(signalsReceived)) {
       assert(_eventSubscription.readyRead);
@@ -207,7 +207,7 @@ class MojoEventHandler {
       handleWrite();
     }
     _isPeerClosed = MojoHandleSignals.isPeerClosed(signalsReceived) ||
-        !_eventSubscription.enableSignals(signalsWatched);
+        !_eventSubscription.enableSignals();
     _isInHandler = false;
     if (_isPeerClosed) {
       close().then((_) {

@@ -4,10 +4,11 @@
 
 #include "mojo/edk/base_edk/platform_message_loop_for_io_impl.h"
 
-#include <utility>
-
+#include "base/logging.h"
+#include "base/macros.h"
 #include "mojo/edk/base_edk/platform_task_runner_impl.h"
 
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::TaskRunner;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
@@ -16,7 +17,8 @@ namespace base_edk {
 
 PlatformMessageLoopForIOImpl::PlatformMessageLoopForIOImpl()
     : task_runner_(MakeRefCounted<PlatformTaskRunnerImpl>(
-          base_message_loop_for_io_.task_runner())) {}
+          base_message_loop_for_io_.task_runner())),
+      platform_handle_watcher_(&base_message_loop_for_io_) {}
 
 PlatformMessageLoopForIOImpl::~PlatformMessageLoopForIOImpl() {}
 

@@ -33,11 +33,6 @@ void PlatformTaskRunnerImpl::PostTask(std::function<void()>&& task) {
   DCHECK(result);
 }
 
-void PlatformTaskRunnerImpl::PostTask(const base::Closure& task) {
-  bool result = base_task_runner_->PostTask(tracked_objects::Location(), task);
-  DCHECK(result);
-}
-
 bool PlatformTaskRunnerImpl::RunsTasksOnCurrentThread() const {
   return base_task_runner_->RunsTasksOnCurrentThread();
 }

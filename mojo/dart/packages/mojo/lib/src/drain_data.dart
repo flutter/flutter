@@ -41,8 +41,7 @@ class DataPipeDrainer {
 
   Future<ByteData> drain() {
     var completer = new Completer();
-    _eventSubscription.subscribe((List<int> event) {
-      int mojoSignals = event[1];
+    _eventSubscription.subscribe((int mojoSignals) {
       if (MojoHandleSignals.isReadable(mojoSignals)) {
         int result = _doRead();
         if (result != MojoResult.kOk) {

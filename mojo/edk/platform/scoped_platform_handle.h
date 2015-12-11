@@ -50,6 +50,9 @@ class ScopedPlatformHandle {
 
   bool is_valid() const { return handle_.is_valid(); }
 
+  // Forwards to |PlatformHandle::Duplicate()|.
+  ScopedPlatformHandle Duplicate() const { return handle_.Duplicate(); }
+
  private:
   PlatformHandle handle_;
 

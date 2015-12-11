@@ -12,14 +12,14 @@ enum LpcmSampleFormat {
 
 struct LpcmMediaTypeDetails {
   LpcmSampleFormat sample_format;
-  uint8 samples_per_frame;
+  uint8 channels;
   uint32 frames_per_second;
 };
 
 struct LpcmMediaTypeSetDetails {
   LpcmSampleFormat sample_format;
-  uint8 min_samples_per_frame;
-  uint8 max_samples_per_frame;
+  uint8 min_channels;
+  uint8 max_channels;
   uint32 min_frames_per_second;
   uint32 max_frames_per_second;
 };

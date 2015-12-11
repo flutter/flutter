@@ -135,6 +135,7 @@ if (is_android) {
 
     deps = [
       "//mojo/android:libsystem_java",
+      "//mojo/edk/base_edk",
       "//mojo/edk/system",
       "//ui/gl",
       ":common",
@@ -244,6 +245,7 @@ if (is_android) {
     set_sources_assignment_filter(sources_assignment_filter)
 
     deps = [
+      "//mojo/edk/base_edk",
       "//mojo/edk/system",
       "//sky/services/keyboard",
       "//sky/services/media",
@@ -269,6 +271,7 @@ if (is_android) {
 
     deps = [
       "//mojo/common",
+      "//mojo/edk/base_edk",
       "//mojo/edk/system",
       ":common",
       ":gpu_direct",
@@ -297,6 +300,7 @@ if (is_android) {
 
     deps = [
       "//mojo/common",
+      "//mojo/edk/base_edk",
       "//mojo/edk/system",
       "//sky/services/ns_net",
       "//ui/gl",

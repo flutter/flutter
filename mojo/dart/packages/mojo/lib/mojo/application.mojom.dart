@@ -263,9 +263,7 @@ class ApplicationRequestQuitParams extends bindings.Struct {
 const int kApplication_initialize_name = 0;
 const int kApplication_acceptConnection_name = 1;
 const int kApplication_requestQuit_name = 2;
-
-const String ApplicationName =
-      'mojo::Application';
+const String ApplicationName = null;
 
 abstract class Application {
   void initialize(Object shell, List<String> args, String url);
@@ -375,9 +373,9 @@ class ApplicationProxy implements bindings.ProxyBase {
   }
 
   factory ApplicationProxy.connectToService(
-      bindings.ServiceConnector s, String url) {
+      bindings.ServiceConnector s, String url, [String serviceName]) {
     ApplicationProxy p = new ApplicationProxy.unbound();
-    s.connectToService(url, p);
+    s.connectToService(url, p, serviceName);
     return p;
   }
 

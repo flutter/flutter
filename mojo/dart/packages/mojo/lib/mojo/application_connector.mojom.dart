@@ -161,9 +161,7 @@ class ApplicationConnectorDuplicateParams extends bindings.Struct {
 
 const int kApplicationConnector_connectToApplication_name = 0;
 const int kApplicationConnector_duplicate_name = 1;
-
-const String ApplicationConnectorName =
-      'mojo::ApplicationConnector';
+const String ApplicationConnectorName = null;
 
 abstract class ApplicationConnector {
   void connectToApplication(String applicationUrl, Object services, Object exposedServices);
@@ -260,9 +258,9 @@ class ApplicationConnectorProxy implements bindings.ProxyBase {
   }
 
   factory ApplicationConnectorProxy.connectToService(
-      bindings.ServiceConnector s, String url) {
+      bindings.ServiceConnector s, String url, [String serviceName]) {
     ApplicationConnectorProxy p = new ApplicationConnectorProxy.unbound();
-    s.connectToService(url, p);
+    s.connectToService(url, p, serviceName);
     return p;
   }
 

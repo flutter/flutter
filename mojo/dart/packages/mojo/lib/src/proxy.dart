@@ -237,12 +237,18 @@ abstract class Proxy extends core.MojoEventHandler {
   }
 }
 
-// Generated Proxy classes implement this interface.
+/// Generated Proxy classes implement this interface.
 abstract class ProxyBase {
   final Proxy impl = null;
   final String name = null;
 }
 
+/// Generated Proxy classes have a factory Proxy.connectToService which takes
+/// a ServiceConnector, a url, and optionally a service name and returns a
+/// bound Proxy. For example, every class extending the Application base class
+/// in package:mojo/application.dart inherits and implementation of the
+/// ServiceConnector interface.
 abstract class ServiceConnector {
-  void connectToService(String url, ProxyBase proxy);
+  /// Connects [proxy] to the service called [serviceName] that lives at [url].
+  void connectToService(String url, ProxyBase proxy, [String serviceName]);
 }

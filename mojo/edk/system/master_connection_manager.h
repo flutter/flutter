@@ -7,9 +7,9 @@
 
 #include <stdint.h>
 
+#include <memory>
 #include <unordered_map>
 
-#include "base/threading/thread.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/system/connection_manager.h"
@@ -18,15 +18,16 @@
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
 
-namespace base {
-class TaskRunner;
-}
-
 namespace mojo {
 
 namespace embedder {
 class MasterProcessDelegate;
 using SlaveInfo = void*;
+}
+
+namespace platform {
+class TaskRunner;
+class Thread;
 }
 
 namespace util {
@@ -144,9 +145,11 @@ class MasterConnectionManager final : public ConnectionManager {
 
   // This is a private I/O thread on which this class does the bulk of its work.
   // It is started in |Init()| and terminated in |Shutdown()|.
-  base::Thread private_thread_;
+  std::unique_ptr<platform::Thread> private_thread_;
+  util::RefPtr<platform::TaskRunner> private_thread_task_runner_;
 
   // The following members are only accessed on |private_thread_|:
+  // TODO(vtl): Make the values unique_ptrs.
   std::unordered_map<ProcessIdentifier, Helper*> helpers_;  // Owns its values.
 
   // Note: |mutex_| is not needed in the constructor, |Init()|,

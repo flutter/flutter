@@ -23,7 +23,6 @@ class PlatformTaskRunnerImpl : public mojo::platform::TaskRunner {
 
   // |mojo::platform::TaskRunner| implementation:
   void PostTask(std::function<void()>&& task) override;
-  void PostTask(const base::Closure& task) override;
   bool RunsTasksOnCurrentThread() const override;
 
  private:

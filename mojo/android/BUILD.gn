@@ -124,6 +124,7 @@ shared_library("mojo_java_unittests") {
     ":system_java_jni_headers",
     "//base",
     "//base/test/:test_support",
+    "//mojo/edk/base_edk",
     "//mojo/edk/system",
     "//mojo/environment:chromium",
     "//mojo/message_pump",

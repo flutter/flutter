@@ -9,13 +9,13 @@
 #include <memory>
 
 #include "mojo/edk/base_edk/message_loop_test_helper.h"
+#include "mojo/edk/base_edk/platform_handle_watcher_test_helper.h"
 #include "mojo/edk/platform/message_loop.h"
-#include "mojo/edk/platform/message_loop_for_io.h"
 #include "mojo/edk/platform/test_message_loops.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 using mojo::platform::MessageLoop;
-using mojo::platform::MessageLoopForIO;
+using mojo::platform::PlatformHandleWatcher;
 
 namespace {
 
@@ -26,9 +26,15 @@ TEST(TestMessageLoopsTest, CreateTestMessageLoop) {
 }
 
 TEST(TestMessageLoopsTest, CreateTestMessageLoopForIO) {
-  std::unique_ptr<MessageLoopForIO> message_loop_for_io =
-      mojo::platform::test::CreateTestMessageLoopForIO();
-  base_edk::test::MessageLoopTestHelper(message_loop_for_io.get());
+  PlatformHandleWatcher* platform_handle_watcher = nullptr;
+  std::unique_ptr<MessageLoop> message_loop =
+      mojo::platform::test::CreateTestMessageLoopForIO(
+          &platform_handle_watcher);
+  EXPECT_TRUE(platform_handle_watcher);
+
+  base_edk::test::MessageLoopTestHelper(message_loop.get());
+  base_edk::test::PlatformHandleWatcherTestHelper(message_loop.get(),
+                                                  platform_handle_watcher);
 }
 
 }  // namespace

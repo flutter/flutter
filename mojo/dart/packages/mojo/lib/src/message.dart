@@ -97,7 +97,8 @@ class ServiceMessage extends Message {
 
   Message get payload {
     if (_payload == null) {
-      var truncatedBuffer = new ByteData.view(buffer.buffer, header.size);
+      var truncatedBuffer = new ByteData.view(
+          buffer.buffer, header.size, dataLength - header.size);
       _payload = new Message(
           truncatedBuffer, handles, dataLength - header.size, handlesLength);
     }
