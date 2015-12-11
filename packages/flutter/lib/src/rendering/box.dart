@@ -609,23 +609,26 @@ abstract class RenderBox extends RenderObject {
   /// visually "on top" (i.e., paints later).
   bool hitTestChildren(HitTestResult result, { Point position }) => false;
 
-  /// Multiply the transform from the parent's coordinate system to this box's
-  /// coordinate system into the given transform
-  ///
-  /// This function is used to convert coordinate systems between boxes.
-  /// Subclasses that apply transforms during painting should override this
-  /// function to factor those transforms into the calculation.
-  void applyPaintTransform(Matrix4 transform) {
-    if (parentData is BoxParentData) {
-      Point position = (parentData as BoxParentData).position;
-      transform.translate(position.x, position.y);
-    }
-  }
-
   static Point _transformPoint(Matrix4 transform, Point point) {
     Vector3 position3 = new Vector3(point.x, point.y, 0.0);
     Vector3 transformed3 = transform.transform3(position3);
     return new Point(transformed3.x, transformed3.y);
+  }
+
+  /// Multiply the transform from the parent's coordinate system to this box's
+  /// coordinate system into the given transform.
+  ///
+  /// This function is used to convert coordinate systems between boxes.
+  /// Subclasses that apply transforms during painting should override this
+  /// function to factor those transforms into the calculation.
+  ///
+  /// The RenderBox implementation takes care of adjusting the matrix for the
+  /// position of the given child.
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child.parent == this);
+    BoxParentData childParentData = child.parentData;
+    Point position = childParentData.position;
+    transform.translate(position.x, position.y);
   }
 
   /// Convert the given point from the global coodinate system to the local
@@ -634,24 +637,25 @@ abstract class RenderBox extends RenderObject {
     assert(attached);
     Matrix4 transform = new Matrix4.identity();
     RenderObject renderer = this;
-    while (renderer != null) {
-      renderer.applyPaintTransform(transform);
-      renderer = renderer.parent;
+    while (renderer.parent is RenderObject) {
+      RenderObject rendererParent = renderer.parent;
+      rendererParent.applyPaintTransform(renderer, transform);
+      renderer = rendererParent;
     }
     /* double det = */ transform.invert();
     // TODO(abarth): Check the determinant for degeneracy.
     return _transformPoint(transform, point);
   }
 
-  /// Convert the given point from the local coordiante system for this box to
-  /// the global coordinate sytem
+  /// Convert the given point from the local coordinate system for this box to
+  /// the global coordinate system.
   Point localToGlobal(Point point) {
     List<RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != null; renderer = renderer.parent)
       renderers.add(renderer);
     Matrix4 transform = new Matrix4.identity();
-    for (RenderObject renderer in renderers.reversed)
-      renderer.applyPaintTransform(transform);
+    for (int index = renderers.length - 1; index > 0; index -= 1)
+      renderers[index].applyPaintTransform(renderers[index - 1], transform);
     return _transformPoint(transform, point);
   }
 

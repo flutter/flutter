@@ -1036,12 +1036,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// be recorded on separate compositing layers.
   void paint(PaintingContext context, Offset offset) { }
 
-  /// If this render object applies a transform before painting, apply that
-  /// transform to the given matrix
+  /// Applies the transform that would be applied when painting the given child
+  /// to the given matrix.
   ///
   /// Used by coordinate conversion functions to translate coordinates local to
   /// one render object into coordinates local to another render object.
-  void applyPaintTransform(Matrix4 transform) { }
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child.parent == this);
+  }
 
 
   // EVENTS

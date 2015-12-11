@@ -420,12 +420,12 @@ class RenderBlockViewport extends RenderBlockBase {
     context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
   }
 
-  void applyPaintTransform(Matrix4 transform) {
-    super.applyPaintTransform(transform);
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
     if (isVertical)
       transform.translate(0.0, startOffset);
     else
       transform.translate(startOffset, 0.0);
+    super.applyPaintTransform(child, transform);
   }
 
   bool hitTestChildren(HitTestResult result, { Point position }) {

@@ -298,17 +298,18 @@ abstract class InkFeature {
     assert(referenceBox.attached);
     assert(!_debugDisposed);
     // find the chain of renderers from us to the feature's referenceBox
-    List<RenderBox> descendants = <RenderBox>[];
+    List<RenderBox> descendants = <RenderBox>[referenceBox];
     RenderBox node = referenceBox;
     while (node != renderer) {
-      descendants.add(node);
       node = node.parent;
       assert(node != null);
+      descendants.add(node);
     }
     // determine the transform that gets our coordinate system to be like theirs
     Matrix4 transform = new Matrix4.identity();
-    for (RenderBox descendant in descendants.reversed)
-      descendant.applyPaintTransform(transform);
+    assert(descendants.length >= 2);
+    for (int index = descendants.length - 1; index > 0; index -= 1)
+      descendants[index].applyPaintTransform(descendants[index - 1], transform);
     paintFeature(canvas, transform);
   }
 

@@ -974,9 +974,9 @@ class RenderTransform extends RenderProxyBox {
     }
   }
 
-  void applyPaintTransform(Matrix4 transform) {
-    super.applyPaintTransform(transform);
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.multiply(_effectiveTransform);
+    super.applyPaintTransform(child, transform);
   }
 
   void debugDescribeSettings(List<String> settings) {
