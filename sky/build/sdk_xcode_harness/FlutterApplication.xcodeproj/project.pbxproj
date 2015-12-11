@@ -13,7 +13,6 @@
 		9E07CFB51BE82D2600BCD8DE /* FlutterApplication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; };
 		9E07CFB61BE82D2600BCD8DE /* FlutterApplication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9E07CFBA1BE82DFF00BCD8DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CF9D1BE8280A00BCD8DE /* main.m */; };
-		9E07CFF41BEAB58200BCD8DE /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFF31BEAB58200BCD8DE /* app.flx */; };
 		9E0FB06C1C1A3F5600DDAEFA /* FlutterApplication.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */; };
 		9E0FB06D1C1A3F5600DDAEFA /* InstructionsSnapshotSource.S in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */; };
 		9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */; };
@@ -63,10 +62,6 @@
 		9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9E07CFAB1BE8280A00BCD8DE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9E07CFAD1BE8280A00BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9E07CFE51BEAA35200BCD8DE /* InstructionsSnapshot.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; name = InstructionsSnapshot.S; path = Generated/InstructionsSnapshot.S; sourceTree = "<group>"; };
-		9E07CFE61BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kDartIsolateSnapshotBuffer.c; path = Generated/kDartIsolateSnapshotBuffer.c; sourceTree = "<group>"; };
-		9E07CFE71BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = kDartVmIsolateSnapshotBuffer.c; path = Generated/kDartVmIsolateSnapshotBuffer.c; sourceTree = "<group>"; };
-		9E07CFF31BEAB58200BCD8DE /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
 		9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FlutterApplication.c; sourceTree = "<group>"; };
 		9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = InstructionsSnapshotSource.S; sourceTree = "<group>"; };
 		9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
@@ -128,7 +123,6 @@
 		9E07CF881BE7F4D200BCD8DE /* FlutterApplication */ = {
 			isa = PBXGroup;
 			children = (
-				9E07CFD61BE997D800BCD8DE /* Generated */,
 				9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */,
 				9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */,
 				9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */,
@@ -156,17 +150,6 @@
 				9E07CF9D1BE8280A00BCD8DE /* main.m */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		9E07CFD61BE997D800BCD8DE /* Generated */ = {
-			isa = PBXGroup;
-			children = (
-				9E07CFF31BEAB58200BCD8DE /* app.flx */,
-				9E07CFE51BEAA35200BCD8DE /* InstructionsSnapshot.S */,
-				9E07CFE61BEAA35200BCD8DE /* kDartIsolateSnapshotBuffer.c */,
-				9E07CFE71BEAA35200BCD8DE /* kDartVmIsolateSnapshotBuffer.c */,
-			);
-			name = Generated;
 			sourceTree = "<group>";
 		};
 		9E40462C1C1B617500A4B87C /* Tools */ = {
@@ -342,7 +325,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9E07CFF41BEAB58200BCD8DE /* app.flx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
