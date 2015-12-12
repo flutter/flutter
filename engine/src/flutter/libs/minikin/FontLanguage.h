@@ -36,7 +36,7 @@ public:
     FontLanguage(const char* buf, size_t length);
 
     bool operator==(const FontLanguage other) const {
-        return !isUnsupported() && isEqualScript(other) && isEqualLanguage(other);
+        return !isUnsupported() && isEqualScript(other) && mLanguage == other.mLanguage;
     }
 
     bool operator!=(const FontLanguage other) const {
@@ -46,8 +46,7 @@ public:
     bool isUnsupported() const { return mLanguage == 0ul; }
     bool hasEmojiFlag() const { return mSubScriptBits & kEmojiFlag; }
 
-    bool isEqualLanguage(const FontLanguage other) const { return mLanguage == other.mLanguage; }
-    bool isEqualScript(const FontLanguage other) const;
+    bool isEqualScript(const FontLanguage& other) const;
 
     // Returns true if this script supports the given script. For example, ja-Jpan supports Hira,
     // ja-Hira doesn't support Jpan.
@@ -55,8 +54,8 @@ public:
 
     std::string getString() const;
 
-    // 0 = no match, 1 = language matches
-    int match(const FontLanguage other) const;
+    // 0 = no match, 1 = script match, 2 = script and primary language match.
+    int getScoreFor(const FontLanguage other) const;
 
     uint64_t getIdentifier() const { return (uint64_t)mScript << 32 | (uint64_t)mLanguage; }
 
@@ -80,8 +79,11 @@ private:
     uint8_t mSubScriptBits;
 
     static uint8_t scriptToSubScriptBits(uint32_t script);
+    bool supportsScript(uint8_t requestedBits) const;
 };
 
+// Due to the limit of font fallback cost calculation, we can't use anything more than 17 languages.
+const size_t FONT_LANGUAGES_LIMIT = 17;
 typedef std::vector<FontLanguage> FontLanguages;
 
 }  // namespace android

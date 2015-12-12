@@ -18,6 +18,7 @@
 
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
+#include <algorithm>
 
 #include "unicode/unistr.h"
 #include "unicode/unorm2.h"
@@ -103,28 +104,134 @@ FontCollection::~FontCollection() {
     }
 }
 
+// Special scores for the font fallback.
+const uint32_t kUnsupportedFontScore = 0;
+const uint32_t kFirstFontScore = UINT32_MAX;
+
+// Calculates a font score.
+// The score of the font family is based on three subscores.
+//  - Coverage Score: How well the font family covers the given character or variation sequence.
+//  - Language Score: How well the font family is appropriate for the language.
+//  - Variant Score: Whether the font family matches the variant. Note that this variant is not the
+//    one in BCP47. This is our own font variant (e.g., elegant, compact).
+//
+// Then, there is a priority for these three subscores as follow:
+//   Coverage Score > Language Score > Variant Score
+// The returned score reflects this priority order.
+//
+// Note that there are two special scores.
+//  - kUnsupportedFontScore: When the font family doesn't support the variation sequence or even its
+//    base character.
+//  - kFirstFontScore: When the font is the first font family in the collection and it supports the
+//    given character or variation sequence.
+uint32_t FontCollection::calcFamilyScore(uint32_t ch, uint32_t vs, int variant, uint32_t langListId,
+                                        FontFamily* fontFamily) const {
+
+    const uint32_t coverageScore = calcCoverageScore(ch, vs, fontFamily);
+    if (coverageScore == kFirstFontScore || coverageScore == kUnsupportedFontScore) {
+        // No need to calculate other scores.
+        return coverageScore;
+    }
+
+    const uint32_t languageScore = calcLanguageMatchingScore(langListId, *fontFamily);
+    const uint32_t variantScore = calcVariantMatchingScore(variant, *fontFamily);
+
+    // Subscores are encoded into 31 bits representation to meet the subscore priority.
+    // The highest 2 bits are for coverage score, then following 28 bits are for language score,
+    // then the last 1 bit is for variant score.
+    return coverageScore << 29 | languageScore << 1 | variantScore;
+}
+
+// Calculates a font score based on variation sequence coverage.
+// - Returns kUnsupportedFontScore if the font doesn't support the variation sequence or its base
+//   character.
+// - Returns kFirstFontScore if the font family is the first font family in the collection and it
+//   supports the given character or variation sequence.
+// - Returns 3 if the font family supports the variation sequence.
+// - Returns 2 if the vs is a color variation selector (U+FE0F) and if the font is an emoji font.
+// - Returns 2 if the vs is a text variation selector (U+FE0E) and if the font is not an emoji font.
+// - Returns 1 if the variation selector is not specified or if the font family only supports the
+//   variation sequence's base character.
+uint32_t FontCollection::calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily* fontFamily) const {
+    const bool hasVSGlyph = (vs != 0) && fontFamily->hasVariationSelector(ch, vs);
+    if (!hasVSGlyph && !fontFamily->getCoverage()->get(ch)) {
+        // The font doesn't support either variation sequence or even the base character.
+        return kUnsupportedFontScore;
+    }
+
+    if ((vs == 0 || hasVSGlyph) && mFamilies[0] == fontFamily) {
+        // If the first font family supports the given character or variation sequence, always use
+        // it.
+        return kFirstFontScore;
+    }
+
+    if (vs == 0) {
+        return 1;
+    }
+
+    if (hasVSGlyph) {
+        return 3;
+    }
+
+    if (vs == 0xFE0F || vs == 0xFE0E) {
+        // TODO use all language in the list.
+        const FontLanguage lang = FontLanguageListCache::getById(fontFamily->langId())[0];
+        const bool hasEmojiFlag = lang.hasEmojiFlag();
+        if (vs == 0xFE0F) {
+            return hasEmojiFlag ? 2 : 1;
+        } else {  // vs == 0xFE0E
+            return hasEmojiFlag ? 1 : 2;
+        }
+    }
+    return 1;
+}
+
+// Calculates font scores based on the script matching and primary langauge matching.
+//
+// If the font's script doesn't support the requested script, the font gets a score of 0. If the
+// font's script supports the requested script and the font has the same primary language as the
+// requested one, the font gets a score of 2. If the font's script supports the requested script
+// but the primary language is different from the requested one, the font gets a score of 1.
+//
+// If two languages in the requested list have the same language score, the font matching with
+// higher priority language gets a higher score. For example, in the case the user requested
+// language list is "ja-Jpan,en-Latn". The score of for the font of "ja-Jpan" gets a higher score
+// than the font of "en-Latn".
+//
+// To achieve the above two conditions, the language score is determined as follows:
+//   LanguageScore = s(0) * 3^(m - 1) + s(1) * 3^(m - 2) + ... + s(m - 2) * 3 + s(m - 1)
+// Here, m is the maximum number of languages to be compared, and s(i) is the i-th language's
+// matching score. The possible values of s(i) are 0, 1 and 2.
+uint32_t FontCollection::calcLanguageMatchingScore(
+        uint32_t userLangListId, const FontFamily& fontFamily) {
+    const FontLanguages& langList = FontLanguageListCache::getById(userLangListId);
+    // TODO use all language in the list.
+    FontLanguage fontLanguage = FontLanguageListCache::getById(fontFamily.langId())[0];
+
+    const size_t maxCompareNum = std::min(langList.size(), FONT_LANGUAGES_LIMIT);
+    uint32_t score = fontLanguage.getScoreFor(langList[0]);  // maxCompareNum can't be zero.
+    for (size_t i = 1; i < maxCompareNum; ++i) {
+        score = score * 3u + fontLanguage.getScoreFor(langList[i]);
+    }
+    return score;
+}
+
+// Calculates a font score based on variant ("compact" or "elegant") matching.
+//  - Returns 1 if the font doesn't have variant or the variant matches with the text style.
+//  - No score if the font has a variant but it doesn't match with the text style.
+uint32_t FontCollection::calcVariantMatchingScore(int variant, const FontFamily& fontFamily) {
+    return (fontFamily.variant() == 0 || fontFamily.variant() == variant) ? 1 : 0;
+}
+
 // Implement heuristic for choosing best-match font. Here are the rules:
 // 1. If first font in the collection has the character, it wins.
-// 2. If a font matches language, it gets a score of 2.
-// 3. Matching the "compact" or "elegant" variant adds one to the score.
-// 4. If there is a variation selector and a font supports the complete variation sequence, we add
-//    8 to the score.
-// 5. If there is a color variation selector (U+FE0F), we add 4 to the score if the font is an emoji
-//    font. This additional score of 4 is only given if the base character is supported in the font,
-//    but not the whole variation sequence.
-// 6. If there is a text variation selector (U+FE0E), we add 4 to the score if the font is not an
-//    emoji font. This additional score of 4 is only given if the base character is supported in the
-//    font, but not the whole variation sequence.
-// 7. Highest score wins, with ties resolved to the first font.
+// 2. Calculate a score for the font family. See comments in calcFamilyScore for the detail.
+// 3. Highest score wins, with ties resolved to the first font.
 FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             uint32_t langListId, int variant) const {
     if (ch >= mMaxChar) {
         return NULL;
     }
-
-    const FontLanguages& langList = FontLanguageListCache::getById(langListId);
-    // TODO: use all languages in langList.
-    const FontLanguage lang = (langList.size() == 0) ? FontLanguage() : langList[0];
 
     // Even if the font supports variation sequence, mRanges isn't aware of the base character of
     // the sequence. Search all FontFamilies if variation sequence is specified.
@@ -141,40 +248,19 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
     ALOGD("querying range %zd:%zd\n", range.start, range.end);
 #endif
     FontFamily* bestFamily = nullptr;
-    int bestScore = -1;
+    uint32_t bestScore = kUnsupportedFontScore;
     for (size_t i = range.start; i < range.end; i++) {
         FontFamily* family = familyVec[i];
-        const bool hasVSGlyph = (vs != 0) && family->hasVariationSelector(ch, vs);
-        if (hasVSGlyph || family->getCoverage()->get(ch)) {
-            if ((vs == 0 || hasVSGlyph) && mFamilies[0] == family) {
-                // If the first font family in collection supports the given character or sequence,
-                // always use it.
-                return family;
-            }
-
-            // TODO use all language in the list.
-            FontLanguage fontLang = FontLanguageListCache::getById(family->langId())[0];
-            int score = lang.match(fontLang) * 2;
-            if (family->variant() == 0 || family->variant() == variant) {
-                score++;
-            }
-            if (hasVSGlyph) {
-                score += 8;
-            } else if (((vs == 0xFE0F) && fontLang.hasEmojiFlag()) ||
-                    ((vs == 0xFE0E) && !fontLang.hasEmojiFlag())) {
-                score += 4;
-            }
-            if (score > bestScore) {
-                bestScore = score;
-                bestFamily = family;
-            }
+        const uint32_t score = calcFamilyScore(ch, vs, variant, langListId, family);
+        if (score == kFirstFontScore) {
+            // If the first font family supports the given character or variation sequence, always
+            // use it.
+            return family;
         }
-    }
-    if (bestFamily == nullptr && vs != 0) {
-        // If no fonts support the codepoint and variation selector pair,
-        // fallback to select a font family that supports just the base
-        // character, ignoring the variation selector.
-        return getFamilyForChar(ch, 0, langListId, variant);
+        if (score > bestScore) {
+            bestScore = score;
+            bestFamily = family;
+        }
     }
     if (bestFamily == nullptr && !mFamilyVec.empty()) {
         UErrorCode errorCode = U_ZERO_ERROR;

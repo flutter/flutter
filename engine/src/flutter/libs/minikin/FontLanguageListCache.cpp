@@ -92,15 +92,20 @@ static FontLanguages constructFontLanguages(const std::string& input) {
         uint64_t identifier = lang.getIdentifier();
         if (!lang.isUnsupported() && seen.count(identifier) == 0) {
             result.push_back(lang);
+            if (result.size() == FONT_LANGUAGES_LIMIT) {
+              break;
+            }
             seen.insert(identifier);
         }
     }
-    locale.assign(input, currentIdx, input.size() - currentIdx);
-    size_t length = toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locale);
-    FontLanguage lang(langTag, length);
-    uint64_t identifier = lang.getIdentifier();
-    if (!lang.isUnsupported() && seen.count(identifier) == 0) {
-        result.push_back(lang);
+    if (result.size() < FONT_LANGUAGES_LIMIT) {
+      locale.assign(input, currentIdx, input.size() - currentIdx);
+      size_t length = toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locale);
+      FontLanguage lang(langTag, length);
+      uint64_t identifier = lang.getIdentifier();
+      if (!lang.isUnsupported() && seen.count(identifier) == 0) {
+          result.push_back(lang);
+      }
     }
     return result;
 }

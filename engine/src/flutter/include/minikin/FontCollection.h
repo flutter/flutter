@@ -67,6 +67,16 @@ private:
 
     FontFamily* getFamilyForChar(uint32_t ch, uint32_t vs, uint32_t langListId, int variant) const;
 
+    uint32_t calcFamilyScore(uint32_t ch, uint32_t vs, int variant, uint32_t langListId,
+                             FontFamily* fontFamily) const;
+
+    uint32_t calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily* fontFamily) const;
+
+    static uint32_t calcLanguageMatchingScore(uint32_t userLangListId,
+                                              const FontFamily& fontFamily);
+
+    static uint32_t calcVariantMatchingScore(int variant, const FontFamily& fontFamily);
+
     // static for allocating unique id's
     static uint32_t sNextId;
 

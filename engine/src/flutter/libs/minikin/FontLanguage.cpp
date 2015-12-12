@@ -115,21 +115,29 @@ std::string FontLanguage::getString() const {
     return std::string(buf, i);
 }
 
-bool FontLanguage::isEqualScript(const FontLanguage other) const {
+bool FontLanguage::isEqualScript(const FontLanguage& other) const {
     return other.mScript == mScript;
+}
+
+bool FontLanguage::supportsScript(uint8_t requestedBits) const {
+    return requestedBits != 0 && (mSubScriptBits & requestedBits) == requestedBits;
 }
 
 bool FontLanguage::supportsHbScript(hb_script_t script) const {
     static_assert(SCRIPT_TAG('J', 'p', 'a', 'n') == HB_TAG('J', 'p', 'a', 'n'),
                   "The Minikin script and HarfBuzz hb_script_t have different encodings.");
     if (script == mScript) return true;
-    uint8_t requestedBits = scriptToSubScriptBits(script);
-    return requestedBits != 0 && (mSubScriptBits & requestedBits) == requestedBits;
+    return supportsScript(scriptToSubScriptBits(script));
 }
 
-int FontLanguage::match(const FontLanguage other) const {
-    // TODO: Use script for matching.
-    return *this == other;
+int FontLanguage::getScoreFor(const FontLanguage other) const {
+    if (isUnsupported() || other.isUnsupported()) {
+        return 0;
+    } else if (isEqualScript(other) || supportsScript(other.mSubScriptBits)) {
+        return mLanguage == other.mLanguage ? 2 : 1;
+    } else {
+        return 0;
+    }
 }
 
 #undef SCRIPT_TAG
