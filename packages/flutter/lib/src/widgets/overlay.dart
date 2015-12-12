@@ -22,29 +22,40 @@ class OverlayEntry {
   bool get opaque => _opaque;
   bool _opaque;
   void set opaque (bool value) {
+    assert(_overlay != null);
     if (_opaque == value)
       return;
-    _opaque = value;
-    markNeedsBuild();
+    _overlay.setState(() {
+      _opaque = value;
+    });
   }
 
-  OverlayState _state;
+  OverlayState _overlay;
+  final GlobalKey _key = new GlobalKey();
 
   /// Remove this entry from the overlay.
   void remove() {
-    _state?._remove(this);
-    _state = null;
+    _overlay?._remove(this);
+    _overlay = null;
   }
 
   /// Cause this entry to rebuild during the next pipeline flush.
   ///
   /// You need to call this function if the output of [builder] has changed.
   void markNeedsBuild() {
-    // TODO(ianh): find a way to make this not rebuild the entire overlay
-    _state?.setState(() {});
+    _key.currentState?.setState(() { /* the state that changed is in the builder */ });
   }
 
   String toString() => '$runtimeType@$hashCode(opaque: $opaque)';
+}
+
+class _OverlayEntry extends StatefulComponent {
+  _OverlayEntry(OverlayEntry entry) : entry = entry, super(key: entry._key);
+  final OverlayEntry entry;
+  _OverlayEntryState createState() => new _OverlayEntryState();
+}
+class _OverlayEntryState extends State<_OverlayEntry> {
+  Widget build(BuildContext context) => config.entry.builder(context);
 }
 
 /// A [Stack] of entries that can be managed independently.
@@ -77,9 +88,9 @@ class OverlayState extends State<Overlay> {
   /// If [above] is non-null, the entry is inserted just above [above].
   /// Otherwise, the entry is inserted on top.
   void insert(OverlayEntry entry, { OverlayEntry above }) {
-    assert(entry._state == null);
-    assert(above == null || (above._state == this && _entries.contains(above)));
-    entry._state = this;
+    assert(entry._overlay == null);
+    assert(above == null || (above._overlay == this && _entries.contains(above)));
+    entry._overlay = this;
     setState(() {
       int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
       _entries.insert(index, entry);
@@ -91,10 +102,10 @@ class OverlayState extends State<Overlay> {
   /// If [above] is non-null, the entries are inserted just above [above].
   /// Otherwise, the entries are inserted on top.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above }) {
-    assert(above == null || (above._state == this && _entries.contains(above)));
+    assert(above == null || (above._overlay == this && _entries.contains(above)));
     for (OverlayEntry entry in entries) {
-      assert(entry._state == null);
-      entry._state = this;
+      assert(entry._overlay == null);
+      entry._overlay = this;
     }
     setState(() {
       int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
@@ -136,10 +147,7 @@ class OverlayState extends State<Overlay> {
 
     for (int i = _entries.length - 1; i >= 0; --i) {
       OverlayEntry entry = _entries[i];
-      backwardsChildren.add(new KeyedSubtree(
-        key: new ObjectKey(entry),
-        child: entry.builder(context)
-      ));
+      backwardsChildren.add(new _OverlayEntry(entry));
       if (entry.opaque)
         break;
     }
