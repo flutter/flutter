@@ -21,7 +21,7 @@ class StockRowPartKey extends Key {
         && stock == typedOther.stock
         && part == typedOther.part;
   }
-  int get hashCode => 37 * (37 * (37 * (373) + identityHashCode(keySalt)) + identityHashCode(stock)) + identityHashCode(part);
+  int get hashCode => hashValues(keySalt, stock, part);
   String toString() => '[$runtimeType ${keySalt.toString().split(".")[1]}:${stock.symbol}:${part.toString().split(".")[1]}]';
 }
 

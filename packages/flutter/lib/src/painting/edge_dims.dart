@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+import 'dart:ui' show hashValues;
 
 /// An immutable set of offsets in each of the four cardinal directions.
 ///
@@ -136,14 +137,7 @@ class EdgeDims {
            left == typedOther.left;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + top.hashCode;
-    value = 37 * value + left.hashCode;
-    value = 37 * value + bottom.hashCode;
-    value = 37 * value + right.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(top, left, bottom, right);
 
   String toString() => "EdgeDims($top, $right, $bottom, $left)";
 }

@@ -39,12 +39,7 @@ class BorderSide {
            width == typedOther.width;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + color.hashCode;
-    value = 37 * value + width.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(color, width);
 
   String toString() => 'BorderSide($color, $width)';
 }
@@ -96,14 +91,7 @@ class Border {
            left == typedOther.left;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + top.hashCode;
-    value = 37 * value + right.hashCode;
-    value = 37 * value + bottom.hashCode;
-    value = 37 * value + left.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(top, right, bottom, left);
 
   String toString() => 'Border($top, $right, $bottom, $left)';
 }
@@ -199,14 +187,7 @@ class BoxShadow {
            spreadRadius == typedOther.spreadRadius;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + color.hashCode;
-    value = 37 * value + offset.hashCode;
-    value = 37 * value + blurRadius.hashCode;
-    value = 37 * value + spreadRadius.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
 
   String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
 }
@@ -282,25 +263,7 @@ class LinearGradient extends Gradient {
     return true;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + begin.hashCode;
-    value = 37 * value + end.hashCode;
-    value = 37 * value + tileMode.hashCode;
-    if (colors != null) {
-      for (int i = 0; i < colors.length; i += 1)
-        value = 37 * value + colors[i].hashCode;
-    } else {
-      value = 37 * value + null.hashCode;
-    }
-    if (stops != null) {
-      for (int i = 0; i < stops.length; i += 1)
-        value = 37 * value + stops[i].hashCode;
-    } else {
-      value = 37 * value + null.hashCode;
-    }
-    return value;
-  }
+  int get hashCode => hashValues(begin, end, tileMode, hashList(colors), hashList(stops));
 
   String toString() {
     return 'LinearGradient($begin, $end, $colors, $stops, $tileMode)';
@@ -374,25 +337,7 @@ class RadialGradient extends Gradient {
     return true;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + center.hashCode;
-    value = 37 * value + radius.hashCode;
-    value = 37 * value + tileMode.hashCode;
-    if (colors != null) {
-      for (int i = 0; i < colors.length; i += 1)
-        value = 37 * value + colors[i].hashCode;
-    } else {
-      value = 37 * value + null.hashCode;
-    }
-    if (stops != null) {
-      for (int i = 0; i < stops.length; i += 1)
-        value = 37 * value + stops[i].hashCode;
-    } else {
-      value = 37 * value + null.hashCode;
-    }
-    return value;
-  }
+  int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops));
 
   String toString() {
     return 'RadialGradient($center, $radius, $colors, $stops, $tileMode)';
@@ -582,12 +527,7 @@ class FractionalOffset {
     return x == typedOther.x &&
            y == typedOther.y;
   }
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + x.hashCode;
-    value = 37 * value + y.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(x, y);
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     if (a == null && b == null)
       return null;
@@ -688,16 +628,7 @@ class BackgroundImage {
            _imageResource == typedOther._imageResource;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + fit.hashCode;
-    value = 37 * value + repeat.hashCode;
-    value = 37 * value + centerSlice.hashCode;
-    value = 37 * value + colorFilter.hashCode;
-    value = 37 * value + alignment.hashCode;
-    value = 37 * value + _imageResource.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(fit, repeat, centerSlice, colorFilter, alignment, _imageResource);
 
   String toString() => 'BackgroundImage($fit, $repeat)';
 }
@@ -850,15 +781,15 @@ class BoxDecoration extends Decoration {
   }
 
   int get hashCode {
-    int value = 373;
-    value = 37 * value + backgroundColor.hashCode;
-    value = 37 * value + backgroundImage.hashCode;
-    value = 37 * value + border.hashCode;
-    value = 37 * value + borderRadius.hashCode;
-    value = 37 * value + boxShadow.hashCode;
-    value = 37 * value + gradient.hashCode;
-    value = 37 * value + shape.hashCode;
-    return value;
+    return hashValues(
+      backgroundColor,
+      backgroundImage,
+      border,
+      borderRadius,
+      boxShadow,
+      gradient,
+      shape
+    );
   }
 
   String toString([String prefix = '']) {

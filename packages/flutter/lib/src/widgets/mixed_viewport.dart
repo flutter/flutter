@@ -63,7 +63,7 @@ class _ChildKey {
     return type == typedOther.type &&
            key == typedOther.key;
   }
-  int get hashCode => ((373 * 37) + type.hashCode) * 37 + key.hashCode;
+  int get hashCode => hashValues(type, key);
   String toString() => "_ChildKey(type: $type, key: $key)";
 }
 

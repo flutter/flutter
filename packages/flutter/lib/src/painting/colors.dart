@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, lerpDouble;
+import 'dart:ui' show Color, lerpDouble, hashValues;
 
 class HSVColor {
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value);
@@ -113,14 +113,7 @@ class HSVColor {
         && typedOther.value == value;
   }
 
-  int get hashCode {
-    int value = 373;
-    value = 37 * value + alpha.hashCode;
-    value = 37 * value + hue.hashCode;
-    value = 37 * value + saturation.hashCode;
-    value = 37 * value + value.hashCode;
-    return value;
-  }
+  int get hashCode => hashValues(alpha, hue, saturation, value);
 
   String toString() => "HSVColor($alpha, $hue, $saturation, $value)";
 }
