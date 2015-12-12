@@ -32,27 +32,27 @@ class PipeToFile {
 
   Future<int> drain() {
     Completer<int> completer = new Completer();
-    // TODO(mpcomplete): Is it legit to pass an async callback to subscribe?
-    _events.subscribe((List<int> event) async {
-      int signal = event[1];
-      if (MojoHandleSignals.isReadable(signal)) {
-        int result = await _doRead();
-        if (result != MojoResult.kOk) {
+    _events.subscribe((int signal) {
+      (() async {
+        if (MojoHandleSignals.isReadable(signal)) {
+          int result = await _doRead();
+          if (result != MojoResult.kOk) {
+            _events.close();
+            _events = null;
+            _outputStream.close();
+            completer.complete(result);
+          } else {
+            _events.enableReadEvents();
+          }
+        } else if (MojoHandleSignals.isPeerClosed(signal)) {
           _events.close();
           _events = null;
           _outputStream.close();
-          completer.complete(result);
+          completer.complete(MojoResult.kOk);
         } else {
-          _events.enableReadEvents();
+          throw 'Unexpected handle event: ${MojoHandleSignals.string(signal)}';
         }
-      } else if (MojoHandleSignals.isPeerClosed(signal)) {
-        _events.close();
-        _events = null;
-        _outputStream.close();
-        completer.complete(MojoResult.kOk);
-      } else {
-        throw 'Unexpected handle event: ${MojoHandleSignals.string(signal)}';
-      }
+      })();
     });
     return completer.future;
   }
