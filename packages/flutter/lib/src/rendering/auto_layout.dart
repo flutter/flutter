@@ -12,8 +12,14 @@ import 'object.dart';
 /// variables. Used as a mixin by layout containers and parent data instances
 /// of render boxes taking part in auto layout.
 abstract class _AutoLayoutParamMixin {
-  // Ideally, the edges would all be final, but then they would have to be
-  // initialized before the constructor. Not sure how to do that using a Mixin.
+
+  void _setupLayoutParameters(dynamic context) {
+    _leftEdge = new al.Param.withContext(context);
+    _rightEdge = new al.Param.withContext(context);
+    _topEdge = new al.Param.withContext(context);
+    _bottomEdge = new al.Param.withContext(context);
+  }
+
   al.Param _leftEdge;
   al.Param _rightEdge;
   al.Param _topEdge;
@@ -31,13 +37,6 @@ abstract class _AutoLayoutParamMixin {
 
   al.Expression get horizontalCenter => (_leftEdge + _rightEdge) / al.cm(2.0);
   al.Expression get verticalCenter => (_topEdge + _bottomEdge) / al.cm(2.0);
-
-  void _setupLayoutParameters(dynamic context) {
-    _leftEdge = new al.Param.withContext(context);
-    _rightEdge = new al.Param.withContext(context);
-    _topEdge = new al.Param.withContext(context);
-    _bottomEdge = new al.Param.withContext(context);
-  }
 
   void _setupEditVariablesInSolver(al.Solver solver, double priority) {
     solver.addEditVariables(<al.Variable>[

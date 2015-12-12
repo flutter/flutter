@@ -4,7 +4,7 @@
 
 /// A [Future]-based library for making HTTP requests.
 ///
-/// Let library is based on Dart's `http` package, but we have removed the
+/// This library is based on Dart's `http` package, but we have removed the
 /// dependency on mirrors and added a `mojo`-based HTTP client.
 library http;
 

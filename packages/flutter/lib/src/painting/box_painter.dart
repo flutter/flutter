@@ -644,7 +644,8 @@ class BackgroundImage {
 
   final List<VoidCallback> _listeners = <VoidCallback>[];
 
-  /// Adds a listener for background-image changes (e.g., arrives from the network).
+  /// Adds a listener for background-image changes (e.g., for when it arrives
+  /// from the network).
   void _addChangeListener(VoidCallback listener) {
     // We add the listener to the _imageResource first so that the first change
     // listener doesn't get callback synchronously if the image resource is
