@@ -26,6 +26,11 @@
     <GlyphID id="6" name="U+4F60"/>
     <GlyphID id="7" name="U+4FAE"/>
     <GlyphID id="8" name="U+845B"/>
+    <GlyphID id="9" name="U+3402"/>
+    <GlyphID id="10" name="U+9AA8"/>
+    <GlyphID id="11" name="U+35A8"/>
+    <GlyphID id="12" name="U+35B6_VS17"/>
+    <GlyphID id="13" name="U+35C5_VS17"/>
   </GlyphOrder>
 
   <head>
@@ -151,6 +156,11 @@
     <mtx name="U+4F60" width="500" lsb="93"/>
     <mtx name="U+4FAE" width="500" lsb="93"/>
     <mtx name="U+845B" width="500" lsb="93"/>
+    <mtx name="U+3402" width="500" lsb="93"/>
+    <mtx name="U+9AA8" width="500" lsb="93"/>
+    <mtx name="U+35A8" width="500" lsb="93"/>
+    <mtx name="U+35B6_VS17" width="500" lsb="93"/>
+    <mtx name="U+35C5_VS17" width="500" lsb="93"/>
   </hmtx>
 
   <cmap>
@@ -164,7 +174,16 @@
       <map code="0x4F60" name="U+4F60" />
       <map code="0x4FAE" name="U+4FAE" />
       <map code="0x845B" name="U+845B" />
+      <map code="0x3402" name="U+3402" />
+      <map code="0x9AA8" name="U+9AA8" />
+      <map code="0x35A8" name="U+35A8" />
     </cmap_format_12>
+    <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="3">
+      <map uvs="0xE0100" uv="0x3402" name="None"/>
+      <map uvs="0xE0100" uv="0x35A8" name="None"/>
+      <map uvs="0xE0100" uv="0x35B6" name="U+35B6_VS17"/>
+      <map uvs="0xE0100" uv="0x35C5" name="U+35C5_VS17"/>
+    </cmap_format_14>
   </cmap>
 
   <loca>
@@ -202,6 +221,21 @@
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
     <TTGlyph name="U+845B" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="U+3402" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="U+9AA8" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="U+35A8" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="U+35B6_VS17" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="U+35C5_VS17" xMin="0" yMin="0" xMax="0" yMax="0">
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
   </glyf>
