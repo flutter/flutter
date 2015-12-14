@@ -1,139 +1,120 @@
 part of flutter_sprites;
 
-// TODO: The sound effects should probably use Android's SoundPool instead of
-// MediaPlayer as it is more efficient and flexible for playing back sound effects
-
-typedef void SoundEffectStreamCallback(SoundEffectStream stream);
-
+/// An audio asset loaded by the SoundEffectPlayer.
 class SoundEffect {
-  SoundEffect(this._pipeFuture);
+  SoundEffect(this._soundId);
 
-  // TODO: Remove load method from SoundEffect
-  Future load() async {
-    _data = await _pipeFuture;
+  int _soundId;
+}
+
+/// A sound being played by the SoundEffectPlayer.
+class SoundEffectStream {
+  SoundEffectStream(SoundEffectPlayer player, int streamId, {
+    double leftVolume,
+    double rightVolume,
+    double pitch
+  }) {
+    _player = player;
+    _streamId = streamId;
+    _paused = false;
+    _leftVolume = leftVolume;
+    _rightVolume = rightVolume;
+    _pitch = pitch;
   }
 
-  Future<MojoDataPipeConsumer> _pipeFuture;
-  MojoDataPipeConsumer _data;
+  SoundEffectPlayer _player;
+  int _streamId;
+
+  SoundPoolProxy get _soundPool => _player._soundPool;
+
+  void stop() {
+    _soundPool.ptr.stop(_streamId);
+  }
+
+  bool get paused => _paused;
+  bool _paused;
+  void set paused(bool value) {
+    _paused = value;
+    if (_paused) {
+      _soundPool.ptr.pause(_streamId);
+    } else {
+      _soundPool.ptr.resume(_streamId);
+    }
+  }
+
+  double get leftVolume => _leftVolume;
+  double _leftVolume;
+  void set leftVolume(double value) {
+    _leftVolume = value;
+    _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
+  }
+
+  double get rightVolume => _rightVolume;
+  double _rightVolume;
+  void set rightVolume(double value) {
+    _rightVolume = value;
+    _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
+  }
+
+  double get pitch => _pitch;
+  double _pitch;
+  void set pitch(double value) {
+    _pitch = value;
+    _soundPool.ptr.setRate(_streamId, _pitch);
+  }
 }
-
-class SoundEffectStream {
-  SoundEffectStream(
-    this.sound,
-    this.loop,
-    this.volume,
-    this.pitch,
-    this.pan,
-    this.onSoundComplete
-  );
-
-  // TODO: Make these properties work
-  SoundEffect sound;
-  bool playing = false;
-  bool loop = false;
-  double volume = 1.0;
-  double pitch = 1.0;
-  double pan = 0.0;
-
-  // TODO: Implement completion callback. On completion, sounds should
-  // also be removed from the list of playing sounds.
-  SoundEffectStreamCallback onSoundComplete;
-
-  MediaPlayerProxy _player;
-}
-
-SoundEffectPlayer _sharedSoundEffectPlayer;
 
 class SoundEffectPlayer {
-
-  static SoundEffectPlayer sharedInstance() {
-    if (_sharedSoundEffectPlayer == null) {
-      _sharedSoundEffectPlayer = new SoundEffectPlayer();
-    }
-    return _sharedSoundEffectPlayer;
+  SoundEffectPlayer(int maxStreams) {
+    MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
+    shell.connectToService(null, mediaService);
+    _soundPool = new SoundPoolProxy.unbound();
+    mediaService.ptr.createSoundPool(_soundPool, maxStreams);
   }
 
-  SoundEffectPlayer() {
-    _mediaService = new MediaServiceProxy.unbound();
-    shell.connectToService(null, _mediaService);
+  SoundPoolProxy _soundPool;
+  bool _paused;
+  int _nextStreamId = 0;
+
+  Future<SoundEffect> load(MojoDataPipeConsumer data) async {
+    SoundPoolLoadResponseParams result = await _soundPool.ptr.load(data);
+    if (result.success)
+      return new SoundEffect(result.soundId);
+
+    throw new Exception('Unable to load sound');
   }
 
-  MediaServiceProxy _mediaService;
-  List<SoundEffectStream> _soundEffectStreams = <SoundEffectStream>[];
-
-  // TODO: This should no longer be needed when moving to SoundPool backing
-  Map<SoundEffect,MediaPlayerProxy> _mediaPlayers = <SoundEffect, MediaPlayerProxy>{};
-
-  Future _prepare(SoundEffectStream playingSound) async {
-    await playingSound._player.ptr.prepare(playingSound.sound._data);
-  }
-
-  // TODO: Move sound loading here
-  // TODO: Support loading sounds from bundles
-  // Future<SoundEffect> load(url) async {
-  //   ...
-  // }
-
-  // TODO: Add sound unloader
-  // unload(SoundEffect effect) {
-  //   ...
-  // }
-
-  // TODO: Add paused property (should pause playback of all sounds)
-  bool paused;
-
-  SoundEffectStream play(
-    SoundEffect sound,
-    [bool loop = false,
-      double volume = 1.0,
-      double pitch = 1.0,
-      double pan = 0.0,
-      SoundEffectStreamCallback callback = null]) {
-
-    // Create new PlayingSound object
-    SoundEffectStream playingSound = new SoundEffectStream(
-      sound,
-      loop,
-      volume,
-      pitch,
-      pan,
-      callback
+  Future<SoundEffectStream> play(SoundEffect sound, {
+    double leftVolume: 1.0,
+    double rightVolume: 1.0,
+    bool loop: false,
+    double pitch: 1.0
+  }) async {
+    int streamId = _nextStreamId++;
+    SoundPoolPlayResponseParams result = await _soundPool.ptr.play(
+      sound._soundId, streamId, <double>[leftVolume, rightVolume], loop, pitch
     );
 
-    // TODO: Replace this with calls to SoundPool
-    if (_mediaPlayers[sound] == null) {
-      // Create player
-      playingSound._player = new MediaPlayerProxy.unbound();
-      _mediaService.ptr.createPlayer(playingSound._player);
+    if (result.success) {
+      return new SoundEffectStream(this, streamId,
+        leftVolume: leftVolume,
+        rightVolume: rightVolume,
+        pitch: pitch
+      );
+    }
 
-      // Prepare sound, then play it
-      _prepare(playingSound).then((_) {
-        playingSound._player.ptr.seekTo(0);
-        playingSound._player.ptr.start();
-      });
+    throw new Exception('Unable to play sound');
+  }
 
-      _soundEffectStreams.add(playingSound);
-      _mediaPlayers[sound] = playingSound._player;
+  bool get paused => _paused;
+
+  void set paused(bool value) {
+    _paused = value;
+    if (_paused) {
+      _soundPool.ptr.pauseAll();
     } else {
-      // Reuse player
-      playingSound._player = _mediaPlayers[sound];
-      playingSound._player.ptr.seekTo(0);
-      playingSound._player.ptr.start();
+      _soundPool.ptr.resumeAll();
     }
-
-    return playingSound;
-  }
-
-  void stop(SoundEffectStream stream) {
-    stream._player.ptr.pause();
-    _soundEffectStreams.remove(stream);
-  }
-
-  void stopAll() {
-    for (SoundEffectStream playingSound in _soundEffectStreams) {
-      playingSound._player.ptr.pause();
-    }
-    _soundEffectStreams = <SoundEffectStream>[];
   }
 }
 
