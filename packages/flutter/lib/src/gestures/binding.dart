@@ -16,7 +16,7 @@ import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
 
-abstract class Pointerer extends BindingBase implements HitTestTarget, HitTestable {
+abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestable {
 
   void initInstances() {
     super.initInstances();
@@ -24,8 +24,8 @@ abstract class Pointerer extends BindingBase implements HitTestTarget, HitTestab
     ui.window.onPointerPacket = _handlePointerPacket;
   }
 
-  static Pointerer _instance;
-  static Pointerer get instance => _instance;
+  static Gesturer _instance;
+  static Gesturer get instance => _instance;
 
   void _handlePointerPacket(ByteData serializedPacket) {
     final mojo_bindings.Message message = new mojo_bindings.Message(

@@ -121,7 +121,7 @@ class GestureDetector extends StatefulComponent {
 }
 
 class _GestureDetectorState extends State<GestureDetector> {
-  PointerRouter get _router => Pointerer.instance.pointerRouter;
+  PointerRouter get _router => Gesturer.instance.pointerRouter;
 
   TapGestureRecognizer _tap;
   DoubleTapGestureRecognizer _doubleTap;
@@ -165,7 +165,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     if (config.onTapDown == null && config.onTapUp == null && config.onTap == null && config.onTapCancel == null) {
       _tap = _ensureDisposed(_tap);
     } else {
-      _tap ??= new TapGestureRecognizer(router: _router, gestureArena: Pointerer.instance.gestureArena);
+      _tap ??= new TapGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _tap
         ..onTapDown = config.onTapDown
         ..onTapUp = config.onTapUp
@@ -178,7 +178,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     if (config.onDoubleTap == null) {
       _doubleTap = _ensureDisposed(_doubleTap);
     } else {
-      _doubleTap ??= new DoubleTapGestureRecognizer(router: _router, gestureArena: Pointerer.instance.gestureArena);
+      _doubleTap ??= new DoubleTapGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _doubleTap.onDoubleTap = config.onDoubleTap;
     }
   }
@@ -187,7 +187,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     if (config.onLongPress == null) {
       _longPress = _ensureDisposed(_longPress);
     } else {
-      _longPress ??= new LongPressGestureRecognizer(router: _router, gestureArena: Pointerer.instance.gestureArena);
+      _longPress ??= new LongPressGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _longPress.onLongPress = config.onLongPress;
     }
   }
@@ -196,7 +196,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     if (config.onVerticalDragStart == null && config.onVerticalDragUpdate == null && config.onVerticalDragEnd == null) {
       _verticalDrag = _ensureDisposed(_verticalDrag);
     } else {
-      _verticalDrag ??= new VerticalDragGestureRecognizer(router: _router, gestureArena: Pointerer.instance.gestureArena);
+      _verticalDrag ??= new VerticalDragGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _verticalDrag
         ..onStart = config.onVerticalDragStart
         ..onUpdate = config.onVerticalDragUpdate
@@ -208,7 +208,7 @@ class _GestureDetectorState extends State<GestureDetector> {
     if (config.onHorizontalDragStart == null && config.onHorizontalDragUpdate == null && config.onHorizontalDragEnd == null) {
       _horizontalDrag = _ensureDisposed(_horizontalDrag);
     } else {
-      _horizontalDrag ??= new HorizontalDragGestureRecognizer(router: _router, gestureArena: Pointerer.instance.gestureArena);
+      _horizontalDrag ??= new HorizontalDragGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _horizontalDrag
         ..onStart = config.onHorizontalDragStart
         ..onUpdate = config.onHorizontalDragUpdate
@@ -221,7 +221,7 @@ class _GestureDetectorState extends State<GestureDetector> {
       _pan = _ensureDisposed(_pan);
     } else {
       assert(_scale == null);  // Scale is a superset of pan; just use scale
-      _pan ??= new PanGestureRecognizer(router: _router, gestureArena: Pointerer.instance.gestureArena);
+      _pan ??= new PanGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _pan
         ..onStart = config.onPanStart
         ..onUpdate = config.onPanUpdate
@@ -234,7 +234,7 @@ class _GestureDetectorState extends State<GestureDetector> {
       _scale = _ensureDisposed(_scale);
     } else {
       assert(_pan == null);  // Scale is a superset of pan; just use scale
-      _scale ??= new ScaleGestureRecognizer(router: _router, gestureArena: Pointerer.instance.gestureArena);
+      _scale ??= new ScaleGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _scale
         ..onStart = config.onScaleStart
         ..onUpdate = config.onScaleUpdate

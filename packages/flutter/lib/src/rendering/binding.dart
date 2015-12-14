@@ -85,7 +85,7 @@ void debugDumpLayerTree() {
 
 /// A concrete binding for applications that use the Rendering framework
 /// directly. This is the glue that binds the framework to the Flutter engine.
-class RenderingFlutterBinding extends BindingBase with Scheduler, Renderer, Pointerer {
+class RenderingFlutterBinding extends BindingBase with Scheduler, Renderer, Gesturer {
   RenderingFlutterBinding({ RenderBox root }) {
     renderView.child = root;
   }

@@ -115,7 +115,7 @@ class _RenderSwitch extends RenderToggleable {
    ) {
     _activeTrackColor = activeTrackColor;
     _inactiveTrackColor = inactiveTrackColor;
-    _drag = new HorizontalDragGestureRecognizer(router: Pointerer.instance.pointerRouter, gestureArena: Pointerer.instance.gestureArena)
+    _drag = new HorizontalDragGestureRecognizer(router: Gesturer.instance.pointerRouter, gestureArena: Gesturer.instance.gestureArena)
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
