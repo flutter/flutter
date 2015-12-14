@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:newton/newton.dart';
@@ -384,6 +385,9 @@ class TabBarSelection {
   PerformanceView get performance => _performance.view;
   final _performance = new Performance(duration: _kTabBarScroll, progress: 1.0);
 
+  bool _indexIsChanging = false;
+  bool get indexIsChanging => _indexIsChanging;
+
   int get index => _index;
   int _index;
   void set index(int value) {
@@ -391,11 +395,13 @@ class TabBarSelection {
       return;
     _previousIndex = _index;
     _index = value;
+    _indexIsChanging = true;
     _performance
       ..progress = 0.0
       ..play().then((_) {
-      if (onChanged != null)
-        onChanged();
+        if (onChanged != null)
+          onChanged();
+        _indexIsChanging = false;
       });
   }
 
@@ -444,37 +450,53 @@ class _TabBarState extends ScrollableState<TabBar> {
 
   Performance get _performance => config.selection._performance;
 
-  bool _indicatorRectIsValid = false;
+  int get _tabCount => config.labels.length;
 
-  // The performance's status change is our indication that the selection index has
-  // changed. We don't start animating the _indicatorRect until after we've reset
-  // _indicatorRect here.
+  bool _indexIsChanging = false;
+
   void _handleStatusChange(PerformanceStatus status) {
-    _indicatorRectIsValid = status == PerformanceStatus.forward;
-    if (status == PerformanceStatus.forward) {
-      if (config.isScrollable)
-        scrollTo(_centeredTabScrollOffset(config.selection.index), duration: _kTabBarScroll);
+    if (_tabCount == 0)
+      return;
+
+    if (_indexIsChanging && status == PerformanceStatus.completed) {
+      _indexIsChanging = false;
+      double progress = 0.5;
+      if (config.selection.index == 0)
+        progress = 0.0;
+      else if (config.selection.index == _tabCount - 1)
+        progress = 1.0;
       setState(() {
         _indicatorRect
-          ..begin = _indicatorRect.value ?? _tabIndicatorRect(config.selection.previousIndex)
-          ..end = _tabIndicatorRect(config.selection.index);
+          ..begin = _tabIndicatorRect(math.max(0, config.selection.index - 1))
+          ..end = _tabIndicatorRect(math.min(_tabCount - 1, config.selection.index + 1))
+          ..curve = null
+          ..setProgress(progress, AnimationDirection.forward);
       });
     }
   }
 
   void _handleProgressChange() {
-    // Performance listeners are notified before statusListeners.
-    if (_indicatorRectIsValid && _performance.status == PerformanceStatus.forward) {
-      setState(() {
-        _indicatorRect.setProgress(_performance.progress, AnimationDirection.forward);
-      });
+    if (_tabCount == 0)
+      return;
+
+    if (!_indexIsChanging && config.selection.indexIsChanging) {
+      if (config.isScrollable)
+        scrollTo(_centeredTabScrollOffset(config.selection.index), duration: _kTabBarScroll);
+      _indicatorRect
+        ..begin = _indicatorRect.value ?? _tabIndicatorRect(config.selection.previousIndex)
+        ..end = _tabIndicatorRect(config.selection.index)
+        ..curve = Curves.ease;
+      _indexIsChanging = true;
     }
+    setState(() {
+      _indicatorRect.setProgress(_performance.progress, AnimationDirection.forward);
+    });
   }
 
   Size _viewportSize = Size.zero;
   Size _tabBarSize;
   List<double> _tabWidths;
-  AnimatedRectValue _indicatorRect = new AnimatedRectValue(null, curve: Curves.ease);
+  AnimatedRectValue _indicatorRect = new AnimatedRectValue(null);
 
   Rect _tabRect(int tabIndex) {
     assert(_tabBarSize != null);
@@ -483,9 +505,9 @@ class _TabBarState extends ScrollableState<TabBar> {
     double tabLeft = 0.0;
     if (tabIndex > 0)
       tabLeft = _tabWidths.take(tabIndex).reduce((double sum, double width) => sum + width);
-    double tabTop = 0.0;
-    double tabBottom = _tabBarSize.height - _kTabIndicatorHeight;
-    double tabRight = tabLeft + _tabWidths[tabIndex];
+    final double tabTop = 0.0;
+    final double tabBottom = _tabBarSize.height - _kTabIndicatorHeight;
+    final double tabRight = tabLeft + _tabWidths[tabIndex];
     return new Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
   }
 
@@ -518,12 +540,15 @@ class _TabBarState extends ScrollableState<TabBar> {
   }
 
   Widget _toTab(TabLabel label, int tabIndex, Color color, Color selectedColor) {
-    Color labelColor = color;
-    if (tabIndex == config.selection.index)
-      labelColor = Color.lerp(color, selectedColor, _performance.progress);
-    else if (tabIndex == config.selection.previousIndex)
-      labelColor = Color.lerp(selectedColor, color, _performance.progress);
-
+    final bool isSelectedTab = tabIndex == config.selection.index;
+    final bool isPreviouslySelectedTab = tabIndex == config.selection.previousIndex;
+    Color labelColor = isSelectedTab ? selectedColor : color;
+    if (config.selection.indexIsChanging) {
+      if (isSelectedTab)
+        labelColor = Color.lerp(color, selectedColor, _performance.progress);
+      else if (isPreviouslySelectedTab)
+        labelColor = Color.lerp(selectedColor, color, _performance.progress);
+    }
     return new _Tab(
       onSelected: () { _handleTabSelected(tabIndex); },
       label: label,
@@ -579,20 +604,14 @@ class _TabBarState extends ScrollableState<TabBar> {
       data: iconTheme,
       child: new DefaultTextStyle(
         style: textStyle,
-        child: new BuilderTransition(
-          variables: <AnimatedValue<Rect>>[_indicatorRect],
-          performance: config.selection.performance,
-          builder: (BuildContext context) {
-            return new _TabBarWrapper(
-              children: tabs,
-              selectedIndex: config.selection.index,
-              indicatorColor: indicatorColor,
-              indicatorRect: _indicatorRect.value,
-              textAndIcons: textAndIcons,
-              isScrollable: config.isScrollable,
-              onLayoutChanged: _layoutChanged
-            );
-          }
+        child: new _TabBarWrapper(
+          children: tabs,
+          selectedIndex: config.selection.index,
+          indicatorColor: indicatorColor,
+          indicatorRect: _indicatorRect.value,
+          textAndIcons: textAndIcons,
+          isScrollable: config.isScrollable,
+          onLayoutChanged: _layoutChanged
         )
       )
     );
@@ -633,19 +652,11 @@ class TabBarView<T> extends PageableList<T> {
   _TabBarViewState createState() => new _TabBarViewState<T>();
 }
 
-// TODO(hansmuller): horizontal scrolling should drive the TabSelection's performance.
-class _NotScrollable extends BoundedBehavior {
-  bool get isScrollable => false;
-}
-
 class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
-
-  final _NotScrollable _notScrollable = new _NotScrollable();
-  ScrollBehavior createScrollBehavior() => _notScrollable;
-  ExtentScrollBehavior get scrollBehavior => _notScrollable;
-
   List<int> _itemIndices = [0, 1];
   AnimationDirection _scrollDirection = AnimationDirection.forward;
+
+  int get _tabCount => config.items.length;
 
   void _initItemIndicesAndScrollPosition() {
     final int selectedIndex = config.selection.index;
@@ -653,13 +664,20 @@ class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
     if (selectedIndex == 0) {
       _itemIndices = <int>[0, 1];
       scrollTo(0.0);
-    } else if (selectedIndex == config.items.length - 1) {
+    } else if (selectedIndex == _tabCount - 1) {
       _itemIndices = <int>[selectedIndex - 1, selectedIndex];
       scrollTo(1.0);
     } else {
       _itemIndices = <int>[selectedIndex - 1, selectedIndex, selectedIndex + 1];
       scrollTo(1.0);
     }
+  }
+
+  BoundedBehavior _boundedBehavior;
+
+  ExtentScrollBehavior get scrollBehavior {
+    _boundedBehavior ??= new BoundedBehavior();
+    return _boundedBehavior;
   }
 
   Performance get _performance => config.selection._performance;
@@ -681,6 +699,10 @@ class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
   }
 
   void _handleStatusChange(PerformanceStatus status) {
+    if (!config.selection.indexIsChanging)
+      return;
+    // The TabBar is driving the TabBarSelection performance.
+
     final int selectedIndex = config.selection.index;
     final int previousSelectedIndex = config.selection.previousIndex;
 
@@ -698,6 +720,10 @@ class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
   }
 
   void _handleProgressChange() {
+    if (!config.selection.indexIsChanging)
+      return;
+    // The TabBar is driving the TabBarSelection performance.
+
     if (_scrollDirection == AnimationDirection.forward)
       scrollTo(_performance.progress);
     else
@@ -713,4 +739,39 @@ class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
       .map((int i) => config.itemBuilder(context, config.items[i], i))
       .toList();
   }
+
+  void dispatchOnScroll() {
+    if (config.selection.indexIsChanging)
+      return;
+    // This class is driving the TabBarSelection's performance.
+
+    if (config.selection.index == 0 || config.selection.index == _tabCount - 1)
+      _performance.progress = scrollOffset;
+    else
+      _performance.progress = scrollOffset / 2.0;
+  }
+
+  Future fling(Offset scrollVelocity) {
+    // TODO(hansmuller): should not short-circuit in this case.
+    if (config.selection.indexIsChanging)
+      return new Future.value();
+
+    if (scrollVelocity != Offset.zero) {
+      final int selectionDelta = scrollVelocity.dx > 0 ? -1 : 1;
+      config.selection.index = (config.selection.index + selectionDelta).clamp(0, _tabCount - 1);
+      return new Future.value();
+    }
+
+    final int selectionIndex = config.selection.index;
+    final int settleIndex = snapScrollOffset(scrollOffset).toInt();
+    if (selectionIndex > 0 && settleIndex != 1) {
+        config.selection.index += settleIndex == 2 ? 1 : -1;
+        return new Future.value();
+    } else if (selectionIndex == 0 && settleIndex == 1) {
+      config.selection.index = 1;
+      return new Future.value();
+    }
+    return settleScrollOffset();
+  }
+
 }
