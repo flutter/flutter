@@ -5,6 +5,8 @@ dependencies:
   flutter:
     path: ../flutter
   flutter_test:
+    path: ../flutter_sprites # Hack until @hixie fixes flutter analyze
+  flutter_test:
     path: ../flutter_test
   stocks:
     path: ../../examples/stocks
