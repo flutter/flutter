@@ -1252,7 +1252,7 @@ class RawText extends LeafRenderObjectWidget {
 
 /// A convience widget for paragraphs of text with heterogeneous style.
 ///
-/// The elements paramter is a recusrive list of lists that matches the
+/// The elements parameter is a recursive list of lists that matches the
 /// following grammar:
 ///
 ///   `elements ::= "string" | [<text-style> <elements>*]``

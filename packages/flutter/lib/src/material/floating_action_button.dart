@@ -13,6 +13,7 @@ import 'theme.dart';
 // TODO(eseidel): This needs to change based on device size?
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
+const double _kSizeMini = 40.0;
 
 class FloatingActionButton extends StatefulComponent {
   const FloatingActionButton({
@@ -21,7 +22,8 @@ class FloatingActionButton extends StatefulComponent {
     this.backgroundColor,
     this.elevation: 6,
     this.highlightElevation: 12,
-    this.onPressed
+    this.onPressed,
+    this.mini: false
   }) : super(key: key);
 
   final Widget child;
@@ -29,6 +31,7 @@ class FloatingActionButton extends StatefulComponent {
   final VoidCallback onPressed;
   final int elevation;
   final int highlightElevation;
+  final bool mini;
 
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }
@@ -56,8 +59,8 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       type: MaterialType.circle,
       elevation: _highlight ? config.highlightElevation : config.elevation,
       child: new Container(
-        width: _kSize,
-        height: _kSize,
+        width: config.mini ? _kSizeMini : _kSize,
+        height: config.mini ? _kSizeMini : _kSize,
         child: new InkWell(
           onTap: config.onPressed,
           onHighlightChanged: _handleHighlightChanged,
