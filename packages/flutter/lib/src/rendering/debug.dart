@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert' show JSON;
+import 'dart:developer';
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 /// Causes each RenderBox to paint a box around its bounds.
@@ -52,6 +55,73 @@ List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
+}
+
+bool _extensionsInitialized = false;
+
+void initServiceExtensions() {
+  if (_extensionsInitialized)
+    return;
+
+  registerExtension('flutter', _flutter);
+  // TODO: Expose debugDumpApp().
+  // TODO: Expose StatisticsOverlay.
+  registerExtension('flutter.debugPaint', _debugPaint);
+  registerExtension('flutter.timeDilation', _timeDilation);
+
+  _extensionsInitialized = true;
+
+  // Emit an info level log message; this tells the debugger that the Flutter
+  // service extensions are registered.
+  log('Flutter initialized', name: 'flutter', level: 800);
+}
+
+/// Just respond to the request. Clients can use the existence of this call to
+/// know that the debug client is a Flutter app.
+Future<ServiceExtensionResponse> _flutter(String method, Map parameters) {
+  String result = JSON.encode({ 'type': '_extensionType', 'method': method });
+  return new Future.value(new ServiceExtensionResponse.result(result));
+}
+
+/// Toggle the [debugPaintSizeEnabled] setting.
+Future<ServiceExtensionResponse> _debugPaint(String method, Map parameters) {
+  if (parameters.containsKey('enabled')) {
+    // TODO: This is a work around for a VM bug: sdk/25208 - all params are
+    // coerced to strings.
+    // bool enabled = parameters['enabled'] == true;
+    debugPaintSizeEnabled = parameters['enabled'].toString() == 'true';
+    // TODO: How to cause a redraw?
+  }
+
+  String result = JSON.encode({
+    'type': '_extensionType',
+    'method': method,
+    'enabled': debugPaintSizeEnabled
+  });
+  return new Future.value(new ServiceExtensionResponse.result(result));
+}
+
+/// Manipulate the scheduler's [timeDilation] field.
+Future<ServiceExtensionResponse> _timeDilation(String method, Map parameters) {
+  if (parameters.containsKey('timeDilation')) {
+    // TODO: Workaround for https://github.com/dart-lang/sdk/issues/25208.
+    dynamic param = parameters['timeDilation'];
+    if (param is String) {
+      param = double.parse(param);
+    } else if (param is num) {
+      param = param.toDouble();
+    }
+    timeDilation = param;
+  } else {
+    timeDilation = 1.0;
+  }
+
+  String result = JSON.encode({
+    'type': '_extensionType',
+    'method': method,
+    'timeDilation': '${timeDilation}'
+  });
+  return new Future.value(new ServiceExtensionResponse.result(result));
 }
 
 /// Prints a message to the console, which you can access using the "flutter"
