@@ -96,7 +96,7 @@ class Draggable<T> extends DraggableBase<T> {
   GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
     return new MultiTapGestureRecognizer(
       router: router,
-      gestureArena: Pointerer.instance.gestureArena,
+      gestureArena: Gesturer.instance.gestureArena,
       onTapDown: starter
     );
   }
@@ -123,7 +123,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
   GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
     return new MultiTapGestureRecognizer(
       router: router,
-      gestureArena: Pointerer.instance.gestureArena,
+      gestureArena: Gesturer.instance.gestureArena,
       longTapDelay: kLongPressTimeout,
       onLongTapDown: (Point position, int pointer) {
         userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
@@ -135,7 +135,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
 
 class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArenaMember {
 
-  PointerRouter get router => Pointerer.instance.pointerRouter;
+  PointerRouter get router => Gesturer.instance.pointerRouter;
 
   void initState() {
     super.initState();
@@ -146,7 +146,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
   Map<int, GestureArenaEntry> _activePointers = <int, GestureArenaEntry>{};
 
   void _routePointer(PointerEvent event) {
-    _activePointers[event.pointer] = Pointerer.instance.gestureArena.add(event.pointer, this);
+    _activePointers[event.pointer] = Gesturer.instance.gestureArena.add(event.pointer, this);
     _recognizer.addPointer(event);
   }
 
