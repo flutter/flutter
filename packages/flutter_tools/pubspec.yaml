@@ -12,6 +12,7 @@ dependencies:
   archive: ^1.0.20
   args: ^0.13.0
   crypto: ^0.9.1
+  den_api: ^0.1.0
   mustache4dart: ^1.0.0
   path: ^1.3.0
   stack_trace: ^1.4.0
