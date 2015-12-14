@@ -386,27 +386,16 @@ class CustomOneChildLayout extends OneChildRenderObjectWidget {
   CustomOneChildLayout({
     Key key,
     this.delegate,
-    this.token,
     Widget child
   }) : super(key: key, child: child) {
     assert(delegate != null);
   }
 
-  /// A long-lived delegate that controls the layout of this widget.
-  ///
-  /// Whenever the delegate changes, we need to recompute the layout of this
-  /// widget, which means you might not want to create a new delegate instance
-  /// every time you build this widget. Instead, consider using a long-lived
-  /// deletate (perhaps held in a component's state) that you re-use every time
-  /// you build this widget.
   final OneChildLayoutDelegate delegate;
-  final Object token;
 
   RenderCustomOneChildLayoutBox createRenderObject() => new RenderCustomOneChildLayoutBox(delegate: delegate);
 
   void updateRenderObject(RenderCustomOneChildLayoutBox renderObject, CustomOneChildLayout oldWidget) {
-    if (oldWidget.token != token)
-      renderObject.markNeedsLayout();
     renderObject.delegate = delegate;
   }
 }
@@ -458,23 +447,19 @@ class LayoutId extends ParentDataWidget {
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   CustomMultiChildLayout(List<Widget> children, {
     Key key,
-    this.delegate,
-    this.token
+    this.delegate
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }
 
   /// The delegate that controls the layout of the children.
   final MultiChildLayoutDelegate delegate;
-  final Object token;
 
   RenderCustomMultiChildLayoutBox createRenderObject() {
     return new RenderCustomMultiChildLayoutBox(delegate: delegate);
   }
 
   void updateRenderObject(RenderCustomMultiChildLayoutBox renderObject, CustomMultiChildLayout oldWidget) {
-    if (oldWidget.token != token)
-      renderObject.markNeedsLayout();
     renderObject.delegate = delegate;
   }
 }

@@ -91,6 +91,9 @@ abstract class MultiChildLayoutDelegate {
     }
   }
 
+  /// Override this method to return true when the children need to be laid out.
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+
   /// Layout and position all children given this widget's size and the specified
   /// constraints. This method must apply layoutChild() to each child. It should
   /// specify the final position of each child with positionChild().
@@ -126,8 +129,9 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
+    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+      markNeedsLayout();
     _delegate = newDelegate;
-    markNeedsLayout();
   }
 
   Size _getSize(BoxConstraints constraints) {

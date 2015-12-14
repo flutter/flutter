@@ -18,12 +18,11 @@ const double _kCloseProgressThreshold = 0.5;
 const Color _kTransparent = const Color(0x00000000);
 const Color _kBarrierColor = Colors.black54;
 
-class BottomSheet extends StatelessComponent {
+class BottomSheet extends StatefulComponent {
   BottomSheet({
     Key key,
     this.performance,
     this.onClosing,
-    this.childHeight,
     this.builder
   }) : super(key: key) {
     assert(onClosing != null);
@@ -34,8 +33,9 @@ class BottomSheet extends StatelessComponent {
   /// passive observer.
   final Performance performance;
   final VoidCallback onClosing;
-  final double childHeight;
   final WidgetBuilder builder;
+
+  _BottomSheetState createState() => new _BottomSheetState();
 
   static Performance createPerformanceController() {
     return new Performance(
@@ -43,28 +43,38 @@ class BottomSheet extends StatelessComponent {
       debugLabel: 'BottomSheet'
     );
   }
+}
 
-  bool get _dismissUnderway => performance.direction == AnimationDirection.reverse;
+class _BottomSheetState extends State<BottomSheet> {
+
+  final _childKey = new GlobalKey(debugLabel: 'BottomSheet child');
+
+  double get _childHeight {
+    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
+    return renderBox.size.height;
+  }
+
+  bool get _dismissUnderway => config.performance.direction == AnimationDirection.reverse;
 
   void _handleDragUpdate(double delta) {
     if (_dismissUnderway)
       return;
-    performance.progress -= delta / (childHeight ?? delta);
+    config.performance.progress -= delta / (_childHeight ?? delta);
   }
 
   void _handleDragEnd(Offset velocity) {
     if (_dismissUnderway)
       return;
     if (velocity.dy > _kMinFlingVelocity) {
-      double flingVelocity = -velocity.dy / childHeight;
-      performance.fling(velocity: flingVelocity);
+      double flingVelocity = -velocity.dy / _childHeight;
+      config.performance.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
-        onClosing();
-    } else if (performance.progress < _kCloseProgressThreshold) {
-      performance.fling(velocity: -1.0);
-      onClosing();
+        config.onClosing();
+    } else if (config.performance.progress < _kCloseProgressThreshold) {
+      config.performance.fling(velocity: -1.0);
+      config.onClosing();
     } else {
-      performance.forward();
+      config.performance.forward();
     }
   }
 
@@ -73,7 +83,8 @@ class BottomSheet extends StatelessComponent {
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
       child: new Material(
-        child: builder(context)
+          key: _childKey,
+        child: config.builder(context)
       )
     );
   }
@@ -87,8 +98,9 @@ class BottomSheet extends StatelessComponent {
 // MODAL BOTTOM SHEETS
 
 class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
-  // The distance from the bottom of the parent to the top of the BottomSheet child.
-  AnimatedValue<double> childTop = new AnimatedValue<double>(0.0);
+  _ModalBottomSheetLayout(this.progress);
+
+  final double progress;
 
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return new BoxConstraints(
@@ -100,8 +112,11 @@ class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
   }
 
   Point getPositionForChild(Size size, Size childSize) {
-    childTop.end = childSize.height;
-    return new Point(0.0, size.height - childTop.value);
+    return new Point(0.0, size.height - childSize.height * progress);
+  }
+
+  bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
+    return progress != oldDelegate.progress;
   }
 }
 
@@ -114,24 +129,18 @@ class _ModalBottomSheet extends StatefulComponent {
 }
 
 class _ModalBottomSheetState extends State<_ModalBottomSheet> {
-
-  final _ModalBottomSheetLayout _layout = new _ModalBottomSheetLayout();
-
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
       child: new BuilderTransition(
         performance: config.route.performance,
-        variables: <AnimatedValue<double>>[_layout.childTop],
         builder: (BuildContext context) {
           return new ClipRect(
             child: new CustomOneChildLayout(
-              delegate: _layout,
-              token: _layout.childTop.value,
+              delegate: new _ModalBottomSheetLayout(config.route.performance.progress),
               child: new BottomSheet(
                 performance: config.route.performance,
                 onClosing: () => Navigator.pop(context),
-                childHeight: _layout.childTop.end,
                 builder: config.route.builder
               )
             )

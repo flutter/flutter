@@ -257,6 +257,9 @@ class OneChildLayoutDelegate {
 
   /// Returns the position where the child should be placed given the size of this object and the size of the child.
   Point getPositionForChild(Size size, Size childSize) => Point.origin;
+
+  /// Override this method to return true when the child needs to be laid out.
+  bool shouldRelayout(OneChildLayoutDelegate oldDelegate) => true;
 }
 
 /// Defers the layout of its single child to a delegate.
@@ -280,8 +283,9 @@ class RenderCustomOneChildLayoutBox extends RenderShiftedBox {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
+    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+      markNeedsLayout();
     _delegate = newDelegate;
-    markNeedsLayout();
   }
 
   Size _getSize(BoxConstraints constraints) {

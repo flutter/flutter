@@ -32,15 +32,24 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
     childSizeFromGetPositionForChild = childSize;
     return Point.origin;
   }
+
+  bool shouldRelayoutCalled = false;
+  bool shouldRelayoutValue = false;
+  bool shouldRelayout(_) {
+    shouldRelayoutCalled = true;
+    return shouldRelayoutValue;
+  }
+}
+
+Widget buildFrame(delegate) {
+  return new Center(child: new CustomOneChildLayout(delegate: delegate, child: new Container()));
 }
 
 void main() {
   test('Control test for CustomOneChildLayout', () {
     testWidgets((WidgetTester tester) {
       TestOneChildLayoutDelegate delegate = new TestOneChildLayoutDelegate();
-      tester.pumpWidget(new Center(
-        child: new CustomOneChildLayout(delegate: delegate, child: new Container())
-      ));
+      tester.pumpWidget(buildFrame(delegate));
 
       expect(delegate.constraintsFromGetSize.minWidth, 0.0);
       expect(delegate.constraintsFromGetSize.maxWidth, 800.0);
@@ -59,4 +68,30 @@ void main() {
       expect(delegate.childSizeFromGetPositionForChild.height, 400.0);
     });
   });
+
+  test('Test OneChildDelegate shouldRelayout method', () {
+    testWidgets((WidgetTester tester) {
+      TestOneChildLayoutDelegate delegate = new TestOneChildLayoutDelegate();
+      tester.pumpWidget(buildFrame(delegate));
+
+      // Layout happened because the delegate was set.
+      expect(delegate.constraintsFromGetConstraintsForChild, isNotNull); // i.e. layout happened
+      expect(delegate.shouldRelayoutCalled, isFalse);
+
+      // Layout did not happen because shouldRelayout() returned false.
+      delegate = new TestOneChildLayoutDelegate();
+      delegate.shouldRelayoutValue = false;
+      tester.pumpWidget(buildFrame(delegate));
+      expect(delegate.shouldRelayoutCalled, isTrue);
+      expect(delegate.constraintsFromGetConstraintsForChild, isNull);
+
+      // Layout happened because shouldRelayout() returned true.
+      delegate = new TestOneChildLayoutDelegate();
+      delegate.shouldRelayoutValue = true;
+      tester.pumpWidget(buildFrame(delegate));
+      expect(delegate.shouldRelayoutCalled, isTrue);
+      expect(delegate.constraintsFromGetConstraintsForChild, isNotNull);
+    });
+  });
+
 }
