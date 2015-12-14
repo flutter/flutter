@@ -13,3 +13,6 @@ before_script:
   - ./travis/setup.sh
 script:
   - ./travis/test.sh
+cache:
+  directories:
+  - $HOME/.pub-cache
