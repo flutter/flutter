@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/gestures.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
@@ -49,7 +53,11 @@ void main() {
 
   test('Should recognize tap', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -57,14 +65,14 @@ void main() {
     };
 
     tap.addPointer(down1);
-    GestureArena.instance.close(1);
+    gestureArena.close(1);
     expect(tapRecognized, isFalse);
     router.route(down1);
     expect(tapRecognized, isFalse);
 
     router.route(up1);
     expect(tapRecognized, isTrue);
-    GestureArena.instance.sweep(1);
+    gestureArena.sweep(1);
     expect(tapRecognized, isTrue);
 
     tap.dispose();
@@ -72,7 +80,11 @@ void main() {
 
   test('No duplicate tap events', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     int tapsRecognized = 0;
     tap.onTap = () {
@@ -80,25 +92,25 @@ void main() {
     };
 
     tap.addPointer(down1);
-    GestureArena.instance.close(1);
+    gestureArena.close(1);
     expect(tapsRecognized, 0);
     router.route(down1);
     expect(tapsRecognized, 0);
 
     router.route(up1);
     expect(tapsRecognized, 1);
-    GestureArena.instance.sweep(1);
+    gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tap.addPointer(down1);
-    GestureArena.instance.close(1);
+    gestureArena.close(1);
     expect(tapsRecognized, 1);
     router.route(down1);
     expect(tapsRecognized, 1);
 
     router.route(up1);
     expect(tapsRecognized, 2);
-    GestureArena.instance.sweep(1);
+    gestureArena.sweep(1);
     expect(tapsRecognized, 2);
 
     tap.dispose();
@@ -106,7 +118,11 @@ void main() {
 
   test('Should not recognize two overlapping taps', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     int tapsRecognized = 0;
     tap.onTap = () {
@@ -114,13 +130,13 @@ void main() {
     };
 
     tap.addPointer(down1);
-    GestureArena.instance.close(1);
+    gestureArena.close(1);
     expect(tapsRecognized, 0);
     router.route(down1);
     expect(tapsRecognized, 0);
 
     tap.addPointer(down2);
-    GestureArena.instance.close(2);
+    gestureArena.close(2);
     expect(tapsRecognized, 0);
     router.route(down1);
     expect(tapsRecognized, 0);
@@ -128,12 +144,12 @@ void main() {
 
     router.route(up1);
     expect(tapsRecognized, 1);
-    GestureArena.instance.sweep(1);
+    gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     router.route(up2);
     expect(tapsRecognized, 1);
-    GestureArena.instance.sweep(2);
+    gestureArena.sweep(2);
     expect(tapsRecognized, 1);
 
     tap.dispose();
@@ -141,7 +157,11 @@ void main() {
 
   test('Distance cancels tap', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -153,7 +173,7 @@ void main() {
     };
 
     tap.addPointer(down3);
-    GestureArena.instance.close(3);
+    gestureArena.close(3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isFalse);
     router.route(down3);
@@ -166,7 +186,7 @@ void main() {
     router.route(up3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
-    GestureArena.instance.sweep(3);
+    gestureArena.sweep(3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
 
@@ -175,7 +195,11 @@ void main() {
 
   test('Timeout does not cancel tap', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -184,7 +208,7 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       tap.addPointer(down1);
-      GestureArena.instance.close(1);
+      gestureArena.close(1);
       expect(tapRecognized, isFalse);
       router.route(down1);
       expect(tapRecognized, isFalse);
@@ -193,7 +217,7 @@ void main() {
       expect(tapRecognized, isFalse);
       router.route(up1);
       expect(tapRecognized, isTrue);
-      GestureArena.instance.sweep(1);
+      gestureArena.sweep(1);
       expect(tapRecognized, isTrue);
     });
 
@@ -202,7 +226,11 @@ void main() {
 
   test('Should yield to other arena members', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -211,16 +239,16 @@ void main() {
 
     tap.addPointer(down1);
     TestGestureArenaMember member = new TestGestureArenaMember();
-    GestureArenaEntry entry = GestureArena.instance.add(1, member);
-    GestureArena.instance.hold(1);
-    GestureArena.instance.close(1);
+    GestureArenaEntry entry = gestureArena.add(1, member);
+    gestureArena.hold(1);
+    gestureArena.close(1);
     expect(tapRecognized, isFalse);
     router.route(down1);
     expect(tapRecognized, isFalse);
 
     router.route(up1);
     expect(tapRecognized, isFalse);
-    GestureArena.instance.sweep(1);
+    gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.accepted);
@@ -231,7 +259,11 @@ void main() {
 
   test('Should trigger on release of held arena', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -240,16 +272,16 @@ void main() {
 
     tap.addPointer(down1);
     TestGestureArenaMember member = new TestGestureArenaMember();
-    GestureArenaEntry entry = GestureArena.instance.add(1, member);
-    GestureArena.instance.hold(1);
-    GestureArena.instance.close(1);
+    GestureArenaEntry entry = gestureArena.add(1, member);
+    gestureArena.hold(1);
+    gestureArena.close(1);
     expect(tapRecognized, isFalse);
     router.route(down1);
     expect(tapRecognized, isFalse);
 
     router.route(up1);
     expect(tapRecognized, isFalse);
-    GestureArena.instance.sweep(1);
+    gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
     entry.resolve(GestureDisposition.rejected);

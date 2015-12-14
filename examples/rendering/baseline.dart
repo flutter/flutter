@@ -87,5 +87,5 @@ void main() {
     direction: FlexDirection.vertical,
     alignItems: FlexAlignItems.stretch
   );
-  new FlutterBinding(root: root);
+  new RenderingFlutterBinding(root: root);
 }

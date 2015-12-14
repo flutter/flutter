@@ -96,6 +96,7 @@ class Draggable<T> extends DraggableBase<T> {
   GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
     return new MultiTapGestureRecognizer(
       router: router,
+      gestureArena: Pointerer.instance.gestureArena,
       onTapDown: starter
     );
   }
@@ -122,6 +123,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
   GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
     return new MultiTapGestureRecognizer(
       router: router,
+      gestureArena: Pointerer.instance.gestureArena,
       longTapDelay: kLongPressTimeout,
       onLongTapDown: (Point position, int pointer) {
         userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
@@ -133,7 +135,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
 
 class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArenaMember {
 
-  PointerRouter get router => FlutterBinding.instance.pointerRouter;
+  PointerRouter get router => Pointerer.instance.pointerRouter;
 
   void initState() {
     super.initState();
@@ -144,7 +146,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
   Map<int, GestureArenaEntry> _activePointers = <int, GestureArenaEntry>{};
 
   void _routePointer(PointerEvent event) {
-    _activePointers[event.pointer] = GestureArena.instance.add(event.pointer, this);
+    _activePointers[event.pointer] = Pointerer.instance.gestureArena.add(event.pointer, this);
     _recognizer.addPointer(event);
   }
 
@@ -315,7 +317,8 @@ class _DragAvatar<T> {
   void update(Point globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
     _entry.markNeedsBuild();
-    HitTestResult result = WidgetFlutterBinding.instance.hitTest(globalPosition + feedbackOffset);
+    HitTestResult result = new HitTestResult();
+    WidgetFlutterBinding.instance.hitTest(result, globalPosition + feedbackOffset);
     _DragTargetState target = _getDragTarget(result.path);
     if (target == _activeTarget)
       return;

@@ -42,5 +42,5 @@ void main() {
     child: new RenderPadding(child: table, padding: new EdgeDims.symmetric(vertical: 50.0))
   );
 
-  new FlutterBinding(root: root);
+  new RenderingFlutterBinding(root: root);
 }

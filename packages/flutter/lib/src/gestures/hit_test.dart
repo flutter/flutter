@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
+import 'events.dart';
+
+/// An object that can hit-test pointers.
+abstract class HitTestable {
+  void hitTest(HitTestResult result, Point position);
+}
 
 /// An object that can handle events.
 abstract class HitTestTarget {

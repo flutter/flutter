@@ -19,11 +19,16 @@ typedef void GestureTapCancelCallback();
 class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   TapGestureRecognizer({
     PointerRouter router,
+    GestureArena gestureArena,
     this.onTapDown,
     this.onTapUp,
     this.onTap,
     this.onTapCancel
-  }) : super(router: router, deadline: kPressTimeout);
+  }) : super(
+    router: router,
+    gestureArena: gestureArena,
+    deadline: kPressTimeout
+  );
 
   GestureTapDownCallback onTapDown;
   GestureTapDownCallback onTapUp;

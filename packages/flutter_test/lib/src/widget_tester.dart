@@ -17,13 +17,15 @@ typedef Point SizeToPointFunction(Size size);
 
 class WidgetTester {
   WidgetTester._(FakeAsync async)
-    : async = async,
+    : binding = WidgetFlutterBinding.ensureInitialized(),
+      async = async,
       clock = async.getClock(new DateTime.utc(2015, 1, 1)) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
     runApp(new ErrorWidget()); // flush out the last build entirely
   }
 
+  final WidgetFlutterBinding binding;
   final FakeAsync async;
   final Clock clock;
 
@@ -34,15 +36,16 @@ class WidgetTester {
 
   void setLocale(String languageCode, String countryCode) {
     ui.Locale locale = new ui.Locale(languageCode, countryCode);
-    FlutterBinding.instance.dispatchLocaleChanged(locale);
+    binding.dispatchLocaleChanged(locale);
     async.flushMicrotasks();
   }
 
   void pump([ Duration duration ]) {
     if (duration != null)
       async.elapse(duration);
-    scheduler.handleBeginFrame(new Duration(
-        milliseconds: clock.now().millisecondsSinceEpoch));
+    binding.handleBeginFrame(new Duration(
+      milliseconds: clock.now().millisecondsSinceEpoch)
+    );
     async.flushMicrotasks();
   }
 
@@ -58,7 +61,7 @@ class WidgetTester {
     }
     return result;
   }
-  List<Layer> get layers => _layers(FlutterBinding.instance.renderView.layer);
+  List<Layer> get layers => _layers(binding.renderView.layer);
 
 
   void walkElements(ElementVisitor visitor) {
@@ -66,7 +69,7 @@ class WidgetTester {
       visitor(element);
       element.visitChildren(walk);
     }
-    WidgetFlutterBinding.instance.renderViewElement.visitChildren(walk);
+    binding.renderViewElement.visitChildren(walk);
   }
 
   Element findElement(bool predicate(Element element)) {
@@ -184,10 +187,14 @@ class WidgetTester {
     _dispatchEvent(event, _hitTest(location));
   }
 
-  HitTestResult _hitTest(Point location) => WidgetFlutterBinding.instance.hitTest(location);
+  HitTestResult _hitTest(Point location) {
+    HitTestResult result = new HitTestResult();
+    binding.hitTest(result, location);
+    return result;
+  }
 
   void _dispatchEvent(PointerEvent event, HitTestResult result) {
-    WidgetFlutterBinding.instance.dispatchEvent(event, result);
+    binding.dispatchEvent(event, result);
   }
 
 }

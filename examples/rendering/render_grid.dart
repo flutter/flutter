@@ -23,4 +23,4 @@ RenderBox buildGridExample() {
   return new RenderGrid(children: children, maxChildExtent: 100.0);
 }
 
-main() => new FlutterBinding(root: buildGridExample());
+main() => new RenderingFlutterBinding(root: buildGridExample());

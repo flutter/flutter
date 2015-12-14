@@ -74,11 +74,11 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     _navigator = new GlobalObjectKey(this);
     _size = ui.window.size;
     didChangeLocale(ui.window.locale);
-    FlutterBinding.instance.addObserver(this);
+    WidgetFlutterBinding.instance.addObserver(this);
   }
 
   void dispose() {
-    FlutterBinding.instance.removeObserver(this);
+    WidgetFlutterBinding.instance.removeObserver(this);
     super.dispose();
   }
 

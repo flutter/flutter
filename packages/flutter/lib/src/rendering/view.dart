@@ -73,7 +73,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void scheduleInitialFrame() {
     scheduleInitialLayout();
     scheduleInitialPaint(new TransformLayer(transform: _logicalToDeviceTransform));
-    scheduler.ensureVisualUpdate();
+    Scheduler.instance.ensureVisualUpdate();
   }
 
   // We never call layout() on this class, so this should never get

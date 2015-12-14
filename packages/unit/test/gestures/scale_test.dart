@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
@@ -5,8 +9,15 @@ import 'package:test/test.dart';
 void main() {
   test('Should recognize scale gestures', () {
     PointerRouter router = new PointerRouter();
-    ScaleGestureRecognizer scale = new ScaleGestureRecognizer(router: router);
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    ScaleGestureRecognizer scale = new ScaleGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool didStartScale = false;
     Point updatedFocalPoint;
@@ -37,7 +48,7 @@ void main() {
     scale.addPointer(down);
     tap.addPointer(down);
 
-    GestureArena.instance.close(1);
+    gestureArena.close(1);
     expect(didStartScale, isFalse);
     expect(updatedScale, isNull);
     expect(updatedFocalPoint, isNull);
@@ -67,7 +78,7 @@ void main() {
     PointerDownEvent down2 = pointer2.down(const Point(10.0, 20.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
-    GestureArena.instance.close(2);
+    gestureArena.close(2);
     router.route(down2);
 
     expect(didEndScale, isTrue);
@@ -100,7 +111,7 @@ void main() {
     PointerDownEvent down3 = pointer3.down(const Point(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
-    GestureArena.instance.close(3);
+    gestureArena.close(3);
     router.route(down3);
 
     expect(didEndScale, isTrue);

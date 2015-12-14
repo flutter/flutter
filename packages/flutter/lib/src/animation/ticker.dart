@@ -40,7 +40,7 @@ class Ticker {
     _startTime = null;
 
     if (_animationId != null) {
-      scheduler.cancelFrameCallbackWithId(_animationId);
+      Scheduler.instance.cancelFrameCallbackWithId(_animationId);
       _animationId = null;
     }
 
@@ -74,6 +74,6 @@ class Ticker {
   void _scheduleTick() {
     assert(isTicking);
     assert(_animationId == null);
-    _animationId = scheduler.scheduleFrameCallback(_tick);
+    _animationId = Scheduler.instance.scheduleFrameCallback(_tick);
   }
 }

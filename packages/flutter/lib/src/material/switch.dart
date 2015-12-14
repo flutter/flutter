@@ -115,7 +115,7 @@ class _RenderSwitch extends RenderToggleable {
    ) {
     _activeTrackColor = activeTrackColor;
     _inactiveTrackColor = inactiveTrackColor;
-    _drag = new HorizontalDragGestureRecognizer(router: FlutterBinding.instance.pointerRouter)
+    _drag = new HorizontalDragGestureRecognizer(router: Pointerer.instance.pointerRouter, gestureArena: Pointerer.instance.gestureArena)
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;

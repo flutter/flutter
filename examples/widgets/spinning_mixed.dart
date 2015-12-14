@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'package:flutter_rendering_examples/solid_color_box.dart';
 
@@ -84,11 +83,6 @@ void rotate(Duration timeStamp) {
 }
 
 void main() {
-  // Because we're going to use Widgets, we want to ensure we're using a
-  // WidgetFlutterBinding rather than some other kind of binding (e.g. a
-  // straight rendering library FlutterBinding).
-  WidgetFlutterBinding.ensureInitialized();
-
   RenderProxyBox proxy = new RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 
@@ -100,6 +94,7 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);
 
-  FlutterBinding.instance.renderView.child = root;
-  scheduler.addPersistentFrameCallback(rotate);
+  WidgetFlutterBinding.ensureInitialized()
+   ..renderView.child = root
+   ..addPersistentFrameCallback(rotate);
 }

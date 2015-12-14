@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
@@ -5,8 +9,15 @@ import 'package:test/test.dart';
 void main() {
   test('Should recognize pan', () {
     PointerRouter router = new PointerRouter();
-    PanGestureRecognizer pan = new PanGestureRecognizer(router: router);
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    PanGestureRecognizer pan = new PanGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool didStartPan = false;
     pan.onStart = (_) {
@@ -32,7 +43,7 @@ void main() {
     PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
     pan.addPointer(down);
     tap.addPointer(down);
-    GestureArena.instance.close(5);
+    gestureArena.close(5);
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, isNull);
     expect(didEndPan, isFalse);

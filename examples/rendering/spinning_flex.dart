@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'lib/solid_color_box.dart';
 
@@ -30,9 +29,8 @@ void main() {
 
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(20.0), child: transformBox);
 
-  new FlutterBinding(root: root);
-
-  scheduler.addPersistentFrameCallback(rotate);
+  new RenderingFlutterBinding(root: root)
+    ..addPersistentFrameCallback(rotate);
 }
 
 void rotate(Duration timeStamp) {

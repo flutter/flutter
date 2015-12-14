@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -65,9 +64,9 @@ void main() {
           )
         )
       );
-      expect(scheduler.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, 0);
       tester.pump(new Duration(seconds: 1));
-      expect(scheduler.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, 0);
       tester.pumpWidget(
         new AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -76,9 +75,9 @@ void main() {
           )
         )
       );
-      expect(scheduler.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, 0);
       tester.pump(new Duration(seconds: 1));
-      expect(scheduler.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, 0);
       tester.pumpWidget(
         new AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -87,9 +86,9 @@ void main() {
           )
         )
       );
-      expect(scheduler.transientCallbackCount, 1); // this is the only time an animation should have started!
+      expect(tester.binding.transientCallbackCount, 1); // this is the only time an animation should have started!
       tester.pump(new Duration(seconds: 1));
-      expect(scheduler.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, 0);
       tester.pumpWidget(
         new AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -98,7 +97,7 @@ void main() {
           )
         )
       );
-      expect(scheduler.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, 0);
     });
   });
 }

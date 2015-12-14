@@ -11,12 +11,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'hit_test.dart';
 import 'layer.dart';
 import 'node.dart';
 
 export 'layer.dart';
-export 'hit_test.dart';
+export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 
 typedef ui.Shader ShaderCallback(Rect bounds);
 
@@ -551,7 +550,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(parent == this.parent);
     } else {
       _nodesNeedingLayout.add(this);
-      scheduler.ensureVisualUpdate();
+      Scheduler.instance.ensureVisualUpdate();
     }
   }
 
@@ -916,7 +915,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // ourselves without involving any other nodes.
       assert(_layer != null);
       _nodesNeedingPaint.add(this);
-      scheduler.ensureVisualUpdate();
+      Scheduler.instance.ensureVisualUpdate();
     } else if (parent is RenderObject) {
       // We don't have our own layer; one of our ancestors will take
       // care of updating the layer we're in and when they do that
@@ -930,7 +929,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // then we have to paint ourselves, since nobody else can paint
       // us. We don't add ourselves to _nodesNeedingPaint in this
       // case, because the root is always told to paint regardless.
-      scheduler.ensureVisualUpdate();
+      Scheduler.instance.ensureVisualUpdate();
     }
   }
 

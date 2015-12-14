@@ -420,6 +420,8 @@ void paintImage({
   double alignX,
   double alignY
 }) {
+  assert(canvas != null);
+  assert(image != null);
   Size outputSize = rect.size;
   Size inputSize = new Size(image.width.toDouble(), image.height.toDouble());
   Offset sliceBorder;
