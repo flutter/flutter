@@ -197,10 +197,13 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Simulation _createFlingSimulation(double velocity) {
-    final double endVelocity = pixelToScrollOffset(kPixelScrollTolerance.velocity);
-    final double endDistance = pixelToScrollOffset(kPixelScrollTolerance.distance);
-    return scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity)
-      ..tolerance = new Tolerance(velocity: endVelocity.abs(), distance: endDistance);
+    final Simulation simulation =  scrollBehavior.createFlingScrollSimulation(scrollOffset, velocity);
+    if (simulation != null) {
+      final double endVelocity = pixelToScrollOffset(kPixelScrollTolerance.velocity);
+      final double endDistance = pixelToScrollOffset(kPixelScrollTolerance.distance);
+      simulation.tolerance = new Tolerance(velocity: endVelocity.abs(), distance: endDistance);
+    }
+    return simulation;
   }
 
   double snapScrollOffset(double value) {
