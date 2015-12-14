@@ -16,14 +16,22 @@ interface MediaPlayer {
 
 [ServiceName="media::SoundPool"]
 interface SoundPool {
-  Load(handle<data_pipe_consumer> data_source) => (bool success, int32 sound_id);
-  Play(int32 sound_id, float left_volume, float right_volume, bool loop, float rate) =>
-      (bool success, int32 stream_id);
+  // Load a sound from a Mojo pipe.
+  Load(handle<data_pipe_consumer> data_source) =>
+      (bool success, int32 sound_id);
+
+  // Play a sound.  The stream ID is supplied by the caller and can be used in
+  // other APIs to control this playback.
+  Play(int32 sound_id, int32 stream_id, array<float> channel_volumes, bool loop,
+       float rate) => (bool success);
+
+  // Stop playing a sound.  After this call the stream ID is no longer valid.
   Stop(int32 stream_id);
+
   Pause(int32 stream_id);
   Resume(int32 stream_id);
   SetRate(int32 stream_id, float rate);
-  SetVolume(int32 stream_id, float left_volume, float right_volume);
+  SetVolume(int32 stream_id, array<float> channel_volumes);
 
   PauseAll();
   ResumeAll();

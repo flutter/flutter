@@ -32,12 +32,16 @@ public class SoundPoolImpl implements SoundPool, android.media.SoundPool.OnLoadC
     private final ArrayList<File> mTempFiles;
     private final HashMap<Integer, LoadResponse> mPendingLoads;
 
+    // Maps stream IDs provided by the client to stream IDs assigned by the Android SoundPool.
+    private final HashMap<Integer, Integer> mStreamIdMap;
+
     public SoundPoolImpl(Core core, Context context, Executor executor, int maxStreams) {
         mCore = core;
         mContext = context;
         mExecutor = executor;
         mTempFiles = new ArrayList<File>();
         mPendingLoads = new HashMap<Integer, LoadResponse>();
+        mStreamIdMap = new HashMap<Integer, Integer>();
 
         android.media.SoundPool.Builder builder = new android.media.SoundPool.Builder();
         builder.setMaxStreams(maxStreams);
@@ -98,35 +102,66 @@ public class SoundPoolImpl implements SoundPool, android.media.SoundPool.OnLoadC
     }
 
     @Override
-    public void play(int soundId, float leftVolume, float rightVolume, boolean loop, float rate,
+    public void play(int soundId, int streamId, float[] channelVolumes, boolean loop, float rate,
                      PlayResponse callback) {
-        int streamId = mSoundPool.play(soundId, leftVolume, rightVolume, 0, loop ? -1 : 0, rate);
-        callback.call(streamId != 0, streamId);
+        if (channelVolumes.length != 2) {
+            Log.e(TAG, "setVolume: channelVolumes must be of length 2");
+            callback.call(false);
+            return;
+        }
+        int poolStreamId = mSoundPool.play(soundId,
+                                           channelVolumes[0], channelVolumes[1],
+                                           0, loop ? -1 : 0, rate);
+        if (poolStreamId != 0) {
+            mStreamIdMap.put(streamId, poolStreamId);
+            callback.call(true);
+        } else {
+            callback.call(false);
+        }
     }
 
     @Override
     public void stop(int streamId) {
-        mSoundPool.stop(streamId);
+        Integer poolStreamId = mStreamIdMap.remove(streamId);
+        if (poolStreamId != null) {
+            mSoundPool.stop(poolStreamId);
+        }
     }
 
     @Override
     public void pause(int streamId) {
-        mSoundPool.pause(streamId);
+        Integer poolStreamId = mStreamIdMap.get(streamId);
+        if (poolStreamId != null) {
+            mSoundPool.pause(poolStreamId);
+        }
     }
 
     @Override
     public void resume(int streamId) {
-        mSoundPool.resume(streamId);
+        Integer poolStreamId = mStreamIdMap.get(streamId);
+        if (poolStreamId != null) {
+            mSoundPool.resume(poolStreamId);
+        }
     }    
 
     @Override
     public void setRate(int streamId, float rate) {
-        mSoundPool.setRate(streamId, rate);
+        Integer poolStreamId = mStreamIdMap.get(streamId);
+        if (poolStreamId != null) {
+            mSoundPool.setRate(poolStreamId, rate);
+        }
     }
 
     @Override
-    public void setVolume(int streamId, float leftVolume, float rightVolume) {
-        mSoundPool.setVolume(streamId, leftVolume, rightVolume);
+    public void setVolume(int streamId, float[] channelVolumes) {
+        if (channelVolumes.length != 2) {
+            Log.e(TAG, "setVolume: channelVolumes must be of length 2");
+            return;
+        }
+        Integer poolStreamId = mStreamIdMap.get(streamId);
+        if (poolStreamId != null) {
+            mSoundPool.setVolume(poolStreamId, channelVolumes[0], channelVolumes[1]);
+        }
     }
 
     @Override
