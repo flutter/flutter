@@ -60,7 +60,7 @@ class StatisticsOverlay extends LeafRenderObjectWidget {
 
   /// The rasterizer threshold is an integer specifying the number of frame
   /// intervals that the rasterizer must miss before it decides that the frame
-  /// is suitable for capturing an SkPicture trace from for further analysis.
+  /// is suitable for capturing an SkPicture trace for further analysis.
   ///
   /// For example, if you want a trace of all pictures that could not be
   /// renderered by the rasterizer within the frame boundary (and hence caused
