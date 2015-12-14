@@ -12,6 +12,8 @@ interface MediaPlayer {
   Start();
   Pause();
   SeekTo(uint32 msec);
+  SetVolume(float volume);
+  SetLooping(bool looping);
 };
 
 [ServiceName="media::SoundPool"]
