@@ -1,7 +1,16 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
+class TestSchedulerBinding extends BindingBase with Scheduler { }
+
 void main() {
+  Scheduler scheduler = new TestSchedulerBinding();
+
   test("Check for a time dilation being in effect", () {
     expect(timeDilation, equals(1.0));
   });

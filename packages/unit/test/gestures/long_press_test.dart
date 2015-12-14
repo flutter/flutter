@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:quiver/testing/async.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
@@ -15,7 +19,11 @@ const PointerUpEvent up = const PointerUpEvent(
 void main() {
   test('Should recognize long press', () {
     PointerRouter router = new PointerRouter();
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -24,7 +32,7 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
-      GestureArena.instance.close(5);
+      gestureArena.close(5);
       expect(longPressRecognized, isFalse);
       router.route(down);
       expect(longPressRecognized, isFalse);
@@ -39,7 +47,11 @@ void main() {
 
   test('Up cancels long press', () {
     PointerRouter router = new PointerRouter();
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -48,7 +60,7 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
-      GestureArena.instance.close(5);
+      gestureArena.close(5);
       expect(longPressRecognized, isFalse);
       router.route(down);
       expect(longPressRecognized, isFalse);
@@ -65,8 +77,15 @@ void main() {
 
   test('Should recognize both tap down and long press', () {
     PointerRouter router = new PointerRouter();
-    TapGestureRecognizer tap = new TapGestureRecognizer(router: router);
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(router: router);
+    GestureArena gestureArena = new GestureArena();
+    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
+    TapGestureRecognizer tap = new TapGestureRecognizer(
+      router: router,
+      gestureArena: gestureArena
+    );
 
     bool tapDownRecognized = false;
     tap.onTapDown = (_) {
@@ -81,7 +100,7 @@ void main() {
     new FakeAsync().run((FakeAsync async) {
       tap.addPointer(down);
       longPress.addPointer(down);
-      GestureArena.instance.close(5);
+      gestureArena.close(5);
       expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
       router.route(down);

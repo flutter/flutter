@@ -100,7 +100,8 @@ class MojoAssetBundle extends AssetBundle {
 AssetBundle _initRootBundle() {
   try {
     AssetBundleProxy bundle = new AssetBundleProxy.fromHandle(
-        new core.MojoHandle(internals.takeRootBundleHandle()));
+      new core.MojoHandle(internals.takeRootBundleHandle())
+    );
     return new MojoAssetBundle(bundle);
   } catch (e) {
     return null;

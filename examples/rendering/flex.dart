@@ -53,5 +53,5 @@ RenderBox buildFlexExample() {
 }
 
 void main() {
-  new FlutterBinding(root: buildFlexExample());
+  new RenderingFlutterBinding(root: buildFlexExample());
 }

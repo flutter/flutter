@@ -18,7 +18,7 @@ void main() {
   var paddedBox = new RenderPadding(
     padding: const EdgeDims.all(50.0),
     child: coloredBox);
-  new FlutterBinding(root: new RenderDecoratedBox(
+  new RenderingFlutterBinding(root: new RenderDecoratedBox(
     decoration: const BoxDecoration(
       backgroundColor: const Color(0xFFFFFFFF)
     ),

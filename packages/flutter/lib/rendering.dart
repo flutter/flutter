@@ -16,7 +16,6 @@ export 'src/rendering/editable_paragraph.dart';
 export 'src/rendering/error.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/grid.dart';
-export 'src/rendering/hit_test.dart';
 export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
 export 'src/rendering/node.dart';

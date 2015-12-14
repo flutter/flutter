@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:mojo/bindings.dart' as bindings;
@@ -37,25 +38,32 @@ class RenderImageGrow extends RenderImage {
 
 RenderImageGrow image;
 
-void handlePopRoute() {
-  activity.finishCurrentActivity();
-}
+class DemoBinding extends BindingBase with Scheduler, Renderer {
+  DemoBinding({ RenderBox root }) {
+    renderView.child = root;
+    ui.window.onPopRoute = handlePopRoute;
+    ui.window.onPointerPacket = handlePointerPacket;
+  }
 
-final Map<int, Touch> touches = <int, Touch>{};
+  void handlePopRoute() {
+    activity.finishCurrentActivity();
+  }
 
-void handlePointerPacket(ByteData serializedPacket) {
-  bindings.Message message = new bindings.Message(
-    serializedPacket,
-    <core.MojoHandle>[],
-    serializedPacket.lengthInBytes,
-    0
-  );
-  PointerPacket packet = PointerPacket.deserialize(message);
+  final Map<int, Touch> touches = <int, Touch>{};
 
-  for (Pointer pointer in packet.pointers) {
-    if (pointer.type == PointerType.MOVE)
-      image.growth = math.max(0.0, image.growth + pointer.x - touches[pointer.pointer].x);
-    touches[pointer.pointer] = new Touch(pointer.x, pointer.y);
+  void handlePointerPacket(ByteData serializedPacket) {
+    bindings.Message message = new bindings.Message(
+      serializedPacket,
+      <core.MojoHandle>[],
+      serializedPacket.lengthInBytes,
+      0
+    );
+    PointerPacket packet = PointerPacket.deserialize(message);
+    for (Pointer pointer in packet.pointers) {
+      if (pointer.type == PointerType.MOVE)
+        image.growth = math.max(0.0, image.growth + pointer.x - touches[pointer.pointer].x);
+      touches[pointer.pointer] = new Touch(pointer.x, pointer.y);
+    }
   }
 }
 
@@ -74,7 +82,7 @@ void main() {
 
   // Resizeable image
   image = new RenderImageGrow(null, new Size(100.0, null));
-  imageCache.load("https://www.dartlang.org/logos/dart-logo.png").first.then((ui.Image dartLogo) {
+  imageCache.load("http://flutter.io/favicon.ico").first.then((ui.Image dartLogo) {
     image.image = dartLogo;
   });
 
@@ -114,7 +122,5 @@ Pancetta meatball tongue tenderloin rump tail jowl boudin.""";
   );
 
   updateTaskDescription('Interactive Flex', topColor);
-  new FlutterBinding(root: root);
-  ui.window.onPopRoute = handlePopRoute;
-  ui.window.onPointerPacket = handlePointerPacket;
+  new DemoBinding(root: root);
 }

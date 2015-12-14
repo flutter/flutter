@@ -6,9 +6,12 @@
 library gestures;
 
 export 'src/gestures/arena.dart';
+export 'src/gestures/binding.dart';
 export 'src/gestures/constants.dart';
+export 'src/gestures/converter.dart';
 export 'src/gestures/drag.dart';
 export 'src/gestures/events.dart';
+export 'src/gestures/hit_test.dart';
 export 'src/gestures/long_press.dart';
 export 'src/gestures/lsq_solver.dart';
 export 'src/gestures/multitap.dart';

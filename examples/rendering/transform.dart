@@ -24,5 +24,5 @@ void main() {
 
   RenderFlex flex = new RenderFlex();
   flex.add(spin);
-  new FlutterBinding(root: flex);
+  new RenderingFlutterBinding(root: flex);
 }

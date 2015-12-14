@@ -7,6 +7,7 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:collection/priority_queue.dart';
+import 'package:flutter/services.dart';
 
 /// Slows down animations by this factor to help in development.
 double timeDilation = 1.0;
@@ -80,11 +81,17 @@ class Priority {
 /// the task should be run.
 ///
 /// Tasks always run in the idle time after a frame has been committed.
-class Scheduler {
+abstract class Scheduler extends BindingBase {
   /// Requires clients to use the [scheduler] singleton
-  Scheduler._() {
+
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
     ui.window.onBeginFrame = handleBeginFrame;
   }
+
+  static Scheduler _instance;
+  static Scheduler get instance => _instance;
 
   SchedulingStrategy schedulingStrategy = new DefaultSchedulingStrategy();
 
@@ -120,7 +127,7 @@ class Scheduler {
     if (_taskQueue.isEmpty)
       return;
     _TaskEntry entry = _taskQueue.first;
-    if (schedulingStrategy.shouldRunTaskWithPriority(entry.priority)) {
+    if (schedulingStrategy.shouldRunTaskWithPriority(priority: entry.priority, scheduler: this)) {
       try {
         (_taskQueue.removeFirst().task)();
       } finally {
@@ -295,17 +302,15 @@ class Scheduler {
   }
 }
 
-final Scheduler scheduler = new Scheduler._();
-
 abstract class SchedulingStrategy {
-  bool shouldRunTaskWithPriority(int priority);
+  bool shouldRunTaskWithPriority({ int priority, Scheduler scheduler });
 }
 
 class DefaultSchedulingStrategy implements SchedulingStrategy {
   // TODO(floitsch): for now we only expose the priority. It might be
   // interesting to provide more info (like, how long the task ran the last
   // time).
-  bool shouldRunTaskWithPriority(int priority) {
+  bool shouldRunTaskWithPriority({ int priority, Scheduler scheduler }) {
     if (scheduler.transientCallbackCount > 0)
       return priority >= Priority.animation._value;
     return true;

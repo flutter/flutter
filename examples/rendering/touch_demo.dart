@@ -77,5 +77,5 @@ void main() {
   final StackParentData paragraphParentData = paragraph.parentData;
   paragraphParentData..top = 40.0
                      ..left = 20.0;
-  new FlutterBinding(root: stack);
+  new RenderingFlutterBinding(root: stack);
 }

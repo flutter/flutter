@@ -73,5 +73,5 @@ void main() {
     ],
     direction: FlexDirection.vertical
   );
-  new FlutterBinding(root: root);
+  new RenderingFlutterBinding(root: root);
 }

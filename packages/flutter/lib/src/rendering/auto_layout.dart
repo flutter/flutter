@@ -220,7 +220,7 @@ class RenderAutoLayout extends RenderBox
     // only indicates that the value has been flushed to the variable.
   }
 
-  bool hitTestChildren(HitTestResult result, {Point position}) {
+  bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position);
   }
 

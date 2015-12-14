@@ -18,5 +18,5 @@ RenderBox buildSectorExample() {
 }
 
 void main() {
-  new FlutterBinding(root: buildSectorExample());
+  new RenderingFlutterBinding(root: buildSectorExample());
 }

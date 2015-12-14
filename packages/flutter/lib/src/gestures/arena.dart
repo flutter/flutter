@@ -64,8 +64,6 @@ class _GestureArenaState {
 class GestureArena {
   final Map<Object, _GestureArenaState> _arenas = new Map<Object, _GestureArenaState>();
 
-  static final GestureArena instance = new GestureArena();
-
   GestureArenaEntry add(Object key, GestureArenaMember member) {
     _GestureArenaState state = _arenas.putIfAbsent(key, () => new _GestureArenaState());
     state.add(member);
