@@ -4,6 +4,8 @@
 
 import 'package:newton/newton.dart';
 
+export 'package:newton/newton.dart' show SpringDescription;
+
 /// A factory for simulations.
 abstract class Force {
   const Force();
