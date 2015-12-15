@@ -24,6 +24,10 @@ abstract class Renderer extends Scheduler
     _instance = this;
     ui.window.onMetricsChanged = handleMetricsChanged;
     initRenderView();
+    assert(() {
+      initServiceExtensions();
+      return true;
+    });
     addPersistentFrameCallback(_handlePersistentFrameCallback);
   }
 

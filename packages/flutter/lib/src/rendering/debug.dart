@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert' show JSON;
+import 'dart:developer' as developer;
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 /// Causes each RenderBox to paint a box around its bounds.
@@ -52,6 +56,87 @@ List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
+}
+
+bool _extensionsInitialized = false;
+
+void initServiceExtensions() {
+  if (_extensionsInitialized)
+    return;
+
+  _extensionsInitialized = true;
+
+  assert(() {
+    developer.registerExtension('flutter', _flutter);
+    developer.registerExtension('flutter.debugPaint', _debugPaint);
+    developer.registerExtension('flutter.timeDilation', _timeDilation);
+
+    // Emit an info level log message; this tells the debugger that the Flutter
+    // service extensions are registered.
+    developer.log('Flutter initialized', name: 'flutter', level: 800);
+
+    return true;
+  });
+}
+
+/// Just respond to the request. Clients can use the existence of this call to
+/// know that the debug client is a Flutter app.
+Future<developer.ServiceExtensionResponse> _flutter(String method, Map<String, dynamic> parameters) {
+  return new Future<developer.ServiceExtensionResponse>.value(
+    new developer.ServiceExtensionResponse.result(JSON.encode({
+      'type': '_extensionType',
+      'method': method
+    }))
+  );
+}
+
+/// Toggle the [debugPaintSizeEnabled] setting.
+Future<developer.ServiceExtensionResponse> _debugPaint(String method, Map<String, dynamic> parameters) {
+  if (parameters.containsKey('enabled')) {
+    // TODO(devoncarew): This is a work around for a VM bug: sdk/25208 - all
+    // params are coerced to strings.
+    debugPaintSizeEnabled = parameters['enabled'].toString() == 'true';
+
+    // Redraw everything - mark the world as dirty.
+    RenderObjectVisitor visitor;
+    visitor = (RenderObject child) {
+      child.markNeedsPaint();
+      child.visitChildren(visitor);
+    };
+    Renderer.instance?.renderView?.visitChildren(visitor);
+  }
+
+  return new Future<developer.ServiceExtensionResponse>.value(
+    new developer.ServiceExtensionResponse.result(JSON.encode({
+      'type': '_extensionType',
+      'method': method,
+      'enabled': debugPaintSizeEnabled
+    }))
+  );
+}
+
+/// Manipulate the scheduler's [timeDilation] field.
+Future<developer.ServiceExtensionResponse> _timeDilation(String method, Map<String, dynamic> parameters) {
+  if (parameters.containsKey('timeDilation')) {
+    // TODO(devoncarew): Workaround for https://github.com/dart-lang/sdk/issues/25208.
+    dynamic param = parameters['timeDilation'];
+    if (param is String) {
+      param = double.parse(param);
+    } else if (param is num) {
+      param = param.toDouble();
+    }
+    timeDilation = param;
+  } else {
+    timeDilation = 1.0;
+  }
+
+  return new Future<developer.ServiceExtensionResponse>.value(
+    new developer.ServiceExtensionResponse.result(JSON.encode({
+      'type': '_extensionType',
+      'method': method,
+      'timeDilation': '$timeDilation'
+    }))
+  );
 }
 
 /// Prints a message to the console, which you can access using the "flutter"
