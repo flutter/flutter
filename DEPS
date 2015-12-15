@@ -72,6 +72,9 @@ deps = {
   'src/third_party/skia':
    Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
+  'src/third_party/yasm/source/patched-yasm':
+   Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
+
   'src/third_party/libjpeg_turbo':
    Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + 'f4631b6ee8b1dbb05e51ae335a7886f9ac598ab6',
 
