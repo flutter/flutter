@@ -12,8 +12,8 @@ class SpringDescription {
   final double springConstant;
 
   /// The damping coefficient.
-  /// Note: Not to be confused with the damping ratio. Use the separate
-  ///       constructor provided for this purpose
+  /// Not to be confused with the damping ratio. Use the separate
+  /// constructor provided for this purpose
   final double damping;
 
   SpringDescription(
