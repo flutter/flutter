@@ -72,6 +72,9 @@ deps = {
   'src/third_party/skia':
    Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
+  'src/third_party/libjpeg_turbo':
+   Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + 'f4631b6ee8b1dbb05e51ae335a7886f9ac598ab6',
+
   'src/third_party/mesa/src':
    Var('chromium_git') + '/chromium/deps/mesa.git' + '@' + '071d25db04c23821a12a8b260ab9d96a097402f0',
 }

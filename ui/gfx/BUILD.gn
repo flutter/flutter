@@ -95,9 +95,9 @@ component("gfx") {
     "//base:i18n",
     "//skia",
     "//third_party/harfbuzz-ng",
-    "//third_party/libjpeg",
     "//third_party/libpng",
     "//third_party/zlib",
+    "//third_party:jpeg",
     "//ui/gfx/geometry",
   ]
   public_deps = [
