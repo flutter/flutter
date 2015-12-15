@@ -26,6 +26,7 @@ if [ $TRAVIS_PULL_REQUEST = "false" ]; then
     GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
     GCLOUD=$HOME/google-cloud-sdk/bin/gcloud
     $GCLOUD auth activate-service-account --key-file gcloud_key_file.json
+    $GSUTIL -m rsync -r -d packages/flutter/doc/api gs://docs.flutter.io/flutter
     $GSUTIL -m rsync -r -d packages/flutter/doc/api gs://docs.domokit.org/flutter
   fi
 fi
