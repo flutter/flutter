@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'demo/chip_demo.dart';
 import 'demo/date_picker_demo.dart';
 import 'demo/drop_down_demo.dart';
+import 'demo/modal_bottom_sheet_demo.dart';
+import 'demo/persistent_bottom_sheet_demo.dart';
 import 'demo/selection_controls_demo.dart';
 import 'demo/slider_demo.dart';
 import 'demo/tabs_demo.dart';
@@ -22,6 +24,8 @@ final List<WidgetDemo> _kDemos = <WidgetDemo>[
   kTabsDemo,
   kTimePickerDemo,
   kDropDownDemo,
+  kModalBottomSheetDemo,
+  kPersistentBottomSheetDemo,
 ];
 
 class _MaterialGallery extends StatefulComponent {
