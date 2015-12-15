@@ -22,8 +22,7 @@ flutter test --flutter-repo
 if [ $TRAVIS_PULL_REQUEST = "false" ]; then
   if [ $TRAVIS_BRANCH = "master" ]; then
     pub global activate dartdoc 0.8.4
-    export PATH="$PATH":"~/.pub-cache/bin"
-    (cd packages/flutter; dartdoc --header=doc/styles.html)
+    (cd packages/flutter; ~/.pub-cache/bin/dartdoc --header=doc/styles.html)
 
     GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
     GCLOUD=$HOME/google-cloud-sdk/bin/gcloud
