@@ -8,6 +8,7 @@
 #include "base/time/time.h"
 #include "sky/engine/tonic/dart_persistent_value.h"
 #include "sky/engine/wtf/text/WTFString.h"
+#include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
 
 namespace blink {
@@ -40,6 +41,8 @@ class Window {
 
   void PushRoute(const std::string& route);
   void PopRoute();
+
+  void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
   static void RegisterNatives(DartLibraryNatives* natives);
 

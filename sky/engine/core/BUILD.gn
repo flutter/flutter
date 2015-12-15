@@ -65,6 +65,7 @@ static_library("core") {
     ":prerequisites",
     "//sky/engine/platform",
     "//sky/engine/bindings",
+    "//sky/services/engine:interfaces",
     "//sky/services/pointer:interfaces",
     "//dart/runtime/bin:embedded_dart_io",
     "//dart/runtime:libdart",

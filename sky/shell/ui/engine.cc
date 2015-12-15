@@ -253,14 +253,21 @@ void Engine::PopRoute() {
     sky_view_->PopRoute();
 }
 
-void Engine::OnActivityPaused() {
-  activity_running_ = false;
-  StopAnimator();
-}
+void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
+  switch (state) {
+    case sky::AppLifecycleState::PAUSED:
+      activity_running_ = false;
+      StopAnimator();
+      break;
 
-void Engine::OnActivityResumed() {
-  activity_running_ = true;
-  StartAnimatorIfPossible();
+    case sky::AppLifecycleState::RESUMED:
+      activity_running_ = true;
+      StartAnimatorIfPossible();
+      break;
+  }
+
+  if (sky_view_)
+    sky_view_->OnAppLifecycleStateChanged(state);
 }
 
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {

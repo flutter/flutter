@@ -47,3 +47,8 @@ void _beginFrame(int microseconds) {
   if (window.onBeginFrame != null)
     window.onBeginFrame(new Duration(microseconds: microseconds));
 }
+
+void _onAppLifecycleStateChanged(int state) {
+  if (window.onAppLifecycleStateChanged != null)
+    window.onAppLifecycleStateChanged(AppLifecycleState.values[state]);
+}

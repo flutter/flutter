@@ -12,6 +12,7 @@ source_set("sky") {
     "//sky/engine/core",
     "//sky/engine/platform",
     "//sky/engine/wtf",
+    "//sky/services/engine:interfaces",
     "//sky/services/pointer:interfaces",
   ]
 
