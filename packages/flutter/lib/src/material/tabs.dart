@@ -31,6 +31,10 @@ const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 300);
 
+// The scrollOffset (velocity) provided to fling() is pixels/ms, and the
+// tolerance velocity is pixels/sec.
+final double _kMinFlingVelocity = kPixelScrollTolerance.velocity / 2000.0;
+
 class _TabBarParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
 class _RenderTabBar extends RenderBox with
@@ -756,7 +760,7 @@ class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
     if (config.selection.indexIsChanging)
       return new Future.value();
 
-    if (scrollVelocity != Offset.zero) {
+    if (scrollVelocity.dx.abs() > _kMinFlingVelocity) {
       final int selectionDelta = scrollVelocity.dx > 0 ? -1 : 1;
       config.selection.index = (config.selection.index + selectionDelta).clamp(0, _tabCount - 1);
       return new Future.value();
