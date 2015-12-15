@@ -516,12 +516,12 @@ source_set("platform") {
     "//third_party/icu",
     "//third_party/libpng",
     "//third_party/qcms",
-    "//third_party/libjpeg",
+    "//third_party:jpeg",
   ]
 
   forward_dependent_configs_from = [
     "//skia",
-    "//third_party/libjpeg",
+    "//third_party:jpeg",
     "//third_party/iccjpeg",
     "//third_party/libpng",
     "//third_party/qcms",
