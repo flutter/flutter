@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include <minikin/FontFamily.h>
+#include "FontLanguage.h"
 
 namespace android {
 
