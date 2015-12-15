@@ -81,7 +81,7 @@ void initServiceExtensions() {
 
 /// Just respond to the request. Clients can use the existence of this call to
 /// know that the debug client is a Flutter app.
-Future<developer.ServiceExtensionResponse> _flutter(String method, Map<String, dynamic> parameters) {
+Future<developer.ServiceExtensionResponse> _flutter(String method, Map<String, String> parameters) {
   return new Future<developer.ServiceExtensionResponse>.value(
     new developer.ServiceExtensionResponse.result(JSON.encode({
       'type': '_extensionType',
@@ -91,11 +91,9 @@ Future<developer.ServiceExtensionResponse> _flutter(String method, Map<String, d
 }
 
 /// Toggle the [debugPaintSizeEnabled] setting.
-Future<developer.ServiceExtensionResponse> _debugPaint(String method, Map<String, dynamic> parameters) {
+Future<developer.ServiceExtensionResponse> _debugPaint(String method, Map<String, String> parameters) {
   if (parameters.containsKey('enabled')) {
-    // TODO(devoncarew): This is a work around for a VM bug: sdk/25208 - all
-    // params are coerced to strings.
-    debugPaintSizeEnabled = parameters['enabled'].toString() == 'true';
+    debugPaintSizeEnabled = parameters['enabled'] == 'true';
 
     // Redraw everything - mark the world as dirty.
     RenderObjectVisitor visitor;
@@ -116,18 +114,9 @@ Future<developer.ServiceExtensionResponse> _debugPaint(String method, Map<String
 }
 
 /// Manipulate the scheduler's [timeDilation] field.
-Future<developer.ServiceExtensionResponse> _timeDilation(String method, Map<String, dynamic> parameters) {
+Future<developer.ServiceExtensionResponse> _timeDilation(String method, Map<String, String> parameters) {
   if (parameters.containsKey('timeDilation')) {
-    // TODO(devoncarew): Workaround for https://github.com/dart-lang/sdk/issues/25208.
-    dynamic param = parameters['timeDilation'];
-    if (param is String) {
-      param = double.parse(param);
-    } else if (param is num) {
-      param = param.toDouble();
-    }
-    timeDilation = param;
-  } else {
-    timeDilation = 1.0;
+    timeDilation = double.parse(parameters['timeDilation']);
   }
 
   return new Future<developer.ServiceExtensionResponse>.value(
