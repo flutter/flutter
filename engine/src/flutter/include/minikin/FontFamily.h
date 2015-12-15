@@ -30,62 +30,6 @@ namespace android {
 
 class MinikinFont;
 
-// FontLanguage is a compact representation of a bcp-47 language tag. It
-// does not capture all possible information, only what directly affects
-// font rendering.
-class FontLanguage {
-    friend class FontStyle;
-    friend class FontLanguages;
-public:
-    FontLanguage() : mBits(0) { }
-
-    // Parse from string
-    FontLanguage(const char* buf, size_t size);
-
-    bool operator==(const FontLanguage other) const {
-        return mBits != kUnsupportedLanguage && mBits == other.mBits;
-    }
-    operator bool() const { return mBits != 0; }
-
-    bool isUnsupported() const { return mBits == kUnsupportedLanguage; }
-    bool hasEmojiFlag() const { return isUnsupported() ? false : (mBits & kEmojiFlag); }
-
-    std::string getString() const;
-
-    // 0 = no match, 1 = language matches
-    int match(const FontLanguage other) const;
-
-private:
-    explicit FontLanguage(uint32_t bits) : mBits(bits) { }
-
-    uint32_t bits() const { return mBits; }
-
-    static const uint32_t kUnsupportedLanguage = 0xFFFFFFFFu;
-    static const uint32_t kBaseLangMask = 0xFFFFFFu;
-    static const uint32_t kHansFlag = 1u << 24;
-    static const uint32_t kHantFlag = 1u << 25;
-    static const uint32_t kEmojiFlag = 1u << 26;
-    static const uint32_t kScriptMask = kHansFlag | kHantFlag | kEmojiFlag;
-    uint32_t mBits;
-};
-
-// A list of zero or more instances of FontLanguage, in the order of
-// preference. Used for further resolution of rendering results.
-class FontLanguages {
-public:
-    FontLanguages() { mLangs.clear(); }
-
-    // Parse from string, which is a comma-separated list of languages
-    FontLanguages(const char* buf, size_t size);
-
-    const FontLanguage& operator[](size_t index) const { return mLangs.at(index); }
-
-    size_t size() const { return mLangs.size(); }
-
-private:
-    std::vector<FontLanguage> mLangs;
-};
-
 // FontStyle represents all style information needed to select an actual font
 // from a collection. The implementation is packed into two 32-bit words
 // so it can be efficiently copied, embedded in other objects, etc.
@@ -158,7 +102,9 @@ class FontFamily : public MinikinRefCounted {
 public:
     FontFamily() : mHbFont(nullptr) { }
 
-    FontFamily(FontLanguage lang, int variant) : mLang(lang), mVariant(variant), mHbFont(nullptr) {
+    FontFamily(int variant);
+
+    FontFamily(uint32_t langId, int variant) : mLangId(langId), mVariant(variant), mHbFont(nullptr) {
     }
 
     ~FontFamily();
@@ -169,7 +115,7 @@ public:
     void addFont(MinikinFont* typeface, FontStyle style);
     FakedFont getClosestMatch(FontStyle style) const;
 
-    FontLanguage lang() const { return mLang; }
+    uint32_t langId() const { return mLangId; }
     int variant() const { return mVariant; }
 
     // API's for enumerating the fonts in a family. These don't guarantee any particular order
@@ -200,7 +146,7 @@ private:
         MinikinFont* typeface;
         FontStyle style;
     };
-    FontLanguage mLang;
+    uint32_t mLangId;
     int mVariant;
     std::vector<Font> mFonts;
 

@@ -16,8 +16,6 @@
 
 #define LOG_TAG "Minikin"
 
-#include <unordered_set>
-
 #include <cutils/log.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -28,6 +26,7 @@
 
 #include <utils/JenkinsHash.h>
 
+#include "FontLanguage.h"
 #include "FontLanguageListCache.h"
 #include "HbFaceCache.h"
 #include "MinikinInternal.h"
@@ -40,117 +39,6 @@
 using std::vector;
 
 namespace android {
-
-// Parse bcp-47 language identifier into internal structure
-FontLanguage::FontLanguage(const char* buf, size_t size) {
-    uint32_t bits = 0;
-    size_t i;
-    for (i = 0; i < size; i++) {
-        uint16_t c = buf[i];
-        if (c == '-' || c == '_') break;
-    }
-    if (i == 2) {
-        bits = uint8_t(buf[0]) | (uint8_t(buf[1]) << 8);
-    } else if (i == 3) {
-        bits = uint8_t(buf[0]) | (uint8_t(buf[1]) << 8) | (uint8_t(buf[2]) << 16);
-    } else {
-        mBits = kUnsupportedLanguage;
-        // We don't understand anything other than two-letter or three-letter
-        // language codes, so we skip parsing the rest of the string.
-        return;
-    }
-    size_t next;
-    for (i++; i < size; i = next + 1) {
-        for (next = i; next < size; next++) {
-            uint16_t c = buf[next];
-            if (c == '-' || c == '_') break;
-        }
-        if (next - i == 4) {
-            if (buf[i] == 'H' && buf[i+1] == 'a' && buf[i+2] == 'n') {
-                if (buf[i+3] == 's') {
-                    bits |= kHansFlag;
-                } else if (buf[i+3] == 't') {
-                    bits |= kHantFlag;
-                }
-            } else if (buf[i] == 'Q' && buf[i+1] == 'a' && buf[i+2] == 'a'&& buf[i+3] == 'e') {
-                bits |= kEmojiFlag;
-            }
-        }
-        // TODO: this might be a good place to infer script from country (zh_TW -> Hant),
-        // but perhaps it's up to the client to do that, before passing a string.
-    }
-    mBits = bits;
-}
-
-std::string FontLanguage::getString() const {
-    if (mBits == kUnsupportedLanguage) {
-        return "und";
-    }
-    char buf[16];
-    size_t i = 0;
-    if (mBits & kBaseLangMask) {
-        buf[i++] = mBits & 0xFFu;
-        buf[i++] = (mBits >> 8) & 0xFFu;
-        char third_letter = (mBits >> 16) & 0xFFu;
-        if (third_letter != 0) buf[i++] = third_letter;
-    }
-    if (mBits & kScriptMask) {
-        if (!i) {
-            // This should not happen, but as it apparently has, we fill the language code part
-            // with "und".
-            buf[i++] = 'u';
-            buf[i++] = 'n';
-            buf[i++] = 'd';
-        }
-        buf[i++] = '-';
-        if (mBits & kEmojiFlag) {
-            buf[i++] = 'Q';
-            buf[i++] = 'a';
-            buf[i++] = 'a';
-            buf[i++] = 'e';
-        } else {
-            buf[i++] = 'H';
-            buf[i++] = 'a';
-            buf[i++] = 'n';
-            buf[i++] = (mBits & kHansFlag) ? 's' : 't';
-        }
-    }
-    return std::string(buf, i);
-}
-
-int FontLanguage::match(const FontLanguage other) const {
-    return *this == other;
-}
-
-FontLanguages::FontLanguages(const char* buf, size_t size) {
-    std::unordered_set<uint32_t> seen;
-    mLangs.clear();
-    const char* bufEnd = buf + size;
-    const char* lastStart = buf;
-    bool isLastLang = false;
-    while (true) {
-        const char* commaLoc = static_cast<const char*>(
-                memchr(lastStart, ',', bufEnd - lastStart));
-        if (commaLoc == NULL) {
-            commaLoc = bufEnd;
-            isLastLang = true;
-        }
-        FontLanguage lang(lastStart, commaLoc - lastStart);
-        if (isLastLang && mLangs.size() == 0) {
-            // Make sure the list has at least one member
-            mLangs.push_back(lang);
-            return;
-        }
-        uint32_t bits = lang.bits();
-        if (bits != FontLanguage::kUnsupportedLanguage && seen.count(bits) == 0) {
-            mLangs.push_back(lang);
-            if (isLastLang) return;
-            seen.insert(bits);
-        }
-        if (isLastLang) return;
-        lastStart = commaLoc + 1;
-    }
-}
 
 FontStyle::FontStyle(int variant, int weight, bool italic)
         : FontStyle(FontLanguageListCache::kEmptyListId, variant, weight, italic) {
@@ -175,6 +63,9 @@ uint32_t FontStyle::registerLanguageList(const std::string& languages) {
 // static
 uint32_t FontStyle::pack(int variant, int weight, bool italic) {
     return (weight & kWeightMask) | (italic ? kItalicMask : 0) | (variant << kVariantShift);
+}
+
+FontFamily::FontFamily(int variant) : FontFamily(FontLanguageListCache::kEmptyListId, variant) {
 }
 
 FontFamily::~FontFamily() {
@@ -210,7 +101,8 @@ void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
     addFontLocked(typeface, style);
 }
 
-void FontFamily::addFontLocked(MinikinFont* typeface, FontStyle style) {    typeface->RefLocked();
+void FontFamily::addFontLocked(MinikinFont* typeface, FontStyle style) {
+    typeface->RefLocked();
     mFonts.push_back(Font(typeface, style));
     mCoverageValid = false;
 }
