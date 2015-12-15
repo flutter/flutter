@@ -43,9 +43,13 @@ void DecodeImage(scoped_ptr<DartPersistentValue> callback,
     DartInvokeAppClosure(callback->value(), {Dart_Null()});
     return;
   }
+  ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
+  if (decoder->failed()) {
+    DartInvokeAppClosure(callback->value(), {Dart_Null()});
+    return;
+  }
 
   RefPtr<CanvasImage> resultImage = CanvasImage::create();
-  ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
   RefPtr<SkImage> skImage = adoptRef(
       SkImage::NewFromBitmap(imageFrame->getSkBitmap()));
   resultImage->setImage(skImage.release());
