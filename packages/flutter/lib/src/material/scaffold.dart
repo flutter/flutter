@@ -95,8 +95,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 }
 
-final _ScaffoldLayout _scaffoldLayout = new _ScaffoldLayout();
-
 class Scaffold extends StatefulComponent {
   Scaffold({
     Key key,
@@ -336,9 +334,8 @@ class ScaffoldState extends State<Scaffold> {
       ));
     }
 
-    return new CustomMultiChildLayout(children, delegate: _scaffoldLayout);
+    return new CustomMultiChildLayout(children, delegate: new _ScaffoldLayout());
   }
-
 }
 
 class ScaffoldFeatureController<T extends Widget> {
@@ -397,13 +394,6 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       config.onDismissed();
   }
 
-  double _childHeight;
-  void _updateChildHeight(Size newSize) {
-    setState(() {
-      _childHeight = newSize.height;
-    });
-  }
-
   Widget build(BuildContext context) {
     return new AlignTransition(
       performance: config.performance,
@@ -412,8 +402,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       child: new BottomSheet(
         performance: config.performance,
         onClosing: config.onClosing,
-        childHeight: _childHeight,
-        builder: (BuildContext context) => new SizeObserver(child: config.builder(context), onSizeChanged: _updateChildHeight)
+        builder: config.builder
       )
     );
   }
