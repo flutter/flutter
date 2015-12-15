@@ -107,4 +107,14 @@ public class MediaPlayerImpl implements MediaPlayer, android.media.MediaPlayer.O
     public void pause() {
         mPlayer.pause();
     }
+
+    @Override
+    public void setLooping(boolean looping) {
+        mPlayer.setLooping(looping);
+    }
+
+    @Override
+    public void setVolume(float volume) {
+        mPlayer.setVolume(volume, volume);
+    }
 }
