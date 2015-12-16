@@ -19,7 +19,7 @@ export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 
 typedef ui.Shader ShaderCallback(Rect bounds);
 
-/// Base class for data associated with a [RenderObject] by its parent
+/// Base class for data associated with a [RenderObject] by its parent.
 ///
 /// Some render objects wish to store data on their children, such as their
 /// input parameters to the parent's layout algorithm or their position relative
@@ -356,7 +356,7 @@ abstract class Painter {
   void paint(PaintingContext context, Offset offset);
 }
 
-/// An abstract set of layout constraints
+/// An abstract set of layout constraints.
 ///
 /// Concrete layout models (such as box) will create concrete subclasses to
 /// communicate layout constraints between parents and children.
@@ -385,7 +385,7 @@ typedef void RenderingExceptionHandler(RenderObject source, String method, dynam
 /// information, such as from [debugDumpRenderTree()].
 RenderingExceptionHandler debugRenderingExceptionHandler;
 
-/// An object in the render tree
+/// An object in the render tree.
 ///
 /// Render objects have a reference to their parent but do not commit to a model
 /// for their children.
@@ -393,7 +393,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // LAYOUT
 
-  /// Data for use by the parent render object
+  /// Data for use by the parent render object.
   ///
   /// The parent data is used by the render object that lays out this object
   /// (typically this object's parent in the render tree) to store information
@@ -410,7 +410,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///   permitted to read some fields of the parent data.
   ParentData parentData;
 
-  /// Override to setup parent data correctly for your children
+  /// Override to setup parent data correctly for your children.
   ///
   /// You can call this function to set up the parent data for child before the
   /// child is added to the parent's child list.
@@ -420,7 +420,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       child.parentData = new ParentData();
   }
 
-  /// Called by subclasses when they decide a render object is a child
+  /// Called by subclasses when they decide a render object is a child.
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
@@ -433,7 +433,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _markNeedsCompositingBitsUpdate();
   }
 
-  /// Called by subclasses when they decide a render object is no longer a child
+  /// Called by subclasses when they decide a render object is no longer a child.
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
@@ -449,7 +449,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _markNeedsCompositingBitsUpdate();
   }
 
-  /// Calls visitor for each immediate child of this render object
+  /// Calls visitor for each immediate child of this render object.
   ///
   /// Override in subclasses with children and call the visitor for each child
   void visitChildren(RenderObjectVisitor visitor) { }
@@ -494,14 +494,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static List<RenderObject> _nodesNeedingLayout = new List<RenderObject>();
   bool _needsLayout = true;
-  /// Whether this render object's layout information is dirty
+  /// Whether this render object's layout information is dirty.
   bool get needsLayout => _needsLayout;
   RenderObject _relayoutSubtreeRoot;
   bool _doingThisLayoutWithCallback = false;
   Constraints _constraints;
-  /// The layout constraints most recently supplied by the parent
+  /// The layout constraints most recently supplied by the parent.
   Constraints get constraints => _constraints;
-  /// Override this function in a subclass to verify that your state matches the constraints object
+  /// Override this function in a subclass to verify that your state matches the constraints object.
   bool debugDoesMeetConstraints();
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
@@ -518,7 +518,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return true;
   }
 
-  /// Mark this render object's layout information as dirty
+  /// Mark this render object's layout information as dirty.
   ///
   /// Rather than eagerly updating layout information in response to writes into
   /// this render object, we instead mark the layout information as dirty, which
@@ -564,7 +564,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  /// Bootstrap the rendering pipeline by scheduling the very first layout
+  /// Bootstrap the rendering pipeline by scheduling the very first layout.
   ///
   /// Requires this render object to be attached and that this render object
   /// is the root of the render tree.
@@ -583,7 +583,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _nodesNeedingLayout.add(this);
   }
 
-  /// Update the layout information for all dirty render objects
+  /// Update the layout information for all dirty render objects.
   ///
   /// This function is one of the core stages of the rendering pipeline. Layout
   /// information is cleaned prior to painting so that render objects will
@@ -636,7 +636,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     markNeedsPaint();
   }
 
-  /// Compute the layout for this render object
+  /// Compute the layout for this render object.
   ///
   /// This function is the main entry point for parents to ask their children to
   /// update their layout information. The parent passes a constraints object,
@@ -740,14 +740,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void debugResetSize() { }
 
   /// Whether the constraints are the only input to the sizing algorithm (in
-  /// particular, child nodes have no impact)
+  /// particular, child nodes have no impact).
   ///
   /// Returning false is always correct, but returning true can be more
   /// efficient when computing the size of this render object because we don't
   /// need to recompute the size if the constraints don't change.
   bool get sizedByParent => false;
 
-  /// Updates the render objects size using only the constraints
+  /// Updates the render objects size using only the constraints.
   ///
   /// Do not call this function directly: call [layout] instead. This function
   /// is called by [layout] when there is actually work to be done by this
@@ -760,7 +760,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Note: This function is called only if [sizedByParent] is true.
   void performResize();
 
-  /// Do the work of computing the layout for this render object
+  /// Do the work of computing the layout for this render object.
   ///
   /// Do not call this function directly: call [layout] instead. This function
   /// is called by [layout] when there is actually work to be done by this
@@ -782,7 +782,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void performLayout();
 
   /// Allows this render object to mutation its child list during layout and
-  /// invokes callback
+  /// invokes callback.
   void invokeLayoutCallback(LayoutCallback callback) {
     assert(_debugMutationsLocked);
     assert(_debugDoingThisLayout);
@@ -795,7 +795,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  /// Rotate this render object (not yet implemented)
+  /// Rotate this render object (not yet implemented).
   void rotate({
     int oldAngle, // 0..3
     int newAngle, // 0..3
@@ -824,7 +824,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
 
-  /// Whether this render object paints using a composited layer
+  /// Whether this render object paints using a composited layer.
   ///
   /// Override this in subclasses to indicate that instances of your class need
   /// to have their own compositing layer. For example, videos should return
@@ -834,7 +834,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool get hasLayer => false;
 
   ContainerLayer _layer;
-  /// The compositing layer that this render object uses to paint
+  /// The compositing layer that this render object uses to paint.
   ///
   /// Call only when [hasLayer] is true.
   ContainerLayer get layer {
@@ -844,7 +844,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   bool _needsCompositingBitsUpdate = true;
-  /// Mark the compositing state for this render object as dirty
+  /// Mark the compositing state for this render object as dirty.
   ///
   /// When the subtree is mutated, we need to recompute our [needsCompositing]
   /// bit, and our ancestors need to do the same (in case ours changed).
@@ -859,8 +859,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       parent._markNeedsCompositingBitsUpdate();
     assert(parent == this.parent);
   }
+
   bool _needsCompositing = false;
-  /// Whether we or one of our descendants has a compositing layer
+  /// Whether we or one of our descendants has a compositing layer.
   ///
   /// Only legal to call after [flushLayout] and [updateCompositingBits] have
   /// been called.
@@ -869,7 +870,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return _needsCompositing;
   }
 
-  /// Updates the [needsCompositing] bits
+  /// Updates the [needsCompositing] bits.
   ///
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
@@ -890,10 +891,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   bool _needsPaint = true;
-  /// The visual appearance of this render object has changed since it last painted
+  /// The visual appearance of this render object has changed since it last painted.
   bool get needsPaint => _needsPaint;
 
-  /// Mark this render object as having changed its visual appearance
+  /// Mark this render object as having changed its visual appearance.
   ///
   /// Rather than eagerly updating this render object's display list
   /// in response to writes, we instead mark the the render object as needing to
@@ -933,7 +934,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  /// Update the display lists for all render objects
+  /// Update the display lists for all render objects.
   ///
   /// This function is one of the core stages of the rendering pipeline.
   /// Painting occurs after layout and before the scene is recomposited so that
@@ -959,7 +960,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  /// Bootstrap the rendering pipeline by scheduling the very first paint
+  /// Bootstrap the rendering pipeline by scheduling the very first paint.
   ///
   /// Requires that this render object is attached, is the root of the render
   /// tree, and has a composited layer.
@@ -1003,7 +1004,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
   }
 
-  /// The bounds within which this render object will paint
+  /// The bounds within which this render object will paint.
   ///
   /// A render object is permitted to paint outside the region it occupies
   /// during layout but is not permitted to paint outside these paints bounds.
@@ -1013,10 +1014,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// layer.
   Rect get paintBounds;
 
-  /// Override this function to paint debugging information
+  /// Override this function to paint debugging information.
   void debugPaint(PaintingContext context, Offset offset) { }
 
-  /// Paint this render object into the given context at the given offset
+  /// Paint this render object into the given context at the given offset.
   ///
   /// Subclasses should override this function to provide a visual appearance
   /// for themselves. The render object's local coordinate system is
@@ -1071,7 +1072,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // You must not add yourself to /result/ if you return false.
 
 
-  /// Returns a human understandable name
+  /// Returns a human understandable name.
   String toString() {
     String header = '$runtimeType';
     if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
@@ -1125,7 +1126,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
 }
 
-/// Obsolete function that will be removed eventually
+/// Obsolete function that will be removed eventually.
 double clamp({ double min: 0.0, double value: 0.0, double max: double.INFINITY }) {
   assert(min != null);
   assert(value != null);
@@ -1134,9 +1135,9 @@ double clamp({ double min: 0.0, double value: 0.0, double max: double.INFINITY }
 }
 
 
-/// Generic mixin for render objects with one child
+/// Generic mixin for render objects with one child.
 ///
-/// Provides a child model for a render object subclass that has a unique child
+/// Provides a child model for a render object subclass that has a unique child.
 abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implements RenderObject {
   ChildType _child;
   /// The render object's unique child
@@ -1169,11 +1170,11 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   }
 }
 
-/// Parent data to support a doubly-linked list of children
+/// Parent data to support a doubly-linked list of children.
 abstract class ContainerParentDataMixin<ChildType extends RenderObject> implements ParentData {
-  /// The previous sibling in the parent's child list
+  /// The previous sibling in the parent's child list.
   ChildType previousSibling;
-  /// The next sibling in the parent's child list
+  /// The next sibling in the parent's child list.
   ChildType nextSibling;
 
   /// Clear the sibling pointers.
@@ -1196,7 +1197,7 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> implemen
   }
 }
 
-/// Generic mixin for render objects with a list of children
+/// Generic mixin for render objects with a list of children.
 ///
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
@@ -1222,7 +1223,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   }
 
   int _childCount = 0;
-  /// The number of children
+  /// The number of children.
   int get childCount => _childCount;
 
   ChildType _firstChild;
@@ -1269,7 +1270,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
       }
     }
   }
-  /// Insert child into this render object's child list before the given child
+  /// Insert child into this render object's child list before the given child.
   ///
   /// To insert a child at the end of the child list, omit the before parameter.
   void add(ChildType child, { ChildType before }) {
@@ -1282,7 +1283,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     _addToChildList(child, before: before);
   }
 
-  /// Add all the children to the end of this render object's child list
+  /// Add all the children to the end of this render object's child list.
   void addAll(List<ChildType> children) {
     if (children != null)
       for (ChildType child in children)
@@ -1313,7 +1314,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     _childCount -= 1;
   }
 
-  /// Remove this child from the child list
+  /// Remove this child from the child list.
   ///
   /// Requires the child to be present in the child list.
   void remove(ChildType child) {
@@ -1321,7 +1322,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     dropChild(child);
   }
 
-  /// Remove all their children from this render object's child list
+  /// Remove all their children from this render object's child list.
   ///
   /// More efficient than removing them individually.
   void removeAll() {
@@ -1339,7 +1340,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     _childCount = 0;
   }
 
-  /// Move this child in the child list to be before the given child
+  /// Move this child in the child list to be before the given child.
   ///
   /// More efficient than removing and re-adding the child. Requires the child
   /// to already be in the child list at some position. Pass null for before to
@@ -1394,13 +1395,13 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
   }
 
-  /// The first child in the child list
+  /// The first child in the child list.
   ChildType get firstChild => _firstChild;
 
-  /// The last child in the child list
+  /// The last child in the child list.
   ChildType get lastChild => _lastChild;
 
-  /// The next child after the given child in the child list
+  /// The next child after the given child in the child list.
   ChildType childAfter(ChildType child) {
     final ParentDataType childParentData = child.parentData;
     return childParentData.nextSibling;

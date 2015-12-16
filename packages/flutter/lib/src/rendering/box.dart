@@ -23,7 +23,7 @@ class _DebugSize extends Size {
   final bool _canBeUsedByParent;
 }
 
-/// Immutable layout constraints for box layout
+/// Immutable layout constraints for box layout.
 ///
 /// A size respects a BoxConstraints if, and only if, all of the following
 /// relations hold:
@@ -51,14 +51,14 @@ class BoxConstraints extends Constraints {
   final double minHeight;
   final double maxHeight;
 
-  /// Constructs box constraints that is respected only by the given size
+  /// Constructs box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
     : minWidth = size.width,
       maxWidth = size.width,
       minHeight = size.height,
       maxHeight = size.height;
 
-  /// Constructs box constraints that require the given width or height
+  /// Constructs box constraints that require the given width or height.
   const BoxConstraints.tightFor({
     double width,
     double height
@@ -67,14 +67,14 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : 0.0,
       maxHeight = height != null ? height : double.INFINITY;
 
-  /// Constructs box constraints that forbid sizes larger than the given size
+  /// Constructs box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
     : minWidth = 0.0,
       maxWidth = size.width,
       minHeight = 0.0,
       maxHeight = size.height;
 
-  /// Constructs box constraints that expand to fill another box contraints
+  /// Constructs box constraints that expand to fill another box contraints.
   ///
   /// If width or height is given, the constraints will require exactly the
   /// given value in the given dimension.
@@ -86,7 +86,7 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : double.INFINITY,
       maxHeight = height != null ? height : double.INFINITY;
 
-  /// Returns new box constraints that are smaller by the given edge dimensions
+  /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
     assert(isNormalized);
@@ -102,7 +102,7 @@ class BoxConstraints extends Constraints {
     );
   }
 
-  /// Returns new box constraints that remove the minimum width and height requirements
+  /// Returns new box constraints that remove the minimum width and height requirements.
   BoxConstraints loosen() {
     assert(isNormalized);
     return new BoxConstraints(
@@ -113,7 +113,8 @@ class BoxConstraints extends Constraints {
     );
   }
 
-  /// Returns new box constraints that respect the given constraints while being as close as possible to the original constraints
+  /// Returns new box constraints that respect the given constraints while being
+  /// as close as possible to the original constraints.
   BoxConstraints enforce(BoxConstraints constraints) {
     return new BoxConstraints(
       minWidth: clamp(min: constraints.minWidth, max: constraints.maxWidth, value: minWidth),
@@ -123,7 +124,8 @@ class BoxConstraints extends Constraints {
     );
   }
 
-  /// Returns new box constraints with a tight width as close to the given width as possible while still respecting the original box constraints
+  /// Returns new box constraints with a tight width as close to the given width
+  /// as possible while still respecting the original box constraints.
   BoxConstraints tightenWidth(double width) {
     return new BoxConstraints(minWidth: math.max(math.min(maxWidth, width), minWidth),
                               maxWidth: math.max(math.min(maxWidth, width), minWidth),
@@ -131,7 +133,8 @@ class BoxConstraints extends Constraints {
                               maxHeight: maxHeight);
   }
 
-  /// Returns new box constraints with a tight height as close to the given height as possible while still respecting the original box constraints
+  /// Returns new box constraints with a tight height as close to the given
+  /// height as possible while still respecting the original box constraints.
   BoxConstraints tightenHeight(double height) {
     return new BoxConstraints(minWidth: minWidth,
                               maxWidth: maxWidth,
@@ -139,25 +142,30 @@ class BoxConstraints extends Constraints {
                               maxHeight: math.max(math.min(maxHeight, height), minHeight));
   }
 
-  /// Returns box constraints with the same width constraints but with unconstrainted height
+  /// Returns box constraints with the same width constraints but with
+  /// unconstrainted height.
   BoxConstraints widthConstraints() => new BoxConstraints(minWidth: minWidth, maxWidth: maxWidth);
 
-  /// Returns box constraints with the same height constraints but with unconstrainted width
+  /// Returns box constraints with the same height constraints but with
+  /// unconstrainted width
   BoxConstraints heightConstraints() => new BoxConstraints(minHeight: minHeight, maxHeight: maxHeight);
 
-  /// Returns the width that both satisfies the constraints and is as close as possible to the given width
+  /// Returns the width that both satisfies the constraints and is as close as
+  /// possible to the given width.
   double constrainWidth([double width = double.INFINITY]) {
     assert(isNormalized);
     return clamp(min: minWidth, max: maxWidth, value: width);
   }
 
-  /// Returns the height that both satisfies the constraints and is as close as possible to the given height
+  /// Returns the height that both satisfies the constraints and is as close as
+  /// possible to the given height.
   double constrainHeight([double height = double.INFINITY]) {
     assert(isNormalized);
     return clamp(min: minHeight, max: maxHeight, value: height);
   }
 
-  /// Returns the size that both satisfies the constraints and is as close as possible to the given size
+  /// Returns the size that both satisfies the constraints and is as close as
+  /// possible to the given size.
   Size constrain(Size size) {
     Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
     assert(() {
@@ -168,22 +176,22 @@ class BoxConstraints extends Constraints {
     return result;
   }
 
-  /// The biggest size that satisifes the constraints
+  /// The biggest size that satisifes the constraints.
   Size get biggest => new Size(constrainWidth(), constrainHeight());
 
-  /// The smallest size that satisfies the constraints
+  /// The smallest size that satisfies the constraints.
   Size get smallest => new Size(constrainWidth(0.0), constrainHeight(0.0));
 
-  /// Whether there is exactly one width value that satisfies the constraints
+  /// Whether there is exactly one width value that satisfies the constraints.
   bool get hasTightWidth => minWidth >= maxWidth;
 
-  /// Whether there is exactly one height value that satisfies the constraints
+  /// Whether there is exactly one height value that satisfies the constraints.
   bool get hasTightHeight => minHeight >= maxHeight;
 
-  /// Whether there is exactly one size that satifies the constraints
+  /// Whether there is exactly one size that satifies the constraints.
   bool get isTight => hasTightWidth && hasTightHeight;
 
-  /// Whether the given size satisfies the constraints
+  /// Whether the given size satisfies the constraints.
   bool isSatisfiedBy(Size size) {
     assert(isNormalized);
     return (minWidth <= size.width) && (size.width <= maxWidth) &&
@@ -226,7 +234,7 @@ class BoxConstraints extends Constraints {
     );
   }
 
-  /// Linearly interpolate between two BoxConstraints
+  /// Linearly interpolate between two BoxConstraints.
   ///
   /// If either is null, this function interpolates from [BoxConstraints.zero].
   static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
@@ -294,19 +302,19 @@ class BoxConstraints extends Constraints {
   }
 }
 
-/// A hit test entry used by [RenderBox]
+/// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry {
   const BoxHitTestEntry(RenderBox target, this.localPosition) : super(target);
 
   RenderBox get target => super.target;
 
-  /// The position of the hit test in the local coordinates of [target]
+  /// The position of the hit test in the local coordinates of [target].
   final Point localPosition;
 
   String toString() => '${target.runtimeType}@$localPosition';
 }
 
-/// Parent data used by [RenderBox] and its subclasses
+/// Parent data used by [RenderBox] and its subclasses.
 class BoxParentData extends ParentData {
   // TODO(abarth): Switch to using an Offset rather than a Point here. This
   //               value is really the offset from the parent.
@@ -325,7 +333,7 @@ class BoxParentData extends ParentData {
 /// ContainerRenderObjectMixin.
 abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
-/// A render object in a 2D cartesian coordinate system
+/// A render object in a 2D cartesian coordinate system.
 ///
 /// The size of each box is expressed as a width and a height. Each box has its
 /// own coordinate system in which its upper left corner is placed at (0, 0).
@@ -351,7 +359,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Returns the minimum width that this box could be without failing to paint
-  /// its contents within itself
+  /// its contents within itself.
   ///
   /// Override in subclasses that implement [performLayout].
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -360,7 +368,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Returns the smallest width beyond which increasing the width never
-  /// decreases the height
+  /// decreases the height.
   ///
   /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
@@ -390,7 +398,7 @@ abstract class RenderBox extends RenderObject {
     return constraints.constrainHeight(0.0);
   }
 
-  /// The size of this render box computed during layout
+  /// The size of this render box computed during layout.
   ///
   /// This value is stale whenever this object is marked as needing layout.
   /// During [performLayout], do not read the size of a child unless you pass
@@ -521,7 +529,7 @@ abstract class RenderBox extends RenderObject {
     return null;
   }
 
-  /// The box constraints most recently received from the parent
+  /// The box constraints most recently received from the parent.
   BoxConstraints get constraints => super.constraints;
   bool debugDoesMeetConstraints() {
     assert(constraints != null);
@@ -571,7 +579,7 @@ abstract class RenderBox extends RenderObject {
     });
   }
 
-  /// Determines the set of render objects located at the given position
+  /// Determines the set of render objects located at the given position.
   ///
   /// Returns true if the given point is contained in this render object or one
   /// of its descendants. Adds any render objects that contain the point to the
@@ -594,11 +602,11 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Override this function if this render object can be hit even if its
-  /// children were not hit
+  /// children were not hit.
   bool hitTestSelf(Point position) => false;
 
   /// Override this function to check whether any children are located at the
-  /// given position
+  /// given position.
   ///
   /// Typically children should be hit tested in reverse paint order so that
   /// hit tests at locations where children overlap hit the child that is
@@ -628,7 +636,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Convert the given point from the global coodinate system to the local
-  /// coordinate system for this box
+  /// coordinate system for this box.
   Point globalToLocal(Point point) {
     assert(attached);
     Matrix4 transform = new Matrix4.identity();
@@ -655,7 +663,7 @@ abstract class RenderBox extends RenderObject {
     return _transformPoint(transform, point);
   }
 
-  /// Returns a rectangle that contains all the pixels painted by this box
+  /// Returns a rectangle that contains all the pixels painted by this box.
   ///
   /// The paint bounds can be larger or smaller than [size], which is the amount
   /// of space this box takes up during layout. For example, if this box casts a
@@ -747,7 +755,7 @@ abstract class RenderBox extends RenderObject {
 /// appropriate.
 abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
 
-  /// Returns the baseline of the first child with a baseline
+  /// Returns the baseline of the first child with a baseline.
   ///
   /// Useful when the children are displayed vertically in the same order they
   /// appear in the child list.
@@ -764,7 +772,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return null;
   }
 
-  /// Returns the minimum baseline value among every child
+  /// Returns the minimum baseline value among every child.
   ///
   /// Useful when the vertical position of the children isn't determined by the
   /// order in the child list.
@@ -787,7 +795,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return result;
   }
 
-  /// Performs a hit test on each child by walking the child list backwards
+  /// Performs a hit test on each child by walking the child list backwards.
   ///
   /// Stops walking once after the first child reports that it contains the
   /// given point. Returns whether any children contain the given point.
@@ -805,7 +813,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     return false;
   }
 
-  /// Paints each child by walking the child list forwards
+  /// Paints each child by walking the child list forwards.
   void defaultPaint(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
