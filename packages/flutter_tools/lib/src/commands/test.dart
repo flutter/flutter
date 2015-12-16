@@ -16,14 +16,16 @@ import '../test/loader.dart' as loader;
 
 class TestCommand extends FlutterCommand {
   String get name => 'test';
-  String get description => 'Runs Flutter unit tests for the current project. At least one of --debug and --release must be set.';
+  String get description => 'Runs Flutter unit tests for the current project.';
 
   bool get requiresProjectRoot => false;
 
   String get projectRootValidationErrorMessage {
     return 'Error: No pubspec.yaml file found.\n'
-      'If you wish to run the tests in the flutter repo, pass --flutter-repo before\n'
-      'any test paths. Otherwise, run this command from the root of your project.';
+      'If you wish to run the tests in the Flutter repository\'s \'flutter\' package,\n'
+      'pass --flutter-repo before any test paths. Otherwise, run this command from the\n'
+      'root of your project. Test files must be called *_test.dart and must reside in\n'
+      'the package\'s \'test\' directory (or one of its subdirectories).';
   }
 
   Future<String> _getShellPath(BuildConfiguration config) async {
@@ -44,7 +46,7 @@ class TestCommand extends FlutterCommand {
   }
 
   TestCommand() {
-    argParser.addFlag('flutter-repo', help: 'Run tests from the Flutter repository instead of the current directory.', defaultsTo: false);
+    argParser.addFlag('flutter-repo', help: 'Run tests from the \'flutter\' package in the Flutter repository instead of the current directory.', defaultsTo: false);
   }
 
   Iterable<String> _findTests(Directory directory) {
@@ -54,7 +56,13 @@ class TestCommand extends FlutterCommand {
   }
 
   Directory get _flutterUnitTestDir {
-    return new Directory(path.join(ArtifactStore.flutterRoot, 'packages', 'unit', 'test'));
+    return new Directory(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter', 'test'));
+  }
+
+  Directory get _currentPackageTestDir {
+    // We don't scan the entire package, only the test/ subdirectory, so that
+    // files with names like like "hit_test.dart" don't get run.
+    return new Directory('test');
   }
 
   Future<int> _runTests(List<String> testArgs, Directory testDirectory) async {
@@ -76,11 +84,11 @@ class TestCommand extends FlutterCommand {
       return 1;
 
     // If we're running the flutter tests, we want to use the packages directory
-    // from the unit package in order to find the proper shell binary.
+    // from the flutter package in order to find the proper shell binary.
     if (runFlutterTests && ArtifactStore.packageRoot == 'packages')
-      ArtifactStore.packageRoot = path.join(ArtifactStore.flutterRoot, 'packages', 'unit', 'packages');
+      ArtifactStore.packageRoot = path.join(ArtifactStore.flutterRoot, 'packages', 'flutter', 'packages');
 
-    Directory testDir = runFlutterTests ? _flutterUnitTestDir : Directory.current;
+    Directory testDir = runFlutterTests ? _flutterUnitTestDir : _currentPackageTestDir;
 
     if (testArgs.isEmpty)
       testArgs.addAll(_findTests(testDir));

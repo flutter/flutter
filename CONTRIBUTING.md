@@ -76,7 +76,7 @@ own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 Running the tests
 -----------------
 
-To automatically find all files named `_test.dart` inside a package and run them inside the flutter shell as a test use the `flutter test` command, e.g:
+To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and run them inside the flutter shell as a test, use the `flutter test` command, e.g:
 
  * `cd examples/stocks`
  * `flutter test`
@@ -90,9 +90,11 @@ Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree
  * `cd packages/newton`
  * `pub run test`
 
-`flutter test --flutter-repo` is a shortcut for those working on the flutter repository itself which finds and runs all tests inside the flutter repository regardless of the current working directory.
+`flutter test --flutter-repo` is a shortcut for those working on the flutter repository itself which runs all tests inside the `flutter` package regardless of the current working directory.
+To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `travis/test.sh`.
 
 If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--debug` or `--release` to change what flutter shell `flutter test` uses.
+To do this with the `travis/test.sh` script, you can use the `FLUTTER_ENGINE` environment variable.
 
 Note: Flutter tests are headless, you won't see any UI. You can use
 `print` to generate console output or you can interact with the DartVM
@@ -101,9 +103,9 @@ via observatory at [http://localhost:8181/](http://localhost:8181/).
 Adding a test
 -------------
 
-To add a test, simply create a file whose name ends with `_test.dart`
-in the `packages/unit/test` directory. The test should have a `main`
-function and use the `test` package.
+To add a test to the Flutter package, simply create a file whose name
+ends with `_test.dart` in the `packages/flutter/test` directory. The
+test should have a `main` function and use the `test` package.
 
 Contributing code
 -----------------

@@ -62,42 +62,11 @@ class AnalyzeCommand extends FlutterCommand {
         }
       }
 
-      bool foundTest = false;
-      Directory flutterDir = new Directory(path.join(ArtifactStore.flutterRoot, 'packages/unit')); // See https://github.com/flutter/flutter/issues/50
-
-      // .../packages/unit/test/*/*_test.dart
-      Directory tests = new Directory(path.join(flutterDir.path, 'test'));
-      for (FileSystemEntity entry in tests.listSync()) {
-        if (entry is Directory) {
-          for (FileSystemEntity subentry in entry.listSync()) {
-            if (subentry is File && subentry.path.endsWith('_test.dart')) {
-              dartFiles.add(subentry.path);
-              foundTest = true;
-            }
-          }
-        }
-      }
-
-      // .../packages/unit/benchmark/*/*_bench.dart
-      Directory benchmarks = new Directory(path.join(flutterDir.path, 'benchmark'));
-      for (FileSystemEntity entry in benchmarks.listSync()) {
-        if (entry is Directory) {
-          for (FileSystemEntity subentry in entry.listSync()) {
-            if (subentry is File && subentry.path.endsWith('_bench.dart')) {
-              dartFiles.add(subentry.path);
-              foundTest = true;
-            }
-          }
-        }
-      }
-
-      if (foundTest)
-        pubSpecDirectories.add(flutterDir.path);
-
       // .../packages/*/bin/*.dart
       // .../packages/*/lib/main.dart
       // .../packages/*/test/*_test.dart
       // .../packages/*/test/*/*_test.dart
+      // .../packages/*/benchmark/*/*_bench.dart
       Directory packages = new Directory(path.join(ArtifactStore.flutterRoot, 'packages'));
       for (FileSystemEntity entry in packages.listSync()) {
         if (entry is Directory) {
@@ -126,12 +95,29 @@ class AnalyzeCommand extends FlutterCommand {
                 for (FileSystemEntity subentry in entry.listSync()) {
                   if (subentry is File && subentry.path.endsWith('_test.dart')) {
                     dartFiles.add(subentry.path);
-                    foundTest = true;
+                    foundOne = true;
                   }
                 }
               } else if (entry is File && entry.path.endsWith('_test.dart')) {
                 dartFiles.add(entry.path);
-                foundTest = true;
+                foundOne = true;
+              }
+            }
+          }
+
+          Directory benchmarkDirectory = new Directory(path.join(entry.path, 'benchmark'));
+          if (benchmarkDirectory.existsSync()) {
+            for (FileSystemEntity entry in benchmarkDirectory.listSync()) {
+              if (entry is Directory) {
+                for (FileSystemEntity subentry in entry.listSync()) {
+                  if (subentry is File && subentry.path.endsWith('_bench.dart')) {
+                    dartFiles.add(subentry.path);
+                    foundOne = true;
+                  }
+                }
+              } else if (entry is File && entry.path.endsWith('_bench.dart')) {
+                dartFiles.add(entry.path);
+                foundOne = true;
               }
             }
           }
