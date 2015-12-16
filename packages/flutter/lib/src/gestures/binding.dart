@@ -16,6 +16,8 @@ import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
 
+typedef void GesturerExceptionHandler(PointerEvent event, HitTestTarget target, dynamic exception, StackTrace stack);
+
 abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestable {
 
   void initInstances() {
@@ -76,11 +78,34 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
     result.add(new HitTestEntry(this));
   }
 
+  /// This callback is invoked whenever an exception is caught by the Gesturer
+  /// binding. The 'event' argument is the pointer event that was being routed.
+  /// The 'target' argument is the class whose handleEvent function threw the
+  /// exception. The 'exception' argument contains the object that was thrown,
+  /// and the 'stack' argument contains the stack trace. The callback is invoked
+  /// after the information is printed to the console.
+  GesturerExceptionHandler debugGesturerExceptionHandler;
+
   /// Dispatch the given event to the path of the given hit test result
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     assert(result != null);
-    for (HitTestEntry entry in result.path)
-      entry.target.handleEvent(event, entry);
+    for (HitTestEntry entry in result.path) {
+      try {
+        entry.target.handleEvent(event, entry);
+      } catch (exception, stack) {
+        debugPrint('-- EXCEPTION --');
+        debugPrint('The following exception was raised while dispatching a pointer event:');
+        debugPrint('$exception');
+        debugPrint('Stack trace:');
+        debugPrint('$stack');
+        debugPrint('Event:');
+        debugPrint('$event');
+        debugPrint('Target:');
+        debugPrint('${entry.target}');
+        if (debugGesturerExceptionHandler != null)
+          debugGesturerExceptionHandler(event, entry.target, exception, stack);
+      }
+    }
   }
 
   void handleEvent(PointerEvent event, HitTestEntry entry) {
