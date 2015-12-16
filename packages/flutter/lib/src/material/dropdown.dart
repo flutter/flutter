@@ -209,7 +209,9 @@ class DropDownButton<T> extends StatefulComponent {
     this.value,
     this.onChanged,
     this.elevation: 8
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(items.where((DropDownMenuItem<T> item) => item.value == value).length == 1);
+  }
 
   final List<DropDownMenuItem<T>> items;
   final T value;
@@ -225,6 +227,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   void initState() {
     super.initState();
     _updateSelectedIndex();
+    assert(_selectedIndex != null);
   }
 
   void didUpdateConfig(DropDownButton<T> oldConfig) {

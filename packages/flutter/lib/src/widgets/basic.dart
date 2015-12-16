@@ -962,7 +962,9 @@ class IndexedStack extends MultiChildRenderObjectWidget {
     Key key,
     this.alignment: const FractionalOffset(0.0, 0.0),
     this.index: 0
-  }) : super(key: key, children: children);
+  }) : super(key: key, children: children) {
+    assert(index != null);
+  }
 
   /// The index of the child to show.
   final int index;
