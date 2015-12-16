@@ -13,4 +13,6 @@ environment:
   sdk: '>=1.12.0 <2.0.0'
 
 dev_dependencies:
-  test: 0.12.6
+  flutter_tools:
+    path: ../flutter_tools
+  test: any # constrained by the dependency in flutter_tools
