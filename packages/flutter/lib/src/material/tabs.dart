@@ -382,9 +382,14 @@ class _TabsScrollBehavior extends BoundedBehavior {
 }
 
 class TabBarSelection {
-  TabBarSelection({ int index: 0, this.onChanged }) : _index = index;
+  TabBarSelection({ int index: 0, this.maxIndex, this.onChanged }) : _index = index {
+    assert(maxIndex != null);
+    assert(index != null);
+    assert(_index >= 0 && _index <= maxIndex);
+  }
 
   final VoidCallback onChanged;
+  final int maxIndex;
 
   PerformanceView get performance => _performance.view;
   final _performance = new Performance(duration: _kTabBarScroll, progress: 1.0);
@@ -400,9 +405,33 @@ class TabBarSelection {
     _previousIndex = _index;
     _index = value;
     _indexIsChanging = true;
+
+    // If the selected index change was triggered by a drag gesture, the current
+    // value of _performance.progress will reflect where the gesture ended. While
+    // the drag was underway progress indicates where the indicator and TabBarView
+    // scrollPosition are vis the indices of the two tabs adjacent to the selected
+    // one. So 0.5 means the drag didn't move at all, 0.0 means the drag extended
+    // to the beginning of the tab on the left and 1.0 likewise for the tab on the
+    // right. That is unless the selected index was 0 or maxIndex. In those cases
+    // progress just moves between the selected tab and the adjacent one.
+    // Convert progress to reflect the fact that we're now moving between (just)
+    // the previous and current selection index.
+
+    double progress;
+    if (_performance.status == PerformanceStatus.completed)
+      progress = 0.0;
+    else if (_previousIndex == 0)
+      progress = _performance.progress;
+    else if (_previousIndex == maxIndex)
+      progress = 1.0 - _performance.progress;
+    else if (_previousIndex < _index)
+      progress = (_performance.progress - 0.5) * 2.0;
+    else
+      progress = 1.0 - _performance.progress * 2.0;
+
     _performance
-      ..progress = 0.0
-      ..play().then((_) {
+      ..progress = progress
+      ..forward().then((_) {
         if (onChanged != null)
           onChanged();
         _indexIsChanging = false;
@@ -425,7 +454,9 @@ class TabBar extends Scrollable {
     this.isScrollable: false
   }) : super(key: key, scrollDirection: ScrollDirection.horizontal) {
     assert(labels != null);
+    assert(labels.length > 1);
     assert(selection != null);
+    assert(selection.maxIndex == labels.length - 1);
   }
 
   final Iterable<TabLabel> labels;
@@ -648,7 +679,10 @@ class TabBarView<T> extends PageableList<T> {
     itemBuilder: itemBuilder,
     itemsWrap: false
   ) {
+    assert(items != null);
+    assert(items.length > 1);
     assert(selection != null);
+    assert(selection.maxIndex == items.length - 1);
   }
 
   final TabBarSelection selection;
@@ -690,43 +724,39 @@ class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> {
     super.initState();
     _initItemIndicesAndScrollPosition();
     _performance
-      ..addStatusListener(_handleStatusChange)
       ..addListener(_handleProgressChange);
   }
 
   void dispose() {
     _performance
-      ..removeStatusListener(_handleStatusChange)
       ..removeListener(_handleProgressChange)
       ..stop();
     super.dispose();
-  }
-
-  void _handleStatusChange(PerformanceStatus status) {
-    if (!config.selection.indexIsChanging)
-      return;
-    // The TabBar is driving the TabBarSelection performance.
-
-    final int selectedIndex = config.selection.index;
-    final int previousSelectedIndex = config.selection.previousIndex;
-
-    if (status == PerformanceStatus.forward) {
-      if (selectedIndex < previousSelectedIndex) {
-        _itemIndices = <int>[selectedIndex, previousSelectedIndex];
-        _scrollDirection = AnimationDirection.reverse;
-      } else {
-        _itemIndices = <int>[previousSelectedIndex, selectedIndex];
-        _scrollDirection = AnimationDirection.forward;
-      }
-    } else if (status == PerformanceStatus.completed) {
-      _initItemIndicesAndScrollPosition();
-    }
   }
 
   void _handleProgressChange() {
     if (!config.selection.indexIsChanging)
       return;
     // The TabBar is driving the TabBarSelection performance.
+
+    if (_performance.status == PerformanceStatus.completed) {
+      _initItemIndicesAndScrollPosition();
+      return;
+    }
+
+    if (_performance.status != PerformanceStatus.forward)
+      return;
+
+    final int selectedIndex = config.selection.index;
+    final int previousSelectedIndex = config.selection.previousIndex;
+
+    if (selectedIndex < previousSelectedIndex) {
+      _itemIndices = <int>[selectedIndex, previousSelectedIndex];
+      _scrollDirection = AnimationDirection.reverse;
+    } else {
+      _itemIndices = <int>[previousSelectedIndex, selectedIndex];
+      _scrollDirection = AnimationDirection.forward;
+    }
 
     if (_scrollDirection == AnimationDirection.forward)
       scrollTo(_performance.progress);

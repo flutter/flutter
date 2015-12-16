@@ -30,7 +30,7 @@ class StockHomeState extends State<StockHome> {
     super.initState();
     _tabBarSelection = PageStorage.of(context)?.readState(context);
     if (_tabBarSelection == null) {
-      _tabBarSelection = new TabBarSelection();
+      _tabBarSelection = new TabBarSelection(maxIndex: 1);
       PageStorage.of(context)?.writeState(context, _tabBarSelection);
     }
   }

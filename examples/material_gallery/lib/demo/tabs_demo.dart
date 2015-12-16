@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'widget_demo.dart';
 
-final TabBarSelection _selection = new TabBarSelection();
 final List<String> _iconNames = <String>["event", "home", "android", "alarm", "face", "language"];
+final TabBarSelection _selection = new TabBarSelection(maxIndex: _iconNames.length - 1);
 
 Widget buildTabBar(_) {
   return new TabBar(
