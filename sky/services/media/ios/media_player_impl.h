@@ -32,6 +32,8 @@ class MediaPlayerImpl : public ::media::MediaPlayer {
   void Start() override;
   void Pause() override;
   void SeekTo(uint32_t msec) override;
+  void SetVolume(float volume) override;
+  void SetLooping(bool looping) override;
 
  private:
   mojo::StrongBinding<::media::MediaPlayer> binding_;

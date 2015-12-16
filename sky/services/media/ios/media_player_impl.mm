@@ -17,6 +17,8 @@
 - (BOOL)play;
 - (void)pause;
 - (BOOL)seekTo:(NSTimeInterval)interval;
+- (void)setVolume:(double)volume;
+- (void)setLooping:(BOOL)loop;
 
 + (NSString*)temporaryFilePath;
 
@@ -56,6 +58,22 @@
 
 - (BOOL)seekTo:(NSTimeInterval)interval {
   return [_player playAtTime:_player.deviceCurrentTime + interval];
+}
+
+- (void)setVolume:(double)volume {
+  if (volume > 1.0) {
+    volume = 1.0;
+  }
+
+  if (volume < 0.0) {
+    volume = 0.0;
+  }
+
+  _player.volume = volume;
+}
+
+- (void)setLooping:(BOOL)shouldLoop {
+  _player.numberOfLoops = shouldLoop ? -1 : 0;
 }
 
 + (NSString*)temporaryFilePath {
@@ -134,6 +152,14 @@ void MediaPlayerImpl::SeekTo(uint32_t msec) {
 void MediaPlayerImpl::reset() {
   [audio_client_ release];
   audio_client_ = nullptr;
+}
+
+void MediaPlayerImpl::SetVolume(float volume) {
+  [audio_client_ setVolume:volume];
+}
+
+void MediaPlayerImpl::SetLooping(bool looping) {
+  [audio_client_ setLooping:looping];
 }
 
 void MediaPlayerFactory::Create(
