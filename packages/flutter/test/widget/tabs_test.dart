@@ -23,7 +23,7 @@ void main() {
   test('TabBar tap selects tab', () {
     testWidgets((WidgetTester tester) {
       List<String> tabs = <String>['A', 'B', 'C'];
-      selection = new TabBarSelection(index: 2);
+      selection = new TabBarSelection(index: 2, maxIndex: tabs.length - 1);
 
       tester.pumpWidget(buildFrame(tabs: tabs, isScrollable: false));
       expect(tester.findText('A'), isNotNull);
@@ -51,7 +51,7 @@ void main() {
   test('Scrollable TabBar tap selects tab', () {
     testWidgets((WidgetTester tester) {
       List<String> tabs = <String>['A', 'B', 'C'];
-      selection = new TabBarSelection(index: 2);
+      selection = new TabBarSelection(index: 2, maxIndex: tabs.length - 1);
 
       tester.pumpWidget(buildFrame(tabs: tabs, isScrollable: true));
       expect(tester.findText('A'), isNotNull);
