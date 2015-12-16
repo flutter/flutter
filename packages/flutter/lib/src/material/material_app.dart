@@ -104,6 +104,8 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     }
   }
 
+  void didChangeAppLifecycleState(ui.AppLifecycleState state) { }
+
   final HeroController _heroController = new HeroController();
 
   Route _generateRoute(RouteSettings settings) {
