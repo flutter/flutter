@@ -16,6 +16,7 @@ class BindingObserver {
   bool didPopRoute() => false;
   void didChangeSize(Size size) { }
   void didChangeLocale(ui.Locale locale) { }
+  void didChangeAppLifecycleState(ui.AppLifecycleState state) { }
 }
 
 /// A concrete binding for applications based on the Widgets framework.
@@ -39,6 +40,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Rendere
     BuildableElement.scheduleBuildFor = scheduleBuildFor;
     ui.window.onLocaleChanged = handleLocaleChanged;
     ui.window.onPopRoute = handlePopRoute;
+    ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
   }
 
   /// The one static instance of this class.
@@ -77,6 +79,11 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Rendere
       if (observer.didPopRoute())
         break;
     }
+  }
+
+  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) {
+    for (BindingObserver observer in _observers)
+      observer.didChangeAppLifecycleState(state);
   }
 
   void beginFrame() {
