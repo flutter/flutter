@@ -145,7 +145,7 @@ class Navigator extends StatefulComponent {
 
   static bool canPop(BuildContext context) {
     NavigatorState navigator = context.ancestorStateOfType(NavigatorState);
-    return navigator.canPop();
+    return navigator != null && navigator.canPop();
   }
 
   static void popAndPushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
