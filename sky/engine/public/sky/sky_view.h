@@ -19,6 +19,7 @@
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
+#include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
@@ -55,6 +56,8 @@ class SkyView : public WindowClient {
                        mojo::ScopedDataPipeConsumerHandle snapshot);
 
   void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
+
+  void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
  private:
   explicit SkyView(SkyViewClient* client);

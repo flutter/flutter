@@ -7,6 +7,16 @@ part of dart_ui;
 typedef void VoidCallback();
 typedef void _FrameCallback(Duration duration);
 typedef void _PointerPacketCallback(ByteData serializedPacket);
+typedef void _AppLifecycleStateCallback(AppLifecycleState state);
+
+/// States that an application can be in.
+///
+/// These values must match the order of the values of AppLifecycleState
+/// in sky_engine.mojom
+enum AppLifecycleState {
+  paused,
+  resumed,
+}
 
 /// A representation of distances for each of the four edges of a rectangle,
 /// used to encode the padding that applications should place around their user
@@ -90,6 +100,10 @@ class Window {
 
   /// A callback that is invoked whenever [locale] changes value.
   VoidCallback onLocaleChanged;
+
+  /// A callback that is invoked when there is a transition in the application's
+  /// lifecycle (such as pausing or resuming).
+  _AppLifecycleStateCallback onAppLifecycleStateChanged;
 
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the

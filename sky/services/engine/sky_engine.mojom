@@ -11,6 +11,11 @@ import "mojo/services/service_registry/interfaces/service_registry.mojom";
 import "sky/services/engine/input_event.mojom";
 import "sky/services/pointer/pointer.mojom";
 
+enum AppLifecycleState {
+  PAUSED,
+  RESUMED,
+};
+
 struct ViewportMetrics {
   int32 physical_width;
   int32 physical_height;
@@ -32,8 +37,7 @@ struct ServicesData {
 interface SkyEngine {
   SetServices(ServicesData services);
 
-  OnActivityPaused();
-  OnActivityResumed();
+  OnAppLifecycleStateChanged(AppLifecycleState state);
 
   OnViewportMetricsChanged(ViewportMetrics metrics);
   OnLocaleChanged(string language_code, string country_code);

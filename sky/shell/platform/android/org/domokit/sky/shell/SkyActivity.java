@@ -14,6 +14,7 @@ import android.view.WindowManager;
 
 import org.chromium.base.PathUtils;
 import org.chromium.base.TraceEvent;
+import org.chromium.mojom.sky.AppLifecycleState;
 import org.chromium.mojom.sky.EventType;
 import org.chromium.mojom.sky.InputEvent;
 
@@ -103,7 +104,7 @@ public class SkyActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if (mView != null) {
-            mView.getEngine().onActivityPaused();
+            mView.getEngine().onAppLifecycleStateChanged(AppLifecycleState.PAUSED);
         }
     }
 
@@ -117,7 +118,7 @@ public class SkyActivity extends Activity {
     protected void onPostResume() {
         super.onPostResume();
         if (mView != null) {
-            mView.getEngine().onActivityResumed();
+            mView.getEngine().onAppLifecycleStateChanged(AppLifecycleState.RESUMED);
         }
     }
 

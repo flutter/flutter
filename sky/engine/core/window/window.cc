@@ -136,6 +136,17 @@ void Window::BeginFrame(base::TimeTicks frameTime) {
   });
 }
 
+void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
+  DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  DartState::Scope scope(dart_state);
+
+  DartInvokeField(library_.value(), "_onAppLifecycleStateChanged", {
+    ToDart(static_cast<int>(state))
+  });
+}
+
 void Window::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     { "Window_scheduleFrame", ScheduleFrame, 1, true },

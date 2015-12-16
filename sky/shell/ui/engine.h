@@ -18,6 +18,7 @@
 #include "skia/ext/refptr.h"
 #include "sky/engine/public/sky/sky_view.h"
 #include "sky/engine/public/sky/sky_view_client.h"
+#include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/rasterizer/rasterizer.mojom.h"
 #include "sky/shell/rasterizer.h"
 #include "sky/shell/ui_delegate.h"
@@ -70,8 +71,7 @@ class Engine : public UIDelegate,
                           mojo::asset_bundle::AssetBundlePtr bundle) override;
   void PushRoute(const mojo::String& route) override;
   void PopRoute() override;
-  void OnActivityPaused() override;
-  void OnActivityResumed() override;
+  void OnAppLifecycleStateChanged(sky::AppLifecycleState state) override;
 
   // SkyViewClient methods:
   void ScheduleFrame() override;

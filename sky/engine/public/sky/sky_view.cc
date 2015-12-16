@@ -104,4 +104,8 @@ void SkyView::Render(Scene* scene) {
   layer_tree_ = scene->takeLayerTree();
 }
 
+void SkyView::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
+  GetWindow()->OnAppLifecycleStateChanged(state);
+}
+
 } // namespace blink
