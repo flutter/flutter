@@ -135,7 +135,7 @@ class SoundTrack {
 SoundTrackPlayer _sharedSoundTrackPlayer;
 
 class SoundTrackPlayer {
-  List<SoundTrack> _soundTracks = <SoundTrack>[];
+  Set<SoundTrack> _soundTracks = new HashSet<SoundTrack>();
 
   static sharedInstance() {
     if (_sharedSoundTrackPlayer == null) {
@@ -176,15 +176,20 @@ class SoundTrackPlayer {
     // soundTrack._player.ptr.setVolume(volume);
     soundTrack._player.ptr.seekTo((startTime * 1000.0).toInt());
     soundTrack._player.ptr.start();
+    _soundTracks.add(soundTrack);
   }
 
   void stop(SoundTrack track) {
     track._player.ptr.pause();
   }
 
-  void stopAll() {
-    for (SoundTrack soundTrack in _soundTracks) {
+  void pauseAll() {
+    for (SoundTrack soundTrack in _soundTracks)
       soundTrack._player.ptr.pause();
-    }
+  }
+
+  void resumeAll() {
+    for (SoundTrack soundTrack in _soundTracks)
+      soundTrack._player.ptr.start();
   }
 }
