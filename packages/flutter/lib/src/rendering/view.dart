@@ -14,23 +14,23 @@ import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
 
-/// The layout constraints for the root render object
+/// The layout constraints for the root render object.
 class ViewConstraints {
   const ViewConstraints({
     this.size: Size.zero,
     this.orientation
   });
 
-  /// The size of the output surface
+  /// The size of the output surface.
   final Size size;
 
-  /// The orientation of the output surface (aspirational)
+  /// The orientation of the output surface (aspirational).
   final int orientation;
 
   String toString() => '$size';
 }
 
-/// The root of the render tree
+/// The root of the render tree.
 ///
 /// The view represents the total output surface of the render tree and handles
 /// bootstraping the rendering pipeline. The view has a unique child
@@ -43,18 +43,18 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     this.child = child;
   }
 
-  /// The amount of time the screen rotation animation should last (aspirational)
+  /// The amount of time the screen rotation animation should last (aspirational).
   Duration timeForRotation;
 
-  /// The current layout size of the view
+  /// The current layout size of the view.
   Size get size => _size;
   Size _size = Size.zero;
 
-  /// The current orientation of the view (aspirational)
+  /// The current orientation of the view (aspirational).
   int get orientation => _orientation;
   int _orientation; // 0..3
 
-  /// The constraints used for the root layout
+  /// The constraints used for the root layout.
   ViewConstraints get rootConstraints => _rootConstraints;
   ViewConstraints _rootConstraints;
   void set rootConstraints(ViewConstraints value) {
@@ -69,7 +69,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return new Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
-  /// Bootstrap the rendering pipeline by scheduling the first frame
+  /// Bootstrap the rendering pipeline by scheduling the first frame.
   void scheduleInitialFrame() {
     scheduleInitialLayout();
     scheduleInitialPaint(new TransformLayer(transform: _logicalToDeviceTransform));
@@ -115,7 +115,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       context.paintChild(child, offset);
   }
 
-  /// Uploads the composited layer tree to the engine
+  /// Uploads the composited layer tree to the engine.
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
   void compositeFrame() {
