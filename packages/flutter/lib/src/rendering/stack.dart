@@ -433,7 +433,8 @@ class RenderStack extends RenderStackBase {
 
 /// Implements the same layout algorithm as RenderStack but only paints the child
 /// specified by index.
-/// Note: although only one child is displayed, the cost of the layout algorithm is
+///
+/// Although only one child is displayed, the cost of the layout algorithm is
 /// still O(N), like an ordinary stack.
 class RenderIndexedStack extends RenderStackBase {
   RenderIndexedStack({
@@ -443,11 +444,14 @@ class RenderIndexedStack extends RenderStackBase {
   }) : _index = index, super(
    children: children,
    alignment: alignment
-  );
+  ) {
+    assert(index != null);
+  }
 
   int get index => _index;
   int _index;
   void set index (int value) {
+    assert(value != null);
     if (_index != value) {
       _index = value;
       markNeedsLayout();
