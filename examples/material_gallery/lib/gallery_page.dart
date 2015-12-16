@@ -49,6 +49,11 @@ class _GalleryPageState extends State<GalleryPage> {
     return builder != null ? builder(context) : null;
   }
 
+  Widget _buildFloatingActionButton() {
+    final WidgetBuilder builder = config.active?.floatingActionButtonBuilder;
+    return builder != null ? builder(context) : null;
+  }
+
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
@@ -56,6 +61,7 @@ class _GalleryPageState extends State<GalleryPage> {
         tabBar: _buildTabBar()
       ),
       drawer: _buildDrawer(),
+      floatingActionButton: _buildFloatingActionButton(),
       body: _buildBody()
     );
   }

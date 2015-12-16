@@ -5,10 +5,11 @@
 import 'package:flutter/material.dart';
 
 class WidgetDemo {
-  WidgetDemo({ this.title, this.routeName, this.tabBarBuilder, this.builder });
+  WidgetDemo({ this.title, this.routeName, this.tabBarBuilder, this.floatingActionButtonBuilder, this.builder });
 
   final String title;
   final String routeName;
   final WidgetBuilder tabBarBuilder;
+  final WidgetBuilder floatingActionButtonBuilder;
   final WidgetBuilder builder;
 }
