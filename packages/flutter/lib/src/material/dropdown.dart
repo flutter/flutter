@@ -95,7 +95,10 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
             padding: _kMenuHorizontalPadding,
             child: route.items[itemIndex]
           ),
-          onTap: () => Navigator.pop(context, route.items[itemIndex].value)
+          onTap: () => Navigator.pop(
+            context,
+            new _DropDownRouteResult<T>(route.items[itemIndex].value)
+          )
         )
       ));
     }
@@ -143,9 +146,24 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
   }
 }
 
-class _DropDownRoute<T> extends PopupRoute<T> {
+// We box the return value so that the return value can be null. Otherwise,
+// canceling the route (which returns null) would get confused with actually
+// returning a real null value.
+class _DropDownRouteResult<T> {
+  const _DropDownRouteResult(this.result);
+  final T result;
+  bool operator ==(dynamic other) {
+    if (other is! _DropDownRouteResult)
+      return false;
+    final _DropDownRouteResult<T> typedOther = other;
+    return result == typedOther.result;
+  }
+  int get hashCode => result.hashCode;
+}
+
+class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   _DropDownRoute({
-    Completer<T> completer,
+    Completer<_DropDownRouteResult<T>> completer,
     this.items,
     this.selectedIndex,
     this.rect,
@@ -246,7 +264,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   void _handleTap() {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
     final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
-    final Completer completer = new Completer<T>();
+    final Completer completer = new Completer<_DropDownRouteResult<T>>();
     Navigator.push(context, new _DropDownRoute<T>(
       completer: completer,
       items: config.items,
@@ -254,11 +272,11 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
       rect: _kMenuHorizontalPadding.inflateRect(rect),
       elevation: config.elevation
     ));
-    completer.future.then((T newValue) {
-      if (!mounted)
+    completer.future.then((_DropDownRouteResult<T> newValue) {
+      if (!mounted || newValue == null)
         return;
       if (config.onChanged != null)
-        config.onChanged(newValue);
+        config.onChanged(newValue.result);
     });
   }
 
