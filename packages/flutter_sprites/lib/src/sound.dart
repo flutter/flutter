@@ -166,14 +166,13 @@ class SoundTrackPlayer {
     _soundTracks.remove(soundTrack);
   }
 
-  void play(
-    SoundTrack soundTrack,
-    [bool loop = false,
-      double volume,
-      double startTime = 0.0]) {
-    // TODO: Implement looping & volume
-    // soundTrack._player.ptr.setLooping(loop);
-    // soundTrack._player.ptr.setVolume(volume);
+  void play(SoundTrack soundTrack, {
+    bool loop: false,
+    double volume: 1.0,
+    double startTime: 0.0
+  }) {
+    soundTrack._player.ptr.setLooping(loop);
+    soundTrack._player.ptr.setVolume(volume);
     soundTrack._player.ptr.seekTo((startTime * 1000.0).toInt());
     soundTrack._player.ptr.start();
   }
