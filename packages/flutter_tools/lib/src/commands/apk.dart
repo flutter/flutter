@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logging.dart';
+import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
@@ -66,19 +67,23 @@ class _ApkBuilder {
     return (_androidJar.existsSync() && _aapt.existsSync() && _zipalign.existsSync());
   }
 
-  void package(File outputApk, File androidManifest, Directory assets, Directory artifacts) {
-    _run(_aapt.path, [
+  void package(File outputApk, File androidManifest, Directory assets, Directory artifacts, Directory resources) {
+    List<String> packageArgs = [_aapt.path,
       'package',
       '-M', androidManifest.path,
       '-A', assets.path,
       '-I', _androidJar.path,
       '-F', outputApk.path,
       artifacts.path
-    ]);
+    ];
+    if (resources.existsSync()) {
+      packageArgs.addAll(['-S', resources.path]);
+    }
+    runCheckedSync(packageArgs);
   }
 
   void sign(File keystore, String keystorePassword, String keyName, File outputApk) {
-    _run(_jarsigner, [
+    runCheckedSync([_jarsigner,
       '-keystore', keystore.path,
       '-storepass', keystorePassword,
       outputApk.path,
@@ -87,17 +92,7 @@ class _ApkBuilder {
   }
 
   void align(File unalignedApk, File outputApk) {
-    _run(_zipalign.path, ['-f', '4', unalignedApk.path, outputApk.path]);
-  }
-
-  void _run(String command, List<String> args, { String workingDirectory }) {
-    ProcessResult result = Process.runSync(
-        command, args, workingDirectory: workingDirectory
-    );
-    if (result.exitCode == 0)
-      return;
-    stdout.write(result.stdout);
-    stderr.write(result.stderr);
+    runCheckedSync([_zipalign.path, '-f', '4', unalignedApk.path, outputApk.path]);
   }
 }
 
@@ -108,6 +103,7 @@ class _ApkComponents {
   File classesDex;
   File libSkyShell;
   File keystore;
+  Directory resources;
 }
 
 class ApkCommand extends FlutterCommand {
@@ -168,6 +164,8 @@ class ApkCommand extends FlutterCommand {
     components.classesDex = new File(artifactPaths[1]);
     components.libSkyShell = new File(artifactPaths[2]);
     components.keystore = new File(artifactPaths[3]);
+    // TODO(eseidel): Should this be configurable from flutter.yaml?
+    components.resources = new Directory('apk/res');
 
     if (!components.androidSdk.existsSync()) {
       logging.severe('Can not locate Android SDK: $androidSdkPath');
@@ -204,7 +202,7 @@ class ApkCommand extends FlutterCommand {
       _ApkBuilder builder = new _ApkBuilder(components.androidSdk.path);
       File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
       builder.package(unalignedApk, components.manifest, assetBuilder.directory,
-                      artifactBuilder.directory);
+                      artifactBuilder.directory, components.resources);
       builder.sign(components.keystore, _kKeystorePassword, _kKeystoreKeyName, unalignedApk);
 
       File finalApk = new File(argResults['output-file']);
