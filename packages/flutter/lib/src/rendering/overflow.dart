@@ -236,4 +236,5 @@ class RenderOffStage extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
   bool hitTest(HitTestResult result, { Point position }) => false;
   void paint(PaintingContext context, Offset offset) { }
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) { }
 }

@@ -1466,7 +1466,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
   }
 
   void debugUpdateRenderObjectOwner() {
-    _renderObject.debugOwner = debugGetOwnershipChain(4);
+    _renderObject.debugOwner = debugGetOwnershipChain(10);
   }
 
   void performRebuild() {

@@ -2009,20 +2009,115 @@ class RepaintBoundary extends OneChildRenderObjectWidget {
 }
 
 class IgnorePointer extends OneChildRenderObjectWidget {
-  IgnorePointer({ Key key, Widget child, this.ignoring: true })
+  IgnorePointer({ Key key, Widget child, this.ignoring: true, this.ignoringSemantics })
     : super(key: key, child: child);
 
   final bool ignoring;
+  final bool ignoringSemantics; // if null, defaults to value of ignoring
 
-  RenderIgnorePointer createRenderObject() => new RenderIgnorePointer(ignoring: ignoring);
+  RenderIgnorePointer createRenderObject() => new RenderIgnorePointer(
+    ignoring: ignoring,
+    ignoringSemantics: ignoringSemantics
+  );
 
   void updateRenderObject(RenderIgnorePointer renderObject, IgnorePointer oldWidget) {
     renderObject.ignoring = ignoring;
+    renderObject.ignoringSemantics = ignoringSemantics;
   }
 }
 
 
 // UTILITY NODES
+
+/// The Semantics widget annotates the widget tree with a description
+/// of the meaning of the widgets, so that accessibility tools, search
+/// engines, and other semantic analysis software can determine the
+/// meaning of the application.
+class Semantics extends OneChildRenderObjectWidget {
+  Semantics({
+    Key key,
+    Widget child,
+    this.container: false,
+    this.checked,
+    this.label
+  }) : super(key: key, child: child) {
+    assert(container != null);
+  }
+
+  /// If 'container' is true, this Widget will introduce a new node in
+  /// the semantics tree. Otherwise, the semantics will be merged with
+  /// the semantics of any ancestors.
+  /// 
+  /// The 'container' flag is implicitly set to true on the immediate
+  /// semantics-providing descendants of a node where multiple
+  /// children have semantics or have descendants providing semantics.
+  /// In other words, the semantics of siblings are not merged. To
+  /// merge the semantics of an entire subtree, including siblings,
+  /// you can use a [MergeSemantics] widget.
+  final bool container;
+
+  /// If non-null, indicates that this subtree represents a checkbox
+  /// or similar widget with a "checked" state, and what its current
+  /// state is.
+  final bool checked;
+
+  /// Provides a textual description of the widget.
+  final String label;
+
+  RenderSemanticAnnotations createRenderObject() => new RenderSemanticAnnotations(
+    container: container,
+    checked: checked,
+    label: label
+  );
+
+  void updateRenderObject(RenderSemanticAnnotations renderObject, Semantics oldWidget) {
+    renderObject.container = container;
+    renderObject.checked = checked;
+    renderObject.label = label;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('container: $container');
+    if (checked != null);
+      description.add('checked: $checked');       
+    if (label != null);
+      description.add('label: "$label"');
+  }
+}
+
+/// Causes all the semantics of the subtree rooted at this node to be
+/// merged into one node in the semantics tree. For example, if you
+/// have a component with a Text node next to a checkbox widget, this
+/// could be used to merge the label from the Text node with the
+/// "checked" semantic state of the checkbox into a single node that
+/// had both the label and the checked state. Otherwise, the label
+/// would be presented as a separate feature than the checkbox, and
+/// the user would not be able to be sure that they were related.
+///
+/// Be aware that if two nodes in the subtree have conflicting
+/// semantics, the result may be nonsensical. For example, a subtree
+/// with a checked checkbox and an unchecked checkbox will be
+/// presented as checked. All the labels will be merged into a single
+/// string (with newlines separating each label from the other). If
+/// multiple nodes in the merged subtree can handle semantic gestures,
+/// the first one in tree order will be the one to receive the
+/// callbacks.
+class MergeSemantics extends OneChildRenderObjectWidget {
+  MergeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  RenderMergeSemantics createRenderObject() => new RenderMergeSemantics();
+}
+
+/// Drops all semantics in this subtree.
+///
+/// This can be used to hide subwidgets that would otherwise be
+/// reported but that would only be confusing. For example, the
+/// material library's [Chip] widget hides the avatar since it is
+/// redundant with the chip label.
+class ExcludeSemantics extends OneChildRenderObjectWidget {
+  ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  RenderExcludeSemantics createRenderObject() => new RenderExcludeSemantics();
+}
 
 class MetaData extends OneChildRenderObjectWidget {
   MetaData({ Key key, Widget child, this.metaData })

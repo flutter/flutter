@@ -35,6 +35,10 @@ class StockSettingsState extends State<StockSettings> {
     sendUpdates(config.configuration.copyWith(showPerformanceOverlay: value));
   }
 
+  void _handleShowSemanticsDebuggerChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(showSemanticsDebugger: value));
+  }
+
   void _confirmOptimismChange() {
     switch (config.configuration.stockMode) {
       case StockMode.optimistic:
@@ -114,6 +118,19 @@ class StockSettingsState extends State<StockSettings> {
             new Switch(
               value: config.configuration.showPerformanceOverlay,
               onChanged: _handleShowPerformanceOverlayChanged
+            ),
+          ]
+        )
+      ),
+      new DrawerItem(
+        icon: 'action/accessibility',
+        onPressed: () { _handleShowSemanticsDebuggerChanged(!config.configuration.showSemanticsDebugger); },
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Show semantics overlay')),
+            new Switch(
+              value: config.configuration.showSemanticsDebugger,
+              onChanged: _handleShowSemanticsDebuggerChanged
             ),
           ]
         )

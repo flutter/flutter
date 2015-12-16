@@ -32,14 +32,16 @@ class PopupMenuItem<T> extends StatelessComponent {
   final T value;
 
   Widget build(BuildContext context) {
-    return new Container(
-      height: _kMenuItemHeight,
-      padding: const EdgeDims.symmetric(horizontal: _kMenuHorizontalPadding),
-      child: new DefaultTextStyle(
-        style: Theme.of(context).text.subhead,
-        child: new Baseline(
-          baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
-          child: child
+    return new MergeSemantics(
+      child: new Container(
+        height: _kMenuItemHeight,
+        padding: const EdgeDims.symmetric(horizontal: _kMenuHorizontalPadding),
+        child: new DefaultTextStyle(
+          style: Theme.of(context).text.subhead,
+          child: new Baseline(
+            baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
+            child: child
+          )
         )
       )
     );

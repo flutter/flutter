@@ -2,6 +2,7 @@ name: stocks
 version: 0.0.2
 update-url: http://localhost:9888/
 material-design-icons:
+  - name: action/accessibility
   - name: action/account_balance
   - name: action/assessment
   - name: action/backup

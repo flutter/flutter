@@ -88,16 +88,16 @@ class StockHomeState extends State<StockHome> {
                 content: new Text('This feature has not yet been implemented.'),
                 actions: <Widget>[
                   new FlatButton(
-                    child: new Text('USE IT'),
                     onPressed: () {
                       Navigator.pop(context, false);
-                    }
+                    },
+                    child: new Text('USE IT')
                   ),
                   new FlatButton(
-                    child: new Text('OH WELL'),
                     onPressed: () {
                       Navigator.pop(context, false);
-                    }
+                    },
+                    child: new Text('OH WELL')
                   ),
                 ]
               )
@@ -107,7 +107,16 @@ class StockHomeState extends State<StockHome> {
         ),
         new DrawerItem(
           icon: 'device/dvr',
-          onPressed: () { debugDumpApp(); debugDumpRenderTree(); debugDumpLayerTree(); },
+          onPressed: () {
+            try {
+              debugDumpApp();
+              debugDumpRenderTree();
+              debugDumpLayerTree();
+              debugDumpSemanticsTree();
+            } catch (e, stack) {
+              debugPrint('Exception while dumping app:\n$e\n$stack');
+            }
+          },
           child: new Text('Dump App to Console')
         ),
         new DrawerDivider(),

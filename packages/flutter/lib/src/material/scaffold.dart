@@ -495,10 +495,13 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
           child: child
         );
       },
-      child: new BottomSheet(
-        animationController: config.animationController,
-        onClosing: config.onClosing,
-        builder: config.builder
+      child: new Semantics(
+        container: true,
+        child: new BottomSheet(
+          animationController: config.animationController,
+          onClosing: config.onClosing,
+          builder: config.builder
+        )
       )
     );
   }

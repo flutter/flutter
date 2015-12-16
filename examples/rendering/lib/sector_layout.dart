@@ -103,6 +103,7 @@ abstract class RenderSector extends RenderObject {
   }
 
   Rect get paintBounds => new Rect.fromLTWH(0.0, 0.0, 2.0 * deltaRadius, 2.0 * deltaRadius);
+  Rect get semanticBounds => new Rect.fromLTWH(-deltaRadius, -deltaRadius, 2.0 * deltaRadius, 2.0 * deltaRadius);
 
   bool hitTest(HitTestResult result, { double radius, double theta }) {
     if (radius < parentData.radius || radius >= parentData.radius + deltaRadius ||

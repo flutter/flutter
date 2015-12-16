@@ -55,6 +55,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     assert(_offsetIsSane(value, scrollDirection));
     _scrollOffset = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// The direction in which the child is permitted to be larger than the viewport
@@ -137,11 +138,15 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
                       dyInDevicePixels / devicePixelRatio);
   }
 
+  bool _wouldNeedClipAtOffset(Offset offset) {
+    assert(child != null);
+    return offset < Offset.zero || !(Offset.zero & size).contains(((Offset.zero - offset) & child.size).bottomRight);
+  }
+
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Offset roundedScrollOffset = _scrollOffsetRoundedToIntegerDevicePixels;
-      bool _needsClip = offset < Offset.zero
-          || !(offset & size).contains(((offset - roundedScrollOffset) & child.size).bottomRight);
+      bool _needsClip = _wouldNeedClipAtOffset(roundedScrollOffset);
       if (_needsClip) {
         context.pushClipRect(needsCompositing, offset, Point.origin & size, (PaintingContext context, Offset offset) {
           context.paintChild(child, offset - roundedScrollOffset);
@@ -155,6 +160,13 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.translate(-scrollOffset.dx, -scrollOffset.dy);
     super.applyPaintTransform(child, transform);
+  }
+
+  Rect describeApproximatePaintClip(RenderObject child) {
+    if (child != null &&
+        _wouldNeedClipAtOffset(_scrollOffsetRoundedToIntegerDevicePixels))
+      return Point.origin & size;
+    return null;
   }
 
   bool hitTestChildren(HitTestResult result, { Point position }) {
@@ -200,6 +212,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
       return;
     _paintOffset = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Called during [layout] to determine the grid's children.
@@ -254,4 +267,6 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   void paint(PaintingContext context, Offset offset) {
     context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
   }
+
+  Rect describeApproximatePaintClip(RenderObject child) => Point.origin & size;
 }

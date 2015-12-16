@@ -95,23 +95,26 @@ class SnackBar extends StatelessComponent {
             child: child
           );
         },
-        child: new Material(
-          elevation: 6,
-          color: _kSnackBackground,
-          child: new Container(
-            margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
-            child: new Theme(
-              data: new ThemeData(
-                brightness: ThemeBrightness.dark,
-                accentColor: theme.accentColor,
-                accentColorBrightness: theme.accentColorBrightness,
-                text: Typography.white
-              ),
-              child: new FadeTransition(
-                opacity: fadeAnimation,
-                child: new Row(
-                  children: children,
-                  alignItems: FlexAlignItems.center
+        child: new Semantics(
+          container: true,
+          child: new Material(
+            elevation: 6,
+            color: _kSnackBackground,
+            child: new Container(
+              margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
+              child: new Theme(
+                data: new ThemeData(
+                  brightness: ThemeBrightness.dark,
+                  accentColor: theme.accentColor,
+                  accentColorBrightness: theme.accentColorBrightness,
+                  text: Typography.white
+                ),
+                child: new FadeTransition(
+                  opacity: fadeAnimation,
+                  child: new Row(
+                    children: children,
+                    alignItems: FlexAlignItems.center
+                  )
                 )
               )
             )

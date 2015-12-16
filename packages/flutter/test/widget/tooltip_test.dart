@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test/test.dart';
 
+import 'test_semantics.dart';
+
 void main() {
   test('Does tooltip end up in the right place - top left', () {
     testWidgets((WidgetTester tester) {
@@ -352,6 +354,76 @@ void main() {
       expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
+    });
+  });
+
+  test('Does tooltip contribute semantics', () {
+    testWidgets((WidgetTester tester) {
+      TestSemanticsClient client = new TestSemanticsClient();
+      GlobalKey key = new GlobalKey();
+      tester.pumpWidget(
+        new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) {
+                return new Stack(
+                  children: <Widget>[
+                    new Positioned(
+                      left: 780.0,
+                      top: 300.0,
+                      child: new Tooltip(
+                        key: key,
+                        message: 'TIP',
+                        fadeDuration: const Duration(seconds: 1),
+                        showDuration: const Duration(seconds: 2),
+                        child: new Container(width: 0.0, height: 0.0)
+                      )
+                    ),
+                  ]
+                );
+              }
+            ),
+          ]
+        )
+      );
+      expect(client.updates.length, equals(2));
+      expect(client.updates[0].id, equals(0));
+      expect(client.updates[0].flags.canBeTapped, isFalse);
+      expect(client.updates[0].flags.canBeLongPressed, isFalse);
+      expect(client.updates[0].flags.canBeScrolledHorizontally, isFalse);
+      expect(client.updates[0].flags.canBeScrolledVertically, isFalse);
+      expect(client.updates[0].flags.hasCheckedState, isFalse);
+      expect(client.updates[0].flags.isChecked, isFalse);
+      expect(client.updates[0].strings.label, equals('TIP'));
+      expect(client.updates[0].geometry.transform, isNull);
+      expect(client.updates[0].geometry.left, equals(0.0));
+      expect(client.updates[0].geometry.top, equals(0.0));
+      expect(client.updates[0].geometry.width, equals(800.0));
+      expect(client.updates[0].geometry.height, equals(600.0));
+      expect(client.updates[0].children.length, equals(0));
+      expect(client.updates[1], isNull);
+      client.updates.clear();
+
+      key.currentState.showTooltip(); // this triggers a rebuild of the semantics because the tree changes
+
+      tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+      expect(client.updates.length, equals(2));
+      expect(client.updates[0].id, equals(0));
+      expect(client.updates[0].flags.canBeTapped, isFalse);
+      expect(client.updates[0].flags.canBeLongPressed, isFalse);
+      expect(client.updates[0].flags.canBeScrolledHorizontally, isFalse);
+      expect(client.updates[0].flags.canBeScrolledVertically, isFalse);
+      expect(client.updates[0].flags.hasCheckedState, isFalse);
+      expect(client.updates[0].flags.isChecked, isFalse);
+      expect(client.updates[0].strings.label, equals('TIP'));
+      expect(client.updates[0].geometry.transform, isNull);
+      expect(client.updates[0].geometry.left, equals(0.0));
+      expect(client.updates[0].geometry.top, equals(0.0));
+      expect(client.updates[0].geometry.width, equals(800.0));
+      expect(client.updates[0].geometry.height, equals(600.0));
+      expect(client.updates[0].children.length, equals(0));
+      expect(client.updates[1], isNull);
+      client.updates.clear();
     });
   });
 }

@@ -14,17 +14,18 @@ const Duration _kToggleDuration = const Duration(milliseconds: 200);
 // toggle animations. It handles storing the current value, dispatching
 // ValueChanged on a tap gesture and driving a changed animation. Subclasses are
 // responsible for painting.
-abstract class RenderToggleable extends RenderConstrainedBox {
+abstract class RenderToggleable extends RenderConstrainedBox implements SemanticActionHandler {
   RenderToggleable({
     bool value,
     Size size,
     Color activeColor,
     Color inactiveColor,
-    this.onChanged,
+    ValueChanged<bool> onChanged,
     double minRadialReactionRadius: 0.0
   }) : _value = value,
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
+       _onChanged = onChanged,
        super(additionalConstraints: new BoxConstraints.tight(size)) {
     assert(value != null);
     assert(activeColor != null);
@@ -61,6 +62,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
+    markNeedsSemanticsUpdate(onlyChanges: true, noGeometry: true);
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
@@ -87,9 +89,20 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  bool get isInteractive => onChanged != null;
+  ValueChanged<bool> get onChanged => _onChanged;
+  ValueChanged<bool> _onChanged;
+  void set onChanged(ValueChanged<bool> value) {
+    if (value == _onChanged)
+      return;
+    final bool wasInteractive = isInteractive;
+    _onChanged = value;
+    if (wasInteractive != isInteractive) {
+      markNeedsPaint();
+      markNeedsSemanticsUpdate(noGeometry: true);
+    }
+  }
 
-  ValueChanged<bool> onChanged;
+  bool get isInteractive => onChanged != null;
 
   CurvedAnimation get position => _position;
   CurvedAnimation _position;
@@ -146,4 +159,20 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       canvas.drawCircle(offset.toPoint(), _reaction.value, reactionPaint);
     }
   }
+
+  bool get hasSemantics => isInteractive;
+  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+    yield (SemanticsNode semantics) {
+      semantics.hasCheckedState = true;
+      semantics.isChecked = _value;
+      semantics.canBeTapped = isInteractive;
+    };
+  }
+  void handleSemanticTap() => _handleTap();
+
+  void handleSemanticLongPress() { }
+  void handleSemanticScrollLeft() { }
+  void handleSemanticScrollRight() { }
+  void handleSemanticScrollUp() { }
+  void handleSemanticScrollDown() { }
 }

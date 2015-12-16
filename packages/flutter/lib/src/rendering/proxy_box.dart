@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
+import 'semantics.dart';
 
 export 'package:flutter/gestures.dart' show
   PointerEvent,
@@ -557,6 +558,7 @@ class RenderOpacity extends RenderProxyBox {
     _alpha = _getAlphaFromOpacity(_opacity);
     markNeedsCompositingBitsUpdate();
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   int _alpha;
@@ -572,6 +574,11 @@ class RenderOpacity extends RenderProxyBox {
       assert(needsCompositing);
       context.pushOpacity(offset, _alpha, super.paint);
     }
+  }
+
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && _alpha != 0)
+      visitor(child);
   }
 
   void debugDescribeSettings(List<String> settings) {
@@ -622,6 +629,17 @@ abstract class CustomClipper<T> {
   /// Returns a description of the clip given that the render object being
   /// clipped is of the given size.
   T getClip(Size size);
+  /// Returns an approximation of the clip returned by [getClip], as
+  /// an axis-aligned Rect. This is used by the semantics layer to
+  /// determine whether widgets should be excluded.
+  ///
+  /// By default, this returns a rectangle that is the same size as
+  /// the RenderObject. If getClip returns a shape that is roughly the
+  /// same size as the RenderObject (e.g. it's a rounded rectangle
+  /// with very small arcs in the corners), then this may be adequate.
+  Rect getApproximateClipRect(Size size) => Point.origin & size;
+  /// Returns true if the new instance will result in a different clip
+  /// than the oldClipper instance.
   bool shouldRepaint(CustomClipper oldClipper);
 }
 
@@ -642,15 +660,19 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     if (newClipper == null) {
       assert(oldClipper != null);
       markNeedsPaint();
+      markNeedsSemanticsUpdate(onlyChanges: true);
     } else if (oldClipper == null ||
         oldClipper.runtimeType != oldClipper.runtimeType ||
         newClipper.shouldRepaint(oldClipper)) {
       markNeedsPaint();
+      markNeedsSemanticsUpdate(onlyChanges: true);
     }
   }
 
   T get _defaultClip;
   T get _clip => _clipper?.getClip(size) ?? _defaultClip;
+
+  Rect describeApproximatePaintClip(RenderObject child) => _clipper?.getApproximateClipRect(size) ?? Point.origin & size;
 }
 
 /// Clips its child using a rectangle.
@@ -721,6 +743,9 @@ class RenderClipRRect extends RenderProxyBox {
     _yRadius = newYRadius;
     markNeedsPaint();
   }
+
+  // TODO(ianh): either convert this to the CustomClipper world, or
+  // TODO(ianh): implement describeApproximatePaintClip for this class
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -1314,18 +1339,59 @@ class RenderRepaintBoundary extends RenderProxyBox {
 /// to hit testing. It still consumes space during layout and paints its child
 /// as usual. It just cannot be the target of located events because it returns
 /// false from [hitTest].
+///
+/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// the semantics layer (and thus e.g. accessibility tools). If
+/// [ignoringSemantics] is null, it uses the value of [ignoring].
 class RenderIgnorePointer extends RenderProxyBox {
-  RenderIgnorePointer({ RenderBox child, this.ignoring: true }) : super(child);
+  RenderIgnorePointer({
+    RenderBox child,
+    bool ignoring: true,
+    bool ignoringSemantics
+  }) : _ignoring = ignoring, _ignoringSemantics = ignoringSemantics, super(child) {
+    assert(_ignoring != null);
+  }
 
-  bool ignoring;
+  bool get ignoring => _ignoring;
+  bool _ignoring;
+  void set ignoring(bool value) {
+    assert(value != null);
+    if (value == _ignoring)
+      return;
+    _ignoring = value;
+    if (ignoringSemantics == null)
+      markNeedsSemanticsUpdate();
+  }
+
+  bool get ignoringSemantics => _ignoringSemantics;
+  bool _ignoringSemantics;
+  void set ignoringSemantics(bool value) {
+    if (value == _ignoringSemantics)
+      return;
+    bool oldEffectiveValue = _effectiveIgnoringSemantics;
+    _ignoringSemantics = value;
+    if (oldEffectiveValue != _effectiveIgnoringSemantics)
+      markNeedsSemanticsUpdate();
+  }
+
+  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
 
   bool hitTest(HitTestResult result, { Point position }) {
     return ignoring ? false : super.hitTest(result, position: position);
   }
 
+  // TODO(ianh): figure out a way to still include labels and flags in
+  // descendants, just make them non-interactive, even when
+  // _effectiveIgnoringSemantics is true
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && !_effectiveIgnoringSemantics)
+      visitor(child);
+  }
+
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
     settings.add('ignoring: $ignoring');
+    settings.add('ignoringSemantics: ${ ignoringSemantics == null ? "implicitly " : "" }$_effectiveIgnoringSemantics');
   }
 }
 
@@ -1335,4 +1401,221 @@ class RenderMetaData extends RenderProxyBox {
 
   /// Opaque meta data ignored by the render tree
   dynamic metaData;
+}
+
+/// Listens for the specified gestures from the semantics server (e.g.
+/// an accessibility tool).
+class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticActionHandler {
+  RenderSemanticsGestureHandler({
+    RenderBox child,
+    GestureTapCallback onTap,
+    GestureLongPressCallback onLongPress,
+    GestureDragUpdateCallback onHorizontalDragUpdate,
+    GestureDragUpdateCallback onVerticalDragUpdate,
+    this.scrollFactor: 0.8
+  }) : _onTap = onTap,
+       _onLongPress = onLongPress,
+       _onHorizontalDragUpdate = onHorizontalDragUpdate,
+       _onVerticalDragUpdate = onVerticalDragUpdate,
+       super(child);
+
+  GestureTapCallback get onTap => _onTap;
+  GestureTapCallback _onTap;
+  void set onTap(GestureTapCallback value) {
+    if (_onTap == value)
+      return;
+    bool didHaveSemantics = hasSemantics;
+    bool hadHandler = _onTap != null;
+    _onTap = value;
+    if ((value != null) != hadHandler)
+      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+  }
+
+  GestureLongPressCallback get onLongPress => _onLongPress;
+  GestureLongPressCallback _onLongPress;
+  void set onLongPress(GestureLongPressCallback value) {
+    if (_onLongPress == value)
+      return;
+    bool didHaveSemantics = hasSemantics;
+    bool hadHandler = _onLongPress != null;
+    _onLongPress = value;
+    if ((value != null) != hadHandler)
+      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+  }
+
+  GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
+  GestureDragUpdateCallback _onHorizontalDragUpdate;
+  void set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
+    if (_onHorizontalDragUpdate == value)
+      return;
+    bool didHaveSemantics = hasSemantics;
+    bool hadHandler = _onHorizontalDragUpdate != null;
+    _onHorizontalDragUpdate = value;
+    if ((value != null) != hadHandler)
+      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+  }
+
+  GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
+  GestureDragUpdateCallback _onVerticalDragUpdate;
+  void set onVerticalDragUpdate(GestureDragUpdateCallback value) {
+    if (_onVerticalDragUpdate == value)
+      return;
+    bool didHaveSemantics = hasSemantics;
+    bool hadHandler = _onVerticalDragUpdate != null;
+    _onVerticalDragUpdate = value;
+    if ((value != null) != hadHandler)
+      markNeedsSemanticsUpdate(onlyChanges: hasSemantics == didHaveSemantics);
+  }
+
+  /// The fraction of the dimension of this render box to use when
+  /// scrolling. For example, if this is 0.8 and the box is 200 pixels
+  /// wide, then when a left-scroll action is received from the
+  /// accessibility system, it will translate into a 160 pixel
+  /// leftwards drag.
+  double scrollFactor;
+
+  bool get hasSemantics {
+    return onTap != null
+        || onLongPress != null
+        || onHorizontalDragUpdate != null
+        || onVerticalDragUpdate != null;
+  }
+
+  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+    if (hasSemantics) {
+      yield (SemanticsNode semantics) {
+        semantics.canBeTapped = onTap != null;
+        semantics.canBeLongPressed = onLongPress != null;
+        semantics.canBeScrolledHorizontally = onHorizontalDragUpdate != null;
+        semantics.canBeScrolledVertically = onVerticalDragUpdate != null;
+      };
+    }
+  }
+
+  void handleSemanticTap() {
+    if (onTap != null)
+      onTap();
+  }
+
+  void handleSemanticLongPress() {
+    if (onLongPress != null)
+      onLongPress();
+  }
+
+  void handleSemanticScrollLeft() {
+    if (onHorizontalDragUpdate != null)
+      onHorizontalDragUpdate(size.width * -scrollFactor);
+  }
+
+  void handleSemanticScrollRight() {
+    if (onHorizontalDragUpdate != null)
+      onHorizontalDragUpdate(size.width * scrollFactor);
+  }
+
+  void handleSemanticScrollUp() {
+    if (onVerticalDragUpdate != null)
+      onVerticalDragUpdate(size.height * -scrollFactor);
+  }
+
+  void handleSemanticScrollDown() {
+    if (onVerticalDragUpdate != null)
+      onVerticalDragUpdate(size.height * scrollFactor);
+  }
+}
+
+/// Add annotations to the SemanticsNode for this subtree.
+class RenderSemanticAnnotations extends RenderProxyBox {
+  RenderSemanticAnnotations({
+    RenderBox child,
+    bool container: false,
+    bool checked,
+    String label
+  }) : _container = container,
+       _checked = checked,
+       _label = label,
+       super(child) {
+    assert(container != null);
+  }
+
+  /// If 'container' is true, this RenderObject will introduce a new
+  /// node in the semantics tree. Otherwise, the semantics will be
+  /// merged with the semantics of any ancestors.
+  /// 
+  /// The 'container' flag is implicitly set to true on the immediate
+  /// semantics-providing descendants of a node where multiple
+  /// children have semantics or have descendants providing semantics.
+  /// In other words, the semantics of siblings are not merged. To
+  /// merge the semantics of an entire subtree, including siblings,
+  /// you can use a [RenderMergeSemantics].
+  bool get container => _container;
+  bool _container;
+  void set container(bool value) {
+    assert(value != null);
+    if (container == value)
+      return;
+    _container = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the "hasCheckedState" semantic to true and the
+  /// "isChecked" semantic to the given value.
+  bool get checked => _checked;
+  bool _checked;
+  void set checked(bool value) {
+    if (checked == value)
+      return;
+    bool hadValue = checked != null;
+    _checked = value;
+    markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the "label" semantic to the given value.
+  String get label => _label;
+  String _label;
+  void set label(String value) {
+    if (label == value)
+      return;
+    bool hadValue = label != null;
+    _label = value;
+    markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
+  }
+
+  bool get hasSemantics => container;
+
+  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+    if (checked != null) {
+      yield (SemanticsNode semantics) {
+        semantics.hasCheckedState = true;
+        semantics.isChecked = checked;
+      };
+    }
+    if (label != null) {
+      yield (SemanticsNode semantics) {
+        semantics.label = label;
+      };
+    }
+  }
+}
+
+/// Causes the semantics of all descendants to be merged into this
+/// node such that the entire subtree becomes a single leaf in the
+/// semantics tree.
+///
+/// Useful for combining the semantics of multiple render objects that
+/// form part of a single conceptual widget, e.g. a checkbox, a label,
+/// and the gesture detector that goes with them.
+class RenderMergeSemantics extends RenderProxyBox {
+  RenderMergeSemantics({ RenderBox child }) : super(child);
+  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+    yield (SemanticsNode node) { node.mergeAllDescendantsIntoThisNode = true; };
+  }
+}
+
+/// Excludes this subtree from the semantic tree.
+///
+/// Useful e.g. for hiding text that is redundant with other text next
+/// to it (e.g. text included only for the visual effect).
+class RenderExcludeSemantics extends RenderProxyBox {
+  RenderExcludeSemantics({ RenderBox child }) : super(child);
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) { }
 }

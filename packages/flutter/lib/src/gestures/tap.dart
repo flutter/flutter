@@ -31,7 +31,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   );
 
   GestureTapDownCallback onTapDown;
-  GestureTapDownCallback onTapUp;
+  GestureTapUpCallback onTapUp;
   GestureTapCallback onTap;
   GestureTapCancelCallback onTapCancel;
 

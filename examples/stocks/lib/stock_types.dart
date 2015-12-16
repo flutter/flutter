@@ -13,13 +13,15 @@ class StockConfiguration {
     this.backupMode,
     this.debugShowGrid,
     this.debugShowSizes,
-    this.showPerformanceOverlay
+    this.showPerformanceOverlay,
+    this.showSemanticsDebugger
   }) {
     assert(stockMode != null);
     assert(backupMode != null);
     assert(debugShowGrid != null);
     assert(debugShowSizes != null);
     assert(showPerformanceOverlay != null);
+    assert(showSemanticsDebugger != null);
   }
 
   final StockMode stockMode;
@@ -27,20 +29,23 @@ class StockConfiguration {
   final bool debugShowGrid;
   final bool debugShowSizes;
   final bool showPerformanceOverlay;
+  final bool showSemanticsDebugger;
 
   StockConfiguration copyWith({
     StockMode stockMode,
     BackupMode backupMode,
     bool debugShowGrid,
     bool debugShowSizes,
-    bool showPerformanceOverlay
+    bool showPerformanceOverlay,
+    bool showSemanticsDebugger
   }) {
     return new StockConfiguration(
       stockMode: stockMode ?? this.stockMode,
       backupMode: backupMode ?? this.backupMode,
       debugShowGrid: debugShowGrid ?? this.debugShowGrid,
       debugShowSizes: debugShowSizes ?? this.debugShowSizes,
-      showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay
+      showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay,
+      showSemanticsDebugger: showSemanticsDebugger ?? this.showSemanticsDebugger
     );
   }
 }

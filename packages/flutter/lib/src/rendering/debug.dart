@@ -48,7 +48,7 @@ bool debugPaintLayerBordersEnabled = false;
 /// The color to use when painting Layer borders.
 ui.Color debugPaintLayerBordersColor = const ui.Color(0xFFFF9800);
 
-/// Causes RenderBox objects to flash while they are being tapped
+/// Causes RenderBox objects to flash while they are being tapped.
 bool debugPaintPointersEnabled = false;
 
 /// The color to use when reporting pointers.

@@ -341,6 +341,7 @@ class RenderBlockViewport extends RenderBlockBase {
     if (value != _startOffset) {
       _startOffset = value;
       markNeedsPaint();
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -429,6 +430,8 @@ class RenderBlockViewport extends RenderBlockBase {
       transform.translate(startOffset, 0.0);
     super.applyPaintTransform(child, transform);
   }
+
+  Rect describeApproximatePaintClip(RenderObject child) => Point.origin & size;
 
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (isVertical)

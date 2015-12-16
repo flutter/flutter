@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:vector_math/vector_math_64.dart';
@@ -16,6 +17,7 @@ class MatrixUtils {
   ///
   /// Returns null, otherwise.
   static Offset getAsTranslation(Matrix4 transform) {
+    assert(transform != null);
     Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[0] == 1.0 &&
@@ -35,6 +37,86 @@ class MatrixUtils {
       return new Offset(values[12], values[13]);
     }
     return null;
+  }
+
+  /// Returns true if the given matrices are exactly equal, and false
+  /// otherwise. Null values are assumed to be the identity matrix.
+  static bool matrixEquals(Matrix4 a, Matrix4 b) {
+    if (identical(a, b))
+      return true;
+    assert(a != null || b != null);
+    if (a == null)
+      return isIdentity(b);
+    if (b == null)
+      return isIdentity(a);
+    assert(a != null && b != null);
+    return a.storage[0] == b.storage[0]
+        && a.storage[1] == b.storage[1]
+        && a.storage[2] == b.storage[2]
+        && a.storage[3] == b.storage[3]
+        && a.storage[4] == b.storage[4]
+        && a.storage[5] == b.storage[5]
+        && a.storage[6] == b.storage[6]
+        && a.storage[7] == b.storage[7]
+        && a.storage[8] == b.storage[8]
+        && a.storage[9] == b.storage[9]
+        && a.storage[10] == b.storage[10]
+        && a.storage[11] == b.storage[11]
+        && a.storage[12] == b.storage[12]
+        && a.storage[13] == b.storage[13]
+        && a.storage[14] == b.storage[14]
+        && a.storage[15] == b.storage[15];
+  }
+
+  static bool isIdentity(Matrix4 a) {
+    assert(a != null);
+    return a.storage[0] == 1.0 // col 1
+        && a.storage[1] == 0.0
+        && a.storage[2] == 0.0
+        && a.storage[3] == 0.0
+        && a.storage[4] == 0.0 // col 2
+        && a.storage[5] == 1.0
+        && a.storage[6] == 0.0
+        && a.storage[7] == 0.0
+        && a.storage[8] == 0.0 // col 3
+        && a.storage[9] == 0.0
+        && a.storage[10] == 1.0
+        && a.storage[11] == 0.0
+        && a.storage[12] == 0.0 // col 4
+        && a.storage[13] == 0.0
+        && a.storage[14] == 0.0
+        && a.storage[15] == 1.0;
+  }
+
+  static Point transformPoint(Matrix4 transform, Point point) {
+    Vector3 position3 = new Vector3(point.x, point.y, 0.0);
+    Vector3 transformed3 = transform.transform3(position3);
+    return new Point(transformed3.x, transformed3.y);
+  }
+
+  static double _min4(double a, double b, double c, double d) {
+    return math.min(a, math.min(b, math.min(c, d)));
+  }
+  static double _max4(double a, double b, double c, double d) {
+    return math.max(a, math.max(b, math.max(c, d)));
+  }
+
+  static Rect transformRect(Rect rect, Matrix4 transform) {
+    assert(rect != null);
+    assert(transform.determinant != 0.0);
+    if (isIdentity(transform))
+      return rect;
+    transform = new Matrix4.copy(transform)..invert();
+    Point point1 = transformPoint(transform, rect.topLeft);
+    Point point2 = transformPoint(transform, rect.topRight);
+    Point point3 = transformPoint(transform, rect.bottomLeft);
+    Point point4 = transformPoint(transform, rect.bottomRight);
+    return new Rect.fromLTRB(
+      _min4(point1.x, point2.x, point3.x, point4.x),
+      _min4(point1.y, point2.y, point3.y, point4.y),
+      _max4(point1.x, point2.x, point3.x, point4.x),
+      _max4(point1.y, point2.y, point3.y, point4.y)
+    );
   }
 
 }

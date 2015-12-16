@@ -11,9 +11,10 @@ import 'text_style.dart';
 abstract class TextSpan {
   // This class must be immutable, because we won't notice when it changes.
   const TextSpan();
-  String toString([String prefix = '']);
   void build(ui.ParagraphBuilder builder);
   ui.ParagraphStyle get paragraphStyle => null;
+  String toPlainText(); // for semantics
+  String toString([String prefix = '']); // for debugging
 }
 
 /// An immutable span of unstyled text.
@@ -37,6 +38,7 @@ class PlainTextSpan extends TextSpan {
 
   int get hashCode => text.hashCode;
 
+  String toPlainText() => text;
   String toString([String prefix = '']) => '$prefix$runtimeType: "$text"';
 }
 
@@ -81,6 +83,8 @@ class StyledTextSpan extends TextSpan {
 
   int get hashCode => hashValues(style, hashList(children));
 
+  String toPlainText() => children.map((TextSpan child) => child.toPlainText()).join();
+
   String toString([String prefix = '']) {
     List<String> result = <String>[];
     result.add('$prefix$runtimeType:');
@@ -94,7 +98,7 @@ class StyledTextSpan extends TextSpan {
 
 /// An object that paints a [TextSpan] into a canvas.
 class TextPainter {
-  TextPainter(TextSpan text) {
+  TextPainter([ TextSpan text ]) {
     this.text = text;
   }
 

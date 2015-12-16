@@ -6,6 +6,7 @@ import 'package:flutter/animation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
 
@@ -24,17 +25,20 @@ class ModalBarrier extends StatelessComponent {
   final bool dismissable;
 
   Widget build(BuildContext context) {
-    return new Listener(
-      onPointerDown: (_) {
-        if (dismissable)
-          Navigator.pop(context);
-      },
-      behavior: HitTestBehavior.opaque,
-      child: new ConstrainedBox(
-        constraints: const BoxConstraints.expand(),
-        child: color == null ? null : new DecoratedBox(
-          decoration: new BoxDecoration(
-            backgroundColor: color
+    return new Semantics(
+      container: true,
+      child: new GestureDetector(
+        onTapDown: (Point position) {
+          if (dismissable)
+            Navigator.pop(context);
+        },
+        behavior: HitTestBehavior.opaque,
+        child: new ConstrainedBox(
+          constraints: const BoxConstraints.expand(),
+          child: color == null ? null : new DecoratedBox(
+            decoration: new BoxDecoration(
+              backgroundColor: color
+            )
           )
         )
       )

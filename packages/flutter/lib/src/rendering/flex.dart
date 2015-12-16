@@ -587,6 +587,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     });
   }
 
+  Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Point.origin & size : null;
+
   String toString() {
     String header = super.toString();
     if (_overflow is double && _overflow > 0.0)

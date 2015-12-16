@@ -169,11 +169,14 @@ class RenderEditableLine extends RenderBox {
     }
   }
 
+  bool get _hasVisualOverflow => _contentSize.width > size.width;
+
   void paint(PaintingContext context, Offset offset) {
-    final bool hasVisualOverflow = (_contentSize.width > size.width);
-    if (hasVisualOverflow)
+    if (_hasVisualOverflow)
       context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
     else
       _paintContents(context, offset);
   }
+
+  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
 }

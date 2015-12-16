@@ -31,6 +31,10 @@ export 'package:flutter/gestures.dart' show
 ///
 /// Attempts to recognize gestures that correspond to its non-null callbacks.
 ///
+/// GestureDetector also listens for accessibility events and maps
+/// them to the callbacks. To ignore accessibility events, set
+/// [excludeFromSemantics] to true.
+///
 /// See http://flutter.io/gestures/ for additional information.
 class GestureDetector extends StatefulComponent {
   const GestureDetector({
@@ -54,7 +58,8 @@ class GestureDetector extends StatefulComponent {
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
-    this.behavior
+    this.behavior,
+    this.excludeFromSemantics: false
   }) : super(key: key);
 
   final Widget child;
@@ -65,7 +70,7 @@ class GestureDetector extends StatefulComponent {
 
   /// A pointer that will trigger a tap has stopped contacting the screen at a
   /// particular location.
-  final GestureTapDownCallback onTapUp;
+  final GestureTapUpCallback onTapUp;
 
   /// A tap has occurred.
   final GestureTapCallback onTap;
@@ -116,6 +121,13 @@ class GestureDetector extends StatefulComponent {
 
   /// How this gesture detector should behave during hit testing.
   final HitTestBehavior behavior;
+
+  /// Whether to exclude these gestures from the semantics tree. For
+  /// example, the long-press gesture for showing a tooltip is
+  /// excluded because the tooltip itself is included in the semantics
+  /// tree directly and so having a gesture to show it would result in
+  /// duplication of information.
+  final bool excludeFromSemantics;
 
   _GestureDetectorState createState() => new _GestureDetectorState();
 }
@@ -269,11 +281,30 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   Widget build(BuildContext context) {
-    return new Listener(
+    Widget result = new Listener(
       onPointerDown: _handlePointerDown,
       behavior: config.behavior ?? _defaultBehavior,
       child: config.child
     );
+    if (!config.excludeFromSemantics) {
+      result = new _GestureSemantics(
+        onTapDown: config.onTapDown,
+        onTapUp: config.onTapUp,
+        onTap: config.onTap,
+        onLongPress: config.onLongPress,
+        onVerticalDragStart: config.onVerticalDragStart,
+        onVerticalDragUpdate: config.onVerticalDragUpdate,
+        onVerticalDragEnd: config.onVerticalDragEnd,
+        onHorizontalDragStart: config.onHorizontalDragStart,
+        onHorizontalDragUpdate: config.onHorizontalDragUpdate,
+        onHorizontalDragEnd: config.onHorizontalDragEnd,
+        onPanStart: config.onPanStart,
+        onPanUpdate: config.onPanUpdate,
+        onPanEnd: config.onPanEnd,
+        child: result
+      );
+    }
+    return result;
   }
 
   void debugFillDescription(List<String> description) {
@@ -307,5 +338,124 @@ class _GestureDetectorState extends State<GestureDetector> {
         description.add('behavior: defer-to-child');
         break;
     }
+  }
+}
+
+class _GestureSemantics extends OneChildRenderObjectWidget {
+  _GestureSemantics({
+    Key key,
+    this.onTapDown,
+    this.onTapUp,
+    this.onTap,
+    this.onLongPress,
+    this.onVerticalDragStart,
+    this.onVerticalDragUpdate,
+    this.onVerticalDragEnd,
+    this.onHorizontalDragStart,
+    this.onHorizontalDragUpdate,
+    this.onHorizontalDragEnd,
+    this.onPanStart,
+    this.onPanUpdate,
+    this.onPanEnd,
+    Widget child
+  }) : super(key: key, child: child);
+
+  final GestureTapDownCallback onTapDown;
+  final GestureTapUpCallback onTapUp;
+  final GestureTapCallback onTap;
+  final GestureLongPressCallback onLongPress;
+  final GestureDragStartCallback onVerticalDragStart;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+  final GestureDragStartCallback onHorizontalDragStart;
+  final GestureDragUpdateCallback onHorizontalDragUpdate;
+  final GestureDragEndCallback onHorizontalDragEnd;
+  final GesturePanStartCallback onPanStart;
+  final GesturePanUpdateCallback onPanUpdate;
+  final GesturePanEndCallback onPanEnd;
+
+  bool get _watchingTaps {
+    return onTapDown != null
+        || onTapUp != null
+        || onTap != null;
+  }
+
+  bool get _watchingHorizontalDrags {
+    return onHorizontalDragStart != null
+        || onHorizontalDragUpdate != null
+        || onHorizontalDragEnd != null;
+  }
+
+  bool get _watchingVerticalDrags {
+    return onVerticalDragStart != null
+        || onVerticalDragUpdate != null
+        || onVerticalDragEnd != null;
+  }
+
+  bool get _watchingPans {
+    return onPanStart != null
+        || onPanUpdate != null
+        || onPanEnd != null;
+  }
+
+  void _handleTap() {
+    if (onTapDown != null)
+      onTapDown(Point.origin);
+    if (onTapUp != null)
+      onTapUp(Point.origin);
+    if (onTap != null)
+      onTap();
+  }
+
+  void _handleHorizontalDragUpdate(double delta) {
+    if (_watchingHorizontalDrags) {
+      if (onHorizontalDragStart != null)
+        onHorizontalDragStart(Point.origin);
+      if (onHorizontalDragUpdate != null)
+        onHorizontalDragUpdate(delta);
+      if (onHorizontalDragEnd != null)
+        onHorizontalDragEnd(Offset.zero);
+    } else {
+      assert(_watchingPans);
+      if (onPanStart != null)
+        onPanStart(Point.origin);
+      if (onPanUpdate != null)
+        onPanUpdate(new Offset(delta, 0.0));
+      if (onPanEnd != null)
+        onPanEnd(Offset.zero);
+    }
+  }
+
+  void _handleVerticalDragUpdate(double delta) {
+    if (_watchingVerticalDrags) {
+      if (onVerticalDragStart != null)
+        onVerticalDragStart(Point.origin);
+      if (onVerticalDragUpdate != null)
+        onVerticalDragUpdate(delta);
+      if (onVerticalDragEnd != null)
+        onVerticalDragEnd(Offset.zero);
+    } else {
+      assert(_watchingPans);
+      if (onPanStart != null)
+        onPanStart(Point.origin);
+      if (onPanUpdate != null)
+        onPanUpdate(new Offset(0.0, delta));
+      if (onPanEnd != null)
+        onPanEnd(Offset.zero);
+    }
+  }
+
+  RenderSemanticsGestureHandler createRenderObject() => new RenderSemanticsGestureHandler(
+    onTap: _watchingTaps ? _handleTap : null,
+    onLongPress: onLongPress,
+    onHorizontalDragUpdate: _watchingHorizontalDrags || _watchingPans ? _handleHorizontalDragUpdate : null,
+    onVerticalDragUpdate: _watchingVerticalDrags || _watchingPans ? _handleVerticalDragUpdate : null
+  );
+
+  void updateRenderObject(RenderSemanticsGestureHandler renderObject, _GestureSemantics oldWidget) {
+    renderObject.onTap = _watchingTaps ? _handleTap : null;
+    renderObject.onLongPress = onLongPress;
+    renderObject.onHorizontalDragUpdate = _watchingHorizontalDrags || _watchingPans ? _handleHorizontalDragUpdate : null;
+    renderObject.onVerticalDragUpdate = _watchingVerticalDrags || _watchingPans ? _handleVerticalDragUpdate : null;
   }
 }

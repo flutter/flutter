@@ -450,6 +450,8 @@ abstract class RenderBox extends RenderObject {
     assert(debugDoesMeetConstraints());
   }
 
+  Rect get semanticBounds => Point.origin & size;
+
   void debugResetSize() {
     // updates the value of size._canBeUsedByParent if necessary
     size = size;
@@ -627,12 +629,6 @@ abstract class RenderBox extends RenderObject {
   /// visually "on top" (i.e., paints later).
   bool hitTestChildren(HitTestResult result, { Point position }) => false;
 
-  static Point _transformPoint(Matrix4 transform, Point point) {
-    Vector3 position3 = new Vector3(point.x, point.y, 0.0);
-    Vector3 transformed3 = transform.transform3(position3);
-    return new Point(transformed3.x, transformed3.y);
-  }
-
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform.
   ///
@@ -666,7 +662,7 @@ abstract class RenderBox extends RenderObject {
     double det = transform.invert();
     if (det == 0.0)
       return Point.origin;
-    return _transformPoint(transform, point);
+    return MatrixUtils.transformPoint(transform, point);
   }
 
   /// Convert the given point from the local coordinate system for this box to
@@ -678,7 +674,7 @@ abstract class RenderBox extends RenderObject {
     Matrix4 transform = new Matrix4.identity();
     for (int index = renderers.length - 1; index > 0; index -= 1)
       renderers[index].applyPaintTransform(renderers[index - 1], transform);
-    return _transformPoint(transform, point);
+    return MatrixUtils.transformPoint(transform, point);
   }
 
   /// Returns a rectangle that contains all the pixels painted by this box.

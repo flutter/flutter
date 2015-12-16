@@ -43,7 +43,8 @@ class StocksAppState extends State<StocksApp> {
     backupMode: BackupMode.enabled,
     debugShowGrid: false,
     debugShowSizes: false,
-    showPerformanceOverlay: false
+    showPerformanceOverlay: false,
+    showSemanticsDebugger: false
   );
 
   void initState() {
@@ -110,6 +111,7 @@ class StocksAppState extends State<StocksApp> {
       theme: theme,
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
+      showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, RouteBuilder>{
          '/':         (RouteArguments args) => new StockHome(_stocks, _symbols, _configuration, configurationUpdater),
          '/settings': (RouteArguments args) => new StockSettings(_configuration, configurationUpdater)
