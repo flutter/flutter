@@ -24,6 +24,7 @@ abstract class Renderer extends Scheduler
     _instance = this;
     ui.window.onMetricsChanged = handleMetricsChanged;
     initRenderView();
+    assert(renderView != null);
     assert(() {
       initServiceExtensions();
       return true;
@@ -39,24 +40,25 @@ abstract class Renderer extends Scheduler
       renderView = new RenderView();
       renderView.scheduleInitialFrame();
     }
-    handleMetricsChanged(); // configures _renderView's metrics
+    handleMetricsChanged(); // configures renderView's metrics
   }
 
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _renderView;
   RenderView _renderView;
   void set renderView(RenderView value) {
+    assert(value != null);
     if (_renderView == value)
       return;
     if (_renderView != null)
       _renderView.detach();
     _renderView = value;
-    if (_renderView != null)
-      _renderView.attach();
+    _renderView.attach();
   }
 
   void handleMetricsChanged() {
-    _renderView.rootConstraints = new ViewConstraints(size: ui.window.size);
+    assert(renderView != null);
+    renderView.rootConstraints = new ViewConstraints(size: ui.window.size);
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
@@ -65,32 +67,35 @@ abstract class Renderer extends Scheduler
 
   /// Pump the rendering pipeline to generate a frame.
   void beginFrame() {
+    assert(renderView != null);
     RenderObject.flushLayout();
-    _renderView.updateCompositingBits();
+    renderView.updateCompositingBits();
     RenderObject.flushPaint();
-    _renderView.compositeFrame();
+    renderView.compositeFrame();
   }
 
   void hitTest(HitTestResult result, Point position) {
-    _renderView.hitTest(result, position: position);
+    assert(renderView != null);
+    renderView.hitTest(result, position: position);
     super.hitTest(result, position);
   }
 }
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(Renderer.instance.renderView.toStringDeep());
+  debugPrint(Renderer.instance?.renderView?.toStringDeep());
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(Renderer.instance.renderView.layer.toStringDeep());
+  debugPrint(Renderer.instance?.renderView?.layer?.toStringDeep());
 }
 
 /// A concrete binding for applications that use the Rendering framework
 /// directly. This is the glue that binds the framework to the Flutter engine.
 class RenderingFlutterBinding extends BindingBase with Scheduler, Renderer, Gesturer {
   RenderingFlutterBinding({ RenderBox root }) {
+    assert(renderView != null);
     renderView.child = root;
   }
 }
