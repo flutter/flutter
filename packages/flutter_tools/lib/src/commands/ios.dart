@@ -22,7 +22,7 @@ class IOSCommand extends FlutterCommand {
   }
 
   static Uri _xcodeProjectUri(String revision) {
-    return Uri.parse("https://storage.googleapis.com/flutter_infra/flutter/${revision}/ios/FlutterXcode.zip");
+    return Uri.parse("https://storage.googleapis.com/flutter_infra/flutter/$revision/ios/FlutterXcode.zip");
   }
 
   Future<List<int>> _fetchXcodeArchive() async {
@@ -98,14 +98,14 @@ class IOSCommand extends FlutterCommand {
     localsBuffer.writeln("// Recreate using `flutter ios`");
 
     String flutterRoot = path.normalize(Platform.environment[kFlutterRootEnvironmentVariableName]);
-    localsBuffer.writeln("FLUTTER_ROOT=${flutterRoot}");
+    localsBuffer.writeln("FLUTTER_ROOT=$flutterRoot");
 
     // This holds because requiresProjectRoot is true for this command
     String applicationRoot = path.normalize(Directory.current.path);
-    localsBuffer.writeln("FLUTTER_APPLICATION_PATH=${applicationRoot}");
+    localsBuffer.writeln("FLUTTER_APPLICATION_PATH=$applicationRoot");
 
     String dartSDKPath = path.normalize(path.join(Platform.resolvedExecutable, "..", ".."));
-    localsBuffer.writeln("DART_SDK_PATH=${dartSDKPath}");
+    localsBuffer.writeln("DART_SDK_PATH=$dartSDKPath");
 
     File localsFile = new File(filePath);
     await localsFile.create(recursive: true);
@@ -147,7 +147,7 @@ class IOSCommand extends FlutterCommand {
     }
 
     if (argResults['init'])
-      return _runInitCommand();
+      return await _runInitCommand();
 
     print("No flags specified...");
     return -1;
