@@ -19,7 +19,7 @@ class GalleryPage extends StatefulComponent {
 class _GalleryPageState extends State<GalleryPage> {
   Widget _buildDrawer() {
     List<Widget> items = <Widget>[
-      new DrawerHeader(child: new Text('Material demos')),
+      new DrawerHeader(child: new Text('Flutter Material demos')),
     ];
 
     for (WidgetDemo demo in config.demos) {
@@ -30,6 +30,20 @@ class _GalleryPageState extends State<GalleryPage> {
         child: new Text(demo.title)
       ));
     }
+
+    // TODO(eseidel): We should make this into a shared DrawerFooter.
+    items.add(new DrawerDivider());
+    items.add(new DrawerItem(child: new Flex([
+      new Text("Made with Flutter "),
+      new Container(
+        margin: const EdgeDims.symmetric(horizontal: 5.0),
+        child: new AssetImage(
+            name: 'assets/flutter_logo.png',
+            height: 16.0,
+            fit: ImageFit.contain
+        )
+      )
+    ])));
 
     return new Drawer(child: new Block(items));
   }
@@ -57,7 +71,7 @@ class _GalleryPageState extends State<GalleryPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
-        center: new Text(config.active?.title ?? 'Material gallery'),
+        center: new Text(config.active?.title ?? 'Flutter Material gallery'),
         tabBar: _buildTabBar()
       ),
       drawer: _buildDrawer(),
