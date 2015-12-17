@@ -9,7 +9,7 @@
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:name="org.domokit.sky.shell.SkyApplication" android:label="Stocks">
+    <application android:icon="@mipmap/ic_launcher" android:name="org.domokit.sky.shell.SkyApplication" android:label="Stocks">
         <activity android:name="org.domokit.sky.shell.SkyActivity"
                   android:launchMode="singleTask"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
