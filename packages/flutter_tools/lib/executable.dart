@@ -17,6 +17,7 @@ import 'src/commands/cache.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/init.dart';
 import 'src/commands/install.dart';
+import 'src/commands/ios.dart';
 import 'src/commands/list.dart';
 import 'src/commands/listen.dart';
 import 'src/commands/logs.dart';
@@ -62,6 +63,7 @@ Future main(List<String> args) async {
     ..addCommand(new DaemonCommand())
     ..addCommand(new InitCommand())
     ..addCommand(new InstallCommand())
+    ..addCommand(new IOSCommand())
     ..addCommand(new ListCommand())
     ..addCommand(new ListenCommand())
     ..addCommand(new LogsCommand())
