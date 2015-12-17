@@ -391,6 +391,10 @@ RenderingExceptionHandler debugRenderingExceptionHandler;
 /// for their children.
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
+  RenderObject() {
+    _needsCompositing = hasLayer;
+  }
+
   // LAYOUT
 
   /// Data for use by the parent render object.
@@ -492,7 +496,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  static List<RenderObject> _nodesNeedingLayout = new List<RenderObject>();
+  static List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
   bool _needsLayout = true;
   /// Whether this render object's layout information is dirty.
   bool get needsLayout => _needsLayout;
@@ -597,11 +601,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
       while (_nodesNeedingLayout.isNotEmpty) {
         List<RenderObject> dirtyNodes = _nodesNeedingLayout;
-        _nodesNeedingLayout = new List<RenderObject>();
-        dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)..forEach((RenderObject node) {
+        _nodesNeedingLayout = <RenderObject>[];
+        for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
           if (node._needsLayout && node.attached)
             node._layoutWithoutResize();
-        });
+        }
       }
     } finally {
       _debugDoingLayout = false;
@@ -822,7 +826,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   static RenderObject _debugActivePaint = null;
   static RenderObject get debugActivePaint => _debugActivePaint;
 
-  static List<RenderObject> _nodesNeedingPaint = new List<RenderObject>();
+  static List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
+  static List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
 
   /// Whether this render object paints using a composited layer.
   ///
@@ -843,49 +848,79 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return _layer;
   }
 
-  bool _needsCompositingBitsUpdate = true;
+  bool _needsCompositingBitsUpdate = false; // set to true when a child is added
   /// Mark the compositing state for this render object as dirty.
   ///
-  /// When the subtree is mutated, we need to recompute our [needsCompositing]
-  /// bit, and our ancestors need to do the same (in case ours changed).
-  /// Therefore, [adoptChild] and [dropChild] call
-  /// [markNeedsCompositingBitsUpdate].
+  /// When the subtree is mutated, we need to recompute our
+  /// [needsCompositing] bit, and some of our ancestors need to do the
+  /// same (in case ours changed in a way that will change theirs). To
+  /// this end, [adoptChild] and [dropChild] call this method, and, as
+  /// necessary, this method calls the parent's, etc, walking up the
+  /// tree to mark all the nodes that need updating.
+  ///
+  /// This method does not schedule a rendering frame, because since
+  /// it cannot be the case that _only_ the compositing bits changed,
+  /// something else will have scheduled a frame for us.
   void _markNeedsCompositingBitsUpdate() {
     if (_needsCompositingBitsUpdate)
       return;
     _needsCompositingBitsUpdate = true;
-    final AbstractNode parent = this.parent;
-    if (parent is RenderObject)
-      parent._markNeedsCompositingBitsUpdate();
-    assert(parent == this.parent);
-  }
-
-  bool _needsCompositing = false;
-  /// Whether we or one of our descendants has a compositing layer.
-  ///
-  /// Only legal to call after [flushLayout] and [updateCompositingBits] have
-  /// been called.
-  bool get needsCompositing {
-    assert(!_needsCompositingBitsUpdate); // make sure we don't use this bit when it is dirty
-    return _needsCompositing;
+    if (parent is RenderObject) {
+      final RenderObject parent = this.parent;
+      if (parent._needsCompositingBitsUpdate)
+        return;
+      if (!hasLayer && !parent.hasLayer) {
+        parent._markNeedsCompositingBitsUpdate();
+        return;
+      }
+    }
+    assert(() {
+      final AbstractNode parent = this.parent;
+      if (parent is RenderObject)
+        return parent._needsCompositing;
+      return true;
+    });
+    // parent is fine (or there isn't one), but we are dirty
+    _nodesNeedingCompositingBitsUpdate.add(this);
   }
 
   /// Updates the [needsCompositing] bits.
   ///
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
-  void updateCompositingBits() {
+  static void flushCompositingBits() {
+    Timeline.startSync('Compositing Bits');
+    _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+    for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
+      if (node.attached)
+        node._updateCompositingBits();
+    }
+    _nodesNeedingCompositingBitsUpdate.clear();
+    Timeline.finishSync();
+  }
+
+  bool _needsCompositing; // initialised in the constructor
+  /// Whether we or one of our descendants has a compositing layer.
+  ///
+  /// Only legal to call after [flushLayout] and [flushCompositingBits] have
+  /// been called.
+  bool get needsCompositing {
+    assert(!_needsCompositingBitsUpdate); // make sure we don't use this bit when it is dirty
+    return _needsCompositing;
+  }
+
+  void _updateCompositingBits() {
     if (!_needsCompositingBitsUpdate)
       return;
-    bool didHaveCompositedDescendant = _needsCompositing;
+    bool oldNeedsCompositing = _needsCompositing;
     visitChildren((RenderObject child) {
-      child.updateCompositingBits();
+      child._updateCompositingBits();
       if (child.needsCompositing)
         _needsCompositing = true;
     });
     if (hasLayer)
       _needsCompositing = true;
-    if (didHaveCompositedDescendant != _needsCompositing)
+    if (oldNeedsCompositing != _needsCompositing)
       markNeedsPaint();
     _needsCompositingBitsUpdate = false;
   }
@@ -946,7 +981,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _debugDoingPaint = true;
     try {
       List<RenderObject> dirtyNodes = _nodesNeedingPaint;
-      _nodesNeedingPaint = new List<RenderObject>();
+      _nodesNeedingPaint = <RenderObject>[];
       // Sort the dirty nodes in reverse order (deepest first).
       for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
         assert(node._needsPaint);

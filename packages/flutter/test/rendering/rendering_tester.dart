@@ -21,6 +21,7 @@ class TestRenderView extends RenderView {
 
 enum EnginePhase {
   layout,
+  compositingBits,
   paint,
   composite
 }
@@ -39,7 +40,9 @@ class TestRenderingFlutterBinding extends BindingBase with Scheduler, Renderer, 
     RenderObject.flushLayout();
     if (phase == EnginePhase.layout)
       return;
-    renderer.renderView.updateCompositingBits();
+    RenderObject.flushCompositingBits();
+    if (phase == EnginePhase.compositingBits)
+      return;
     RenderObject.flushPaint();
     if (phase == EnginePhase.paint)
       return;
