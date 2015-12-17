@@ -19,6 +19,7 @@ import 'start.dart';
 
 const String _kDefaultAndroidManifestPath = 'apk/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
+const String _kDefaultResourcesPath = 'apk/res';
 const String _kKeystoreKeyName = "chromiumdebugkey";
 const String _kKeystorePassword = "chromium";
 
@@ -74,11 +75,11 @@ class _ApkBuilder {
       '-A', assets.path,
       '-I', _androidJar.path,
       '-F', outputApk.path,
-      artifacts.path
     ];
-    if (resources.existsSync()) {
-      packageArgs.addAll(['-S', resources.path]);
+    if (resources != null) {
+      packageArgs.addAll(['-S', resources.absolute.path]);
     }
+    packageArgs.add(artifacts.path);
     runCheckedSync(packageArgs);
   }
 
@@ -115,6 +116,10 @@ class ApkCommand extends FlutterCommand {
         abbr: 'm',
         defaultsTo: _kDefaultAndroidManifestPath,
         help: 'Android manifest XML file.');
+    argParser.addOption('resources',
+        abbr: 'r',
+        defaultsTo: _kDefaultResourcesPath,
+        help: 'Resources directory path.');
     argParser.addOption('output-file',
         abbr: 'o',
         defaultsTo: _kDefaultOutputPath,
@@ -159,13 +164,18 @@ class ApkCommand extends FlutterCommand {
 
     _ApkComponents components = new _ApkComponents();
     components.androidSdk = new Directory(androidSdkPath);
-    components.manifest = new File(argResults['manifest']);;
+    components.manifest = new File(argResults['manifest']);
     components.icuData = new File(artifactPaths[0]);
     components.classesDex = new File(artifactPaths[1]);
     components.libSkyShell = new File(artifactPaths[2]);
     components.keystore = new File(artifactPaths[3]);
-    // TODO(eseidel): Should this be configurable from flutter.yaml?
-    components.resources = new Directory('apk/res');
+    components.resources = new Directory(argResults['resources']);
+
+    if (!components.resources.existsSync()) {
+      // TODO(eseidel): This level should be higher when path is manually set.
+      logging.info('Can not locate Resources: ${components.resources}, ignoring.');
+      components.resources = null;
+    }
 
     if (!components.androidSdk.existsSync()) {
       logging.severe('Can not locate Android SDK: $androidSdkPath');
