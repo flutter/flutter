@@ -255,8 +255,6 @@ class PositionedTransition extends TransitionWithChild {
 }
 
 
-typedef Widget BuilderFunction(BuildContext context);
-
 class BuilderTransition extends TransitionComponent {
   BuilderTransition({
     Key key,
@@ -267,7 +265,7 @@ class BuilderTransition extends TransitionComponent {
              performance: performance);
 
   final List<AnimatedValue> variables;
-  final BuilderFunction builder;
+  final WidgetBuilder builder;
 
   Widget build(BuildContext context) {
     for (int i = 0; i < variables.length; ++i)
