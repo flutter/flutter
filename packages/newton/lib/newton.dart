@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Simple Physics Simulations for Dart. Springs, friction, gravity, etc.
 library newton;
 
 import 'dart:math' as math;
