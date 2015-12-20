@@ -10,9 +10,11 @@ double _evaluateCubic(double a, double b, double m) {
 
 const double _kCubicErrorBound = 0.001;
 
-/// A mapping of the unit interval to the unit interval
+/// A mapping of the unit interval to the unit interval.
 ///
 /// A curve must map 0.0 to 0.0 and 1.0 to 1.0.
+///
+/// See [Curves] for a collection of common animation curves.
 abstract class Curve {
   /// Returns the value of the curve at point [t].
   ///
