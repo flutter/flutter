@@ -646,6 +646,8 @@ class Performance extends PerformanceView
     return _timeline.animateWith(force.release(progress, velocity));
   }
 
+  /// Starts running this animation in the forward direction, and
+  /// restarts the animation when it completes.
   Future repeat({ double min: 0.0, double max: 1.0, Duration period }) {
     period ??= duration;
     return _timeline.animateWith(new _RepeatingSimulation(min, max, period));
