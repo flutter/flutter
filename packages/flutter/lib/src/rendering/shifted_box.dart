@@ -163,7 +163,12 @@ class RenderPadding extends RenderShiftedBox {
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
-/// with horizontal and vertical set to 1.0.
+/// with the alignment set to (1.0, 1.0).
+///
+/// By default, sizes to be as big as possible in both axes. If either axis is
+/// unconstrained, then in that direction it will be sized to fit the child's
+/// dimensions. Using widthFactor and heightFactor you can force this latter
+/// behaviour in all cases.
 class RenderPositionedBox extends RenderShiftedBox {
   RenderPositionedBox({
     RenderBox child,
