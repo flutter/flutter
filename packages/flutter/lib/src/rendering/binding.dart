@@ -69,7 +69,7 @@ abstract class Renderer extends Scheduler
   void beginFrame() {
     assert(renderView != null);
     RenderObject.flushLayout();
-    renderView.updateCompositingBits();
+    RenderObject.flushCompositingBits();
     RenderObject.flushPaint();
     renderView.compositeFrame();
   }
