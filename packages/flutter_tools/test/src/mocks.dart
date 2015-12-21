@@ -17,8 +17,6 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 }
 
 class MockCompiler extends Mock implements Compiler {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class MockToolchain extends Toolchain {
@@ -27,23 +25,14 @@ class MockToolchain extends Toolchain {
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
   TargetPlatform get platform => TargetPlatform.android;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
   TargetPlatform get platform => TargetPlatform.iOS;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
   TargetPlatform get platform => TargetPlatform.iOSSimulator;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class MockDeviceStore extends DeviceStore {
