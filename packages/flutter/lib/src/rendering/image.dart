@@ -216,8 +216,8 @@ class RenderImage extends RenderBox {
       image: _image,
       colorFilter: _colorFilter,
       fit: _fit,
-      alignX: _alignment?.x,
-      alignY: _alignment?.y,
+      alignX: _alignment?.dx,
+      alignY: _alignment?.dy,
       centerSlice: _centerSlice,
       repeat: _repeat
     );

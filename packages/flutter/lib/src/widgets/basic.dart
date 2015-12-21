@@ -270,7 +270,7 @@ class ClipOval extends OneChildRenderObjectWidget {
 
 /// Applies a transformation before painting its child.
 class Transform extends OneChildRenderObjectWidget {
-  Transform({ Key key, this.transform, this.origin, this.alignment, Widget child })
+  Transform({ Key key, this.transform, this.origin, this.alignment, this.transformHitTests: true, Widget child })
     : super(key: key, child: child) {
     assert(transform != null);
   }
@@ -291,12 +291,43 @@ class Transform extends OneChildRenderObjectWidget {
   /// If it is specificed at the same time as an offset, both are applied.
   final FractionalOffset alignment;
 
-  RenderTransform createRenderObject() => new RenderTransform(transform: transform, origin: origin, alignment: alignment);
+  /// Whether to apply the translation when performing hit tests.
+  final bool transformHitTests;
+
+  RenderTransform createRenderObject() => new RenderTransform(
+    transform: transform,
+    origin: origin,
+    alignment: alignment,
+    transformHitTests: transformHitTests
+  );
 
   void updateRenderObject(RenderTransform renderObject, Transform oldWidget) {
     renderObject.transform = transform;
     renderObject.origin = origin;
     renderObject.alignment = alignment;
+    renderObject.transformHitTests = transformHitTests;
+  }
+}
+
+/// Applies a translation expressed as a fraction of the box's size before
+/// painting its child.
+class FractionalTranslation extends OneChildRenderObjectWidget {
+  FractionalTranslation({ Key key, this.translation, this.transformHitTests: true, Widget child })
+    : super(key: key, child: child) {
+    assert(translation != null);
+  }
+
+  /// The offset by which to translate the child, as a multiple of its size.
+  final FractionalOffset translation;
+
+  /// Whether to apply the translation when performing hit tests.
+  final bool transformHitTests;
+
+  RenderFractionalTranslation createRenderObject() => new RenderFractionalTranslation(translation: translation, transformHitTests: transformHitTests);
+
+  void updateRenderObject(RenderFractionalTranslation renderObject, FractionalTranslation oldWidget) {
+    renderObject.translation = translation;
+    renderObject.transformHitTests = transformHitTests;
   }
 }
 
@@ -335,7 +366,7 @@ class Align extends OneChildRenderObjectWidget {
     this.heightFactor,
     Widget child
   }) : super(key: key, child: child) {
-    assert(alignment != null && alignment.x != null && alignment.y != null);
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
     assert(widthFactor == null || widthFactor >= 0.0);
     assert(heightFactor == null || heightFactor >= 0.0);
   }

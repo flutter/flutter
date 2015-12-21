@@ -328,9 +328,7 @@ abstract class RenderStackBase extends RenderBox
       final StackParentData childParentData = child.parentData;
 
       if (!childParentData.isPositioned) {
-        double x = (size.width - child.size.width) * alignment.x;
-        double y = (size.height - child.size.height) * alignment.y;
-        childParentData.position = new Point(x, y);
+        childParentData.position = alignment.alongOffset(size - child.size).toPoint();
       } else {
         BoxConstraints childConstraints = const BoxConstraints();
 

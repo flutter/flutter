@@ -12,11 +12,11 @@ ScrollDirection scrollDirection = ScrollDirection.vertical;
 DismissDirection dismissDirection = DismissDirection.horizontal;
 List<int> dismissedItems = <int>[];
 
-void handleOnResized(item) {
+void handleOnResized(int item) {
   expect(dismissedItems.contains(item), isFalse);
 }
 
-void handleOnDismissed(item) {
+void handleOnDismissed(int item) {
   expect(dismissedItems.contains(item), isFalse);
   dismissedItems.add(item);
 }
@@ -39,7 +39,7 @@ Widget widgetBuilder() {
   return new Container(
     padding: const EdgeDims.all(10.0),
     child: new ScrollableList<int>(
-      items: [0, 1, 2, 3, 4].where((int i) => !dismissedItems.contains(i)).toList(),
+      items: <int>[0, 1, 2, 3, 4].where((int i) => !dismissedItems.contains(i)).toList(),
       itemBuilder: buildDismissableItem,
       scrollDirection: scrollDirection,
       itemExtent: itemExtent
@@ -56,25 +56,25 @@ void dismissElement(WidgetTester tester, Element itemElement, { DismissDirection
   Point upLocation;
   switch(gestureDirection) {
     case DismissDirection.left:
-      // Note: getTopRight() returns a point that's just beyond
-      // itemWidget's right edge and outside the Dismissable event
-      // listener's bounds.
+      // getTopRight() returns a point that's just beyond itemWidget's right
+      // edge and outside the Dismissable event listener's bounds.
       downLocation = tester.getTopRight(itemElement) + const Offset(-0.1, 0.0);
       upLocation = tester.getTopLeft(itemElement);
       break;
     case DismissDirection.right:
-      downLocation = tester.getTopLeft(itemElement);
+      // we do the same thing here to keep the test symmetric
+      downLocation = tester.getTopLeft(itemElement) + const Offset(0.1, 0.0);
       upLocation = tester.getTopRight(itemElement);
       break;
     case DismissDirection.up:
-      // Note: getBottomLeft() returns a point that's just below
-      // itemWidget's bottom edge and outside the Dismissable event
-      // listener's bounds.
+      // getBottomLeft() returns a point that's just below itemWidget's bottom
+      // edge and outside the Dismissable event listener's bounds.
       downLocation = tester.getBottomLeft(itemElement) + const Offset(0.0, -0.1);
       upLocation = tester.getTopLeft(itemElement);
       break;
     case DismissDirection.down:
-      downLocation = tester.getTopLeft(itemElement);
+      // again with doing the same here for symmetry
+      downLocation = tester.getTopLeft(itemElement) + const Offset(0.1, 0.0);
       upLocation = tester.getBottomLeft(itemElement);
       break;
     default:
@@ -96,9 +96,11 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
 
   dismissElement(tester, itemElement, gestureDirection: gestureDirection);
 
-  tester.pumpWidget(widgetBuilder()); // start the resize animation
-  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the resize animation
-  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // dismiss
+  tester.pumpWidget(widgetBuilder()); // start the slide
+  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the slide and start shrinking...
+  tester.pumpWidget(widgetBuilder()); // first frame of shrinking animation
+  tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the shrinking and call the callback...
+  tester.pumpWidget(widgetBuilder()); // rebuild after the callback removes the entry
 }
 
 class Test1215DismissableComponent extends StatelessComponent {
@@ -229,8 +231,12 @@ void main() {
     });
   });
 
-  // This is a regression test for
-  // https://github.com/domokit/sky_engine/issues/1068
+  // This is a regression test for an fn2 bug where dragging a card caused an
+  // assert "'!_disqualifiedFromEverAppearingAgain' is not true". The old URL
+  // was https://github.com/domokit/sky_engine/issues/1068 but that issue is 404
+  // now since we migrated to the new repo. The bug was fixed by
+  // https://github.com/flutter/engine/pull/1134 at the time, and later made
+  // irrelevant by fn3, but just in case...
   test('Verify that drag-move events do not assert', () {
     testWidgets((WidgetTester tester) {
       scrollDirection = ScrollDirection.horizontal;
@@ -255,8 +261,12 @@ void main() {
     });
   });
 
-  // This one is for
-  // https://github.com/flutter/engine/issues/1215
+  // This one is for a case where dssmissing a component above a previously
+  // dismissed component threw an exception, which was documented at the
+  // now-obsolete URL https://github.com/flutter/engine/issues/1215 (the URL
+  // died in the migration to the new repo). Don't copy this test; it doesn't
+  // actually remove the dismissed widget, which is a violation of the
+  // Dismissable contract. This is not an example of good practice.
   test('dismissing bottom then top (smoketest)', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Center(
@@ -272,11 +282,13 @@ void main() {
       expect(tester.findText('1'), isNotNull);
       expect(tester.findText('2'), isNotNull);
       dismissElement(tester, tester.findText('2'), gestureDirection: DismissDirection.right);
-      tester.pump(new Duration(seconds: 1));
+      tester.pump(); // start the slide away
+      tester.pump(new Duration(seconds: 1)); // finish the slide away
       expect(tester.findText('1'), isNotNull);
       expect(tester.findText('2'), isNull);
       dismissElement(tester, tester.findText('1'), gestureDirection: DismissDirection.right);
-      tester.pump(new Duration(seconds: 1));
+      tester.pump(); // start the slide away
+      tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
       expect(tester.findText('1'), isNull);
       expect(tester.findText('2'), isNull);
     });
