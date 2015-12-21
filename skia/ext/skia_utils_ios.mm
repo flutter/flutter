@@ -48,7 +48,7 @@ SkBitmap CGImageToSkBitmap(CGImageRef image, CGSize size, bool is_opaque) {
       8,
       size.width * 4,
       color_space,
-      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Host));
+      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Little));
 
   DCHECK(context);
   if (!context)

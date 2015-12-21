@@ -40,7 +40,7 @@ SkBitmap NSImageOrNSImageRepToSkBitmapWithColorSpace(
       8,
       size.width * 4,
       color_space,
-      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Host));
+      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Little));
 
   // Something went really wrong. Best guess is that the bitmap data is invalid.
   DCHECK(context);
@@ -430,7 +430,7 @@ CGContextRef SkiaBitLocker::cgContext() {
       CGColorSpaceCreateDeviceRGB());
   cgContext_ = CGBitmapContextCreate(bitmap_.getPixels(), bitmap_.width(),
     bitmap_.height(), 8, bitmap_.rowBytes(), colorSpace, 
-    kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst);
+    kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedLast);
   DCHECK(cgContext_);
 
   SkMatrix matrix = canvas_->getTotalMatrix();

@@ -32,7 +32,7 @@ static CGContextRef CGContextForData(void* data, int width, int height) {
       CGBitmapContextCreate(data, width, height, 8, width * 4,
                             base::mac::GetSystemColorSpace(),
                             kCGImageAlphaPremultipliedLast |
-                                kCGBitmapByteOrder32Host);
+                                kCGBitmapByteOrder32Little);
 
   if (!context)
     return NULL;
