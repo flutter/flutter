@@ -24,15 +24,9 @@ class StockHomeState extends State<StockHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool _isSearching = false;
   String _searchQuery;
-  TabBarSelection _tabBarSelection;
 
   void initState() {
     super.initState();
-    _tabBarSelection = PageStorage.of(context)?.readState(context);
-    if (_tabBarSelection == null) {
-      _tabBarSelection = new TabBarSelection(maxIndex: 1);
-      PageStorage.of(context)?.writeState(context, _tabBarSelection);
-    }
   }
 
   void _handleSearchBegin() {
@@ -168,7 +162,6 @@ class StockHomeState extends State<StockHome> {
         )
       ],
       tabBar: new TabBar(
-        selection: _tabBarSelection,
         labels: <TabLabel>[
           new TabLabel(text: StockStrings.of(context).market()),
           new TabLabel(text: StockStrings.of(context).portfolio())
@@ -273,24 +266,26 @@ class StockHomeState extends State<StockHome> {
   }
 
   Widget build(BuildContext context) {
-    return new Scaffold(
-      key: _scaffoldKey,
-      toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
-      floatingActionButton: buildFloatingActionButton(),
-      drawer: _buildDrawer(context),
-      body: new TabBarView<StockHomeTab>(
-        selection: _tabBarSelection,
-        items: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
-        itemBuilder: (BuildContext context, StockHomeTab tab, _) {
-          switch (tab) {
-            case StockHomeTab.market:
-              return _buildStockTab(context, tab, config.symbols);
-            case StockHomeTab.portfolio:
-              return _buildStockTab(context, tab, portfolioSymbols);
-            default:
-              assert(false);
+    return new TabBarSelection(
+      maxIndex: 1,
+      child: new Scaffold(
+        key: _scaffoldKey,
+        toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
+        floatingActionButton: buildFloatingActionButton(),
+        drawer: _buildDrawer(context),
+        body: new TabBarView<StockHomeTab>(
+          items: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
+          itemBuilder: (BuildContext context, StockHomeTab tab, _) {
+            switch (tab) {
+              case StockHomeTab.market:
+                return _buildStockTab(context, tab, config.symbols);
+              case StockHomeTab.portfolio:
+                return _buildStockTab(context, tab, portfolioSymbols);
+              default:
+                assert(false);
+            }
           }
-        }
+        )
       )
     );
   }
