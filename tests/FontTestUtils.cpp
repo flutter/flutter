@@ -20,8 +20,6 @@
 #include <minikin/FontFamily.h>
 
 #include <cutils/log.h>
-
-#include "FontLanguage.h"
 #include "MinikinFontForTest.h"
 
 std::unique_ptr<android::FontCollection> getFontCollection(
@@ -46,10 +44,9 @@ std::unique_ptr<android::FontCollection> getFontCollection(
         }
 
         xmlChar* lang = xmlGetProp(familyNode, (const xmlChar*)"lang");
-        uint32_t langId = android::FontStyle::registerLanguageList(
-                std::string((const char*)lang, xmlStrlen(lang)));
 
-        android::FontFamily* family = new android::FontFamily(langId, variant);
+        android::FontFamily* family = new android::FontFamily(
+                android::FontLanguage((const char*)lang, xmlStrlen(lang)), variant);
 
         for (xmlNode* fontNode = familyNode->children; fontNode; fontNode = fontNode->next) {
             if (xmlStrcmp(fontNode->name, (const xmlChar*)"font") != 0) {
