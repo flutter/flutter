@@ -16,9 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include "FontLanguage.h"
 #include "FontTestUtils.h"
-#include "ICUTestBase.h"
 #include "MinikinFontForTest.h"
 #include "UnicodeUtils.h"
 
@@ -44,8 +42,6 @@ const char kColorEmojiFont[] = kTestFontDir "ColorEmojiFont.ttf";
 const char kTextEmojiFont[] = kTestFontDir "TextEmojiFont.ttf";
 const char kMixedEmojiFont[] = kTestFontDir "ColorTextMixedEmojiFont.ttf";
 
-typedef ICUTestBase FontCollectionItemizeTest;
-
 // Utility function for calling itemize function.
 void itemize(FontCollection* collection, const char* str, FontStyle style,
         std::vector<FontCollection::Run>* result) {
@@ -64,7 +60,7 @@ const std::string& getFontPath(const FontCollection::Run& run) {
     return ((MinikinFontForTest*)run.fakedFont.font)->fontPath();
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_latin) {
+TEST(FontCollectionItemizeTest, itemize_latin) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -134,7 +130,7 @@ TEST_F(FontCollectionItemizeTest, itemize_latin) {
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_emoji) {
+TEST(FontCollectionItemizeTest, itemize_emoji) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -195,7 +191,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emoji) {
     EXPECT_FALSE(runs[1].fakedFont.fakery.isFakeItalic());
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_non_latin) {
+TEST(FontCollectionItemizeTest, itemize_non_latin) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -284,7 +280,7 @@ TEST_F(FontCollectionItemizeTest, itemize_non_latin) {
     EXPECT_FALSE(runs[0].fakedFont.fakery.isFakeItalic());
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_mixed) {
+TEST(FontCollectionItemizeTest, itemize_mixed) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -323,7 +319,7 @@ TEST_F(FontCollectionItemizeTest, itemize_mixed) {
     EXPECT_FALSE(runs[4].fakedFont.fakery.isFakeItalic());
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_variationSelector) {
+TEST(FontCollectionItemizeTest, itemize_variationSelector) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -462,7 +458,7 @@ TEST_F(FontCollectionItemizeTest, itemize_variationSelector) {
     EXPECT_EQ(kLatinFont, getFontPath(runs[0]));
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
+TEST(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -587,7 +583,7 @@ TEST_F(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
     EXPECT_TRUE(runs[0].fakedFont.font == nullptr || kLatinFont == getFontPath(runs[0]));
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_no_crash) {
+TEST(FontCollectionItemizeTest, itemize_no_crash) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -611,7 +607,7 @@ TEST_F(FontCollectionItemizeTest, itemize_no_crash) {
     itemize(collection.get(), "U+FE00 U+302D U+E0100", FontStyle(), &runs);
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_fakery) {
+TEST(FontCollectionItemizeTest, itemize_fakery) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
     std::vector<FontCollection::Run> runs;
 
@@ -651,18 +647,18 @@ TEST_F(FontCollectionItemizeTest, itemize_fakery) {
     EXPECT_TRUE(runs[0].fakedFont.fakery.isFakeItalic());
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
+TEST(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
     // kVSTestFont supports U+717D U+FE02 but doesn't support U+717D.
     // kVSTestFont should be selected for U+717D U+FE02 even if it does not support the base code
     // point.
     const std::string kVSTestFont = kTestFontDir "VarioationSelectorTest-Regular.ttf";
 
     std::vector<android::FontFamily*> families;
-    FontFamily* family1 = new FontFamily(android::VARIANT_DEFAULT);
+    FontFamily* family1 = new FontFamily(FontLanguage(), android::VARIANT_DEFAULT);
     family1->addFont(new MinikinFontForTest(kLatinFont));
     families.push_back(family1);
 
-    FontFamily* family2 = new FontFamily(android::VARIANT_DEFAULT);
+    FontFamily* family2 = new FontFamily(FontLanguage(), android::VARIANT_DEFAULT);
     family2->addFont(new MinikinFontForTest(kVSTestFont));
     families.push_back(family2);
 
@@ -680,7 +676,7 @@ TEST_F(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
     family2->Unref();
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_emojiSelection) {
+TEST(FontCollectionItemizeTest, itemize_emojiSelection) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
     std::vector<FontCollection::Run> runs;
 
@@ -752,7 +748,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection) {
     EXPECT_TRUE(runs[0].fakedFont.font == NULL || kNoGlyphFont == getFontPath(runs[0]));
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0E) {
+TEST(FontCollectionItemizeTest, itemize_emojiSelection_withFE0E) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
     std::vector<FontCollection::Run> runs;
 
@@ -834,7 +830,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0E) {
     EXPECT_EQ(kMixedEmojiFont, getFontPath(runs[0]));
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0F) {
+TEST(FontCollectionItemizeTest, itemize_emojiSelection_withFE0F) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
     std::vector<FontCollection::Run> runs;
 
