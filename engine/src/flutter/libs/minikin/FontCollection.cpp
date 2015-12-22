@@ -22,7 +22,6 @@
 #include "unicode/unistr.h"
 #include "unicode/unorm2.h"
 
-#include "FontLanguage.h"
 #include "FontLanguageListCache.h"
 #include "MinikinInternal.h"
 #include <minikin/FontCollection.h>
@@ -151,17 +150,14 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
                 // always use it.
                 return family;
             }
-
-            // TODO use all language in the list.
-            FontLanguage fontLang = FontLanguageListCache::getById(family->langId())[0];
-            int score = lang.match(fontLang) * 2;
+            int score = lang.match(family->lang()) * 2;
             if (family->variant() == 0 || family->variant() == variant) {
                 score++;
             }
             if (hasVSGlyph) {
                 score += 8;
-            } else if (((vs == 0xFE0F) && fontLang.hasEmojiFlag()) ||
-                    ((vs == 0xFE0E) && !fontLang.hasEmojiFlag())) {
+            } else if (((vs == 0xFE0F) && family->lang().hasEmojiFlag()) ||
+                    ((vs == 0xFE0E) && !family->lang().hasEmojiFlag())) {
                 score += 4;
             }
             if (score > bestScore) {
