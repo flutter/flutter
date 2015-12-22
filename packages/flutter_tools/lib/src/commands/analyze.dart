@@ -31,7 +31,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     Set<String> pubSpecDirectories = new Set<String>();
-    Set<String> dartFiles = new Set<String>.from(argResults.rest);
+    List<String> dartFiles = argResults.rest.toList();
 
     for (String file in dartFiles) {
       // TODO(ianh): figure out how dartanalyzer decides which .packages file to use when given a random file
@@ -44,7 +44,6 @@ class AnalyzeCommand extends FlutterCommand {
       Directory examples = new Directory(path.join(ArtifactStore.flutterRoot, 'examples'));
       for (FileSystemEntity entry in examples.listSync()) {
         if (entry is Directory) {
-          String packageName = path.basename(entry.path);
           bool foundOne = false;
           for (FileSystemEntity subentry in entry.listSync()) {
             if (subentry is File && subentry.path.endsWith('.dart')) {
@@ -54,12 +53,6 @@ class AnalyzeCommand extends FlutterCommand {
               String mainPath = path.join(subentry.path, 'main.dart');
               if (FileSystemEntity.isFileSync(mainPath)) {
                 dartFiles.add(mainPath);
-                foundOne = true;
-              }
-              // Check for <packageName>/lib/<packageName>.dart.
-              String mainFilePath = path.join(subentry.path, '$packageName.dart');
-              if (FileSystemEntity.isFileSync(mainFilePath)) {
-                dartFiles.add(mainFilePath);
                 foundOne = true;
               }
             }
@@ -182,9 +175,8 @@ class AnalyzeCommand extends FlutterCommand {
 
     // prepare a Dart file that references all the above Dart files
     StringBuffer mainBody = new StringBuffer();
-    int fileIndex = 0;
-    for (String filePath in dartFiles)
-      mainBody.writeln('import \'${path.normalize(path.absolute(filePath))}\' as file${fileIndex++};');
+    for (int index = 0; index < dartFiles.length; index += 1)
+      mainBody.writeln('import \'${path.normalize(path.absolute(dartFiles[index]))}\' as file$index;');
     mainBody.writeln('void main() { }');
 
     // prepare a union of all the .packages files
@@ -285,6 +277,8 @@ class AnalyzeCommand extends FlutterCommand {
 
     int exitCode = await process.exitCode;
 
+    host.deleteSync(recursive: true);
+
     List<Pattern> patternsToSkip = <Pattern>[
       'Analyzing [${mainFile.path}]...',
       new RegExp('^\\[hint\\] Unused import \\(${mainFile.path},'),
@@ -315,6 +309,9 @@ class AnalyzeCommand extends FlutterCommand {
           String errorMessage = groups[2];
           int lineNumber = int.parse(groups[4]);
           int colNumber = int.parse(groups[5]);
+          // Ignore issues reported in the stub entry-point file (like unused imports).
+          if (filename == mainFile.path)
+            continue;
           File source = new File(filename);
           List<String> sourceLines = source.readAsLinesSync();
           String sourceLine = (lineNumber < sourceLines.length) ? sourceLines[lineNumber-1] : '';
@@ -346,8 +343,6 @@ class AnalyzeCommand extends FlutterCommand {
         errorCount += 1;
       }
     }
-
-    host.deleteSync(recursive: true);
 
     if (exitCode < 0 || exitCode > 3) // 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
