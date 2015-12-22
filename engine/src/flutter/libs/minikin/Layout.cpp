@@ -34,7 +34,6 @@
 #include <hb-icu.h>
 #include <hb-ot.h>
 
-#include "FontLanguage.h"
 #include "FontLanguageListCache.h"
 #include "LayoutUtils.h"
 #include "HbFaceCache.h"
@@ -747,15 +746,9 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             const FontLanguages& langList =
                     FontLanguageListCache::getById(ctx->style.getLanguageListId());
             if (langList.size() != 0) {
-                const FontLanguage* hbLanguage = &langList[0];
-                for (size_t i = 0; i < langList.size(); ++i) {
-                    if (langList[i].supportsHbScript(script)) {
-                        hbLanguage = &langList[i];
-                        break;
-                    }
-                }
-                hb_buffer_set_language(buffer,
-                        hb_language_from_string(hbLanguage->getString().c_str(), -1));
+                // TODO: use all languages in langList.
+                string lang = langList[0].getString();
+                hb_buffer_set_language(buffer, hb_language_from_string(lang.c_str(), -1));
             }
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
             if (ctx->paint.hyphenEdit.hasHyphen() && srunend > srunstart) {
