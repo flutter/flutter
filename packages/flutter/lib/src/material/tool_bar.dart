@@ -8,7 +8,6 @@ import 'constants.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'material.dart';
-import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -30,7 +29,7 @@ class ToolBar extends StatelessComponent {
   final Widget center;
   final List<Widget> right;
   final Widget bottom;
-  final TabBar tabBar;
+  final Widget tabBar;
   final int elevation;
   final Color backgroundColor;
   final TextTheme textTheme;

@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-TabBarSelection selection;
-
 Widget buildFrame({ List<String> tabs, bool isScrollable: false }) {
   return new Material(
-    child: new TabBar(
-      labels: tabs.map((String tab) => new TabLabel(text: tab)).toList(),
-      selection: selection,
-      isScrollable: isScrollable
+    child: new TabBarSelection(
+      index: 2,
+      maxIndex: tabs.length - 1,
+      child: new TabBar(
+        labels: tabs.map((String tab) => new TabLabel(text: tab)).toList(),
+        isScrollable: isScrollable
+      )
     )
   );
 }
@@ -23,9 +24,10 @@ void main() {
   test('TabBar tap selects tab', () {
     testWidgets((WidgetTester tester) {
       List<String> tabs = <String>['A', 'B', 'C'];
-      selection = new TabBarSelection(index: 2, maxIndex: tabs.length - 1);
 
       tester.pumpWidget(buildFrame(tabs: tabs, isScrollable: false));
+      TabBarSelectionState selection = tester.findStateOfType(TabBarSelectionState);
+      expect(selection, isNotNull);
       expect(tester.findText('A'), isNotNull);
       expect(tester.findText('B'), isNotNull);
       expect(tester.findText('C'), isNotNull);
@@ -51,9 +53,10 @@ void main() {
   test('Scrollable TabBar tap selects tab', () {
     testWidgets((WidgetTester tester) {
       List<String> tabs = <String>['A', 'B', 'C'];
-      selection = new TabBarSelection(index: 2, maxIndex: tabs.length - 1);
 
       tester.pumpWidget(buildFrame(tabs: tabs, isScrollable: true));
+      TabBarSelectionState selection = tester.findStateOfType(TabBarSelectionState);
+      expect(selection, isNotNull);
       expect(tester.findText('A'), isNotNull);
       expect(tester.findText('B'), isNotNull);
       expect(tester.findText('C'), isNotNull);

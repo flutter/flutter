@@ -63,20 +63,27 @@ class _GalleryPageState extends State<GalleryPage> {
     return builder != null ? builder(context) : null;
   }
 
+  Widget _buildPageWrapper(BuildContext context, Widget child) {
+    final PageWrapperBuilder builder = config.active?.pageWrapperBuilder;
+    return builder != null ? builder(context, child) : child;
+  }
+
   Widget _buildFloatingActionButton() {
     final WidgetBuilder builder = config.active?.floatingActionButtonBuilder;
     return builder != null ? builder(context) : null;
   }
 
   Widget build(BuildContext context) {
-    return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text(config.active?.title ?? 'Flutter Material gallery'),
-        tabBar: _buildTabBar()
-      ),
-      drawer: _buildDrawer(),
-      floatingActionButton: _buildFloatingActionButton(),
-      body: _buildBody()
+    return _buildPageWrapper(context,
+      new Scaffold(
+        toolBar: new ToolBar(
+          center: new Text(config.active?.title ?? 'Flutter Material gallery'),
+          tabBar: _buildTabBar()
+        ),
+        drawer: _buildDrawer(),
+        floatingActionButton: _buildFloatingActionButton(),
+        body: _buildBody()
+      )
     );
   }
 }
