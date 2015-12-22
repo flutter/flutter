@@ -46,7 +46,7 @@ TEST_F(FontLanguageTest, basicTests) {
     FontLanguage english = createFontLanguage("en");
     FontLanguage french = createFontLanguage("fr");
     FontLanguage und = createFontLanguage("und");
-    FontLanguage undQaae = createFontLanguage("und-Qaae");
+    FontLanguage undZsye = createFontLanguage("und-Zsye");
 
     EXPECT_EQ(english, english);
     EXPECT_EQ(french, french);
@@ -59,8 +59,8 @@ TEST_F(FontLanguageTest, basicTests) {
     EXPECT_TRUE(english != defaultLang);
     EXPECT_TRUE(english != emptyLang);
     EXPECT_TRUE(english != french);
-    EXPECT_TRUE(english != undQaae);
-    EXPECT_TRUE(und != undQaae);
+    EXPECT_TRUE(english != undZsye);
+    EXPECT_TRUE(und != undZsye);
     EXPECT_TRUE(english != und);
 
     EXPECT_TRUE(defaultLang.isUnsupported());
@@ -69,7 +69,7 @@ TEST_F(FontLanguageTest, basicTests) {
     EXPECT_FALSE(english.isUnsupported());
     EXPECT_FALSE(french.isUnsupported());
     EXPECT_FALSE(und.isUnsupported());
-    EXPECT_FALSE(undQaae.isUnsupported());
+    EXPECT_FALSE(undZsye.isUnsupported());
 }
 
 TEST_F(FontLanguageTest, getStringTest) {
@@ -89,9 +89,9 @@ TEST_F(FontLanguageTest, getStringTest) {
     EXPECT_EQ("und", createFontLanguage("und").getString());
     EXPECT_EQ("und", createFontLanguage("UND").getString());
     EXPECT_EQ("und", createFontLanguage("Und").getString());
-    EXPECT_EQ("und-Qaae", createFontLanguage("und-Qaae").getString());
-    EXPECT_EQ("und-Qaae", createFontLanguage("Und-QAAE").getString());
-    EXPECT_EQ("und-Qaae", createFontLanguage("Und-qaae").getString());
+    EXPECT_EQ("und-Zsye", createFontLanguage("und-Zsye").getString());
+    EXPECT_EQ("und-Zsye", createFontLanguage("Und-ZSYE").getString());
+    EXPECT_EQ("und-Zsye", createFontLanguage("Und-zsye").getString());
 
     EXPECT_EQ("de-Latn", createFontLanguage("de-1901").getString());
 
@@ -259,7 +259,7 @@ TEST_F(FontLanguagesTest, repeatedLanguageTests) {
 }
 
 TEST_F(FontLanguagesTest, undEmojiTests) {
-    FontLanguage emoji = createFontLanguage("und-Qaae");
+    FontLanguage emoji = createFontLanguage("und-Zsye");
     EXPECT_TRUE(emoji.hasEmojiFlag());
 
     FontLanguage und = createFontLanguage("und");
