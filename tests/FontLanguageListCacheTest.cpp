@@ -17,11 +17,15 @@
 #include <gtest/gtest.h>
 
 #include <minikin/FontFamily.h>
+
 #include "FontLanguageListCache.h"
+#include "ICUTestBase.h"
 
 namespace android {
 
-TEST(FontLanguageListCacheTest, getId) {
+typedef ICUTestBase FontLanguageListCacheTest;
+
+TEST_F(FontLanguageListCacheTest, getId) {
     EXPECT_EQ(0UL, FontLanguageListCache::getId(""));
     EXPECT_NE(0UL, FontStyle::registerLanguageList("en"));
     EXPECT_NE(0UL, FontStyle::registerLanguageList("jp"));
@@ -42,11 +46,15 @@ TEST(FontLanguageListCacheTest, getId) {
               FontLanguageListCache::getId("en,zh-Hant"));
 }
 
-TEST(FontLanguageListCacheTest, getById) {
-    FontLanguage english("en", 2);
-    FontLanguage japanese("jp", 2);
+TEST_F(FontLanguageListCacheTest, getById) {
+    uint32_t enLangId = FontLanguageListCache::getId("en");
+    uint32_t jpLangId = FontLanguageListCache::getId("jp");
+    FontLanguage english = FontLanguageListCache::getById(enLangId)[0];
+    FontLanguage japanese = FontLanguageListCache::getById(jpLangId)[0];
 
-    EXPECT_EQ(0UL, FontLanguageListCache::getById(0).size());
+    FontLanguages defLangs = FontLanguageListCache::getById(0);
+    EXPECT_EQ(1UL, defLangs.size());
+    EXPECT_TRUE(defLangs[0].isUnsupported());
 
     FontLanguages langs = FontLanguageListCache::getById(FontLanguageListCache::getId("en"));
     ASSERT_EQ(1UL, langs.size());
