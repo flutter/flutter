@@ -6,6 +6,8 @@
 
 #include "gen/sky/bindings/DartGlobal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
+#include "sky/engine/core/compositing/Scene.h"
+#include "sky/engine/core/compositing/SceneBuilder.h"
 #include "sky/engine/core/painting/painting.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -40,6 +42,8 @@ void DartUI::InitForIsolate() {
     DartRuntimeHooks::RegisterNatives(g_natives);
     Window::RegisterNatives(g_natives);
     Painting::RegisterNatives(g_natives);
+    Scene::RegisterNatives(g_natives);
+    SceneBuilder::RegisterNatives(g_natives);
   }
 
   DART_CHECK_VALID(Dart_SetNativeResolver(

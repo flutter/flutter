@@ -65,6 +65,21 @@ class DartWrappable {
  private:                                                                      \
   static const DartWrapperInfo& dart_wrapper_info_
 
+#define IMPLEMENT_WRAPPERTYPEINFO(ClassName)                                   \
+static void RefObject(DartWrappable* impl) {                                   \
+  static_cast<ClassName*>(impl)->ref();                                        \
+}                                                                              \
+static void DerefObject(DartWrappable* impl) {                                 \
+  static_cast<ClassName*>(impl)->deref();                                      \
+}                                                                              \
+static const DartWrapperInfo kDartWrapperInfo = {                              \
+  #ClassName,                                                                  \
+  sizeof(ClassName),                                                           \
+  &RefObject,                                                                  \
+  &DerefObject,                                                                \
+};                                                                             \
+const DartWrapperInfo& ClassName::dart_wrapper_info_ = kDartWrapperInfo;                                   \
+
 struct DartConverterWrappable {
   static DartWrappable* FromDart(Dart_Handle handle);
   static DartWrappable* FromArguments(Dart_NativeArguments args,
@@ -79,7 +94,7 @@ template<typename T>
 struct DartConverter<
     T*,
     typename base::enable_if<
-        base::is_convertible<T*, DartWrappable*>::value>::type> {
+        base::is_convertible<T*, const DartWrappable*>::value>::type> {
   static Dart_Handle ToDart(DartWrappable* val) {
     if (!val)
       return Dart_Null();
@@ -131,6 +146,15 @@ struct DartConverter<RefPtr<T>> {
 
   static RefPtr<T> FromDart(Dart_Handle handle) {
     return DartConverter<T*>::FromDart(handle);
+  }
+};
+
+template<typename T>
+struct DartConverter<PassRefPtr<T>> {
+  static void SetReturnValue(Dart_NativeArguments args,
+                             PassRefPtr<T> val,
+                             bool auto_scope = true) {
+    DartConverter<T*>::SetReturnValue(args, val.get());
   }
 };
 

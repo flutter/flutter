@@ -20,9 +20,14 @@ class Offset {
 template <>
 struct DartConverter<Offset> {
   static Offset FromDart(Dart_Handle handle);
+  static Offset FromArguments(Dart_NativeArguments args,
+                              int index,
+                              Dart_Handle& exception);
   static Offset FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                          int index,
-                                          Dart_Handle& exception);
+                                           int index,
+                                           Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
 };
 
 } // namespace blink

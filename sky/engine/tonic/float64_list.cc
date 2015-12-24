@@ -7,6 +7,9 @@
 
 namespace blink {
 
+Float64List::Float64List()
+    : data_(nullptr), num_elements_(0), dart_handle_(nullptr) {}
+
 Float64List::Float64List(Dart_Handle list)
     : data_(nullptr), num_elements_(0), dart_handle_(list) {
   if (Dart_IsNull(list))
@@ -32,7 +35,7 @@ Float64List::~Float64List() {
     Dart_TypedDataReleaseData(dart_handle_);
 }
 
-Float64List DartConverter<Float64List>::FromArgumentsWithNullCheck(
+Float64List DartConverter<Float64List>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

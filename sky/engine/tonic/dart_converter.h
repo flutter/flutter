@@ -226,8 +226,7 @@ struct DartConverter<String> {
 
   static String FromArguments(Dart_NativeArguments args,
                               int index,
-                              Dart_Handle& exception,
-                              bool auto_scope = true) {
+                              Dart_Handle& exception) {
     // TODO(abarth): What should we do with auto_scope?
     void* peer = nullptr;
     Dart_Handle handle = Dart_GetNativeStringArgument(args, index, &peer);
@@ -309,8 +308,7 @@ struct DartConverter<Vector<T>> {
 
   static Vector<ValueType> FromArguments(Dart_NativeArguments args,
                                           int index,
-                                          Dart_Handle& exception,
-                                          bool auto_scope = true) {
+                                          Dart_Handle& exception) {
     // TODO(abarth): What should we do with auto_scope?
     return FromDart(Dart_GetNativeArgument(args, index));
   }
@@ -335,8 +333,7 @@ struct DartConverter<DartValue*> {
 
   static PassRefPtr<DartValue> FromArguments(Dart_NativeArguments args,
                                              int index,
-                                             Dart_Handle& exception,
-                                             bool auto_scope = true) {
+                                             Dart_Handle& exception) {
     // TODO(abarth): What should we do with auto_scope?
     return FromDart(Dart_GetNativeArgument(args, index));
   }

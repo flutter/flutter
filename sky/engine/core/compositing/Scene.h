@@ -16,6 +16,7 @@
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
+class DartLibraryNatives;
 
 class Scene : public RefCounted<Scene>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
@@ -29,6 +30,8 @@ class Scene : public RefCounted<Scene>, public DartWrappable {
   std::unique_ptr<sky::compositor::LayerTree> takeLayerTree();
 
   void dispose();
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   explicit Scene(std::unique_ptr<sky::compositor::Layer> rootLayer,

@@ -29,7 +29,7 @@ Offset DartConverter<Offset>::FromDart(Dart_Handle handle) {
   return result;
 }
 
-Offset DartConverter<Offset>::FromArgumentsWithNullCheck(
+Offset DartConverter<Offset>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

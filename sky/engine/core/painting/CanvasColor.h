@@ -13,7 +13,13 @@
 
 namespace blink {
 
-class CanvasColor {};
+struct CanvasColor {
+  SkColor color;
+
+  CanvasColor(SkColor color) : color(color) { }
+  CanvasColor() : color() { }
+  operator SkColor() { return color; }
+};
 
 template <>
 struct DartConverterTypes<CanvasColor> {
@@ -24,9 +30,14 @@ struct DartConverterTypes<CanvasColor> {
 template <>
 struct DartConverter<CanvasColor> {
   static SkColor FromDart(Dart_Handle handle);
+  static SkColor FromArguments(Dart_NativeArguments args,
+                               int index,
+                               Dart_Handle& exception);
   static SkColor FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                             int index,
-                                            Dart_Handle& exception);
+                                            Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
   static void SetReturnValue(Dart_NativeArguments args, SkColor val);
 };
 

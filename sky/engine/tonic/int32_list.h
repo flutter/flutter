@@ -19,6 +19,7 @@ class Int32List {
  public:
   explicit Int32List(Dart_Handle list);
   Int32List(Int32List&& other);
+  Int32List();
   ~Int32List();
 
   int32_t& at(intptr_t i)
@@ -52,10 +53,14 @@ class Int32List {
 template <>
 struct DartConverter<Int32List> {
   static void SetReturnValue(Dart_NativeArguments args, Int32List val);
-
+  static Int32List FromArguments(Dart_NativeArguments args,
+                                 int index,
+                                 Dart_Handle& exception);
   static Int32List FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                               int index,
-                                              Dart_Handle& exception);
+                                              Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
 };
 
 } // namespace blink

@@ -7,6 +7,9 @@
 
 namespace blink {
 
+Int32List::Int32List()
+    : data_(nullptr), num_elements_(0), dart_handle_(nullptr) {}
+
 Int32List::Int32List(Dart_Handle list)
     : data_(nullptr), num_elements_(0), dart_handle_(list) {
   if (Dart_IsNull(list))
@@ -39,7 +42,7 @@ void Int32List::Release() {
 }
 
 
-Int32List DartConverter<Int32List>::FromArgumentsWithNullCheck(
+Int32List DartConverter<Int32List>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

@@ -20,9 +20,14 @@ class Rect {
 template <>
 struct DartConverter<Rect> {
   static Rect FromDart(Dart_Handle handle);
+  static Rect FromArguments(Dart_NativeArguments args,
+                            int index,
+                            Dart_Handle& exception);
   static Rect FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                          int index,
-                                         Dart_Handle& exception);
+                                         Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
 };
 
 } // namespace blink

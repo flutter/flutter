@@ -19,6 +19,7 @@ class Uint8List {
  public:
   explicit Uint8List(Dart_Handle list);
   Uint8List(Uint8List&& other);
+  Uint8List();
   ~Uint8List();
 
   uint8& at(intptr_t i)
@@ -50,10 +51,14 @@ class Uint8List {
 template <>
 struct DartConverter<Uint8List> {
   static void SetReturnValue(Dart_NativeArguments args, Uint8List val);
-
+  static Uint8List FromArguments(Dart_NativeArguments args,
+                                 int index,
+                                 Dart_Handle& exception);
   static Uint8List FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                               int index,
-                                              Dart_Handle& exception);
+                                              Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
 
   static Dart_Handle ToDart(const uint8_t* buffer, unsigned int length);
 };
