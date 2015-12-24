@@ -82,18 +82,18 @@ class SlideTransition extends TransitionWithChild {
     Key key,
     this.position,
     PerformanceView performance,
+    this.transformHitTests: true,
     Widget child
   }) : super(key: key,
              performance: performance,
              child: child);
 
-  final AnimatedValue<Point> position;
+  final AnimatedValue<FractionalOffset> position;
+  bool transformHitTests;
 
   Widget buildWithChild(BuildContext context, Widget child) {
     performance.updateVariable(position);
-    Matrix4 transform = new Matrix4.identity()
-      ..translate(position.value.x, position.value.y);
-    return new Transform(transform: transform, child: child);
+    return new FractionalTranslation(translation: position.value, transformHitTests: transformHitTests, child: child);
   }
 }
 

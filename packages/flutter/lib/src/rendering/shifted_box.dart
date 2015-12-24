@@ -179,7 +179,7 @@ class RenderPositionedBox extends RenderShiftedBox {
        _widthFactor = widthFactor,
        _heightFactor = heightFactor,
        super(child) {
-    assert(alignment != null && alignment.x != null && alignment.y != null);
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
     assert(widthFactor == null || widthFactor >= 0.0);
     assert(heightFactor == null || heightFactor >= 0.0);
   }
@@ -196,7 +196,7 @@ class RenderPositionedBox extends RenderShiftedBox {
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
   void set alignment (FractionalOffset newAlignment) {
-    assert(newAlignment != null && newAlignment.x != null && newAlignment.y != null);
+    assert(newAlignment != null && newAlignment.dx != null && newAlignment.dy != null);
     if (_alignment == newAlignment)
       return;
     _alignment = newAlignment;
@@ -237,9 +237,8 @@ class RenderPositionedBox extends RenderShiftedBox {
       child.layout(constraints.loosen(), parentUsesSize: true);
       size = constraints.constrain(new Size(shrinkWrapWidth ? child.size.width * (_widthFactor ?? 1.0) : double.INFINITY,
                                             shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.INFINITY));
-      final Offset delta = size - child.size;
       final BoxParentData childParentData = child.parentData;
-      childParentData.position = delta.scale(_alignment.x, _alignment.y).toPoint();
+      childParentData.position = _alignment.alongOffset(size - child.size).toPoint();
     } else {
       size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.INFINITY,
                                             shrinkWrapHeight ? 0.0 : double.INFINITY));

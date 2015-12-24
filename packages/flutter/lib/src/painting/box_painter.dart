@@ -510,36 +510,55 @@ void paintImage({
 /// FractionalOffset(1.0, 0.0) represents the top right of the Size,
 /// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
 class FractionalOffset {
-  const FractionalOffset(this.x, this.y);
-  final double x;
-  final double y;
+  const FractionalOffset(this.dx, this.dy);
+  final double dx;
+  final double dy;
+  static const FractionalOffset zero = const FractionalOffset(0.0, 0.0);
+  FractionalOffset operator -() {
+    return new FractionalOffset(-dx, -dy);
+  }
   FractionalOffset operator -(FractionalOffset other) {
-    return new FractionalOffset(x - other.x, y - other.y);
+    return new FractionalOffset(dx - other.dx, dy - other.dy);
   }
   FractionalOffset operator +(FractionalOffset other) {
-    return new FractionalOffset(x + other.x, y + other.y);
+    return new FractionalOffset(dx + other.dx, dy + other.dy);
   }
   FractionalOffset operator *(double other) {
-    return new FractionalOffset(x * other, y * other);
+    return new FractionalOffset(dx * other, dy * other);
+  }
+  FractionalOffset operator /(double other) {
+    return new FractionalOffset(dx / other, dy / other);
+  }
+  FractionalOffset operator ~/(double other) {
+    return new FractionalOffset((dx ~/ other).toDouble(), (dy ~/ other).toDouble());
+  }
+  FractionalOffset operator %(double other) {
+    return new FractionalOffset(dx % other, dy % other);
+  }
+  Offset alongOffset(Offset other) {
+    return new Offset(dx * other.dx, dy * other.dy);
+  }
+  Offset alongSize(Size other) {
+    return new Offset(dx * other.width, dy * other.height);
   }
   bool operator ==(dynamic other) {
     if (other is! FractionalOffset)
       return false;
     final FractionalOffset typedOther = other;
-    return x == typedOther.x &&
-           y == typedOther.y;
+    return dx == typedOther.dx &&
+           dy == typedOther.dy;
   }
-  int get hashCode => hashValues(x, y);
+  int get hashCode => hashValues(dx, dy);
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return new FractionalOffset(b.x * t, b.y * t);
+      return new FractionalOffset(b.dx * t, b.dy * t);
     if (b == null)
-      return new FractionalOffset(b.x * (1.0 - t), b.y * (1.0 - t));
-    return new FractionalOffset(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
+      return new FractionalOffset(b.dx * (1.0 - t), b.dy * (1.0 - t));
+    return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
   }
-  String toString() => '$runtimeType($x, $y)';
+  String toString() => '$runtimeType($dx, $dy)';
 }
 
 /// A background image for a box.
@@ -919,8 +938,8 @@ class _BoxDecorationPainter extends BoxPainter {
       rect: rect,
       image: image,
       colorFilter: backgroundImage.colorFilter,
-      alignX: backgroundImage.alignment?.x,
-      alignY: backgroundImage.alignment?.y,
+      alignX: backgroundImage.alignment?.dx,
+      alignY: backgroundImage.alignment?.dy,
       fit:  backgroundImage.fit,
       repeat: backgroundImage.repeat
     );

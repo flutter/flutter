@@ -851,10 +851,11 @@ class RenderTransform extends RenderProxyBox {
     Matrix4 transform,
     Offset origin,
     FractionalOffset alignment,
+    this.transformHitTests: true,
     RenderBox child
   }) : super(child) {
     assert(transform != null);
-    assert(alignment == null || (alignment.x != null && alignment.y != null));
+    assert(alignment == null || (alignment.dx != null && alignment.dy != null));
     this.transform = transform;
     this.alignment = alignment;
     this.origin = origin;
@@ -881,12 +882,20 @@ class RenderTransform extends RenderProxyBox {
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
   void set alignment (FractionalOffset newAlignment) {
-    assert(newAlignment == null || (newAlignment.x != null && newAlignment.y != null));
+    assert(newAlignment == null || (newAlignment.dx != null && newAlignment.dy != null));
     if (_alignment == newAlignment)
       return;
     _alignment = newAlignment;
     markNeedsPaint();
   }
+
+  /// When set to true, hit tests are performed based on the position of the
+  /// child as it is painted. When set to false, hit tests are performed
+  /// ignoring the transformation.
+  ///
+  /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
+  /// always honor the transformation, regardless of the value of this property.
+  bool transformHitTests;
 
   // Note the lack of a getter for transform because Matrix4 is not immutable
   Matrix4 _transform;
@@ -942,25 +951,29 @@ class RenderTransform extends RenderProxyBox {
     Matrix4 result = new Matrix4.identity();
     if (_origin != null)
       result.translate(_origin.dx, _origin.dy);
-    if (_alignment != null)
-      result.translate(_alignment.x * size.width, _alignment.y * size.height);
+    Offset translation;
+    if (_alignment != null) {
+      translation = _alignment.alongSize(size);
+      result.translate(translation.dx, translation.dy);
+    }
     result.multiply(_transform);
     if (_alignment != null)
-      result.translate(-_alignment.x * size.width, -_alignment.y * size.height);
+      result.translate(-translation.dx, -translation.dy);
     if (_origin != null)
       result.translate(-_origin.dx, -_origin.dy);
     return result;
   }
 
   bool hitTest(HitTestResult result, { Point position }) {
-    Matrix4 inverse = new Matrix4.zero();
-    // TODO(abarth): Check the determinant for degeneracy.
-    inverse.copyInverse(_effectiveTransform);
-
-    Vector3 position3 = new Vector3(position.x, position.y, 0.0);
-    Vector3 transformed3 = inverse.transform3(position3);
-    Point transformed = new Point(transformed3.x, transformed3.y);
-    return super.hitTest(result, position: transformed);
+    if (transformHitTests) {
+      Matrix4 inverse = new Matrix4.zero();
+      // TODO(abarth): Check the determinant for degeneracy.
+      inverse.copyInverse(_effectiveTransform);
+      Vector3 position3 = new Vector3(position.x, position.y, 0.0);
+      Vector3 transformed3 = inverse.transform3(position3);
+      position = new Point(transformed3.x, transformed3.y);
+    }
+    return super.hitTest(result, position: position);
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -985,6 +998,65 @@ class RenderTransform extends RenderProxyBox {
     settings.addAll(debugDescribeTransform(_transform));
     settings.add('origin: $origin');
     settings.add('alignment: $alignment');
+    settings.add('transformHitTests: $transformHitTests');
+  }
+}
+
+/// Applies a translation transformation before painting its child. The
+/// translation is expressed as a [FractionalOffset] relative to the
+/// RenderFractionalTranslation box's size. Hit tests will only be detected
+/// inside the bounds of the RenderFractionalTranslation, even if the contents
+/// are offset such that they overflow.
+class RenderFractionalTranslation extends RenderProxyBox {
+  RenderFractionalTranslation({
+    FractionalOffset translation,
+    this.transformHitTests: true,
+    RenderBox child
+  }) : _translation = translation, super(child) {
+    assert(translation == null || (translation.dx != null && translation.dy != null));
+  }
+
+  /// The translation to apply to the child, as a multiple of the size.
+  FractionalOffset get translation => _translation;
+  FractionalOffset _translation;
+  void set translation (FractionalOffset newTranslation) {
+    assert(newTranslation == null || (newTranslation.dx != null && newTranslation.dy != null));
+    if (_translation == newTranslation)
+      return;
+    _translation = newTranslation;
+    markNeedsPaint();
+  }
+
+  /// When set to true, hit tests are performed based on the position of the
+  /// child as it is painted. When set to false, hit tests are performed
+  /// ignoring the transformation.
+  ///
+  /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
+  /// always honor the transformation, regardless of the value of this property.
+  bool transformHitTests;
+
+  bool hitTest(HitTestResult result, { Point position }) {
+    assert(!needsLayout);
+    if (transformHitTests)
+      position = new Point(position.x - translation.dx * size.width, position.y - translation.dy * size.height);
+    return super.hitTest(result, position: position);
+  }
+
+  void paint(PaintingContext context, Offset offset) {
+    assert(!needsLayout);
+    if (child != null)
+      super.paint(context, offset + translation.alongSize(size));
+  }
+
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.translate(translation.dx * size.width, translation.dy * size.height);
+    super.applyPaintTransform(child, transform);
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('translation: $translation');
+    settings.add('transformHitTests: $transformHitTests');
   }
 }
 
