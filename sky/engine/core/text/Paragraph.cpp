@@ -8,8 +8,34 @@
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 
 namespace blink {
+
+IMPLEMENT_WRAPPERTYPEINFO(Paragraph);
+
+#define FOR_EACH_BINDING(V) \
+  V(Paragraph, minWidth) \
+  V(Paragraph, setMinWidth) \
+  V(Paragraph, maxWidth) \
+  V(Paragraph, setMaxWidth) \
+  V(Paragraph, minHeight) \
+  V(Paragraph, setMinHeight) \
+  V(Paragraph, maxHeight) \
+  V(Paragraph, setMaxHeight) \
+  V(Paragraph, width) \
+  V(Paragraph, height) \
+  V(Paragraph, minIntrinsicWidth) \
+  V(Paragraph, maxIntrinsicWidth) \
+  V(Paragraph, alphabeticBaseline) \
+  V(Paragraph, ideographicBaseline) \
+  V(Paragraph, layout) \
+  V(Paragraph, paint)
+
+DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
 Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
     : m_renderView(renderView)

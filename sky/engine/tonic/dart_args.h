@@ -90,6 +90,11 @@ struct DartArgHolder {
       : value(it->GetNext<ValueType>()) {}
 };
 
+template<typename T>
+void DartReturn(T result, Dart_NativeArguments args) {
+  DartConverter<T>::SetReturnValue(args, result);
+}
+
 template <typename IndicesType, typename T>
 class DartDispatcher {
 };
@@ -148,11 +153,6 @@ struct DartDispatcher<IndicesHolder<indices...>, ResultType (C::*)(ArgTypes...)>
                it_->args());
   }
 };
-
-template<typename T>
-void DartReturn(T result, Dart_NativeArguments args) {
-  DartConverter<T>::SetReturnValue(args, result);
-}
 
 template<typename Sig>
 void DartCall(Sig func, Dart_NativeArguments args) {

@@ -250,8 +250,6 @@ core_idl_files = get_path_info([
                                  "painting/Picture.idl",
                                  "painting/PictureRecorder.idl",
                                  "painting/Shader.idl",
-                                 "text/Paragraph.idl",
-                                 "text/ParagraphBuilder.idl",
                                ],
                                "abspath")
 

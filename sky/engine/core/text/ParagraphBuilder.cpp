@@ -9,6 +9,10 @@
 #include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 
 namespace blink {
 namespace {
@@ -66,6 +70,27 @@ const int kTextBaselineMask = 1 << kTextBaselineIndex;
 const int kLineHeightMask = 1 << kLineHeightIndex;
 
 }  // namespace
+
+static void ParagraphBuilder_constructor(Dart_NativeArguments args) {
+  DartCallConstructor(&ParagraphBuilder::create, args);
+}
+
+IMPLEMENT_WRAPPERTYPEINFO(ParagraphBuilder);
+
+#define FOR_EACH_BINDING(V) \
+  V(ParagraphBuilder, pushStyle) \
+  V(ParagraphBuilder, pop) \
+  V(ParagraphBuilder, addText) \
+  V(ParagraphBuilder, build)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void ParagraphBuilder::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "ParagraphBuilder_constructor", ParagraphBuilder_constructor, 1, true },
+FOR_EACH_BINDING(DART_REGISTER_NATIVE)
+  });
+}
 
 ParagraphBuilder::ParagraphBuilder()
 {
