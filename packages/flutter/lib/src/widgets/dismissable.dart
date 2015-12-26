@@ -139,12 +139,15 @@ class _DismissableState extends State<Dismissable> {
   }
 
   void _handleDragStart(_) {
-    if (_dismissPerformance.isAnimating)
-      return;
     setState(() {
       _dragUnderway = true;
-      _dragExtent = 0.0;
-      _dismissPerformance.progress = 0.0;
+      if (_dismissPerformance.isAnimating) {
+        _dragExtent = _dismissPerformance.progress * _size.width * _dragExtent.sign;
+        _dismissPerformance.stop();
+      } else {
+        _dragExtent = 0.0;
+        _dismissPerformance.progress = 0.0;
+      }
     });
   }
 
