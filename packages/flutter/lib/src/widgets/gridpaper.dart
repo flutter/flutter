@@ -35,6 +35,8 @@ class _GridPaperPainter extends CustomPainter {
   }
 }
 
+/// Draws a rectalinear grid of 1px width lines at the specified color and interval.
+/// Useful with a Stack for visualizing your layout along a grid.
 class GridPaper extends StatelessComponent {
   GridPaper({
     Key key,
