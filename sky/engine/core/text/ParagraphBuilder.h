@@ -14,6 +14,7 @@
 #include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
+class DartLibraryNatives;
 
 class ParagraphBuilder : public RefCounted<ParagraphBuilder>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -30,6 +31,8 @@ public:
     void addText(const String& text);
 
     PassRefPtr<Paragraph> build(Int32List& encoded, double lineHeight);
+
+    static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
     explicit ParagraphBuilder();

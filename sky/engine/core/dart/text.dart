@@ -309,16 +309,41 @@ class ParagraphStyle {
   final double _lineHeight;
 }
 
-class ParagraphBuilder extends _ParagraphBuilder {
+abstract class Paragraph extends NativeFieldWrapperClass2 {
+  double get minWidth native "Paragraph_minWidth";
+  void set minWidth(double value) native "Paragraph_setMinWidth";
+  double get maxWidth native "Paragraph_maxWidth";
+  void set maxWidth(double value) native "Paragraph_setMaxWidth";
+  double get minHeight native "Paragraph_minHeight";
+  void set minHeight(double value) native "Paragraph_setMinHeight";
+  double get maxHeight native "Paragraph_maxHeight";
+  void set maxHeight(double value) native "Paragraph_setMaxHeight";
+  double get width native "Paragraph_width";
+  double get height native "Paragraph_height";
+  double get minIntrinsicWidth native "Paragraph_minIntrinsicWidth";
+  double get maxIntrinsicWidth native "Paragraph_maxIntrinsicWidth";
+  double get alphabeticBaseline native "Paragraph_alphabeticBaseline";
+  double get ideographicBaseline native "Paragraph_ideographicBaseline";
+
+  void layout() native "Paragraph_layout";
+  void paint(Canvas canvas, Offset offset) native "Paragraph_paint";
+}
+
+class ParagraphBuilder extends NativeFieldWrapperClass2 {
+  void _constructor() native "ParagraphBuilder_constructor";
+  ParagraphBuilder() { _constructor(); }
+
+  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing) native "ParagraphBuilder_pushStyle";
+
   void pushStyle(TextStyle style) {
     _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing);
   }
 
-  void pop() => _pop();
-  void addText(String text) => _addText(text);
+  void pop() native "ParagraphBuilder_pop";
+  void addText(String text) native "ParagraphBuilder_addText";
 
-  Paragraph build(ParagraphStyle style) {
-    Paragraph result = _build(style._encoded, style._lineHeight);
-    return result;
-  }
+  Paragraph _build(Int32List encoded, double lineHeight) native "ParagraphBuilder_build";
+
+  Paragraph build(ParagraphStyle style) => _build(style._encoded, style._lineHeight);
 }
+

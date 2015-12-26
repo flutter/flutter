@@ -9,6 +9,8 @@
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/compositing/SceneBuilder.h"
 #include "sky/engine/core/painting/painting.h"
+#include "sky/engine/core/text/Paragraph.h"
+#include "sky/engine/core/text/ParagraphBuilder.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
@@ -40,10 +42,12 @@ void DartUI::InitForIsolate() {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     DartRuntimeHooks::RegisterNatives(g_natives);
-    Window::RegisterNatives(g_natives);
     Painting::RegisterNatives(g_natives);
+    Paragraph::RegisterNatives(g_natives);
+    ParagraphBuilder::RegisterNatives(g_natives);
     Scene::RegisterNatives(g_natives);
     SceneBuilder::RegisterNatives(g_natives);
+    Window::RegisterNatives(g_natives);
   }
 
   DART_CHECK_VALID(Dart_SetNativeResolver(

@@ -13,6 +13,7 @@
 #include "sky/engine/core/rendering/RenderView.h"
 
 namespace blink {
+class DartLibraryNatives;
 
 class Paragraph : public RefCounted<Paragraph>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -23,17 +24,17 @@ public:
 
     ~Paragraph() override;
 
-    LayoutUnit minWidth() const { return m_minWidth; }
-    void setMinWidth(LayoutUnit width) { m_minWidth = width; }
+    double minWidth() { return m_minWidth; }
+    void setMinWidth(double width) { m_minWidth = width; }
 
-    LayoutUnit maxWidth() const { return m_maxWidth; }
-    void setMaxWidth(LayoutUnit width) { m_maxWidth = width; }
+    double maxWidth() { return m_maxWidth; }
+    void setMaxWidth(double width) { m_maxWidth = width; }
 
-    LayoutUnit minHeight() const { return m_minHeight; }
-    void setMinHeight(LayoutUnit height) { m_minHeight = height; }
+    double minHeight() { return m_minHeight; }
+    void setMinHeight(double height) { m_minHeight = height; }
 
-    LayoutUnit maxHeight() const { return m_maxHeight; }
-    void setMaxHeight(LayoutUnit height) { m_maxHeight = height; }
+    double maxHeight() { return m_maxHeight; }
+    void setMaxHeight(double height) { m_maxHeight = height; }
 
     double width();
     double height();
@@ -46,6 +47,8 @@ public:
     void paint(Canvas* canvas, const Offset& offset);
 
     RenderView* renderView() const { return m_renderView.get(); }
+
+    static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
     RenderBox* firstChildBox() const { return m_renderView->firstChildBox(); }
