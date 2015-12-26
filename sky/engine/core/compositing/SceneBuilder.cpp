@@ -16,17 +16,17 @@
 #include "sky/compositor/statistics_layer.h"
 #include "sky/compositor/transform_layer.h"
 #include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_library_natives.h"
 
 namespace blink {
-namespace {
 
-void ConstructorCallback(Dart_NativeArguments args) {
+static void SceneBuilder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&SceneBuilder::create, args);
 }
 
-void PushTransformCallback(Dart_NativeArguments args) {
+static void SceneBuilder_pushTransform(Dart_NativeArguments args) {
   DartArgIterator it(args);
   Float64List matrix4 = it.GetNext<Float64List>();
   if (it.had_exception())
@@ -37,64 +37,27 @@ void PushTransformCallback(Dart_NativeArguments args) {
     Dart_ThrowException(es.GetDartException(args, true));
 }
 
-void PushClipRectCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::pushClipRect, args);
-}
-
-void PushClipRRectCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::pushClipRRect, args);
-}
-
-void PushClipPathCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::pushClipPath, args);
-}
-
-void PushOpacityCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::pushOpacity, args);
-}
-
-void PushColorFilterCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::pushColorFilter, args);
-}
-
-void PopCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::pop, args);
-}
-
-void AddPictureCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::addPicture, args);
-}
-
-void AddStatisticsCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::addStatistics, args);
-}
-
-void SetRasterizerTracingThresholdCallback(Dart_NativeArguments args) {
-  DartCall(&SceneBuilder::setRasterizerTracingThreshold, args);
-}
-
-void BuildCallback(Dart_NativeArguments args) {
-  DartCallAndReturn(&SceneBuilder::build, args);
-}
-
-}  // namespace
-
 IMPLEMENT_WRAPPERTYPEINFO(SceneBuilder);
+
+#define FOR_EACH_BINDING(V) \
+  V(SceneBuilder, pushClipRect) \
+  V(SceneBuilder, pushClipRRect) \
+  V(SceneBuilder, pushClipPath) \
+  V(SceneBuilder, pushOpacity) \
+  V(SceneBuilder, pushColorFilter) \
+  V(SceneBuilder, pop) \
+  V(SceneBuilder, addPicture) \
+  V(SceneBuilder, addStatistics) \
+  V(SceneBuilder, setRasterizerTracingThreshold) \
+  V(SceneBuilder, build)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void SceneBuilder::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
-    { "SceneBuilder_constructor", ConstructorCallback, 2, true },
-    { "SceneBuilder_pushTransform", PushTransformCallback, 2, true },
-    { "SceneBuilder_pushClipRect", PushClipRectCallback, 2, true },
-    { "SceneBuilder_pushClipRRect", PushClipRRectCallback, 3, true },
-    { "SceneBuilder_pushClipPath", PushClipPathCallback, 3, true },
-    { "SceneBuilder_pushOpacity", PushOpacityCallback, 3, true },
-    { "SceneBuilder_pushColorFilter", PushColorFilterCallback, 4, true },
-    { "SceneBuilder_pop", PopCallback, 1, true },
-    { "SceneBuilder_addPicture", AddPictureCallback, 4, true },
-    { "SceneBuilder_addStatistics", AddStatisticsCallback, 3, true },
-    { "SceneBuilder_setRasterizerTracingThreshold", SetRasterizerTracingThresholdCallback, 2, true },
-    { "SceneBuilder_build", BuildCallback, 1, true },
+    { "SceneBuilder_constructor", SceneBuilder_constructor, 2, true },
+    { "SceneBuilder_pushTransform", SceneBuilder_pushTransform, 2, true },
+FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
