@@ -69,6 +69,7 @@ public class KeyboardServiceImpl implements KeyboardService {
         InputMethodManager imm =
                 (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.restartInput(mViewState.getView());
+        mViewState.setText(text);
     }
 
     @Override
