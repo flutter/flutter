@@ -18,8 +18,8 @@ flutter analyze --flutter-repo --no-current-directory --no-current-package --con
 
 (cd examples/stocks; flutter test)
 
-if [ $TRAVIS_PULL_REQUEST = "false" ]; then
-  if [ $TRAVIS_BRANCH = "master" ]; then
+if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+  if [ "$TRAVIS_BRANCH" = "master" ]; then
     pub global activate dartdoc 0.8.4
     cat packages/flutter/doc/styles.html doc/_analytics.html > /tmp/_header.html
 
