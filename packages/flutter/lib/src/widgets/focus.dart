@@ -82,51 +82,71 @@ class Focus extends StatefulComponent {
   final bool autofocus;
   final Widget child;
 
-  static bool at(BuildContext context, Widget widget, { bool autofocus: true }) {
-    assert(widget != null);
-    assert(widget.key is GlobalKey);
+  static GlobalKey debugOnlyFocusedKey;
+
+  static bool at(BuildContext context, { bool autofocus: true }) {
+    assert(context != null);
+    assert(context.widget != null);
+    assert(context.widget.key != null);
+    assert(context.widget.key is GlobalKey);
     _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
     if (focusScope != null) {
       if (autofocus)
-        focusScope._setFocusedWidgetIfUnset(widget.key);
+        focusScope._setFocusedWidgetIfUnset(context.widget.key);
       return focusScope.scopeFocused &&
              focusScope.focusedScope == null &&
-             focusScope.focusedWidget == widget.key;
+             focusScope.focusedWidget == context.widget.key;
     }
+    assert(() {
+      if (debugOnlyFocusedKey?.currentContext == null)
+        debugOnlyFocusedKey = context.widget.key;
+      if (debugOnlyFocusedKey != context.widget.key) {
+        debugPrint('Tried to focus widgets with two different keys: $debugOnlyFocusedKey and ${context.widget.key}');
+        assert('If you have more than one focusable widget, then you should put them inside a Focus.' == true);
+      }
+      return true;
+    });
     return true;
   }
 
-  static bool _atScope(BuildContext context, Widget widget, { bool autofocus: true }) {
-    assert(widget != null);
+  static bool _atScope(BuildContext context, { bool autofocus: true }) {
+    assert(context != null);
+    assert(context.widget != null);
+    assert(context.widget is Focus);
     _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
     if (focusScope != null) {
+      assert(context.widget.key != null);
       if (autofocus)
-        focusScope._setFocusedScopeIfUnset(widget.key);
-      assert(widget.key != null);
+        focusScope._setFocusedScopeIfUnset(context.widget.key);
       return focusScope.scopeFocused &&
-             focusScope.focusedScope == widget.key;
+             focusScope.focusedScope == context.widget.key;
     }
     return true;
   }
 
-  // Don't call moveTo() and moveScopeTo() from your build()
-  // functions, it's intended to be called from event listeners, e.g.
-  // in response to a finger tap or tab key.
-
-  static void moveTo(BuildContext context, Widget widget) {
-    assert(widget != null);
-    assert(widget.key is GlobalKey);
-    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
+  /// Focuses a particular widget, identified by its GlobalKey.
+  /// The widget must be in the widget tree.
+  /// 
+  /// Don't call moveTo() from your build() functions, it's intended to be
+  /// called from event listeners, e.g. in response to a finger tap or tab key.
+  static void moveTo(GlobalKey key) {
+    assert(key.currentContext != null);
+    _FocusScope focusScope = key.currentContext.ancestorWidgetOfType(_FocusScope);
     if (focusScope != null)
-      focusScope.focusState._setFocusedWidget(widget.key);
+      focusScope.focusState._setFocusedWidget(key);
   }
 
-  static void moveScopeTo(BuildContext context, Focus component) {
-    assert(component != null);
-    assert(component.key != null);
-    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
+  /// Focuses a particular focus scope, identified by its GlobalKey. The widget
+  /// must be in the widget tree.
+  /// 
+  /// Don't call moveScopeTo() from your build() functions, it's intended to be
+  /// called from event listeners, e.g. in response to a finger tap or tab key.
+  static void moveScopeTo(GlobalKey key) {
+    assert(key.currentWidget is Focus);
+    assert(key.currentContext != null);
+    _FocusScope focusScope = key.currentContext.ancestorWidgetOfType(_FocusScope);
     if (focusScope != null)
-      focusScope.focusState._setFocusedScope(component.key);
+      focusScope.focusState._setFocusedScope(key);
   }
 
   FocusState createState() => new FocusState();
@@ -222,7 +242,7 @@ class FocusState extends State<Focus> {
   Widget build(BuildContext context) {
     return new _FocusScope(
       focusState: this,
-      scopeFocused: Focus._atScope(context, config),
+      scopeFocused: Focus._atScope(context),
       focusedScope: _focusedScope == _noFocusedScope ? null : _focusedScope,
       focusedWidget: _focusedWidget,
       child: config.child

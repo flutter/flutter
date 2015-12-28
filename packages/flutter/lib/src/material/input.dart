@@ -27,7 +27,9 @@ class Input extends Scrollable {
     key: key,
     initialScrollOffset: 0.0,
     scrollDirection: ScrollDirection.horizontal
-  );
+  ) {
+    assert(key != null);
+  }
 
   final String initialValue;
   final KeyboardType keyboardType;
@@ -78,7 +80,7 @@ class InputState extends ScrollableState<Input> {
   Widget buildContent(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
-    bool focused = Focus.at(context, config);
+    bool focused = Focus.at(context);
 
     if (focused && !_keyboardHandle.attached) {
       _keyboardHandle = keyboard.show(_editableValue.stub, config.keyboardType);
@@ -118,7 +120,17 @@ class InputState extends ScrollableState<Input> {
       scrollOffset: scrollOffsetVector
     ));
 
-    return new Listener(
+    return new GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (Focus.at(context)) {
+          assert(_keyboardHandle.attached);
+          _keyboardHandle.showByRequest();
+        } else {
+          Focus.moveTo(config.key);
+          // we'll get told to rebuild and we'll take care of the keyboard then
+        }
+      },
       child: new SizeObserver(
         onSizeChanged: _handleContainerSizeChanged,
         child: new Container(
@@ -136,18 +148,7 @@ class InputState extends ScrollableState<Input> {
             )
           )
         )
-      ),
-      behavior: HitTestBehavior.opaque,
-      onPointerDown: (_) {
-        // TODO(ianh): https://github.com/flutter/engine/issues/1530
-        if (Focus.at(context, config)) {
-          assert(_keyboardHandle.attached);
-          _keyboardHandle.showByRequest();
-        } else {
-          Focus.moveTo(context, config);
-          // we'll get told to rebuild and we'll take care of the keyboard then
-        }
-      }
+      )
     );
   }
 

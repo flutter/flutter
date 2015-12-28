@@ -11,9 +11,9 @@ class TestFocusable extends StatelessComponent {
   final String no;
   final String yes;
   Widget build(BuildContext context) {
-    bool focused = Focus.at(context, this);
+    bool focused = Focus.at(context);
     return new GestureDetector(
-      onTap: () { Focus.moveTo(context, this); },
+      onTap: () { Focus.moveTo(key); },
       child: new Text(focused ? yes : no)
     );
   }
