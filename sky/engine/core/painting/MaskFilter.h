@@ -12,6 +12,7 @@
 class SkMaskFilter;
 
 namespace blink {
+class DartLibraryNatives;
 
 class MaskFilter : public RefCounted<MaskFilter>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
@@ -21,6 +22,8 @@ class MaskFilter : public RefCounted<MaskFilter>, public DartWrappable {
       unsigned style, double sigma, unsigned flags);
 
   SkMaskFilter* filter() { return filter_.get(); }
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   MaskFilter(PassRefPtr<SkMaskFilter> filter);
