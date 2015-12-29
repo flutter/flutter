@@ -4,13 +4,13 @@
 
 #include "sky/engine/bindings/dart_ui.h"
 
-#include "gen/sky/bindings/DartGlobal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/compositing/SceneBuilder.h"
 #include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/CanvasGradient.h"
 #include "sky/engine/core/painting/CanvasImage.h"
+#include "sky/engine/core/painting/CanvasPath.h"
 #include "sky/engine/core/painting/ColorFilter.h"
 #include "sky/engine/core/painting/DrawLooperLayerInfo.h"
 #include "sky/engine/core/painting/ImageShader.h"
@@ -33,17 +33,11 @@ static DartLibraryNatives* g_natives;
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                          int argument_count,
                                          bool* auto_setup_scope) {
-  if (auto result = g_natives->GetNativeFunction(name,
-                                                 argument_count,
-                                                 auto_setup_scope))
-    return result;
-  return skySnapshotResolver(name, argument_count, auto_setup_scope);
+  return g_natives->GetNativeFunction(name, argument_count, auto_setup_scope);
 }
 
 const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
-  if (auto result = g_natives->GetSymbol(native_function))
-    return result;
-  return skySnapshotSymbolizer(native_function);
+  return g_natives->GetSymbol(native_function);
 }
 
 }  // namespace
@@ -54,6 +48,7 @@ void DartUI::InitForIsolate() {
     Canvas::RegisterNatives(g_natives);
     CanvasGradient::RegisterNatives(g_natives);
     CanvasImage::RegisterNatives(g_natives);
+    CanvasPath::RegisterNatives(g_natives);
     ColorFilter::RegisterNatives(g_natives);
     DartRuntimeHooks::RegisterNatives(g_natives);
     DrawLooperLayerInfo::RegisterNatives(g_natives);

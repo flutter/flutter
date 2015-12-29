@@ -19,6 +19,30 @@ void decodeImageFromDataPipe(int handle, _ImageDecoderCallback callback)
 void decodeImageFromList(Uint8List list, _ImageDecoderCallback callback)
     native "decodeImageFromList";
 
+class Path extends NativeFieldWrapperClass2 {
+  void _constructor() native "Path_constructor";
+  Path() { _constructor(); }
+
+  void moveTo(double x, double y) native "Path_moveTo";
+  void relativeMoveTo(double dx, double dy) native "Path_relativeMoveTo";
+  void lineTo(double x, double y) native "Path_lineTo";
+  void relativeLineTo(double dx, double dy) native "Path_relativeLineTo";
+  void quadraticBezierTo(double x1, double y1, double x2, double y2) native "Path_quadraticBezierTo";
+  void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2) native "Path_relativeQuadraticBezierTo";
+  void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native "Path_cubicTo";
+  void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native "Path_relativeCubicTo";
+  void conicTo(double x1, double y1, double x2, double y2, double w) native "Path_conicTo";
+  void relativeConicTo(double x1, double y1, double x2, double y2, double w) native "Path_relativeConicTo";
+  void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) native "Path_arcTo";
+  void addRect(Rect rect) native "Path_addRect";
+  void addOval(Rect oval) native "Path_addOval";
+  void addArc(Rect oval, double startAngle, double sweepAngle) native "Path_addArc";
+  void addRRect(RRect rrect) native "Path_addRRect";
+  void close() native "Path_close";
+  void reset() native "Path_reset";
+  Path shift(Offset offset) native "Path_shift";
+}
+
 abstract class DrawLooper extends NativeFieldWrapperClass2 {
 }
 

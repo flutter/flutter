@@ -232,11 +232,6 @@ sky_core_files = [
   "window/window.h",
 ]
 
-core_idl_files = get_path_info([
-                                 "painting/Path.idl",
-                               ],
-                               "abspath")
-
 core_dart_files = get_path_info([
                                   "dart/compositing.dart",
                                   "dart/hash_codes.dart",
