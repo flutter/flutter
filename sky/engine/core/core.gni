@@ -76,7 +76,6 @@ sky_core_files = [
   "painting/Size.cpp",
   "painting/Size.h",
   "painting/TransferMode.h",
-  "painting/VertexMode.h",
   "rendering/BidiRun.h",
   "rendering/BidiRunForLine.cpp",
   "rendering/BidiRunForLine.h",
@@ -234,11 +233,7 @@ sky_core_files = [
 ]
 
 core_idl_files = get_path_info([
-                                 "painting/Canvas.idl",
-                                 "painting/Image.idl",
                                  "painting/Path.idl",
-                                 "painting/Picture.idl",
-                                 "painting/PictureRecorder.idl",
                                ],
                                "abspath")
 
@@ -263,6 +258,5 @@ core_dart_files = get_path_info([
                                   "painting/Rect.dart",
                                   "painting/Size.dart",
                                   "painting/TransferMode.dart",
-                                  "painting/VertexMode.dart",
                                 ],
                                 "abspath")

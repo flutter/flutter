@@ -12,8 +12,8 @@
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace blink {
-
 class Canvas;
+class DartLibraryNatives;
 class Picture;
 
 class PictureRecorder : public RefCounted<PictureRecorder>,
@@ -32,6 +32,8 @@ public:
     bool isRecording();
 
     void set_canvas(PassRefPtr<Canvas> canvas);
+
+    static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
     PictureRecorder();

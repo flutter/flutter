@@ -9,10 +9,95 @@
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Matrix.h"
 #include "sky/engine/platform/geometry/IntRect.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {
+
+static void Canvas_constructor(Dart_NativeArguments args) {
+  DartCallConstructor(&Canvas::create, args);
+}
+
+static void Canvas_concat(Dart_NativeArguments args) {
+  DartArgIterator it(args);
+  Float64List matrix4 = it.GetNext<Float64List>();
+  if (it.had_exception())
+    return;
+  ExceptionState es;
+  GetReceiver<Canvas>(args)->concat(matrix4, es);
+  if (es.had_exception())
+    Dart_ThrowException(es.GetDartException(args, true));
+}
+
+static void Canvas_setMatrix(Dart_NativeArguments args) {
+  DartArgIterator it(args);
+  Float64List matrix4 = it.GetNext<Float64List>();
+  if (it.had_exception())
+    return;
+  ExceptionState es;
+  GetReceiver<Canvas>(args)->setMatrix(matrix4, es);
+  if (es.had_exception())
+    Dart_ThrowException(es.GetDartException(args, true));
+}
+
+IMPLEMENT_WRAPPERTYPEINFO(Canvas);
+
+#define FOR_EACH_BINDING(V) \
+  V(Canvas, save) \
+  V(Canvas, saveLayer) \
+  V(Canvas, restore) \
+  V(Canvas, getSaveCount) \
+  V(Canvas, translate) \
+  V(Canvas, scale) \
+  V(Canvas, rotate) \
+  V(Canvas, skew) \
+  V(Canvas, getTotalMatrix) \
+  V(Canvas, clipRect) \
+  V(Canvas, clipRRect) \
+  V(Canvas, clipPath) \
+  V(Canvas, drawColor) \
+  V(Canvas, drawLine) \
+  V(Canvas, drawPaint) \
+  V(Canvas, drawRect) \
+  V(Canvas, drawRRect) \
+  V(Canvas, drawDRRect) \
+  V(Canvas, drawOval) \
+  V(Canvas, drawCircle) \
+  V(Canvas, drawPath) \
+  V(Canvas, drawImage) \
+  V(Canvas, drawImageRect) \
+  V(Canvas, drawImageNine) \
+  V(Canvas, drawPicture) \
+  V(Canvas, drawVertices) \
+  V(Canvas, drawAtlas)
+
+  // These are custom because of ExceptionState:
+  // V(Canvas, concat)
+  // V(Canvas, setMatrix)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void Canvas::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "Canvas_constructor", Canvas_constructor, 3, true },
+    { "Canvas_concat", Canvas_concat, 2, true },
+    { "Canvas_setMatrix", Canvas_setMatrix, 2, true },
+FOR_EACH_BINDING(DART_REGISTER_NATIVE)
+  });
+}
+
+PassRefPtr<Canvas> Canvas::create(PictureRecorder* recorder,
+                                  Rect& bounds) {
+    ASSERT(recorder);
+    ASSERT(!recorder->isRecording());
+    PassRefPtr<Canvas> canvas = adoptRef(new Canvas(recorder->beginRecording(bounds)));
+    recorder->set_canvas(canvas.get());
+    return canvas;
+}
 
 Canvas::Canvas(SkCanvas* skCanvas)
     : m_canvas(skCanvas)
@@ -102,7 +187,7 @@ void Canvas::setMatrix(const Float64List& matrix4, ExceptionState& es)
     m_canvas->setMatrix(sk_matrix);
 }
 
-Float64List Canvas::getTotalMatrix() const
+Float64List Canvas::getTotalMatrix()
 {
     // Maybe we should throw an exception instead of returning an empty matrix?
     SkMatrix sk_matrix;
@@ -132,7 +217,7 @@ void Canvas::clipPath(const CanvasPath* path)
     m_canvas->clipPath(path->path(), SkRegion::kIntersect_Op);
 }
 
-void Canvas::drawColor(SkColor color, SkXfermode::Mode transferMode)
+void Canvas::drawColor(CanvasColor color, TransferMode transferMode)
 {
     if (!m_canvas)
         return;
@@ -231,97 +316,73 @@ void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
         const Vector<Point>& vertices,
         const Vector<Point>& textureCoordinates,
         const Vector<SkColor>& colors,
-        SkXfermode::Mode transferMode,
+        TransferMode transferMode,
         const Vector<int>& indices,
-        const Paint& paint,
-        ExceptionState& es)
+        const Paint& paint)
 {
-    if (!m_canvas)
-        return;
-    size_t vertexCount = vertices.size();
+  if (!m_canvas)
+    return;
 
-    if (textureCoordinates.size() && textureCoordinates.size() != vertexCount)
-        return es.ThrowRangeError("vertices and textureCoordinates lengths must match");
-    if (colors.size() && colors.size() != vertexCount)
-        return es.ThrowRangeError("vertices and colors lengths must match");
+  Vector<SkPoint> skVertices;
+  skVertices.reserveInitialCapacity(vertices.size());
+  for (const Point& point : vertices)
+    skVertices.append(point.sk_point);
 
-    Vector<SkPoint> skVertices;
-    for (size_t x = 0; x < vertices.size(); x++) {
-        const Point& point = vertices[x];
-        if (point.is_null)
-            return es.ThrowRangeError("vertices contained a null");
-        skVertices.append(point.sk_point);
-    }
+  Vector<SkPoint> skTextureCoordinates;
+  skVertices.reserveInitialCapacity(textureCoordinates.size());
+  for (const Point& point : textureCoordinates)
+    skTextureCoordinates.append(point.sk_point);
 
-    Vector<SkPoint> skTextureCoordinates;
-    for (size_t x = 0; x < textureCoordinates.size(); x++) {
-        const Point& point = textureCoordinates[x];
-        if (point.is_null)
-            return es.ThrowRangeError("textureCoordinates contained a null");
-        skTextureCoordinates.append(point.sk_point);
-    }
+  Vector<uint16_t> skIndices;
+  skIndices.reserveInitialCapacity(indices.size());
+  for (uint16_t i : indices)
+    skIndices.append(i);
 
-    Vector<uint16_t> skIndices;
-    for (size_t x = 0; x < indices.size(); x++) {
-        uint16_t i = indices[x];
-        skIndices.append(i);
-    }
+  RefPtr<SkXfermode> transferModePtr = adoptRef(SkXfermode::Create(transferMode));
 
-    RefPtr<SkXfermode> transferModePtr = adoptRef(SkXfermode::Create(transferMode));
-
-    m_canvas->drawVertices(
-        vertexMode,
-        skVertices.size(),
-        skVertices.data(),
-        skTextureCoordinates.isEmpty() ? nullptr : skTextureCoordinates.data(),
-        colors.isEmpty() ? nullptr : colors.data(),
-        transferModePtr.get(),
-        skIndices.isEmpty() ? nullptr : skIndices.data(),
-        skIndices.size(),
-        *paint.paint()
-    );
+  m_canvas->drawVertices(
+    vertexMode,
+    skVertices.size(),
+    skVertices.data(),
+    skTextureCoordinates.isEmpty() ? nullptr : skTextureCoordinates.data(),
+    colors.isEmpty() ? nullptr : colors.data(),
+    transferModePtr.get(),
+    skIndices.isEmpty() ? nullptr : skIndices.data(),
+    skIndices.size(),
+    *paint.paint()
+  );
 }
 
 void Canvas::drawAtlas(CanvasImage* atlas,
     const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
-    const Vector<SkColor>& colors, SkXfermode::Mode mode,
-    const Rect& cullRect, const Paint& paint, ExceptionState& es)
+    const Vector<SkColor>& colors, TransferMode mode,
+    const Rect& cullRect, const Paint& paint)
 {
-    if (!m_canvas)
-        return;
-    RefPtr<SkImage> skImage = atlas->image();
-    if (transforms.size() != rects.size())
-        return es.ThrowRangeError("transforms and rects lengths must match");
-    if (colors.size() && colors.size() != rects.size())
-        return es.ThrowRangeError("if supplied, colors length must match that of transforms and rects");
+  if (!m_canvas)
+    return;
 
-    Vector<SkRSXform> skXForms;
-    for (size_t x = 0; x < transforms.size(); x++) {
-        const RSTransform& transform = transforms[x];
-        if (transform.is_null)
-            return es.ThrowRangeError("transforms contained a null");
-        skXForms.append(transform.sk_xform);
-    }
+  RefPtr<SkImage> skImage = atlas->image();
 
-    Vector<SkRect> skRects;
-    for (size_t x = 0; x < rects.size(); x++) {
-        const Rect& rect = rects[x];
-        if (rect.is_null)
-            return es.ThrowRangeError("rects contained a null");
-        skRects.append(rect.sk_rect);
-    }
+  Vector<SkRSXform> skXForms;
+  skXForms.reserveInitialCapacity(transforms.size());
+  for (const RSTransform& transform : transforms)
+    skXForms.append(transform.sk_xform);
 
-    m_canvas->drawAtlas(
-        skImage.get(),
-        skXForms.data(),
-        skRects.data(),
-        colors.isEmpty() ? nullptr : colors.data(),
-        skXForms.size(),
-        mode,
-        cullRect.is_null ? nullptr : &cullRect.sk_rect,
-        paint.paint()
-    );
+  Vector<SkRect> skRects;
+  skRects.reserveInitialCapacity(rects.size());
+  for (const Rect& rect : rects)
+    skRects.append(rect.sk_rect);
+
+  m_canvas->drawAtlas(
+      skImage.get(),
+      skXForms.data(),
+      skRects.data(),
+      colors.isEmpty() ? nullptr : colors.data(),
+      skXForms.size(),
+      mode,
+      cullRect.is_null ? nullptr : &cullRect.sk_rect,
+      paint.paint()
+  );
 }
-
 
 } // namespace blink

@@ -10,6 +10,7 @@
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace blink {
+class DartLibraryNatives;
 
 class CanvasImage final : public RefCounted<CanvasImage>,
                           public DartWrappable {
@@ -18,12 +19,14 @@ class CanvasImage final : public RefCounted<CanvasImage>,
   ~CanvasImage() override;
   static PassRefPtr<CanvasImage> create() { return adoptRef(new CanvasImage); }
 
-  int width() const;
-  int height() const;
+  int width();
+  int height();
   void dispose();
 
   SkImage* image() const { return image_.get(); }
   void setImage(PassRefPtr<SkImage> image) { image_ = image; }
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   CanvasImage();

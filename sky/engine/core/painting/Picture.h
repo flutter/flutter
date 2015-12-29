@@ -11,8 +11,8 @@
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
-
 class Canvas;
+class DartLibraryNatives;
 
 class Picture : public RefCounted<Picture>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -24,6 +24,8 @@ public:
 
     void playback(Canvas* canvas);
     void dispose();
+
+    static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
     explicit Picture(PassRefPtr<SkPicture> skPicture);

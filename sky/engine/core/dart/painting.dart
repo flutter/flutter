@@ -4,6 +4,13 @@
 
 part of dart_ui;
 
+abstract class Image extends NativeFieldWrapperClass2 {
+  int get width native "Image_width";
+  int get height native "Image_height";
+
+  void dispose() native "Image_dispose";
+}
+
 typedef void _ImageDecoderCallback(Image result);
 
 void decodeImageFromDataPipe(int handle, _ImageDecoderCallback callback)
@@ -156,3 +163,133 @@ class ImageShader extends Shader {
   }
 }
 
+/// Defines how a list of points is interpreted when drawing a set of triangles.
+/// See Skia or OpenGL documentation for more details.
+enum VertexMode {
+  triangles,
+  triangleStrip,
+  triangleFan,
+}
+
+class Canvas extends NativeFieldWrapperClass2 {
+  void _constructor(PictureRecorder recorder, Rect bounds) native "Canvas_constructor";
+  Canvas(PictureRecorder recorder, Rect bounds) {
+    if (recorder == null)
+      throw new ArgumentError("[recorder] argument cannot be null.");
+    if (recorder.isRecording)
+      throw new ArgumentError("You must call endRecording() before reusing a PictureRecorder to create a new Canvas object.");
+    _constructor(recorder, bounds);
+  }
+
+  void save() native "Canvas_save";
+  // TODO(jackson): Paint should be optional, but making it optional causes crash
+  void saveLayer(Rect bounds, Paint paint) native "Canvas_saveLayer";
+  void restore() native "Canvas_restore";
+  
+  /// returns 1 for a clean canvas; each call to save() or saveLayer() increments it, and each call to 
+  int getSaveCount() native "Canvas_getSaveCount";
+  
+  void translate(double dx, double dy) native "Canvas_translate";
+  void scale(double sx, double sy) native "Canvas_scale";
+  void rotate(double radians) native "Canvas_rotate";
+  void skew(double sx, double sy) native "Canvas_skew";
+  void concat(Float64List matrix4) native "Canvas_concat";
+  void setMatrix(Float64List matrix4) native "Canvas_setMatrix";
+  Float64List getTotalMatrix() native "Canvas_getTotalMatrix";
+  void clipRect(Rect rect) native "Canvas_clipRect";
+  void clipRRect(RRect rrect) native "Canvas_clipRRect";
+  void clipPath(Path path) native "Canvas_clipPath";
+  void drawColor(Color color, TransferMode transferMode) native "Canvas_drawColor";
+  void drawLine(Point p1, Point p2, Paint paint) native "Canvas_drawLine";
+  void drawPaint(Paint paint) native "Canvas_drawPaint";
+  void drawRect(Rect rect, Paint paint) native "Canvas_drawRect";
+  void drawRRect(RRect rrect, Paint paint) native "Canvas_drawRRect";
+  void drawDRRect(RRect outer, RRect inner, Paint paint) native "Canvas_drawDRRect";
+  void drawOval(Rect rect, Paint paint) native "Canvas_drawOval";
+  void drawCircle(Point c, double radius, Paint paint) native "Canvas_drawCircle";
+  void drawPath(Path path, Paint paint) native "Canvas_drawPath";
+  void drawImage(Image image, Point p, Paint paint) native "Canvas_drawImage";
+  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) native "Canvas_drawImageRect";
+  void drawImageNine(Image image, Rect center, Rect dst, Paint paint) native "Canvas_drawImageNine";
+  void drawPicture(Picture picture) native "Canvas_drawPicture";
+
+  void _drawVertices(int vertexMode,
+                     List<Point> vertices,
+                     List<Point> textureCoordinates,
+                     List<Color> colors,
+                     TransferMode transferMode,
+                     List<int> indicies,
+                     Paint paint) native "Canvas_drawVertices";
+
+  void drawVertices(VertexMode vertexMode,
+                    List<Point> vertices,
+                    List<Point> textureCoordinates,
+                    List<Color> colors,
+                    TransferMode transferMode,
+                    List<int> indicies,
+                    Paint paint) {
+    int vertexCount = vertices.length;
+    if (textureCoordinates.isNotEmpty && textureCoordinates.length != vertexCount)
+      throw new ArgumentError("[vertices] and [textureCoordinates] lengths must match");
+    if (colors.isNotEmpty && colors.length != vertexCount)
+      throw new ArgumentError("[vertices] and [colors] lengths must match");
+    for (Point point in vertices) {
+      if (point == null)
+        throw new ArgumentError("[vertices] cannot contain a null");
+    }
+    for (Point point in textureCoordinates) {
+      if (point == null)
+        throw new ArgumentError("[textureCoordinates] cannot contain a null");
+    }
+    _drawVertices(vertexMode.index, vertices, textureCoordinates, colors, transferMode, indicies, paint);
+  }
+
+  // TODO(eseidel): Paint should be optional, but optional doesn't work.
+  void _drawAtlas(Image image,
+                  List<RSTransform> transforms,
+                  List<Rect> rects,
+                  List<Color> colors,
+                  TransferMode mode,
+                  Rect cullRect,
+                  Paint paint) native "Canvas_drawAtlas";
+
+  void drawAtlas(Image image,
+                 List<RSTransform> transforms,
+                 List<Rect> rects,
+                 List<Color> colors,
+                 TransferMode mode,
+                 Rect cullRect,
+                 Paint paint) {
+    if (transforms.length != rects.length)
+      throw new ArgumentError("[transforms] and [rects] lengths must match");
+    if (colors.isNotEmpty && colors.length != rects.length)
+      throw new ArgumentError("if supplied, [colors] length must match that of [transforms] and [rects]");
+    for (RSTransform transform in transforms) {
+      if (transform == null)
+        throw new ArgumentError("[transforms] cannot contain a null");
+    }
+    for (Rect rect in rects) {
+      if (rect == null)
+        throw new ArgumentError("[rects] cannot contain a null");
+    }
+    _drawAtlas(image, transforms, rects, colors, mode, cullRect, paint);
+  }
+}
+
+abstract class Picture extends NativeFieldWrapperClass2 {
+  /// Replays the drawing commands on the specified canvas. Note that
+  /// this has the effect of unfurling this picture into the destination
+  /// canvas. Using the Canvas drawPicture entry point gives the destination
+  /// canvas the option of just taking a ref.
+  void playback(Canvas canvas) native "Picture_playback";
+
+  void dispose() native "Picture_dispose";
+}
+
+class PictureRecorder extends NativeFieldWrapperClass2 {
+  void _constructor() native "PictureRecorder_constructor";
+  PictureRecorder() { _constructor(); }
+
+  bool get isRecording native "PictureRecorder_isRecording";
+  Picture endRecording() native "PictureRecorder_endRecording";
+}

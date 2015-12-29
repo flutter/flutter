@@ -6,6 +6,7 @@
 #define SKY_ENGINE_TONIC_DART_ARGS_H_
 
 #include <type_traits>
+#include <utility>
 
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_wrappable.h"
@@ -92,7 +93,7 @@ struct DartArgHolder {
 
 template<typename T>
 void DartReturn(T result, Dart_NativeArguments args) {
-  DartConverter<T>::SetReturnValue(args, result);
+  DartConverter<T>::SetReturnValue(args, std::move(result));
 }
 
 template <typename IndicesType, typename T>
