@@ -4,7 +4,49 @@
 
 #include "sky/engine/core/painting/CanvasPath.h"
 
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
+
 namespace blink {
+
+typedef CanvasPath Path;
+
+static void Path_constructor(Dart_NativeArguments args) {
+  DartCallConstructor(&CanvasPath::create, args);
+}
+
+IMPLEMENT_WRAPPERTYPEINFO(Path);
+
+#define FOR_EACH_BINDING(V) \
+  V(Path, moveTo) \
+  V(Path, relativeMoveTo) \
+  V(Path, lineTo) \
+  V(Path, relativeLineTo) \
+  V(Path, quadraticBezierTo) \
+  V(Path, relativeQuadraticBezierTo) \
+  V(Path, cubicTo) \
+  V(Path, relativeCubicTo) \
+  V(Path, conicTo) \
+  V(Path, relativeConicTo) \
+  V(Path, arcTo) \
+  V(Path, addRect) \
+  V(Path, addOval) \
+  V(Path, addArc) \
+  V(Path, addRRect) \
+  V(Path, close) \
+  V(Path, reset) \
+  V(Path, shift)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void CanvasPath::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "Path_constructor", Path_constructor, 1, true },
+FOR_EACH_BINDING(DART_REGISTER_NATIVE)
+  });
+}
 
 CanvasPath::CanvasPath()
 {

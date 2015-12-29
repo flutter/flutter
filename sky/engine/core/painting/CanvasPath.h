@@ -20,6 +20,7 @@
 // (The existence of that class is why this is CanvasPath and not just Path.)
 
 namespace blink {
+class DartLibraryNatives;
 
 class CanvasPath : public RefCounted<CanvasPath>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -63,6 +64,8 @@ public:
     const SkPath& path() const { return m_path; }
 
     PassRefPtr<CanvasPath> shift(const Offset& offset);
+
+    static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
     CanvasPath();

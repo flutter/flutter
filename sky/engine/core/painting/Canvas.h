@@ -16,7 +16,6 @@
 #include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/painting/Size.h"
 #include "sky/engine/core/painting/RSTransform.h"
-#include "sky/engine/core/painting/VertexMode.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float64_list.h"
 #include "sky/engine/wtf/PassRefPtr.h"
@@ -24,37 +23,16 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {
+class DartLibraryNatives;
 class CanvasImage;
+
+template <>
+struct DartConverter<SkCanvas::VertexMode> : public DartConverterInteger<SkCanvas::VertexMode> {};
 
 class Canvas : public RefCounted<Canvas>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<Canvas> create(SkCanvas* skCanvas) {
-        ASSERT(skCanvas);
-        return adoptRef(new Canvas(skCanvas));
-    }
-
-    // TODO(ianh): fix crashes here https://github.com/domokit/mojo/issues/326
-    static PassRefPtr<Canvas> create(PictureRecorder* recorder,
-                                     Rect& bounds,
-                                     ExceptionState& es) {
-        ASSERT(recorder);
-        if (recorder->isRecording()) {
-            es.ThrowTypeError(
-                "You must call PictureRecorder.endRecording() before reusing a"
-                " PictureRecorder to create a new Canvas object.");
-            // TODO(iansf): We should return a nullptr here, I think, but doing
-            //              so will require modifying the dart template code to
-            //              to correctly handle constructors that throw
-            //              exceptions.  For now, just let it return a dart
-            //              object that may cause a crash later on -- if the
-            //              dart code catches the error, it will leak a canvas
-            //              but it won't crash.
-        }
-        PassRefPtr<Canvas> canvas = create(recorder->beginRecording(bounds));
-        recorder->set_canvas(canvas.get());
-        return canvas;
-    }
+    static PassRefPtr<Canvas> create(PictureRecorder* recorder, Rect& bounds);
 
     ~Canvas() override;
 
@@ -70,13 +48,13 @@ public:
     void concat(const Float64List& matrix4, ExceptionState&);
 
     void setMatrix(const Float64List& matrix4, ExceptionState&);
-    Float64List getTotalMatrix() const;
+    Float64List getTotalMatrix();
 
     void clipRect(const Rect& rect);
     void clipRRect(const RRect& rrect);
     void clipPath(const CanvasPath* path);
 
-    void drawColor(SkColor color, SkXfermode::Mode transferMode);
+    void drawColor(CanvasColor color, TransferMode transferMode);
     void drawLine(const Point& p1, const Point& p2, const Paint& paint);
     void drawPaint(const Paint& paint);
     void drawRect(const Rect& rect, const Paint& paint);
@@ -94,19 +72,20 @@ public:
         const Vector<Point>& vertices,
         const Vector<Point>& textureCoordinates,
         const Vector<SkColor>& colors,
-        SkXfermode::Mode transferMode,
+        TransferMode transferMode,
         const Vector<int>& indices,
-        const Paint& paint,
-        ExceptionState& es);
+        const Paint& paint);
 
     void drawAtlas(CanvasImage* atlas,
         const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
-        const Vector<SkColor>& colors, SkXfermode::Mode mode,
-        const Rect& cullRect, const Paint& paint, ExceptionState&);
+        const Vector<SkColor>& colors, TransferMode mode,
+        const Rect& cullRect, const Paint& paint);
 
     SkCanvas* skCanvas() { return m_canvas; }
     void clearSkCanvas() { m_canvas = nullptr; }
     bool isRecording() const { return !!m_canvas; }
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
 protected:
     explicit Canvas(SkCanvas* skCanvas);

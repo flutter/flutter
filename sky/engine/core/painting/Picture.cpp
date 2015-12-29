@@ -5,8 +5,20 @@
 #include "sky/engine/core/painting/Picture.h"
 
 #include "sky/engine/core/painting/Canvas.h"
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 
 namespace blink {
+
+IMPLEMENT_WRAPPERTYPEINFO(Picture);
+
+#define FOR_EACH_BINDING(V) \
+  V(Picture, playback) \
+  V(Picture, dispose)
+
+DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
 PassRefPtr<Picture> Picture::create(PassRefPtr<SkPicture> skPicture)
 {
