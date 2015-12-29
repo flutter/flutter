@@ -8,8 +8,6 @@ import("//sky/engine/core/core.gni")
 
 source_set("bindings") {
   sources = [
-    "dart_callback.cc",
-    "dart_callback.h",
     "dart_mojo_internal.cc",
     "dart_mojo_internal.h",
     "dart_runtime_hooks.cc",
@@ -22,9 +20,6 @@ source_set("bindings") {
     "exception_state_placeholder.h",
     "exception_state.cc",
     "exception_state.h",
-    "nullable.h",
-    "scheduled_action.cc",
-    "scheduled_action.h",
   ]
 
   defines = [ "DART_IO_SECURE_SOCKET_DISABLED" ]
