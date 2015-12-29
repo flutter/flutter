@@ -5,5 +5,4 @@
   Constructor()
 ] interface PictureRecorder {
   Picture endRecording();
-  Drawable endRecordingAsDrawable();
 };
