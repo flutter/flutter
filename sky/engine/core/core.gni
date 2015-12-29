@@ -39,8 +39,6 @@ sky_core_files = [
   "painting/CanvasPath.h",
   "painting/ColorFilter.cpp",
   "painting/ColorFilter.h",
-  "painting/Drawable.cpp",
-  "painting/Drawable.h",
   "painting/DrawLooper.cpp",
   "painting/DrawLooper.h",
   "painting/DrawLooperLayerInfo.cpp",
@@ -238,7 +236,6 @@ sky_core_files = [
 core_idl_files = get_path_info([
                                  "painting/Canvas.idl",
                                  "painting/ColorFilter.idl",
-                                 "painting/Drawable.idl",
                                  "painting/DrawLooper.idl",
                                  "painting/DrawLooperLayerInfo.idl",
                                  "painting/Gradient.idl",

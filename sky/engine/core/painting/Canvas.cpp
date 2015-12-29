@@ -227,14 +227,6 @@ void Canvas::drawPicture(Picture* picture)
     m_canvas->drawPicture(picture->toSkia());
 }
 
-void Canvas::drawDrawable(Drawable* drawable)
-{
-    if (!m_canvas)
-        return;
-    ASSERT(drawable);
-    m_canvas->drawDrawable(drawable->toSkia());
-}
-
 void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
         const Vector<Point>& vertices,
         const Vector<Point>& textureCoordinates,

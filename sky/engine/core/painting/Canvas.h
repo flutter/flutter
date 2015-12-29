@@ -7,7 +7,6 @@
 
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/painting/CanvasPath.h"
-#include "sky/engine/core/painting/Drawable.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/Paint.h"
 #include "sky/engine/core/painting/Picture.h"
@@ -90,7 +89,6 @@ public:
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint);
     void drawImageNine(const CanvasImage* image, Rect& center, Rect& dst, const Paint& paint);
     void drawPicture(Picture* picture);
-    void drawDrawable(Drawable* drawable);
 
     void drawVertices(SkCanvas::VertexMode vertexMode,
         const Vector<Point>& vertices,
