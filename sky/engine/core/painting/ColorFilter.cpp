@@ -4,11 +4,27 @@
 
 #include "sky/engine/core/painting/ColorFilter.h"
 
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
+
 namespace blink {
 
-// static
-PassRefPtr<ColorFilter> ColorFilter::create(SkColor color,
-                                            SkXfermode::Mode transfer_mode) {
+static void ColorFilter_constructor(Dart_NativeArguments args) {
+  DartCallConstructor(&ColorFilter::create, args);
+}
+
+IMPLEMENT_WRAPPERTYPEINFO(ColorFilter);
+
+void ColorFilter::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "ColorFilter_constructor", ColorFilter_constructor, 3, true },
+  });
+}
+
+PassRefPtr<ColorFilter> ColorFilter::create(CanvasColor color,
+                                            TransferMode transfer_mode) {
   return adoptRef(new ColorFilter(
       adoptRef(SkColorFilter::CreateModeFilter(color, transfer_mode))));
 }

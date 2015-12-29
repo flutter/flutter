@@ -50,3 +50,36 @@ class LayerDrawLooperBuilder extends NativeFieldWrapperClass2 {
   DrawLooper build() native "LayerDrawLooperBuilder_build";
   void addLayerOnTop(DrawLooperLayerInfo info, Paint paint) native "LayerDrawLooperBuilder_addLayerOnTop";
 }
+
+/// Blur styles. These mirror SkBlurStyle and must be kept in sync.
+enum BlurStyle {
+  normal,  /// Fuzzy inside and outside.
+  solid,  /// Solid inside, fuzzy outside.
+  outer,  /// Nothing inside, fuzzy outside.
+  inner,  /// Fuzzy inside, nothing outside.
+}
+
+// Convert constructor parameters to the SkBlurMaskFilter::BlurFlags type.
+int _makeBlurFlags(bool ignoreTransform, bool highQuality) {
+  int flags = 0;
+  if (ignoreTransform)
+    flags |= 0x01;
+  if (highQuality)
+    flags |= 0x02;
+  return flags;
+}
+
+class MaskFilter extends NativeFieldWrapperClass2 {
+  void _constructor(int style, double sigma, int flags) native "MaskFilter_constructor";
+  MaskFilter.blur(BlurStyle style, double sigma,
+                  {bool ignoreTransform: false, bool highQuality: false}) {
+    _constructor(style.index, sigma, _makeBlurFlags(ignoreTransform, highQuality));
+  }
+}
+
+class ColorFilter extends NativeFieldWrapperClass2 {
+  void _constructor(Color color, TransferMode transferMode) native "ColorFilter_constructor";
+  ColorFilter.mode(Color color, TransferMode transferMode) {
+    _constructor(color, transferMode);
+  }
+}

@@ -8,6 +8,8 @@
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/compositing/SceneBuilder.h"
+#include "sky/engine/core/painting/ColorFilter.h"
+#include "sky/engine/core/painting/MaskFilter.h"
 #include "sky/engine/core/painting/DrawLooperLayerInfo.h"
 #include "sky/engine/core/painting/LayerDrawLooperBuilder.h"
 #include "sky/engine/core/painting/painting.h"
@@ -46,6 +48,8 @@ void DartUI::InitForIsolate() {
     DartRuntimeHooks::RegisterNatives(g_natives);
     DrawLooperLayerInfo::RegisterNatives(g_natives);
     LayerDrawLooperBuilder::RegisterNatives(g_natives);
+    ColorFilter::RegisterNatives(g_natives);
+    MaskFilter::RegisterNatives(g_natives);
     Painting::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);

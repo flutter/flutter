@@ -235,11 +235,9 @@ sky_core_files = [
 
 core_idl_files = get_path_info([
                                  "painting/Canvas.idl",
-                                 "painting/ColorFilter.idl",
                                  "painting/Gradient.idl",
                                  "painting/Image.idl",
                                  "painting/ImageShader.idl",
-                                 "painting/MaskFilter.idl",
                                  "painting/Path.idl",
                                  "painting/Picture.idl",
                                  "painting/PictureRecorder.idl",
@@ -257,11 +255,9 @@ core_dart_files = get_path_info([
                                   "dart/text.dart",
                                   "dart/window.dart",
                                   "painting/Color.dart",
-                                  "painting/ColorFilter.dart",
                                   "painting/FilterQuality.dart",
                                   "painting/Gradient.dart",
                                   "painting/ImageShader.dart",
-                                  "painting/MaskFilter.dart",
                                   "painting/Offset.dart",
                                   "painting/OffsetBase.dart",
                                   "painting/Paint.dart",
