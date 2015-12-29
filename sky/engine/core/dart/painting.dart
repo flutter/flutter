@@ -130,8 +130,7 @@ enum TileMode {
 
 void _validateColorStops(List<Color> colors, List<double> colorStops) {
   if (colorStops != null && (colors == null || colors.length != colorStops.length)) {
-    throw new ArgumentError(
-        "[colors] and [colorStops] parameters must be equal length.");
+    throw new ArgumentError("[colors] and [colorStops] parameters must be equal length.");
   }
 }
 
