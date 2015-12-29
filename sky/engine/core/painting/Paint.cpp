@@ -102,9 +102,9 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
   return result;
 }
 
-Paint DartConverter<Paint>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                       int index,
-                                                       Dart_Handle& exception) {
+Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
+                                          int index,
+                                          Dart_Handle& exception) {
   Dart_Handle dart_rect = Dart_GetNativeArgument(args, index);
   DCHECK(!LogIfError(dart_rect));
   return FromDart(dart_rect);

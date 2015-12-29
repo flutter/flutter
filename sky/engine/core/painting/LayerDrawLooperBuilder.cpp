@@ -7,9 +7,32 @@
 #include "sky/engine/core/painting/DrawLooper.h"
 #include "sky/engine/core/painting/DrawLooperLayerInfo.h"
 #include "sky/engine/core/painting/Paint.h"
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 namespace blink {
+
+static void LayerDrawLooperBuilder_constructor(Dart_NativeArguments args) {
+  DartCallConstructor(&LayerDrawLooperBuilder::create, args);
+}
+
+IMPLEMENT_WRAPPERTYPEINFO(LayerDrawLooperBuilder);
+
+#define FOR_EACH_BINDING(V) \
+  V(LayerDrawLooperBuilder, build) \
+  V(LayerDrawLooperBuilder, addLayerOnTop)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void LayerDrawLooperBuilder::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "LayerDrawLooperBuilder_constructor", LayerDrawLooperBuilder_constructor, 1, true },
+FOR_EACH_BINDING(DART_REGISTER_NATIVE)
+  });
+}
 
 LayerDrawLooperBuilder::LayerDrawLooperBuilder() {
 }

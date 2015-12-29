@@ -8,6 +8,8 @@
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/compositing/SceneBuilder.h"
+#include "sky/engine/core/painting/DrawLooperLayerInfo.h"
+#include "sky/engine/core/painting/LayerDrawLooperBuilder.h"
 #include "sky/engine/core/painting/painting.h"
 #include "sky/engine/core/text/Paragraph.h"
 #include "sky/engine/core/text/ParagraphBuilder.h"
@@ -42,6 +44,8 @@ void DartUI::InitForIsolate() {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     DartRuntimeHooks::RegisterNatives(g_natives);
+    DrawLooperLayerInfo::RegisterNatives(g_natives);
+    LayerDrawLooperBuilder::RegisterNatives(g_natives);
     Painting::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);
