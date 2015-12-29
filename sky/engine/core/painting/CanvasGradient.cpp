@@ -4,7 +4,33 @@
 
 #include "sky/engine/core/painting/CanvasGradient.h"
 
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
+
 namespace blink {
+
+typedef CanvasGradient Gradient; // Because the C++ name doesn't match the Dart name.
+
+static void Gradient_constructor(Dart_NativeArguments args) {
+  DartCallConstructor(&CanvasGradient::create, args);
+}
+
+IMPLEMENT_WRAPPERTYPEINFO(Gradient);
+
+#define FOR_EACH_BINDING(V) \
+  V(Gradient, initLinear) \
+  V(Gradient, initRadial)
+
+FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+
+void CanvasGradient::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "Gradient_constructor", Gradient_constructor, 1, true },
+FOR_EACH_BINDING(DART_REGISTER_NATIVE)
+  });
+}
 
 PassRefPtr<CanvasGradient> CanvasGradient::create() {
   return adoptRef(new CanvasGradient());

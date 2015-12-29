@@ -4,7 +4,39 @@
 
 #include "sky/engine/core/painting/ImageShader.h"
 
+#include "sky/engine/tonic/dart_args.h"
+#include "sky/engine/tonic/dart_binding_macros.h"
+#include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/tonic/dart_library_natives.h"
+
 namespace blink {
+
+static void ImageShader_constructor(Dart_NativeArguments args) {
+  DartCallConstructor(&ImageShader::create, args);
+}
+
+static void ImageShader_initWithImage(Dart_NativeArguments args) {
+  DartArgIterator it(args);
+  CanvasImage* image = it.GetNext<CanvasImage*>();
+  SkShader::TileMode tmx = it.GetNext<SkShader::TileMode>();
+  SkShader::TileMode tmy = it.GetNext<SkShader::TileMode>();
+  Float64List matrix4 = it.GetNext<Float64List>();
+  if (it.had_exception())
+    return;
+  ExceptionState es;
+  GetReceiver<ImageShader>(args)->initWithImage(image, tmx, tmy, matrix4, es);
+  if (es.had_exception())
+    Dart_ThrowException(es.GetDartException(args, true));
+}
+
+IMPLEMENT_WRAPPERTYPEINFO(ImageShader);
+
+void ImageShader::RegisterNatives(DartLibraryNatives* natives) {
+  natives->Register({
+    { "ImageShader_constructor", ImageShader_constructor, 1, true },
+    { "ImageShader_initWithImage", ImageShader_initWithImage, 5, true },
+  });
+}
 
 PassRefPtr<ImageShader> ImageShader::create() {
   return adoptRef(new ImageShader());

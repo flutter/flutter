@@ -12,16 +12,15 @@
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
 namespace blink {
-
-class TileMode {};
+class DartLibraryNatives;
 
 template <>
-struct DartConverter<TileMode> : public DartConverterEnum<SkShader::TileMode> {};
+struct DartConverter<SkShader::TileMode> : public DartConverterInteger<SkShader::TileMode> {};
 
-COMPILE_ASSERT(SkShader::kTileModeCount == 3, Need_to_update_Gradient_dart);
+COMPILE_ASSERT(SkShader::kTileModeCount == 3, Need_to_update_TileMode_enum);
 
 class CanvasGradient : public Shader {
-    DEFINE_WRAPPERTYPEINFO();
+  DEFINE_WRAPPERTYPEINFO();
  public:
   ~CanvasGradient() override;
   static PassRefPtr<CanvasGradient> create();
@@ -30,11 +29,14 @@ class CanvasGradient : public Shader {
                   const Vector<SkColor>& colors,
                   const Vector<float>& color_stops,
                   SkShader::TileMode tile_mode);
+
   void initRadial(const Point& center,
                   double radius,
                   const Vector<SkColor>& colors,
                   const Vector<float>& color_stops,
                   SkShader::TileMode tile_mode);
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   CanvasGradient();

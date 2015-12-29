@@ -29,7 +29,7 @@ Point DartConverter<Point>::FromDart(Dart_Handle handle) {
   return result;
 }
 
-Point DartConverter<Point>::FromArgumentsWithNullCheck(
+Point DartConverter<Point>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {

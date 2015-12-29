@@ -16,6 +16,7 @@
 #include "third_party/skia/include/core/SkMatrix.h"
 
 namespace blink {
+class DartLibraryNatives;
 
 class ImageShader : public Shader {
     DEFINE_WRAPPERTYPEINFO();
@@ -28,6 +29,8 @@ class ImageShader : public Shader {
                      SkShader::TileMode tmy,
                      const Float64List& matrix4,
                      ExceptionState& es);
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   ImageShader();
