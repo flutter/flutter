@@ -83,3 +83,76 @@ class ColorFilter extends NativeFieldWrapperClass2 {
     _constructor(color, transferMode);
   }
 }
+
+abstract class Shader extends NativeFieldWrapperClass2 {
+}
+
+/// Defines what happens at the edge of the gradient.
+enum TileMode {
+  /// Edge is clamped to the final color.
+  clamp,
+  /// Edge is repeated from first color to last.
+  repeated,
+  /// Edge is mirrored from last color to first.
+  mirror
+}
+
+void _validateColorStops(List<Color> colors, List<double> colorStops) {
+  if (colorStops != null && (colors == null || colors.length != colorStops.length)) {
+    throw new ArgumentError(
+        "[colors] and [colorStops] parameters must be equal length.");
+  }
+}
+
+class Gradient extends Shader {
+  void _constructor() native "Gradient_constructor";
+  void _initLinear(List<Point> endPoints, List<Color> colors, List<double> colorStops, int tileMode) native "Gradient_initLinear";
+  void _initRadial(Point center, double radius, List<Color> colors, List<double> colorStops, int tileMode) native "Gradient_initRadial";
+
+  /// Creates a linear gradient from [endPoint[0]] to [endPoint[1]]. If
+  /// [colorStops] is provided, [colorStops[i]] is a number from 0 to 1 that
+  /// specifies where [color[i]] begins in the gradient.
+  // TODO(mpcomplete): Maybe pass a list of (color, colorStop) pairs instead?
+  Gradient.linear(List<Point> endPoints,
+                  List<Color> colors,
+                  [List<double> colorStops = null,
+                  TileMode tileMode = TileMode.clamp]) {
+    _constructor();
+    if (endPoints == null || endPoints.length != 2)
+      throw new ArgumentError("Expected exactly 2 [endPoints].");
+    _validateColorStops(colors, colorStops);
+    _initLinear(endPoints, colors, colorStops, tileMode.index);
+  }
+
+  /// Creates a radial gradient centered at [center] that ends at [radius]
+  /// distance from the center. If [colorStops] is provided, [colorStops[i]] is
+  /// a number from 0 to 1 that specifies where [color[i]] begins in the
+  /// gradient.
+  Gradient.radial(Point center,
+                  double radius,
+                  List<Color> colors,
+                  [List<double> colorStops = null,
+                  TileMode tileMode = TileMode.clamp]) {
+    _constructor();
+    _validateColorStops(colors, colorStops);
+    _initRadial(center, radius, colors, colorStops, tileMode.index);
+  }
+}
+
+class ImageShader extends Shader {
+  void _constructor() native "ImageShader_constructor";
+  void _initWithImage(Image image, int tmx, int tmy, Float64List matrix4) native "ImageShader_initWithImage";
+
+  ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
+    if (image == null)
+      throw new ArgumentError("[image] argument cannot be null");
+    if (tmx == null)
+      throw new ArgumentError("[tmx] argument cannot be null");
+    if (tmy == null)
+      throw new ArgumentError("[tmy] argument cannot be null");
+    if (matrix4 == null)
+      throw new ArgumentError("[matrix4] argument cannot be null");
+    _initWithImage(image, tmx.index, tmy.index, matrix4);
+  }
+}
+

@@ -18,7 +18,7 @@ struct CanvasColor {
 
   CanvasColor(SkColor color) : color(color) { }
   CanvasColor() : color() { }
-  operator SkColor() { return color; }
+  operator SkColor() const { return color; }
 };
 
 template <>

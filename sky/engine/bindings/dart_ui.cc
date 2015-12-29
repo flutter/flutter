@@ -8,10 +8,12 @@
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/compositing/SceneBuilder.h"
+#include "sky/engine/core/painting/CanvasGradient.h"
 #include "sky/engine/core/painting/ColorFilter.h"
-#include "sky/engine/core/painting/MaskFilter.h"
 #include "sky/engine/core/painting/DrawLooperLayerInfo.h"
+#include "sky/engine/core/painting/ImageShader.h"
 #include "sky/engine/core/painting/LayerDrawLooperBuilder.h"
+#include "sky/engine/core/painting/MaskFilter.h"
 #include "sky/engine/core/painting/painting.h"
 #include "sky/engine/core/text/Paragraph.h"
 #include "sky/engine/core/text/ParagraphBuilder.h"
@@ -45,10 +47,12 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 void DartUI::InitForIsolate() {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
+    CanvasGradient::RegisterNatives(g_natives);
+    ColorFilter::RegisterNatives(g_natives);
     DartRuntimeHooks::RegisterNatives(g_natives);
     DrawLooperLayerInfo::RegisterNatives(g_natives);
+    ImageShader::RegisterNatives(g_natives);
     LayerDrawLooperBuilder::RegisterNatives(g_natives);
-    ColorFilter::RegisterNatives(g_natives);
     MaskFilter::RegisterNatives(g_natives);
     Painting::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);

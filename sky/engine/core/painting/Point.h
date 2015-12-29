@@ -20,9 +20,14 @@ class Point {
 template <>
 struct DartConverter<Point> {
   static Point FromDart(Dart_Handle handle);
+  static Point FromArguments(Dart_NativeArguments args,
+                             int index,
+                             Dart_Handle& exception);
   static Point FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                           int index,
-                                          Dart_Handle& exception);
+                                          Dart_Handle& exception) {
+    return FromArguments(args, index, exception);
+  }
 };
 
 } // namespace blink
