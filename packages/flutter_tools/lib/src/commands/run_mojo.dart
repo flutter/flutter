@@ -154,7 +154,7 @@ class RunMojoCommand extends FlutterCommand {
     if (bundlePath == null) {
       bundlePath = _kDefaultBundlePath;
 
-      String mainPath = StartCommand.findMainDartFile(argResults['target']);
+      String mainPath = StartCommandBase.findMainDartFile(argResults['target']);
 
       BuildCommand builder = new BuildCommand();
       builder.inheritFromParent(this);
