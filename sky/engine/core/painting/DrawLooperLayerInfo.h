@@ -13,6 +13,7 @@
 #include "third_party/skia/include/effects/SkLayerDrawLooper.h"
 
 namespace blink {
+class DartLibraryNatives;
 
 class DrawLooperLayerInfo : public RefCounted<DrawLooperLayerInfo>,
                             public DartWrappable {
@@ -25,11 +26,13 @@ class DrawLooperLayerInfo : public RefCounted<DrawLooperLayerInfo>,
   ~DrawLooperLayerInfo() override;
 
   void setPaintBits(unsigned bits) { layer_info_.fPaintBits = bits; }
-  void setColorMode(SkXfermode::Mode mode) { layer_info_.fColorMode = mode; }
+  void setColorMode(TransferMode mode) { layer_info_.fColorMode = mode; }
   void setOffset(Offset offset) { layer_info_.fOffset = SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()); }
   void setPostTranslate(bool val) { layer_info_.fPostTranslate = val; }
 
   const SkLayerDrawLooper::LayerInfo& layer_info() const { return layer_info_; }
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   DrawLooperLayerInfo();

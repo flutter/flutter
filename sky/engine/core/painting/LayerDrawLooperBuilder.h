@@ -12,7 +12,7 @@
 #include "third_party/skia/include/effects/SkLayerDrawLooper.h"
 
 namespace blink {
-
+class DartLibraryNatives;
 class DrawLooper;
 class DrawLooperLayerInfo;
 
@@ -27,6 +27,8 @@ class LayerDrawLooperBuilder : public RefCounted<LayerDrawLooperBuilder>,
 
   PassRefPtr<DrawLooper> build();
   void addLayerOnTop(DrawLooperLayerInfo* layer_info, const Paint& paint);
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
   LayerDrawLooperBuilder();
