@@ -5,104 +5,67 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../application_package.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
-import '../device.dart';
-import '../runner/flutter_command.dart';
-import 'build.dart';
+import 'start.dart';
 
-class ListenCommand extends FlutterCommand {
+class ListenCommand extends StartCommandBase {
   final String name = 'listen';
-  final String description = 'Listen for changes to files and reload the running app on all connected devices.';
-  List<String> watchCommand;
+  final String description = 'Listen for changes to files and reload the running app on all connected devices. (Android only.)'
+      'By default, only listens to "./" and "./lib/". To listen to additional directories, list them on the command line.';
 
   /// Only run once.  Used for testing.
-  bool singleRun;
+  final bool singleRun;
 
-  ListenCommand({ this.singleRun: false }) {
-    argParser.addFlag('checked',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Toggle Dart\'s checked mode.');
-    argParser.addOption('target',
-        defaultsTo: '.',
-        abbr: 't',
-        help: 'Target app path or filename to start.');
-  }
-
-  static const String _remoteFlutterBundle = 'Documents/app.flx';
+  ListenCommand({ this.singleRun: false });
 
   @override
   Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
     await downloadToolchain();
 
-    if (argResults.rest.length > 0) {
-      watchCommand = _initWatchCommand(argResults.rest);
-    } else {
-      watchCommand = _initWatchCommand(['.']);
-    }
+    List<String> watchCommand = _constructWatchCommand(() sync* {
+      yield* argResults.rest;
+      yield '.';
+      yield 'lib';
+    }());
 
-    while (true) {
+    int result = 0;
+    bool firstTime = true;
+    do {
       logging.info('Updating running Flutter apps...');
-
-      BuildCommand builder = new BuildCommand();
-      builder.inheritFromParent(this);
-      await builder.buildInTempDir(
-        onBundleAvailable: (String localBundlePath) {
-          for (Device device in devices.all) {
-            ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-            if (package == null || !device.isConnected())
-              continue;
-            if (device is AndroidDevice) {
-              device.startBundle(package, localBundlePath, poke: true, checked: argResults['checked']);
-            } else if (device is IOSDevice) {
-              device.pushFile(package, localBundlePath, _remoteFlutterBundle);
-            } else if (device is IOSSimulator) {
-              // TODO(abarth): Move pushFile up to Device once Android supports
-              // pushing new bundles.
-              device.pushFile(package, localBundlePath, _remoteFlutterBundle);
-            } else {
-              assert(false);
-            }
-          }
-        }
-      );
-
-      if (singleRun || !watchDirectory())
-        break;
-    }
-
+      result = await startApp(install: firstTime, stop: true);
+      firstTime = false;
+    } while (!singleRun && result == 0 && _watchDirectory(watchCommand));
     return 0;
   }
 
-  List<String> _initWatchCommand(List<String> directories) {
+  List<String> _constructWatchCommand(Iterable<String> directories) {
     if (Platform.isMacOS) {
       try {
-        runCheckedSync(['which', 'fswatch']);
+        runCheckedSync(<String>['which', 'fswatch']);
       } catch (e) {
         logging.severe('"listen" command is only useful if you have installed '
             'fswatch on Mac.  Run "brew install fswatch" to install it with '
             'homebrew.');
         return null;
       }
-      return ['fswatch', '-r', '-v', '-1']..addAll(directories);
+      return <String>['fswatch', '-r', '-v', '-1']..addAll(directories);
     } else if (Platform.isLinux) {
       try {
-        runCheckedSync(['which', 'inotifywait']);
+        runCheckedSync(<String>['which', 'inotifywait']);
       } catch (e) {
         logging.severe('"listen" command is only useful if you have installed '
             'inotifywait on Linux.  Run "apt-get install inotify-tools" or '
             'equivalent to install it.');
         return null;
       }
-      return [
+      return <String>[
         'inotifywait',
         '-r',
         '-e',
         // Only listen for events that matter, to avoid triggering constantly
-        // from the editor watching files
+        // from the editor watching files.
         'modify,close_write,move,create,delete',
       ]..addAll(directories);
     } else {
@@ -111,17 +74,15 @@ class ListenCommand extends FlutterCommand {
     return null;
   }
 
-  bool watchDirectory() {
-    if (watchCommand == null)
-      return false;
-
+  bool _watchDirectory(List<String> watchCommand) {
+    logging.info('Attempting to listen to these directories: ${watchCommand.join(", ")}');
+    assert(watchCommand != null);
     try {
       runCheckedSync(watchCommand);
     } catch (e) {
       logging.warning('Watching directories failed.', e);
       return false;
     }
-
     return true;
   }
 }

@@ -15,14 +15,10 @@ import 'build.dart';
 import 'install.dart';
 import 'stop.dart';
 
-class StartCommand extends FlutterCommand {
-  final String name = 'start';
-  final String description = 'Start your Flutter app on attached devices.';
+// We don't yet support iOS here. https://github.com/flutter/flutter/issues/1036
 
-  StartCommand() {
-    argParser.addFlag('poke',
-        negatable: false,
-        help: 'Restart the connection to the server (Android only).');
+abstract class StartCommandBase extends FlutterCommand {
+  StartCommandBase() {
     argParser.addFlag('checked',
         negatable: true,
         defaultsTo: true,
@@ -35,9 +31,8 @@ class StartCommand extends FlutterCommand {
         defaultsTo: '',
         abbr: 't',
         help: 'Target app path or filename to start.');
-    argParser.addOption('route', help: 'Which route to load when starting the app.');
-    argParser.addFlag('boot',
-        help: 'Boot the iOS Simulator if it isn\'t already running.');
+    argParser.addOption('route',
+        help: 'Which route to load when starting the app.');
   }
 
   /// Given the value of the --target option, return the path of the Dart file
@@ -51,29 +46,29 @@ class StartCommand extends FlutterCommand {
     }
   }
 
-  @override
-  Future<int> runInProject() async {
-    logging.fine('downloading toolchain');
+  Future<int> startApp({ bool stop: true, bool install: true, bool poke: false }) async {
 
-    await Future.wait([
-      downloadToolchain(),
-      downloadApplicationPackagesAndConnectToDevices(),
-    ]);
+    String mainPath = findMainDartFile(argResults['target']);
+    if (!FileSystemEntity.isFileSync(mainPath)) {
+      String message = 'Tried to run $mainPath, but that file does not exist.';
+      if (!argResults.wasParsed('target'))
+        message += '\nConsider using the -t option to specify that Dart file to start.';
+      logging.severe(message);
+      return 1;
+    }
 
-    bool poke = argResults['poke'];
-    if (!poke) {
-      logging.fine('running stop command');
-
+    if (stop) {
+      logging.fine('Running stop command.');
       StopCommand stopper = new StopCommand();
       stopper.inheritFromParent(this);
       stopper.stop();
-
-      logging.fine('running install command');
-
-      // Only install if the user did not specify a poke
+    }
+ 
+    if (install) {
+      logging.fine('Running install command.');
       InstallCommand installer = new InstallCommand();
       installer.inheritFromParent(this);
-      installer.install(boot: argResults['boot']);
+      installer.install();
     }
 
     bool startedSomething = false;
@@ -83,39 +78,22 @@ class StartCommand extends FlutterCommand {
       if (package == null || !device.isConnected())
         continue;
 
-      if (device is AndroidDevice) {
-        String mainPath = findMainDartFile(argResults['target']);
-        if (!FileSystemEntity.isFileSync(mainPath)) {
-          String message = 'Tried to run $mainPath, but that file does not exist.';
-          if (!argResults.wasParsed('target'))
-            message += '\nConsider using the -t option to specify that Dart file to start.';
-          stderr.writeln(message);
-          continue;
+      logging.fine('Running build command for $device.');
+      BuildCommand builder = new BuildCommand();
+      builder.inheritFromParent(this);
+      await builder.buildInTempDir(
+        mainPath: mainPath,
+        onBundleAvailable: (String localBundlePath) {
+          logging.fine('Starting bundle for $device.');
+          final AndroidDevice androidDevice = device; // https://github.com/flutter/flutter/issues/1035
+          if (androidDevice.startBundle(package, localBundlePath,
+                                        poke: poke,
+                                        checked: argResults['checked'],
+                                        traceStartup: argResults['trace-startup'],
+                                        route: argResults['route']))
+            startedSomething = true;
         }
-
-        logging.fine('running build command for $device');
-
-        BuildCommand builder = new BuildCommand();
-        builder.inheritFromParent(this);
-        await builder.buildInTempDir(
-          mainPath: mainPath,
-          onBundleAvailable: (String localBundlePath) {
-            logging.fine('running start bundle for $device');
-
-            if (device.startBundle(package, localBundlePath,
-                                   poke: poke,
-                                   checked: argResults['checked'],
-                                   traceStartup: argResults['trace-startup'],
-                                   route: argResults['route']))
-              startedSomething = true;
-          }
-        );
-      } else {
-        logging.fine('running start command for $device');
-
-        if (await device.startApp(package))
-          startedSomething = true;
-      }
+      );
     }
 
     if (!startedSomething) {
@@ -126,8 +104,35 @@ class StartCommand extends FlutterCommand {
       }
     }
 
-    logging.fine('finished start command');
-
     return startedSomething ? 0 : 2;
+  }
+}
+
+class StartCommand extends StartCommandBase {
+  final String name = 'start';
+  final String description = 'Start your Flutter app on attached devices. (Android only.)';
+
+  StartCommand() {
+    argParser.addFlag('poke',
+        negatable: false,
+        help: 'Restart the connection to the server.');
+  }
+
+  @override
+  Future<int> runInProject() async {
+    logging.fine('Downloading toolchain.');
+
+    await Future.wait([
+      downloadToolchain(),
+      downloadApplicationPackagesAndConnectToDevices(),
+    ]);
+
+    bool poke = argResults['poke'];
+
+    // Only stop and reinstall if the user did not specify a poke
+    int result = await startApp(stop: !poke, install: !poke, poke: poke);
+
+    logging.fine('Finished start command.');
+    return result;
   }
 }

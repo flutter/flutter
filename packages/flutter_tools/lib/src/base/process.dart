@@ -62,12 +62,14 @@ Future<Process> runDetached(List<String> cmd) {
 
 /// Run cmd and return stdout.
 /// Throws an error if cmd exits with a non-zero value.
-String runCheckedSync(List<String> cmd, { String workingDirectory }) =>
-    _runWithLoggingSync(cmd, workingDirectory: workingDirectory, checked: true);
+String runCheckedSync(List<String> cmd, { String workingDirectory }) {
+  return _runWithLoggingSync(cmd, workingDirectory: workingDirectory, checked: true);
+}
 
 /// Run cmd and return stdout.
-String runSync(List<String> cmd, { String workingDirectory }) =>
-    _runWithLoggingSync(cmd, workingDirectory: workingDirectory);
+String runSync(List<String> cmd, { String workingDirectory }) {
+  return _runWithLoggingSync(cmd, workingDirectory: workingDirectory);
+}
 
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`
 /// ==> `pub.bat`.
