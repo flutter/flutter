@@ -23,7 +23,6 @@
 
 #include "sky/engine/platform/fonts/Font.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/platform/LayoutUnit.h"
 #include "sky/engine/platform/fonts/Character.h"
 #include "sky/engine/platform/fonts/FontCache.h"
@@ -143,7 +142,6 @@ void Font::drawText(GraphicsContext* context, const TextRunPaintInfo& runInfo,
         return;
 
     if (runInfo.cachedTextBlob && runInfo.cachedTextBlob->get()) {
-        ASSERT(RuntimeEnabledFeatures::textBlobEnabled());
         // we have a pre-cached blob -- happy joy!
         drawTextBlob(context, runInfo.cachedTextBlob->get(), point.data());
         return;
@@ -157,18 +155,16 @@ void Font::drawText(GraphicsContext* context, const TextRunPaintInfo& runInfo,
         if (glyphBuffer.isEmpty())
             return;
 
-        if (RuntimeEnabledFeatures::textBlobEnabled()) {
-            // Enabling text-blobs forces the blob rendering path even for uncacheable blobs.
-            TextBlobPtr uncacheableTextBlob;
-            TextBlobPtr& textBlob = runInfo.cachedTextBlob ? *runInfo.cachedTextBlob : uncacheableTextBlob;
-            FloatRect blobBounds = runInfo.bounds;
-            blobBounds.moveBy(-point);
+        // Enabling text-blobs forces the blob rendering path even for uncacheable blobs.
+        TextBlobPtr uncacheableTextBlob;
+        TextBlobPtr& textBlob = runInfo.cachedTextBlob ? *runInfo.cachedTextBlob : uncacheableTextBlob;
+        FloatRect blobBounds = runInfo.bounds;
+        blobBounds.moveBy(-point);
 
-            textBlob = buildTextBlob(glyphBuffer, initialAdvance, blobBounds);
-            if (textBlob) {
-                drawTextBlob(context, textBlob.get(), point.data());
-                return;
-            }
+        textBlob = buildTextBlob(glyphBuffer, initialAdvance, blobBounds);
+        if (textBlob) {
+            drawTextBlob(context, textBlob.get(), point.data());
+            return;
         }
 
         drawGlyphBuffer(context, runInfo, glyphBuffer, FloatPoint(point.x() + initialAdvance, point.y()));

@@ -66,6 +66,5 @@ source_set("platform_headers") {
 source_set("web_headers") {
   public = [
     "web/Sky.h",
-    "web/WebRuntimeFeatures.h",
   ]
 }

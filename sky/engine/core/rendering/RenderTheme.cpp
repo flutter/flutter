@@ -21,7 +21,6 @@
 
 #include "sky/engine/core/rendering/RenderTheme.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"

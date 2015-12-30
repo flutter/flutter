@@ -19,14 +19,10 @@ class Shell {
  public:
   ~Shell();
 
-  struct Settings {
-    bool enable_dart_checked_mode = false;
-  };
-
   // Init the shell to stand alone from MojoShell.
   static void InitStandalone();
   // Init the shell to run inside MojoShell.
-  static void Init(const Settings& settings);
+  static void Init();
 
   static Shell& Shared();
 
@@ -42,11 +38,10 @@ class Shell {
     return io_task_runner_.get();
   }
 
-  const Settings& settings() { return settings_; }
   TracingController& tracing_controller();
 
  private:
-  explicit Shell(const Settings& settings);
+  Shell();
 
   void InitGPU(const base::Thread::Options& options);
   void InitUI(const base::Thread::Options& options);
@@ -59,7 +54,6 @@ class Shell {
   scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner_;
   scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
 
-  Settings settings_;
   TracingController tracing_controller_;
 
   DISALLOW_COPY_AND_ASSIGN(Shell);

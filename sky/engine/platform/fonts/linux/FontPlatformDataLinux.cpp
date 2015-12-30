@@ -30,7 +30,6 @@
 
 #include "sky/engine/public/platform/Platform.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/platform/LayoutTestSupport.h"
 #include "sky/engine/platform/fonts/FontPlatformData.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -82,9 +81,8 @@ void FontPlatformData::setupPaint(SkPaint* paint, GraphicsContext* context)
         paint->setLCDRenderText(m_style.useSubpixelRendering);
 
     // Do not enable subpixel text on low-dpi if full hinting is requested.
-    bool useSubpixelText = RuntimeEnabledFeatures::subpixelFontScalingEnabled()
-        && (paint->getHinting() != SkPaint::kFull_Hinting
-            || (context && context->deviceScaleFactor() > 1.0f));
+    bool useSubpixelText = paint->getHinting() != SkPaint::kFull_Hinting
+        || (context && context->deviceScaleFactor() > 1.0f);
 
     // TestRunner specifically toggles the subpixel positioning flag.
     if (useSubpixelText && !LayoutTestSupport::isRunningLayoutTest())

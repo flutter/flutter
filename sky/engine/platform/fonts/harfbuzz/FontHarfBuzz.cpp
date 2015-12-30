@@ -30,7 +30,6 @@
 
 #include "sky/engine/platform/fonts/Font.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/platform/fonts/FontPlatformFeatures.h"
 #include "sky/engine/platform/fonts/GlyphBuffer.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
@@ -206,8 +205,6 @@ void Font::drawGlyphs(GraphicsContext* gc, const SimpleFontData* font,
 
 void Font::drawTextBlob(GraphicsContext* gc, const SkTextBlob* blob, const SkPoint& origin) const
 {
-    ASSERT(RuntimeEnabledFeatures::textBlobEnabled());
-
     // FIXME: It would be good to move this to Font.cpp, if we're sure that none
     // of the things in FontMac's setupPaint need to apply here.
     // See also paintGlyphs.
@@ -316,8 +313,6 @@ bool buildTextBlobInternal(const GlyphBuffer& glyphBuffer, SkScalar initialAdvan
 
 PassTextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initialAdvance, const FloatRect& bounds) const
 {
-    ASSERT(RuntimeEnabledFeatures::textBlobEnabled());
-
     SkTextBlobBuilder builder;
     SkScalar advance = SkFloatToScalar(initialAdvance);
 

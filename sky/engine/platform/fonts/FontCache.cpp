@@ -29,7 +29,6 @@
 
 #include "sky/engine/platform/fonts/FontCache.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/platform/fonts/AlternateFontFamily.h"
 #include "sky/engine/platform/fonts/FontCacheClient.h"
 #include "sky/engine/platform/fonts/FontCacheKey.h"

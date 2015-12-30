@@ -23,7 +23,6 @@
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 
 #include <algorithm>
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/RenderTheme.h"
 #include "sky/engine/core/rendering/style/AppliedTextDecoration.h"
 #include "sky/engine/core/rendering/style/DataEquivalency.h"

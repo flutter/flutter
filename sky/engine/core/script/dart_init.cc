@@ -12,7 +12,6 @@
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
 #include "sky/engine/bindings/dart_mojo_internal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
@@ -20,6 +19,7 @@
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
 #include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/public/platform/sky_settings.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_dependency_catcher.h"
@@ -122,7 +122,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       DartUI::InitForIsolate();
       DartMojoInternal::InitForIsolate();
       DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate);
-      if (RuntimeEnabledFeatures::observatoryEnabled()) {
+      if (SkySettings::Get().enable_observatory) {
         std::string ip = "127.0.0.1";
         const intptr_t port = 8181;
         const bool service_isolate_booted = DartServiceIsolate::Startup(
@@ -268,7 +268,7 @@ void InitDartVM() {
   DartMojoInternal::SetHandleWatcherProducerHandle(
       mojo::dart::HandleWatcher::Start());
 
-  bool enable_checked_mode = RuntimeEnabledFeatures::dartCheckedModeEnabled();
+  bool enable_checked_mode = SkySettings::Get().enable_dart_checked_mode;
 #if ENABLE(DART_STRICT)
   enable_checked_mode = true;
 #endif

@@ -29,7 +29,6 @@
 
 #include "sky/engine/platform/fonts/FontDescription.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/wtf/text/AtomicStringHash.h"
 #include "sky/engine/wtf/text/StringHash.h"
 
@@ -132,9 +131,7 @@ void FontDescription::setVariantLigatures(const VariantLigatures& ligatures)
 
 float FontDescription::effectiveFontSize() const
 {
-    float size = (RuntimeEnabledFeatures::subpixelFontScalingEnabled())
-        ? computedSize()
-        : computedPixelSize();
+    float size = computedSize();
 
     // Ensure that the effective precision matches the font-cache precision.
     // This guarantees that the same precision is used regardless of cache status.

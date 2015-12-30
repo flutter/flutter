@@ -15,6 +15,7 @@
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/message_pump/message_pump_mojo.h"
+#include "sky/engine/public/platform/sky_settings.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/ui/engine.h"
 
@@ -51,7 +52,7 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 
 }  // namespace
 
-Shell::Shell(const Settings& settings) : settings_(settings) {
+Shell::Shell() {
   DCHECK(!g_shell);
 
   base::Thread::Options options;
@@ -79,19 +80,23 @@ void Shell::InitStandalone() {
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  Settings settings;
+  blink::SkySettings settings;
+  settings.enable_observatory =
+      !command_line.HasSwitch(switches::kNonInteractive);
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
-  Init(settings);
-  if (command_line.HasSwitch(switches::kTraceStartup)) {
+  blink::SkySettings::Set(settings);
+
+  Init();
+
+  if (command_line.HasSwitch(switches::kTraceStartup))
     Shared().tracing_controller().StartTracing();
-  }
 }
 
-void Shell::Init(const Settings& settings) {
+void Shell::Init() {
   base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
   DCHECK(!g_shell);
-  g_shell = new Shell(settings);
+  g_shell = new Shell();
   g_shell->ui_task_runner()->PostTask(FROM_HERE, base::Bind(&Engine::Init));
 }
 

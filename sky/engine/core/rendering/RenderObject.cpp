@@ -27,7 +27,6 @@
 #include "sky/engine/core/rendering/RenderObject.h"
 
 #include <algorithm>
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderFlexibleBox.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
