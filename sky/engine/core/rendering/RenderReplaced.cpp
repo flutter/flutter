@@ -23,7 +23,6 @@
 
 #include "sky/engine/core/rendering/RenderReplaced.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
@@ -203,11 +202,8 @@ LayoutRect RenderReplaced::replacedContentRect(const LayoutSize* overriddenIntri
     LayoutRect contentRect = contentBoxRect();
     ObjectFit objectFit = style()->objectFit();
 
-    if (objectFit == ObjectFitFill && style()->objectPosition() == RenderStyle::initialObjectPosition()) {
-        if (RuntimeEnabledFeatures::objectFitPositionEnabled())
-            return contentRect;
+    if (objectFit == ObjectFitFill && style()->objectPosition() == RenderStyle::initialObjectPosition())
         objectFit = ObjectFitContain;
-    }
 
     LayoutSize intrinsicSize = overriddenIntrinsicSize ? *overriddenIntrinsicSize : this->intrinsicSize();
     if (!intrinsicSize.width() || !intrinsicSize.height())

@@ -4,7 +4,6 @@
 
 #include "sky/shell/testing/testing.h"
 
-#include "sky/engine/public/web/WebRuntimeFeatures.h"
 #include "base/command_line.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/testing/test_runner.h"
@@ -14,8 +13,6 @@ namespace shell {
 
 bool InitForTesting() {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-  blink::WebRuntimeFeatures::enableObservatory(
-      !command_line.HasSwitch(switches::kNonInteractive));
 
   TestRunner::TestDescriptor test;
   test.package_root = command_line.GetSwitchValueASCII(switches::kPackageRoot);

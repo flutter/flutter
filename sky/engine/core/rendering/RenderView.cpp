@@ -20,7 +20,6 @@
 
 #include "sky/engine/core/rendering/RenderView.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/RenderGeometryMap.h"
 #include "sky/engine/core/rendering/RenderLayer.h"

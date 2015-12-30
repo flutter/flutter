@@ -14,6 +14,7 @@
 #include "mojo/public/cpp/application/application_impl.h"
 #include "mojo/public/cpp/application/interface_factory_impl.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
+#include "sky/engine/public/platform/sky_settings.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/platform/mojo/content_handler_impl.h"
 
@@ -38,10 +39,12 @@ class MojoApp : public mojo::ApplicationDelegate,
     mojo::icu::Initialize(app);
     tracing_.Initialize(app);
 
-    Shell::Settings settings;
+    blink::SkySettings settings;
+    settings.enable_observatory = true;
     settings.enable_dart_checked_mode = app->HasArg(kEnableCheckedMode);
+    blink::SkySettings::Set(settings);
 
-    Shell::Init(settings);
+    Shell::Init();
   }
 
   bool ConfigureIncomingConnection(

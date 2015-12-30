@@ -3,47 +3,10 @@
 # found in the LICENSE file.
 
 import("//build/config/ui.gni")
-import("//sky/engine/build/scripts/scripts.gni")
 import("//sky/engine/config.gni")
 import("//testing/test.gni")
 
-# Most targets in this file are private actions so use that as the default.
-visibility = [ ":*" ]
-
-sky_platform_output_dir = "$root_gen_dir/sky/platform"
-
-action("runtime_enabled_features") {
-  script = "../build/scripts/make_runtime_features.py"
-
-  runtime_enabled_features_in = "RuntimeEnabledFeatures.in"
-  inputs = scripts_for_in_files + [
-             runtime_enabled_features_in,
-             "../build/scripts/templates/RuntimeEnabledFeatures.cpp.tmpl",
-             "../build/scripts/templates/RuntimeEnabledFeatures.h.tmpl",
-           ]
-
-  outputs = [
-    "$sky_platform_output_dir/RuntimeEnabledFeatures.cpp",
-    "$sky_platform_output_dir/RuntimeEnabledFeatures.h",
-  ]
-
-  args = [
-    rebase_path(runtime_enabled_features_in, root_build_dir),
-    "--output_dir",
-    rebase_path(sky_platform_output_dir, root_build_dir),
-  ]
-}
-
-group("make_platform_generated") {
-  visibility += [ ":*" ]
-  deps = [
-    ":runtime_enabled_features",
-  ]
-}
-
 source_set("platform") {
-  visibility += [ "//sky/*" ]
-
   sources = [
     "CalculationValue.h",
     "Decimal.cpp",
@@ -92,6 +55,7 @@ source_set("platform") {
     "animation/UnitBezier.h",
     "exported/Platform.cpp",
     "exported/ServiceProvider.cpp",
+    "exported/sky_settings.cc",
     "exported/WebArrayBuffer.cpp",
     "exported/WebCString.cpp",
     "exported/WebCommon.cpp",
@@ -433,9 +397,6 @@ source_set("platform") {
     sources += [ "fonts/apple/FontPlatformDataApple.cpp" ]
   }
 
-  # Add in the generated files.
-  sources += get_target_outputs(":runtime_enabled_features")
-
   configs += [
     "//sky/engine:config",
     "//sky/engine:non_test_config",
@@ -449,7 +410,6 @@ source_set("platform") {
   include_dirs = [ "$root_build_dir" ]
 
   deps = [
-    ":make_platform_generated",
     "//base:base",
     "//mojo/application",
     "//mojo/data_pipe_utils",
@@ -497,7 +457,6 @@ source_set("platform") {
 }
 
 test("platform_unittests") {
-  visibility += [ "//sky/*" ]
   output_name = "sky_platform_unittests"
 
   sources = [

@@ -22,7 +22,6 @@
 
 #include "sky/engine/core/rendering/InlineTextBox.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/editing/CompositionUnderline.h"
 #include "sky/engine/core/editing/CompositionUnderlineRangeFilter.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
@@ -397,9 +396,7 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     // subpixel boundaries on the x-axis and thus there is no reason to
     // snap the x value. We still round the y-axis to ensure consistent
     // line heights.
-    LayoutPoint adjustedPaintOffset = RuntimeEnabledFeatures::subpixelFontScalingEnabled()
-        ? LayoutPoint(paintOffset.x(), paintOffset.y().round())
-        : roundedIntPoint(paintOffset);
+    LayoutPoint adjustedPaintOffset = LayoutPoint(paintOffset.x(), paintOffset.y().round());
 
     if (logicalStart >= paintEnd || logicalStart + logicalExtent <= paintStart)
         return;
@@ -490,13 +487,13 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
     // FIXME: This cache should probably ultimately be held somewhere else.
     // A hashmap is convenient to avoid a memory hit when the
     // RuntimeEnabledFeature is off.
-    bool textBlobIsCacheable = RuntimeEnabledFeatures::textBlobEnabled() && startOffset == 0 && endOffset == length;
+    bool textBlobIsCacheable = startOffset == 0 && endOffset == length;
     TextBlobPtr* cachedTextBlob = textBlobIsCacheable ? &m_cachedTextBlob : nullptr;
     paintTextWithEmphasisMark(context, font, textStyle, textRun, emphasisMark, emphasisMarkOffset, startOffset, endOffset, length, textOrigin, boxRect, cachedTextBlob);
 
     if (paintSelectedTextSeparately && sPos < ePos) {
         // paint only the text that is selected
-        bool textBlobIsCacheable = RuntimeEnabledFeatures::textBlobEnabled() && sPos == 0 && ePos == length;
+        bool textBlobIsCacheable = sPos == 0 && ePos == length;
         TextBlobPtr* cachedTextBlob = textBlobIsCacheable ? &m_cachedTextBlob : nullptr;
         paintTextWithEmphasisMark(context, font, selectionStyle, textRun, emphasisMark, emphasisMarkOffset, sPos, ePos, length, textOrigin, boxRect, cachedTextBlob);
     }

@@ -43,7 +43,6 @@
 
 #include "sky/engine/core/rendering/RenderLayer.h"
 
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/HitTestResult.h"
 #include "sky/engine/core/rendering/HitTestingTransformState.h"

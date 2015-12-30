@@ -17,6 +17,5 @@ source_set("web") {
 
   sources = [
     "Sky.cpp",
-    "WebRuntimeFeatures.cpp",
   ]
 }

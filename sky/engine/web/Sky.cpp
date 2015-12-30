@@ -32,7 +32,6 @@
 
 #include "base/message_loop/message_loop.h"
 #include "base/rand_util.h"
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/Init.h"

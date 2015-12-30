@@ -34,7 +34,6 @@
 #include <unicode/normlzr.h>
 #include <unicode/uchar.h>
 #include <unicode/uscript.h>
-#include "gen/sky/platform/RuntimeEnabledFeatures.h"
 #include "hb.h"
 #include "sky/engine/platform/LayoutUnit.h"
 #include "sky/engine/platform/fonts/Character.h"
@@ -559,9 +558,6 @@ bool HarfBuzzShaper::shape(GlyphBuffer* glyphBuffer)
     m_totalWidth = 0;
     if (!shapeHarfBuzzRuns())
         return false;
-
-    if (!RuntimeEnabledFeatures::subpixelFontScalingEnabled())
-        m_totalWidth = roundf(m_totalWidth);
 
     if (m_harfBuzzRuns.last()->hasGlyphToCharacterIndexes()
         && glyphBuffer && !fillGlyphBuffer(glyphBuffer))
