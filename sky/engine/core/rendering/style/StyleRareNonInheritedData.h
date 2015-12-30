@@ -25,13 +25,13 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLERARENONINHERITEDDATA_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_STYLERARENONINHERITEDDATA_H_
 
-#include "sky/engine/core/css/StyleColor.h"
 #include "sky/engine/core/rendering/ClipPathOperation.h"
 #include "sky/engine/core/rendering/style/CounterDirectives.h"
 #include "sky/engine/core/rendering/style/DataRef.h"
 #include "sky/engine/core/rendering/style/FillLayer.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
 #include "sky/engine/core/rendering/style/ShapeValue.h"
+#include "sky/engine/core/rendering/style/StyleColor.h"
 #include "sky/engine/platform/LengthPoint.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassRefPtr.h"

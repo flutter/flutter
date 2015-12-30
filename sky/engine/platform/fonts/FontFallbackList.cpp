@@ -28,7 +28,6 @@
 
 #include "sky/engine/platform/fonts/FontFallbackList.h"
 
-#include "gen/sky/platform/FontFamilyNames.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/fonts/FontDescription.h"
 #include "sky/engine/platform/fonts/FontFamily.h"
@@ -203,15 +202,6 @@ PassRefPtr<FontData> FontFallbackList::getFontData(const FontDescription& fontDe
 
     if (result || startIndex)
         return result.release();
-
-    // If it's the primary font that we couldn't find, we try the following. In all other cases, we will
-    // just use per-character system fallback.
-
-    if (m_fontSelector) {
-        // Try the user's preferred standard font.
-        if (RefPtr<FontData> data = m_fontSelector->getFontData(fontDescription, FontFamilyNames::webkit_standard))
-            return data.release();
-    }
 
     // Still no result. Hand back our last resort fallback font.
     return FontCache::fontCache()->getLastResortFallbackFont(fontDescription);

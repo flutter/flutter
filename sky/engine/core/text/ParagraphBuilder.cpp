@@ -4,11 +4,11 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
-#include "sky/engine/core/css/FontSize.h"
 #include "sky/engine/core/rendering/RenderInline.h"
 #include "sky/engine/core/rendering/RenderParagraph.h"
 #include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "sky/engine/platform/text/LocaleToScriptMapping.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -26,6 +26,34 @@ RenderParagraph* createRenderParagraph(RenderStyle* parentStyle)
     RenderParagraph* renderParagraph = new RenderParagraph();
     renderParagraph->setStyle(style.release());
     return renderParagraph;
+}
+
+float getComputedSizeFromSpecifiedSize(float specifiedSize)
+{
+    if (specifiedSize < std::numeric_limits<float>::epsilon())
+        return 0.0f;
+    return specifiedSize;
+}
+
+void createFontForDocument(RenderStyle* style)
+{
+    FontDescription fontDescription = FontDescription();
+    fontDescription.setScript(localeToScriptCodeForFontSelection(style->locale()));
+
+    // Using 14px default to match Material Design English Body1:
+    // http://www.google.com/design/spec/style/typography.html#typography-typeface
+    const float defaultFontSize = 14.0;
+
+    fontDescription.setSpecifiedSize(defaultFontSize);
+    fontDescription.setComputedSize(defaultFontSize);
+
+    FontOrientation fontOrientation = Horizontal;
+    NonCJKGlyphOrientation glyphOrientation = NonCJKGlyphOrientationVerticalRight;
+
+    fontDescription.setOrientation(fontOrientation);
+    fontDescription.setNonCJKGlyphOrientation(glyphOrientation);
+    style->setFontDescription(fontDescription);
+    style->font().update(nullptr);
 }
 
 Color getColorFromARGB(int argb) {
@@ -94,7 +122,6 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
 
 ParagraphBuilder::ParagraphBuilder()
 {
-    m_fontSelector = CSSFontSelector::create();
     createRenderView();
     m_renderParagraph = createRenderParagraph(m_renderView->style());
     m_currentRenderObject = m_renderParagraph;
@@ -145,14 +172,14 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
       if (mask & kFontSizeMask) {
         fontDescription.setSpecifiedSize(fontSize);
         fontDescription.setIsAbsoluteSize(true);
-        fontDescription.setComputedSize(FontSize::getComputedSizeFromSpecifiedSize(true, fontSize));
+        fontDescription.setComputedSize(getComputedSizeFromSpecifiedSize(fontSize));
       }
 
       if (mask & kLetterSpacingMask)
         fontDescription.setLetterSpacing(letterSpacing);
 
       style->setFontDescription(fontDescription);
-      style->font().update(m_fontSelector);
+      style->font().update(nullptr);
     }
 
     encoded.Release();
@@ -214,10 +241,7 @@ void ParagraphBuilder::createRenderView()
     style->setRTLOrdering(LogicalOrder);
     style->setZIndex(0);
     style->setUserModify(READ_ONLY);
-
-    FontBuilder fontBuilder;
-    fontBuilder.initForStyleResolve(style.get());
-    fontBuilder.createFontForDocument(m_fontSelector.get(), style.get());
+    createFontForDocument(style.get());
 
     m_renderView = adoptPtr(new RenderView());
     m_renderView->setStyle(style.release());
