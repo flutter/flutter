@@ -173,8 +173,6 @@ component("wtf") {
     "text/AtomicString.cpp",
     "text/AtomicString.h",
     "text/AtomicStringHash.h",
-    "text/Base64.cpp",
-    "text/Base64.h",
     "text/CString.cpp",
     "text/CString.h",
     "text/IntegerToStringConversion.h",

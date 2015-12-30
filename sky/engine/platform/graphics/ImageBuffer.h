@@ -101,7 +101,6 @@ public:
 
     void putByteArray(Multiply, Uint8ClampedArray*, const IntSize& sourceSize, const IntRect& sourceRect, const IntPoint& destPoint);
 
-    String toDataURL(const String& mimeType, const double* quality = 0) const;
     AffineTransform baseTransform() const { return AffineTransform(); }
     void transformColorSpace(ColorSpace srcColorSpace, ColorSpace dstColorSpace);
     WebLayer* platformLayer() const;
@@ -136,8 +135,6 @@ struct ImageDataBuffer {
     IntSize m_size;
     RefPtr<Uint8ClampedArray> m_data;
 };
-
-String PLATFORM_EXPORT ImageDataToDataURL(const ImageDataBuffer&, const String& mimeType, const double* quality);
 
 } // namespace blink
 

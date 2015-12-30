@@ -32,9 +32,6 @@
 
 #include "sky/engine/platform/graphics/ImageBuffer.h"
 
-#include "platform/image-encoders/skia/JPEGImageEncoder.h"
-#include "platform/image-encoders/skia/PNGImageEncoder.h"
-#include "sky/engine/platform/MIMETypeRegistry.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/platform/graphics/BitmapImage.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -48,7 +45,6 @@
 #include "sky/engine/public/platform/WebGraphicsContext3DProvider.h"
 #include "sky/engine/wtf/MathExtras.h"
 #include "sky/engine/wtf/Vector.h"
-#include "sky/engine/wtf/text/Base64.h"
 #include "sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/effects/SkTableColorFilter.h"
@@ -305,53 +301,6 @@ void ImageBuffer::putByteArray(Multiply multiplied, Uint8ClampedArray* source, c
     m_surface->willAccessPixels();
 
     context()->writePixels(info, srcAddr, srcBytesPerRow, destX, destY);
-}
-
-template <typename T>
-static bool encodeImage(T& source, const String& mimeType, const double* quality, Vector<char>* output)
-{
-    Vector<unsigned char>* encodedImage = reinterpret_cast<Vector<unsigned char>*>(output);
-
-    if (mimeType == "image/jpeg") {
-        int compressionQuality = JPEGImageEncoder::DefaultCompressionQuality;
-        if (quality && *quality >= 0.0 && *quality <= 1.0)
-            compressionQuality = static_cast<int>(*quality * 100 + 0.5);
-        if (!JPEGImageEncoder::encode(source, compressionQuality, encodedImage))
-            return false;
-    } else {
-        if (!PNGImageEncoder::encode(source, encodedImage))
-            return false;
-        ASSERT(mimeType == "image/png");
-    }
-
-    return true;
-}
-
-String ImageBuffer::toDataURL(const String& mimeType, const double* quality) const
-{
-    ASSERT(MIMETypeRegistry::isSupportedImageMIMETypeForEncoding(mimeType));
-
-    Vector<char> encodedImage;
-    if (!isSurfaceValid() || !encodeImage(m_surface->bitmap(), mimeType, quality, &encodedImage))
-        return "data:,";
-    Vector<char> base64Data;
-    base64Encode(encodedImage, base64Data);
-
-    return "data:" + mimeType + ";base64," + base64Data;
-}
-
-String ImageDataToDataURL(const ImageDataBuffer& imageData, const String& mimeType, const double* quality)
-{
-    ASSERT(MIMETypeRegistry::isSupportedImageMIMETypeForEncoding(mimeType));
-
-    Vector<char> encodedImage;
-    if (!encodeImage(imageData, mimeType, quality, &encodedImage))
-        return "data:,";
-
-    Vector<char> base64Data;
-    base64Encode(encodedImage, base64Data);
-
-    return "data:" + mimeType + ";base64," + base64Data;
 }
 
 } // namespace blink
