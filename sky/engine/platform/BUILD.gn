@@ -12,24 +12,6 @@ visibility = [ ":*" ]
 
 sky_platform_output_dir = "$root_gen_dir/sky/platform"
 
-action("font_family_names") {
-  script = "../build/scripts/make_names.py"
-
-  font_family_names_in = "fonts/FontFamilyNames.in"
-  inputs = make_names_files + [ font_family_names_in ]
-
-  outputs = [
-    "$sky_platform_output_dir/FontFamilyNames.cpp",
-    "$sky_platform_output_dir/FontFamilyNames.h",
-  ]
-
-  args = [
-    rebase_path(font_family_names_in, root_build_dir),
-    "--output_dir",
-    rebase_path(sky_platform_output_dir, root_build_dir),
-  ]
-}
-
 action("runtime_enabled_features") {
   script = "../build/scripts/make_runtime_features.py"
 
@@ -55,7 +37,6 @@ action("runtime_enabled_features") {
 group("make_platform_generated") {
   visibility += [ ":*" ]
   deps = [
-    ":font_family_names",
     ":runtime_enabled_features",
   ]
 }
@@ -179,8 +160,6 @@ source_set("platform") {
     "fonts/FontSmoothingMode.h",
     "fonts/FontTraits.h",
     "fonts/FontWidthVariant.h",
-    "fonts/GenericFontFamilySettings.cpp",
-    "fonts/GenericFontFamilySettings.h",
     "fonts/Glyph.h",
     "fonts/GlyphBuffer.h",
     "fonts/GlyphMetricsMap.h",
@@ -483,8 +462,7 @@ source_set("platform") {
   }
 
   # Add in the generated files.
-  sources += get_target_outputs(":font_family_names") +
-             get_target_outputs(":runtime_enabled_features")
+  sources += get_target_outputs(":runtime_enabled_features")
 
   configs += [
     "//sky/engine:config",

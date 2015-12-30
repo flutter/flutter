@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_APPLIEDTEXTDECORATION_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_APPLIEDTEXTDECORATION_H_
 
-#include "sky/engine/core/css/StyleColor.h"
 #include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "sky/engine/core/rendering/style/StyleColor.h"
 
 namespace blink {
 

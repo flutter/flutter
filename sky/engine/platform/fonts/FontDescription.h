@@ -25,7 +25,6 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_FONTDESCRIPTION_H_
 #define SKY_ENGINE_PLATFORM_FONTS_FONTDESCRIPTION_H_
 
-#include "gen/sky/platform/FontFamilyNames.h"
 #include "sky/engine/platform/fonts/FixedPitchFontType.h"
 #include "sky/engine/platform/fonts/FontCacheKey.h"
 #include "sky/engine/platform/fonts/FontFamily.h"
@@ -116,13 +115,6 @@ public:
     static FontWeight bolderWeight(FontWeight);
     GenericFamilyType genericFamily() const { return static_cast<GenericFamilyType>(m_genericFamily); }
 
-    // only use fixed default size when there is only one font family, and that family is "monospace"
-    FixedPitchFontType fixedPitchFontType() const
-    {
-        if (genericFamily() == MonospaceFamily && !family().next() && family().family() == FontFamilyNames::webkit_monospace)
-            return FixedPitchFont;
-        return NonFixedPitchFont;
-    }
     Kerning kerning() const { return static_cast<Kerning>(m_kerning); }
     VariantLigatures variantLigatures() const;
     LigaturesState commonLigaturesState() const { return static_cast<LigaturesState>(m_commonLigaturesState); }
