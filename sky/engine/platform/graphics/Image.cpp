@@ -27,7 +27,6 @@
 #include "sky/engine/platform/graphics/Image.h"
 
 #include "sky/engine/platform/Length.h"
-#include "sky/engine/platform/MIMETypeRegistry.h"
 #include "sky/engine/platform/SharedBuffer.h"
 #include "sky/engine/platform/TraceEvent.h"
 #include "sky/engine/platform/geometry/FloatPoint.h"
