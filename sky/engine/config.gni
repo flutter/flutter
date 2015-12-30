@@ -56,12 +56,3 @@ if (sky_dart_strict_mode) {
 if (sky_use_dart) {
   feature_defines_list += [ "WTF_USE_DART=1" ]
 }
-
-# feature_defines_string -------------------------------------------------------
-
-# Convert the list to a space-separated string for passing to scripts.
-# This would be the equivalent of passing '<(feature_defines)' in GYP.
-feature_defines_string =
-    exec_script("build/gn_list_to_space_separated_string.py",
-                feature_defines_list,
-                "trim string")
