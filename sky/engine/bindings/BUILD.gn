@@ -141,36 +141,13 @@ source_set("snapshot_cc") {
   ]
 }
 
-copy("copy_core_dart_files") {
-  sources = core_dart_files
-  outputs = [
-    "$bindings_output_dir/Custom{{source_file_part}}",
+copy("generate_dart_ui") {
+  sources = [
+    "dart_ui.dart",
   ]
-}
-
-action("generate_dart_ui") {
-  sources = core_dart_files
-  script = "$bindings_scripts_dir/compiler.py"
-
-  file_list = "$target_gen_dir/${target_name}_file_list.txt"
-  write_file(file_list, rebase_path(sources, root_build_dir))
-
-  inputs = sources + [ "scripts/templates/dart_blink.template" ]
+  sources += core_dart_files
 
   outputs = [
-    file_list,
-    "$bindings_output_dir/dart_ui.dart",
-  ]
-
-  args = [
-    "--output-directory",
-    rebase_path(bindings_output_dir, root_build_dir),
-    "--generate-dart-blink",
-    rebase_path(bindings_output_dir, root_build_dir),
-    rebase_path(file_list, root_build_dir),
-  ]
-
-  deps = [
-    ":copy_core_dart_files",
+    "$bindings_output_dir/{{source_file_part}}",
   ]
 }
