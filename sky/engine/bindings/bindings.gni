@@ -4,7 +4,6 @@
 
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
 
-bindings_scripts_dir = "//sky/engine/bindings/scripts"
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 
 dart_host_toolchain = host_toolchain

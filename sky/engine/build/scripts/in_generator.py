@@ -78,9 +78,6 @@ class Writer(object):
         for file_name, generator in self._outputs.items():
             self._write_file(output_dir, generator(), file_name)
 
-    def set_gperf_path(self, gperf_path):
-        self.gperf_path = gperf_path
-
 
 class Maker(object):
     def __init__(self, writer_class):
@@ -94,10 +91,8 @@ class Maker(object):
             exit(1)
 
         parser = optparse.OptionParser()
-        parser.add_option("--gperf", default="gperf")
         parser.add_option("--output_dir", default=os.getcwd())
         options, args = parser.parse_args()
 
         writer = self._writer_class(args)
-        writer.set_gperf_path(options.gperf)
         writer.write_files(options.output_dir)
