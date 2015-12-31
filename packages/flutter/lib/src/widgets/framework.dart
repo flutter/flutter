@@ -446,17 +446,50 @@ abstract class _ProxyComponent extends Widget {
   final Widget child;
 }
 
-abstract class ParentDataWidget extends _ProxyComponent {
+abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyComponent {
   const ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
   ParentDataElement createElement() => new ParentDataElement(this);
 
-  /// Subclasses should override this function to ensure that they are placed
-  /// inside widgets that expect them.
+  /// Subclasses should override this function to return true if the given
+  /// ancestor is a RenderObjectWidget that wraps a RenderObject that can handle
+  /// the kind of ParentData widget that the ParentDataWidget subclass handles.
   ///
-  /// The given ancestor is the first RenderObjectWidget ancestor of this widget.
-  void debugValidateAncestor(RenderObjectWidget ancestor);
+  /// The default implementation uses the type argument.
+  bool debugIsValidAncestor(RenderObjectWidget ancestor) {
+    assert(T != dynamic);
+    assert(T != RenderObjectWidget);
+    return ancestor is T;
+  }
+
+  /// Subclasses should override this to describe the requirements for using the
+  /// ParentDataWidget subclass. It is called when debugIsValidAncestor()
+  /// returned false for an ancestor, or when there are extraneous
+  /// ParentDataWidgets in the ancestor chain.
+  String debugDescribeInvalidAncestorChain({ String description, String ownershipChain, bool foundValidAncestor, Iterable<Widget> badAncestors }) {
+    assert(T != dynamic);
+    assert(T != RenderObjectWidget);
+    String result;
+    if (!foundValidAncestor) {
+      result = '$runtimeType widgets must be placed inside $T widgets.\n'
+               '$description has no $T ancestor at all.\n';
+    } else {
+      assert(badAncestors.isNotEmpty);
+      result = '$runtimeType widgets must be placed directly inside $T widgets.\n'
+               '$description has a $T ancestor, but there are other widgets between them:\n';
+      for (Widget ancestor in badAncestors) {
+        if (ancestor.runtimeType == runtimeType) {
+          result += '  $ancestor (this is a different $runtimeType than the one with the problem)\n';
+        } else {
+          result += '  $ancestor\n';
+        }
+      }
+      result += 'These widgets cannot come between a $runtimeType and its $T.\n';
+    }
+    result += 'The ownership chain for the parent of the offending $runtimeType was:\n  $ownershipChain';
+    return result;
+  }
 
   void applyParentData(RenderObject renderObject);
 }
@@ -1286,16 +1319,27 @@ class ParentDataElement extends _ProxyElement<ParentDataWidget> {
 
   void mount(Element parent, dynamic slot) {
     assert(() {
+      List<Widget> badAncestors = <Widget>[];
       Element ancestor = parent;
-      while (ancestor is! RenderObjectElement) {
-        assert(ancestor != null);
-        assert(() {
-          'You cannot nest parent data widgets inside one another.';
-          return ancestor is! ParentDataElement;
-        });
+      while (ancestor != null) {
+        if (ancestor is ParentDataElement) {
+          badAncestors.add(ancestor.widget);
+        } else if (ancestor is RenderObjectElement) {
+          if (widget.debugIsValidAncestor(ancestor.widget))
+            break;
+          badAncestors.add(ancestor.widget);
+        }
         ancestor = ancestor._parent;
       }
-      _widget.debugValidateAncestor(ancestor._widget);
+      if (ancestor != null && badAncestors.isEmpty)
+        return true;
+      debugPrint(widget.debugDescribeInvalidAncestorChain(
+        description: "$this",
+        ownershipChain: parent.debugGetOwnershipChain(10),
+        foundValidAncestor: ancestor != null,
+        badAncestors: badAncestors
+      ));
+      assert('Incorrect use of ParentDataWidget. See console log for details.' == true);
       return true;
     });
     super.mount(parent, slot);

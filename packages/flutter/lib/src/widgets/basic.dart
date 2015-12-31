@@ -432,7 +432,7 @@ class CustomOneChildLayout extends OneChildRenderObjectWidget {
 }
 
 /// Metadata for identifying children in a [CustomMultiChildLayout].
-class LayoutId extends ParentDataWidget {
+class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   LayoutId({
     Key key,
     Widget child,
@@ -444,13 +444,6 @@ class LayoutId extends ParentDataWidget {
 
   /// An object representing the identity of this child.
   final Object id;
-
-  void debugValidateAncestor(Widget ancestor) {
-    assert(() {
-      'LayoutId must placed inside a CustomMultiChildLayout';
-      return ancestor is CustomMultiChildLayout;
-    });
-  }
 
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
@@ -967,11 +960,18 @@ class BlockBody extends MultiChildRenderObjectWidget {
   }
 }
 
+abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
+  StackRenderObjectWidgetBase({
+    List<Widget> children,
+    Key key
+  }) : super(key: key, children: children);
+}
+
 /// Uses the stack layout algorithm for its children.
 ///
 /// For details about the stack layout algorithm, see [RenderStack]. To control
 /// the position of child widgets, see the [Positioned] widget.
-class Stack extends MultiChildRenderObjectWidget {
+class Stack extends StackRenderObjectWidgetBase {
   Stack(List<Widget> children, {
     Key key,
     this.alignment: const FractionalOffset(0.0, 0.0)
@@ -988,7 +988,7 @@ class Stack extends MultiChildRenderObjectWidget {
 }
 
 /// A [Stack] that shows a single child at once.
-class IndexedStack extends MultiChildRenderObjectWidget {
+class IndexedStack extends StackRenderObjectWidgetBase {
   IndexedStack(List<Widget> children, {
     Key key,
     this.alignment: const FractionalOffset(0.0, 0.0),
@@ -1017,7 +1017,7 @@ class IndexedStack extends MultiChildRenderObjectWidget {
 /// This widget must be a descendant of a [Stack], and the path from this widget
 /// to its enclosing [Stack] must contain only components (e.g., not other
 /// kinds of widgets, like [RenderObjectWidget]s).
-class Positioned extends ParentDataWidget {
+class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
   Positioned({
     Key key,
     Widget child,
@@ -1065,13 +1065,6 @@ class Positioned extends ParentDataWidget {
   ///
   /// Ignored if both top and bottom are non-null.
   final double height;
-
-  void debugValidateAncestor(Widget ancestor) {
-    assert(() {
-      'Positioned must placed inside a Stack';
-      return ancestor is Stack;
-    });
-  }
 
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
@@ -1214,7 +1207,7 @@ class Column extends Flex {
 /// path from this widget to its enclosing [Flex], [Row], or [Column] must
 /// contain only components (e.g., not other kinds of widgets, like
 /// [RenderObjectWidget]s).
-class Flexible extends ParentDataWidget {
+class Flexible extends ParentDataWidget<Flex> {
   Flexible({ Key key, this.flex: 1, Widget child })
     : super(key: key, child: child);
 
@@ -1225,13 +1218,6 @@ class Flexible extends ParentDataWidget {
   /// dividing the free space (after placing the inflexible children)
   /// according to the flex factors of the flexible children.
   final int flex;
-
-  void debugValidateAncestor(Widget ancestor) {
-    assert(() {
-      'Flexible must placed inside a Flex';
-      return ancestor is Flex;
-    });
-  }
 
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
