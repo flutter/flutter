@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 import '../artifacts.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
+import '../device.dart';
 
 class InitCommand extends Command {
   final String name = 'init';
@@ -121,7 +122,11 @@ abstract class Template {
     String relativeFlutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
 
     files.forEach((String filePath, String contents) {
-      Map m = {'projectName': projectName, 'description': description, 'flutterPackagePath': relativeFlutterPackagePath};
+      Map m = {
+        'projectName': projectName,
+        'description': description,
+        'flutterPackagePath': relativeFlutterPackagePath
+      };
       contents = mustache.render(contents, m);
       filePath = filePath.replaceAll('/', Platform.pathSeparator);
       File file = new File(path.join(dir.path, filePath));
@@ -223,11 +228,11 @@ class FlutterDemo extends StatelessComponent {
 }
 ''';
 
-const String _apkManifest = r'''
+final String _apkManifest = '''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.{{projectName}}">
 
-    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
+    <uses-sdk android:minSdkVersion="${AndroidDevice.minApiLevel}" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application android:name="org.domokit.sky.shell.SkyApplication" android:label="{{projectName}}">

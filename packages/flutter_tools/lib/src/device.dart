@@ -474,7 +474,11 @@ class IOSSimulator extends Device {
 }
 
 class AndroidDevice extends Device {
-  static const String _ADB_PATH = 'adb';
+  static const int minApiLevel = 16;
+  static const String minVersionName = 'Jelly Bean';
+  static const String minVersionText = '4.1.x';
+
+  static const String _defaultAdbPath = 'adb';
   static const int _observatoryPort = 8181;
 
   static final String defaultDeviceID = 'default_android_device';
@@ -574,7 +578,7 @@ class AndroidDevice extends Device {
     _adbPath = _getAdbPath();
     _hasAdb = _checkForAdb();
 
-    // Checking for Jelly Bean only needs to be done if we are starting an
+    // Checking for [minApiName] only needs to be done if we are starting an
     // app, but it has an important side effect, which is to discard any
     // progress messages if the adb server is restarted.
     _hasValidAndroid = _checkForSupportedAndroidVersion();
@@ -606,8 +610,7 @@ class AndroidDevice extends Device {
   static String _getAdbPath() {
     if (Platform.environment.containsKey('ANDROID_HOME')) {
       String androidHomeDir = Platform.environment['ANDROID_HOME'];
-      String adbPath1 =
-          path.join(androidHomeDir, 'sdk', 'platform-tools', 'adb');
+      String adbPath1 = path.join(androidHomeDir, 'sdk', 'platform-tools', 'adb');
       String adbPath2 = path.join(androidHomeDir, 'platform-tools', 'adb');
       if (FileSystemEntity.isFileSync(adbPath1)) {
         return adbPath1;
@@ -615,11 +618,11 @@ class AndroidDevice extends Device {
         return adbPath2;
       } else {
         logging.info('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
-            'using default path "$_ADB_PATH"');
-        return _ADB_PATH;
+            'using default path "$_defaultAdbPath"');
+        return _defaultAdbPath;
       }
     } else {
-      return _ADB_PATH;
+      return _defaultAdbPath;
     }
   }
 
@@ -703,9 +706,10 @@ class AndroidDevice extends Device {
         logging.severe('Unexpected response from getprop: "$sdkVersion"');
         return false;
       }
-      if (sdkVersionParsed < 16) {
-        logging.severe('The Android version ($sdkVersion) on the target device '
-            'is too old. Please use a Jelly Bean (version 16 / 4.1.x) device or later.');
+      if (sdkVersionParsed < minApiLevel) {
+        logging.severe(
+          'The Android version ($sdkVersion) on the target device is too old. Please '
+          'use a $minVersionName (version $minApiLevel / $minVersionText) device or later.');
         return false;
       }
       return true;
@@ -735,8 +739,7 @@ class AndroidDevice extends Device {
     if (!isConnected()) {
       return false;
     }
-    if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])) ==
-        '') {
+    if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])) == '') {
       logging.info(
           'TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
       return false;
