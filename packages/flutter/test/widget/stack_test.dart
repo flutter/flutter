@@ -123,11 +123,11 @@ void main() {
 
       Element child0 = tester.findElementByKey(child0Key);
       final StackParentData child0RenderObjectParentData = child0.renderObject.parentData;
-      expect(child0RenderObjectParentData.position, equals(const Point(0.0, 0.0)));
+      expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
 
       Element child1 = tester.findElementByKey(child1Key);
       final StackParentData child1RenderObjectParentData = child1.renderObject.parentData;
-      expect(child1RenderObjectParentData.position, equals(const Point(5.0, 5.0)));
+      expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
     });
   });
 
@@ -233,8 +233,8 @@ void main() {
       expect(parentData.left, equals(10.0));
       expect(parentData.width, equals(11.0));
       expect(parentData.height, equals(12.0));
-      expect(parentData.position.x, equals(10.0));
-      expect(parentData.position.y, equals(0.0));
+      expect(parentData.offset.dx, equals(10.0));
+      expect(parentData.offset.dy, equals(0.0));
       expect(renderBox.size.width, equals(11.0));
       expect(renderBox.size.height, equals(12.0));
 
@@ -258,8 +258,8 @@ void main() {
       expect(parentData.left, isNull);
       expect(parentData.width, equals(11.0));
       expect(parentData.height, equals(12.0));
-      expect(parentData.position.x, equals(779.0));
-      expect(parentData.position.y, equals(0.0));
+      expect(parentData.offset.dx, equals(779.0));
+      expect(parentData.offset.dy, equals(0.0));
       expect(renderBox.size.width, equals(11.0));
       expect(renderBox.size.height, equals(12.0));
     });

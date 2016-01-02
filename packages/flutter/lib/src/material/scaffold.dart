@@ -44,14 +44,14 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (isChild(_Child.toolBar)) {
       toolBarSize = layoutChild(_Child.toolBar, toolBarConstraints);
-      positionChild(_Child.toolBar, Point.origin);
+      positionChild(_Child.toolBar, Offset.zero);
     }
 
     if (isChild(_Child.body)) {
       final double bodyHeight = size.height - toolBarSize.height;
       final BoxConstraints bodyConstraints = toolBarConstraints.tightenHeight(bodyHeight);
       layoutChild(_Child.body, bodyConstraints);
-      positionChild(_Child.body, new Point(0.0, toolBarSize.height));
+      positionChild(_Child.body, new Offset(0.0, toolBarSize.height));
     }
 
     // The BottomSheet and the SnackBar are anchored to the bottom of the parent,
@@ -69,12 +69,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (isChild(_Child.bottomSheet)) {
       bottomSheetSize = layoutChild(_Child.bottomSheet, fullWidthConstraints);
-      positionChild(_Child.bottomSheet, new Point((size.width - bottomSheetSize.width) / 2.0, size.height - bottomSheetSize.height));
+      positionChild(_Child.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, size.height - bottomSheetSize.height));
     }
 
     if (isChild(_Child.snackBar)) {
       snackBarSize = layoutChild(_Child.snackBar, fullWidthConstraints);
-      positionChild(_Child.snackBar, new Point(0.0, size.height - snackBarSize.height));
+      positionChild(_Child.snackBar, new Offset(0.0, size.height - snackBarSize.height));
     }
 
     if (isChild(_Child.floatingActionButton)) {
@@ -85,12 +85,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         fabY = math.min(fabY, size.height - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
       if (bottomSheetSize.height > 0.0)
         fabY = math.min(fabY, size.height - bottomSheetSize.height - fabSize.height / 2.0);
-      positionChild(_Child.floatingActionButton, new Point(fabX, fabY));
+      positionChild(_Child.floatingActionButton, new Offset(fabX, fabY));
     }
 
     if (isChild(_Child.drawer)) {
       layoutChild(_Child.drawer, looseConstraints);
-      positionChild(_Child.drawer, Point.origin);
+      positionChild(_Child.drawer, Offset.zero);
     }
   }
 }

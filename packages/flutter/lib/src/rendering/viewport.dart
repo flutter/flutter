@@ -135,7 +135,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
       child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child.size);
       final BoxParentData childParentData = child.parentData;
-      childParentData.position = Point.origin;
+      childParentData.offset = Offset.zero;
     } else {
       performResize();
     }

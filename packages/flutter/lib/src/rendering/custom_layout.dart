@@ -47,11 +47,11 @@ abstract class MultiChildLayoutDelegate {
   }
 
   /// Specify the child's origin relative to this origin.
-  void positionChild(Object childId, Point position) {
+  void positionChild(Object childId, Offset offset) {
     final RenderBox child = _idToChild[childId];
     assert(child != null);
     final MultiChildLayoutParentData childParentData = child.parentData;
-    childParentData.position = position;
+    childParentData.offset = offset;
   }
 
   void _callPerformLayout(Size size, BoxConstraints constraints, RenderBox firstChild) {

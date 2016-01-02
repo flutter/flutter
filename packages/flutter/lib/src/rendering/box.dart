@@ -316,17 +316,15 @@ class BoxHitTestEntry extends HitTestEntry {
 
 /// Parent data used by [RenderBox] and its subclasses.
 class BoxParentData extends ParentData {
-  // TODO(abarth): Switch to using an Offset rather than a Point here. This
-  //               value is really the offset from the parent.
-  Point _position = Point.origin;
-  /// The point at which to paint the child in the parent's coordinate system
-  Point get position => _position;
-  void set position(Point value) {
+  /// The offset at which to paint the child in the parent's coordinate system
+  Offset get offset => _offset;
+  Offset _offset = Offset.zero;
+  void set offset(Offset value) {
     assert(RenderObject.debugDoingLayout);
-    _position = value;
+    _offset = value;
   }
-  Offset get offset => _position.toOffset();
-  String toString() => 'position=$position';
+
+  String toString() => 'offset=$offset';
 }
 
 /// Abstract ParentData subclass for RenderBox subclasses that want the
@@ -631,8 +629,8 @@ abstract class RenderBox extends RenderObject {
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
     BoxParentData childParentData = child.parentData;
-    Point position = childParentData.position;
-    transform.translate(position.x, position.y);
+    Offset offset = childParentData.offset;
+    transform.translate(offset.dx, offset.dy);
   }
 
   /// Convert the given point from the global coodinate system to the local
@@ -766,7 +764,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
       final ParentDataType childParentData = child.parentData;
       double result = child.getDistanceToActualBaseline(baseline);
       if (result != null)
-        return result + childParentData.position.y;
+        return result + childParentData.offset.dy;
       child = childParentData.nextSibling;
     }
     return null;
@@ -784,7 +782,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
       final ParentDataType childParentData = child.parentData;
       double candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
-        candidate += childParentData.position.y;
+        candidate += childParentData.offset.dy;
         if (result != null)
           result = math.min(result, candidate);
         else
@@ -804,8 +802,8 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      Point transformed = new Point(position.x - childParentData.position.x,
-                                    position.y - childParentData.position.y);
+      Point transformed = new Point(position.x - childParentData.offset.dx,
+                                    position.y - childParentData.offset.dy);
       if (child.hitTest(result, position: transformed))
         return true;
       child = childParentData.previousSibling;

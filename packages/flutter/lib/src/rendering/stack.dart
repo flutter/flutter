@@ -303,7 +303,7 @@ abstract class RenderStackBase extends RenderBox
         hasNonPositionedChildren = true;
 
         child.layout(constraints, parentUsesSize: true);
-        childParentData.position = Point.origin;
+        childParentData.offset = Offset.zero;
 
         final Size childSize = child.size;
         width = math.max(width, childSize.width);
@@ -328,7 +328,7 @@ abstract class RenderStackBase extends RenderBox
       final StackParentData childParentData = child.parentData;
 
       if (!childParentData.isPositioned) {
-        childParentData.position = alignment.alongOffset(size - child.size).toPoint();
+        childParentData.offset = alignment.alongOffset(size - child.size);
       } else {
         BoxConstraints childConstraints = const BoxConstraints();
 
@@ -362,7 +362,7 @@ abstract class RenderStackBase extends RenderBox
         if (y < 0.0 || y + child.size.height > size.height)
           _hasVisualOverflow = true;
 
-        childParentData.position = new Point(x, y);
+        childParentData.offset = new Offset(x, y);
       }
 
       assert(child.parentData == childParentData);
@@ -475,8 +475,8 @@ class RenderIndexedStack extends RenderStackBase {
     assert(position != null);
     RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    Point transformed = new Point(position.x - childParentData.position.x,
-                                  position.y - childParentData.position.y);
+    Point transformed = new Point(position.x - childParentData.offset.dx,
+                                  position.y - childParentData.offset.dy);
     return child.hitTest(result, position: transformed);
   }
 
