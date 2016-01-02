@@ -313,9 +313,11 @@ class RenderBlockViewport extends RenderBlockBase {
   void set overlayPainter(Painter value) {
     if (_overlayPainter == value)
       return;
-    _overlayPainter?.detach();
+    if (attached)
+      _overlayPainter?.detach();
     _overlayPainter = value;
-    _overlayPainter?.attach(this);
+    if (attached)
+      _overlayPainter?.attach(this);
     markNeedsPaint();
   }
 

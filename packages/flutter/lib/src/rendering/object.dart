@@ -345,6 +345,7 @@ abstract class Painter {
 
   void attach(RenderObject renderObject) {
     assert(_renderObject == null);
+    assert(renderObject != null);
     _renderObject = renderObject;
   }
 
