@@ -160,6 +160,7 @@ String _normalizeProjectName(String name) {
 
 const String _gitignore = r'''
 .DS_Store
+.atom/
 .idea
 .packages
 .pub/
