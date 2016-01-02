@@ -87,7 +87,7 @@ void main() {
     layout(paddedBox);
 
     BoxParentData parentData = coloredBox.parentData;
-    expect(parentData.position.x, isNot(equals(0.0)));
+    expect(parentData.offset.dx, isNot(equals(0.0)));
 
     paddedBox.child = null;
     RenderConstrainedBox constraintedBox = new RenderConstrainedBox(
@@ -96,6 +96,6 @@ void main() {
     layout(constraintedBox);
 
     parentData = coloredBox.parentData;
-    expect(parentData.position.x, equals(0.0));
+    expect(parentData.offset.dx, equals(0.0));
   });
 }

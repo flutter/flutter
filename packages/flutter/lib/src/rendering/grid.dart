@@ -125,7 +125,7 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
       double x = (column + 1) * metrics.childPadding + (column * metrics.childSize.width);
       double y = (row + 1) * metrics.childPadding + (row * metrics.childSize.height);
       final GridParentData childParentData = child.parentData;
-      childParentData.position = new Point(x, y);
+      childParentData.offset = new Offset(x, y);
 
       column += 1;
       if (column >= metrics.childrenPerRow) {

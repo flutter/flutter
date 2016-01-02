@@ -141,7 +141,7 @@ class _RenderTabBar extends RenderBox with
     while (child != null) {
       child.layout(tabConstraints);
       final _TabBarParentData childParentData = child.parentData;
-      childParentData.position = new Point(x, 0.0);
+      childParentData.offset = new Offset(x, 0.0);
       x += tabWidth;
       child = childParentData.nextSibling;
     }
@@ -159,7 +159,7 @@ class _RenderTabBar extends RenderBox with
     while (child != null) {
       child.layout(tabConstraints, parentUsesSize: true);
       final _TabBarParentData childParentData = child.parentData;
-      childParentData.position = new Point(x, 0.0);
+      childParentData.offset = new Offset(x, 0.0);
       x += child.size.width;
       child = childParentData.nextSibling;
     }
@@ -226,7 +226,7 @@ class _RenderTabBar extends RenderBox with
     final Size size = new Size(selectedTab.size.width, _kTabIndicatorHeight);
     final _TabBarParentData selectedTabParentData = selectedTab.parentData;
     final Point point = new Point(
-      selectedTabParentData.position.x,
+      selectedTabParentData.offset.dx,
       _tabBarHeight - _kTabIndicatorHeight
     );
     canvas.drawRect((point + offset) & size, new Paint()..color = indicatorColor);

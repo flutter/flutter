@@ -113,7 +113,7 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> with _
       height: _bottomEdge.value - _topEdge.value
     );
     _renderBox.layout(size);
-    position = new Point(_leftEdge.value, _topEdge.value);
+    offset = new Offset(_leftEdge.value, _topEdge.value);
   }
 
   List<al.Constraint> _constructImplicitConstraints() {

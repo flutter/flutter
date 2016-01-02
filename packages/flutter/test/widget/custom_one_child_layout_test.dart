@@ -27,10 +27,10 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
     );
   }
 
-  Point getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(Size size, Size childSize) {
     sizeFromGetPositionForChild = size;
     childSizeFromGetPositionForChild = childSize;
-    return Point.origin;
+    return Offset.zero;
   }
 
   bool shouldRelayoutCalled = false;

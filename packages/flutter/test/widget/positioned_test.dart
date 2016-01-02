@@ -28,14 +28,14 @@ void main() {
         duration: const Duration(seconds: 10)
       );
       final List<Size> sizes = <Size>[];
-      final List<Point> positions = <Point>[];
+      final List<Offset> positions = <Offset>[];
       final GlobalKey key = new GlobalKey();
 
       void recordMetrics() {
         RenderBox box = key.currentContext.findRenderObject();
         BoxParentData boxParentData = box.parentData;
         sizes.add(box.size);
-        positions.add(boxParentData.position);
+        positions.add(boxParentData.offset);
       }
 
       tester.pumpWidget(
@@ -69,7 +69,7 @@ void main() {
       recordMetrics();
 
       expect(sizes, equals([const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0)]));
-      expect(positions, equals([const Point(10.0, 10.0), const Point(10.0, 10.0), const Point(17.0, 17.0), const Point(24.0, 24.0), const Point(45.0, 45.0), const Point(80.0, 80.0)]));
+      expect(positions, equals([const Offset(10.0, 10.0), const Offset(10.0, 10.0), const Offset(17.0, 17.0), const Offset(24.0, 24.0), const Offset(45.0, 45.0), const Offset(80.0, 80.0)]));
 
     });
   });

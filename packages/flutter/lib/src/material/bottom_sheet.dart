@@ -111,8 +111,8 @@ class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
     );
   }
 
-  Point getPositionForChild(Size size, Size childSize) {
-    return new Point(0.0, size.height - childSize.height * progress);
+  Offset getPositionForChild(Size size, Size childSize) {
+    return new Offset(0.0, size.height - childSize.height * progress);
   }
 
   bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {

@@ -49,7 +49,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
       result = child.getDistanceToActualBaseline(baseline);
       final BoxParentData childParentData = child.parentData;
       if (result != null)
-        result += childParentData.position.y;
+        result += childParentData.offset.dy;
     } else {
       result = super.computeDistanceToActualBaseline(baseline);
     }
@@ -66,8 +66,8 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       final BoxParentData childParentData = child.parentData;
-      final Point childPosition = new Point(position.x - childParentData.position.x,
-                                            position.y - childParentData.position.y);
+      final Point childPosition = new Point(position.x - childParentData.offset.dx,
+                                            position.y - childParentData.offset.dy);
       return child.hitTest(result, position: childPosition);
     }
     return false;
@@ -146,7 +146,7 @@ class RenderPadding extends RenderShiftedBox {
     BoxConstraints innerConstraints = constraints.deflate(padding);
     child.layout(innerConstraints, parentUsesSize: true);
     final BoxParentData childParentData = child.parentData;
-    childParentData.position = new Point(padding.left, padding.top);
+    childParentData.offset = new Offset(padding.left, padding.top);
     size = constraints.constrain(new Size(
       padding.left + child.size.width + padding.right,
       padding.top + child.size.height + padding.bottom
@@ -238,7 +238,7 @@ class RenderPositionedBox extends RenderShiftedBox {
       size = constraints.constrain(new Size(shrinkWrapWidth ? child.size.width * (_widthFactor ?? 1.0) : double.INFINITY,
                                             shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.INFINITY));
       final BoxParentData childParentData = child.parentData;
-      childParentData.position = _alignment.alongOffset(size - child.size).toPoint();
+      childParentData.offset = _alignment.alongOffset(size - child.size);
     } else {
       size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.INFINITY,
                                             shrinkWrapHeight ? 0.0 : double.INFINITY));
@@ -260,7 +260,7 @@ class OneChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints;
 
   /// Returns the position where the child should be placed given the size of this object and the size of the child.
-  Point getPositionForChild(Size size, Size childSize) => Point.origin;
+  Offset getPositionForChild(Size size, Size childSize) => Offset.zero;
 
   /// Override this method to return true when the child needs to be laid out.
   bool shouldRelayout(OneChildLayoutDelegate oldDelegate) => true;
@@ -328,7 +328,7 @@ class RenderCustomOneChildLayoutBox extends RenderShiftedBox {
       assert(childConstraints.isNormalized);
       child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child.parentData;
-      childParentData.position = delegate.getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child.size);
+      childParentData.offset = delegate.getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child.size);
     }
   }
 }
@@ -376,7 +376,7 @@ class RenderBaseline extends RenderShiftedBox {
       size = constraints.constrain(child.size);
       double delta = baseline - child.getDistanceToBaseline(baselineType);
       final BoxParentData childParentData = child.parentData;
-      childParentData.position = new Point(0.0, delta);
+      childParentData.offset = new Offset(0.0, delta);
     } else {
       performResize();
     }

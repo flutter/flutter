@@ -96,8 +96,8 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
       return minExtent;
     BoxParentData parentData = child.parentData;
     return isVertical ?
-        math.max(minExtent, parentData.position.y + child.size.height) :
-        math.max(minExtent, parentData.position.x + child.size.width);
+        math.max(minExtent, parentData.offset.dy + child.size.height) :
+        math.max(minExtent, parentData.offset.dx + child.size.width);
   }
 
   void performLayout() {
@@ -107,7 +107,7 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
     while (child != null) {
       child.layout(innerConstraints, parentUsesSize: true);
       final BlockParentData childParentData = child.parentData;
-      childParentData.position = isVertical ? new Point(0.0, position) : new Point(position, 0.0);
+      childParentData.offset = isVertical ? new Offset(0.0, position) : new Offset(position, 0.0);
       position += isVertical ? child.size.height : child.size.width;
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;

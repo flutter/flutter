@@ -530,10 +530,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
       switch (_direction) {
         case FlexDirection.horizontal:
-          childParentData.position = new Point(childMainPosition, childCrossPosition);
+          childParentData.offset = new Offset(childMainPosition, childCrossPosition);
           break;
         case FlexDirection.vertical:
-          childParentData.position = new Point(childCrossPosition, childMainPosition);
+          childParentData.offset = new Offset(childCrossPosition, childMainPosition);
           break;
       }
       childMainPosition += _getMainSize(child) + betweenSpace;
