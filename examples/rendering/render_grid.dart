@@ -20,7 +20,10 @@ Color randomColor() {
 
 RenderBox buildGridExample() {
   List<RenderBox> children = new List<RenderBox>.generate(30, (_) => new RenderSolidColorBox(randomColor()));
-  return new RenderGrid(children: children, maxChildExtent: 100.0);
+  return new RenderGrid(
+    children: children,
+    delegate: new MaxTileWidthGridDelegate(maxTileWidth: 100.0)
+  );
 }
 
 main() => new RenderingFlutterBinding(root: buildGridExample());

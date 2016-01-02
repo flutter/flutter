@@ -16,7 +16,10 @@ void main() {
       new RenderDecoratedBox(decoration: new BoxDecoration())
     ];
 
-    RenderGrid grid = new RenderGrid(children: children, maxChildExtent: 100.0);
+    RenderGrid grid = new RenderGrid(
+      children: children,
+      delegate: new MaxTileWidthGridDelegate(maxTileWidth: 100.0)
+    );
     layout(grid, constraints: const BoxConstraints(maxWidth: 200.0));
 
     children.forEach((RenderBox child) {
@@ -28,7 +31,7 @@ void main() {
     expect(grid.size.height, equals(200.0), reason: "grid height");
 
     expect(grid.needsLayout, equals(false));
-    grid.maxChildExtent = 60.0;
+    grid.delegate = new MaxTileWidthGridDelegate(maxTileWidth: 60.0);
     expect(grid.needsLayout, equals(true));
 
     pumpFrame();

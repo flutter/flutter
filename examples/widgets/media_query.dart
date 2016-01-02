@@ -62,7 +62,7 @@ class AdaptiveItem {
 }
 
 class MediaQueryExample extends StatelessComponent {
-  static const double _maxChildExtent = 150.0;
+  static const double _maxTileWidth = 150.0;
   static const double _gridViewBreakpoint = 450.0;
 
   Widget _buildBody(BuildContext context) {
@@ -78,9 +78,9 @@ class MediaQueryExample extends StatelessComponent {
     } else {
       return new Block(
         <Widget>[
-          new Grid(
+          new MaxTileWidthGrid(
             items.map((AdaptiveItem item) => item.toCard()).toList(),
-            maxChildExtent: _maxChildExtent
+            maxTileWidth: _maxTileWidth
           )
         ]
       );
