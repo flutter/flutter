@@ -46,11 +46,11 @@ class ListItem extends StatelessComponent {
       ));
     }
 
-    return new Padding(
-      padding: const EdgeDims.symmetric(horizontal: 16.0),
-      child: new InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
+    return new InkWell(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: new Padding(
+        padding: const EdgeDims.symmetric(horizontal: 16.0),
         child: new Row(children)
       )
     );
