@@ -33,6 +33,7 @@ export 'package:flutter/rendering.dart' show
     FontWeight,
     FractionalOffset,
     Gradient,
+    GridDelegate,
     HitTestBehavior,
     ImageFit,
     ImageRepeat,
@@ -1125,21 +1126,125 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
   }
 }
 
+abstract class GridRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
+  GridRenderObjectWidgetBase({
+    List<Widget> children,
+    Key key
+  }) : super(key: key, children: children) {
+    _delegate = createDelegate();
+  }
+
+  GridDelegate _delegate;
+
+  /// The delegate that controls the layout of the children.
+  GridDelegate createDelegate();
+
+  RenderGrid createRenderObject() => new RenderGrid(delegate: _delegate);
+
+  void updateRenderObject(RenderGrid renderObject, GridRenderObjectWidgetBase oldWidget) {
+    renderObject.delegate = _delegate;
+  }
+}
+
 /// Uses the grid layout algorithm for its children.
 ///
 /// For details about the grid layout algorithm, see [RenderGrid].
-class Grid extends MultiChildRenderObjectWidget {
-  Grid(List<Widget> children, { Key key, this.maxChildExtent })
+class CustomGrid extends GridRenderObjectWidgetBase {
+  CustomGrid(List<Widget> children, { Key key, this.delegate })
     : super(key: key, children: children) {
-    assert(maxChildExtent != null);
+    assert(delegate != null);
   }
 
-  final double maxChildExtent;
+  /// The delegate that controls the layout of the children.
+  final GridDelegate delegate;
 
-  RenderGrid createRenderObject() => new RenderGrid(maxChildExtent: maxChildExtent);
+  GridDelegate createDelegate() => delegate;
+}
 
-  void updateRenderObject(RenderGrid renderObject, Grid oldWidget) {
-    renderObject.maxChildExtent = maxChildExtent;
+/// Uses a grid layout with a fixed column count.
+///
+/// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
+class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
+  FixedColumnCountGrid(List<Widget> children, {
+    Key key,
+    this.columnCount,
+    this.tileAspectRatio: 1.0,
+    this.padding: EdgeDims.zero
+  }) : super(key: key, children: children) {
+    assert(columnCount != null);
+  }
+
+  /// The number of columns in the grid.
+  final int columnCount;
+
+  /// The ratio of the width to the height of each tile in the grid.
+  final double tileAspectRatio;
+
+  /// The amount of padding to apply to each child.
+  final EdgeDims padding;
+
+  FixedColumnCountGridDelegate createDelegate() {
+    return new FixedColumnCountGridDelegate(
+      columnCount: columnCount,
+      tileAspectRatio: tileAspectRatio,
+      padding: padding
+    );
+  }
+}
+
+/// Uses a grid layout with a max tile width.
+///
+/// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
+class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
+  MaxTileWidthGrid(List<Widget> children, {
+    Key key,
+    this.maxTileWidth,
+    this.tileAspectRatio: 1.0,
+    this.padding: EdgeDims.zero
+  }) : super(key: key, children: children) {
+    assert(maxTileWidth != null);
+  }
+
+  /// The maximum width of a tile in the grid.
+  final double maxTileWidth;
+
+  /// The ratio of the width to the height of each tile in the grid.
+  final double tileAspectRatio;
+
+  /// The amount of padding to apply to each child.
+  final EdgeDims padding;
+
+  MaxTileWidthGridDelegate createDelegate() {
+    return new MaxTileWidthGridDelegate(
+      maxTileWidth: maxTileWidth,
+      tileAspectRatio: tileAspectRatio,
+      padding: padding
+    );
+  }
+}
+
+/// Supplies per-child data to the grid's [GridDelegate].
+class GridPlacementData<DataType, WidgetType extends RenderObjectWidget> extends ParentDataWidget<WidgetType> {
+  GridPlacementData({ Key key, this.placementData, Widget child })
+    : super(key: key, child: child);
+
+  /// Opaque data passed to the getChildPlacement method of the grid's [GridDelegate].
+  final DataType placementData;
+
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is GridParentData);
+    final GridParentData parentData = renderObject.parentData;
+    if (parentData.placementData != placementData) {
+      parentData.placementData = placementData;
+      AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
+    }
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('placementData: $placementData');
   }
 }
 

@@ -374,7 +374,7 @@ abstract class RenderBox extends RenderObject {
     return constraints.constrainWidth(0.0);
   }
 
-  /// Return the minimum height that this box could be without failing to render
+  /// Return the minimum height that this box could be without failing to paint
   /// its contents within itself.
   ///
   /// Override in subclasses that implement [performLayout].
