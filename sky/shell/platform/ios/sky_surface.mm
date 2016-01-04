@@ -179,7 +179,7 @@ static std::string TracesBasePath() {
   // to resolve the path there first.
   // TODO: Allow specification of the application bundle identifier
   NSBundle* applicationBundle = [NSBundle
-      bundleWithIdentifier:@"io.flutter.aplication.FlutterApplication"];
+      bundleWithIdentifier:@"io.flutter.application.FlutterApplication"];
   NSString* path = [applicationBundle pathForResource:@"app" ofType:@"flx"];
   if (path.length != 0) {
     return path.UTF8String;
