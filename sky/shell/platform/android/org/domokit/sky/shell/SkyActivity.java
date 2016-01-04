@@ -86,6 +86,9 @@ public class SkyActivity extends Activity {
      */
     @Override
     protected void onDestroy() {
+        if (mView != null) {
+            mView.destroy();
+        }
         // Do we need to shut down Sky too?
         mTracingController.stop();
         super.onDestroy();
