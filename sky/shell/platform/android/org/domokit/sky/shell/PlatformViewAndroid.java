@@ -131,8 +131,7 @@ public class PlatformViewAndroid extends SurfaceView {
         return mSkyEngine;
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
+    void destroy() {
         getHolder().removeCallback(mSurfaceCallback);
         nativeDetach(mNativePlatformView);
         mNativePlatformView = 0;
