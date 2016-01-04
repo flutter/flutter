@@ -178,3 +178,66 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     return false;
   }
 }
+
+abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<RenderBox>>
+    extends RenderBox with ContainerRenderObjectMixin<RenderBox, T>,
+                           RenderBoxContainerDefaultsMixin<RenderBox, T> {
+  RenderVirtualViewport({
+    int virtualChildCount,
+    Offset paintOffset,
+    LayoutCallback callback
+  }) : _virtualChildCount = virtualChildCount,
+       _paintOffset = paintOffset,
+       _callback = callback;
+
+  int get virtualChildCount => _virtualChildCount ?? childCount;
+  int _virtualChildCount;
+  void set virtualChildCount(int value) {
+    if (_virtualChildCount == value)
+      return;
+    _virtualChildCount = value;
+    markNeedsLayout();
+  }
+
+  /// The offset at which to paint the first item.
+  ///
+  /// Note: you can modify this property from within [callback], if necessary.
+  Offset get paintOffset => _paintOffset;
+  Offset _paintOffset;
+  void set paintOffset(Offset value) {
+    assert(value != null);
+    if (value == _paintOffset)
+      return;
+    _paintOffset = value;
+    markNeedsPaint();
+  }
+
+  /// Called during [layout] to determine the grid's children.
+  ///
+  /// Typically the callback will mutate the child list appropriately, for
+  /// example so the child list contains only visible children.
+  LayoutCallback get callback => _callback;
+  LayoutCallback _callback;
+  void set callback(LayoutCallback value) {
+    if (value == _callback)
+      return;
+    _callback = value;
+    markNeedsLayout();
+  }
+
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform.translate(paintOffset));
+  }
+
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return defaultHitTestChildren(result, position: position + -paintOffset);
+  }
+
+  void _paintContents(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset + paintOffset);
+  }
+
+  void paint(PaintingContext context, Offset offset) {
+    context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
+  }
+}

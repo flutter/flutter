@@ -6,8 +6,7 @@ import 'dart:typed_data';
 
 import 'box.dart';
 import 'object.dart';
-
-import 'package:vector_math/vector_math_64.dart';
+import 'viewport.dart';
 
 bool _debugIsMonotonic(List<double> offsets) {
   bool result = true;
@@ -314,8 +313,7 @@ class GridParentData extends ContainerBoxParentDataMixin<RenderBox> {
 ///
 /// Additionally, grid layout materializes all of its children, which makes it
 /// most useful for grids containing a moderate number of tiles.
-class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, GridParentData>,
-                                        RenderBoxContainerDefaultsMixin<RenderBox, GridParentData> {
+class RenderGrid extends RenderVirtualViewport<GridParentData> {
   RenderGrid({
     List<RenderBox> children,
     GridDelegate delegate,
@@ -323,11 +321,11 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
     LayoutCallback callback
-  }) : _delegate = delegate,
-       _virtualChildBase = virtualChildBase,
-       _virtualChildCount = virtualChildCount,
-       _paintOffset = paintOffset,
-       _callback = callback {
+  }) : _delegate = delegate, _virtualChildBase = virtualChildBase, super(
+    virtualChildCount: virtualChildCount,
+    paintOffset: paintOffset,
+    callback: callback
+  ) {
     assert(delegate != null);
     addAll(children);
   }
@@ -357,49 +355,6 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
     if (_virtualChildBase == value)
       return;
     _virtualChildBase = value;
-    markNeedsLayout();
-  }
-
-  /// The total number of virtual children in the grid.
-  ///
-  /// When asking the delegate for the grid specification, the grid will use
-  /// this number of children, which can be larger than the actual number of
-  /// children of this render object.
-  ///
-  /// If the this value is null, the grid will use the actual child count of
-  /// this render object.
-  int get virtualChildCount => _virtualChildCount ?? childCount;
-  int _virtualChildCount;
-  void set virtualChildCount(int value) {
-    if (_virtualChildCount == value)
-      return;
-    _virtualChildCount = value;
-    markNeedsLayout();
-  }
-
-  /// The offset at which to paint the first tile.
-  ///
-  /// Note: you can modify this property from within [callback], if necessary.
-  Offset get paintOffset => _paintOffset;
-  Offset _paintOffset;
-  void set paintOffset(Offset value) {
-    assert(value != null);
-    if (value == _paintOffset)
-      return;
-    _paintOffset = value;
-    markNeedsPaint();
-  }
-
-  /// Called during [layout] to determine the grid's children.
-  ///
-  /// Typically the callback will mutate the child list appropriately, for
-  /// example so the child list contains only visible children.
-  LayoutCallback get callback => _callback;
-  LayoutCallback _callback;
-  void set callback(LayoutCallback value) {
-    if (value == _callback)
-      return;
-    _callback = value;
     markNeedsLayout();
   }
 
@@ -447,17 +402,13 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
     }
   }
 
-  bool _hasVisualOverflow = false;
-
   void performLayout() {
     _updateGridSpecification();
     Size gridSize = _specification.gridSize;
     size = constraints.constrain(gridSize);
-    if (gridSize.width > size.width || gridSize.height > size.height)
-      _hasVisualOverflow = true;
 
-    if (_callback != null)
-      invokeLayoutCallback(_callback);
+    if (callback != null)
+      invokeLayoutCallback(callback);
 
     double gridTopPadding = _specification.padding.top;
     double gridLeftPadding = _specification.padding.left;
@@ -492,29 +443,10 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
         tileTop + placement.padding.top
       );
 
-      ++childIndex;
+      childIndex += 1;
 
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
-  }
-
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    super.applyPaintTransform(child, transform.translate(paintOffset));
-  }
-
-  bool hitTestChildren(HitTestResult result, { Point position }) {
-    return defaultHitTestChildren(result, position: position + -paintOffset);
-  }
-
-  void _paintContents(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset + paintOffset);
-  }
-
-  void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
-    else
-      _paintContents(context, offset);
   }
 }
