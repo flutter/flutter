@@ -1,5 +1,5 @@
 solutions = [{
-  "name"        : "..",
+  "name"        : "src",
   "url"         : "https://github.com/flutter/engine.git",
   "deps_file"   : "DEPS",
   "managed"     : False,
