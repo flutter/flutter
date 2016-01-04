@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'box.dart';
 import 'object.dart';
+
+import 'package:vector_math/vector_math_64.dart';
 
 bool _debugIsMonotonic(List<double> offsets) {
   bool result = true;
@@ -23,7 +27,7 @@ bool _debugIsMonotonic(List<double> offsets) {
 
 List<double> _generateRegularOffsets(int count, double size) {
   int length = count + 1;
-  List<double> result = new List<double>(length);
+  List<double> result = new Float64List(length);
   for (int i = 0; i < length; ++i)
     result[i] = i * size;
   return result;
@@ -87,6 +91,12 @@ class GridSpecification {
 
   /// The size of the grid.
   Size get gridSize => new Size(columnOffsets.last + padding.horizontal, rowOffsets.last + padding.vertical);
+
+  /// The number of columns in this grid.
+  int get columnCount => columnOffsets.length - 1;
+
+  /// The number of rows in this grid.
+  int get rowCount => rowOffsets.length - 1;
 }
 
 /// Where to place a child within a grid.
@@ -308,8 +318,16 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
                                         RenderBoxContainerDefaultsMixin<RenderBox, GridParentData> {
   RenderGrid({
     List<RenderBox> children,
-    GridDelegate delegate
-  }) : _delegate = delegate {
+    GridDelegate delegate,
+    int virtualChildBase: 0,
+    int virtualChildCount,
+    Offset paintOffset: Offset.zero,
+    LayoutCallback callback
+  }) : _delegate = delegate,
+       _virtualChildBase = virtualChildBase,
+       _virtualChildCount = virtualChildCount,
+       _paintOffset = paintOffset,
+       _callback = callback {
     assert(delegate != null);
     addAll(children);
   }
@@ -321,9 +339,68 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
-    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate)) {
+      _specification = null;
       markNeedsLayout();
+    }
     _delegate = newDelegate;
+  }
+
+  /// The virtual index of the first child.
+  ///
+  /// When asking the delegate for the position of each child, the grid will add
+  /// the virtual child i to the indices of its children.
+  int get virtualChildBase => _virtualChildBase;
+  int _virtualChildBase;
+  void set virtualChildBase(int value) {
+    assert(value != null);
+    if (_virtualChildBase == value)
+      return;
+    _virtualChildBase = value;
+    markNeedsLayout();
+  }
+
+  /// The total number of virtual children in the grid.
+  ///
+  /// When asking the delegate for the grid specification, the grid will use
+  /// this number of children, which can be larger than the actual number of
+  /// children of this render object.
+  ///
+  /// If the this value is null, the grid will use the actual child count of
+  /// this render object.
+  int get virtualChildCount => _virtualChildCount ?? childCount;
+  int _virtualChildCount;
+  void set virtualChildCount(int value) {
+    if (_virtualChildCount == value)
+      return;
+    _virtualChildCount = value;
+    markNeedsLayout();
+  }
+
+  /// The offset at which to paint the first tile.
+  ///
+  /// Note: you can modify this property from within [callback], if necessary.
+  Offset get paintOffset => _paintOffset;
+  Offset _paintOffset;
+  void set paintOffset(Offset value) {
+    assert(value != null);
+    if (value == _paintOffset)
+      return;
+    _paintOffset = value;
+    markNeedsPaint();
+  }
+
+  /// Called during [layout] to determine the grid's children.
+  ///
+  /// Typically the callback will mutate the child list appropriately, for
+  /// example so the child list contains only visible children.
+  LayoutCallback get callback => _callback;
+  LayoutCallback _callback;
+  void set callback(LayoutCallback value) {
+    if (value == _callback)
+      return;
+    _callback = value;
+    markNeedsLayout();
   }
 
   void setupParentData(RenderBox child) {
@@ -333,46 +410,63 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.isNormalized);
-    return _delegate.getMinIntrinsicWidth(constraints, childCount);
+    return _delegate.getMinIntrinsicWidth(constraints, virtualChildCount);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.isNormalized);
-    return _delegate.getMaxIntrinsicWidth(constraints, childCount);
+    return _delegate.getMaxIntrinsicWidth(constraints, virtualChildCount);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.isNormalized);
-    return _delegate.getMinIntrinsicHeight(constraints, childCount);
+    return _delegate.getMinIntrinsicHeight(constraints, virtualChildCount);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.isNormalized);
-    return _delegate.getMaxIntrinsicHeight(constraints, childCount);
+    return _delegate.getMaxIntrinsicHeight(constraints, virtualChildCount);
   }
 
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
+  GridSpecification get specification => _specification;
   GridSpecification _specification;
+  int _specificationChildCount;
+  BoxConstraints _specificationConstraints;
+
+  void _updateGridSpecification() {
+    if (_specification == null
+        || _specificationChildCount != virtualChildCount
+        || _specificationConstraints != constraints) {
+      _specification = delegate.getGridSpecification(constraints, virtualChildCount);
+      _specificationChildCount = virtualChildCount;
+      _specificationConstraints = constraints;
+    }
+  }
+
   bool _hasVisualOverflow = false;
 
   void performLayout() {
-    _specification = delegate.getGridSpecification(constraints, childCount);
+    _updateGridSpecification();
     Size gridSize = _specification.gridSize;
     size = constraints.constrain(gridSize);
     if (gridSize.width > size.width || gridSize.height > size.height)
       _hasVisualOverflow = true;
 
+    if (_callback != null)
+      invokeLayoutCallback(_callback);
+
     double gridTopPadding = _specification.padding.top;
     double gridLeftPadding = _specification.padding.left;
-    int index = 0;
+    int childIndex = virtualChildBase;
     RenderBox child = firstChild;
     while (child != null) {
       final GridParentData childParentData = child.parentData;
 
-      GridChildPlacement placement = delegate.getChildPlacement(_specification, index, childParentData.placementData);
+      GridChildPlacement placement = delegate.getChildPlacement(_specification, childIndex, childParentData.placementData);
       assert(placement.column >= 0);
       assert(placement.row >= 0);
       assert(placement.column + placement.columnSpan < _specification.columnOffsets.length);
@@ -398,21 +492,29 @@ class RenderGrid extends RenderBox with ContainerRenderObjectMixin<RenderBox, Gr
         tileTop + placement.padding.top
       );
 
-      ++index;
+      ++childIndex;
 
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
   }
 
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform.translate(paintOffset));
+  }
+
   bool hitTestChildren(HitTestResult result, { Point position }) {
-    return defaultHitTestChildren(result, position: position);
+    return defaultHitTestChildren(result, position: position + -paintOffset);
+  }
+
+  void _paintContents(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset + paintOffset);
   }
 
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, defaultPaint);
+      context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
     else
-      defaultPaint(context, offset);
+      _paintContents(context, offset);
   }
 }

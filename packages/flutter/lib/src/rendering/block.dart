@@ -261,7 +261,7 @@ class RenderBlockViewport extends RenderBlockBase {
   bool _inCallback = false;
   bool get hasLayer => true;
 
-  /// Called during [layout] to determine the blocks children.
+  /// Called during [layout] to determine the block's children.
   ///
   /// Typically the callback will mutate the child list appropriately, for
   /// example so the child list contains only visible children.
@@ -396,7 +396,9 @@ class RenderBlockViewport extends RenderBlockBase {
   // scroll the RenderBlockViewport, it would shift in its parent if
   // the parent was baseline-aligned, which makes no sense.
 
+  // TODO(abarth): debugDoesLayoutWithCallback appears to be unreferenced.
   bool get debugDoesLayoutWithCallback => true;
+
   void performLayout() {
     if (_callback != null) {
       try {
