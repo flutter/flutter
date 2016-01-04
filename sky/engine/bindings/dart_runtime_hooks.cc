@@ -24,7 +24,6 @@
 #include "sky/engine/tonic/dart_library_natives.h"
 #include "sky/engine/tonic/dart_microtask_queue.h"
 #include "sky/engine/tonic/dart_state.h"
-#include "sky/engine/tonic/dart_timer_heap.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 #if defined(OS_ANDROID)
@@ -50,9 +49,7 @@ namespace blink {
 #define BUILTIN_NATIVE_LIST(V) \
   V(Logger_PrintString, 1)     \
   V(ScheduleMicrotask, 1)      \
-  V(GetBaseURLString, 0)       \
-  V(Timer_create, 3)           \
-  V(Timer_cancel, 1)
+  V(GetBaseURLString, 0)
 
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
 
@@ -72,7 +69,6 @@ static Dart_Handle GetClosure(Dart_Handle builtin_library, const char* name) {
 static void InitDartInternal(Dart_Handle builtin_library,
                              DartRuntimeHooks::IsolateType isolate_type) {
   Dart_Handle print = GetClosure(builtin_library, "_getPrintClosure");
-  Dart_Handle timer = GetClosure(builtin_library, "_getCreateTimerClosure");
 
   Dart_Handle internal_library = Dart_LookupLibrary(ToDart("dart:_internal"));
 
@@ -80,11 +76,19 @@ static void InitDartInternal(Dart_Handle builtin_library,
       internal_library, ToDart("_printClosure"), print));
 
   if (isolate_type == DartRuntimeHooks::MainIsolate) {
-    Dart_Handle vm_hooks_name = ToDart("VMLibraryHooks");
-    Dart_Handle vm_hooks = Dart_GetClass(internal_library, vm_hooks_name);
-    DART_CHECK_VALID(vm_hooks);
-    Dart_Handle timer_name = ToDart("timerFactory");
-    DART_CHECK_VALID(Dart_SetField(vm_hooks, timer_name, timer));
+    // Import internal_library into builtin_library.
+    DART_CHECK_VALID(Dart_LibraryImportLibrary(builtin_library,
+                                               internal_library,
+                                               Dart_Null()));
+    // Call |_setupHooks| to configure |VMLibraryHooks|.
+    Dart_Handle method_name =
+        Dart_NewStringFromCString("_setupHooks");
+    DART_CHECK_VALID(Dart_Invoke(builtin_library, method_name, 0, NULL))
+
+    // Call |_setupHooks| to configure |VMLibraryHooks|.
+    Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
+    DART_CHECK_VALID(isolate_lib);
+    DART_CHECK_VALID(Dart_Invoke(isolate_lib, method_name, 0, NULL));
   } else {
     CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
     Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
@@ -184,37 +188,6 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
 
 void GetBaseURLString(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, ToDart(UIDartState::Current()->url()));
-}
-
-void Timer_create(Dart_NativeArguments args) {
-  int64_t milliseconds = 0;
-  DART_CHECK_VALID(Dart_GetNativeIntegerArgument(args, 0, &milliseconds));
-  Dart_Handle closure = Dart_GetNativeArgument(args, 1);
-  DART_CHECK_VALID(closure);
-  CHECK(Dart_IsClosure(closure));
-  bool repeating = false;
-  DART_CHECK_VALID(Dart_GetNativeBooleanArgument(args, 2, &repeating));
-
-  DartState* state = DartState::Current();
-  CHECK(state);
-
-  std::unique_ptr<DartTimerHeap::Task> task =
-      std::unique_ptr<DartTimerHeap::Task>(new DartTimerHeap::Task);
-  task->closure.Set(state, closure);
-  task->delay = base::TimeDelta::FromMilliseconds(milliseconds);
-  task->repeating = repeating;
-
-  int timer_id = state->timer_heap().Add(std::move(task));
-  Dart_SetIntegerReturnValue(args, timer_id);
-}
-
-void Timer_cancel(Dart_NativeArguments args) {
-  int64_t timer_id = 0;
-  DART_CHECK_VALID(Dart_GetNativeIntegerArgument(args, 0, &timer_id));
-
-  DartState* state = DartState::Current();
-  CHECK(state);
-  state->timer_heap().Remove(timer_id);
 }
 
 }  // namespace blink

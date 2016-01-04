@@ -9,7 +9,6 @@
 #include "sky/engine/tonic/dart_exception_factory.h"
 #include "sky/engine/tonic/dart_library_loader.h"
 #include "sky/engine/tonic/dart_message_handler.h"
-#include "sky/engine/tonic/dart_timer_heap.h"
 
 namespace blink {
 
@@ -24,7 +23,6 @@ DartState::DartState()
       class_library_(std::unique_ptr<DartClassLibrary>(new DartClassLibrary)),
       exception_factory_(new DartExceptionFactory(this)),
       library_loader_(new DartLibraryLoader(this)),
-      timer_heap_(new DartTimerHeap()),
       message_handler_(std::unique_ptr<DartMessageHandler>(
           new DartMessageHandler())),
       weak_factory_(this) {

@@ -43,8 +43,6 @@ source_set("tonic") {
     "dart_snapshot_loader.h",
     "dart_state.cc",
     "dart_state.h",
-    "dart_timer_heap.cc",
-    "dart_timer_heap.h",
     "dart_wrappable.cc",
     "dart_wrappable.h",
     "dart_wrapper_info.h",
