@@ -17,17 +17,30 @@ class _BaselinePainter extends CustomPainter {
     double baseline = paragraph.getDistanceToBaseline(TextBaseline.alphabetic);
     double w = paragraph.getMaxIntrinsicWidth(new BoxConstraints.loose(size));
     double h = paragraph.getMaxIntrinsicHeight(new BoxConstraints.loose(size));
-    Path path = new Path();
+
+    Path path;
+    Paint paint;
+
+    // top and bottom
+    path = new Path();
     path.moveTo(0.0, 0.0);
     path.lineTo(w, 0.0);
-    path.moveTo(0.0, baseline);
-    path.lineTo(w, baseline);
     path.moveTo(0.0, h);
     path.lineTo(w, h);
-    Paint paint = new Paint()
+    paint = new Paint()
      ..color = const Color(0xFFFF9000)
      ..style = ui.PaintingStyle.stroke
-     ..strokeWidth = 3.0;
+     ..strokeWidth = 1.5;
+    canvas.drawPath(path, paint);
+
+    // baseline
+    path = new Path();
+    path.moveTo(0.0, baseline);
+    path.lineTo(w, baseline);
+    paint = new Paint()
+     ..color = const Color(0xFF00FF90)
+     ..style = ui.PaintingStyle.stroke
+     ..strokeWidth = 1.5;
     canvas.drawPath(path, paint);
   }
 
@@ -81,8 +94,8 @@ void main() {
       new RenderConstrainedBox(
         additionalConstraints: new BoxConstraints.tightFor(height: 50.0)
       ),
-      getBox(1.0),
       getBox(null),
+      getBox(1.2),
     ],
     direction: FlexDirection.vertical,
     alignItems: FlexAlignItems.stretch

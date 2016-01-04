@@ -16,6 +16,7 @@ class TextStyle {
     this.fontWeight,
     this.fontStyle,
     this.letterSpacing,
+    this.wordSpacing,
     this.textAlign,
     this.textBaseline,
     this.height,
@@ -45,6 +46,9 @@ class TextStyle {
   /// The amount of space to add between each letter.
   final double letterSpacing;
 
+  /// The amount of space to add at each sequence of white-space (i.e. between each word).
+  final double wordSpacing;
+
   /// How the text should be aligned (applies only to the outermost
   /// StyledTextSpan, which establishes the container for the text).
   final TextAlign textAlign;
@@ -73,6 +77,7 @@ class TextStyle {
     FontWeight fontWeight,
     FontStyle fontStyle,
     double letterSpacing,
+    double wordSpacing,
     TextAlign textAlign,
     TextBaseline textBaseline,
     double height,
@@ -88,6 +93,7 @@ class TextStyle {
       fontWeight: fontWeight != null ? fontWeight : this.fontWeight,
       fontStyle: fontStyle != null ? fontStyle : this.fontStyle,
       letterSpacing: letterSpacing != null ? letterSpacing : this.letterSpacing,
+      wordSpacing: wordSpacing != null ? wordSpacing : this.wordSpacing,
       textAlign: textAlign != null ? textAlign : this.textAlign,
       textBaseline: textBaseline != null ? textBaseline : this.textBaseline,
       height: height != null ? height : this.height,
@@ -111,6 +117,7 @@ class TextStyle {
       fontWeight: other.fontWeight,
       fontStyle: other.fontStyle,
       letterSpacing: other.letterSpacing,
+      wordSpacing: other.wordSpacing,
       textAlign: other.textAlign,
       textBaseline: other.textBaseline,
       height: other.height,
@@ -130,7 +137,9 @@ class TextStyle {
       fontStyle: fontStyle,
       fontFamily: fontFamily,
       fontSize: fontSize,
-      letterSpacing: letterSpacing
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      lineHeight: height
     );
   }
 
@@ -155,8 +164,10 @@ class TextStyle {
            fontWeight == typedOther.fontWeight &&
            fontStyle == typedOther.fontStyle &&
            letterSpacing == typedOther.letterSpacing &&
+           wordSpacing == typedOther.wordSpacing &&
            textAlign == typedOther.textAlign &&
            textBaseline == typedOther.textBaseline &&
+           height == typedOther.height &&
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle;
@@ -164,15 +175,17 @@ class TextStyle {
 
   int get hashCode {
     return hashValues(
-      super.hashCode,
+      inherit,
       color,
       fontFamily,
       fontSize,
       fontWeight,
       fontStyle,
       letterSpacing,
+      wordSpacing,
       textAlign,
       textBaseline,
+      height,
       decoration,
       decorationColor,
       decorationStyle
@@ -181,7 +194,7 @@ class TextStyle {
 
   String toString([String prefix = '']) {
     List<String> result = <String>[];
-    result.add('${prefix}inhert: $inherit');
+    result.add('${prefix}inherit: $inherit');
     if (color != null)
       result.add('${prefix}color: $color');
     if (fontFamily != null)
@@ -230,7 +243,9 @@ class TextStyle {
       }
     }
     if (letterSpacing != null)
-      result.add('${prefix}letterSpacing: $letterSpacing');
+      result.add('${prefix}letterSpacing: ${letterSpacing}x');
+    if (wordSpacing != null)
+      result.add('${prefix}wordSpacing: ${wordSpacing}x');
     if (textAlign != null) {
       switch (textAlign) {
         case TextAlign.left:
@@ -254,6 +269,8 @@ class TextStyle {
           break;
       }
     }
+    if (height != null)
+      result.add('${prefix}height: ${height}x');
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       String decorationDescription = '${prefix}decoration: ';
       bool haveDecorationDescription = false;
