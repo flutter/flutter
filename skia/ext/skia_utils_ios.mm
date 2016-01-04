@@ -39,12 +39,6 @@ SkBitmap CGImageToSkBitmap(CGImageRef image, CGSize size, bool is_opaque) {
 
   void* data = bitmap.getPixels();
 
-  // Allocate a bitmap context with 4 components per pixel (BGRA). Apple
-  // recommends these flags for improved CG performance.
-#define HAS_ARGB_SHIFTS(a, r, g, b) \
-            (SK_A32_SHIFT == (a) && SK_R32_SHIFT == (r) \
-             && SK_G32_SHIFT == (g) && SK_B32_SHIFT == (b))
-#if defined(SK_CPU_LENDIAN) && HAS_ARGB_SHIFTS(24, 16, 8, 0)
   base::ScopedCFTypeRef<CGColorSpaceRef> color_space(
       CGColorSpaceCreateDeviceRGB());
   base::ScopedCFTypeRef<CGContextRef> context(CGBitmapContextCreate(
@@ -54,12 +48,7 @@ SkBitmap CGImageToSkBitmap(CGImageRef image, CGSize size, bool is_opaque) {
       8,
       size.width * 4,
       color_space,
-      kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host));
-#else
-#error We require that Skia's and CoreGraphics's recommended \
-       image memory layout match.
-#endif
-#undef HAS_ARGB_SHIFTS
+      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Little));
 
   DCHECK(context);
   if (!context)

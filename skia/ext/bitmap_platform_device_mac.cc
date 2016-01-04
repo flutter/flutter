@@ -23,13 +23,6 @@ namespace skia {
 namespace {
 
 static CGContextRef CGContextForData(void* data, int width, int height) {
-#define HAS_ARGB_SHIFTS(a, r, g, b) \
-            (SK_A32_SHIFT == (a) && SK_R32_SHIFT == (r) \
-             && SK_G32_SHIFT == (g) && SK_B32_SHIFT == (b))
-#if defined(SK_CPU_LENDIAN) && HAS_ARGB_SHIFTS(24, 16, 8, 0)
-  // Allocate a bitmap context with 4 components per pixel (BGRA).  Apple
-  // recommends these flags for improved CG performance.
-
   // CGBitmapContextCreate returns NULL if width/height are 0. However, our
   // callers expect to get a canvas back (which they later resize/reallocate)
   // so we pin the dimensions here.
@@ -38,13 +31,8 @@ static CGContextRef CGContextForData(void* data, int width, int height) {
   CGContextRef context =
       CGBitmapContextCreate(data, width, height, 8, width * 4,
                             base::mac::GetSystemColorSpace(),
-                            kCGImageAlphaPremultipliedFirst |
-                                kCGBitmapByteOrder32Host);
-#else
-#error We require that Skia's and CoreGraphics's recommended \
-       image memory layout match.
-#endif
-#undef HAS_ARGB_SHIFTS
+                            kCGImageAlphaPremultipliedLast |
+                                kCGBitmapByteOrder32Little);
 
   if (!context)
     return NULL;
