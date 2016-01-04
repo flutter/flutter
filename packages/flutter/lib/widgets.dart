@@ -32,6 +32,7 @@ export 'src/widgets/pageable_list.dart';
 export 'src/widgets/placeholder.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/scrollable.dart';
+export 'src/widgets/scrollable_grid.dart';
 export 'src/widgets/statistics_overlay.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/title.dart';

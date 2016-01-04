@@ -76,13 +76,9 @@ class MediaQueryExample extends StatelessComponent {
         items.map((AdaptiveItem item) => item.toListItem()).toList()
       );
     } else {
-      return new Block(
-        <Widget>[
-          new MaxTileWidthGrid(
-            items.map((AdaptiveItem item) => item.toCard()).toList(),
-            maxTileWidth: _maxTileWidth
-          )
-        ]
+      return new ScrollableGrid(
+        children: items.map((AdaptiveItem item) => item.toCard()).toList(),
+        delegate: new MaxTileWidthGridDelegate(maxTileWidth: _maxTileWidth)
       );
     }
   }

@@ -79,6 +79,7 @@ abstract class _ViewportBaseElement<T extends _ViewportBase> extends RenderObjec
   void update(T newWidget) {
     bool needLayout = newWidget.isLayoutDifferentThan(widget);
     super.update(newWidget);
+    // TODO(abarth): Don't we need to update overlayPainter here?
     if (needLayout)
       renderObject.markNeedsLayout();
     else
