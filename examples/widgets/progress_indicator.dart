@@ -5,6 +5,13 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
+final Tween _kValueTween = new Tween<double>(
+  begin: 0.0,
+  end: 1.0,
+  curve: const Interval(0.0, 0.9, curve: Curves.ease),
+  reverseCurve: Curves.ease
+);
+
 class ProgressIndicatorApp extends StatefulComponent {
   ProgressIndicatorAppState createState() => new ProgressIndicatorAppState();
 }
@@ -12,22 +19,17 @@ class ProgressIndicatorApp extends StatefulComponent {
 class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
   void initState() {
     super.initState();
-    valueAnimation = new ValuePerformance<double>()
+    valueAnimation = new Performance()
       ..duration = const Duration(milliseconds: 1500)
-      ..variable = new AnimatedValue<double>(
-        0.0,
-        end: 1.0,
-        curve: new Interval(0.0, 0.9, curve: Curves.ease),
-        reverseCurve: Curves.ease
-      );
-    valueAnimation.addStatusListener((PerformanceStatus status) {
-      if (status == PerformanceStatus.dismissed || status == PerformanceStatus.completed)
-        reverseValueAnimationDirection();
-    });
-    valueAnimation.play(valueAnimationDirection);
+      ..addStatusListener((PerformanceStatus status) {
+        if (status == PerformanceStatus.dismissed
+            || status == PerformanceStatus.completed)
+          reverseValueAnimationDirection();
+      })
+      ..play(valueAnimationDirection);
   }
 
-  ValuePerformance<double> valueAnimation;
+  Performance valueAnimation;
   AnimationDirection valueAnimationDirection = AnimationDirection.forward;
 
   void handleTap() {
@@ -48,6 +50,7 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
   }
 
   Widget buildIndicators(BuildContext context) {
+    double value = _kValueTween.evaluate(valueAnimation);
     List<Widget> indicators = <Widget>[
         new SizedBox(
           width: 200.0,
@@ -55,19 +58,19 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
         ),
         new LinearProgressIndicator(),
         new LinearProgressIndicator(),
-        new LinearProgressIndicator(value: valueAnimation.value),
+        new LinearProgressIndicator(value: value),
         new CircularProgressIndicator(),
         new SizedBox(
             width: 20.0,
             height: 20.0,
-            child: new CircularProgressIndicator(value: valueAnimation.value)
+            child: new CircularProgressIndicator(value: value)
         ),
         new SizedBox(
           width: 50.0,
           height: 30.0,
-          child: new CircularProgressIndicator(value: valueAnimation.value)
+          child: new CircularProgressIndicator(value: value)
         ),
-        new Text("${(valueAnimation.value * 100.0).toStringAsFixed(1)}%" + (valueAnimation.isAnimating ? '' : ' (paused)'))
+        new Text("${(value* 100.0).toStringAsFixed(1)}%" + (valueAnimation.isAnimating ? '' : ' (paused)'))
     ];
     return new Column(
       indicators
@@ -83,7 +86,6 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
         child: new BuilderTransition(
-          variables: <AnimatedValue<double>>[valueAnimation.variable],
           performance: valueAnimation.view,
           builder: buildIndicators
         )
