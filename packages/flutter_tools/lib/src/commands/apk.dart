@@ -20,8 +20,12 @@ import 'start.dart';
 const String _kDefaultAndroidManifestPath = 'apk/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
 const String _kDefaultResourcesPath = 'apk/res';
-const String _kKeystoreKeyName = "chromiumdebugkey";
-const String _kKeystorePassword = "chromium";
+
+// Alias of the key provided in the Chromium debug keystore
+const String _kDebugKeystoreKeyAlias = "chromiumdebugkey";
+
+// Password for the Chromium debug keystore
+const String _kDebugKeystorePassword = "chromium";
 
 const String _kAndroidPlatformVersion = '22';
 const String _kBuildToolsVersion = '22.0.1';
@@ -83,12 +87,13 @@ class _ApkBuilder {
     runCheckedSync(packageArgs);
   }
 
-  void sign(File keystore, String keystorePassword, String keyName, File outputApk) {
+  void sign(File keystore, String keystorePassword, String keyAlias, String keyPassword, File outputApk) {
     runCheckedSync([_jarsigner,
       '-keystore', keystore.path,
       '-storepass', keystorePassword,
+      '-keypass', keyPassword,
       outputApk.path,
-      keyName,
+      keyAlias,
     ]);
   }
 
@@ -103,7 +108,7 @@ class _ApkComponents {
   File icuData;
   File classesDex;
   File libSkyShell;
-  File keystore;
+  File debugKeystore;
   Directory resources;
 }
 
@@ -132,6 +137,18 @@ class ApkCommand extends FlutterCommand {
         abbr: 'f',
         defaultsTo: '',
         help: 'Path to the FLX file. If this is not provided, an FLX will be built.');
+    argParser.addOption('keystore',
+        defaultsTo: '',
+        help: 'Path to the keystore used to sign the app.');
+    argParser.addOption('keystore-password',
+        defaultsTo: '',
+        help: 'Password used to access the keystore.');
+    argParser.addOption('keystore-key-alias',
+        defaultsTo: '',
+        help: 'Alias of the entry within the keystore.');
+    argParser.addOption('keystore-key-password',
+        defaultsTo: '',
+        help: 'Password for the entry within the keystore.');
   }
 
   Future<_ApkComponents> _findApkComponents(BuildConfiguration config) async {
@@ -168,7 +185,7 @@ class ApkCommand extends FlutterCommand {
     components.icuData = new File(artifactPaths[0]);
     components.classesDex = new File(artifactPaths[1]);
     components.libSkyShell = new File(artifactPaths[2]);
-    components.keystore = new File(artifactPaths[3]);
+    components.debugKeystore = new File(artifactPaths[3]);
     components.resources = new Directory(argResults['resources']);
 
     if (!components.resources.existsSync()) {
@@ -188,7 +205,7 @@ class ApkCommand extends FlutterCommand {
       return null;
     }
     for (File f in [components.manifest, components.icuData, components.classesDex,
-                    components.libSkyShell, components.keystore]) {
+                    components.libSkyShell, components.debugKeystore]) {
       if (!f.existsSync()) {
         logging.severe('Can not locate file: ${f.path}');
         return null;
@@ -213,7 +230,10 @@ class ApkCommand extends FlutterCommand {
       File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
       builder.package(unalignedApk, components.manifest, assetBuilder.directory,
                       artifactBuilder.directory, components.resources);
-      builder.sign(components.keystore, _kKeystorePassword, _kKeystoreKeyName, unalignedApk);
+
+      int signResult = _signApk(builder, components, unalignedApk);
+      if (signResult != 0)
+        return signResult;
 
       File finalApk = new File(argResults['output-file']);
       ensureDirectoryExists(finalApk.path);
@@ -225,6 +245,36 @@ class ApkCommand extends FlutterCommand {
     } finally {
       tempDir.deleteSync(recursive: true);
     }
+  }
+
+  int _signApk(_ApkBuilder builder, _ApkComponents components, File apk) {
+    File keystore;
+    String keystorePassword;
+    String keyAlias;
+    String keyPassword;
+
+    if (argResults['keystore'].isEmpty) {
+      logging.warning('Signing the APK using the debug keystore');
+      keystore = components.debugKeystore;
+      keystorePassword = _kDebugKeystorePassword;
+      keyAlias = _kDebugKeystoreKeyAlias;
+      keyPassword = _kDebugKeystorePassword;
+    } else {
+      keystore = new File(argResults['keystore']);
+      keystorePassword = argResults['keystore-password'];
+      keyAlias = argResults['keystore-key-alias'];
+      if (keystorePassword.isEmpty || keyAlias.isEmpty) {
+        logging.severe('Must provide a keystore password and a key alias');
+        return 1;
+      }
+      keyPassword = argResults['keystore-key-password'];
+      if (keyPassword.isEmpty)
+        keyPassword = keystorePassword;
+    }
+
+    builder.sign(keystore, keystorePassword, keyAlias, keyPassword, apk);
+
+    return 0;
   }
 
   @override
