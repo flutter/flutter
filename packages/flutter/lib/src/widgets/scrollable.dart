@@ -91,9 +91,6 @@ abstract class Scrollable extends StatefulComponent {
         Point scrollableCenter = scrollableBox.localToGlobal(new Point(scrollableSize.width / 2.0, 0.0));
         scrollOffsetDelta = targetCenter.x - scrollableCenter.x;
         break;
-      case ScrollDirection.both:
-        assert(false); // See https://github.com/flutter/engine/issues/888
-        break;
     }
 
     ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;

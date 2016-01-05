@@ -319,9 +319,6 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
         return childRenderObject.getMaxIntrinsicHeight(innerConstraints);
       case ScrollDirection.horizontal:
         return childRenderObject.getMaxIntrinsicWidth(innerConstraints);
-      case ScrollDirection.both:
-        assert(false); // we don't support ScrollDirection.both, see issue 888
-        return double.NAN;
     }
   }
 
@@ -331,9 +328,6 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
         return new BoxConstraints.tightFor(width: constraints.constrainWidth());
       case ScrollDirection.horizontal:
         return new BoxConstraints.tightFor(height: constraints.constrainHeight());
-      case ScrollDirection.both:
-        assert(false); // we don't support ScrollDirection.both, see issue 888
-        return null;
     }
   }
 
@@ -373,7 +367,6 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
           'width (e.g. inside something else that scrolls horizontally), because it would then just eagerly build ' +
           'all the children. You probably want to put the MixedViewport inside a Container with a fixed width.' is String);
         break;
-      case ScrollDirection.both: assert(false); // we don't support ScrollDirection.both, see issue 888
     }
     final double endOffset = widget.startOffset + extent;
 
@@ -523,7 +516,6 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
         case ScrollDirection.horizontal:
           renderObject.direction = BlockDirection.horizontal;
           break;
-        case ScrollDirection.both: assert(false); // we don't support ScrollDirection.both, see issue 888
       }
       renderObject.startOffset = _childOffsets[index] - widget.startOffset;
       // Build all the widgets we still need.
