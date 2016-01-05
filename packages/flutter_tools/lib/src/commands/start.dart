@@ -46,7 +46,12 @@ abstract class StartCommandBase extends FlutterCommand {
     }
   }
 
-  Future<int> startApp({ bool stop: true, bool install: true, bool poke: false }) async {
+  Future<int> startApp({
+    bool stop: true,
+    bool install: true,
+    bool poke: false,
+    bool clearLogs: false
+  }) async {
 
     String mainPath = findMainDartFile(argResults['target']);
     if (!FileSystemEntity.isFileSync(mainPath)) {
@@ -63,7 +68,7 @@ abstract class StartCommandBase extends FlutterCommand {
       stopper.inheritFromParent(this);
       stopper.stop();
     }
- 
+
     if (install) {
       logging.fine('Running install command.');
       InstallCommand installer = new InstallCommand();
@@ -90,7 +95,8 @@ abstract class StartCommandBase extends FlutterCommand {
                                         poke: poke,
                                         checked: argResults['checked'],
                                         traceStartup: argResults['trace-startup'],
-                                        route: argResults['route']))
+                                        route: argResults['route'],
+                                        clearLogs: clearLogs))
             startedSomething = true;
         }
       );
@@ -110,12 +116,15 @@ abstract class StartCommandBase extends FlutterCommand {
 
 class StartCommand extends StartCommandBase {
   final String name = 'start';
-  final String description = 'Start your Flutter app on attached devices. (Android only.)';
+  final String description = 'Start your Flutter app on attached devices (Android only).';
 
   StartCommand() {
     argParser.addFlag('poke',
         negatable: false,
         help: 'Restart the connection to the server.');
+    argParser.addFlag('clear-logs',
+        defaultsTo: true,
+        help: 'Clear log history before starting the app.');
   }
 
   @override
@@ -128,9 +137,10 @@ class StartCommand extends StartCommandBase {
     ]);
 
     bool poke = argResults['poke'];
+    bool clearLogs = argResults['clear-logs'];
 
     // Only stop and reinstall if the user did not specify a poke
-    int result = await startApp(stop: !poke, install: !poke, poke: poke);
+    int result = await startApp(stop: !poke, install: !poke, poke: poke, clearLogs: clearLogs);
 
     logging.fine('Finished start command.');
     return result;

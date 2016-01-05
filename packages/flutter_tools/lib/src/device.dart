@@ -776,10 +776,11 @@ class AndroidDevice extends Device {
   }
 
   bool startBundle(AndroidApk apk, String bundlePath, {
-    bool poke,
-    bool checked,
-    bool traceStartup,
-    String route
+    bool poke: false,
+    bool checked: true,
+    bool traceStartup: false,
+    String route,
+    bool clearLogs: false
   }) {
     logging.fine('$this startBundle');
 
@@ -791,6 +792,9 @@ class AndroidDevice extends Device {
     if (!poke)
       _forwardObservatoryPort();
 
+    if (clearLogs)
+      this.clearLogs();
+
     String deviceTmpPath = '/data/local/tmp/dev.flx';
     runCheckedSync(adbCommandForDevice(['push', bundlePath, deviceTmpPath]));
     List<String> cmd = adbCommandForDevice([
@@ -801,7 +805,7 @@ class AndroidDevice extends Device {
     if (checked)
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
     if (traceStartup)
-        cmd.addAll(['--ez', 'trace-startup', 'true']);
+      cmd.addAll(['--ez', 'trace-startup', 'true']);
     if (route != null)
       cmd.addAll(['--es', 'route', route]);
     cmd.add(apk.launchActivity);
