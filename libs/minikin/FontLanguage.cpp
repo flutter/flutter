@@ -88,7 +88,7 @@ uint8_t FontLanguage::scriptToSubScriptBits(uint32_t script) {
         case SCRIPT_TAG('K', 'o', 'r', 'e'):
             subScriptBits = kHanFlag | kHangulFlag;
             break;
-        case SCRIPT_TAG('Q', 'a', 'a', 'e'):
+        case SCRIPT_TAG('Z', 's', 'y', 'e'):
             subScriptBits = kEmojiFlag;
             break;
     }
