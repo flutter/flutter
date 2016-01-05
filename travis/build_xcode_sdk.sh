@@ -5,6 +5,37 @@
 
 set -ex
 
+# When run using the Xcode Bot, the TARGET_TEMP_DIR variable is set. If not,
+# use /tmp
+WORKSPACE=${TARGET_TEMP_DIR}/tmp/flutter_build_workspace
+DEPOT_WORKSPACE=${TARGET_TEMP_DIR}/tmp/flutter_depot_tools
+
+function NukeWorkspace {
+  rm -rf ${WORKSPACE}
+  rm -rf ${DEPOT_WORKSPACE}
+}
+
+trap NukeWorkspace EXIT
+
+NukeWorkspace
+
+# Create a separate workspace for gclient
+mkdir -p ${WORKSPACE}
+cp -a . ${WORKSPACE}/src
+cp travis/gclient ${WORKSPACE}/.gclient
+
+# Move into the fresh workspace
+pushd ${WORKSPACE}/src
+
+# Setup Depot tools
+rm -rf ${DEPOT_WORKSPACE}
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ${DEPOT_WORKSPACE}
+PATH="${DEPOT_WORKSPACE}:$PATH"
+
+# Sync dependencies
+gclient sync
+
+# Setup Goma if available
 GOMA_FLAGS="-j900"
 if [[ -z "$GOMA_DIR" ]]; then
   GOMA_FLAGS=""
@@ -30,5 +61,14 @@ cp -R out/ios_Release/Flutter out/FlutterXcode
 
 # Package it into a ZIP file for the builder to upload to cloud storage
 pushd out/FlutterXcode
+
 zip -r FlutterXcode.zip Flutter
-popd
+
+# When built for archiving, the DSTROOT is set by Xcode.
+if [[ ! -z ${DSTROOT} ]]; then
+  mv FlutterXcode.zip ${DSTROOT}
+fi
+
+popd # Out of the Xcode project
+
+popd # Out of the workspace

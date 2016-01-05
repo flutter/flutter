@@ -1,0 +1,112 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXGroup section */
+		9E687EA21C3C6D9A00FBE171 = {
+			isa = PBXGroup;
+			children = (
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		9E687EA71C3C6D9A00FBE171 /* bot */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = travis/build_xcode_sdk.sh;
+			buildConfigurationList = 9E687EAA1C3C6D9A00FBE171 /* Build configuration list for PBXLegacyTarget "bot" */;
+			buildPhases = (
+			);
+			buildToolPath = /bin/sh;
+			buildWorkingDirectory = ..;
+			dependencies = (
+			);
+			name = bot;
+			passBuildSettingsInEnvironment = 1;
+			productName = bot;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		9E687EA31C3C6D9A00FBE171 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = Flutter;
+				TargetAttributes = {
+					9E687EA71C3C6D9A00FBE171 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+				};
+			};
+			buildConfigurationList = 9E687EA61C3C6D9A00FBE171 /* Build configuration list for PBXProject "bot" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9E687EA21C3C6D9A00FBE171;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9E687EA71C3C6D9A00FBE171 /* bot */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		9E687EA81C3C6D9A00FBE171 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		9E687EA91C3C6D9A00FBE171 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		9E687EAB1C3C6D9A00FBE171 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		9E687EAC1C3C6D9A00FBE171 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9E687EA61C3C6D9A00FBE171 /* Build configuration list for PBXProject "bot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E687EA81C3C6D9A00FBE171 /* Debug */,
+				9E687EA91C3C6D9A00FBE171 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9E687EAA1C3C6D9A00FBE171 /* Build configuration list for PBXLegacyTarget "bot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E687EAB1C3C6D9A00FBE171 /* Debug */,
+				9E687EAC1C3C6D9A00FBE171 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9E687EA31C3C6D9A00FBE171 /* Project object */;
+}
