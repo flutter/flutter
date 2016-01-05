@@ -72,13 +72,14 @@ class MediaQueryExample extends StatelessComponent {
       items.add(new AdaptiveItem("Item $i"));
 
     if (MediaQuery.of(context).size.width < _gridViewBreakpoint) {
-      return new Block(
-        items.map((AdaptiveItem item) => item.toListItem()).toList()
+      return new ScrollableList2(
+        itemExtent: 50.0,
+        children: items.map((AdaptiveItem item) => item.toListItem()).toList()
       );
     } else {
       return new ScrollableGrid(
-        children: items.map((AdaptiveItem item) => item.toCard()).toList(),
-        delegate: new MaxTileWidthGridDelegate(maxTileWidth: _maxTileWidth)
+        delegate: new MaxTileWidthGridDelegate(maxTileWidth: _maxTileWidth),
+        children: items.map((AdaptiveItem item) => item.toCard()).toList()
       );
     }
   }

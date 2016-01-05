@@ -4,9 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'basic.dart';
 import 'framework.dart';
 import 'scrollable.dart';
+import 'virtual_viewport.dart';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
@@ -38,11 +38,11 @@ class ScrollableGrid extends Scrollable {
   final GridDelegate delegate;
   final List<Widget> children;
 
-  ScrollableState createState() => new _ScrollableGrid();
+  ScrollableState createState() => new _ScrollableGridState();
 }
 
-class _ScrollableGrid extends ScrollableState<ScrollableGrid> {
-  ScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
@@ -65,9 +65,7 @@ class _ScrollableGrid extends ScrollableState<ScrollableGrid> {
   }
 }
 
-typedef void ExtentsChangedCallback(double contentExtent, double containerExtent);
-
-class GridViewport extends RenderObjectWidget {
+class GridViewport extends VirtualViewport {
   GridViewport({
     Key key,
     this.startOffset,
@@ -87,6 +85,7 @@ class GridViewport extends RenderObjectWidget {
 }
 
 // TODO(abarth): This function should go somewhere more general.
+// See https://github.com/dart-lang/collection/pull/16
 int _lowerBound(List sortedList, var value, { int begin: 0 }) {
   int current = begin;
   int count = sortedList.length - current;
@@ -103,82 +102,31 @@ int _lowerBound(List sortedList, var value, { int begin: 0 }) {
   return current;
 }
 
-class _GridViewportElement extends RenderObjectElement<GridViewport> {
+class _GridViewportElement extends VirtualViewportElement<GridViewport> {
   _GridViewportElement(GridViewport widget) : super(widget);
-
-  double _contentExtent;
-  double _containerExtent;
-
-  int _materializedChildBase;
-  int _materializedChildCount;
-
-  List<Element> _materializedChildren = const <Element>[];
-
-  GridSpecification _specification;
-  double _repaintOffsetBase;
-  double _repaintOffsetLimit;
 
   RenderGrid get renderObject => super.renderObject;
 
-  void visitChildren(ElementVisitor visitor) {
-    if (_materializedChildren == null)
-      return;
-    for (Element child in _materializedChildren)
-      visitor(child);
-  }
+  int get materializedChildBase => _materializedChildBase;
+  int _materializedChildBase;
 
-  void mount(Element parent, dynamic newSlot) {
-    super.mount(parent, newSlot);
-    renderObject.callback = layout;
-    _updateRenderObject();
-  }
+  int get materializedChildCount => _materializedChildCount;
+  int _materializedChildCount;
 
-  void unmount() {
-    renderObject.callback = null;
-    super.unmount();
-  }
+  double get repaintOffsetBase => _repaintOffsetBase;
+  double _repaintOffsetBase;
 
-  void update(GridViewport newWidget) {
-    super.update(newWidget);
-    _updateRenderObject();
-    if (!renderObject.needsLayout)
-      _materializeChildren();
-  }
+  double get repaintOffsetLimit =>_repaintOffsetLimit;
+  double _repaintOffsetLimit;
 
-  void _updatePaintOffset() {
-    renderObject.paintOffset = new Offset(0.0, -(widget.startOffset - _repaintOffsetBase));
-  }
-
-  void _updateRenderObject() {
+  void updateRenderObject() {
     renderObject.delegate = widget.delegate;
-    renderObject.virtualChildCount = widget.children.length;
-
-    if (_specification != null) {
-      _updatePaintOffset();
-
-      // If we don't already need layout, we need to request a layout if the
-      // viewport has shifted to expose a new row.
-      if (!renderObject.needsLayout) {
-        if (_repaintOffsetBase != null && widget.startOffset < _repaintOffsetBase)
-          renderObject.markNeedsLayout();
-        else if (_repaintOffsetLimit != null && widget.startOffset + _containerExtent > _repaintOffsetLimit)
-          renderObject.markNeedsLayout();
-      }
-    }
+    super.updateRenderObject();
   }
 
-  void _materializeChildren() {
-    assert(_materializedChildBase != null);
-    assert(_materializedChildCount != null);
-    List<Widget> newWidgets = new List<Widget>(_materializedChildCount);
-    for (int i = 0; i < _materializedChildCount; ++i) {
-      int childIndex = _materializedChildBase + i;
-      Widget child = widget.children[childIndex];
-      Key key = new ValueKey(child.key ?? childIndex);
-      newWidgets[i] = new RepaintBoundary(key: key, child: child);
-    }
-    _materializedChildren = updateChildren(_materializedChildren, newWidgets);
-  }
+  double _contentExtent;
+  double _containerExtent;
+  GridSpecification _specification;
 
   void layout(BoxConstraints constraints) {
     _specification = renderObject.specification;
@@ -188,34 +136,17 @@ class _GridViewportElement extends RenderObjectElement<GridViewport> {
     int materializedRowBase = math.max(0, _lowerBound(_specification.rowOffsets, widget.startOffset) - 1);
     int materializedRowLimit = math.min(_specification.rowCount, _lowerBound(_specification.rowOffsets, widget.startOffset + containerExtent));
 
-    _materializedChildBase = materializedRowBase * _specification.columnCount;
-    _materializedChildCount = math.min(widget.children.length, materializedRowLimit * _specification.columnCount) - _materializedChildBase;
+    _materializedChildBase = (materializedRowBase * _specification.columnCount).clamp(0, widget.children.length);
+    _materializedChildCount = (materializedRowLimit * _specification.columnCount).clamp(0, widget.children.length) - _materializedChildBase;
     _repaintOffsetBase = _specification.rowOffsets[materializedRowBase];
     _repaintOffsetLimit = _specification.rowOffsets[materializedRowLimit];
-    _updatePaintOffset();
 
-    BuildableElement.lockState(_materializeChildren);
+    super.layout(constraints);
 
     if (contentExtent != _contentExtent || containerExtent != _containerExtent) {
       _contentExtent = contentExtent;
       _containerExtent = containerExtent;
       widget.onExtentsChanged(_contentExtent, _containerExtent);
     }
-  }
-
-  void insertChildRenderObject(RenderObject child, Element slot) {
-    RenderObject nextSibling = slot?.renderObject;
-    renderObject.add(child, before: nextSibling);
-  }
-
-  void moveChildRenderObject(RenderObject child, Element slot) {
-    assert(child.parent == renderObject);
-    RenderObject nextSibling = slot?.renderObject;
-    renderObject.move(child, before: nextSibling);
-  }
-
-  void removeChildRenderObject(RenderObject child) {
-    assert(child.parent == renderObject);
-    renderObject.remove(child);
   }
 }
