@@ -28,21 +28,12 @@ android_java_prebuilt("uiautomator_java") {
   jar_path = "$android_sdk/uiautomator.jar"
 }
 
-android_resources("android_support_design_resources") {
-  v14_skip = true
-  resource_dirs = [ "$android_sdk_root/extras/android/support/design/res" ]
-  deps = [
-    ":android_support_v7_appcompat_resources",
-  ]
-  custom_package = "android.support.design"
+android_java_prebuilt("android_support_annotations_javalib") {
+  jar_path = "$android_sdk_root/extras/android/support/annotations/android-support-annotations.jar"
 }
 
-android_java_prebuilt("android_support_design_java") {
-  deps = [
-    ":android_support_v7_appcompat_java",
-    ":android_support_design_resources",
-  ]
-  jar_path = "$android_sdk_root/extras/android/support/design/libs/android-support-design.jar"
+java_prebuilt("android_support_multidex_java") {
+  jar_path = "$android_sdk_root/extras/android/support/multidex/library/libs/android-support-multidex.jar"
 }
 
 android_java_prebuilt("android_support_v13_java") {
@@ -108,30 +99,6 @@ android_java_prebuilt("google_play_services_default_java") {
     ":android_support_v7_mediarouter_java",
     ":google_play_services_default_resources",
   ]
-  proguard_preprocess = true
-  proguard_config = "//third_party/android_tools/proguard.flags"
-
-  # TODO(dgn) deps should not complain about having a custom action here
-  # Currently, there is no guarantee that the data_deps actions will complete before the current one runs
-  data_deps = [ ":check_sdk_extras_version" ]
+  proguard_preprocess = false
   jar_path = "$android_sdk_root/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"
-}
-
-action("check_sdk_extras_version") {
-  script = "//build/check_sdk_extras_version.py"
-  args = [
-    "--package-id",
-    "extra-google-google_play_services",
-    "--package-location",
-    rebase_path("$android_sdk_root/extras/google/google_play_services"),
-    "--stamp",
-    rebase_path("$target_gen_dir/checked_sdk_extras_version.stamp"),
-  ]
-  inputs = [
-    "//build/android_sdk_extras.json",
-    "$android_sdk_root/extras/google/google_play_services/source.properties",
-  ]
-  outputs = [
-    "$target_gen_dir/checked_sdk_extras_version.stamp",
-  ]
 }
