@@ -36,7 +36,7 @@ typedef double _Constrainer(double value);
 abstract class RenderBlockBase extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData>
-    implements RenderScrollable {
+    implements HasScrollDirection {
 
   RenderBlockBase({
     List<RenderBox> children,

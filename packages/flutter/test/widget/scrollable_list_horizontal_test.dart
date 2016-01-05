@@ -13,16 +13,14 @@ Widget buildFrame() {
   return new Center(
     child: new Container(
       height: 50.0,
-      child: new ScrollableList<int>(
-        items: items,
-        itemBuilder: (BuildContext context, int item, int index) {
+      child: new ScrollableList2(
+        itemExtent: 290.0,
+        scrollDirection: ScrollDirection.horizontal,
+        children: items.map((int item) {
           return new Container(
-            key: new ValueKey<int>(item),
             child: new Text('$item')
           );
-        },
-        itemExtent: 290.0,
-        scrollDirection: ScrollDirection.horizontal
+        })
       )
     )
   );

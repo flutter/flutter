@@ -18,7 +18,7 @@ enum ScrollDirection {
   vertical,
 }
 
-abstract class RenderScrollable {
+abstract class HasScrollDirection {
   ScrollDirection get scrollDirection;
 }
 
@@ -32,7 +32,7 @@ abstract class RenderScrollable {
 /// Viewport is the core scrolling primitive in the system, but it can be used
 /// in other situations.
 class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox>
-    implements RenderScrollable {
+    implements HasScrollDirection {
 
   RenderViewport({
     RenderBox child,

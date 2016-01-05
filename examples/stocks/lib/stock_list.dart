@@ -14,10 +14,9 @@ class StockList extends StatelessComponent {
   final StockRowActionCallback onAction;
 
   Widget build(BuildContext context) {
-    return new ScrollableList<Stock>(
-      items: stocks,
+    return new ScrollableList2(
       itemExtent: StockRow.kHeight,
-      itemBuilder: (BuildContext context, Stock stock, int index) {
+      children: stocks.map((Stock stock) {
         return new StockRow(
           keySalt: keySalt,
           stock: stock,
@@ -25,7 +24,7 @@ class StockList extends StatelessComponent {
           onDoubleTap: onShow,
           onLongPressed: onAction
         );
-      }
+      })
     );
   }
 }

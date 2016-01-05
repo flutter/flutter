@@ -99,16 +99,15 @@ void main() {
 
       (key.currentState as StateMarkerState).marker = "marked";
 
-      tester.pumpWidget(new ScrollableList<int>(
-        items: <int>[0],
+      tester.pumpWidget(new ScrollableList2(
         itemExtent: 100.0,
-        itemBuilder: (BuildContext context, int item, int index) {
-          return new Container(
+        children: <Widget>[
+          new Container(
             key: new Key('container'),
             height: 100.0,
             child: new StateMarker(key: key)
-          );
-        }
+          )
+        ]
       ));
 
       expect((key.currentState as StateMarkerState).marker, equals("marked"));

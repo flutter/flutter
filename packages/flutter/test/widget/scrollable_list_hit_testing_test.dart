@@ -17,20 +17,18 @@ void main() {
       tester.pumpWidget(new Center(
         child: new Container(
           height: 50.0,
-          child: new ScrollableList<int>(
+          child: new ScrollableList2(
             key: new GlobalKey(),
-            items: items,
-            itemBuilder: (BuildContext context, int item, int index) {
+            itemExtent: 290.0,
+            scrollDirection: ScrollDirection.horizontal,
+            children: items.map((int item) {
               return new Container(
-                key: new ValueKey<int>(item),
                 child: new GestureDetector(
                   onTap: () { tapped.add(item); },
                   child: new Text('$item')
                 )
               );
-            },
-            itemExtent: 290.0,
-            scrollDirection: ScrollDirection.horizontal
+            })
           )
         )
       ));
@@ -59,20 +57,18 @@ void main() {
       tester.pumpWidget(new Center(
         child: new Container(
           width: 50.0,
-          child: new ScrollableList<int>(
+          child: new ScrollableList2(
             key: new GlobalKey(),
-            items: items,
-            itemBuilder: (BuildContext context, int item, int index) {
+            itemExtent: 290.0,
+            scrollDirection: ScrollDirection.vertical,
+            children: items.map((int item) {
               return new Container(
-                key: new ValueKey<int>(item),
                 child: new GestureDetector(
                   onTap: () { tapped.add(item); },
                   child: new Text('$item')
                 )
               );
-            },
-            itemExtent: 290.0,
-            scrollDirection: ScrollDirection.vertical
+            })
           )
         )
       ));

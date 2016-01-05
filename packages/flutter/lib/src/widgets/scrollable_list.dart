@@ -39,7 +39,7 @@ class ScrollableList2 extends Scrollable {
   final bool itemsWrap;
   final EdgeDims padding;
   final ScrollableListPainter scrollableListPainter;
-  final List<Widget> children;
+  final Iterable<Widget> children;
 
   ScrollableState createState() => new _ScrollableList2State();
 }
@@ -111,7 +111,7 @@ class ListViewport extends VirtualViewport {
   final bool itemsWrap;
   final EdgeDims padding;
   final Painter overlayPainter;
-  final List<Widget> children;
+  final Iterable<Widget> children;
 
   RenderList createRenderObject() => new RenderList(itemExtent: itemExtent);
 
@@ -156,14 +156,14 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
   }
 
   void layout(BoxConstraints constraints) {
-    double contentExtent = widget.itemExtent * widget.children.length;
+    int length = renderObject.virtualChildCount;
+    double contentExtent = widget.itemExtent * length;
     double containerExtent = _getContainerExtentFromRenderObject();
 
     _materializedChildBase = math.max(0, widget.startOffset ~/ widget.itemExtent);
     int materializedChildLimit = math.max(0, ((widget.startOffset + containerExtent) / widget.itemExtent).ceil());
 
     if (!widget.itemsWrap) {
-      int length = widget.children.length;
       _materializedChildBase = math.min(length, _materializedChildBase);
       materializedChildLimit = math.min(length, materializedChildLimit);
     }

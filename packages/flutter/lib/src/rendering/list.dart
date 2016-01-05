@@ -11,7 +11,7 @@ import 'viewport.dart';
 /// Parent data for use with [RenderList].
 class ListParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
-class RenderList extends RenderVirtualViewport<ListParentData> implements RenderScrollable {
+class RenderList extends RenderVirtualViewport<ListParentData> implements HasScrollDirection {
   RenderList({
     List<RenderBox> children,
     double itemExtent,

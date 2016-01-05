@@ -446,14 +446,15 @@ class Block extends StatelessComponent {
 abstract class ScrollableListPainter extends Painter {
   void attach(RenderObject renderObject) {
     assert(renderObject is RenderBox);
-    assert(renderObject is RenderScrollable);
+    assert(renderObject is HasScrollDirection);
     super.attach(renderObject);
   }
 
   RenderBox get renderObject => super.renderObject;
 
   ScrollDirection get scrollDirection {
-    return (renderObject as RenderScrollable)?.scrollDirection;
+    HasScrollDirection scrollable = renderObject as dynamic;
+    return scrollable?.scrollDirection;
   }
 
   Size get viewportSize => renderObject.size;

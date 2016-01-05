@@ -36,7 +36,7 @@ class ScrollableGrid extends Scrollable {
   );
 
   final GridDelegate delegate;
-  final List<Widget> children;
+  final Iterable<Widget> children;
 
   ScrollableState createState() => new _ScrollableGridState();
 }
@@ -77,7 +77,7 @@ class GridViewport extends VirtualViewport {
   final double startOffset;
   final GridDelegate delegate;
   final ExtentsChangedCallback onExtentsChanged;
-  final List<Widget> children;
+  final Iterable<Widget> children;
 
   // TODO(abarth): Support horizontal scrolling;
   ScrollDirection get scrollDirection => ScrollDirection.vertical;
@@ -139,8 +139,8 @@ class _GridViewportElement extends VirtualViewportElement<GridViewport> {
     int materializedRowBase = math.max(0, _lowerBound(_specification.rowOffsets, widget.startOffset) - 1);
     int materializedRowLimit = math.min(_specification.rowCount, _lowerBound(_specification.rowOffsets, widget.startOffset + containerExtent));
 
-    _materializedChildBase = (materializedRowBase * _specification.columnCount).clamp(0, widget.children.length);
-    _materializedChildCount = (materializedRowLimit * _specification.columnCount).clamp(0, widget.children.length) - _materializedChildBase;
+    _materializedChildBase = (materializedRowBase * _specification.columnCount).clamp(0, renderObject.virtualChildCount);
+    _materializedChildCount = (materializedRowLimit * _specification.columnCount).clamp(0, renderObject.virtualChildCount) - _materializedChildBase;
     _repaintOffsetBase = _specification.rowOffsets[materializedRowBase];
     _repaintOffsetLimit = _specification.rowOffsets[materializedRowLimit];
 

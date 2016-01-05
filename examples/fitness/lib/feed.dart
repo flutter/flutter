@@ -14,11 +14,10 @@ class FitnessItemList extends StatelessComponent {
   final FitnessItemHandler onDismissed;
 
   Widget build(BuildContext context) {
-    return new ScrollableList<FitnessItem>(
+    return new ScrollableList2(
       padding: const EdgeDims.all(4.0),
-      items: items,
       itemExtent: kFitnessItemHeight,
-      itemBuilder: (BuildContext context, FitnessItem item, int index) => item.toRow(onDismissed: onDismissed)
+      children: items.map((FitnessItem item) => item.toRow(onDismissed: onDismissed))
     );
   }
 }
