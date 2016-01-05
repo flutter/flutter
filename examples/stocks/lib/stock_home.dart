@@ -161,16 +161,14 @@ class StockHomeState extends State<StockHome> {
           onPressed: _handleMenuShow
         )
       ],
-      tabBar: new TabBar(
-        labels: <TabLabel>[
-          new TabLabel(text: StockStrings.of(context).market()),
-          new TabLabel(text: StockStrings.of(context).portfolio())
-        ]
+      tabBar: new TabBar<StockHomeTab>(
+        labels: <StockHomeTab, TabLabel>{
+          StockHomeTab.market: new TabLabel(text: StockStrings.of(context).market()),
+          StockHomeTab.portfolio: new TabLabel(text: StockStrings.of(context).portfolio())
+        }
       )
     );
   }
-
-  int selectedTabIndex = 0;
 
   Iterable<Stock> _getStockList(Iterable<String> symbols) {
     return symbols.map((String symbol) => config.stocks[symbol])
@@ -266,8 +264,8 @@ class StockHomeState extends State<StockHome> {
   }
 
   Widget build(BuildContext context) {
-    return new TabBarSelection(
-      maxIndex: 1,
+    return new TabBarSelection<StockHomeTab>(
+      values: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
       child: new Scaffold(
         key: _scaffoldKey,
         toolBar: _isSearching ? buildSearchBar() : buildToolBar(),

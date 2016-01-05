@@ -9,16 +9,15 @@ import 'widget_demo.dart';
 final List<String> _iconNames = <String>["event", "home", "android", "alarm", "face", "language"];
 
 Widget _buildTabBarSelection(_, Widget child) {
-  return new TabBarSelection(
-    maxIndex: _iconNames.length - 1,
-    child: child
-  );
+  return new TabBarSelection<String>(values: _iconNames, child: child);
 }
 
 Widget _buildTabBar(_) {
-  return new TabBar(
+  return new TabBar<String>(
     isScrollable: true,
-    labels: _iconNames.map((String iconName) => new TabLabel(text: iconName, icon: "action/$iconName")).toList()
+    labels: new Map.fromIterable(
+      _iconNames,
+      value: (String iconName) => new TabLabel(text: iconName, icon: "action/$iconName"))
   );
 }
 
