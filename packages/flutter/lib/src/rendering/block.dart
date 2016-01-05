@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'object.dart';
+import 'viewport.dart';
 
 /// Parent data for use with [RenderBlockBase].
 class BlockParentData extends ContainerBoxParentDataMixin<RenderBox> { }
@@ -32,8 +33,10 @@ typedef double _Constrainer(double value);
 /// children. Because blocks expand in the main axis, blocks must be given
 /// unlimited space in the main axis, typically by being contained in a
 /// viewport with a scrolling direction that matches the block's main axis.
-abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
-                                                      RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
+abstract class RenderBlockBase extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
+         RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData>
+    implements RenderScrollable {
 
   RenderBlockBase({
     List<RenderBox> children,
@@ -81,6 +84,9 @@ abstract class RenderBlockBase extends RenderBox with ContainerRenderObjectMixin
 
   /// Whether the main axis is vertical.
   bool get isVertical => _direction == BlockDirection.vertical;
+
+  // TODO(abarth): Remove BlockDirection in favor of ScrollDirection.
+  ScrollDirection get scrollDirection => isVertical ? ScrollDirection.vertical : ScrollDirection.horizontal;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     if (isVertical)

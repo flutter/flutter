@@ -11,6 +11,7 @@ typedef void ExtentsChangedCallback(double contentExtent, double containerExtent
 
 abstract class VirtualViewport extends RenderObjectWidget {
   double get startOffset;
+  ScrollDirection get scrollDirection;
   List<Widget> get children;
 }
 
@@ -52,8 +53,23 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   }
 
   void _updatePaintOffset() {
-    renderObject.paintOffset =
-    renderObject.paintOffset = new Offset(0.0, -(widget.startOffset - repaintOffsetBase));
+    switch (widget.scrollDirection) {
+      case ScrollDirection.vertical:
+        renderObject.paintOffset = new Offset(0.0, -(widget.startOffset - repaintOffsetBase));
+        break;
+      case ScrollDirection.horizontal:
+        renderObject.paintOffset = new Offset(-(widget.startOffset - repaintOffsetBase), 0.0);
+        break;
+    }
+  }
+
+  double get _containerExtent {
+    switch (widget.scrollDirection) {
+      case ScrollDirection.vertical:
+        return renderObject.size.height;
+      case ScrollDirection.horizontal:
+        return renderObject.size.width;
+    }
   }
 
   void updateRenderObject() {
@@ -67,7 +83,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
       if (!renderObject.needsLayout) {
         if (repaintOffsetBase != null && widget.startOffset < repaintOffsetBase)
           renderObject.markNeedsLayout();
-        else if (repaintOffsetLimit != null && widget.startOffset + renderObject.size.height > repaintOffsetLimit)
+        else if (repaintOffsetLimit != null && widget.startOffset + _containerExtent > repaintOffsetLimit)
           renderObject.markNeedsLayout();
       }
     }
@@ -88,7 +104,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     List<Widget> newWidgets = new List<Widget>(count);
     for (int i = 0; i < count; ++i) {
       int childIndex = base + i;
-      Widget child = widget.children[childIndex];
+      Widget child = widget.children[childIndex % widget.children.length];
       Key key = new ValueKey(child.key ?? childIndex);
       newWidgets[i] = new RepaintBoundary(key: key, child: child);
     }

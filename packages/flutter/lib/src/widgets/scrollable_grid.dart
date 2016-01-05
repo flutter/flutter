@@ -79,6 +79,9 @@ class GridViewport extends VirtualViewport {
   final ExtentsChangedCallback onExtentsChanged;
   final List<Widget> children;
 
+  // TODO(abarth): Support horizontal scrolling;
+  ScrollDirection get scrollDirection => ScrollDirection.vertical;
+
   RenderGrid createRenderObject() => new RenderGrid(delegate: delegate);
 
   _GridViewportElement createElement() => new _GridViewportElement(this);
