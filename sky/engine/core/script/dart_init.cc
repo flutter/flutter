@@ -290,6 +290,8 @@ void InitDartVM() {
     DartDebugger::InitDebugger();
   }
 
+  DartUI::InitForGlobal();
+
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");
     CHECK(Dart_Initialize(reinterpret_cast<uint8_t*>(

@@ -42,7 +42,7 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 
 }  // namespace
 
-void DartUI::InitForIsolate() {
+void DartUI::InitForGlobal() {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     Canvas::RegisterNatives(g_natives);
@@ -64,7 +64,10 @@ void DartUI::InitForIsolate() {
     SceneBuilder::RegisterNatives(g_natives);
     Window::RegisterNatives(g_natives);
   }
+}
 
+void DartUI::InitForIsolate() {
+  DCHECK(g_natives);
   DART_CHECK_VALID(Dart_SetNativeResolver(
       Dart_LookupLibrary(ToDart("dart:ui")), GetNativeFunction, GetSymbol));
 }
