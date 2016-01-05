@@ -16,9 +16,6 @@ enum ScrollDirection {
 
   /// Scroll up and down
   vertical,
-
-  /// Scroll in all four cardinal directions
-  both
 }
 
 /// A render object that's bigger on the inside.
@@ -44,8 +41,6 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
 
   bool _offsetIsSane(Offset offset, ScrollDirection direction) {
     switch (direction) {
-      case ScrollDirection.both:
-        return true;
       case ScrollDirection.horizontal:
         return offset.dy == 0.0;
       case ScrollDirection.vertical:
@@ -84,9 +79,6 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     BoxConstraints innerConstraints;
     switch (scrollDirection) {
-      case ScrollDirection.both:
-        innerConstraints = new BoxConstraints();
-        break;
       case ScrollDirection.horizontal:
         innerConstraints = constraints.heightConstraints();
         break;
