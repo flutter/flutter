@@ -25,7 +25,9 @@ namespace android {
 Mutex gMinikinLock;
 
 void assertMinikinLocked() {
-    LOG_FATAL_IF(gMinikinLock.tryLock() == 0);
+#ifdef ENABLE_RACE_DETECTION
+    LOG_ALWAYS_FATAL_IF(gMinikinLock.tryLock() == 0);
+#endif
 }
 
 }
