@@ -227,6 +227,7 @@ bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
     // Currently mRanges can not be used here since it isn't aware of the variation sequence.
     // TODO: Use mRanges for narrowing down the search range.
     for (size_t i = 0; i < mFamilies.size(); i++) {
+        AutoMutex _l(gMinikinLock);
         if (mFamilies[i]->hasVariationSelector(baseCodepoint, variationSelector)) {
           return true;
         }
