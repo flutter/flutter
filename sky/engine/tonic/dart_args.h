@@ -16,8 +16,8 @@ namespace blink {
 
 class DartArgIterator {
  public:
-  explicit DartArgIterator(Dart_NativeArguments args)
-      : args_(args), index_(1), had_exception_(false) { }
+  DartArgIterator(Dart_NativeArguments args, int start_index = 1)
+      : args_(args), index_(start_index), had_exception_(false) { }
 
   template<typename T>
   T GetNext() {
@@ -163,6 +163,16 @@ void DartCall(Sig func, Dart_NativeArguments args) {
   if (it.had_exception())
     return;
   decoder.Dispatch(func);
+}
+
+template<typename Sig>
+void DartCallStatic(Sig func, Dart_NativeArguments args) {
+  DartArgIterator it(args, 0);
+  using Indices = typename IndicesForSignature<Sig>::type;
+  DartDispatcher<Indices, Sig> decoder(&it);
+  if (it.had_exception())
+    return;
+  DartReturn(decoder.Dispatch(func), args);
 }
 
 template<typename Sig>
