@@ -69,15 +69,6 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     }
   }
 
-  double get _containerExtent {
-    switch (widget.scrollDirection) {
-      case ScrollDirection.vertical:
-        return renderObject.size.height;
-      case ScrollDirection.horizontal:
-        return renderObject.size.width;
-    }
-  }
-
   void updateRenderObject() {
     renderObject.virtualChildCount = widget.children.length;
 
@@ -89,7 +80,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
       if (!renderObject.needsLayout) {
         if (repaintOffsetBase != null && widget.startOffset < repaintOffsetBase)
           renderObject.markNeedsLayout();
-        else if (repaintOffsetLimit != null && widget.startOffset + _containerExtent > repaintOffsetLimit)
+        else if (repaintOffsetLimit != null && widget.startOffset > repaintOffsetLimit)
           renderObject.markNeedsLayout();
       }
     }

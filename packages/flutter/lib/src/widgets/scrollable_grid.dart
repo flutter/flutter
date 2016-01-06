@@ -142,7 +142,7 @@ class _GridViewportElement extends VirtualViewportElement<GridViewport> {
     _materializedChildBase = (materializedRowBase * _specification.columnCount).clamp(0, renderObject.virtualChildCount);
     _materializedChildCount = (materializedRowLimit * _specification.columnCount).clamp(0, renderObject.virtualChildCount) - _materializedChildBase;
     _repaintOffsetBase = _specification.rowOffsets[materializedRowBase];
-    _repaintOffsetLimit = _specification.rowOffsets[materializedRowLimit];
+    _repaintOffsetLimit = _specification.rowOffsets[materializedRowLimit] - containerExtent;
 
     super.layout(constraints);
 
