@@ -267,6 +267,29 @@ struct DartConverter<AtomicString> {
   }
 };
 
+template <>
+struct DartConverter<const char*> {
+  static Dart_Handle ToDart(const char* val) {
+    return Dart_NewStringFromCString(val);
+  }
+
+  static void SetReturnValue(Dart_NativeArguments args, const char* val) {
+    Dart_SetReturnValue(args, ToDart(val));
+  }
+
+  static const char* FromDart(Dart_Handle handle) {
+    const char* result = nullptr;
+    Dart_StringToCString(handle, &result);
+    return result;
+  }
+
+  static const char* FromArguments(Dart_NativeArguments args,
+                                   int index,
+                                   Dart_Handle& exception) {
+    return FromDart(Dart_GetNativeArgument(args, index));
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Collections
 
@@ -342,8 +365,32 @@ struct DartConverter<DartValue*> {
   static PassRefPtr<DartValue> FromArguments(Dart_NativeArguments args,
                                              int index,
                                              Dart_Handle& exception) {
-    // TODO(abarth): What should we do with auto_scope?
     return FromDart(Dart_GetNativeArgument(args, index));
+  }
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Dart_Handle
+
+template <>
+struct DartConverter<Dart_Handle> {
+  static Dart_Handle ToDart(DartState* state, Dart_Handle val) {
+    return val;
+  }
+
+  static void SetReturnValue(Dart_NativeArguments args, Dart_Handle val) {
+    Dart_SetReturnValue(args, val);
+  }
+
+  static Dart_Handle FromDart(Dart_Handle handle) {
+    return handle;
+  }
+
+  static Dart_Handle FromArguments(Dart_NativeArguments args,
+                                   int index,
+                                   Dart_Handle& exception) {
+    return Dart_GetNativeArgument(args, index);
   }
 };
 
