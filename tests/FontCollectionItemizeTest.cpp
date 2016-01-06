@@ -20,12 +20,15 @@
 #include "FontTestUtils.h"
 #include "ICUTestBase.h"
 #include "MinikinFontForTest.h"
+#include "MinikinInternal.h"
 #include "UnicodeUtils.h"
 
+using android::AutoMutex;
 using android::FontCollection;
 using android::FontFamily;
 using android::FontLanguage;
 using android::FontStyle;
+using android::gMinikinLock;
 
 const char kItemizeFontXml[] = kTestFontDir "itemize.xml";
 const char kEmojiFont[] = kTestFontDir "Emoji.ttf";
@@ -55,6 +58,7 @@ void itemize(FontCollection* collection, const char* str, FontStyle style,
 
     result->clear();
     ParseUnicode(buf, BUF_SIZE, str, &len, NULL);
+    AutoMutex _l(gMinikinLock);
     collection->itemize(buf, len, style, result);
 }
 
