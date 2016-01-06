@@ -9,6 +9,7 @@ import "package:path/path.dart" as path;
 
 import "../runner/flutter_command_runner.dart";
 import "../runner/flutter_command.dart";
+import "../artifacts.dart";
 
 class IOSCommand extends FlutterCommand {
   final String name = "ios";
@@ -22,17 +23,17 @@ class IOSCommand extends FlutterCommand {
   }
 
   static Uri _xcodeProjectUri(String revision) {
-    return Uri.parse("https://storage.googleapis.com/flutter_infra/flutter/$revision/ios/FlutterXcode.zip");
+    String uriString = "https://storage.googleapis.com/flutter_infra/flutter/$revision/ios/FlutterXcode.zip";
+    print("Downloading $uriString ...");
+    return Uri.parse(uriString);
   }
 
   Future<List<int>> _fetchXcodeArchive() async {
     print("Fetching the Xcode project archive from the cloud...");
 
     HttpClient client = new HttpClient();
-    // TODO(chinmaygarde): Currently, engine releases are not tied to the release of the Xcode project
-    // archive. So use a "Current" tag. This will need to be replaced once releases
-    // are in lockstep with the engine
-    HttpClientRequest request = await client.getUrl(_xcodeProjectUri("Current"));
+
+    HttpClientRequest request = await client.getUrl(_xcodeProjectUri(ArtifactStore.engineRevision));
     HttpClientResponse response = await request.close();
 
     if (response.statusCode != 200)
