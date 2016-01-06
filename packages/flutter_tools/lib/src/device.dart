@@ -887,10 +887,24 @@ class AndroidDevice extends Device {
     return "$m-$d $H:$M:$S.$q";
   }
 
+  // TODO(eseidel): This is fragile, there must be a better way!
+  DateTime timeOnDevice() {
+    // Careful: Android's date command is super-lame, any arguments are taken as
+    // attempts to set the timezone and will screw your device.
+    String output = runCheckedSync(adbCommandForDevice(['shell', 'date'])).trim();
+    // format: Fri Dec 18 13:22:07 PST 2015
+    // intl doesn't handle timezones: https://github.com/dart-lang/intl/issues/93
+    // So we use the local date command to parse dates for us.
+    String seconds = runSync(['date', '--date', output, '+%s']);
+    // Although '%s' is supposed to be UTC, date appears to be ignoring the
+    // timezone in the passed string, so using isUTC: false here.
+    return new DateTime.fromMillisecondsSinceEpoch(int.parse(seconds) * 1000, isUtc: false);
+  }
+
   String stopTracing(AndroidApk apk, { String outPath: null }) {
     // Workaround for logcat -c not always working:
     // http://stackoverflow.com/questions/25645012/logcat-on-android-l-not-clearing-after-unplugging-and-reconnecting
-    String beforeStop = _logcatDateFormat(new DateTime.now());
+    String beforeStop = _logcatDateFormat(timeOnDevice());
     runCheckedSync(adbCommandForDevice([
       'shell',
       'am',
