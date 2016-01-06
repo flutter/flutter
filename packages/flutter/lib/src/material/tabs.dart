@@ -772,26 +772,30 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 }
 
-class TabBarView<T> extends PageableList<T> {
+typedef Widget TabItemBuilder<T>(T item);
+
+class TabBarView<T> extends PageableList {
   TabBarView({
     Key key,
     List<T> items,
-    ItemBuilder<T> itemBuilder
-  }) : super(
+    TabItemBuilder<T> itemBuilder
+  }) : items = items, itemBuilder = itemBuilder, super(
     key: key,
     scrollDirection: ScrollDirection.horizontal,
-    items: items,
-    itemBuilder: itemBuilder,
+    children: items.map((T item) => itemBuilder(item)),
     itemsWrap: false
   ) {
     assert(items != null);
     assert(items.length > 1);
   }
 
+  final List<T> items;
+  final TabItemBuilder<T> itemBuilder;
+
   _TabBarViewState createState() => new _TabBarViewState<T>();
 }
 
-class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> implements TabBarSelectionPerformanceListener {
+class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements TabBarSelectionPerformanceListener {
 
   TabBarSelectionState _selection;
   List<int> _itemIndices = [0, 1];
@@ -916,14 +920,10 @@ class _TabBarViewState<T> extends PageableListState<T, TabBarView<T>> implements
     return settleScrollOffset();
   }
 
-  List<Widget> buildItems(BuildContext context, int start, int count) {
+  Widget buildContent(BuildContext context) {
     TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
     if (_selection != newSelection)
       _initSelection(newSelection);
-    return _itemIndices
-      .skip(start)
-      .take(count)
-      .map((int i) => config.itemBuilder(context, config.items[i], i))
-      .toList();
+    return super.buildContent(context);
   }
 }

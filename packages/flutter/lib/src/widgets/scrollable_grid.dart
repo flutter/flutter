@@ -116,11 +116,11 @@ class _GridViewportElement extends VirtualViewportElement<GridViewport> {
   int get materializedChildCount => _materializedChildCount;
   int _materializedChildCount;
 
-  double get repaintOffsetBase => _repaintOffsetBase;
-  double _repaintOffsetBase;
+  double get startOffsetBase => _startOffsetBase;
+  double _startOffsetBase;
 
-  double get repaintOffsetLimit =>_repaintOffsetLimit;
-  double _repaintOffsetLimit;
+  double get startOffsetLimit =>_startOffsetLimit;
+  double _startOffsetLimit;
 
   void updateRenderObject() {
     renderObject.delegate = widget.delegate;
@@ -141,8 +141,8 @@ class _GridViewportElement extends VirtualViewportElement<GridViewport> {
 
     _materializedChildBase = (materializedRowBase * _specification.columnCount).clamp(0, renderObject.virtualChildCount);
     _materializedChildCount = (materializedRowLimit * _specification.columnCount).clamp(0, renderObject.virtualChildCount) - _materializedChildBase;
-    _repaintOffsetBase = _specification.rowOffsets[materializedRowBase];
-    _repaintOffsetLimit = _specification.rowOffsets[materializedRowLimit] - containerExtent;
+    _startOffsetBase = _specification.rowOffsets[materializedRowBase];
+    _startOffsetLimit = _specification.rowOffsets[materializedRowLimit] - containerExtent;
 
     super.layout(constraints);
 

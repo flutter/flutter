@@ -28,7 +28,6 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
          paintOffset: paintOffset,
          callback: callback
        ) {
-    assert(itemExtent != null);
     addAll(children);
   }
 
@@ -75,6 +74,8 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
   }
 
   double get _preferredExtent {
+    if (itemExtent == null)
+      return double.INFINITY;
     double extent = itemExtent * virtualChildCount;
     if (padding != null)
       extent += _scrollAxisPadding;
@@ -118,8 +119,16 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
   }
 
   void performLayout() {
-    size = new Size(constraints.maxWidth,
-                    constraints.constrainHeight(_preferredExtent));
+    switch (scrollDirection) {
+      case ScrollDirection.vertical:
+        size = new Size(constraints.maxWidth,
+                        constraints.constrainHeight(_preferredExtent));
+        break;
+      case ScrollDirection.horizontal:
+        size = new Size(constraints.constrainWidth(_preferredExtent),
+                        constraints.maxHeight);
+        break;
+    }
 
     if (callback != null)
       invokeLayoutCallback(callback);
@@ -136,15 +145,15 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
     switch (scrollDirection) {
       case ScrollDirection.vertical:
         itemWidth = math.max(0, size.width - (padding == null ? 0.0 : padding.horizontal));
-        itemHeight = itemExtent;
+        itemHeight = itemExtent ?? size.height;
         y = padding != null ? padding.top : 0.0;
-        dy = itemExtent;
+        dy = itemHeight;
         break;
       case ScrollDirection.horizontal:
-        itemWidth = itemExtent;
+        itemWidth = itemExtent ?? size.width;
         itemHeight = math.max(0, size.height - (padding == null ? 0.0 : padding.vertical));
         x = padding != null ? padding.left : 0.0;
-        dx = itemExtent;
+        dx = itemWidth;
         break;
     }
 

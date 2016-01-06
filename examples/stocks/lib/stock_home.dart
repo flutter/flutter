@@ -273,7 +273,7 @@ class StockHomeState extends State<StockHome> {
         drawer: _buildDrawer(context),
         body: new TabBarView<StockHomeTab>(
           items: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
-          itemBuilder: (BuildContext context, StockHomeTab tab, _) {
+          itemBuilder: (StockHomeTab tab) {
             switch (tab) {
               case StockHomeTab.market:
                 return _buildStockTab(context, tab, config.symbols);

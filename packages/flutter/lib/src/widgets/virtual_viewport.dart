@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -20,8 +22,10 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
 
   int get materializedChildBase;
   int get materializedChildCount;
-  double get repaintOffsetBase;
-  double get repaintOffsetLimit;
+  double get startOffsetBase;
+  double get startOffsetLimit;
+
+  double get paintOffset => -(widget.startOffset - startOffsetBase);
 
   List<Element> _materializedChildren = const <Element>[];
 
@@ -61,10 +65,10 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   void _updatePaintOffset() {
     switch (widget.scrollDirection) {
       case ScrollDirection.vertical:
-        renderObject.paintOffset = new Offset(0.0, -(widget.startOffset - repaintOffsetBase));
+        renderObject.paintOffset = new Offset(0.0, paintOffset);
         break;
       case ScrollDirection.horizontal:
-        renderObject.paintOffset = new Offset(-(widget.startOffset - repaintOffsetBase), 0.0);
+        renderObject.paintOffset = new Offset(paintOffset, 0.0);
         break;
     }
   }
@@ -72,24 +76,25 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   void updateRenderObject() {
     renderObject.virtualChildCount = widget.children.length;
 
-    if (repaintOffsetBase != null) {
+    if (startOffsetBase != null) {
       _updatePaintOffset();
 
       // If we don't already need layout, we need to request a layout if the
       // viewport has shifted to expose new children.
       if (!renderObject.needsLayout) {
-        if (repaintOffsetBase != null && widget.startOffset < repaintOffsetBase)
+        if (startOffsetBase != null && widget.startOffset < startOffsetBase)
           renderObject.markNeedsLayout();
-        else if (repaintOffsetLimit != null && widget.startOffset > repaintOffsetLimit)
+        else if (startOffsetLimit != null && widget.startOffset > startOffsetLimit)
           renderObject.markNeedsLayout();
       }
     }
   }
 
   void layout(BoxConstraints constraints) {
-    assert(repaintOffsetBase != null);
-    assert(repaintOffsetLimit != null);
+    assert(startOffsetBase != null);
+    assert(startOffsetLimit != null);
     _updatePaintOffset();
+    // TODO(abarth): Set building: true here.
     BuildableElement.lockState(_materializeChildren);
   }
 
@@ -119,11 +124,11 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     int length = renderObject.virtualChildCount;
     assert(base != null);
     assert(count != null);
-    _populateWidgets(base + count);
+    _populateWidgets(base < 0 ? length : math.min(length, base + count));
     List<Widget> newWidgets = new List<Widget>(count);
     for (int i = 0; i < count; ++i) {
       int childIndex = base + i;
-      Widget child = _widgets[childIndex % length];
+      Widget child = _widgets[(childIndex % length).abs()];
       Key key = new ValueKey(child.key ?? childIndex);
       newWidgets[i] = new RepaintBoundary(key: key, child: child);
     }
