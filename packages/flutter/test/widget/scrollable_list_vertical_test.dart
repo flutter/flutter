@@ -9,16 +9,14 @@ import 'package:test/test.dart';
 const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 
 Widget buildFrame() {
-  return new ScrollableList<int>(
-    items: items,
-    itemBuilder: (BuildContext context, int item, int index) {
+  return new ScrollableList2(
+    itemExtent: 290.0,
+    scrollDirection: ScrollDirection.vertical,
+    children: items.map((int item) {
       return new Container(
-        key: new ValueKey<int>(item),
         child: new Text('$item')
       );
-    },
-    itemExtent: 290.0,
-    scrollDirection: ScrollDirection.vertical
+    })
   );
 }
 

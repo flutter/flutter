@@ -21,44 +21,35 @@ Map<MaterialListType, double> _kItemExtent = const <MaterialListType, double>{
   MaterialListType.threeLine: kThreeLineListItemHeight,
 };
 
-class MaterialList<T> extends StatefulComponent {
+class MaterialList extends StatefulComponent {
   MaterialList({
     Key key,
     this.initialScrollOffset,
     this.onScroll,
-    this.items,
-    this.itemBuilder,
-    this.type: MaterialListType.twoLine
+    this.type: MaterialListType.twoLine,
+    this.children
   }) : super(key: key);
 
   final double initialScrollOffset;
   final ScrollListener onScroll;
-  final List<T> items;
-  final ItemBuilder<T> itemBuilder;
   final MaterialListType type;
+  final Iterable<Widget> children;
 
-  _MaterialListState<T> createState() => new _MaterialListState<T>();
+  _MaterialListState createState() => new _MaterialListState();
 }
 
-class _MaterialListState<T> extends State<MaterialList<T>> {
-
-  void initState() {
-    super.initState();
-    _scrollbarPainter = new ScrollbarPainter();
-  }
-
-  ScrollbarPainter _scrollbarPainter;
+class _MaterialListState extends State<MaterialList> {
+  ScrollbarPainter _scrollbarPainter = new ScrollbarPainter();
 
   Widget build(BuildContext context) {
-    return new ScrollableList<T>(
+    return new ScrollableList2(
       initialScrollOffset: config.initialScrollOffset,
       scrollDirection: ScrollDirection.vertical,
       onScroll: config.onScroll,
-      items: config.items,
-      itemBuilder: config.itemBuilder,
       itemExtent: _kItemExtent[config.type],
       padding: const EdgeDims.symmetric(vertical: 8.0),
-      scrollableListPainter: _scrollbarPainter
+      scrollableListPainter: _scrollbarPainter,
+      children: config.children
     );
   }
 }

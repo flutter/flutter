@@ -5,6 +5,21 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
+final NumberFormat _dd = new NumberFormat("00", "en_US");
+
+class _Item extends StatelessComponent {
+  _Item(this.index);
+
+  int index;
+
+  Widget build(BuildContext context) {
+    return new Text('Item ${_dd.format(index)}',
+      key: new ValueKey<int>(index),
+      style: Theme.of(context).text.title
+    );
+  }
+}
+
 class ScrollbarApp extends StatefulComponent {
   ScrollbarAppState createState() => new ScrollbarAppState();
 }
@@ -15,17 +30,10 @@ class ScrollbarAppState extends State<ScrollbarApp> {
   final ScrollbarPainter _scrollbarPainter = new ScrollbarPainter();
 
   Widget _buildMenu(BuildContext context) {
-    NumberFormat dd = new NumberFormat("00", "en_US");
-    return new ScrollableList<int>(
-      items: new List<int>.generate(_itemCount, (int i) => i),
+    return new ScrollableList2(
       itemExtent: _itemExtent,
-      itemBuilder: (_, __, int index) {
-        return new Text('Item ${dd.format(index)}',
-          key: new ValueKey<int>(index),
-          style: Theme.of(context).text.title
-        );
-      },
-      scrollableListPainter: _scrollbarPainter
+      scrollableListPainter: _scrollbarPainter,
+      children: new List<Widget>.generate(_itemCount, (int i) => new _Item(i))
     );
   }
 

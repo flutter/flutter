@@ -18,6 +18,10 @@ enum ScrollDirection {
   vertical,
 }
 
+abstract class HasScrollDirection {
+  ScrollDirection get scrollDirection;
+}
+
 /// A render object that's bigger on the inside.
 ///
 /// The child of a viewport can layout to a larger size than the viewport
@@ -27,7 +31,8 @@ enum ScrollDirection {
 ///
 /// Viewport is the core scrolling primitive in the system, but it can be used
 /// in other situations.
-class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox>
+    implements HasScrollDirection {
 
   RenderViewport({
     RenderBox child,
@@ -177,10 +182,12 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   RenderVirtualViewport({
     int virtualChildCount,
     Offset paintOffset,
-    LayoutCallback callback
+    LayoutCallback callback,
+    Painter overlayPainter
   }) : _virtualChildCount = virtualChildCount,
        _paintOffset = paintOffset,
-       _callback = callback;
+       _callback = callback,
+       _overlayPainter = overlayPainter;
 
   int get virtualChildCount => _virtualChildCount ?? childCount;
   int _virtualChildCount;
@@ -217,8 +224,31 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     markNeedsLayout();
   }
 
+  Painter get overlayPainter => _overlayPainter;
+  Painter _overlayPainter;
+  void set overlayPainter(Painter value) {
+    if (_overlayPainter == value)
+      return;
+    if (attached)
+      _overlayPainter?.detach();
+    _overlayPainter = value;
+    if (attached)
+      _overlayPainter?.attach(this);
+    markNeedsPaint();
+  }
+
+  void attach() {
+    super.attach();
+    _overlayPainter?.attach(this);
+  }
+
+  void detach() {
+    super.detach();
+    _overlayPainter?.detach();
+  }
+
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    super.applyPaintTransform(child, transform.translate(paintOffset));
+    super.applyPaintTransform(child, transform.translate(paintOffset.dx, paintOffset.dy));
   }
 
   bool hitTestChildren(HitTestResult result, { Point position }) {
@@ -227,6 +257,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
 
   void _paintContents(PaintingContext context, Offset offset) {
     defaultPaint(context, offset + paintOffset);
+    _overlayPainter?.paint(context, offset);
   }
 
   void paint(PaintingContext context, Offset offset) {

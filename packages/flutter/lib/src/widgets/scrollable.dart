@@ -445,15 +445,19 @@ class Block extends StatelessComponent {
 
 abstract class ScrollableListPainter extends Painter {
   void attach(RenderObject renderObject) {
-    assert(renderObject is RenderBlockViewport);
+    assert(renderObject is RenderBox);
+    assert(renderObject is HasScrollDirection);
     super.attach(renderObject);
   }
 
-  RenderBlockViewport get renderer => renderObject;
+  RenderBox get renderObject => super.renderObject;
 
-  bool get isVertical => renderer.isVertical;
+  ScrollDirection get scrollDirection {
+    HasScrollDirection scrollable = renderObject as dynamic;
+    return scrollable?.scrollDirection;
+  }
 
-  Size get viewportSize => renderer.size;
+  Size get viewportSize => renderObject.size;
 
   double get contentExtent => _contentExtent;
   double _contentExtent = 0.0;
@@ -463,7 +467,7 @@ abstract class ScrollableListPainter extends Painter {
     if (_contentExtent == value)
       return;
     _contentExtent = value;
-    renderer?.markNeedsPaint();
+    renderObject?.markNeedsPaint();
   }
 
   double get scrollOffset => _scrollOffset;
@@ -473,7 +477,7 @@ abstract class ScrollableListPainter extends Painter {
     if (_scrollOffset == value)
       return;
     _scrollOffset = value;
-    renderer?.markNeedsPaint();
+    renderObject?.markNeedsPaint();
   }
 
   /// Called when a scroll starts. Subclasses may override this method to
@@ -675,7 +679,7 @@ class ScrollableList<T> extends ScrollableWidgetList {
     double snapAlignmentOffset: 0.0,
     this.items,
     this.itemBuilder,
-    itemsWrap: false,
+    bool itemsWrap: false,
     double itemExtent,
     EdgeDims padding,
     ScrollableListPainter scrollableListPainter

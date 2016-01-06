@@ -12,9 +12,8 @@ const double itemExtent = 200.0;
 ScrollDirection scrollDirection = ScrollDirection.vertical;
 GlobalKey scrollableListKey;
 
-Widget buildItem(BuildContext context, int item, int index) {
+Widget buildItem(int item) {
   return new Container(
-    key: new ValueKey<int>(item),
     width: itemExtent,
     height: itemExtent,
     child: new Text(item.toString())
@@ -30,13 +29,12 @@ Widget buildFrame() {
   return new Center(
     child: new Container(
       height: itemExtent * 2.0,
-      child: new ScrollableList<int>(
+      child: new ScrollableList2(
         key: scrollableListKey,
         snapOffsetCallback: snapOffsetCallback,
         scrollDirection: scrollDirection,
-        items: <int>[0, 1, 2, 3, 4, 5, 7, 8, 9],
-        itemBuilder: buildItem,
-        itemExtent: itemExtent
+        itemExtent: itemExtent,
+        children: <int>[0, 1, 2, 3, 4, 5, 7, 8, 9].map(buildItem)
       )
     )
   );

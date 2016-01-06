@@ -393,12 +393,11 @@ class CardCollectionState extends State<CardCollection> {
   Widget build(BuildContext context) {
     Widget cardCollection;
     if (_fixedSizeCards) {
-      cardCollection = new ScrollableList<CardModel> (
+      cardCollection = new ScrollableList2 (
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
         snapAlignmentOffset: _cardCollectionSize.height / 2.0,
-        items: _cardModels,
-        itemBuilder: (BuildContext context, CardModel card, int index) => _buildCard(context, card.value),
-        itemExtent: _cardModels[0].height
+        itemExtent: _cardModels[0].height,
+        children: _cardModels.map((CardModel card) => _buildCard(context, card.value))
       );
     } else {
       cardCollection = new ScrollableMixedWidgetList(

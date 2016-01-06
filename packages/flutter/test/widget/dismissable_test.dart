@@ -21,7 +21,7 @@ void handleOnDismissed(int item) {
   dismissedItems.add(item);
 }
 
-Widget buildDismissableItem(BuildContext context, int item, int index) {
+Widget buildDismissableItem(int item) {
   return new Dismissable(
     key: new ValueKey<int>(item),
     direction: dismissDirection,
@@ -38,11 +38,12 @@ Widget buildDismissableItem(BuildContext context, int item, int index) {
 Widget widgetBuilder() {
   return new Container(
     padding: const EdgeDims.all(10.0),
-    child: new ScrollableList<int>(
-      items: <int>[0, 1, 2, 3, 4].where((int i) => !dismissedItems.contains(i)).toList(),
-      itemBuilder: buildDismissableItem,
+    child: new ScrollableList2(
       scrollDirection: scrollDirection,
-      itemExtent: itemExtent
+      itemExtent: itemExtent,
+      children: <int>[0, 1, 2, 3, 4].where(
+        (int i) => !dismissedItems.contains(i)
+      ).map(buildDismissableItem)
     )
   );
 }

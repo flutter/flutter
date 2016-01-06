@@ -11,7 +11,8 @@ typedef void ExtentsChangedCallback(double contentExtent, double containerExtent
 
 abstract class VirtualViewport extends RenderObjectWidget {
   double get startOffset;
-  List<Widget> get children;
+  ScrollDirection get scrollDirection;
+  Iterable<Widget> get children;
 }
 
 abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderObjectElement<T> {
@@ -35,6 +36,8 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
 
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
+    _iterator = null;
+    _widgets = <Widget>[];
     renderObject.callback = layout;
     updateRenderObject();
   }
@@ -45,6 +48,10 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   }
 
   void update(T newWidget) {
+    if (widget.children != newWidget.children) {
+      _iterator = null;
+      _widgets = <Widget>[];
+    }
     super.update(newWidget);
     updateRenderObject();
     if (!renderObject.needsLayout)
@@ -52,8 +59,23 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   }
 
   void _updatePaintOffset() {
-    renderObject.paintOffset =
-    renderObject.paintOffset = new Offset(0.0, -(widget.startOffset - repaintOffsetBase));
+    switch (widget.scrollDirection) {
+      case ScrollDirection.vertical:
+        renderObject.paintOffset = new Offset(0.0, -(widget.startOffset - repaintOffsetBase));
+        break;
+      case ScrollDirection.horizontal:
+        renderObject.paintOffset = new Offset(-(widget.startOffset - repaintOffsetBase), 0.0);
+        break;
+    }
+  }
+
+  double get _containerExtent {
+    switch (widget.scrollDirection) {
+      case ScrollDirection.vertical:
+        return renderObject.size.height;
+      case ScrollDirection.horizontal:
+        return renderObject.size.width;
+    }
   }
 
   void updateRenderObject() {
@@ -67,7 +89,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
       if (!renderObject.needsLayout) {
         if (repaintOffsetBase != null && widget.startOffset < repaintOffsetBase)
           renderObject.markNeedsLayout();
-        else if (repaintOffsetLimit != null && widget.startOffset + renderObject.size.height > repaintOffsetLimit)
+        else if (repaintOffsetLimit != null && widget.startOffset + _containerExtent > repaintOffsetLimit)
           renderObject.markNeedsLayout();
       }
     }
@@ -80,15 +102,37 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     BuildableElement.lockState(_materializeChildren);
   }
 
+  Iterator<Widget> _iterator;
+  List<Widget> _widgets;
+
+  void _populateWidgets(int limit) {
+    if (limit <= _widgets.length)
+      return;
+    if (widget.children is List<Widget>) {
+      _widgets = widget.children;
+      return;
+    }
+    _iterator ??= widget.children.iterator;
+    while (_widgets.length < limit) {
+      bool moved = _iterator.moveNext();
+      assert(moved);
+      Widget current = _iterator.current;
+      assert(current != null);
+      _widgets.add(current);
+    }
+  }
+
   void _materializeChildren() {
     int base = materializedChildBase;
     int count = materializedChildCount;
+    int length = renderObject.virtualChildCount;
     assert(base != null);
     assert(count != null);
+    _populateWidgets(base + count);
     List<Widget> newWidgets = new List<Widget>(count);
     for (int i = 0; i < count; ++i) {
       int childIndex = base + i;
-      Widget child = widget.children[childIndex];
+      Widget child = _widgets[childIndex % length];
       Key key = new ValueKey(child.key ?? childIndex);
       newWidgets[i] = new RepaintBoundary(key: key, child: child);
     }
