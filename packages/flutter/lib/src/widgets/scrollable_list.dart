@@ -170,7 +170,7 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
 
     _materializedChildCount = materializedChildLimit - _materializedChildBase;
     _repaintOffsetBase = _materializedChildBase * widget.itemExtent;
-    _repaintOffsetLimit = materializedChildLimit * widget.itemExtent;
+    _repaintOffsetLimit = materializedChildLimit * widget.itemExtent - containerExtent;
 
     super.layout(constraints);
 
