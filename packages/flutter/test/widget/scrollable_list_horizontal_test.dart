@@ -13,7 +13,7 @@ Widget buildFrame() {
   return new Center(
     child: new Container(
       height: 50.0,
-      child: new ScrollableList2(
+      child: new ScrollableList(
         itemExtent: 290.0,
         scrollDirection: ScrollDirection.horizontal,
         children: items.map((int item) {

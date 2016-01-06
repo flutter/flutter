@@ -29,7 +29,7 @@ Widget buildFrame() {
   return new Center(
     child: new Container(
       height: itemExtent * 2.0,
-      child: new ScrollableList2(
+      child: new ScrollableList(
         key: scrollableListKey,
         snapOffsetCallback: snapOffsetCallback,
         scrollDirection: scrollDirection,

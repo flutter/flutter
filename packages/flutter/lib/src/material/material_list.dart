@@ -42,7 +42,7 @@ class _MaterialListState extends State<MaterialList> {
   ScrollbarPainter _scrollbarPainter = new ScrollbarPainter();
 
   Widget build(BuildContext context) {
-    return new ScrollableList2(
+    return new ScrollableList(
       initialScrollOffset: config.initialScrollOffset,
       scrollDirection: ScrollDirection.vertical,
       onScroll: config.onScroll,

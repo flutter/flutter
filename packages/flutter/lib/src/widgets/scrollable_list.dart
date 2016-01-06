@@ -11,8 +11,8 @@ import 'virtual_viewport.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
-class ScrollableList2 extends Scrollable {
-  ScrollableList2({
+class ScrollableList extends Scrollable {
+  ScrollableList({
     Key key,
     double initialScrollOffset,
     ScrollDirection scrollDirection: ScrollDirection.vertical,
@@ -44,7 +44,7 @@ class ScrollableList2 extends Scrollable {
   ScrollableState createState() => new _ScrollableList2State();
 }
 
-class _ScrollableList2State extends ScrollableState<ScrollableList2> {
+class _ScrollableList2State extends ScrollableState<ScrollableList> {
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 

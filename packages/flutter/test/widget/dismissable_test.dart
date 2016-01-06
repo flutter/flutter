@@ -38,7 +38,7 @@ Widget buildDismissableItem(int item) {
 Widget widgetBuilder() {
   return new Container(
     padding: const EdgeDims.all(10.0),
-    child: new ScrollableList2(
+    child: new ScrollableList(
       scrollDirection: scrollDirection,
       itemExtent: itemExtent,
       children: <int>[0, 1, 2, 3, 4].where(

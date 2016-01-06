@@ -30,7 +30,7 @@ class ScrollbarAppState extends State<ScrollbarApp> {
   final ScrollbarPainter _scrollbarPainter = new ScrollbarPainter();
 
   Widget _buildMenu(BuildContext context) {
-    return new ScrollableList2(
+    return new ScrollableList(
       itemExtent: _itemExtent,
       scrollableListPainter: _scrollbarPainter,
       children: new List<Widget>.generate(_itemCount, (int i) => new _Item(i))
