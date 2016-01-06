@@ -99,7 +99,7 @@ void main() {
 
       (key.currentState as StateMarkerState).marker = "marked";
 
-      tester.pumpWidget(new ScrollableList2(
+      tester.pumpWidget(new ScrollableList(
         itemExtent: 100.0,
         children: <Widget>[
           new Container(

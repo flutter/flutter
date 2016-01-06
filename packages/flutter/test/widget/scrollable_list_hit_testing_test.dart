@@ -17,7 +17,7 @@ void main() {
       tester.pumpWidget(new Center(
         child: new Container(
           height: 50.0,
-          child: new ScrollableList2(
+          child: new ScrollableList(
             key: new GlobalKey(),
             itemExtent: 290.0,
             scrollDirection: ScrollDirection.horizontal,
@@ -57,7 +57,7 @@ void main() {
       tester.pumpWidget(new Center(
         child: new Container(
           width: 50.0,
-          child: new ScrollableList2(
+          child: new ScrollableList(
             key: new GlobalKey(),
             itemExtent: 290.0,
             scrollDirection: ScrollDirection.vertical,

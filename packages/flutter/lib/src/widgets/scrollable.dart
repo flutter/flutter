@@ -666,59 +666,6 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
 
 typedef Widget ItemBuilder<T>(BuildContext context, T item, int index);
 
-/// A wrapper around [ScrollableWidgetList] that helps you translate a list of
-/// model objects into a scrollable list of widgets. Assumes all the widgets
-/// have the same height.
-class ScrollableList<T> extends ScrollableWidgetList {
-  ScrollableList({
-    Key key,
-    double initialScrollOffset,
-    ScrollDirection scrollDirection: ScrollDirection.vertical,
-    ScrollListener onScroll,
-    SnapOffsetCallback snapOffsetCallback,
-    double snapAlignmentOffset: 0.0,
-    this.items,
-    this.itemBuilder,
-    bool itemsWrap: false,
-    double itemExtent,
-    EdgeDims padding,
-    ScrollableListPainter scrollableListPainter
-  }) : super(
-    key: key,
-    initialScrollOffset: initialScrollOffset,
-    scrollDirection: scrollDirection,
-    onScroll: onScroll,
-    snapOffsetCallback: snapOffsetCallback,
-    snapAlignmentOffset: snapAlignmentOffset,
-    itemsWrap: itemsWrap,
-    itemExtent: itemExtent,
-    padding: padding,
-    scrollableListPainter: scrollableListPainter
-  );
-
-  final List<T> items;
-  final ItemBuilder<T> itemBuilder;
-
-  ScrollableListState<T, ScrollableList<T>> createState() => new ScrollableListState<T, ScrollableList<T>>();
-}
-
-class ScrollableListState<T, Config extends ScrollableList<T>> extends ScrollableWidgetListState<Config> {
-  ScrollBehavior createScrollBehavior() {
-    return config.itemsWrap ? new UnboundedBehavior() : super.createScrollBehavior();
-  }
-
-  int get itemCount => config.items.length;
-
-  List<Widget> buildItems(BuildContext context, int start, int count) {
-    List<Widget> result = new List<Widget>();
-    int begin = config.itemsWrap ? start : math.max(0, start);
-    int end = config.itemsWrap ? begin + count : math.min(begin + count, config.items.length);
-    for (int i = begin; i < end; ++i)
-      result.add(config.itemBuilder(context, config.items[i % itemCount], i));
-    return result;
-  }
-}
-
 /// A general scrollable list for a large number of children that might not all
 /// have the same height. Prefer [ScrollableWidgetList] when all the children
 /// have the same height because it can use that property to be more efficient.

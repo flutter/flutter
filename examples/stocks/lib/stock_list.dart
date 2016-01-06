@@ -14,7 +14,7 @@ class StockList extends StatelessComponent {
   final StockRowActionCallback onAction;
 
   Widget build(BuildContext context) {
-    return new ScrollableList2(
+    return new ScrollableList(
       itemExtent: StockRow.kHeight,
       children: stocks.map((Stock stock) {
         return new StockRow(
