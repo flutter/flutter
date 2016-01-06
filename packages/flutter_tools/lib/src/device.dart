@@ -850,6 +850,7 @@ class AndroidDevice extends Device {
       'flutter:V',
       'chromium:D',
       'ActivityManager:W',
+      'System.err:W',
       '*:F',
     ]), prefix: 'android: ');
   }
