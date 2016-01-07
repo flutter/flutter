@@ -782,7 +782,7 @@ class TabBarView<T> extends PageableList {
   }) : items = items, itemBuilder = itemBuilder, super(
     key: key,
     scrollDirection: ScrollDirection.horizontal,
-    children: items.map((T item) => itemBuilder(item)),
+    children: items.map((T item) => itemBuilder(item)).toList(),
     itemsWrap: false
   ) {
     assert(items != null);
@@ -798,7 +798,7 @@ class TabBarView<T> extends PageableList {
 class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements TabBarSelectionPerformanceListener {
 
   TabBarSelectionState _selection;
-  List<int> _itemIndices = [0, 1];
+  List<Widget> _items;
   AnimationDirection _scrollDirection = AnimationDirection.forward;
 
   int get _tabCount => config.items.length;
@@ -809,7 +809,6 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     _boundedBehavior ??= new BoundedBehavior();
     return _boundedBehavior;
   }
-
 
   void _initSelection(TabBarSelectionState<T> selection) {
     _selection = selection;
@@ -833,17 +832,24 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     _selection = null;
   }
 
+  void _updateItems(int first, int second, [int third]) {
+    List<Widget> widgets = config.children;
+    _items = <Widget>[widgets[first], widgets[second]];
+    if (third != null)
+      _items.add(widgets[third]);
+  }
+
   void _initItemIndicesAndScrollPosition() {
     assert(_selection != null);
     final int selectedIndex = _selection.index;
     if (selectedIndex == 0) {
-      _itemIndices = <int>[0, 1];
+      _updateItems(0, 1);
       scrollTo(0.0);
     } else if (selectedIndex == _tabCount - 1) {
-      _itemIndices = <int>[selectedIndex - 1, selectedIndex];
+      _updateItems(selectedIndex - 1, selectedIndex);
       scrollTo(1.0);
     } else {
-      _itemIndices = <int>[selectedIndex - 1, selectedIndex, selectedIndex + 1];
+      _updateItems(selectedIndex - 1, selectedIndex, selectedIndex + 1);
       scrollTo(1.0);
     }
   }
@@ -870,10 +876,10 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     final int previousSelectedIndex = _selection.previousIndex;
 
     if (selectedIndex < previousSelectedIndex) {
-      _itemIndices = <int>[selectedIndex, previousSelectedIndex];
+      _updateItems(selectedIndex, previousSelectedIndex);
       _scrollDirection = AnimationDirection.reverse;
     } else {
-      _itemIndices = <int>[previousSelectedIndex, selectedIndex];
+      _updateItems(previousSelectedIndex, selectedIndex);
       _scrollDirection = AnimationDirection.forward;
     }
 
@@ -882,8 +888,6 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     else
       scrollTo(1.0 - performance.progress);
   }
-
-  int get itemCount => _itemIndices.length;
 
   void dispatchOnScroll() {
     if (_selection == null || _selection.valueIsChanging)
@@ -904,14 +908,16 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
     if (scrollVelocity.dx.abs() > _kMinFlingVelocity) {
       final int selectionDelta = scrollVelocity.dx > 0 ? -1 : 1;
-      _selection.value = _selection.values[(_selection.index + selectionDelta).clamp(0, _tabCount - 1)];
+      final int targetIndex = (_selection.index + selectionDelta).clamp(0, _tabCount - 1);
+      _selection.value = _selection.values[targetIndex];
       return new Future.value();
     }
 
     final int selectionIndex = _selection.index;
     final int settleIndex = snapScrollOffset(scrollOffset).toInt();
     if (selectionIndex > 0 && settleIndex != 1) {
-      _selection.value = _selection.values[selectionIndex + (settleIndex == 2 ? 1 : -1)];
+      final int targetIndex = (selectionIndex + (settleIndex == 2 ? 1 : -1)).clamp(0, _tabCount - 1);
+      _selection.value = _selection.values[targetIndex];
       return new Future.value();
     } else if (selectionIndex == 0 && settleIndex == 1) {
       _selection.value = _selection.values[1];
@@ -924,6 +930,12 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
     if (_selection != newSelection)
       _initSelection(newSelection);
-    return super.buildContent(context);
+    return new PageViewport(
+      itemsWrap: config.itemsWrap,
+      scrollDirection: config.scrollDirection,
+      startOffset: scrollOffset,
+      overlayPainter: config.scrollableListPainter,
+      children: _items
+    );
   }
 }
