@@ -772,7 +772,11 @@ class AndroidDevice extends Device {
   void _forwardObservatoryPort() {
     // Set up port forwarding for observatory.
     String portString = 'tcp:$_observatoryPort';
-    runCheckedSync(adbCommandForDevice(['forward', portString, portString]));
+    try {
+      runCheckedSync(adbCommandForDevice(['forward', portString, portString]));
+    } catch (e) {
+      logging.warning('Unable to forward observatory port ($_observatoryPort):\n$e');
+    }
   }
 
   bool startBundle(AndroidApk apk, String bundlePath, {
