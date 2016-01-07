@@ -94,8 +94,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     assert(startOffsetBase != null);
     assert(startOffsetLimit != null);
     _updatePaintOffset();
-    // TODO(abarth): Set building: true here.
-    BuildableElement.lockState(_materializeChildren);
+    BuildableElement.lockState(_materializeChildren, building: true);
   }
 
   Iterator<Widget> _iterator;
