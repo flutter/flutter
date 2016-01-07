@@ -20,6 +20,23 @@ class StockSettings extends StatefulComponent {
 }
 
 class StockSettingsState extends State<StockSettings> {
+  static OverlayEntry frameStats = null;
+
+  void _toggleFrameStats() {
+    OverlayState overlay = Overlay.of(context);
+    if (frameStats != null) {
+      frameStats.remove();
+      frameStats = null;
+    } else {
+      frameStats = new OverlayEntry(builder:_buildStatiticsOverlay);
+      overlay.insert(frameStats);
+    }
+  }
+
+  Widget _buildStatiticsOverlay(BuildContext context) {
+    return new StatisticsOverlay.allEnabled();
+  }
+
   void _handleOptimismChanged(bool value) {
     value ??= false;
     sendUpdates(value ? StockMode.optimistic : StockMode.pessimistic, config.backup);
@@ -86,6 +103,17 @@ class StockSettingsState extends State<StockSettings> {
             new Checkbox(
               value: config.optimism == StockMode.optimistic,
               onChanged: (bool value) => _confirmOptimismChange()
+            ),
+          ])
+        ),
+        new DrawerItem(
+          icon: 'action/picture_in_picture',
+          onPressed: () => _toggleFrameStats(),
+          child: new Row(<Widget>[
+            new Flexible(child: new Text('Show Frame Graphs')),
+            new Checkbox(
+              value: frameStats != null,
+              onChanged: (bool value) => _toggleFrameStats()
             ),
           ])
         ),
