@@ -66,19 +66,19 @@ class DartWrappable {
   static const DartWrapperInfo& dart_wrapper_info_
 
 #define IMPLEMENT_WRAPPERTYPEINFO(ClassName)                                   \
-static void RefObject(DartWrappable* impl) {                                   \
+static void RefObject_##ClassName(DartWrappable* impl) {                       \
   static_cast<ClassName*>(impl)->ref();                                        \
 }                                                                              \
-static void DerefObject(DartWrappable* impl) {                                 \
+static void DerefObject_##ClassName(DartWrappable* impl) {                     \
   static_cast<ClassName*>(impl)->deref();                                      \
 }                                                                              \
-static const DartWrapperInfo kDartWrapperInfo = {                              \
+static const DartWrapperInfo kDartWrapperInfo_##ClassName = {                  \
   #ClassName,                                                                  \
   sizeof(ClassName),                                                           \
-  &RefObject,                                                                  \
-  &DerefObject,                                                                \
+  &RefObject_##ClassName,                                                      \
+  &DerefObject_##ClassName,                                                    \
 };                                                                             \
-const DartWrapperInfo& ClassName::dart_wrapper_info_ = kDartWrapperInfo;                                   \
+const DartWrapperInfo& ClassName::dart_wrapper_info_ = kDartWrapperInfo_##ClassName;
 
 struct DartConverterWrappable {
   static DartWrappable* FromDart(Dart_Handle handle);
