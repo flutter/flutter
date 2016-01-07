@@ -786,7 +786,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// information without informing this render object.
   void performLayout();
 
-  /// Allows this render object to mutation its child list during layout and
+  /// Allows this render object to mutate its child list during layout and
   /// invokes callback.
   void invokeLayoutCallback(LayoutCallback callback) {
     assert(_debugMutationsLocked);
