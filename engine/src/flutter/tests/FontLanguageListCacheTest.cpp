@@ -20,16 +20,19 @@
 
 #include "FontLanguageListCache.h"
 #include "ICUTestBase.h"
+#include "MinikinInternal.h"
 
 namespace android {
 
 typedef ICUTestBase FontLanguageListCacheTest;
 
 TEST_F(FontLanguageListCacheTest, getId) {
-    EXPECT_EQ(0UL, FontLanguageListCache::getId(""));
     EXPECT_NE(0UL, FontStyle::registerLanguageList("en"));
     EXPECT_NE(0UL, FontStyle::registerLanguageList("jp"));
     EXPECT_NE(0UL, FontStyle::registerLanguageList("en,zh-Hans"));
+
+    AutoMutex _l(gMinikinLock);
+    EXPECT_EQ(0UL, FontLanguageListCache::getId(""));
 
     EXPECT_EQ(FontLanguageListCache::getId("en"), FontLanguageListCache::getId("en"));
     EXPECT_NE(FontLanguageListCache::getId("en"), FontLanguageListCache::getId("jp"));
@@ -47,6 +50,7 @@ TEST_F(FontLanguageListCacheTest, getId) {
 }
 
 TEST_F(FontLanguageListCacheTest, getById) {
+    AutoMutex _l(gMinikinLock);
     uint32_t enLangId = FontLanguageListCache::getId("en");
     uint32_t jpLangId = FontLanguageListCache::getId("jp");
     FontLanguage english = FontLanguageListCache::getById(enLangId)[0];
