@@ -45,20 +45,20 @@ class ListenCommand extends StartCommandBase {
       try {
         runCheckedSync(<String>['which', 'fswatch']);
       } catch (e) {
-        logging.severe('"listen" command is only useful if you have installed '
+        logging.severe('"listen" command requires '
             'fswatch on Mac.  Run "brew install fswatch" to install it with '
             'homebrew.');
-        return null;
+        exit(1);
       }
       return <String>['fswatch', '-r', '-v', '-1']..addAll(directories);
     } else if (Platform.isLinux) {
       try {
         runCheckedSync(<String>['which', 'inotifywait']);
       } catch (e) {
-        logging.severe('"listen" command is only useful if you have installed '
+        logging.severe('"listen" requires '
             'inotifywait on Linux.  Run "apt-get install inotify-tools" or '
             'equivalent to install it.');
-        return null;
+        exit(1);
       }
       return <String>[
         'inotifywait',
