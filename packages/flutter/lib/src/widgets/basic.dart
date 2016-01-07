@@ -1411,7 +1411,7 @@ class DefaultTextStyle extends InheritedWidget {
 
   /// The style from the closest instance of this class that encloses the given context.
   static TextStyle of(BuildContext context) {
-    DefaultTextStyle result = context.inheritFromWidgetOfType(DefaultTextStyle);
+    DefaultTextStyle result = context.inheritFromWidgetOfExactType(DefaultTextStyle);
     return result?.style;
   }
 
@@ -1737,7 +1737,7 @@ class DefaultAssetBundle extends InheritedWidget {
 
   /// The bundle from the closest instance of this class that encloses the given context.
   static AssetBundle of(BuildContext context) {
-    DefaultAssetBundle result = context.inheritFromWidgetOfType(DefaultAssetBundle);
+    DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
     return result?.bundle;
   }
 

@@ -111,7 +111,7 @@ class MimicOverlayEntry {
       }
     }
 
-    RenderBox stack = context.ancestorRenderObjectOfType(RenderStack);
+    RenderBox stack = context.ancestorRenderObjectOfType(const TypeMatcher<RenderStack>());
     // TODO(abarth): Handle the case where the transform here isn't just a translation.
     Point localPosition = stack == null ? globalPosition: stack.globalToLocal(globalPosition);
     return new Positioned(

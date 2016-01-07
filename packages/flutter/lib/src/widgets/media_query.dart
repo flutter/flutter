@@ -58,7 +58,7 @@ class MediaQuery extends InheritedWidget {
   /// When that information changes, your widget will be scheduled to be rebuilt,
   /// keeping your widget up-to-date.
   static MediaQueryData of(BuildContext context) {
-    MediaQuery query = context.inheritFromWidgetOfType(MediaQuery);
+    MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
     return query == null ? null : query.data;
   }
 

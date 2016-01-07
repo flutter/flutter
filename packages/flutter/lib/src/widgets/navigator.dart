@@ -144,7 +144,7 @@ class Navigator extends StatefulComponent {
   }
 
   static bool canPop(BuildContext context) {
-    NavigatorState navigator = context.ancestorStateOfType(NavigatorState);
+    NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     return navigator != null && navigator.canPop();
   }
 
@@ -156,7 +156,7 @@ class Navigator extends StatefulComponent {
   }
 
   static void openTransaction(BuildContext context, NavigatorTransactionCallback callback) {
-    NavigatorState navigator = context.ancestorStateOfType(NavigatorState);
+    NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     navigator.openTransaction(callback);
   }
 

@@ -8,7 +8,7 @@ import 'material.dart';
 
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
-    if (context.widget is Material || context.ancestorWidgetOfType(Material) != null)
+    if (context.widget is Material || context.ancestorWidgetOfExactType(Material) != null)
       return true;
     Element element = context;
     debugPrint('${context.widget} needs to be placed inside a Material widget. Ownership chain:\n${element.debugGetOwnershipChain(10)}');

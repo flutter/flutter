@@ -89,7 +89,7 @@ class Focus extends StatefulComponent {
     assert(context.widget != null);
     assert(context.widget.key != null);
     assert(context.widget.key is GlobalKey);
-    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
+    _FocusScope focusScope = context.inheritFromWidgetOfExactType(_FocusScope);
     if (focusScope != null) {
       if (autofocus)
         focusScope._setFocusedWidgetIfUnset(context.widget.key);
@@ -113,7 +113,7 @@ class Focus extends StatefulComponent {
     assert(context != null);
     assert(context.widget != null);
     assert(context.widget is Focus);
-    _FocusScope focusScope = context.inheritFromWidgetOfType(_FocusScope);
+    _FocusScope focusScope = context.inheritFromWidgetOfExactType(_FocusScope);
     if (focusScope != null) {
       assert(context.widget.key != null);
       if (autofocus)
@@ -131,7 +131,7 @@ class Focus extends StatefulComponent {
   /// called from event listeners, e.g. in response to a finger tap or tab key.
   static void moveTo(GlobalKey key) {
     assert(key.currentContext != null);
-    _FocusScope focusScope = key.currentContext.ancestorWidgetOfType(_FocusScope);
+    _FocusScope focusScope = key.currentContext.ancestorWidgetOfExactType(_FocusScope);
     if (focusScope != null)
       focusScope.focusState._setFocusedWidget(key);
   }
@@ -144,7 +144,7 @@ class Focus extends StatefulComponent {
   static void moveScopeTo(GlobalKey key) {
     assert(key.currentWidget is Focus);
     assert(key.currentContext != null);
-    _FocusScope focusScope = key.currentContext.ancestorWidgetOfType(_FocusScope);
+    _FocusScope focusScope = key.currentContext.ancestorWidgetOfExactType(_FocusScope);
     if (focusScope != null)
       focusScope.focusState._setFocusedScope(key);
   }
