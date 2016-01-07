@@ -30,6 +30,7 @@ if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     (cd packages/newton; ~/.pub-cache/bin/dartdoc --header=/tmp/_header.html)
     (cd packages/cassowary; ~/.pub-cache/bin/dartdoc --header=/tmp/_header.html)
     (cd packages/flutter_test; ~/.pub-cache/bin/dartdoc --header=/tmp/_header.html)
+    (cd packages/flutter_sprites; ~/.pub-cache/bin/dartdoc --header=/tmp/_header.html)
 
     GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
     GCLOUD=$HOME/google-cloud-sdk/bin/gcloud
@@ -41,5 +42,6 @@ if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     $GSUTIL -m -q rsync -r -d packages/newton/doc/api gs://docs.flutter.io/newton
     $GSUTIL -m -q rsync -r -d packages/cassowary/doc/api gs://docs.flutter.io/cassowary
     $GSUTIL -m -q rsync -r -d packages/flutter_test/doc/api gs://docs.flutter.io/flutter_test
+    $GSUTIL -m -q rsync -r -d packages/flutter_sprites/doc/api gs://docs.flutter.io/flutter_sprites
   fi
 fi
