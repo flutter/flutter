@@ -12,6 +12,7 @@ import 'demo/persistent_bottom_sheet_demo.dart';
 import 'demo/selection_controls_demo.dart';
 import 'demo/slider_demo.dart';
 import 'demo/tabs_demo.dart';
+import 'demo/page_selector_demo.dart';
 import 'demo/time_picker_demo.dart';
 import 'demo/widget_demo.dart';
 import 'gallery_page.dart';
@@ -22,6 +23,7 @@ final List<WidgetDemo> _kDemos = <WidgetDemo>[
   kSliderDemo,
   kDatePickerDemo,
   kTabsDemo,
+  kPageSelectorDemo,
   kTimePickerDemo,
   kDropDownDemo,
   kModalBottomSheetDemo,
