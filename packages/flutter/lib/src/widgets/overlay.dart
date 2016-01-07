@@ -69,7 +69,7 @@ class Overlay extends StatefulComponent {
   final List<OverlayEntry> initialEntries;
 
   /// The state from the closest instance of this class that encloses the given context.
-  static OverlayState of(BuildContext context) => context.ancestorStateOfType(OverlayState);
+  static OverlayState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<OverlayState>());
 
   OverlayState createState() => new OverlayState();
 }

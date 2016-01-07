@@ -5,7 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher;
 
 class TestTransition extends TransitionComponent {
   TestTransition({
@@ -99,7 +99,7 @@ void main() {
         )
       );
 
-      NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(NavigatorState);
+      NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(const TypeMatcher<NavigatorState>());
 
       expect(state(), equals('BC')); // transition ->1 is at 1.0
 

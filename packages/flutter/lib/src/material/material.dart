@@ -95,7 +95,7 @@ class Material extends StatefulComponent {
 
   /// The ink controller from the closest instance of this class that encloses the given context.
   static MaterialInkController of(BuildContext context) {
-    final RenderInkFeatures result = context.ancestorRenderObjectOfType(RenderInkFeatures);
+    final RenderInkFeatures result = context.ancestorRenderObjectOfType(const TypeMatcher<RenderInkFeatures>());
     return result;
   }
 

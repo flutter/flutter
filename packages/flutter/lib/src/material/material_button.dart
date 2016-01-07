@@ -27,7 +27,7 @@ class ButtonTheme extends InheritedWidget {
   ///
   /// Defaults to [ButtonColor.normal] if none exists.
   static ButtonColor of(BuildContext context) {
-    ButtonTheme result = context.inheritFromWidgetOfType(ButtonTheme);
+    ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
     return result?.color ?? ButtonColor.normal;
   }
 

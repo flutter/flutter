@@ -59,7 +59,7 @@ abstract class Scrollable extends StatefulComponent {
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScrollableState of(BuildContext context) {
-    return context.ancestorStateOfType(ScrollableState);
+    return context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
   }
 
   /// Scrolls the closest enclosing scrollable to make the given context visible.

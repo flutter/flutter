@@ -26,7 +26,7 @@ class Theme extends InheritedWidget {
   ///
   /// Defaults to the fallback theme data if none exists.
   static ThemeData of(BuildContext context) {
-    Theme theme = context.inheritFromWidgetOfType(Theme);
+    Theme theme = context.inheritFromWidgetOfExactType(Theme);
     return theme?.data ?? _kFallbackTheme;
   }
 

@@ -198,6 +198,11 @@ class GlobalObjectKey extends GlobalKey {
   String toString() => '[$runtimeType ${value.runtimeType}(${value.hashCode})]';
 }
 
+/// This class is a work-around for the "is" operator not accepting a variable value as its right operand
+class TypeMatcher<T> {
+  const TypeMatcher();
+  bool check(dynamic object) => object is T;
+}
 
 // WIDGETS
 
@@ -585,10 +590,10 @@ typedef void ElementVisitor(Element element);
 abstract class BuildContext {
   Widget get widget;
   RenderObject findRenderObject();
-  InheritedWidget inheritFromWidgetOfType(Type targetType);
-  Widget ancestorWidgetOfType(Type targetType);
-  State ancestorStateOfType(Type targetType);
-  RenderObject ancestorRenderObjectOfType(Type targetType);
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType);
+  Widget ancestorWidgetOfExactType(Type targetType);
+  State ancestorStateOfType(TypeMatcher matcher);
+  RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
   void visitAncestorElements(bool visitor(Element element));
   void visitChildElements(void visitor(Element element));
 }
@@ -876,24 +881,24 @@ abstract class Element<T extends Widget> implements BuildContext {
   RenderObject findRenderObject() => renderObject;
 
   Set<Type> _dependencies;
-  InheritedWidget inheritFromWidgetOfType(Type targetType) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
     if (_dependencies == null)
       _dependencies = new Set<Type>();
     _dependencies.add(targetType);
-    return ancestorWidgetOfType(targetType);
+    return ancestorWidgetOfExactType(targetType);
   }
 
-  Widget ancestorWidgetOfType(Type targetType) {
+  Widget ancestorWidgetOfExactType(Type targetType) {
     Element ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != targetType)
       ancestor = ancestor._parent;
     return ancestor?.widget;
   }
 
-  State ancestorStateOfType(Type targetType) {
+  State ancestorStateOfType(TypeMatcher matcher) {
     Element ancestor = _parent;
     while (ancestor != null) {
-      if (ancestor is StatefulComponentElement && ancestor.state.runtimeType == targetType)
+      if (ancestor is StatefulComponentElement && matcher.check(ancestor.state))
         break;
       ancestor = ancestor._parent;
     }
@@ -901,10 +906,10 @@ abstract class Element<T extends Widget> implements BuildContext {
     return statefulAncestor?.state;
   }
 
-  RenderObject ancestorRenderObjectOfType(Type targetType) {
+  RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
     Element ancestor = _parent;
     while (ancestor != null) {
-      if (ancestor is RenderObjectElement && ancestor.renderObject.runtimeType == targetType)
+      if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
         break;
       ancestor = ancestor._parent;
     }
