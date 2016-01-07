@@ -146,6 +146,14 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
       _updateCurve();
     _performanceController.duration = config.duration;
     if (_configAllVariables()) {
+      _updateBeginValue(_constraints);
+      _updateBeginValue(_decoration);
+      _updateBeginValue(_foregroundDecoration);
+      _updateBeginValue(_margin);
+      _updateBeginValue(_padding);
+      _updateBeginValue(_transform);
+      _updateBeginValue(_width);
+      _updateBeginValue(_height);
       _performanceController.progress = 0.0;
       _performanceController.play();
     }
@@ -183,82 +191,84 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
     });
   }
 
-  bool _configVariable(AnimatedValue variable, dynamic targetValue) {
+  bool _updateEndValue(AnimatedValue variable, dynamic targetValue) {
     if (targetValue == variable.end)
       return false;
-    dynamic currentValue = variable.value;
     variable.end = targetValue;
-    variable.begin = currentValue;
-    return currentValue != targetValue;
+    return true;
+  }
+
+  void _updateBeginValue(AnimatedValue variable) {
+    variable?.begin = variable.value;
   }
 
   bool _configAllVariables() {
-    bool needsAnimation = false;
+    bool startAnimation = false;
     if (config.constraints != null) {
       _constraints ??= new AnimatedBoxConstraintsValue(config.constraints);
-      if (_configVariable(_constraints, config.constraints))
-        needsAnimation = true;
+      if (_updateEndValue(_constraints, config.constraints))
+        startAnimation = true;
     } else {
       _constraints = null;
     }
 
     if (config.decoration != null) {
       _decoration ??= new AnimatedDecorationValue(config.decoration);
-      if (_configVariable(_decoration, config.decoration))
-        needsAnimation = true;
+      if (_updateEndValue(_decoration, config.decoration))
+        startAnimation = true;
     } else {
       _decoration = null;
     }
 
     if (config.foregroundDecoration != null) {
       _foregroundDecoration ??= new AnimatedDecorationValue(config.foregroundDecoration);
-      if (_configVariable(_foregroundDecoration, config.foregroundDecoration))
-        needsAnimation = true;
+      if (_updateEndValue(_foregroundDecoration, config.foregroundDecoration))
+        startAnimation = true;
     } else {
       _foregroundDecoration = null;
     }
 
     if (config.margin != null) {
       _margin ??= new AnimatedEdgeDimsValue(config.margin);
-      if (_configVariable(_margin, config.margin))
-        needsAnimation = true;
+      if (_updateEndValue(_margin, config.margin))
+        startAnimation = true;
     } else {
       _margin = null;
     }
 
     if (config.padding != null) {
       _padding ??= new AnimatedEdgeDimsValue(config.padding);
-      if (_configVariable(_padding, config.padding))
-        needsAnimation = true;
+      if (_updateEndValue(_padding, config.padding))
+        startAnimation = true;
     } else {
       _padding = null;
     }
 
     if (config.transform != null) {
       _transform ??= new AnimatedMatrix4Value(config.transform);
-      if (_configVariable(_transform, config.transform))
-        needsAnimation = true;
+      if (_updateEndValue(_transform, config.transform))
+        startAnimation = true;
     } else {
       _transform = null;
     }
 
     if (config.width != null) {
       _width ??= new AnimatedValue<double>(config.width);
-      if (_configVariable(_width, config.width))
-        needsAnimation = true;
+      if (_updateEndValue(_width, config.width))
+        startAnimation = true;
     } else {
       _width = null;
     }
 
     if (config.height != null) {
       _height ??= new AnimatedValue<double>(config.height);
-      if (_configVariable(_height, config.height))
-        needsAnimation = true;
+      if (_updateEndValue(_height, config.height))
+        startAnimation = true;
     } else {
       _height = null;
     }
 
-    return needsAnimation;
+    return startAnimation;
   }
 
   Widget build(BuildContext context) {
