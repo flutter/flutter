@@ -14,7 +14,16 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    int code = await runCommandAndStreamOutput([
+    try {
+      runCheckedSync(<String>[
+        'git', 'rev-parse', '@{u}'
+      ], workingDirectory: ArtifactStore.flutterRoot);
+    } catch (e) {
+      print('Unable to upgrade Flutter. No upstream repository configured for Flutter.');
+      return 1;
+    }
+
+    int code = await runCommandAndStreamOutput(<String>[
       'git', 'pull', '--ff-only'
     ], workingDirectory: ArtifactStore.flutterRoot);
 
