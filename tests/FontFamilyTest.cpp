@@ -31,11 +31,13 @@ typedef ICUTestBase FontLanguagesTest;
 typedef ICUTestBase FontLanguageTest;
 
 static FontLanguages createFontLanguages(const std::string& input) {
+    AutoMutex _l(gMinikinLock);
     uint32_t langId = FontLanguageListCache::getId(input);
     return FontLanguageListCache::getById(langId);
 }
 
 static FontLanguage createFontLanguage(const std::string& input) {
+    AutoMutex _l(gMinikinLock);
     uint32_t langId = FontLanguageListCache::getId(input);
     return FontLanguageListCache::getById(langId)[0];
 }
