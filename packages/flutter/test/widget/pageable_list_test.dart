@@ -13,7 +13,7 @@ final List<GlobalKey> globalKeys = defaultPages.map((_) => new GlobalKey()).toLi
 int currentPage = null;
 bool itemsWrap = false;
 
-Widget buildPage(BuildContext context, int page, int index) {
+Widget buildPage(int page) {
   return new Container(
     key: globalKeys[page],
     width: pageSize.width,
@@ -23,9 +23,8 @@ Widget buildPage(BuildContext context, int page, int index) {
 }
 
 Widget buildFrame({ List<int> pages: defaultPages }) {
-  final list = new PageableList<int>(
-    items: pages,
-    itemBuilder: buildPage,
+  final list = new PageableList(
+    children: pages.map(buildPage),
     itemsWrap: itemsWrap,
     scrollDirection: ScrollDirection.horizontal,
     onPageChanged: (int page) { currentPage = page; }
@@ -136,7 +135,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       currentPage = null;
       itemsWrap = true;
-      tester.pumpWidget(buildFrame(pages: null));
+      tester.pumpWidget(buildFrame(pages: <int>[]));
       expect(currentPage, isNull);
     });
   });

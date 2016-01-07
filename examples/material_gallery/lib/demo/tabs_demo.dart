@@ -29,7 +29,7 @@ class _TabsDemoState extends State<TabsDemo> {
   Widget build(_) {
     return new TabBarView<String>(
       items: _iconNames,
-      itemBuilder: (BuildContext context, String iconName, int index) {
+      itemBuilder: (String iconName) {
         return new Container(
           key: new ValueKey<String>(iconName),
           padding: const EdgeDims.all(12.0),

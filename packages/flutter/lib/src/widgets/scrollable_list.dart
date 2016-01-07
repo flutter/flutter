@@ -129,11 +129,11 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
   int get materializedChildCount => _materializedChildCount;
   int _materializedChildCount;
 
-  double get repaintOffsetBase => _repaintOffsetBase;
-  double _repaintOffsetBase;
+  double get startOffsetBase => _startOffsetBase;
+  double _startOffsetBase;
 
-  double get repaintOffsetLimit =>_repaintOffsetLimit;
-  double _repaintOffsetLimit;
+  double get startOffsetLimit =>_startOffsetLimit;
+  double _startOffsetLimit;
 
   void updateRenderObject() {
     renderObject.scrollDirection = widget.scrollDirection;
@@ -156,21 +156,25 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
   }
 
   void layout(BoxConstraints constraints) {
-    int length = renderObject.virtualChildCount;
+    final int length = renderObject.virtualChildCount;
+    final double itemExtent = widget.itemExtent;
+
     double contentExtent = widget.itemExtent * length;
     double containerExtent = _getContainerExtentFromRenderObject();
 
-    _materializedChildBase = math.max(0, widget.startOffset ~/ widget.itemExtent);
-    int materializedChildLimit = math.max(0, ((widget.startOffset + containerExtent) / widget.itemExtent).ceil());
+    _materializedChildBase = math.max(0, widget.startOffset ~/ itemExtent);
+    int materializedChildLimit = math.max(0, ((widget.startOffset + containerExtent) / itemExtent).ceil());
 
     if (!widget.itemsWrap) {
       _materializedChildBase = math.min(length, _materializedChildBase);
       materializedChildLimit = math.min(length, materializedChildLimit);
+    } else if (length == 0) {
+      materializedChildLimit = _materializedChildBase;
     }
 
     _materializedChildCount = materializedChildLimit - _materializedChildBase;
-    _repaintOffsetBase = _materializedChildBase * widget.itemExtent;
-    _repaintOffsetLimit = materializedChildLimit * widget.itemExtent - containerExtent;
+    _startOffsetBase = _materializedChildBase * itemExtent;
+    _startOffsetLimit = materializedChildLimit * itemExtent - containerExtent;
 
     super.layout(constraints);
 

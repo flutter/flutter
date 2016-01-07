@@ -664,8 +664,6 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
 
 }
 
-typedef Widget ItemBuilder<T>(BuildContext context, T item, int index);
-
 /// A general scrollable list for a large number of children that might not all
 /// have the same height. Prefer [ScrollableWidgetList] when all the children
 /// have the same height because it can use that property to be more efficient.

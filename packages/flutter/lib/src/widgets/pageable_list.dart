@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,8 +10,8 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'homogeneous_viewport.dart';
 import 'scrollable.dart';
+import 'virtual_viewport.dart';
 
 /// Controls what alignment items use when settling.
 enum ItemsSnapAlignment {
@@ -22,7 +21,7 @@ enum ItemsSnapAlignment {
 
 typedef void PageChangedCallback(int newPage);
 
-class PageableList<T> extends Scrollable {
+class PageableList extends Scrollable {
   PageableList({
     Key key,
     initialScrollOffset,
@@ -32,14 +31,13 @@ class PageableList<T> extends Scrollable {
     ScrollListener onScrollEnd,
     SnapOffsetCallback snapOffsetCallback,
     double snapAlignmentOffset: 0.0,
-    this.items,
-    this.itemBuilder,
     this.itemsWrap: false,
     this.itemsSnapAlignment: ItemsSnapAlignment.adjacentItem,
     this.onPageChanged,
     this.scrollableListPainter,
     this.duration: const Duration(milliseconds: 200),
-    this.curve: Curves.ease
+    this.curve: Curves.ease,
+    this.children
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
@@ -51,21 +49,19 @@ class PageableList<T> extends Scrollable {
     snapAlignmentOffset: snapAlignmentOffset
   );
 
-  final List<T> items;
-  final ItemBuilder<T> itemBuilder;
-  final ItemsSnapAlignment itemsSnapAlignment;
   final bool itemsWrap;
+  final ItemsSnapAlignment itemsSnapAlignment;
   final PageChangedCallback onPageChanged;
   final ScrollableListPainter scrollableListPainter;
   final Duration duration;
   final Curve curve;
+  final Iterable<Widget> children;
 
-  PageableListState<T, PageableList<T>> createState() => new PageableListState<T, PageableList<T>>();
+  PageableListState createState() => new PageableListState();
 }
 
-class PageableListState<T, Config extends PageableList<T>> extends ScrollableState<Config> {
-
-  int get itemCount => config.items?.length ?? 0;
+class PageableListState<T extends PageableList> extends ScrollableState<T> {
+  int get itemCount => config.children?.length ?? 0;
   int _previousItemCount;
 
   double pixelToScrollOffset(double value) {
@@ -76,7 +72,12 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
     return pixelScrollExtent == 0.0 ? 0.0 : value / pixelScrollExtent;
   }
 
-  void didUpdateConfig(Config oldConfig) {
+  void initState() {
+    super.initState();
+    _updateScrollBehavior();
+  }
+
+  void didUpdateConfig(PageableList oldConfig) {
     super.didUpdateConfig(oldConfig);
 
     bool scrollBehaviorUpdateNeeded = config.scrollDirection != oldConfig.scrollDirection;
@@ -94,9 +95,7 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
   }
 
   void _updateScrollBehavior() {
-    // if you don't call this from build(), you must call it from setState().
-    if (config.scrollableListPainter != null)
-      config.scrollableListPainter.contentExtent = itemCount.toDouble();
+    config.scrollableListPainter?.contentExtent = itemCount.toDouble();
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: itemCount.toDouble(),
       containerExtent: 1.0,
@@ -111,8 +110,7 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
 
   void dispatchOnScroll() {
     super.dispatchOnScroll();
-    if (config.scrollableListPainter != null)
-      config.scrollableListPainter.scrollOffset = scrollOffset;
+    config.scrollableListPainter?.scrollOffset = scrollOffset;
   }
 
   void dispatchOnScrollEnd() {
@@ -121,17 +119,12 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
   }
 
   Widget buildContent(BuildContext context) {
-    if (itemCount != _previousItemCount) {
-      _previousItemCount = itemCount;
-      _updateScrollBehavior();
-    }
-    return new HomogeneousPageViewport(
-      builder: buildItems,
+    return new PageViewport(
       itemsWrap: config.itemsWrap,
-      itemCount: itemCount,
-      direction: config.scrollDirection,
+      scrollDirection: config.scrollDirection,
       startOffset: scrollOffset,
-      overlayPainter: config.scrollableListPainter
+      overlayPainter: config.scrollableListPainter,
+      children: config.children
     );
   }
 
@@ -180,18 +173,94 @@ class PageableListState<T, Config extends PageableList<T>> extends ScrollableSta
       .then(_notifyPageChanged);
   }
 
-  List<Widget> buildItems(BuildContext context, int start, int count) {
-    final List<Widget> result = new List<Widget>();
-    final int begin = config.itemsWrap ? start : math.max(0, start);
-    final int end = config.itemsWrap ? begin + count : math.min(begin + count, itemCount);
-    for (int i = begin; i < end; ++i)
-      result.add(config.itemBuilder(context, config.items[i % itemCount], i));
-    assert(result.every((Widget item) => item.key != null));
-    return result;
-  }
-
   void _notifyPageChanged(_) {
     if (config.onPageChanged != null)
       config.onPageChanged(itemCount == 0 ? 0 : scrollOffset.floor() % itemCount);
+  }
+}
+
+class PageViewport extends VirtualViewport {
+  PageViewport({
+    Key key,
+    this.startOffset: 0.0,
+    this.scrollDirection: ScrollDirection.vertical,
+    this.itemsWrap: false,
+    this.overlayPainter,
+    this.children
+  }) {
+    assert(scrollDirection != null);
+  }
+
+  final double startOffset;
+  final ScrollDirection scrollDirection;
+  final bool itemsWrap;
+  final Painter overlayPainter;
+  final Iterable<Widget> children;
+
+  RenderList createRenderObject() => new RenderList();
+
+  _PageViewportElement createElement() => new _PageViewportElement(this);
+}
+
+class _PageViewportElement extends VirtualViewportElement<PageViewport> {
+  _PageViewportElement(PageViewport widget) : super(widget);
+
+  RenderList get renderObject => super.renderObject;
+
+  int get materializedChildBase => _materializedChildBase;
+  int _materializedChildBase;
+
+  int get materializedChildCount => _materializedChildCount;
+  int _materializedChildCount;
+
+  double get startOffsetBase => _repaintOffsetBase;
+  double _repaintOffsetBase;
+
+  double get startOffsetLimit =>_repaintOffsetLimit;
+  double _repaintOffsetLimit;
+
+  double get paintOffset {
+    if (_containerExtent == null)
+      return 0.0;
+    return -(widget.startOffset - startOffsetBase) * _containerExtent;
+  }
+
+  void updateRenderObject() {
+    renderObject.scrollDirection = widget.scrollDirection;
+    renderObject.overlayPainter = widget.overlayPainter;
+    super.updateRenderObject();
+  }
+
+  double _containerExtent;
+
+  double _getContainerExtentFromRenderObject() {
+    switch (widget.scrollDirection) {
+      case ScrollDirection.vertical:
+        return renderObject.size.height;
+      case ScrollDirection.horizontal:
+        return renderObject.size.width;
+    }
+  }
+
+  void layout(BoxConstraints constraints) {
+    int length = renderObject.virtualChildCount;
+    _containerExtent = _getContainerExtentFromRenderObject();
+
+    _materializedChildBase = widget.startOffset.floor();
+    int materializedChildLimit = (widget.startOffset + 1.0).ceil();
+
+    if (!widget.itemsWrap) {
+      _materializedChildBase = _materializedChildBase.clamp(0, length);
+      materializedChildLimit = materializedChildLimit.clamp(0, length);
+    } else if (length == 0) {
+      materializedChildLimit = _materializedChildBase;
+    }
+
+    _materializedChildCount = materializedChildLimit - _materializedChildBase;
+
+    _repaintOffsetBase = _materializedChildBase.toDouble();
+    _repaintOffsetLimit = (materializedChildLimit - 1).toDouble();
+
+    super.layout(constraints);
   }
 }

@@ -41,7 +41,7 @@ class PageableListAppState extends State<PageableListApp> {
   ScrollDirection scrollDirection = ScrollDirection.horizontal;
   bool itemsWrap = false;
 
-  Widget buildCard(BuildContext context, CardModel cardModel, int index) {
+  Widget buildCard(CardModel cardModel) {
     Widget card = new Card(
       color: cardModel.color,
       child: new Container(
@@ -114,10 +114,9 @@ class PageableListAppState extends State<PageableListApp> {
   }
 
   Widget _buildBody(BuildContext context) {
-    return new PageableList<CardModel>(
-      items: cardModels,
+    return new PageableList(
+      children: cardModels.map(buildCard),
       itemsWrap: itemsWrap,
-      itemBuilder: buildCard,
       scrollDirection: scrollDirection
     );
   }
