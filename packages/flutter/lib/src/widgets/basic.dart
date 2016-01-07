@@ -11,7 +11,6 @@ import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
     BackgroundImage,
-    BlockDirection,
     Border,
     BorderSide,
     BoxConstraints,
@@ -948,13 +947,13 @@ class Container extends StatelessComponent {
 class BlockBody extends MultiChildRenderObjectWidget {
   BlockBody(List<Widget> children, {
     Key key,
-    this.direction: BlockDirection.vertical
+    this.direction: ScrollDirection.vertical
   }) : super(key: key, children: children) {
     assert(direction != null);
   }
 
   /// The direction to use as the main axis.
-  final BlockDirection direction;
+  final ScrollDirection direction;
 
   RenderBlock createRenderObject() => new RenderBlock(direction: direction);
 

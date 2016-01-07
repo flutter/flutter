@@ -424,14 +424,8 @@ class Block extends StatelessComponent {
   final ScrollDirection scrollDirection;
   final ScrollListener onScroll;
 
-  BlockDirection get _direction {
-    if (scrollDirection == ScrollDirection.vertical)
-      return BlockDirection.vertical;
-    return BlockDirection.horizontal;
-  }
-
   Widget build(BuildContext context) {
-    Widget contents = new BlockBody(children, direction: _direction);
+    Widget contents = new BlockBody(children, direction: scrollDirection);
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
     return new ScrollableViewport(
