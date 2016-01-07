@@ -77,8 +77,9 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Rendere
   void handlePopRoute() {
     for (BindingObserver observer in _observers) {
       if (observer.didPopRoute())
-        break;
+        return;
     }
+    activity.finishCurrentActivity();
   }
 
   void handleAppLifecycleStateChanged(ui.AppLifecycleState state) {
