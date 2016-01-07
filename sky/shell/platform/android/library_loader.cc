@@ -11,6 +11,7 @@
 #include "base/logging.h"
 #include "mojo/android/system/base_run_loop.h"
 #include "mojo/android/system/core_impl.h"
+#include "sky/engine/bindings/jni/dart_jni.h"
 #include "sky/shell/platform/android/platform_view_android.h"
 #include "sky/shell/platform/android/sky_main.h"
 #include "sky/shell/platform/android/tracing_controller.h"
@@ -35,15 +36,22 @@ bool RegisterJNI(JNIEnv* env) {
                                arraysize(kSkyRegisteredMethods));
 }
 
+bool InitJNI() {
+  return blink::DartJni::InitJni();
+}
+
 }  // namespace
 
 // This is called by the VM when the shared library is first loaded.
 JNI_EXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   std::vector<base::android::RegisterCallback> register_callbacks;
   register_callbacks.push_back(base::Bind(&RegisterJNI));
+
+  std::vector<base::android::InitCallback> init_callbacks;
+  init_callbacks.push_back(base::Bind(&InitJNI));
+
   if (!base::android::OnJNIOnLoadRegisterJNI(vm, register_callbacks) ||
-      !base::android::OnJNIOnLoadInit(
-          std::vector<base::android::InitCallback>())) {
+      !base::android::OnJNIOnLoadInit(init_callbacks)) {
     return -1;
   }
 

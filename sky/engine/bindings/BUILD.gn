@@ -37,6 +37,10 @@ source_set("bindings") {
     "//sky/engine/wtf",
   ]
 
+  if (is_android) {
+    deps += [ "//sky/engine/bindings/jni" ]
+  }
+
   # On iOS (device), precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
   # specified up front. In such cases, there can be no updater or generic
@@ -144,6 +148,7 @@ source_set("snapshot_cc") {
 copy("generate_dart_ui") {
   sources = [
     "dart_ui.dart",
+    "jni/jni.dart",
   ]
   sources += core_dart_files
 
