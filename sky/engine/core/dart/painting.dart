@@ -217,7 +217,21 @@ class Canvas extends NativeFieldWrapperClass2 {
   void rotate(double radians) native "Canvas_rotate";
   void skew(double sx, double sy) native "Canvas_skew";
   void concat(Float64List matrix4) native "Canvas_concat";
-  void setMatrix(Float64List matrix4) native "Canvas_setMatrix";
+
+  void _transform(Float64List matrix4) native "Canvas_transform";
+  void transform(Float64List matrix4) {
+    if (matrix4.length != 16)
+      throw new ArgumentError("[matrix4] must have 16 entries.");
+    _transform(matrix4);
+  }
+
+  void _setMatrix(Float64List matrix4) native "Canvas_setMatrix";
+  void setMatrix(Float64List matrix4) {
+    if (matrix4.length != 16)
+      throw new ArgumentError("[matrix4] must have 16 entries.");
+    _setMatrix(matrix4);
+  }
+
   Float64List getTotalMatrix() native "Canvas_getTotalMatrix";
   void clipRect(Rect rect) native "Canvas_clipRect";
   void clipRRect(RRect rrect) native "Canvas_clipRRect";
