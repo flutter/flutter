@@ -11,6 +11,7 @@ dependencies:
   sky_engine: 0.0.75
   sky_services: 0.0.75
   vector_math: '>=1.4.3 <2.0.0'
+  quiver: '>=0.21.4 <0.22.0'
 
   # See the comment in flutter_tools' pubspec.yaml. We have to pin it
   # here also because sky_services depends on mojo_sdk which depends

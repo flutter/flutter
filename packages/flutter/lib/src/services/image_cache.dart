@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
+import 'package:quiver/collection.dart';
 
 import 'fetch.dart';
 import 'image_decoder.dart';
@@ -35,11 +36,16 @@ class _UrlFetcher implements ImageProvider {
   int get hashCode => _url.hashCode;
 }
 
+const int _kDefaultSize = 1000;
+
 class _ImageCache {
   _ImageCache._();
 
-  final Map<ImageProvider, ImageResource> _cache =
-      new Map<ImageProvider, ImageResource>();
+  final LruMap<ImageProvider, ImageResource> _cache =
+      new LruMap<ImageProvider, ImageResource>(maximumSize: _kDefaultSize);
+
+  int get maximumSize => _cache.maximumSize;
+  void set maximumSize(int value) { _cache.maximumSize = value; }
 
   ImageResource loadProvider(ImageProvider provider) {
     return _cache.putIfAbsent(provider, () {
