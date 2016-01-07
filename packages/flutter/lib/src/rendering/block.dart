@@ -13,14 +13,6 @@ import 'viewport.dart';
 /// Parent data for use with [RenderBlockBase].
 class BlockParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
-/// The direction in which the block should lay out.
-enum BlockDirection {
-  /// Children are arranged horizontally, from left to right.
-  horizontal,
-  /// Children are arranged vertically, from top to bottom.
-  vertical
-}
-
 typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints);
 typedef double _Constrainer(double value);
 
@@ -40,7 +32,7 @@ abstract class RenderBlockBase extends RenderBox
 
   RenderBlockBase({
     List<RenderBox> children,
-    BlockDirection direction: BlockDirection.vertical,
+    ScrollDirection direction: ScrollDirection.vertical,
     double itemExtent,
     double minExtent: 0.0
   }) : _direction = direction, _itemExtent = itemExtent, _minExtent = minExtent {
@@ -53,9 +45,9 @@ abstract class RenderBlockBase extends RenderBox
   }
 
   /// The direction to use as the main axis.
-  BlockDirection get direction => _direction;
-  BlockDirection _direction;
-  void set direction (BlockDirection value) {
+  ScrollDirection get direction => _direction;
+  ScrollDirection _direction;
+  void set direction (ScrollDirection value) {
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
@@ -83,10 +75,9 @@ abstract class RenderBlockBase extends RenderBox
   }
 
   /// Whether the main axis is vertical.
-  bool get isVertical => _direction == BlockDirection.vertical;
+  bool get isVertical => _direction == ScrollDirection.vertical;
 
-  // TODO(abarth): Remove BlockDirection in favor of ScrollDirection.
-  ScrollDirection get scrollDirection => isVertical ? ScrollDirection.vertical : ScrollDirection.horizontal;
+  ScrollDirection get scrollDirection => _direction;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     if (isVertical)
@@ -135,7 +126,7 @@ class RenderBlock extends RenderBlockBase {
 
   RenderBlock({
     List<RenderBox> children,
-    BlockDirection direction: BlockDirection.vertical,
+    ScrollDirection direction: ScrollDirection.vertical,
     double itemExtent,
     double minExtent: 0.0
   }) : super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
@@ -251,7 +242,7 @@ class RenderBlockViewport extends RenderBlockBase {
     ExtentCallback maxCrossAxisDimensionCallback,
     ExtentCallback minCrossAxisDimensionCallback,
     Painter overlayPainter,
-    BlockDirection direction: BlockDirection.vertical,
+    ScrollDirection direction: ScrollDirection.vertical,
     double itemExtent,
     double minExtent: 0.0,
     double startOffset: 0.0,

@@ -509,14 +509,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     int index = startIndex;
     if (haveChildren) {
       // Update the renderObject configuration
-      switch (widget.direction) {
-        case ScrollDirection.vertical:
-          renderObject.direction = BlockDirection.vertical;
-          break;
-        case ScrollDirection.horizontal:
-          renderObject.direction = BlockDirection.horizontal;
-          break;
-      }
+      renderObject.direction = renderObject.direction;
       renderObject.startOffset = _childOffsets[index] - widget.startOffset;
       // Build all the widgets we still need.
       while (_childOffsets[index] < endOffset) {

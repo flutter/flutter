@@ -207,7 +207,7 @@ class _HomogeneousViewportElement extends _ViewportBaseElement<HomogeneousViewpo
       _layoutItemCount = math.max(0, _layoutItemCount);
       _updateChildren();
       // Update the renderObject configuration
-      renderObject.direction = widget.direction == ScrollDirection.vertical ? BlockDirection.vertical : BlockDirection.horizontal;
+      renderObject.direction = widget.direction;
       renderObject.itemExtent = widget.itemExtent;
       renderObject.minExtent = getTotalExtent(null);
       renderObject.startOffset = offset;
