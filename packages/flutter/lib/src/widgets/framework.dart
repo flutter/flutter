@@ -1404,6 +1404,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     assert(_slot == newSlot);
+    assert(() { debugUpdateRenderObjectOwner(); return true; });
     attachRenderObject(newSlot);
     _dirty = false;
   }
@@ -1788,7 +1789,7 @@ void _debugReportException(String context, dynamic exception, StackTrace stack) 
   if (debugWidgetsExceptionHandler != null) {
     debugWidgetsExceptionHandler(context, exception, stack);
   } else {
-    debugPrint('------------------------------------------------------------------------');
+    debugPrint('-- EXCEPTION CAUGHT BY WIDGETS LIBRARY ---------------------------------');
     debugPrint('Exception caught while $context');
     debugPrint('$exception');
     debugPrint('Stack trace:');

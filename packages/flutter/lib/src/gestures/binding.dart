@@ -82,8 +82,8 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
   /// binding. The 'event' argument is the pointer event that was being routed.
   /// The 'target' argument is the class whose handleEvent function threw the
   /// exception. The 'exception' argument contains the object that was thrown,
-  /// and the 'stack' argument contains the stack trace. The callback is invoked
-  /// after the information is printed to the console.
+  /// and the 'stack' argument contains the stack trace. If no handler is
+  /// registered, then the information will be printed to the console instead.
   GesturerExceptionHandler debugGesturerExceptionHandler;
 
   /// Dispatch the given event to the path of the given hit test result
@@ -93,17 +93,20 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
       try {
         entry.target.handleEvent(event, entry);
       } catch (exception, stack) {
-        debugPrint('-- EXCEPTION --');
-        debugPrint('The following exception was raised while dispatching a pointer event:');
-        debugPrint('$exception');
-        debugPrint('Stack trace:');
-        debugPrint('$stack');
-        debugPrint('Event:');
-        debugPrint('$event');
-        debugPrint('Target:');
-        debugPrint('${entry.target}');
-        if (debugGesturerExceptionHandler != null)
+        if (debugGesturerExceptionHandler != null) {
           debugGesturerExceptionHandler(event, entry.target, exception, stack);
+        } else {
+          debugPrint('-- EXCEPTION CAUGHT BY GESTURE LIBRARY ---------------------------------');
+          debugPrint('The following exception was raised while dispatching a pointer event:');
+          debugPrint('$exception');
+          debugPrint('Event:');
+          debugPrint('$event');
+          debugPrint('Target:');
+          debugPrint('${entry.target}');
+          debugPrint('Stack trace:');
+          debugPrint('$stack');
+          debugPrint('------------------------------------------------------------------------');
+        }
       }
     }
   }

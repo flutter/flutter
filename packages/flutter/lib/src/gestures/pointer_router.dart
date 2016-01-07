@@ -43,9 +43,9 @@ class PointerRouter {
   /// the exception. The 'event' argument is the pointer event that was being
   /// routed. The 'route' argument is the callback that threw the exception. The
   /// 'exception' argument contains the object that was thrown, and the 'stack'
-  /// argument contains the stack trace. The callback is invoked after the
-  /// information (exception, stack trace, and event; not the route callback
-  /// itself) is printed to the console.
+  /// argument contains the stack trace. If no handler is registered, then the
+  /// human-readable parts of this information (the exception, event, and stack
+  /// trace) will be printed to the console instead.
   PointerExceptionHandler debugPointerExceptionHandler;
 
   /// Calls the routes registered for this pointer event.
@@ -60,15 +60,18 @@ class PointerRouter {
       try {
         route(event);
       } catch (exception, stack) {
-        debugPrint('-- EXCEPTION --');
-        debugPrint('The following exception was raised while routing a pointer event:');
-        debugPrint('$exception');
-        debugPrint('Stack trace:');
-        debugPrint('$stack');
-        debugPrint('Event:');
-        debugPrint('$event');
-        if (debugPointerExceptionHandler != null)
+        if (debugPointerExceptionHandler != null) {
           debugPointerExceptionHandler(this, event, route, exception, stack);
+        } else {
+          debugPrint('-- EXCEPTION CAUGHT BY GESTURE LIBRARY ---------------------------------');
+          debugPrint('The following exception was raised while routing a pointer event:');
+          debugPrint('$exception');
+          debugPrint('Event:');
+          debugPrint('$event');
+          debugPrint('Stack trace:');
+          debugPrint('$stack');
+          debugPrint('------------------------------------------------------------------------');
+        }
       }
     }
   }
