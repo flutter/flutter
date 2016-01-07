@@ -100,4 +100,74 @@ void main() {
       expect(tester.binding.transientCallbackCount, 0);
     });
   });
+
+  test('Animation rerun', () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(
+        new Center(
+          child: new AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 100.0,
+            height: 100.0,
+            child: new Text('X')
+          )
+        )
+      );
+
+      tester.pump();
+      tester.pump(new Duration(milliseconds: 100));
+
+      RenderBox text = tester.findText('X').renderObject;
+      expect(text.size.width, equals(100.0));
+      expect(text.size.height, equals(100.0));
+
+      tester.pump(new Duration(milliseconds: 1000));
+
+      tester.pumpWidget(
+        new Center(
+          child: new AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 200.0,
+            height: 200.0,
+            child: new Text('X')
+          )
+        )
+      );
+      tester.pump();
+      tester.pump(new Duration(milliseconds: 100));
+
+      text = tester.findText('X').renderObject;
+      expect(text.size.width, greaterThan(110.0));
+      expect(text.size.width, lessThan(190.0));
+      expect(text.size.height, greaterThan(110.0));
+      expect(text.size.height, lessThan(190.0));
+
+      tester.pump(new Duration(milliseconds: 1000));
+
+      expect(text.size.width, equals(200.0));
+      expect(text.size.height, equals(200.0));
+
+      tester.pumpWidget(
+        new Center(
+          child: new AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 200.0,
+            height: 100.0,
+            child: new Text('X')
+          )
+        )
+      );
+      tester.pump();
+      tester.pump(new Duration(milliseconds: 100));
+
+      expect(text.size.width, equals(200.0));
+      expect(text.size.height, greaterThan(110.0));
+      expect(text.size.height, lessThan(190.0));
+
+      tester.pump(new Duration(milliseconds: 1000));
+
+      expect(text.size.width, equals(200.0));
+      expect(text.size.height, equals(100.0));
+    });
+  });
 }
