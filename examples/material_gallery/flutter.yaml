@@ -3,6 +3,8 @@ assets:
   - assets/flutter_logo.png
 material-design-icons:
   - name: navigation/arrow_drop_down
+  - name: navigation/arrow_forward
+  - name: navigation/arrow_back
   - name: navigation/cancel
   - name: navigation/menu
   - name: action/event
