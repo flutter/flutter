@@ -45,9 +45,12 @@ public:
     void scale(float sx, float sy);
     void rotate(float radians);
     void skew(float sx, float sy);
+    void transform(const Float64List& matrix4);
+    void setMatrix(const Float64List& matrix4);
+
+    // TODO(abarth): Remove concat.
     void concat(const Float64List& matrix4, ExceptionState&);
 
-    void setMatrix(const Float64List& matrix4, ExceptionState&);
     Float64List getTotalMatrix();
 
     void clipRect(const Rect& rect);

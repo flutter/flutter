@@ -33,17 +33,6 @@ static void Canvas_concat(Dart_NativeArguments args) {
     Dart_ThrowException(es.GetDartException(args, true));
 }
 
-static void Canvas_setMatrix(Dart_NativeArguments args) {
-  DartArgIterator it(args);
-  Float64List matrix4 = it.GetNext<Float64List>();
-  if (it.had_exception())
-    return;
-  ExceptionState es;
-  GetReceiver<Canvas>(args)->setMatrix(matrix4, es);
-  if (es.had_exception())
-    Dart_ThrowException(es.GetDartException(args, true));
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(Canvas);
 
 #define FOR_EACH_BINDING(V) \
@@ -55,6 +44,8 @@ IMPLEMENT_WRAPPERTYPEINFO(Canvas);
   V(Canvas, scale) \
   V(Canvas, rotate) \
   V(Canvas, skew) \
+  V(Canvas, transform) \
+  V(Canvas, setMatrix) \
   V(Canvas, getTotalMatrix) \
   V(Canvas, clipRect) \
   V(Canvas, clipRRect) \
@@ -77,7 +68,6 @@ IMPLEMENT_WRAPPERTYPEINFO(Canvas);
 
   // These are custom because of ExceptionState:
   // V(Canvas, concat)
-  // V(Canvas, setMatrix)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -85,7 +75,6 @@ void Canvas::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     { "Canvas_constructor", Canvas_constructor, 3, true },
     { "Canvas_concat", Canvas_concat, 2, true },
-    { "Canvas_setMatrix", Canvas_setMatrix, 2, true },
 FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
@@ -165,6 +154,20 @@ void Canvas::skew(float sx, float sy)
     m_canvas->skew(sx, sy);
 }
 
+void Canvas::transform(const Float64List& matrix4)
+{
+    if (!m_canvas)
+        return;
+    m_canvas->concat(toSkMatrix(matrix4));
+}
+
+void Canvas::setMatrix(const Float64List& matrix4)
+{
+    if (!m_canvas)
+        return;
+    m_canvas->setMatrix(toSkMatrix(matrix4));
+}
+
 void Canvas::concat(const Float64List& matrix4, ExceptionState& es)
 {
     if (!m_canvas)
@@ -174,17 +177,6 @@ void Canvas::concat(const Float64List& matrix4, ExceptionState& es)
     if (es.had_exception())
         return;
     m_canvas->concat(sk_matrix);
-}
-
-void Canvas::setMatrix(const Float64List& matrix4, ExceptionState& es)
-{
-    if (!m_canvas)
-        return es.ThrowTypeError("No canvas");
-
-    SkMatrix sk_matrix = toSkMatrix(matrix4, es);
-    if (es.had_exception())
-        return;
-    m_canvas->setMatrix(sk_matrix);
 }
 
 Float64List Canvas::getTotalMatrix()

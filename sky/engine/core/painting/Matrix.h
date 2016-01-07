@@ -11,7 +11,11 @@
 
 namespace blink {
 
+// TODO(abarth): Remove this version of toSkMatrix and do the error checking
+// inside the VM.
 SkMatrix toSkMatrix(const Float64List& matrix4, ExceptionState& es);
+
+SkMatrix toSkMatrix(const Float64List& matrix4);
 Float64List toMatrix4(const SkMatrix& sk_matrix);
 
 }  // namespace blink
