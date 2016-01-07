@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'print.dart';
+
 /// A callback for when the image is available.
 typedef void ImageListener(ui.Image image);
 
@@ -15,7 +17,7 @@ typedef void ImageListener(ui.Image image);
 /// or because the underlying image resource was mutated.
 class ImageResource {
   ImageResource(this._futureImage) {
-    _futureImage.then(_handleImageLoaded, onError: _handleImageError);
+    _futureImage.then(_handleImageLoaded, onError: (exception, stack) => _handleImageError('Failed to load image:', exception, stack));
   }
 
   bool _resolved = false;
@@ -34,8 +36,13 @@ class ImageResource {
   /// this object will call the listener synchronously.
   void addListener(ImageListener listener) {
     _listeners.add(listener);
-    if (_resolved)
-      listener(_image);
+    if (_resolved) {
+      try {
+        listener(_image);
+      } catch (exception, stack) {
+        _handleImageError('The following exception was thrown by a synchronously-invoked image listener:', exception, stack);
+      }
+    }
   }
 
   /// Stop listening for new concrete [ui.Image] objects.
@@ -49,19 +56,24 @@ class ImageResource {
     _notifyListeners();
   }
 
-  void _handleImageError(e, stackTrace) {
-    print('Failed to load image: $e\nStack trace: $stackTrace');
-  }
-
   void _notifyListeners() {
     assert(_resolved);
     List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
     for (ImageListener listener in localListeners) {
       try {
         listener(_image);
-      } catch(e) {
-        print('Image listener had exception: $e');
+      } catch (exception, stack) {
+        _handleImageError('The following exception was thrown by an image listener:', exception, stack);
       }
     }
+  }
+
+  void _handleImageError(String message, dynamic exception, dynamic stack) {
+    debugPrint('-- EXCEPTION CAUGHT BY SERVICES LIBRARY --------------------------------');
+    debugPrint(message);
+    debugPrint('$exception');
+    debugPrint('Stack trace:');
+    debugPrint('$stack');
+    debugPrint('------------------------------------------------------------------------');
   }
 }

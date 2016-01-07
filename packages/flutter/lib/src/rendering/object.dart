@@ -381,9 +381,8 @@ typedef void RenderingExceptionHandler(RenderObject source, String method, dynam
 /// exception. The 'method' argument is the method in which the exception
 /// occurred; it will be one of 'performResize', 'performLayout, or 'paint'. The
 /// 'exception' argument contains the object that was thrown, and the 'stack'
-/// argument contains the stack trace. The callback is invoked after the
-/// information is printed to the console, and could be used to print additional
-/// information, such as from [debugDumpRenderTree()].
+/// argument contains the stack trace. If no handler is registered, then the
+/// information will be printed to the console instead.
 RenderingExceptionHandler debugRenderingExceptionHandler;
 
 /// An object in the render tree.
@@ -461,16 +460,19 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   dynamic debugOwner;
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    debugPrint('-- EXCEPTION --');
-    debugPrint('The following exception was raised during $method():');
-    debugPrint('$exception');
-    debugPrint('Stack trace:');
-    debugPrint('$stack');
-    debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
-    if (debugOwner != null)
-      debugPrint('That RenderObject had the following owner:\n$debugOwner');
-    if (debugRenderingExceptionHandler != null)
+    if (debugRenderingExceptionHandler != null) {
       debugRenderingExceptionHandler(this, method, exception, stack);
+    } else {
+      debugPrint('-- EXCEPTION CAUGHT BY RENDERING LIBRARY -------------------------------');
+      debugPrint('The following exception was raised during $method():');
+      debugPrint('$exception');
+      debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
+      if (debugOwner != null)
+        debugPrint('That RenderObject had the following owner:\n$debugOwner');
+      debugPrint('Stack trace:');
+      debugPrint('$stack');
+      debugPrint('------------------------------------------------------------------------');
+    }
   }
 
   static bool _debugDoingLayout = false;

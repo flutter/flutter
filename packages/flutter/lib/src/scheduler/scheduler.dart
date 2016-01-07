@@ -271,10 +271,12 @@ abstract class Scheduler extends BindingBase {
       if (debugSchedulerExceptionHandler != null) {
         debugSchedulerExceptionHandler(exception, stack);
       } else {
-        print('-- EXCEPTION IN SCHEDULER CALLBACK --');
-        print('$exception');
-        print('Stack trace:');
-        print('$stack');
+        debugPrint('-- EXCEPTION CAUGHT BY SCHEDULER LIBRARY -------------------------------');
+        debugPrint('An exception was raised during a scheduler callback:');
+        debugPrint('$exception');
+        debugPrint('Stack trace:');
+        debugPrint('$stack');
+        debugPrint('------------------------------------------------------------------------');
       }
     }
   }
