@@ -13,6 +13,8 @@
 namespace sky {
 namespace compositor {
 
+#if ENABLE_RASTER_CACHE
+
 static const int kRasterThreshold = 3;
 
 static bool isWorthRasterizing(SkPicture* picture) {
@@ -20,6 +22,8 @@ static bool isWorthRasterizing(SkPicture* picture) {
   // wasting memory on trivial layers that are easy to re-rasterize every frame.
   return picture->approximateOpCount() > 10 || picture->hasText();
 }
+
+#endif
 
 RasterCache::RasterCache() {
 }
