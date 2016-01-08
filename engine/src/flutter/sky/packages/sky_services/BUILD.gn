@@ -24,6 +24,7 @@ dart_pkg("sky_services") {
   deps = [
     ":copy_sky_services_license",
     "//sky/services/activity:interfaces",
+    "//sky/services/firebase:interfaces",
     "//sky/services/gcm:interfaces",
     "//sky/services/media:interfaces",
     "//sky/services/pointer:interfaces",
