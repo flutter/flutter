@@ -967,7 +967,7 @@ class RenderTransform extends RenderProxyBox {
   bool hitTest(HitTestResult result, { Point position }) {
     if (transformHitTests) {
       Matrix4 inverse = new Matrix4.zero();
-      // TODO(abarth): Check the determinant for degeneracy.
+      assert(_effectiveTransform.determinant() != 0.0);
       inverse.copyInverse(_effectiveTransform);
       Vector3 position3 = new Vector3(position.x, position.y, 0.0);
       Vector3 transformed3 = inverse.transform3(position3);
