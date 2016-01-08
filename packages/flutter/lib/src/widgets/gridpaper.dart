@@ -10,29 +10,38 @@ import 'framework.dart';
 class _GridPaperPainter extends CustomPainter {
   const _GridPaperPainter({
     this.color,
-    this.interval
+    this.interval,
+    this.divisions,
+    this.subDivisions
   });
 
   final Color color;
   final double interval;
+  final int divisions;
+  final int subDivisions;
 
   void paint(Canvas canvas, Size size) {
     Paint linePaint = new Paint()
       ..color = color;
-    for (double x = 0.0; x <= size.width; x += interval / 10.0) {
-      linePaint.strokeWidth = (x % interval == 0.0) ? 1.0 : (x % (interval / 2.0) == 0.0) ? 0.5: 0.25;
+    double allDivisions = (divisions * subDivisions).toDouble();
+    for (double x = 0.0; x <= size.width; x += interval / allDivisions) {
+      linePaint.strokeWidth = (x % interval == 0.0) ? 1.0 : (x % (interval / subDivisions) == 0.0) ? 0.5: 0.25;
       canvas.drawLine(new Point(x, 0.0), new Point(x, size.height), linePaint);
     }
-    for (double y = 0.0; y <= size.height; y += interval / 10.0) {
-      linePaint.strokeWidth = (y % interval == 0.0) ? 1.0 : (y % (interval / 2.0) == 0.0) ? 0.5: 0.25;
+    for (double y = 0.0; y <= size.height; y += interval / allDivisions) {
+      linePaint.strokeWidth = (y % interval == 0.0) ? 1.0 : (y % (interval / subDivisions) == 0.0) ? 0.5: 0.25;
       canvas.drawLine(new Point(0.0, y), new Point(size.width, y), linePaint);
     }
   }
 
   bool shouldRepaint(_GridPaperPainter oldPainter) {
     return oldPainter.color != color
-        || oldPainter.interval != interval;
+        || oldPainter.interval != interval
+        || oldPainter.divisions != divisions
+        || oldPainter.subDivisions != subDivisions;
   }
+
+  bool hitTest(Point position) => false;
 }
 
 /// Draws a rectalinear grid of 1px width lines at the specified color and interval.
@@ -40,21 +49,28 @@ class _GridPaperPainter extends CustomPainter {
 class GridPaper extends StatelessComponent {
   GridPaper({
     Key key,
-    this.color: const Color(0xFF000000),
-    this.interval: 100.0
+    this.color: const Color(0x7FC3E8F3),
+    this.interval: 100.0,
+    this.divisions: 2,
+    this.subDivisions: 5,
+    this.child
   }) : super(key: key);
 
   final Color color;
   final double interval;
+  final int divisions;
+  final int subDivisions;
+  final Widget child;
 
   Widget build(BuildContext context) {
-    return new IgnorePointer(
-      child: new CustomPaint(
-        painter: new _GridPaperPainter(
-          color: color,
-          interval: interval
-        )
-      )
+    return new CustomPaint(
+      foregroundPainter: new _GridPaperPainter(
+        color: color,
+        interval: interval,
+        divisions: divisions,
+        subDivisions: subDivisions
+      ),
+      child: child
     );
   }
 }
