@@ -22,6 +22,7 @@ void PaintContext::beginFrame(ScopedFrame& frame, bool enableInstrumentation) {
 }
 
 void PaintContext::endFrame(ScopedFrame& frame, bool enableInstrumentation) {
+  raster_cache_.SweepAfterFrame();
   if (enableInstrumentation) {
     frame_time_.stop();
   }

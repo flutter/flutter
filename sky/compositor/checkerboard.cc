@@ -27,12 +27,12 @@ static void DrawCheckerboard(SkCanvas* canvas,
   canvas->drawPaint(paint);
 }
 
-void DrawCheckerboard(SkCanvas* canvas, int width, int height) {
-  SkRect rect = SkRect::MakeIWH(width, height);
-
+void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   // Draw a checkerboard
+  canvas->save();
   canvas->clipRect(rect);
   DrawCheckerboard(canvas, 0x4400FF00, 0x00000000, 12);
+  canvas->restore();
 
   // Stroke the drawn area
   SkPaint debugPaint;

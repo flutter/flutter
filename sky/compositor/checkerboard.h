@@ -10,7 +10,7 @@
 namespace sky {
 namespace compositor {
 
-void DrawCheckerboard(SkCanvas* canvas, int width, int height);
+void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect);
 
 }  // namespace compositor
 }  // namespace sky
