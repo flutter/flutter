@@ -17,6 +17,8 @@ class TransformLayer : public ContainerLayer {
 
   void set_transform(const SkMatrix& transform) { transform_ = transform; }
 
+  void Preroll(PaintContext::ScopedFrame& frame,
+               const SkMatrix& matrix) override;
   void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:

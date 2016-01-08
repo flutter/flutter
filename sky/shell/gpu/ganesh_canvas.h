@@ -26,6 +26,8 @@ class GaneshCanvas {
 
   bool IsValid();
 
+  GrContext* gr_context() { return gr_context_.get(); }
+
  private:
   skia::RefPtr<GrContext> gr_context_;
   skia::RefPtr<SkSurface> sk_surface_;

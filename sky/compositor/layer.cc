@@ -18,5 +18,8 @@ Layer::Layer()
 Layer::~Layer() {
 }
 
+void Layer::Preroll(PaintContext::ScopedFrame& frame, const SkMatrix& matrix) {
+}
+
 }  // namespace compositor
 }  // namespace sky

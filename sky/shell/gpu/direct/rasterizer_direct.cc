@@ -89,9 +89,9 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
     SkCanvas* canvas = ganesh_canvas_.GetCanvas(
       surface_->GetBackingFrameBufferObject(), layer_tree->frame_size());
     sky::compositor::PaintContext::ScopedFrame frame =
-        paint_context_.AcquireFrame(*canvas);
+        paint_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
     canvas->clear(SK_ColorBLACK);
-    layer_tree->root_layer()->Paint(frame);
+    layer_tree->Raster(frame);
     canvas->flush();
     surface_->SwapBuffers();
   }

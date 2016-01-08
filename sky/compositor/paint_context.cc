@@ -28,8 +28,9 @@ void PaintContext::endFrame(ScopedFrame& frame, bool enableInstrumentation) {
   }
 }
 
-PaintContext::ScopedFrame PaintContext::AcquireFrame(SkCanvas& canvas) {
-  return ScopedFrame(*this, canvas);
+PaintContext::ScopedFrame PaintContext::AcquireFrame(GrContext* gr_context,
+                                                     SkCanvas& canvas) {
+  return ScopedFrame(*this, gr_context, canvas);
 }
 
 PaintContext::ScopedFrame PaintContext::AcquireFrame(
@@ -38,8 +39,11 @@ PaintContext::ScopedFrame PaintContext::AcquireFrame(
   return ScopedFrame(*this, trace_file_name, frame_size);
 }
 
-PaintContext::ScopedFrame::ScopedFrame(PaintContext& context, SkCanvas& canvas)
-    : context_(context), canvas_(&canvas), instrumentation_enabled_(true) {
+PaintContext::ScopedFrame::ScopedFrame(PaintContext& context,
+                                       GrContext* gr_context,
+                                       SkCanvas& canvas)
+    : context_(context), gr_context_(gr_context), canvas_(&canvas),
+      instrumentation_enabled_(true) {
   context_.beginFrame(*this, instrumentation_enabled_);
 }
 

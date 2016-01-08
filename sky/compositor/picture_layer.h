@@ -21,11 +21,16 @@ class PictureLayer : public Layer {
 
   SkPicture* picture() const { return picture_.get(); }
 
+  void Preroll(PaintContext::ScopedFrame& frame,
+               const SkMatrix& matrix) override;
   void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:
   SkPoint offset_;
   RefPtr<SkPicture> picture_;
+
+  // If we rasterized the picture separately, image_ holds the pixels.
+  RefPtr<SkImage> image_;
 
   DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };
