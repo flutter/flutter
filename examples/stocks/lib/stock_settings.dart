@@ -6,15 +6,17 @@ part of stocks;
 
 typedef void SettingsUpdater({
   StockMode optimism,
-  BackupMode backup
+  BackupMode backup,
+  bool showGrid
 });
 
 class StockSettings extends StatefulComponent {
-  const StockSettings(this.optimism, this.backup, this.updater);
+  const StockSettings(this.optimism, this.backup, this.showGrid, this.updater);
 
   final StockMode optimism;
   final BackupMode backup;
   final SettingsUpdater updater;
+  final bool showGrid;
 
   StockSettingsState createState() => new StockSettingsState();
 }
@@ -22,11 +24,15 @@ class StockSettings extends StatefulComponent {
 class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
     value ??= false;
-    sendUpdates(value ? StockMode.optimistic : StockMode.pessimistic, config.backup);
+    sendUpdates(value ? StockMode.optimistic : StockMode.pessimistic, config.backup, config.showGrid);
   }
 
   void _handleBackupChanged(bool value) {
-    sendUpdates(config.optimism, value ? BackupMode.enabled : BackupMode.disabled);
+    sendUpdates(config.optimism, value ? BackupMode.enabled : BackupMode.disabled, config.showGrid);
+  }
+
+  void _handleShowGridChanged(bool value) {
+    sendUpdates(config.optimism, config.backup, value);
   }
 
   void _confirmOptimismChange() {
@@ -60,11 +66,12 @@ class StockSettingsState extends State<StockSettings> {
     }
   }
 
-  void sendUpdates(StockMode optimism, BackupMode backup) {
+  void sendUpdates(StockMode optimism, BackupMode backup, bool showGrid) {
     if (config.updater != null)
       config.updater(
         optimism: optimism,
-        backup: backup
+        backup: backup,
+        showGrid: showGrid
       );
   }
 
@@ -77,30 +84,49 @@ class StockSettingsState extends State<StockSettings> {
   Widget buildSettingsPane(BuildContext context) {
     // TODO(ianh): Once we have the gesture API hooked up, fix https://github.com/domokit/mojo/issues/281
     // (whereby tapping the widgets below causes both the widget and the menu item to fire their callbacks)
-    return new Block(<Widget>[
+    List<Widget> rows = <Widget>[
+      new DrawerItem(
+        icon: 'action/thumb_up',
+        onPressed: () => _confirmOptimismChange(),
+        child: new Row(<Widget>[
+          new Flexible(child: new Text('Everything is awesome')),
+          new Checkbox(
+            value: config.optimism == StockMode.optimistic,
+            onChanged: (bool value) => _confirmOptimismChange()
+          ),
+        ])
+      ),
+      new DrawerItem(
+        icon: 'action/backup',
+        onPressed: () { _handleBackupChanged(!(config.backup == BackupMode.enabled)); },
+        child: new Row(<Widget>[
+          new Flexible(child: new Text('Back up stock list to the cloud')),
+          new Switch(
+            value: config.backup == BackupMode.enabled,
+            onChanged: _handleBackupChanged
+          ),
+        ])
+      ),
+    ];
+    assert(() {
+      // material grid is only available in checked mode
+      rows.add(
         new DrawerItem(
-          icon: 'action/thumb_up',
-          onPressed: () => _confirmOptimismChange(),
+          icon: 'editor/border_clear',
+          onPressed: () { _handleShowGridChanged(!config.showGrid); },
           child: new Row(<Widget>[
-            new Flexible(child: new Text('Everything is awesome')),
-            new Checkbox(
-              value: config.optimism == StockMode.optimistic,
-              onChanged: (bool value) => _confirmOptimismChange()
-            ),
-          ])
-        ),
-        new DrawerItem(
-          icon: 'action/backup',
-          onPressed: () { _handleBackupChanged(!(config.backup == BackupMode.enabled)); },
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Back up stock list to the cloud')),
+            new Flexible(child: new Text('Show material grid (for debugging)')),
             new Switch(
-              value: config.backup == BackupMode.enabled,
-              onChanged: _handleBackupChanged
+              value: config.showGrid,
+              onChanged: _handleShowGridChanged
             ),
           ])
-        ),
-      ],
+        )
+      );
+      return true;
+    });
+    return new Block(
+      rows,
       padding: const EdgeDims.symmetric(vertical: 20.0)
     );
   }

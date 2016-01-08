@@ -48,17 +48,20 @@ class StocksAppState extends State<StocksApp> {
 
   StockMode _optimismSetting = StockMode.optimistic;
   BackupMode _backupSetting = BackupMode.disabled;
+  bool _showGridSetting = false;
   void modeUpdater(StockMode optimism) {
     setState(() {
       _optimismSetting = optimism;
     });
   }
-  void settingsUpdater({ StockMode optimism, BackupMode backup }) {
+  void settingsUpdater({ StockMode optimism, BackupMode backup, bool showGrid }) {
     setState(() {
       if (optimism != null)
         _optimismSetting = optimism;
       if (backup != null)
         _backupSetting = backup;
+      if (showGrid != null)
+        _showGridSetting = showGrid;
     });
   }
 
@@ -105,9 +108,10 @@ class StocksAppState extends State<StocksApp> {
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
+      debugShowMaterialGrid: _showGridSetting,
       routes: <String, RouteBuilder>{
          '/':         (RouteArguments args) => new StockHome(_stocks, _symbols, _optimismSetting, modeUpdater),
-         '/settings': (RouteArguments args) => new StockSettings(_optimismSetting, _backupSetting, settingsUpdater)
+         '/settings': (RouteArguments args) => new StockSettings(_optimismSetting, _backupSetting, _showGridSetting, settingsUpdater)
       },
       onGenerateRoute: _getRoute,
       onLocaleChanged: _onLocaleChanged
