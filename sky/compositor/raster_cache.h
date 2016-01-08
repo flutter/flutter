@@ -23,7 +23,8 @@ class RasterCache {
   RasterCache();
   ~RasterCache();
 
-  RefPtr<SkImage> GetImage(SkPicture* picture, const SkMatrix& ctm);
+  RefPtr<SkImage> GetPrerolledImage(GrContext* context, SkPicture* picture,
+                                    const SkMatrix& ctm);
   void SweepAfterFrame();
 
  private:

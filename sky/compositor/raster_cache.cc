@@ -8,6 +8,8 @@
 #include "base/logging.h"
 #include "third_party/skia/include/core/SkImage.h"
 
+#define ENABLE_RASTER_CACHE 0
+
 namespace sky {
 namespace compositor {
 
@@ -32,7 +34,10 @@ RasterCache::Entry::Entry() {
 RasterCache::Entry::~Entry() {
 }
 
-RefPtr<SkImage> RasterCache::GetImage(SkPicture* picture, const SkMatrix& ctm) {
+RefPtr<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
+                                               SkPicture* picture,
+                                               const SkMatrix& ctm) {
+#if ENABLE_RASTER_CACHE
   SkScalar scaleX = ctm.getScaleX();
   SkScalar scaleY = ctm.getScaleY();
 
@@ -67,10 +72,15 @@ RefPtr<SkImage> RasterCache::GetImage(SkPicture* picture, const SkMatrix& ctm) {
       SkMatrix matrix = SkMatrix::MakeScale(scaleX, scaleY);
       entry.image = adoptRef(SkImage::NewFromPicture(picture, physical_size,
                                                      &matrix, nullptr));
+      entry.image->preroll(context, SkShader::kClamp_TileMode,
+                           SkShader::kClamp_TileMode, kMedium_SkFilterQuality);
     }
   }
 
   return entry.image;
+#else
+  return nullptr;
+#endif
 }
 
 void RasterCache::SweepAfterFrame() {

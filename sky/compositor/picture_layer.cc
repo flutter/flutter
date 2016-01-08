@@ -8,8 +8,6 @@
 #include "sky/compositor/checkerboard.h"
 #include "sky/compositor/raster_cache.h"
 
-#define ENABLE_RASTER_CACHE 0
-
 namespace sky {
 namespace compositor {
 
@@ -24,13 +22,8 @@ PictureLayer::~PictureLayer() {
 
 void PictureLayer::Preroll(PaintContext::ScopedFrame& frame,
                            const SkMatrix& matrix) {
-#if ENABLE_RASTER_CACHE
-  image_ = frame.context().raster_cache().GetImage(picture_.get(), matrix);
-  if (image_) {
-    image_->preroll(frame.gr_context(), SkShader::kClamp_TileMode,
-                    SkShader::kClamp_TileMode, kMedium_SkFilterQuality);
-  }
-#endif
+  image_ = frame.context().raster_cache().GetPrerolledImage(
+      frame.gr_context(), picture_.get(), matrix);
 }
 
 void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
