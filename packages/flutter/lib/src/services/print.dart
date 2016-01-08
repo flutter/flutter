@@ -44,3 +44,11 @@ void _debugPrintTask() {
     _debugPrintStopwatch.start();
   }
 }
+
+void debugPrintStack() {
+  try {
+    throw new Exception();
+  } catch (e, stack) {
+    debugPrint(stack.toString());
+  }
+}

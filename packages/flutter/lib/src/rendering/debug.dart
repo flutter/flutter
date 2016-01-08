@@ -52,6 +52,12 @@ HSVColor debugCurrentRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0)
 /// The amount to increment the hue of the current repaint color.
 double debugRepaintRainboxHueIncrement = 2.0;
 
+/// Log the call stacks that mark render objects as needing paint.
+bool debugPrintMarkNeedsPaintStacks = false;
+
+/// Log the call stacks that mark render objects as needing layout.
+bool debugPrintMarkNeedsLayoutStacks = false;
+
 List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();

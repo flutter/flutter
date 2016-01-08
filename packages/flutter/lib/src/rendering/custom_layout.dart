@@ -92,7 +92,7 @@ abstract class MultiChildLayoutDelegate {
   }
 
   /// Override this method to return true when the children need to be laid out.
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate);
 
   /// Layout and position all children given this widget's size and the specified
   /// constraints. This method must apply layoutChild() to each child. It should

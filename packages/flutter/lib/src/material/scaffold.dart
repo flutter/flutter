@@ -39,17 +39,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // in this case the toolbar appears -after- the body in the stacking order,
     // so the toolbar's shadow is drawn on top of the body.
 
-    final BoxConstraints toolBarConstraints = looseConstraints.tightenWidth(size.width);
+    final BoxConstraints fullWidthConstraints = looseConstraints.tightenWidth(size.width);
     Size toolBarSize = Size.zero;
 
     if (isChild(_Child.toolBar)) {
-      toolBarSize = layoutChild(_Child.toolBar, toolBarConstraints);
+      toolBarSize = layoutChild(_Child.toolBar, fullWidthConstraints);
       positionChild(_Child.toolBar, Offset.zero);
     }
 
     if (isChild(_Child.body)) {
       final double bodyHeight = size.height - toolBarSize.height;
-      final BoxConstraints bodyConstraints = toolBarConstraints.tightenHeight(bodyHeight);
+      final BoxConstraints bodyConstraints = fullWidthConstraints.tightenHeight(bodyHeight);
       layoutChild(_Child.body, bodyConstraints);
       positionChild(_Child.body, new Offset(0.0, toolBarSize.height));
     }
@@ -63,7 +63,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // non-zero height then it's inset from the parent's right and bottom edges
     // by _kFloatingActionButtonMargin.
 
-    final BoxConstraints fullWidthConstraints = looseConstraints.tightenWidth(size.width);
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
@@ -89,10 +88,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (isChild(_Child.drawer)) {
-      layoutChild(_Child.drawer, looseConstraints);
+      layoutChild(_Child.drawer, new BoxConstraints.tight(size));
       positionChild(_Child.drawer, Offset.zero);
     }
   }
+
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => false;
 }
 
 class Scaffold extends StatefulComponent {
