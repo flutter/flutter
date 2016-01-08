@@ -15,7 +15,7 @@ static void ColorFilter_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&ColorFilter::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(ColorFilter);
+IMPLEMENT_WRAPPERTYPEINFO(ui, ColorFilter);
 
 void ColorFilter::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({

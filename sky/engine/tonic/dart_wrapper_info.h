@@ -13,6 +13,7 @@ class DartWrappable;
 typedef void (*DartWrappableAccepter)(DartWrappable*);
 
 struct DartWrapperInfo {
+  const char* library_name;
   const char* interface_name;
   const size_t size_in_bytes;
   const DartWrappableAccepter ref_object;

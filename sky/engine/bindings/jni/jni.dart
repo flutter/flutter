@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart_ui;
+library dart_jni;
+
+import 'dart:nativewrappers';
 
 /// Wrapper for a Java class accessed via JNI.
 class JniClass extends NativeFieldWrapperClass2 {

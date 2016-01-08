@@ -17,7 +17,7 @@ static void PictureRecorder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&PictureRecorder::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(PictureRecorder);
+IMPLEMENT_WRAPPERTYPEINFO(ui, PictureRecorder);
 
 #define FOR_EACH_BINDING(V) \
   V(PictureRecorder, isRecording) \

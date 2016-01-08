@@ -6,7 +6,7 @@
 
 namespace blink {
 
-IMPLEMENT_WRAPPERTYPEINFO(DrawLooper);
+IMPLEMENT_WRAPPERTYPEINFO(ui, DrawLooper);
 
 DrawLooper::DrawLooper(PassRefPtr<SkDrawLooper> looper)
     : looper_(looper) {

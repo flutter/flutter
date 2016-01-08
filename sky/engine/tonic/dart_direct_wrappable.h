@@ -68,16 +68,16 @@ struct DartConverterDirectWrappable {
   }
 };
 
-#define IMPLEMENT_DIRECT_WRAPPABLE(DartName, ImplType)                         \
-static const DartWrapperInfo kDartWrapperInfo_##DartName = {                   \
-  #DartName, 0, 0, 0,                                                          \
+#define IMPLEMENT_DIRECT_WRAPPABLE(LibraryName, DartName, ImplType)            \
+static const DartWrapperInfo kDartWrapperInfo_##LibraryName_##DartName = {     \
+  #LibraryName, #DartName, 0, 0, 0,                                            \
 };                                                                             \
-static const DartWrapperInfo& GetWrapperTypeInfo##DartName() {                 \
-  return kDartWrapperInfo_##DartName;                                          \
+static const DartWrapperInfo& GetWrapperTypeInfo_##LibraryName_##DartName() {  \
+  return kDartWrapperInfo_##LibraryName_##DartName;                            \
 }                                                                              \
 template <>                                                                    \
 struct DartConverter<ImplType> : public DartConverterDirectWrappable<          \
-    ImplType, GetWrapperTypeInfo##DartName> {};
+    ImplType, GetWrapperTypeInfo_##LibraryName_##DartName> {};
 
 }  // namespace blink
 

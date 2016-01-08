@@ -33,7 +33,7 @@ static void Canvas_concat(Dart_NativeArguments args) {
     Dart_ThrowException(es.GetDartException(args, true));
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(Canvas);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
 
 #define FOR_EACH_BINDING(V) \
   V(Canvas, save) \

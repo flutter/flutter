@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:jni';
 import 'dart:math';
 import 'dart:mojo.internal';
 import 'dart:ui';

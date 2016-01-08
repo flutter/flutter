@@ -6,7 +6,7 @@
 
 namespace blink {
 
-IMPLEMENT_WRAPPERTYPEINFO(Shader);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Shader);
 
 Shader::Shader(PassRefPtr<SkShader> shader)
     : shader_(shader) {

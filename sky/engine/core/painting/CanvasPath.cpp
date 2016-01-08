@@ -17,7 +17,7 @@ static void Path_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&CanvasPath::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(Path);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Path);
 
 #define FOR_EACH_BINDING(V) \
   V(Path, moveTo) \

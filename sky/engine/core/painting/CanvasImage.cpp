@@ -13,7 +13,7 @@ namespace blink {
 
 typedef CanvasImage Image;
 
-IMPLEMENT_WRAPPERTYPEINFO(Image);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Image);
 
 #define FOR_EACH_BINDING(V) \
   V(Image, width) \

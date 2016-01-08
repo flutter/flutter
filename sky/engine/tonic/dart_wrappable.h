@@ -65,20 +65,22 @@ class DartWrappable {
  private:                                                                      \
   static const DartWrapperInfo& dart_wrapper_info_
 
-#define IMPLEMENT_WRAPPERTYPEINFO(ClassName)                                   \
-static void RefObject_##ClassName(DartWrappable* impl) {                       \
+#define IMPLEMENT_WRAPPERTYPEINFO(LibraryName, ClassName)                      \
+static void RefObject_##LibraryName_##ClassName(DartWrappable* impl) {         \
   static_cast<ClassName*>(impl)->ref();                                        \
 }                                                                              \
-static void DerefObject_##ClassName(DartWrappable* impl) {                     \
+static void DerefObject_##LibraryName_##ClassName(DartWrappable* impl) {       \
   static_cast<ClassName*>(impl)->deref();                                      \
 }                                                                              \
-static const DartWrapperInfo kDartWrapperInfo_##ClassName = {                  \
+static const DartWrapperInfo kDartWrapperInfo_##LibraryName_##ClassName = {    \
+  #LibraryName,                                                                \
   #ClassName,                                                                  \
   sizeof(ClassName),                                                           \
-  &RefObject_##ClassName,                                                      \
-  &DerefObject_##ClassName,                                                    \
+  &RefObject_##LibraryName_##ClassName,                                        \
+  &DerefObject_##LibraryName_##ClassName,                                      \
 };                                                                             \
-const DartWrapperInfo& ClassName::dart_wrapper_info_ = kDartWrapperInfo_##ClassName;
+const DartWrapperInfo& ClassName::dart_wrapper_info_ =                         \
+    kDartWrapperInfo_##LibraryName_##ClassName;
 
 struct DartConverterWrappable {
   static DartWrappable* FromDart(Dart_Handle handle);

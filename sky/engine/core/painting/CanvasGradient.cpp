@@ -17,7 +17,7 @@ static void Gradient_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&CanvasGradient::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(Gradient);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Gradient);
 
 #define FOR_EACH_BINDING(V) \
   V(Gradient, initLinear) \

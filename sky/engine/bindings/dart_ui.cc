@@ -25,10 +25,6 @@
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 
-#ifdef OS_ANDROID
-#include "sky/engine/bindings/jni/dart_jni.h"
-#endif
-
 namespace blink {
 namespace {
 
@@ -67,11 +63,6 @@ void DartUI::InitForGlobal() {
     Scene::RegisterNatives(g_natives);
     SceneBuilder::RegisterNatives(g_natives);
     Window::RegisterNatives(g_natives);
-
-#ifdef OS_ANDROID
-    // TODO(jsimmons): move this into a dart:jni library
-    DartJni::RegisterNatives(g_natives);
-#endif
   }
 }
 

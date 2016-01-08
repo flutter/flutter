@@ -16,7 +16,8 @@ namespace blink {
 
 class DartJni {
  public:
-  static void RegisterNatives(DartLibraryNatives* natives);
+  static void InitForGlobal();
+  static void InitForIsolate();
   static bool InitJni();
 
   static base::android::ScopedJavaLocalRef<jclass> GetClass(

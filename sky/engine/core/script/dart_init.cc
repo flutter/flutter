@@ -33,6 +33,10 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/uint8_list.h"
 
+#ifdef OS_ANDROID
+#include "sky/engine/bindings/jni/dart_jni.h"
+#endif
+
 namespace dart {
 namespace observatory {
 
@@ -121,6 +125,9 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       DartIO::InitForIsolate();
       DartUI::InitForIsolate();
       DartMojoInternal::InitForIsolate();
+#ifdef OS_ANDROID
+      DartJni::InitForIsolate();
+#endif
       DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate);
       if (SkySettings::Get().enable_observatory) {
         std::string ip = "127.0.0.1";
@@ -151,6 +158,9 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
+#ifdef OS_ANDROID
+    DartJni::InitForIsolate();
+#endif
 
     if (!script_uri)
       CreateEmptyRootLibraryIfNeeded();
@@ -291,6 +301,9 @@ void InitDartVM() {
   }
 
   DartUI::InitForGlobal();
+#ifdef OS_ANDROID
+  DartJni::InitForGlobal();
+#endif
 
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");

@@ -29,7 +29,7 @@ static void ImageShader_initWithImage(Dart_NativeArguments args) {
     Dart_ThrowException(es.GetDartException(args, true));
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(ImageShader);
+IMPLEMENT_WRAPPERTYPEINFO(ui, ImageShader);
 
 void ImageShader::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
