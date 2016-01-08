@@ -814,7 +814,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     _selection = selection;
     if (_selection != null) {
       _selection.registerPerformanceListener(this);
-      _initItemIndicesAndScrollPosition();
+      _initItemsAndScrollOffset();
     }
   }
 
@@ -839,18 +839,18 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
       _items.add(widgets[third]);
   }
 
-  void _initItemIndicesAndScrollPosition() {
+  void _initItemsAndScrollOffset() {
     assert(_selection != null);
     final int selectedIndex = _selection.index;
     if (selectedIndex == 0) {
       _updateItems(0, 1);
-      scrollTo(0.0);
+      scrollTo(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 0.0));
     } else if (selectedIndex == _tabCount - 1) {
       _updateItems(selectedIndex - 1, selectedIndex);
-      scrollTo(1.0);
+      scrollTo(scrollBehavior.updateExtents(contentExtent: 1.0, containerExtent: 1.0, scrollOffset: 1.0));
     } else {
       _updateItems(selectedIndex - 1, selectedIndex, selectedIndex + 1);
-      scrollTo(1.0);
+      scrollTo(scrollBehavior.updateExtents(contentExtent: 3.0, containerExtent: 1.0, scrollOffset: 1.0));
     }
   }
 
@@ -865,7 +865,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     final Performance performance = _selection.performance;
 
     if (performance.status == PerformanceStatus.completed) {
-      _initItemIndicesAndScrollPosition();
+      _initItemsAndScrollOffset();
       return;
     }
 
