@@ -12,6 +12,7 @@ material-design-icons:
   - name: action/thumb_up
   - name: content/add
   - name: device/dvr
+  - name: editor/border_clear
   - name: navigation/arrow_back
   - name: navigation/menu
   - name: navigation/more_vert

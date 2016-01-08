@@ -47,10 +47,12 @@ class MaterialApp extends StatefulComponent {
     this.theme,
     this.routes: const <String, RouteBuilder>{},
     this.onGenerateRoute,
-    this.onLocaleChanged
+    this.onLocaleChanged,
+    this.debugShowMaterialGrid: false
   }) : super(key: key) {
     assert(routes != null);
     assert(routes.containsKey(Navigator.defaultRouteName) || onGenerateRoute != null);
+    assert(debugShowMaterialGrid != null);
   }
 
   final String title;
@@ -58,6 +60,7 @@ class MaterialApp extends StatefulComponent {
   final Map<String, RouteBuilder> routes;
   final RouteFactory onGenerateRoute;
   final LocaleChangedCallback onLocaleChanged;
+  final bool debugShowMaterialGrid;
 
   _MaterialAppState createState() => new _MaterialAppState();
 }
@@ -131,7 +134,7 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     }
 
     ThemeData theme = config.theme ?? new ThemeData.fallback();
-    return new MediaQuery(
+    Widget result = new MediaQuery(
       data: new MediaQueryData(size: _size),
       child: new LocaleQuery(
         data: _localeData,
@@ -156,6 +159,19 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
         )
       )
     );
+    assert(() {
+      if (config.debugShowMaterialGrid) {
+        result = new GridPaper(
+          color: const Color(0xE0F9BBE0),
+          interval: 8.0,
+          divisions: 2,
+          subDivisions: 1,
+          child: result
+        );
+      }
+      return true;
+    });
+    return result;
   }
 
 }
