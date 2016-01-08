@@ -12,7 +12,7 @@
 
 namespace blink {
 
-IMPLEMENT_WRAPPERTYPEINFO(Picture);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 #define FOR_EACH_BINDING(V) \
   V(Picture, playback) \

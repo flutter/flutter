@@ -37,7 +37,7 @@ static void SceneBuilder_pushTransform(Dart_NativeArguments args) {
     Dart_ThrowException(es.GetDartException(args, true));
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(SceneBuilder);
+IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
 
 #define FOR_EACH_BINDING(V) \
   V(SceneBuilder, pushClipRect) \

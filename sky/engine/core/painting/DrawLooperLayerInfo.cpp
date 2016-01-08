@@ -15,7 +15,7 @@ static void DrawLooperLayerInfo_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&DrawLooperLayerInfo::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(DrawLooperLayerInfo);
+IMPLEMENT_WRAPPERTYPEINFO(ui, DrawLooperLayerInfo);
 
 #define FOR_EACH_BINDING(V) \
   V(DrawLooperLayerInfo, setPaintBits) \

@@ -15,7 +15,7 @@
 
 namespace blink {
 
-IMPLEMENT_WRAPPERTYPEINFO(Paragraph);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 
 #define FOR_EACH_BINDING(V) \
   V(Paragraph, minWidth) \

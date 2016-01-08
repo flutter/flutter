@@ -24,7 +24,6 @@ part 'TransferMode.dart';
 part 'compositing.dart';
 part 'hash_codes.dart';
 part 'hooks.dart';
-part 'jni.dart';
 part 'lerp.dart';
 part 'natives.dart';
 part 'painting.dart';

@@ -17,6 +17,18 @@ using base::android::ScopedJavaGlobalRef;
 
 namespace {
 
+DartLibraryNatives* g_natives = nullptr;
+
+Dart_NativeFunction GetNativeFunction(Dart_Handle name,
+                                      int argument_count,
+                                      bool* auto_setup_scope) {
+  return g_natives->GetNativeFunction(name, argument_count, auto_setup_scope);
+}
+
+const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
+  return g_natives->GetSymbol(native_function);
+}
+
 // Check if a JNI API has thrown an exception.  If so, rethrow it as a
 // Dart exception.
 void CheckJniException(JNIEnv* env) {
@@ -44,11 +56,21 @@ DART_NATIVE_CALLBACK_STATIC(JniClass, fromName);
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
-void DartJni::RegisterNatives(DartLibraryNatives* natives) {
-  natives->Register({
-    DART_REGISTER_NATIVE_STATIC(JniClass, fromName)
-    FOR_EACH_BINDING(DART_REGISTER_NATIVE)
-  });
+void DartJni::InitForGlobal() {
+  if (!g_natives) {
+    g_natives = new DartLibraryNatives();
+
+    g_natives->Register({
+      DART_REGISTER_NATIVE_STATIC(JniClass, fromName)
+      FOR_EACH_BINDING(DART_REGISTER_NATIVE)
+    });
+  }
+}
+
+void DartJni::InitForIsolate() {
+  DCHECK(g_natives);
+  DART_CHECK_VALID(Dart_SetNativeResolver(
+      Dart_LookupLibrary(ToDart("dart:jni")), GetNativeFunction, GetSymbol));
 }
 
 ScopedJavaGlobalRef<jobject> DartJni::class_loader_;
@@ -81,7 +103,7 @@ ScopedJavaLocalRef<jclass> DartJni::GetClass(JNIEnv* env, const char* name) {
   return ScopedJavaLocalRef<jclass>(env, static_cast<jclass>(clazz));
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(JniClass);
+IMPLEMENT_WRAPPERTYPEINFO(jni, JniClass);
 
 JniClass::JniClass(JNIEnv* env, jclass clazz)
     : clazz_(env, clazz) {
@@ -124,7 +146,7 @@ PassRefPtr<JniObject> JniClass::getStaticObjectField(jfieldID fieldId) {
   return JniObject::create(env, obj);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(JniObject);
+IMPLEMENT_WRAPPERTYPEINFO(jni, JniObject);
 
 JniObject::JniObject(JNIEnv* env, jobject object)
     : object_(env, object) {

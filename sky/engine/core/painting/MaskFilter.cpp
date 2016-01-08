@@ -16,7 +16,7 @@ static void MaskFilter_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&MaskFilter::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(MaskFilter);
+IMPLEMENT_WRAPPERTYPEINFO(ui, MaskFilter);
 
 void MaskFilter::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({

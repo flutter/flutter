@@ -20,14 +20,16 @@ class DartClassLibrary {
   explicit DartClassLibrary();
   ~DartClassLibrary();
 
-  void set_provider(std::unique_ptr<DartClassProvider> provider) {
-    provider_ = std::move(provider);
+  void add_provider(const std::string& library_name,
+                    std::unique_ptr<DartClassProvider> provider) {
+    providers_.insert(std::make_pair(library_name, std::move(provider)));
   }
 
   Dart_PersistentHandle GetClass(const DartWrapperInfo& info);
 
  private:
-  std::unique_ptr<DartClassProvider> provider_;
+  std::unordered_map<std::string, std::unique_ptr<DartClassProvider>>
+      providers_;
   std::unordered_map<const DartWrapperInfo*, Dart_PersistentHandle> cache_;
 
   DISALLOW_COPY_AND_ASSIGN(DartClassLibrary);

@@ -13,7 +13,7 @@
 
 namespace blink {
 
-IMPLEMENT_WRAPPERTYPEINFO(Scene);
+IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
 #define FOR_EACH_BINDING(V) \
   V(Scene, dispose)

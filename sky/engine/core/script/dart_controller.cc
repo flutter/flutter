@@ -32,6 +32,10 @@
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/MakeUnique.h"
 
+#ifdef OS_ANDROID
+#include "sky/engine/bindings/jni/dart_jni.h"
+#endif
+
 namespace blink {
 namespace {
 
@@ -157,8 +161,16 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
     DartMojoInternal::InitForIsolate();
     DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate);
 
-    dart_state()->class_library().set_provider(
+    dart_state()->class_library().add_provider(
+      "ui",
       WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:ui"));
+
+#ifdef OS_ANDROID
+    DartJni::InitForIsolate();
+    dart_state()->class_library().add_provider(
+      "jni",
+      WTF::MakeUnique<DartClassProvider>(dart_state(), "dart:jni"));
+#endif
   }
   Dart_ExitIsolate();
 }

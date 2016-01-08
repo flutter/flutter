@@ -107,7 +107,7 @@ static void ParagraphBuilder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&ParagraphBuilder::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(ParagraphBuilder);
+IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
 
 #define FOR_EACH_BINDING(V) \
   V(ParagraphBuilder, pushStyle) \

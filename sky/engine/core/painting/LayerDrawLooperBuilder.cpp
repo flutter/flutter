@@ -19,7 +19,7 @@ static void LayerDrawLooperBuilder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&LayerDrawLooperBuilder::create, args);
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(LayerDrawLooperBuilder);
+IMPLEMENT_WRAPPERTYPEINFO(ui, LayerDrawLooperBuilder);
 
 #define FOR_EACH_BINDING(V) \
   V(LayerDrawLooperBuilder, build) \
