@@ -32,8 +32,15 @@ RasterCache::Entry::Entry() {
 RasterCache::Entry::~Entry() {
 }
 
-RefPtr<SkImage> RasterCache::GetImage(
-    SkPicture* picture, const SkISize& physical_size) {
+RefPtr<SkImage> RasterCache::GetImage(SkPicture* picture, const SkMatrix& ctm) {
+  SkScalar scaleX = ctm.getScaleX();
+  SkScalar scaleY = ctm.getScaleY();
+
+  SkRect rect = picture->cullRect();
+
+  SkISize physical_size = SkISize::Make(rect.width() * scaleX,
+                                        rect.height() * scaleY);
+
   if (physical_size.isEmpty())
     return nullptr;
 
@@ -57,8 +64,9 @@ RefPtr<SkImage> RasterCache::GetImage(
     entry.access_count = kRasterThreshold;
 
     if (!entry.image && isWorthRasterizing(picture)) {
+      SkMatrix matrix = SkMatrix::MakeScale(scaleX, scaleY);
       entry.image = adoptRef(SkImage::NewFromPicture(picture, physical_size,
-                                                     nullptr, nullptr));
+                                                     &matrix, nullptr));
     }
   }
 

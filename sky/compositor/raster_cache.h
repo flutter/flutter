@@ -23,7 +23,7 @@ class RasterCache {
   RasterCache();
   ~RasterCache();
 
-  RefPtr<SkImage> GetImage(SkPicture* picture, const SkISize& physical_size);
+  RefPtr<SkImage> GetImage(SkPicture* picture, const SkMatrix& ctm);
   void SweepAfterFrame();
 
  private:

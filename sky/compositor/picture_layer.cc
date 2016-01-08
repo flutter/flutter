@@ -25,11 +25,7 @@ PictureLayer::~PictureLayer() {
 void PictureLayer::Preroll(PaintContext::ScopedFrame& frame,
                            const SkMatrix& matrix) {
 #if ENABLE_RASTER_CACHE
-  SkISize size = SkISize::Make(paint_bounds().width() * matrix.getScaleX(),
-                               paint_bounds().height() * matrix.getScaleY());
-
-  RasterCache& cache = frame.context().raster_cache();
-  image_ = cache.GetImage(picture_.get(), size);
+  image_ = frame.context().raster_cache().GetImage(picture_.get(), matrix);
   if (image_) {
     image_->preroll(frame.gr_context(), SkShader::kClamp_TileMode,
                     SkShader::kClamp_TileMode, kMedium_SkFilterQuality);
@@ -42,7 +38,19 @@ void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
 
   SkCanvas& canvas = frame.canvas();
   if (image_) {
-    canvas.drawImage(image_.get(), offset_.x(), offset_.y());
+    const SkMatrix& ctm = canvas.getTotalMatrix();
+    SkScalar scaleX = ctm.getScaleX();
+    SkScalar scaleY = ctm.getScaleY();
+
+    SkRect rect = picture_->cullRect();
+    SkScalar dx = (offset_.x() + rect.left()) * scaleX;
+    SkScalar dy = (offset_.y() + rect.top()) * scaleY;
+
+    canvas.save();
+    canvas.scale(1.0 / scaleX, 1.0 / scaleY);
+    canvas.drawImage(image_.get(), dx, dy);
+    canvas.restore();
+
     if (kDebugCheckerboardRasterizedLayers) {
       SkRect rect = paint_bounds().makeOffset(offset_.x(), offset_.y());
       DrawCheckerboard(&canvas, rect);
