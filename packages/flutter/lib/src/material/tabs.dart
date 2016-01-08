@@ -409,15 +409,7 @@ class TabBarSelection<T> extends StatefulComponent {
   TabBarSelectionState createState() => new TabBarSelectionState<T>();
 
   static TabBarSelectionState of(BuildContext context) {
-    TabBarSelectionState result = null;
-    context.visitAncestorElements((ancestor) {
-      if (ancestor is StatefulComponentElement && ancestor.state is TabBarSelectionState) {
-        result = ancestor.state;
-        return false;
-      }
-      return true;
-    });
-    return result;
+    return context.ancestorStateOfType(const TypeMatcher<TabBarSelectionState>());
   }
 }
 
