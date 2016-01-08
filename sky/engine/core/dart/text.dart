@@ -284,6 +284,27 @@ class TextStyle {
   final double _wordSpacing;
   final double _lineHeight;
 
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! TextStyle)
+      return false;
+    final TextStyle typedOther = other;
+    if (_fontFamily != typedOther._fontFamily ||
+        _fontSize != typedOther._fontSize ||
+        _letterSpacing != typedOther._letterSpacing ||
+        _wordSpacing != typedOther._wordSpacing ||
+        _lineHeight != typedOther._lineHeight)
+     return false;
+    for (int index = 0; index < _encoded.length; index += 1) {
+      if (_encoded[index] != typedOther._encoded[index])
+        return false;
+    }
+    return true;
+  }
+
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _lineHeight);
+
   String toString() {
     return 'TextStyle(${_encoded[0]}|'
              'color: ${          _encoded[0] & 0x001 == 0x001 ? new Color(_encoded[1])                  : "unspecified"}, '
@@ -342,6 +363,23 @@ class ParagraphStyle {
 
   final Int32List _encoded;
   final double _lineHeight;
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! ParagraphStyle)
+      return false;
+    final ParagraphStyle typedOther = other;
+    if (_lineHeight != typedOther._lineHeight)
+     return false;
+    for (int index = 0; index < _encoded.length; index += 1) {
+      if (_encoded[index] != typedOther._encoded[index])
+        return false;
+    }
+    return true;
+  }
+
+  int get hashCode => hashValues(hashList(_encoded), _lineHeight);
 
   String toString() {
     return 'ParagraphStyle('
