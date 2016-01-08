@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -556,6 +557,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
       assert(parent == this.parent);
     } else {
+      assert(() {
+        if (debugPrintMarkNeedsLayoutStacks)
+          debugPrintStack();
+        return true;
+      });
       _nodesNeedingLayout.add(this);
       Scheduler.instance.ensureVisualUpdate();
     }
@@ -950,6 +956,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return;
     _needsPaint = true;
     if (hasLayer) {
+      assert(() {
+        if (debugPrintMarkNeedsPaintStacks)
+          debugPrintStack();
+        return true;
+      });
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
       assert(_layer != null);
