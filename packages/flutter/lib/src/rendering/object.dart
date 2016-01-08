@@ -278,7 +278,7 @@ class PaintingContext {
       Matrix4 offsetMatrix = new Matrix4.translationValues(offset.dx, offset.dy, 0.0);
       Matrix4 transformWithOffset = offsetMatrix * transform;
       canvas.save();
-      canvas.concat(transformWithOffset.storage);
+      canvas.transform(transformWithOffset.storage);
       painter(this, Offset.zero);
       canvas.restore();
     }

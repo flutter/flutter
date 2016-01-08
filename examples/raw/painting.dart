@@ -39,7 +39,7 @@ ui.Picture paint(ui.Rect paintBounds) {
       0.0, 0.0, 1.0, 0.0,
       0.0, 0.0, 0.0, 1.0,
   ]);
-  canvas.concat(scaleMatrix);
+  canvas.transform(scaleMatrix);
   paint.color = const ui.Color.fromARGB(128, 0, 255, 0);
   canvas.drawCircle(ui.Point.origin, radius, paint);
 
