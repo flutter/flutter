@@ -21,6 +21,8 @@ class LayerTree {
   LayerTree();
   ~LayerTree();
 
+  void Raster(PaintContext::ScopedFrame& frame);
+
   Layer* root_layer() const { return root_layer_.get(); }
 
   void set_root_layer(std::unique_ptr<Layer> root_layer) {

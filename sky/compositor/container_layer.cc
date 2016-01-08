@@ -18,6 +18,17 @@ void ContainerLayer::Add(std::unique_ptr<Layer> layer) {
   layers_.push_back(std::move(layer));
 }
 
+void ContainerLayer::Preroll(PaintContext::ScopedFrame& frame,
+                             const SkMatrix& matrix) {
+  PrerollChildren(frame, matrix);
+}
+
+void ContainerLayer::PrerollChildren(PaintContext::ScopedFrame& frame,
+                                     const SkMatrix& matrix) {
+  for (auto& layer : layers_)
+    layer->Preroll(frame, matrix);
+}
+
 void ContainerLayer::PaintChildren(PaintContext::ScopedFrame& frame) const {
   for (auto& layer : layers_)
     layer->Paint(frame);

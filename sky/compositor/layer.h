@@ -31,6 +31,8 @@ class Layer {
   Layer();
   virtual ~Layer();
 
+  virtual void Preroll(PaintContext::ScopedFrame& frame,
+                       const SkMatrix& matrix);
   virtual void Paint(PaintContext::ScopedFrame& frame) = 0;
 
   ContainerLayer* parent() const { return parent_; }

@@ -15,5 +15,10 @@ LayerTree::LayerTree() : rasterizer_tracing_threashold_(0) {
 LayerTree::~LayerTree() {
 }
 
+void LayerTree::Raster(PaintContext::ScopedFrame& frame) {
+  root_layer_->Preroll(frame, SkMatrix());
+  root_layer_->Paint(frame);
+}
+
 }  // namespace compositor
 }  // namespace sky

@@ -26,6 +26,7 @@ class PaintContext {
     SkCanvas& canvas() { return *canvas_; }
 
     PaintContext& context() const { return context_; }
+    GrContext* gr_context() const { return gr_context_; }
 
     ScopedFrame(ScopedFrame&& frame);
 
@@ -33,12 +34,13 @@ class PaintContext {
 
    private:
     PaintContext& context_;
+    GrContext* gr_context_;
     SkCanvas* canvas_;
     std::string trace_file_name_;
     std::unique_ptr<SkPictureRecorder> trace_recorder_;
     const bool instrumentation_enabled_;
 
-    ScopedFrame(PaintContext& context, SkCanvas& canvas);
+    ScopedFrame(PaintContext& context, GrContext* gr_context, SkCanvas& canvas);
 
     ScopedFrame(PaintContext& context,
                 const std::string& trace_file_name,
@@ -52,7 +54,7 @@ class PaintContext {
   PaintContext();
   ~PaintContext();
 
-  ScopedFrame AcquireFrame(SkCanvas& canvas);
+  ScopedFrame AcquireFrame(GrContext* gr_context, SkCanvas& canvas);
 
   ScopedFrame AcquireFrame(const std::string& trace_file_name,
                            gfx::Size frame_size);
