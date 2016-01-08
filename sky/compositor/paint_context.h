@@ -11,6 +11,7 @@
 #include "base/macros.h"
 #include "base/logging.h"
 #include "sky/compositor/instrumentation.h"
+#include "sky/compositor/raster_cache.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "ui/gfx/geometry/size.h"
@@ -56,6 +57,8 @@ class PaintContext {
   ScopedFrame AcquireFrame(const std::string& trace_file_name,
                            gfx::Size frame_size);
 
+  RasterCache& raster_cache() { return raster_cache_; }
+
   const instrumentation::Counter& frame_count() const { return frame_count_; }
 
   const instrumentation::Stopwatch& frame_time() const { return frame_time_; }
@@ -63,6 +66,8 @@ class PaintContext {
   instrumentation::Stopwatch& engine_time() { return engine_time_; };
 
  private:
+  RasterCache raster_cache_;
+
   instrumentation::Counter frame_count_;
   instrumentation::Stopwatch frame_time_;
   instrumentation::Stopwatch engine_time_;

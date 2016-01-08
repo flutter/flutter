@@ -32,6 +32,8 @@ source_set("compositor") {
     "picture_layer.h",
     "picture_serializer.cc",
     "picture_serializer.h",
+    "raster_cache.cc",
+    "raster_cache.h",
     "statistics_layer.cc",
     "statistics_layer.h",
     "transform_layer.cc",
