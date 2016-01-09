@@ -158,6 +158,19 @@ class RenderConstrainedBox extends RenderProxyBox {
     }
   }
 
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
+    assert(() {
+      Paint paint;
+      if (child == null || child.size.isEmpty) {
+        paint = new Paint()
+          ..color = debugPaintSpacingColor;
+        context.canvas.drawRect(offset & size, paint);
+      }
+      return true;
+    });
+  }
+
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
     settings.add('additionalConstraints: $additionalConstraints');
