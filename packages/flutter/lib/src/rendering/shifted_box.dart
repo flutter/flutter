@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/painting.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'object.dart';
 
 /// Abstract class for one-child-layout render boxes that provide control over
@@ -153,6 +157,50 @@ class RenderPadding extends RenderShiftedBox {
     ));
   }
 
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
+    assert(() {
+      Paint paint;
+      if (child != null && !child.size.isEmpty) {
+        Path path;
+        paint = new Paint()
+          ..color = debugPaintPaddingColor;
+        path = new Path()
+          ..moveTo(offset.dx, offset.dy)
+          ..lineTo(offset.dx + size.width, offset.dy)
+          ..lineTo(offset.dx + size.width, offset.dy + size.height)
+          ..lineTo(offset.dx, offset.dy + size.height)
+          ..close()
+          ..moveTo(offset.dx + padding.left, offset.dy + padding.top)
+          ..lineTo(offset.dx + padding.left, offset.dy + size.height - padding.bottom)
+          ..lineTo(offset.dx + size.width - padding.right, offset.dy + size.height - padding.bottom)
+          ..lineTo(offset.dx + size.width - padding.right, offset.dy + padding.top)
+          ..close();
+        context.canvas.drawPath(path, paint);
+        paint = new Paint()
+          ..color = debugPaintPaddingInnerEdgeColor;
+        const kOutline = 2.0;
+        path = new Path()
+          ..moveTo(offset.dx + math.max(padding.left - kOutline, 0.0), offset.dy + math.max(padding.top - kOutline, 0.0))
+          ..lineTo(offset.dx + math.min(size.width - padding.right + kOutline, size.width), offset.dy + math.max(padding.top - kOutline, 0.0))
+          ..lineTo(offset.dx + math.min(size.width - padding.right + kOutline, size.width), offset.dy + math.min(size.height - padding.bottom + kOutline, size.height))
+          ..lineTo(offset.dx + math.max(padding.left - kOutline, 0.0), offset.dy + math.min(size.height - padding.bottom + kOutline, size.height))
+          ..close()
+          ..moveTo(offset.dx + padding.left, offset.dy + padding.top)
+          ..lineTo(offset.dx + padding.left, offset.dy + size.height - padding.bottom)
+          ..lineTo(offset.dx + size.width - padding.right, offset.dy + size.height - padding.bottom)
+          ..lineTo(offset.dx + size.width - padding.right, offset.dy + padding.top)
+          ..close();
+        context.canvas.drawPath(path, paint);
+      } else {
+        paint = new Paint()
+          ..color = debugPaintSpacingColor;
+        context.canvas.drawRect(offset & size, paint);
+      }
+      return true;
+    });
+  }
+
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
     settings.add('padding: $padding');
@@ -243,6 +291,63 @@ class RenderPositionedBox extends RenderShiftedBox {
       size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.INFINITY,
                                             shrinkWrapHeight ? 0.0 : double.INFINITY));
     }
+  }
+
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
+    assert(() {
+      Paint paint;
+      if (child != null && !child.size.isEmpty) {
+        Path path;
+        paint = new Paint()
+          ..style = ui.PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = debugPaintArrowColor;
+        path = new Path();
+        final BoxParentData childParentData = child.parentData;
+        if (childParentData.offset.dy > 0.0) {
+          // vertical alignment arrows
+          double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
+          path
+            ..moveTo(offset.dx + size.width / 2.0, offset.dy)
+            ..relativeLineTo(0.0, childParentData.offset.dy - headSize)
+            ..relativeLineTo(headSize, 0.0)
+            ..relativeLineTo(-headSize, headSize)
+            ..relativeLineTo(-headSize, -headSize)
+            ..relativeLineTo(headSize, 0.0)
+            ..moveTo(offset.dx + size.width / 2.0, offset.dy + size.height)
+            ..relativeLineTo(0.0, -childParentData.offset.dy + headSize)
+            ..relativeLineTo(headSize, 0.0)
+            ..relativeLineTo(-headSize, -headSize)
+            ..relativeLineTo(-headSize, headSize)
+            ..relativeLineTo(headSize, 0.0);
+          context.canvas.drawPath(path, paint);
+        }
+        if (childParentData.offset.dx > 0.0) {
+          // horizontal alignment arrows
+          double headSize = math.min(childParentData.offset.dx * 0.2, 10.0);
+          path
+            ..moveTo(offset.dx, offset.dy + size.height / 2.0)
+            ..relativeLineTo(childParentData.offset.dx - headSize, 0.0)
+            ..relativeLineTo(0.0, headSize)
+            ..relativeLineTo(headSize, -headSize)
+            ..relativeLineTo(-headSize, -headSize)
+            ..relativeLineTo(0.0, headSize)
+            ..moveTo(offset.dx + size.width, offset.dy + size.height / 2.0)
+            ..relativeLineTo(-childParentData.offset.dx + headSize, 0.0)
+            ..relativeLineTo(0.0, headSize)
+            ..relativeLineTo(-headSize, -headSize)
+            ..relativeLineTo(headSize, -headSize)
+            ..relativeLineTo(0.0, headSize);
+          context.canvas.drawPath(path, paint);
+        }
+      } else {
+        paint = new Paint()
+          ..color = debugPaintSpacingColor;
+        context.canvas.drawRect(offset & size, paint);
+      }
+      return true;
+    });
   }
 
   void debugDescribeSettings(List<String> settings) {

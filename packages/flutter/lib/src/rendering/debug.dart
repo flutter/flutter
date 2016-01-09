@@ -13,11 +13,25 @@ import 'package:flutter/scheduler.dart';
 
 export 'package:flutter/services.dart' show debugPrint;
 
-/// Causes each RenderBox to paint a box around its bounds.
+/// Causes each RenderBox to paint a box around its bounds, and some extra
+/// boxes, such as RenderPadding, to draw construction lines.
 bool debugPaintSizeEnabled = false;
 
 /// The color to use when painting RenderObject bounds.
 ui.Color debugPaintSizeColor = const ui.Color(0xFF00FFFF);
+
+/// The color to use when painting some boxes that just add space (e.g. an empty
+/// RenderConstrainedBox or RenderPadding).
+ui.Color debugPaintSpacingColor = const ui.Color(0x90909090);
+
+/// The color to use when painting RenderPadding edges.
+ui.Color debugPaintPaddingColor = const ui.Color(0x900090FF);
+
+/// The color to use when painting RenderPadding edges.
+ui.Color debugPaintPaddingInnerEdgeColor = const ui.Color(0xFF0090FF);
+
+/// The color to use when painting the arrows used to show RenderPositionedBox alignment.
+ui.Color debugPaintArrowColor = const ui.Color(0xFFFFFF00);
 
 /// Causes each RenderBox to paint a line at each of its baselines.
 bool debugPaintBaselinesEnabled = false;

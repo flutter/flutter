@@ -693,50 +693,62 @@ abstract class RenderBox extends RenderObject {
   }
 
   void debugPaint(PaintingContext context, Offset offset) {
-    if (debugPaintSizeEnabled)
-      debugPaintSize(context, offset);
-    if (debugPaintBaselinesEnabled)
-      debugPaintBaselines(context, offset);
-    if (debugPaintPointersEnabled)
-      debugPaintPointers(context, offset);
+    assert(() {
+      if (debugPaintSizeEnabled)
+        debugPaintSize(context, offset);
+      if (debugPaintBaselinesEnabled)
+        debugPaintBaselines(context, offset);
+      if (debugPaintPointersEnabled)
+        debugPaintPointers(context, offset);
+      return true;
+    });
   }
   void debugPaintSize(PaintingContext context, Offset offset) {
-    Paint paint = new Paint()
-     ..style = ui.PaintingStyle.stroke
-     ..strokeWidth = 1.0
-     ..color = debugPaintSizeColor;
-    context.canvas.drawRect(offset & size, paint);
+    assert(() {
+      Paint paint = new Paint()
+       ..style = ui.PaintingStyle.stroke
+       ..strokeWidth = 1.0
+       ..color = debugPaintSizeColor;
+      context.canvas.drawRect((offset & size).deflate(0.5), paint);
+      return true;
+    });
   }
   void debugPaintBaselines(PaintingContext context, Offset offset) {
-    Paint paint = new Paint()
-     ..style = ui.PaintingStyle.stroke
-     ..strokeWidth = 0.25;
-    Path path;
-    // ideographic baseline
-    double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
-    if (baselineI != null) {
-      paint.color = debugPaintIdeographicBaselineColor;
-      path = new Path();
-      path.moveTo(offset.dx, offset.dy + baselineI);
-      path.lineTo(offset.dx + size.width, offset.dy + baselineI);
-      context.canvas.drawPath(path, paint);
-    }
-    // alphabetic baseline
-    double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
-    if (baselineA != null) {
-      paint.color = debugPaintAlphabeticBaselineColor;
-      path = new Path();
-      path.moveTo(offset.dx, offset.dy + baselineA);
-      path.lineTo(offset.dx + size.width, offset.dy + baselineA);
-      context.canvas.drawPath(path, paint);
-    }
+    assert(() {
+      Paint paint = new Paint()
+       ..style = ui.PaintingStyle.stroke
+       ..strokeWidth = 0.25;
+      Path path;
+      // ideographic baseline
+      double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
+      if (baselineI != null) {
+        paint.color = debugPaintIdeographicBaselineColor;
+        path = new Path();
+        path.moveTo(offset.dx, offset.dy + baselineI);
+        path.lineTo(offset.dx + size.width, offset.dy + baselineI);
+        context.canvas.drawPath(path, paint);
+      }
+      // alphabetic baseline
+      double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+      if (baselineA != null) {
+        paint.color = debugPaintAlphabeticBaselineColor;
+        path = new Path();
+        path.moveTo(offset.dx, offset.dy + baselineA);
+        path.lineTo(offset.dx + size.width, offset.dy + baselineA);
+        context.canvas.drawPath(path, paint);
+      }
+      return true;
+    });
   }
   void debugPaintPointers(PaintingContext context, Offset offset) {
-    if (_debugActivePointers > 0) {
-      Paint paint = new Paint()
-       ..color = new Color(debugPaintPointersColorValue | ((0x04000000 * depth) & 0xFF000000));
-      context.canvas.drawRect(offset & size, paint);
-    }
+    assert(() {
+      if (_debugActivePointers > 0) {
+        Paint paint = new Paint()
+         ..color = new Color(debugPaintPointersColorValue | ((0x04000000 * depth) & 0xFF000000));
+        context.canvas.drawRect(offset & size, paint);
+      }
+      return true;
+    });
   }
 
   void debugDescribeSettings(List<String> settings) {
