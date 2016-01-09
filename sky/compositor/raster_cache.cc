@@ -4,8 +4,9 @@
 
 #include "sky/compositor/raster_cache.h"
 
-#include "sky/compositor/paint_context.h"
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
+#include "sky/compositor/paint_context.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 #define ENABLE_RASTER_CACHE 0
@@ -73,6 +74,9 @@ RefPtr<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
     entry.access_count = kRasterThreshold;
 
     if (!entry.image && isWorthRasterizing(picture)) {
+      TRACE_EVENT2("flutter", "Rasterize picture layer",
+                   "width", physical_size.width(),
+                   "height", physical_size.height());
       SkMatrix matrix = SkMatrix::MakeScale(scaleX, scaleY);
       entry.image = adoptRef(SkImage::NewFromPicture(picture, physical_size,
                                                      &matrix, nullptr));

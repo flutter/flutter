@@ -72,6 +72,9 @@ static const char* kDartArgs[] = {
     // default profile period to 100Hz. This number is suitable for older
     // Raspberry Pi devices but quite low for current smartphones.
     "--profile_period=1000",
+    // Background compilation isn't quite ready, but this flag turns it on if we
+    // want to experiment with it.
+    // "--background_compilation",
 #if (WTF_OS_IOS || WTF_OS_MACOSX)
     // On platforms where LLDB is the primary debugger, SIGPROF signals
     // overwhelm LLDB.
