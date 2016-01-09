@@ -13,12 +13,17 @@ OpacityLayer::OpacityLayer() {
 OpacityLayer::~OpacityLayer() {
 }
 
+void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  ContainerLayer::Preroll(context, matrix);
+  set_paint_bounds(context->child_paint_bounds);
+}
+
 void OpacityLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkPaint paint;
   paint.setColor(SkColorSetARGB(alpha_, 0, 0, 0));
   paint.setXfermodeMode(SkXfermode::kSrcOver_Mode);
   SkCanvas& canvas = frame.canvas();
-  canvas.saveLayer(has_paint_bounds() ? &paint_bounds() : nullptr, &paint);
+  canvas.saveLayer(&paint_bounds(), &paint);
   PaintChildren(frame);
   canvas.restore();
 }

@@ -16,7 +16,8 @@ LayerTree::~LayerTree() {
 }
 
 void LayerTree::Raster(PaintContext::ScopedFrame& frame) {
-  root_layer_->Preroll(frame, SkMatrix());
+  Layer::PrerollContext context = { frame, SkRect::MakeEmpty() };
+  root_layer_->Preroll(&context, SkMatrix());
   root_layer_->Paint(frame);
 }
 

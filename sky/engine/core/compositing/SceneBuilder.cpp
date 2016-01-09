@@ -62,8 +62,7 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
 }
 
 SceneBuilder::SceneBuilder(const Rect& bounds)
-    : m_rootPaintBounds(bounds.sk_rect)
-    , m_currentLayer(nullptr)
+    : m_currentLayer(nullptr)
     , m_currentRasterizerTracingThreshold(0)
 {
 }
@@ -106,8 +105,6 @@ void SceneBuilder::pushClipPath(const CanvasPath* path, const Rect& bounds)
 void SceneBuilder::pushOpacity(int alpha, const Rect& bounds)
 {
     std::unique_ptr<sky::compositor::OpacityLayer> layer(new sky::compositor::OpacityLayer());
-    if (!bounds.is_null)
-      layer->set_paint_bounds(bounds.sk_rect);
     layer->set_alpha(alpha);
     addLayer(std::move(layer));
 }
@@ -115,8 +112,6 @@ void SceneBuilder::pushOpacity(int alpha, const Rect& bounds)
 void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode, const Rect& bounds)
 {
     std::unique_ptr<sky::compositor::ColorFilterLayer> layer(new sky::compositor::ColorFilterLayer());
-    if (!bounds.is_null)
-      layer->set_paint_bounds(bounds.sk_rect);
     layer->set_color(color);
     layer->set_transfer_mode(transferMode);
     addLayer(std::move(layer));
@@ -128,7 +123,6 @@ void SceneBuilder::addLayer(std::unique_ptr<sky::compositor::ContainerLayer> lay
     if (!m_rootLayer) {
         DCHECK(!m_currentLayer);
         m_rootLayer = std::move(layer);
-        m_rootLayer->set_paint_bounds(m_rootPaintBounds);
         m_currentLayer = m_rootLayer.get();
         return;
     }
@@ -153,8 +147,6 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture, const Rect
     std::unique_ptr<sky::compositor::PictureLayer> layer(new sky::compositor::PictureLayer());
     layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
     layer->set_picture(picture->toSkia());
-    if (!paintBounds.is_null)
-      layer->set_paint_bounds(paintBounds.sk_rect);
     m_currentLayer->Add(std::move(layer));
 }
 

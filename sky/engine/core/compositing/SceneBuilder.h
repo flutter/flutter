@@ -57,7 +57,6 @@ private:
 
     void addLayer(std::unique_ptr<sky::compositor::ContainerLayer> layer);
 
-    SkRect m_rootPaintBounds;
     std::unique_ptr<sky::compositor::ContainerLayer> m_rootLayer;
     sky::compositor::ContainerLayer* m_currentLayer;
     int32_t m_currentRasterizerTracingThreshold;

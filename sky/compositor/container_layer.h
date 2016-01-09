@@ -18,10 +18,9 @@ class ContainerLayer : public Layer {
 
   void Add(std::unique_ptr<Layer> layer);
 
-  void Preroll(PaintContext::ScopedFrame& frame,
-               const SkMatrix& matrix) override;
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+  void PrerollChildren(PrerollContext* context, const SkMatrix& matrix);
 
-  void PrerollChildren(PaintContext::ScopedFrame& frame, const SkMatrix& matrix);
   void PaintChildren(PaintContext::ScopedFrame& frame) const;
 
   const std::vector<std::unique_ptr<Layer>>& layers() const { return layers_; }

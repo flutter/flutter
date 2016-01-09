@@ -13,11 +13,11 @@ TransformLayer::TransformLayer() {
 TransformLayer::~TransformLayer() {
 }
 
-void TransformLayer::Preroll(PaintContext::ScopedFrame& frame,
-                             const SkMatrix& matrix) {
+void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkMatrix childMatrix;
   childMatrix.setConcat(matrix, transform_);
-  PrerollChildren(frame, childMatrix);
+  PrerollChildren(context, childMatrix);
+  transform_.mapRect(&context->child_paint_bounds);
 }
 
 void TransformLayer::Paint(PaintContext::ScopedFrame& frame) {
