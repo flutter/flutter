@@ -56,13 +56,135 @@ class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
   }
 }
 
+/// An abstract widget for building components that gradually change their
+/// values over a period of time.
+abstract class AnimatedWidgetBase extends StatefulComponent {
+  AnimatedWidgetBase({
+    Key key,
+    this.curve: Curves.linear,
+    this.duration
+  }) : super(key: key) {
+    assert(curve != null);
+    assert(duration != null);
+  }
+
+  /// The curve to apply when animating the parameters of this container.
+  final Curve curve;
+
+  /// The duration over which to animate the parameters of this container.
+  final Duration duration;
+
+  AnimatedWidgetBaseState createState();
+}
+
+typedef AnimatedValue<T> VariableConstructor<T>(T targetValue);
+typedef AnimatedValue<T> VariableVisitor<T>(AnimatedValue<T> variable, T targetValue, VariableConstructor<T> constructor);
+
+abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends State<T> {
+  Performance _performanceController;
+  PerformanceView _performance;
+
+  void initState() {
+    super.initState();
+    _performanceController = new Performance(
+      duration: config.duration,
+      debugLabel: '${config.toStringShort()}'
+    );
+    _updateCurve();
+    _configAllVariables();
+  }
+
+  void didUpdateConfig(T oldConfig) {
+    if (config.curve != oldConfig.curve)
+      _updateCurve();
+    _performanceController.duration = config.duration;
+    if (_configAllVariables()) {
+      forEachVariable((AnimatedValue variable, dynamic targetValue, VariableConstructor<T> constructor) {
+        _updateBeginValue(variable); return variable;
+      });
+      _performanceController.progress = 0.0;
+      _performanceController.play();
+    }
+  }
+
+  void _updateCurve() {
+    _performance?.removeListener(_updateAllVariables);
+    if (config.curve != null)
+      _performance = new CurvedPerformance(_performanceController, curve: config.curve);
+    else
+      _performance = _performanceController;
+    _performance.addListener(_updateAllVariables);
+  }
+
+  void dispose() {
+    _performanceController.stop();
+    super.dispose();
+  }
+
+  void _updateVariable(Animatable variable) {
+    if (variable != null)
+      _performance.updateVariable(variable);
+  }
+
+  void _updateAllVariables() {
+    setState(() {
+      forEachVariable((AnimatedValue variable, dynamic targetValue, VariableConstructor<T> constructor) {
+        _updateVariable(variable); return variable;
+      });
+    });
+  }
+
+  bool _updateEndValue(AnimatedValue variable, dynamic targetValue) {
+    if (targetValue == variable.end)
+      return false;
+    variable.end = targetValue;
+    return true;
+  }
+
+  void _updateBeginValue(AnimatedValue variable) {
+    variable?.begin = variable.value;
+  }
+
+  bool _configAllVariables() {
+    bool startAnimation = false;
+    forEachVariable((AnimatedValue variable, dynamic targetValue, VariableConstructor<T> constructor) { 
+      if (targetValue != null) {
+        variable ??= constructor(targetValue);
+        if (_updateEndValue(variable, targetValue))
+          startAnimation = true;
+      } else {
+        variable = null;
+      }
+      return variable;
+    });
+    return startAnimation;
+  }
+
+  /// Subclasses must implement this function by running through the following
+  /// steps for for each animatable facet in the class:
+  ///
+  /// 1. Call the visitor callback with three arguments, the first argument
+  /// being the current value of the AnimatedValue<T> object that represents the
+  /// variable (initially null), the second argument, of type T, being the value
+  /// on the Widget (config) that represents the current target value of the
+  /// variable, and the third being a callback that takes a value T (which will
+  /// be the second argument to the visitor callback), and that returns an
+  /// AnimatedValue<T> object for the variable, configured with the given value
+  /// as the begin value.
+  ///
+  /// 2. Take the value returned from the callback, and store it. This is the
+  /// value to use as the current value the next time that the forEachVariable()
+  /// method is called.
+  void forEachVariable(VariableVisitor visitor);
+}
+
 /// A container that gradually changes its values over a period of time.
 ///
 /// This class is useful for generating simple implicit transitions between
 /// different parameters to [Container]. For more complex animations, you'll
 /// likely want to use a subclass of [Transition] or control a [Performance]
 /// yourself.
-class AnimatedContainer extends StatefulComponent {
+class AnimatedContainer extends AnimatedWidgetBase {
   AnimatedContainer({
     Key key,
     this.child,
@@ -74,15 +196,13 @@ class AnimatedContainer extends StatefulComponent {
     this.transform,
     this.width,
     this.height,
-    this.curve: Curves.linear,
-    this.duration
-  }) : super(key: key) {
-    assert(margin == null || margin.isNonNegative);
-    assert(padding == null || padding.isNonNegative);
+    Curve curve: Curves.linear,
+    Duration duration
+  }) : super(key: key, curve: curve, duration: duration) {
     assert(decoration == null || decoration.debugAssertValid());
     assert(foregroundDecoration == null || foregroundDecoration.debugAssertValid());
-    assert(curve != null);
-    assert(duration != null);
+    assert(margin == null || margin.isNonNegative);
+    assert(padding == null || padding.isNonNegative);
   }
 
   final Widget child;
@@ -111,16 +231,10 @@ class AnimatedContainer extends StatefulComponent {
   /// If non-null, requires the decoration to have this height.
   final double height;
 
-  /// The curve to apply when animating the parameters of this container.
-  final Curve curve;
-
-  /// The duration over which to animate the parameters of this container.
-  final Duration duration;
-
   _AnimatedContainerState createState() => new _AnimatedContainerState();
 }
 
-class _AnimatedContainerState extends State<AnimatedContainer> {
+class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer> {
   AnimatedBoxConstraintsValue _constraints;
   AnimatedDecorationValue _decoration;
   AnimatedDecorationValue _foregroundDecoration;
@@ -130,147 +244,16 @@ class _AnimatedContainerState extends State<AnimatedContainer> {
   AnimatedValue<double> _width;
   AnimatedValue<double> _height;
 
-  Performance _performanceController;
-  PerformanceView _performance;
-
-  void initState() {
-    super.initState();
-    _performanceController = new Performance(
-      duration: config.duration,
-      debugLabel: '${config.toStringShort()}'
-    );
-    _updateCurve();
-    _configAllVariables();
-  }
-
-  void didUpdateConfig(AnimatedContainer oldConfig) {
-    if (config.curve != oldConfig.curve)
-      _updateCurve();
-    _performanceController.duration = config.duration;
-    if (_configAllVariables()) {
-      _updateBeginValue(_constraints);
-      _updateBeginValue(_decoration);
-      _updateBeginValue(_foregroundDecoration);
-      _updateBeginValue(_margin);
-      _updateBeginValue(_padding);
-      _updateBeginValue(_transform);
-      _updateBeginValue(_width);
-      _updateBeginValue(_height);
-      _performanceController.progress = 0.0;
-      _performanceController.play();
-    }
-  }
-
-  void _updateCurve() {
-    _performance?.removeListener(_updateAllVariables);
-    if (config.curve != null)
-      _performance = new CurvedPerformance(_performanceController, curve: config.curve);
-    else
-      _performance = _performanceController;
-    _performance.addListener(_updateAllVariables);
-  }
-
-  void dispose() {
-    _performanceController.stop();
-    super.dispose();
-  }
-
-  void _updateVariable(Animatable variable) {
-    if (variable != null)
-      _performance.updateVariable(variable);
-  }
-
-  void _updateAllVariables() {
-    setState(() {
-      _updateVariable(_constraints);
-      _updateVariable(_decoration);
-      _updateVariable(_foregroundDecoration);
-      _updateVariable(_margin);
-      _updateVariable(_padding);
-      _updateVariable(_transform);
-      _updateVariable(_width);
-      _updateVariable(_height);
-    });
-  }
-
-  bool _updateEndValue(AnimatedValue variable, dynamic targetValue) {
-    if (targetValue == variable.end)
-      return false;
-    variable.end = targetValue;
-    return true;
-  }
-
-  void _updateBeginValue(AnimatedValue variable) {
-    variable?.begin = variable.value;
-  }
-
-  bool _configAllVariables() {
-    bool startAnimation = false;
-    if (config.constraints != null) {
-      _constraints ??= new AnimatedBoxConstraintsValue(config.constraints);
-      if (_updateEndValue(_constraints, config.constraints))
-        startAnimation = true;
-    } else {
-      _constraints = null;
-    }
-
-    if (config.decoration != null) {
-      _decoration ??= new AnimatedDecorationValue(config.decoration);
-      if (_updateEndValue(_decoration, config.decoration))
-        startAnimation = true;
-    } else {
-      _decoration = null;
-    }
-
-    if (config.foregroundDecoration != null) {
-      _foregroundDecoration ??= new AnimatedDecorationValue(config.foregroundDecoration);
-      if (_updateEndValue(_foregroundDecoration, config.foregroundDecoration))
-        startAnimation = true;
-    } else {
-      _foregroundDecoration = null;
-    }
-
-    if (config.margin != null) {
-      _margin ??= new AnimatedEdgeDimsValue(config.margin);
-      if (_updateEndValue(_margin, config.margin))
-        startAnimation = true;
-    } else {
-      _margin = null;
-    }
-
-    if (config.padding != null) {
-      _padding ??= new AnimatedEdgeDimsValue(config.padding);
-      if (_updateEndValue(_padding, config.padding))
-        startAnimation = true;
-    } else {
-      _padding = null;
-    }
-
-    if (config.transform != null) {
-      _transform ??= new AnimatedMatrix4Value(config.transform);
-      if (_updateEndValue(_transform, config.transform))
-        startAnimation = true;
-    } else {
-      _transform = null;
-    }
-
-    if (config.width != null) {
-      _width ??= new AnimatedValue<double>(config.width);
-      if (_updateEndValue(_width, config.width))
-        startAnimation = true;
-    } else {
-      _width = null;
-    }
-
-    if (config.height != null) {
-      _height ??= new AnimatedValue<double>(config.height);
-      if (_updateEndValue(_height, config.height))
-        startAnimation = true;
-    } else {
-      _height = null;
-    }
-
-    return startAnimation;
+  void forEachVariable(VariableVisitor visitor) {
+    // TODO(ianh): Use constructor tear-offs when it becomes possible
+    _constraints = visitor(_constraints, config.constraints, (dynamic value) => new AnimatedBoxConstraintsValue(value));
+    _decoration = visitor(_decoration, config.decoration, (dynamic value) => new AnimatedDecorationValue(value));
+    _foregroundDecoration = visitor(_foregroundDecoration, config.foregroundDecoration, (dynamic value) => new AnimatedDecorationValue(value));
+    _margin = visitor(_margin, config.margin, (dynamic value) => new AnimatedEdgeDimsValue(value));
+    _padding = visitor(_padding, config.padding, (dynamic value) => new AnimatedEdgeDimsValue(value));
+    _transform = visitor(_transform, config.transform, (dynamic value) => new AnimatedMatrix4Value(value));
+    _width = visitor(_width, config.width, (dynamic value) => new AnimatedValue<double>(value));
+    _height = visitor(_height, config.height, (dynamic value) => new AnimatedValue<double>(value));
   }
 
   Widget build(BuildContext context) {
