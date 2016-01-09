@@ -13,13 +13,18 @@ ColorFilterLayer::ColorFilterLayer() {
 ColorFilterLayer::~ColorFilterLayer() {
 }
 
+void ColorFilterLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  ContainerLayer::Preroll(context, matrix);
+  set_paint_bounds(context->child_paint_bounds);
+}
+
 void ColorFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
   RefPtr<SkColorFilter> color_filter =
       adoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));
   SkPaint paint;
   paint.setColorFilter(color_filter.get());
   SkCanvas& canvas = frame.canvas();
-  canvas.saveLayer(has_paint_bounds() ? &paint_bounds() : nullptr, &paint);
+  canvas.saveLayer(&paint_bounds(), &paint);
   PaintChildren(frame);
   canvas.restore();
 }

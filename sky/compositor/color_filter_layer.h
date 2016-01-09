@@ -21,6 +21,8 @@ class ColorFilterLayer : public ContainerLayer {
     transfer_mode_ = transfer_mode;
   }
 
+ protected:
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:

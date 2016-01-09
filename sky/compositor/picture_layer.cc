@@ -20,10 +20,11 @@ PictureLayer::PictureLayer() {
 PictureLayer::~PictureLayer() {
 }
 
-void PictureLayer::Preroll(PaintContext::ScopedFrame& frame,
+void PictureLayer::Preroll(PrerollContext* context,
                            const SkMatrix& matrix) {
-  image_ = frame.context().raster_cache().GetPrerolledImage(
-      frame.gr_context(), picture_.get(), matrix);
+  image_ = context->frame.context().raster_cache().GetPrerolledImage(
+      context->frame.gr_context(), picture_.get(), matrix);
+  context->child_paint_bounds = picture_->cullRect();
 }
 
 void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
@@ -44,10 +45,9 @@ void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
     canvas.drawImage(image_.get(), dx, dy);
     canvas.restore();
 
-    if (kDebugCheckerboardRasterizedLayers) {
-      SkRect rect = paint_bounds().makeOffset(offset_.x(), offset_.y());
-      DrawCheckerboard(&canvas, rect);
-    }
+    if (kDebugCheckerboardRasterizedLayers)
+      DrawCheckerboard(&canvas, rect.makeOffset(offset_.x(), offset_.y()));
+
   } else {
     canvas.save();
     canvas.translate(offset_.x(), offset_.y());

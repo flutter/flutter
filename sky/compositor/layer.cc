@@ -18,7 +18,7 @@ Layer::Layer()
 Layer::~Layer() {
 }
 
-void Layer::Preroll(PaintContext::ScopedFrame& frame, const SkMatrix& matrix) {
+void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 }  // namespace compositor
