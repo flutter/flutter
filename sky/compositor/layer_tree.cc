@@ -4,6 +4,7 @@
 
 #include "sky/compositor/layer_tree.h"
 
+#include "base/trace_event/trace_event.h"
 #include "sky/compositor/layer.h"
 
 namespace sky {
@@ -16,9 +17,16 @@ LayerTree::~LayerTree() {
 }
 
 void LayerTree::Raster(PaintContext::ScopedFrame& frame) {
-  Layer::PrerollContext context = { frame, SkRect::MakeEmpty() };
-  root_layer_->Preroll(&context, SkMatrix());
-  root_layer_->Paint(frame);
+  {
+    TRACE_EVENT0("flutter", "LayerTree::Preroll")
+    Layer::PrerollContext context = { frame, SkRect::MakeEmpty() };
+    root_layer_->Preroll(&context, SkMatrix());
+  }
+
+  {
+    TRACE_EVENT0("flutter", "LayerTree::Paint")
+    root_layer_->Paint(frame);
+  }
 }
 
 }  // namespace compositor
