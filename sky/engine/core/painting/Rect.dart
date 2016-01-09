@@ -58,13 +58,17 @@ class Rect {
   /// Returns a new rectangle with edges moved inwards by the given delta.
   Rect deflate(double delta) => inflate(-delta);
 
-  /// Returns a new rectangle that is the intersection of the given rectangle and this rectangle.
+  /// Returns a new rectangle that is the intersection of the given
+  /// rectangle and this rectangle. The two rectangles must overlap
+  /// for this to be meaningful. If the two rectangles do not overlap,
+  /// then the resulting Rect will have a negative width or height.
   Rect intersect(Rect other) {
     return new Rect.fromLTRB(
       math.max(left, other.left),
       math.max(top, other.top),
       math.min(right, other.right),
-      math.min(bottom, other.bottom));
+      math.min(bottom, other.bottom)
+    );
   }
 
   /// The distance between the left and right edges of this rectangle.
