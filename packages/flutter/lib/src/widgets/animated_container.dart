@@ -79,8 +79,10 @@ class AnimatedContainer extends StatefulComponent {
   }) : super(key: key) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
+    assert(decoration == null || decoration.debugAssertValid());
+    assert(foregroundDecoration == null || foregroundDecoration.debugAssertValid());
     assert(curve != null);
-    assert(duration != null || decoration.debugAssertValid());
+    assert(duration != null);
   }
 
   final Widget child;
