@@ -644,8 +644,8 @@ abstract class RenderBox extends RenderObject {
       rendererParent.applyPaintTransform(renderer, transform);
       renderer = rendererParent;
     }
-    /* double det = */ transform.invert();
-    // TODO(abarth): Check the determinant for degeneracy.
+    double det = transform.invert();
+    assert(det != 0.0);
     return _transformPoint(transform, point);
   }
 
