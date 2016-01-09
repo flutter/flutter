@@ -16,3 +16,4 @@ export 'src/animation/performance.dart';
 export 'src/animation/scroll_behavior.dart';
 export 'src/animation/simulation_stepper.dart';
 export 'src/animation/ticker.dart';
+export 'src/animation/tweens.dart';

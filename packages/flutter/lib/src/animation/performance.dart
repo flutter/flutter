@@ -117,7 +117,7 @@ class AlwaysCompletePerformance extends PerformanceView {
   double get progress => 1.0;
 }
 const AlwaysCompletePerformance alwaysCompletePerformance = const AlwaysCompletePerformance();
- 
+
 class AlwaysDismissedPerformance extends PerformanceView {
   const AlwaysDismissedPerformance();
 
@@ -373,7 +373,7 @@ class TrainHoppingPerformance extends PerformanceView
   AnimationDirection get direction => _currentTrain.direction;
   AnimationDirection get curveDirection => _currentTrain.curveDirection;
 
-  double _lastProgress;  
+  double _lastProgress;
   void _valueChangeHandler() {
     assert(_currentTrain != null);
     bool hop = false;
@@ -382,7 +382,7 @@ class TrainHoppingPerformance extends PerformanceView
         case _TrainHoppingMode.minimize:
           hop = _nextTrain.progress <= _currentTrain.progress;
           break;
-        case _TrainHoppingMode.maximize: 
+        case _TrainHoppingMode.maximize:
           hop = _nextTrain.progress >= _currentTrain.progress;
           break;
       }
@@ -489,60 +489,114 @@ class ProxyPerformance extends PerformanceView
   double get progress => _masterPerformance != null ? _masterPerformance.progress : _progress;
 }
 
-class CurvedPerformance extends PerformanceView {
-  CurvedPerformance(this._performance, { this.curve, this.reverseCurve });
+class ImmutableProxyPerformance extends PerformanceView {
+  ImmutableProxyPerformance(this.masterPerformance);
 
-  final PerformanceView _performance;
-
-  /// The curve to use in the forward direction
-  Curve curve;
-
-  /// The curve to use in the reverse direction
-  ///
-  /// If this field is null, use [curve] in both directions.
-  Curve reverseCurve;
+  final PerformanceView masterPerformance;
 
   void addListener(VoidCallback listener) {
-    _performance.addListener(listener);
+    masterPerformance.addListener(listener);
   }
   void removeListener(VoidCallback listener) {
-    _performance.removeListener(listener);
+    masterPerformance.removeListener(listener);
   }
 
   void addStatusListener(PerformanceStatusListener listener) {
-    _performance.addStatusListener(listener);
+    masterPerformance.addStatusListener(listener);
   }
   void removeStatusListener(PerformanceStatusListener listener) {
-    _performance.removeStatusListener(listener);
+    masterPerformance.removeStatusListener(listener);
   }
 
   void updateVariable(Animatable variable) {
     variable.setProgress(progress, curveDirection);
   }
 
-  PerformanceStatus get status => _performance.status;
-  AnimationDirection get direction => _performance.direction;
-  AnimationDirection get curveDirection => _performance.curveDirection;
-  double get progress {
+  PerformanceStatus get status => masterPerformance.status;
+  AnimationDirection get direction => masterPerformance.direction;
+  AnimationDirection get curveDirection => masterPerformance.curveDirection;
+  double get progress => masterPerformance.progress;
+}
+
+class Tween<T extends dynamic> {
+  Tween({
+    this.begin,
+    this.end,
+    this.curve,
+    this.reverseCurve
+  });
+
+  T begin;
+  T end;
+  Curve curve;
+  Curve reverseCurve;
+
+  /// Override this function in subclasses to customize the interpolation.
+  T lerp(double t) => begin + (end - begin) * t;
+
+  double applyCurve(PerformanceView performance) {
     Curve activeCurve;
-    if (curveDirection == AnimationDirection.forward || reverseCurve == null)
+    if (performance.curveDirection == AnimationDirection.forward || reverseCurve == null)
       activeCurve = curve;
     else
       activeCurve = reverseCurve;
     if (activeCurve == null)
-      return _performance.progress;
-    if (_performance.status == PerformanceStatus.dismissed) {
-      assert(_performance.progress == 0.0);
+      return performance.progress;
+    if (performance.status == PerformanceStatus.dismissed) {
+      assert(performance.progress == 0.0);
       assert(activeCurve.transform(0.0).roundToDouble() == 0.0);
       return 0.0;
     }
-    if (_performance.status == PerformanceStatus.completed) {
-      assert(_performance.progress == 1.0);
+    if (performance.status == PerformanceStatus.completed) {
+      assert(performance.progress == 1.0);
       assert(activeCurve.transform(1.0).roundToDouble() == 1.0);
       return 1.0;
     }
-    return activeCurve.transform(_performance.progress);
+    return activeCurve.transform(performance.progress);
   }
+
+  T evaluate(PerformanceView performance) {
+    double t = applyCurve(performance);
+    if (end == null)
+      return begin;
+    if (t == 0.0)
+      return begin;
+    else if (t == 1.0)
+      return end;
+    else
+      return lerp(t);
+  }
+}
+
+class CurvedPerformance extends ImmutableProxyPerformance {
+  CurvedPerformance(PerformanceView masterPerformance, {
+    Curve curve,
+    Curve reverseCurve
+  }) : _tween = new Tween<double>(curve: curve, reverseCurve: reverseCurve),
+       super(masterPerformance);
+
+  final Tween _tween;
+
+  /// The curve to use in the forward direction
+  Curve get curve => _tween.curve;
+  void set curve(Curve value) { _tween.curve = value; }
+
+  /// The curve to use in the reverse direction
+  ///
+  /// If this field is null, use [curve] in both directions.
+  Curve get reverseCurve => _tween.reverseCurve;
+  void set reverseCurve(Curve value) { _tween.reverseCurve = value; }
+
+  double get progress => _tween.applyCurve(masterPerformance);
+}
+
+class TweenPerformance<T extends dynamic> extends ImmutableProxyPerformance {
+  TweenPerformance(PerformanceView masterPerformance, this.tween) : super(masterPerformance);
+
+  Tween<T> tween;
+
+  /// The current value of the tween.
+  T get value => tween.evaluate(masterPerformance);
 }
 
 /// A timeline that can be reversed and used to update [Animatable]s.
@@ -686,7 +740,7 @@ class Performance extends PerformanceView
     _checkStatusChanged();
   }
 
-  String toStringDetails() {    
+  String toStringDetails() {
     String paused = _timeline.isAnimating ? '' : '; paused';
     String label = debugLabel == null ? '' : '; for $debugLabel';
     String more = super.toStringDetails();
@@ -696,8 +750,8 @@ class Performance extends PerformanceView
 
 /// An animation performance with an animated variable with a concrete type.
 class ValuePerformance<T> extends Performance {
-  ValuePerformance({ this.variable, Duration duration, double progress }) :
-    super(duration: duration, progress: progress);
+  ValuePerformance({ this.variable, Duration duration, double progress })
+    : super(duration: duration, progress: progress);
 
   AnimatedValue<T> variable;
   T get value => variable.value;
