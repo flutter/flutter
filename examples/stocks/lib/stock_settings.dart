@@ -4,19 +4,11 @@
 
 part of stocks;
 
-typedef void SettingsUpdater({
-  StockMode optimism,
-  BackupMode backup,
-  bool showGrid
-});
-
 class StockSettings extends StatefulComponent {
-  const StockSettings(this.optimism, this.backup, this.showGrid, this.updater);
+  const StockSettings(this.configuration, this.updater);
 
-  final StockMode optimism;
-  final BackupMode backup;
-  final SettingsUpdater updater;
-  final bool showGrid;
+  final StockConfiguration configuration;
+  final ValueChanged<StockConfiguration> updater;
 
   StockSettingsState createState() => new StockSettingsState();
 }
@@ -24,19 +16,19 @@ class StockSettings extends StatefulComponent {
 class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
     value ??= false;
-    sendUpdates(value ? StockMode.optimistic : StockMode.pessimistic, config.backup, config.showGrid);
+    sendUpdates(config.configuration.copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
   }
 
   void _handleBackupChanged(bool value) {
-    sendUpdates(config.optimism, value ? BackupMode.enabled : BackupMode.disabled, config.showGrid);
+    sendUpdates(config.configuration.copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
   }
 
   void _handleShowGridChanged(bool value) {
-    sendUpdates(config.optimism, config.backup, value);
+    sendUpdates(config.configuration.copyWith(showGrid: value));
   }
 
   void _confirmOptimismChange() {
-    switch (config.optimism) {
+    switch (config.configuration.stockMode) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
         break;
@@ -66,13 +58,9 @@ class StockSettingsState extends State<StockSettings> {
     }
   }
 
-  void sendUpdates(StockMode optimism, BackupMode backup, bool showGrid) {
+  void sendUpdates(StockConfiguration value) {
     if (config.updater != null)
-      config.updater(
-        optimism: optimism,
-        backup: backup,
-        showGrid: showGrid
-      );
+      config.updater(value);
   }
 
   Widget buildToolBar(BuildContext context) {
@@ -82,8 +70,6 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   Widget buildSettingsPane(BuildContext context) {
-    // TODO(ianh): Once we have the gesture API hooked up, fix https://github.com/domokit/mojo/issues/281
-    // (whereby tapping the widgets below causes both the widget and the menu item to fire their callbacks)
     List<Widget> rows = <Widget>[
       new DrawerItem(
         icon: 'action/thumb_up',
@@ -91,18 +77,18 @@ class StockSettingsState extends State<StockSettings> {
         child: new Row(<Widget>[
           new Flexible(child: new Text('Everything is awesome')),
           new Checkbox(
-            value: config.optimism == StockMode.optimistic,
+            value: config.configuration.stockMode == StockMode.optimistic,
             onChanged: (bool value) => _confirmOptimismChange()
           ),
         ])
       ),
       new DrawerItem(
         icon: 'action/backup',
-        onPressed: () { _handleBackupChanged(!(config.backup == BackupMode.enabled)); },
+        onPressed: () { _handleBackupChanged(!(config.configuration.backupMode == BackupMode.enabled)); },
         child: new Row(<Widget>[
           new Flexible(child: new Text('Back up stock list to the cloud')),
           new Switch(
-            value: config.backup == BackupMode.enabled,
+            value: config.configuration.backupMode == BackupMode.enabled,
             onChanged: _handleBackupChanged
           ),
         ])
@@ -113,11 +99,11 @@ class StockSettingsState extends State<StockSettings> {
       rows.add(
         new DrawerItem(
           icon: 'editor/border_clear',
-          onPressed: () { _handleShowGridChanged(!config.showGrid); },
+          onPressed: () { _handleShowGridChanged(!config.configuration.showGrid); },
           child: new Row(<Widget>[
             new Flexible(child: new Text('Show material grid (for debugging)')),
             new Switch(
-              value: config.showGrid,
+              value: config.configuration.showGrid,
               onChanged: _handleShowGridChanged
             ),
           ])

@@ -9,12 +9,12 @@ typedef void ModeUpdater(StockMode mode);
 enum StockHomeTab { market, portfolio }
 
 class StockHome extends StatefulComponent {
-  StockHome(this.stocks, this.symbols, this.stockMode, this.modeUpdater);
+  const StockHome(this.stocks, this.symbols, this.configuration, this.updater);
 
   final Map<String, Stock> stocks;
   final List<String> symbols;
-  final StockMode stockMode;
-  final ModeUpdater modeUpdater;
+  final StockConfiguration configuration;
+  final ValueChanged<StockConfiguration> updater;
 
   StockHomeState createState() => new StockHomeState();
 }
@@ -24,10 +24,6 @@ class StockHomeState extends State<StockHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool _isSearching = false;
   String _searchQuery;
-
-  void initState() {
-    super.initState();
-  }
 
   void _handleSearchBegin() {
     ModalRoute.of(context).addLocalHistoryEntry(new LocalHistoryEntry(
@@ -61,8 +57,8 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode value) {
-    if (config.modeUpdater != null)
-      config.modeUpdater(value);
+    if (config.updater != null)
+      config.updater(config.configuration.copyWith(stockMode: value));
   }
 
   void _handleMenuShow() {
@@ -120,7 +116,7 @@ class StockHomeState extends State<StockHome> {
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
           child: new Row(<Widget>[
             new Flexible(child: new Text('Optimistic')),
-            new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
+            new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
           ])
         ),
         new DrawerItem(
@@ -128,7 +124,7 @@ class StockHomeState extends State<StockHome> {
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           child: new Row(<Widget>[
             new Flexible(child: new Text('Pessimistic')),
-            new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.stockMode, onChanged: _handleStockModeChange)
+            new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
           ])
         ),
         new DrawerDivider(),
