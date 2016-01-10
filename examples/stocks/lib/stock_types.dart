@@ -11,26 +11,36 @@ class StockConfiguration {
   StockConfiguration({
     this.stockMode,
     this.backupMode,
-    this.showGrid
+    this.debugShowGrid,
+    this.debugShowSizes,
+    this.showRenderingStatistics
   }) {
     assert(stockMode != null);
     assert(backupMode != null);
-    assert(showGrid != null);
+    assert(debugShowGrid != null);
+    assert(debugShowSizes != null);
+    assert(showRenderingStatistics != null);
   }
 
   final StockMode stockMode;
   final BackupMode backupMode;
-  final bool showGrid;
+  final bool debugShowGrid;
+  final bool debugShowSizes;
+  final bool showRenderingStatistics;
 
   StockConfiguration copyWith({
     StockMode stockMode,
     BackupMode backupMode,
-    bool showGrid
+    bool debugShowGrid,
+    bool debugShowSizes,
+    bool showRenderingStatistics
   }) {
     return new StockConfiguration(
       stockMode: stockMode ?? this.stockMode,
       backupMode: backupMode ?? this.backupMode,
-      showGrid: showGrid ?? this.showGrid
+      debugShowGrid: debugShowGrid ?? this.debugShowGrid,
+      debugShowSizes: debugShowSizes ?? this.debugShowSizes,
+      showRenderingStatistics: showRenderingStatistics ?? this.showRenderingStatistics
     );
   }
 }

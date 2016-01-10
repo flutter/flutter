@@ -5,28 +5,57 @@
 import 'box.dart';
 import 'object.dart';
 
-class RenderStatisticsBox extends RenderBox {
+/// The options that control whether the statistics overlay displays certain
+/// aspects of the compositor
+enum StatisticsOption {
+  /// Display the frame time and FPS of the last frame rendered. This field is
+  /// updated every frame.
+  ///
+  /// This is the time spent by the rasterizer as it tries
+  /// to convert the layer tree obtained from the widgets into OpenGL commands
+  /// and tries to flush them onto the screen. When the total time taken by this
+  /// step exceeds the frame slice, a frame is lost.
+  displayRasterizerStatistics,
+  /// Display the rasterizer frame times as they change over a set period of
+  /// time in the form of a graph. The y axis of the graph denotes the total
+  /// time spent by the rasterizer as a fraction of the total frame slice. When
+  /// the bar turns red, a frame is lost.
+  visualizeRasterizerStatistics,
+  /// Display the frame time and FPS at which the interface can construct a
+  /// layer tree for the rasterizer (whose behavior is described above) to
+  /// consume.
+  ///
+  /// This involves all layout, animations, etc. When the total time taken by
+  /// this step exceeds the frame slice, a frame is lost.
+  displayEngineStatistics,
+  /// Display the engine frame times as they change over a set period of time
+  /// in the form of a graph. The y axis of the graph denotes the total time
+  /// spent by the eninge as a fraction of the total frame slice. When the bar
+  /// turns red, a frame is lost.
+  visualizeEngineStatistics,
+}
 
-  RenderStatisticsBox({int optionsMask: 0, int rasterizerThreshold: 0})
+class RenderStatisticsBox extends RenderBox {
+  RenderStatisticsBox({ int optionsMask: 0, int rasterizerThreshold: 0 })
     : _optionsMask = optionsMask,
       _rasterizerThreshold = rasterizerThreshold;
 
-  int _optionsMask;
+  /// The mask is created by shifting 1 by the index of the specific
+  /// StatisticOption to enable.
   int get optionsMask => _optionsMask;
-  void set optionsMask (int mask) {
-    if (mask == _optionsMask) {
+  int _optionsMask;
+  void set optionsMask(int mask) {
+    if (mask == _optionsMask)
       return;
-    }
     _optionsMask = mask;
     markNeedsPaint();
   }
 
-  int _rasterizerThreshold;
   int get rasterizerThreshold => _rasterizerThreshold;
+  int _rasterizerThreshold;
   void set rasterizerThreshold (int threshold) {
-    if  (threshold == _rasterizerThreshold) {
+    if (threshold == _rasterizerThreshold)
       return;
-    }
     _rasterizerThreshold = threshold;
     markNeedsPaint();
   }
@@ -34,27 +63,35 @@ class RenderStatisticsBox extends RenderBox {
   bool get sizedByParent => true;
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
-    return constraints.minWidth;
+    return constraints.constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
-    return constraints.maxWidth;
+    return constraints.constrainWidth(0.0);
+  }
+
+  double get intrinsicHeight {
+    const double kGraphHeight = 80.0; // must match value in statistics_layer.cc
+    double result = 0.0;
+    if ((optionsMask | (1 << StatisticsOption.displayRasterizerStatistics.index) > 0) ||
+        (optionsMask | (1 << StatisticsOption.visualizeRasterizerStatistics.index) > 0))
+      result += kGraphHeight;
+    if ((optionsMask | (1 << StatisticsOption.displayEngineStatistics.index) > 0) ||
+        (optionsMask | (1 << StatisticsOption.visualizeEngineStatistics.index) > 0))
+      result += kGraphHeight;
+    return result;
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
-    return constraints.minHeight;
+    return constraints.constrainHeight(intrinsicHeight);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
-    return constraints.maxHeight;
+    return constraints.constrainHeight(intrinsicHeight);
   }
 
   void performResize() {
-    size = constraints.biggest;
+    size = constraints.constrain(new Size(double.INFINITY, intrinsicHeight));
   }
 
   void paint(PaintingContext context, Offset offset) {

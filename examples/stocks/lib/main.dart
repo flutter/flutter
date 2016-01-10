@@ -40,7 +40,9 @@ class StocksAppState extends State<StocksApp> {
   StockConfiguration _configuration = new StockConfiguration(
     stockMode: StockMode.optimistic,
     backupMode: BackupMode.enabled,
-    showGrid: false
+    debugShowGrid: false,
+    debugShowSizes: false,
+    showRenderingStatistics: false
   );
 
   void initState() {
@@ -98,10 +100,15 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Widget build(BuildContext context) {
+    assert(() {
+      debugPaintSizeEnabled = _configuration.debugShowSizes;
+      return true;
+    });
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
-      debugShowMaterialGrid: _configuration.showGrid,
+      debugShowMaterialGrid: _configuration.debugShowGrid,
+      showRenderingPerformanceOverlay: _configuration.showRenderingStatistics,
       routes: <String, RouteBuilder>{
          '/':         (RouteArguments args) => new StockHome(_stocks, _symbols, _configuration, configurationUpdater),
          '/settings': (RouteArguments args) => new StockSettings(_configuration, configurationUpdater)
