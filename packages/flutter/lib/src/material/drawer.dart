@@ -152,57 +152,59 @@ class DrawerControllerState extends State<DrawerController> {
   }
 
   final AnimatedColorValue _color = new AnimatedColorValue(Colors.transparent, end: Colors.black54);
+  final GlobalKey _gestureDetectorKey = new GlobalKey();
 
   Widget build(BuildContext context) {
-    HitTestBehavior behavior;
-    Widget child;
     if (_performance.status == PerformanceStatus.dismissed) {
-      behavior = HitTestBehavior.translucent;
-      child = new Align(
+      return new Align(
         alignment: const FractionalOffset(0.0, 0.5),
-        widthFactor: 1.0,
-        child: new Container(width: _kEdgeDragWidth)
+        child: new GestureDetector(
+          key: _gestureDetectorKey,
+          onHorizontalDragUpdate: _move,
+          onHorizontalDragEnd: _settle,
+          behavior: HitTestBehavior.translucent,
+          child: new Container(width: _kEdgeDragWidth)
+        )
       );
     } else {
       _performance.updateVariable(_color);
-      child = new RepaintBoundary(
-        child: new Stack(<Widget>[
-          new GestureDetector(
-            onTap: close,
-            child: new DecoratedBox(
-              decoration: new BoxDecoration(
-                backgroundColor: _color.value
-              ),
-              child: new Container()
-            )
-          ),
-          new Align(
-            alignment: const FractionalOffset(0.0, 0.5),
-            child: new Listener(
-              onPointerDown: _handlePointerDown,
-              child: new Align(
-                alignment: const FractionalOffset(1.0, 0.5),
-                widthFactor: _performance.progress,
-                child: new SizeObserver(
-                  onSizeChanged: _handleSizeChanged,
-                  child: new RepaintBoundary(
-                    child: new Focus(
-                      key: new GlobalObjectKey(config.key),
-                      child: config.child
+      return new GestureDetector(
+        key: _gestureDetectorKey,
+        onHorizontalDragUpdate: _move,
+        onHorizontalDragEnd: _settle,
+        child: new RepaintBoundary(
+          child: new Stack(<Widget>[
+            new GestureDetector(
+              onTap: close,
+              child: new DecoratedBox(
+                decoration: new BoxDecoration(
+                  backgroundColor: _color.value
+                ),
+                child: new Container()
+              )
+            ),
+            new Align(
+              alignment: const FractionalOffset(0.0, 0.5),
+              child: new Listener(
+                onPointerDown: _handlePointerDown,
+                child: new Align(
+                  alignment: const FractionalOffset(1.0, 0.5),
+                  widthFactor: _performance.progress,
+                  child: new SizeObserver(
+                    onSizeChanged: _handleSizeChanged,
+                    child: new RepaintBoundary(
+                      child: new Focus(
+                        key: new GlobalObjectKey(config.key),
+                        child: config.child
+                      )
                     )
                   )
                 )
               )
             )
-          )
-        ])
+          ])
+        )
       );
     }
-    return new GestureDetector(
-      onHorizontalDragUpdate: _move,
-      onHorizontalDragEnd: _settle,
-      behavior: behavior,
-      child: child
-    );
   }
 }
