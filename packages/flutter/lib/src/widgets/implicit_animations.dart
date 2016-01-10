@@ -290,3 +290,114 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
       description.add('has height');
   }
 }
+
+/// Animated version of [Positioned] which automatically transitions the child's
+/// position over a given duration whenever the given positon changes.
+///
+/// Only works if it's the child of a [Stack].
+class AnimatedPositioned extends AnimatedWidgetBase {
+  AnimatedPositioned({
+    Key key,
+    this.child,
+    this.left,
+    this.top,
+    this.right,
+    this.bottom,
+    this.width,
+    this.height,
+    Curve curve: Curves.linear,
+    Duration duration
+  }) : super(key: key, curve: curve, duration: duration) {
+    assert(left == null || right == null || width == null);
+    assert(top == null || bottom == null || height == null);
+  }
+
+  AnimatedPositioned.fromRect({
+    Key key,
+    this.child,
+    Rect rect,
+    Curve curve: Curves.linear,
+    Duration duration
+  }) : left = rect.left,
+       top = rect.top,
+       width = rect.width,
+       height = rect.height,
+       right = null,
+       bottom = null,
+       super(key: key, curve: curve, duration: duration);
+
+  final Widget child;
+
+  /// The offset of the child's left edge from the left of the stack.
+  final double left;
+
+  /// The offset of the child's top edge from the top of the stack.
+  final double top;
+
+  /// The offset of the child's right edge from the right of the stack.
+  final double right;
+
+  /// The offset of the child's bottom edge from the bottom of the stack.
+  final double bottom;
+
+  /// The child's width.
+  ///
+  /// Only two out of the three horizontal values (left, right, width) can be
+  /// set. The third must be null.
+  final double width;
+
+  /// The child's height.
+  ///
+  /// Only two out of the three vertical values (top, bottom, height) can be
+  /// set. The third must be null.
+  final double height;
+
+  _AnimatedPositionedState createState() => new _AnimatedPositionedState();
+}
+
+class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositioned> {
+  AnimatedValue<double> _left;
+  AnimatedValue<double> _top;
+  AnimatedValue<double> _right;
+  AnimatedValue<double> _bottom;
+  AnimatedValue<double> _width;
+  AnimatedValue<double> _height;
+
+  void forEachVariable(VariableVisitor visitor) {
+    // TODO(ianh): Use constructor tear-offs when it becomes possible
+    _left = visitor(_left, config.left, (dynamic value) => new AnimatedValue<double>(value));
+    _top = visitor(_top, config.top, (dynamic value) => new AnimatedValue<double>(value));
+    _right = visitor(_right, config.right, (dynamic value) => new AnimatedValue<double>(value));
+    _bottom = visitor(_bottom, config.bottom, (dynamic value) => new AnimatedValue<double>(value));
+    _width = visitor(_width, config.width, (dynamic value) => new AnimatedValue<double>(value));
+    _height = visitor(_height, config.height, (dynamic value) => new AnimatedValue<double>(value));
+  }
+
+  Widget build(BuildContext context) {
+    return new Positioned(
+      child: config.child,
+      left: _left?.value,
+      top: _top?.value,
+      right: _right?.value,
+      bottom: _bottom?.value,
+      width: _width?.value,
+      height: _height?.value
+    );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (_left != null)
+      description.add('has left');
+    if (_top != null)
+      description.add('has top');
+    if (_right != null)
+      description.add('has right');
+    if (_bottom != null)
+      description.add('has bottom');
+    if (_width != null)
+      description.add('has width');
+    if (_height != null)
+      description.add('has height');
+  }
+}
