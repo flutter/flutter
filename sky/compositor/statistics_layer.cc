@@ -66,7 +66,7 @@ void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
   using Opt = CompositorOptions::Option;
 
   SkScalar width = has_paint_bounds() ? paint_bounds().width() : 0;
-  SkAutoCanvasRestore save(&frame.canvas(), false);
+  SkAutoCanvasRestore save(&frame.canvas(), true);
 
   VisualizeStopWatch(frame.canvas(), frame.context().frame_time(), width,
                      options_.isEnabled(Opt::VisualizeRasterizerStatistics),
