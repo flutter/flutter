@@ -226,7 +226,11 @@ class AnimatedRelativeRectValue extends AnimatedValue<RelativeRect> {
   RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
 }
 
-/// Animated version of [Positioned].
+/// Animated version of [Positioned] which takes a specific
+/// [AnimatedRelativeRectValue] and a [PerformanceView] to transition the
+/// child's position from a start position to and end position over the lifetime
+/// of the performance.
+///
 /// Only works if it's the child of a [Stack].
 class PositionedTransition extends TransitionWithChild {
   PositionedTransition({

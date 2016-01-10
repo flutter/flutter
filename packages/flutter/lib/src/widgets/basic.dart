@@ -1023,15 +1023,15 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
   Positioned({
     Key key,
     Widget child,
+    this.left,
     this.top,
     this.right,
     this.bottom,
-    this.left,
     this.width,
     this.height
   }) : super(key: key, child: child) {
-    assert(top == null || bottom == null || height == null);
     assert(left == null || right == null || width == null);
+    assert(top == null || bottom == null || height == null);
   }
 
   Positioned.fromRect({
@@ -1046,6 +1046,9 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
        bottom = null,
        super(key: key, child: child);
 
+  /// The offset of the child's left edge from the left of the stack.
+  final double left;
+
   /// The offset of the child's top edge from the top of the stack.
   final double top;
 
@@ -1055,23 +1058,27 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
   /// The offset of the child's bottom edge from the bottom of the stack.
   final double bottom;
 
-  /// The offset of the child's left edge from the left of the stack.
-  final double left;
-
   /// The child's width.
   ///
-  /// Ignored if both left and right are non-null.
+  /// Only two out of the three horizontal values (left, right, width) can be
+  /// set. The third must be null.
   final double width;
 
   /// The child's height.
   ///
-  /// Ignored if both top and bottom are non-null.
+  /// Only two out of the three vertical values (top, bottom, height) can be
+  /// set. The third must be null.
   final double height;
 
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
     final StackParentData parentData = renderObject.parentData;
     bool needsLayout = false;
+
+    if (parentData.left != left) {
+      parentData.left = left;
+      needsLayout = true;
+    }
 
     if (parentData.top != top) {
       parentData.top = top;
@@ -1085,11 +1092,6 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
 
     if (parentData.bottom != bottom) {
       parentData.bottom = bottom;
-      needsLayout = true;
-    }
-
-    if (parentData.left != left) {
-      parentData.left = left;
       needsLayout = true;
     }
 

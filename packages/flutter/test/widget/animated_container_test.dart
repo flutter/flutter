@@ -30,7 +30,7 @@ void main() {
         )
       );
 
-      RenderDecoratedBox box = key.currentState.context.findRenderObject();
+      RenderDecoratedBox box = key.currentContext.findRenderObject();
       actualDecoration = box.decoration;
       expect(actualDecoration.backgroundColor, equals(decorationA.backgroundColor));
 
@@ -42,7 +42,7 @@ void main() {
         )
       );
 
-      expect(key.currentState.context.findRenderObject(), equals(box));
+      expect(key.currentContext.findRenderObject(), equals(box));
       actualDecoration = box.decoration;
       expect(actualDecoration.backgroundColor, equals(decorationA.backgroundColor));
 
