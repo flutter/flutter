@@ -7,22 +7,22 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 /// Displays performance statistics.
-class StatisticsOverlay extends LeafRenderObjectWidget {
+class PerformanceOverlay extends LeafRenderObjectWidget {
   // TODO(abarth): We should have a page on the web site with a screenshot and
   // an explanation of all the various readouts.
 
-  /// Create a statistics overlay that only displays specific statistics. The
+  /// Create a performance overlay that only displays specific statistics. The
   /// mask is created by shifting 1 by the index of the specific
   /// [StatisticOption] to enable.
-  StatisticsOverlay({ this.optionsMask, this.rasterizerThreshold: 0, Key key }) : super(key: key);
+  PerformanceOverlay({ this.optionsMask, this.rasterizerThreshold: 0, Key key }) : super(key: key);
 
-  /// Create a statistics overaly that displays all available statistics
-  StatisticsOverlay.allEnabled({ Key key, this.rasterizerThreshold: 0 })
+  /// Create a performance overlay that displays all available statistics
+  PerformanceOverlay.allEnabled({ Key key, this.rasterizerThreshold: 0 })
     : optionsMask = (
-        1 << StatisticsOption.displayRasterizerStatistics.index |
-        1 << StatisticsOption.visualizeRasterizerStatistics.index |
-        1 << StatisticsOption.displayEngineStatistics.index |
-        1 << StatisticsOption.visualizeEngineStatistics.index
+        1 << PerformanceOverlayOption.displayRasterizerStatistics.index |
+        1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index |
+        1 << PerformanceOverlayOption.displayEngineStatistics.index |
+        1 << PerformanceOverlayOption.visualizeEngineStatistics.index
       ),
       super(key: key);
 
@@ -51,17 +51,17 @@ class StatisticsOverlay extends LeafRenderObjectWidget {
   /// the instrumentation available in observatory.
   ///
   /// To decide what threshold interval to use, count the number of horizontal
-  /// lines displayed in the statistics overlay for the rasterizer (not the
+  /// lines displayed in the performance overlay for the rasterizer (not the
   /// engine). That should give an idea of how often frames are skipped (and by
   /// how many frame intervals).
   final int rasterizerThreshold;
 
-  RenderStatisticsBox createRenderObject() => new RenderStatisticsBox(
+  RenderPerformanceOverlay createRenderObject() => new RenderPerformanceOverlay(
     optionsMask: optionsMask,
     rasterizerThreshold: rasterizerThreshold
   );
 
-  void updateRenderObject(RenderStatisticsBox renderObject, RenderObjectWidget oldWidget) {
+  void updateRenderObject(RenderPerformanceOverlay renderObject, RenderObjectWidget oldWidget) {
     renderObject.optionsMask = optionsMask;
     renderObject.rasterizerThreshold = rasterizerThreshold;
   }

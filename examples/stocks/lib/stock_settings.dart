@@ -31,8 +31,8 @@ class StockSettingsState extends State<StockSettings> {
     sendUpdates(config.configuration.copyWith(debugShowSizes: value));
   }
 
-  void _handleShowRenderingStatisticsChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(showRenderingStatistics: value));
+  void _handleShowPerformanceOverlayChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(showPerformanceOverlay: value));
   }
 
   void _confirmOptimismChange() {
@@ -103,12 +103,12 @@ class StockSettingsState extends State<StockSettings> {
       ),
       new DrawerItem(
         icon: 'action/picture_in_picture',
-        onPressed: () { _handleShowRenderingStatisticsChanged(!config.configuration.showRenderingStatistics); },
+        onPressed: () { _handleShowPerformanceOverlayChanged(!config.configuration.showPerformanceOverlay); },
         child: new Row(<Widget>[
           new Flexible(child: new Text('Show rendering performance overlay')),
           new Switch(
-            value: config.configuration.showRenderingStatistics,
-            onChanged: _handleShowRenderingStatisticsChanged
+            value: config.configuration.showPerformanceOverlay,
+            onChanged: _handleShowPerformanceOverlayChanged
           ),
         ])
       ),

@@ -49,12 +49,12 @@ class MaterialApp extends StatefulComponent {
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.debugShowMaterialGrid: false,
-    this.showRenderingPerformanceOverlay: false
+    this.showPerformanceOverlay: false
   }) : super(key: key) {
     assert(routes != null);
     assert(routes.containsKey(Navigator.defaultRouteName) || onGenerateRoute != null);
     assert(debugShowMaterialGrid != null);
-    assert(showRenderingPerformanceOverlay != null);
+    assert(showPerformanceOverlay != null);
   }
 
   final String title;
@@ -63,7 +63,7 @@ class MaterialApp extends StatefulComponent {
   final RouteFactory onGenerateRoute;
   final LocaleChangedCallback onLocaleChanged;
   final bool debugShowMaterialGrid;
-  final bool showRenderingPerformanceOverlay;
+  final bool showPerformanceOverlay;
 
   _MaterialAppState createState() => new _MaterialAppState();
 }
@@ -174,10 +174,10 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
       }
       return true;
     });
-    if (config.showRenderingPerformanceOverlay) {
+    if (config.showPerformanceOverlay) {
       result = new Stack([
         result,
-        new Positioned(bottom: 0.0, left: 0.0, right: 0.0, child: new StatisticsOverlay.allEnabled()),
+        new Positioned(bottom: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
       ]);
     }
     return result;

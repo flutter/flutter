@@ -128,9 +128,9 @@ class PictureLayer extends Layer {
 }
 
 /// A layer that indicates to the compositor that it should display
-/// certain statistics within it
-class StatisticsLayer extends Layer {
-  StatisticsLayer({
+/// certain performance statistics within it.
+class PerformanceOverlayLayer extends Layer {
+  PerformanceOverlayLayer({
     Offset offset: Offset.zero,
     this.paintBounds,
     this.optionsMask,
@@ -147,7 +147,7 @@ class StatisticsLayer extends Layer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
-    builder.addStatistics(optionsMask, paintBounds.shift(offset + layerOffset));
+    builder.addPerformanceOverlay(optionsMask, paintBounds.shift(offset + layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
   }
 }
