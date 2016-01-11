@@ -127,7 +127,7 @@ void main() {
           left: new MixedViewport(
             builder: itemBuilder,
             startOffset: offset,
-            direction: ScrollDirection.horizontal
+            direction: Axis.horizontal
           ),
           right: new Text('Not Today')
         );

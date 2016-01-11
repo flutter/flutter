@@ -41,7 +41,7 @@ class HorizontalScrollingApp extends StatelessComponent {
     return new Center(
       child: new Container(
         height: 50.0,
-        child: new Block(circles, scrollDirection: ScrollDirection.horizontal)
+        child: new Block(circles, scrollDirection: Axis.horizontal)
       )
     );
   }

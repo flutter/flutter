@@ -17,7 +17,7 @@ abstract class _ViewportBase extends RenderObjectWidget {
     this.builder,
     this.itemsWrap: false,
     this.itemCount,
-    this.direction: ScrollDirection.vertical,
+    this.direction: Axis.vertical,
     this.startOffset: 0.0,
     this.overlayPainter
   }) : super(key: key);
@@ -25,7 +25,7 @@ abstract class _ViewportBase extends RenderObjectWidget {
   final ListBuilder builder;
   final bool itemsWrap;
   final int itemCount;
-  final ScrollDirection direction;
+  final Axis direction;
   final double startOffset;
   final Painter overlayPainter;
 
@@ -112,7 +112,7 @@ abstract class _ViewportBaseElement<T extends _ViewportBase> extends RenderObjec
   }
 
   double getMaxCrossAxisExtent(BoxConstraints constraints) {
-    if (widget.direction == ScrollDirection.vertical)
+    if (widget.direction == Axis.vertical)
       return constraints.maxWidth;
     return constraints.maxHeight;
   }
@@ -141,7 +141,7 @@ class HomogeneousViewport extends _ViewportBase {
     ListBuilder builder,
     bool itemsWrap: false,
     int itemCount, // optional, but you cannot shrink-wrap this class or otherwise use its intrinsic dimensions if you don't specify it
-    ScrollDirection direction: ScrollDirection.vertical,
+    Axis direction: Axis.vertical,
     double startOffset: 0.0,
     Painter overlayPainter,
     this.itemExtent // required, must be non-zero
@@ -180,7 +180,7 @@ class _HomogeneousViewportElement extends _ViewportBaseElement<HomogeneousViewpo
     // be ok because we are exempt from that assert since we are still actively
     // doing our own layout.)
     BuildableElement.lockState(() {
-      double mainAxisExtent = widget.direction == ScrollDirection.vertical ? constraints.maxHeight : constraints.maxWidth;
+      double mainAxisExtent = widget.direction == Axis.vertical ? constraints.maxHeight : constraints.maxWidth;
       double offset;
       if (widget.startOffset <= 0.0 && !widget.itemsWrap) {
         _layoutFirstIndex = 0;

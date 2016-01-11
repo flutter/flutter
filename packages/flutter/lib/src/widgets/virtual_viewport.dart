@@ -13,7 +13,7 @@ typedef void ExtentsChangedCallback(double contentExtent, double containerExtent
 
 abstract class VirtualViewport extends RenderObjectWidget {
   double get startOffset;
-  ScrollDirection get scrollDirection;
+  Axis get scrollDirection;
   Iterable<Widget> get children;
 }
 
@@ -64,10 +64,10 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
 
   void _updatePaintOffset() {
     switch (widget.scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         renderObject.paintOffset = new Offset(0.0, paintOffset);
         break;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         renderObject.paintOffset = new Offset(paintOffset, 0.0);
         break;
     }

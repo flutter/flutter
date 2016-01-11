@@ -9,17 +9,8 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'object.dart';
 
-/// The direction in which to scroll
-enum ScrollDirection {
-  /// Scroll left and right
-  horizontal,
-
-  /// Scroll up and down
-  vertical,
-}
-
 abstract class HasScrollDirection {
-  ScrollDirection get scrollDirection;
+  Axis get scrollDirection;
 }
 
 /// A render object that's bigger on the inside.
@@ -37,18 +28,18 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   RenderViewport({
     RenderBox child,
     Offset scrollOffset: Offset.zero,
-    ScrollDirection scrollDirection: ScrollDirection.vertical
+    Axis scrollDirection: Axis.vertical
   }) : _scrollOffset = scrollOffset,
        _scrollDirection = scrollDirection {
     assert(_offsetIsSane(scrollOffset, scrollDirection));
     this.child = child;
   }
 
-  bool _offsetIsSane(Offset offset, ScrollDirection direction) {
+  bool _offsetIsSane(Offset offset, Axis direction) {
     switch (direction) {
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return offset.dy == 0.0;
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return offset.dx == 0.0;
     }
   }
@@ -71,9 +62,9 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   /// If the viewport is scrollable in a particular direction (e.g., vertically),
   /// the child is given layout constraints that are fully unconstrainted in
   /// that direction (e.g., the child can be as tall as it wants).
-  ScrollDirection get scrollDirection => _scrollDirection;
-  ScrollDirection _scrollDirection;
-  void set scrollDirection(ScrollDirection value) {
+  Axis get scrollDirection => _scrollDirection;
+  Axis _scrollDirection;
+  void set scrollDirection(Axis value) {
     if (value == _scrollDirection)
       return;
     assert(_offsetIsSane(scrollOffset, value));
@@ -84,10 +75,10 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     BoxConstraints innerConstraints;
     switch (scrollDirection) {
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         innerConstraints = constraints.heightConstraints();
         break;
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         innerConstraints = constraints.widthConstraints();
         break;
     }

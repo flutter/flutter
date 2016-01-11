@@ -31,7 +31,7 @@ class ScrollbarPainter extends ScrollableListPainter {
     Size thumbSize;
 
     switch (scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         double thumbHeight = viewportBounds.height * viewportBounds.height / contentExtent;
         thumbHeight = thumbHeight.clamp(_kMinScrollbarThumbLength, viewportBounds.height);
         final double maxThumbTop = viewportBounds.height - thumbHeight;
@@ -40,7 +40,7 @@ class ScrollbarPainter extends ScrollableListPainter {
         thumbOrigin = new Point(viewportBounds.right - _kScrollbarThumbGirth, thumbTop);
         thumbSize = new Size(_kScrollbarThumbGirth, thumbHeight);
         break;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         double thumbWidth = viewportBounds.width * viewportBounds.width / contentExtent;
         thumbWidth = thumbWidth.clamp(_kMinScrollbarThumbLength, viewportBounds.width);
         final double maxThumbLeft = viewportBounds.width - thumbWidth;

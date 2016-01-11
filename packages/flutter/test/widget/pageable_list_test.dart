@@ -26,7 +26,7 @@ Widget buildFrame({ List<int> pages: defaultPages }) {
   final list = new PageableList(
     children: pages.map(buildPage),
     itemsWrap: itemsWrap,
-    scrollDirection: ScrollDirection.horizontal,
+    scrollDirection: Axis.horizontal,
     onPageChanged: (int page) { currentPage = page; }
   );
 

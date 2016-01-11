@@ -11,7 +11,7 @@ const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 Widget buildFrame() {
   return new ScrollableList(
     itemExtent: 290.0,
-    scrollDirection: ScrollDirection.vertical,
+    scrollDirection: Axis.vertical,
     children: items.map((int item) {
       return new Container(
         child: new Text('$item')

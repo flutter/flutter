@@ -20,7 +20,7 @@ void main() {
           child: new ScrollableList(
             key: new GlobalKey(),
             itemExtent: 290.0,
-            scrollDirection: ScrollDirection.horizontal,
+            scrollDirection: Axis.horizontal,
             children: items.map((int item) {
               return new Container(
                 child: new GestureDetector(
@@ -60,7 +60,7 @@ void main() {
           child: new ScrollableList(
             key: new GlobalKey(),
             itemExtent: 290.0,
-            scrollDirection: ScrollDirection.vertical,
+            scrollDirection: Axis.vertical,
             children: items.map((int item) {
               return new Container(
                 child: new GestureDetector(

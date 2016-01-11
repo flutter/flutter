@@ -44,7 +44,7 @@ class _MaterialListState extends State<MaterialList> {
   Widget build(BuildContext context) {
     return new ScrollableList(
       initialScrollOffset: config.initialScrollOffset,
-      scrollDirection: ScrollDirection.vertical,
+      scrollDirection: Axis.vertical,
       onScroll: config.onScroll,
       itemExtent: _kItemExtent[config.type],
       padding: const EdgeDims.symmetric(vertical: 8.0),

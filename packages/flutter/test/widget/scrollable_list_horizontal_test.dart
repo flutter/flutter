@@ -15,7 +15,7 @@ Widget buildFrame() {
       height: 50.0,
       child: new ScrollableList(
         itemExtent: 290.0,
-        scrollDirection: ScrollDirection.horizontal,
+        scrollDirection: Axis.horizontal,
         children: items.map((int item) {
           return new Container(
             child: new Text('$item')

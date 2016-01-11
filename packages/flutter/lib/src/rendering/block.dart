@@ -32,7 +32,7 @@ abstract class RenderBlockBase extends RenderBox
 
   RenderBlockBase({
     List<RenderBox> children,
-    ScrollDirection direction: ScrollDirection.vertical,
+    Axis direction: Axis.vertical,
     double itemExtent,
     double minExtent: 0.0
   }) : _direction = direction, _itemExtent = itemExtent, _minExtent = minExtent {
@@ -45,9 +45,9 @@ abstract class RenderBlockBase extends RenderBox
   }
 
   /// The direction to use as the main axis.
-  ScrollDirection get direction => _direction;
-  ScrollDirection _direction;
-  void set direction (ScrollDirection value) {
+  Axis get direction => _direction;
+  Axis _direction;
+  void set direction (Axis value) {
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
@@ -75,9 +75,9 @@ abstract class RenderBlockBase extends RenderBox
   }
 
   /// Whether the main axis is vertical.
-  bool get isVertical => _direction == ScrollDirection.vertical;
+  bool get isVertical => _direction == Axis.vertical;
 
-  ScrollDirection get scrollDirection => _direction;
+  Axis get scrollDirection => _direction;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     if (isVertical)
@@ -126,7 +126,7 @@ class RenderBlock extends RenderBlockBase {
 
   RenderBlock({
     List<RenderBox> children,
-    ScrollDirection direction: ScrollDirection.vertical,
+    Axis direction: Axis.vertical,
     double itemExtent,
     double minExtent: 0.0
   }) : super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
@@ -242,7 +242,7 @@ class RenderBlockViewport extends RenderBlockBase {
     ExtentCallback maxCrossAxisDimensionCallback,
     ExtentCallback minCrossAxisDimensionCallback,
     Painter overlayPainter,
-    ScrollDirection direction: ScrollDirection.vertical,
+    Axis direction: Axis.vertical,
     double itemExtent,
     double minExtent: 0.0,
     double startOffset: 0.0,

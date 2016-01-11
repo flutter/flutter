@@ -18,7 +18,7 @@ class MixedViewport extends RenderObjectWidget {
   MixedViewport({
     Key key,
     this.startOffset: 0.0,
-    this.direction: ScrollDirection.vertical,
+    this.direction: Axis.vertical,
     this.builder,
     this.token,
     this.onExtentsUpdate,
@@ -26,7 +26,7 @@ class MixedViewport extends RenderObjectWidget {
   }) : super(key: key);
 
   final double startOffset;
-  final ScrollDirection direction;
+  final Axis direction;
   final IndexedBuilder builder;
   final Object token; // change this if the list changed (i.e. there are added, removed, or resorted items)
   final ExtentsUpdateCallback onExtentsUpdate;
@@ -315,18 +315,18 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
   double _getElementExtent(Element element, BoxConstraints innerConstraints) {
     final RenderBox childRenderObject = element.renderObject;
     switch (widget.direction) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return childRenderObject.getMaxIntrinsicHeight(innerConstraints);
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return childRenderObject.getMaxIntrinsicWidth(innerConstraints);
     }
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     switch (widget.direction) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return new BoxConstraints.tightFor(width: constraints.constrainWidth());
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return new BoxConstraints.tightFor(height: constraints.constrainHeight());
     }
   }
@@ -353,14 +353,14 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     // Establish the start and end offsets based on our current constraints.
     double extent;
     switch (widget.direction) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         extent = constraints.maxHeight;
         assert(extent < double.INFINITY &&
           'There is no point putting a lazily-built vertical MixedViewport inside a box with infinite internal ' +
           'height (e.g. inside something else that scrolls vertically), because it would then just eagerly build ' +
           'all the children. You probably want to put the MixedViewport inside a Container with a fixed height.' is String);
         break;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         extent = constraints.maxWidth;
         assert(extent < double.INFINITY &&
           'There is no point putting a lazily-built horizontal MixedViewport inside a box with infinite internal ' +

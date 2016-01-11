@@ -18,7 +18,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
     EdgeDims padding,
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
-    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    Axis scrollDirection: Axis.vertical,
     LayoutCallback callback
   }) : _itemExtent = itemExtent,
        _padding = padding,
@@ -50,9 +50,9 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
     markNeedsLayout();
   }
 
-  ScrollDirection get scrollDirection => _scrollDirection;
-  ScrollDirection _scrollDirection;
-  void set scrollDirection (ScrollDirection newValue) {
+  Axis get scrollDirection => _scrollDirection;
+  Axis _scrollDirection;
+  void set scrollDirection (Axis newValue) {
     if (_scrollDirection == newValue)
       return;
     _scrollDirection = newValue;
@@ -66,9 +66,9 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
 
   double get _scrollAxisPadding {
     switch (scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return padding.vertical;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return padding.horizontal;
     }
   }
@@ -85,9 +85,9 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
   double _getIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.isNormalized);
     switch (scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return constraints.constrainWidth(0.0);
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return constraints.constrainWidth(_preferredExtent);
     }
   }
@@ -103,9 +103,9 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
   double _getIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.isNormalized);
     switch (scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return constraints.constrainHeight(_preferredExtent);
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return constraints.constrainHeight(0.0);
     }
   }
@@ -120,11 +120,11 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
 
   void performLayout() {
     switch (scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         size = new Size(constraints.maxWidth,
                         constraints.constrainHeight(_preferredExtent));
         break;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         size = new Size(constraints.constrainWidth(_preferredExtent),
                         constraints.maxHeight);
         break;
@@ -143,13 +143,13 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
     double dy = 0.0;
 
     switch (scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         itemWidth = math.max(0, size.width - (padding == null ? 0.0 : padding.horizontal));
         itemHeight = itemExtent ?? size.height;
         y = padding != null ? padding.top : 0.0;
         dy = itemHeight;
         break;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         itemWidth = itemExtent ?? size.width;
         itemHeight = math.max(0, size.height - (padding == null ? 0.0 : padding.vertical));
         x = padding != null ? padding.left : 0.0;
