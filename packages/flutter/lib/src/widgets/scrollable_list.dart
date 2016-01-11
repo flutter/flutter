@@ -41,10 +41,10 @@ class ScrollableList extends Scrollable {
   final ScrollableListPainter scrollableListPainter;
   final Iterable<Widget> children;
 
-  ScrollableState createState() => new _ScrollableList2State();
+  ScrollableState createState() => new _ScrollableListState();
 }
 
-class _ScrollableList2State extends ScrollableState<ScrollableList> {
+class _ScrollableListState extends ScrollableState<ScrollableList> {
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
