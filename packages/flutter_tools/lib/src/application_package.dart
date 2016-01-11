@@ -98,13 +98,11 @@ class ApplicationPackageStore {
 
         case TargetPlatform.iOS:
           assert(iOS == null);
-          assert(config.type != BuildType.prebuilt);
           iOS = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
           break;
 
         case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
-          assert(config.type != BuildType.prebuilt);
           iOSSimulator = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
           break;
 
