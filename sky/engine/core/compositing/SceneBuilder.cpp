@@ -13,7 +13,7 @@
 #include "sky/compositor/container_layer.h"
 #include "sky/compositor/opacity_layer.h"
 #include "sky/compositor/picture_layer.h"
-#include "sky/compositor/statistics_layer.h"
+#include "sky/compositor/performance_overlay_layer.h"
 #include "sky/compositor/transform_layer.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
@@ -47,7 +47,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushColorFilter) \
   V(SceneBuilder, pop) \
   V(SceneBuilder, addPicture) \
-  V(SceneBuilder, addStatistics) \
+  V(SceneBuilder, addPerformanceOverlay) \
   V(SceneBuilder, setRasterizerTracingThreshold) \
   V(SceneBuilder, build)
 
@@ -150,11 +150,11 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture, const Rect
     m_currentLayer->Add(std::move(layer));
 }
 
-void SceneBuilder::addStatistics(uint64_t enabledOptions, const Rect& bounds)
+void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions, const Rect& bounds)
 {
     if (!m_currentLayer)
         return;
-    std::unique_ptr<sky::compositor::StatisticsLayer> layer(new sky::compositor::StatisticsLayer(enabledOptions));
+    std::unique_ptr<sky::compositor::PerformanceOverlayLayer> layer(new sky::compositor::PerformanceOverlayLayer(enabledOptions));
     if (!bounds.is_null)
       layer->set_paint_bounds(bounds.sk_rect);
     m_currentLayer->Add(std::move(layer));
