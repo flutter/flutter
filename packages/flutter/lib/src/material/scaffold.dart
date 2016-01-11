@@ -314,7 +314,7 @@ class ScaffoldState extends State<Scaffold> {
       if (_currentBottomSheet != null)
         bottomSheets.add(_currentBottomSheet._widget);
       Widget stack = new Stack(
-        bottomSheets,
+        children: bottomSheets,
         alignment: const FractionalOffset(0.5, 1.0) // bottom-aligned, centered
       );
       _addIfNonNull(children, stack, _Child.bottomSheet);
@@ -335,7 +335,7 @@ class ScaffoldState extends State<Scaffold> {
       ));
     }
 
-    return new CustomMultiChildLayout(children, delegate: new _ScaffoldLayout());
+    return new CustomMultiChildLayout(children: children, delegate: new _ScaffoldLayout());
   }
 }
 

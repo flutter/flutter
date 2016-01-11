@@ -31,15 +31,17 @@ class DrawerHeader extends StatelessComponent {
       ),
       padding: const EdgeDims.only(bottom: 7.0),
       margin: const EdgeDims.only(bottom: 8.0),
-      child: new Column(<Widget>[
-        new Flexible(child: new Container()),
-        new Container(
-          padding: const EdgeDims.symmetric(horizontal: 16.0),
-          child: new DefaultTextStyle(
-            style: Theme.of(context).text.body2,
-            child: child
+      child: new Column(
+        children: <Widget>[
+          new Flexible(child: new Container()),
+          new Container(
+            padding: const EdgeDims.symmetric(horizontal: 16.0),
+            child: new DefaultTextStyle(
+              style: Theme.of(context).text.body2,
+              child: child
+            )
           )
-        )]
+        ]
       )
     );
   }

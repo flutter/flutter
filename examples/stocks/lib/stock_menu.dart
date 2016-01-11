@@ -19,7 +19,8 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
     items: <PopupMenuItem>[
       new PopupMenuItem(
         value: _MenuItems.autorefresh,
-        child: new Row(<Widget>[
+        child: new Row(
+          children: <Widget>[
             new Flexible(child: new Text('Autorefresh')),
             new StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
@@ -75,16 +76,18 @@ Future showStockMenu({BuildContext context, bool autorefresh, ValueChanged<bool>
           content: new Text('This feature has not yet been implemented.'),
           actions: <Widget>[
             new FlatButton(
-              child: new Row(<Widget>[
-                new Icon(
-                  icon: 'device/dvr',
-                  size: IconSize.s18
-                ),
-                new Container(
-                  width: 8.0
-                ),
-                new Text('DUMP APP TO CONSOLE'),
-              ]),
+              child: new Row(
+                children: <Widget>[
+                  new Icon(
+                    icon: 'device/dvr',
+                    size: IconSize.s18
+                  ),
+                  new Container(
+                    width: 8.0
+                  ),
+                  new Text('DUMP APP TO CONSOLE'),
+                ]
+              ),
               onPressed: () { debugDumpApp(); }
             ),
             new FlatButton(

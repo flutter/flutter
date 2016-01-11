@@ -12,13 +12,13 @@ import '../rendering/rendering_tester.dart';
 void main() {
   test('Can construct an empty Stack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Stack(<Widget>[]));
+      tester.pumpWidget(new Stack());
     });
   });
 
   test('Can construct an empty Centered Stack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Center(child: new Stack(<Widget>[])));
+      tester.pumpWidget(new Center(child: new Stack()));
     });
   });
 
@@ -27,16 +27,18 @@ void main() {
       Key key = new Key('container');
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            left: 10.0,
-            child: new Container(
-              key: key,
-              width: 10.0,
-              height: 10.0
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              left: 10.0,
+              child: new Container(
+                key: key,
+                width: 10.0,
+                height: 10.0
+              )
             )
-          )
-        ])
+          ]
+        )
       );
 
       Element container;
@@ -52,16 +54,18 @@ void main() {
       expect(parentData.height, isNull);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            right: 10.0,
-            child: new Container(
-              key: key,
-              width: 10.0,
-              height: 10.0
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              right: 10.0,
+              child: new Container(
+                key: key,
+                width: 10.0,
+                height: 10.0
+              )
             )
-          )
-        ])
+          ]
+        )
       );
 
       container = tester.findElementByKey(key);
@@ -80,7 +84,7 @@ void main() {
       Key key = new Key('container');
       Container container = new Container(key: key, width: 10.0, height: 10.0);
 
-      tester.pumpWidget(new Stack(<Widget>[ new Positioned(left: 10.0, child: container) ]));
+      tester.pumpWidget(new Stack(children: <Widget>[ new Positioned(left: 10.0, child: container) ]));
       Element containerElement = tester.findElementByKey(key);
 
       StackParentData parentData;
@@ -92,7 +96,7 @@ void main() {
       expect(parentData.width, isNull);
       expect(parentData.height, isNull);
 
-      tester.pumpWidget(new Stack(<Widget>[ container ]));
+      tester.pumpWidget(new Stack(children: <Widget>[ container ]));
       containerElement = tester.findElementByKey(key);
 
       parentData = containerElement.renderObject.parentData;
@@ -112,7 +116,8 @@ void main() {
 
       tester.pumpWidget(
         new Center(
-          child: new Stack(<Widget>[
+          child: new Stack(
+            children: <Widget>[
               new Container(key: child0Key, width: 20.0, height: 20.0),
               new Container(key: child1Key, width: 10.0, height: 10.0)
             ],
@@ -133,13 +138,13 @@ void main() {
 
   test('Can construct an empty IndexedStack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new IndexedStack(<Widget>[]));
+      tester.pumpWidget(new IndexedStack());
     });
   });
 
   test('Can construct an empty Centered IndexedStack', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Center(child: new IndexedStack(<Widget>[])));
+      tester.pumpWidget(new Center(child: new IndexedStack()));
     });
   });
 
@@ -158,7 +163,7 @@ void main() {
             )
           );
         });
-        return new Center(child: new IndexedStack(items, index: index));
+        return new Center(child: new IndexedStack(children: items, index: index));
       }
 
       tester.pumpWidget(buildFrame(0));
@@ -186,7 +191,7 @@ void main() {
         List<Widget> items = new List<Widget>.generate(itemCount, (i) {
           return new GestureDetector(child: new Text('$i'), onTap: () { itemsTapped.add(i); });
         });
-        return new Center(child: new IndexedStack(items, key: key, index: index));
+        return new Center(child: new IndexedStack(children: items, key: key, index: index));
       }
 
       tester.pumpWidget(buildFrame(0));
@@ -210,14 +215,16 @@ void main() {
       );
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            left: 10.0,
-            width: 11.0,
-            height: 12.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecoration)
-          )
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              left: 10.0,
+              width: 11.0,
+              height: 12.0,
+              child: new DecoratedBox(key: key, decoration: kBoxDecoration)
+            )
+          ]
+        )
       );
 
       Element box;
@@ -239,14 +246,16 @@ void main() {
       expect(renderBox.size.height, equals(12.0));
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            right: 10.0,
-            width: 11.0,
-            height: 12.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecoration)
-          )
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              right: 10.0,
+              width: 11.0,
+              height: 12.0,
+              child: new DecoratedBox(key: key, decoration: kBoxDecoration)
+            )
+          ]
+        )
       );
 
       box = tester.findElementByKey(key);

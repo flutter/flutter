@@ -35,7 +35,7 @@ class MealRow extends FitnessItemRow {
       )
     ];
     return new Row(
-      children,
+      children: children,
       alignItems: FlexAlignItems.baseline,
       textBaseline: DefaultTextStyle.of(context).textBaseline
     );

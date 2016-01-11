@@ -46,9 +46,9 @@ class DrawerItem extends StatelessComponent {
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
 
-    List<Widget> flexChildren = new List<Widget>();
+    List<Widget> children = <Widget>[];
     if (icon != null) {
-      flexChildren.add(
+      children.add(
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(
@@ -58,7 +58,7 @@ class DrawerItem extends StatelessComponent {
         )
       );
     }
-    flexChildren.add(
+    children.add(
       new Flexible(
         child: new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
@@ -74,7 +74,7 @@ class DrawerItem extends StatelessComponent {
       height: 48.0,
       child: new InkWell(
         onTap: onPressed,
-        child: new Row(flexChildren)
+        child: new Row(children: children)
       )
     );
   }

@@ -17,7 +17,8 @@ class Field extends StatelessComponent {
   final String placeholder;
 
   Widget build(BuildContext context) {
-    return new Row(<Widget>[
+    return new Row(
+      children: <Widget>[
         new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(icon: icon)

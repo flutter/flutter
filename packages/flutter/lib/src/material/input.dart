@@ -134,7 +134,7 @@ class InputState extends ScrollableState<Input> {
       child: new SizeObserver(
         onSizeChanged: _handleContainerSizeChanged,
         child: new Container(
-          child: new Stack(textChildren),
+          child: new Stack(children: textChildren),
           margin: config.isDense ?
             const EdgeDims.symmetric(vertical: 4.0) :
             const EdgeDims.symmetric(vertical: 8.0),

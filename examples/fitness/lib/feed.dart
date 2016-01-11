@@ -35,7 +35,7 @@ class DialogMenuItem extends StatelessComponent {
         onTap: onPressed,
         child: new Padding(
           padding: const EdgeDims.symmetric(horizontal: 16.0),
-          child: new Row(children)
+          child: new Row(children: children)
         )
       )
     );
@@ -163,7 +163,7 @@ class FeedFragmentState extends State<FeedFragment> {
       return new Container();
     if (config.userData.items.length == 0) {
       return new Row(
-        <Widget>[new Text("No data yet.\nAdd some!", style: style)],
+        children: <Widget>[new Text("No data yet.\nAdd some!", style: style)],
         justifyContent: FlexJustifyContent.center
       );
     }

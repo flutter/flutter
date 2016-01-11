@@ -103,7 +103,7 @@ class SnackBar extends StatelessComponent {
                 performance: performance,
                 opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: _snackBarFadeCurve),
                 child: new Row(
-                  children,
+                  children: children,
                   alignItems: FlexAlignItems.center
                 )
               )

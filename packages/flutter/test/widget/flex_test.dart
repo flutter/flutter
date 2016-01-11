@@ -16,29 +16,33 @@ void main() {
           decoration: const BoxDecoration(
             backgroundColor: const Color(0xFF00FF00)
           ),
-          child: new Stack(<Widget>[
-            new Positioned(
-              top: 10.0,
-              left: 10.0,
-              child: new Column(<Widget>[
-                new GestureDetector(
-                  onTap: () {
-                    didReceiveTap = true;
-                  },
-                  child: new Container(
-                    decoration: const BoxDecoration(
-                      backgroundColor: const Color(0xFF0000FF)
-                    ),
-                    width: 100.0,
-                    height: 100.0,
-                    child: new Center(
-                      child: new Text('X')
+          child: new Stack(
+            children: <Widget>[
+              new Positioned(
+                top: 10.0,
+                left: 10.0,
+                child: new Column(
+                  children: <Widget>[
+                    new GestureDetector(
+                      onTap: () {
+                        didReceiveTap = true;
+                      },
+                      child: new Container(
+                        decoration: const BoxDecoration(
+                          backgroundColor: const Color(0xFF0000FF)
+                        ),
+                        width: 100.0,
+                        height: 100.0,
+                        child: new Center(
+                          child: new Text('X')
+                        )
+                      )
                     )
-                  )
+                  ]
                 )
-              ])
-            )
-          ])
+              )
+            ]
+          )
         )
       );
 
@@ -53,10 +57,11 @@ void main() {
     // Row without justifyContent: FlexJustifyContent.collapse
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Center(
-        child: new Row([
-          new Container(width: 10.0, height: 100.0),
-          new Container(width: 30.0, height: 100.0)
-        ],
+        child: new Row(
+          children: <Widget>[
+            new Container(width: 10.0, height: 100.0),
+            new Container(width: 30.0, height: 100.0)
+          ],
           key: flexKey
         )
       ));
@@ -66,10 +71,11 @@ void main() {
 
       // Row with justifyContent: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
-        child: new Row([
-          new Container(width: 10.0, height: 100.0),
-          new Container(width: 30.0, height: 100.0)
-        ],
+        child: new Row(
+          children: <Widget>[
+            new Container(width: 10.0, height: 100.0),
+            new Container(width: 30.0, height: 100.0)
+          ],
           key: flexKey,
           justifyContent: FlexJustifyContent.collapse
         )
@@ -82,10 +88,11 @@ void main() {
     // Column without justifyContent: FlexJustifyContent.collapse
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Center(
-        child: new Column([
-          new Container(width: 100.0, height: 100.0),
-          new Container(width: 100.0, height: 150.0)
-        ],
+        child: new Column(
+          children: <Widget>[
+            new Container(width: 100.0, height: 100.0),
+            new Container(width: 100.0, height: 150.0)
+          ],
           key: flexKey
         )
       ));
@@ -95,10 +102,11 @@ void main() {
 
       // Column with justifyContent: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
-        child: new Column([
-          new Container(width: 100.0, height: 100.0),
-          new Container(width: 100.0, height: 150.0)
-        ],
+        child: new Column(
+          children: <Widget>[
+            new Container(width: 100.0, height: 100.0),
+            new Container(width: 100.0, height: 150.0)
+          ],
           key: flexKey,
           justifyContent: FlexJustifyContent.collapse
         )
@@ -117,12 +125,15 @@ void main() {
         child: new Container(
           width: 0.0,
           height: 0.0,
-          child:  new Column([
-            new Container(
-              key: childKey,
-              width: 100.0,
-              height: 100.0
-            )], justifyContent: FlexJustifyContent.collapse
+          child:  new Column(
+            children: <Widget>[
+              new Container(
+                key: childKey,
+                width: 100.0,
+                height: 100.0
+              )
+            ],
+            justifyContent: FlexJustifyContent.collapse
           )
         )
       ));
@@ -135,12 +146,15 @@ void main() {
         child: new Container(
           width: 0.0,
           height: 0.0,
-          child:  new Row([
-            new Container(
-              key: childKey,
-              width: 100.0,
-              height: 100.0
-            )], justifyContent: FlexJustifyContent.collapse
+          child:  new Row(
+            children: <Widget>[
+              new Container(
+                key: childKey,
+                width: 100.0,
+                height: 100.0
+              )
+            ],
+            justifyContent: FlexJustifyContent.collapse
           )
         )
       ));

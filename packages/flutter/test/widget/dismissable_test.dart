@@ -274,10 +274,12 @@ void main() {
         child: new Container(
           width: 100.0,
           height: 1000.0,
-          child: new Column(<Widget>[
-            new Test1215DismissableComponent('1'),
-            new Test1215DismissableComponent('2')
-          ])
+          child: new Column(
+            children: <Widget>[
+              new Test1215DismissableComponent('1'),
+              new Test1215DismissableComponent('2')
+            ]
+          )
         )
       ));
       expect(tester.findText('1'), isNotNull);

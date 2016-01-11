@@ -31,13 +31,16 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
   }
 
   Widget build(BuildContext context) {
-    return new Column([
-      new Text(new DateFormat.yMMMd().format(_selectedDate)),
-      new RaisedButton(
-        onPressed: _handleSelectDate,
-        child: new Text('SELECT DATE')
-      ),
-    ], justifyContent: FlexJustifyContent.center);
+    return new Column(
+      children: <Widget>[
+        new Text(new DateFormat.yMMMd().format(_selectedDate)),
+        new RaisedButton(
+          onPressed: _handleSelectDate,
+          child: new Text('SELECT DATE')
+        ),
+      ],
+      justifyContent: FlexJustifyContent.center
+    );
   }
 }
 

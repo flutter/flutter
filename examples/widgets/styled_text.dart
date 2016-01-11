@@ -89,7 +89,8 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 
     Widget body = new Container(
         padding: new EdgeDims.symmetric(horizontal: 8.0),
-        child: new Column(children,
+        child: new Column(
+          children: children,
           justifyContent: FlexJustifyContent.center,
           alignItems: FlexAlignItems.start
         )

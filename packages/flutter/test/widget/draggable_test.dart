@@ -15,7 +15,8 @@ void main() {
 
       tester.pumpWidget(new MaterialApp(
         routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) { return new Column(<Widget>[
+          '/': (RouteArguments args) { return new Column(
+            children: <Widget>[
               new Draggable(
                 data: 1,
                 child: new Text('Source'),

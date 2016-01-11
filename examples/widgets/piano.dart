@@ -88,7 +88,7 @@ class PianoApp extends StatelessComponent {
         )
       ));
     }
-    return new Column(children);
+    return new Column(children: children);
   }
 }
 

@@ -67,7 +67,8 @@ class StockRow extends StatelessComponent {
             bottom: new BorderSide(color: Theme.of(context).dividerColor)
           )
         ),
-        child: new Row(<Widget>[
+        child: new Row(
+          children: <Widget>[
             new Container(
               margin: const EdgeDims.only(right: 5.0),
               child: new Hero(
@@ -77,7 +78,8 @@ class StockRow extends StatelessComponent {
               )
             ),
             new Flexible(
-              child: new Row(<Widget>[
+              child: new Row(
+                children: <Widget>[
                   new Flexible(
                     flex: 2,
                     child: new Text(

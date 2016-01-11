@@ -95,7 +95,7 @@ class ToolBar extends StatelessComponent {
         height: kToolBarHeight,
         child: new DefaultTextStyle(
           style: sideStyle,
-          child: new Row(firstRow)
+          child: new Row(children: firstRow)
         )
       )
     ];
@@ -123,7 +123,7 @@ class ToolBar extends StatelessComponent {
       child: new Container(
         padding: combinedPadding,
         child: new Column(
-          rows,
+          children: rows,
           justifyContent: FlexJustifyContent.collapse
         )
       )

@@ -209,13 +209,15 @@ class CardCollectionState extends State<CardCollection> {
   Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled: true }) {
     return new DrawerItem(
       onPressed: enabled ? callback : null,
-      child: new Row(<Widget>[
-        new Flexible(child: new Text(label)),
-        new Checkbox(
-          value: value,
-          onChanged: enabled ? (_) { callback(); } : null
-        )
-      ])
+      child: new Row(
+        children: <Widget>[
+          new Flexible(child: new Text(label)),
+          new Checkbox(
+            value: value,
+            onChanged: enabled ? (_) { callback(); } : null
+          )
+        ]
+      )
     );
   }
 
@@ -223,14 +225,16 @@ class CardCollectionState extends State<CardCollection> {
     return new DrawerItem(
       icon: icon,
       onPressed: enabled ? () { onChanged(itemValue); } : null,
-      child: new Row(<Widget>[
-        new Flexible(child: new Text(label)),
-        new Radio<Map<int, Color>>(
-          value: itemValue,
-          groupValue: currentValue,
-          onChanged: enabled ? onChanged : null
-        )
-      ])
+      child: new Row(
+        children: <Widget>[
+          new Flexible(child: new Text(label)),
+          new Radio<Map<int, Color>>(
+            value: itemValue,
+            groupValue: currentValue,
+            onChanged: enabled ? onChanged : null
+          )
+        ]
+      )
     );
   }
 
@@ -238,14 +242,16 @@ class CardCollectionState extends State<CardCollection> {
     return new DrawerItem(
       icon: icon,
       onPressed: enabled ? () { onChanged(itemValue); } : null,
-      child: new Row(<Widget>[
-        new Flexible(child: new Text(label)),
-        new Radio<DismissDirection>(
-          value: itemValue,
-          groupValue: currentValue,
-          onChanged: enabled ? onChanged : null
-        )
-      ])
+      child: new Row(
+        children: <Widget>[
+          new Flexible(child: new Text(label)),
+          new Radio<DismissDirection>(
+            value: itemValue,
+            groupValue: currentValue,
+            onChanged: enabled ? onChanged : null
+          )
+        ]
+      )
     );
   }
 
@@ -253,14 +259,16 @@ class CardCollectionState extends State<CardCollection> {
     return new DrawerItem(
       icon: icon,
       onPressed: enabled ? () { onChanged(itemValue); } : null,
-      child: new Row(<Widget>[
-        new Flexible(child: new Text(label)),
-        new Radio<TextStyle>(
-          value: itemValue,
-          groupValue: currentValue,
-          onChanged: enabled ? onChanged : null
-        )
-      ])
+      child: new Row(
+        children: <Widget>[
+          new Flexible(child: new Text(label)),
+          new Radio<TextStyle>(
+            value: itemValue,
+            groupValue: currentValue,
+            onChanged: enabled ? onChanged : null
+          )
+        ]
+      )
     );
   }
 
@@ -307,7 +315,8 @@ class CardCollectionState extends State<CardCollection> {
               style: DefaultTextStyle.of(context).merge(cardLabelStyle).merge(_textStyle).copyWith(
                 fontSize: _varyFontSizes ? _cardModels.length.toDouble() : null
               ),
-              child: new Column(<Widget>[
+              child: new Column(
+                children: <Widget>[
                   new Text(cardModel.label)
                 ],
                 alignItems: FlexAlignItems.stretch,
@@ -357,11 +366,13 @@ class CardCollectionState extends State<CardCollection> {
           child: new Container(
             height: cardModel.height,
             decoration: new BoxDecoration(backgroundColor: Theme.of(context).primaryColor),
-            child: new Row(<Widget>[
-              leftArrowIcon,
-              new Flexible(child: new Text(backgroundMessage, style: backgroundTextStyle)),
-              rightArrowIcon
-            ])
+            child: new Row(
+              children: <Widget>[
+                leftArrowIcon,
+                new Flexible(child: new Text(backgroundMessage, style: backgroundTextStyle)),
+                rightArrowIcon
+              ]
+            )
           )
         )
       )
@@ -370,7 +381,7 @@ class CardCollectionState extends State<CardCollection> {
     return new IconTheme(
       key: cardModel.key,
       data: const IconThemeData(color: IconThemeColor.white),
-      child: new Stack(<Widget>[background, card])
+      child: new Stack(children: <Widget>[background, card])
     );
   }
 
@@ -409,11 +420,14 @@ class CardCollectionState extends State<CardCollection> {
       );
     }
 
-    if (_sunshine)
-      cardCollection = new Stack(<Widget>[
-        new Column(<Widget>[new NetworkImage(src: _sunshineURL)]),
-        new ShaderMask(child: cardCollection, shaderCallback: _createShader)
-      ]);
+    if (_sunshine) {
+      cardCollection = new Stack(
+        children: <Widget>[
+          new Column(children: <Widget>[new NetworkImage(src: _sunshineURL)]),
+          new ShaderMask(child: cardCollection, shaderCallback: _createShader)
+        ]
+      );
+    }
 
     Widget body = new SizeObserver(
       onSizeChanged: _updateCardCollectionSize,
@@ -434,7 +448,7 @@ class CardCollectionState extends State<CardCollection> {
           )
         )
       );
-      body = new Stack(<Widget>[body, indicator]);
+      body = new Stack(children: <Widget>[body, indicator]);
     }
 
     return new Theme(

@@ -89,13 +89,16 @@ class _DatePickerState extends State<DatePicker> {
         );
         break;
     }
-    return new Column(<Widget>[
-      header,
-      new Container(
-        height: _calendarHeight,
-        child: picker
-      )
-    ], alignItems: FlexAlignItems.stretch);
+    return new Column(
+      children: <Widget>[
+        header,
+        new Container(
+          height: _calendarHeight,
+          child: picker
+        )
+      ],
+      alignItems: FlexAlignItems.stretch
+    );
   }
 
 }
@@ -138,20 +141,22 @@ class _DatePickerHeader extends StatelessComponent {
     return new Container(
       padding: new EdgeDims.all(10.0),
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
-      child: new Column(<Widget>[
-        new GestureDetector(
-          onTap: () => _handleChangeMode(_DatePickerMode.day),
-          child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle)
-        ),
-        new GestureDetector(
-          onTap: () => _handleChangeMode(_DatePickerMode.day),
-          child: new Text(new DateFormat("d").format(selectedDate), style: dayStyle)
-        ),
-        new GestureDetector(
-          onTap: () => _handleChangeMode(_DatePickerMode.year),
-          child: new Text(new DateFormat("yyyy").format(selectedDate), style: yearStyle)
-        )
-      ])
+      child: new Column(
+        children: <Widget>[
+          new GestureDetector(
+            onTap: () => _handleChangeMode(_DatePickerMode.day),
+            child: new Text(new DateFormat("MMM").format(selectedDate).toUpperCase(), style: monthStyle)
+          ),
+          new GestureDetector(
+            onTap: () => _handleChangeMode(_DatePickerMode.day),
+            child: new Text(new DateFormat("d").format(selectedDate), style: dayStyle)
+          ),
+          new GestureDetector(
+            onTap: () => _handleChangeMode(_DatePickerMode.year),
+            child: new Text(new DateFormat("yyyy").format(selectedDate), style: yearStyle)
+          )
+        ]
+      )
     );
   }
 }
@@ -190,7 +195,7 @@ class DayPicker extends StatelessComponent {
     List<Widget> rows = <Widget>[
       new Text(new DateFormat("MMMM y").format(displayedMonth), style: monthStyle),
       new Flex(
-        headers,
+        children: headers,
         justifyContent: FlexJustifyContent.spaceAround
       )
     ];
@@ -255,11 +260,11 @@ class DayPicker extends StatelessComponent {
     for (int w = 0; w < weeksShown; w++) {
       int startIndex = w * days.length;
       rows.add(new Row(
-        labels.sublist(startIndex, startIndex + days.length)
+        children: labels.sublist(startIndex, startIndex + days.length)
       ));
     }
 
-    return new Column(rows);
+    return new Column(children: rows);
   }
 }
 

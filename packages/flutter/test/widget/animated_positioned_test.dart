@@ -16,7 +16,7 @@ void main() {
 
       tester.pumpWidget(
         new Stack(
-          <Widget>[
+          children: <Widget>[
             new AnimatedPositioned(
               child: new Container(key: key),
               left: 50.0,
@@ -39,7 +39,7 @@ void main() {
 
       tester.pumpWidget(
         new Stack(
-          <Widget>[
+          children: <Widget>[
             new AnimatedPositioned(
               child: new Container(key: key),
               left: 37.0,
@@ -77,7 +77,7 @@ void main() {
 
       tester.pumpWidget(
         new Stack(
-          <Widget>[
+          children: <Widget>[
             new AnimatedPositioned(
               child: new Container(key: key),
               left: 0.0,
@@ -100,7 +100,7 @@ void main() {
 
       tester.pumpWidget(
         new Stack(
-          <Widget>[
+          children: <Widget>[
             new AnimatedPositioned(
               child: new Container(key: key),
               left: 100.0,
@@ -123,7 +123,7 @@ void main() {
 
       tester.pumpWidget(
         new Stack(
-          <Widget>[
+          children: <Widget>[
             new AnimatedPositioned(
               child: new Container(key: key),
               left: 150.0,
@@ -160,7 +160,7 @@ void main() {
 
       tester.pumpWidget(
         new Stack(
-          <Widget>[
+          children: <Widget>[
             new AnimatedPositioned(
               child: new Container(key: key),
               left: 0.0,
@@ -183,7 +183,7 @@ void main() {
 
       tester.pumpWidget(
         new Stack(
-          <Widget>[
+          children: <Widget>[
             new AnimatedPositioned(
               child: new Container(key: key),
               left: 0.0,

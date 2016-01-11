@@ -65,31 +65,35 @@ class TabViewDemo extends StatelessComponent {
       values: _iconNames,
       child: new Builder(
         builder: (BuildContext context) {
-          return new Column([
-            new Container(
-              margin: const EdgeDims.only(top: 16.0),
-              child: new Row(<Widget>[
-                new IconButton(
-                  icon: "navigation/arrow_back",
-                  onPressed: () { _handleArrowButtonPress(context, -1); }
-                ),
-                new Row(
-                  _iconNames.map((String name) => _buildTabIndicator(context, name)).toList(),
-                  justifyContent: FlexJustifyContent.collapse
-                ),
-                new IconButton(
-                  icon: "navigation/arrow_forward",
-                  onPressed: () { _handleArrowButtonPress(context, 1); }
-                )],
-                justifyContent: FlexJustifyContent.spaceBetween
+          return new Column(
+            children: <Widget>[
+              new Container(
+                margin: const EdgeDims.only(top: 16.0),
+                child: new Row(
+                  children: <Widget>[
+                    new IconButton(
+                      icon: "navigation/arrow_back",
+                      onPressed: () { _handleArrowButtonPress(context, -1); }
+                    ),
+                    new Row(
+                      children: _iconNames.map((String name) => _buildTabIndicator(context, name)).toList(),
+                      justifyContent: FlexJustifyContent.collapse
+                    ),
+                    new IconButton(
+                      icon: "navigation/arrow_forward",
+                      onPressed: () { _handleArrowButtonPress(context, 1); }
+                    )
+                  ],
+                  justifyContent: FlexJustifyContent.spaceBetween
+                )
+              ),
+              new Flexible(
+                child: new TabBarView(
+                  children: _iconNames.map(_buildTabView).toList()
+                )
               )
-            ),
-            new Flexible(
-              child: new TabBarView(
-                children: _iconNames.map(_buildTabView).toList()
-              )
-            )
-          ]);
+            ]
+          );
         }
       )
     );

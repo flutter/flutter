@@ -82,35 +82,41 @@ class StockSettingsState extends State<StockSettings> {
       new DrawerItem(
         icon: 'action/thumb_up',
         onPressed: () => _confirmOptimismChange(),
-        child: new Row(<Widget>[
-          new Flexible(child: new Text('Everything is awesome')),
-          new Checkbox(
-            value: config.configuration.stockMode == StockMode.optimistic,
-            onChanged: (bool value) => _confirmOptimismChange()
-          ),
-        ])
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Everything is awesome')),
+            new Checkbox(
+              value: config.configuration.stockMode == StockMode.optimistic,
+              onChanged: (bool value) => _confirmOptimismChange()
+            ),
+          ]
+        )
       ),
       new DrawerItem(
         icon: 'action/backup',
         onPressed: () { _handleBackupChanged(!(config.configuration.backupMode == BackupMode.enabled)); },
-        child: new Row(<Widget>[
-          new Flexible(child: new Text('Back up stock list to the cloud')),
-          new Switch(
-            value: config.configuration.backupMode == BackupMode.enabled,
-            onChanged: _handleBackupChanged
-          ),
-        ])
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Back up stock list to the cloud')),
+            new Switch(
+              value: config.configuration.backupMode == BackupMode.enabled,
+              onChanged: _handleBackupChanged
+            ),
+          ]
+        )
       ),
       new DrawerItem(
         icon: 'action/picture_in_picture',
         onPressed: () { _handleShowPerformanceOverlayChanged(!config.configuration.showPerformanceOverlay); },
-        child: new Row(<Widget>[
-          new Flexible(child: new Text('Show rendering performance overlay')),
-          new Switch(
-            value: config.configuration.showPerformanceOverlay,
-            onChanged: _handleShowPerformanceOverlayChanged
-          ),
-        ])
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Show rendering performance overlay')),
+            new Switch(
+              value: config.configuration.showPerformanceOverlay,
+              onChanged: _handleShowPerformanceOverlayChanged
+            ),
+          ]
+        )
       ),
     ];
     assert(() {
@@ -119,24 +125,28 @@ class StockSettingsState extends State<StockSettings> {
         new DrawerItem(
           icon: 'editor/border_clear',
           onPressed: () { _handleShowGridChanged(!config.configuration.debugShowGrid); },
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Show material grid (for debugging)')),
-            new Switch(
-              value: config.configuration.debugShowGrid,
-              onChanged: _handleShowGridChanged
-            ),
-          ])
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Show material grid (for debugging)')),
+              new Switch(
+                value: config.configuration.debugShowGrid,
+                onChanged: _handleShowGridChanged
+              ),
+            ]
+          )
         ),
         new DrawerItem(
           icon: 'editor/border_all',
           onPressed: () { _handleShowSizesChanged(!config.configuration.debugShowSizes); },
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Show construction lines (for debugging)')),
-            new Switch(
-              value: config.configuration.debugShowSizes,
-              onChanged: _handleShowSizesChanged
-            ),
-          ])
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Show construction lines (for debugging)')),
+              new Switch(
+                value: config.configuration.debugShowSizes,
+                onChanged: _handleShowSizesChanged
+              ),
+            ]
+          )
         )
       ]);
       return true;

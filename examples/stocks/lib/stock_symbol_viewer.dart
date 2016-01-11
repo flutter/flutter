@@ -18,8 +18,10 @@ class StockSymbolView extends StatelessComponent {
     TextStyle headings = Theme.of(context).text.body2;
     return new Container(
       padding: new EdgeDims.all(20.0),
-      child: new Column(<Widget>[
-          new Row(<Widget>[
+      child: new Column(
+        children: <Widget>[
+          new Row(
+            children: <Widget>[
               new Text(
                 '${stock.symbol}',
                 style: Theme.of(context).text.display2

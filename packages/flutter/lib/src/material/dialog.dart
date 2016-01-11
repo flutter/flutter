@@ -89,7 +89,8 @@ class Dialog extends StatelessComponent {
       dialogBody.add(new ButtonTheme(
         color: ButtonColor.accent,
         child: new Container(
-          child: new Row(actions,
+          child: new Row(
+            children: actions,
             justifyContent: FlexJustifyContent.end
           )
         )

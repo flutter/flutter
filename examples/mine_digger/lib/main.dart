@@ -139,7 +139,7 @@ class MineDiggerState extends State<MineDigger> {
       }
       flexRows.add(
         new Row(
-          row,
+          children: row,
           justifyContent: FlexJustifyContent.center,
           key: new ValueKey<int>(iy)
         )
@@ -157,7 +157,7 @@ class MineDiggerState extends State<MineDigger> {
       padding: new EdgeDims.all(10.0),
       margin: new EdgeDims.all(10.0),
       decoration: new BoxDecoration(backgroundColor: const Color(0xFF6B6B6B)),
-      child: new Column(flexRows)
+      child: new Column(children: flexRows)
     );
   }
 

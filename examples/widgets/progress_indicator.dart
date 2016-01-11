@@ -70,7 +70,7 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
         new Text("${(valueAnimation.value * 100.0).toStringAsFixed(1)}%" + (valueAnimation.isAnimating ? '' : ' (paused)'))
     ];
     return new Column(
-      indicators
+      children: indicators
         .map((Widget c) => new Container(child: c, margin: const EdgeDims.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
       justifyContent: FlexJustifyContent.center

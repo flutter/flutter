@@ -152,7 +152,7 @@ class OverlayState extends State<Overlay> {
         break;
     }
 
-    return new Stack(backwardsChildren.reversed.toList(growable: false));
+    return new Stack(children: backwardsChildren.reversed.toList(growable: false));
   }
 
   void debugFillDescription(List<String> description) {

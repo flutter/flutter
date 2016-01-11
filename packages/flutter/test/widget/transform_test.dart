@@ -11,41 +11,43 @@ void main() {
     testWidgets((WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: new Color(0xFF0000FF)
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFF0000FF)
+                )
               )
-            )
-          ),
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              child: new Transform(
-                transform: new Matrix4.identity().scale(0.5, 0.5),
-                origin: new Offset(100.0, 50.0),
-                child: new GestureDetector(
-                  onTap: () {
-                    didReceiveTap = true;
-                  },
-                  child: new Container(
-                    decoration: new BoxDecoration(
-                      backgroundColor: new Color(0xFF00FFFF)
+            ),
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                child: new Transform(
+                  transform: new Matrix4.identity().scale(0.5, 0.5),
+                  origin: new Offset(100.0, 50.0),
+                  child: new GestureDetector(
+                    onTap: () {
+                      didReceiveTap = true;
+                    },
+                    child: new Container(
+                      decoration: new BoxDecoration(
+                        backgroundColor: new Color(0xFF00FFFF)
+                      )
                     )
                   )
                 )
               )
             )
-          )
-        ])
+          ]
+        )
       );
 
       expect(didReceiveTap, isFalse);
@@ -60,41 +62,43 @@ void main() {
     testWidgets((WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: new Color(0xFF0000FF)
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFF0000FF)
+                )
               )
-            )
-          ),
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              child: new Transform(
-                transform: new Matrix4.identity().scale(0.5, 0.5),
-                alignment: new FractionalOffset(1.0, 0.5),
-                child: new GestureDetector(
-                  onTap: () {
-                    didReceiveTap = true;
-                  },
-                  child: new Container(
-                    decoration: new BoxDecoration(
-                      backgroundColor: new Color(0xFF00FFFF)
+            ),
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                child: new Transform(
+                  transform: new Matrix4.identity().scale(0.5, 0.5),
+                  alignment: new FractionalOffset(1.0, 0.5),
+                  child: new GestureDetector(
+                    onTap: () {
+                      didReceiveTap = true;
+                    },
+                    child: new Container(
+                      decoration: new BoxDecoration(
+                        backgroundColor: new Color(0xFF00FFFF)
+                      )
                     )
                   )
                 )
               )
             )
-          )
-        ])
+          ]
+        )
       );
 
       expect(didReceiveTap, isFalse);
@@ -109,42 +113,44 @@ void main() {
     testWidgets((WidgetTester tester) {
       bool didReceiveTap = false;
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: new Color(0xFF0000FF)
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFF0000FF)
+                )
               )
-            )
-          ),
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              child: new Transform(
-                transform: new Matrix4.identity().scale(0.5, 0.5),
-                origin: new Offset(100.0, 0.0),
-                alignment: new FractionalOffset(0.0, 0.5),
-                child: new GestureDetector(
-                  onTap: () {
-                    didReceiveTap = true;
-                  },
-                  child: new Container(
-                    decoration: new BoxDecoration(
-                      backgroundColor: new Color(0xFF00FFFF)
+            ),
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                child: new Transform(
+                  transform: new Matrix4.identity().scale(0.5, 0.5),
+                  origin: new Offset(100.0, 0.0),
+                  alignment: new FractionalOffset(0.0, 0.5),
+                  child: new GestureDetector(
+                    onTap: () {
+                      didReceiveTap = true;
+                    },
+                    child: new Container(
+                      decoration: new BoxDecoration(
+                        backgroundColor: new Color(0xFF00FFFF)
+                      )
                     )
                   )
                 )
               )
             )
-          )
-        ])
+          ]
+        )
       );
 
       expect(didReceiveTap, isFalse);

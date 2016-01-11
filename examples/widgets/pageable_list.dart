@@ -95,10 +95,12 @@ class PageableListAppState extends State<PageableListApp> {
         ),
         new DrawerItem(
           onPressed: toggleItemsWrap,
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Scrolling wraps around')),
-            new Checkbox(value: itemsWrap)
-          ])
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Scrolling wraps around')),
+              new Checkbox(value: itemsWrap)
+            ]
+          )
         )
       ])
     );

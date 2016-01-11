@@ -59,20 +59,22 @@ class HeroDemo extends StatelessComponent {
         child: new GestureDetector(
           onTap: () => Navigator.push(context, new CrabRoute()),
           child: new Card(
-            child: new Row(<Widget>[
-              new HeroImage(
-                size: const Size(100.0, 100.0)
-              ),
-              new Flexible(
-                child: new Container(
-                  padding: const EdgeDims.all(10.0),
-                  child: new Text(
-                    "Low Crab Diet",
-                    style: Theme.of(context).text.title
+            child: new Row(
+              children: <Widget>[
+                new HeroImage(
+                  size: const Size(100.0, 100.0)
+                ),
+                new Flexible(
+                  child: new Container(
+                    padding: const EdgeDims.all(10.0),
+                    child: new Text(
+                      "Low Crab Diet",
+                      style: Theme.of(context).text.title
+                    )
                   )
                 )
-              )
-            ])
+              ]
+            )
           )
         )
       )
@@ -94,34 +96,39 @@ class CrabPage extends StatelessComponent {
       color: const Color(0x00000000),
       child: new Block(
         <Widget>[
-          new Stack(<Widget>[
-            new HeroImage(
-              size: new Size(ui.window.size.width, ui.window.size.width)
-            ),
-            new ToolBar(
-              padding: new EdgeDims.only(top: ui.window.padding.top),
-              backgroundColor: const Color(0x00000000),
-              left: new IconButton(
-                icon: "navigation/arrow_back",
-                onPressed: () => Navigator.pop(context)
+          new Stack(
+            children: <Widget>[
+              new HeroImage(
+                size: new Size(ui.window.size.width, ui.window.size.width)
               ),
-              right: <Widget>[
-                  new IconButton(icon: "navigation/more_vert")
-              ]
-            ),
-            new Positioned(
-              bottom: 10.0,
-              left: 10.0,
-              child: new Text("Low Crab Diet", style: titleStyle)
-            )
-          ]),
+              new ToolBar(
+                padding: new EdgeDims.only(top: ui.window.padding.top),
+                backgroundColor: const Color(0x00000000),
+                left: new IconButton(
+                  icon: "navigation/arrow_back",
+                  onPressed: () => Navigator.pop(context)
+                ),
+                right: <Widget>[
+                    new IconButton(icon: "navigation/more_vert")
+                ]
+              ),
+              new Positioned(
+                bottom: 10.0,
+                left: 10.0,
+                child: new Text("Low Crab Diet", style: titleStyle)
+              )
+            ]
+          ),
           new Material(
             child: new Container(
               padding: const EdgeDims.all(10.0),
-              child: new Column(<Widget>[
-                new Text(kText, style: Theme.of(context).text.body1),
-                new Container(height: 800.0),
-              ], alignItems: FlexAlignItems.start)
+              child: new Column(
+                children: <Widget>[
+                  new Text(kText, style: Theme.of(context).text.body1),
+                  new Container(height: 800.0),
+                ],
+                alignItems: FlexAlignItems.start
+              )
             )
           )
         ]
