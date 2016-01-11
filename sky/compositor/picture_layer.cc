@@ -32,27 +32,13 @@ void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
 
   SkCanvas& canvas = frame.canvas();
   if (image_) {
-    const SkMatrix& ctm = canvas.getTotalMatrix();
-    SkScalar scaleX = ctm.getScaleX();
-    SkScalar scaleY = ctm.getScaleY();
-
-    SkRect rect = picture_->cullRect();
-    SkScalar dx = (offset_.x() + rect.left()) * scaleX;
-    SkScalar dy = (offset_.y() + rect.top()) * scaleY;
-
-    canvas.save();
-    canvas.scale(1.0 / scaleX, 1.0 / scaleY);
-    canvas.drawImage(image_.get(), dx, dy);
-    canvas.restore();
-
+    SkRect rect = picture_->cullRect().makeOffset(offset_.x(), offset_.y());
+    canvas.drawImageRect(image_.get(), rect, nullptr, SkCanvas::kFast_SrcRectConstraint);
     if (kDebugCheckerboardRasterizedLayers)
-      DrawCheckerboard(&canvas, rect.makeOffset(offset_.x(), offset_.y()));
-
+      DrawCheckerboard(&canvas, rect);
   } else {
-    canvas.save();
-    canvas.translate(offset_.x(), offset_.y());
-    canvas.drawPicture(picture_.get());
-    canvas.restore();
+    SkMatrix matrix = SkMatrix::MakeTrans(offset_.x(), offset_.y());
+    canvas.drawPicture(picture_.get(), &matrix, nullptr);
   }
 }
 
