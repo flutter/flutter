@@ -67,6 +67,7 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   bool get sizedByParent => true;
+  bool get alwaysNeedsCompositing => true;
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
@@ -101,6 +102,7 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
+    assert(needsCompositing);
     context.pushPerformanceOverlay(offset, optionsMask, rasterizerThreshold, size);
   }
 }
