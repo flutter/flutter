@@ -246,7 +246,13 @@ class Canvas extends NativeFieldWrapperClass2 {
   void drawCircle(Point c, double radius, Paint paint) native "Canvas_drawCircle";
   void drawPath(Path path, Paint paint) native "Canvas_drawPath";
   void drawImage(Image image, Point p, Paint paint) native "Canvas_drawImage";
+
+  /// Drawss the src rect from the image into the canvas as dst rect.
+  ///
+  /// Might sample from outside the src rect by half the width of an applied
+  /// filter.
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint) native "Canvas_drawImageRect";
+
   void drawImageNine(Image image, Rect center, Rect dst, Paint paint) native "Canvas_drawImageNine";
   void drawPicture(Picture picture) native "Canvas_drawPicture";
 

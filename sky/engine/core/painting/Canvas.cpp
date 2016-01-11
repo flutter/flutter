@@ -284,7 +284,7 @@ void Canvas::drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const
     if (!m_canvas)
         return;
     ASSERT(image);
-    m_canvas->drawImageRect(image->image(), src.sk_rect, dst.sk_rect, paint.paint());
+    m_canvas->drawImageRect(image->image(), src.sk_rect, dst.sk_rect, paint.paint(), SkCanvas::kFast_SrcRectConstraint);
 }
 
 void Canvas::drawImageNine(const CanvasImage* image, Rect& center, Rect& dst, const Paint& paint) {
