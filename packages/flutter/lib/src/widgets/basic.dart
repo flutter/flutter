@@ -816,15 +816,20 @@ class Container extends StatelessComponent {
   Container({
     Key key,
     this.child,
-    this.constraints,
+    BoxConstraints constraints,
     this.decoration,
     this.foregroundDecoration,
     this.margin,
     this.padding,
     this.transform,
-    this.width,
-    this.height
-  }) : super(key: key) {
+    double width,
+    double height
+  }) : constraints = 
+        (width != null || height != null)
+          ? constraints?.tighten(width: width, height: height)
+            ?? new BoxConstraints.tightFor(width: width, height: height)
+          : constraints,
+       super(key: key) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
     assert(decoration == null || decoration.debugAssertValid());
@@ -853,12 +858,6 @@ class Container extends StatelessComponent {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  /// If non-null, requires the decoration to have this width.
-  final double width;
-
-  /// If non-null, requires the decoration to have this height.
-  final double height;
-
   EdgeDims get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
       return padding;
@@ -871,7 +870,7 @@ class Container extends StatelessComponent {
   Widget build(BuildContext context) {
     Widget current = child;
 
-    if (child == null && (width == null || height == null))
+    if (child == null && (constraints == null || !constraints.isTight))
       current = new ConstrainedBox(constraints: const BoxConstraints.expand());
 
     EdgeDims effectivePadding = _paddingIncludingDecoration;
@@ -885,14 +884,6 @@ class Container extends StatelessComponent {
       current = new DecoratedBox(
         decoration: foregroundDecoration,
         position: DecorationPosition.foreground,
-        child: current
-      );
-    }
-
-    if (width != null || height != null) {
-      current = new SizedBox(
-        width: width,
-        height: height,
         child: current
       );
     }
@@ -923,10 +914,6 @@ class Container extends StatelessComponent {
       description.add('padding: $padding');
     if (transform != null)
       description.add('has transform');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
   }
 }
 
