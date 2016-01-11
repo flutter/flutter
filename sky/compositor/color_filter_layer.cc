@@ -23,10 +23,11 @@ void ColorFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
       adoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));
   SkPaint paint;
   paint.setColorFilter(color_filter.get());
+
   SkCanvas& canvas = frame.canvas();
+  SkAutoCanvasRestore save(&canvas, false);
   canvas.saveLayer(&paint_bounds(), &paint);
   PaintChildren(frame);
-  canvas.restore();
 }
 
 }  // namespace compositor

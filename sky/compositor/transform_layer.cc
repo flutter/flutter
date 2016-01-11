@@ -22,10 +22,9 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
 void TransformLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
-  canvas.save();
+  SkAutoCanvasRestore save(&canvas, true);
   canvas.concat(transform_);
   PaintChildren(frame);
-  canvas.restore();
 }
 
 }  // namespace compositor

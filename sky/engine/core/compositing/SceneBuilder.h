@@ -37,14 +37,15 @@ public:
 
     void pushTransform(const Float64List& matrix4, ExceptionState&);
     void pushClipRect(const Rect& rect);
-    void pushClipRRect(const RRect& rrect, const Rect& bounds);
-    void pushClipPath(const CanvasPath* path, const Rect& bounds);
-    void pushOpacity(int alpha, const Rect& bounds);
-    void pushColorFilter(CanvasColor color, TransferMode transferMode, const Rect& bounds);
+    void pushClipRRect(const RRect& rrect);
+    void pushClipPath(const CanvasPath* path);
+    void pushOpacity(int alpha);
+    void pushColorFilter(CanvasColor color, TransferMode transferMode);
+    void pushShader(Shader* shader, TransferMode transferMode);
     void pop();
 
-    void addPicture(const Offset& offset, Picture* picture, const Rect& bounds);
     void addPerformanceOverlay(uint64_t enabledOptions, const Rect& bounds);
+    void addPicture(const Offset& offset, Picture* picture);
 
     void setRasterizerTracingThreshold(uint32_t frameInterval);
 

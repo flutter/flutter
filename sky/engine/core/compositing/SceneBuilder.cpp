@@ -6,6 +6,7 @@
 
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "sky/engine/core/painting/Matrix.h"
+#include "sky/engine/core/painting/Shader.h"
 #include "sky/compositor/clip_path_layer.h"
 #include "sky/compositor/clip_rect_layer.h"
 #include "sky/compositor/clip_rrect_layer.h"
@@ -14,6 +15,7 @@
 #include "sky/compositor/opacity_layer.h"
 #include "sky/compositor/picture_layer.h"
 #include "sky/compositor/performance_overlay_layer.h"
+#include "sky/compositor/shader_layer.h"
 #include "sky/compositor/transform_layer.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
@@ -45,6 +47,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushClipPath) \
   V(SceneBuilder, pushOpacity) \
   V(SceneBuilder, pushColorFilter) \
+  V(SceneBuilder, pushShader) \
   V(SceneBuilder, pop) \
   V(SceneBuilder, addPicture) \
   V(SceneBuilder, addPerformanceOverlay) \
@@ -88,31 +91,39 @@ void SceneBuilder::pushClipRect(const Rect& rect)
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushClipRRect(const RRect& rrect, const Rect& bounds)
+void SceneBuilder::pushClipRRect(const RRect& rrect)
 {
     std::unique_ptr<sky::compositor::ClipRRectLayer> layer(new sky::compositor::ClipRRectLayer());
     layer->set_clip_rrect(rrect.sk_rrect);
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushClipPath(const CanvasPath* path, const Rect& bounds)
+void SceneBuilder::pushClipPath(const CanvasPath* path)
 {
     std::unique_ptr<sky::compositor::ClipPathLayer> layer(new sky::compositor::ClipPathLayer());
     layer->set_clip_path(path->path());
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushOpacity(int alpha, const Rect& bounds)
+void SceneBuilder::pushOpacity(int alpha)
 {
     std::unique_ptr<sky::compositor::OpacityLayer> layer(new sky::compositor::OpacityLayer());
     layer->set_alpha(alpha);
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode, const Rect& bounds)
+void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode)
 {
     std::unique_ptr<sky::compositor::ColorFilterLayer> layer(new sky::compositor::ColorFilterLayer());
     layer->set_color(color);
+    layer->set_transfer_mode(transferMode);
+    addLayer(std::move(layer));
+}
+
+void SceneBuilder::pushShader(Shader* shader, TransferMode transferMode)
+{
+    std::unique_ptr<sky::compositor::ShaderLayer> layer(new sky::compositor::ShaderLayer());
+    layer->set_shader(shader->shader());
     layer->set_transfer_mode(transferMode);
     addLayer(std::move(layer));
 }
@@ -140,7 +151,7 @@ void SceneBuilder::pop()
     m_currentLayer = m_currentLayer->parent();
 }
 
-void SceneBuilder::addPicture(const Offset& offset, Picture* picture, const Rect& paintBounds)
+void SceneBuilder::addPicture(const Offset& offset, Picture* picture)
 {
     if (!m_currentLayer)
         return;

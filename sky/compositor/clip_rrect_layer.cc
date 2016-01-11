@@ -15,10 +15,10 @@ ClipRRectLayer::~ClipRRectLayer() {
 
 void ClipRRectLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
+  SkAutoCanvasRestore save(&canvas, false);
   canvas.saveLayer(&clip_rrect_.getBounds(), nullptr);
   canvas.clipRRect(clip_rrect_);
   PaintChildren(frame);
-  canvas.restore();
 }
 
 }  // namespace compositor
