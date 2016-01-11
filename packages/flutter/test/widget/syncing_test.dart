@@ -115,22 +115,24 @@ void main() {
     testWidgets((WidgetTester tester) {
       Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
       Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
-      tester.pumpWidget(new Column(<Widget>[]));
+      tester.pumpWidget(new Column());
 
       GlobalKey keyA = new GlobalKey();
       GlobalKey keyB = new GlobalKey();
 
       tester.pumpWidget(
-        new Column(<Widget>[
-          new Container(
-            key: keyA,
-            child: a
-          ),
-          new Container(
-            key: keyB,
-            child: b
-          )
-        ])
+        new Column(
+          children: <Widget>[
+            new Container(
+              key: keyA,
+              child: a
+            ),
+            new Container(
+              key: keyB,
+              child: b
+            )
+          ]
+        )
       );
 
       TestWidgetState first, second;
@@ -146,16 +148,18 @@ void main() {
       expect(second.syncedState, equals(0x42));
 
       tester.pumpWidget(
-        new Column(<Widget>[
-          new Container(
-            key: keyA,
-            child: a
-          ),
-          new Container(
-            key: keyB,
-            child: b
-          )
-        ])
+        new Column(
+          children: <Widget>[
+            new Container(
+              key: keyA,
+              child: a
+            ),
+            new Container(
+              key: keyB,
+              child: b
+            )
+          ]
+        )
       );
 
       first = tester.findStateByConfig(a);
@@ -173,16 +177,18 @@ void main() {
       // since they are both "old" nodes, they shouldn't sync with each other even though they look alike
 
       tester.pumpWidget(
-        new Column(<Widget>[
-          new Container(
-            key: keyA,
-            child: b
-          ),
-          new Container(
-            key: keyB,
-            child: a
-          )
-        ])
+        new Column(
+          children: <Widget>[
+            new Container(
+              key: keyA,
+              child: b
+            ),
+            new Container(
+              key: keyB,
+              child: a
+            )
+          ]
+        )
       );
 
       first = tester.findStateByConfig(b);

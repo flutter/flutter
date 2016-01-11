@@ -282,6 +282,7 @@ abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   MultiChildRenderObjectWidget({ Key key, this.children })
     : super(key: key) {
+    assert(children != null);
     assert(!children.any((Widget child) => child == null));
   }
 

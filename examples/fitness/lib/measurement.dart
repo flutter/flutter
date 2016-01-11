@@ -47,7 +47,7 @@ class MeasurementRow extends FitnessItemRow {
       )
     ];
     return new Row(
-      children,
+      children: children,
       alignItems: FlexAlignItems.baseline,
       textBaseline: DefaultTextStyle.of(context).textBaseline
     );
@@ -124,24 +124,30 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
     // TODO(jackson): Revisit the layout of this pane to be more maintainable
     return new Container(
       padding: const EdgeDims.all(20.0),
-      child: new Column(<Widget>[
-        new GestureDetector(
-          onTap: _handleDatePressed,
-          child: new Container(
-            height: 50.0,
-            child: new Column(<Widget>[
-              new Text('Measurement Date'),
-              new Text(measurement.displayDate, style: Theme.of(context).text.caption),
-            ], alignItems: FlexAlignItems.start)
-          )
-        ),
-        new Input(
-          key: weightKey,
-          placeholder: 'Enter weight',
-          keyboardType: KeyboardType.NUMBER,
-          onChanged: _handleWeightChanged
-        ),
-      ], alignItems: FlexAlignItems.stretch)
+      child: new Column(
+        children: <Widget>[
+          new GestureDetector(
+            onTap: _handleDatePressed,
+            child: new Container(
+              height: 50.0,
+              child: new Column(
+                children: <Widget>[
+                  new Text('Measurement Date'),
+                  new Text(measurement.displayDate, style: Theme.of(context).text.caption),
+                ],
+                alignItems: FlexAlignItems.start
+              )
+            )
+          ),
+          new Input(
+            key: weightKey,
+            placeholder: 'Enter weight',
+            keyboardType: KeyboardType.NUMBER,
+            onChanged: _handleWeightChanged
+          ),
+        ],
+        alignItems: FlexAlignItems.stretch
+      )
     );
   }
 

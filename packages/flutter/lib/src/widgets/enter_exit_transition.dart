@@ -171,17 +171,19 @@ class _EnterExitTransitionState extends State<EnterExitTransition> {
       size: _entries.last.childSize,
       duration: config.duration,
       curve: config.curve,
-      child: new Stack(_entries.map((_Entry entry) {
-        return new SizeObserver(
-          key: new ObjectKey(entry),
-          onSizeChanged: (Size newSize) {
-            setState(() {
-              entry.childSize = newSize;
-            });
-          },
-          child: entry.currentTransition
-        );
-      }).toList())
+      child: new Stack(
+        children: _entries.map((_Entry entry) {
+          return new SizeObserver(
+            key: new ObjectKey(entry),
+            onSizeChanged: (Size newSize) {
+              setState(() {
+                entry.childSize = newSize;
+              });
+            },
+            child: entry.currentTransition
+          );
+        }).toList()
+      )
     );
   }
 }

@@ -76,18 +76,20 @@ void main() {
                     key: insideKey,
                     builder: (BuildContext context) {
                       PageRoute route = ModalRoute.of(context);
-                      return new Column([
-                        new TestTransition(
-                          childFirstHalf: new Text('A'),
-                          childSecondHalf: new Text('B'),
-                          performance: route.performance
-                        ),
-                        new TestTransition(
-                          childFirstHalf: new Text('C'),
-                          childSecondHalf: new Text('D'),
-                          performance: route.forwardPerformance
-                        ),
-                      ]);
+                      return new Column(
+                        children: <Widget>[
+                          new TestTransition(
+                            childFirstHalf: new Text('A'),
+                            childSecondHalf: new Text('B'),
+                            performance: route.performance
+                          ),
+                          new TestTransition(
+                            childFirstHalf: new Text('C'),
+                            childSecondHalf: new Text('D'),
+                            performance: route.forwardPerformance
+                          ),
+                        ]
+                      );
                     }
                   )
                 );

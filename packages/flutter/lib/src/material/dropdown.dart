@@ -289,18 +289,19 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
       onTap: _handleTap,
       child: new Container(
         decoration: new BoxDecoration(border: _kDropDownUnderline),
-        child: new Row(<Widget>[
-          new IndexedStack(
-            config.items,
-            key: indexedStackKey,
-            index: _selectedIndex,
-            alignment: const FractionalOffset(0.5, 0.0)
-          ),
-          new Container(
-            child: new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s36),
-            padding: const EdgeDims.only(top: 6.0)
-          )
-        ],
+        child: new Row(
+          children: <Widget>[
+            new IndexedStack(
+              children: config.items,
+              key: indexedStackKey,
+              index: _selectedIndex,
+              alignment: const FractionalOffset(0.5, 0.0)
+            ),
+            new Container(
+              child: new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s36),
+              padding: const EdgeDims.only(top: 6.0)
+            )
+          ],
           justifyContent: FlexJustifyContent.collapse
         )
       )

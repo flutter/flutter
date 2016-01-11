@@ -32,17 +32,19 @@ void main() {
 
       StateMarker grandchild = new StateMarker();
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Container(
-            child: new StateMarker(key: left)
-          ),
-          new Container(
-            child: new StateMarker(
-              key: right,
-              child: grandchild
-            )
-          ),
-        ])
+        new Stack(
+          children: <Widget>[
+            new Container(
+              child: new StateMarker(key: left)
+            ),
+            new Container(
+              child: new StateMarker(
+                key: right,
+                child: grandchild
+              )
+            ),
+          ]
+        )
       );
 
       (left.currentState as StateMarkerState).marker = "left";
@@ -54,17 +56,19 @@ void main() {
 
       StateMarker newGrandchild = new StateMarker();
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Container(
-            child: new StateMarker(
-              key: right,
-              child: newGrandchild
-            )
-          ),
-          new Container(
-            child: new StateMarker(key: left)
-          ),
-        ])
+        new Stack(
+          children: <Widget>[
+            new Container(
+              child: new StateMarker(
+                key: right,
+                child: newGrandchild
+              )
+            ),
+            new Container(
+              child: new StateMarker(key: left)
+            ),
+          ]
+        )
       );
 
       expect((left.currentState as StateMarkerState).marker, equals("left"));

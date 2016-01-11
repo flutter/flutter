@@ -175,10 +175,12 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
       return true;
     });
     if (config.showPerformanceOverlay) {
-      result = new Stack([
-        result,
-        new Positioned(bottom: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
-      ]);
+      result = new Stack(
+        children: <Widget>[
+          result,
+          new Positioned(bottom: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
+        ]
+      );
     }
     return result;
   }

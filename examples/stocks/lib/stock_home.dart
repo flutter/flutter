@@ -114,18 +114,22 @@ class StockHomeState extends State<StockHome> {
         new DrawerItem(
           icon: 'action/thumb_up',
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Optimistic')),
-            new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
-          ])
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Optimistic')),
+              new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
+            ]
+          )
         ),
         new DrawerItem(
           icon: 'action/thumb_down',
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Pessimistic')),
-            new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
-          ])
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Pessimistic')),
+              new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
+            ]
+          )
         ),
         new DrawerDivider(),
         new DrawerItem(
@@ -241,12 +245,14 @@ class StockHomeState extends State<StockHome> {
       // TODO(ianh): Fill this out.
       context: context,
       builder: (BuildContext context) {
-        return new Column([
-          new Input(
-            key: companyNameKey,
-            placeholder: 'Company Name'
-          ),
-        ]);
+        return new Column(
+          children: <Widget>[
+            new Input(
+              key: companyNameKey,
+              placeholder: 'Company Name'
+            ),
+          ]
+        );
       }
     );
   }

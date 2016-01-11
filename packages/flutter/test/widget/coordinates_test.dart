@@ -14,26 +14,28 @@ void main() {
       Key keyB = new GlobalKey();
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new SizedBox(
-              key: keyA,
-              width: 10.0,
-              height: 10.0
-            )
-          ),
-          new Positioned(
-            left: 100.0,
-            top: 200.0,
-            child: new SizedBox(
-              key: keyB,
-              width: 20.0,
-              height: 10.0
-            )
-          ),
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new SizedBox(
+                key: keyA,
+                width: 10.0,
+                height: 10.0
+              )
+            ),
+            new Positioned(
+              left: 100.0,
+              top: 200.0,
+              child: new SizedBox(
+                key: keyB,
+                width: 20.0,
+                height: 10.0
+              )
+            ),
+          ]
+        )
       );
 
       expect((tester.findElementByKey(keyA).renderObject as RenderBox).localToGlobal(const Point(0.0, 0.0)),

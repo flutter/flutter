@@ -68,33 +68,39 @@ class SectorAppState extends State<SectorApp> {
   }
 
   Widget buildBody() {
-    return new Column(<Widget>[
+    return new Column(
+      children: <Widget>[
         new Container(
           padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
-          child: new Row(<Widget>[
+          child: new Row(
+            children: <Widget>[
               new RaisedButton(
                 child: new IntrinsicWidth(
-                  child: new Row(<Widget>[
-                    new Container(
-                      padding: new EdgeDims.all(4.0),
-                      margin: new EdgeDims.only(right: 10.0),
-                      child: new WidgetToRenderBoxAdapter(sectorAddIcon)
-                    ),
-                    new Text('ADD SECTOR'),
-                  ])
+                  child: new Row(
+                    children: <Widget>[
+                      new Container(
+                        padding: new EdgeDims.all(4.0),
+                        margin: new EdgeDims.only(right: 10.0),
+                        child: new WidgetToRenderBoxAdapter(sectorAddIcon)
+                      ),
+                      new Text('ADD SECTOR'),
+                    ]
+                  )
                 ),
                 onPressed: _enabledAdd ? addSector : null
               ),
               new RaisedButton(
                 child: new IntrinsicWidth(
-                  child: new Row(<Widget>[
-                    new Container(
-                      padding: new EdgeDims.all(4.0),
-                      margin: new EdgeDims.only(right: 10.0),
-                      child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
-                    ),
-                    new Text('REMOVE SECTOR'),
-                  ])
+                  child: new Row(
+                    children: <Widget>[
+                      new Container(
+                        padding: new EdgeDims.all(4.0),
+                        margin: new EdgeDims.only(right: 10.0),
+                        child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
+                      ),
+                      new Text('REMOVE SECTOR'),
+                    ]
+                  )
                 ),
                 onPressed: _enabledRemove ? removeSector : null
               )

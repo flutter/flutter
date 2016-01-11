@@ -169,7 +169,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     ];
     for (MarkerType type in markers.keys)
       layers.add(new Marker(type: type, position: markers[type]));
-    return new Stack(layers);
+    return new Stack(children: layers);
   }
 }
 

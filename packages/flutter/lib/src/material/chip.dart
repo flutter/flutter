@@ -79,7 +79,10 @@ class Chip extends StatelessComponent {
         backgroundColor: Colors.grey[300],
         borderRadius: 16.0
       ),
-      child: new Row(children, justifyContent: FlexJustifyContent.collapse)
+      child: new Row(
+        children: children,
+        justifyContent: FlexJustifyContent.collapse
+      )
     );
   }
 }

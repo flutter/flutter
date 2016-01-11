@@ -464,6 +464,8 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   }
 }
 
+const List<Widget> _emptyWidgetList = const <Widget>[];
+
 /// Defers the layout of multiple children to a delegate.
 ///
 /// The delegate can determine the layout constraints for each child and can
@@ -471,8 +473,9 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
 /// size of the parent, but the size of the parent cannot depend on the sizes of
 /// the children.
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
-  CustomMultiChildLayout(List<Widget> children, {
+  CustomMultiChildLayout({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     this.delegate
   }) : super(key: key, children: children) {
     assert(delegate != null);
@@ -927,8 +930,9 @@ class Container extends StatelessComponent {
 ///
 /// For details about the block layout algorithm, see [RenderBlockBase].
 class BlockBody extends MultiChildRenderObjectWidget {
-  BlockBody(List<Widget> children, {
+  BlockBody({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     this.direction: Axis.vertical
   }) : super(key: key, children: children) {
     assert(direction != null);
@@ -946,7 +950,7 @@ class BlockBody extends MultiChildRenderObjectWidget {
 
 abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
   StackRenderObjectWidgetBase({
-    List<Widget> children,
+    List<Widget> children: _emptyWidgetList,
     Key key
   }) : super(key: key, children: children);
 }
@@ -956,8 +960,9 @@ abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget 
 /// For details about the stack layout algorithm, see [RenderStack]. To control
 /// the position of child widgets, see the [Positioned] widget.
 class Stack extends StackRenderObjectWidgetBase {
-  Stack(List<Widget> children, {
+  Stack({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     this.alignment: const FractionalOffset(0.0, 0.0)
   }) : super(key: key, children: children);
 
@@ -973,8 +978,9 @@ class Stack extends StackRenderObjectWidgetBase {
 
 /// A [Stack] that shows a single child at once.
 class IndexedStack extends StackRenderObjectWidgetBase {
-  IndexedStack(List<Widget> children, {
+  IndexedStack({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     this.alignment: const FractionalOffset(0.0, 0.0),
     this.index: 0
   }) : super(key: key, children: children) {
@@ -1113,7 +1119,7 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
 
 abstract class GridRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
   GridRenderObjectWidgetBase({
-    List<Widget> children,
+    List<Widget> children: _emptyWidgetList,
     Key key
   }) : super(key: key, children: children) {
     _delegate = createDelegate();
@@ -1135,7 +1141,7 @@ abstract class GridRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
 ///
 /// For details about the grid layout algorithm, see [RenderGrid].
 class CustomGrid extends GridRenderObjectWidgetBase {
-  CustomGrid(List<Widget> children, { Key key, this.delegate })
+  CustomGrid({ Key key, List<Widget> children: _emptyWidgetList, this.delegate })
     : super(key: key, children: children) {
     assert(delegate != null);
   }
@@ -1150,8 +1156,9 @@ class CustomGrid extends GridRenderObjectWidgetBase {
 ///
 /// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
 class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
-  FixedColumnCountGrid(List<Widget> children, {
+  FixedColumnCountGrid({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     this.columnCount,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeDims.zero
@@ -1181,8 +1188,9 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
 ///
 /// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
 class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
-  MaxTileWidthGrid(List<Widget> children, {
+  MaxTileWidthGrid({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     this.maxTileWidth,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeDims.zero
@@ -1238,8 +1246,9 @@ class GridPlacementData<DataType, WidgetType extends RenderObjectWidget> extends
 /// For details about the flex layout algorithm, see [RenderFlex]. To control
 /// the flex of child widgets, see the [Flexible] widget.
 class Flex extends MultiChildRenderObjectWidget {
-  Flex(List<Widget> children, {
+  Flex({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     this.direction: FlexDirection.horizontal,
     this.justifyContent: FlexJustifyContent.start,
     this.alignItems: FlexAlignItems.center,
@@ -1270,12 +1279,20 @@ class Flex extends MultiChildRenderObjectWidget {
 /// For details about the flex layout algorithm, see [RenderFlex]. To control
 /// the flex of child widgets, see the [Flexible] widget.
 class Row extends Flex {
-  Row(List<Widget> children, {
+  Row({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     justifyContent: FlexJustifyContent.start,
     alignItems: FlexAlignItems.center,
     textBaseline
-  }) : super(children, key: key, direction: FlexDirection.horizontal, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
+  }) : super(
+    children: children,
+    key: key,
+    direction: FlexDirection.horizontal,
+    justifyContent: justifyContent,
+    alignItems: alignItems,
+    textBaseline: textBaseline
+  );
 }
 
 /// Lays out child elements in a column.
@@ -1283,12 +1300,20 @@ class Row extends Flex {
 /// For details about the flex layout algorithm, see [RenderFlex]. To control
 /// the flex of child widgets, see the [Flexible] widget.
 class Column extends Flex {
-  Column(List<Widget> children, {
+  Column({
     Key key,
+    List<Widget> children: _emptyWidgetList,
     justifyContent: FlexJustifyContent.start,
     alignItems: FlexAlignItems.center,
     textBaseline
-  }) : super(children, key: key, direction: FlexDirection.vertical, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
+  }) : super(
+    children: children,
+    key: key,
+    direction: FlexDirection.vertical,
+    justifyContent: justifyContent,
+    alignItems: alignItems,
+    textBaseline: textBaseline
+  );
 }
 
 /// Controls how a child of a [Flex], [Row], or [Column] flexes.

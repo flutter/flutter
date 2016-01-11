@@ -144,30 +144,32 @@ void main() {
 
       void pumpWidgetTree(HitTestBehavior behavior) {
         tester.pumpWidget(
-          new Stack([
-            new Listener(
-              onPointerDown: (_) {
-                didReceivePointerDown = true;
-              },
-              child: new Container(
+          new Stack(
+            children: <Widget>[
+              new Listener(
+                onPointerDown: (_) {
+                  didReceivePointerDown = true;
+                },
+                child: new Container(
+                  width: 100.0,
+                  height: 100.0,
+                  decoration: const BoxDecoration(
+                    backgroundColor: const Color(0xFF00FF00)
+                  )
+                )
+              ),
+              new Container(
                 width: 100.0,
                 height: 100.0,
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFF00FF00)
+                child: new GestureDetector(
+                  onTap: () {
+                    didTap = true;
+                  },
+                  behavior: behavior
                 )
               )
-            ),
-            new Container(
-              width: 100.0,
-              height: 100.0,
-              child: new GestureDetector(
-                onTap: () {
-                  didTap = true;
-                },
-                behavior: behavior
-              )
-            )
-          ])
+            ]
+          )
         );
       }
 

@@ -425,7 +425,7 @@ class Block extends StatelessComponent {
   final ScrollListener onScroll;
 
   Widget build(BuildContext context) {
-    Widget contents = new BlockBody(children, direction: scrollDirection);
+    Widget contents = new BlockBody(children: children, direction: scrollDirection);
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
     return new ScrollableViewport(

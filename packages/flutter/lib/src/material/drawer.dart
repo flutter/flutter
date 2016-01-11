@@ -173,36 +173,38 @@ class DrawerControllerState extends State<DrawerController> {
         onHorizontalDragUpdate: _move,
         onHorizontalDragEnd: _settle,
         child: new RepaintBoundary(
-          child: new Stack(<Widget>[
-            new GestureDetector(
-              onTap: close,
-              child: new DecoratedBox(
-                decoration: new BoxDecoration(
-                  backgroundColor: _color.value
-                ),
-                child: new Container()
-              )
-            ),
-            new Align(
-              alignment: const FractionalOffset(0.0, 0.5),
-              child: new Listener(
-                onPointerDown: _handlePointerDown,
-                child: new Align(
-                  alignment: const FractionalOffset(1.0, 0.5),
-                  widthFactor: _performance.progress,
-                  child: new SizeObserver(
-                    onSizeChanged: _handleSizeChanged,
-                    child: new RepaintBoundary(
-                      child: new Focus(
-                        key: new GlobalObjectKey(config.key),
-                        child: config.child
+          child: new Stack(
+            children: <Widget>[
+              new GestureDetector(
+                onTap: close,
+                child: new DecoratedBox(
+                  decoration: new BoxDecoration(
+                    backgroundColor: _color.value
+                  ),
+                  child: new Container()
+                )
+              ),
+              new Align(
+                alignment: const FractionalOffset(0.0, 0.5),
+                child: new Listener(
+                  onPointerDown: _handlePointerDown,
+                  child: new Align(
+                    alignment: const FractionalOffset(1.0, 0.5),
+                    widthFactor: _performance.progress,
+                    child: new SizeObserver(
+                      onSizeChanged: _handleSizeChanged,
+                      child: new RepaintBoundary(
+                        child: new Focus(
+                          key: new GlobalObjectKey(config.key),
+                          child: config.child
+                        )
                       )
                     )
                   )
                 )
               )
-            )
-          ])
+            ]
+          )
         )
       );
     }

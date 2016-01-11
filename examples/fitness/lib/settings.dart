@@ -89,14 +89,17 @@ class SettingsFragmentState extends State<SettingsFragment> {
     return new Block(<Widget>[
         new DrawerItem(
           onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
-          child: new Row(<Widget>[
-            new Flexible(child: new Text('Back up data to the cloud')),
-            new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
-          ])
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Back up data to the cloud')),
+              new Switch(value: config.userData.backupMode == BackupMode.enabled, onChanged: _handleBackupChanged),
+            ]
+          )
         ),
         new DrawerItem(
           onPressed: () => _handleGoalWeightPressed(),
-          child: new Column(<Widget>[
+          child: new Column(
+            children: <Widget>[
               new Text('Goal Weight'),
               new Text(goalWeightText, style: Theme.of(context).text.caption),
             ],

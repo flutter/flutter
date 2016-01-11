@@ -138,68 +138,79 @@ class ScaleAppState extends State<ScaleApp> {
       child: new Scaffold(
         toolBar: new ToolBar(
             center: new Text('Gestures Demo')),
-        body: new Stack([
-          new GestureDetector(
-            onScaleStart: _scaleEnabled ? _handleScaleStart : null,
-            onScaleUpdate: _scaleEnabled ? _handleScaleUpdate : null,
-            onTap: _tapEnabled ? _handleColorChange : null,
-            onDoubleTap: _doubleTapEnabled ? _handleScaleReset : null,
-            onLongPress: _longPressEnabled ? _handleDirectionChange : null,
-            child: new CustomPaint(
-              painter: new _GesturePainter(
-                zoom: _zoom,
-                offset: _offset,
-                swatch: _swatch,
-                forward: _forward,
-                scaleEnabled: _scaleEnabled,
-                tapEnabled: _tapEnabled,
-                doubleTapEnabled: _doubleTapEnabled,
-                longPressEnabled: _longPressEnabled
-              )
-            )
-          ),
-          new Positioned(
-            bottom: 0.0,
-            left: 0.0,
-            child: new Card(
-              child: new Container(
-                padding: new EdgeDims.all(4.0),
-                child: new Column([
-                    new Row([
-                      new Checkbox(
-                        value: _scaleEnabled,
-                        onChanged: (bool value) { setState(() { _scaleEnabled = value; }); }
-                      ),
-                      new Text('Scale'),
-                    ]),
-                    new Row([
-                      new Checkbox(
-                        value: _tapEnabled,
-                        onChanged: (bool value) { setState(() { _tapEnabled = value; }); }
-                      ),
-                      new Text('Tap'),
-                    ]),
-                    new Row([
-                      new Checkbox(
-                        value: _doubleTapEnabled,
-                        onChanged: (bool value) { setState(() { _doubleTapEnabled = value; }); }
-                      ),
-                      new Text('Double Tap'),
-                    ]),
-                    new Row([
-                      new Checkbox(
-                        value: _longPressEnabled,
-                        onChanged: (bool value) { setState(() { _longPressEnabled = value; }); }
-                      ),
-                      new Text('Long Press'),
-                    ]),
-                  ],
-                  alignItems: FlexAlignItems.start
+        body: new Stack(
+          children: <Widget>[
+            new GestureDetector(
+              onScaleStart: _scaleEnabled ? _handleScaleStart : null,
+              onScaleUpdate: _scaleEnabled ? _handleScaleUpdate : null,
+              onTap: _tapEnabled ? _handleColorChange : null,
+              onDoubleTap: _doubleTapEnabled ? _handleScaleReset : null,
+              onLongPress: _longPressEnabled ? _handleDirectionChange : null,
+              child: new CustomPaint(
+                painter: new _GesturePainter(
+                  zoom: _zoom,
+                  offset: _offset,
+                  swatch: _swatch,
+                  forward: _forward,
+                  scaleEnabled: _scaleEnabled,
+                  tapEnabled: _tapEnabled,
+                  doubleTapEnabled: _doubleTapEnabled,
+                  longPressEnabled: _longPressEnabled
                 )
               )
-            )
-          ),
-        ])
+            ),
+            new Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              child: new Card(
+                child: new Container(
+                  padding: new EdgeDims.all(4.0),
+                  child: new Column(
+                    children: <Widget>[
+                      new Row(
+                        children: <Widget>[
+                          new Checkbox(
+                            value: _scaleEnabled,
+                            onChanged: (bool value) { setState(() { _scaleEnabled = value; }); }
+                          ),
+                          new Text('Scale'),
+                        ]
+                      ),
+                      new Row(
+                        children: <Widget>[
+                          new Checkbox(
+                            value: _tapEnabled,
+                            onChanged: (bool value) { setState(() { _tapEnabled = value; }); }
+                          ),
+                          new Text('Tap'),
+                        ]
+                      ),
+                      new Row(
+                        children: <Widget>[
+                          new Checkbox(
+                            value: _doubleTapEnabled,
+                            onChanged: (bool value) { setState(() { _doubleTapEnabled = value; }); }
+                          ),
+                          new Text('Double Tap'),
+                        ]
+                      ),
+                      new Row(
+                        children: <Widget>[
+                          new Checkbox(
+                            value: _longPressEnabled,
+                            onChanged: (bool value) { setState(() { _longPressEnabled = value; }); }
+                          ),
+                          new Text('Long Press'),
+                        ]
+                      ),
+                    ],
+                    alignItems: FlexAlignItems.start
+                  )
+                )
+              )
+            ),
+          ]
+        )
       )
     );
   }

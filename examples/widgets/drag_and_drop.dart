@@ -135,37 +135,44 @@ class DragAndDropApp extends StatelessComponent {
       toolBar: new ToolBar(
         center: new Text('Drag and Drop Flutter Demo')
       ),
-      body: new Column(<Widget>[
-        new Flexible(child: new Row(<Widget>[
-            new ExampleDragSource(
-              color: const Color(0xFFFFF000),
-              under: true,
-              heavy: false,
-              child: new Text('under')
-            ),
-            new ExampleDragSource(
-              color: const Color(0xFF0FFF00),
-              under: false,
-              heavy: true,
-              child: new Text('long-press above')
-            ),
-            new ExampleDragSource(
-              color: const Color(0xFF00FFF0),
-              under: false,
-              heavy: false,
-              child: new Text('above')
-            ),
-          ],
-          alignItems: FlexAlignItems.center,
-          justifyContent: FlexJustifyContent.spaceAround
-        )),
-        new Flexible(child: new Row(<Widget>[
-          new Flexible(child: new ExampleDragTarget()),
-          new Flexible(child: new ExampleDragTarget()),
-          new Flexible(child: new ExampleDragTarget()),
-          new Flexible(child: new ExampleDragTarget()),
-        ])),
-      ])
+      body: new Column(
+        children: <Widget>[
+          new Flexible(child: new Row(
+            children: <Widget>[
+              new ExampleDragSource(
+                color: const Color(0xFFFFF000),
+                under: true,
+                heavy: false,
+                child: new Text('under')
+              ),
+              new ExampleDragSource(
+                color: const Color(0xFF0FFF00),
+                under: false,
+                heavy: true,
+                child: new Text('long-press above')
+              ),
+              new ExampleDragSource(
+                color: const Color(0xFF00FFF0),
+                under: false,
+                heavy: false,
+                child: new Text('above')
+              ),
+            ],
+            alignItems: FlexAlignItems.center,
+            justifyContent: FlexJustifyContent.spaceAround
+          )),
+          new Flexible(
+            child: new Row(
+              children: <Widget>[
+                new Flexible(child: new ExampleDragTarget()),
+                new Flexible(child: new ExampleDragTarget()),
+                new Flexible(child: new ExampleDragTarget()),
+                new Flexible(child: new ExampleDragTarget()),
+              ]
+            )
+          ),
+        ]
+      )
     );
   }
 }

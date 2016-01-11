@@ -37,15 +37,18 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
     container: container,
     child: new Container(
       height: 300.0,
-      child: new Column(<Widget>[
+      child: new Column(
+        children: <Widget>[
           new Rectangle(const Color(0xFF00FFFF)),
           new Container(
             padding: new EdgeDims.all(10.0),
             margin: new EdgeDims.all(10.0),
             decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-            child: new Row(<Widget>[
+            child: new Row(
+              children: <Widget>[
                 new RaisedButton(
-                  child: new Row(<Widget>[
+                  child: new Row(
+                    children: <Widget>[
                       new NetworkImage(src: "http://flutter.io/favicon.ico"),
                       new Text('PRESS ME'),
                     ]

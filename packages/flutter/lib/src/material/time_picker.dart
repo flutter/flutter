@@ -123,20 +123,23 @@ class _TimePickerState extends State<TimePicker> {
       onModeChanged: _handleModeChanged,
       onChanged: config.onChanged
     );
-    return new Column(<Widget>[
-      header,
-      new AspectRatio(
-        aspectRatio: 1.0,
-        child: new Container(
-          margin: const EdgeDims.all(12.0),
-          child: new _Dial(
-            mode: _mode,
-            selectedTime: config.selectedTime,
-            onChanged: config.onChanged
+    return new Column(
+      children: <Widget>[
+        header,
+        new AspectRatio(
+          aspectRatio: 1.0,
+          child: new Container(
+            margin: const EdgeDims.all(12.0),
+            child: new _Dial(
+              mode: _mode,
+              selectedTime: config.selectedTime,
+              onChanged: config.onChanged
+            )
           )
         )
-      )
-    ], alignItems: FlexAlignItems.stretch);
+      ],
+      alignItems: FlexAlignItems.stretch
+    );
   }
 }
 
@@ -199,31 +202,37 @@ class _TimePickerHeader extends StatelessComponent {
     return new Container(
       padding: kDialogHeadingPadding,
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
-      child: new Row(<Widget>[
-        new GestureDetector(
-          onTap: () => _handleChangeMode(_TimePickerMode.hour),
-          child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle)
-        ),
-        new Text(':', style: inactiveStyle),
-        new GestureDetector(
-          onTap: () => _handleChangeMode(_TimePickerMode.minute),
-          child: new Text(selectedTime.minuteLabel, style: minuteStyle)
-        ),
-        new GestureDetector(
-          onTap: _handleChangeDayPeriod,
-          behavior: HitTestBehavior.opaque,
-          child: new Container(
-            padding: const EdgeDims.only(left: 16.0, right: 24.0),
-            child: new Column([
-              new Text('AM', style: amStyle),
-              new Container(
-                padding: const EdgeDims.only(top: 4.0),
-                child: new Text('PM', style: pmStyle)
-              ),
-            ], justifyContent: FlexJustifyContent.end)
+      child: new Row(
+        children: <Widget>[
+          new GestureDetector(
+            onTap: () => _handleChangeMode(_TimePickerMode.hour),
+            child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle)
+          ),
+          new Text(':', style: inactiveStyle),
+          new GestureDetector(
+            onTap: () => _handleChangeMode(_TimePickerMode.minute),
+            child: new Text(selectedTime.minuteLabel, style: minuteStyle)
+          ),
+          new GestureDetector(
+            onTap: _handleChangeDayPeriod,
+            behavior: HitTestBehavior.opaque,
+            child: new Container(
+              padding: const EdgeDims.only(left: 16.0, right: 24.0),
+              child: new Column(
+                children: <Widget>[
+                  new Text('AM', style: amStyle),
+                  new Container(
+                    padding: const EdgeDims.only(top: 4.0),
+                    child: new Text('PM', style: pmStyle)
+                  ),
+                ],
+                justifyContent: FlexJustifyContent.end
+              )
+            )
           )
-        )
-      ], justifyContent: FlexJustifyContent.end)
+        ],
+        justifyContent: FlexJustifyContent.end
+      )
     );
   }
 }

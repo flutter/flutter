@@ -41,7 +41,8 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
 
 Widget buildFrame(MultiChildLayoutDelegate delegate) {
   return new Center(
-    child: new CustomMultiChildLayout([
+    child: new CustomMultiChildLayout(
+      children: <Widget>[
         new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
         new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
       ],
@@ -105,16 +106,22 @@ void main() {
     testWidgets((WidgetTester tester) {
       TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
       tester.pumpWidget(new Center(
-        child: new CustomMultiChildLayout([
-          new LayoutId(
-            id: 0,
-            child: new CustomMultiChildLayout([
-              new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
-              new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
-            ], delegate: delegate)
-          ),
-          new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
-        ], delegate: delegate)
+        child: new CustomMultiChildLayout(
+          children: <Widget>[
+            new LayoutId(
+              id: 0,
+              child: new CustomMultiChildLayout(
+                children: <Widget>[
+                  new LayoutId(id: 0, child: new Container(width: 150.0, height: 100.0)),
+                  new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
+                ],
+                delegate: delegate
+              )
+            ),
+            new LayoutId(id: 1, child: new Container(width: 100.0, height: 200.0)),
+          ],
+          delegate: delegate
+        )
       ));
 
     });

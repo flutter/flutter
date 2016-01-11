@@ -53,7 +53,8 @@ class HardwareKeyDemoState extends State<HardwareKeyDemo> implements mojo.RawKey
         child: new Text("Press a key", style: Typography.black.display1)
       );
     }
-    return new Column([
+    return new Column(
+      children: <Widget>[
         new Text(
           '${_event.type}',
           style: Typography.black.body2
@@ -62,7 +63,9 @@ class HardwareKeyDemoState extends State<HardwareKeyDemo> implements mojo.RawKey
           '${_event.keyData.keyCode}',
           style: Typography.black.display4
         )
-    ], justifyContent: FlexJustifyContent.center);
+      ],
+      justifyContent: FlexJustifyContent.center
+    );
   }
 
   Widget build(BuildContext context)  {

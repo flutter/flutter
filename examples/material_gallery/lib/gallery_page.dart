@@ -33,17 +33,19 @@ class _GalleryPageState extends State<GalleryPage> {
 
     // TODO(eseidel): We should make this into a shared DrawerFooter.
     items.add(new DrawerDivider());
-    items.add(new DrawerItem(child: new Flex([
-      new Text("Made with Flutter "),
-      new Container(
-        margin: const EdgeDims.symmetric(horizontal: 5.0),
-        child: new AssetImage(
-            name: 'assets/flutter_logo.png',
-            height: 16.0,
-            fit: ImageFit.contain
+    items.add(new DrawerItem(child: new Flex(
+      children: <Widget>[
+        new Text("Made with Flutter "),
+        new Container(
+          margin: const EdgeDims.symmetric(horizontal: 5.0),
+          child: new AssetImage(
+              name: 'assets/flutter_logo.png',
+              height: 16.0,
+              fit: ImageFit.contain
+          )
         )
-      )
-    ])));
+      ]
+    )));
 
     return new Drawer(child: new Block(items));
   }

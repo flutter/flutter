@@ -28,13 +28,16 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
   }
 
   Widget build(BuildContext context) {
-    return new Column([
-      new Text('$_selectedTime'),
-      new RaisedButton(
-        onPressed: _handleSelectTime,
-        child: new Text('SELECT TIME')
-      ),
-    ], justifyContent: FlexJustifyContent.center);
+    return new Column(
+      children: <Widget>[
+        new Text('$_selectedTime'),
+        new RaisedButton(
+          onPressed: _handleSelectTime,
+          child: new Text('SELECT TIME')
+        ),
+      ],
+      justifyContent: FlexJustifyContent.center
+    );
   }
 }
 

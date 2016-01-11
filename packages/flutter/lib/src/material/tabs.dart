@@ -331,7 +331,7 @@ class _Tab extends StatelessComponent {
       labelContent = _buildLabelIcon();
     } else {
       labelContent = new Column(
-        <Widget>[
+        children: <Widget>[
           new Container(
             child: _buildLabelIcon(),
             margin: const EdgeDims.only(bottom: 10.0)

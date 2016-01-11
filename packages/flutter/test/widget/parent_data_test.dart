@@ -65,15 +65,17 @@ void main() {
     testWidgets((WidgetTester tester) {
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new DecoratedBox(decoration: kBoxDecorationA),
-          new Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB)
-          ),
-          new DecoratedBox(decoration: kBoxDecorationC),
-        ])
+        new Stack(
+          children: <Widget>[
+            new DecoratedBox(decoration: kBoxDecorationA),
+            new Positioned(
+              top: 10.0,
+              left: 10.0,
+              child: new DecoratedBox(decoration: kBoxDecorationB)
+            ),
+            new DecoratedBox(decoration: kBoxDecorationC),
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -83,19 +85,21 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            bottom: 5.0,
-            right: 7.0,
-            child: new DecoratedBox(decoration: kBoxDecorationA)
-          ),
-          new Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB)
-          ),
-          new DecoratedBox(decoration: kBoxDecorationC),
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              bottom: 5.0,
+              right: 7.0,
+              child: new DecoratedBox(decoration: kBoxDecorationA)
+            ),
+            new Positioned(
+              top: 10.0,
+              left: 10.0,
+              child: new DecoratedBox(decoration: kBoxDecorationB)
+            ),
+            new DecoratedBox(decoration: kBoxDecorationC),
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -109,19 +113,21 @@ void main() {
       DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            bottom: 5.0,
-            right: 7.0,
-            child: kDecoratedBoxA
-          ),
-          new Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: kDecoratedBoxB
-          ),
-          kDecoratedBoxC,
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              bottom: 5.0,
+              right: 7.0,
+              child: kDecoratedBoxA
+            ),
+            new Positioned(
+              top: 10.0,
+              left: 10.0,
+              child: kDecoratedBoxB
+            ),
+            kDecoratedBoxC,
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -131,19 +137,21 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            bottom: 6.0,
-            right: 8.0,
-            child: kDecoratedBoxA
-          ),
-          new Positioned(
-            left: 10.0,
-            right: 10.0,
-            child: kDecoratedBoxB
-          ),
-          kDecoratedBoxC,
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              bottom: 6.0,
+              right: 8.0,
+              child: kDecoratedBoxA
+            ),
+            new Positioned(
+              left: 10.0,
+              right: 10.0,
+              child: kDecoratedBoxB
+            ),
+            kDecoratedBoxC,
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -153,15 +161,17 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          kDecoratedBoxA,
-          new Positioned(
-            left: 11.0,
-            right: 12.0,
-            child: new Container(child: kDecoratedBoxB)
-          ),
-          kDecoratedBoxC,
-        ])
+        new Stack(
+          children: <Widget>[
+            kDecoratedBoxA,
+            new Positioned(
+              left: 11.0,
+              right: 12.0,
+              child: new Container(child: kDecoratedBoxB)
+            ),
+            kDecoratedBoxC,
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -171,19 +181,21 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          kDecoratedBoxA,
-          new Positioned(
-            right: 10.0,
-            child: new Container(child: kDecoratedBoxB)
-          ),
-          new Container(
-            child: new Positioned(
-              top: 8.0,
-              child: kDecoratedBoxC
+        new Stack(
+          children: <Widget>[
+            kDecoratedBoxA,
+            new Positioned(
+              right: 10.0,
+              child: new Container(child: kDecoratedBoxB)
+            ),
+            new Container(
+              child: new Positioned(
+                top: 8.0,
+                child: kDecoratedBoxC
+              )
             )
-          )
-        ])
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -193,12 +205,14 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            right: 10.0,
-            child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
-          ),
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              right: 10.0,
+              child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
+            ),
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -213,12 +227,14 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 7.0,
-            child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
-          ),
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 7.0,
+              child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
+            ),
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -233,7 +249,7 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[])
+        new Stack()
       );
 
       checkTree(tester, <TestParentData>[]);
@@ -245,36 +261,40 @@ void main() {
       expect(cachedException, isNull);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 5.0,
-            bottom: 8.0,
-            child: new Positioned(
-              top: 6.0,
-              left: 7.0,
-              child: new DecoratedBox(decoration: kBoxDecorationB)
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 5.0,
+              bottom: 8.0,
+              child: new Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: new DecoratedBox(decoration: kBoxDecorationB)
+              )
             )
-          )
-        ])
+          ]
+        )
       );
 
       expect(cachedException, isNotNull);
       cachedException = null;
 
-      tester.pumpWidget(new Stack(<Widget>[]));
+      tester.pumpWidget(new Stack());
 
       checkTree(tester, <TestParentData>[]);
       expect(cachedException, isNull);
 
       tester.pumpWidget(
         new Container(
-          child: new Flex(<Widget>[
-            new Positioned(
-              top: 6.0,
-              left: 7.0,
-              child: new DecoratedBox(decoration: kBoxDecorationB)
-            )
-          ])
+          child: new Flex(
+            children: <Widget>[
+              new Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: new DecoratedBox(decoration: kBoxDecorationB)
+              )
+            ]
+          )
         )
       );
 
@@ -282,7 +302,7 @@ void main() {
       cachedException = null;
 
       tester.pumpWidget(
-        new Stack(<Widget>[])
+        new Stack()
       );
 
       checkTree(tester, <TestParentData>[]);
@@ -294,30 +314,15 @@ void main() {
       GlobalKey key = new GlobalKey();
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
-          )
-        ])
-      );
-
-      checkTree(tester, <TestParentData>[
-        new TestParentData(top: 10.0, left: 10.0),
-      ]);
-
-      tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: new DecoratedBox(
-              decoration: kBoxDecorationB,
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 10.0,
+              left: 10.0,
               child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
             )
-          )
-        ])
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[
@@ -325,13 +330,34 @@ void main() {
       ]);
 
       tester.pumpWidget(
-        new Stack(<Widget>[
-          new Positioned(
-            top: 10.0,
-            left: 10.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
-          )
-        ])
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 10.0,
+              left: 10.0,
+              child: new DecoratedBox(
+                decoration: kBoxDecorationB,
+                child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
+              )
+            )
+          ]
+        )
+      );
+
+      checkTree(tester, <TestParentData>[
+        new TestParentData(top: 10.0, left: 10.0),
+      ]);
+
+      tester.pumpWidget(
+        new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 10.0,
+              left: 10.0,
+              child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
+            )
+          ]
+        )
       );
 
       checkTree(tester, <TestParentData>[

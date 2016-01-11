@@ -51,7 +51,7 @@ class ListItem extends StatelessComponent {
       onLongPress: onLongPress,
       child: new Padding(
         padding: const EdgeDims.symmetric(horizontal: 16.0),
-        child: new Row(children)
+        child: new Row(children: children)
       )
     );
   }

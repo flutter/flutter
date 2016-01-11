@@ -17,7 +17,7 @@ class AdaptiveItem {
 
   Widget toListItem() {
     return new Row(
-      <Widget>[
+      children: <Widget>[
         new Container(
           width: 32.0,
           height: 32.0,
@@ -34,7 +34,7 @@ class AdaptiveItem {
   Widget toCard() {
     return new Card(
       child: new Column(
-        <Widget>[
+        children: <Widget>[
           new Flexible(
             child: new Container(
               decoration: new BoxDecoration(
@@ -45,7 +45,7 @@ class AdaptiveItem {
           new Container(
             margin: const EdgeDims.only(left: 8.0),
             child: new Row(
-              <Widget>[
+              children: <Widget>[
                 new Flexible(
                   child: new Text(name)
                 ),

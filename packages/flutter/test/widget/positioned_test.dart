@@ -43,15 +43,17 @@ void main() {
           child: new Container(
             height: 100.0,
             width: 100.0,
-            child: new Stack(<Widget>[
-              new PositionedTransition(
-                rect: rect,
-                performance: performance,
-                child: new Container(
-                  key: key
+            child: new Stack(
+              children: <Widget>[
+                new PositionedTransition(
+                  rect: rect,
+                  performance: performance,
+                  child: new Container(
+                    key: key
+                  )
                 )
-              )
-            ])
+              ]
+            )
           )
         )
       ); // t=0

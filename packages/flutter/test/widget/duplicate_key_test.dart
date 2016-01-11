@@ -37,10 +37,12 @@ class KeyedWrapper extends StatelessComponent {
 }
 
 Widget builder() {
-  return new Column(<Widget>[
-    new KeyedWrapper(items[1].key1, items[1].key2),
-    new KeyedWrapper(items[0].key1, items[0].key2)
-  ]);
+  return new Column(
+    children: <Widget>[
+      new KeyedWrapper(items[1].key1, items[1].key2),
+      new KeyedWrapper(items[0].key1, items[0].key2)
+    ]
+  );
 }
 
 void main() {
