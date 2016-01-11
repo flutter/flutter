@@ -6,19 +6,19 @@
 #include <iostream>
 #include <iomanip>
 
-#include "sky/compositor/statistics_layer.h"
+#include "sky/compositor/performance_overlay_layer.h"
 
 namespace sky {
 namespace compositor {
 
-StatisticsLayer::StatisticsLayer(uint64_t enabledOptions)
+PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t enabledOptions)
     : options_(enabledOptions) {
 }
 
-static void PaintContext_DrawStatisticsText(SkCanvas& canvas,
-                                            const std::string& string,
-                                            int x,
-                                            int y) {
+static void DrawStatisticsText(SkCanvas& canvas,
+                               const std::string& string,
+                               int x,
+                               int y) {
   SkPaint paint;
   paint.setTextSize(14);
   paint.setLinearText(false);
@@ -50,7 +50,7 @@ static void VisualizeStopWatch(SkCanvas& canvas,
     stream << std::setprecision(2);
     stream << label_prefix << " " << fps << " FPS | " << msPerFrame
            << "ms/frame";
-    PaintContext_DrawStatisticsText(canvas, stream.str(), x, y);
+    DrawStatisticsText(canvas, stream.str(), x, y);
   }
 
   if (show_labels || show_graph) {
@@ -58,24 +58,22 @@ static void VisualizeStopWatch(SkCanvas& canvas,
   }
 }
 
-void StatisticsLayer::Paint(PaintContext::ScopedFrame& frame) {
-  if (!options_.anyEnabled()) {
+void PerformanceOverlayLayer::Paint(PaintContext::ScopedFrame& frame) {
+  if (!options_) {
     return;
   }
-
-  using Opt = CompositorOptions::Option;
 
   SkScalar width = has_paint_bounds() ? paint_bounds().width() : 0;
   SkAutoCanvasRestore save(&frame.canvas(), true);
 
   VisualizeStopWatch(frame.canvas(), frame.context().frame_time(), width,
-                     options_.isEnabled(Opt::VisualizeRasterizerStatistics),
-                     options_.isEnabled(Opt::DisplayRasterizerStatistics),
+                     options_ & kVisualizeRasterizerStatistics,
+                     options_ & kDisplayRasterizerStatistics,
                      "Rasterizer");
 
   VisualizeStopWatch(frame.canvas(), frame.context().engine_time(), width,
-                     options_.isEnabled(Opt::VisualizeEngineStatistics),
-                     options_.isEnabled(Opt::DisplayEngineStatistics),
+                     options_ & kVisualizeEngineStatistics,
+                     options_ & kDisplayEngineStatistics,
                      "Engine");
 }
 

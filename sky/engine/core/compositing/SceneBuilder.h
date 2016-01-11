@@ -44,7 +44,7 @@ public:
     void pop();
 
     void addPicture(const Offset& offset, Picture* picture, const Rect& bounds);
-    void addStatistics(uint64_t enabledOptions, const Rect& bounds);
+    void addPerformanceOverlay(uint64_t enabledOptions, const Rect& bounds);
 
     void setRasterizerTracingThreshold(uint32_t frameInterval);
 
