@@ -24,7 +24,15 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   void _handleShowGridChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(showGrid: value));
+    sendUpdates(config.configuration.copyWith(debugShowGrid: value));
+  }
+
+  void _handleShowSizesChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(debugShowSizes: value));
+  }
+
+  void _handleShowRenderingStatisticsChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(showRenderingStatistics: value));
   }
 
   void _confirmOptimismChange() {
@@ -93,22 +101,44 @@ class StockSettingsState extends State<StockSettings> {
           ),
         ])
       ),
+      new DrawerItem(
+        icon: 'action/picture_in_picture',
+        onPressed: () { _handleShowRenderingStatisticsChanged(!config.configuration.showRenderingStatistics); },
+        child: new Row(<Widget>[
+          new Flexible(child: new Text('Show rendering performance overlay')),
+          new Switch(
+            value: config.configuration.showRenderingStatistics,
+            onChanged: _handleShowRenderingStatisticsChanged
+          ),
+        ])
+      ),
     ];
     assert(() {
-      // material grid is only available in checked mode
-      rows.add(
+      // material grid and size construction lines are only available in checked mode
+      rows.addAll([
         new DrawerItem(
           icon: 'editor/border_clear',
-          onPressed: () { _handleShowGridChanged(!config.configuration.showGrid); },
+          onPressed: () { _handleShowGridChanged(!config.configuration.debugShowGrid); },
           child: new Row(<Widget>[
             new Flexible(child: new Text('Show material grid (for debugging)')),
             new Switch(
-              value: config.configuration.showGrid,
+              value: config.configuration.debugShowGrid,
               onChanged: _handleShowGridChanged
             ),
           ])
+        ),
+        new DrawerItem(
+          icon: 'editor/border_all',
+          onPressed: () { _handleShowSizesChanged(!config.configuration.debugShowSizes); },
+          child: new Row(<Widget>[
+            new Flexible(child: new Text('Show construction lines (for debugging)')),
+            new Switch(
+              value: config.configuration.debugShowSizes,
+              onChanged: _handleShowSizesChanged
+            ),
+          ])
         )
-      );
+      ]);
       return true;
     });
     return new Block(
