@@ -25,7 +25,7 @@ void main() {
 
   test('Flex and padding', () {
     RenderBox size = new RenderConstrainedBox(
-      additionalConstraints: new BoxConstraints().tightenHeight(100.0)
+      additionalConstraints: new BoxConstraints().tighten(height: 100.0)
     );
     RenderBox inner = new RenderDecoratedBox(
       decoration: new BoxDecoration(

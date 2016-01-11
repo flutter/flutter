@@ -124,22 +124,14 @@ class BoxConstraints extends Constraints {
     );
   }
 
-  /// Returns new box constraints with a tight width as close to the given width
-  /// as possible while still respecting the original box constraints.
-  BoxConstraints tightenWidth(double width) {
-    return new BoxConstraints(minWidth: math.max(math.min(maxWidth, width), minWidth),
-                              maxWidth: math.max(math.min(maxWidth, width), minWidth),
-                              minHeight: minHeight,
-                              maxHeight: maxHeight);
-  }
-
-  /// Returns new box constraints with a tight height as close to the given
-  /// height as possible while still respecting the original box constraints.
-  BoxConstraints tightenHeight(double height) {
-    return new BoxConstraints(minWidth: minWidth,
-                              maxWidth: maxWidth,
-                              minHeight: math.max(math.min(maxHeight, height), minHeight),
-                              maxHeight: math.max(math.min(maxHeight, height), minHeight));
+  /// Returns new box constraints with a tight width and/or height as close to
+  /// the given width and height as possible while still respecting the original
+  /// box constraints.
+  BoxConstraints tighten({ double width, double height }) {
+    return new BoxConstraints(minWidth: width == null ? minWidth : math.max(math.min(maxWidth, width), minWidth),
+                              maxWidth: width == null ? maxWidth : math.max(math.min(maxWidth, width), minWidth),
+                              minHeight: height == null ? minHeight : math.max(math.min(maxHeight, height), minHeight),
+                              maxHeight: height == null ? maxHeight : math.max(math.min(maxHeight, height), minHeight));
   }
 
   /// Returns box constraints with the same width constraints but with
