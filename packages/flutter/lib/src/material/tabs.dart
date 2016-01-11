@@ -764,36 +764,29 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 }
 
-typedef Widget TabItemBuilder<T>(T item);
-
-class TabBarView<T> extends PageableList {
+class TabBarView extends PageableList {
   TabBarView({
     Key key,
-    List<T> items,
-    TabItemBuilder<T> itemBuilder
-  }) : items = items, itemBuilder = itemBuilder, super(
+    List<Widget> children
+  }) : super(
     key: key,
     scrollDirection: ScrollDirection.horizontal,
-    children: items.map((T item) => itemBuilder(item)).toList(),
-    itemsWrap: false
+    children: children
   ) {
-    assert(items != null);
-    assert(items.length > 1);
+    assert(children != null);
+    assert(children.length > 1);
   }
 
-  final List<T> items;
-  final TabItemBuilder<T> itemBuilder;
-
-  _TabBarViewState createState() => new _TabBarViewState<T>();
+  _TabBarViewState createState() => new _TabBarViewState();
 }
 
-class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements TabBarSelectionPerformanceListener {
+class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSelectionPerformanceListener {
 
   TabBarSelectionState _selection;
   List<Widget> _items;
   AnimationDirection _scrollDirection = AnimationDirection.forward;
 
-  int get _tabCount => config.items.length;
+  int get _tabCount => config.children.length;
 
   BoundedBehavior _boundedBehavior;
 
@@ -802,7 +795,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
     return _boundedBehavior;
   }
 
-  void _initSelection(TabBarSelectionState<T> selection) {
+  void _initSelection(TabBarSelectionState selection) {
     _selection = selection;
     if (_selection != null) {
       _selection.registerPerformanceListener(this);
@@ -919,7 +912,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   }
 
   Widget buildContent(BuildContext context) {
-    TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
+    TabBarSelectionState newSelection = TabBarSelection.of(context);
     if (_selection != newSelection)
       _initSelection(newSelection);
     return new PageViewport(

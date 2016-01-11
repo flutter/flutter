@@ -27,9 +27,8 @@ class TabsDemo extends StatefulComponent {
 
 class _TabsDemoState extends State<TabsDemo> {
   Widget build(_) {
-    return new TabBarView<String>(
-      items: _iconNames,
-      itemBuilder: (String iconName) {
+    return new TabBarView(
+      children: _iconNames.map((String iconName) {
         return new Container(
           key: new ValueKey<String>(iconName),
           padding: const EdgeDims.all(12.0),
@@ -37,7 +36,7 @@ class _TabsDemoState extends State<TabsDemo> {
             child: new Center(child: new Icon(icon: "action/$iconName", size:IconSize.s48))
           )
         );
-      }
+      }).toList()
     );
   }
 }

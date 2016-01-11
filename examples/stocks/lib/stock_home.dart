@@ -267,18 +267,11 @@ class StockHomeState extends State<StockHome> {
         toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
         floatingActionButton: buildFloatingActionButton(),
         drawer: _buildDrawer(context),
-        body: new TabBarView<StockHomeTab>(
-          items: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
-          itemBuilder: (StockHomeTab tab) {
-            switch (tab) {
-              case StockHomeTab.market:
-                return _buildStockTab(context, tab, config.symbols);
-              case StockHomeTab.portfolio:
-                return _buildStockTab(context, tab, portfolioSymbols);
-              default:
-                assert(false);
-            }
-          }
+        body: new TabBarView(
+          children: <Widget>[
+            _buildStockTab(context, StockHomeTab.market, config.symbols),
+            _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),
+          ]
         )
       )
     );

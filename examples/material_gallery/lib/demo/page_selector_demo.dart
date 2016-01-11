@@ -85,9 +85,8 @@ class TabViewDemo extends StatelessComponent {
               )
             ),
             new Flexible(
-              child: new TabBarView<String>(
-                items: _iconNames,
-                itemBuilder: _buildTabView
+              child: new TabBarView(
+                children: _iconNames.map(_buildTabView).toList()
               )
             )
           ]);
