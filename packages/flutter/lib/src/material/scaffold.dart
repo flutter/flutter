@@ -19,6 +19,7 @@ import 'drawer.dart';
 import 'icon_button.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
+const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 400);
 
 enum _Child {
   body,
@@ -94,6 +95,66 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => false;
+}
+
+class _FloatingActionButtonTransition extends StatefulComponent {
+  _FloatingActionButtonTransition({
+    Key key,
+    this.child
+  }) : super(key: key) {
+    assert(child != null);
+  }
+
+  final Widget child;
+
+  _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
+}
+
+class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> {
+  final Performance performance = new Performance(duration: _kFloatingActionButtonSegue);
+  Widget oldChild;
+
+  void initState() {
+    super.initState();
+    performance.play().then((_) {
+      oldChild = null;
+    });
+  }
+
+  void dispose() {
+    performance.stop();
+    super.dispose();
+  }
+
+  void didUpdateConfig(_FloatingActionButtonTransition oldConfig) {
+    if (Widget.canUpdate(oldConfig.child, config.child))
+      return;
+    oldChild = oldConfig.child;
+    performance
+      ..progress = 0.0
+      ..play().then((_) {
+        oldChild = null;
+      });
+  }
+
+  Widget build(BuildContext context) {
+    final List<Widget> children = new List<Widget>();
+    if (oldChild != null) {
+      children.add(new ScaleTransition(
+        scale: new AnimatedValue<double>(1.0, end: 0.0, curve: new Interval(0.0, 0.5, curve: Curves.easeIn)),
+        performance: performance,
+        child: oldChild
+      ));
+    }
+
+    children.add(new ScaleTransition(
+      scale: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.5, 1.0, curve: Curves.easeIn)),
+      performance: performance,
+      child: config.child
+    ));
+
+    return new Stack(children: children);
+  }
 }
 
 class Scaffold extends StatefulComponent {
@@ -323,7 +384,13 @@ class ScaffoldState extends State<Scaffold> {
     if (_snackBars.isNotEmpty)
       _addIfNonNull(children, _snackBars.first._widget, _Child.snackBar);
 
-    _addIfNonNull(children, config.floatingActionButton, _Child.floatingActionButton);
+    if (config.floatingActionButton != null) {
+      Widget fab = new _FloatingActionButtonTransition(
+        key: new ValueKey<Key>(config.floatingActionButton.key),
+        child: config.floatingActionButton
+      );
+      children.add(new LayoutId(child: fab, id: _Child.floatingActionButton));
+    }
 
     if (config.drawer != null) {
       children.add(new LayoutId(

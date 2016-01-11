@@ -230,6 +230,11 @@ abstract class Widget {
   }
 
   void debugFillDescription(List<String> description) { }
+
+  static bool canUpdate(Widget oldWidget, Widget newWidget) {
+    return oldWidget.runtimeType == newWidget.runtimeType &&
+      oldWidget.key == newWidget.key;
+  }
 }
 
 // TODO(ianh): move the next four classes to below InheritedWidget
@@ -512,11 +517,6 @@ abstract class InheritedWidget extends _ProxyComponent {
 
 // ELEMENTS
 
-bool _canUpdate(Widget oldWidget, Widget newWidget) {
-  return oldWidget.runtimeType == newWidget.runtimeType &&
-         oldWidget.key == newWidget.key;
-}
-
 enum _ElementLifecycle {
   initial,
   active,
@@ -691,7 +691,7 @@ abstract class Element<T extends Widget> implements BuildContext {
           updateSlotForChild(child, newSlot);
         return child;
       }
-      if (_canUpdate(child.widget, newWidget)) {
+      if (Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         child.update(newWidget);
@@ -741,7 +741,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(newWidget != widget);
     assert(depth != null);
     assert(_active);
-    assert(_canUpdate(widget, newWidget));
+    assert(Widget.canUpdate(widget, newWidget));
     _widget = newWidget;
   }
 
@@ -798,7 +798,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     Element element = key._currentElement;
     if (element == null)
       return null;
-    if (!_canUpdate(element.widget, newWidget))
+    if (!Widget.canUpdate(element.widget, newWidget))
       return null;
     if (element._parent != null && !element._parent.detachChild(element))
       return null;
@@ -1493,7 +1493,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
       Element oldChild = oldChildren[childrenTop];
       Widget newWidget = newWidgets[childrenTop];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
-      if (!_canUpdate(oldChild.widget, newWidget))
+      if (!Widget.canUpdate(oldChild.widget, newWidget))
         break;
       childrenTop += 1;
     }
@@ -1508,7 +1508,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
       Element oldChild = oldChildren[oldChildrenBottom];
       Widget newWidget = newWidgets[newChildrenBottom];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
-      if (!_canUpdate(oldChild.widget, newWidget))
+      if (!Widget.canUpdate(oldChild.widget, newWidget))
         break;
       Element newChild = updateChild(oldChild, newWidget, nextSibling);
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
@@ -1543,7 +1543,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
         if (key != null) {
           oldChild = oldKeyedChildren[newWidget.key];
           if (oldChild != null) {
-            if (_canUpdate(oldChild.widget, newWidget)) {
+            if (Widget.canUpdate(oldChild.widget, newWidget)) {
               // we found a match!
               // remove it from oldKeyedChildren so we don't unsync it later
               oldKeyedChildren.remove(key);
@@ -1554,7 +1554,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
           }
         }
       }
-      assert(oldChild == null || _canUpdate(oldChild.widget, newWidget));
+      assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
       Element newChild = updateChild(oldChild, newWidget, nextSibling);
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
@@ -1571,7 +1571,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
       Element oldChild = oldChildren[childrenTop];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       Widget newWidget = newWidgets[childrenTop];
-      assert(_canUpdate(oldChild.widget, newWidget));
+      assert(Widget.canUpdate(oldChild.widget, newWidget));
       Element newChild = updateChild(oldChild, newWidget, nextSibling);
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
