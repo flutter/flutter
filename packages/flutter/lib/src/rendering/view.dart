@@ -108,7 +108,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
-  bool get hasLayer => true;
+  bool get isRepaintBoundary => true;
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null)

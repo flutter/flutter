@@ -67,7 +67,7 @@ class PaintingContext {
   /// painting. The render object's layer is re-used, along with any layers in
   /// the subtree that don't need to be repainted.
   static void repaintCompositedChild(RenderObject child) {
-    assert(child.hasLayer);
+    assert(child.isRepaintBoundary);
     assert(child.needsPaint);
     child._layer ??= new ContainerLayer();
     child._layer.removeAllChildren();
@@ -86,7 +86,7 @@ class PaintingContext {
   /// into the layer subtree associated with this painting context. Otherwise,
   /// the child will be painted into the current PictureLayer for this context.
   void paintChild(RenderObject child, Offset offset) {
-    if (child.hasLayer) {
+    if (child.isRepaintBoundary) {
       _stopRecordingIfNeeded();
       _compositeChild(child, offset);
     } else {
@@ -96,7 +96,7 @@ class PaintingContext {
 
   void _compositeChild(RenderObject child, Offset offset) {
     assert(!_isRecording);
-    assert(child.hasLayer);
+    assert(child.isRepaintBoundary);
     assert(_canvas == null || _canvas.getSaveCount() == 1);
 
     // Create a layer for our child, and paint the child into it.
@@ -393,7 +393,7 @@ RenderingExceptionHandler debugRenderingExceptionHandler;
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   RenderObject() {
-    _needsCompositing = hasLayer;
+    _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
   }
 
   // LAYOUT
@@ -838,21 +838,31 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   static List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
   static List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
 
-  /// Whether this render object paints using a composited layer.
+  /// Whether this render object repaints separately from its parent.
   ///
-  /// Override this in subclasses to indicate that instances of your class need
-  /// to have their own compositing layer. For example, videos should return
+  /// Override this in subclasses to indicate that instances of your class ought
+  /// to repaint independently. For example, render objects that repaint
+  /// frequently might want to repaint themselves without requiring their parent
+  /// to repaint.
+  ///
+  /// Warning: This getter must not change value over the lifetime of this object.
+  bool get isRepaintBoundary => false;
+
+  /// Whether this render object always needs compositing.
+  ///
+  /// Override this in subclasses to indicate that your paint function always
+  /// creates at least one composited layer. For example, videos should return
   /// true if they use hardware decoders.
   ///
-  /// Note: This getter must not change value over the lifetime of this object.
-  bool get hasLayer => false;
+  /// Warning: This getter must not change value over the lifetime of this object.
+  bool get alwaysNeedsCompositing => false;
 
   ContainerLayer _layer;
-  /// The compositing layer that this render object uses to paint.
+  /// The compositing layer that this render object uses to repaint.
   ///
-  /// Call only when [hasLayer] is true.
+  /// Call only when [isRepaintBoundary] is true.
   ContainerLayer get layer {
-    assert(hasLayer);
+    assert(isRepaintBoundary);
     assert(!_needsPaint);
     return _layer;
   }
@@ -878,7 +888,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       final RenderObject parent = this.parent;
       if (parent._needsCompositingBitsUpdate)
         return;
-      if (!hasLayer && !parent.hasLayer) {
+      if (!isRepaintBoundary && !parent.isRepaintBoundary) {
         parent._markNeedsCompositingBitsUpdate();
         return;
       }
@@ -927,7 +937,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       if (child.needsCompositing)
         _needsCompositing = true;
     });
-    if (hasLayer)
+    if (isRepaintBoundary || alwaysNeedsCompositing)
       _needsCompositing = true;
     if (oldNeedsCompositing != _needsCompositing)
       markNeedsPaint();
@@ -955,7 +965,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (_needsPaint)
       return;
     _needsPaint = true;
-    if (hasLayer) {
+    if (isRepaintBoundary) {
       assert(() {
         if (debugPrintMarkNeedsPaintStacks)
           debugPrintStack();
@@ -1019,7 +1029,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(attached);
     assert(parent is! RenderObject);
     assert(!_debugDoingPaint);
-    assert(hasLayer);
+    assert(isRepaintBoundary);
     assert(_layer == null);
     _layer = rootLayer;
     assert(_needsPaint);
@@ -1034,7 +1044,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisPaint = true;
       debugLastActivePaint = _debugActivePaint;
       _debugActivePaint = this;
-      assert(!hasLayer || _layer != null);
+      assert(!isRepaintBoundary || _layer != null);
       return true;
     });
     _needsPaint = false;
