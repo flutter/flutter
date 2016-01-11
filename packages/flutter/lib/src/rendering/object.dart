@@ -183,18 +183,18 @@ class PaintingContext {
 
   static final Paint _disableAntialias = new Paint()..isAntiAlias = false;
 
-  /// Push a statistics overlay.
+  /// Push a performance overlay.
   ///
-  /// Statistics overlays are always composited because they're drawn by the
+  /// Performance overlays are always composited because they're drawn by the
   /// compositor.
-  void pushStatistics(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
+  void pushPerformanceOverlay(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
     _stopRecordingIfNeeded();
-    StatisticsLayer statisticsLayer = new StatisticsLayer(
+    PerformanceOverlayLayer performanceOverlayLayer = new PerformanceOverlayLayer(
       paintBounds: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
       optionsMask: optionsMask,
       rasterizerThreshold: rasterizerThreshold
     );
-    _appendLayer(statisticsLayer, offset);
+    _appendLayer(performanceOverlayLayer, offset);
   }
 
   /// Push a rectangular clip rect.

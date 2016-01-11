@@ -5,9 +5,12 @@
 import 'box.dart';
 import 'object.dart';
 
-/// The options that control whether the statistics overlay displays certain
-/// aspects of the compositor
-enum StatisticsOption {
+/// The options that control whether the performance overlay displays certain
+/// aspects of the compositor.
+enum PerformanceOverlayOption {
+  // these must be in the order needed for their index values to match the
+  // constants in //engine/src/sky/compositor/performance_overlay_layer.h
+
   /// Display the frame time and FPS of the last frame rendered. This field is
   /// updated every frame.
   ///
@@ -16,11 +19,13 @@ enum StatisticsOption {
   /// and tries to flush them onto the screen. When the total time taken by this
   /// step exceeds the frame slice, a frame is lost.
   displayRasterizerStatistics,
+
   /// Display the rasterizer frame times as they change over a set period of
   /// time in the form of a graph. The y axis of the graph denotes the total
   /// time spent by the rasterizer as a fraction of the total frame slice. When
   /// the bar turns red, a frame is lost.
   visualizeRasterizerStatistics,
+
   /// Display the frame time and FPS at which the interface can construct a
   /// layer tree for the rasterizer (whose behavior is described above) to
   /// consume.
@@ -28,6 +33,7 @@ enum StatisticsOption {
   /// This involves all layout, animations, etc. When the total time taken by
   /// this step exceeds the frame slice, a frame is lost.
   displayEngineStatistics,
+
   /// Display the engine frame times as they change over a set period of time
   /// in the form of a graph. The y axis of the graph denotes the total time
   /// spent by the eninge as a fraction of the total frame slice. When the bar
@@ -35,13 +41,13 @@ enum StatisticsOption {
   visualizeEngineStatistics,
 }
 
-class RenderStatisticsBox extends RenderBox {
-  RenderStatisticsBox({ int optionsMask: 0, int rasterizerThreshold: 0 })
+class RenderPerformanceOverlay extends RenderBox {
+  RenderPerformanceOverlay({ int optionsMask: 0, int rasterizerThreshold: 0 })
     : _optionsMask = optionsMask,
       _rasterizerThreshold = rasterizerThreshold;
 
   /// The mask is created by shifting 1 by the index of the specific
-  /// StatisticOption to enable.
+  /// PerformanceOverlayOption to enable.
   int get optionsMask => _optionsMask;
   int _optionsMask;
   void set optionsMask(int mask) {
@@ -71,13 +77,13 @@ class RenderStatisticsBox extends RenderBox {
   }
 
   double get intrinsicHeight {
-    const double kGraphHeight = 80.0; // must match value in statistics_layer.cc
+    const double kGraphHeight = 80.0; // must match value in performance_overlay_layer.cc
     double result = 0.0;
-    if ((optionsMask | (1 << StatisticsOption.displayRasterizerStatistics.index) > 0) ||
-        (optionsMask | (1 << StatisticsOption.visualizeRasterizerStatistics.index) > 0))
+    if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0))
       result += kGraphHeight;
-    if ((optionsMask | (1 << StatisticsOption.displayEngineStatistics.index) > 0) ||
-        (optionsMask | (1 << StatisticsOption.visualizeEngineStatistics.index) > 0))
+    if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
+        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0))
       result += kGraphHeight;
     return result;
   }
@@ -95,6 +101,6 @@ class RenderStatisticsBox extends RenderBox {
   }
 
   void paint(PaintingContext context, Offset offset) {
-    context.pushStatistics(offset, optionsMask, rasterizerThreshold, size);
+    context.pushPerformanceOverlay(offset, optionsMask, rasterizerThreshold, size);
   }
 }
