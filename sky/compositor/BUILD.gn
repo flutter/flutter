@@ -34,6 +34,8 @@ source_set("compositor") {
     "raster_cache.h",
     "performance_overlay_layer.cc",
     "performance_overlay_layer.h",
+    "shader_layer.cc",
+    "shader_layer.h",
     "transform_layer.cc",
     "transform_layer.h",
   ]

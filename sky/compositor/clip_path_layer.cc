@@ -15,10 +15,10 @@ ClipPathLayer::~ClipPathLayer() {
 
 void ClipPathLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
+  SkAutoCanvasRestore save(&canvas, false);
   canvas.saveLayer(&clip_path_.getBounds(), nullptr);
   canvas.clipPath(clip_path_);
   PaintChildren(frame);
-  canvas.restore();
 }
 
 }  // namespace compositor
