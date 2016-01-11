@@ -38,19 +38,19 @@ abstract class Scrollable extends StatefulComponent {
   Scrollable({
     Key key,
     this.initialScrollOffset,
-    this.scrollDirection: ScrollDirection.vertical,
+    this.scrollDirection: Axis.vertical,
     this.onScrollStart,
     this.onScroll,
     this.onScrollEnd,
     this.snapOffsetCallback,
     this.snapAlignmentOffset: 0.0
   }) : super(key: key) {
-    assert(scrollDirection == ScrollDirection.vertical ||
-           scrollDirection == ScrollDirection.horizontal);
+    assert(scrollDirection == Axis.vertical ||
+           scrollDirection == Axis.horizontal);
   }
 
   final double initialScrollOffset;
-  final ScrollDirection scrollDirection;
+  final Axis scrollDirection;
   final ScrollListener onScrollStart;
   final ScrollListener onScroll;
   final ScrollListener onScrollEnd;
@@ -81,12 +81,12 @@ abstract class Scrollable extends StatefulComponent {
 
     double scrollOffsetDelta;
     switch (scrollable.config.scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         Point targetCenter = targetBox.localToGlobal(new Point(0.0, targetSize.height / 2.0));
         Point scrollableCenter = scrollableBox.localToGlobal(new Point(0.0, scrollableSize.height / 2.0));
         scrollOffsetDelta = targetCenter.y - scrollableCenter.y;
         break;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         Point targetCenter = targetBox.localToGlobal(new Point(targetSize.width / 2.0, 0.0));
         Point scrollableCenter = scrollableBox.localToGlobal(new Point(scrollableSize.width / 2.0, 0.0));
         scrollOffsetDelta = targetCenter.x - scrollableCenter.x;
@@ -119,7 +119,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   double _scrollOffset;
 
   Offset get scrollOffsetVector {
-    if (config.scrollDirection == ScrollDirection.horizontal)
+    if (config.scrollDirection == Axis.horizontal)
       return new Offset(scrollOffset, 0.0);
     return new Offset(0.0, scrollOffset);
   }
@@ -131,7 +131,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   double pixelToScrollOffset(double pixelValue) => pixelValue;
 
   double scrollDirectionVelocity(Offset scrollVelocity) {
-    return config.scrollDirection == ScrollDirection.horizontal
+    return config.scrollDirection == Axis.horizontal
       ? -scrollVelocity.dx
       : -scrollVelocity.dy;
   }
@@ -144,19 +144,19 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return _scrollBehavior;
   }
 
-  GestureDragStartCallback _getDragStartHandler(ScrollDirection direction) {
+  GestureDragStartCallback _getDragStartHandler(Axis direction) {
     if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
       return null;
     return _handleDragStart;
   }
 
-  GestureDragUpdateCallback _getDragUpdateHandler(ScrollDirection direction) {
+  GestureDragUpdateCallback _getDragUpdateHandler(Axis direction) {
     if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
       return null;
     return _handleDragUpdate;
   }
 
-  GestureDragEndCallback _getDragEndHandler(ScrollDirection direction) {
+  GestureDragEndCallback _getDragEndHandler(Axis direction) {
     if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
       return null;
     return _handleDragEnd;
@@ -164,12 +164,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onVerticalDragStart: _getDragStartHandler(ScrollDirection.vertical),
-      onVerticalDragUpdate: _getDragUpdateHandler(ScrollDirection.vertical),
-      onVerticalDragEnd: _getDragEndHandler(ScrollDirection.vertical),
-      onHorizontalDragStart: _getDragStartHandler(ScrollDirection.horizontal),
-      onHorizontalDragUpdate: _getDragUpdateHandler(ScrollDirection.horizontal),
-      onHorizontalDragEnd: _getDragEndHandler(ScrollDirection.horizontal),
+      onVerticalDragStart: _getDragStartHandler(Axis.vertical),
+      onVerticalDragUpdate: _getDragUpdateHandler(Axis.vertical),
+      onVerticalDragEnd: _getDragEndHandler(Axis.vertical),
+      onHorizontalDragStart: _getDragStartHandler(Axis.horizontal),
+      onHorizontalDragUpdate: _getDragUpdateHandler(Axis.horizontal),
+      onHorizontalDragEnd: _getDragEndHandler(Axis.horizontal),
       behavior: HitTestBehavior.opaque,
       child: new Listener(
         child: buildContent(context),
@@ -348,7 +348,7 @@ class ScrollableViewport extends Scrollable {
     Key key,
     this.child,
     double initialScrollOffset,
-    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    Axis scrollDirection: Axis.vertical,
     ScrollListener onScroll
   }) : super(
     key: key,
@@ -369,13 +369,13 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
   double _viewportSize = 0.0;
   double _childSize = 0.0;
   void _handleViewportSizeChanged(Size newSize) {
-    _viewportSize = config.scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
+    _viewportSize = config.scrollDirection == Axis.vertical ? newSize.height : newSize.width;
     setState(() {
       _updateScrollBehavior();
     });
   }
   void _handleChildSizeChanged(Size newSize) {
-    _childSize = config.scrollDirection == ScrollDirection.vertical ? newSize.height : newSize.width;
+    _childSize = config.scrollDirection == Axis.vertical ? newSize.height : newSize.width;
     setState(() {
       _updateScrollBehavior();
     });
@@ -412,7 +412,7 @@ class Block extends StatelessComponent {
     Key key,
     this.padding,
     this.initialScrollOffset,
-    this.scrollDirection: ScrollDirection.vertical,
+    this.scrollDirection: Axis.vertical,
     this.onScroll
   }) : super(key: key) {
     assert(!children.any((Widget child) => child == null));
@@ -421,7 +421,7 @@ class Block extends StatelessComponent {
   final List<Widget> children;
   final EdgeDims padding;
   final double initialScrollOffset;
-  final ScrollDirection scrollDirection;
+  final Axis scrollDirection;
   final ScrollListener onScroll;
 
   Widget build(BuildContext context) {
@@ -446,7 +446,7 @@ abstract class ScrollableListPainter extends Painter {
 
   RenderBox get renderObject => super.renderObject;
 
-  ScrollDirection get scrollDirection {
+  Axis get scrollDirection {
     HasScrollDirection scrollable = renderObject as dynamic;
     return scrollable?.scrollDirection;
   }
@@ -495,7 +495,7 @@ abstract class ScrollableWidgetList extends Scrollable {
   ScrollableWidgetList({
     Key key,
     double initialScrollOffset,
-    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    Axis scrollDirection: Axis.vertical,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
     double snapAlignmentOffset: 0.0,
@@ -554,7 +554,7 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   double get _containerExtent {
-    return config.scrollDirection == ScrollDirection.vertical
+    return config.scrollDirection == Axis.vertical
       ? _containerSize.height
       : _containerSize.width;
   }
@@ -568,14 +568,14 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
 
   double get _leadingPadding {
     EdgeDims padding = config.padding;
-    if (config.scrollDirection == ScrollDirection.vertical)
+    if (config.scrollDirection == Axis.vertical)
       return padding != null ? padding.top : 0.0;
     return padding != null ? padding.left : -.0;
   }
 
   double get _trailingPadding {
     EdgeDims padding = config.padding;
-    if (config.scrollDirection == ScrollDirection.vertical)
+    if (config.scrollDirection == Axis.vertical)
       return padding != null ? padding.bottom : 0.0;
     return padding != null ? padding.right : 0.0;
   }
@@ -584,7 +584,7 @@ abstract class ScrollableWidgetListState<T extends ScrollableWidgetList> extends
     EdgeDims padding = config.padding;
     if (padding == null)
       return null;
-    if (config.scrollDirection == ScrollDirection.vertical)
+    if (config.scrollDirection == Axis.vertical)
       return new EdgeDims.only(left: padding.left, right: padding.right);
     return new EdgeDims.only(top: padding.top, bottom: padding.bottom);
   }

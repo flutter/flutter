@@ -15,7 +15,7 @@ class ScrollableList extends Scrollable {
   ScrollableList({
     Key key,
     double initialScrollOffset,
-    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    Axis scrollDirection: Axis.vertical,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
     double snapAlignmentOffset: 0.0,
@@ -93,7 +93,7 @@ class ListViewport extends VirtualViewport {
     Key key,
     this.onExtentsChanged,
     this.startOffset: 0.0,
-    this.scrollDirection: ScrollDirection.vertical,
+    this.scrollDirection: Axis.vertical,
     this.itemExtent,
     this.itemsWrap: false,
     this.padding,
@@ -106,7 +106,7 @@ class ListViewport extends VirtualViewport {
 
   final ExtentsChangedCallback onExtentsChanged;
   final double startOffset;
-  final ScrollDirection scrollDirection;
+  final Axis scrollDirection;
   final double itemExtent;
   final bool itemsWrap;
   final EdgeDims padding;
@@ -148,9 +148,9 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
 
   double _getContainerExtentFromRenderObject() {
     switch (widget.scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return renderObject.size.height;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return renderObject.size.width;
     }
   }

@@ -23,6 +23,15 @@ class _DebugSize extends Size {
   final bool _canBeUsedByParent;
 }
 
+/// The two cardinal directions in two dimensions.
+enum Axis {
+  /// Left and right
+  horizontal,
+
+  /// Up and down
+  vertical,
+}
+
 /// Immutable layout constraints for box layout.
 ///
 /// A size respects a BoxConstraints if, and only if, all of the following

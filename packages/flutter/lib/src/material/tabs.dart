@@ -544,7 +544,7 @@ class TabBar<T> extends Scrollable {
     Key key,
     this.labels,
     this.isScrollable: false
-  }) : super(key: key, scrollDirection: ScrollDirection.horizontal);
+  }) : super(key: key, scrollDirection: Axis.horizontal);
 
   final Map<T, TabLabel> labels;
   final bool isScrollable;
@@ -687,7 +687,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
   void _updateScrollBehavior() {
     scrollBehavior.updateExtents(
-      containerExtent: config.scrollDirection == ScrollDirection.vertical ? _viewportSize.height : _viewportSize.width,
+      containerExtent: config.scrollDirection == Axis.vertical ? _viewportSize.height : _viewportSize.width,
       contentExtent: _tabWidths.reduce((double sum, double width) => sum + width)
     );
   }
@@ -753,7 +753,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       contents = new SizeObserver(
         onSizeChanged: _handleViewportSizeChanged,
         child: new Viewport(
-          scrollDirection: ScrollDirection.horizontal,
+          scrollDirection: Axis.horizontal,
           scrollOffset: new Offset(scrollOffset, 0.0),
           child: contents
         )
@@ -770,7 +770,7 @@ class TabBarView extends PageableList {
     List<Widget> children
   }) : super(
     key: key,
-    scrollDirection: ScrollDirection.horizontal,
+    scrollDirection: Axis.horizontal,
     children: children
   ) {
     assert(children != null);

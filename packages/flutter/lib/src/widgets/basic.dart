@@ -54,7 +54,7 @@ export 'package:flutter/rendering.dart' show
     PointerUpEvent,
     RadialGradient,
     Rect,
-    ScrollDirection,
+    Axis,
     Size,
     StyledTextSpan,
     TextAlign,
@@ -755,7 +755,7 @@ class Baseline extends OneChildRenderObjectWidget {
 class Viewport extends OneChildRenderObjectWidget {
   Viewport({
     Key key,
-    this.scrollDirection: ScrollDirection.vertical,
+    this.scrollDirection: Axis.vertical,
     this.scrollOffset: Offset.zero,
     Widget child
   }) : super(key: key, child: child) {
@@ -768,7 +768,7 @@ class Viewport extends OneChildRenderObjectWidget {
   /// If the viewport is scrollable in a particular direction (e.g., vertically),
   /// the child is given layout constraints that are fully unconstrainted in
   /// that direction (e.g., the child can be as tall as it wants).
-  final ScrollDirection scrollDirection;
+  final Axis scrollDirection;
 
   /// The offset at which to paint the child.
   ///
@@ -824,7 +824,7 @@ class Container extends StatelessComponent {
     this.transform,
     double width,
     double height
-  }) : constraints = 
+  }) : constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
@@ -929,13 +929,13 @@ class Container extends StatelessComponent {
 class BlockBody extends MultiChildRenderObjectWidget {
   BlockBody(List<Widget> children, {
     Key key,
-    this.direction: ScrollDirection.vertical
+    this.direction: Axis.vertical
   }) : super(key: key, children: children) {
     assert(direction != null);
   }
 
   /// The direction to use as the main axis.
-  final ScrollDirection direction;
+  final Axis direction;
 
   RenderBlock createRenderObject() => new RenderBlock(direction: direction);
 

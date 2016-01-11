@@ -143,7 +143,7 @@ void main() {
             builder: itemBuilder,
             startOffset: offset,
             itemExtent: 200.0,
-            direction: ScrollDirection.horizontal
+            direction: Axis.horizontal
           ),
           right: new Text('Not Today')
         );

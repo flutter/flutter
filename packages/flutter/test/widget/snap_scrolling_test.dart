@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 const double itemExtent = 200.0;
-ScrollDirection scrollDirection = ScrollDirection.vertical;
+Axis scrollDirection = Axis.vertical;
 GlobalKey scrollableListKey;
 
 Widget buildItem(int item) {
@@ -48,7 +48,7 @@ void set scrollOffset(double value) {
 }
 
 Future fling(double velocity) {
-  Offset velocityOffset = scrollDirection == ScrollDirection.vertical
+  Offset velocityOffset = scrollDirection == Axis.vertical
     ? new Offset(0.0, velocity)
     : new Offset(velocity, 0.0);
   return scrollableState.fling(velocityOffset);

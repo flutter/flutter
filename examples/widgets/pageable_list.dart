@@ -38,7 +38,7 @@ class PageableListAppState extends State<PageableListApp> {
 
   List<CardModel> cardModels;
   Size pageSize = new Size(200.0, 200.0);
-  ScrollDirection scrollDirection = ScrollDirection.horizontal;
+  Axis scrollDirection = Axis.horizontal;
   bool itemsWrap = false;
 
   Widget buildCard(CardModel cardModel) {
@@ -52,7 +52,7 @@ class PageableListAppState extends State<PageableListApp> {
       )
     );
 
-    BoxConstraints constraints = (scrollDirection == ScrollDirection.vertical)
+    BoxConstraints constraints = (scrollDirection == Axis.vertical)
       ? new BoxConstraints.tightFor(height: pageSize.height)
       : new BoxConstraints.tightFor(width: pageSize.width);
 
@@ -65,9 +65,9 @@ class PageableListAppState extends State<PageableListApp> {
 
   void switchScrollDirection() {
     setState(() {
-      scrollDirection = (scrollDirection == ScrollDirection.vertical)
-        ? ScrollDirection.horizontal
-        : ScrollDirection.vertical;
+      scrollDirection = (scrollDirection == Axis.vertical)
+        ? Axis.horizontal
+        : Axis.vertical;
     });
   }
 
@@ -83,13 +83,13 @@ class PageableListAppState extends State<PageableListApp> {
         new DrawerHeader(child: new Text('Options')),
         new DrawerItem(
           icon: 'navigation/more_horiz',
-          selected: scrollDirection == ScrollDirection.horizontal,
+          selected: scrollDirection == Axis.horizontal,
           child: new Text('Horizontal Layout'),
           onPressed: switchScrollDirection
         ),
         new DrawerItem(
           icon: 'navigation/more_vert',
-          selected: scrollDirection == ScrollDirection.vertical,
+          selected: scrollDirection == Axis.vertical,
           child: new Text('Vertical Layout'),
           onPressed: switchScrollDirection
         ),
@@ -108,7 +108,7 @@ class PageableListAppState extends State<PageableListApp> {
     return new ToolBar(
       center: new Text('PageableList'),
       right: <Widget>[
-        new Text(scrollDirection == ScrollDirection.horizontal ? "horizontal" : "vertical")
+        new Text(scrollDirection == Axis.horizontal ? "horizontal" : "vertical")
       ]
     );
   }

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 const double itemExtent = 100.0;
-ScrollDirection scrollDirection = ScrollDirection.vertical;
+Axis scrollDirection = Axis.vertical;
 DismissDirection dismissDirection = DismissDirection.horizontal;
 List<int> dismissedItems = <int>[];
 
@@ -120,7 +120,7 @@ class Test1215DismissableComponent extends StatelessComponent {
 void main() {
   test('Horizontal drag triggers dismiss scrollDirection=vertical', () {
     testWidgets((WidgetTester tester) {
-      scrollDirection = ScrollDirection.vertical;
+      scrollDirection = Axis.vertical;
       dismissDirection = DismissDirection.horizontal;
       dismissedItems = <int>[];
 
@@ -139,7 +139,7 @@ void main() {
 
   test('Vertical drag triggers dismiss scrollDirection=horizontal', () {
     testWidgets((WidgetTester tester) {
-      scrollDirection = ScrollDirection.horizontal;
+      scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.vertical;
       dismissedItems = <int>[];
 
@@ -158,7 +158,7 @@ void main() {
 
   test('drag-left with DismissDirection.left triggers dismiss', () {
     testWidgets((WidgetTester tester) {
-      scrollDirection = ScrollDirection.vertical;
+      scrollDirection = Axis.vertical;
       dismissDirection = DismissDirection.left;
       dismissedItems = <int>[];
 
@@ -177,7 +177,7 @@ void main() {
 
   test('drag-right with DismissDirection.right triggers dismiss', () {
     testWidgets((WidgetTester tester) {
-      scrollDirection = ScrollDirection.vertical;
+      scrollDirection = Axis.vertical;
       dismissDirection = DismissDirection.right;
       dismissedItems = <int>[];
 
@@ -196,7 +196,7 @@ void main() {
 
   test('drag-up with DismissDirection.up triggers dismiss', () {
     testWidgets((WidgetTester tester) {
-      scrollDirection = ScrollDirection.horizontal;
+      scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.up;
       dismissedItems = <int>[];
 
@@ -215,7 +215,7 @@ void main() {
 
   test('drag-down with DismissDirection.down triggers dismiss', () {
     testWidgets((WidgetTester tester) {
-      scrollDirection = ScrollDirection.horizontal;
+      scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.down;
       dismissedItems = <int>[];
 
@@ -240,7 +240,7 @@ void main() {
   // irrelevant by fn3, but just in case...
   test('Verify that drag-move events do not assert', () {
     testWidgets((WidgetTester tester) {
-      scrollDirection = ScrollDirection.horizontal;
+      scrollDirection = Axis.horizontal;
       dismissDirection = DismissDirection.down;
       dismissedItems = <int>[];
 

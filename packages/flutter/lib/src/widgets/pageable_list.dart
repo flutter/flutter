@@ -25,7 +25,7 @@ class PageableList extends Scrollable {
   PageableList({
     Key key,
     initialScrollOffset,
-    ScrollDirection scrollDirection: ScrollDirection.vertical,
+    Axis scrollDirection: Axis.vertical,
     ScrollListener onScrollStart,
     ScrollListener onScroll,
     ScrollListener onScrollEnd,
@@ -68,7 +68,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     final RenderBox box = context.findRenderObject();
     if (box == null || !box.hasSize)
       return 0.0;
-    final double pixelScrollExtent = config.scrollDirection == ScrollDirection.vertical ? box.size.height : box.size.width;
+    final double pixelScrollExtent = config.scrollDirection == Axis.vertical ? box.size.height : box.size.width;
     return pixelScrollExtent == 0.0 ? 0.0 : value / pixelScrollExtent;
   }
 
@@ -183,7 +183,7 @@ class PageViewport extends VirtualViewport {
   PageViewport({
     Key key,
     this.startOffset: 0.0,
-    this.scrollDirection: ScrollDirection.vertical,
+    this.scrollDirection: Axis.vertical,
     this.itemsWrap: false,
     this.overlayPainter,
     this.children
@@ -192,7 +192,7 @@ class PageViewport extends VirtualViewport {
   }
 
   final double startOffset;
-  final ScrollDirection scrollDirection;
+  final Axis scrollDirection;
   final bool itemsWrap;
   final Painter overlayPainter;
   final Iterable<Widget> children;
@@ -235,9 +235,9 @@ class _PageViewportElement extends VirtualViewportElement<PageViewport> {
 
   double _getContainerExtentFromRenderObject() {
     switch (widget.scrollDirection) {
-      case ScrollDirection.vertical:
+      case Axis.vertical:
         return renderObject.size.height;
-      case ScrollDirection.horizontal:
+      case Axis.horizontal:
         return renderObject.size.width;
     }
   }

@@ -26,7 +26,7 @@ class Input extends Scrollable {
   }) : super(
     key: key,
     initialScrollOffset: 0.0,
-    scrollDirection: ScrollDirection.horizontal
+    scrollDirection: Axis.horizontal
   ) {
     assert(key != null);
   }

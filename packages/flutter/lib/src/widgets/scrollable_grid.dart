@@ -29,7 +29,7 @@ class ScrollableGrid extends Scrollable {
     // TODO(abarth): Support horizontal offsets. For horizontally scrolling
     // grids. For horizontally scrolling grids, we'll probably need to use a
     // delegate that places children in column-major order.
-    scrollDirection: ScrollDirection.vertical,
+    scrollDirection: Axis.vertical,
     onScroll: onScroll,
     snapOffsetCallback: snapOffsetCallback,
     snapAlignmentOffset: snapAlignmentOffset
@@ -80,7 +80,7 @@ class GridViewport extends VirtualViewport {
   final Iterable<Widget> children;
 
   // TODO(abarth): Support horizontal scrolling;
-  ScrollDirection get scrollDirection => ScrollDirection.vertical;
+  Axis get scrollDirection => Axis.vertical;
 
   RenderGrid createRenderObject() => new RenderGrid(delegate: delegate);
 
