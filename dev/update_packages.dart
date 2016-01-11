@@ -9,7 +9,7 @@ final String binaryName = Platform.isWindows ? 'pub.bat' : 'pub';
 int runPub(Directory directory, List<String> pubArgs) {
   int updateCount = 0;
   for (FileSystemEntity dir in directory.listSync()) {
-    if (dir is Directory) {
+    if (dir is Directory && FileSystemEntity.isFileSync(dir.path + Platform.pathSeparator + 'pubspec.yaml')) {
       updateCount++;
       Stopwatch timer = new Stopwatch()..start();
       stdout.write("Updating ${dir.path}...");
