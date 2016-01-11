@@ -525,6 +525,8 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
 }
 
+int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
+
 /// Makes its child partially transparent.
 ///
 /// This class paints its child into an intermediate buffer and then blends the
@@ -534,9 +536,11 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 /// into an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
   RenderOpacity({ RenderBox child, double opacity })
-    : this._opacity = opacity, super(child) {
+    : _opacity = opacity, _alpha = _getAlphaFromOpacity(opacity), super(child) {
     assert(opacity >= 0.0 && opacity <= 1.0);
   }
+
+  bool get alwaysNeedsCompositing => _alpha != 0 && _alpha != 255;
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -550,22 +554,23 @@ class RenderOpacity extends RenderProxyBox {
     if (_opacity == newOpacity)
       return;
     _opacity = newOpacity;
+    _alpha = _getAlphaFromOpacity(_opacity);
+    markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
-  int get _alpha => (_opacity * 255).round();
+  int _alpha;
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      int a = _alpha;
-      if (a == 0)
+      if (_alpha == 0)
         return;
-      if (a == 255) {
+      if (_alpha == 255) {
         context.paintChild(child, offset);
         return;
       }
-      // TODO(abarth): We should pass bounds here.
-      context.pushOpacity(needsCompositing, offset, null, a, super.paint);
+      assert(needsCompositing);
+      context.pushOpacity(offset, _alpha, super.paint);
     }
   }
 

@@ -372,11 +372,7 @@ class TransformLayer extends ContainerLayer {
 
 /// A composited layer that makes its children partially transparent
 class OpacityLayer extends ContainerLayer {
-  OpacityLayer({ Offset offset: Offset.zero, this.bounds, this.alpha }) : super(offset: offset);
-
-  /// Unused
-  Rect bounds;
-  // TODO(abarth): Remove.
+  OpacityLayer({ Offset offset: Offset.zero, this.alpha }) : super(offset: offset);
 
   /// The amount to multiply into the alpha channel
   ///
@@ -386,14 +382,13 @@ class OpacityLayer extends ContainerLayer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Offset childOffset = offset + layerOffset;
-    builder.pushOpacity(alpha, bounds?.shift(childOffset));
+    builder.pushOpacity(alpha, null);
     addChildrenToScene(builder, childOffset);
     builder.pop();
   }
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
-    settings.add('bounds: $bounds');
     settings.add('alpha: $alpha');
   }
 }

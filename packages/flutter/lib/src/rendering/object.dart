@@ -285,31 +285,17 @@ class PaintingContext {
     }
   }
 
-  static Paint _getPaintForAlpha(int alpha) {
-    return new Paint()
-      ..color = new Color.fromARGB(alpha, 0, 0, 0)
-      ..transferMode = TransferMode.srcOver
-      ..isAntiAlias = false;
-  }
-
   /// Push an opacity layer.
   ///
   /// This function will call painter synchronously with a painting context that
   /// will be blended with the given alpha value.
-  void pushOpacity(bool needsCompositing, Offset offset, Rect bounds, int alpha, PaintingContextCallback painter) {
-    if (needsCompositing) {
-      _stopRecordingIfNeeded();
-      OpacityLayer opacityLayer = new OpacityLayer(bounds: bounds, alpha: alpha);
-      _appendLayer(opacityLayer, offset);
-      PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
-      painter(childContext, Offset.zero);
-      childContext._stopRecordingIfNeeded();
-    } else {
-      // TODO(abarth): pushOpacity should require bounds.
-      canvas.saveLayer(bounds?.shift(offset), _getPaintForAlpha(alpha));
-      painter(this, offset);
-      canvas.restore();
-    }
+  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+    _stopRecordingIfNeeded();
+    OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
+    _appendLayer(opacityLayer, offset);
+    PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
+    painter(childContext, Offset.zero);
+    childContext._stopRecordingIfNeeded();
   }
 
   static Paint _getPaintForShaderMask(Rect bounds,
@@ -435,7 +421,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     setupParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
-    _markNeedsCompositingBitsUpdate();
+    markNeedsCompositingBitsUpdate();
   }
 
   /// Called by subclasses when they decide a render object is no longer a child.
@@ -451,7 +437,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     child.parentData = null;
     super.dropChild(child);
     markNeedsLayout();
-    _markNeedsCompositingBitsUpdate();
+    markNeedsCompositingBitsUpdate();
   }
 
   /// Calls visitor for each immediate child of this render object.
@@ -854,7 +840,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// creates at least one composited layer. For example, videos should return
   /// true if they use hardware decoders.
   ///
-  /// Warning: This getter must not change value over the lifetime of this object.
+  /// You must call markNeedsCompositingBitsUpdate() if the value of this
+  /// getter changes.
   bool get alwaysNeedsCompositing => false;
 
   ContainerLayer _layer;
@@ -880,7 +867,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// This method does not schedule a rendering frame, because since
   /// it cannot be the case that _only_ the compositing bits changed,
   /// something else will have scheduled a frame for us.
-  void _markNeedsCompositingBitsUpdate() {
+  void markNeedsCompositingBitsUpdate() {
     if (_needsCompositingBitsUpdate)
       return;
     _needsCompositingBitsUpdate = true;
@@ -889,7 +876,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       if (parent._needsCompositingBitsUpdate)
         return;
       if (!isRepaintBoundary && !parent.isRepaintBoundary) {
-        parent._markNeedsCompositingBitsUpdate();
+        parent.markNeedsCompositingBitsUpdate();
         return;
       }
     }
