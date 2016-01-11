@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/services.dart';
 
 import 'events.dart';
@@ -13,14 +15,14 @@ typedef void PointerExceptionHandler(PointerRouter source, PointerEvent event, P
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {
-  final Map<int, List<PointerRoute>> _routeMap = new Map<int, List<PointerRoute>>();
+  final Map<int, LinkedHashSet<PointerRoute>> _routeMap = new Map<int, LinkedHashSet<PointerRoute>>();
 
   /// Adds a route to the routing table.
   ///
   /// Whenever this object routes a [PointerEvent] corresponding to
   /// pointer, call route.
   void addRoute(int pointer, PointerRoute route) {
-    List<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => new List<PointerRoute>());
+    LinkedHashSet<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => new LinkedHashSet<PointerRoute>());
     assert(!routes.contains(route));
     routes.add(route);
   }
@@ -31,7 +33,7 @@ class PointerRouter {
   /// pointer. Requires that this route was previously added to the router.
   void removeRoute(int pointer, PointerRoute route) {
     assert(_routeMap.containsKey(pointer));
-    List<PointerRoute> routes = _routeMap[pointer];
+    LinkedHashSet<PointerRoute> routes = _routeMap[pointer];
     assert(routes.contains(route));
     routes.remove(route);
     if (routes.isEmpty)
@@ -53,10 +55,12 @@ class PointerRouter {
   /// Routes are called in the order in which they were added to the
   /// PointerRouter object.
   void route(PointerEvent event) {
-    List<PointerRoute> routes = _routeMap[event.pointer];
+    LinkedHashSet<PointerRoute> routes = _routeMap[event.pointer];
     if (routes == null)
       return;
     for (PointerRoute route in new List<PointerRoute>.from(routes)) {
+      if (!routes.contains(route))
+        continue;
       try {
         route(event);
       } catch (exception, stack) {

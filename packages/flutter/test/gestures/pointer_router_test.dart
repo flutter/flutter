@@ -27,4 +27,19 @@ void main() {
     router.route(pointer3.up());
     expect(callbackRan, isFalse);
   });
+
+  test('Supports re-entrant cancellation', () {
+    bool callbackRan = false;
+    void callback(PointerEvent event) {
+      callbackRan = true;
+    }
+    PointerRouter router = new PointerRouter();
+    router.addRoute(2, (PointerEvent event) {
+      router.removeRoute(2, callback);
+    });
+    router.addRoute(2, callback);
+    TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Point.origin));
+    expect(callbackRan, isFalse);
+  });
 }
