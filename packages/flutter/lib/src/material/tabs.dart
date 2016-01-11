@@ -799,13 +799,19 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     _selection = selection;
     if (_selection != null) {
       _selection.registerPerformanceListener(this);
-      _initItemsAndScrollOffset();
+      _updateItemsAndScrollBehavior();
     }
   }
 
   void initState() {
     super.initState();
     _initSelection(TabBarSelection.of(context));
+  }
+
+  void didUpdateConfig(TabBarView oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    if (_selection != null && config.children != oldConfig.children)
+      _updateItemsForSelectedIndex(_selection.index);
   }
 
   void dispose() {
@@ -817,26 +823,38 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     _selection = null;
   }
 
-  void _updateItems(int first, int second, [int third]) {
+  void _updateItemsFromChildren(int first, int second, [int third]) {
     List<Widget> widgets = config.children;
     _items = <Widget>[widgets[first], widgets[second]];
     if (third != null)
       _items.add(widgets[third]);
   }
 
-  void _initItemsAndScrollOffset() {
-    assert(_selection != null);
-    final int selectedIndex = _selection.index;
+  void _updateItemsForSelectedIndex(int selectedIndex) {
     if (selectedIndex == 0) {
-      _updateItems(0, 1);
+      _updateItemsFromChildren(0, 1);
+    } else if (selectedIndex == _tabCount - 1) {
+      _updateItemsFromChildren(selectedIndex - 1, selectedIndex);
+    } else {
+      _updateItemsFromChildren(selectedIndex - 1, selectedIndex, selectedIndex + 1);
+    }
+  }
+
+  void _updateScrollBehaviorForSelectedIndex(int selectedIndex) {
+    if (selectedIndex == 0) {
       scrollTo(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 0.0));
     } else if (selectedIndex == _tabCount - 1) {
-      _updateItems(selectedIndex - 1, selectedIndex);
       scrollTo(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 1.0));
     } else {
-      _updateItems(selectedIndex - 1, selectedIndex, selectedIndex + 1);
       scrollTo(scrollBehavior.updateExtents(contentExtent: 3.0, containerExtent: 1.0, scrollOffset: 1.0));
     }
+  }
+
+  void _updateItemsAndScrollBehavior() {
+    assert(_selection != null);
+    final int selectedIndex = _selection.index;
+    _updateItemsForSelectedIndex(selectedIndex);
+    _updateScrollBehaviorForSelectedIndex(selectedIndex);
   }
 
   void handleStatusChange(PerformanceStatus status) {
@@ -850,7 +868,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     final Performance performance = _selection.performance;
 
     if (performance.status == PerformanceStatus.completed) {
-      _initItemsAndScrollOffset();
+      _updateItemsAndScrollBehavior();
       return;
     }
 
@@ -861,10 +879,10 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     final int previousSelectedIndex = _selection.previousIndex;
 
     if (selectedIndex < previousSelectedIndex) {
-      _updateItems(selectedIndex, previousSelectedIndex);
+      _updateItemsFromChildren(selectedIndex, previousSelectedIndex);
       _scrollDirection = AnimationDirection.reverse;
     } else {
-      _updateItems(previousSelectedIndex, selectedIndex);
+      _updateItemsFromChildren(previousSelectedIndex, selectedIndex);
       _scrollDirection = AnimationDirection.forward;
     }
 
