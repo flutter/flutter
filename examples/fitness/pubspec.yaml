@@ -5,3 +5,5 @@ dependencies:
     path: ../../packages/flutter
   playfair:
     path: ../../packages/playfair
+  gcm:
+    path: ../../packages/gcm
