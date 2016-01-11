@@ -509,12 +509,7 @@ class SizedBox extends OneChildRenderObjectWidget {
   );
 
   BoxConstraints get _additionalConstraints {
-    BoxConstraints result = const BoxConstraints();
-    if (width != null)
-      result = result.tightenWidth(width);
-    if (height != null)
-      result = result.tightenHeight(height);
-    return result;
+    return new BoxConstraints.tightFor(width: width, height: height);
   }
 
   void updateRenderObject(RenderConstrainedBox renderObject, SizedBox oldWidget) {

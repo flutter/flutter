@@ -39,7 +39,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // in this case the toolbar appears -after- the body in the stacking order,
     // so the toolbar's shadow is drawn on top of the body.
 
-    final BoxConstraints fullWidthConstraints = looseConstraints.tightenWidth(size.width);
+    final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
     Size toolBarSize = Size.zero;
 
     if (isChild(_Child.toolBar)) {
@@ -49,7 +49,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (isChild(_Child.body)) {
       final double bodyHeight = size.height - toolBarSize.height;
-      final BoxConstraints bodyConstraints = fullWidthConstraints.tightenHeight(bodyHeight);
+      final BoxConstraints bodyConstraints = fullWidthConstraints.tighten(height: bodyHeight);
       layoutChild(_Child.body, bodyConstraints);
       positionChild(_Child.body, new Offset(0.0, toolBarSize.height));
     }

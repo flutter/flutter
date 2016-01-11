@@ -333,14 +333,14 @@ abstract class RenderStackBase extends RenderBox
         BoxConstraints childConstraints = const BoxConstraints();
 
         if (childParentData.left != null && childParentData.right != null)
-          childConstraints = childConstraints.tightenWidth(size.width - childParentData.right - childParentData.left);
+          childConstraints = childConstraints.tighten(width: size.width - childParentData.right - childParentData.left);
         else if (childParentData.width != null)
-          childConstraints = childConstraints.tightenWidth(childParentData.width);
+          childConstraints = childConstraints.tighten(width: childParentData.width);
 
         if (childParentData.top != null && childParentData.bottom != null)
-          childConstraints = childConstraints.tightenHeight(size.height - childParentData.bottom - childParentData.top);
+          childConstraints = childConstraints.tighten(height: size.height - childParentData.bottom - childParentData.top);
         else if (childParentData.height != null)
-          childConstraints = childConstraints.tightenHeight(childParentData.height);
+          childConstraints = childConstraints.tighten(height: childParentData.height);
 
         child.layout(childConstraints, parentUsesSize: true);
 
