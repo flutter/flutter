@@ -9,10 +9,29 @@ sky_app("fitness") {
   manifest = "flutter.yaml"
 
   if (is_android) {
+    import("//build/config/android/config.gni")
+    import("//build/config/android/rules.gni")
+
     apk_name = "Fitness"
+
+    android_library("java") {
+      java_files = [
+        "apk/src/org/domokit/fitness/FitnessApplication.java",
+      ]
+
+      deps = [
+        "//base:base_java",
+        "//mojo/public/java:bindings",
+        "//mojo/public/java:system",
+        "//sky/services/gcm:gcm_lib",
+        "//sky/services/gcm:interfaces_java",
+        "//sky/shell:java",
+      ]
+    }
 
     deps = [
       "//examples/fitness/apk:resources",
+      ":java",
     ]
   } else if (is_mac) {
     info_plist = "mac/Info.plist"

@@ -8,7 +8,17 @@
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:icon="@mipmap/ic_launcher" android:label="Fitness" android:name="org.domokit.sky.shell.SkyApplication">
+    <!-- for GCM -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!-- Supposedly this permission prevents other apps from receiving our
+    messages, but it doesn't seem to have any effect. -->
+    <permission android:name="org.domokit.sky.shell.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="org.domokit.sky.shell.permission.C2D_MESSAGE" />
+    <!-- end for GCM -->
+
+    <application android:icon="@mipmap/ic_launcher" android:label="Fitness" android:name="org.domokit.fitness.FitnessApplication">
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize" android:hardwareAccelerated="true" android:launchMode="singleTask" android:name="org.domokit.sky.shell.SkyActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,5 +29,34 @@
             android:name="org.domokit.sky.shell.UpdateService"
             android:exported="false"
             android:process=":remote"/>
+
+        <!-- for GCM -->
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="org.domokit.sky.shell" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="org.domokit.gcm.GcmListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name="org.domokit.gcm.InstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name="org.domokit.gcm.RegistrationIntentService"
+            android:exported="false">
+        </service>
     </application>
  </manifest>
