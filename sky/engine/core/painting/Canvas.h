@@ -74,14 +74,14 @@ public:
     void drawVertices(SkCanvas::VertexMode vertexMode,
         const Vector<Point>& vertices,
         const Vector<Point>& textureCoordinates,
-        const Vector<SkColor>& colors,
+        const Vector<CanvasColor>& colors,
         TransferMode transferMode,
         const Vector<int>& indices,
         const Paint& paint);
 
     void drawAtlas(CanvasImage* atlas,
         const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
-        const Vector<SkColor>& colors, TransferMode mode,
+        const Vector<CanvasColor>& colors, TransferMode mode,
         const Rect& cullRect, const Paint& paint);
 
     SkCanvas* skCanvas() { return m_canvas; }

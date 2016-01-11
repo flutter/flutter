@@ -307,7 +307,7 @@ void Canvas::drawPicture(Picture* picture)
 void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
         const Vector<Point>& vertices,
         const Vector<Point>& textureCoordinates,
-        const Vector<SkColor>& colors,
+        const Vector<CanvasColor>& colors,
         TransferMode transferMode,
         const Vector<int>& indices,
         const Paint& paint)
@@ -325,6 +325,11 @@ void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
   for (const Point& point : textureCoordinates)
     skTextureCoordinates.append(point.sk_point);
 
+  Vector<SkColor> skColors;
+  skColors.reserveInitialCapacity(colors.size());
+  for (const CanvasColor& color : colors)
+    skColors.append(color);
+
   Vector<uint16_t> skIndices;
   skIndices.reserveInitialCapacity(indices.size());
   for (uint16_t i : indices)
@@ -337,7 +342,7 @@ void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
     skVertices.size(),
     skVertices.data(),
     skTextureCoordinates.isEmpty() ? nullptr : skTextureCoordinates.data(),
-    colors.isEmpty() ? nullptr : colors.data(),
+    skColors.isEmpty() ? nullptr : skColors.data(),
     transferModePtr.get(),
     skIndices.isEmpty() ? nullptr : skIndices.data(),
     skIndices.size(),
@@ -347,7 +352,7 @@ void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
 
 void Canvas::drawAtlas(CanvasImage* atlas,
     const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
-    const Vector<SkColor>& colors, TransferMode mode,
+    const Vector<CanvasColor>& colors, TransferMode mode,
     const Rect& cullRect, const Paint& paint)
 {
   if (!m_canvas)
@@ -365,11 +370,16 @@ void Canvas::drawAtlas(CanvasImage* atlas,
   for (const Rect& rect : rects)
     skRects.append(rect.sk_rect);
 
+  Vector<SkColor> skColors;
+  skColors.reserveInitialCapacity(colors.size());
+  for (const CanvasColor& color : colors)
+    skColors.append(color);
+
   m_canvas->drawAtlas(
       skImage.get(),
       skXForms.data(),
       skRects.data(),
-      colors.isEmpty() ? nullptr : colors.data(),
+      skColors.isEmpty() ? nullptr : skColors.data(),
       skXForms.size(),
       mode,
       cullRect.is_null ? nullptr : &cullRect.sk_rect,

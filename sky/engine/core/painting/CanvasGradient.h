@@ -26,13 +26,13 @@ class CanvasGradient : public Shader {
   static PassRefPtr<CanvasGradient> create();
 
   void initLinear(const Vector<Point>& end_points,
-                  const Vector<SkColor>& colors,
+                  const Vector<CanvasColor>& colors,
                   const Vector<float>& color_stops,
                   SkShader::TileMode tile_mode);
 
   void initRadial(const Point& center,
                   double radius,
-                  const Vector<SkColor>& colors,
+                  const Vector<CanvasColor>& colors,
                   const Vector<float>& color_stops,
                   SkShader::TileMode tile_mode);
 

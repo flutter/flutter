@@ -10,19 +10,19 @@
 
 namespace blink {
 
-SkColor DartConverter<CanvasColor>::FromDart(Dart_Handle dart_color) {
+CanvasColor DartConverter<CanvasColor>::FromDart(Dart_Handle dart_color) {
   Dart_Handle value =
       Dart_GetField(dart_color, DOMDartState::Current()->value_handle());
 
-  uint64_t color = 0;
-  Dart_Handle rv = Dart_IntegerToUint64(value, &color);
+  uint64_t sk_color = 0;
+  Dart_Handle rv = Dart_IntegerToUint64(value, &sk_color);
   DCHECK(!LogIfError(rv));
-  DCHECK(color <= 0xffffffff);
+  DCHECK(sk_color <= 0xffffffff);
 
-  return static_cast<SkColor>(color);
+  return static_cast<SkColor>(sk_color);
 }
 
-SkColor DartConverter<CanvasColor>::FromArguments(
+CanvasColor DartConverter<CanvasColor>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {
@@ -32,9 +32,9 @@ SkColor DartConverter<CanvasColor>::FromArguments(
 }
 
 void DartConverter<CanvasColor>::SetReturnValue(Dart_NativeArguments args,
-                                                SkColor val) {
+                                                CanvasColor val) {
   Dart_Handle color_class = DOMDartState::Current()->color_class();
-  Dart_Handle constructor_args[] = { ToDart(val) };
+  Dart_Handle constructor_args[] = { ToDart(val.sk_color) };
   Dart_SetReturnValue(args,
                       Dart_New(color_class, Dart_Null(), 1, constructor_args));
 }

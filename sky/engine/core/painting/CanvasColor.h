@@ -14,31 +14,25 @@
 namespace blink {
 
 struct CanvasColor {
-  SkColor color;
+  SkColor sk_color;
 
-  CanvasColor(SkColor color) : color(color) { }
-  CanvasColor() : color() { }
-  operator SkColor() const { return color; }
-};
-
-template <>
-struct DartConverterTypes<CanvasColor> {
-  using ConverterType = CanvasColor;
-  using ValueType = SkColor;
+  CanvasColor(SkColor color) : sk_color(color) { }
+  CanvasColor() : sk_color() { }
+  operator SkColor() const { return sk_color; }
 };
 
 template <>
 struct DartConverter<CanvasColor> {
-  static SkColor FromDart(Dart_Handle handle);
-  static SkColor FromArguments(Dart_NativeArguments args,
-                               int index,
-                               Dart_Handle& exception);
-  static SkColor FromArgumentsWithNullCheck(Dart_NativeArguments args,
+  static CanvasColor FromDart(Dart_Handle handle);
+  static CanvasColor FromArguments(Dart_NativeArguments args,
+                                   int index,
+                                   Dart_Handle& exception);
+  static CanvasColor FromArgumentsWithNullCheck(Dart_NativeArguments args,
                                             int index,
                                             Dart_Handle& exception) {
     return FromArguments(args, index, exception);
   }
-  static void SetReturnValue(Dart_NativeArguments args, SkColor val);
+  static void SetReturnValue(Dart_NativeArguments args, CanvasColor val);
 };
 
 } // namespace blink
