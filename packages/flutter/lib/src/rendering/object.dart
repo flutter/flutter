@@ -18,8 +18,6 @@ import 'node.dart';
 export 'layer.dart';
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 
-typedef ui.Shader ShaderCallback(Rect bounds);
-
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
 /// Some render objects wish to store data on their children, such as their
@@ -298,27 +296,21 @@ class PaintingContext {
     childContext._stopRecordingIfNeeded();
   }
 
-  static Paint _getPaintForShaderMask(Rect bounds,
-                                      ShaderCallback shaderCallback,
-                                      TransferMode transferMode) {
-    return new Paint()
-     ..transferMode = transferMode
-     ..shader = shaderCallback(bounds);
-  }
-
   /// Push a shader mask.
   ///
   /// This function will call painter synchronously with a painting context that
   /// will be masked with the given shader.
-  ///
-  /// WARNING: This function does not yet support compositing.
-  void pushShaderMask(bool needsCompositing, Offset offset, Rect bounds, ShaderCallback shaderCallback, TransferMode transferMode, PaintingContextCallback painter) {
-    assert(!needsCompositing); // TODO(abarth): Implement compositing for shader masks.
-    canvas.saveLayer(bounds.shift(offset), _disableAntialias);
-    painter(this, offset);
-    Paint shaderPaint = _getPaintForShaderMask(bounds, shaderCallback, transferMode);
-    canvas.drawRect(bounds, shaderPaint);
-    canvas.restore();
+  void pushShaderMask(Offset offset, ui.Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
+    _stopRecordingIfNeeded();
+    ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
+      shader: shader,
+      maskRect: maskRect,
+      transferMode: transferMode
+    );
+    _appendLayer(shaderLayer, offset);
+    PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
+    painter(childContext, Offset.zero);
+    childContext._stopRecordingIfNeeded();
   }
 }
 
