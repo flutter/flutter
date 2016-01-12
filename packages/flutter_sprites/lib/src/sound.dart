@@ -67,7 +67,7 @@ class SoundEffectStream {
 class SoundEffectPlayer {
   SoundEffectPlayer(int maxStreams) {
     MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
-    shell.connectToService(null, mediaService);
+    shell.connectToService("mojo:media_service", mediaService);
     _soundPool = new SoundPoolProxy.unbound();
     mediaService.ptr.createSoundPool(_soundPool, maxStreams);
   }
@@ -146,7 +146,7 @@ class SoundTrackPlayer {
 
   SoundTrackPlayer() {
     _mediaService = new MediaServiceProxy.unbound();
-    shell.connectToService(null, _mediaService);
+    shell.connectToService("mojo:media_service", _mediaService);
   }
 
   MediaServiceProxy _mediaService;
