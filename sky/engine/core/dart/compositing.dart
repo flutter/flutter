@@ -18,7 +18,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   void _pushClipPath(Path path) native "SceneBuilder_pushClipPath";
   void _pushOpacity(int alpha) native "SceneBuilder_pushOpacity";
   void _pushColorFilter(Color color, TransferMode transferMode) native "SceneBuilder_pushColorFilter";
-  void pushShader(Shader shader, TransferMode transferMode) native "SceneBuilder_pushShader";
+  void pushShaderMask(Shader shader, Rect maskRect, TransferMode transferMode) native "SceneBuilder_pushShaderMask";
 
   void pop() native "SceneBuilder_pop";
 

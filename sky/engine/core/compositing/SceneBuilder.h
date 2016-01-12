@@ -41,7 +41,7 @@ public:
     void pushClipPath(const CanvasPath* path);
     void pushOpacity(int alpha);
     void pushColorFilter(CanvasColor color, TransferMode transferMode);
-    void pushShader(Shader* shader, TransferMode transferMode);
+    void pushShaderMask(Shader* shader, const Rect& maskRect, TransferMode transferMode);
     void pop();
 
     void addPerformanceOverlay(uint64_t enabledOptions, const Rect& bounds);
