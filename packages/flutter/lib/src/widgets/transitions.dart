@@ -97,6 +97,32 @@ class SlideTransition extends TransitionWithChild {
   }
 }
 
+class ScaleTransition extends TransitionWithChild {
+  ScaleTransition({
+    Key key,
+    this.scale,
+    this.alignment: const FractionalOffset(0.5, 0.5),
+    PerformanceView performance,
+    Widget child
+  }) : super(key: key,
+             performance: performance,
+             child: child);
+
+  final AnimatedValue<double> scale;
+  final FractionalOffset alignment;
+
+  Widget buildWithChild(BuildContext context, Widget child) {
+    performance.updateVariable(scale);
+    Matrix4 transform = new Matrix4.identity()
+      ..scale(scale.value, scale.value);
+    return new Transform(
+      transform: transform,
+      alignment: alignment,
+      child: child
+    );
+  }
+}
+
 class RotationTransition extends TransitionWithChild {
   RotationTransition({
     Key key,

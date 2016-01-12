@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'icon_theme.dart';
@@ -14,6 +15,8 @@ import 'theme.dart';
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
 const double _kSizeMini = 40.0;
+const Duration _kChildSegue = const Duration(milliseconds: 400);
+const Interval _kChildSegueInterval = const Interval(0.65, 1.0);
 
 class FloatingActionButton extends StatefulComponent {
   const FloatingActionButton({
@@ -37,6 +40,22 @@ class FloatingActionButton extends StatefulComponent {
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
+  final Performance _childSegue = new Performance(duration: _kChildSegue);
+
+  void initState() {
+    super.initState();
+    _childSegue.play();
+  }
+
+  void didUpdateConfig(FloatingActionButton oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    if (Widget.canUpdate(oldConfig.child, config.child) && config.backgroundColor == oldConfig.backgroundColor)
+      return;
+    _childSegue
+      ..progress = 0.0
+      ..play();
+  }
+
   bool _highlight = false;
 
   void _handleHighlightChanged(bool value) {
@@ -67,7 +86,11 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
           child: new Center(
             child: new IconTheme(
               data: new IconThemeData(color: iconThemeColor),
-              child: config.child
+              child: new RotationTransition(
+                performance: _childSegue,
+                turns: new AnimatedValue<double>(-0.125, end: 0.0, curve: _kChildSegueInterval),
+                child: config.child
+              )
             )
           )
         )

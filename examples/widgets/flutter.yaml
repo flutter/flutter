@@ -10,6 +10,8 @@ material-design-icons:
   - name: action/home
   - name: action/language
   - name: action/list
+  - name: content/add
+  - name: content/create
   - name: device/dvr
   - name: editor/format_align_center
   - name: editor/format_align_left
