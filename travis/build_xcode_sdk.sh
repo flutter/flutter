@@ -19,6 +19,13 @@ trap NukeWorkspace EXIT
 
 NukeWorkspace
 
+# Figure out the engine release SHA
+ENGINE_SHA="$(git rev-parse HEAD)"
+
+if [[ -z "$ENGINE_SHA" ]]; then
+  exit 1
+fi
+
 # Create a separate workspace for gclient
 mkdir -p ${WORKSPACE}
 cp -a . ${WORKSPACE}/src
@@ -64,9 +71,15 @@ pushd out/FlutterXcode
 
 zip -r FlutterXcode.zip Flutter
 
-# When built for archiving, the DSTROOT is set by Xcode.
-if [[ ! -z ${DSTROOT} ]]; then
-  mv FlutterXcode.zip ${DSTROOT}
+# Upload generated assets if the key to the service account is available
+if [[ ! -z ${BUCKET_KEY_FILE} ]]; then
+  GCLOUD_CMD="$(command -v gcloud)"
+  if [[ -z GCLOUD_CMD ]]; then
+    CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    curl https://sdk.cloud.google.com | bash
+  fi
+  gcloud auth activate-service-account --key-file ${BUCKET_KEY_FILE}
+  gsutil cp FlutterXcode.zip gs://flutter_infra/flutter/${ENGINE_SHA}/ios/FlutterXcode.zip
 fi
 
 popd # Out of the Xcode project
