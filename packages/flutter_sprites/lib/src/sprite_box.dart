@@ -337,7 +337,7 @@ class SpriteBox extends RenderBox {
 
     // Move to correct coordinate space before drawing
     canvas.translate(offset.dx, offset.dy);
-    canvas.concat(transformMatrix.storage);
+    canvas.transform(transformMatrix.storage);
 
     // Draw the sprite tree
     Matrix4 totalMatrix = new Matrix4.fromFloat64List(canvas.getTotalMatrix());

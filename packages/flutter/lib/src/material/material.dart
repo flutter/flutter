@@ -379,7 +379,7 @@ class _InkSplash extends InkFeature implements InkSplash {
     Offset originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
       canvas.save();
-      canvas.concat(transform.storage);
+      canvas.transform(transform.storage);
       if (clipToReferenceBox)
         canvas.clipRect(Point.origin & referenceBox.size);
       if (repositionToReferenceBox)
@@ -465,7 +465,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     Offset originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
       canvas.save();
-      canvas.concat(transform.storage);
+      canvas.transform(transform.storage);
       _paintHighlight(canvas, Point.origin & referenceBox.size, paint);
       canvas.restore();
     } else {
