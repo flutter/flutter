@@ -62,6 +62,7 @@ action("generate_snapshot_bin") {
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
     "//sky/engine/bindings/internals.dart",
+    "//sky/engine/bindings/jni/jni.dart",
     "snapshot.dart",
   ] + rebase_path(dart_mojo_internal_sdk_sources,
                   "",

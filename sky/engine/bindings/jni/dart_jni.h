@@ -37,13 +37,18 @@ class JniClass : public RefCounted<JniClass>, public DartWrappable {
  public:
   ~JniClass() override;
 
-  static PassRefPtr<JniClass> fromName(const char* className);
+  static PassRefPtr<JniClass> FromName(const char* className);
 
-  intptr_t getFieldId(const char* name, const char* sig);
-  intptr_t getStaticFieldId(const char* name, const char* sig);
+  intptr_t GetFieldId(const char* name, const char* sig);
+  intptr_t GetStaticFieldId(const char* name, const char* sig);
+  intptr_t GetMethodId(const char* name, const char* sig);
+  intptr_t GetStaticMethodId(const char* name, const char* sig);
 
-  jint getStaticIntField(jfieldID fieldId);
-  PassRefPtr<JniObject> getStaticObjectField(jfieldID fieldId);
+  jint GetStaticIntField(jfieldID fieldId);
+  PassRefPtr<JniObject> GetStaticObjectField(jfieldID fieldId);
+
+  jlong CallStaticLongMethod(jmethodID methodId,
+                             const Vector<Dart_Handle>& args);
 
  private:
   JniClass(JNIEnv* env, jclass clazz);
@@ -60,7 +65,7 @@ class JniObject : public RefCounted<JniObject>, public DartWrappable {
 
   static PassRefPtr<JniObject> create(JNIEnv* env, jobject object);
 
-  jint getIntField(jfieldID fieldId);
+  jint GetIntField(jfieldID fieldId);
 
  private:
   JniObject(JNIEnv* env, jobject object);
@@ -74,8 +79,23 @@ struct DartConverter<jfieldID> {
                                 int index,
                                 Dart_Handle& exception) {
     int64_t result = 0;
-    Dart_GetNativeIntegerArgument(args, index, &result);
+    Dart_Handle handle = Dart_GetNativeIntegerArgument(args, index, &result);
+    if (Dart_IsError(handle))
+      exception = handle;
     return reinterpret_cast<jfieldID>(result);
+  }
+};
+
+template <>
+struct DartConverter<jmethodID> {
+  static jmethodID FromArguments(Dart_NativeArguments args,
+                                 int index,
+                                 Dart_Handle& exception) {
+    int64_t result = 0;
+    Dart_Handle handle = Dart_GetNativeIntegerArgument(args, index, &result);
+    if (Dart_IsError(handle))
+      exception = handle;
+    return reinterpret_cast<jmethodID>(result);
   }
 };
 
