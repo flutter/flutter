@@ -22,17 +22,6 @@ static void Canvas_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&Canvas::create, args);
 }
 
-static void Canvas_concat(Dart_NativeArguments args) {
-  DartArgIterator it(args);
-  Float64List matrix4 = it.GetNext<Float64List>();
-  if (it.had_exception())
-    return;
-  ExceptionState es;
-  GetReceiver<Canvas>(args)->concat(matrix4, es);
-  if (es.had_exception())
-    Dart_ThrowException(es.GetDartException(args, true));
-}
-
 IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
 
 #define FOR_EACH_BINDING(V) \
@@ -66,15 +55,11 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, drawVertices) \
   V(Canvas, drawAtlas)
 
-  // These are custom because of ExceptionState:
-  // V(Canvas, concat)
-
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void Canvas::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     { "Canvas_constructor", Canvas_constructor, 3, true },
-    { "Canvas_concat", Canvas_concat, 2, true },
 FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
@@ -166,17 +151,6 @@ void Canvas::setMatrix(const Float64List& matrix4)
     if (!m_canvas)
         return;
     m_canvas->setMatrix(toSkMatrix(matrix4));
-}
-
-void Canvas::concat(const Float64List& matrix4, ExceptionState& es)
-{
-    if (!m_canvas)
-        return es.ThrowTypeError("No canvas");
-
-    SkMatrix sk_matrix = toSkMatrix(matrix4, es);
-    if (es.had_exception())
-        return;
-    m_canvas->concat(sk_matrix);
 }
 
 Float64List Canvas::getTotalMatrix()

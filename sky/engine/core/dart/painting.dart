@@ -216,7 +216,6 @@ class Canvas extends NativeFieldWrapperClass2 {
   void scale(double sx, double sy) native "Canvas_scale";
   void rotate(double radians) native "Canvas_rotate";
   void skew(double sx, double sy) native "Canvas_skew";
-  void concat(Float64List matrix4) native "Canvas_concat";
 
   void _transform(Float64List matrix4) native "Canvas_transform";
   void transform(Float64List matrix4) {

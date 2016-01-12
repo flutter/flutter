@@ -14,34 +14,17 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
 
   void pushTransform(Float64List matrix4) native "SceneBuilder_pushTransform";
   void pushClipRect(Rect rect) native "SceneBuilder_pushClipRect";
-  void _pushClipRRect(RRect rrect) native "SceneBuilder_pushClipRRect";
-  void _pushClipPath(Path path) native "SceneBuilder_pushClipPath";
-  void _pushOpacity(int alpha) native "SceneBuilder_pushOpacity";
-  void _pushColorFilter(Color color, TransferMode transferMode) native "SceneBuilder_pushColorFilter";
+  void pushClipRRect(RRect rrect) native "SceneBuilder_pushClipRRect";
+  void pushClipPath(Path path) native "SceneBuilder_pushClipPath";
+  void pushOpacity(int alpha) native "SceneBuilder_pushOpacity";
+  void pushColorFilter(Color color, TransferMode transferMode) native "SceneBuilder_pushColorFilter";
   void pushShaderMask(Shader shader, Rect maskRect, TransferMode transferMode) native "SceneBuilder_pushShaderMask";
 
   void pop() native "SceneBuilder_pop";
 
   void addPerformanceOverlay(int enabledOptions, Rect bounds) native "SceneBuilder_addPerformanceOverlay";
-  void _addPicture(Offset offset, Picture picture) native "SceneBuilder_addPicture";
+  void addPicture(Offset offset, Picture picture) native "SceneBuilder_addPicture";
   void setRasterizerTracingThreshold(int frameInterval) native "SceneBuilder_setRasterizerTracingThreshold";
 
   Scene build() native "SceneBuilder_build";
-
-  // TODO(abarth): Remove these once clients stop passing bounds.
-  void pushClipRRect(RRect rrect, [ Rect bounds ]) {
-    _pushClipRRect(rrect);
-  }
-  void pushClipPath(Path path, [ Rect bounds ]) {
-    _pushClipPath(path);
-  }
-  void pushOpacity(int alpha, [ Rect bounds ]) {
-    _pushOpacity(alpha);
-  }
-  void pushColorFilter(Color color, TransferMode transferMode, [ Rect bounds ]) {
-    _pushColorFilter(color, transferMode);
-  }
-  void addPicture(Offset offset, Picture picture, [ Rect bounds ]) {
-    _addPicture(offset, picture);
-  }
 }
