@@ -232,7 +232,7 @@ class PaintingContext {
     } else {
       canvas.saveLayer(bounds.shift(offset), _disableAntialias);
       canvas.clipRRect(clipRRect.shift(offset));
-      painter(this, Offset.zero);
+      painter(this, offset);
       canvas.restore();
     }
   }
