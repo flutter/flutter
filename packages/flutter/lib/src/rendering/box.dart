@@ -126,10 +126,10 @@ class BoxConstraints extends Constraints {
   /// as close as possible to the original constraints.
   BoxConstraints enforce(BoxConstraints constraints) {
     return new BoxConstraints(
-      minWidth: clamp(min: constraints.minWidth, max: constraints.maxWidth, value: minWidth),
-      maxWidth: clamp(min: constraints.minWidth, max: constraints.maxWidth, value: maxWidth),
-      minHeight: clamp(min: constraints.minHeight, max: constraints.maxHeight, value: minHeight),
-      maxHeight: clamp(min: constraints.minHeight, max: constraints.maxHeight, value: maxHeight)
+      minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
+      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight)
     );
   }
 
@@ -137,10 +137,10 @@ class BoxConstraints extends Constraints {
   /// the given width and height as possible while still respecting the original
   /// box constraints.
   BoxConstraints tighten({ double width, double height }) {
-    return new BoxConstraints(minWidth: width == null ? minWidth : math.max(math.min(maxWidth, width), minWidth),
-                              maxWidth: width == null ? maxWidth : math.max(math.min(maxWidth, width), minWidth),
-                              minHeight: height == null ? minHeight : math.max(math.min(maxHeight, height), minHeight),
-                              maxHeight: height == null ? maxHeight : math.max(math.min(maxHeight, height), minHeight));
+    return new BoxConstraints(minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth),
+                              maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth),
+                              minHeight: height == null ? minHeight : height.clamp(minHeight, maxHeight),
+                              maxHeight: height == null ? maxHeight : height.clamp(minHeight, maxHeight));
   }
 
   /// Returns box constraints with the same width constraints but with
@@ -155,14 +155,14 @@ class BoxConstraints extends Constraints {
   /// possible to the given width.
   double constrainWidth([double width = double.INFINITY]) {
     assert(isNormalized);
-    return clamp(min: minWidth, max: maxWidth, value: width);
+    return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
   double constrainHeight([double height = double.INFINITY]) {
     assert(isNormalized);
-    return clamp(min: minHeight, max: maxHeight, value: height);
+    return height.clamp(minHeight, maxHeight);
   }
 
   /// Returns the size that both satisfies the constraints and is as close as
