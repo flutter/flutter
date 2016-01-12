@@ -103,14 +103,8 @@ abstract class Layer {
 
 /// A composited layer containing a [Picture]
 class PictureLayer extends Layer {
-  PictureLayer({ Offset offset: Offset.zero, this.paintBounds })
+  PictureLayer({ Offset offset: Offset.zero })
     : super(offset: offset);
-
-  /// The rectangle in this layer's coodinate system that bounds the recording
-  ///
-  /// The paint bounds are used to decide how much graphics memory to allocate
-  /// when rasterizing this layer.
-  Rect paintBounds;
 
   /// The picture recorded for this layer
   ///
@@ -118,12 +112,7 @@ class PictureLayer extends Layer {
   ui.Picture picture;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.addPicture(offset + layerOffset, picture, paintBounds);
-  }
-
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('paintBounds: $paintBounds');
+    builder.addPicture(offset + layerOffset, picture);
   }
 }
 
@@ -132,22 +121,22 @@ class PictureLayer extends Layer {
 class PerformanceOverlayLayer extends Layer {
   PerformanceOverlayLayer({
     Offset offset: Offset.zero,
-    this.paintBounds,
+    this.overlayRect,
     this.optionsMask,
     this.rasterizerThreshold
   }) : super(offset: offset);
 
-  /// The rectangle in this layer's coodinate system that bounds the recording
-  Rect paintBounds;
+  /// The rectangle in this layer's coodinate system that the overlay should occupy.
+  Rect overlayRect;
 
-  /// A mask specifying the statistics to display
+  /// A mask specifying the statistics to display.
   final int optionsMask;
 
   final int rasterizerThreshold;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
-    builder.addPerformanceOverlay(optionsMask, paintBounds.shift(offset + layerOffset));
+    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(offset + layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
   }
 }
@@ -296,11 +285,7 @@ class ClipRectLayer extends ContainerLayer {
 
 /// A composite layer that clips its children using a rounded rectangle
 class ClipRRectLayer extends ContainerLayer {
-  ClipRRectLayer({ Offset offset: Offset.zero, this.bounds, this.clipRRect }) : super(offset: offset);
-
-  /// Unused
-  Rect bounds;
-  // TODO(abarth): Remove.
+  ClipRRectLayer({ Offset offset: Offset.zero, this.clipRRect }) : super(offset: offset);
 
   /// The rounded-rect to clip in the parent's coordinate system
   ui.RRect clipRRect;
@@ -309,25 +294,20 @@ class ClipRRectLayer extends ContainerLayer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Offset childOffset = offset + layerOffset;
-    builder.pushClipRRect(clipRRect.shift(childOffset), bounds.shift(childOffset));
+    builder.pushClipRRect(clipRRect.shift(childOffset));
     addChildrenToScene(builder, childOffset);
     builder.pop();
   }
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
-    settings.add('bounds: $bounds');
     settings.add('clipRRect: $clipRRect');
   }
 }
 
 /// A composite layer that clips its children using a path
 class ClipPathLayer extends ContainerLayer {
-  ClipPathLayer({ Offset offset: Offset.zero, this.bounds, this.clipPath }) : super(offset: offset);
-
-  /// Unused
-  Rect bounds;
-  // TODO(abarth): Remove.
+  ClipPathLayer({ Offset offset: Offset.zero, this.clipPath }) : super(offset: offset);
 
   /// The path to clip in the parent's coordinate system
   Path clipPath;
@@ -336,14 +316,13 @@ class ClipPathLayer extends ContainerLayer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Offset childOffset = offset + layerOffset;
-    builder.pushClipPath(clipPath.shift(childOffset), bounds.shift(childOffset));
+    builder.pushClipPath(clipPath.shift(childOffset));
     addChildrenToScene(builder, childOffset);
     builder.pop();
   }
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
-    settings.add('bounds: $bounds');
     settings.add('clipPath: $clipPath');
   }
 }

@@ -152,7 +152,7 @@ class PaintingContext {
 
   void _startRecording() {
     assert(!_isRecording);
-    _currentLayer = new PictureLayer(paintBounds: _paintBounds);
+    _currentLayer = new PictureLayer();
     _recorder = new ui.PictureRecorder();
     _canvas = new Canvas(_recorder, _paintBounds);
     _containerLayer.append(_currentLayer);
@@ -188,7 +188,7 @@ class PaintingContext {
   void pushPerformanceOverlay(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
     _stopRecordingIfNeeded();
     PerformanceOverlayLayer performanceOverlayLayer = new PerformanceOverlayLayer(
-      paintBounds: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
+      overlayRect: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
       optionsMask: optionsMask,
       rasterizerThreshold: rasterizerThreshold
     );
@@ -224,16 +224,14 @@ class PaintingContext {
   void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, ui.RRect clipRRect, PaintingContextCallback painter) {
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipRRectLayer clipLayer = new ClipRRectLayer(bounds: bounds, clipRRect: clipRRect);
+      ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: clipRRect);
       _appendLayer(clipLayer, offset);
       PaintingContext childContext = new PaintingContext._(clipLayer, bounds);
       painter(childContext, Offset.zero);
       childContext._stopRecordingIfNeeded();
     } else {
       canvas.saveLayer(bounds.shift(offset), _disableAntialias);
-      // TODO(abarth): Remove this translation once RRect.shift works again.
-      canvas.translate(offset.dx, offset.dy);
-      canvas.clipRRect(clipRRect);
+      canvas.clipRRect(clipRRect.shift(offset));
       painter(this, Offset.zero);
       canvas.restore();
     }
@@ -247,7 +245,7 @@ class PaintingContext {
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipPathLayer clipLayer = new ClipPathLayer(bounds: bounds, clipPath: clipPath);
+      ClipPathLayer clipLayer = new ClipPathLayer(clipPath: clipPath);
       _appendLayer(clipLayer, offset);
       PaintingContext childContext = new PaintingContext._(clipLayer, bounds);
       painter(childContext, Offset.zero);
