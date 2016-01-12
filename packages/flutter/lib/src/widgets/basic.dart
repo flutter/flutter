@@ -1910,7 +1910,7 @@ class AssetImage extends StatelessComponent {
 /// widget enforces that restriction by keying itself using a [GlobalObjectKey]
 /// for the given render object.
 class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
-  WidgetToRenderBoxAdapter(RenderBox renderBox)
+  WidgetToRenderBoxAdapter({ RenderBox renderBox, this.onBuild })
     : renderBox = renderBox,
       // WidgetToRenderBoxAdapter objects are keyed to their render box. This
       // prevents the widget being used in the widget hierarchy in two different
@@ -1923,7 +1923,18 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// The render box to place in the widget tree.
   final RenderBox renderBox;
 
+  /// Called when it is safe to update the render box and its descendants. If
+  /// you update the RenderObject subtree under this widget outside of
+  /// invocations of this callback, features like hit-testing will fail as the
+  /// tree will be dirty.
+  final VoidCallback onBuild;
+
   RenderBox createRenderObject() => renderBox;
+
+  void updateRenderObject(RenderBox renderObject, WidgetToRenderBoxAdapter oldWidget) {
+    if (onBuild != null)
+      onBuild();
+  }
 }
 
 
