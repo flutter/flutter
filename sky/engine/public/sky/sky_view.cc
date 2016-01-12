@@ -100,6 +100,10 @@ void SkyView::ScheduleFrame() {
   client_->ScheduleFrame();
 }
 
+void SkyView::FlushRealTimeEvents() {
+  client_->FlushRealTimeEvents();
+}
+
 void SkyView::Render(Scene* scene) {
   layer_tree_ = scene->takeLayerTree();
 }

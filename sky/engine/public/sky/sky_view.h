@@ -65,6 +65,7 @@ class SkyView : public WindowClient {
   Window* GetWindow();
 
   void ScheduleFrame() override;
+  void FlushRealTimeEvents() override;
   void Render(Scene* scene) override;
 
   SkyViewClient* client_;

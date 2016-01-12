@@ -16,6 +16,7 @@ namespace blink {
 class SkyViewClient {
  public:
   virtual void ScheduleFrame() = 0;
+  virtual void FlushRealTimeEvents() = 0;
   virtual void Render(std::unique_ptr<sky::compositor::LayerTree> layer_tree) = 0;
 
   virtual void DidCreateIsolate(Dart_Isolate isolate) = 0;

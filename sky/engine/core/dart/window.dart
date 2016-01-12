@@ -135,6 +135,9 @@ class Window {
   /// [Scene]. For optimal performance, this should only be called in response
   /// to the [onBeginFrame] callback being invoked.
   void render(Scene scene) native "Window_render";
+
+  /// Flushes pending real-time events, executing their callbacks.
+  void flushRealTimeEvents() native "Scheduler_FlushRealTimeEvents";
 }
 
 /// The [Window] singleton.

@@ -37,6 +37,9 @@ void SkyHeadless::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
 void SkyHeadless::ScheduleFrame() {
 }
 
+void SkyHeadless::FlushRealTimeEvents() {
+}
+
 void SkyHeadless::Render(Scene* scene) {
 }
 

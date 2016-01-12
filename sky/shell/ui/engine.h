@@ -75,6 +75,7 @@ class Engine : public UIDelegate,
 
   // SkyViewClient methods:
   void ScheduleFrame() override;
+  void FlushRealTimeEvents() override;
   void Render(std::unique_ptr<compositor::LayerTree> layer_tree) override;
   void DidCreateIsolate(Dart_Isolate isolate) override;
 

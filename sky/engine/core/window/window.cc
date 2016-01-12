@@ -29,6 +29,11 @@ void Render(Dart_NativeArguments args) {
   DOMDartState::Current()->window()->client()->Render(scene);
 }
 
+
+void FlushRealTimeEvents(Dart_NativeArguments args) {
+  DOMDartState::Current()->window()->client()->FlushRealTimeEvents();
+}
+
 }  // namespace
 
 WindowClient::~WindowClient() {
@@ -151,6 +156,7 @@ void Window::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     { "Window_scheduleFrame", ScheduleFrame, 1, true },
     { "Window_render", Render, 2, true },
+    { "Scheduler_FlushRealTimeEvents", FlushRealTimeEvents, 1, true},
   });
 }
 

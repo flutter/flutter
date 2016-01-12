@@ -19,6 +19,7 @@ class DartLibraryNatives;
 class WindowClient {
  public:
   virtual void ScheduleFrame() = 0;
+  virtual void FlushRealTimeEvents() = 0;
   virtual void Render(Scene* scene) = 0;
 
  protected:
