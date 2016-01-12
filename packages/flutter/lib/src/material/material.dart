@@ -84,6 +84,7 @@ class Material extends StatefulComponent {
     this.color,
     this.textStyle
   }) : super(key: key) {
+    assert(type != null);
     assert(elevation != null);
   }
 
@@ -100,6 +101,14 @@ class Material extends StatefulComponent {
   }
 
   _MaterialState createState() => new _MaterialState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$type');
+    description.add('elevation: $elevation');
+    if (color != null)
+      description.add('color: $color');
+  }
 }
 
 class _MaterialState extends State<Material> {

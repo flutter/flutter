@@ -726,32 +726,6 @@ class BoxDecoration extends Decoration {
     );
   }
 
-  double getEffectiveBorderRadius(Rect rect) {
-    double shortestSide = rect.shortestSide;
-    // In principle, we should use shortestSide / 2.0, but we don't want to
-    // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let ui.Canvas do any remaining clamping.
-    return borderRadius > shortestSide ? shortestSide : borderRadius;
-  }
-
-  bool hitTest(Size size, Point position) {
-    assert(shape != null);
-    assert((Point.origin & size).contains(position));
-    switch (shape) {
-      case BoxShape.rectangle:
-        if (borderRadius != null) {
-          ui.RRect bounds = new ui.RRect.fromRectXY(Point.origin & size, borderRadius, borderRadius);
-          return bounds.contains(position);
-        }
-        return true;
-      case BoxShape.circle:
-        // Circles are inscribed into our smallest dimension.
-        Point center = size.center(Point.origin);
-        double distance = (position - center).distance;
-        return distance <= math.min(size.width, size.height) / 2.0;
-    }
-  }
-
   /// Linearly interpolate between two box decorations.
   ///
   /// Interpolates each parameter of the box decoration separately.
@@ -841,6 +815,32 @@ class BoxDecoration extends Decoration {
   }
   void removeChangeListener(VoidCallback listener) {
     backgroundImage?._removeChangeListener(listener);
+  }
+
+  double getEffectiveBorderRadius(Rect rect) {
+    double shortestSide = rect.shortestSide;
+    // In principle, we should use shortestSide / 2.0, but we don't want to
+    // run into floating point rounding errors. Instead, we just use
+    // shortestSide and let ui.Canvas do any remaining clamping.
+    return borderRadius > shortestSide ? shortestSide : borderRadius;
+  }
+
+  bool hitTest(Size size, Point position) {
+    assert(shape != null);
+    assert((Point.origin & size).contains(position));
+    switch (shape) {
+      case BoxShape.rectangle:
+        if (borderRadius != null) {
+          ui.RRect bounds = new ui.RRect.fromRectXY(Point.origin & size, borderRadius, borderRadius);
+          return bounds.contains(position);
+        }
+        return true;
+      case BoxShape.circle:
+        // Circles are inscribed into our smallest dimension.
+        Point center = size.center(Point.origin);
+        double distance = (position - center).distance;
+        return distance <= math.min(size.width, size.height) / 2.0;
+    }
   }
 
   _BoxDecorationPainter createBoxPainter() => new _BoxDecorationPainter(this);
