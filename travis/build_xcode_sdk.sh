@@ -73,7 +73,9 @@ zip -r FlutterXcode.zip Flutter
 
 # Upload generated assets if the key to the service account is available
 if [[ ! -z ${BUCKET_KEY_FILE} ]]; then
+  set +e
   GCLOUD_CMD="$(command -v gcloud)"
+  set -e
   if [[ -z GCLOUD_CMD ]]; then
     CLOUDSDK_CORE_DISABLE_PROMPTS=1
     curl https://sdk.cloud.google.com | bash
