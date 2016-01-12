@@ -15,7 +15,7 @@
 #include "sky/compositor/opacity_layer.h"
 #include "sky/compositor/picture_layer.h"
 #include "sky/compositor/performance_overlay_layer.h"
-#include "sky/compositor/shader_layer.h"
+#include "sky/compositor/shader_mask_layer.h"
 #include "sky/compositor/transform_layer.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
@@ -47,7 +47,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushClipPath) \
   V(SceneBuilder, pushOpacity) \
   V(SceneBuilder, pushColorFilter) \
-  V(SceneBuilder, pushShader) \
+  V(SceneBuilder, pushShaderMask) \
   V(SceneBuilder, pop) \
   V(SceneBuilder, addPicture) \
   V(SceneBuilder, addPerformanceOverlay) \
@@ -120,10 +120,11 @@ void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode)
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::pushShader(Shader* shader, TransferMode transferMode)
+void SceneBuilder::pushShaderMask(Shader* shader, const Rect& maskRect, TransferMode transferMode)
 {
-    std::unique_ptr<sky::compositor::ShaderLayer> layer(new sky::compositor::ShaderLayer());
+    std::unique_ptr<sky::compositor::ShaderMaskLayer> layer(new sky::compositor::ShaderMaskLayer());
     layer->set_shader(shader->shader());
+    layer->set_mask_rect(maskRect.sk_rect);
     layer->set_transfer_mode(transferMode);
     addLayer(std::move(layer));
 }

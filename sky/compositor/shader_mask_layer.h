@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_COMPOSITOR_SHADER_LAYER_H_
-#define SKY_COMPOSITOR_SHADER_LAYER_H_
+#ifndef SKY_COMPOSITOR_SHADER_MASK_LAYER_H_
+#define SKY_COMPOSITOR_SHADER_MASK_LAYER_H_
 
 #include "sky/compositor/container_layer.h"
 
@@ -12,12 +12,16 @@
 namespace sky {
 namespace compositor {
 
-class ShaderLayer : public ContainerLayer {
+class ShaderMaskLayer : public ContainerLayer {
  public:
-  ShaderLayer();
-  ~ShaderLayer() override;
+  ShaderMaskLayer();
+  ~ShaderMaskLayer() override;
 
   void set_shader(SkShader* shader) { shader_ = shader; }
+
+  void set_mask_rect(const SkRect& mask_rect) {
+    mask_rect_ = mask_rect;
+  }
 
   void set_transfer_mode(SkXfermode::Mode transfer_mode) {
     transfer_mode_ = transfer_mode;
@@ -29,12 +33,13 @@ class ShaderLayer : public ContainerLayer {
 
  private:
   RefPtr<SkShader> shader_;
+  SkRect mask_rect_;
   SkXfermode::Mode transfer_mode_;
 
-  DISALLOW_COPY_AND_ASSIGN(ShaderLayer);
+  DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);
 };
 
 }  // namespace compositor
 }  // namespace sky
 
-#endif  // SKY_COMPOSITOR_SHADER_LAYER_H_
+#endif  // SKY_COMPOSITOR_SHADER_MASK_LAYER_H_
