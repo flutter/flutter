@@ -30,6 +30,7 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    Stopwatch stopwatch = new Stopwatch()..start();
     Set<String> pubSpecDirectories = new Set<String>();
     List<String> dartFiles = argResults.rest.toList();
 
@@ -322,14 +323,16 @@ class AnalyzeCommand extends FlutterCommand {
         errorCount += 1;
       }
     }
+    stopwatch.stop();
+    String elapsed = (stopwatch.elapsedMilliseconds / 100.0).toStringAsFixed(1);
 
     if (exitCode < 0 || exitCode > 3) // 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
 
     if (errorCount > 0)
-      return 1;
+      return 1; // Doesn't this mean 'hints' per the above comment?
     if (argResults['congratulate'])
-      print('No analyzer warnings!');
+      print('No analyzer warnings! (ran in ${elapsed}s)');
     return 0;
   }
 }
