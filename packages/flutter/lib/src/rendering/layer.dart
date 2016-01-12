@@ -392,3 +392,31 @@ class OpacityLayer extends ContainerLayer {
     settings.add('alpha: $alpha');
   }
 }
+
+/// A composited layer that applies a shader to hits children.
+class ShaderMaskLayer extends ContainerLayer {
+  ShaderMaskLayer({ Offset offset: Offset.zero, this.shader, this.maskRect, this.transferMode }) : super(offset: offset);
+
+  /// The shader to apply to the children.
+  ui.Shader shader;
+
+  /// The size of the shader.
+  Rect maskRect;
+
+  /// The tranfer mode to apply when blending the shader with the children.
+  TransferMode transferMode;
+
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    Offset childOffset = offset + layerOffset;
+    builder.pushShaderMask(shader, maskRect.shift(childOffset), transferMode);
+    addChildrenToScene(builder, childOffset);
+    builder.pop();
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('shader: $shader');
+    settings.add('maskRect: $maskRect');
+    settings.add('transferMode: $transferMode');
+  }
+}

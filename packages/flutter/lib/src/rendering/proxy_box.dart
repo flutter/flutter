@@ -540,7 +540,7 @@ class RenderOpacity extends RenderProxyBox {
     assert(opacity >= 0.0 && opacity <= 1.0);
   }
 
-  bool get alwaysNeedsCompositing => _alpha != 0 && _alpha != 255;
+  bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -580,6 +580,8 @@ class RenderOpacity extends RenderProxyBox {
   }
 }
 
+typedef ui.Shader ShaderCallback(Rect bounds);
+
 class RenderShaderMask extends RenderProxyBox {
   RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, TransferMode transferMode })
     : _shaderCallback = shaderCallback, _transferMode = transferMode, super(child);
@@ -604,9 +606,14 @@ class RenderShaderMask extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  bool get alwaysNeedsCompositing => child != null;
+
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.pushShaderMask(needsCompositing, offset, Point.origin & size, _shaderCallback, _transferMode, super.paint);
+    if (child != null) {
+      assert(needsCompositing);
+      Rect rect = Point.origin & size;
+      context.pushShaderMask(offset, _shaderCallback(rect), rect, _transferMode, super.paint);
+    }
   }
 }
 
