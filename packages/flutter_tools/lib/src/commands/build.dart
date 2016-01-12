@@ -18,7 +18,7 @@ import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
-const List<String> _kDensities = const ['drawable-xxhdpi'];
+const List<String> _kDensities = const ['mdpi', 'hdpi', 'xdpi', 'xxhdpi', 'xxxhdpi'];
 const List<String> _kThemes = const ['white', 'black'];
 const List<int> _kSizes = const [18, 24, 36, 48];
 
@@ -53,7 +53,7 @@ class _MaterialAsset {
     List<String> parts = name.split('/');
     String category = parts[0];
     String subtype = parts[1];
-    return '$category/$density/ic_${subtype}_${theme}_${size}dp.png';
+    return '$category/drawable-$density/ic_${subtype}_${theme}_${size}dp.png';
   }
 }
 

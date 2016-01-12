@@ -57,6 +57,22 @@ class Icon extends StatelessComponent {
     }
   }
 
+  String _getDisplayDensity(BuildContext context) {
+    MediaQueryData media = MediaQuery.of(context);
+    // Values below are the midpoints between the normative ratios
+    // for the given selectors, with 1.0 equating to 160dpi. See:
+    // http://developer.android.com/intl/es/guide/practices/screens_support.html
+    if (media.devicePixelRatio > 3.5)
+      return 'xxxhdpi';
+    if (media.devicePixelRatio > 2.5)
+      return 'xxhdpi';
+    if (media.devicePixelRatio > 1.75)
+      return 'xhdpi';
+    if (media.devicePixelRatio > 1.25)
+      return 'hdpi';
+    return 'mdpi';
+  }
+
   Widget build(BuildContext context) {
     String category = '';
     String subtype = '';
@@ -65,13 +81,13 @@ class Icon extends StatelessComponent {
       category = parts[0];
       subtype = parts[1];
     }
-    // TODO(eseidel): This clearly isn't correct.  Not sure what would be.
-    // Should we use the ios images on ios?
-    String density = 'drawable-xxhdpi';
+    // TODO(kgiesing): Should selector logic be moved down a level so that
+    // any generic asset can be resolved using consistent contextual logic?
+    String density = _getDisplayDensity(context);
     String colorSuffix = _getColorSuffix(context);
     int iconSize = _kIconSize[size];
     return new AssetImage(
-      name: '$category/$density/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
+      name: '$category/drawable-$density/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
       width: iconSize.toDouble(),
       height: iconSize.toDouble(),
       colorFilter: colorFilter
