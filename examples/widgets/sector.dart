@@ -25,22 +25,45 @@ class SectorAppState extends State<SectorApp> {
   final RenderBoxToRenderSectorAdapter sectors = initCircle();
   final math.Random rand = new math.Random(1);
 
+  List<double> wantedSectorSizes = <double>[];
+  List<double> actualSectorSizes = <double>[];
+  double get currentTheta => wantedSectorSizes.fold(0.0, (double total, double value) => total + value);
+
   void addSector() {
-    double deltaTheta;
-    var ring = (sectors.child as RenderSectorRing);
-    SectorDimensions currentSize = ring.getIntrinsicDimensions(const SectorConstraints(), ring.deltaRadius);
-    if (currentSize.deltaTheta >= kTwoPi - (math.PI * 0.2 + 0.05))
-      deltaTheta = kTwoPi - currentSize.deltaTheta;
-    else
-      deltaTheta = math.PI * rand.nextDouble() / 5.0 + 0.05;
-    Color color = new Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
-    ring.add(new RenderSolidColor(color, desiredDeltaTheta: deltaTheta));
-    updateEnabledState();
+    final double currentTheta = this.currentTheta;
+    if (currentTheta < kTwoPi) {
+      double deltaTheta;
+      if (currentTheta >= kTwoPi - (math.PI * 0.2 + 0.05))
+        deltaTheta = kTwoPi - currentTheta;
+      else
+        deltaTheta = math.PI * rand.nextDouble() / 5.0 + 0.05;
+      wantedSectorSizes.add(deltaTheta);
+      updateEnabledState();
+    }
   }
 
   void removeSector() {
-    (sectors.child as RenderSectorRing).remove((sectors.child as RenderSectorRing).lastChild);
-    updateEnabledState();
+    if (wantedSectorSizes.isNotEmpty) {
+      wantedSectorSizes.removeLast();
+      updateEnabledState();
+    }
+  }
+
+  void doUpdates() {
+    int index = 0;
+    while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index])
+      index += 1;
+    RenderSectorRing ring = sectors.child;
+    while (index < actualSectorSizes.length) {
+      ring.remove(ring.lastChild);
+      actualSectorSizes.removeLast();
+    }
+    while (index < wantedSectorSizes.length) {
+      Color color = new Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
+      ring.add(new RenderSolidColor(color, desiredDeltaTheta: wantedSectorSizes[index]));
+      actualSectorSizes.add(wantedSectorSizes[index]);
+      index += 1;
+    }
   }
 
   static RenderBox initSector(Color color) {
@@ -60,10 +83,8 @@ class SectorAppState extends State<SectorApp> {
   bool _enabledRemove = false;
   void updateEnabledState() {
     setState(() {
-      var ring = (sectors.child as RenderSectorRing);
-      SectorDimensions currentSize = ring.getIntrinsicDimensions(const SectorConstraints(), ring.deltaRadius);
-      _enabledAdd = currentSize.deltaTheta < kTwoPi;
-      _enabledRemove = ring.firstChild != null;
+      _enabledAdd = currentTheta < kTwoPi;
+      _enabledRemove = wantedSectorSizes.isNotEmpty;
     });
   }
 
@@ -75,35 +96,35 @@ class SectorAppState extends State<SectorApp> {
           child: new Row(
             children: <Widget>[
               new RaisedButton(
+                onPressed: _enabledAdd ? addSector : null,
                 child: new IntrinsicWidth(
                   child: new Row(
                     children: <Widget>[
                       new Container(
                         padding: new EdgeDims.all(4.0),
                         margin: new EdgeDims.only(right: 10.0),
-                        child: new WidgetToRenderBoxAdapter(sectorAddIcon)
+                        child: new WidgetToRenderBoxAdapter(renderBox: sectorAddIcon)
                       ),
                       new Text('ADD SECTOR'),
                     ]
                   )
-                ),
-                onPressed: _enabledAdd ? addSector : null
+                )
               ),
               new RaisedButton(
+                onPressed: _enabledRemove ? removeSector : null,
                 child: new IntrinsicWidth(
                   child: new Row(
                     children: <Widget>[
                       new Container(
                         padding: new EdgeDims.all(4.0),
                         margin: new EdgeDims.only(right: 10.0),
-                        child: new WidgetToRenderBoxAdapter(sectorRemoveIcon)
+                        child: new WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon)
                       ),
                       new Text('REMOVE SECTOR'),
                     ]
                   )
-                ),
-                onPressed: _enabledRemove ? removeSector : null
-              )
+                )
+              ),
             ],
             justifyContent: FlexJustifyContent.spaceAround
           )
@@ -115,7 +136,10 @@ class SectorAppState extends State<SectorApp> {
               border: new Border.all(color: new Color(0xFF000000))
             ),
             padding: new EdgeDims.all(8.0),
-            child: new WidgetToRenderBoxAdapter(sectors)
+            child: new WidgetToRenderBoxAdapter(
+              renderBox: sectors,
+              onBuild: doUpdates
+            )
           )
         ),
       ],
