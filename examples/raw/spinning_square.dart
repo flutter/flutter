@@ -35,7 +35,7 @@ void beginFrame(Duration timeStamp) {
       ..[15] = 1.0;
     ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
       ..pushTransform(deviceTransform)
-      ..addPicture(ui.Offset.zero, picture, paintBounds)
+      ..addPicture(ui.Offset.zero, picture)
       ..pop();
     ui.window.render(sceneBuilder.build());
   });

@@ -46,7 +46,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
     ..[15] = 1.0;
   ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
     ..pushTransform(deviceTransform)
-    ..addPicture(ui.Offset.zero, picture, paintBounds)
+    ..addPicture(ui.Offset.zero, picture)
     ..pop();
   return sceneBuilder.build();
 }

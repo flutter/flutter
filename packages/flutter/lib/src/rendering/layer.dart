@@ -361,7 +361,7 @@ class OpacityLayer extends ContainerLayer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Offset childOffset = offset + layerOffset;
-    builder.pushOpacity(alpha, null);
+    builder.pushOpacity(alpha);
     addChildrenToScene(builder, childOffset);
     builder.pop();
   }
