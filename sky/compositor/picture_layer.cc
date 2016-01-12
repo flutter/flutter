@@ -37,8 +37,9 @@ void PictureLayer::Paint(PaintContext::ScopedFrame& frame) {
     if (kDebugCheckerboardRasterizedLayers)
       DrawCheckerboard(&canvas, rect);
   } else {
-    SkMatrix matrix = SkMatrix::MakeTrans(offset_.x(), offset_.y());
-    canvas.drawPicture(picture_.get(), &matrix, nullptr);
+    SkAutoCanvasRestore save(&canvas, true);
+    canvas.translate(offset_.x(), offset_.y());
+    canvas.drawPicture(picture_.get());
   }
 }
 
