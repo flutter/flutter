@@ -64,7 +64,7 @@ class PianoApp extends StatelessComponent {
   Future loadSounds() async {
     MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
     try {
-      shell.connectToService(null, mediaService);
+      shell.connectToService("mojo:media_service", mediaService);
       List<Future<MediaPlayerPrepareResponseParams>> pending = <Future<MediaPlayerPrepareResponseParams>>[];
       for (PianoKey key in keys)
         pending.add(key.load(mediaService));
