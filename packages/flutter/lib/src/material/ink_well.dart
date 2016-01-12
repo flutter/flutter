@@ -61,8 +61,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     } else {
       _lastHighlight.deactivate();
     }
+    assert(value == (_lastHighlight != null && _lastHighlight.active));
     if (config.onHighlightChanged != null)
-      config.onHighlightChanged(value != null);
+      config.onHighlightChanged(value);
   }
 
 
