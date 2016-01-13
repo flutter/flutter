@@ -116,7 +116,7 @@ abstract class StartCommandBase extends FlutterCommand {
 
 class StartCommand extends StartCommandBase {
   final String name = 'start';
-  final String description = 'Start your Flutter app on attached devices (Android only).';
+  final String description = 'Start your Flutter app on attached devices (defaults to checked/debug mode) (Android only).';
 
   StartCommand() {
     argParser.addFlag('poke',
