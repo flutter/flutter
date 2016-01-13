@@ -4,12 +4,12 @@
 
 #include "sky/engine/bindings/jni/dart_jni.h"
 
-#include <vector>
-
 #include "base/logging.h"
 #include "base/android/jni_android.h"
 #include "base/android/jni_string.h"
-#include "base/strings/string_util.h"
+#include "sky/engine/bindings/jni/jni_array.h"
+#include "sky/engine/bindings/jni/jni_class.h"
+#include "sky/engine/bindings/jni/jni_object.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -18,10 +18,6 @@ namespace blink {
 
 using base::android::ScopedJavaLocalRef;
 using base::android::ScopedJavaGlobalRef;
-
-#define ENTER_JNI()                                                            \
-  JNIEnv* env = base::android::AttachCurrentThread();                          \
-  base::android::ScopedJavaLocalFrame java_frame(env);
 
 namespace {
 
@@ -36,6 +32,41 @@ Dart_NativeFunction GetNativeFunction(Dart_Handle name,
 const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
   return g_natives->GetSymbol(native_function);
 }
+
+// Data cached for each Dart isolate.
+struct DartJniIsolateData : public base::SupportsUserData::Data {
+  Dart_PersistentHandle jni_object_type;
+  Dart_PersistentHandle jni_float_type;
+};
+
+// Data cached from the Java VM.
+struct DartJniJvmData {
+  ScopedJavaGlobalRef<jobject> class_loader;
+  ScopedJavaGlobalRef<jclass> class_clazz;
+  jmethodID class_loader_load_class_method_id;
+  jmethodID class_get_name_method_id;
+};
+
+DartJniJvmData* g_jvm_data = nullptr;
+
+void* UserDataKey() {
+  // Return a unique key for our per-isolate data.
+  static int data_key = 0;
+  return reinterpret_cast<void*>(&data_key);
+}
+
+void CreateIsolateData() {
+  DartState::Current()->SetUserData(UserDataKey(), new DartJniIsolateData());
+}
+
+DartJniIsolateData* IsolateData() {
+  base::SupportsUserData::Data* user_data =
+      DartState::Current()->GetUserData(UserDataKey());
+  DCHECK(user_data);
+  return static_cast<DartJniIsolateData*>(user_data);
+}
+
+} // anonymous namespace
 
 // Check if a JNI API has thrown an exception.  If so, convert it to a
 // Dart exception.
@@ -61,20 +92,43 @@ bool CheckDartException(Dart_Handle result, Dart_Handle* exception) {
   return true;
 }
 
-} // anonymous namespace
-
 DART_NATIVE_CALLBACK_STATIC(JniClass, FromName);
 
 #define FOR_EACH_BINDING(V) \
   V(JniArray, GetLength) \
+  V(JniClass, CallStaticBooleanMethod) \
+  V(JniClass, CallStaticByteMethod) \
+  V(JniClass, CallStaticCharMethod) \
+  V(JniClass, CallStaticDoubleMethod) \
+  V(JniClass, CallStaticFloatMethod) \
+  V(JniClass, CallStaticIntMethod) \
   V(JniClass, CallStaticLongMethod) \
+  V(JniClass, CallStaticObjectMethod) \
+  V(JniClass, CallStaticShortMethod) \
+  V(JniClass, CallStaticVoidMethod) \
   V(JniClass, NewObject) \
   V(JniClass, GetFieldId) \
   V(JniClass, GetMethodId) \
+  V(JniClass, GetStaticBooleanField) \
+  V(JniClass, GetStaticByteField) \
+  V(JniClass, GetStaticCharField) \
+  V(JniClass, GetStaticDoubleField) \
   V(JniClass, GetStaticFieldId) \
+  V(JniClass, GetStaticFloatField) \
   V(JniClass, GetStaticIntField) \
+  V(JniClass, GetStaticLongField) \
   V(JniClass, GetStaticMethodId) \
   V(JniClass, GetStaticObjectField) \
+  V(JniClass, GetStaticShortField) \
+  V(JniClass, SetStaticBooleanField) \
+  V(JniClass, SetStaticByteField) \
+  V(JniClass, SetStaticCharField) \
+  V(JniClass, SetStaticDoubleField) \
+  V(JniClass, SetStaticFloatField) \
+  V(JniClass, SetStaticIntField) \
+  V(JniClass, SetStaticLongField) \
+  V(JniClass, SetStaticObjectField) \
+  V(JniClass, SetStaticShortField) \
   V(JniObject, CallBooleanMethod) \
   V(JniObject, CallIntMethod) \
   V(JniObject, CallObjectMethod) \
@@ -98,35 +152,51 @@ void DartJni::InitForGlobal() {
 
 void DartJni::InitForIsolate() {
   DCHECK(g_natives);
-  DART_CHECK_VALID(Dart_SetNativeResolver(
-      Dart_LookupLibrary(ToDart("dart:jni")), GetNativeFunction, GetSymbol));
-}
 
-ScopedJavaGlobalRef<jobject> DartJni::class_loader_;
-jmethodID DartJni::class_loader_load_class_method_id_;
-jmethodID DartJni::class_get_name_method_id_;
+  Dart_Handle jni_library = Dart_LookupLibrary(ToDart("dart:jni"));
+  DART_CHECK_VALID(jni_library)
+
+  DART_CHECK_VALID(Dart_SetNativeResolver(
+      jni_library, GetNativeFunction, GetSymbol));
+
+  CreateIsolateData();
+
+  Dart_Handle object_type = Dart_GetType(
+      jni_library, ToDart("JniObject"), 0, nullptr);
+  DART_CHECK_VALID(object_type);
+  IsolateData()->jni_object_type = Dart_NewPersistentHandle(object_type);
+  DART_CHECK_VALID(IsolateData()->jni_object_type);
+
+  Dart_Handle float_type = Dart_GetType(
+      jni_library, ToDart("JniFloat"), 0, nullptr);
+  DART_CHECK_VALID(float_type);
+  IsolateData()->jni_float_type = Dart_NewPersistentHandle(float_type);
+  DART_CHECK_VALID(IsolateData()->jni_float_type);
+}
 
 bool DartJni::InitJni() {
   JNIEnv* env = base::android::AttachCurrentThread();
 
-  class_loader_.Reset(base::android::GetClassLoader(env));
+  DCHECK(!g_jvm_data);
+  g_jvm_data = new DartJniJvmData();
+
+  g_jvm_data->class_loader.Reset(base::android::GetClassLoader(env));
 
   ScopedJavaLocalRef<jclass> class_loader_clazz(
       env, env->FindClass("java/lang/ClassLoader"));
   CHECK(!base::android::ClearException(env));
 
-  class_loader_load_class_method_id_ = env->GetMethodID(
+  g_jvm_data->class_loader_load_class_method_id = env->GetMethodID(
       class_loader_clazz.obj(),
       "loadClass",
       "(Ljava/lang/String;)Ljava/lang/Class;");
   CHECK(!base::android::ClearException(env));
 
-  ScopedJavaLocalRef<jclass> class_clazz(
-      env, env->FindClass("java/lang/Class"));
+  g_jvm_data->class_clazz.Reset(env, env->FindClass("java/lang/Class"));
   CHECK(!base::android::ClearException(env));
 
-  class_get_name_method_id_ = env->GetMethodID(
-      class_clazz.obj(),
+  g_jvm_data->class_get_name_method_id = env->GetMethodID(
+      g_jvm_data->class_clazz.obj(),
       "getName",
       "()Ljava/lang/String;");
   CHECK(!base::android::ClearException(env));
@@ -136,8 +206,8 @@ bool DartJni::InitJni() {
 
 ScopedJavaLocalRef<jclass> DartJni::GetClass(JNIEnv* env, const char* name) {
   jobject clazz = env->CallObjectMethod(
-      class_loader_.obj(),
-      class_loader_load_class_method_id_,
+      g_jvm_data->class_loader.obj(),
+      g_jvm_data->class_loader_load_class_method_id,
       base::android::ConvertUTF8ToJavaString(env, name).obj());
 
   return ScopedJavaLocalRef<jclass>(env, static_cast<jclass>(clazz));
@@ -147,26 +217,29 @@ std::string DartJni::GetObjectClassName(JNIEnv* env, jobject obj) {
   jclass clazz = env->GetObjectClass(obj);
   DCHECK(clazz);
   jstring name = static_cast<jstring>(
-      env->CallObjectMethod(clazz, class_get_name_method_id_));
+      env->CallObjectMethod(clazz, g_jvm_data->class_get_name_method_id));
   DCHECK(name);
 
   return base::android::ConvertJavaStringToUTF8(env, name);
 }
 
-class JniMethodArgs {
- public:
-  void Convert(JNIEnv* env,
-               const Vector<Dart_Handle>& dart_args,
-               Dart_Handle* exception);
-  jvalue* jvalues() { return jvalues_.data(); }
+jclass DartJni::class_clazz() {
+  return g_jvm_data->class_clazz.obj();
+}
 
- private:
-  jvalue DartToJavaValue(JNIEnv* env,
-                         Dart_Handle handle,
-                         Dart_Handle* exception);
+Dart_Handle DartJni::jni_object_type() {
+  Dart_Handle object_type = Dart_HandleFromPersistent(
+      IsolateData()->jni_object_type);
+  DCHECK(!Dart_IsError(object_type));
+  return object_type;
+}
 
-  std::vector<jvalue> jvalues_;
-};
+Dart_Handle DartJni::jni_float_type() {
+  Dart_Handle float_type = Dart_HandleFromPersistent(
+      IsolateData()->jni_float_type);
+  DCHECK(!Dart_IsError(float_type));
+  return float_type;
+}
 
 void JniMethodArgs::Convert(JNIEnv* env,
                             const Vector<Dart_Handle>& dart_args,
@@ -187,11 +260,20 @@ jvalue JniMethodArgs::DartToJavaValue(JNIEnv* env,
 
   if (Dart_IsBoolean(dart_value)) {
     java_value.z = DartConverter<bool>::FromDart(dart_value);
-  } else if (Dart_IsInteger(dart_value)) {
+    return java_value;
+  }
+
+  if (Dart_IsInteger(dart_value)) {
     java_value.j = DartConverter<jlong>::FromDart(dart_value);
-  } else if (Dart_IsDouble(dart_value)) {
+    return java_value;
+  }
+
+  if (Dart_IsDouble(dart_value)) {
     java_value.d = DartConverter<jdouble>::FromDart(dart_value);
-  } else if (Dart_IsString(dart_value)) {
+    return java_value;
+  }
+
+  if (Dart_IsString(dart_value)) {
     intptr_t length;
     Dart_Handle result = Dart_StringLength(dart_value, &length);
     if (CheckDartException(result, exception)) return java_value;
@@ -202,387 +284,48 @@ jvalue JniMethodArgs::DartToJavaValue(JNIEnv* env,
 
     java_value.l = env->NewString(string_data.data(), length);
     CheckJniException(env, exception);
-  } else {
-    *exception = ToDart("Argument has unsupported data type");
+
+    return java_value;
   }
 
+  if (Dart_IsNull(dart_value)) {
+    java_value.l = nullptr;
+    return java_value;
+  }
+
+  bool is_object;
+  Dart_Handle result = Dart_ObjectIsType(
+      dart_value, DartJni::jni_object_type(), &is_object);
+  if (CheckDartException(result, exception)) return java_value;
+
+  if (is_object) {
+    JniObject* jni_object = DartConverter<JniObject*>::FromDart(dart_value);
+    if (jni_object != nullptr) {
+      java_value.l = jni_object->java_object();
+    } else {
+      *exception = ToDart("Invalid JniObject argument");
+    }
+    return java_value;
+  }
+
+  bool is_float;
+  result = Dart_ObjectIsType(dart_value, DartJni::jni_float_type(), &is_float);
+  if (CheckDartException(result, exception)) return java_value;
+
+  if (is_float) {
+    Dart_Handle value_handle = Dart_GetField(dart_value, ToDart("value"));
+    if (CheckDartException(value_handle, exception)) return java_value;
+
+    double double_value;
+    result = Dart_DoubleValue(value_handle, &double_value);
+    if (CheckDartException(result, exception)) return java_value;
+
+    java_value.f = static_cast<jfloat>(double_value);
+    return java_value;
+  }
+
+  *exception = ToDart("Argument has unsupported data type");
   return java_value;
-}
-
-IMPLEMENT_WRAPPERTYPEINFO(jni, JniClass);
-
-JniClass::JniClass(JNIEnv* env, jclass clazz)
-    : clazz_(env, clazz) {
-}
-
-JniClass::~JniClass() {
-}
-
-PassRefPtr<JniClass> JniClass::FromName(const char* name) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    ScopedJavaLocalRef<jclass> clazz = DartJni::GetClass(env, name);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return adoptRef(new JniClass(env, clazz.obj()));
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return nullptr;
-}
-
-intptr_t JniClass::GetFieldId(const char* name, const char* sig) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jfieldID id = env->GetFieldID(clazz_.obj(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return reinterpret_cast<intptr_t>(id);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-intptr_t JniClass::GetStaticFieldId(const char* name, const char* sig) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jfieldID id = env->GetStaticFieldID(clazz_.obj(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return reinterpret_cast<intptr_t>(id);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-intptr_t JniClass::GetMethodId(const char* name, const char* sig) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jmethodID id = env->GetMethodID(clazz_.obj(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return reinterpret_cast<intptr_t>(id);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-intptr_t JniClass::GetStaticMethodId(const char* name, const char* sig) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jmethodID id = env->GetStaticMethodID(clazz_.obj(), name, sig);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return reinterpret_cast<intptr_t>(id);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-jint JniClass::GetStaticIntField(jfieldID fieldId) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jint result = env->GetStaticIntField(clazz_.obj(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return result;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-PassRefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jobject obj = env->GetStaticObjectField(clazz_.obj(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return JniObject::Create(env, obj);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return nullptr;
-}
-
-PassRefPtr<JniObject> JniClass::NewObject(jmethodID methodId,
-                                          const Vector<Dart_Handle>& args) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    JniMethodArgs java_args;
-    java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
-
-    jobject obj = env->NewObjectA(clazz_.obj(), methodId, java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return JniObject::Create(env, obj);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return nullptr;
-}
-
-jlong JniClass::CallStaticLongMethod(jmethodID methodId,
-                                     const Vector<Dart_Handle>& args) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    JniMethodArgs java_args;
-    java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
-
-    jlong result = env->CallStaticLongMethodA(clazz_.obj(), methodId,
-                                              java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return result;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-IMPLEMENT_WRAPPERTYPEINFO(jni, JniObject);
-
-JniObject::JniObject(JNIEnv* env, jobject object)
-    : object_(env, object) {
-}
-
-JniObject::~JniObject() {
-}
-
-PassRefPtr<JniObject> JniObject::Create(JNIEnv* env, jobject object) {
-  std::string class_name = DartJni::GetObjectClassName(env, object);
-
-  JniObject* result;
-
-  if (class_name == "java.lang.String") {
-    result = new JniString(env, static_cast<jstring>(object));
-  } else if (base::StartsWith(class_name, "[L", base::CompareCase::SENSITIVE)) {
-    result = new JniObjectArray(env, static_cast<jobjectArray>(object));
-  } else {
-    result = new JniObject(env, object);
-  }
-
-  return adoptRef(result);
-}
-
-jint JniObject::GetIntField(jfieldID fieldId) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jint result = env->GetIntField(java_object(), fieldId);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return result;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-PassRefPtr<JniObject> JniObject::CallObjectMethod(
-    jmethodID methodId,
-    const Vector<Dart_Handle>& args) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    JniMethodArgs java_args;
-    java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
-
-    jobject result = env->CallObjectMethodA(java_object(), methodId,
-                                            java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return JniObject::Create(env, result);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return nullptr;
-}
-
-bool JniObject::CallBooleanMethod(jmethodID methodId,
-                                  const Vector<Dart_Handle>& args) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    JniMethodArgs java_args;
-    java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
-
-    jboolean result = env->CallBooleanMethodA(java_object(), methodId,
-                                              java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return result == JNI_TRUE;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return false;
-}
-
-jint JniObject::CallIntMethod(jmethodID methodId,
-                              const Vector<Dart_Handle>& args) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    JniMethodArgs java_args;
-    java_args.Convert(env, args, &exception);
-    if (exception) goto fail;
-
-    jint result = env->CallIntMethodA(java_object(), methodId,
-                                      java_args.jvalues());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return result;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-IMPLEMENT_WRAPPERTYPEINFO(jni, JniString);
-
-JniString::JniString(JNIEnv* env, jstring object)
-    : JniObject(env, object) {}
-
-JniString::~JniString() {
-}
-
-jstring JniString::java_string() {
-  return static_cast<jstring>(java_object());
-}
-
-String JniString::GetText() {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jsize length = env->GetStringLength(java_string());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    const jchar* chars = env->GetStringChars(java_string(), NULL);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    String result(chars, length);
-    env->ReleaseStringChars(java_string(), chars);
-
-    return result;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return String();
-}
-
-IMPLEMENT_WRAPPERTYPEINFO(jni, JniArray);
-
-JniArray::JniArray(JNIEnv* env, jarray array)
-    : JniObject(env, array) {}
-
-JniArray::~JniArray() {
-}
-
-jsize JniArray::GetLength() {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jsize result = env->GetArrayLength(java_array<jarray>());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return result;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return 0;
-}
-
-template<typename JArrayType>
-JArrayType JniArray::java_array() const {
-  return static_cast<JArrayType>(java_object());
-}
-
-IMPLEMENT_WRAPPERTYPEINFO(jni, JniObjectArray);
-
-JniObjectArray::JniObjectArray(JNIEnv* env, jobjectArray array)
-    : JniArray(env, array) {}
-
-JniObjectArray::~JniObjectArray() {
-}
-
-PassRefPtr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    jobject obj = env->GetObjectArrayElement(java_array<jobjectArray>(),
-                                             index);
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return JniObject::Create(env, obj);
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
-  return nullptr;
-}
-
-void JniObjectArray::SetArrayElement(jsize index, const JniObject* value) {
-  Dart_Handle exception = nullptr;
-  {
-    ENTER_JNI();
-
-    env->SetObjectArrayElement(java_array<jobjectArray>(), index,
-                               value->java_object());
-    if (CheckJniException(env, &exception)) goto fail;
-
-    return;
-  }
-fail:
-  Dart_ThrowException(exception);
-  ASSERT_NOT_REACHED();
 }
 
 } // namespace blink

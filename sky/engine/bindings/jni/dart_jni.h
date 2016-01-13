@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_OBJC_DART_JNI_H_
-#define SKY_ENGINE_BINDINGS_OBJC_DART_JNI_H_
+#ifndef SKY_ENGINE_BINDINGS_JNI_DART_JNI_H_
+#define SKY_ENGINE_BINDINGS_JNI_DART_JNI_H_
+
+#include <vector>
 
 #include "base/android/jni_android.h"
 #include "base/android/jni_utils.h"
@@ -12,7 +14,14 @@
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
 
+#define ENTER_JNI()                                                            \
+  JNIEnv* env = base::android::AttachCurrentThread();                          \
+  base::android::ScopedJavaLocalFrame java_frame(env);
+
 namespace blink {
+
+bool CheckJniException(JNIEnv* env, Dart_Handle *exception);
+bool CheckDartException(Dart_Handle result, Dart_Handle* exception);
 
 class DartJni {
  public:
@@ -25,111 +34,24 @@ class DartJni {
 
   static std::string GetObjectClassName(JNIEnv* env, jobject obj);
 
- private:
-  static base::android::ScopedJavaGlobalRef<jobject> class_loader_;
-  static jmethodID class_loader_load_class_method_id_;
-  static jmethodID class_get_name_method_id_;
+  static jclass class_clazz();
+  static Dart_Handle jni_object_type();
+  static Dart_Handle jni_float_type();
 };
 
-class JniObject;
-
-// Wrapper that exposes a JNI jclass to Dart
-class JniClass : public RefCounted<JniClass>, public DartWrappable {
-  DEFINE_WRAPPERTYPEINFO();
-
+class JniMethodArgs {
  public:
-  ~JniClass() override;
-
-  static PassRefPtr<JniClass> FromName(const char* className);
-
-  intptr_t GetFieldId(const char* name, const char* sig);
-  intptr_t GetStaticFieldId(const char* name, const char* sig);
-  intptr_t GetMethodId(const char* name, const char* sig);
-  intptr_t GetStaticMethodId(const char* name, const char* sig);
-
-  jint GetStaticIntField(jfieldID fieldId);
-  PassRefPtr<JniObject> GetStaticObjectField(jfieldID fieldId);
-
-  PassRefPtr<JniObject> NewObject(jmethodID methodId,
-                                  const Vector<Dart_Handle>& args);
-
-  jlong CallStaticLongMethod(jmethodID methodId,
-                             const Vector<Dart_Handle>& args);
+  void Convert(JNIEnv* env,
+               const Vector<Dart_Handle>& dart_args,
+               Dart_Handle* exception);
+  jvalue* jvalues() { return jvalues_.data(); }
 
  private:
-  JniClass(JNIEnv* env, jclass clazz);
+  jvalue DartToJavaValue(JNIEnv* env,
+                         Dart_Handle handle,
+                         Dart_Handle* exception);
 
-  base::android::ScopedJavaGlobalRef<jclass> clazz_;
-};
-
-// Wrapper that exposes a JNI jobject to Dart
-class JniObject : public RefCounted<JniObject>, public DartWrappable {
-  DEFINE_WRAPPERTYPEINFO();
-
- public:
-  ~JniObject() override;
-
-  static PassRefPtr<JniObject> Create(JNIEnv* env, jobject object);
-
-  jobject java_object() const { return object_.obj(); }
-
-  jint GetIntField(jfieldID fieldId);
-
-  PassRefPtr<JniObject> CallObjectMethod(jmethodID methodId,
-                                         const Vector<Dart_Handle>& args);
-  bool CallBooleanMethod(jmethodID methodId,
-                         const Vector<Dart_Handle>& args);
-  jint CallIntMethod(jmethodID methodId,
-                     const Vector<Dart_Handle>& args);
-
- protected:
-  JniObject(JNIEnv* env, jobject object);
-
-  base::android::ScopedJavaGlobalRef<jobject> object_;
-};
-
-// Wrapper for a JNI string
-class JniString : public JniObject {
-  DEFINE_WRAPPERTYPEINFO();
-  friend class JniObject;
-
- public:
-  ~JniString() override;
-
-  String GetText();
-
- private:
-  JniString(JNIEnv* env, jstring string);
-
-  jstring java_string();
-};
-
-// Wrapper for a JNI array
-class JniArray : public JniObject {
-  DEFINE_WRAPPERTYPEINFO();
-
- public:
-  ~JniArray() override;
-
-  jsize GetLength();
-
- protected:
-  JniArray(JNIEnv* env, jarray array);
-  template <typename JArrayType> JArrayType java_array() const;
-};
-
-class JniObjectArray : public JniArray {
-  DEFINE_WRAPPERTYPEINFO();
-  friend class JniObject;
-
- public:
-  ~JniObjectArray() override;
-
-  PassRefPtr<JniObject> GetArrayElement(jsize index);
-  void SetArrayElement(jsize index, const JniObject* value);
-
- private:
-  JniObjectArray(JNIEnv* env, jobjectArray array);
+  std::vector<jvalue> jvalues_;
 };
 
 template <>
@@ -160,4 +82,4 @@ struct DartConverter<jmethodID> {
 
 } // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_OBJC_DART_JNI_H_
+#endif  // SKY_ENGINE_BINDINGS_JNI_DART_JNI_H_
