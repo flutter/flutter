@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 import '../artifacts.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';
+import '../build_configuration.dart';.
 import '../runner/flutter_command.dart';
 
 class AnalyzeCommand extends FlutterCommand {
@@ -324,7 +324,7 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
     stopwatch.stop();
-    String elapsed = (stopwatch.elapsedMilliseconds / 100.0).toStringAsFixed(1);
+    String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
     if (exitCode < 0 || exitCode > 3) // 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
