@@ -7,9 +7,11 @@
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
 #include "sky/compositor/paint_context.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
-#define ENABLE_RASTER_CACHE 0
+#define ENABLE_RASTER_CACHE 1
 
 namespace sky {
 namespace compositor {
@@ -77,11 +79,16 @@ RefPtr<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
       TRACE_EVENT2("flutter", "Rasterize picture layer",
                    "width", physical_size.width(),
                    "height", physical_size.height());
-      SkMatrix matrix = SkMatrix::MakeScale(scaleX, scaleY);
-      entry.image = adoptRef(SkImage::NewFromPicture(picture, physical_size,
-                                                     &matrix, nullptr));
-      entry.image->preroll(context, SkShader::kClamp_TileMode,
-                           SkShader::kClamp_TileMode, kMedium_SkFilterQuality);
+      SkImageInfo info = SkImageInfo::MakeN32Premul(physical_size);
+      RefPtr<SkSurface> surface = adoptRef(SkSurface::NewRenderTarget(
+          context, SkSurface::kYes_Budgeted, info));
+      if (surface) {
+        SkCanvas* canvas = surface->getCanvas();
+        canvas->clear(SK_ColorTRANSPARENT);
+        SkMatrix matrix = SkMatrix::MakeScale(scaleX, scaleY);
+        canvas->drawPicture(picture, &matrix, nullptr);
+        entry.image = adoptRef(surface->newImageSnapshot());
+      }
     }
   }
 
