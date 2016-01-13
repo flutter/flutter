@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
@@ -1161,15 +1160,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   String debugDescribeChildren(String prefix) => '';
 
 }
-
-/// Obsolete function that will be removed eventually.
-double clamp({ double min: 0.0, double value: 0.0, double max: double.INFINITY }) {
-  assert(min != null);
-  assert(value != null);
-  assert(max != null);
-  return math.max(min, math.min(max, value));
-}
-
 
 /// Generic mixin for render objects with one child.
 ///

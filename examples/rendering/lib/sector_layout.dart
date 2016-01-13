@@ -29,11 +29,11 @@ class SectorConstraints extends Constraints {
   final double maxDeltaTheta;
 
   double constrainDeltaRadius(double deltaRadius) {
-    return clamp(min: minDeltaRadius, max: maxDeltaRadius, value: deltaRadius);
+    return deltaRadius.clamp(minDeltaRadius, maxDeltaRadius);
   }
 
   double constrainDeltaTheta(double deltaTheta) {
-    return clamp(min: minDeltaTheta, max: maxDeltaTheta, value: deltaTheta);
+    return deltaTheta.clamp(minDeltaTheta, maxDeltaTheta);
   }
 
   bool get isTight => minDeltaTheta >= maxDeltaTheta && minDeltaTheta >= maxDeltaTheta;
