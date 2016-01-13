@@ -636,6 +636,9 @@ abstract class RenderBox extends RenderObject {
 
   /// Convert the given point from the global coodinate system to the local
   /// coordinate system for this box.
+  ///
+  /// If the transform from global coordinates to local coordinates is
+  /// degenerate, this function returns Point.origin.
   Point globalToLocal(Point point) {
     assert(attached);
     Matrix4 transform = new Matrix4.identity();
@@ -645,8 +648,9 @@ abstract class RenderBox extends RenderObject {
       rendererParent.applyPaintTransform(renderer, transform);
       renderer = rendererParent;
     }
-    /* double det = */ transform.invert();
-    // TODO(abarth): Check the determinant for degeneracy.
+    double det = transform.invert();
+    if (det == 0.0)
+      return Point.origin;
     return _transformPoint(transform, point);
   }
 

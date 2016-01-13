@@ -991,9 +991,14 @@ class RenderTransform extends RenderProxyBox {
 
   bool hitTest(HitTestResult result, { Point position }) {
     if (transformHitTests) {
-      Matrix4 inverse = new Matrix4.zero();
-      // TODO(abarth): Check the determinant for degeneracy.
-      inverse.copyInverse(_effectiveTransform);
+      Matrix4 inverse;
+      try {
+        inverse = new Matrix4.inverted(_effectiveTransform);
+      } catch (e) {
+        // We cannot invert the effective transform. That means the child
+        // doesn't appear on screen and cannot be hit.
+        return false;
+      }
       Vector3 position3 = new Vector3(position.x, position.y, 0.0);
       Vector3 transformed3 = inverse.transform3(position3);
       position = new Point(transformed3.x, transformed3.y);
