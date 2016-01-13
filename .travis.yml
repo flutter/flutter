@@ -2,6 +2,7 @@ language: dart
 sudo: false
 dart:
   - stable
+  - dev
 addons:
   apt:
     sources:
