@@ -84,8 +84,9 @@ skia::RefPtr<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
       if (surface) {
         SkCanvas* canvas = surface->getCanvas();
         canvas->clear(SK_ColorTRANSPARENT);
-        SkMatrix matrix = SkMatrix::MakeScale(scaleX, scaleY);
-        canvas->drawPicture(picture, &matrix, nullptr);
+        canvas->translate(-rect.left(), -rect.right());
+        canvas->scale(scaleX, scaleY);
+        canvas->drawPicture(picture);
         entry.image = skia::AdoptRef(surface->newImageSnapshot());
       }
     }
