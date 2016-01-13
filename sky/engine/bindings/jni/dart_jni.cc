@@ -231,6 +231,7 @@ PassRefPtr<JniClass> JniClass::FromName(const char* name) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return nullptr;
 }
 
 intptr_t JniClass::GetFieldId(const char* name, const char* sig) {
@@ -246,6 +247,7 @@ intptr_t JniClass::GetFieldId(const char* name, const char* sig) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 intptr_t JniClass::GetStaticFieldId(const char* name, const char* sig) {
@@ -261,6 +263,7 @@ intptr_t JniClass::GetStaticFieldId(const char* name, const char* sig) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 intptr_t JniClass::GetMethodId(const char* name, const char* sig) {
@@ -276,6 +279,7 @@ intptr_t JniClass::GetMethodId(const char* name, const char* sig) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 intptr_t JniClass::GetStaticMethodId(const char* name, const char* sig) {
@@ -291,6 +295,7 @@ intptr_t JniClass::GetStaticMethodId(const char* name, const char* sig) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 jint JniClass::GetStaticIntField(jfieldID fieldId) {
@@ -306,6 +311,7 @@ jint JniClass::GetStaticIntField(jfieldID fieldId) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 PassRefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
@@ -321,6 +327,7 @@ PassRefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return nullptr;
 }
 
 PassRefPtr<JniObject> JniClass::NewObject(jmethodID methodId,
@@ -341,6 +348,7 @@ PassRefPtr<JniObject> JniClass::NewObject(jmethodID methodId,
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return nullptr;
 }
 
 jlong JniClass::CallStaticLongMethod(jmethodID methodId,
@@ -362,6 +370,7 @@ jlong JniClass::CallStaticLongMethod(jmethodID methodId,
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniObject);
@@ -402,6 +411,7 @@ jint JniObject::GetIntField(jfieldID fieldId) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 PassRefPtr<JniObject> JniObject::CallObjectMethod(
@@ -424,6 +434,7 @@ PassRefPtr<JniObject> JniObject::CallObjectMethod(
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return nullptr;
 }
 
 bool JniObject::CallBooleanMethod(jmethodID methodId,
@@ -445,6 +456,7 @@ bool JniObject::CallBooleanMethod(jmethodID methodId,
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return false;
 }
 
 jint JniObject::CallIntMethod(jmethodID methodId,
@@ -466,6 +478,7 @@ jint JniObject::CallIntMethod(jmethodID methodId,
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniString);
@@ -499,6 +512,7 @@ String JniString::GetText() {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return String();
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniArray);
@@ -522,6 +536,7 @@ jsize JniArray::GetLength() {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return 0;
 }
 
 template<typename JArrayType>
@@ -551,6 +566,7 @@ PassRefPtr<JniObject> JniObjectArray::GetArrayElement(jsize index) {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
+  return nullptr;
 }
 
 void JniObjectArray::SetArrayElement(jsize index, const JniObject* value) {
