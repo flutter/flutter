@@ -14,7 +14,6 @@
 #include "sky/compositor/raster_cache.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
-#include "ui/gfx/geometry/size.h"
 
 namespace sky {
 namespace compositor {
@@ -24,27 +23,22 @@ class PaintContext {
   class ScopedFrame {
    public:
     SkCanvas& canvas() { return *canvas_; }
-
     PaintContext& context() const { return context_; }
     GrContext* gr_context() const { return gr_context_; }
 
     ScopedFrame(ScopedFrame&& frame);
-
     ~ScopedFrame();
 
    private:
     PaintContext& context_;
     GrContext* gr_context_;
     SkCanvas* canvas_;
-    std::string trace_file_name_;
-    std::unique_ptr<SkPictureRecorder> trace_recorder_;
     const bool instrumentation_enabled_;
 
-    ScopedFrame(PaintContext& context, GrContext* gr_context, SkCanvas& canvas);
-
     ScopedFrame(PaintContext& context,
-                const std::string& trace_file_name,
-                gfx::Size frame_size);
+                GrContext* gr_context,
+                SkCanvas& canvas,
+                bool instrumentation_enabled);
 
     friend class PaintContext;
 
@@ -54,17 +48,13 @@ class PaintContext {
   PaintContext();
   ~PaintContext();
 
-  ScopedFrame AcquireFrame(GrContext* gr_context, SkCanvas& canvas);
-
-  ScopedFrame AcquireFrame(const std::string& trace_file_name,
-                           gfx::Size frame_size);
+  ScopedFrame AcquireFrame(GrContext* gr_context,
+                           SkCanvas& canvas,
+                           bool instrumentation_enabled = true);
 
   RasterCache& raster_cache() { return raster_cache_; }
-
   const instrumentation::Counter& frame_count() const { return frame_count_; }
-
   const instrumentation::Stopwatch& frame_time() const { return frame_time_; }
-
   instrumentation::Stopwatch& engine_time() { return engine_time_; };
 
  private:

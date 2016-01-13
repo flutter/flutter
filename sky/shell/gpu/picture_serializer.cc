@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "sky/shell/gpu/picture_serializer.h"
+
 #include <vector>
-#include "sky/compositor/picture_serializer.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkPixelSerializer.h"
 #include "third_party/skia/include/core/SkStream.h"
@@ -27,8 +28,8 @@ class PngPixelSerializer : public SkPixelSerializer {
   }
 };
 
-void SerializePicture(const char* file_name, SkPicture* picture) {
-  SkFILEWStream stream(file_name);
+void SerializePicture(const base::FilePath& file_name, SkPicture* picture) {
+  SkFILEWStream stream(file_name.AsUTF8Unsafe().c_str());
   PngPixelSerializer serializer;
   picture->serialize(&stream, &serializer);
 }

@@ -17,7 +17,7 @@ class PictureLayer : public Layer {
 
   void set_offset(const SkPoint& offset) { offset_ = offset; }
 
-  void set_picture(PassRefPtr<SkPicture> picture) { picture_ = picture; }
+  void set_picture(SkPicture* picture) { picture_ = skia::SharePtr(picture); }
 
   SkPicture* picture() const { return picture_.get(); }
 
@@ -26,10 +26,10 @@ class PictureLayer : public Layer {
 
  private:
   SkPoint offset_;
-  RefPtr<SkPicture> picture_;
+  skia::RefPtr<SkPicture> picture_;
 
   // If we rasterized the picture separately, image_ holds the pixels.
-  RefPtr<SkImage> image_;
+  skia::RefPtr<SkImage> image_;
 
   DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };

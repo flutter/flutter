@@ -5,6 +5,9 @@
 #ifndef SKIA_EXT_REFPTR_H_
 #define SKIA_EXT_REFPTR_H_
 
+#include <algorithm>
+#include <cstddef>
+
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace skia {
@@ -37,6 +40,12 @@ namespace skia {
 //
 //   skia::RefPtr<SkShader> shader = skia::SharePtr(paint.getShader());
 //
+// To pass a reference while clearing the pointer (without changing the ref
+// count):
+//
+//   skia::RefPtr<SkShader> shader = ...;
+//   UseThisShader(std::move(shader));
+//
 // Never call ref() or unref() on the underlying ref-counted pointer. If you
 // AdoptRef() the raw pointer immediately into a skia::RefPtr and always work
 // with skia::RefPtr instances instead, the ref-counting will be taken care of
@@ -44,21 +53,41 @@ namespace skia {
 template<typename T>
 class RefPtr {
  public:
-  RefPtr() : ptr_(NULL) {}
+  RefPtr() : ptr_(nullptr) {}
 
+  RefPtr(std::nullptr_t) : ptr_(nullptr) {}
+
+  // Copy constructor.
   RefPtr(const RefPtr& other)
       : ptr_(other.get()) {
     SkSafeRef(ptr_);
   }
 
+  // Copy conversion constructor.
   template<typename U>
   RefPtr(const RefPtr<U>& other)
       : ptr_(other.get()) {
     SkSafeRef(ptr_);
   }
 
+  // Move constructor. This is required in addition to the conversion
+  // constructor below in order for clang to warn about pessimizing moves.
+  RefPtr(RefPtr&& other) : ptr_(other.get()) { other.ptr_ = nullptr; }
+
+  // Move conversion constructor.
+  template <typename U>
+  RefPtr(RefPtr<U>&& other)
+      : ptr_(other.get()) {
+    other.ptr_ = nullptr;
+  }
+
   ~RefPtr() {
     clear();
+  }
+
+  RefPtr& operator=(std::nullptr_t) {
+    clear();
+    return *this;
   }
 
   RefPtr& operator=(const RefPtr& other) {
@@ -72,9 +101,16 @@ class RefPtr {
     return *this;
   }
 
+  template <typename U>
+  RefPtr& operator=(RefPtr<U>&& other) {
+    RefPtr<T> temp(std::move(other));
+    std::swap(ptr_, temp.ptr_);
+    return *this;
+  }
+
   void clear() {
     T* to_unref = ptr_;
-    ptr_ = NULL;
+    ptr_ = nullptr;
     SkSafeUnref(to_unref);
   }
 
@@ -84,7 +120,7 @@ class RefPtr {
 
   typedef T* RefPtr::*unspecified_bool_type;
   operator unspecified_bool_type() const {
-    return ptr_ ? &RefPtr::ptr_ : NULL;
+    return ptr_ ? &RefPtr::ptr_ : nullptr;
   }
 
  private:
@@ -102,6 +138,9 @@ class RefPtr {
 
   template<typename U>
   friend RefPtr<U> SharePtr(U* ptr);
+
+  template <typename U>
+  friend class RefPtr;
 };
 
 // For objects that have an unowned reference (such as newly created objects).

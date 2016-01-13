@@ -10,6 +10,9 @@
 #include "sky/compositor/layer.h"
 #include "sky/compositor/paint_context.h"
 #include "sky/compositor/picture_layer.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
+#include "sky/shell/gpu/picture_serializer.h"
 #include "sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
@@ -111,9 +114,18 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
 
   if (frameExceededThreshold || tracingController.picture_tracing_enabled()) {
     base::FilePath path = tracingController.PictureTracingPathForCurrentTime();
-    sky::compositor::PaintContext::ScopedFrame to_file_frame =
-        paint_context_.AcquireFrame(path.AsUTF8Unsafe(), size);
-    layer_tree->root_layer()->Paint(to_file_frame);
+
+    SkPictureRecorder recoder;
+    recoder.beginRecording(SkRect::MakeWH(size.width(), size.height()));
+
+    {
+      auto frame = paint_context_.AcquireFrame(
+          nullptr, *recoder.getRecordingCanvas(), false);
+      layer_tree->Raster(frame);
+    }
+
+    RefPtr<SkPicture> picture = adoptRef(recoder.endRecordingAsPicture());
+    SerializePicture(path, picture.get());
   }
 
   callback.Run();

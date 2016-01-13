@@ -44,7 +44,7 @@ TEST(RefPtrTest, ReferenceCounting) {
       EXPECT_FALSE(ref->unique());
 
       EXPECT_FALSE(refptr2);
-      EXPECT_EQ(NULL, refptr2.get());
+      EXPECT_EQ(nullptr, refptr2.get());
 
       EXPECT_TRUE(refptr3);
       EXPECT_FALSE(refptr3->unique());
@@ -119,6 +119,99 @@ TEST(RefPtrTest, Upcast) {
 
   EXPECT_FALSE(child->unique());
   EXPECT_FALSE(parent->unique());
+}
+
+// Counts the number of ref/unref operations (which require atomic operations)
+// that are done.
+class RefCountCounter : public SkRefCnt {
+ public:
+  void ref() const {
+    ref_count_changes_++;
+    SkRefCnt::ref();
+  }
+  void unref() const {
+    ref_count_changes_++;
+    SkRefCnt::unref();
+  }
+  int ref_count_changes() const { return ref_count_changes_; }
+  void ResetRefCountChanges() { ref_count_changes_ = 0; }
+
+ private:
+  mutable int ref_count_changes_ = 0;
+};
+
+TEST(RefPtrTest, ConstructionFromTemporary) {
+  // No ref count changes to move temporary into a local.
+  RefPtr<RefCountCounter> object = skia::AdoptRef(new RefCountCounter);
+  EXPECT_EQ(0, object->ref_count_changes());
+
+  // Only one change to share the pointer.
+  object->ResetRefCountChanges();
+  RefPtr<RefCountCounter> shared = skia::SharePtr(object.get());
+  EXPECT_EQ(1, object->ref_count_changes());
+
+  // Two ref count changes for the extra ref when passed as an argument, but no
+  // more.
+  object->ResetRefCountChanges();
+  auto do_nothing = [](RefPtr<RefCountCounter>) {};
+  do_nothing(object);
+  EXPECT_EQ(2, object->ref_count_changes());
+
+  // No ref count changes when passing a newly adopted ref as an argument.
+  auto lambda = [](RefPtr<RefCountCounter> arg) {
+    EXPECT_EQ(0, arg->ref_count_changes());
+  };
+  lambda(skia::AdoptRef(new RefCountCounter));
+}
+
+TEST(RefPtrTest, AssignmentFromTemporary) {
+  // No ref count changes to move temporary into a local.
+  RefPtr<RefCountCounter> object;
+  object = skia::AdoptRef(new RefCountCounter);
+  EXPECT_EQ(0, object->ref_count_changes());
+
+  // Only one change to share the pointer.
+  object->ResetRefCountChanges();
+  RefPtr<RefCountCounter> shared;
+  shared = skia::SharePtr(object.get());
+  EXPECT_EQ(1, object->ref_count_changes());
+}
+
+TEST(RefPtrTest, PassIntoArguments) {
+  // No ref count changes when passing an argument with Pass().
+  RefPtr<RefCountCounter> object = skia::AdoptRef(new RefCountCounter);
+  RefPtr<RefCountCounter> object2 = std::move(object);
+  auto lambda = [](RefPtr<RefCountCounter> arg) {
+    EXPECT_EQ(0, arg->ref_count_changes());
+  };
+  lambda(std::move(object2));
+}
+
+class DestructionNotifier : public SkRefCnt {
+ public:
+  DestructionNotifier(bool* flag) : flag_(flag) {}
+  ~DestructionNotifier() override { *flag_ = true; }
+
+ private:
+  bool* flag_;
+};
+
+TEST(RefPtrTest, Nullptr) {
+  RefPtr<SkRefCnt> null(nullptr);
+  EXPECT_FALSE(null);
+
+  bool is_destroyed = false;
+  RefPtr<DestructionNotifier> destroy_me =
+      skia::AdoptRef(new DestructionNotifier(&is_destroyed));
+  destroy_me = nullptr;
+  EXPECT_TRUE(is_destroyed);
+  EXPECT_FALSE(destroy_me);
+
+  // Check that returning nullptr from a function correctly causes an implicit
+  // conversion.
+  auto lambda = []() -> RefPtr<SkRefCnt> { return nullptr; };
+  RefPtr<SkRefCnt> returned = lambda();
+  EXPECT_FALSE(returned);
 }
 
 }  // namespace
