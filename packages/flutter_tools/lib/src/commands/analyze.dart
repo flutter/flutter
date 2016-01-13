@@ -265,7 +265,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     List<Pattern> patternsToSkip = <Pattern>[
       'Analyzing [${mainFile.path}]...',
-      new RegExp('^\\[hint\\] Unused import \\(${mainFile.path},'),
+      new RegExp('^\\[(hint|error)\\] Unused import \\(${mainFile.path},'),
       new RegExp(r'^\[.+\] .+ \(.+/\.pub-cache/.+'),
       new RegExp(r'^\[error\] Invalid override\. The type of [^ ]+ \(.+\) is not a subtype of [^ ]+ \(.+\)\.'), // we allow type narrowing
       new RegExp(r'^\[warning\] .+ will need runtime check to cast to type .+'), // https://github.com/dart-lang/sdk/issues/24542
@@ -273,6 +273,7 @@ class AnalyzeCommand extends FlutterCommand {
       new RegExp('^\\[error\\] Target of URI does not exist: \'dart:ui_internals\''), // https://github.com/flutter/flutter/issues/83
       new RegExp(r'\[lint\] Prefer using lowerCamelCase for constant names.'), // sometimes we have no choice (e.g. when matching other platforms)
       new RegExp(r'\[lint\] Avoid defining a one-member abstract class when a simple function will do.'), // too many false-positives; code review should catch real instances
+      new RegExp(r'\[info\] TODO.+'),
       new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
       new RegExp(r'^$'),
     ];
