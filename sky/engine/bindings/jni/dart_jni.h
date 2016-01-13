@@ -23,9 +23,12 @@ class DartJni {
   static base::android::ScopedJavaLocalRef<jclass> GetClass(
       JNIEnv* env, const char* name);
 
+  static std::string GetObjectClassName(JNIEnv* env, jobject obj);
+
  private:
   static base::android::ScopedJavaGlobalRef<jobject> class_loader_;
-  static jmethodID load_class_method_id_;
+  static jmethodID class_loader_load_class_method_id_;
+  static jmethodID class_get_name_method_id_;
 };
 
 class JniObject;
@@ -47,6 +50,9 @@ class JniClass : public RefCounted<JniClass>, public DartWrappable {
   jint GetStaticIntField(jfieldID fieldId);
   PassRefPtr<JniObject> GetStaticObjectField(jfieldID fieldId);
 
+  PassRefPtr<JniObject> NewObject(jmethodID methodId,
+                                  const Vector<Dart_Handle>& args);
+
   jlong CallStaticLongMethod(jmethodID methodId,
                              const Vector<Dart_Handle>& args);
 
@@ -63,14 +69,67 @@ class JniObject : public RefCounted<JniObject>, public DartWrappable {
  public:
   ~JniObject() override;
 
-  static PassRefPtr<JniObject> create(JNIEnv* env, jobject object);
+  static PassRefPtr<JniObject> Create(JNIEnv* env, jobject object);
+
+  jobject java_object() const { return object_.obj(); }
 
   jint GetIntField(jfieldID fieldId);
 
- private:
+  PassRefPtr<JniObject> CallObjectMethod(jmethodID methodId,
+                                         const Vector<Dart_Handle>& args);
+  bool CallBooleanMethod(jmethodID methodId,
+                         const Vector<Dart_Handle>& args);
+  jint CallIntMethod(jmethodID methodId,
+                     const Vector<Dart_Handle>& args);
+
+ protected:
   JniObject(JNIEnv* env, jobject object);
 
   base::android::ScopedJavaGlobalRef<jobject> object_;
+};
+
+// Wrapper for a JNI string
+class JniString : public JniObject {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniString() override;
+
+  String GetText();
+
+ private:
+  JniString(JNIEnv* env, jstring string);
+
+  jstring java_string();
+};
+
+// Wrapper for a JNI array
+class JniArray : public JniObject {
+  DEFINE_WRAPPERTYPEINFO();
+
+ public:
+  ~JniArray() override;
+
+  jsize GetLength();
+
+ protected:
+  JniArray(JNIEnv* env, jarray array);
+  template <typename JArrayType> JArrayType java_array() const;
+};
+
+class JniObjectArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniObjectArray() override;
+
+  PassRefPtr<JniObject> GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, const JniObject* value);
+
+ private:
+  JniObjectArray(JNIEnv* env, jobjectArray array);
 };
 
 template <>
