@@ -22,6 +22,19 @@
 
 namespace android {
 
+// Returns true if the character appears before or after zwj in a zwj emoji sequence. See
+// http://www.unicode.org/emoji/charts/emoji-zwj-sequences.html
+bool isZwjEmoji(uint32_t c) {
+    return (c == 0x2764       // HEAVY BLACK HEART
+            || c == 0x1F468   // MAN
+            || c == 0x1F469   // WOMAN
+            || c == 0x1F48B   // KISS MARK
+            || c == 0x1F466   // BOY
+            || c == 0x1F467   // GIRL
+            || c == 0x1F441   // EYE
+            || c == 0x1F5E8); // LEFT SPEECH BUBBLE
+}
+
 bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t count,
         size_t offset) {
     // This implementation closely follows Unicode Standard Annex #29 on
@@ -92,6 +105,19 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     if (u_getIntPropertyValue(c1, UCHAR_CANONICAL_COMBINING_CLASS) == 9  // virama
             && u_getIntPropertyValue(c2, UCHAR_GENERAL_CATEGORY) == U_OTHER_LETTER) {
         return false;
+    }
+    // Tailoring: make emoji sequences with ZWJ a single grapheme cluster
+    if (c1 == 0x200D && isZwjEmoji(c2) && offset_back > start) {
+        // look at character before ZWJ to see that both can participate in an emoji zwj sequence
+        uint32_t c0 = 0;
+        U16_PREV(buf, start, offset_back, c0);
+        if (c0 == 0xFE0F && offset_back > start) {
+            // skip over emoji variation selector
+            U16_PREV(buf, start, offset_back, c0);
+        }
+        if (isZwjEmoji(c0)) {
+            return false;
+        }
     }
     // Rule GB10, Any / Any
     return true;
