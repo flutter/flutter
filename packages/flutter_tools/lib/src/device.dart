@@ -852,7 +852,6 @@ class AndroidDevice extends Device {
       'tag', // Only log the tag and the message
       '-s',
       'flutter:V',
-      'chromium:D',
       'ActivityManager:W',
       'System.err:W',
       '*:F',
