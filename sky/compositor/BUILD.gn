@@ -28,8 +28,6 @@ source_set("compositor") {
     "paint_context.h",
     "picture_layer.cc",
     "picture_layer.h",
-    "picture_serializer.cc",
-    "picture_serializer.h",
     "raster_cache.cc",
     "raster_cache.h",
     "performance_overlay_layer.cc",
@@ -43,8 +41,5 @@ source_set("compositor") {
   deps = [
     "//base",
     "//skia",
-    "//sky/engine/wtf",
-    "//ui/gfx",
-    "//ui/gfx/geometry",
   ]
 }

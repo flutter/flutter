@@ -9,11 +9,10 @@
 #include <unordered_map>
 
 #include "base/macros.h"
+#include "skia/ext/refptr.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "sky/compositor/instrumentation.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
 
 namespace sky {
 namespace compositor {
@@ -23,8 +22,8 @@ class RasterCache {
   RasterCache();
   ~RasterCache();
 
-  RefPtr<SkImage> GetPrerolledImage(GrContext* context, SkPicture* picture,
-                                    const SkMatrix& ctm);
+  skia::RefPtr<SkImage> GetPrerolledImage(
+      GrContext* context, SkPicture* picture, const SkMatrix& ctm);
   void SweepAfterFrame();
 
  private:
@@ -35,7 +34,7 @@ class RasterCache {
     bool used_this_frame = false;
     int access_count = 0;
     SkISize physical_size;
-    RefPtr<SkImage> image;
+    skia::RefPtr<SkImage> image;
   };
 
   using Cache = std::unordered_map<uint32_t, Entry>;

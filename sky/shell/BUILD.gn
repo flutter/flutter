@@ -6,6 +6,8 @@ source_set("common") {
   sources = [
     "gpu/ganesh_canvas.cc",
     "gpu/ganesh_canvas.h",
+    "gpu/picture_serializer.cc",
+    "gpu/picture_serializer.h",
     "rasterizer.cc",
     "rasterizer.h",
     "platform_view.cc",

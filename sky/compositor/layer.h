@@ -8,9 +8,10 @@
 #include <memory>
 #include <vector>
 
+#include "base/logging.h"
 #include "base/macros.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "skia/ext/refptr.h"
+#include "sky/compositor/paint_context.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -20,7 +21,6 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkXfermode.h"
-#include "sky/compositor/paint_context.h"
 
 namespace sky {
 namespace compositor {
@@ -46,7 +46,7 @@ class Layer {
   const bool has_paint_bounds() const { return has_paint_bounds_; }
 
   const SkRect& paint_bounds() const {
-    ASSERT(has_paint_bounds_);
+    DCHECK(has_paint_bounds_);
     return paint_bounds_;
   }
 
