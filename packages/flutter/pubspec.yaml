@@ -10,7 +10,7 @@ dependencies:
   material_design_icons: '>=0.0.3 <0.1.0'
   sky_engine: 0.0.81
   sky_services: 0.0.81
-  vector_math: '>=1.4.3 <2.0.0'
+  vector_math: '>=1.4.5 <2.0.0'
   quiver: '>=0.21.4 <0.22.0'
 
   # See the comment in flutter_tools' pubspec.yaml. We have to pin it
