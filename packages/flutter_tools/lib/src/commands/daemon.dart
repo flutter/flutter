@@ -30,11 +30,7 @@ const String command = 'command';
 /// process).
 class DaemonCommand extends FlutterCommand {
   final String name = 'daemon';
-  final String description =
-      'Run a persistent, JSON-RPC based server to communicate with devices.';
-  final String usageFooter =
-      '\nThis command is intended to be used by tooling environments that need '
-      'a programatic interface into launching Flutter applications.';
+  final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
 
   @override
   Future<int> runInProject() async {
