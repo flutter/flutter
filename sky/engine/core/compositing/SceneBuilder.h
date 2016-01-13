@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <memory>
 
-#include "sky/compositor/layer.h"
+#include "flow/layer.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/painting/CanvasPath.h"
@@ -56,10 +56,10 @@ public:
 private:
     explicit SceneBuilder(const Rect& bounds);
 
-    void addLayer(std::unique_ptr<sky::compositor::ContainerLayer> layer);
+    void addLayer(std::unique_ptr<flow::ContainerLayer> layer);
 
-    std::unique_ptr<sky::compositor::ContainerLayer> m_rootLayer;
-    sky::compositor::ContainerLayer* m_currentLayer;
+    std::unique_ptr<flow::ContainerLayer> m_rootLayer;
+    flow::ContainerLayer* m_currentLayer;
     int32_t m_currentRasterizerTracingThreshold;
 };
 

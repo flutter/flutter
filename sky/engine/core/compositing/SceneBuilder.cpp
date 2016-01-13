@@ -7,16 +7,16 @@
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "sky/engine/core/painting/Matrix.h"
 #include "sky/engine/core/painting/Shader.h"
-#include "sky/compositor/clip_path_layer.h"
-#include "sky/compositor/clip_rect_layer.h"
-#include "sky/compositor/clip_rrect_layer.h"
-#include "sky/compositor/color_filter_layer.h"
-#include "sky/compositor/container_layer.h"
-#include "sky/compositor/opacity_layer.h"
-#include "sky/compositor/picture_layer.h"
-#include "sky/compositor/performance_overlay_layer.h"
-#include "sky/compositor/shader_mask_layer.h"
-#include "sky/compositor/transform_layer.h"
+#include "flow/clip_path_layer.h"
+#include "flow/clip_rect_layer.h"
+#include "flow/clip_rrect_layer.h"
+#include "flow/color_filter_layer.h"
+#include "flow/container_layer.h"
+#include "flow/opacity_layer.h"
+#include "flow/picture_layer.h"
+#include "flow/performance_overlay_layer.h"
+#include "flow/shader_mask_layer.h"
+#include "flow/transform_layer.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -79,42 +79,42 @@ void SceneBuilder::pushTransform(const Float64List& matrix4, ExceptionState& es)
     SkMatrix sk_matrix = toSkMatrix(matrix4, es);
     if (es.had_exception())
         return;
-    std::unique_ptr<sky::compositor::TransformLayer> layer(new sky::compositor::TransformLayer());
+    std::unique_ptr<flow::TransformLayer> layer(new flow::TransformLayer());
     layer->set_transform(sk_matrix);
     addLayer(std::move(layer));
 }
 
 void SceneBuilder::pushClipRect(const Rect& rect)
 {
-    std::unique_ptr<sky::compositor::ClipRectLayer> layer(new sky::compositor::ClipRectLayer());
+    std::unique_ptr<flow::ClipRectLayer> layer(new flow::ClipRectLayer());
     layer->set_clip_rect(rect.sk_rect);
     addLayer(std::move(layer));
 }
 
 void SceneBuilder::pushClipRRect(const RRect& rrect)
 {
-    std::unique_ptr<sky::compositor::ClipRRectLayer> layer(new sky::compositor::ClipRRectLayer());
+    std::unique_ptr<flow::ClipRRectLayer> layer(new flow::ClipRRectLayer());
     layer->set_clip_rrect(rrect.sk_rrect);
     addLayer(std::move(layer));
 }
 
 void SceneBuilder::pushClipPath(const CanvasPath* path)
 {
-    std::unique_ptr<sky::compositor::ClipPathLayer> layer(new sky::compositor::ClipPathLayer());
+    std::unique_ptr<flow::ClipPathLayer> layer(new flow::ClipPathLayer());
     layer->set_clip_path(path->path());
     addLayer(std::move(layer));
 }
 
 void SceneBuilder::pushOpacity(int alpha)
 {
-    std::unique_ptr<sky::compositor::OpacityLayer> layer(new sky::compositor::OpacityLayer());
+    std::unique_ptr<flow::OpacityLayer> layer(new flow::OpacityLayer());
     layer->set_alpha(alpha);
     addLayer(std::move(layer));
 }
 
 void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode)
 {
-    std::unique_ptr<sky::compositor::ColorFilterLayer> layer(new sky::compositor::ColorFilterLayer());
+    std::unique_ptr<flow::ColorFilterLayer> layer(new flow::ColorFilterLayer());
     layer->set_color(color);
     layer->set_transfer_mode(transferMode);
     addLayer(std::move(layer));
@@ -122,14 +122,14 @@ void SceneBuilder::pushColorFilter(CanvasColor color, TransferMode transferMode)
 
 void SceneBuilder::pushShaderMask(Shader* shader, const Rect& maskRect, TransferMode transferMode)
 {
-    std::unique_ptr<sky::compositor::ShaderMaskLayer> layer(new sky::compositor::ShaderMaskLayer());
+    std::unique_ptr<flow::ShaderMaskLayer> layer(new flow::ShaderMaskLayer());
     layer->set_shader(shader->shader());
     layer->set_mask_rect(maskRect.sk_rect);
     layer->set_transfer_mode(transferMode);
     addLayer(std::move(layer));
 }
 
-void SceneBuilder::addLayer(std::unique_ptr<sky::compositor::ContainerLayer> layer)
+void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer)
 {
     DCHECK(layer);
     if (!m_rootLayer) {
@@ -140,7 +140,7 @@ void SceneBuilder::addLayer(std::unique_ptr<sky::compositor::ContainerLayer> lay
     }
     if (!m_currentLayer)
         return;
-    sky::compositor::ContainerLayer* newLayer = layer.get();
+    flow::ContainerLayer* newLayer = layer.get();
     m_currentLayer->Add(std::move(layer));
     m_currentLayer = newLayer;
 }
@@ -156,7 +156,7 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture)
 {
     if (!m_currentLayer)
         return;
-    std::unique_ptr<sky::compositor::PictureLayer> layer(new sky::compositor::PictureLayer());
+    std::unique_ptr<flow::PictureLayer> layer(new flow::PictureLayer());
     layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
     layer->set_picture(picture->toSkia());
     m_currentLayer->Add(std::move(layer));
@@ -166,7 +166,7 @@ void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions, const Rect& bo
 {
     if (!m_currentLayer)
         return;
-    std::unique_ptr<sky::compositor::PerformanceOverlayLayer> layer(new sky::compositor::PerformanceOverlayLayer(enabledOptions));
+    std::unique_ptr<flow::PerformanceOverlayLayer> layer(new flow::PerformanceOverlayLayer(enabledOptions));
     if (!bounds.is_null)
       layer->set_paint_bounds(bounds.sk_rect);
     m_currentLayer->Add(std::move(layer));

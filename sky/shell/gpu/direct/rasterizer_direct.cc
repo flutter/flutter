@@ -6,10 +6,10 @@
 
 #include "base/trace_event/trace_event.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "sky/compositor/container_layer.h"
-#include "sky/compositor/layer.h"
-#include "sky/compositor/paint_context.h"
-#include "sky/compositor/picture_layer.h"
+#include "flow/container_layer.h"
+#include "flow/layer.h"
+#include "flow/paint_context.h"
+#include "flow/picture_layer.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/shell/gpu/picture_serializer.h"
@@ -72,8 +72,8 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
     return;
   }
 
-  scoped_ptr<compositor::LayerTree> layer_tree(
-      reinterpret_cast<compositor::LayerTree*>(layer_tree_ptr));
+  scoped_ptr<flow::LayerTree> layer_tree(
+      reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
   gfx::Size size(layer_tree->frame_size().width(),
                  layer_tree->frame_size().height());
@@ -91,7 +91,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
     CHECK(context_->MakeCurrent(surface_.get()));
     SkCanvas* canvas = ganesh_canvas_.GetCanvas(
       surface_->GetBackingFrameBufferObject(), layer_tree->frame_size());
-    sky::compositor::PaintContext::ScopedFrame frame =
+    flow::PaintContext::ScopedFrame frame =
         paint_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
     canvas->clear(SK_ColorBLACK);
     layer_tree->Raster(frame);

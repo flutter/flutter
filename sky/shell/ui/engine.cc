@@ -79,7 +79,7 @@ void Engine::Init() {
   Shell::Shared().tracing_controller().SetDartInitialized();
 }
 
-std::unique_ptr<compositor::LayerTree> Engine::BeginFrame(
+std::unique_ptr<flow::LayerTree> Engine::BeginFrame(
     base::TimeTicks frame_time) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
 
@@ -87,7 +87,7 @@ std::unique_ptr<compositor::LayerTree> Engine::BeginFrame(
     return nullptr;
 
   auto begin_time = base::TimeTicks::Now();
-  std::unique_ptr<compositor::LayerTree> layer_tree =
+  std::unique_ptr<flow::LayerTree> layer_tree =
       sky_view_->BeginFrame(frame_time);
   if (layer_tree) {
     layer_tree->set_frame_size(
@@ -287,7 +287,7 @@ void Engine::FlushRealTimeEvents() {
   animator_->FlushRealTimeEvents();
 }
 
-void Engine::Render(std::unique_ptr<compositor::LayerTree> layer_tree) {
+void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 }
 
 }  // namespace shell

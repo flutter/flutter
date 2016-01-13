@@ -7,7 +7,7 @@
 
 #include "base/memory/weak_ptr.h"
 #include "skia/ext/refptr.h"
-#include "sky/compositor/paint_context.h"
+#include "flow/paint_context.h"
 #include "sky/shell/gpu/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
 #include "ui/gfx/geometry/size.h"
@@ -52,7 +52,7 @@ class RasterizerDirect : public Rasterizer {
   skia::RefPtr<const GrGLInterface> gr_gl_interface_;
   GaneshCanvas ganesh_canvas_;
 
-  compositor::PaintContext paint_context_;
+  flow::PaintContext paint_context_;
 
   mojo::Binding<rasterizer::Rasterizer> binding_;
 

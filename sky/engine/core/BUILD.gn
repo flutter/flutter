@@ -10,6 +10,7 @@ visibility = [ "//sky/engine/*" ]
 source_set("libraries") {
   public_deps = [
     "//base",
+    "//flow",
     "//mojo/application",
     "//mojo/data_pipe_utils",
     "//mojo/public/c/system",
@@ -19,7 +20,6 @@ source_set("libraries") {
     "//mojo/public/interfaces/application",
     "//mojo/public/platform/dart:mojo_internal_impl",
     "//skia",
-    "//sky/compositor",
     "//sky/engine/tonic:tonic",
     "//sky/engine/wtf",
     "//third_party/iccjpeg",

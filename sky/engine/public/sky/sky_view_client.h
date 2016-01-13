@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "sky/compositor/layer_tree.h"
+#include "flow/layer_tree.h"
 
 typedef struct _Dart_Isolate* Dart_Isolate;
 
@@ -17,7 +17,7 @@ class SkyViewClient {
  public:
   virtual void ScheduleFrame() = 0;
   virtual void FlushRealTimeEvents() = 0;
-  virtual void Render(std::unique_ptr<sky::compositor::LayerTree> layer_tree) = 0;
+  virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
 
   virtual void DidCreateIsolate(Dart_Isolate isolate) = 0;
 

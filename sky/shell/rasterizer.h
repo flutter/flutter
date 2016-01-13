@@ -11,7 +11,7 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding.h"
-#include "sky/compositor/layer_tree.h"
+#include "flow/layer_tree.h"
 #include "sky/services/rasterizer/rasterizer.mojom.h"
 
 namespace sky {
