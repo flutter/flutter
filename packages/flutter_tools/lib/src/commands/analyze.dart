@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 import '../artifacts.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
-import '../build_configuration.dart';.
+import '../build_configuration.dart';
 import '../runner/flutter_command.dart';
 
 class AnalyzeCommand extends FlutterCommand {
