@@ -11,7 +11,7 @@
 #include "base/time/time.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
-#include "sky/compositor/layer_tree.h"
+#include "flow/layer_tree.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/public/platform/WebCommon.h"
 #include "sky/engine/public/platform/WebString.h"
@@ -44,7 +44,7 @@ class SkyView : public WindowClient {
   void PushRoute(const std::string& route);
   void PopRoute();
 
-  std::unique_ptr<sky::compositor::LayerTree> BeginFrame(
+  std::unique_ptr<flow::LayerTree> BeginFrame(
       base::TimeTicks frame_time);
 
   void CreateView(const String& name);
@@ -73,7 +73,7 @@ class SkyView : public WindowClient {
   std::string language_code_;
   std::string country_code_;
   std::unique_ptr<DartController> dart_controller_;
-  std::unique_ptr<sky::compositor::LayerTree> layer_tree_;
+  std::unique_ptr<flow::LayerTree> layer_tree_;
 
   base::WeakPtrFactory<SkyView> weak_factory_;
 

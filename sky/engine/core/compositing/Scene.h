@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <memory>
 
-#include "sky/compositor/layer.h"
-#include "sky/compositor/layer_tree.h"
+#include "flow/layer.h"
+#include "flow/layer_tree.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -24,20 +24,20 @@ class Scene : public RefCounted<Scene>, public DartWrappable {
  public:
   ~Scene() override;
   static PassRefPtr<Scene> create(
-      std::unique_ptr<sky::compositor::Layer> rootLayer,
+      std::unique_ptr<flow::Layer> rootLayer,
       uint32_t rasterizerTracingThreshold);
 
-  std::unique_ptr<sky::compositor::LayerTree> takeLayerTree();
+  std::unique_ptr<flow::LayerTree> takeLayerTree();
 
   void dispose();
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
  private:
-  explicit Scene(std::unique_ptr<sky::compositor::Layer> rootLayer,
+  explicit Scene(std::unique_ptr<flow::Layer> rootLayer,
                  uint32_t rasterizerTracingThreshold);
 
-  std::unique_ptr<sky::compositor::LayerTree> m_layerTree;
+  std::unique_ptr<flow::LayerTree> m_layerTree;
 };
 
 }  // namespace blink

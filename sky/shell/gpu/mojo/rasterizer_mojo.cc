@@ -51,8 +51,8 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
     return;
   }
 
-  scoped_ptr<compositor::LayerTree> layer_tree(
-      reinterpret_cast<compositor::LayerTree*>(layer_tree_ptr));
+  scoped_ptr<flow::LayerTree> layer_tree(
+      reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
   if (layer_tree->frame_size().isEmpty()) {
     callback.Run();
@@ -62,7 +62,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   MGLResizeSurface(layer_tree->frame_size().width(),
                    layer_tree->frame_size().height());
   SkCanvas* canvas = ganesh_canvas_.GetCanvas(0, layer_tree->frame_size());
-  sky::compositor::PaintContext::ScopedFrame frame =
+  flow::PaintContext::ScopedFrame frame =
       paint_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
   canvas->clear(SK_ColorBLACK);
   layer_tree->Raster(frame);

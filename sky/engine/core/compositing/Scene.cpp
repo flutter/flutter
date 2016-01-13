@@ -21,15 +21,15 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 
 PassRefPtr<Scene> Scene::create(
-    std::unique_ptr<sky::compositor::Layer> rootLayer,
+    std::unique_ptr<flow::Layer> rootLayer,
     uint32_t rasterizerTracingThreshold) {
   ASSERT(rootLayer);
   return adoptRef(new Scene(std::move(rootLayer), rasterizerTracingThreshold));
 }
 
-Scene::Scene(std::unique_ptr<sky::compositor::Layer> rootLayer,
+Scene::Scene(std::unique_ptr<flow::Layer> rootLayer,
              uint32_t rasterizerTracingThreshold)
-    : m_layerTree(new sky::compositor::LayerTree()) {
+    : m_layerTree(new flow::LayerTree()) {
   m_layerTree->set_root_layer(std::move(rootLayer));
   m_layerTree->set_rasterizer_tracing_threshold(rasterizerTracingThreshold);
 }
@@ -40,7 +40,7 @@ void Scene::dispose() {
   ClearDartWrapper();
 }
 
-std::unique_ptr<sky::compositor::LayerTree> Scene::takeLayerTree() {
+std::unique_ptr<flow::LayerTree> Scene::takeLayerTree() {
   return std::move(m_layerTree);
 }
 

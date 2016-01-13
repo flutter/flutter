@@ -81,7 +81,7 @@ void SkyView::RunFromSnapshot(const WebString& name,
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 
-std::unique_ptr<sky::compositor::LayerTree> SkyView::BeginFrame(
+std::unique_ptr<flow::LayerTree> SkyView::BeginFrame(
     base::TimeTicks frame_time) {
   GetWindow()->BeginFrame(frame_time);
   return std::move(layer_tree_);

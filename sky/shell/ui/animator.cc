@@ -83,7 +83,7 @@ void Animator::BeginFrame(int64_t time_stamp) {
   base::TimeTicks frame_time = time_stamp ?
       base::TimeTicks::FromInternalValue(time_stamp) : base::TimeTicks::Now();
 
-  scoped_ptr<compositor::LayerTree> layer_tree =
+  scoped_ptr<flow::LayerTree> layer_tree =
       make_scoped_ptr(engine_->BeginFrame(frame_time).release());
 
   if (!layer_tree) {

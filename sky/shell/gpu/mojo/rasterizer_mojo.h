@@ -9,7 +9,7 @@
 #include "mojo/public/c/gpu/MGL/mgl.h"
 #include "mojo/services/native_viewport/interfaces/native_viewport.mojom.h"
 #include "skia/ext/refptr.h"
-#include "sky/compositor/paint_context.h"
+#include "flow/paint_context.h"
 #include "sky/shell/gpu/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
 
@@ -43,7 +43,7 @@ class RasterizerMojo : public ::sky::shell::Rasterizer {
   MGLContext context_;
   GaneshCanvas ganesh_canvas_;
 
-  compositor::PaintContext paint_context_;
+  flow::PaintContext paint_context_;
 
   mojo::Binding<rasterizer::Rasterizer> binding_;
 

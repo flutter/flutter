@@ -48,7 +48,7 @@ class Engine : public UIDelegate,
 
   static void Init();
 
-  std::unique_ptr<compositor::LayerTree> BeginFrame(base::TimeTicks frame_time);
+  std::unique_ptr<flow::LayerTree> BeginFrame(base::TimeTicks frame_time);
 
  private:
   // UIDelegate implementation:
@@ -76,7 +76,7 @@ class Engine : public UIDelegate,
   // SkyViewClient methods:
   void ScheduleFrame() override;
   void FlushRealTimeEvents() override;
-  void Render(std::unique_ptr<compositor::LayerTree> layer_tree) override;
+  void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void DidCreateIsolate(Dart_Isolate isolate) override;
 
   void RunFromLibrary(const std::string& name);
