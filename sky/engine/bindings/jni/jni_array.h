@@ -7,6 +7,7 @@
 
 #include <jni.h>
 
+#include "sky/engine/bindings/jni/jni_class.h"
 #include "sky/engine/bindings/jni/jni_object.h"
 
 namespace blink {
@@ -32,11 +33,132 @@ class JniObjectArray : public JniArray {
  public:
   ~JniObjectArray() override;
 
+  static PassRefPtr<JniObjectArray> Create(const JniClass* clazz, jsize length);
   PassRefPtr<JniObject> GetArrayElement(jsize index);
   void SetArrayElement(jsize index, const JniObject* value);
 
  private:
   JniObjectArray(JNIEnv* env, jobjectArray array);
+};
+
+class JniBooleanArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniBooleanArray() override;
+
+  static PassRefPtr<JniBooleanArray> Create(jsize length);
+  bool GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, bool value);
+
+ private:
+  JniBooleanArray(JNIEnv* env, jbooleanArray array);
+};
+
+class JniByteArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniByteArray() override;
+
+  static PassRefPtr<JniByteArray> Create(jsize length);
+  int64_t GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, int64_t value);
+
+ private:
+  JniByteArray(JNIEnv* env, jbyteArray array);
+};
+
+class JniCharArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniCharArray() override;
+
+  static PassRefPtr<JniCharArray> Create(jsize length);
+  int64_t GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, int64_t value);
+
+ private:
+  JniCharArray(JNIEnv* env, jcharArray array);
+};
+
+class JniShortArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniShortArray() override;
+
+  static PassRefPtr<JniShortArray> Create(jsize length);
+  int64_t GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, int64_t value);
+
+ private:
+  JniShortArray(JNIEnv* env, jshortArray array);
+};
+
+class JniIntArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniIntArray() override;
+
+  static PassRefPtr<JniIntArray> Create(jsize length);
+  int64_t GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, int64_t value);
+
+ private:
+  JniIntArray(JNIEnv* env, jintArray array);
+};
+
+class JniLongArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniLongArray() override;
+
+  static PassRefPtr<JniLongArray> Create(jsize length);
+  int64_t GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, int64_t value);
+
+ private:
+  JniLongArray(JNIEnv* env, jlongArray array);
+};
+
+class JniFloatArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniFloatArray() override;
+
+  static PassRefPtr<JniFloatArray> Create(jsize length);
+  double GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, double value);
+
+ private:
+  JniFloatArray(JNIEnv* env, jfloatArray array);
+};
+
+class JniDoubleArray : public JniArray {
+  DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
+
+ public:
+  ~JniDoubleArray() override;
+
+  static PassRefPtr<JniDoubleArray> Create(jsize length);
+  double GetArrayElement(jsize index);
+  void SetArrayElement(jsize index, double value);
+
+ private:
+  JniDoubleArray(JNIEnv* env, jdoubleArray array);
 };
 
 } // namespace blink

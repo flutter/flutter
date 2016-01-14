@@ -10,6 +10,7 @@
 #include "sky/engine/bindings/jni/jni_array.h"
 #include "sky/engine/bindings/jni/jni_class.h"
 #include "sky/engine/bindings/jni/jni_object.h"
+#include "sky/engine/bindings/jni/jni_string.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -92,10 +93,27 @@ bool CheckDartException(Dart_Handle result, Dart_Handle* exception) {
   return true;
 }
 
+DART_NATIVE_CALLBACK_STATIC(JniBooleanArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniByteArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniCharArray, Create);
 DART_NATIVE_CALLBACK_STATIC(JniClass, FromName);
+DART_NATIVE_CALLBACK_STATIC(JniClass, FromClassObject);
+DART_NATIVE_CALLBACK_STATIC(JniDoubleArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniFloatArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniIntArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniLongArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniObjectArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniShortArray, Create);
+DART_NATIVE_CALLBACK_STATIC(JniString, Create);
 
 #define FOR_EACH_BINDING(V) \
   V(JniArray, GetLength) \
+  V(JniBooleanArray, GetArrayElement) \
+  V(JniBooleanArray, SetArrayElement) \
+  V(JniByteArray, GetArrayElement) \
+  V(JniByteArray, SetArrayElement) \
+  V(JniCharArray, GetArrayElement) \
+  V(JniCharArray, SetArrayElement) \
   V(JniClass, CallStaticBooleanMethod) \
   V(JniClass, CallStaticByteMethod) \
   V(JniClass, CallStaticCharMethod) \
@@ -129,12 +147,46 @@ DART_NATIVE_CALLBACK_STATIC(JniClass, FromName);
   V(JniClass, SetStaticLongField) \
   V(JniClass, SetStaticObjectField) \
   V(JniClass, SetStaticShortField) \
+  V(JniDoubleArray, GetArrayElement) \
+  V(JniDoubleArray, SetArrayElement) \
+  V(JniFloatArray, GetArrayElement) \
+  V(JniFloatArray, SetArrayElement) \
+  V(JniIntArray, GetArrayElement) \
+  V(JniIntArray, SetArrayElement) \
+  V(JniLongArray, GetArrayElement) \
+  V(JniLongArray, SetArrayElement) \
   V(JniObject, CallBooleanMethod) \
+  V(JniObject, CallByteMethod) \
+  V(JniObject, CallCharMethod) \
+  V(JniObject, CallDoubleMethod) \
+  V(JniObject, CallFloatMethod) \
   V(JniObject, CallIntMethod) \
+  V(JniObject, CallLongMethod) \
   V(JniObject, CallObjectMethod) \
+  V(JniObject, CallShortMethod) \
+  V(JniObject, CallVoidMethod) \
+  V(JniObject, GetBooleanField) \
+  V(JniObject, GetByteField) \
+  V(JniObject, GetCharField) \
+  V(JniObject, GetDoubleField) \
+  V(JniObject, GetFloatField) \
   V(JniObject, GetIntField) \
+  V(JniObject, GetLongField) \
+  V(JniObject, GetObjectField) \
+  V(JniObject, GetShortField) \
+  V(JniObject, SetBooleanField) \
+  V(JniObject, SetByteField) \
+  V(JniObject, SetCharField) \
+  V(JniObject, SetDoubleField) \
+  V(JniObject, SetFloatField) \
+  V(JniObject, SetIntField) \
+  V(JniObject, SetLongField) \
+  V(JniObject, SetObjectField) \
+  V(JniObject, SetShortField) \
   V(JniObjectArray, GetArrayElement) \
   V(JniObjectArray, SetArrayElement) \
+  V(JniShortArray, GetArrayElement) \
+  V(JniShortArray, SetArrayElement) \
   V(JniString, GetText)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
@@ -144,7 +196,18 @@ void DartJni::InitForGlobal() {
     g_natives = new DartLibraryNatives();
 
     g_natives->Register({
+      DART_REGISTER_NATIVE_STATIC(JniBooleanArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniByteArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniCharArray, Create)
       DART_REGISTER_NATIVE_STATIC(JniClass, FromName)
+      DART_REGISTER_NATIVE_STATIC(JniClass, FromClassObject)
+      DART_REGISTER_NATIVE_STATIC(JniDoubleArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniFloatArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniIntArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniLongArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniObjectArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniShortArray, Create)
+      DART_REGISTER_NATIVE_STATIC(JniString, Create)
       FOR_EACH_BINDING(DART_REGISTER_NATIVE)
     });
   }
@@ -223,6 +286,26 @@ std::string DartJni::GetObjectClassName(JNIEnv* env, jobject obj) {
   return base::android::ConvertJavaStringToUTF8(env, name);
 }
 
+jstring DartJni::DartToJavaString(JNIEnv* env, Dart_Handle dart_string,
+                                  Dart_Handle* exception) {
+  if (!Dart_IsString(dart_string)) {
+    *exception = ToDart("Argument must be a string");
+    return nullptr;
+  }
+
+  intptr_t length;
+  Dart_Handle result = Dart_StringLength(dart_string, &length);
+  if (CheckDartException(result, exception)) return nullptr;
+
+  std::vector<uint16_t> string_data(length);
+  result = Dart_StringToUTF16(dart_string, string_data.data(), &length);
+  if (CheckDartException(result, exception)) return nullptr;
+
+  jstring java_string = env->NewString(string_data.data(), length);
+  CheckJniException(env, exception);
+  return java_string;
+}
+
 jclass DartJni::class_clazz() {
   return g_jvm_data->class_clazz.obj();
 }
@@ -274,17 +357,7 @@ jvalue JniMethodArgs::DartToJavaValue(JNIEnv* env,
   }
 
   if (Dart_IsString(dart_value)) {
-    intptr_t length;
-    Dart_Handle result = Dart_StringLength(dart_value, &length);
-    if (CheckDartException(result, exception)) return java_value;
-
-    std::vector<uint16_t> string_data(length);
-    result = Dart_StringToUTF16(dart_value, string_data.data(), &length);
-    if (CheckDartException(result, exception)) return java_value;
-
-    java_value.l = env->NewString(string_data.data(), length);
-    CheckJniException(env, exception);
-
+    java_value.l = DartJni::DartToJavaString(env, dart_value, exception);
     return java_value;
   }
 

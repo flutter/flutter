@@ -8,21 +8,21 @@
 #include "sky/engine/tonic/dart_args.h"
 
 #define DART_NATIVE_CALLBACK(CLASS, METHOD) \
-  static void CLASS_##METHOD(Dart_NativeArguments args) { \
+  static void CLASS##_##METHOD(Dart_NativeArguments args) { \
     DartCall(&CLASS::METHOD, args); \
   }
 
 #define DART_NATIVE_CALLBACK_STATIC(CLASS, METHOD) \
-  static void CLASS_##METHOD(Dart_NativeArguments args) { \
+  static void CLASS##_##METHOD(Dart_NativeArguments args) { \
     DartCallStatic(&CLASS::METHOD, args); \
   }
 
 #define DART_REGISTER_NATIVE(CLASS, METHOD) \
-  { #CLASS "_" #METHOD, CLASS_##METHOD, \
+  { #CLASS "_" #METHOD, CLASS##_##METHOD, \
     IndicesForSignature<decltype(&CLASS::METHOD)>::count + 1, true },
 
 #define DART_REGISTER_NATIVE_STATIC(CLASS, METHOD) \
-  { #CLASS "_" #METHOD, CLASS_##METHOD, \
+  { #CLASS "_" #METHOD, CLASS##_##METHOD, \
     IndicesForSignature<decltype(&CLASS::METHOD)>::count, true },
 
 #define DART_BIND_ALL(CLASS, FOR_EACH) \

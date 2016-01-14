@@ -88,19 +88,71 @@ class JniClass extends NativeFieldWrapperClass2 {
 
 /// Wrapper for a Java object accessed via JNI.
 class JniObject extends NativeFieldWrapperClass2 {
+  JniObject getObjectField(int fieldId)
+      native 'JniObject_GetObjectField';
+  bool getBooleanField(int fieldId)
+      native 'JniObject_GetBooleanField';
+  int getByteField(int fieldId)
+      native 'JniObject_GetByteField';
+  int getCharField(int fieldId)
+      native 'JniObject_GetCharField';
+  int getShortField(int fieldId)
+      native 'JniObject_GetShortField';
   int getIntField(int fieldId)
       native 'JniObject_GetIntField';
+  int getLongField(int fieldId)
+      native 'JniObject_GetLongField';
+  double getFloatField(int fieldId)
+      native 'JniObject_GetFloatField';
+  double getDoubleField(int fieldId)
+      native 'JniObject_GetDoubleField';
+
+  void setObjectField(int fieldId, JniObject value)
+      native 'JniObject_SetObjectField';
+  void setBooleanField(int fieldId, bool value)
+      native 'JniObject_SetBooleanField';
+  void setByteField(int fieldId, int value)
+      native 'JniObject_SetByteField';
+  void setCharField(int fieldId, int value)
+      native 'JniObject_SetCharField';
+  void setShortField(int fieldId, int value)
+      native 'JniObject_SetShortField';
+  void setIntField(int fieldId, int value)
+      native 'JniObject_SetIntField';
+  void setLongField(int fieldId, int value)
+      native 'JniObject_SetLongField';
+  void setFloatField(int fieldId, double value)
+      native 'JniObject_SetFloatField';
+  void setDoubleField(int fieldId, double value)
+      native 'JniObject_SetDoubleField';
 
   JniObject callObjectMethod(int methodId, List args)
       native 'JniObject_CallObjectMethod';
   bool callBooleanMethod(int methodId, List args)
       native 'JniObject_CallBooleanMethod';
+  int callByteMethod(int methodId, List args)
+      native 'JniObject_CallByteMethod';
+  int callCharMethod(int methodId, List args)
+      native 'JniObject_CallCharMethod';
+  int callShortMethod(int methodId, List args)
+      native 'JniObject_CallShortMethod';
   int callIntMethod(int methodId, List args)
       native 'JniObject_CallIntMethod';
+  int callLongMethod(int methodId, List args)
+      native 'JniObject_CallLongMethod';
+  double callFloatMethod(int methodId, List args)
+      native 'JniObject_CallFloatMethod';
+  double callDoubleMethod(int methodId, List args)
+      native 'JniObject_CallDoubleMethod';
+  void callVoidMethod(int methodId, List args)
+      native 'JniObject_CallVoidMethod';
 }
 
 /// Wrapper for a Java string.
 class JniString extends JniObject {
+  static JniString create(String value)
+      native 'JniString_Create';
+
   // Retrieve the value as a Dart string.
   String get text native 'JniString_GetText';
 }
@@ -111,9 +163,102 @@ class JniArray extends JniObject {
 }
 
 class JniObjectArray extends JniArray {
-  JniObject operator [](int index) native 'JniObjectArray_GetArrayElement';
+  static JniObjectArray create(JniClass clazz, int length)
+      native 'JniObjectArray_Create';
 
-  void operator []=(int index, JniObject value) native 'JniObjectArray_SetArrayElement';
+  JniObject operator [](int index)
+      native 'JniObjectArray_GetArrayElement';
+
+  void operator []=(int index, JniObject value)
+      native 'JniObjectArray_SetArrayElement';
+}
+
+class JniBooleanArray extends JniArray {
+  static JniBooleanArray create(int length)
+      native 'JniBooleanArray_Create';
+
+  bool operator [](int index)
+      native 'JniBooleanArray_GetArrayElement';
+
+  void operator []=(int index, bool value)
+      native 'JniBooleanArray_SetArrayElement';
+}
+
+class JniByteArray extends JniArray {
+  static JniByteArray create(int length)
+      native 'JniByteArray_Create';
+
+  int operator [](int index)
+      native 'JniByteArray_GetArrayElement';
+
+  void operator []=(int index, int value)
+      native 'JniByteArray_SetArrayElement';
+}
+
+class JniCharArray extends JniArray {
+  static JniCharArray create(int length)
+      native 'JniCharArray_Create';
+
+  int operator [](int index)
+      native 'JniCharArray_GetArrayElement';
+
+  void operator []=(int index, int value)
+      native 'JniCharArray_SetArrayElement';
+}
+
+class JniShortArray extends JniArray {
+  static JniShortArray create(int length)
+      native 'JniShortArray_Create';
+
+  int operator [](int index)
+      native 'JniShortArray_GetArrayElement';
+
+  void operator []=(int index, int value)
+      native 'JniShortArray_SetArrayElement';
+}
+
+class JniIntArray extends JniArray {
+  static JniIntArray create(int length)
+      native 'JniIntArray_Create';
+
+  int operator [](int index)
+      native 'JniIntArray_GetArrayElement';
+
+  void operator []=(int index, int value)
+      native 'JniIntArray_SetArrayElement';
+}
+
+class JniLongArray extends JniArray {
+  static JniLongArray create(int length)
+      native 'JniLongArray_Create';
+
+  int operator [](int index)
+      native 'JniLongArray_GetArrayElement';
+
+  void operator []=(int index, int value)
+      native 'JniLongArray_SetArrayElement';
+}
+
+class JniFloatArray extends JniArray {
+  static JniFloatArray create(int length)
+      native 'JniFloatArray_Create';
+
+  double operator [](int index)
+      native 'JniFloatArray_GetArrayElement';
+
+  void operator []=(int index, double value)
+      native 'JniFloatArray_SetArrayElement';
+}
+
+class JniDoubleArray extends JniArray {
+  static JniDoubleArray create(int length)
+      native 'JniDoubleArray_Create';
+
+  double operator [](int index)
+      native 'JniDoubleArray_GetArrayElement';
+
+  void operator []=(int index, double value)
+      native 'JniDoubleArray_SetArrayElement';
 }
 
 /// Used to pass arguments of type "float" to Java methods.
