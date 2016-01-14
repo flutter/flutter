@@ -95,8 +95,7 @@ class IOSDevice extends Device {
         'To copy files to iOS devices, please install ios-deploy. '
         'You can do this using homebrew as follows:\n'
         '\$ brew tap flutter/flutter\n'
-        '\$ brew install ios-deploy',
-        'Copying files to iOS devices is not currently supported on Linux.');
+        '\$ brew install ios-deploy');
   }
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
@@ -178,7 +177,7 @@ class IOSDevice extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     try {
-      String apps = runCheckedSync([installerPath, '-l']);
+      String apps = runCheckedSync([installerPath, '--list-apps']);
       if (new RegExp(app.id, multiLine: true).hasMatch(apps)) {
         return true;
       }
@@ -188,24 +187,52 @@ class IOSDevice extends Device {
     return false;
   }
 
+  Future<bool> buildPrecompiledApplication(ApplicationPackage app) async {
+    int result = await runCommandAndStreamOutput([
+      '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
+    ], workingDirectory: app.localPath);
+
+    return result == 0;
+  }
+
   @override
   Future<bool> startApp(ApplicationPackage app) async {
-    if (!isAppInstalled(app)) {
+    logging.fine("Attempting to build and install ${app.name} on $id");
+
+    // Step 1: Install the precompiled application if necessary
+    bool buildResult = await buildPrecompiledApplication(app);
+
+    if (!buildResult) {
+      logging.severe('Could not build the precompiled application for the device');
       return false;
     }
-    // idevicedebug hangs forever after launching the app, so kill it after
-    // giving it plenty of time to send the launch command.
-    return await runAndKill(
-      [debuggerPath, 'run', app.id],
-      new Duration(seconds: 3)
-    ).then(
-      (_) {
-        return true;
-      }, onError: (e) {
-        logging.info('Failure running $debuggerPath: ', e);
-        return false;
-      }
-    );
+
+    // Step 2: Check that the application exists at the specified path
+    Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
+
+    bool bundleExists = await bundle.exists();
+    if (!bundleExists) {
+      logging.severe('Could not find the built application bundle at ${bundle.path}');
+      return false;
+    }
+
+    // Step 3: Attempt to install the application on the device
+    int installationResult = await runCommandAndStreamOutput([
+      '/usr/bin/env',
+      'ios-deploy',
+      '--id',
+      id,
+      '--bundle',
+      bundle.path,
+    ]);
+
+    if (installationResult != 0) {
+      logging.severe('Could not install ${bundle.path} on $id');
+      return false;
+    }
+
+    logging.fine('Installation successful');
+    return true;
   }
 
   @override
