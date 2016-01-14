@@ -19,7 +19,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'mojo_sdk_revision': 'c29387104b5fbcbf681e2da2559a3db5860f153f',
+  'mojo_sdk_revision': '6759b40b6f2f97b939280692070d457dfc5221b0',
   'mojo_devtools_revision': '49879d78ce4486e10c2214a101d9b2e82794b2f4',
   'skia_revision': '52e2581700b719aad317605160a2cef45d3db68b',
 
@@ -231,6 +231,31 @@ hooks = [
                 '--no_auth',
                 '--bucket', 'chromium-eu-strip',
                 '-s', 'src/build/linux/bin/eu-strip.sha1',
+    ],
+  },
+  # Pull the mojom parser binaries using checked-in hashes.
+  {
+    'name': 'mojom_parser',
+    'pattern': '',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--quiet',
+                '--platform=linux*',
+                '--no_auth',
+                '--bucket', 'mojo/mojom_parser/linux64',
+                '-s', 'src/mojo/public/tools/bindings/mojom_parser/bin/linux64/mojom_parser.sha1',
+    ],
+  },
+  {
+    'name': 'mojom_parser',
+    'pattern': '',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--quiet',
+                '--platform=darwin',
+                '--no_auth',
+                '--bucket', 'mojo/mojom_parser/mac64',
+                '-s', 'src/mojo/public/tools/bindings/mojom_parser/bin/mac64/mojom_parser.sha1',
     ],
   },
   {
