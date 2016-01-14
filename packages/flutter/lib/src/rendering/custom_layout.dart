@@ -5,6 +5,8 @@
 import 'box.dart';
 import 'object.dart';
 
+// For OneChildLayoutDelegate and RenderCustomOneChildLayoutBox, see shifted_box.dart
+
 class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// An object representing the identity of this child.
   Object id;

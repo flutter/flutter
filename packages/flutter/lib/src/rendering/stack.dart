@@ -14,6 +14,9 @@ import 'object.dart';
 /// container, this class has no width and height members. To determine the
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
+///
+/// If you create the RelativeRect with null values, the methods on
+/// RelativeRect will not work usefully (or at all).
 class RelativeRect {
 
   /// Creates a RelativeRect with the given values.
@@ -125,7 +128,7 @@ class RelativeRect {
 
   int get hashCode => hashValues(left, top, right, bottom);
 
-  String toString() => "RelativeRect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})";
+  String toString() => "RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})";
 }
 
 /// Parent data for use with [RenderStack]
@@ -155,10 +158,10 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// Get or set the current values in terms of a RelativeRect object.
   RelativeRect get rect => new RelativeRect.fromLTRB(left, top, right, bottom);
   void set rect(RelativeRect value) {
-    left = value.left;
     top = value.top;
     right = value.right;
     bottom = value.bottom;
+    left = value.left;
   }
 
   void merge(StackParentData other) {
@@ -185,7 +188,24 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// children in the stack.
   bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
 
-  String toString() => '${super.toString()}; top=$top; right=$right; bottom=$bottom; left=$left; width=$width; height=$height';
+  String toString() {
+    List<String> values = <String>[];
+    if (top != null)
+      values.add('top=$top');
+    if (right != null)
+      values.add('right=$right');
+    if (bottom != null)
+      values.add('bottom=$bottom');
+    if (left != null)
+      values.add('left=$left');
+    if (width != null)
+      values.add('width=$width');
+    if (height != null)
+      values.add('height=$height');
+    if (values.length == null)
+      return 'all null';
+    return values.join('; ');
+  }
 }
 
 abstract class RenderStackBase extends RenderBox

@@ -73,7 +73,8 @@ class TabViewDemo extends StatelessComponent {
                   children: <Widget>[
                     new IconButton(
                       icon: "navigation/arrow_back",
-                      onPressed: () { _handleArrowButtonPress(context, -1); }
+                      onPressed: () { _handleArrowButtonPress(context, -1); },
+                      tooltip: 'Back'
                     ),
                     new Row(
                       children: _iconNames.map((String name) => _buildTabIndicator(context, name)).toList(),
@@ -81,7 +82,8 @@ class TabViewDemo extends StatelessComponent {
                     ),
                     new IconButton(
                       icon: "navigation/arrow_forward",
-                      onPressed: () { _handleArrowButtonPress(context, 1); }
+                      onPressed: () { _handleArrowButtonPress(context, 1); },
+                      tooltip: 'Forward'
                     )
                   ],
                   justifyContent: FlexJustifyContent.spaceBetween

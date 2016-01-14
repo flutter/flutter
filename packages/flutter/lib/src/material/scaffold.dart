@@ -331,14 +331,16 @@ class ScaffoldState extends State<Scaffold> {
       if (config.drawer != null) {
         left = new IconButton(
           icon: 'navigation/menu',
-          onPressed: openDrawer
+          onPressed: openDrawer,
+          tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
       } else {
         _shouldShowBackArrow ??= Navigator.canPop(context);
         if (_shouldShowBackArrow) {
           left = new IconButton(
             icon: 'navigation/arrow_back',
-            onPressed: () => Navigator.pop(context)
+            onPressed: () => Navigator.pop(context),
+            tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
           );
         }
       }
