@@ -154,11 +154,13 @@ class StockHomeState extends State<StockHome> {
       right: <Widget>[
         new IconButton(
           icon: "action/search",
-          onPressed: _handleSearchBegin
+          onPressed: _handleSearchBegin,
+          tooltip: 'Search'
         ),
         new IconButton(
           icon: "navigation/more_vert",
-          onPressed: _handleMenuShow
+          onPressed: _handleMenuShow,
+          tooltip: 'Show menu'
         )
       ],
       tabBar: new TabBar<StockHomeTab>(
@@ -229,7 +231,8 @@ class StockHomeState extends State<StockHome> {
       left: new IconButton(
         icon: 'navigation/arrow_back',
         colorFilter: new ColorFilter.mode(Theme.of(context).accentColor, ui.TransferMode.srcATop),
-        onPressed: _handleSearchEnd
+        onPressed: _handleSearchEnd,
+        tooltip: 'Back'
       ),
       center: new Input(
         key: searchFieldKey,

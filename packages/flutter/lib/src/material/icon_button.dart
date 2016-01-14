@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'icon.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
+import 'tooltip.dart';
 
 class IconButton extends StatelessComponent {
   const IconButton({
@@ -14,16 +15,18 @@ class IconButton extends StatelessComponent {
     this.icon,
     this.color,
     this.colorFilter,
-    this.onPressed
+    this.onPressed,
+    this.tooltip
   }) : super(key: key);
 
   final String icon;
   final IconThemeColor color;
   final ColorFilter colorFilter;
   final VoidCallback onPressed;
+  final String tooltip;
 
   Widget build(BuildContext context) {
-    return new InkResponse(
+    Widget result = new InkResponse(
       onTap: onPressed,
       child: new Padding(
         padding: const EdgeDims.all(8.0),
@@ -34,10 +37,23 @@ class IconButton extends StatelessComponent {
         )
       )
     );
+    if (tooltip != null) {
+      result = new Tooltip(
+        message: tooltip,
+        child: result
+      );
+    }
+    return result;
   }
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$icon');
+    if (onPressed == null)
+      description.add('disabled');
+    if (color != null)
+      description.add('$color');
+    if (tooltip != null)
+      description.add('tooltip: "$tooltip"');
   }
 }
