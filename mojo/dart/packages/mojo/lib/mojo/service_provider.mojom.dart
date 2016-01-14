@@ -11,16 +11,16 @@ import 'package:mojo/core.dart' as core;
 
 
 
-class ServiceProviderConnectToServiceParams extends bindings.Struct {
+class _ServiceProviderConnectToServiceParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(24, 0)
   ];
   String interfaceName = null;
   core.MojoMessagePipeEndpoint pipe = null;
 
-  ServiceProviderConnectToServiceParams() : super(kVersions.last.size);
+  _ServiceProviderConnectToServiceParams() : super(kVersions.last.size);
 
-  static ServiceProviderConnectToServiceParams deserialize(bindings.Message message) {
+  static _ServiceProviderConnectToServiceParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -29,11 +29,11 @@ class ServiceProviderConnectToServiceParams extends bindings.Struct {
     return result;
   }
 
-  static ServiceProviderConnectToServiceParams decode(bindings.Decoder decoder0) {
+  static _ServiceProviderConnectToServiceParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ServiceProviderConnectToServiceParams result = new ServiceProviderConnectToServiceParams();
+    _ServiceProviderConnectToServiceParams result = new _ServiceProviderConnectToServiceParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -73,7 +73,7 @@ class ServiceProviderConnectToServiceParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ServiceProviderConnectToServiceParams("
+    return "_ServiceProviderConnectToServiceParams("
            "interfaceName: $interfaceName" ", "
            "pipe: $pipe" ")";
   }
@@ -84,31 +84,28 @@ class ServiceProviderConnectToServiceParams extends bindings.Struct {
   }
 }
 
-const int kServiceProvider_connectToService_name = 0;
-const String ServiceProviderName = null;
+const int _ServiceProvider_connectToServiceName = 0;
 
 abstract class ServiceProvider {
+  static const String serviceName = null;
   void connectToService(String interfaceName, core.MojoMessagePipeEndpoint pipe);
-
 }
 
 
-class ServiceProviderProxyImpl extends bindings.Proxy {
-  ServiceProviderProxyImpl.fromEndpoint(
+class _ServiceProviderProxyImpl extends bindings.Proxy {
+  _ServiceProviderProxyImpl.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
 
-  ServiceProviderProxyImpl.fromHandle(core.MojoHandle handle) :
+  _ServiceProviderProxyImpl.fromHandle(core.MojoHandle handle) :
       super.fromHandle(handle);
 
-  ServiceProviderProxyImpl.unbound() : super.unbound();
+  _ServiceProviderProxyImpl.unbound() : super.unbound();
 
-  static ServiceProviderProxyImpl newFromEndpoint(
+  static _ServiceProviderProxyImpl newFromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For ServiceProviderProxyImpl"));
-    return new ServiceProviderProxyImpl.fromEndpoint(endpoint);
+    assert(endpoint.setDescription("For _ServiceProviderProxyImpl"));
+    return new _ServiceProviderProxyImpl.fromEndpoint(endpoint);
   }
-
-  String get name => ServiceProviderName;
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -121,13 +118,13 @@ class ServiceProviderProxyImpl extends bindings.Proxy {
 
   String toString() {
     var superString = super.toString();
-    return "ServiceProviderProxyImpl($superString)";
+    return "_ServiceProviderProxyImpl($superString)";
   }
 }
 
 
 class _ServiceProviderProxyCalls implements ServiceProvider {
-  ServiceProviderProxyImpl _proxyImpl;
+  _ServiceProviderProxyImpl _proxyImpl;
 
   _ServiceProviderProxyCalls(this._proxyImpl);
     void connectToService(String interfaceName, core.MojoMessagePipeEndpoint pipe) {
@@ -135,37 +132,35 @@ class _ServiceProviderProxyCalls implements ServiceProvider {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ServiceProviderConnectToServiceParams();
+      var params = new _ServiceProviderConnectToServiceParams();
       params.interfaceName = interfaceName;
       params.pipe = pipe;
-      _proxyImpl.sendMessage(params, kServiceProvider_connectToService_name);
+      _proxyImpl.sendMessage(params, _ServiceProvider_connectToServiceName);
     }
-  
 }
 
 
 class ServiceProviderProxy implements bindings.ProxyBase {
   final bindings.Proxy impl;
   ServiceProvider ptr;
-  final String name = ServiceProviderName;
 
-  ServiceProviderProxy(ServiceProviderProxyImpl proxyImpl) :
+  ServiceProviderProxy(_ServiceProviderProxyImpl proxyImpl) :
       impl = proxyImpl,
       ptr = new _ServiceProviderProxyCalls(proxyImpl);
 
   ServiceProviderProxy.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) :
-      impl = new ServiceProviderProxyImpl.fromEndpoint(endpoint) {
+      impl = new _ServiceProviderProxyImpl.fromEndpoint(endpoint) {
     ptr = new _ServiceProviderProxyCalls(impl);
   }
 
   ServiceProviderProxy.fromHandle(core.MojoHandle handle) :
-      impl = new ServiceProviderProxyImpl.fromHandle(handle) {
+      impl = new _ServiceProviderProxyImpl.fromHandle(handle) {
     ptr = new _ServiceProviderProxyCalls(impl);
   }
 
   ServiceProviderProxy.unbound() :
-      impl = new ServiceProviderProxyImpl.unbound() {
+      impl = new _ServiceProviderProxyImpl.unbound() {
     ptr = new _ServiceProviderProxyCalls(impl);
   }
 
@@ -181,6 +176,8 @@ class ServiceProviderProxy implements bindings.ProxyBase {
     assert(endpoint.setDescription("For ServiceProviderProxy"));
     return new ServiceProviderProxy.fromEndpoint(endpoint);
   }
+
+  String get serviceName => ServiceProvider.serviceName;
 
   Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
@@ -220,8 +217,6 @@ class ServiceProviderStub extends bindings.Stub {
     return new ServiceProviderStub.fromEndpoint(endpoint);
   }
 
-  static const String name = ServiceProviderName;
-
 
 
   dynamic handleMessage(bindings.ServiceMessage message) {
@@ -232,8 +227,8 @@ class ServiceProviderStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case kServiceProvider_connectToService_name:
-        var params = ServiceProviderConnectToServiceParams.deserialize(
+      case _ServiceProvider_connectToServiceName:
+        var params = _ServiceProviderConnectToServiceParams.deserialize(
             message.payload);
         _impl.connectToService(params.interfaceName, params.pipe);
         break;

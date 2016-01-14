@@ -14,8 +14,6 @@
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/platform/io_thread.h"
 #include "mojo/edk/platform/platform_handle.h"
-#include "mojo/edk/platform/scoped_platform_handle.h"
-#include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/platform/thread.h"
 #include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
@@ -84,7 +82,8 @@ class MasterConnectionManager::Helper final : public RawChannel::Delegate {
          ScopedPlatformHandle platform_handle);
   ~Helper() override;
 
-  void Init();
+  void Init(RefPtr<TaskRunner>&& task_runner,
+            PlatformHandleWatcher* platform_handle_watcher);
   embedder::SlaveInfo Shutdown();
 
  private:
@@ -120,8 +119,10 @@ MasterConnectionManager::Helper::~Helper() {
   DCHECK(!raw_channel_);
 }
 
-void MasterConnectionManager::Helper::Init() {
-  raw_channel_->Init(this);
+void MasterConnectionManager::Helper::Init(
+    RefPtr<TaskRunner>&& task_runner,
+    PlatformHandleWatcher* platform_handle_watcher) {
+  raw_channel_->Init(std::move(task_runner), platform_handle_watcher, this);
 }
 
 embedder::SlaveInfo MasterConnectionManager::Helper::Shutdown() {
@@ -331,7 +332,8 @@ class MasterConnectionManager::ProcessConnections {
 MasterConnectionManager::MasterConnectionManager(
     embedder::PlatformSupport* platform_support)
     : ConnectionManager(platform_support),
-      master_process_delegate_(),
+      master_process_delegate_(nullptr),
+      private_thread_platform_handle_watcher_(nullptr),
       next_process_identifier_(kFirstSlaveProcessIdentifier) {
   connections_[kMasterProcessIdentifier] = new ProcessConnections();
 }
@@ -355,10 +357,8 @@ void MasterConnectionManager::Init(
 
   delegate_thread_task_runner_ = std::move(delegate_thread_task_runner);
   master_process_delegate_ = master_process_delegate;
-  // TODO(vtl): We'll need to plumb this in further.
-  PlatformHandleWatcher* platform_handle_watcher = nullptr;
   private_thread_ = platform::CreateAndStartIOThread(
-      &private_thread_task_runner_, &platform_handle_watcher);
+      &private_thread_task_runner_, &private_thread_platform_handle_watcher_);
 }
 
 ProcessIdentifier MasterConnectionManager::AddSlave(
@@ -423,6 +423,7 @@ void MasterConnectionManager::Shutdown() {
   private_thread_->Stop();
   private_thread_.reset();
   private_thread_task_runner_ = nullptr;
+  private_thread_platform_handle_watcher_ = nullptr;
   DCHECK(helpers_.empty());
   DCHECK(pending_connects_.empty());
   master_process_delegate_ = nullptr;
@@ -691,7 +692,8 @@ void MasterConnectionManager::AddSlaveOnPrivateThread(
 
   std::unique_ptr<Helper> helper(new Helper(
       this, slave_process_identifier, slave_info, platform_handle.Pass()));
-  helper->Init();
+  helper->Init(private_thread_task_runner_.Clone(),
+               private_thread_platform_handle_watcher_);
 
   DCHECK(helpers_.find(slave_process_identifier) == helpers_.end());
   helpers_[slave_process_identifier] = helper.release();
@@ -744,9 +746,7 @@ void MasterConnectionManager::CallOnSlaveDisconnect(
 }
 
 void MasterConnectionManager::AssertNotOnPrivateThread() const {
-  // This should only be called after |Init()| and before |Shutdown()|. (If not,
-  // the subsequent |DCHECK_NE()| is invalid, since the current thread may not
-  // have a message loop.)
+  // This should only be called after |Init()| and before |Shutdown()|.
   DCHECK(!private_thread_task_runner_->RunsTasksOnCurrentThread());
 }
 

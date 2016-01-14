@@ -1,0 +1,64 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.media;
+
+import "mojo/services/media/common/interfaces/media_clock.mojom";
+import "mojo/services/media/common/interfaces/media_common.mojom";
+import "mojo/services/media/common/interfaces/media_metadata.mojom";
+import "mojo/services/media/common/interfaces/media_state.mojom";
+import "mojo/services/media/common/interfaces/media_transport.mojom";
+import "mojo/services/media/common/interfaces/media_types.mojom";
+
+// Produces media streams delivered from a specified origin.
+interface MediaSource {
+  // Gets the streams produced by this source.
+  GetStreams() => (array<MediaSourceStreamDescriptor> streams);
+
+  // Gets the clock disposition from the source.
+  GetClockDisposition() => (ClockDisposition clock_disposition);
+
+  // Gets a master clock if the source can be master, null otherwise.
+  GetMasterClock(Clock& master_clock);
+
+  // Sets a master clock.
+  SetMasterClock(Clock? master_clock);
+
+  // Gets the producer for the specified stream.
+  GetProducer(uint32 stream_index, MediaProducer& producer);
+
+  // Gets the pull mode producer for the specified stream.
+  GetPullModeProducer(uint32 stream_index, MediaPullModeProducer& producer);
+
+  // Gets the status. To get the status immediately, call GetStatus(0). To
+  // get updates thereafter, pass the version sent in the previous callback.
+  GetStatus(uint64 version_last_seen) =>
+      (uint64 version, MediaSourceStatus status);
+
+  // Prepares the source.
+  // TODO(dalesat): Revisit.
+  Prepare() => ();
+};
+
+// Describes a media stream produced by a source.
+struct MediaSourceStreamDescriptor {
+  // Zero-based index.
+  uint32 index;
+
+  // Media type of the stream after conversion.
+  MediaType media_type;
+
+  // Media type of the stream before conversion (as produced by the demux).
+  MediaType original_media_type;
+};
+
+// Describes the media source.
+struct MediaSourceStatus {
+  // Current state of the source.
+  MediaState state;
+
+  // Describes the media.
+  MediaMetadata? metadata;
+};

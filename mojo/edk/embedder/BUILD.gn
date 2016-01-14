@@ -4,6 +4,7 @@
 
 import("../mojo_edk.gni")
 
+# TODO(vtl): Move multiprocess stuff into a separate target.
 mojo_edk_source_set("embedder") {
   # This isn't really a standalone target; it must be linked into the
   # mojo_system_impl component.
@@ -16,6 +17,8 @@ mojo_edk_source_set("embedder") {
     "embedder.h",
     "embedder_internal.h",
     "entrypoints.cc",
+    "multiprocess_embedder.cc",
+    "multiprocess_embedder.h",
     "system_impl_private_entrypoints.cc",
 
     # Test-only code:
@@ -97,9 +100,11 @@ mojo_edk_source_set("delegates") {
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
 }
 
+# TODO(vtl): Move multiprocess stuff into a separate target.
 mojo_edk_unittests("mojo_edk_embedder_unittests") {
   sources = [
     "embedder_unittest.cc",
+    "multiprocess_embedder_unittest.cc",
     "platform_channel_pair_unittest.cc",
     "simple_platform_shared_buffer_unittest.cc",
   ]

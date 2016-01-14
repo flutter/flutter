@@ -8,8 +8,8 @@
 #define MOJO_EDK_UTIL_REF_PTR_H_
 
 #include <assert.h>
-
 #include <cstddef>
+
 #include <utility>
 
 #include "mojo/edk/util/ref_ptr_internal.h"

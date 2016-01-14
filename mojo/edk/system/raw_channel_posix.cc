@@ -15,19 +15,18 @@
 #include <utility>
 #include <vector>
 
-#include "base/bind.h"
-#include "base/location.h"
 #include "base/logging.h"
 #include "base/memory/weak_ptr.h"
-#include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/platform_channel_utils.h"
 #include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/platform_handle_watcher.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/transport_data.h"
 #include "mojo/edk/util/make_unique.h"
 #include "mojo/public/cpp/system/macros.h"
 
 using mojo::platform::PlatformHandle;
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
@@ -37,8 +36,7 @@ namespace system {
 
 namespace {
 
-class RawChannelPosix final : public RawChannel,
-                              public base::MessageLoopForIO::Watcher {
+class RawChannelPosix final : public RawChannel {
  public:
   explicit RawChannelPosix(ScopedPlatformHandle handle);
   ~RawChannelPosix() override;
@@ -67,9 +65,9 @@ class RawChannelPosix final : public RawChannel,
   void OnShutdownNoLock(std::unique_ptr<ReadBuffer> read_buffer,
                         std::unique_ptr<WriteBuffer> write_buffer) override;
 
-  // |base::MessageLoopForIO::Watcher| implementation:
-  void OnFileCanReadWithoutBlocking(int fd) override;
-  void OnFileCanWriteWithoutBlocking(int fd) override;
+  // Called when we can read/write from/to |fd_| without blocking.
+  void OnCanReadWithoutBlocking();
+  void OnCanWriteWithoutBlocking();
 
   // Implements most of |Read()| (except for a bit of clean-up):
   IOResult ReadImpl(size_t* bytes_read);
@@ -80,8 +78,8 @@ class RawChannelPosix final : public RawChannel,
   ScopedPlatformHandle fd_;
 
   // The following members are only used on the I/O thread:
-  std::unique_ptr<base::MessageLoopForIO::FileDescriptorWatcher> read_watcher_;
-  std::unique_ptr<base::MessageLoopForIO::FileDescriptorWatcher> write_watcher_;
+  std::unique_ptr<PlatformHandleWatcher::WatchToken> read_watch_token_;
+  std::unique_ptr<PlatformHandleWatcher::WatchToken> write_watch_token_;
 
   bool pending_read_;
 
@@ -115,8 +113,8 @@ RawChannelPosix::~RawChannelPosix() {
   DCHECK(!weak_ptr_factory_.HasWeakPtrs());
 
   // These must have been shut down/destroyed on the I/O thread.
-  DCHECK(!read_watcher_);
-  DCHECK(!write_watcher_);
+  DCHECK(!read_watch_token_);
+  DCHECK(!write_watch_token_);
 }
 
 size_t RawChannelPosix::GetSerializedPlatformHandleSize() const {
@@ -178,19 +176,19 @@ bool RawChannelPosix::OnReadMessageForRawChannel(
 }
 
 RawChannel::IOResult RawChannelPosix::Read(size_t* bytes_read) {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
+  DCHECK(io_task_runner()->RunsTasksOnCurrentThread());
   DCHECK(!pending_read_);
 
   IOResult rv = ReadImpl(bytes_read);
   if (rv != IO_SUCCEEDED && rv != IO_PENDING) {
-    // Make sure that |OnFileCanReadWithoutBlocking()| won't be called again.
-    read_watcher_.reset();
+    // Make sure that |OnCanReadWithoutBlocking()| won't be called again.
+    read_watch_token_.reset();
   }
   return rv;
 }
 
 RawChannel::IOResult RawChannelPosix::ScheduleRead() {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
+  DCHECK(io_task_runner()->RunsTasksOnCurrentThread());
   DCHECK(!pending_read_);
 
   pending_read_ = true;
@@ -301,48 +299,48 @@ RawChannel::IOResult RawChannelPosix::ScheduleWriteNoLock() {
 
   // Set up to wait for the FD to become writable.
   // If we're not on the I/O thread, we have to post a task to do this.
-  if (base::MessageLoop::current() != message_loop_for_io()) {
-    message_loop_for_io()->PostTask(FROM_HERE,
-                                    base::Bind(&RawChannelPosix::WaitToWrite,
-                                               weak_ptr_factory_.GetWeakPtr()));
+  if (!io_task_runner()->RunsTasksOnCurrentThread()) {
+    // TODO(vtl): Need C++14 lambdas sooner.
+    auto weak_self = weak_ptr_factory_.GetWeakPtr();
+    io_task_runner()->PostTask([weak_self]() {
+      if (weak_self)
+        weak_self->WaitToWrite();
+    });
     pending_write_ = true;
     return IO_PENDING;
   }
 
-  if (message_loop_for_io()->WatchFileDescriptor(
-          fd_.get().fd, false, base::MessageLoopForIO::WATCH_WRITE,
-          write_watcher_.get(), this)) {
-    pending_write_ = true;
-    return IO_PENDING;
-  }
+  write_watch_token_ = io_watcher()->Watch(
+      fd_.get(), false, nullptr, [this]() { OnCanWriteWithoutBlocking(); });
+  if (!write_watch_token_)
+    return IO_FAILED_UNKNOWN;
 
-  return IO_FAILED_UNKNOWN;
+  pending_write_ = true;
+  return IO_PENDING;
 }
 
 void RawChannelPosix::OnInit() {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
+  DCHECK(io_task_runner()->RunsTasksOnCurrentThread());
 
-  DCHECK(!read_watcher_);
-  read_watcher_.reset(new base::MessageLoopForIO::FileDescriptorWatcher());
-  DCHECK(!write_watcher_);
-  write_watcher_.reset(new base::MessageLoopForIO::FileDescriptorWatcher());
+  DCHECK(!read_watch_token_);
+  DCHECK(!write_watch_token_);
 
   // I don't know how this can fail (unless |fd_| is bad, in which case it's a
   // bug in our code). I also don't know if |WatchFileDescriptor()| actually
   // fails cleanly.
-  CHECK(message_loop_for_io()->WatchFileDescriptor(
-      fd_.get().fd, true, base::MessageLoopForIO::WATCH_READ,
-      read_watcher_.get(), this));
+  read_watch_token_ = io_watcher()->Watch(
+      fd_.get(), true, [this]() { OnCanReadWithoutBlocking(); }, nullptr);
+  CHECK(read_watch_token_);
 }
 
 void RawChannelPosix::OnShutdownNoLock(
     std::unique_ptr<ReadBuffer> /*read_buffer*/,
     std::unique_ptr<WriteBuffer> /*write_buffer*/) {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
+  DCHECK(io_task_runner()->RunsTasksOnCurrentThread());
   write_mutex().AssertHeld();
 
-  read_watcher_.reset();   // This will stop watching (if necessary).
-  write_watcher_.reset();  // This will stop watching (if necessary).
+  read_watch_token_.reset();   // This will stop watching (if necessary).
+  write_watch_token_.reset();  // This will stop watching (if necessary).
 
   pending_read_ = false;
   pending_write_ = false;
@@ -353,9 +351,8 @@ void RawChannelPosix::OnShutdownNoLock(
   weak_ptr_factory_.InvalidateWeakPtrs();
 }
 
-void RawChannelPosix::OnFileCanReadWithoutBlocking(int fd) {
-  DCHECK_EQ(fd, fd_.get().fd);
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
+void RawChannelPosix::OnCanReadWithoutBlocking() {
+  DCHECK(io_task_runner()->RunsTasksOnCurrentThread());
 
   if (!pending_read_) {
     NOTREACHED();
@@ -369,11 +366,11 @@ void RawChannelPosix::OnFileCanReadWithoutBlocking(int fd) {
     OnReadCompleted(io_result, bytes_read);
     // TODO(vtl): If we weren't destroyed, we'd like to do
     //
-    //   DCHECK(!read_watcher_ || pending_read_);
+    //   DCHECK(!read_watch_token_ || pending_read_);
     //
-    // On failure, |read_watcher_| must have been reset; on success, we assume
-    // that |OnReadCompleted()| always schedules another read. Otherwise, we
-    // could end up spinning -- getting |OnFileCanReadWithoutBlocking()| again
+    // On failure, |read_watch_token_| must have been reset; on success, we
+    // assume that |OnReadCompleted()| always schedules another read. Otherwise,
+    // we could end up spinning -- getting |OnCanReadWithoutBlocking()| again
     // and again but not doing any actual read.
     // TODO(yzshen): An alternative is to stop watching if RawChannel doesn't
     // schedule a new read. But that code won't be reached under the current
@@ -384,9 +381,12 @@ void RawChannelPosix::OnFileCanReadWithoutBlocking(int fd) {
   DCHECK(pending_read_);
 }
 
-void RawChannelPosix::OnFileCanWriteWithoutBlocking(int fd) {
-  DCHECK_EQ(fd, fd_.get().fd);
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
+void RawChannelPosix::OnCanWriteWithoutBlocking() {
+  DCHECK(io_task_runner()->RunsTasksOnCurrentThread());
+
+  // Our write-watching is one-shot, so we can get rid of the token.
+  DCHECK(write_watch_token_);
+  write_watch_token_.reset();
 
   IOResult io_result;
   size_t platform_handles_written = 0;
@@ -452,13 +452,13 @@ RawChannel::IOResult RawChannelPosix::ReadImpl(size_t* bytes_read) {
 }
 
 void RawChannelPosix::WaitToWrite() {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io());
+  DCHECK(io_task_runner()->RunsTasksOnCurrentThread());
 
-  DCHECK(write_watcher_);
+  DCHECK(!write_watch_token_);
 
-  if (!message_loop_for_io()->WatchFileDescriptor(
-          fd_.get().fd, false, base::MessageLoopForIO::WATCH_WRITE,
-          write_watcher_.get(), this)) {
+  write_watch_token_ = io_watcher()->Watch(
+      fd_.get(), false, nullptr, [this]() { OnCanWriteWithoutBlocking(); });
+  if (!write_watch_token_) {
     {
       MutexLocker locker(&write_mutex());
 

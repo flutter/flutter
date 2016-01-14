@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+[DartPackage="mojo_services"]
 module mojo.media;
 
 import "mojo/services/media/common/interfaces/media_common.mojom";
@@ -24,13 +25,19 @@ struct MediaPacketRegion {
 struct MediaPacket {
   const int64 kNoTimestamp = 0x7fffffffffffffff;
 
-  // Presentation Time Stamp.  Time time at which the media should be presented,
+  // Presentation Time Stamp.  Time at which the media should be presented,
   // according to the media timeline.
   int64 pts = kNoTimestamp;
 
+  // Duration represented by the packet.
+  uint64 duration;
+
+  // Indicates whether this is the last packet in the stream.
+  bool end_of_stream;
+
   // Bookkeeping to determine where this MediaPacket's payload exists in its
   // MediaPipe's shared buffer.
-  // 
+  //
   // For simple cases, only the payload field is used.  It provides the offset
   // into the shared buffer for the payload, as well as its length.  In more
   // complicated cases (circular buffer, arbitrary scatter-gather), additional
@@ -45,7 +52,7 @@ struct MediaPacket {
   // it is zero length.  If this is not going to change, then we should just
   // merge these two fields.
   MediaPacketRegion payload;
-  array<MediaPacketRegion> extra_payload;
+  array<MediaPacketRegion>? extra_payload;
 
   // TODO(johngro): do we need to describe the MediaType of this payload, or is
   // its type implicit based on the channel over which it is being pushed?
@@ -93,15 +100,15 @@ interface MediaPipe {
   // object is now available for new data.  MediaResults in the operation may
   // include...
   //
-  // kOK:
+  // OK:
   //   Media packet has been consumed without error.
-  // kBadState:
+  // BAD_STATE:
   //   The media pipe is in a bad state (perhaps uninitialized) and payloads
   //   cannot be pushed to it.
-  // kInvalidArgs:
+  // INVALID_ARGUMENT:
   //   One or more of the payload regions does not appears to go outside the
   //   shared buffer bounds.
-  // kFlushed:
+  // FLUSHED:
   //   The packet was flushed at the request of the producer.  It was not
   //   completely consumed (but may have been partially consumed)
   SendPacket(MediaPacket packet) => (MediaResult result);
@@ -112,11 +119,11 @@ interface MediaPipe {
   // flushing and that the pipeline is now empty.  Possible values for the
   // MediaResult parameter of the callback include...
   //
-  // kOK:
+  // OK:
   //    Pipeline has been successfully flushed.
-  // kBusy:
+  // BUSY:
   //    A flush was already in progress, this flush request was ignored.
-  // kBadState:
+  // BAD_STATE:
   //   The media pipe is in a bad state (perhaps uninitialized) and cannot be
   //   flushed
   Flush() => (MediaResult result);

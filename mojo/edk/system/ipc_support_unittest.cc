@@ -231,6 +231,7 @@ class TestSlave {
                            test_io_thread->task_runner().Clone(),
                            &slave_process_delegate_,
                            test_io_thread->task_runner().Clone(),
+                           test_io_thread->platform_handle_watcher(),
                            platform_handle.Pass()) {}
   ~TestSlave() {}
 
@@ -368,6 +369,7 @@ class IPCSupportTest : public testing::Test {
                             test_io_thread_.task_runner().Clone(),
                             &master_process_delegate_,
                             test_io_thread_.task_runner().Clone(),
+                            test_io_thread_.platform_handle_watcher(),
                             ScopedPlatformHandle()) {}
   ~IPCSupportTest() override {}
 
@@ -587,7 +589,9 @@ TEST_F(IPCSupportTest, MasterSlaveInternal) {
   IPCSupport slave_ipc_support(
       &platform_support(), embedder::ProcessType::SLAVE,
       test_io_thread().task_runner().Clone(), &slave_process_delegate,
-      test_io_thread().task_runner().Clone(), channel_pair.PassClientHandle());
+      test_io_thread().task_runner().Clone(),
+      test_io_thread().platform_handle_watcher(),
+      channel_pair.PassClientHandle());
 
   ScopedPlatformHandle slave_second_platform_handle =
       slave_ipc_support.ConnectToMasterInternal(connection_id);
@@ -674,7 +678,8 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlaveInternal) {
   IPCSupport ipc_support(
       &platform_support, embedder::ProcessType::SLAVE,
       test_io_thread.task_runner().Clone(), &slave_process_delegate,
-      test_io_thread.task_runner().Clone(), client_platform_handle.Pass());
+      test_io_thread.task_runner().Clone(),
+      test_io_thread.platform_handle_watcher(), client_platform_handle.Pass());
 
   std::string connection_id_string;
   ASSERT_TRUE(test::GetTestCommandLine()->GetOptionValue(

@@ -13,7 +13,7 @@ import 'package:mojo/mojo/service_provider.mojom.dart' as service_provider_mojom
 
 
 
-class ShellConnectToApplicationParams extends bindings.Struct {
+class _ShellConnectToApplicationParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(32, 0)
   ];
@@ -21,9 +21,9 @@ class ShellConnectToApplicationParams extends bindings.Struct {
   Object services = null;
   Object exposedServices = null;
 
-  ShellConnectToApplicationParams() : super(kVersions.last.size);
+  _ShellConnectToApplicationParams() : super(kVersions.last.size);
 
-  static ShellConnectToApplicationParams deserialize(bindings.Message message) {
+  static _ShellConnectToApplicationParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -32,11 +32,11 @@ class ShellConnectToApplicationParams extends bindings.Struct {
     return result;
   }
 
-  static ShellConnectToApplicationParams decode(bindings.Decoder decoder0) {
+  static _ShellConnectToApplicationParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ShellConnectToApplicationParams result = new ShellConnectToApplicationParams();
+    _ShellConnectToApplicationParams result = new _ShellConnectToApplicationParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -82,7 +82,7 @@ class ShellConnectToApplicationParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ShellConnectToApplicationParams("
+    return "_ShellConnectToApplicationParams("
            "applicationUrl: $applicationUrl" ", "
            "services: $services" ", "
            "exposedServices: $exposedServices" ")";
@@ -95,15 +95,15 @@ class ShellConnectToApplicationParams extends bindings.Struct {
 }
 
 
-class ShellCreateApplicationConnectorParams extends bindings.Struct {
+class _ShellCreateApplicationConnectorParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
   ];
   Object applicationConnectorRequest = null;
 
-  ShellCreateApplicationConnectorParams() : super(kVersions.last.size);
+  _ShellCreateApplicationConnectorParams() : super(kVersions.last.size);
 
-  static ShellCreateApplicationConnectorParams deserialize(bindings.Message message) {
+  static _ShellCreateApplicationConnectorParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -112,11 +112,11 @@ class ShellCreateApplicationConnectorParams extends bindings.Struct {
     return result;
   }
 
-  static ShellCreateApplicationConnectorParams decode(bindings.Decoder decoder0) {
+  static _ShellCreateApplicationConnectorParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ShellCreateApplicationConnectorParams result = new ShellCreateApplicationConnectorParams();
+    _ShellCreateApplicationConnectorParams result = new _ShellCreateApplicationConnectorParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -150,7 +150,7 @@ class ShellCreateApplicationConnectorParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ShellCreateApplicationConnectorParams("
+    return "_ShellCreateApplicationConnectorParams("
            "applicationConnectorRequest: $applicationConnectorRequest" ")";
   }
 
@@ -160,33 +160,30 @@ class ShellCreateApplicationConnectorParams extends bindings.Struct {
   }
 }
 
-const int kShell_connectToApplication_name = 0;
-const int kShell_createApplicationConnector_name = 1;
-const String ShellName = null;
+const int _Shell_connectToApplicationName = 0;
+const int _Shell_createApplicationConnectorName = 1;
 
 abstract class Shell {
+  static const String serviceName = null;
   void connectToApplication(String applicationUrl, Object services, Object exposedServices);
   void createApplicationConnector(Object applicationConnectorRequest);
-
 }
 
 
-class ShellProxyImpl extends bindings.Proxy {
-  ShellProxyImpl.fromEndpoint(
+class _ShellProxyImpl extends bindings.Proxy {
+  _ShellProxyImpl.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
 
-  ShellProxyImpl.fromHandle(core.MojoHandle handle) :
+  _ShellProxyImpl.fromHandle(core.MojoHandle handle) :
       super.fromHandle(handle);
 
-  ShellProxyImpl.unbound() : super.unbound();
+  _ShellProxyImpl.unbound() : super.unbound();
 
-  static ShellProxyImpl newFromEndpoint(
+  static _ShellProxyImpl newFromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For ShellProxyImpl"));
-    return new ShellProxyImpl.fromEndpoint(endpoint);
+    assert(endpoint.setDescription("For _ShellProxyImpl"));
+    return new _ShellProxyImpl.fromEndpoint(endpoint);
   }
-
-  String get name => ShellName;
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -199,13 +196,13 @@ class ShellProxyImpl extends bindings.Proxy {
 
   String toString() {
     var superString = super.toString();
-    return "ShellProxyImpl($superString)";
+    return "_ShellProxyImpl($superString)";
   }
 }
 
 
 class _ShellProxyCalls implements Shell {
-  ShellProxyImpl _proxyImpl;
+  _ShellProxyImpl _proxyImpl;
 
   _ShellProxyCalls(this._proxyImpl);
     void connectToApplication(String applicationUrl, Object services, Object exposedServices) {
@@ -213,48 +210,45 @@ class _ShellProxyCalls implements Shell {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ShellConnectToApplicationParams();
+      var params = new _ShellConnectToApplicationParams();
       params.applicationUrl = applicationUrl;
       params.services = services;
       params.exposedServices = exposedServices;
-      _proxyImpl.sendMessage(params, kShell_connectToApplication_name);
+      _proxyImpl.sendMessage(params, _Shell_connectToApplicationName);
     }
-  
     void createApplicationConnector(Object applicationConnectorRequest) {
       if (!_proxyImpl.isBound) {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ShellCreateApplicationConnectorParams();
+      var params = new _ShellCreateApplicationConnectorParams();
       params.applicationConnectorRequest = applicationConnectorRequest;
-      _proxyImpl.sendMessage(params, kShell_createApplicationConnector_name);
+      _proxyImpl.sendMessage(params, _Shell_createApplicationConnectorName);
     }
-  
 }
 
 
 class ShellProxy implements bindings.ProxyBase {
   final bindings.Proxy impl;
   Shell ptr;
-  final String name = ShellName;
 
-  ShellProxy(ShellProxyImpl proxyImpl) :
+  ShellProxy(_ShellProxyImpl proxyImpl) :
       impl = proxyImpl,
       ptr = new _ShellProxyCalls(proxyImpl);
 
   ShellProxy.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) :
-      impl = new ShellProxyImpl.fromEndpoint(endpoint) {
+      impl = new _ShellProxyImpl.fromEndpoint(endpoint) {
     ptr = new _ShellProxyCalls(impl);
   }
 
   ShellProxy.fromHandle(core.MojoHandle handle) :
-      impl = new ShellProxyImpl.fromHandle(handle) {
+      impl = new _ShellProxyImpl.fromHandle(handle) {
     ptr = new _ShellProxyCalls(impl);
   }
 
   ShellProxy.unbound() :
-      impl = new ShellProxyImpl.unbound() {
+      impl = new _ShellProxyImpl.unbound() {
     ptr = new _ShellProxyCalls(impl);
   }
 
@@ -270,6 +264,8 @@ class ShellProxy implements bindings.ProxyBase {
     assert(endpoint.setDescription("For ShellProxy"));
     return new ShellProxy.fromEndpoint(endpoint);
   }
+
+  String get serviceName => Shell.serviceName;
 
   Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
@@ -309,8 +305,6 @@ class ShellStub extends bindings.Stub {
     return new ShellStub.fromEndpoint(endpoint);
   }
 
-  static const String name = ShellName;
-
 
 
   dynamic handleMessage(bindings.ServiceMessage message) {
@@ -321,13 +315,13 @@ class ShellStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case kShell_connectToApplication_name:
-        var params = ShellConnectToApplicationParams.deserialize(
+      case _Shell_connectToApplicationName:
+        var params = _ShellConnectToApplicationParams.deserialize(
             message.payload);
         _impl.connectToApplication(params.applicationUrl, params.services, params.exposedServices);
         break;
-      case kShell_createApplicationConnector_name:
-        var params = ShellCreateApplicationConnectorParams.deserialize(
+      case _Shell_createApplicationConnectorName:
+        var params = _ShellCreateApplicationConnectorParams.deserialize(
             message.payload);
         _impl.createApplicationConnector(params.applicationConnectorRequest);
         break;

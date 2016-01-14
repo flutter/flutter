@@ -86,7 +86,7 @@ class ApplicationConnection {
         (remoteServiceProvider != null) &&
         remoteServiceProvider.impl.isBound);
 
-    var name = serviceName ?? proxy.name;
+    var name = serviceName ?? proxy.serviceName;
     assert((name != null) && name.isNotEmpty);
 
     var pipe = new core.MojoMessagePipe();

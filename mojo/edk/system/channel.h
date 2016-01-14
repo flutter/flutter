@@ -11,6 +11,7 @@
 #include <unordered_map>
 
 #include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
 #include "mojo/edk/system/incoming_endpoint.h"
@@ -30,22 +31,22 @@ namespace embedder {
 class PlatformSupport;
 }
 
+namespace platform {
+class PlatformHandleWatcher;
+}
+
 namespace system {
 
 class ChannelEndpointClient;
 class ChannelManager;
 class MessageInTransitQueue;
 
-// This class is mostly thread-safe. It must be created on an I/O thread.
-// |Init()| must be called on that same thread before it becomes thread-safe (in
-// particular, before references are given to any other thread) and |Shutdown()|
-// must be called on that same thread before destruction. Its public methods are
-// otherwise thread-safe. (Many private methods are restricted to the creation
-// thread.) It may be destroyed on any thread, in the sense that the last
-// reference to it may be released on any thread, with the proviso that
-// |Shutdown()| must have been called first (so the pattern is that a "main"
-// reference is kept on its creation thread and is released after |Shutdown()|
-// is called, but other threads may have temporarily "dangling" references).
+// This class is mostly thread-safe. It may be created and destroyed on any
+// thread. However, |Init()| must be called on an I/O thread before other
+// methods are called. Before destruction, |Shutdown()| must be called on that
+// same thread, after which other methods may not be called. Subject to these
+// restrictions, its public methods are otherwise thread-safe. (Many private
+// methods are restricted to the I/O thread.)
 //
 // Note the lock order (in order of allowable acquisition):
 // |ChannelEndpointClient| (e.g., |MessagePipe|), |ChannelEndpoint|, |Channel|.
@@ -56,10 +57,12 @@ class Channel final : public util::RefCountedThreadSafe<Channel>,
  public:
   // Note: Use |util::MakeRefCounted<Channel>()|.
 
-  // This must be called on the creation thread before any other methods are
-  // called, and before references to this object are given to any other
-  // threads. |raw_channel| should be uninitialized.
-  void Init(std::unique_ptr<RawChannel> raw_channel) MOJO_NOT_THREAD_SAFE;
+  // This must be called on an I/O thread before any other methods are called.
+  // |io_task_runner| and |io_watcher| should be for this thread. |raw_channel|
+  // should be uninitialized.
+  void Init(util::RefPtr<platform::TaskRunner>&& io_task_runner,
+            platform::PlatformHandleWatcher* io_watcher,
+            std::unique_ptr<RawChannel> raw_channel) MOJO_NOT_THREAD_SAFE;
 
   // Sets the channel manager associated with this channel. This should be set
   // at most once and only called before |WillShutdownSoon()| (and

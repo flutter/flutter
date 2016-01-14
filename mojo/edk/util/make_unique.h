@@ -14,7 +14,8 @@
 #ifndef MOJO_EDK_UTIL_MAKE_UNIQUE_H_
 #define MOJO_EDK_UTIL_MAKE_UNIQUE_H_
 
-#include <cstddef>
+#include <stddef.h>
+
 #include <memory>
 #include <type_traits>
 #include <utility>

@@ -10,4 +10,8 @@ mojom("interfaces") {
     "audio_server.mojom",
     "audio_track.mojom",
   ]
+
+  deps = [
+    "../../common/interfaces",
+  ]
 }

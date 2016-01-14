@@ -20,6 +20,9 @@ package_mojo_bindings = [
   "lib/mojo/http_header.mojom.dart",
   "lib/mojo/service_provider.mojom.dart",
   "lib/mojo/url_response.mojom.dart",
+  "lib/mojo/bindings/types/mojom_files.mojom.dart",
+  "lib/mojo/bindings/types/mojom_types.mojom.dart",
+  "lib/mojo/bindings/types/service_describer.mojom.dart",
 ]
 
 package_mojo_sources = [

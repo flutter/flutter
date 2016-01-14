@@ -84,7 +84,9 @@ void ChannelThread::InitChannelOnIOThread(
 
   // Create and initialize |Channel|.
   channel_ = MakeRefCounted<Channel>(platform_support_);
-  channel_->Init(RawChannel::Create(platform_handle.Pass()));
+  channel_->Init(test_io_thread_.task_runner().Clone(),
+                 test_io_thread_.platform_handle_watcher(),
+                 RawChannel::Create(platform_handle.Pass()));
 
   // Start the bootstrap endpoint.
   // Note: On the "server" (parent process) side, we need not attach/run the

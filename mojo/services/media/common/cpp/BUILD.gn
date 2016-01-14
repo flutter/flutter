@@ -10,9 +10,15 @@ mojo_sdk_source_set("cpp") {
   sources = [
     "circular_buffer_media_pipe_adapter.cc",
     "circular_buffer_media_pipe_adapter.h",
+    "fifo_allocator.cc",
+    "fifo_allocator.h",
     "linear_transform.cc",
     "linear_transform.h",
     "local_time.h",
+    "mapped_shared_buffer.cc",
+    "mapped_shared_buffer.h",
+    "shared_media_buffer_allocator.cc",
+    "shared_media_buffer_allocator.h",
   ]
 
   if (is_posix) {

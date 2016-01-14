@@ -38,7 +38,9 @@ void ChannelTestBase::InitChannelOnIOThread(unsigned i) {
 
   CHECK(raw_channels_[i]);
   CHECK(channels_[i]);
-  channels_[i]->Init(std::move(raw_channels_[i]));
+  channels_[i]->Init(io_thread()->task_runner().Clone(),
+                     io_thread()->platform_handle_watcher(),
+                     std::move(raw_channels_[i]));
 }
 
 void ChannelTestBase::CreateAndInitChannelOnIOThread(unsigned i) {

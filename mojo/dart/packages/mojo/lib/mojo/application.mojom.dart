@@ -13,7 +13,7 @@ import 'package:mojo/mojo/shell.mojom.dart' as shell_mojom;
 
 
 
-class ApplicationInitializeParams extends bindings.Struct {
+class _ApplicationInitializeParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(32, 0)
   ];
@@ -21,9 +21,9 @@ class ApplicationInitializeParams extends bindings.Struct {
   List<String> args = null;
   String url = null;
 
-  ApplicationInitializeParams() : super(kVersions.last.size);
+  _ApplicationInitializeParams() : super(kVersions.last.size);
 
-  static ApplicationInitializeParams deserialize(bindings.Message message) {
+  static _ApplicationInitializeParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -32,11 +32,11 @@ class ApplicationInitializeParams extends bindings.Struct {
     return result;
   }
 
-  static ApplicationInitializeParams decode(bindings.Decoder decoder0) {
+  static _ApplicationInitializeParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ApplicationInitializeParams result = new ApplicationInitializeParams();
+    _ApplicationInitializeParams result = new _ApplicationInitializeParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -100,7 +100,7 @@ class ApplicationInitializeParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ApplicationInitializeParams("
+    return "_ApplicationInitializeParams("
            "shell: $shell" ", "
            "args: $args" ", "
            "url: $url" ")";
@@ -113,7 +113,7 @@ class ApplicationInitializeParams extends bindings.Struct {
 }
 
 
-class ApplicationAcceptConnectionParams extends bindings.Struct {
+class _ApplicationAcceptConnectionParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(40, 0)
   ];
@@ -122,9 +122,9 @@ class ApplicationAcceptConnectionParams extends bindings.Struct {
   Object exposedServices = null;
   String resolvedUrl = null;
 
-  ApplicationAcceptConnectionParams() : super(kVersions.last.size);
+  _ApplicationAcceptConnectionParams() : super(kVersions.last.size);
 
-  static ApplicationAcceptConnectionParams deserialize(bindings.Message message) {
+  static _ApplicationAcceptConnectionParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -133,11 +133,11 @@ class ApplicationAcceptConnectionParams extends bindings.Struct {
     return result;
   }
 
-  static ApplicationAcceptConnectionParams decode(bindings.Decoder decoder0) {
+  static _ApplicationAcceptConnectionParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ApplicationAcceptConnectionParams result = new ApplicationAcceptConnectionParams();
+    _ApplicationAcceptConnectionParams result = new _ApplicationAcceptConnectionParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -189,7 +189,7 @@ class ApplicationAcceptConnectionParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ApplicationAcceptConnectionParams("
+    return "_ApplicationAcceptConnectionParams("
            "requestorUrl: $requestorUrl" ", "
            "services: $services" ", "
            "exposedServices: $exposedServices" ", "
@@ -203,14 +203,14 @@ class ApplicationAcceptConnectionParams extends bindings.Struct {
 }
 
 
-class ApplicationRequestQuitParams extends bindings.Struct {
+class _ApplicationRequestQuitParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(8, 0)
   ];
 
-  ApplicationRequestQuitParams() : super(kVersions.last.size);
+  _ApplicationRequestQuitParams() : super(kVersions.last.size);
 
-  static ApplicationRequestQuitParams deserialize(bindings.Message message) {
+  static _ApplicationRequestQuitParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -219,11 +219,11 @@ class ApplicationRequestQuitParams extends bindings.Struct {
     return result;
   }
 
-  static ApplicationRequestQuitParams decode(bindings.Decoder decoder0) {
+  static _ApplicationRequestQuitParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ApplicationRequestQuitParams result = new ApplicationRequestQuitParams();
+    _ApplicationRequestQuitParams result = new _ApplicationRequestQuitParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -251,7 +251,7 @@ class ApplicationRequestQuitParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ApplicationRequestQuitParams("")";
+    return "_ApplicationRequestQuitParams("")";
   }
 
   Map toJson() {
@@ -260,35 +260,32 @@ class ApplicationRequestQuitParams extends bindings.Struct {
   }
 }
 
-const int kApplication_initialize_name = 0;
-const int kApplication_acceptConnection_name = 1;
-const int kApplication_requestQuit_name = 2;
-const String ApplicationName = null;
+const int _Application_initializeName = 0;
+const int _Application_acceptConnectionName = 1;
+const int _Application_requestQuitName = 2;
 
 abstract class Application {
+  static const String serviceName = null;
   void initialize(Object shell, List<String> args, String url);
   void acceptConnection(String requestorUrl, Object services, Object exposedServices, String resolvedUrl);
   void requestQuit();
-
 }
 
 
-class ApplicationProxyImpl extends bindings.Proxy {
-  ApplicationProxyImpl.fromEndpoint(
+class _ApplicationProxyImpl extends bindings.Proxy {
+  _ApplicationProxyImpl.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
 
-  ApplicationProxyImpl.fromHandle(core.MojoHandle handle) :
+  _ApplicationProxyImpl.fromHandle(core.MojoHandle handle) :
       super.fromHandle(handle);
 
-  ApplicationProxyImpl.unbound() : super.unbound();
+  _ApplicationProxyImpl.unbound() : super.unbound();
 
-  static ApplicationProxyImpl newFromEndpoint(
+  static _ApplicationProxyImpl newFromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For ApplicationProxyImpl"));
-    return new ApplicationProxyImpl.fromEndpoint(endpoint);
+    assert(endpoint.setDescription("For _ApplicationProxyImpl"));
+    return new _ApplicationProxyImpl.fromEndpoint(endpoint);
   }
-
-  String get name => ApplicationName;
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -301,13 +298,13 @@ class ApplicationProxyImpl extends bindings.Proxy {
 
   String toString() {
     var superString = super.toString();
-    return "ApplicationProxyImpl($superString)";
+    return "_ApplicationProxyImpl($superString)";
   }
 }
 
 
 class _ApplicationProxyCalls implements Application {
-  ApplicationProxyImpl _proxyImpl;
+  _ApplicationProxyImpl _proxyImpl;
 
   _ApplicationProxyCalls(this._proxyImpl);
     void initialize(Object shell, List<String> args, String url) {
@@ -315,60 +312,56 @@ class _ApplicationProxyCalls implements Application {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ApplicationInitializeParams();
+      var params = new _ApplicationInitializeParams();
       params.shell = shell;
       params.args = args;
       params.url = url;
-      _proxyImpl.sendMessage(params, kApplication_initialize_name);
+      _proxyImpl.sendMessage(params, _Application_initializeName);
     }
-  
     void acceptConnection(String requestorUrl, Object services, Object exposedServices, String resolvedUrl) {
       if (!_proxyImpl.isBound) {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ApplicationAcceptConnectionParams();
+      var params = new _ApplicationAcceptConnectionParams();
       params.requestorUrl = requestorUrl;
       params.services = services;
       params.exposedServices = exposedServices;
       params.resolvedUrl = resolvedUrl;
-      _proxyImpl.sendMessage(params, kApplication_acceptConnection_name);
+      _proxyImpl.sendMessage(params, _Application_acceptConnectionName);
     }
-  
     void requestQuit() {
       if (!_proxyImpl.isBound) {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ApplicationRequestQuitParams();
-      _proxyImpl.sendMessage(params, kApplication_requestQuit_name);
+      var params = new _ApplicationRequestQuitParams();
+      _proxyImpl.sendMessage(params, _Application_requestQuitName);
     }
-  
 }
 
 
 class ApplicationProxy implements bindings.ProxyBase {
   final bindings.Proxy impl;
   Application ptr;
-  final String name = ApplicationName;
 
-  ApplicationProxy(ApplicationProxyImpl proxyImpl) :
+  ApplicationProxy(_ApplicationProxyImpl proxyImpl) :
       impl = proxyImpl,
       ptr = new _ApplicationProxyCalls(proxyImpl);
 
   ApplicationProxy.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) :
-      impl = new ApplicationProxyImpl.fromEndpoint(endpoint) {
+      impl = new _ApplicationProxyImpl.fromEndpoint(endpoint) {
     ptr = new _ApplicationProxyCalls(impl);
   }
 
   ApplicationProxy.fromHandle(core.MojoHandle handle) :
-      impl = new ApplicationProxyImpl.fromHandle(handle) {
+      impl = new _ApplicationProxyImpl.fromHandle(handle) {
     ptr = new _ApplicationProxyCalls(impl);
   }
 
   ApplicationProxy.unbound() :
-      impl = new ApplicationProxyImpl.unbound() {
+      impl = new _ApplicationProxyImpl.unbound() {
     ptr = new _ApplicationProxyCalls(impl);
   }
 
@@ -384,6 +377,8 @@ class ApplicationProxy implements bindings.ProxyBase {
     assert(endpoint.setDescription("For ApplicationProxy"));
     return new ApplicationProxy.fromEndpoint(endpoint);
   }
+
+  String get serviceName => Application.serviceName;
 
   Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
@@ -423,8 +418,6 @@ class ApplicationStub extends bindings.Stub {
     return new ApplicationStub.fromEndpoint(endpoint);
   }
 
-  static const String name = ApplicationName;
-
 
 
   dynamic handleMessage(bindings.ServiceMessage message) {
@@ -435,18 +428,18 @@ class ApplicationStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case kApplication_initialize_name:
-        var params = ApplicationInitializeParams.deserialize(
+      case _Application_initializeName:
+        var params = _ApplicationInitializeParams.deserialize(
             message.payload);
         _impl.initialize(params.shell, params.args, params.url);
         break;
-      case kApplication_acceptConnection_name:
-        var params = ApplicationAcceptConnectionParams.deserialize(
+      case _Application_acceptConnectionName:
+        var params = _ApplicationAcceptConnectionParams.deserialize(
             message.payload);
         _impl.acceptConnection(params.requestorUrl, params.services, params.exposedServices, params.resolvedUrl);
         break;
-      case kApplication_requestQuit_name:
-        var params = ApplicationRequestQuitParams.deserialize(
+      case _Application_requestQuitName:
+        var params = _ApplicationRequestQuitParams.deserialize(
             message.payload);
         _impl.requestQuit();
         break;

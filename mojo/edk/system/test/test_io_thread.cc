@@ -6,8 +6,12 @@
 
 #include <utility>
 
+#include "base/logging.h"
+#include "mojo/edk/platform/io_thread.h"
+#include "mojo/edk/platform/thread.h"
 #include "mojo/edk/util/waitable_event.h"
 
+using mojo::platform::CreateAndStartIOThread;
 using mojo::util::AutoResetWaitableEvent;
 using mojo::util::MakeRefCounted;
 
@@ -16,7 +20,7 @@ namespace system {
 namespace test {
 
 TestIOThread::TestIOThread(StartMode start_mode)
-    : io_thread_("test_io_thread"), io_thread_started_(false) {
+    : io_platform_handle_watcher_(nullptr) {
   switch (start_mode) {
     case StartMode::AUTO:
       Start();
@@ -32,23 +36,23 @@ TestIOThread::~TestIOThread() {
 }
 
 void TestIOThread::Start() {
-  CHECK(!io_thread_started_);
-  io_thread_started_ = true;
-  CHECK(io_thread_.StartWithOptions(
-      base::Thread::Options(base::MessageLoop::TYPE_IO, 0)));
-  io_task_runner_ = MakeRefCounted<base_edk::PlatformTaskRunnerImpl>(
-      message_loop()->task_runner());
+  CHECK(!io_thread_);
+  io_thread_ =
+      CreateAndStartIOThread(&io_task_runner_, &io_platform_handle_watcher_);
 }
 
 void TestIOThread::Stop() {
-  // Note: It's okay to call |Stop()| even if the thread isn't running.
-  io_thread_.Stop();
-  io_thread_started_ = false;
+  if (!io_thread_)
+    return;  // Nothing to do.
+
+  io_thread_->Stop();
+  io_thread_.reset();
+  io_task_runner_ = nullptr;
+  io_platform_handle_watcher_ = nullptr;
 }
 
 bool TestIOThread::IsCurrentAndRunning() const {
-  return base::MessageLoop::current() == io_thread_.message_loop() &&
-         io_thread_.message_loop()->is_running();
+  return io_task_runner_->RunsTasksOnCurrentThread();
 }
 
 void TestIOThread::PostTask(std::function<void()>&& task) {

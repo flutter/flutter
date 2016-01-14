@@ -5,6 +5,6 @@
 part of bindings;
 
 class MojoEnum {
-  final int value;
-  const MojoEnum(this.value);
+  final int mojoEnumValue;
+  const MojoEnum(this.mojoEnumValue);
 }

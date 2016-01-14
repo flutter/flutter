@@ -44,6 +44,8 @@ define("mojo/services/public/js/service_exchange", [
 
     provideService(service, factory) {
       checkServiceExchange(this);
+      if (!service.name)
+        throw new Error("Service does not have a ServiceName.");
 
       var provider = {
         service: service, // A JS bindings interface object.

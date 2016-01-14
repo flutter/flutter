@@ -292,7 +292,7 @@ class Encoder {
   }
 
   void encodeEnum(MojoEnum value, int offset) =>
-      encodeUint32(value.value, offset);
+      encodeUint32(value.mojoEnumValue, offset);
 
   void encodeNestedUnion(Union value, int offset, bool nullable) {
     encodePointerToNextUnclaimed(offset);

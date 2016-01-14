@@ -12,7 +12,9 @@
 #include "mojo/edk/system/transport_data.h"
 #include "mojo/edk/util/string_printf.h"
 
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::TaskRunner;
 using mojo::util::MakeRefCounted;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
@@ -33,7 +35,9 @@ struct SerializedEndpoint {
 
 }  // namespace
 
-void Channel::Init(std::unique_ptr<RawChannel> raw_channel) {
+void Channel::Init(RefPtr<TaskRunner>&& io_task_runner,
+                   PlatformHandleWatcher* io_watcher,
+                   std::unique_ptr<RawChannel> raw_channel) {
 #if !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
   DCHECK(thread_checker_.IsCreationThreadCurrent());
 #endif  // !defined(NDEBUG) || defined(DCHECK_ALWAYS_ON)
@@ -43,7 +47,7 @@ void Channel::Init(std::unique_ptr<RawChannel> raw_channel) {
   // becomes thread-safe.
   DCHECK(!is_running_);
   raw_channel_ = std::move(raw_channel);
-  raw_channel_->Init(this);
+  raw_channel_->Init(std::move(io_task_runner), io_watcher, this);
   is_running_ = true;
 }
 

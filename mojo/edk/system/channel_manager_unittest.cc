@@ -39,6 +39,7 @@ class ChannelManagerTest : public testing::Test {
         message_loop_(CreateTestMessageLoopForIO(&platform_handle_watcher_)),
         channel_manager_(&platform_support_,
                          message_loop_->GetTaskRunner().Clone(),
+                         platform_handle_watcher_,
                          nullptr) {}
   ~ChannelManagerTest() override {}
 
