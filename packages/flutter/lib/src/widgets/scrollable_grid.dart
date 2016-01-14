@@ -122,9 +122,9 @@ class _GridViewportElement extends VirtualViewportElement<GridViewport> {
   double get startOffsetLimit =>_startOffsetLimit;
   double _startOffsetLimit;
 
-  void updateRenderObject() {
+  void updateRenderObject(GridViewport oldWidget) {
     renderObject.delegate = widget.delegate;
-    super.updateRenderObject();
+    super.updateRenderObject(oldWidget);
   }
 
   double _contentExtent;

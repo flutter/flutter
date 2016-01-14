@@ -225,10 +225,10 @@ class _PageViewportElement extends VirtualViewportElement<PageViewport> {
     return -(widget.startOffset - startOffsetBase) * _containerExtent;
   }
 
-  void updateRenderObject() {
+  void updateRenderObject(PageViewport oldWidget) {
     renderObject.scrollDirection = widget.scrollDirection;
     renderObject.overlayPainter = widget.overlayPainter;
-    super.updateRenderObject();
+    super.updateRenderObject(oldWidget);
   }
 
   double _containerExtent;
