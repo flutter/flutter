@@ -29,11 +29,26 @@ struct AuthData {
   string token;
 };
 
+interface ValueEventListener {
+  OnCancelled(Error error);
+  OnDataChange(DataSnapshot snapshot);
+};
+
+interface ChildEventListener {
+  OnCancelled(Error error);
+  OnChildAdded(DataSnapshot snapshot, string previousChildName);
+  OnChildChanged(DataSnapshot snapshot, string previousChildName);
+  OnChildMoved(DataSnapshot snapshot, string previousChildName);
+  OnChildRemoved(DataSnapshot snapshot);
+};
+
 [ServiceName="firebase::Firebase"]
 interface Firebase {
   InitWithUrl(string url);
   GetRoot(Firebase& root);
   GetChild(string path, Firebase& child);
+  AddValueEventListener(ValueEventListener listener);
+  AddChildEventListener(ChildEventListener listener);
   ObserveSingleEventOfType(EventType eventType) => (DataSnapshot snapshot);
   AuthWithOAuthToken(string provider, string credentials) => (Error? error, AuthData? authData);
 };
