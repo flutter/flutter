@@ -75,6 +75,11 @@ abstract class AnimatedWidgetBase extends StatefulComponent {
   final Duration duration;
 
   AnimatedWidgetBaseState createState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('duration: ${duration.inMilliseconds}ms');
+  }
 }
 
 typedef AnimatedValue<T> VariableConstructor<T>(T targetValue);
@@ -232,6 +237,26 @@ class AnimatedContainer extends AnimatedWidgetBase {
   final double height;
 
   _AnimatedContainerState createState() => new _AnimatedContainerState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (constraints != null)
+      description.add('$constraints');
+    if (decoration != null)
+      description.add('has background');
+    if (foregroundDecoration != null)
+      description.add('has foreground');
+    if (margin != null)
+      description.add('margin: $margin');
+    if (padding != null)
+      description.add('padding: $padding');
+    if (transform != null)
+      description.add('has transform');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+  }
 }
 
 class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer> {
