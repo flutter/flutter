@@ -118,7 +118,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     Dart_Isolate isolate = Dart_CreateIsolate(
         script_uri, "main", reinterpret_cast<const uint8_t*>(
                                 DART_SYMBOL(kDartIsolateSnapshotBuffer)),
-        nullptr, nullptr, error);
+        nullptr, dart_state, error);
     CHECK(isolate) << error;
     dart_state->SetIsolate(isolate);
     CHECK(Dart_IsServiceIsolate(isolate));

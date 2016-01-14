@@ -9,28 +9,94 @@ import 'dart:nativewrappers';
 
 /// Wrapper for a Java class accessed via JNI.
 class JniClass extends NativeFieldWrapperClass2 {
-  static JniClass fromName(String name) native 'JniClass_FromName';
+  static JniClass fromName(String name)
+      native 'JniClass_FromName';
+  static JniClass fromClassObject(JniObject classObject)
+      native 'JniClass_FromClassObject';
 
-  int getFieldId(String name, String sig) native 'JniClass_GetFieldId';
-  int getStaticFieldId(String name, String sig) native 'JniClass_GetStaticFieldId';
-  int getMethodId(String name, String sig) native 'JniClass_GetMethodId';
-  int getStaticMethodId(String name, String sig) native 'JniClass_GetStaticMethodId';
+  int getFieldId(String name, String sig)
+      native 'JniClass_GetFieldId';
+  int getStaticFieldId(String name, String sig)
+      native 'JniClass_GetStaticFieldId';
+  int getMethodId(String name, String sig)
+      native 'JniClass_GetMethodId';
+  int getStaticMethodId(String name, String sig)
+      native 'JniClass_GetStaticMethodId';
 
-  int getStaticIntField(int fieldId) native 'JniClass_GetStaticIntField';
-  JniObject getStaticObjectField(int fieldId) native 'JniClass_GetStaticObjectField';
+  JniObject newObject(int methodId, List args)
+      native 'JniClass_NewObject';
 
-  JniObject newObject(int methodId, List args) native 'JniClass_NewObject';
+  JniObject getStaticObjectField(int fieldId)
+      native 'JniClass_GetStaticObjectField';
+  bool getStaticBooleanField(int fieldId)
+      native 'JniClass_GetStaticBooleanField';
+  int getStaticByteField(int fieldId)
+      native 'JniClass_GetStaticByteField';
+  int getStaticCharField(int fieldId)
+      native 'JniClass_GetStaticCharField';
+  int getStaticShortField(int fieldId)
+      native 'JniClass_GetStaticShortField';
+  int getStaticIntField(int fieldId)
+      native 'JniClass_GetStaticIntField';
+  int getStaticLongField(int fieldId)
+      native 'JniClass_GetStaticLongField';
+  double getStaticFloatField(int fieldId)
+      native 'JniClass_GetStaticFloatField';
+  double getStaticDoubleField(int fieldId)
+      native 'JniClass_GetStaticDoubleField';
 
-  int callStaticLongMethod(int methodId, List args) native 'JniClass_CallStaticLongMethod';
+  void setStaticObjectField(int fieldId, JniObject value)
+      native 'JniClass_SetStaticObjectField';
+  void setStaticBooleanField(int fieldId, bool value)
+      native 'JniClass_SetStaticBooleanField';
+  void setStaticByteField(int fieldId, int value)
+      native 'JniClass_SetStaticByteField';
+  void setStaticCharField(int fieldId, int value)
+      native 'JniClass_SetStaticCharField';
+  void setStaticShortField(int fieldId, int value)
+      native 'JniClass_SetStaticShortField';
+  void setStaticIntField(int fieldId, int value)
+      native 'JniClass_SetStaticIntField';
+  void setStaticLongField(int fieldId, int value)
+      native 'JniClass_SetStaticLongField';
+  void setStaticFloatField(int fieldId, double value)
+      native 'JniClass_SetStaticFloatField';
+  void setStaticDoubleField(int fieldId, double value)
+      native 'JniClass_SetStaticDoubleField';
+
+  JniObject callStaticObjectMethod(int methodId, List args)
+      native 'JniClass_CallStaticObjectMethod';
+  bool callStaticBooleanMethod(int methodId, List args)
+      native 'JniClass_CallStaticBooleanMethod';
+  int callStaticByteMethod(int methodId, List args)
+      native 'JniClass_CallStaticByteMethod';
+  int callStaticCharMethod(int methodId, List args)
+      native 'JniClass_CallStaticCharMethod';
+  int callStaticShortMethod(int methodId, List args)
+      native 'JniClass_CallStaticShortMethod';
+  int callStaticIntMethod(int methodId, List args)
+      native 'JniClass_CallStaticIntMethod';
+  int callStaticLongMethod(int methodId, List args)
+      native 'JniClass_CallStaticLongMethod';
+  double callStaticFloatMethod(int methodId, List args)
+      native 'JniClass_CallStaticFloatMethod';
+  double callStaticDoubleMethod(int methodId, List args)
+      native 'JniClass_CallStaticDoubleMethod';
+  void callStaticVoidMethod(int methodId, List args)
+      native 'JniClass_CallStaticVoidMethod';
 }
 
 /// Wrapper for a Java object accessed via JNI.
 class JniObject extends NativeFieldWrapperClass2 {
-  int getIntField(String name, String sig) native 'JniObject_getIntField';
+  int getIntField(int fieldId)
+      native 'JniObject_GetIntField';
 
-  JniObject callObjectMethod(int methodId, List args) native 'JniObject_CallObjectMethod';
-  bool callBooleanMethod(int methodId, List args) native 'JniObject_CallBooleanMethod';
-  int callIntMethod(int methodId, List args) native 'JniObject_CallIntMethod';
+  JniObject callObjectMethod(int methodId, List args)
+      native 'JniObject_CallObjectMethod';
+  bool callBooleanMethod(int methodId, List args)
+      native 'JniObject_CallBooleanMethod';
+  int callIntMethod(int methodId, List args)
+      native 'JniObject_CallIntMethod';
 }
 
 /// Wrapper for a Java string.
@@ -48,4 +114,10 @@ class JniObjectArray extends JniArray {
   JniObject operator [](int index) native 'JniObjectArray_GetArrayElement';
 
   void operator []=(int index, JniObject value) native 'JniObjectArray_SetArrayElement';
+}
+
+/// Used to pass arguments of type "float" to Java methods.
+class JniFloat {
+  final double value;
+  JniFloat(this.value);
 }
