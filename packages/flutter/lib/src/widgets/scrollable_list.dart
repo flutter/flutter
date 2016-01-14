@@ -135,12 +135,12 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
   double get startOffsetLimit =>_startOffsetLimit;
   double _startOffsetLimit;
 
-  void updateRenderObject() {
+  void updateRenderObject(ListViewport oldWidget) {
     renderObject.scrollDirection = widget.scrollDirection;
     renderObject.itemExtent = widget.itemExtent;
     renderObject.padding = widget.padding;
     renderObject.overlayPainter = widget.overlayPainter;
-    super.updateRenderObject();
+    super.updateRenderObject(oldWidget);
   }
 
   double _contentExtent;

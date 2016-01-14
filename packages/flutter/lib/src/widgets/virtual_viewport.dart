@@ -43,7 +43,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     _iterator = null;
     _widgets = <Widget>[];
     renderObject.callback = layout;
-    updateRenderObject();
+    updateRenderObject(null);
   }
 
   void unmount() {
@@ -56,8 +56,9 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
       _iterator = null;
       _widgets = <Widget>[];
     }
+    T oldWidget = widget;
     super.update(newWidget);
-    updateRenderObject();
+    updateRenderObject(oldWidget);
     if (!renderObject.needsLayout)
       _materializeChildren();
   }
@@ -73,7 +74,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     }
   }
 
-  void updateRenderObject() {
+  void updateRenderObject(T oldWidget) {
     renderObject.virtualChildCount = widget.children.length;
 
     if (startOffsetBase != null) {
@@ -82,9 +83,22 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
       // If we don't already need layout, we need to request a layout if the
       // viewport has shifted to expose new children.
       if (!renderObject.needsLayout) {
-        if (startOffsetBase != null && widget.startOffset < startOffsetBase)
-          renderObject.markNeedsLayout();
-        else if (startOffsetLimit != null && widget.startOffset > startOffsetLimit)
+        bool shouldLayout = false;
+        if (startOffsetBase != null) {
+          if (widget.startOffset < startOffsetBase)
+            shouldLayout = true;
+          else if (widget.startOffset == startOffsetBase && oldWidget?.startOffset != startOffsetBase)
+            shouldLayout = true;
+        }
+
+        if (startOffsetLimit != null) {
+          if (widget.startOffset > startOffsetLimit)
+            shouldLayout = true;
+          else if (widget.startOffset == startOffsetLimit && oldWidget?.startOffset != startOffsetLimit)
+            shouldLayout = true;
+        }
+
+        if (shouldLayout)
           renderObject.markNeedsLayout();
       }
     }
