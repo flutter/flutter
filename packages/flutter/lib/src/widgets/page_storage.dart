@@ -31,6 +31,10 @@ class _StorageEntryIdentifier {
     return true;
   }
   int get hashCode => hashValues(clientType, scopeKey, hashList(keys));
+
+  String toString() {
+    return 'StorageEntryIdentifier($clientType, $scopeKey, ${keys?.join(":")})';
+  }
 }
 
 class PageStorageBucket {
@@ -39,6 +43,8 @@ class PageStorageBucket {
     result.clientType = context.widget.runtimeType;
     Key lastKey = context.widget.key;
     if (lastKey is! GlobalKey) {
+      if (lastKey != null)
+        result.addKey(lastKey);
       context.visitAncestorElements((Element element) {
         if (element.widget.key is GlobalKey) {
           lastKey = element.widget.key;
