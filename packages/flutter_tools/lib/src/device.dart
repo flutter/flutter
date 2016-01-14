@@ -997,6 +997,30 @@ class DeviceStore {
     this.iOSSimulator
   });
 
+  static Device _deviceForConfig(BuildConfiguration config, List<Device> devices) {
+    Device device = null;
+
+    if (config.deviceId != null) {
+      // Step 1: If a device identifier is specified, try to find a device
+      // matching that specific identifier
+      device = devices.firstWhere(
+          (Device dev) => (dev.id == config.deviceId),
+          orElse: () => null);
+      if (device == null) {
+        logging.severe('Warning: Device ID ${config.deviceId} not found');
+      }
+    } else if (devices.length == 1) {
+      // Step 2: If no identifier is specified and there is only one connected
+      // device, pick that one.
+      device = devices[0];
+    } else if (devices.length > 1) {
+      // Step 3: D:
+      logging.severe('Warning: Multiple devices are connected, but no device ID was specified.');
+    }
+
+    return device;
+  }
+
   factory DeviceStore.forConfigs(List<BuildConfiguration> configs) {
     AndroidDevice android;
     IOSDevice iOS;
@@ -1006,23 +1030,11 @@ class DeviceStore {
       switch (config.targetPlatform) {
         case TargetPlatform.android:
           assert(android == null);
-          List<AndroidDevice> androidDevices = AndroidDevice.getAttachedDevices();
-          if (config.deviceId != null) {
-            android = androidDevices.firstWhere(
-                (AndroidDevice dev) => (dev.id == config.deviceId),
-                orElse: () => null);
-            if (android == null) {
-              print('Warning: Device ID ${config.deviceId} not found');
-            }
-          } else if (androidDevices.length == 1) {
-            android = androidDevices[0];
-          } else if (androidDevices.length > 1) {
-            print('Warning: Multiple Android devices are connected, but no device ID was specified.');
-          }
+          android = _deviceForConfig(config, AndroidDevice.getAttachedDevices());
           break;
         case TargetPlatform.iOS:
           assert(iOS == null);
-          iOS = new IOSDevice();
+          iOS = _deviceForConfig(config, IOSDevice.getAttachedDevices());
           break;
         case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
