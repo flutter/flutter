@@ -53,20 +53,10 @@ class StockData {
 }
 
 typedef void StockDataCallback(StockData data);
-const _kChunkSize = 100;
+const _kChunkCount = 30;
 
 String _urlToFetch(int chunk) {
-  Map<String, String> queryParameters = {
-    'limitToFirst': _kChunkSize.toString(),
-    'startAt': '\"${chunk * _kChunkSize}\"',
-    'orderBy': '"\$key"',
-  };
-  // Just a demo firebase app owned by eseidel.
-  return new Uri.https(
-    'sizzling-torch-6112.firebaseio.com',
-    '.json',
-    queryParameters=queryParameters
-  ).toString();
+  return 'https://domokit.github.io/examples/stocks/data/stock_data_$chunk.json';
 }
 
 class StockDataFetcher {
@@ -82,7 +72,6 @@ class StockDataFetcher {
   void _fetchNextChunk() {
     if (!actuallyFetchData)
       return;
-
     http.get(_urlToFetch(_nextChunk++)).then((http.Response response) {
       String json = response.body;
       if (json == null) {
@@ -90,9 +79,8 @@ class StockDataFetcher {
         return;
       }
       JsonDecoder decoder = new JsonDecoder();
-      Map responseJson = decoder.convert(json);
-      callback(new StockData(responseJson.values.toList()));
-      if (responseJson.isNotEmpty)
+      callback(new StockData(decoder.convert(json)));
+      if (_nextChunk < _kChunkCount)
         _fetchNextChunk();
     });
   }
