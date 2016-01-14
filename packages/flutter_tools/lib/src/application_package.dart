@@ -47,11 +47,11 @@ class AndroidApk extends ApplicationPackage {
 }
 
 class IOSApp extends ApplicationPackage {
-  static const String _defaultName = 'SkyShell.app';
-  static const String _defaultId = 'com.google.SkyShell';
+  static const String _defaultId = 'io.flutter.runner.Runner';
+  static const String _defaultPath = 'ios';
 
   IOSApp({
-    String localPath,
+    String localPath: _defaultPath,
     String id: _defaultId
   }) : super(localPath: localPath, id: id);
 }
@@ -98,12 +98,12 @@ class ApplicationPackageStore {
 
         case TargetPlatform.iOS:
           assert(iOS == null);
-          iOS = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
+          iOS = new IOSApp();
           break;
 
         case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
-          iOSSimulator = new IOSApp(localPath: path.join(config.buildDir, IOSApp._defaultName));
+          iOSSimulator = new IOSApp();
           break;
 
         case TargetPlatform.mac:
