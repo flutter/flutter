@@ -30,6 +30,10 @@ class FirebaseImpl : public ::firebase::Firebase {
   void GetChild(
       const mojo::String& path,
       mojo::InterfaceRequest<Firebase> child) override;
+  void AddValueEventListener(
+    ::firebase::ValueEventListenerPtr listener) override;
+  void AddChildEventListener(
+    ::firebase::ChildEventListenerPtr listener) override;
   void ObserveSingleEventOfType(
       ::firebase::EventType eventType,
       const ObserveSingleEventOfTypeCallback& callback) override;
@@ -41,6 +45,8 @@ class FirebaseImpl : public ::firebase::Firebase {
  private:
   mojo::StrongBinding<::firebase::Firebase> binding_;
   ::Firebase* client_;
+  std::vector<::firebase::ValueEventListenerPtr> value_event_listeners_;
+  std::vector<::firebase::ChildEventListenerPtr> child_event_listeners_;
 
   DISALLOW_COPY_AND_ASSIGN(FirebaseImpl);
 };
