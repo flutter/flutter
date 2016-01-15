@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+[DartPackage="mojo_services"]
 module mojo.media;
 
 import "mojo/services/media/common/interfaces/media_common.mojom";
@@ -22,7 +23,7 @@ struct AudioTrackConfiguration {
   uint64 max_frames;
 
   // Ratio of audio frames to media time ticks.
-  // 
+  //
   // Presentation time stamps on audio packets are expressed in units of media
   // time ticks.  Many users will choose to use units of audio frames to express
   // their media time, and can simply leave this ratio at the default of 1:1.
@@ -46,10 +47,10 @@ interface AudioTrack {
   // Set the configuration, receive a pipe to send data to in return.
   // Possible results include...
   //
-  // kOK:
+  // OK:
   //   Configuration successful, the bound pipe interface is ready to be used.
-  // 
-  // kInvalidArgs:
+  //
+  // INVALID_ARGUMENT:
   //   One or more of the configuration arguments are illegal.  For example, a
   //   value of 0 for either numerator or denominator of the audio frame to
   //   media time ratio.
@@ -57,14 +58,14 @@ interface AudioTrack {
   // kUnsupportedConfig:
   //   The requested configuration is not supported by this track.
   //
-  // kInsufficientResources:
+  // INSUFFICIENT_RESOURCES:
   //   Resource limitations prevent configuring the audio track is the desired
   //   way.  Perhaps there is not enough RAM to support the 2.7 days of audio
   //   buffer you requested, or perhaps there is not enough CPU power given the
   //   existing active tracks in the system to support rendering 128 channels
   //   at 1.5 MHz frame rate.
   //
-  // kBadState:
+  // BAD_STATE:
   //  The track is already configured and has pending data in its pipe.  Data
   //  needs to be flushed and the media clock must be stopped before the track
   //  may be re-configured.
@@ -74,10 +75,10 @@ interface AudioTrack {
   // Request the rate control interface for this AudioTrack
   // Possbile results include...
   //
-  // kOK:
+  // OK:
   //  Everything went well.
   //
-  // kBadState:
+  // BAD_STATE:
   //  Rate control interface is already bound to a different client.
   GetRateControl(RateControl& rate_control) => (MediaResult result);
 };

@@ -6,14 +6,19 @@
 #define MOJO_EDK_SYSTEM_TEST_TEST_IO_THREAD_H_
 
 #include <functional>
+#include <memory>
 
-#include "base/threading/thread.h"
-#include "mojo/edk/base_edk/platform_task_runner_impl.h"
 #include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
+
+namespace platform {
+class PlatformHandleWatcher;
+class Thread;
+}
+
 namespace system {
 namespace test {
 
@@ -41,18 +46,18 @@ class TestIOThread final {
   // posted task is executed (note the deadlock risk!).
   void PostTaskAndWait(std::function<void()>&& task);
 
-  base::MessageLoopForIO* message_loop() {
-    return static_cast<base::MessageLoopForIO*>(io_thread_.message_loop());
-  }
-
   const util::RefPtr<platform::TaskRunner>& task_runner() const {
     return io_task_runner_;
   }
 
+  platform::PlatformHandleWatcher* platform_handle_watcher() const {
+    return io_platform_handle_watcher_;
+  }
+
  private:
-  base::Thread io_thread_;
-  bool io_thread_started_;
+  std::unique_ptr<platform::Thread> io_thread_;
   util::RefPtr<platform::TaskRunner> io_task_runner_;
+  platform::PlatformHandleWatcher* io_platform_handle_watcher_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(TestIOThread);
 };

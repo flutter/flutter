@@ -240,7 +240,7 @@ abstract class Proxy extends core.MojoEventHandler {
 /// Generated Proxy classes implement this interface.
 abstract class ProxyBase {
   final Proxy impl = null;
-  final String name = null;
+  final String serviceName = null;
 }
 
 /// Generated Proxy classes have a factory Proxy.connectToService which takes

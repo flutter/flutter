@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+[DartPackage="mojo_services"]
 module mojo.media;
 
 // TimelineQuad
+// TODO(dalesat): Rename reference -> presentation.
+// TODO(dalesat): Rename target -> reference.
 //
 // A structure which holds the four numbers needed to define a linear
 // relationship between the points in two different timelines.  The relationship
@@ -38,6 +41,8 @@ struct TimelineQuad {
 };
 
 // TimelineTransform
+// TODO(dalesat): Rename reference -> presentation.
+// TODO(dalesat): Rename target -> reference.
 //
 // A structure which holds both a timeline quad, and a pair of identifiers which
 // define the specific timelines which are the reference and target timelines.

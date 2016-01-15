@@ -12,7 +12,7 @@ import 'package:mojo/mojo/service_provider.mojom.dart' as service_provider_mojom
 
 
 
-class ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
+class _ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(32, 0)
   ];
@@ -20,9 +20,9 @@ class ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
   Object services = null;
   Object exposedServices = null;
 
-  ApplicationConnectorConnectToApplicationParams() : super(kVersions.last.size);
+  _ApplicationConnectorConnectToApplicationParams() : super(kVersions.last.size);
 
-  static ApplicationConnectorConnectToApplicationParams deserialize(bindings.Message message) {
+  static _ApplicationConnectorConnectToApplicationParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -31,11 +31,11 @@ class ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
     return result;
   }
 
-  static ApplicationConnectorConnectToApplicationParams decode(bindings.Decoder decoder0) {
+  static _ApplicationConnectorConnectToApplicationParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ApplicationConnectorConnectToApplicationParams result = new ApplicationConnectorConnectToApplicationParams();
+    _ApplicationConnectorConnectToApplicationParams result = new _ApplicationConnectorConnectToApplicationParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -81,7 +81,7 @@ class ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ApplicationConnectorConnectToApplicationParams("
+    return "_ApplicationConnectorConnectToApplicationParams("
            "applicationUrl: $applicationUrl" ", "
            "services: $services" ", "
            "exposedServices: $exposedServices" ")";
@@ -94,15 +94,15 @@ class ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
 }
 
 
-class ApplicationConnectorDuplicateParams extends bindings.Struct {
+class _ApplicationConnectorDuplicateParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
   ];
   Object applicationConnectorRequest = null;
 
-  ApplicationConnectorDuplicateParams() : super(kVersions.last.size);
+  _ApplicationConnectorDuplicateParams() : super(kVersions.last.size);
 
-  static ApplicationConnectorDuplicateParams deserialize(bindings.Message message) {
+  static _ApplicationConnectorDuplicateParams deserialize(bindings.Message message) {
     var decoder = new bindings.Decoder(message);
     var result = decode(decoder);
     if (decoder.excessHandles != null) {
@@ -111,11 +111,11 @@ class ApplicationConnectorDuplicateParams extends bindings.Struct {
     return result;
   }
 
-  static ApplicationConnectorDuplicateParams decode(bindings.Decoder decoder0) {
+  static _ApplicationConnectorDuplicateParams decode(bindings.Decoder decoder0) {
     if (decoder0 == null) {
       return null;
     }
-    ApplicationConnectorDuplicateParams result = new ApplicationConnectorDuplicateParams();
+    _ApplicationConnectorDuplicateParams result = new _ApplicationConnectorDuplicateParams();
 
     var mainDataHeader = decoder0.decodeStructDataHeader();
     if (mainDataHeader.version <= kVersions.last.version) {
@@ -149,7 +149,7 @@ class ApplicationConnectorDuplicateParams extends bindings.Struct {
   }
 
   String toString() {
-    return "ApplicationConnectorDuplicateParams("
+    return "_ApplicationConnectorDuplicateParams("
            "applicationConnectorRequest: $applicationConnectorRequest" ")";
   }
 
@@ -159,33 +159,30 @@ class ApplicationConnectorDuplicateParams extends bindings.Struct {
   }
 }
 
-const int kApplicationConnector_connectToApplication_name = 0;
-const int kApplicationConnector_duplicate_name = 1;
-const String ApplicationConnectorName = null;
+const int _ApplicationConnector_connectToApplicationName = 0;
+const int _ApplicationConnector_duplicateName = 1;
 
 abstract class ApplicationConnector {
+  static const String serviceName = null;
   void connectToApplication(String applicationUrl, Object services, Object exposedServices);
   void duplicate(Object applicationConnectorRequest);
-
 }
 
 
-class ApplicationConnectorProxyImpl extends bindings.Proxy {
-  ApplicationConnectorProxyImpl.fromEndpoint(
+class _ApplicationConnectorProxyImpl extends bindings.Proxy {
+  _ApplicationConnectorProxyImpl.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) : super.fromEndpoint(endpoint);
 
-  ApplicationConnectorProxyImpl.fromHandle(core.MojoHandle handle) :
+  _ApplicationConnectorProxyImpl.fromHandle(core.MojoHandle handle) :
       super.fromHandle(handle);
 
-  ApplicationConnectorProxyImpl.unbound() : super.unbound();
+  _ApplicationConnectorProxyImpl.unbound() : super.unbound();
 
-  static ApplicationConnectorProxyImpl newFromEndpoint(
+  static _ApplicationConnectorProxyImpl newFromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) {
-    assert(endpoint.setDescription("For ApplicationConnectorProxyImpl"));
-    return new ApplicationConnectorProxyImpl.fromEndpoint(endpoint);
+    assert(endpoint.setDescription("For _ApplicationConnectorProxyImpl"));
+    return new _ApplicationConnectorProxyImpl.fromEndpoint(endpoint);
   }
-
-  String get name => ApplicationConnectorName;
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -198,13 +195,13 @@ class ApplicationConnectorProxyImpl extends bindings.Proxy {
 
   String toString() {
     var superString = super.toString();
-    return "ApplicationConnectorProxyImpl($superString)";
+    return "_ApplicationConnectorProxyImpl($superString)";
   }
 }
 
 
 class _ApplicationConnectorProxyCalls implements ApplicationConnector {
-  ApplicationConnectorProxyImpl _proxyImpl;
+  _ApplicationConnectorProxyImpl _proxyImpl;
 
   _ApplicationConnectorProxyCalls(this._proxyImpl);
     void connectToApplication(String applicationUrl, Object services, Object exposedServices) {
@@ -212,48 +209,45 @@ class _ApplicationConnectorProxyCalls implements ApplicationConnector {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ApplicationConnectorConnectToApplicationParams();
+      var params = new _ApplicationConnectorConnectToApplicationParams();
       params.applicationUrl = applicationUrl;
       params.services = services;
       params.exposedServices = exposedServices;
-      _proxyImpl.sendMessage(params, kApplicationConnector_connectToApplication_name);
+      _proxyImpl.sendMessage(params, _ApplicationConnector_connectToApplicationName);
     }
-  
     void duplicate(Object applicationConnectorRequest) {
       if (!_proxyImpl.isBound) {
         _proxyImpl.proxyError("The Proxy is closed.");
         return;
       }
-      var params = new ApplicationConnectorDuplicateParams();
+      var params = new _ApplicationConnectorDuplicateParams();
       params.applicationConnectorRequest = applicationConnectorRequest;
-      _proxyImpl.sendMessage(params, kApplicationConnector_duplicate_name);
+      _proxyImpl.sendMessage(params, _ApplicationConnector_duplicateName);
     }
-  
 }
 
 
 class ApplicationConnectorProxy implements bindings.ProxyBase {
   final bindings.Proxy impl;
   ApplicationConnector ptr;
-  final String name = ApplicationConnectorName;
 
-  ApplicationConnectorProxy(ApplicationConnectorProxyImpl proxyImpl) :
+  ApplicationConnectorProxy(_ApplicationConnectorProxyImpl proxyImpl) :
       impl = proxyImpl,
       ptr = new _ApplicationConnectorProxyCalls(proxyImpl);
 
   ApplicationConnectorProxy.fromEndpoint(
       core.MojoMessagePipeEndpoint endpoint) :
-      impl = new ApplicationConnectorProxyImpl.fromEndpoint(endpoint) {
+      impl = new _ApplicationConnectorProxyImpl.fromEndpoint(endpoint) {
     ptr = new _ApplicationConnectorProxyCalls(impl);
   }
 
   ApplicationConnectorProxy.fromHandle(core.MojoHandle handle) :
-      impl = new ApplicationConnectorProxyImpl.fromHandle(handle) {
+      impl = new _ApplicationConnectorProxyImpl.fromHandle(handle) {
     ptr = new _ApplicationConnectorProxyCalls(impl);
   }
 
   ApplicationConnectorProxy.unbound() :
-      impl = new ApplicationConnectorProxyImpl.unbound() {
+      impl = new _ApplicationConnectorProxyImpl.unbound() {
     ptr = new _ApplicationConnectorProxyCalls(impl);
   }
 
@@ -269,6 +263,8 @@ class ApplicationConnectorProxy implements bindings.ProxyBase {
     assert(endpoint.setDescription("For ApplicationConnectorProxy"));
     return new ApplicationConnectorProxy.fromEndpoint(endpoint);
   }
+
+  String get serviceName => ApplicationConnector.serviceName;
 
   Future close({bool immediate: false}) => impl.close(immediate: immediate);
 
@@ -308,8 +304,6 @@ class ApplicationConnectorStub extends bindings.Stub {
     return new ApplicationConnectorStub.fromEndpoint(endpoint);
   }
 
-  static const String name = ApplicationConnectorName;
-
 
 
   dynamic handleMessage(bindings.ServiceMessage message) {
@@ -320,13 +314,13 @@ class ApplicationConnectorStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case kApplicationConnector_connectToApplication_name:
-        var params = ApplicationConnectorConnectToApplicationParams.deserialize(
+      case _ApplicationConnector_connectToApplicationName:
+        var params = _ApplicationConnectorConnectToApplicationParams.deserialize(
             message.payload);
         _impl.connectToApplication(params.applicationUrl, params.services, params.exposedServices);
         break;
-      case kApplicationConnector_duplicate_name:
-        var params = ApplicationConnectorDuplicateParams.deserialize(
+      case _ApplicationConnector_duplicateName:
+        var params = _ApplicationConnectorDuplicateParams.deserialize(
             message.payload);
         _impl.duplicate(params.applicationConnectorRequest);
         break;

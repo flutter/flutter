@@ -5,7 +5,7 @@
 #ifndef MOJO_ICU_CONSTANTS_H_
 #define MOJO_ICU_CONSTANTS_H_
 
-#include <cstring>
+#include <stddef.h>
 
 namespace mojo {
 namespace icu {

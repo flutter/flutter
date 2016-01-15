@@ -122,6 +122,8 @@ class RemoteMessagePipeTest : public testing::Test {
 
     channels_[channel_index] = MakeRefCounted<Channel>(&platform_support_);
     channels_[channel_index]->Init(
+        io_thread()->task_runner().Clone(),
+        io_thread()->platform_handle_watcher(),
         RawChannel::Create(platform_handles_[channel_index].Pass()));
   }
 

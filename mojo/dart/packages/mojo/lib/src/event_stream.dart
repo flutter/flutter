@@ -111,7 +111,18 @@ class MojoEventSubscription {
   String toString() => "$_handle";
 }
 
-typedef void ErrorHandler(Object e);
+/// Object returned to pipe's error handlers containing both the thrown error
+/// and the associated stack trace.
+class MojoHandlerError {
+  final Object error;
+  final StackTrace stacktrace;
+
+  MojoHandlerError(this.error, this.stacktrace);
+
+  String toString() => error.toString();
+}
+
+typedef void ErrorHandler(MojoHandlerError e);
 
 class MojoEventHandler {
   ErrorHandler onError;
@@ -163,17 +174,7 @@ class MojoEventHandler {
       throw new MojoApiError("MojoEventHandler is unbound.");
     }
     _isOpen = true;
-    _eventSubscription.subscribe((int event) {
-      try {
-        _handleEvent(event);
-      } catch (e) {
-        close(immediate: true).then((_) {
-          if (onError != null) {
-            onError(e);
-          }
-        });
-      }
-    });
+    _eventSubscription.subscribe(_tryHandleEvent);
   }
 
   Future close({bool immediate: false}) {
@@ -188,6 +189,31 @@ class MojoEventHandler {
       });
     }
     return result != null ? result : new Future.value(null);
+  }
+
+  void _tryHandleEvent(int event) {
+    // This callback is running in the handler for a RawReceivePort. All
+    // exceptions rethrown or not caught here will be unhandled exceptions in
+    // the root zone, bringing down the whole app. An app should rather have an
+    // opportunity to handle exceptions coming from Mojo, like the
+    // MojoCodecError.
+    // TODO(zra): Rather than hard-coding a list of exceptions that bypass the
+    // onError callback and are rethrown, investigate allowing an implementer to
+    // provide a filter function (possibly initialized with a sensible default).
+    try {
+      _handleEvent(event);
+    } on Error catch (_) {
+      // An Error exception from the core libraries is probably a programming
+      // error that can't be handled. We rethrow the error so that
+      // MojoEventHandlers can't swallow it by mistake.
+      rethrow;
+    } catch (e, s) {
+      close(immediate: true).then((_) {
+        if (onError != null) {
+          onError(new MojoHandlerError(e, s));
+        }
+      });
+    }
   }
 
   void _handleEvent(int signalsReceived) {
@@ -218,7 +244,17 @@ class MojoEventHandler {
     }
   }
 
+  /// The event handler calls the [handleRead] method when the underlying Mojo
+  /// message pipe endpoint has a message available to be read. Implementers
+  /// should read, decode, and handle the message. If [handleRead] throws
+  /// an exception derived from [Error], the exception will be thrown into the
+  /// root zone, and the application will end. Otherwise, the exception object
+  /// will be passed to [onError] if it has been set, and the exception will
+  /// not be propagated to the root zone.
   void handleRead() {}
+
+  /// Like [handleRead] but indicating that the underlying message pipe endpoint
+  /// is ready for writing.
   void handleWrite() {}
 
   MojoMessagePipeEndpoint get endpoint => _endpoint;

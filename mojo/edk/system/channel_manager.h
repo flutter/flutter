@@ -28,6 +28,10 @@ namespace embedder {
 class PlatformSupport;
 }
 
+namespace platform {
+class PlatformHandleWatcher;
+}
+
 namespace system {
 
 class Channel;
@@ -40,12 +44,14 @@ class MessagePipeDispatcher;
 // specifically noted.
 class ChannelManager {
  public:
-  // |io_thread_task_runner| should be the |TaskRunner| for the I/O thread, on
-  // which this channel manager will create all channels. Connection manager is
-  // optional and may be null. All arguments (if non-null) must remain alive at
-  // least until after shutdown completion.
+  // |io_task_runner| and |io_watcher| should be the |TaskRunner| and
+  // |PlatformHandleWatcher|, respectively, for the I/O thread, on which this
+  // channel manager will create all channels. |connection_manager| is optional
+  // and may be null. All arguments (if non-null) must remain alive at least
+  // until after shutdown completion.
   ChannelManager(embedder::PlatformSupport* platform_support,
-                 util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
+                 util::RefPtr<platform::TaskRunner>&& io_task_runner,
+                 platform::PlatformHandleWatcher* io_watcher,
                  ConnectionManager* connection_manager);
   ~ChannelManager();
 
@@ -57,7 +63,7 @@ class ChannelManager {
   void ShutdownOnIOThread();
 
   // Like |ShutdownOnIOThread()|, but may be called from any thread. On
-  // completion, will call |callback| ("on" |io_thread_task_runner| if
+  // completion, will call |callback| ("on" |io_task_runner| if
   // |callback_thread_task_runner| is null else by posted using
   // |callback_thread_task_runner|). Note: This will always post a task to the
   // I/O thread, even it is the current thread.
@@ -132,7 +138,8 @@ class ChannelManager {
 
   // Note: These must not be used after shutdown.
   embedder::PlatformSupport* const platform_support_;
-  const util::RefPtr<platform::TaskRunner> io_thread_task_runner_;
+  const util::RefPtr<platform::TaskRunner> io_task_runner_;
+  platform::PlatformHandleWatcher* const io_watcher_;
   ConnectionManager* const connection_manager_;
 
   // Note: |Channel| methods should not be called under |mutex_|.

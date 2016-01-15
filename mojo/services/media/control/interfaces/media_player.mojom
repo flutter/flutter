@@ -1,0 +1,37 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.media;
+
+import "mojo/services/media/common/interfaces/media_metadata.mojom";
+import "mojo/services/media/common/interfaces/media_state.mojom";
+import "mojo/services/media/common/interfaces/rate_control.mojom";
+
+// Plays media.
+interface MediaPlayer {
+  // Starts playback.
+  Play();
+
+  // Pauses playback.
+  Pause();
+
+  // Gets the status. To get the status immediately, call GetStatus(0). To
+  // get updates thereafter, pass the version sent in the previous callback.
+  GetStatus(uint64 version_last_seen) =>
+      (uint64 version, MediaPlayerStatus status);
+};
+
+// MediaPlayer status information.
+struct MediaPlayerStatus {
+  // Current state of the player.
+  MediaState state;
+
+  // Transform translating local time to presentation time. Reverse translation
+  // (presentation time to local time) is only valid when media is playing.
+  TimelineTransform? timeline_transform;
+
+  // Describes the media.
+  MediaMetadata? metadata;
+};

@@ -89,10 +89,14 @@ class RemoteDataPipeImplTest : public testing::Test {
 
     embedder::PlatformChannelPair channel_pair;
     channels_[0] = MakeRefCounted<Channel>(&platform_support_);
-    channels_[0]->Init(RawChannel::Create(channel_pair.PassServerHandle()));
+    channels_[0]->Init(io_thread_.task_runner().Clone(),
+                       io_thread_.platform_handle_watcher(),
+                       RawChannel::Create(channel_pair.PassServerHandle()));
     channels_[0]->SetBootstrapEndpoint(std::move(ep0));
     channels_[1] = MakeRefCounted<Channel>(&platform_support_);
-    channels_[1]->Init(RawChannel::Create(channel_pair.PassClientHandle()));
+    channels_[1]->Init(io_thread_.task_runner().Clone(),
+                       io_thread_.platform_handle_watcher(),
+                       RawChannel::Create(channel_pair.PassClientHandle()));
     channels_[1]->SetBootstrapEndpoint(std::move(ep1));
   }
 

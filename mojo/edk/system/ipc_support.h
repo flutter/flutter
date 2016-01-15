@@ -26,6 +26,10 @@ class PlatformSupport;
 class ProcessDelegate;
 }
 
+namespace platform {
+class PlatformHandleWatcher;
+}
+
 namespace system {
 
 class ChannelManager;
@@ -66,7 +70,8 @@ class IPCSupport {
              embedder::ProcessType process_type,
              util::RefPtr<platform::TaskRunner>&& delegate_thread_task_runner,
              embedder::ProcessDelegate* process_delegate,
-             util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
+             util::RefPtr<platform::TaskRunner>&& io_task_runner,
+             platform::PlatformHandleWatcher* io_watcher,
              platform::ScopedPlatformHandle platform_handle);
   // Note: This object must be shut down before destruction (see
   // |ShutdownOnIOThread()|).
@@ -129,8 +134,8 @@ class IPCSupport {
       const {
     return delegate_thread_task_runner_;
   }
-  const util::RefPtr<platform::TaskRunner>& io_thread_task_runner() const {
-    return io_thread_task_runner_;
+  const util::RefPtr<platform::TaskRunner>& io_task_runner() const {
+    return io_task_runner_;
   }
   // TODO(vtl): The things that use the following should probably be moved into
   // this class.
@@ -168,7 +173,8 @@ class IPCSupport {
   embedder::ProcessType process_type_;
   util::RefPtr<platform::TaskRunner> delegate_thread_task_runner_;
   embedder::ProcessDelegate* process_delegate_;
-  util::RefPtr<platform::TaskRunner> io_thread_task_runner_;
+  util::RefPtr<platform::TaskRunner> io_task_runner_;
+  platform::PlatformHandleWatcher* io_watcher_;
 
   std::unique_ptr<ConnectionManager> connection_manager_;
   std::unique_ptr<ChannelManager> channel_manager_;

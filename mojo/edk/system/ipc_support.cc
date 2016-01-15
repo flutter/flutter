@@ -15,6 +15,7 @@
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 #include "mojo/edk/system/slave_connection_manager.h"
 
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
 using mojo::util::RefPtr;
@@ -26,14 +27,17 @@ IPCSupport::IPCSupport(embedder::PlatformSupport* platform_support,
                        embedder::ProcessType process_type,
                        RefPtr<TaskRunner>&& delegate_thread_task_runner,
                        embedder::ProcessDelegate* process_delegate,
-                       RefPtr<TaskRunner>&& io_thread_task_runner,
+                       RefPtr<TaskRunner>&& io_task_runner,
+                       PlatformHandleWatcher* io_watcher,
                        ScopedPlatformHandle platform_handle)
     : process_type_(process_type),
       delegate_thread_task_runner_(std::move(delegate_thread_task_runner)),
       process_delegate_(process_delegate),
-      io_thread_task_runner_(std::move(io_thread_task_runner)) {
+      io_task_runner_(std::move(io_task_runner)),
+      io_watcher_(io_watcher) {
   DCHECK(delegate_thread_task_runner_);
-  DCHECK(io_thread_task_runner_);
+  DCHECK(io_task_runner_);
+  DCHECK(io_watcher_);
 
   switch (process_type_) {
     case embedder::ProcessType::UNINITIALIZED:
@@ -63,9 +67,9 @@ IPCSupport::IPCSupport(embedder::PlatformSupport* platform_support,
       break;
   }
 
-  channel_manager_.reset(new ChannelManager(platform_support,
-                                            io_thread_task_runner_.Clone(),
-                                            connection_manager_.get()));
+  channel_manager_.reset(
+      new ChannelManager(platform_support, io_task_runner_.Clone(), io_watcher_,
+                         connection_manager_.get()));
 }
 
 IPCSupport::~IPCSupport() {
@@ -83,7 +87,8 @@ void IPCSupport::ShutdownOnIOThread() {
     connection_manager_.reset();
   }
 
-  io_thread_task_runner_ = nullptr;
+  io_watcher_ = nullptr;
+  io_task_runner_ = nullptr;
   process_delegate_ = nullptr;
   delegate_thread_task_runner_ = nullptr;
   process_type_ = embedder::ProcessType::UNINITIALIZED;

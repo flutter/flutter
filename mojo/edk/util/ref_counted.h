@@ -7,11 +7,6 @@
 #ifndef MOJO_EDK_UTIL_REF_COUNTED_H_
 #define MOJO_EDK_UTIL_REF_COUNTED_H_
 
-#include <assert.h>
-
-#include <cstddef>
-#include <utility>
-
 #include "mojo/edk/util/ref_counted_internal.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"

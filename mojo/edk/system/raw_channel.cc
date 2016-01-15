@@ -9,16 +9,16 @@
 #include <algorithm>
 #include <utility>
 
-#include "base/bind.h"
-#include "base/location.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/transport_data.h"
 
 using mojo::platform::PlatformHandle;
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::TaskRunner;
 using mojo::util::MutexLocker;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace system {
@@ -158,12 +158,11 @@ void RawChannel::WriteBuffer::GetBuffers(std::vector<Buffer>* buffers) const {
 // RawChannel ------------------------------------------------------------------
 
 RawChannel::RawChannel()
-    : message_loop_for_io_(nullptr),
+    : io_watcher_(nullptr),
       delegate_(nullptr),
       set_on_shutdown_(nullptr),
       write_stopped_(false),
-      weak_ptr_factory_(this) {
-}
+      weak_ptr_factory_(this) {}
 
 RawChannel::~RawChannel() {
   DCHECK(!read_buffer_);
@@ -175,16 +174,19 @@ RawChannel::~RawChannel() {
   DCHECK(!weak_ptr_factory_.HasWeakPtrs());
 }
 
-void RawChannel::Init(Delegate* delegate) {
+void RawChannel::Init(RefPtr<TaskRunner>&& io_task_runner,
+                      PlatformHandleWatcher* io_watcher,
+                      Delegate* delegate) {
+  DCHECK(io_task_runner);
+  DCHECK(io_watcher);
   DCHECK(delegate);
 
   DCHECK(!delegate_);
   delegate_ = delegate;
-
-  CHECK_EQ(base::MessageLoop::current()->type(), base::MessageLoop::TYPE_IO);
-  DCHECK(!message_loop_for_io_);
-  message_loop_for_io_ =
-      static_cast<base::MessageLoopForIO*>(base::MessageLoop::current());
+  DCHECK(!io_task_runner_);
+  io_task_runner_ = io_task_runner;
+  DCHECK(!io_watcher_);
+  io_watcher_ = io_watcher;
 
   // No need to take the lock. No one should be using us yet.
   DCHECK(!read_buffer_);
@@ -198,16 +200,19 @@ void RawChannel::Init(Delegate* delegate) {
   if (io_result != IO_PENDING) {
     // This will notify the delegate about the read failure. Although we're on
     // the I/O thread, don't call it in the nested context.
-    message_loop_for_io_->PostTask(
-        FROM_HERE, base::Bind(&RawChannel::OnReadCompleted,
-                              weak_ptr_factory_.GetWeakPtr(), io_result, 0));
+    // TODO(vtl): Need C++14 lambdas now.
+    auto weak_self = weak_ptr_factory_.GetWeakPtr();
+    io_task_runner_->PostTask([weak_self, io_result]() {
+      if (weak_self)
+        weak_self->OnReadCompleted(io_result, 0);
+    });
   }
   // Note: |ScheduleRead()| failure is treated as a read failure (by notifying
   // the delegate), not an initialization failure.
 }
 
 void RawChannel::Shutdown() {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io_);
+  DCHECK(io_task_runner_->RunsTasksOnCurrentThread());
 
   MutexLocker locker(&write_mutex_);
 
@@ -253,10 +258,12 @@ bool RawChannel::WriteMessage(std::unique_ptr<MessageInTransit> message) {
   if (!result) {
     // Even if we're on the I/O thread, don't call |OnError()| in the nested
     // context.
-    message_loop_for_io_->PostTask(
-        FROM_HERE,
-        base::Bind(&RawChannel::CallOnError, weak_ptr_factory_.GetWeakPtr(),
-                   Delegate::ERROR_WRITE));
+    // TODO(vtl): Need C++14 lambdas now.
+    auto weak_self = weak_ptr_factory_.GetWeakPtr();
+    io_task_runner_->PostTask([weak_self]() {
+      if (weak_self)
+        weak_self->CallOnError(Delegate::ERROR_WRITE);
+    });
   }
 
   return result;
@@ -269,7 +276,7 @@ bool RawChannel::IsWriteBufferEmpty() {
 }
 
 void RawChannel::OnReadCompleted(IOResult io_result, size_t bytes_read) {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io_);
+  DCHECK(io_task_runner_->RunsTasksOnCurrentThread());
 
   // Keep reading data in a loop, and dispatch messages if enough data is
   // received. Exit the loop if any of the following happens:
@@ -412,7 +419,7 @@ void RawChannel::OnReadCompleted(IOResult io_result, size_t bytes_read) {
 void RawChannel::OnWriteCompleted(IOResult io_result,
                                   size_t platform_handles_written,
                                   size_t bytes_written) {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io_);
+  DCHECK(io_task_runner_->RunsTasksOnCurrentThread());
   DCHECK_NE(io_result, IO_PENDING);
 
   bool did_fail = false;
@@ -468,7 +475,7 @@ RawChannel::Delegate::Error RawChannel::ReadIOResultToError(
 }
 
 void RawChannel::CallOnError(Delegate::Error error) {
-  DCHECK_EQ(base::MessageLoop::current(), message_loop_for_io_);
+  DCHECK(io_task_runner_->RunsTasksOnCurrentThread());
   // TODO(vtl): Add a "write_mutex_.AssertNotHeld()"?
   if (delegate_) {
     delegate_->OnError(error);

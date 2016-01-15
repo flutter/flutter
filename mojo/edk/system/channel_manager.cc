@@ -12,6 +12,7 @@
 #include "mojo/edk/system/message_pipe_dispatcher.h"
 
 using mojo::platform::PlatformHandle;
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
 using mojo::util::MakeRefCounted;
@@ -22,13 +23,16 @@ namespace mojo {
 namespace system {
 
 ChannelManager::ChannelManager(embedder::PlatformSupport* platform_support,
-                               RefPtr<TaskRunner>&& io_thread_task_runner,
+                               RefPtr<TaskRunner>&& io_task_runner,
+                               PlatformHandleWatcher* io_watcher,
                                ConnectionManager* connection_manager)
     : platform_support_(platform_support),
-      io_thread_task_runner_(std::move(io_thread_task_runner)),
+      io_task_runner_(std::move(io_task_runner)),
+      io_watcher_(io_watcher),
       connection_manager_(connection_manager) {
   DCHECK(platform_support_);
-  DCHECK(io_thread_task_runner_);
+  DCHECK(io_task_runner_);
+  DCHECK(io_watcher_);
   // (|connection_manager_| may be null.)
 }
 
@@ -58,7 +62,7 @@ void ChannelManager::Shutdown(
     RefPtr<TaskRunner>&& callback_thread_task_runner) {
   // TODO(vtl): With C++14 lambda captures, we'll be able to move |callback| and
   // |callback_thread_task_runner| instead of copying them.
-  io_thread_task_runner_->PostTask(
+  io_task_runner_->PostTask(
       [this, callback, callback_thread_task_runner]() mutable {
         ShutdownOnIOThread();
         if (callback_thread_task_runner)
@@ -100,9 +104,9 @@ RefPtr<MessagePipeDispatcher> ChannelManager::CreateChannel(
   // TODO(vtl): We have to copy or "unscope" various things due to C++11 lambda
   // capture limitations.
   PlatformHandle raw_platform_handle = platform_handle.release();
-  io_thread_task_runner_->PostTask([this, channel_id, raw_platform_handle,
-                                    bootstrap_channel_endpoint, callback,
-                                    callback_thread_task_runner]() mutable {
+  io_task_runner_->PostTask([this, channel_id, raw_platform_handle,
+                             bootstrap_channel_endpoint, callback,
+                             callback_thread_task_runner]() mutable {
     CreateChannelOnIOThreadHelper(channel_id,
                                   ScopedPlatformHandle(raw_platform_handle),
                                   std::move(bootstrap_channel_endpoint));
@@ -152,7 +156,7 @@ void ChannelManager::ShutdownChannel(
   channel->WillShutdownSoon();
   // TODO(vtl): With C++14 lambda captures, we'll be able to move stuff instead
   // of copying.
-  io_thread_task_runner_->PostTask(
+  io_task_runner_->PostTask(
       [channel, callback, callback_thread_task_runner]() mutable {
         channel->Shutdown();
         if (callback_thread_task_runner)
@@ -171,7 +175,8 @@ RefPtr<Channel> ChannelManager::CreateChannelOnIOThreadHelper(
 
   // Create and initialize a |Channel|.
   auto channel = MakeRefCounted<Channel>(platform_support_);
-  channel->Init(RawChannel::Create(platform_handle.Pass()));
+  channel->Init(io_task_runner_.Clone(), io_watcher_,
+                RawChannel::Create(platform_handle.Pass()));
   if (bootstrap_channel_endpoint)
     channel->SetBootstrapEndpoint(std::move(bootstrap_channel_endpoint));
 

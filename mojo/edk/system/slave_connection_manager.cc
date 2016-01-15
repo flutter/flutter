@@ -6,17 +6,19 @@
 
 #include <utility>
 
-#include "base/bind.h"
-#include "base/bind_helpers.h"
-#include "base/location.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
+#include "mojo/edk/platform/io_thread.h"
+#include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/thread.h"
 #include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/util/make_unique.h"
 
+using mojo::platform::PlatformHandle;
+using mojo::platform::PlatformHandleWatcher;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
+using mojo::platform::Thread;
 using mojo::util::MakeUnique;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
@@ -29,8 +31,8 @@ namespace system {
 SlaveConnectionManager::SlaveConnectionManager(
     embedder::PlatformSupport* platform_support)
     : ConnectionManager(platform_support),
-      slave_process_delegate_(),
-      private_thread_("SlaveConnectionManagerPrivateThread"),
+      slave_process_delegate_(nullptr),
+      private_thread_platform_handle_watcher_(nullptr),
       awaiting_ack_type_(NOT_AWAITING_ACK),
       ack_result_(nullptr),
       ack_peer_process_identifier_(nullptr),
@@ -40,7 +42,7 @@ SlaveConnectionManager::SlaveConnectionManager(
 SlaveConnectionManager::~SlaveConnectionManager() {
   DCHECK(!delegate_thread_task_runner_);
   DCHECK(!slave_process_delegate_);
-  DCHECK(!private_thread_.message_loop());
+  DCHECK(!private_thread_);
   DCHECK_EQ(awaiting_ack_type_, NOT_AWAITING_ACK);
   DCHECK(!ack_result_);
   DCHECK(!ack_peer_process_identifier_);
@@ -57,29 +59,34 @@ void SlaveConnectionManager::Init(
   DCHECK(platform_handle.is_valid());
   DCHECK(!delegate_thread_task_runner_);
   DCHECK(!slave_process_delegate_);
-  DCHECK(!private_thread_.message_loop());
+  DCHECK(!private_thread_);
 
   delegate_thread_task_runner_ = std::move(delegate_thread_task_runner);
   slave_process_delegate_ = slave_process_delegate;
-  CHECK(private_thread_.StartWithOptions(
-      base::Thread::Options(base::MessageLoop::TYPE_IO, 0)));
-  private_thread_.message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&SlaveConnectionManager::InitOnPrivateThread,
-                 base::Unretained(this), base::Passed(&platform_handle)));
+  private_thread_ = platform::CreateAndStartIOThread(
+      &private_thread_task_runner_, &private_thread_platform_handle_watcher_);
+  // TODO(vtl): With C++14 lambda captures, we'll be able to move
+  // |platform_handle|.
+  auto raw_platform_handle = platform_handle.release();
+  private_thread_task_runner_->PostTask([this, raw_platform_handle]() {
+    InitOnPrivateThread(
+        ScopedPlatformHandle(PlatformHandle(raw_platform_handle)));
+  });
   event_.Wait();
 }
 
 void SlaveConnectionManager::Shutdown() {
   AssertNotOnPrivateThread();
   DCHECK(slave_process_delegate_);
-  DCHECK(private_thread_.message_loop());
+  DCHECK(private_thread_);
 
   // The |Stop()| will actually finish all posted tasks.
-  private_thread_.message_loop()->PostTask(
-      FROM_HERE, base::Bind(&SlaveConnectionManager::ShutdownOnPrivateThread,
-                            base::Unretained(this)));
-  private_thread_.Stop();
+  private_thread_task_runner_->PostTask(
+      [this]() { ShutdownOnPrivateThread(); });
+  private_thread_->Stop();
+  private_thread_.reset();
+  private_thread_task_runner_ = nullptr;
+  private_thread_platform_handle_watcher_ = nullptr;
   slave_process_delegate_ = nullptr;
   delegate_thread_task_runner_ = nullptr;
 }
@@ -90,10 +97,9 @@ bool SlaveConnectionManager::AllowConnect(
 
   MutexLocker locker(&mutex_);
   Result result = Result::FAILURE;
-  private_thread_.message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&SlaveConnectionManager::AllowConnectOnPrivateThread,
-                 base::Unretained(this), connection_id, &result));
+  private_thread_task_runner_->PostTask([this, &connection_id, &result]() {
+    AllowConnectOnPrivateThread(connection_id, &result);
+  });
   event_.Wait();
   DCHECK(result == Result::FAILURE || result == Result::SUCCESS);
   return result == Result::SUCCESS;
@@ -105,10 +111,9 @@ bool SlaveConnectionManager::CancelConnect(
 
   MutexLocker locker(&mutex_);
   Result result = Result::FAILURE;
-  private_thread_.message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&SlaveConnectionManager::CancelConnectOnPrivateThread,
-                 base::Unretained(this), connection_id, &result));
+  private_thread_task_runner_->PostTask([this, &connection_id, &result]() {
+    CancelConnectOnPrivateThread(connection_id, &result);
+  });
   event_.Wait();
   DCHECK(result == Result::FAILURE || result == Result::SUCCESS);
   return result == Result::SUCCESS;
@@ -127,11 +132,12 @@ ConnectionManager::Result SlaveConnectionManager::Connect(
 
   MutexLocker locker(&mutex_);
   Result result = Result::FAILURE;
-  private_thread_.message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&SlaveConnectionManager::ConnectOnPrivateThread,
-                 base::Unretained(this), connection_id, &result,
-                 peer_process_identifier, is_first, platform_handle));
+  private_thread_task_runner_->PostTask([this, &connection_id, &result,
+                                         peer_process_identifier, is_first,
+                                         platform_handle]() {
+    ConnectOnPrivateThread(connection_id, &result, peer_process_identifier,
+                           is_first, platform_handle);
+  });
   event_.Wait();
   return result;
 }
@@ -141,7 +147,8 @@ void SlaveConnectionManager::InitOnPrivateThread(
   AssertOnPrivateThread();
 
   raw_channel_ = RawChannel::Create(platform_handle.Pass());
-  raw_channel_->Init(this);
+  raw_channel_->Init(private_thread_task_runner_.Clone(),
+                     private_thread_platform_handle_watcher_, this);
   event_.Signal();
 }
 
@@ -336,17 +343,13 @@ void SlaveConnectionManager::OnError(Error error) {
 }
 
 void SlaveConnectionManager::AssertNotOnPrivateThread() const {
-  // This should only be called after |Init()| and before |Shutdown()|. (If not,
-  // the subsequent |DCHECK_NE()| is invalid, since the current thread may not
-  // have a message loop.)
-  DCHECK(private_thread_.message_loop());
-  DCHECK_NE(base::MessageLoop::current(), private_thread_.message_loop());
+  // This should only be called after |Init()| and before |Shutdown()|.
+  DCHECK(!private_thread_task_runner_->RunsTasksOnCurrentThread());
 }
 
 void SlaveConnectionManager::AssertOnPrivateThread() const {
   // This should only be called after |Init()| and before |Shutdown()|.
-  DCHECK(private_thread_.message_loop());
-  DCHECK_EQ(base::MessageLoop::current(), private_thread_.message_loop());
+  DCHECK(private_thread_task_runner_->RunsTasksOnCurrentThread());
 }
 
 }  // namespace system

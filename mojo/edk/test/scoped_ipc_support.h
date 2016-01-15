@@ -18,6 +18,11 @@
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
+
+namespace platform {
+class PlatformHandleWatcher;
+}
+
 namespace test {
 
 namespace internal {
@@ -29,13 +34,15 @@ class ScopedIPCSupportHelper final {
 
   void Init(embedder::ProcessType process_type,
             embedder::ProcessDelegate* process_delegate,
-            util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
+            util::RefPtr<platform::TaskRunner>&& io_task_runner,
+            platform::PlatformHandleWatcher* io_watcher,
             platform::ScopedPlatformHandle platform_handle);
 
   void OnShutdownCompleteImpl();
 
  private:
-  util::RefPtr<platform::TaskRunner> io_thread_task_runner_;
+  util::RefPtr<platform::TaskRunner> io_task_runner_;
+  platform::PlatformHandleWatcher* io_watcher_ = nullptr;
 
   // Set after shut down.
   util::ManualResetWaitableEvent event_;
@@ -51,8 +58,8 @@ class ScopedIPCSupportHelper final {
 // thread).
 class ScopedIPCSupport final : public embedder::ProcessDelegate {
  public:
-  explicit ScopedIPCSupport(
-      util::RefPtr<platform::TaskRunner>&& io_thread_task_runner);
+  ScopedIPCSupport(util::RefPtr<platform::TaskRunner>&& io_task_runner,
+                   platform::PlatformHandleWatcher* io_watcher);
   ~ScopedIPCSupport() override;
 
  private:
@@ -69,12 +76,12 @@ class ScopedIPCSupport final : public embedder::ProcessDelegate {
 // call a callback (on the I/O thread) on receiving |OnSlaveDisconnect()|.
 class ScopedMasterIPCSupport final : public embedder::MasterProcessDelegate {
  public:
-  explicit ScopedMasterIPCSupport(
-      util::RefPtr<platform::TaskRunner>&& io_thread_task_runner);
-  ScopedMasterIPCSupport(
-      util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
-      std::function<void(embedder::SlaveInfo slave_info)>&&
-          on_slave_disconnect);
+  ScopedMasterIPCSupport(util::RefPtr<platform::TaskRunner>&& io_task_runner,
+                         platform::PlatformHandleWatcher* io_watcher);
+  ScopedMasterIPCSupport(util::RefPtr<platform::TaskRunner>&& io_task_runner,
+                         platform::PlatformHandleWatcher* io_watcher,
+                         std::function<void(embedder::SlaveInfo slave_info)>&&
+                             on_slave_disconnect);
   ~ScopedMasterIPCSupport() override;
 
  private:
@@ -93,13 +100,13 @@ class ScopedMasterIPCSupport final : public embedder::MasterProcessDelegate {
 // call a callback (on the I/O thread) on receiving |OnMasterDisconnect()|.
 class ScopedSlaveIPCSupport final : public embedder::SlaveProcessDelegate {
  public:
-  ScopedSlaveIPCSupport(
-      util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
-      platform::ScopedPlatformHandle platform_handle);
-  ScopedSlaveIPCSupport(
-      util::RefPtr<platform::TaskRunner>&& io_thread_task_runner,
-      platform::ScopedPlatformHandle platform_handle,
-      std::function<void()>&& on_master_disconnect);
+  ScopedSlaveIPCSupport(util::RefPtr<platform::TaskRunner>&& io_task_runner,
+                        platform::PlatformHandleWatcher* io_watcher,
+                        platform::ScopedPlatformHandle platform_handle);
+  ScopedSlaveIPCSupport(util::RefPtr<platform::TaskRunner>&& io_task_runner,
+                        platform::PlatformHandleWatcher* io_watcher,
+                        platform::ScopedPlatformHandle platform_handle,
+                        std::function<void()>&& on_master_disconnect);
   ~ScopedSlaveIPCSupport() override;
 
  private:

@@ -36,7 +36,8 @@
 #ifndef MOJO_EDK_UTIL_COMMAND_LINE_H_
 #define MOJO_EDK_UTIL_COMMAND_LINE_H_
 
-#include <cstddef>
+#include <stddef.h>
+
 #include <initializer_list>
 #include <string>
 #include <unordered_map>

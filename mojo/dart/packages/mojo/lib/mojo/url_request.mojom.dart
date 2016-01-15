@@ -11,22 +11,23 @@ import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/http_header.mojom.dart' as http_header_mojom;
 
 
+
 class UrlRequestCacheMode extends bindings.MojoEnum {
-  static const DEFAULT = const UrlRequestCacheMode._(0);
-  static const BYPASS_CACHE = const UrlRequestCacheMode._(1);
-  static const ONLY_FROM_CACHE = const UrlRequestCacheMode._(2);
+  static const UrlRequestCacheMode default_ = const UrlRequestCacheMode._(0);
+  static const UrlRequestCacheMode bypassCache = const UrlRequestCacheMode._(1);
+  static const UrlRequestCacheMode onlyFromCache = const UrlRequestCacheMode._(2);
 
   const UrlRequestCacheMode._(int v) : super(v);
 
   static const Map<String, UrlRequestCacheMode> valuesMap = const {
-    "DEFAULT": DEFAULT,
-    "BYPASS_CACHE": BYPASS_CACHE,
-    "ONLY_FROM_CACHE": ONLY_FROM_CACHE,
+    "default_": default_,
+    "bypassCache": bypassCache,
+    "onlyFromCache": onlyFromCache,
   };
   static const List<UrlRequestCacheMode> values = const [
-    DEFAULT,
-    BYPASS_CACHE,
-    ONLY_FROM_CACHE,
+    default_,
+    bypassCache,
+    onlyFromCache,
   ];
 
   static UrlRequestCacheMode valueOf(String name) => valuesMap[name];
@@ -34,11 +35,11 @@ class UrlRequestCacheMode extends bindings.MojoEnum {
   factory UrlRequestCacheMode(int v) {
     switch (v) {
       case 0:
-        return DEFAULT;
+        return default_;
       case 1:
-        return BYPASS_CACHE;
+        return bypassCache;
       case 2:
-        return ONLY_FROM_CACHE;
+        return onlyFromCache;
       default:
         return null;
     }
@@ -56,16 +57,16 @@ class UrlRequestCacheMode extends bindings.MojoEnum {
 
   String toString() {
     switch(this) {
-      case DEFAULT:
-        return 'UrlRequestCacheMode.DEFAULT';
-      case BYPASS_CACHE:
-        return 'UrlRequestCacheMode.BYPASS_CACHE';
-      case ONLY_FROM_CACHE:
-        return 'UrlRequestCacheMode.ONLY_FROM_CACHE';
+      case default_:
+        return 'UrlRequestCacheMode.default_';
+      case bypassCache:
+        return 'UrlRequestCacheMode.bypassCache';
+      case onlyFromCache:
+        return 'UrlRequestCacheMode.onlyFromCache';
     }
   }
 
-  int toJson() => value;
+  int toJson() => mojoEnumValue;
 }
 
 class UrlRequest extends bindings.Struct {

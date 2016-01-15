@@ -10,16 +10,15 @@
 
 #include "base/memory/weak_ptr.h"
 #include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/platform_handle_watcher.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/message_in_transit_queue.h"
 #include "mojo/edk/util/mutex.h"
+#include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/cpp/system/macros.h"
-
-namespace base {
-class MessageLoopForIO;
-}
 
 namespace mojo {
 namespace system {
@@ -92,7 +91,9 @@ class RawChannel {
   // *not* take ownership of |delegate|. Both the I/O thread and |delegate| must
   // remain alive until |Shutdown()| is called (unless this fails); |delegate|
   // will no longer be used after |Shutdown()|.
-  void Init(Delegate* delegate) MOJO_NOT_THREAD_SAFE;
+  void Init(util::RefPtr<platform::TaskRunner>&& io_task_runner,
+            platform::PlatformHandleWatcher* io_watcher,
+            Delegate* delegate) MOJO_NOT_THREAD_SAFE;
 
   // This must be called (on the I/O thread) before this object is destroyed.
   void Shutdown() MOJO_NOT_THREAD_SAFE;
@@ -211,7 +212,10 @@ class RawChannel {
                         size_t platform_handles_written,
                         size_t bytes_written) MOJO_LOCKS_EXCLUDED(write_mutex_);
 
-  base::MessageLoopForIO* message_loop_for_io() { return message_loop_for_io_; }
+  const util::RefPtr<platform::TaskRunner>& io_task_runner() const {
+    return io_task_runner_;
+  }
+  platform::PlatformHandleWatcher* io_watcher() const { return io_watcher_; }
   util::Mutex& write_mutex() MOJO_LOCK_RETURNED(write_mutex_) {
     return write_mutex_;
   }
@@ -316,9 +320,10 @@ class RawChannel {
 
   // Set in |Init()| and never changed (hence usable on any thread without
   // locking):
-  base::MessageLoopForIO* message_loop_for_io_;
+  util::RefPtr<platform::TaskRunner> io_task_runner_;
 
   // Only used on the I/O thread:
+  platform::PlatformHandleWatcher* io_watcher_;
   Delegate* delegate_;
   bool* set_on_shutdown_;
   std::unique_ptr<ReadBuffer> read_buffer_;
