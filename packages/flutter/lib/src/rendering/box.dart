@@ -534,7 +534,7 @@ abstract class RenderBox extends RenderObject {
     assert(constraints != null);
     assert(_size != null);
     assert(() {
-      'See https://flutter.github.io/layout/#unbounded-constraints';
+      'See https://flutter.io/layout/#unbounded-constraints';
       return !_size.isInfinite;
     });
     bool result = constraints.isSatisfiedBy(_size);
