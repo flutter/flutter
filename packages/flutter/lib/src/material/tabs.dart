@@ -441,12 +441,6 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
       _initValueToIndex();
   }
 
-  void dispose() {
-    _performance.stop();
-    PageStorage.of(context)?.writeState(context, _value);
-    super.dispose();
-  }
-
   List<T> get values => config.values;
 
   T get previousValue => _previousValue;
@@ -520,11 +514,13 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   }
 
   void deactivate() {
+    _performance.stop();
     for (TabBarSelectionPerformanceListener listener in _performanceListeners.toList()) {
       listener.handleSelectionDeactivate();
       unregisterPerformanceListener(listener);
     }
     assert(_performanceListeners.isEmpty);
+    PageStorage.of(context)?.writeState(context, _value);
   }
 
   Widget build(BuildContext context) {
