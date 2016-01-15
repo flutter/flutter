@@ -15,7 +15,7 @@ enum EventType {
 
 struct DataSnapshot {
   string key;
-  string value;           // TODO(jackson): Support more value types
+  string jsonValue;
 };
 
 struct Error {
@@ -51,4 +51,5 @@ interface Firebase {
   AddChildEventListener(ChildEventListener listener);
   ObserveSingleEventOfType(EventType eventType) => (DataSnapshot snapshot);
   AuthWithOAuthToken(string provider, string credentials) => (Error? error, AuthData? authData);
+  SetValue(string jsonValue) => (Error? error);
 };

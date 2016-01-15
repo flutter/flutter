@@ -41,6 +41,7 @@ class FirebaseImpl : public ::firebase::Firebase {
     const mojo::String& provider,
     const mojo::String& credentials,
     const AuthWithOAuthTokenCallback& callback) override;
+  void FirebaseImpl::SetValue(const mojo::String& url);
 
  private:
   mojo::StrongBinding<::firebase::Firebase> binding_;

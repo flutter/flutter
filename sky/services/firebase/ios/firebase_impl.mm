@@ -159,6 +159,10 @@ void FirebaseImpl::AuthWithOAuthToken(
   }];
 }
 
+void FirebaseImpl::SetValue(const mojo::String& url) {
+  [client_ setValue:@(url.data())];
+}
+
 void FirebaseFactory::Create(
     mojo::ApplicationConnection* connection,
     mojo::InterfaceRequest<::firebase::Firebase> request) {
