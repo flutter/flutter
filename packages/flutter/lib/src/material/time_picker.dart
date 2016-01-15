@@ -110,7 +110,7 @@ class _TimePickerState extends State<TimePicker> {
   _TimePickerMode _mode = _TimePickerMode.hour;
 
   void _handleModeChanged(_TimePickerMode mode) {
-    userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
+    userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
     setState(() {
       _mode = mode;
     });

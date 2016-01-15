@@ -88,7 +88,7 @@ void handlePointerPacket(ByteData serializedPacket) {
   PointerPacket packet = PointerPacket.deserialize(message);
 
   for (Pointer pointer in packet.pointers) {
-    if (pointer.type == PointerType.UP) {
+    if (pointer.type == PointerType.up) {
       imageCache.load(url2).first.then(handleImageLoad);
     }
   }

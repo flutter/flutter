@@ -60,7 +60,7 @@ class DemoBinding extends BindingBase with Scheduler, Renderer {
     );
     PointerPacket packet = PointerPacket.deserialize(message);
     for (Pointer pointer in packet.pointers) {
-      if (pointer.type == PointerType.MOVE)
+      if (pointer.type == PointerType.move)
         image.growth = math.max(0.0, image.growth + pointer.x - touches[pointer.pointer].x);
       touches[pointer.pointer] = new Touch(pointer.x, pointer.y);
     }

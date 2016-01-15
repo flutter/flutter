@@ -29,7 +29,7 @@ class MockKeyboard implements KeyboardService {
 
 void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
-  serviceMocker.registerMockService(KeyboardServiceName, mockKeyboard);
+  serviceMocker.registerMockService(KeyboardService.serviceName, mockKeyboard);
 
   test('Editable text has consistent width', () {
     testWidgets((WidgetTester tester) {

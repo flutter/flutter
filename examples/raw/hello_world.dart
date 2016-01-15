@@ -57,10 +57,10 @@ void handlePointerPacket(ByteData serializedPacket) {
   PointerPacket packet = PointerPacket.deserialize(message);
 
   for (Pointer pointer in packet.pointers) {
-    if (pointer.type == PointerType.DOWN) {
+    if (pointer.type == PointerType.down) {
       color = new ui.Color.fromARGB(255, 0, 0, 255);
       ui.window.scheduleFrame();
-    } else if (pointer.type == PointerType.UP) {
+    } else if (pointer.type == PointerType.up) {
       color = new ui.Color.fromARGB(255, 0, 255, 0);
       ui.window.scheduleFrame();
     }

@@ -113,7 +113,7 @@ class MineDiggerState extends State<MineDigger> {
                 probe(ix, iy);
             },
             onLongPress: () {
-              userFeedback.performHapticFeedback(HapticFeedbackType.LONG_PRESS);
+              userFeedback.performHapticFeedback(HapticFeedbackType.longPress);
               flag(ix, iy);
             },
             child: new Listener(
