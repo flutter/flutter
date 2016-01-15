@@ -787,6 +787,9 @@ class BoxDecoration extends Decoration {
     );
   }
 
+  /// Stringifies the BoxDecoration. By default, the output will be on one line.
+  /// If the method is passed a non-empty string argument, then the output will
+  /// span multiple lines, each prefixed by that argument.
   String toString([String prefix = '']) {
     List<String> result = <String>[];
     if (backgroundColor != null)
@@ -803,6 +806,8 @@ class BoxDecoration extends Decoration {
       result.add('${prefix}gradient: $gradient');
     if (shape != BoxShape.rectangle)
       result.add('${prefix}shape: $shape');
+    if (prefix == '')
+      return '$runtimeType(${result.join(', ')})';
     if (result.isEmpty)
       return '$prefix<no decorations specified>';
     return result.join('\n');
