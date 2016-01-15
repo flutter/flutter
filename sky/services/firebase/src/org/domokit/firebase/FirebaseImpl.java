@@ -9,16 +9,17 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import com.firebase.client.ValueEventListener;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Firebase.AuthResultHandler;
 import com.firebase.client.AuthData;
 
+import org.chromium.mojo.bindings.ConnectionErrorHandler;
 import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.firebase.DataSnapshot;
-import org.chromium.mojom.firebase.Firebase;
 import org.chromium.mojom.firebase.EventType;
+import org.chromium.mojom.firebase.Firebase;
+import org.chromium.mojom.firebase.ValueEventListener;
 
 public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     private static final String TAG = "FirebaseImpl";
@@ -26,10 +27,10 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     private com.firebase.client.Firebase mClient;
 
     public FirebaseImpl(Context context) {
-      if (context != mContext)
-          com.firebase.client.Firebase.setAndroidContext(context);
-      mContext = context;
-      Log.v(TAG, "constructed");
+        if (context != mContext)
+            com.firebase.client.Firebase.setAndroidContext(context);
+        mContext = context;
+        Log.v(TAG, "constructed");
     }
 
     @Override
@@ -58,15 +59,72 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     }
 
     @Override
+    public void addValueEventListener(org.chromium.mojom.firebase.ValueEventListener listener) {
+        final org.chromium.mojom.firebase.ValueEventListener.Proxy proxy =
+            (org.chromium.mojom.firebase.ValueEventListener.Proxy)listener;
+        final com.firebase.client.ValueEventListener firebaseListener =
+            new com.firebase.client.ValueEventListener() {
+            @Override
+            public void onCancelled(FirebaseError error) {
+                proxy.onCancelled(toMojoError(error));
+            }
+            @Override
+            public void onDataChange(com.firebase.client.DataSnapshot snapshot) {
+                proxy.onDataChange(toMojoSnapshot(snapshot));
+            }
+        };
+        proxy.getProxyHandler().setErrorHandler(new ConnectionErrorHandler() {
+            @Override
+            public void onConnectionError(MojoException e) {
+                mClient.removeEventListener(firebaseListener);
+            }
+        });
+        mClient.addValueEventListener(firebaseListener);
+    }
+
+    @Override
+    public void addChildEventListener(org.chromium.mojom.firebase.ChildEventListener listener) {
+        final org.chromium.mojom.firebase.ChildEventListener.Proxy proxy =
+            (org.chromium.mojom.firebase.ChildEventListener.Proxy)listener;
+        final com.firebase.client.ChildEventListener firebaseListener =
+            new com.firebase.client.ChildEventListener() {
+            @Override
+            public void onCancelled(FirebaseError error) {
+                proxy.onCancelled(toMojoError(error));
+            }
+            @Override
+            public void onChildAdded(com.firebase.client.DataSnapshot snapshot, String previousChildName) {
+                proxy.onChildAdded(toMojoSnapshot(snapshot), previousChildName);
+            }
+            @Override
+            public void onChildChanged(com.firebase.client.DataSnapshot snapshot, String previousChildName) {
+                proxy.onChildChanged(toMojoSnapshot(snapshot), previousChildName);
+            }
+            @Override
+            public void onChildMoved(com.firebase.client.DataSnapshot snapshot, String previousChildName) {
+                proxy.onChildMoved(toMojoSnapshot(snapshot), previousChildName);
+            }
+            @Override
+            public void onChildRemoved(com.firebase.client.DataSnapshot snapshot) {
+                proxy.onChildRemoved(toMojoSnapshot(snapshot));
+            }
+        };
+        proxy.getProxyHandler().setErrorHandler(new ConnectionErrorHandler() {
+            @Override
+            public void onConnectionError(MojoException e) {
+                mClient.removeEventListener(firebaseListener);
+            }
+        });
+        mClient.addChildEventListener(firebaseListener);
+    }
+
+    @Override
     public void observeSingleEventOfType(int eventType, ObserveSingleEventOfTypeResponse response) {
         final ObserveSingleEventOfTypeResponse responseCopy = response;
-        mClient.addListenerForSingleValueEvent(new ValueEventListener() {
+        mClient.addListenerForSingleValueEvent(new com.firebase.client.ValueEventListener() {
             @Override
-            public void onDataChange(com.firebase.client.DataSnapshot dataSnapshot) {
-                DataSnapshot mojoSnapshot = new DataSnapshot();
-                mojoSnapshot.key = dataSnapshot.getKey();
-                mojoSnapshot.value = (String)dataSnapshot.getValue();
-                responseCopy.call(mojoSnapshot);
+            public void onDataChange(com.firebase.client.DataSnapshot snapshot) {
+                responseCopy.call(toMojoSnapshot(snapshot));
             }
 
             @Override
@@ -98,5 +156,20 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
             responseCopy.call(mojoError, null);
           }
         });
+    }
+
+    DataSnapshot toMojoSnapshot(com.firebase.client.DataSnapshot snapshot) {
+        DataSnapshot mojoSnapshot = new DataSnapshot();
+        mojoSnapshot.key = snapshot.getKey();
+        mojoSnapshot.value = (String)snapshot.getValue();
+        return mojoSnapshot;
+    }
+
+    org.chromium.mojom.firebase.Error toMojoError(FirebaseError error) {
+        org.chromium.mojom.firebase.Error mojoError =
+          new org.chromium.mojom.firebase.Error();
+        mojoError.code = error.getCode();
+        mojoError.message = error.getMessage();
+        return mojoError;
     }
 }
