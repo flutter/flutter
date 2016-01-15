@@ -4,8 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import 'widget_demo.dart';
-
 class ChipDemo extends StatefulComponent {
   _ChipDemoState createState() => new _ChipDemoState();
 }
@@ -37,19 +35,14 @@ class _ChipDemoState extends State<ChipDemo> {
       ));
     }
 
-    return new Block(chips.map((Widget widget) {
-      return new Container(
-        height: 100.0,
-        child: new Center(
-          child: widget
-        )
-      );
-    }).toList());
+    return new Scaffold(
+      toolBar: new ToolBar(center: new Text("Chips")),
+      body: new Block(chips.map((Widget widget) {
+        return new Container(
+          height: 100.0,
+          child: new Center(child: widget)
+        );
+      }).toList())
+    );
   }
 }
-
-final WidgetDemo kChipDemo = new WidgetDemo(
-  title: 'Chips',
-  routeName: '/chips',
-  builder: (_) => new ChipDemo()
-);

@@ -5,11 +5,7 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
-import 'widget_demo.dart';
-
-final List<String> _iconNames = <String>["event", "home", "android", "alarm", "face", "language"];
-
-class TabViewDemo extends StatelessComponent {
+class PageSelectorDemo extends StatelessComponent {
   Widget _buildTabIndicator(BuildContext context, String iconName) {
     final Color color = Theme.of(context).primaryColor;
     final ColorTween _selectedColor = new ColorTween(begin: Colors.transparent, end: color);
@@ -61,49 +57,48 @@ class TabViewDemo extends StatelessComponent {
   }
 
   Widget build(BuildContext notUsed) { // Can't find the TabBarSelection from this context.
-    return new TabBarSelection(
-      values: _iconNames,
-      child: new Builder(
-        builder: (BuildContext context) {
-          return new Column(
-            children: <Widget>[
-              new Container(
-                margin: const EdgeDims.only(top: 16.0),
-                child: new Row(
-                  children: <Widget>[
-                    new IconButton(
-                      icon: "navigation/arrow_back",
-                      onPressed: () { _handleArrowButtonPress(context, -1); },
-                      tooltip: 'Back'
-                    ),
-                    new Row(
-                      children: _iconNames.map((String name) => _buildTabIndicator(context, name)).toList(),
-                      justifyContent: FlexJustifyContent.collapse
-                    ),
-                    new IconButton(
-                      icon: "navigation/arrow_forward",
-                      onPressed: () { _handleArrowButtonPress(context, 1); },
-                      tooltip: 'Forward'
-                    )
-                  ],
-                  justifyContent: FlexJustifyContent.spaceBetween
+    final List<String> iconNames = <String>["event", "home", "android", "alarm", "face", "language"];
+
+    return new Scaffold(
+      toolBar: new ToolBar(center: new Text("Page Selector")),
+      body: new TabBarSelection(
+        values: iconNames,
+        child: new Builder(
+          builder: (BuildContext context) {
+            return new Column(
+              children: <Widget>[
+                new Container(
+                  margin: const EdgeDims.only(top: 16.0),
+                  child: new Row(
+                    children: <Widget>[
+                      new IconButton(
+                        icon: "navigation/arrow_back",
+                        onPressed: () { _handleArrowButtonPress(context, -1); },
+                        tooltip: 'Back'
+                      ),
+                      new Row(
+                        children: iconNames.map((String name) => _buildTabIndicator(context, name)).toList(),
+                        justifyContent: FlexJustifyContent.collapse
+                      ),
+                      new IconButton(
+                        icon: "navigation/arrow_forward",
+                        onPressed: () { _handleArrowButtonPress(context, 1); },
+                        tooltip: 'Forward'
+                      )
+                    ],
+                    justifyContent: FlexJustifyContent.spaceBetween
+                  )
+                ),
+                new Flexible(
+                  child: new TabBarView(
+                    children: iconNames.map(_buildTabView).toList()
+                  )
                 )
-              ),
-              new Flexible(
-                child: new TabBarView(
-                  children: _iconNames.map(_buildTabView).toList()
-                )
-              )
-            ]
-          );
-        }
+              ]
+            );
+          }
+        )
       )
     );
   }
 }
-
-final WidgetDemo kPageSelectorDemo = new WidgetDemo(
-  title: 'Page Selector',
-  routeName: '/page-selector',
-  builder: (_) => new TabViewDemo()
-);
