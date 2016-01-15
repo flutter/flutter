@@ -49,7 +49,7 @@ static void addRange(vector<uint32_t> &coverage, uint32_t start, uint32_t end) {
     }
 }
 
-// Get the coverage information out of a Format 12 subtable, storing it in the coverage vector
+// Get the coverage information out of a Format 4 subtable, storing it in the coverage vector
 static bool getCoverageFormat4(vector<uint32_t>& coverage, const uint8_t* data, size_t size) {
     const size_t kSegCountOffset = 6;
     const size_t kEndCountOffset = 14;
@@ -63,29 +63,33 @@ static bool getCoverageFormat4(vector<uint32_t>& coverage, const uint8_t* data, 
         return false;
     }
     for (size_t i = 0; i < segCount; i++) {
-        int end = readU16(data, kEndCountOffset + 2 * i);
-        int start = readU16(data, kHeaderSize + 2 * (segCount + i));
-        int rangeOffset = readU16(data, kHeaderSize + 2 * (3 * segCount + i));
+        uint32_t end = readU16(data, kEndCountOffset + 2 * i);
+        uint32_t start = readU16(data, kHeaderSize + 2 * (segCount + i));
+        if (end < start) {
+            // invalid segment range: size must be positive
+            return false;
+        }
+        uint32_t rangeOffset = readU16(data, kHeaderSize + 2 * (3 * segCount + i));
         if (rangeOffset == 0) {
-            int delta = readU16(data, kHeaderSize + 2 * (2 * segCount + i));
+            uint32_t delta = readU16(data, kHeaderSize + 2 * (2 * segCount + i));
             if (((end + delta) & 0xffff) > end - start) {
                 addRange(coverage, start, end + 1);
             } else {
-                for (int j = start; j < end + 1; j++) {
+                for (uint32_t j = start; j < end + 1; j++) {
                     if (((j + delta) & 0xffff) != 0) {
                         addRange(coverage, j, j + 1);
                     }
                 }
             }
         } else {
-            for (int j = start; j < end + 1; j++) {
+            for (uint32_t j = start; j < end + 1; j++) {
                 uint32_t actualRangeOffset = kHeaderSize + 6 * segCount + rangeOffset +
                     (i + j - start) * 2;
                 if (actualRangeOffset + 2 > size) {
                     // invalid rangeOffset is considered a "warning" by OpenType Sanitizer
                     continue;
                 }
-                int glyphId = readU16(data, actualRangeOffset);
+                uint32_t glyphId = readU16(data, actualRangeOffset);
                 if (glyphId != 0) {
                     addRange(coverage, j, j + 1);
                 }
@@ -115,6 +119,10 @@ static bool getCoverageFormat12(vector<uint32_t>& coverage, const uint8_t* data,
         uint32_t groupOffset = kFirstGroupOffset + i * kGroupSize;
         uint32_t start = readU32(data, groupOffset + kStartCharCodeOffset);
         uint32_t end = readU32(data, groupOffset + kEndCharCodeOffset);
+        if (end < start) {
+            // invalid group range: size must be positive
+            return false;
+        }
         addRange(coverage, start, end + 1);  // file is inclusive, vector is exclusive
     }
     return true;
@@ -128,18 +136,19 @@ bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data,
     const size_t kPlatformIdOffset = 0;
     const size_t kEncodingIdOffset = 2;
     const size_t kOffsetOffset = 4;
-    const int kMicrosoftPlatformId = 3;
-    const int kUnicodeBmpEncodingId = 1;
-    const int kUnicodeUcs4EncodingId = 10;
+    const uint16_t kMicrosoftPlatformId = 3;
+    const uint16_t kUnicodeBmpEncodingId = 1;
+    const uint16_t kUnicodeUcs4EncodingId = 10;
+    const uint32_t kNoTable = UINT32_MAX;
     if (kHeaderSize > cmap_size) {
         return false;
     }
-    int numTables = readU16(cmap_data, kNumTablesOffset);
+    uint32_t numTables = readU16(cmap_data, kNumTablesOffset);
     if (kHeaderSize + numTables * kTableSize > cmap_size) {
         return false;
     }
-    int bestTable = -1;
-    for (int i = 0; i < numTables; i++) {
+    uint32_t bestTable = kNoTable;
+    for (uint32_t i = 0; i < numTables; i++) {
         uint16_t platformId = readU16(cmap_data, kHeaderSize + i * kTableSize + kPlatformIdOffset);
         uint16_t encodingId = readU16(cmap_data, kHeaderSize + i * kTableSize + kEncodingIdOffset);
         if (platformId == kMicrosoftPlatformId && encodingId == kUnicodeUcs4EncodingId) {
@@ -152,11 +161,11 @@ bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data,
 #ifdef VERBOSE_DEBUG
     ALOGD("best table = %d\n", bestTable);
 #endif
-    if (bestTable < 0) {
+    if (bestTable == kNoTable) {
         return false;
     }
     uint32_t offset = readU32(cmap_data, kHeaderSize + bestTable * kTableSize + kOffsetOffset);
-    if (offset + 2 > cmap_size) {
+    if (offset > cmap_size - 2) {
         return false;
     }
     uint16_t format = readU16(cmap_data, offset);
