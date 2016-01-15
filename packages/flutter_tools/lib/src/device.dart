@@ -433,7 +433,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> startApp(ApplicationPackage app) async {
-    logging.fine('Building ${app.name} for ${id}');
+    logging.fine('Building ${app.name} for $id');
 
     // Step 1: Build the Xcode project
     bool buildResult = await _buildIOSXcodeProject(app, false);
