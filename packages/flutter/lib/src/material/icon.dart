@@ -1,8 +1,10 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 
 import 'theme.dart';
 import 'icon_theme.dart';
@@ -22,6 +24,60 @@ const Map<IconSize, int> _kIconSize = const <IconSize, int>{
   IconSize.s48: 48,
 };
 
+class DensityQualifier extends BreakpointQualifier {
+  DensityQualifier(BuildContext context) : super(
+    candidates: [ 'mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi' ],
+    values: [ 1.0, 1.5, 2.0, 3.0, 4.0 ]
+  ) {
+    MediaQueryData media = MediaQuery.of(context);
+    value = media.devicePixelRatio;
+  }
+}
+
+class ColorQualifier extends Qualifier {
+  ColorQualifier({ this.context, this.color });
+  final BuildContext context;
+  final IconThemeColor color;
+  String resolve() {
+    IconThemeColor iconThemeColor = color;
+    if (iconThemeColor == null) {
+      IconThemeData iconThemeData = IconTheme.of(context);
+      iconThemeColor = iconThemeData == null ? null : iconThemeData.color;
+    }
+    if (iconThemeColor == null) {
+      ThemeBrightness themeBrightness = Theme.of(context).brightness;
+      iconThemeColor = themeBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
+    }
+    switch(iconThemeColor) {
+      case IconThemeColor.white:
+        return "white";
+      case IconThemeColor.black:
+        return "black";
+    }
+  }
+}
+
+class MaterialIconResolver extends AssetResolver {
+  MaterialIconResolver({ this.iconSize, this.context, this.color });
+
+  int iconSize;
+  BuildContext context;
+  IconThemeColor color;
+
+  Future<String> resolve(String icon) {
+    String category = '';
+    String subtype = '';
+    List<String> parts = icon.split('/');
+    if (parts.length == 2) {
+      category = parts[0];
+      subtype = parts[1];
+    }
+    String density = new DensityQualifier(context).resolve();
+    String colorSuffix = new ColorQualifier(context: context, color: color).resolve();
+    return new Future.sync(() => '$category/drawable-$density/ic_${subtype}_${colorSuffix}_${iconSize}dp.png');
+  }
+}
+
 class Icon extends StatelessComponent {
   Icon({
     Key key,
@@ -39,55 +95,16 @@ class Icon extends StatelessComponent {
   final IconThemeColor color;
   final ColorFilter colorFilter;
 
-  String _getColorSuffix(BuildContext context) {
-    IconThemeColor iconThemeColor = color;
-    if (iconThemeColor == null) {
-      IconThemeData iconThemeData = IconTheme.of(context);
-      iconThemeColor = iconThemeData == null ? null : iconThemeData.color;
-    }
-    if (iconThemeColor == null) {
-      ThemeBrightness themeBrightness = Theme.of(context).brightness;
-      iconThemeColor = themeBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
-    }
-    switch(iconThemeColor) {
-      case IconThemeColor.white:
-        return "white";
-      case IconThemeColor.black:
-        return "black";
-    }
-  }
-
-  String _getDisplayDensity(BuildContext context) {
-    MediaQueryData media = MediaQuery.of(context);
-    // Values below are the midpoints between the normative ratios
-    // for the given selectors, with 1.0 equating to 160dpi. See:
-    // http://developer.android.com/intl/es/guide/practices/screens_support.html
-    if (media.devicePixelRatio > 3.5)
-      return 'xxxhdpi';
-    if (media.devicePixelRatio > 2.5)
-      return 'xxhdpi';
-    if (media.devicePixelRatio > 1.75)
-      return 'xhdpi';
-    if (media.devicePixelRatio > 1.25)
-      return 'hdpi';
-    return 'mdpi';
-  }
-
   Widget build(BuildContext context) {
-    String category = '';
-    String subtype = '';
-    List<String> parts = icon.split('/');
-    if (parts.length == 2) {
-      category = parts[0];
-      subtype = parts[1];
-    }
-    // TODO(kgiesing): Should selector logic be moved down a level so that
-    // any generic asset can be resolved using consistent contextual logic?
-    String density = _getDisplayDensity(context);
-    String colorSuffix = _getColorSuffix(context);
+    MaterialIconResolver resolver = new MaterialIconResolver(
+      context: context,
+      iconSize: _kIconSize[size],
+      color: color
+    );
     int iconSize = _kIconSize[size];
     return new AssetImage(
-      name: '$category/drawable-$density/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
+      name: icon,
+      resolver: resolver,
       width: iconSize.toDouble(),
       height: iconSize.toDouble(),
       colorFilter: colorFilter
