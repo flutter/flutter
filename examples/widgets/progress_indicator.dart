@@ -6,10 +6,10 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
 class ProgressIndicatorApp extends StatefulComponent {
-  ProgressIndicatorAppState createState() => new ProgressIndicatorAppState();
+  _ProgressIndicatorAppState createState() => new _ProgressIndicatorAppState();
 }
 
-class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
+class _ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
   void initState() {
     super.initState();
     valueAnimation = new ValuePerformance<double>()
@@ -98,14 +98,11 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
           primarySwatch: Colors.blue,
           accentColor: Colors.redAccent[200]
         ),
-        child: new Title(
-          title: 'Progress Indicators',
-          child: new Scaffold(
-            toolBar: new ToolBar(center: new Text('Progress Indicators')),
-            body: new DefaultTextStyle(
-              style: Theme.of(context).text.title,
-              child: body
-            )
+        child: new Scaffold(
+          toolBar: new ToolBar(center: new Text('Progress Indicators')),
+          body: new DefaultTextStyle(
+            style: Theme.of(context).text.title,
+            child: body
           )
         )
       )
@@ -114,5 +111,10 @@ class ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
 }
 
 void main() {
-  runApp(new ProgressIndicatorApp());
+  runApp(new MaterialApp(
+    title: 'Progress Indicators',
+    routes: {
+      '/': (RouteArguments args) => new ProgressIndicatorApp()
+    }
+  ));
 }
