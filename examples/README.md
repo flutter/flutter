@@ -6,7 +6,7 @@ individual Dart application package.
 
 To run a sample with the `flutter` tool, run `pub get` inside its directory,
 then run `flutter start`. (See the
-[getting started guide](https://flutter.github.io/getting-started/) to install
+[getting started guide](https://flutter.io/getting-started/) to install
 the `flutter` tool.)
 
 Available examples include:
