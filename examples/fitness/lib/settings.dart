@@ -63,7 +63,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
         content: new Input(
           key: weightGoalKey,
           placeholder: 'Goal weight in lbs',
-          keyboardType: KeyboardType.NUMBER,
+          keyboardType: KeyboardType.number,
           onChanged: _handleGoalWeightChanged
         ),
         actions: <Widget>[

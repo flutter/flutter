@@ -40,14 +40,14 @@ class _DatePickerState extends State<DatePicker> {
   _DatePickerMode _mode = _DatePickerMode.day;
 
   void _handleModeChanged(_DatePickerMode mode) {
-    userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
+    userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
     setState(() {
       _mode = mode;
     });
   }
 
   void _handleYearChanged(DateTime dateTime) {
-    userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
+    userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
     setState(() {
       _mode = _DatePickerMode.day;
     });
@@ -56,7 +56,7 @@ class _DatePickerState extends State<DatePicker> {
   }
 
   void _handleDayChanged(DateTime dateTime) {
-    userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
+    userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
     if (config.onChanged != null)
       config.onChanged(dateTime);
   }

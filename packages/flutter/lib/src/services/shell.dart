@@ -62,13 +62,13 @@ class _Shell {
 
     ServiceProviderProxy services = new ServiceProviderProxy.unbound();
     _shell.connectToApplication(url, services, null);
-    var pipe = new core.MojoMessagePipe();
+    core.MojoMessagePipe pipe = new core.MojoMessagePipe();
     proxy.impl.bind(pipe.endpoints[0]);
-    services.ptr.connectToService(proxy.name, pipe.endpoints[1]);
+    services.ptr.connectToService(proxy.serviceName, pipe.endpoints[1]);
     services.close();
   }
 
-  void connectToService(String url, Object proxy) {
+  void connectToService(String url, bindings.ProxyBase proxy) {
     if (overrideConnectToService != null && overrideConnectToService(url, proxy))
       return;
     _connectToService(url, proxy);

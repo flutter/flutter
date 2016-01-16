@@ -42,7 +42,7 @@ class PointerEventConverter {
       assert(_pointerKindMap.containsKey(datum.kind));
       PointerDeviceKind kind = _pointerKindMap[datum.kind];
       switch (datum.type) {
-        case PointerType.DOWN:
+        case PointerType.down:
           assert(!_pointers.containsKey(datum.pointer));
           _PointerState state = _pointers.putIfAbsent(
             datum.pointer,
@@ -84,7 +84,7 @@ class PointerEventConverter {
             tilt: datum.tilt
           );
           break;
-        case PointerType.MOVE:
+        case PointerType.move:
           // If the service starts supporting hover pointers, then it must also
           // start sending us ADDED and REMOVED data points.
           // See also: https://github.com/flutter/flutter/issues/720
@@ -114,14 +114,14 @@ class PointerEventConverter {
             tilt: datum.tilt
           );
           break;
-        case PointerType.UP:
-        case PointerType.CANCEL:
+        case PointerType.up:
+        case PointerType.cancel:
           assert(_pointers.containsKey(datum.pointer));
           _PointerState state = _pointers[datum.pointer];
           assert(state.down);
           assert(position == state.lastPosition);
           state.setUp();
-          if (datum.type == PointerType.UP) {
+          if (datum.type == PointerType.up) {
             yield new PointerUpEvent(
               timeStamp: timeStamp,
               pointer: state.pointer,
@@ -175,9 +175,9 @@ class PointerEventConverter {
   }
 
   static const Map<PointerKind, PointerDeviceKind> _pointerKindMap = const <PointerKind, PointerDeviceKind>{
-    PointerKind.TOUCH: PointerDeviceKind.touch,
-    PointerKind.MOUSE: PointerDeviceKind.mouse,
-    PointerKind.STYLUS: PointerDeviceKind.stylus,
-    PointerKind.INVERTED_STYLUS: PointerDeviceKind.invertedStylus,
+    PointerKind.touch: PointerDeviceKind.touch,
+    PointerKind.mouse: PointerDeviceKind.mouse,
+    PointerKind.stylus: PointerDeviceKind.stylus,
+    PointerKind.invertedStylus: PointerDeviceKind.invertedStylus,
   };
 }

@@ -126,7 +126,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
       gestureArena: Gesturer.instance.gestureArena,
       longTapDelay: kLongPressTimeout,
       onLongTapDown: (Point position, int pointer) {
-        userFeedback.performHapticFeedback(HapticFeedbackType.VIRTUAL_KEY);
+        userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
         starter(position, pointer);
       }
     );

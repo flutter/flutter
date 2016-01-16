@@ -1,4 +1,5 @@
 import 'package:flutter/src/services/shell.dart' as shell;
+import 'package:mojo/bindings.dart' as bindings;
 
 // Tests can use ServiceMocker to register replacement implementations
 // of Mojo services.
@@ -10,12 +11,12 @@ class _ServiceMocker {
   // Map of interface names to mock implementations.
   Map<String, Object> _interfaceMock = new Map<String, Object>();
 
-  bool _connectToService(String url, dynamic proxy) {
-    Object mock = _interfaceMock[proxy.impl.name];
+  bool _connectToService(String url, bindings.ProxyBase proxy) {
+    Object mock = _interfaceMock[proxy.serviceName];
     if (mock != null) {
       // Replace the proxy's implementation of the service interface with the
-      // mock.
-      proxy.ptr = mock;
+      // mock. The mojom bindings put the "ptr" field on all proxies.
+      (proxy as dynamic).ptr = mock;
       return true;
     } else {
       return false;

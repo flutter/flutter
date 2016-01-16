@@ -21,7 +21,7 @@ class Input extends Scrollable {
     this.hideText: false,
     this.isDense: false,
     this.onChanged,
-    this.keyboardType: KeyboardType.TEXT,
+    this.keyboardType: KeyboardType.text,
     this.onSubmitted
   }) : super(
     key: key,
