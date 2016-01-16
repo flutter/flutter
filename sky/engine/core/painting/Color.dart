@@ -10,7 +10,7 @@ Color _scaleAlpha(Color a, double factor) {
 
 /// An immutable 32 bit color value in ARGB
 class Color {
-  /// Construct a color from the lower 32 bits of an int
+  /// Construct a color from the lower 32 bits of an int.
   ///
   /// Bits 24-31 are the alpha value.
   /// Bits 16-23 are the red value.
@@ -25,25 +25,28 @@ class Color {
                 ((g & 0xff) << 8) |
                 ((b & 0xff) << 0)) & 0xFFFFFFFF);
 
-  final int _value;
-  /// A 32 bit value representing this color
+  /// A 32 bit value representing this color.
   ///
   /// Bits 24-31 are the alpha value.
   /// Bits 16-23 are the red value.
   /// Bits 8-15 are the green value.
   /// Bits 0-7 are the blue value.
   int get value => _value;
+  final int _value;
 
-  /// The alpha channel of this color in an 8 bit value
+  /// The alpha channel of this color in an 8 bit value.
   int get alpha => (0xff000000 & _value) >> 24;
 
-  /// The red channel of this color in an 8 bit value
+  /// The alpha channel of this color as a double.
+  double get opacity => alpha / 0xFF;
+
+  /// The red channel of this color in an 8 bit value.
   int get red => (0x00ff0000 & _value) >> 16;
 
-  /// The green channel of this color in an 8 bit value
+  /// The green channel of this color in an 8 bit value.
   int get green => (0x0000ff00 & _value) >> 8;
 
-  /// The blue channel of this color in an 8 bit value
+  /// The blue channel of this color in an 8 bit value.
   int get blue => (0x000000ff & _value) >> 0;
 
   /// Returns a new color that matches this color with the alpha channel replaced with a.
