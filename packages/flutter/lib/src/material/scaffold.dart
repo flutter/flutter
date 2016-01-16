@@ -21,7 +21,7 @@ import 'icon_button.dart';
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 400);
 
-enum _Child {
+enum _ScaffoldSlot {
   body,
   toolBar,
   bottomSheet,
@@ -43,16 +43,16 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
     Size toolBarSize = Size.zero;
 
-    if (isChild(_Child.toolBar)) {
-      toolBarSize = layoutChild(_Child.toolBar, fullWidthConstraints);
-      positionChild(_Child.toolBar, Offset.zero);
+    if (isChild(_ScaffoldSlot.toolBar)) {
+      toolBarSize = layoutChild(_ScaffoldSlot.toolBar, fullWidthConstraints);
+      positionChild(_ScaffoldSlot.toolBar, Offset.zero);
     }
 
-    if (isChild(_Child.body)) {
+    if (isChild(_ScaffoldSlot.body)) {
       final double bodyHeight = size.height - toolBarSize.height;
       final BoxConstraints bodyConstraints = fullWidthConstraints.tighten(height: bodyHeight);
-      layoutChild(_Child.body, bodyConstraints);
-      positionChild(_Child.body, new Offset(0.0, toolBarSize.height));
+      layoutChild(_ScaffoldSlot.body, bodyConstraints);
+      positionChild(_ScaffoldSlot.body, new Offset(0.0, toolBarSize.height));
     }
 
     // The BottomSheet and the SnackBar are anchored to the bottom of the parent,
@@ -67,30 +67,30 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
-    if (isChild(_Child.bottomSheet)) {
-      bottomSheetSize = layoutChild(_Child.bottomSheet, fullWidthConstraints);
-      positionChild(_Child.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, size.height - bottomSheetSize.height));
+    if (isChild(_ScaffoldSlot.bottomSheet)) {
+      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints);
+      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, size.height - bottomSheetSize.height));
     }
 
-    if (isChild(_Child.snackBar)) {
-      snackBarSize = layoutChild(_Child.snackBar, fullWidthConstraints);
-      positionChild(_Child.snackBar, new Offset(0.0, size.height - snackBarSize.height));
+    if (isChild(_ScaffoldSlot.snackBar)) {
+      snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+      positionChild(_ScaffoldSlot.snackBar, new Offset(0.0, size.height - snackBarSize.height));
     }
 
-    if (isChild(_Child.floatingActionButton)) {
-      final Size fabSize = layoutChild(_Child.floatingActionButton, looseConstraints);
+    if (isChild(_ScaffoldSlot.floatingActionButton)) {
+      final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
       double fabY = size.height - fabSize.height - _kFloatingActionButtonMargin;
       if (snackBarSize.height > 0.0)
         fabY = math.min(fabY, size.height - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
       if (bottomSheetSize.height > 0.0)
         fabY = math.min(fabY, size.height - bottomSheetSize.height - fabSize.height / 2.0);
-      positionChild(_Child.floatingActionButton, new Offset(fabX, fabY));
+      positionChild(_ScaffoldSlot.floatingActionButton, new Offset(fabX, fabY));
     }
 
-    if (isChild(_Child.drawer)) {
-      layoutChild(_Child.drawer, new BoxConstraints.tight(size));
-      positionChild(_Child.drawer, Offset.zero);
+    if (isChild(_ScaffoldSlot.drawer)) {
+      layoutChild(_ScaffoldSlot.drawer, new BoxConstraints.tight(size));
+      positionChild(_ScaffoldSlot.drawer, Offset.zero);
     }
   }
 
@@ -366,8 +366,8 @@ class ScaffoldState extends State<Scaffold> {
     }
 
     final List<LayoutId>children = new List<LayoutId>();
-    _addIfNonNull(children, materialBody, _Child.body);
-    _addIfNonNull(children, _modifiedToolBar, _Child.toolBar);
+    _addIfNonNull(children, materialBody, _ScaffoldSlot.body);
+    _addIfNonNull(children, _modifiedToolBar, _ScaffoldSlot.toolBar);
 
     if (_currentBottomSheet != null ||
         (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)) {
@@ -380,23 +380,23 @@ class ScaffoldState extends State<Scaffold> {
         children: bottomSheets,
         alignment: const FractionalOffset(0.5, 1.0) // bottom-aligned, centered
       );
-      _addIfNonNull(children, stack, _Child.bottomSheet);
+      _addIfNonNull(children, stack, _ScaffoldSlot.bottomSheet);
     }
 
     if (_snackBars.isNotEmpty)
-      _addIfNonNull(children, _snackBars.first._widget, _Child.snackBar);
+      _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
 
     if (config.floatingActionButton != null) {
       Widget fab = new _FloatingActionButtonTransition(
         key: new ValueKey<Key>(config.floatingActionButton.key),
         child: config.floatingActionButton
       );
-      children.add(new LayoutId(child: fab, id: _Child.floatingActionButton));
+      children.add(new LayoutId(child: fab, id: _ScaffoldSlot.floatingActionButton));
     }
 
     if (config.drawer != null) {
       children.add(new LayoutId(
-        id: _Child.drawer,
+        id: _ScaffoldSlot.drawer,
         child: new DrawerController(
           key: _drawerKey,
           child: config.drawer
