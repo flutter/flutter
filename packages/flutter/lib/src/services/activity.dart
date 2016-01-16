@@ -11,7 +11,7 @@ import 'shell.dart';
 
 export 'package:sky_services/activity/activity.mojom.dart';
 
-/// Dart wrapper around Activity mojo service available in Sky on Android.
+/// Dart wrapper around Activity mojo service available in Flutter on Android.
 ///
 /// Most clients will want to use these methods instead of the activity service
 /// directly.
@@ -50,8 +50,10 @@ final PathService pathService = _pathServiceProxy.ptr;
 Color _cachedPrimaryColor;
 String _cachedLabel;
 
-/// Sets the TaskDescription for the current Activity
-void updateTaskDescription(String label, Color color) {
+/// Sets the TaskDescription for the current Activity.
+/// The color, if provided, must be opaque.
+void updateTaskDescription({ String label, Color color }) {
+  assert(color == null || color.alpha == 0xFF);
   if (_cachedPrimaryColor == color && _cachedLabel == label)
     return;
 
