@@ -58,7 +58,7 @@ abstract class Renderer extends Scheduler
 
   void handleMetricsChanged() {
     assert(renderView != null);
-    renderView.rootConstraints = new ViewConstraints(size: ui.window.size);
+    renderView.configuration = new ViewConfiguration(size: ui.window.size);
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
