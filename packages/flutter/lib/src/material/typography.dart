@@ -4,8 +4,6 @@
 
 // See http://www.google.com/design/spec/style/typography.html
 
-import 'dart:ui' show Color;
-
 import 'package:flutter/painting.dart';
 
 import 'colors.dart';
@@ -13,7 +11,10 @@ import 'colors.dart';
 // TODO(eseidel): Font weights are supposed to be language relative!
 // TODO(jackson): Baseline should be language relative!
 // These values are for English-like text.
+// TODO(ianh): There's no font-family specified here.
 class TextTheme {
+
+  const TextTheme._(this.display4, this.display3, this.display2, this.display1, this.headline, this.title, this.subhead, this.body2, this.body1, this.caption, this.button);
 
   const TextTheme._black()
     : display4 = const TextStyle(inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
@@ -53,26 +54,26 @@ class TextTheme {
   final TextStyle caption;
   final TextStyle button;
 
+  static TextTheme lerp(TextTheme begin, TextTheme end, double t) {
+    return new TextTheme._(
+      TextStyle.lerp(begin.display4, end.display4, t),
+      TextStyle.lerp(begin.display3, end.display3, t),
+      TextStyle.lerp(begin.display2, end.display2, t),
+      TextStyle.lerp(begin.display1, end.display1, t),
+      TextStyle.lerp(begin.headline, end.headline, t),
+      TextStyle.lerp(begin.title, end.title, t),
+      TextStyle.lerp(begin.subhead, end.subhead, t),
+      TextStyle.lerp(begin.body2, end.body2, t),
+      TextStyle.lerp(begin.body1, end.body1, t),
+      TextStyle.lerp(begin.caption, end.caption, t),
+      TextStyle.lerp(begin.button, end.button, t)
+    );
+  }
+
 }
 
 class Typography {
   Typography._();
-
   static const TextTheme black = const TextTheme._black();
   static const TextTheme white = const TextTheme._white();
-
-  // TODO(abarth): Maybe this should be hard-coded in Scaffold?
-  static const String typeface = 'font-family: sans-serif';
-
-  // TODO(ianh): Remove this when we remove fn2, now that it's hard-coded in App.
-  static const TextStyle error = const TextStyle(
-    color: const Color(0xD0FF0000),
-    fontFamily: 'monospace',
-    fontSize: 48.0,
-    fontWeight: FontWeight.w900,
-    textAlign: TextAlign.right,
-    decoration: TextDecoration.underline,
-    decorationColor: const Color(0xFFFF00),
-    decorationStyle: TextDecorationStyle.double
-  );
 }

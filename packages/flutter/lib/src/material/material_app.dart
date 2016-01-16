@@ -141,8 +141,9 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
       data: new MediaQueryData(size: _size),
       child: new LocaleQuery(
         data: _localeData,
-        child: new Theme(
+        child: new AnimatedTheme(
           data: theme,
+          duration: kThemeAnimationDuration,
           child: new DefaultTextStyle(
             style: _errorTextStyle,
             child: new DefaultAssetBundle(

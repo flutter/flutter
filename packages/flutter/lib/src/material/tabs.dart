@@ -717,9 +717,17 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     ThemeData themeData = Theme.of(context);
     Color backgroundColor = Material.of(context).color;
-    Color indicatorColor = themeData.accentColor;
-    if (indicatorColor == backgroundColor)
+    Color indicatorColor = themeData.indicatorColor;
+    if (indicatorColor == backgroundColor) {
+      // ThemeData tries to avoid this by having indicatorColor avoid being the
+      // primaryColor. However, it's possible that the tab strip is on a
+      // Material that isn't the primaryColor. In that case, if the indicator
+      // color ends up clashing, then this overrides it. When that happens,
+      // automatic transitions of the theme will likely look ugly as the
+      // indicator color suddenly snaps to white at one end, but it's not clear
+      // how to avoid that any further.
       indicatorColor = Colors.white;
+    }
 
     TextStyle textStyle = themeData.primaryTextTheme.body1;
     IconThemeData iconTheme = themeData.primaryIconTheme;

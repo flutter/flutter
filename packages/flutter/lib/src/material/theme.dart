@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme_data.dart';
 
 export 'theme_data.dart' show ThemeData, ThemeBrightness;
+
+const kThemeAnimationDuration = const Duration(milliseconds: 200);
 
 class Theme extends InheritedWidget {
   Theme({
@@ -35,5 +38,57 @@ class Theme extends InheritedWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$data');
+  }
+}
+
+/// An animated value that interpolates [BoxConstraint]s.
+class AnimatedThemeDataValue extends AnimatedValue<ThemeData> {
+  AnimatedThemeDataValue(ThemeData begin, { ThemeData end, Curve curve, Curve reverseCurve })
+    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+
+  ThemeData lerp(double t) => ThemeData.lerp(begin, end, t);
+}
+
+/// Animated version of [Theme] which automatically transitions the colours,
+/// etc, over a given duration whenever the given theme changes.
+class AnimatedTheme extends AnimatedWidgetBase {
+  AnimatedTheme({
+    Key key,
+    this.data,
+    Curve curve: Curves.linear,
+    Duration duration,
+    this.child
+  }) : super(key: key, curve: curve, duration: duration) {
+    assert(child != null);
+    assert(data != null);
+  }
+
+  final ThemeData data;
+
+  final Widget child;
+
+  _AnimatedThemeState createState() => new _AnimatedThemeState();
+}
+
+class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
+  AnimatedThemeDataValue _data;
+
+  void forEachVariable(VariableVisitor visitor) {
+    // TODO(ianh): Use constructor tear-offs when it becomes possible
+    _data = visitor(_data, config.data, (dynamic value) => new AnimatedThemeDataValue(value));
+    assert(_data != null);
+  }
+
+  Widget build(BuildContext context) {
+    return new Theme(
+      child: config.child,
+      data: _data.value
+    );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (_data != null)
+      description.add('$_data');
   }
 }
