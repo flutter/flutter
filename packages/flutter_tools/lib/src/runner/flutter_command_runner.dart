@@ -147,9 +147,9 @@ class FlutterCommandRunner extends CommandRunner {
       Logger.root.level = Level.FINE;
 
     _globalResults = globalResults;
-    ArtifactStore.flutterRoot = globalResults['flutter-root'];
+    ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
     if (globalResults.wasParsed('package-root'))
-      ArtifactStore.packageRoot = globalResults['package-root'];
+      ArtifactStore.packageRoot = path.normalize(path.absolute(globalResults['package-root']));
 
     if (globalResults['version']) {
       print(getVersion(ArtifactStore.flutterRoot));

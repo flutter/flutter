@@ -34,9 +34,24 @@ class AnalyzeCommand extends FlutterCommand {
     Set<String> pubSpecDirectories = new Set<String>();
     List<String> dartFiles = argResults.rest.toList();
 
+    bool foundAnyInCurrentDirectory = false;
+    bool foundAnyInFlutterRepo = false;
+
     for (String file in dartFiles) {
-      // TODO(ianh): figure out how dartanalyzer decides which .packages file to use when given a random file
-      pubSpecDirectories.add(path.dirname(file));
+      file = path.normalize(path.absolute(file));
+      String root = path.rootPrefix(file);
+      while (file != root) {
+        file = path.dirname(file);
+        if (FileSystemEntity.isFileSync(path.join(file, 'pubspec.yaml'))) {
+          pubSpecDirectories.add(file);
+          if (file == path.normalize(path.absolute(ArtifactStore.flutterRoot))) {
+            foundAnyInFlutterRepo = true;
+          } else if (file == path.normalize(path.absolute(path.current))) {
+            foundAnyInCurrentDirectory = true;
+          }
+          break;
+        }
+      }
     }
 
     if (argResults['flutter-repo']) {
@@ -129,8 +144,6 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
-    bool foundAnyInCurrentDirectory = false;
-
     if (argResults['current-directory']) {
       // ./*.dart
       Directory currentDirectory = new Directory('.');
@@ -204,7 +217,7 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
     if (hadInconsistentRequirements) {
-      if (argResults['flutter-repo'])
+      if (foundAnyInFlutterRepo)
         logging.warning('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))} --upgrade".');
       if (foundAnyInCurrentDirectory)
         logging.warning('You may need to run "pub upgrade".');
