@@ -39,6 +39,10 @@ void PlatformServiceProvider::ConnectToService(
     vsync_.Create(nullptr, mojo::MakeRequest<::vsync::VSyncProvider>(
                                client_handle.Pass()));
   }
+  if (service_name == ::activity::PathService::Name_) {
+    path_.Create(nullptr, mojo::MakeRequest<::activity::PathService>(
+                              client_handle.Pass()));
+  }
 #endif
 }
 

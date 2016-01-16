@@ -5,13 +5,11 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("activity") {
-  testonly = true
-
   deps = [
     ":interfaces",
   ]
 
-  if (is_android) {
+  if (is_android || is_ios) {
     deps += [ ":activity_lib" ]
   }
 }
@@ -38,6 +36,21 @@ if (is_android) {
       "//mojo/public/java:bindings",
       "//mojo/public/java:system",
       ":interfaces_java",
+    ]
+  }
+}
+
+if (is_ios) {
+  source_set("activity_lib") {
+    sources = [
+      "ios/path_service_impl.h",
+      "ios/path_service_impl.mm",
+    ]
+    deps = [
+      "//base:base",
+      "//mojo/public/cpp/application",
+      "//mojo/public/cpp/bindings:bindings",
+      "//sky//services/activity:interfaces",
     ]
   }
 }
