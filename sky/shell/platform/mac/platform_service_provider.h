@@ -10,9 +10,10 @@
 #include "sky/services/ns_net/network_service_impl.h"
 
 #if TARGET_OS_IPHONE
+#include "sky/services/activity/ios/path_service_impl.h"
 #include "sky/services/keyboard/ios/keyboard_service_impl.h"
-#include "sky/services/media/ios/media_service_impl.h"
 #include "sky/services/media/ios/media_player_impl.h"
+#include "sky/services/media/ios/media_service_impl.h"
 #include "sky/services/vsync/ios/vsync_provider_impl.h"
 #endif
 
@@ -38,6 +39,7 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
   sky::services::keyboard::KeyboardServiceFactory keyboard_;
   sky::services::media::MediaPlayerFactory media_player_;
   sky::services::media::MediaServiceFactory media_service_;
+  sky::services::path::PathServiceFactory path_;
   sky::services::vsync::VSyncProviderFactory vsync_;
 #endif
 
