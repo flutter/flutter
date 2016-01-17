@@ -126,11 +126,14 @@ public class ActivityImpl implements Activity {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return;
         }
+        int color = description.primaryColor;
+        if (color != 0) // 0 means color isn't set, use system default
+          color = color | 0xFF000000; // color must be opaque if set
         sCurrentActivity.setTaskDescription(
                 new android.app.ActivityManager.TaskDescription(
                     description.label,
                     null,
-                    description.primaryColor
+                    color
                 )
         );
     }
