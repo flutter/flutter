@@ -908,9 +908,9 @@ class Container extends StatelessComponent {
     if (constraints != null)
       description.add('$constraints');
     if (decoration != null)
-      description.add('has background');
+      description.add('bg: $decoration');
     if (foregroundDecoration != null)
-      description.add('has foreground');
+      description.add('fg: $foregroundDecoration');
     if (margin != null)
       description.add('margin: $margin');
     if (padding != null)
