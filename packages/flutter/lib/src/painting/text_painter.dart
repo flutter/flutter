@@ -10,6 +10,7 @@ import 'text_style.dart';
 /// An immutable span of text.
 abstract class TextSpan {
   // This class must be immutable, because we won't notice when it changes.
+  const TextSpan();
   String toString([String prefix = '']);
   void build(ui.ParagraphBuilder builder);
   ui.ParagraphStyle get paragraphStyle => null;
@@ -17,14 +18,13 @@ abstract class TextSpan {
 
 /// An immutable span of unstyled text.
 class PlainTextSpan extends TextSpan {
-  PlainTextSpan(this.text) {
-    assert(text != null);
-  }
+  const PlainTextSpan(this.text);
 
   /// The text contained in the span.
   final String text;
 
   void build(ui.ParagraphBuilder builder) {
+    assert(text != null);
     builder.addText(text);
   }
 
@@ -42,10 +42,7 @@ class PlainTextSpan extends TextSpan {
 
 /// An immutable text span that applies a style to a list of children.
 class StyledTextSpan extends TextSpan {
-  StyledTextSpan(this.style, this.children) {
-    assert(style != null);
-    assert(children != null);
-  }
+  const StyledTextSpan(this.style, this.children);
 
   /// The style to apply to the children.
   final TextStyle style;
@@ -54,9 +51,13 @@ class StyledTextSpan extends TextSpan {
   final List<TextSpan> children;
 
   void build(ui.ParagraphBuilder builder) {
+    assert(style != null);
+    assert(children != null);
     builder.pushStyle(style.textStyle);
-    for (TextSpan child in children)
+    for (TextSpan child in children) {
+      assert(child != null);
       child.build(builder);
+    }
     builder.pop();
   }
 

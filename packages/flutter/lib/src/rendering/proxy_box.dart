@@ -1304,6 +1304,7 @@ class RenderPointerListener extends RenderProxyBox {
 /// not, we can re-record its display list without re-recording the display list
 /// for the surround tree.
 class RenderRepaintBoundary extends RenderProxyBox {
+  RenderRepaintBoundary({ RenderBox child }) : super(child);
   bool get isRepaintBoundary => true;
 }
 
