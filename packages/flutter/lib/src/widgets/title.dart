@@ -7,7 +7,9 @@ import 'package:flutter/widgets.dart';
 
 /// Controls the description of this app in the operating system.
 class Title extends StatelessComponent {
-  Title({ this.title, this.child, this.color });
+  Title({ this.title, this.child, this.color }) {
+    assert(color == null || color.alpha == 0xFF);
+  }
 
   final Widget child;
 
@@ -18,13 +20,15 @@ class Title extends StatelessComponent {
   final Color color;
 
   Widget build(BuildContext context) {
-    updateTaskDescription(title, color);
+    updateTaskDescription(label: title, color: color);
     return child;
   }
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('"$title"');
-    description.add('color: $color');
+    if (title != null)
+      description.add('"$title"');
+    if (color != null)
+      description.add('color: $color');
   }
 }
