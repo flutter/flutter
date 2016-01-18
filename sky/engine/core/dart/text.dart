@@ -20,50 +20,54 @@ class FontWeight {
   final int index;
 
   /// Thin, the least thick
-  static const w100 = const FontWeight._(0);
+  static const FontWeight w100 = const FontWeight._(0);
 
   /// Extra-light
-  static const w200 = const FontWeight._(1);
+  static const FontWeight w200 = const FontWeight._(1);
 
   /// Light
-  static const w300 = const FontWeight._(2);
+  static const FontWeight w300 = const FontWeight._(2);
 
   /// Normal / regular / plain
-  static const w400 = const FontWeight._(3);
+  static const FontWeight w400 = const FontWeight._(3);
 
   /// Medium
-  static const w500 = const FontWeight._(4);
+  static const FontWeight w500 = const FontWeight._(4);
 
   /// Semi-bold
-  static const w600 = const FontWeight._(5);
+  static const FontWeight w600 = const FontWeight._(5);
 
   /// Bold
-  static const w700 = const FontWeight._(6);
+  static const FontWeight w700 = const FontWeight._(6);
 
   /// Extra-bold
-  static const w800 = const FontWeight._(7);
+  static const FontWeight w800 = const FontWeight._(7);
 
   /// Black, the most thick
-  static const w900 = const FontWeight._(8);
+  static const FontWeight w900 = const FontWeight._(8);
 
-  static const normal = w400;
-  static const bold = w700;
+  static const FontWeight normal = w400;
+  static const FontWeight bold = w700;
 
   static const List<FontWeight> values = const [
     w100, w200, w300, w400, w500, w600, w700, w800, w900
   ];
 
+  static FontWeight lerp(FontWeight begin, FontWeight end, double t) {
+    return values[lerpDouble(begin?.index ?? normal.index, end?.index ?? normal.index, t.clamp(0.0, 1.0)).round()];
+  }
+
   String toString() {
-    return const {
-      0: FontWeight.w100,
-      1: FontWeight.w200,
-      2: FontWeight.w300,
-      3: FontWeight.w400,
-      4: FontWeight.w500,
-      5: FontWeight.w600,
-      6: FontWeight.w700,
-      7: FontWeight.w800,
-      8: FontWeight.w900,
+    return const <int, String>{
+      0: 'FontWeight.w100',
+      1: 'FontWeight.w200',
+      2: 'FontWeight.w300',
+      3: 'FontWeight.w400',
+      4: 'FontWeight.w500',
+      5: 'FontWeight.w600',
+      6: 'FontWeight.w700',
+      7: 'FontWeight.w800',
+      8: 'FontWeight.w900',
     }[index];
   }
 }
