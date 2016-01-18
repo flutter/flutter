@@ -1826,7 +1826,7 @@ class AsyncImage extends StatelessComponent {
 
 /// Displays an image from an [AssetBundle].
 ///
-/// By default, asset image will load the image from the cloest enclosing
+/// By default, asset image will load the image from the closest enclosing
 /// [DefaultAssetBundle].
 class AssetImage extends StatelessComponent {
   // Don't add asserts here unless absolutely necessary, since it will
@@ -1835,6 +1835,7 @@ class AssetImage extends StatelessComponent {
     Key key,
     this.name,
     this.bundle,
+    this.resolver,
     this.width,
     this.height,
     this.colorFilter,
@@ -1852,6 +1853,14 @@ class AssetImage extends StatelessComponent {
   /// If null, the image will be loaded from the closest enclosing
   /// [DefaultAssetBundle].
   final AssetBundle bundle;
+
+  /// The asset resolver to use when identifying the precise asset in the
+  /// bundle.
+  ///
+  /// Typically used to select one of several possible alternatives for this
+  /// image, such as different resolutions. If null, the name of the image
+  /// is used directly as the asset key with no indirection.
+  final AssetResolver resolver;
 
   /// If non-null, require the image to have this width.
   ///
@@ -1892,7 +1901,7 @@ class AssetImage extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new RawImageResource(
-      image: (bundle ?? DefaultAssetBundle.of(context)).loadImage(name),
+      image: (bundle ?? DefaultAssetBundle.of(context)).loadImage(name, resolver),
       width: width,
       height: height,
       colorFilter: colorFilter,

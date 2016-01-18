@@ -12,6 +12,7 @@ import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart';
 
+import 'asset_resolver.dart';
 import 'fetch.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
@@ -20,7 +21,7 @@ import 'shell.dart';
 
 abstract class AssetBundle {
   void close();
-  ImageResource loadImage(String key);
+  ImageResource loadImage(String key, [ AssetResolver resolver ]);
   Future<String> loadString(String key);
   Future<core.MojoDataPipeConsumer> load(String key);
 }
@@ -38,7 +39,7 @@ class NetworkAssetBundle extends AssetBundle {
     return (await fetchUrl(_urlFromKey(key))).body;
   }
 
-  ImageResource loadImage(String key) => imageCache.load(_urlFromKey(key));
+  ImageResource loadImage(String key, [ AssetResolver resolver ]) => imageCache.load(_urlFromKey(key));
 
   Future<String> loadString(String key) async {
     return (await http.get(_urlFromKey(key))).body;
@@ -63,7 +64,7 @@ class MojoAssetBundle extends AssetBundle {
   }
 
   AssetBundleProxy _bundle;
-  Map<String, ImageResource> _imageCache = new Map<String, ImageResource>();
+  Map<String, ui.Image> _imageCache = new Map<String, ui.Image>();
   Map<String, Future<String>> _stringCache = new Map<String, Future<String>>();
 
   void close() {
@@ -72,14 +73,18 @@ class MojoAssetBundle extends AssetBundle {
     _imageCache = null;
   }
 
-  Future<ui.Image> _fetchImage(String key) async {
-    return await decodeImageFromDataPipe(await load(key));
+  Future<ui.Image> _fetchImage(String key, [ AssetResolver resolver ]) async {
+    if (resolver != null)
+      key = await resolver.resolve(key);
+    if (_imageCache.containsKey(key))
+      return _imageCache[key];
+    ui.Image value = await decodeImageFromDataPipe(await load(key));
+    _imageCache[key] = value;
+    return value;
   }
 
-  ImageResource loadImage(String key) {
-    return _imageCache.putIfAbsent(key, () {
-      return new ImageResource(_fetchImage(key));
-    });
+  ImageResource loadImage(String key, [ AssetResolver resolver ]) {
+    return new ImageResource(_fetchImage(key, resolver));
   }
 
   Future<String> _fetchString(String key) async {

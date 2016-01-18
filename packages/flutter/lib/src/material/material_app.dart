@@ -72,13 +72,11 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
 
   GlobalObjectKey _navigator;
 
-  Size _size;
   LocaleQueryData _localeData;
 
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
-    _size = ui.window.size;
     didChangeLocale(ui.window.locale);
     WidgetFlutterBinding.instance.addObserver(this);
   }
@@ -99,7 +97,9 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     return result;
   }
 
-  void didChangeSize(Size size) => setState(() { _size = size; });
+  void didChangeMetrics() {
+      setState(() {});
+  }
 
   void didChangeLocale(ui.Locale locale) {
     if (config.onLocaleChanged != null) {
@@ -137,8 +137,18 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     }
 
     ThemeData theme = config.theme ?? new ThemeData.fallback();
+    final EdgeDims padding = new EdgeDims.TRBL(
+      ui.window.padding.top,
+      ui.window.padding.right,
+      ui.window.padding.bottom,
+      ui.window.padding.left
+    );
     Widget result = new MediaQuery(
-      data: new MediaQueryData(size: _size),
+      data: new MediaQueryData(
+        size: ui.window.size,
+        devicePixelRatio: ui.window.devicePixelRatio,
+        padding: padding
+      ),
       child: new LocaleQuery(
         data: _localeData,
         child: new Theme(

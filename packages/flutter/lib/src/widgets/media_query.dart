@@ -16,10 +16,22 @@ enum Orientation {
 
 /// The result of a media query.
 class MediaQueryData {
-  const MediaQueryData({ this.size });
+  const MediaQueryData({ this.size, this.devicePixelRatio, this.padding });
 
   /// The size of the media (e.g, the size of the screen).
   final Size size;
+
+  /// The number of device pixels for each logical pixel. This number might not
+  /// be a power of two. Indeed, it might not even be an integer. For example,
+  /// the Nexus 6 has a device pixel ratio of 3.5.
+  final double devicePixelRatio;
+
+  /// The number of pixels on each side of the display rectangle into which the
+  /// application can render, but over which the operating system will likely
+  /// place system UI (such as the Android system notification area), or which
+  /// might be rendered outside of the physical display (e.g. overscan regions
+  /// on television screens).
+  final EdgeDims padding;
 
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
