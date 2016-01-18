@@ -22,15 +22,15 @@ void main() {
     tester.pump(const Duration(seconds: 1)); // Complete drawer animation
   });
 
-  ViewConstraints big = const ViewConstraints(size: const Size(360.0, 640.0));
-  ViewConstraints small = const ViewConstraints(size: const Size(355.0, 635.0));
+  ViewConfiguration big = const ViewConfiguration(size: const Size(360.0, 640.0));
+  ViewConfiguration small = const ViewConfiguration(size: const Size(355.0, 635.0));
   RenderView renderView = WidgetFlutterBinding.instance.renderView;
 
   Stopwatch watch = new Stopwatch()
     ..start();
 
   for (int i = 0; i < _kNumberOfIterations || _kRunForever; ++i) {
-    renderView.rootConstraints = (i % 2 == 0) ? big : small;
+    renderView.configuration = (i % 2 == 0) ? big : small;
     RenderObject.flushLayout();
   }
 

@@ -11,7 +11,7 @@ const Size _kTestViewSize = const Size(800.0, 600.0);
 
 class TestRenderView extends RenderView {
   TestRenderView() {
-    rootConstraints = new ViewConstraints(size: _kTestViewSize);
+    configuration = new ViewConfiguration(size: _kTestViewSize);
   }
   void scheduleInitialFrame() {
     scheduleInitialLayout();

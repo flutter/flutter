@@ -15,8 +15,8 @@ import 'layer.dart';
 import 'object.dart';
 
 /// The layout constraints for the root render object.
-class ViewConstraints {
-  const ViewConstraints({
+class ViewConfiguration {
+  const ViewConfiguration({
     this.size: Size.zero,
     this.orientation
   });
@@ -55,12 +55,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   int _orientation; // 0..3
 
   /// The constraints used for the root layout.
-  ViewConstraints get rootConstraints => _rootConstraints;
-  ViewConstraints _rootConstraints;
-  void set rootConstraints(ViewConstraints value) {
-    if (rootConstraints == value)
+  ViewConfiguration get configuration => _configuration;
+  ViewConfiguration _configuration;
+  void set configuration(ViewConfiguration value) {
+    if (configuration == value)
       return;
-    _rootConstraints = value;
+    _configuration = value;
     markNeedsLayout();
   }
 
@@ -85,12 +85,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   void performLayout() {
-    if (rootConstraints.orientation != _orientation) {
+    if (configuration.orientation != _orientation) {
       if (_orientation != null && child != null)
-        child.rotate(oldAngle: _orientation, newAngle: rootConstraints.orientation, time: timeForRotation);
-      _orientation = rootConstraints.orientation;
+        child.rotate(oldAngle: _orientation, newAngle: configuration.orientation, time: timeForRotation);
+      _orientation = configuration.orientation;
     }
-    _size = rootConstraints.size;
+    _size = configuration.size;
     assert(!_size.isInfinite);
 
     if (child != null)
@@ -146,6 +146,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // call to ${super.debugDescribeSettings(prefix)} is omitted because the root superclasses don't include any interesting information for this class
     settings.add('window size: ${ui.window.size} (in device pixels)');
     settings.add('device pixel ratio: ${ui.window.devicePixelRatio} (device pixels per logical pixel)');
-    settings.add('root constraints: $rootConstraints (in logical pixels)');
+    settings.add('configuration: $configuration (in logical pixels)');
   }
 }
