@@ -531,15 +531,30 @@ abstract class RenderBox extends RenderObject {
   /// The box constraints most recently received from the parent.
   BoxConstraints get constraints => super.constraints;
   bool debugDoesMeetConstraints() {
+    assert(!RenderObject.debugInDebugDoesMeetConstraints);
+    RenderObject.debugInDebugDoesMeetConstraints = true;
     assert(constraints != null);
+    // verify that the size is not infinite
     assert(_size != null);
     assert(() {
       'See https://flutter.io/layout/#unbounded-constraints';
       return !_size.isInfinite;
     });
+    // verify that the size is within the constraints
     bool result = constraints.isSatisfiedBy(_size);
     if (!result)
       debugPrint("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
+    // verify that the intrinsics are also within the constraints
+    double intrinsic;
+    intrinsic = getMinIntrinsicWidth(constraints);
+    assert(intrinsic == constraints.constrainWidth(intrinsic));
+    intrinsic = getMaxIntrinsicWidth(constraints);
+    assert(intrinsic == constraints.constrainWidth(intrinsic));
+    intrinsic = getMinIntrinsicHeight(constraints);
+    assert(intrinsic == constraints.constrainHeight(intrinsic));
+    intrinsic = getMaxIntrinsicHeight(constraints);
+    assert(intrinsic == constraints.constrainHeight(intrinsic));
+    RenderObject.debugInDebugDoesMeetConstraints = false;
     return result;
   }
 

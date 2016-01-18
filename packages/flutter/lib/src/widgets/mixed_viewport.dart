@@ -156,7 +156,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
       'MixedViewport does not support returning intrinsic dimensions. ' +
       'Calculating the intrinsic dimensions would require walking the entire child list, ' +
       'which defeats the entire point of having a lazily-built list of children.';
-      return false;
+      return RenderObject.debugInDebugDoesMeetConstraints;
     });
     return null;
   }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -13,11 +14,13 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   Size childSizeFromGetPositionForChild;
 
   Size getSize(BoxConstraints constraints) {
-    constraintsFromGetSize = constraints;
+    if (!RenderObject.debugInDebugDoesMeetConstraints)
+      constraintsFromGetSize = constraints;
     return new Size(200.0, 300.0);
   }
 
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    assert(!RenderObject.debugInDebugDoesMeetConstraints);
     constraintsFromGetConstraintsForChild = constraints;
     return new BoxConstraints(
       minWidth: 100.0,
@@ -28,6 +31,7 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   }
 
   Offset getPositionForChild(Size size, Size childSize) {
+    assert(!RenderObject.debugInDebugDoesMeetConstraints);
     sizeFromGetPositionForChild = size;
     childSizeFromGetPositionForChild = childSize;
     return Offset.zero;
@@ -36,6 +40,7 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   bool shouldRelayoutCalled = false;
   bool shouldRelayoutValue = false;
   bool shouldRelayout(_) {
+    assert(!RenderObject.debugInDebugDoesMeetConstraints);
     shouldRelayoutCalled = true;
     return shouldRelayoutValue;
   }

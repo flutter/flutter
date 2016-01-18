@@ -131,7 +131,7 @@ class RenderBlock extends RenderBlockBase {
     double minExtent: 0.0
   }) : super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
 
-  double _getIntrinsicCrossAxis(BoxConstraints constraints, _ChildSizingFunction childSize) {
+  double _getIntrinsicCrossAxis(BoxConstraints constraints, _ChildSizingFunction childSize, _Constrainer constrainer) {
     double extent = 0.0;
     BoxConstraints innerConstraints = isVertical ? constraints.widthConstraints() : constraints.heightConstraints();
     RenderBox child = firstChild;
@@ -140,10 +140,10 @@ class RenderBlock extends RenderBlockBase {
       final BlockParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
-    return extent;
+    return constrainer(extent);
   }
 
-  double _getIntrinsicMainAxis(BoxConstraints constraints) {
+  double _getIntrinsicMainAxis(BoxConstraints constraints, _Constrainer constrainer) {
     double extent = 0.0;
     BoxConstraints innerConstraints = _getInnerConstraints(constraints);
     RenderBox child = firstChild;
@@ -160,7 +160,7 @@ class RenderBlock extends RenderBlockBase {
       final BlockParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
-    return math.max(extent, minExtent);
+    return constrainer(math.max(extent, minExtent));
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
@@ -168,10 +168,11 @@ class RenderBlock extends RenderBlockBase {
     if (isVertical) {
       return _getIntrinsicCrossAxis(
         constraints,
-        (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicWidth(innerConstraints)
+        (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicWidth(innerConstraints),
+        constraints.constrainWidth
       );
     }
-    return _getIntrinsicMainAxis(constraints);
+    return _getIntrinsicMainAxis(constraints, constraints.constrainWidth);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
@@ -179,29 +180,32 @@ class RenderBlock extends RenderBlockBase {
     if (isVertical) {
       return _getIntrinsicCrossAxis(
         constraints,
-        (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicWidth(innerConstraints)
+        (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicWidth(innerConstraints),
+        constraints.constrainWidth
       );
     }
-    return _getIntrinsicMainAxis(constraints);
+    return _getIntrinsicMainAxis(constraints, constraints.constrainWidth);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.isNormalized);
     if (isVertical)
-      return _getIntrinsicMainAxis(constraints);
+      return _getIntrinsicMainAxis(constraints, constraints.constrainHeight);
     return _getIntrinsicCrossAxis(
       constraints,
-      (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicWidth(innerConstraints)
+      (RenderBox child, BoxConstraints innerConstraints) => child.getMinIntrinsicWidth(innerConstraints),
+      constraints.constrainHeight
     );
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.isNormalized);
     if (isVertical)
-      return _getIntrinsicMainAxis(constraints);
+      return _getIntrinsicMainAxis(constraints, constraints.constrainHeight);
     return _getIntrinsicCrossAxis(
       constraints,
-      (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicWidth(innerConstraints)
+      (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicWidth(innerConstraints),
+      constraints.constrainHeight
     );
   }
 
@@ -346,7 +350,7 @@ class RenderBlockViewport extends RenderBlockBase {
     if (intrinsicCallback == null) {
       assert(() {
         'RenderBlockViewport does not support returning intrinsic dimensions if the relevant callbacks have not been specified.';
-        return false;
+        return RenderObject.debugInDebugDoesMeetConstraints;
       });
       return constrainer(0.0);
     }

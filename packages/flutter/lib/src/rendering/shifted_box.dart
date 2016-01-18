@@ -110,7 +110,7 @@ class RenderPadding extends RenderShiftedBox {
     assert(constraints.isNormalized);
     double totalPadding = padding.left + padding.right;
     if (child != null)
-      return child.getMinIntrinsicWidth(constraints.deflate(padding)) + totalPadding;
+      return constraints.constrainWidth(child.getMinIntrinsicWidth(constraints.deflate(padding)) + totalPadding);
     return constraints.constrainWidth(totalPadding);
   }
 
@@ -118,7 +118,7 @@ class RenderPadding extends RenderShiftedBox {
     assert(constraints.isNormalized);
     double totalPadding = padding.left + padding.right;
     if (child != null)
-      return child.getMaxIntrinsicWidth(constraints.deflate(padding)) + totalPadding;
+      return constraints.constrainWidth(child.getMaxIntrinsicWidth(constraints.deflate(padding)) + totalPadding);
     return constraints.constrainWidth(totalPadding);
   }
 
@@ -126,7 +126,7 @@ class RenderPadding extends RenderShiftedBox {
     assert(constraints.isNormalized);
     double totalPadding = padding.top + padding.bottom;
     if (child != null)
-      return child.getMinIntrinsicHeight(constraints.deflate(padding)) + totalPadding;
+      return constraints.constrainHeight(child.getMinIntrinsicHeight(constraints.deflate(padding)) + totalPadding);
     return constraints.constrainHeight(totalPadding);
   }
 
@@ -134,7 +134,7 @@ class RenderPadding extends RenderShiftedBox {
     assert(constraints.isNormalized);
     double totalPadding = padding.top + padding.bottom;
     if (child != null)
-      return child.getMaxIntrinsicHeight(constraints.deflate(padding)) + totalPadding;
+      return constraints.constrainHeight(child.getMaxIntrinsicHeight(constraints.deflate(padding)) + totalPadding);
     return constraints.constrainHeight(totalPadding);
   }
 
