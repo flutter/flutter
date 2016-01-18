@@ -436,18 +436,51 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   dynamic debugOwner;
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    if (debugRenderingExceptionHandler != null) {
-      debugRenderingExceptionHandler(this, method, exception, stack);
-    } else {
-      debugPrint('-- EXCEPTION CAUGHT BY RENDERING LIBRARY -------------------------------');
-      debugPrint('The following exception was raised during $method():');
-      debugPrint('$exception');
-      debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
-      if (debugOwner != null)
-        debugPrint('That RenderObject had the following owner:\n$debugOwner');
-      debugPrint('Stack trace:');
-      debugPrint('$stack');
-      debugPrint('------------------------------------------------------------------------');
+    try {
+      if (debugRenderingExceptionHandler != null) {
+        debugRenderingExceptionHandler(this, method, exception, stack);
+      } else {
+        debugPrint('-- EXCEPTION CAUGHT BY RENDERING LIBRARY -------------------------------');
+        debugPrint('The following exception was raised during $method():');
+        debugPrint('$exception');
+        debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
+        if (debugOwner != null)
+          debugPrint('This RenderObject had the following owner:\n$debugOwner');
+        int depth = 0;
+        List<String> descendants = <String>[];
+        void visitor(RenderObject child) {
+          descendants.add('${"  " * depth}$child');
+          depth += 1;
+          if (depth < 5)
+            child.visitChildren(visitor);
+          depth -= 1;
+        }
+        visitChildren(visitor);
+        if (descendants.length > 1) {
+          debugPrint('This RenderObject had the following descendants:');
+        } else if (descendants.length == 1) {
+          debugPrint('This RenderObject had the following child:');
+        } else {
+          debugPrint('This RenderObject has no descendants.');
+        }
+        descendants.forEach(debugPrint);
+        assert(() {
+          if (debugInDebugDoesMeetConstraints) {
+            debugPrint('This exception was thrown while debugDoesMeetConstraints() was running.');
+            debugPrint('debugDoesMeetConstraints() verifies that some invariants are not being');
+            debugPrint('violated. For example, it verifies that RenderBox objects are sized in');
+            debugPrint('a manner consistent with the constraints provided, and, in addition, that');
+            debugPrint('the getMinIntrinsicWidth(), getMaxIntrinsicWidth(), etc, functions all');
+            debugPrint('return consistent values within the same constraints.');
+          }
+          return true;
+        });
+        debugPrint('Stack trace:');
+        debugPrint('$stack');
+        debugPrint('------------------------------------------------------------------------');
+      }
+    } catch (exception) {
+      debugPrint('(exception during exception handler: $exception)');
     }
   }
 
@@ -486,6 +519,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   Constraints get constraints => _constraints;
   /// Override this function in a subclass to verify that your state matches the constraints object.
   bool debugDoesMeetConstraints();
+  /// When true, debugDoesMeetConstraints() is currently executing.
+  ///
+  /// This should be set by implementations of debugDoesMeetConstraints() so that
+  /// tests can selectively ignore custom layout callbacks. It should not be set
+  /// outside of debugDoesMeetConstraints() implementations and should not be used
+  /// for purposes other than tests.
+  static bool debugInDebugDoesMeetConstraints = false;
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do

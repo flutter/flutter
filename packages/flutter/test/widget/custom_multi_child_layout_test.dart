@@ -11,7 +11,8 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   BoxConstraints getSizeConstraints;
 
   Size getSize(BoxConstraints constraints) {
-    getSizeConstraints = constraints;
+    if (!RenderObject.debugInDebugDoesMeetConstraints)
+      getSizeConstraints = constraints;
     return new Size(200.0, 300.0);
   }
 
@@ -22,6 +23,7 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   bool performLayoutIsChild;
 
   void performLayout(Size size, BoxConstraints constraints) {
+    assert(!RenderObject.debugInDebugDoesMeetConstraints);
     expect(() {
       performLayoutSize = size;
       performLayoutConstraints = constraints;
@@ -34,6 +36,7 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   bool shouldRelayoutCalled = false;
   bool shouldRelayoutValue = false;
   bool shouldRelayout(_) {
+    assert(!RenderObject.debugInDebugDoesMeetConstraints);
     shouldRelayoutCalled = true;
     return shouldRelayoutValue;
   }
