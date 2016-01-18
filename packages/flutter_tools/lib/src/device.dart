@@ -536,6 +536,9 @@ class AndroidDevice extends Device {
       if (line.startsWith('* daemon '))
         continue;
 
+      if (line.startsWith('List of devices'))
+        continue;
+
       if (deviceRegex1.hasMatch(line)) {
         Match match = deviceRegex1.firstMatch(line);
         String deviceID = match[1];
