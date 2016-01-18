@@ -160,12 +160,18 @@ class _MaterialState extends State<Material> {
         curve: Curves.ease,
         duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
-          backgroundColor: backgroundColor,
           borderRadius: kMaterialEdges[config.type],
           boxShadow: config.elevation == 0 ? null : elevationToShadow[config.elevation],
           shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
         ),
-        child: contents
+        child: new Container(
+          decoration: new BoxDecoration(
+            borderRadius: kMaterialEdges[config.type],
+            backgroundColor: backgroundColor,
+            shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
+          ),
+          child: contents
+        )
       );
     }
     return contents;

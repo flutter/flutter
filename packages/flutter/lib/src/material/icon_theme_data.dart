@@ -8,6 +8,12 @@ class IconThemeData {
   const IconThemeData({ this.color });
   final IconThemeColor color;
 
+  static IconThemeData lerp(IconThemeData begin, IconThemeData end, double t) {
+    return new IconThemeData(
+      color: t < 0.5 ? begin.color : end.color
+    );
+  }
+
   bool operator ==(dynamic other) {
     if (other is! IconThemeData)
       return false;

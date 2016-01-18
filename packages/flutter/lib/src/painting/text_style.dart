@@ -127,6 +127,31 @@ class TextStyle {
     );
   }
 
+  /// Interpolate between two text styles.
+  ///
+  /// This will not work well if the styles don't set the same fields.
+  static TextStyle lerp(TextStyle begin, TextStyle end, double t) {
+    assert(begin.inherit == end.inherit);
+    return new TextStyle(
+      inherit: end.inherit,
+      color: Color.lerp(begin.color, end.color, t),
+      fontFamily: t < 0.5 ? begin.fontFamily : end.fontFamily,
+      fontSize: ui.lerpDouble(begin.fontSize ?? end.fontSize, end.fontSize ?? begin.fontSize, t),
+      // TODO(ianh): Replace next line with "fontWeight: FontWeight.lerp(begin.fontWeight, end.fontWeight, t)," once engine is revved
+      fontWeight: FontWeight.values[ui.lerpDouble(begin?.fontWeight.index ?? FontWeight.normal.index, end?.fontWeight.index ?? FontWeight.normal.index, t.clamp(0.0, 1.0)).round()],
+      fontStyle: t < 0.5 ? begin.fontStyle : end.fontStyle,
+      letterSpacing: ui.lerpDouble(begin.letterSpacing ?? end.letterSpacing, end.letterSpacing ?? begin.letterSpacing, t),
+      wordSpacing: ui.lerpDouble(begin.wordSpacing ?? end.wordSpacing, end.wordSpacing ?? begin.wordSpacing, t),
+      textAlign: t < 0.5 ? begin.textAlign : end.textAlign,
+      textBaseline: t < 0.5 ? begin.textBaseline : end.textBaseline,
+      height: ui.lerpDouble(begin.height ?? end.height, end.height ?? begin.height, t),
+      decoration: t < 0.5 ? begin.decoration : end.decoration,
+      decorationColor: Color.lerp(begin.decorationColor, end.decorationColor, t),
+      decorationStyle: t < 0.5 ? begin.decorationStyle : end.decorationStyle
+    );
+  }
+  
+
   ui.TextStyle get textStyle {
     return new ui.TextStyle(
       color: color,

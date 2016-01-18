@@ -317,7 +317,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 }
 
 /// Animated version of [Positioned] which automatically transitions the child's
-/// position over a given duration whenever the given positon changes.
+/// position over a given duration whenever the given position changes.
 ///
 /// Only works if it's the child of a [Stack].
 class AnimatedPositioned extends AnimatedWidgetBase {
