@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -31,7 +32,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     Stopwatch stopwatch = new Stopwatch()..start();
-    Set<String> pubSpecDirectories = new Set<String>();
+    Set<String> pubSpecDirectories = new HashSet<String>();
     List<String> dartFiles = argResults.rest.toList();
 
     bool foundAnyInCurrentDirectory = false;

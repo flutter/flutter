@@ -81,7 +81,7 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
   static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
   static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = new Map<GlobalKey, Set<GlobalKeyRemoveListener>>();
-  static final Set<GlobalKey> _removedKeys = new Set<GlobalKey>();
+  static final Set<GlobalKey> _removedKeys = new HashSet<GlobalKey>();
 
   void _register(Element element) {
     assert(() {
@@ -129,7 +129,7 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
   static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
     assert(key != null);
     Set<GlobalKeyRemoveListener> listeners =
-        _removeListeners.putIfAbsent(key, () => new Set<GlobalKeyRemoveListener>());
+        _removeListeners.putIfAbsent(key, () => new HashSet<GlobalKeyRemoveListener>());
     bool added = listeners.add(listener);
     assert(added);
   }
@@ -160,7 +160,7 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
     try {
       for (GlobalKey key in _removedKeys) {
         if (!_registry.containsKey(key) && _removeListeners.containsKey(key)) {
-          Set<GlobalKeyRemoveListener> localListeners = new Set<GlobalKeyRemoveListener>.from(_removeListeners[key]);
+          Set<GlobalKeyRemoveListener> localListeners = new HashSet<GlobalKeyRemoveListener>.from(_removeListeners[key]);
           for (GlobalKeyRemoveListener listener in localListeners)
             listener(key);
         }
@@ -524,7 +524,7 @@ enum _ElementLifecycle {
 
 class _InactiveElements {
   bool _locked = false;
-  final Set<Element> _elements = new Set<Element>();
+  final Set<Element> _elements = new HashSet<Element>();
 
   void _unmount(Element element) {
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
@@ -897,7 +897,7 @@ abstract class Element<T extends Widget> implements BuildContext {
       ancestor = ancestor._parent;
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
-      _dependencies ??= new Set<InheritedElement>();
+      _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
       InheritedElement typedAncestor = ancestor;
       typedAncestor._dependants.add(this);
@@ -1378,7 +1378,7 @@ class ParentDataElement extends _ProxyElement<ParentDataWidget> {
 class InheritedElement extends _ProxyElement<InheritedWidget> {
   InheritedElement(InheritedWidget widget) : super(widget);
 
-  Set<Element> _dependants = new Set<Element>();
+  Set<Element> _dependants = new HashSet<Element>();
 
   void debugDeactivated() {
     assert(() {

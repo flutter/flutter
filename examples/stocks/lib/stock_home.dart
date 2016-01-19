@@ -203,7 +203,7 @@ class StockHomeState extends State<StockHome> {
       stocks: stocks.toList(),
       onAction: _buyStock,
       onOpen: (Stock stock, Key arrowKey) {
-        Set<Key> mostValuableKeys = new Set<Key>();
+        Set<Key> mostValuableKeys = new HashSet<Key>();
         mostValuableKeys.add(arrowKey);
         Navigator.pushNamed(context, '/stock/${stock.symbol}', mostValuableKeys: mostValuableKeys);
       },

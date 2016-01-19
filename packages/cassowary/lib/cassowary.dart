@@ -5,6 +5,7 @@
 /// An implementation of the Cassowary constraint solving algorithm in Dart.
 library cassowary;
 
+import 'dart:collection';
 import 'dart:math';
 
 part 'constraint.dart';

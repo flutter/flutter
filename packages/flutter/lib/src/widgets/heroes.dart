@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -98,7 +100,7 @@ class Hero extends StatefulComponent {
   final bool alwaysAnimate;
 
   static Map<Object, HeroHandle> of(BuildContext context, Set<Key> mostValuableKeys) {
-    mostValuableKeys ??= new Set<Key>();
+    mostValuableKeys ??= new HashSet<Key>();
     assert(!mostValuableKeys.contains(null));
     // first we collect ALL the heroes, sorted by their tags
     Map<Object, Map<Key, HeroState>> heroes = <Object, Map<Key, HeroState>>{};
@@ -177,7 +179,7 @@ class HeroState extends State<Hero> implements HeroHandle {
     _HeroManifest result = new _HeroManifest(
       key: _key,
       config: config,
-      sourceStates: new Set<HeroState>.from(<HeroState>[this]),
+      sourceStates: new HashSet<HeroState>.from(<HeroState>[this]),
       currentRect: startRect,
       currentTurns: config.turns.toDouble()
     );
@@ -268,7 +270,7 @@ class _HeroQuestState implements HeroHandle {
     _taken = true;
     Set<HeroState> states = sourceStates;
     if (targetState != null)
-      states = states.union(new Set<HeroState>.from(<HeroState>[targetState]));
+      states = states.union(new HashSet<HeroState>.from(<HeroState>[targetState]));
     return new _HeroManifest(
       key: key,
       config: child,
@@ -351,7 +353,7 @@ class HeroParty {
       assert(to == null || to.sourceStates.length == 1);
       assert(to == null || to.currentTurns.floor() == to.currentTurns);
       HeroState targetState = to != null ? to.sourceStates.elementAt(0) : null;
-      Set<HeroState> sourceStates = from != null ? from.sourceStates : new Set<HeroState>();
+      Set<HeroState> sourceStates = from != null ? from.sourceStates : new HashSet<HeroState>();
       sourceStates.remove(targetState);
       RelativeRect sourceRect = from != null ? from.currentRect :
         new RelativeRect.fromRect(to.currentRect.toRect(animationArea).center & Size.zero, animationArea);
@@ -489,7 +491,7 @@ class HeroController extends NavigatorObserver {
   Set<Key> _getMostValuableKeys() {
     assert(_from != null);
     assert(_to != null);
-    Set<Key> result = new Set<Key>();
+    Set<Key> result = new HashSet<Key>();
     if (_from.settings.mostValuableKeys != null)
       result.addAll(_from.settings.mostValuableKeys);
     if (_to.settings.mostValuableKeys != null)

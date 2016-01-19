@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 final List<String> results = <String>[];
 
-Set<TestRoute> routes = new Set<TestRoute>();
+Set<TestRoute> routes = new HashSet<TestRoute>();
 
 class TestRoute extends Route<String> {
   TestRoute(this.name);

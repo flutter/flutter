@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ui' show Point, Offset;
 
 import 'arena.dart';
@@ -43,7 +44,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   GestureArena _gestureArena;
 
   final List<GestureArenaEntry> _entries = <GestureArenaEntry>[];
-  final Set<int> _trackedPointers = new Set<int>();
+  final Set<int> _trackedPointers = new HashSet<int>();
 
   void handleEvent(PointerEvent event);
   void acceptGesture(int pointer) { }

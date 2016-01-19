@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -97,7 +99,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
   Map<_ChildKey, Element> _childrenByKey = new Map<_ChildKey, Element>();
 
   /// The child offsets that we've been told are invalid.
-  final Set<int> _invalidIndices = new Set<int>();
+  final Set<int> _invalidIndices = new HashSet<int>();
 
   /// Returns false if any of the previously-cached offsets have been marked as
   /// invalid and need to be updated.
