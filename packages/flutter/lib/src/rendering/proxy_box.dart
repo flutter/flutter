@@ -535,7 +535,7 @@ int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
 /// This class is relatively expensive because it requires painting the child
 /// into an intermediate buffer.
 class RenderOpacity extends RenderProxyBox {
-  RenderOpacity({ RenderBox child, double opacity })
+  RenderOpacity({ RenderBox child, double opacity: 1.0 })
     : _opacity = opacity, _alpha = _getAlphaFromOpacity(opacity), super(child) {
     assert(opacity >= 0.0 && opacity <= 1.0);
   }
