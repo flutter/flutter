@@ -226,6 +226,18 @@ class FlutterCommandRunner extends CommandRunner {
           testable: true
         ));
       }
+
+      if (hostPlatform == HostPlatform.mac) {
+        configs.add(new BuildConfiguration.prebuilt(
+          hostPlatform: HostPlatform.mac,
+          targetPlatform: TargetPlatform.iOS
+        ));
+
+        configs.add(new BuildConfiguration.prebuilt(
+          hostPlatform: HostPlatform.mac,
+          targetPlatform: TargetPlatform.iOSSimulator
+        ));
+      }
     } else {
       if (!FileSystemEntity.isDirectorySync(enginePath))
         logging.warning('$enginePath is not a valid directory');

@@ -95,8 +95,7 @@ class IOSDevice extends Device {
         'To copy files to iOS devices, please install ios-deploy. '
         'You can do this using homebrew as follows:\n'
         '\$ brew tap flutter/flutter\n'
-        '\$ brew install ios-deploy',
-        'Copying files to iOS devices is not currently supported on Linux.');
+        '\$ brew install ios-deploy');
   }
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
@@ -178,7 +177,7 @@ class IOSDevice extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     try {
-      String apps = runCheckedSync([installerPath, '-l']);
+      String apps = runCheckedSync([installerPath, '--list-apps']);
       if (new RegExp(app.id, multiLine: true).hasMatch(apps)) {
         return true;
       }
@@ -190,22 +189,42 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> startApp(ApplicationPackage app) async {
-    if (!isAppInstalled(app)) {
+    logging.fine("Attempting to build and install ${app.name} on $id");
+
+    // Step 1: Install the precompiled application if necessary
+    bool buildResult = await _buildIOSXcodeProject(app, true);
+
+    if (!buildResult) {
+      logging.severe('Could not build the precompiled application for the device');
       return false;
     }
-    // idevicedebug hangs forever after launching the app, so kill it after
-    // giving it plenty of time to send the launch command.
-    return await runAndKill(
-      [debuggerPath, 'run', app.id],
-      new Duration(seconds: 3)
-    ).then(
-      (_) {
-        return true;
-      }, onError: (e) {
-        logging.info('Failure running $debuggerPath: ', e);
-        return false;
-      }
-    );
+
+    // Step 2: Check that the application exists at the specified path
+    Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
+
+    bool bundleExists = await bundle.exists();
+    if (!bundleExists) {
+      logging.severe('Could not find the built application bundle at ${bundle.path}');
+      return false;
+    }
+
+    // Step 3: Attempt to install the application on the device
+    int installationResult = await runCommandAndStreamOutput([
+      '/usr/bin/env',
+      'ios-deploy',
+      '--id',
+      id,
+      '--bundle',
+      bundle.path,
+    ]);
+
+    if (installationResult != 0) {
+      logging.severe('Could not install ${bundle.path} on $id');
+      return false;
+    }
+
+    logging.fine('Installation successful');
+    return true;
   }
 
   @override
@@ -230,11 +249,6 @@ class IOSDevice extends Device {
       ]);
       return true;
     } else {
-      // TODO(iansf): It may be possible to make this work on Linux. Since this
-      //              functionality appears to be the only that prevents us from
-      //              supporting iOS on Linux, it may be worth putting some time
-      //              into investigating this.
-      //              See https://bbs.archlinux.org/viewtopic.php?id=192655
       return false;
     }
     return false;
@@ -337,8 +351,6 @@ class IOSSimulator extends Device {
     List<IOSSimulator> devices = [];
     String id = _getRunningSimulatorID(mockIOS);
     if (id != null) {
-      // TODO(iansf): get the simulator's name
-      // String name = _getDeviceName(id, mockIOS);
       devices.add(new IOSSimulator(id: id));
     }
     return devices;
@@ -421,20 +433,53 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> startApp(ApplicationPackage app) async {
-    if (!isAppInstalled(app)) {
+    logging.fine('Building ${app.name} for $id');
+
+    // Step 1: Build the Xcode project
+    bool buildResult = await _buildIOSXcodeProject(app, false);
+    if (!buildResult) {
+      logging.severe('Could not build the application for the simulator');
       return false;
     }
-    try {
-      if (id == defaultDeviceID) {
-        runCheckedSync(
-            [xcrunPath, 'simctl', 'launch', 'booted', app.id]);
-      } else {
-        runCheckedSync([xcrunPath, 'simctl', 'launch', id, app.id]);
-      }
-      return true;
-    } catch (e) {
+
+    // Step 2: Assert that the Xcode project was successfully built
+    Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphonesimulator', 'Runner.app'));
+    bool bundleExists = await bundle.exists();
+    if (!bundleExists) {
+      logging.severe('Could not find the built application bundle at ${bundle.path}');
       return false;
     }
+
+    // Step 3: Install the updated bundle to the simulator
+    int installResult = await runCommandAndStreamOutput([
+      xcrunPath,
+      'simctl',
+      'install',
+      id == defaultDeviceID ? 'booted' : id,
+      path.absolute(bundle.path)
+    ]);
+
+    if (installResult != 0) {
+      logging.severe('Could not install the application bundle on the simulator');
+      return false;
+    }
+
+    // Step 4: Launch the updated application in the simulator
+    int launchResult = await runCommandAndStreamOutput([
+      xcrunPath,
+      'simctl',
+      'launch',
+      id == defaultDeviceID ? 'booted' : id,
+      app.id
+    ]);
+
+    if (launchResult != 0) {
+      logging.severe('Could not launch the freshly installed application on the simulator');
+      return false;
+    }
+
+    logging.fine('Successfully started ${app.name} on $id');
+    return true;
   }
 
   @override
@@ -973,6 +1018,30 @@ class DeviceStore {
     this.iOSSimulator
   });
 
+  static Device _deviceForConfig(BuildConfiguration config, List<Device> devices) {
+    Device device = null;
+
+    if (config.deviceId != null) {
+      // Step 1: If a device identifier is specified, try to find a device
+      // matching that specific identifier
+      device = devices.firstWhere(
+          (Device dev) => (dev.id == config.deviceId),
+          orElse: () => null);
+      if (device == null) {
+        logging.severe('Warning: Device ID ${config.deviceId} not found');
+      }
+    } else if (devices.length == 1) {
+      // Step 2: If no identifier is specified and there is only one connected
+      // device, pick that one.
+      device = devices[0];
+    } else if (devices.length > 1) {
+      // Step 3: D:
+      logging.severe('Warning: Multiple devices are connected, but no device ID was specified.');
+    }
+
+    return device;
+  }
+
   factory DeviceStore.forConfigs(List<BuildConfiguration> configs) {
     AndroidDevice android;
     IOSDevice iOS;
@@ -982,27 +1051,19 @@ class DeviceStore {
       switch (config.targetPlatform) {
         case TargetPlatform.android:
           assert(android == null);
-          List<AndroidDevice> androidDevices = AndroidDevice.getAttachedDevices();
-          if (config.deviceId != null) {
-            android = androidDevices.firstWhere(
-                (AndroidDevice dev) => (dev.id == config.deviceId),
-                orElse: () => null);
-            if (android == null) {
-              print('Warning: Device ID ${config.deviceId} not found');
-            }
-          } else if (androidDevices.length == 1) {
-            android = androidDevices[0];
-          } else if (androidDevices.length > 1) {
-            print('Warning: Multiple Android devices are connected, but no device ID was specified.');
-          }
+          android = _deviceForConfig(config, AndroidDevice.getAttachedDevices());
           break;
         case TargetPlatform.iOS:
           assert(iOS == null);
-          iOS = new IOSDevice();
+          iOS = _deviceForConfig(config, IOSDevice.getAttachedDevices());
           break;
         case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
-          iOSSimulator = new IOSSimulator();
+          iOSSimulator = _deviceForConfig(config, IOSSimulator.getAttachedDevices());
+          if (iOSSimulator == null) {
+            // Creates a simulator with the default identifier
+            iOSSimulator = new IOSSimulator();
+          }
           break;
         case TargetPlatform.mac:
         case TargetPlatform.linux:
@@ -1012,4 +1073,18 @@ class DeviceStore {
 
     return new DeviceStore(android: android, iOS: iOS, iOSSimulator: iOSSimulator);
   }
+}
+
+Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async {
+  List<String> command = [
+    '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
+  ];
+
+  if (!isDevice) {
+    command.addAll(['-sdk', 'iphonesimulator']);
+  }
+
+  int result = await runCommandAndStreamOutput(command,
+      workingDirectory: app.localPath);
+  return result == 0;
 }
