@@ -20,8 +20,7 @@ void ScheduleFrame(Dart_NativeArguments args) {
 
 void Render(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
-  Scene* scene = DartConverter<Scene*>::FromArgumentsWithNullCheck(
-      args, 1, exception);
+  Scene* scene = DartConverter<Scene*>::FromArguments(args, 1, exception);
   if (exception) {
     Dart_ThrowException(exception);
     return;

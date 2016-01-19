@@ -60,8 +60,6 @@ sky_core_files = [
   "painting/RSTransform.h",
   "painting/Shader.cpp",
   "painting/Shader.h",
-  "painting/Size.cpp",
-  "painting/Size.h",
   "painting/TransferMode.h",
   "rendering/BidiRun.h",
   "rendering/BidiRunForLine.cpp",

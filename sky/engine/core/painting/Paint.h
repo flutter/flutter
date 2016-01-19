@@ -36,11 +36,6 @@ struct DartConverter<Paint> {
   static Paint FromArguments(Dart_NativeArguments args,
                              int index,
                              Dart_Handle& exception);
-  static Paint FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                          int index,
-                                          Dart_Handle& exception) {
-    return FromArguments(args, index, exception);
-  }
 };
 
 class StrokeCap {};

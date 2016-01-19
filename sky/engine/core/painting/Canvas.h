@@ -14,7 +14,6 @@
 #include "sky/engine/core/painting/Point.h"
 #include "sky/engine/core/painting/RRect.h"
 #include "sky/engine/core/painting/Rect.h"
-#include "sky/engine/core/painting/Size.h"
 #include "sky/engine/core/painting/RSTransform.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/float64_list.h"

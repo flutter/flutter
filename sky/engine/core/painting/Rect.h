@@ -23,11 +23,6 @@ struct DartConverter<Rect> {
   static Rect FromArguments(Dart_NativeArguments args,
                             int index,
                             Dart_Handle& exception);
-  static Rect FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                         int index,
-                                         Dart_Handle& exception) {
-    return FromArguments(args, index, exception);
-  }
 };
 
 } // namespace blink

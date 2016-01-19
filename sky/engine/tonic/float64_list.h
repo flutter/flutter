@@ -54,11 +54,6 @@ struct DartConverter<Float64List> {
   static Float64List FromArguments(Dart_NativeArguments args,
                                    int index,
                                    Dart_Handle& exception);
-  static Float64List FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                int index,
-                                                Dart_Handle& exception) {
-    return FromArguments(args, index, exception);
-  }
 };
 
 } // namespace blink

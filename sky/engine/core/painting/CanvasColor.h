@@ -27,11 +27,6 @@ struct DartConverter<CanvasColor> {
   static CanvasColor FromArguments(Dart_NativeArguments args,
                                    int index,
                                    Dart_Handle& exception);
-  static CanvasColor FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                            int index,
-                                            Dart_Handle& exception) {
-    return FromArguments(args, index, exception);
-  }
   static void SetReturnValue(Dart_NativeArguments args, CanvasColor val);
 };
 

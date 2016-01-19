@@ -62,7 +62,7 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
   mojo::ScopedDataPipeConsumerHandle consumer =
-      DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArgumentsWithNullCheck(
+      DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArguments(
           args, 0, exception);
   if (exception) {
     Dart_ThrowException(exception);
@@ -84,8 +84,7 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
 void DecodeImageFromList(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
-  Uint8List list = DartConverter<Uint8List>::FromArgumentsWithNullCheck(
-      args, 0, exception);
+  Uint8List list = DartConverter<Uint8List>::FromArguments(args, 0, exception);
   if (exception) {
     Dart_ThrowException(exception);
     return;

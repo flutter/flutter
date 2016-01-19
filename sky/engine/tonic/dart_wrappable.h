@@ -89,9 +89,6 @@ struct DartConverterWrappable {
   static DartWrappable* FromArguments(Dart_NativeArguments args,
                                       int index,
                                       Dart_Handle& exception);
-  static DartWrappable* FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                   int index,
-                                                   Dart_Handle& exception);
 };
 
 template<typename T>
@@ -129,15 +126,6 @@ struct DartConverter<
                           bool auto_scope = true) {
     // TODO(abarth): We're missing a type check.
     return static_cast<T*>(DartConverterWrappable::FromArguments(
-        args, index, exception));
-  }
-
-  static T* FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                       int index,
-                                       Dart_Handle& exception,
-                                       bool auto_scope = true) {
-    // TODO(abarth): We're missing a type check.
-    return static_cast<T*>(DartConverterWrappable::FromArgumentsWithNullCheck(
         args, index, exception));
   }
 };

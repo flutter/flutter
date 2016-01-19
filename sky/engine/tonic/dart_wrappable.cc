@@ -105,23 +105,4 @@ DartWrappable* DartConverterWrappable::FromArguments(Dart_NativeArguments args,
       native_fields[DartWrappable::kPeerIndex]);
 }
 
-DartWrappable* DartConverterWrappable::FromArgumentsWithNullCheck(
-    Dart_NativeArguments args, int index, Dart_Handle& exception) {
-  Dart_Handle handle = Dart_GetNativeArgument(args, index);
-  if (Dart_IsNull(handle)) {
-    DartState* state = DartState::Current();
-    exception = state->exception_factory().CreateNullArgumentException(index);
-    return nullptr;
-  }
-  intptr_t native_fields[DartWrappable::kNumberOfNativeFields];
-  Dart_Handle result = Dart_GetNativeFieldsOfArgument(
-      args, index, DartWrappable::kNumberOfNativeFields, native_fields);
-  if (Dart_IsError(result)) {
-    exception = Dart_NewStringFromCString(DartError::kInvalidArgument);
-    return nullptr;
-  }
-  return reinterpret_cast<DartWrappable*>(
-      native_fields[DartWrappable::kPeerIndex]);
-}
-
 }  // namespace blink
