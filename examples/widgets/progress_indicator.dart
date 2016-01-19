@@ -16,7 +16,7 @@ class _ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
       duration: const Duration(milliseconds: 1500)
     )..play(AnimationDirection.forward);
 
-    animation = new ACurve(
+    animation = new CurvedAnimation(
       parent: controller,
       curve: new Interval(0.0, 0.9, curve: Curves.ease),
       reverseCurve: Curves.ease
