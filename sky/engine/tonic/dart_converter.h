@@ -6,8 +6,8 @@
 #define SKY_ENGINE_TONIC_DART_CONVERTER_H_
 
 #include <string>
+#include <vector>
 #include "sky/engine/tonic/dart_state.h"
-#include "sky/engine/wtf/Vector.h"
 
 namespace blink {
 
@@ -239,11 +239,11 @@ struct DartConverter<const char*> {
 // Collections
 
 template <typename T>
-struct DartConverter<Vector<T>> {
+struct DartConverter<std::vector<T>> {
   using ValueType = typename DartConverterTypes<T>::ValueType;
   using ConverterType = typename DartConverterTypes<T>::ConverterType;
 
-  static Dart_Handle ToDart(const Vector<ValueType>& val) {
+  static Dart_Handle ToDart(const std::vector<ValueType>& val) {
     Dart_Handle list = Dart_NewList(val.size());
     if (Dart_IsError(list))
       return list;
@@ -257,35 +257,35 @@ struct DartConverter<Vector<T>> {
     return list;
   }
 
-  static Vector<ValueType> FromDart(Dart_Handle handle) {
-    Vector<ValueType> result;
+  static std::vector<ValueType> FromDart(Dart_Handle handle) {
+    std::vector<ValueType> result;
+
     if (!Dart_IsList(handle))
       return result;
+
     intptr_t length = 0;
     Dart_ListLength(handle, &length);
 
-    if (length == 0) {
+    if (length == 0)
       return result;
-    }
 
-    result.reserveCapacity(length);
+    result.reserve(length);
 
-    Vector<Dart_Handle> items(length);
+    std::vector<Dart_Handle> items(length);
     Dart_Handle items_result = Dart_ListGetRange(handle, 0, length,
                                                  items.data());
     DCHECK(!Dart_IsError(items_result));
 
     for (intptr_t i = 0; i < length; ++i) {
       DCHECK(items[i]);
-      result.append(DartConverter<ConverterType>::FromDart(items[i]));
+      result.push_back(DartConverter<ConverterType>::FromDart(items[i]));
     }
     return result;
   }
 
-  static Vector<ValueType> FromArguments(Dart_NativeArguments args,
+  static std::vector<ValueType> FromArguments(Dart_NativeArguments args,
                                           int index,
                                           Dart_Handle& exception) {
-    // TODO(abarth): What should we do with auto_scope?
     return FromDart(Dart_GetNativeArgument(args, index));
   }
 };
@@ -316,12 +316,7 @@ struct DartConverter<Dart_Handle> {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Convience wrappers using type inference for ease of code generation
-
-template <typename T>
-inline Dart_Handle VectorToDart(const Vector<T>& val) {
-  return DartConverter<Vector<T>>::ToDart(val);
-}
+// Convience wrappers using type inference
 
 template<typename T>
 Dart_Handle ToDart(const T& object) {

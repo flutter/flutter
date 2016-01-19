@@ -19,7 +19,7 @@ Uint8List::Uint8List(Dart_Handle list)
   Dart_TypedDataAcquireData(
       list, &type, reinterpret_cast<void**>(&data_), &num_elements_);
   DCHECK(!LogIfError(list));
-  ASSERT(type == Dart_TypedData_kUint8);
+  DCHECK(type == Dart_TypedData_kUint8);
 }
 
 Uint8List::Uint8List(Uint8List&& other)

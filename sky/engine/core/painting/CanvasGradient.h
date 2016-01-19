@@ -25,15 +25,15 @@ class CanvasGradient : public Shader {
   ~CanvasGradient() override;
   static PassRefPtr<CanvasGradient> create();
 
-  void initLinear(const Vector<Point>& end_points,
-                  const Vector<CanvasColor>& colors,
-                  const Vector<float>& color_stops,
+  void initLinear(const std::vector<Point>& end_points,
+                  const std::vector<CanvasColor>& colors,
+                  const std::vector<float>& color_stops,
                   SkShader::TileMode tile_mode);
 
   void initRadial(const Point& center,
                   double radius,
-                  const Vector<CanvasColor>& colors,
-                  const Vector<float>& color_stops,
+                  const std::vector<CanvasColor>& colors,
+                  const std::vector<float>& color_stops,
                   SkShader::TileMode tile_mode);
 
   static void RegisterNatives(DartLibraryNatives* natives);

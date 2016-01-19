@@ -12,6 +12,8 @@
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrapper_info.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 class DartGCVisitor;

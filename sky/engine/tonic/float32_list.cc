@@ -19,7 +19,7 @@ Float32List::Float32List(Dart_Handle list)
   Dart_TypedDataAcquireData(
       list, &type, reinterpret_cast<void**>(&data_), &num_elements_);
   DCHECK(!LogIfError(list));
-  ASSERT(type == Dart_TypedData_kFloat32);
+  DCHECK(type == Dart_TypedData_kFloat32);
 }
 
 Float32List::Float32List(Float32List&& other)

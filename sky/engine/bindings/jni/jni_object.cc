@@ -56,7 +56,7 @@ fail:
 
 PassRefPtr<JniObject> JniObject::CallObjectMethod(
     jmethodID methodId,
-    const Vector<Dart_Handle>& args) {
+    const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -78,7 +78,7 @@ fail:
 }
 
 bool JniObject::CallBooleanMethod(jmethodID methodId,
-                                  const Vector<Dart_Handle>& args) {
+                                  const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -100,7 +100,7 @@ fail:
 }
 
 int64_t JniObject::CallIntMethod(jmethodID methodId,
-                              const Vector<Dart_Handle>& args) {
+                                 const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -133,7 +133,7 @@ jstring JniString::java_string() {
   return static_cast<jstring>(java_object());
 }
 
-String JniString::GetText() {
+std::string JniString::GetText() {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -144,7 +144,7 @@ String JniString::GetText() {
     const jchar* chars = env->GetStringChars(java_string(), NULL);
     if (CheckJniException(env, &exception)) goto fail;
 
-    String result(chars, length);
+    std::string result(reinterpret_cast<const char*>(chars), length);
     env->ReleaseStringChars(java_string(), chars);
 
     return result;
@@ -152,7 +152,7 @@ String JniString::GetText() {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
-  return String();
+  return std::string();
 }
 
 } // namespace blink

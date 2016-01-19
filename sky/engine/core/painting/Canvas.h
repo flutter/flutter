@@ -69,16 +69,18 @@ public:
     void drawPicture(Picture* picture);
 
     void drawVertices(SkCanvas::VertexMode vertexMode,
-        const Vector<Point>& vertices,
-        const Vector<Point>& textureCoordinates,
-        const Vector<CanvasColor>& colors,
+        const std::vector<Point>& vertices,
+        const std::vector<Point>& textureCoordinates,
+        const std::vector<CanvasColor>& colors,
         TransferMode transferMode,
-        const Vector<int>& indices,
+        const std::vector<int>& indices,
         const Paint& paint);
 
     void drawAtlas(CanvasImage* atlas,
-        const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
-        const Vector<CanvasColor>& colors, TransferMode mode,
+        const std::vector<RSTransform>& transforms,
+        const std::vector<Rect>& rects,
+        const std::vector<CanvasColor>& colors,
+        TransferMode mode,
         const Rect& cullRect, const Paint& paint);
 
     SkCanvas* skCanvas() { return m_canvas; }
