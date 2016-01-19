@@ -63,6 +63,55 @@ class _TransitionState extends State<TransitionComponent> {
   }
 }
 
+abstract class AnimationWatchingComponent extends StatefulComponent {
+  AnimationWatchingComponent({
+    Key key,
+    this.watchable
+  }) : super(key: key) {
+    assert(watchable != null);
+  }
+
+  final Watchable watchable;
+
+  Widget build(BuildContext context);
+
+  _AnimationWatchingComponentState createState() => new _AnimationWatchingComponentState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('watchable: $watchable');
+  }
+}
+
+class _AnimationWatchingComponentState extends State<AnimationWatchingComponent> {
+  void initState() {
+    super.initState();
+    config.watchable.addListener(_handleTick);
+  }
+
+  void didUpdateConfig(AnimationWatchingComponent oldConfig) {
+    if (config.watchable != oldConfig.watchable) {
+      oldConfig.watchable.removeListener(_handleTick);
+      config.watchable.addListener(_handleTick);
+    }
+  }
+
+  void dispose() {
+    config.watchable.removeListener(_handleTick);
+    super.dispose();
+  }
+
+  void _handleTick() {
+    setState(() {
+      // The watchable's state is our build state, and it changed already.
+    });
+  }
+
+  Widget build(BuildContext context) {
+    return config.build(context);
+  }
+}
+
 abstract class TransitionWithChild extends TransitionComponent {
   TransitionWithChild({
     Key key,
@@ -284,7 +333,6 @@ class PositionedTransition extends TransitionWithChild {
   }
 }
 
-
 class BuilderTransition extends TransitionComponent {
   BuilderTransition({
     Key key,
@@ -300,6 +348,20 @@ class BuilderTransition extends TransitionComponent {
   Widget build(BuildContext context) {
     for (int i = 0; i < variables.length; ++i)
       performance.updateVariable(variables[i]);
+    return builder(context);
+  }
+}
+
+class AnimationWatchingBuilder extends AnimationWatchingComponent {
+  AnimationWatchingBuilder({
+    Key key,
+    Watchable watchable,
+    this.builder
+  }) : super(key: key, watchable: watchable);
+
+  final WidgetBuilder builder;
+
+  Widget build(BuildContext context) {
     return builder(context);
   }
 }
