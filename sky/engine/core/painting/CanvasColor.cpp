@@ -6,7 +6,6 @@
 
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
-#include "sky/engine/tonic/dart_value.h"
 
 namespace blink {
 

@@ -9,7 +9,6 @@
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_string.h"
 #include "sky/engine/tonic/dart_string_cache.h"
-#include "sky/engine/tonic/dart_value.h"
 #include "sky/engine/wtf/text/StringUTF8Adaptor.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
@@ -341,30 +340,6 @@ struct DartConverter<Vector<T>> {
                                           int index,
                                           Dart_Handle& exception) {
     // TODO(abarth): What should we do with auto_scope?
-    return FromDart(Dart_GetNativeArgument(args, index));
-  }
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// DartValue
-
-template <>
-struct DartConverter<DartValue*> {
-  static Dart_Handle ToDart(DartState* state, DartValue* val) {
-    return val->dart_value();
-  }
-
-  static void SetReturnValue(Dart_NativeArguments args, DartValue* val) {
-    Dart_SetReturnValue(args, val->dart_value());
-  }
-
-  static PassRefPtr<DartValue> FromDart(Dart_Handle handle) {
-    return DartValue::Create(DartState::Current(), handle);
-  }
-
-  static PassRefPtr<DartValue> FromArguments(Dart_NativeArguments args,
-                                             int index,
-                                             Dart_Handle& exception) {
     return FromDart(Dart_GetNativeArgument(args, index));
   }
 };

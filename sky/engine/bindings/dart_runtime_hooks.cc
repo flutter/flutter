@@ -15,7 +15,6 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/script/dom_dart_state.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_converter.h"
@@ -23,9 +22,9 @@
 #include "sky/engine/tonic/dart_invoke.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_library_natives.h"
+#include "sky/engine/tonic/dart_microtask_queue.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_timer_heap.h"
-#include "sky/engine/tonic/dart_value.h"
 #include "sky/engine/wtf/text/WTFString.h"
 
 #if defined(OS_ANDROID)
@@ -163,23 +162,11 @@ void Logger_PrintString(Dart_NativeArguments args) {
   }
 }
 
-static void ExecuteMicrotask(base::WeakPtr<DartState> dart_state,
-                             RefPtr<DartValue> callback) {
-  if (!dart_state)
-    return;
-  DartIsolateScope scope(dart_state->isolate());
-  DartApiScope api_scope;
-  DartInvokeAppClosure(callback->dart_value(), 0, nullptr);
-}
-
 void ScheduleMicrotask(Dart_NativeArguments args) {
   Dart_Handle closure = Dart_GetNativeArgument(args, 0);
   if (LogIfError(closure) || !Dart_IsClosure(closure))
     return;
-  DartState* dart_state = DartState::Current();
-  CHECK(dart_state);
-  Microtask::enqueueMicrotask(base::Bind(&ExecuteMicrotask,
-    dart_state->GetWeakPtr(), DartValue::Create(dart_state, closure)));
+  DartMicrotaskQueue::ScheduleMicrotask(closure);
 }
 
 void GetBaseURLString(Dart_NativeArguments args) {
