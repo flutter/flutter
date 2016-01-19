@@ -7,8 +7,15 @@ import 'dart:io';
 
 Process daemon;
 
+// To use, start from the console and enter:
+//   version: print version
+//   shutdown: terminate the server
+//   start: start an app
+//   stopAll: stop any running app
+//   devices: list devices
+
 main() async {
-  daemon = await Process.start('dart', ['bin/flutter_tools.dart', 'daemon']);
+  daemon = await Process.start('flutter', ['daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout
@@ -20,13 +27,15 @@ main() async {
   stdout.write('> ');
   stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
     if (line == 'version' || line == 'v') {
-      _send({'event': 'daemon.version'});
+      _send({'method': 'daemon.version'});
     } else if (line == 'shutdown' || line == 'q') {
-      _send({'event': 'daemon.shutdown'});
+      _send({'method': 'daemon.shutdown'});
     } else if (line == 'start') {
-      _send({'event': 'app.start'});
+      _send({'method': 'app.start'});
     } else if (line == 'stopAll') {
-      _send({'event': 'app.stopAll'});
+      _send({'method': 'app.stopAll'});
+    } else if (line == 'devices') {
+      _send({'method': 'device.getDevices'});
     } else {
       print('command not understood: ${line}');
     }

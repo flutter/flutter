@@ -21,7 +21,13 @@ abstract class Device {
     return _deviceCache.putIfAbsent(id, () => constructor(id));
   }
 
+  static void removeFromCache(String id) {
+    _deviceCache.remove(id);
+  }
+
   Device._(this.id);
+
+  String get name;
 
   /// Install an app package on the current device
   bool installApp(ApplicationPackage app);
@@ -532,20 +538,25 @@ class AndroidDevice extends Device {
   String modelID;
   String deviceCodeName;
 
+  bool _connected;
   String _adbPath;
   String get adbPath => _adbPath;
   bool _hasAdb = false;
   bool _hasValidAndroid = false;
 
-  factory AndroidDevice(
-      {String id: null,
-      String productID: null,
-      String modelID: null,
-      String deviceCodeName: null}) {
+  factory AndroidDevice({
+    String id: null,
+    String productID: null,
+    String modelID: null,
+    String deviceCodeName: null,
+    bool connected
+  }) {
     AndroidDevice device = Device._unique(id ?? defaultDeviceID, (String id) => new AndroidDevice._(id));
     device.productID = productID;
     device.modelID = modelID;
     device.deviceCodeName = deviceCodeName;
+    if (connected != null)
+      device._connected = connected;
     return device;
   }
 
@@ -553,7 +564,7 @@ class AndroidDevice extends Device {
   /// we don't have to rely on the test setup having adb available to it.
   static List<AndroidDevice> getAttachedDevices([AndroidDevice mockAndroid]) {
     List<AndroidDevice> devices = [];
-    String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : _getAdbPath();
+    String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : getAdbPath();
 
     try {
       runCheckedSync([adbPath, 'version']);
@@ -623,7 +634,7 @@ class AndroidDevice extends Device {
   }
 
   AndroidDevice._(id) : super._(id) {
-    _adbPath = _getAdbPath();
+    _adbPath = getAdbPath();
     _hasAdb = _checkForAdb();
 
     // Checking for [minApiName] only needs to be done if we are starting an
@@ -655,7 +666,7 @@ class AndroidDevice extends Device {
     }
   }
 
-  static String _getAdbPath() {
+  static String getAdbPath() {
     if (Platform.environment.containsKey('ANDROID_HOME')) {
       String androidHomeDir = Platform.environment['ANDROID_HOME'];
       String adbPath1 = path.join(androidHomeDir, 'sdk', 'platform-tools', 'adb');
@@ -781,6 +792,8 @@ class AndroidDevice extends Device {
     sha1.add(file.readAsBytesSync());
     return CryptoUtils.bytesToHex(sha1.close());
   }
+
+  String get name => modelID;
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
@@ -992,8 +1005,11 @@ class AndroidDevice extends Device {
     return null;
   }
 
-  @override
-  bool isConnected() => _hasValidAndroid;
+  bool isConnected() => _connected != null ? _connected : _hasValidAndroid;
+
+  void setConnected(bool value) {
+    _connected = value;
+  }
 }
 
 class DeviceStore {
