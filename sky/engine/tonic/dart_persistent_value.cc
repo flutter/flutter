@@ -12,6 +12,13 @@ namespace blink {
 DartPersistentValue::DartPersistentValue() : value_(nullptr) {
 }
 
+DartPersistentValue::DartPersistentValue(DartPersistentValue&& other)
+  : dart_state_(other.dart_state_),
+    value_(other.value_) {
+  other.dart_state_ = base::WeakPtr<DartState>();
+  other.value_ = nullptr;
+}
+
 DartPersistentValue::DartPersistentValue(DartState* dart_state,
                                          Dart_Handle value)
     : value_(nullptr) {

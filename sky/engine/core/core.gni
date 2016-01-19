@@ -11,8 +11,6 @@ sky_core_files = [
   "compositing/Scene.h",
   "compositing/SceneBuilder.cpp",
   "compositing/SceneBuilder.h",
-  "dom/Microtask.cpp",
-  "dom/Microtask.h",
   "editing/CompositionUnderline.h",
   "editing/CompositionUnderlineRangeFilter.cpp",
   "editing/CompositionUnderlineRangeFilter.h",

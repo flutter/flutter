@@ -19,6 +19,7 @@ class DartState;
 class DartPersistentValue {
  public:
   DartPersistentValue();
+  DartPersistentValue(DartPersistentValue&& other);
   DartPersistentValue(DartState* dart_state, Dart_Handle value);
   ~DartPersistentValue();
 

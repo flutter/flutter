@@ -33,12 +33,12 @@
 #include "base/message_loop/message_loop.h"
 #include "base/rand_util.h"
 #include "mojo/message_pump/message_pump_mojo.h"
-#include "sky/engine/core/dom/Microtask.h"
 #include "sky/engine/core/Init.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/platform/LayoutTestSupport.h"
 #include "sky/engine/platform/Logging.h"
 #include "sky/engine/public/platform/Platform.h"
+#include "sky/engine/tonic/dart_microtask_queue.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/engine/wtf/CryptographicallyRandomNumber.h"
 #include "sky/engine/wtf/MainThread.h"
@@ -57,7 +57,7 @@ void willProcessTask()
 
 void didProcessTask()
 {
-    Microtask::performCheckpoint();
+    DartMicrotaskQueue::RunMicrotasks();
     // FIXME: Report memory usage to dart?
 }
 

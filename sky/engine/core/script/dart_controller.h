@@ -22,7 +22,6 @@ class DartUI;
 class DOMDartState;
 class DartLibraryProvider;
 class DartSnapshotLoader;
-class DartValue;
 class View;
 
 class DartController {
