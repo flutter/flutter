@@ -17,7 +17,6 @@ namespace blink {
 class DartClassLibrary;
 class DartExceptionFactory;
 class DartLibraryLoader;
-class DartStringCache;
 class DartTimerHeap;
 
 // DartState represents the state associated with a given Dart isolate. The
@@ -51,7 +50,6 @@ class DartState : public base::SupportsUserData {
   DartClassLibrary& class_library() { return *class_library_; }
   DartExceptionFactory& exception_factory() { return *exception_factory_; }
   DartLibraryLoader& library_loader() { return *library_loader_; }
-  DartStringCache& string_cache() { return *string_cache_; }
   DartTimerHeap& timer_heap() { return *timer_heap_; }
 
   Dart_Handle index_handle() { return index_handle_.value(); }
@@ -63,7 +61,6 @@ class DartState : public base::SupportsUserData {
   std::unique_ptr<DartClassLibrary> class_library_;
   std::unique_ptr<DartExceptionFactory> exception_factory_;
   std::unique_ptr<DartLibraryLoader> library_loader_;
-  std::unique_ptr<DartStringCache> string_cache_;
   std::unique_ptr<DartTimerHeap> timer_heap_;
   DartPersistentValue index_handle_;
 

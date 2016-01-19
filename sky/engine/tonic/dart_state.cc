@@ -8,7 +8,6 @@
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_exception_factory.h"
 #include "sky/engine/tonic/dart_library_loader.h"
-#include "sky/engine/tonic/dart_string_cache.h"
 #include "sky/engine/tonic/dart_timer_heap.h"
 
 namespace blink {
@@ -22,14 +21,9 @@ DartState::Scope::~Scope() {
 DartState::DartState()
     : isolate_(NULL),
       class_library_(std::unique_ptr<DartClassLibrary>(new DartClassLibrary)),
-      exception_factory_(std::unique_ptr<DartExceptionFactory>(
-          new DartExceptionFactory(this))),
-      library_loader_(std::unique_ptr<DartLibraryLoader>(
-          new DartLibraryLoader(this))),
-      string_cache_(std::unique_ptr<DartStringCache>(
-          new DartStringCache)),
-      timer_heap_(std::unique_ptr<DartTimerHeap>(
-          new DartTimerHeap())),
+      exception_factory_(new DartExceptionFactory(this)),
+      library_loader_(new DartLibraryLoader(this)),
+      timer_heap_(new DartTimerHeap()),
       weak_factory_(this) {
 }
 

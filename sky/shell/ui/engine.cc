@@ -169,9 +169,8 @@ void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
 void Engine::RunFromLibrary(const std::string& name) {
   TRACE_EVENT0("flutter", "Engine::RunFromLibrary");
   sky_view_ = blink::SkyView::Create(this);
-  sky_view_->CreateView(blink::WebString::fromUTF8(name));
-  sky_view_->RunFromLibrary(blink::WebString::fromUTF8(name),
-                            dart_library_provider_.get());
+  sky_view_->CreateView(name);
+  sky_view_->RunFromLibrary(name, dart_library_provider_.get());
   sky_view_->SetDisplayMetrics(display_metrics_);
   sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
@@ -183,8 +182,8 @@ void Engine::RunFromSnapshotStream(
     mojo::ScopedDataPipeConsumerHandle snapshot) {
   TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
   sky_view_ = blink::SkyView::Create(this);
-  sky_view_->CreateView(blink::WebString::fromUTF8(name));
-  sky_view_->RunFromSnapshot(blink::WebString::fromUTF8(name), snapshot.Pass());
+  sky_view_->CreateView(name);
+  sky_view_->RunFromSnapshot(name, snapshot.Pass());
   sky_view_->SetDisplayMetrics(display_metrics_);
   sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())

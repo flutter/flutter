@@ -23,10 +23,10 @@ public:
 
     ~ParagraphBuilder() override;
 
-    void pushStyle(Int32List& encoded, const String& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight);
+    void pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight);
     void pop();
 
-    void addText(const String& text);
+    void addText(const std::string& text);
 
     PassRefPtr<Paragraph> build(Int32List& encoded, double lineHeight);
 

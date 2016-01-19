@@ -136,7 +136,7 @@ ParagraphBuilder::~ParagraphBuilder()
 {
 }
 
-void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight)
+void ParagraphBuilder::pushStyle(Int32List& encoded, const std::string& fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight)
 {
     DCHECK(encoded.num_elements() == 7);
     RefPtr<RenderStyle> style = RenderStyle::create();
@@ -169,7 +169,7 @@ void ParagraphBuilder::pushStyle(Int32List& encoded, const String& fontFamily, d
 
       if (mask & tsFontFamilyMask) {
         FontFamily family;
-        family.setFamily(fontFamily);
+        family.setFamily(String::fromUTF8(fontFamily));
         fontDescription.setFamily(family);
       }
 
@@ -207,11 +207,11 @@ void ParagraphBuilder::pop()
         m_currentRenderObject = m_currentRenderObject->parent();
 }
 
-void ParagraphBuilder::addText(const String& text)
+void ParagraphBuilder::addText(const std::string& text)
 {
     if (!m_currentRenderObject)
         return;
-    RenderText* renderText = new RenderText(text.impl());
+    RenderText* renderText = new RenderText(String::fromUTF8(text).impl());
     RefPtr<RenderStyle> style = RenderStyle::create();
     style->inheritFrom(m_currentRenderObject->style());
     renderText->setStyle(style.release());

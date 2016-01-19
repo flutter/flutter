@@ -9,6 +9,7 @@
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/painting/TransferMode.h"
 #include "sky/engine/tonic/dart_wrappable.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/effects/SkLayerDrawLooper.h"
 

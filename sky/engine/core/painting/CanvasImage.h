@@ -7,6 +7,7 @@
 
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace blink {

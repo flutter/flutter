@@ -78,13 +78,13 @@ DartController::~DartController() {
   }
 }
 
-void DartController::DidLoadMainLibrary(String name) {
+void DartController::DidLoadMainLibrary(std::string name) {
   DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
   DartApiScope dart_api_scope;
 
   CHECK(!LogIfError(Dart_FinalizeLoading(true)));
 
-  Dart_Handle library = Dart_LookupLibrary(StringToDart(dart_state(), name));
+  Dart_Handle library = Dart_LookupLibrary(ToDart(name));
   if (LogIfError(library))
     exit(1);
   if (DartInvokeField(library, "main", {}))
@@ -127,7 +127,7 @@ void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
   DartInvokeField(library, "main", {});
 }
 
-void DartController::RunFromLibrary(const String& name,
+void DartController::RunFromLibrary(const std::string& name,
                                     DartLibraryProvider* library_provider) {
   DartState::Scope scope(dart_state());
   CreateEmptyRootLibraryIfNeeded();
@@ -136,7 +136,7 @@ void DartController::RunFromLibrary(const String& name,
   loader.set_library_provider(library_provider);
 
   DartDependencyCatcher dependency_catcher(loader);
-  loader.LoadLibrary(name.toUTF8());
+  loader.LoadLibrary(name);
   loader.WaitForDependencies(dependency_catcher.dependencies(),
                              base::Bind(&DartController::DidLoadMainLibrary,
                                         weak_factory_.GetWeakPtr(), name));
@@ -146,7 +146,7 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
   char* error = nullptr;
   dom_dart_state_ = std::move(state);
   Dart_Isolate isolate = Dart_CreateIsolate(
-      dom_dart_state_->url().utf8().data(), "main",
+      dom_dart_state_->url().c_str(), "main",
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, static_cast<DartState*>(dom_dart_state_.get()), &error);
   Dart_SetMessageNotifyCallback(MessageNotifyCallback);
