@@ -31,13 +31,6 @@ abstract class Watchable {
   /// The current direction of the animation.
   AnimationDirection get direction;
 
-  /// The direction used to select the current curve.
-  ///
-  /// The curve direction is only reset when we hit the beginning or the end of
-  /// the timeline to avoid discontinuities in the value of any variables this
-  /// performance is used to animate.
-  AnimationDirection get curveDirection;
-
   /// Whether this animation is stopped at the beginning.
   bool get isDismissed => status == PerformanceStatus.dismissed;
 
@@ -94,7 +87,6 @@ abstract class ProxyWatchableMixin implements Watchable {
 
   PerformanceStatus get status => parent.status;
   AnimationDirection get direction => parent.direction;
-  AnimationDirection get curveDirection => parent.curveDirection;
 }
 
 abstract class Evaluatable<T> {
@@ -148,8 +140,6 @@ class AnimationController extends Animation
   SimulationStepper _timeline;
   AnimationDirection get direction => _direction;
   AnimationDirection _direction = AnimationDirection.forward;
-  AnimationDirection get curveDirection => _curveDirection;
-  AnimationDirection _curveDirection = AnimationDirection.forward;
 
   /// The progress of this performance along the timeline.
   ///
@@ -228,13 +218,6 @@ class AnimationController extends Animation
     _lastStatus = currentStatus;
   }
 
-  void _updateCurveDirection() {
-    if (status != _lastStatus) {
-      if (_lastStatus == PerformanceStatus.dismissed || _lastStatus == PerformanceStatus.completed)
-        _curveDirection = _direction;
-    }
-  }
-
   Future _animateTo(double target) {
     Duration remainingDuration = duration * (target - _timeline.value).abs();
     _timeline.stop();
@@ -244,7 +227,6 @@ class AnimationController extends Animation
   }
 
   void _tick(double t) {
-    _updateCurveDirection();
     notifyListeners();
     _checkStatusChanged();
   }
@@ -284,6 +266,7 @@ class ACurve extends Animation with ProxyWatchableMixin {
   ACurve({ this.parent, this.curve, this.reverseCurve }) {
     assert(parent != null);
     assert(curve != null);
+    parent.addStatusListener(_handleStatusChanged);
   }
 
   final Animation parent;
@@ -296,8 +279,30 @@ class ACurve extends Animation with ProxyWatchableMixin {
   /// If this field is null, uses [curve] in both directions.
   Curve reverseCurve;
 
+  /// The direction used to select the current curve.
+  ///
+  /// The curve direction is only reset when we hit the beginning or the end of
+  /// the timeline to avoid discontinuities in the value of any variables this
+  /// performance is used to animate.
+  AnimationDirection _curveDirection;
+
+  void _handleStatusChanged(PerformanceStatus status) {
+    switch (status) {
+      case PerformanceStatus.dismissed:
+      case PerformanceStatus.completed:
+        _curveDirection = null;
+        break;
+      case PerformanceStatus.forward:
+        _curveDirection ??= AnimationDirection.forward;
+        break;
+      case PerformanceStatus.reverse:
+        _curveDirection ??= AnimationDirection.reverse;
+        break;
+    }
+  }
+
   double get progress {
-    final bool useForwardCurve = parent.curveDirection == AnimationDirection.forward || reverseCurve == null;
+    final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.direction) == AnimationDirection.forward;
     Curve activeCurve = useForwardCurve ? curve : reverseCurve;
 
     double t = parent.progress;
