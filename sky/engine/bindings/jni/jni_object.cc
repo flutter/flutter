@@ -133,7 +133,7 @@ jstring JniString::java_string() {
   return static_cast<jstring>(java_object());
 }
 
-std::string JniString::GetText() {
+Dart_Handle JniString::GetText() {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -144,7 +144,7 @@ std::string JniString::GetText() {
     const jchar* chars = env->GetStringChars(java_string(), NULL);
     if (CheckJniException(env, &exception)) goto fail;
 
-    std::string result(reinterpret_cast<const char*>(chars), length);
+    Dart_Handle result = Dart_NewStringFromUTF16(chars, length);
     env->ReleaseStringChars(java_string(), chars);
 
     return result;
@@ -152,7 +152,7 @@ std::string JniString::GetText() {
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
-  return std::string();
+  return Dart_Null();
 }
 
 } // namespace blink
