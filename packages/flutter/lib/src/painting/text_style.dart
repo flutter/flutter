@@ -138,7 +138,7 @@ class TextStyle {
       fontFamily: t < 0.5 ? begin.fontFamily : end.fontFamily,
       fontSize: ui.lerpDouble(begin.fontSize ?? end.fontSize, end.fontSize ?? begin.fontSize, t),
       // TODO(ianh): Replace next line with "fontWeight: FontWeight.lerp(begin.fontWeight, end.fontWeight, t)," once engine is revved
-      fontWeight: FontWeight.values[ui.lerpDouble(begin?.fontWeight.index ?? FontWeight.normal.index, end?.fontWeight.index ?? FontWeight.normal.index, t.clamp(0.0, 1.0)).round()],
+      fontWeight: FontWeight.values[ui.lerpDouble(begin?.fontWeight?.index ?? FontWeight.normal.index, end?.fontWeight?.index ?? FontWeight.normal.index, t.clamp(0.0, 1.0)).round()],
       fontStyle: t < 0.5 ? begin.fontStyle : end.fontStyle,
       letterSpacing: ui.lerpDouble(begin.letterSpacing ?? end.letterSpacing, end.letterSpacing ?? begin.letterSpacing, t),
       wordSpacing: ui.lerpDouble(begin.wordSpacing ?? end.wordSpacing, end.wordSpacing ?? begin.wordSpacing, t),
@@ -150,7 +150,7 @@ class TextStyle {
       decorationStyle: t < 0.5 ? begin.decorationStyle : end.decorationStyle
     );
   }
-  
+
 
   ui.TextStyle get textStyle {
     return new ui.TextStyle(
