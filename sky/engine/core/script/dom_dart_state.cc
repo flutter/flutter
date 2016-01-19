@@ -9,7 +9,7 @@
 
 namespace blink {
 
-DOMDartState::DOMDartState(std::unique_ptr<Window> window, const String& url)
+DOMDartState::DOMDartState(std::unique_ptr<Window> window, const std::string& url)
     : window_(std::move(window)), url_(url) {
 }
 

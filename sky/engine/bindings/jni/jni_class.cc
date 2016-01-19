@@ -119,8 +119,8 @@ fail:
   return 0;
 }
 
-PassRefPtr<JniObject> JniClass::NewObject(jmethodID methodId,
-                                          const Vector<Dart_Handle>& args) {
+PassRefPtr<JniObject> JniClass::NewObject(
+    jmethodID methodId, const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -430,7 +430,7 @@ fail:
 }
 
 PassRefPtr<JniObject> JniClass::CallStaticObjectMethod(
-    jmethodID methodId, const Vector<Dart_Handle>& args) {
+    jmethodID methodId, const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -452,7 +452,7 @@ fail:
 }
 
 bool JniClass::CallStaticBooleanMethod(jmethodID methodId,
-                                       const Vector<Dart_Handle>& args) {
+                                       const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -474,7 +474,7 @@ fail:
 }
 
 int64_t JniClass::CallStaticByteMethod(jmethodID methodId,
-                                       const Vector<Dart_Handle>& args) {
+                                       const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -496,7 +496,7 @@ fail:
 }
 
 int64_t JniClass::CallStaticCharMethod(jmethodID methodId,
-                                       const Vector<Dart_Handle>& args) {
+                                       const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -518,7 +518,7 @@ fail:
 }
 
 int64_t JniClass::CallStaticShortMethod(jmethodID methodId,
-                                        const Vector<Dart_Handle>& args) {
+                                        const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -540,7 +540,7 @@ fail:
 }
 
 int64_t JniClass::CallStaticIntMethod(jmethodID methodId,
-                                      const Vector<Dart_Handle>& args) {
+                                      const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -562,7 +562,7 @@ fail:
 }
 
 int64_t JniClass::CallStaticLongMethod(jmethodID methodId,
-                                       const Vector<Dart_Handle>& args) {
+                                       const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -584,7 +584,7 @@ fail:
 }
 
 double JniClass::CallStaticFloatMethod(jmethodID methodId,
-                                       const Vector<Dart_Handle>& args) {
+                                       const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -606,7 +606,7 @@ fail:
 }
 
 double JniClass::CallStaticDoubleMethod(jmethodID methodId,
-                                        const Vector<Dart_Handle>& args) {
+                                        const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
@@ -628,7 +628,7 @@ fail:
 }
 
 void JniClass::CallStaticVoidMethod(jmethodID methodId,
-                                    const Vector<Dart_Handle>& args) {
+                                    const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();

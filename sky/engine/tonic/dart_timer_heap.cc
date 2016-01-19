@@ -41,13 +41,12 @@ void DartTimerHeap::Run(int id) {
   auto it = heap_.find(id);
   if (it == heap_.end())
     return;
-  std::unique_ptr<Task> task = std::unique_ptr<Task>(it->second.release());
+  std::unique_ptr<Task> task = std::move(it->second);
   heap_.erase(it);
   if (!task->closure.dart_state())
     return;
-  DartIsolateScope scope(task->closure.dart_state()->isolate());
-  DartApiScope api_scope;
-  DartInvokeAppClosure(task->closure.value(), 0, nullptr);
+  DartState::Scope dart_scope(task->closure.dart_state().get());
+  DartInvokeVoid(task->closure.value());
   if (task->repeating)
     Schedule(id, std::move(task));
 }

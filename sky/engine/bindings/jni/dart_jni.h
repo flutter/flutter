@@ -42,7 +42,7 @@ class DartJni {
 class JniMethodArgs {
  public:
   void Convert(JNIEnv* env,
-               const Vector<Dart_Handle>& dart_args,
+               const std::vector<Dart_Handle>& dart_args,
                Dart_Handle* exception);
   jvalue* jvalues() { return jvalues_.data(); }
 

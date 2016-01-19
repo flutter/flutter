@@ -51,7 +51,7 @@ void SkyView::PopRoute() {
   GetWindow()->PopRoute();
 }
 
-void SkyView::CreateView(const String& name) {
+void SkyView::CreateView(const std::string& name) {
   DCHECK(!dart_controller_);
 
   dart_controller_ = WTF::MakeUnique<DartController>();
@@ -67,7 +67,7 @@ void SkyView::CreateView(const String& name) {
   GetWindow()->UpdateLocale(language_code_, country_code_);
 }
 
-void SkyView::RunFromLibrary(const WebString& name,
+void SkyView::RunFromLibrary(const std::string& name,
                              DartLibraryProvider* library_provider) {
   dart_controller_->RunFromLibrary(name, library_provider);
 }
@@ -76,7 +76,7 @@ void SkyView::RunFromPrecompiledSnapshot() {
   dart_controller_->RunFromPrecompiledSnapshot();
 }
 
-void SkyView::RunFromSnapshot(const WebString& name,
+void SkyView::RunFromSnapshot(const std::string& name,
                               mojo::ScopedDataPipeConsumerHandle snapshot) {
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }

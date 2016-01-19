@@ -15,12 +15,8 @@ bool DartInvokeField(Dart_Handle target,
                      const char* name,
                      std::initializer_list<Dart_Handle> args);
 
-bool DartInvokeAppClosure(Dart_Handle closure,
-                          int number_of_arguments,
-                          Dart_Handle* arguments);
-
-bool DartInvokeAppClosure(Dart_Handle closure,
-                          std::initializer_list<Dart_Handle> args);
+void DartInvoke(Dart_Handle closure, std::initializer_list<Dart_Handle> args);
+void DartInvokeVoid(Dart_Handle closure);
 
 }  // namespace blink
 

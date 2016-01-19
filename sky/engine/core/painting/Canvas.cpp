@@ -279,35 +279,35 @@ void Canvas::drawPicture(Picture* picture)
 }
 
 void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
-        const Vector<Point>& vertices,
-        const Vector<Point>& textureCoordinates,
-        const Vector<CanvasColor>& colors,
+        const std::vector<Point>& vertices,
+        const std::vector<Point>& textureCoordinates,
+        const std::vector<CanvasColor>& colors,
         TransferMode transferMode,
-        const Vector<int>& indices,
+        const std::vector<int>& indices,
         const Paint& paint)
 {
   if (!m_canvas)
     return;
 
-  Vector<SkPoint> skVertices;
-  skVertices.reserveInitialCapacity(vertices.size());
+  std::vector<SkPoint> skVertices;
+  skVertices.reserve(vertices.size());
   for (const Point& point : vertices)
-    skVertices.append(point.sk_point);
+    skVertices.push_back(point.sk_point);
 
-  Vector<SkPoint> skTextureCoordinates;
-  skVertices.reserveInitialCapacity(textureCoordinates.size());
+  std::vector<SkPoint> skTextureCoordinates;
+  skVertices.reserve(textureCoordinates.size());
   for (const Point& point : textureCoordinates)
-    skTextureCoordinates.append(point.sk_point);
+    skTextureCoordinates.push_back(point.sk_point);
 
-  Vector<SkColor> skColors;
-  skColors.reserveInitialCapacity(colors.size());
+  std::vector<SkColor> skColors;
+  skColors.reserve(colors.size());
   for (const CanvasColor& color : colors)
-    skColors.append(color);
+    skColors.push_back(color);
 
-  Vector<uint16_t> skIndices;
-  skIndices.reserveInitialCapacity(indices.size());
+  std::vector<uint16_t> skIndices;
+  skIndices.reserve(indices.size());
   for (uint16_t i : indices)
-    skIndices.append(i);
+    skIndices.push_back(i);
 
   RefPtr<SkXfermode> transferModePtr = adoptRef(SkXfermode::Create(transferMode));
 
@@ -315,18 +315,18 @@ void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,
     vertexMode,
     skVertices.size(),
     skVertices.data(),
-    skTextureCoordinates.isEmpty() ? nullptr : skTextureCoordinates.data(),
-    skColors.isEmpty() ? nullptr : skColors.data(),
+    skTextureCoordinates.empty() ? nullptr : skTextureCoordinates.data(),
+    skColors.empty() ? nullptr : skColors.data(),
     transferModePtr.get(),
-    skIndices.isEmpty() ? nullptr : skIndices.data(),
+    skIndices.empty() ? nullptr : skIndices.data(),
     skIndices.size(),
     *paint.paint()
   );
 }
 
 void Canvas::drawAtlas(CanvasImage* atlas,
-    const Vector<RSTransform>& transforms, const Vector<Rect>& rects,
-    const Vector<CanvasColor>& colors, TransferMode mode,
+    const std::vector<RSTransform>& transforms, const std::vector<Rect>& rects,
+    const std::vector<CanvasColor>& colors, TransferMode mode,
     const Rect& cullRect, const Paint& paint)
 {
   if (!m_canvas)
@@ -334,26 +334,26 @@ void Canvas::drawAtlas(CanvasImage* atlas,
 
   RefPtr<SkImage> skImage = atlas->image();
 
-  Vector<SkRSXform> skXForms;
-  skXForms.reserveInitialCapacity(transforms.size());
+  std::vector<SkRSXform> skXForms;
+  skXForms.reserve(transforms.size());
   for (const RSTransform& transform : transforms)
-    skXForms.append(transform.sk_xform);
+    skXForms.push_back(transform.sk_xform);
 
-  Vector<SkRect> skRects;
-  skRects.reserveInitialCapacity(rects.size());
+  std::vector<SkRect> skRects;
+  skRects.reserve(rects.size());
   for (const Rect& rect : rects)
-    skRects.append(rect.sk_rect);
+    skRects.push_back(rect.sk_rect);
 
-  Vector<SkColor> skColors;
-  skColors.reserveInitialCapacity(colors.size());
+  std::vector<SkColor> skColors;
+  skColors.reserve(colors.size());
   for (const CanvasColor& color : colors)
-    skColors.append(color);
+    skColors.push_back(color);
 
   m_canvas->drawAtlas(
       skImage.get(),
       skXForms.data(),
       skRects.data(),
-      skColors.isEmpty() ? nullptr : skColors.data(),
+      skColors.empty() ? nullptr : skColors.data(),
       skXForms.size(),
       mode,
       cullRect.is_null ? nullptr : &cullRect.sk_rect,

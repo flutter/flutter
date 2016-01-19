@@ -56,11 +56,6 @@ struct DartConverter<Int32List> {
   static Int32List FromArguments(Dart_NativeArguments args,
                                  int index,
                                  Dart_Handle& exception);
-  static Int32List FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                              int index,
-                                              Dart_Handle& exception) {
-    return FromArguments(args, index, exception);
-  }
 };
 
 } // namespace blink

@@ -19,7 +19,7 @@ Float64List::Float64List(Dart_Handle list)
   Dart_TypedDataAcquireData(
       list, &type, reinterpret_cast<void**>(&data_), &num_elements_);
   DCHECK(!LogIfError(list));
-  ASSERT(type == Dart_TypedData_kFloat64);
+  DCHECK(type == Dart_TypedData_kFloat64);
 }
 
 Float64List::Float64List(Float64List&& other)

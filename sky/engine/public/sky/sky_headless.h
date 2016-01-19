@@ -32,7 +32,7 @@ class SkyHeadless : public WindowClient {
   SkyHeadless(Client* client);
   ~SkyHeadless();
 
-  void Init(const String& name);
+  void Init(const std::string& name);
   void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
 
  private:

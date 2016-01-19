@@ -35,17 +35,17 @@ void DecodeImage(scoped_ptr<DartPersistentValue> callback,
   // decoder can be null if the buffer was empty and we couldn't even guess
   // what type of image to decode.
   if (!decoder) {
-    DartInvokeAppClosure(callback->value(), {Dart_Null()});
+    DartInvoke(callback->value(), {Dart_Null()});
     return;
   }
   decoder->setData(buffer.get(), true);
   if (decoder->failed() || decoder->frameCount() == 0) {
-    DartInvokeAppClosure(callback->value(), {Dart_Null()});
+    DartInvoke(callback->value(), {Dart_Null()});
     return;
   }
   ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
   if (decoder->failed()) {
-    DartInvokeAppClosure(callback->value(), {Dart_Null()});
+    DartInvoke(callback->value(), {Dart_Null()});
     return;
   }
 
@@ -54,7 +54,7 @@ void DecodeImage(scoped_ptr<DartPersistentValue> callback,
       SkImage::NewFromBitmap(imageFrame->getSkBitmap()));
   resultImage->setImage(skImage.release());
 
-  DartInvokeAppClosure(callback->value(), {ToDart(resultImage)});
+  DartInvoke(callback->value(), {ToDart(resultImage)});
 }
 
 
@@ -62,7 +62,7 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
   mojo::ScopedDataPipeConsumerHandle consumer =
-      DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArgumentsWithNullCheck(
+      DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArguments(
           args, 0, exception);
   if (exception) {
     Dart_ThrowException(exception);
@@ -84,8 +84,7 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
 void DecodeImageFromList(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
-  Uint8List list = DartConverter<Uint8List>::FromArgumentsWithNullCheck(
-      args, 0, exception);
+  Uint8List list = DartConverter<Uint8List>::FromArguments(args, 0, exception);
   if (exception) {
     Dart_ThrowException(exception);
     return;

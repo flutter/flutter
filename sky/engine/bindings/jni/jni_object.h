@@ -10,6 +10,7 @@
 #include "base/android/jni_android.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 
@@ -27,11 +28,11 @@ class JniObject : public RefCounted<JniObject>, public DartWrappable {
   int64_t GetIntField(jfieldID fieldId);
 
   PassRefPtr<JniObject> CallObjectMethod(jmethodID methodId,
-                                         const Vector<Dart_Handle>& args);
+                                         const std::vector<Dart_Handle>& args);
   bool CallBooleanMethod(jmethodID methodId,
-                         const Vector<Dart_Handle>& args);
+                         const std::vector<Dart_Handle>& args);
   int64_t CallIntMethod(jmethodID methodId,
-                        const Vector<Dart_Handle>& args);
+                        const std::vector<Dart_Handle>& args);
 
  protected:
   JniObject(JNIEnv* env, jobject object);
@@ -47,7 +48,7 @@ class JniString : public JniObject {
  public:
   ~JniString() override;
 
-  String GetText();
+  std::string GetText();
 
  private:
   JniString(JNIEnv* env, jstring string);

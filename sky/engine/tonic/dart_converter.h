@@ -6,11 +6,8 @@
 #define SKY_ENGINE_TONIC_DART_CONVERTER_H_
 
 #include <string>
+#include <vector>
 #include "sky/engine/tonic/dart_state.h"
-#include "sky/engine/tonic/dart_string.h"
-#include "sky/engine/tonic/dart_string_cache.h"
-#include "sky/engine/wtf/text/StringUTF8Adaptor.h"
-#include "sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 
@@ -190,79 +187,28 @@ struct DartConverterEnum {
 // Strings
 
 template <>
-struct DartConverter<String> {
-  static Dart_Handle ToDart(DartState* state, const String& val) {
-    if (val.isEmpty())
-      return Dart_EmptyString();
-    return Dart_HandleFromWeakPersistent(state->string_cache().Get(val.impl()));
+struct DartConverter<std::string> {
+  static Dart_Handle ToDart(const std::string& val) {
+    return Dart_NewStringFromUTF8(reinterpret_cast<const uint8_t*>(val.data()),
+                                  val.length());
   }
 
   static void SetReturnValue(Dart_NativeArguments args,
-                             const String& val,
-                             bool auto_scope = true) {
-    // TODO(abarth): What should we do with auto_scope?
-    if (val.isEmpty()) {
-      Dart_SetReturnValue(args, Dart_EmptyString());
-      return;
-    }
-    DartState* state = DartState::Current();
-    Dart_SetWeakHandleReturnValue(args, state->string_cache().Get(val.impl()));
+                             const std::string& val) {
+    Dart_SetReturnValue(args, ToDart(val));
   }
 
-  static void SetReturnValueWithNullCheck(Dart_NativeArguments args,
-                                          const String& val,
-                                          bool auto_scope = true) {
-    if (val.isNull())
-      Dart_SetReturnValue(args, Dart_Null());
-    else
-      SetReturnValue(args, val, auto_scope);
+  static std::string FromDart(Dart_Handle handle) {
+    uint8_t* data = nullptr;
+    intptr_t length = 0;;
+    Dart_StringToUTF8(handle, &data, &length);
+    return std::string(reinterpret_cast<char*>(data), length);
   }
 
-  static String FromDart(Dart_Handle handle) {
-    intptr_t char_size = 0;
-    intptr_t length = 0;
-    void* peer = nullptr;
-    Dart_Handle result =
-        Dart_StringGetProperties(handle, &char_size, &length, &peer);
-    if (peer)
-      return String(static_cast<StringImpl*>(peer));
-    if (Dart_IsError(result))
-      return String();
-    return ExternalizeDartString(handle);
-  }
-
-  static String FromArguments(Dart_NativeArguments args,
-                              int index,
-                              Dart_Handle& exception) {
-    // TODO(abarth): What should we do with auto_scope?
-    void* peer = nullptr;
-    Dart_Handle handle = Dart_GetNativeStringArgument(args, index, &peer);
-    if (peer)
-      return reinterpret_cast<StringImpl*>(peer);
-    if (Dart_IsError(handle))
-      return String();
-    return ExternalizeDartString(handle);
-  }
-
-  static String FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                           int index,
-                                           Dart_Handle& exception,
-                                           bool auto_scope = true) {
-    // TODO(abarth): What should we do with auto_scope?
-    void* peer = nullptr;
-    Dart_Handle handle = Dart_GetNativeStringArgument(args, index, &peer);
-    if (peer)
-      return reinterpret_cast<StringImpl*>(peer);
-    if (Dart_IsError(handle) || Dart_IsNull(handle))
-      return String();
-    return ExternalizeDartString(handle);
-  }
-};
-
-template <>
-struct DartConverter<AtomicString> {
-  static Dart_Handle ToDart(DartState* state, const AtomicString& val) {
-    return DartConverter<String>::ToDart(state, val.string());
+  static std::string FromArguments(Dart_NativeArguments args,
+                                   int index,
+                                   Dart_Handle& exception) {
+    return FromDart(Dart_GetNativeArgument(args, index));
   }
 };
 
@@ -293,11 +239,11 @@ struct DartConverter<const char*> {
 // Collections
 
 template <typename T>
-struct DartConverter<Vector<T>> {
+struct DartConverter<std::vector<T>> {
   using ValueType = typename DartConverterTypes<T>::ValueType;
   using ConverterType = typename DartConverterTypes<T>::ConverterType;
 
-  static Dart_Handle ToDart(const Vector<ValueType>& val) {
+  static Dart_Handle ToDart(const std::vector<ValueType>& val) {
     Dart_Handle list = Dart_NewList(val.size());
     if (Dart_IsError(list))
       return list;
@@ -311,35 +257,35 @@ struct DartConverter<Vector<T>> {
     return list;
   }
 
-  static Vector<ValueType> FromDart(Dart_Handle handle) {
-    Vector<ValueType> result;
+  static std::vector<ValueType> FromDart(Dart_Handle handle) {
+    std::vector<ValueType> result;
+
     if (!Dart_IsList(handle))
       return result;
+
     intptr_t length = 0;
     Dart_ListLength(handle, &length);
 
-    if (length == 0) {
+    if (length == 0)
       return result;
-    }
 
-    result.reserveCapacity(length);
+    result.reserve(length);
 
-    Vector<Dart_Handle> items(length);
+    std::vector<Dart_Handle> items(length);
     Dart_Handle items_result = Dart_ListGetRange(handle, 0, length,
                                                  items.data());
     DCHECK(!Dart_IsError(items_result));
 
     for (intptr_t i = 0; i < length; ++i) {
       DCHECK(items[i]);
-      result.append(DartConverter<ConverterType>::FromDart(items[i]));
+      result.push_back(DartConverter<ConverterType>::FromDart(items[i]));
     }
     return result;
   }
 
-  static Vector<ValueType> FromArguments(Dart_NativeArguments args,
+  static std::vector<ValueType> FromArguments(Dart_NativeArguments args,
                                           int index,
                                           Dart_Handle& exception) {
-    // TODO(abarth): What should we do with auto_scope?
     return FromDart(Dart_GetNativeArgument(args, index));
   }
 };
@@ -370,27 +316,7 @@ struct DartConverter<Dart_Handle> {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Convience wrappers for commonly used conversions
-
-inline Dart_Handle StringToDart(DartState* state, const String& val) {
-  return DartConverter<String>::ToDart(state, val);
-}
-
-inline Dart_Handle StringToDart(DartState* state, const AtomicString& val) {
-  return DartConverter<AtomicString>::ToDart(state, val);
-}
-
-inline String StringFromDart(Dart_Handle handle) {
-  return DartConverter<String>::FromDart(handle);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Convience wrappers using type inference for ease of code generation
-
-template <typename T>
-inline Dart_Handle VectorToDart(const Vector<T>& val) {
-  return DartConverter<Vector<T>>::ToDart(val);
-}
+// Convience wrappers using type inference
 
 template<typename T>
 Dart_Handle ToDart(const T& object) {
@@ -398,19 +324,15 @@ Dart_Handle ToDart(const T& object) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// std::string support (slower, but more convienent for some clients)
+// std::string support
 
 inline Dart_Handle StdStringToDart(const std::string& val) {
-  return Dart_NewStringFromUTF8(reinterpret_cast<const uint8_t*>(val.data()),
-                                val.length());
+  return DartConverter<std::string>::ToDart(val);
 }
 
 inline std::string StdStringFromDart(Dart_Handle handle) {
-  String string = StringFromDart(handle);
-  StringUTF8Adaptor utf8(string);
-  return std::string(utf8.data(), utf8.length());
+  return DartConverter<std::string>::FromDart(handle);
 }
-
 
 // Alias Dart_NewStringFromCString for less typing.
 inline Dart_Handle ToDart(const char* val) {

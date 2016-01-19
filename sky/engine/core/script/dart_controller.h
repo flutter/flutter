@@ -31,7 +31,7 @@ class DartController {
 
   static void InitVM();
 
-  void RunFromLibrary(const String& name,
+  void RunFromLibrary(const std::string& name,
                       DartLibraryProvider* library_provider);
   void RunFromPrecompiledSnapshot();
   void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
@@ -43,7 +43,7 @@ class DartController {
   DOMDartState* dart_state() const { return dom_dart_state_.get(); }
 
  private:
-  void DidLoadMainLibrary(String url);
+  void DidLoadMainLibrary(std::string url);
   void DidLoadSnapshot();
 
   std::unique_ptr<DOMDartState> dom_dart_state_;

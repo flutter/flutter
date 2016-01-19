@@ -12,6 +12,8 @@
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrapper_info.h"
+#include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 class DartGCVisitor;
@@ -87,9 +89,6 @@ struct DartConverterWrappable {
   static DartWrappable* FromArguments(Dart_NativeArguments args,
                                       int index,
                                       Dart_Handle& exception);
-  static DartWrappable* FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                   int index,
-                                                   Dart_Handle& exception);
 };
 
 template<typename T>
@@ -127,15 +126,6 @@ struct DartConverter<
                           bool auto_scope = true) {
     // TODO(abarth): We're missing a type check.
     return static_cast<T*>(DartConverterWrappable::FromArguments(
-        args, index, exception));
-  }
-
-  static T* FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                       int index,
-                                       Dart_Handle& exception,
-                                       bool auto_scope = true) {
-    // TODO(abarth): We're missing a type check.
-    return static_cast<T*>(DartConverterWrappable::FromArgumentsWithNullCheck(
         args, index, exception));
   }
 };

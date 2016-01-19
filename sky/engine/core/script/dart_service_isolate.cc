@@ -8,7 +8,6 @@
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_library_natives.h"
-#include "sky/engine/tonic/dart_string.h"
 
 #define RETURN_ERROR_HANDLE(handle)                             \
   if (Dart_IsError(handle)) {                                   \

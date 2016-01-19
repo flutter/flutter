@@ -22,9 +22,6 @@ class RSTransform {
 template <>
 struct DartConverter<RSTransform> {
   static RSTransform FromDart(Dart_Handle handle);
-  static RSTransform FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                         int index,
-                                         Dart_Handle& exception);
 };
 
 } // namespace blink

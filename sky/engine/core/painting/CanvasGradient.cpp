@@ -36,9 +36,9 @@ PassRefPtr<CanvasGradient> CanvasGradient::create() {
   return adoptRef(new CanvasGradient());
 }
 
-void CanvasGradient::initLinear(const Vector<Point>& end_points,
-                                const Vector<CanvasColor>& colors,
-                                const Vector<float>& color_stops,
+void CanvasGradient::initLinear(const std::vector<Point>& end_points,
+                                const std::vector<CanvasColor>& colors,
+                                const std::vector<float>& color_stops,
                                 SkShader::TileMode tile_mode) {
   ASSERT(end_points.size() == 2);
   ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
@@ -46,10 +46,10 @@ void CanvasGradient::initLinear(const Vector<Point>& end_points,
   for (int i = 0; i < 2; ++i)
     sk_end_points[i] = end_points[i].sk_point;
 
-  Vector<SkColor> sk_colors;
-  sk_colors.reserveInitialCapacity(colors.size());
+  std::vector<SkColor> sk_colors;
+  sk_colors.reserve(colors.size());
   for (const CanvasColor& color : colors)
-    sk_colors.append(color);
+    sk_colors.push_back(color);
 
   SkShader* shader = SkGradientShader::CreateLinear(
       sk_end_points, sk_colors.data(), color_stops.data(), sk_colors.size(),
@@ -59,15 +59,15 @@ void CanvasGradient::initLinear(const Vector<Point>& end_points,
 
 void CanvasGradient::initRadial(const Point& center,
                                 double radius,
-                                const Vector<CanvasColor>& colors,
-                                const Vector<float>& color_stops,
+                                const std::vector<CanvasColor>& colors,
+                                const std::vector<float>& color_stops,
                                 SkShader::TileMode tile_mode) {
   ASSERT(colors.size() == color_stops.size() || color_stops.data() == nullptr);
 
-  Vector<SkColor> sk_colors;
-  sk_colors.reserveInitialCapacity(colors.size());
+  std::vector<SkColor> sk_colors;
+  sk_colors.reserve(colors.size());
   for (const CanvasColor& color : colors)
-    sk_colors.append(color);
+    sk_colors.push_back(color);
 
   SkShader* shader = SkGradientShader::CreateRadial(
       center.sk_point, radius, sk_colors.data(), color_stops.data(),

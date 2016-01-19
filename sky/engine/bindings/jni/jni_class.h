@@ -10,6 +10,7 @@
 #include "base/android/jni_android.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
+#include "sky/engine/wtf/RefCounted.h"
 
 namespace blink {
 
@@ -31,7 +32,7 @@ class JniClass : public RefCounted<JniClass>, public DartWrappable {
   intptr_t GetStaticMethodId(const char* name, const char* sig);
 
   PassRefPtr<JniObject> NewObject(jmethodID methodId,
-                                  const Vector<Dart_Handle>& args);
+                                  const std::vector<Dart_Handle>& args);
 
   PassRefPtr<JniObject> GetStaticObjectField(jfieldID fieldId);
   bool GetStaticBooleanField(jfieldID fieldId);
@@ -53,26 +54,26 @@ class JniClass : public RefCounted<JniClass>, public DartWrappable {
   void SetStaticFloatField(jfieldID fieldId, double value);
   void SetStaticDoubleField(jfieldID fieldId, double value);
 
-  PassRefPtr<JniObject> CallStaticObjectMethod(jmethodID methodId,
-                                               const Vector<Dart_Handle>& args);
+  PassRefPtr<JniObject> CallStaticObjectMethod(
+      jmethodID methodId, const std::vector<Dart_Handle>& args);
   bool CallStaticBooleanMethod(jmethodID methodId,
-                               const Vector<Dart_Handle>& args);
+                               const std::vector<Dart_Handle>& args);
   int64_t CallStaticByteMethod(jmethodID methodId,
-                               const Vector<Dart_Handle>& args);
+                               const std::vector<Dart_Handle>& args);
   int64_t CallStaticCharMethod(jmethodID methodId,
-                               const Vector<Dart_Handle>& args);
+                               const std::vector<Dart_Handle>& args);
   int64_t CallStaticShortMethod(jmethodID methodId,
-                                const Vector<Dart_Handle>& args);
+                                const std::vector<Dart_Handle>& args);
   int64_t CallStaticIntMethod(jmethodID methodId,
-                              const Vector<Dart_Handle>& args);
+                              const std::vector<Dart_Handle>& args);
   int64_t CallStaticLongMethod(jmethodID methodId,
-                               const Vector<Dart_Handle>& args);
+                               const std::vector<Dart_Handle>& args);
   double CallStaticFloatMethod(jmethodID methodId,
-                               const Vector<Dart_Handle>& args);
+                               const std::vector<Dart_Handle>& args);
   double CallStaticDoubleMethod(jmethodID methodId,
-                                const Vector<Dart_Handle>& args);
+                                const std::vector<Dart_Handle>& args);
   void CallStaticVoidMethod(jmethodID methodId,
-                            const Vector<Dart_Handle>& args);
+                            const std::vector<Dart_Handle>& args);
 
  private:
   JniClass(JNIEnv* env, jclass clazz);

@@ -56,7 +56,7 @@ class DartLibraryLoader::Job : public DartDependency,
       loader_->DidFailJob(this);
       return;
     }
-    drainer_ = adoptPtr(new DataPipeDrainer(this, pipe.Pass()));
+    drainer_ = std::unique_ptr<DataPipeDrainer>(new DataPipeDrainer(this, pipe.Pass()));
   }
 
   // DataPipeDrainer::Client
@@ -67,7 +67,7 @@ class DartLibraryLoader::Job : public DartDependency,
   // Subclasses must implement OnDataComplete.
 
   std::string name_;
-  OwnPtr<DataPipeDrainer> drainer_;
+  std::unique_ptr<DataPipeDrainer> drainer_;
 
   base::WeakPtrFactory<Job> weak_factory_;
 };
@@ -150,7 +150,7 @@ class DartLibraryLoader::WatcherSignaler {
   WatcherSignaler(DartLibraryLoader& loader,
                   DartDependency* resolved_dependency)
       : loader_(loader),
-        catcher_(adoptPtr(new DartDependencyCatcher(loader))),
+        catcher_(new DartDependencyCatcher(loader)),
         resolved_dependency_(resolved_dependency) {}
 
   ~WatcherSignaler() {
@@ -164,7 +164,7 @@ class DartLibraryLoader::WatcherSignaler {
     // Notice that we remove the dependency catcher and extract all the
     // callbacks before running any of them. We don't want to be re-entered
     // below the callbacks and end up in an inconsistent state.
-    catcher_.clear();
+    catcher_ = nullptr;
     std::vector<base::Closure> callbacks;
     for (const auto& watcher : completed_watchers) {
       callbacks.push_back(watcher->callback());
@@ -178,7 +178,7 @@ class DartLibraryLoader::WatcherSignaler {
 
  private:
   DartLibraryLoader& loader_;
-  OwnPtr<DartDependencyCatcher> catcher_;
+  std::unique_ptr<DartDependencyCatcher> catcher_;
   DartDependency* resolved_dependency_;
 };
 

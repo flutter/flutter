@@ -170,8 +170,7 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
 }
 
 void GetBaseURLString(Dart_NativeArguments args) {
-  String url = DOMDartState::Current()->url();
-  Dart_SetReturnValue(args, StringToDart(DartState::Current(), url));
+  Dart_SetReturnValue(args, ToDart(DOMDartState::Current()->url()));
 }
 
 void Timer_create(Dart_NativeArguments args) {

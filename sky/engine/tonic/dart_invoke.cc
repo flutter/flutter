@@ -19,20 +19,20 @@ bool DartInvokeField(Dart_Handle target,
       target, field, args.size(), const_cast<Dart_Handle*>(args.begin())));
 }
 
-bool DartInvokeAppClosure(Dart_Handle closure,
-                          int number_of_arguments,
-                          Dart_Handle* arguments) {
-  TRACE_EVENT0("flutter", "DartInvoke::DartInvokeAppClosure");
-  Dart_Handle handle = Dart_InvokeClosure(closure, number_of_arguments, arguments);
-  bool result = LogIfError(handle);
+void DartInvoke(Dart_Handle closure, std::initializer_list<Dart_Handle> args) {
+  TRACE_EVENT0("flutter", "DartInvoke");
+  int argc = args.size();
+  Dart_Handle* argv = const_cast<Dart_Handle*>(args.begin());
+  Dart_Handle handle = Dart_InvokeClosure(closure, argc, argv);
+  LogIfError(handle);
   CHECK(!Dart_IsCompilationError(handle));
-  return result;
 }
 
-bool DartInvokeAppClosure(Dart_Handle closure,
-                          std::initializer_list<Dart_Handle> args) {
-  return DartInvokeAppClosure(closure, args.size(),
-                              const_cast<Dart_Handle*>(args.begin()));
+void DartInvokeVoid(Dart_Handle closure) {
+  TRACE_EVENT0("flutter", "DartInvokeVoid");
+  Dart_Handle handle = Dart_InvokeClosure(closure, 0, nullptr);
+  LogIfError(handle);
+  CHECK(!Dart_IsCompilationError(handle));
 }
 
 }  // namespace blink

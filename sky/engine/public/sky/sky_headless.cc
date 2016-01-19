@@ -17,7 +17,7 @@ SkyHeadless::SkyHeadless(Client* client) : client_(client) {
 SkyHeadless::~SkyHeadless() {
 }
 
-void SkyHeadless::Init(const String& name) {
+void SkyHeadless::Init(const std::string& name) {
   DCHECK(!dart_controller_);
 
   dart_controller_ = WTF::MakeUnique<DartController>();

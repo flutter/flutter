@@ -23,11 +23,6 @@ struct DartConverter<Offset> {
   static Offset FromArguments(Dart_NativeArguments args,
                               int index,
                               Dart_Handle& exception);
-  static Offset FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                           int index,
-                                           Dart_Handle& exception) {
-    return FromArguments(args, index, exception);
-  }
 };
 
 } // namespace blink

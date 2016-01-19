@@ -45,12 +45,4 @@ RSTransform DartConverter<RSTransform>::FromDart(Dart_Handle dart_xform) {
   return result;
 }
 
-RSTransform DartConverter<RSTransform>::FromArgumentsWithNullCheck(Dart_NativeArguments args,
-                                                     int index,
-                                                     Dart_Handle& exception) {
-  Dart_Handle dart_xform = Dart_GetNativeArgument(args, index);
-  DCHECK(!LogIfError(dart_xform));
-  return FromDart(dart_xform);
-}
-
 } // namespace blink

@@ -19,7 +19,7 @@ Int32List::Int32List(Dart_Handle list)
   Dart_TypedDataAcquireData(
       list, &type, reinterpret_cast<void**>(&data_), &num_elements_);
   DCHECK(!LogIfError(list));
-  ASSERT(type == Dart_TypedData_kInt32);
+  DCHECK(type == Dart_TypedData_kInt32);
 }
 
 Int32List::Int32List(Int32List&& other)

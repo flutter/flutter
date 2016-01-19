@@ -17,13 +17,13 @@ class Window;
 
 class DOMDartState : public DartState {
  public:
-  DOMDartState(std::unique_ptr<Window> window, const String& url);
+  DOMDartState(std::unique_ptr<Window> window, const std::string& url);
   ~DOMDartState() override;
 
   virtual void DidSetIsolate();
 
   Window* window() const { return window_.get(); }
-  const String& url() const { return url_; }
+  const std::string& url() const { return url_; }
 
   static DOMDartState* Current();
 
@@ -37,7 +37,7 @@ class DOMDartState : public DartState {
 
  private:
   std::unique_ptr<Window> window_;
-  String url_;
+  std::string url_;
 
   DartPersistentValue x_handle_;
   DartPersistentValue y_handle_;

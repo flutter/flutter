@@ -242,7 +242,7 @@ Dart_Handle DartJni::jni_float_type() {
 }
 
 void JniMethodArgs::Convert(JNIEnv* env,
-                            const Vector<Dart_Handle>& dart_args,
+                            const std::vector<Dart_Handle>& dart_args,
                             Dart_Handle* exception) {
   jvalues_.reserve(dart_args.size());
 
