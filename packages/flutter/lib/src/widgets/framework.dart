@@ -566,20 +566,12 @@ class _InactiveElements {
     _elements.add(element);
   }
 
-  void _reactivate(Element element) {
-    assert(element._debugLifecycleState == _ElementLifecycle.inactive);
-    element.reactivate();
-    assert(element._debugLifecycleState == _ElementLifecycle.active);
-    element.visitChildren(_reactivate);
-  }
-
   void remove(Element element) {
     assert(!_locked);
     assert(_elements.contains(element));
     assert(element._parent == null);
     _elements.remove(element);
     assert(!element._active);
-    _reactivate(element);
   }
 }
 
@@ -729,6 +721,7 @@ abstract class Element<T extends Widget> implements BuildContext {
       final GlobalKey key = widget.key;
       key._register(this);
     }
+    _updateInheritance();
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
   }
 
@@ -793,7 +786,7 @@ abstract class Element<T extends Widget> implements BuildContext {
     _slot = newSlot;
   }
 
-  Element _findAndActivateElement(GlobalKey key, Widget newWidget) {
+  Element _retakeInactiveElement(GlobalKey key, Widget newWidget) {
     Element element = key._currentElement;
     if (element == null)
       return null;
@@ -809,13 +802,11 @@ abstract class Element<T extends Widget> implements BuildContext {
   Element _inflateWidget(Widget newWidget, dynamic newSlot) {
     Key key = newWidget.key;
     if (key is GlobalKey) {
-      Element newChild = _findAndActivateElement(key, newWidget);
+      Element newChild = _retakeInactiveElement(key, newWidget);
       if (newChild != null) {
         assert(newChild._parent == null);
         assert(() { _debugCheckForCycles(newChild); return true; });
-        newChild._parent = this;
-        newChild._updateDepth();
-        newChild.attachRenderObject(newSlot);
+        newChild.activate(this, newSlot);
         Element updatedChild = updateChild(newChild, newWidget, newSlot);
         assert(newChild == updatedChild);
         return updatedChild;
@@ -847,6 +838,26 @@ abstract class Element<T extends Widget> implements BuildContext {
     _inactiveElements.add(child); // this eventually calls child.deactivate()
   }
 
+  void activate(Element parent, dynamic newSlot) {
+    assert(_debugLifecycleState == _ElementLifecycle.inactive);
+    _reactivate();
+    _parent = parent;
+    _updateDepth();
+    _updateInheritance();
+    attachRenderObject(newSlot);
+    assert(_debugLifecycleState == _ElementLifecycle.active);
+  }
+
+  void _reactivate() {
+    assert(_debugLifecycleState == _ElementLifecycle.inactive);
+    assert(widget != null);
+    assert(depth != null);
+    assert(!_active);
+    _active = true;
+    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
+    visitChildren((Element child) => child._reactivate());
+  }
+
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(widget != null);
@@ -866,15 +877,6 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
   }
 
-  void reactivate() {
-    assert(_debugLifecycleState == _ElementLifecycle.inactive);
-    assert(widget != null);
-    assert(depth != null);
-    assert(!_active);
-    _active = true;
-    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
-  }
-
   /// Called when an Element is removed from the tree permanently.
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
@@ -890,20 +892,22 @@ abstract class Element<T extends Widget> implements BuildContext {
 
   RenderObject findRenderObject() => renderObject;
 
+  Map<Type, InheritedElement> _inheritedWidgets;
   Set<InheritedElement> _dependencies;
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
-    Element ancestor = _parent;
-    while (ancestor != null && ancestor.widget.runtimeType != targetType)
-      ancestor = ancestor._parent;
+    InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
       _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
-      InheritedElement typedAncestor = ancestor;
-      typedAncestor._dependants.add(this);
+      ancestor._dependants.add(this);
       return ancestor.widget;
     }
     return null;
+  }
+
+  void _updateInheritance() {
+    _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
   Widget ancestorWidgetOfExactType(Type targetType) {
@@ -1378,7 +1382,16 @@ class ParentDataElement extends _ProxyElement<ParentDataWidget> {
 class InheritedElement extends _ProxyElement<InheritedWidget> {
   InheritedElement(InheritedWidget widget) : super(widget);
 
-  Set<Element> _dependants = new HashSet<Element>();
+  final Set<Element> _dependants = new HashSet<Element>();
+
+  void _updateInheritance() {
+    final Map<Type, InheritedElement> incomingWidgets = _parent?._inheritedWidgets;
+    if (incomingWidgets != null)
+      _inheritedWidgets = new Map<Type, InheritedElement>.from(incomingWidgets);
+    else
+      _inheritedWidgets = new Map<Type, InheritedElement>();
+    _inheritedWidgets[widget.runtimeType] = this;
+  }
 
   void debugDeactivated() {
     assert(() {
