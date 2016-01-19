@@ -105,7 +105,7 @@ class Adb {
         });
         socket.done.then((_) => controller.close());
       },
-      onCancel: () => socket.destroy()
+      onCancel: () => socket?.destroy()
     );
 
     return controller.stream;
