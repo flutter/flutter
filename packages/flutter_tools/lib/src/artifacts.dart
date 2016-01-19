@@ -192,6 +192,14 @@ class ArtifactStore {
     }
   }
 
+  static void ensureHasSkyEnginePackage() {
+    Directory skyEnginePackage = new Directory(path.join(packageRoot, 'sky_engine'));
+    if (!skyEnginePackage.existsSync()) {
+      stderr.writeln("Cannot locate the sky_engine package; did you include 'flutter' in your pubspec.yaml file?");
+      throw new ProcessExit(2);
+    }
+  }
+
   static String _engineRevision;
 
   static String get engineRevision {
@@ -274,6 +282,7 @@ class ArtifactStore {
   }
 
   static Directory _getCacheDirForPlatform(String platform) {
+    ensureHasSkyEnginePackage();
     Directory baseDir = _getBaseCacheDir();
     // TODO(jamesr): Add support for more configurations.
     String config = 'Release';

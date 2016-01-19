@@ -144,7 +144,7 @@ class StartCommand extends StartCommandBase {
     await Future.wait([
       downloadToolchain(),
       downloadApplicationPackagesAndConnectToDevices(),
-    ]);
+    ], eagerError: true);
 
     bool poke = argResults['poke'];
     bool clearLogs = argResults['clear-logs'];
