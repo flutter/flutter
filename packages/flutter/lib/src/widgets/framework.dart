@@ -554,6 +554,7 @@ class _InactiveElements {
     element.deactivate();
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
     element.visitChildren(_deactivate);
+    assert(() { element.debugDeactivated(); return true; });
   }
 
   void add(Element element) {
@@ -851,8 +852,18 @@ abstract class Element<T extends Widget> implements BuildContext {
     assert(widget != null);
     assert(depth != null);
     assert(_active);
+    if (_dependencies != null) {
+      for (InheritedElement dependency in _dependencies)
+        dependency._dependants.remove(this);
+      _dependencies.clear();
+    }
     _active = false;
     assert(() { _debugLifecycleState = _ElementLifecycle.inactive; return true; });
+  }
+
+  /// Called after children have been deactivated.
+  void debugDeactivated() {
+    assert(_debugLifecycleState == _ElementLifecycle.inactive);
   }
 
   void reactivate() {
@@ -879,12 +890,20 @@ abstract class Element<T extends Widget> implements BuildContext {
 
   RenderObject findRenderObject() => renderObject;
 
-  Set<Type> _dependencies;
+  Set<InheritedElement> _dependencies;
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
-    if (_dependencies == null)
-      _dependencies = new Set<Type>();
-    _dependencies.add(targetType);
-    return ancestorWidgetOfExactType(targetType);
+    Element ancestor = _parent;
+    while (ancestor != null && ancestor.widget.runtimeType != targetType)
+      ancestor = ancestor._parent;
+    if (ancestor != null) {
+      assert(ancestor is InheritedElement);
+      _dependencies ??= new Set<InheritedElement>();
+      _dependencies.add(ancestor);
+      InheritedElement typedAncestor = ancestor;
+      typedAncestor._dependants.add(this);
+      return ancestor.widget;
+    }
+    return null;
   }
 
   Widget ancestorWidgetOfExactType(Type targetType) {
@@ -1359,19 +1378,30 @@ class ParentDataElement extends _ProxyElement<ParentDataWidget> {
 class InheritedElement extends _ProxyElement<InheritedWidget> {
   InheritedElement(InheritedWidget widget) : super(widget);
 
+  Set<Element> _dependants = new Set<Element>();
+
+  void debugDeactivated() {
+    assert(() {
+      assert(_dependants.isEmpty);
+      return true;
+    });
+    super.debugDeactivated();
+  }
+
   void notifyDescendants(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
     final Type ourRuntimeType = widget.runtimeType;
-    void notifyChildren(Element child) {
-      if (child._dependencies != null &&
-          child._dependencies.contains(ourRuntimeType)) {
-        child.dependenciesChanged(ourRuntimeType);
-      }
-      if (child.runtimeType != ourRuntimeType)
-        child.visitChildren(notifyChildren);
+    for (Element dependant in _dependants) {
+      dependant.dependenciesChanged(ourRuntimeType);
+      assert(() {
+        // check that it really is our descendant
+        Element ancestor = dependant._parent;
+        while (ancestor != this && ancestor != null)
+          ancestor = ancestor._parent;
+        return ancestor == this;
+      });
     }
-    visitChildren(notifyChildren);
   }
 }
 
