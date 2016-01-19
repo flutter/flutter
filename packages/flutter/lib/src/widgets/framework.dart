@@ -237,65 +237,6 @@ abstract class Widget {
   }
 }
 
-// TODO(ianh): move the next four classes to below InheritedWidget
-
-/// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
-/// which wrap [RenderObject]s, which provide the actual rendering of the
-/// application.
-abstract class RenderObjectWidget extends Widget {
-  const RenderObjectWidget({ Key key }) : super(key: key);
-
-  /// RenderObjectWidgets always inflate to a RenderObjectElement subclass.
-  RenderObjectElement createElement();
-
-  /// Constructs an instance of the RenderObject class that this
-  /// RenderObjectWidget represents, using the configuration described by this
-  /// RenderObjectWidget.
-  RenderObject createRenderObject();
-
-  /// Copies the configuration described by this RenderObjectWidget to the given
-  /// RenderObject, which must be of the same type as returned by this class'
-  /// createRenderObject().
-  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
-
-  void didUnmountRenderObject(RenderObject renderObject) { }
-}
-
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
-/// that have no children.
-abstract class LeafRenderObjectWidget extends RenderObjectWidget {
-  const LeafRenderObjectWidget({ Key key }) : super(key: key);
-
-  LeafRenderObjectElement createElement() => new LeafRenderObjectElement(this);
-}
-
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
-/// that have a single child slot. (This superclass only provides the storage
-/// for that child, it doesn't actually provide the updating logic.)
-abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
-  const OneChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
-
-  final Widget child;
-
-  OneChildRenderObjectElement createElement() => new OneChildRenderObjectElement(this);
-}
-
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
-/// that have a single list of children. (This superclass only provides the
-/// storage for that child list, it doesn't actually provide the updating
-/// logic.)
-abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
-  MultiChildRenderObjectWidget({ Key key, this.children })
-    : super(key: key) {
-    assert(children != null);
-    assert(!children.any((Widget child) => child == null));
-  }
-
-  final List<Widget> children;
-
-  MultiChildRenderObjectElement createElement() => new MultiChildRenderObjectElement(this);
-}
-
 /// StatelessComponents describe a way to compose other Widgets to form reusable
 /// parts, which doesn't depend on anything other than the configuration
 /// information in the object itself. (For compositions that can change
@@ -512,6 +453,63 @@ abstract class InheritedWidget extends _ProxyComponent {
   InheritedElement createElement() => new InheritedElement(this);
 
   bool updateShouldNotify(InheritedWidget oldWidget);
+}
+
+/// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
+/// which wrap [RenderObject]s, which provide the actual rendering of the
+/// application.
+abstract class RenderObjectWidget extends Widget {
+  const RenderObjectWidget({ Key key }) : super(key: key);
+
+  /// RenderObjectWidgets always inflate to a RenderObjectElement subclass.
+  RenderObjectElement createElement();
+
+  /// Constructs an instance of the RenderObject class that this
+  /// RenderObjectWidget represents, using the configuration described by this
+  /// RenderObjectWidget.
+  RenderObject createRenderObject();
+
+  /// Copies the configuration described by this RenderObjectWidget to the given
+  /// RenderObject, which must be of the same type as returned by this class'
+  /// createRenderObject().
+  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
+
+  void didUnmountRenderObject(RenderObject renderObject) { }
+}
+
+/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// that have no children.
+abstract class LeafRenderObjectWidget extends RenderObjectWidget {
+  const LeafRenderObjectWidget({ Key key }) : super(key: key);
+
+  LeafRenderObjectElement createElement() => new LeafRenderObjectElement(this);
+}
+
+/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// that have a single child slot. (This superclass only provides the storage
+/// for that child, it doesn't actually provide the updating logic.)
+abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
+  const OneChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
+
+  final Widget child;
+
+  OneChildRenderObjectElement createElement() => new OneChildRenderObjectElement(this);
+}
+
+/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// that have a single list of children. (This superclass only provides the
+/// storage for that child list, it doesn't actually provide the updating
+/// logic.)
+abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
+  MultiChildRenderObjectWidget({ Key key, this.children })
+    : super(key: key) {
+    assert(children != null);
+    assert(!children.any((Widget child) => child == null));
+  }
+
+  final List<Widget> children;
+
+  MultiChildRenderObjectElement createElement() => new MultiChildRenderObjectElement(this);
 }
 
 
