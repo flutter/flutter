@@ -48,7 +48,7 @@ class JniString : public JniObject {
  public:
   ~JniString() override;
 
-  std::string GetText();
+  Dart_Handle GetText();
 
  private:
   JniString(JNIEnv* env, jstring string);
