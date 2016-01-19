@@ -13,17 +13,17 @@ import '../base/process.dart';
 
 /// A wrapper around the `adb` command-line tool and the adb server.
 class Adb {
+  Adb(this.adbPath);
+
   static const int adbServerPort = 5037;
 
   final String adbPath;
-
-  Adb(this.adbPath);
 
   bool exists() {
     try {
       runCheckedSync([adbPath, 'version']);
       return true;
-    } catch (_) {
+    } catch (exception) {
       return false;
     }
   }
@@ -68,7 +68,8 @@ class Adb {
     if (message.isEmpty)
       return <AdbDevice>[];
     return message.split('\n').map(
-      (String deviceInfo) => new AdbDevice(deviceInfo)).toList();
+      (String deviceInfo) => new AdbDevice(deviceInfo)
+    ).toList();
   }
 
   /// Listen to device activations and deactivations via the asb server's
@@ -131,16 +132,6 @@ class Adb {
 }
 
 class AdbDevice {
-  static final RegExp deviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
-
-  /// Always non-null; something like `TA95000FQA`.
-  String id;
-
-  /// device, offline, unauthorized.
-  String status;
-
-  Map<String, String> _info = <String, String>{};
-
   AdbDevice(String deviceInfo) {
     // 'TA95000FQA	device'
     // 'TA95000FQA             device usb:340787200X product:peregrine_retus model:XT1045 device:peregrine'
@@ -162,6 +153,16 @@ class AdbDevice {
     }
   }
 
+  static final RegExp deviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
+
+  /// Always non-null; something like `TA95000FQA`.
+  String id;
+
+  /// device, offline, unauthorized.
+  String status;
+
+  final Map<String, String> _info = <String, String>{};
+
   bool get isAvailable => status == 'device';
 
   /// Device model; can be null. `XT1045`, `Nexus_7`
@@ -173,7 +174,14 @@ class AdbDevice {
   /// Device product; can be null. `peregrine_retus`, `nakasi`
   String get productID => _info['product'];
 
-  operator==(other) => other is AdbDevice && other.id == id;
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! AdbDevice)
+      return false;
+    final AdbDevice typedOther = other;
+    return id == typedOther.id;
+  }
 
   int get hashCode => id.hashCode;
 
@@ -191,17 +199,14 @@ List<int> _createAdbRequest(String payload) {
 
   // A 4-byte hexadecimal string giving the length of the payload.
   String prefix = data.length.toRadixString(16).padLeft(4, '0');
-  List<int> result = new List<int>();
+  List<int> result = <int>[];
   result.addAll(prefix.codeUnits);
   result.addAll(data);
   return result;
 }
 
 class _AdbServerResponse {
-  String status;
-  String message;
-
-  _AdbServerResponse(String text, {bool noStatus: false}) {
+  _AdbServerResponse(String text, { bool noStatus: false }) {
     if (noStatus) {
       message = text;
     } else {
@@ -216,6 +221,9 @@ class _AdbServerResponse {
       message = message.substring(4);
     }
   }
+
+  String status;
+  String message;
 
   bool get isOkay => status == 'OKAY';
 
