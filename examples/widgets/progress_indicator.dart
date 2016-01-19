@@ -12,39 +12,38 @@ class ProgressIndicatorApp extends StatefulComponent {
 class _ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
   void initState() {
     super.initState();
-    valueAnimation = new ValuePerformance<double>()
-      ..duration = const Duration(milliseconds: 1500)
-      ..variable = new AnimatedValue<double>(
-        0.0,
-        end: 1.0,
-        curve: new Interval(0.0, 0.9, curve: Curves.ease),
-        reverseCurve: Curves.ease
-      );
-    valueAnimation.addStatusListener((PerformanceStatus status) {
+    controller = new AnimationController(
+      duration: const Duration(milliseconds: 1500)
+    )..play(AnimationDirection.forward);
+
+    animation = new ACurve(
+      parent: controller,
+      curve: new Interval(0.0, 0.9, curve: Curves.ease),
+      reverseCurve: Curves.ease
+    )..addStatusListener((PerformanceStatus status) {
       if (status == PerformanceStatus.dismissed || status == PerformanceStatus.completed)
         reverseValueAnimationDirection();
     });
-    valueAnimation.play(valueAnimationDirection);
   }
 
-  ValuePerformance<double> valueAnimation;
-  AnimationDirection valueAnimationDirection = AnimationDirection.forward;
+  Animation animation;
+  AnimationController controller;
 
   void handleTap() {
     setState(() {
       // valueAnimation.isAnimating is part of our build state
-      if (valueAnimation.isAnimating)
-        valueAnimation.stop();
+      if (controller.isAnimating)
+        controller.stop();
       else
-        valueAnimation.resume();
+        controller.resume();
     });
   }
 
   void reverseValueAnimationDirection() {
-    valueAnimationDirection = (valueAnimationDirection == AnimationDirection.forward)
+    AnimationDirection direction = (controller.direction == AnimationDirection.forward)
       ? AnimationDirection.reverse
       : AnimationDirection.forward;
-    valueAnimation.play(valueAnimationDirection);
+    controller.play(direction);
   }
 
   Widget buildIndicators(BuildContext context) {
@@ -55,19 +54,19 @@ class _ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
         ),
         new LinearProgressIndicator(),
         new LinearProgressIndicator(),
-        new LinearProgressIndicator(value: valueAnimation.value),
+        new LinearProgressIndicator(value: animation.progress),
         new CircularProgressIndicator(),
         new SizedBox(
             width: 20.0,
             height: 20.0,
-            child: new CircularProgressIndicator(value: valueAnimation.value)
+            child: new CircularProgressIndicator(value: animation.progress)
         ),
         new SizedBox(
           width: 50.0,
           height: 30.0,
-          child: new CircularProgressIndicator(value: valueAnimation.value)
+          child: new CircularProgressIndicator(value: animation.progress)
         ),
-        new Text("${(valueAnimation.value * 100.0).toStringAsFixed(1)}%" + (valueAnimation.isAnimating ? '' : ' (paused)'))
+        new Text("${(animation.progress * 100.0).toStringAsFixed(1)}%" + (controller.isAnimating ? '' : ' (paused)'))
     ];
     return new Column(
       children: indicators
@@ -82,9 +81,8 @@ class _ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
       onTap: handleTap,
       child: new Container(
         padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-        child: new BuilderTransition(
-          variables: <AnimatedValue<double>>[valueAnimation.variable],
-          performance: valueAnimation.view,
+        child: new AnimationWatchingBuilder(
+          watchable: animation,
           builder: buildIndicators
         )
       )
