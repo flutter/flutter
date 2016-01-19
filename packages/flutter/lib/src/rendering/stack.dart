@@ -202,8 +202,9 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
       values.add('width=$width');
     if (height != null)
       values.add('height=$height');
-    if (values.length == null)
-      return 'all null';
+    if (values.isEmpty)
+      values.add('not positioned');
+    values.add(super.toString());
     return values.join('; ');
   }
 }
