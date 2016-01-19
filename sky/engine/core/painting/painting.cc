@@ -35,17 +35,17 @@ void DecodeImage(scoped_ptr<DartPersistentValue> callback,
   // decoder can be null if the buffer was empty and we couldn't even guess
   // what type of image to decode.
   if (!decoder) {
-    DartInvokeAppClosure(callback->value(), {Dart_Null()});
+    DartInvoke(callback->value(), {Dart_Null()});
     return;
   }
   decoder->setData(buffer.get(), true);
   if (decoder->failed() || decoder->frameCount() == 0) {
-    DartInvokeAppClosure(callback->value(), {Dart_Null()});
+    DartInvoke(callback->value(), {Dart_Null()});
     return;
   }
   ImageFrame* imageFrame = decoder->frameBufferAtIndex(0);
   if (decoder->failed()) {
-    DartInvokeAppClosure(callback->value(), {Dart_Null()});
+    DartInvoke(callback->value(), {Dart_Null()});
     return;
   }
 
@@ -54,7 +54,7 @@ void DecodeImage(scoped_ptr<DartPersistentValue> callback,
       SkImage::NewFromBitmap(imageFrame->getSkBitmap()));
   resultImage->setImage(skImage.release());
 
-  DartInvokeAppClosure(callback->value(), {ToDart(resultImage)});
+  DartInvoke(callback->value(), {ToDart(resultImage)});
 }
 
 

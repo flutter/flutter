@@ -36,7 +36,7 @@ void DartMicrotaskQueue::RunMicrotasks() {
       if (!dart_state.get())
         continue;
       DartState::Scope dart_scope(dart_state.get());
-      DartInvokeAppClosure(callback.value(), 0, nullptr);
+      DartInvokeVoid(callback.value());
     }
   }
 }

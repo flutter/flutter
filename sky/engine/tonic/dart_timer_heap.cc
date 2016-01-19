@@ -46,7 +46,7 @@ void DartTimerHeap::Run(int id) {
   if (!task->closure.dart_state())
     return;
   DartState::Scope dart_scope(task->closure.dart_state().get());
-  DartInvokeAppClosure(task->closure.value(), 0, nullptr);
+  DartInvokeVoid(task->closure.value());
   if (task->repeating)
     Schedule(id, std::move(task));
 }
