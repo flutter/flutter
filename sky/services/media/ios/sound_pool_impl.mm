@@ -5,6 +5,7 @@
 #include "sky/services/media/ios/sound_pool_impl.h"
 
 #include "base/bind.h"
+#include "base/files/file_util.h"
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
@@ -171,6 +172,10 @@ SoundPoolImpl::SoundPoolImpl(mojo::InterfaceRequest<::media::SoundPool> request)
 
 SoundPoolImpl::~SoundPoolImpl() {
   [sound_pool_ release];
+
+  for (const auto& path : temp_files_) {
+    base::DeleteFile(path, false);
+  }
 }
 
 static base::FilePath TemporaryFilePath() {
@@ -204,6 +209,8 @@ void SoundPoolImpl::onCopyToTemp(
     callback.Run(false, 0);
     return;
   }
+
+  temp_files_.push_back(path);
 
   // After the copy, initialize the audio player instance in the pool
   NSString* filePath =

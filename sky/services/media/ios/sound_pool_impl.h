@@ -55,6 +55,7 @@ class SoundPoolImpl : public ::media::SoundPool {
  private:
   mojo::StrongBinding<::media::SoundPool> binding_;
   SoundPoolClient* sound_pool_;
+  std::vector<base::FilePath> temp_files_;
 
   void onCopyToTemp(const ::media::SoundPool::LoadCallback& callback,
                     base::FilePath path,
