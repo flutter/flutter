@@ -126,23 +126,25 @@ abstract class TransitionWithChild extends TransitionComponent {
   Widget buildWithChild(BuildContext context, Widget child);
 }
 
-class SlideTransition extends TransitionWithChild {
+class SlideTransition extends AnimatedComponent {
   SlideTransition({
     Key key,
-    this.position,
+    Animated<FractionalOffset> position,
     PerformanceView performance,
     this.transformHitTests: true,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
+    this.child
+  }) : position = position, super(key: key, animation: position);
 
-  final AnimatedValue<FractionalOffset> position;
-  bool transformHitTests;
+  final Animated<FractionalOffset> position;
+  final bool transformHitTests;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(position);
-    return new FractionalTranslation(translation: position.value, transformHitTests: transformHitTests, child: child);
+  Widget build(BuildContext context) {
+    return new FractionalTranslation(
+      translation: position.value,
+      transformHitTests: transformHitTests,
+      child: child
+    );
   }
 }
 

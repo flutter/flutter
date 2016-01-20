@@ -378,7 +378,7 @@ class HeroParty {
 
   Animated<double> _currentAnimation;
 
-  void _clearCurrentPerformance() {
+  void _clearCurrentAnimation() {
     _currentAnimation?.removeStatusListener(_handleUpdate);
     _currentAnimation = null;
   }
@@ -386,7 +386,7 @@ class HeroParty {
   void setAnimation(Animated<double> animation) {
     assert(animation != null || _heroes.length == 0);
     if (animation != _currentAnimation) {
-      _clearCurrentPerformance();
+      _clearCurrentAnimation();
       _currentAnimation = animation;
       _currentAnimation?.addStatusListener(_handleUpdate);
     }
@@ -402,7 +402,7 @@ class HeroParty {
           source._resetChild();
       }
       _heroes.clear();
-      _clearCurrentPerformance();
+      _clearCurrentAnimation();
       if (onQuestFinished != null)
         onQuestFinished();
     }

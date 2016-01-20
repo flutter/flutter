@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
@@ -42,7 +41,7 @@ class MimicOverlayEntry {
   // Animation state
   GlobalKey _targetKey;
   Curve _curve;
-  Performance _performance;
+  AnimationController _controller;
 
   /// Animate the entry to the location of the widget that has the given target key.
   ///
@@ -63,10 +62,10 @@ class MimicOverlayEntry {
     _targetKey = targetKey;
     _curve = curve;
     // TODO(abarth): Support changing the animation target when in flight.
-    assert(_performance == null);
-    _performance = new Performance(duration: duration)
+    assert(_controller == null);
+    _controller = new AnimationController(duration: duration)
       ..addListener(_overlayEntry.markNeedsBuild);
-    return _performance.play();
+    return _controller.forward();
   }
 
   /// Cause the overlay entry to rebuild during the next pipeline flush.
@@ -84,8 +83,8 @@ class MimicOverlayEntry {
   void dispose() {
     _targetKey = null;
     _curve = null;
-    _performance?.stop();
-    _performance = null;
+    _controller?.stop();
+    _controller = null;
     _key.stopMimic();
     _key = null;
     _overlayEntry.remove();
@@ -98,16 +97,14 @@ class MimicOverlayEntry {
     Rect globalBounds = _initialGlobalBounds;
     Point globalPosition = globalBounds.topLeft;
     if (_targetKey != null) {
-      assert(_performance != null);
+      assert(_controller != null);
       assert(_curve != null);
       RenderBox box = _targetKey.currentContext?.findRenderObject();
       if (box != null) {
         // TODO(abarth): Handle the case where the transform here isn't just a translation.
         Point localPosition = box.localToGlobal(Point.origin);
-        double t = _curve.transform(_performance.progress);
-        // TODO(abarth): Add Point.lerp.
-        globalPosition = new Point(ui.lerpDouble(globalPosition.x, localPosition.x, t),
-                                 ui.lerpDouble(globalPosition.y, localPosition.y, t));
+        double t = _curve.transform(_controller.value);
+        globalPosition = Point.lerp(globalPosition, localPosition, t);
       }
     }
 

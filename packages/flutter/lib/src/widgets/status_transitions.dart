@@ -24,24 +24,24 @@ abstract class StatusTransitionComponent extends StatefulComponent {
 class _StatusTransitionState extends State<StatusTransitionComponent> {
   void initState() {
     super.initState();
-    config.animation.addStatusListener(_performanceStatusChanged);
+    config.animation.addStatusListener(_animationStatusChanged);
   }
 
   void didUpdateConfig(StatusTransitionComponent oldConfig) {
     if (config.animation != oldConfig.animation) {
-      oldConfig.animation.removeStatusListener(_performanceStatusChanged);
-      config.animation.addStatusListener(_performanceStatusChanged);
+      oldConfig.animation.removeStatusListener(_animationStatusChanged);
+      config.animation.addStatusListener(_animationStatusChanged);
     }
   }
 
   void dispose() {
-    config.animation.removeStatusListener(_performanceStatusChanged);
+    config.animation.removeStatusListener(_animationStatusChanged);
     super.dispose();
   }
 
-  void _performanceStatusChanged(PerformanceStatus status) {
+  void _animationStatusChanged(PerformanceStatus status) {
     setState(() {
-      // The performance's state is our build state, and it changed already.
+      // The animation's state is our build state, and it changed already.
     });
   }
 

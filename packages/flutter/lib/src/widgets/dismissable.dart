@@ -72,23 +72,23 @@ class Dismissable extends StatefulComponent {
 class _DismissableState extends State<Dismissable> {
   void initState() {
     super.initState();
-    _dismissPerformance = new Performance(duration: _kCardDismissDuration);
-    _dismissPerformance.addStatusListener((PerformanceStatus status) {
+    _dismissController = new AnimationController(duration: _kCardDismissDuration);
+    _dismissController.addStatusListener((PerformanceStatus status) {
       if (status == PerformanceStatus.completed)
         _handleDismissCompleted();
     });
   }
 
-  Performance _dismissPerformance;
-  Performance _resizePerformance;
+  AnimationController _dismissController;
+  AnimationController _resizeController;
 
   Size _size;
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
 
   void dispose() {
-    _dismissPerformance?.stop();
-    _resizePerformance?.stop();
+    _dismissController?.stop();
+    _resizeController?.stop();
     super.dispose();
   }
 
@@ -101,11 +101,11 @@ class _DismissableState extends State<Dismissable> {
 
   void _handleDismissCompleted() {
     if (!_dragUnderway)
-      _startResizePerformance();
+      _startResizeAnimation();
   }
 
   bool get _isActive {
-    return _size != null && (_dragUnderway || _dismissPerformance.isAnimating);
+    return _size != null && (_dragUnderway || _dismissController.isAnimating);
   }
 
   void _maybeCallOnResized() {
@@ -118,21 +118,20 @@ class _DismissableState extends State<Dismissable> {
       config.onDismissed();
   }
 
-  void _startResizePerformance() {
+  void _startResizeAnimation() {
     assert(_size != null);
-    assert(_dismissPerformance != null);
-    assert(_dismissPerformance.isCompleted);
-    assert(_resizePerformance == null);
+    assert(_dismissController != null);
+    assert(_dismissController.isCompleted);
+    assert(_resizeController == null);
     setState(() {
-      _resizePerformance = new Performance()
-        ..duration = _kCardResizeDuration
+      _resizeController = new AnimationController(duration: _kCardResizeDuration)
         ..addListener(_handleResizeProgressChanged);
-      _resizePerformance.play();
+      _resizeController.forward();
     });
   }
 
   void _handleResizeProgressChanged() {
-    if (_resizePerformance.isCompleted)
+    if (_resizeController.isCompleted)
       _maybeCallOnDismissed();
     else
       _maybeCallOnResized();
@@ -141,18 +140,18 @@ class _DismissableState extends State<Dismissable> {
   void _handleDragStart(_) {
     setState(() {
       _dragUnderway = true;
-      if (_dismissPerformance.isAnimating) {
-        _dragExtent = _dismissPerformance.progress * _size.width * _dragExtent.sign;
-        _dismissPerformance.stop();
+      if (_dismissController.isAnimating) {
+        _dragExtent = _dismissController.value * _size.width * _dragExtent.sign;
+        _dismissController.stop();
       } else {
         _dragExtent = 0.0;
-        _dismissPerformance.progress = 0.0;
+        _dismissController.value = 0.0;
       }
     });
   }
 
   void _handleDragUpdate(double delta) {
-    if (!_isActive || _dismissPerformance.isAnimating)
+    if (!_isActive || _dismissController.isAnimating)
       return;
 
     double oldDragExtent = _dragExtent;
@@ -180,11 +179,11 @@ class _DismissableState extends State<Dismissable> {
         // Rebuild to update the new drag endpoint.
         // The sign of _dragExtent is part of our build state;
         // the actual value is not, it's just used to configure
-        // the performances.
+        // the animations.
       });
     }
-    if (!_dismissPerformance.isAnimating)
-      _dismissPerformance.progress = _dragExtent.abs() / _size.width;
+    if (!_dismissController.isAnimating)
+      _dismissController.value = _dragExtent.abs() / _size.width;
   }
 
   bool _isFlingGesture(ui.Offset velocity) {
@@ -217,20 +216,20 @@ class _DismissableState extends State<Dismissable> {
   }
 
   void _handleDragEnd(ui.Offset velocity) {
-    if (!_isActive || _dismissPerformance.isAnimating)
+    if (!_isActive || _dismissController.isAnimating)
       return;
     setState(() {
       _dragUnderway = false;
-      if (_dismissPerformance.isCompleted) {
-        _startResizePerformance();
+      if (_dismissController.isCompleted) {
+        _startResizeAnimation();
       } else if (_isFlingGesture(velocity)) {
         double flingVelocity = _directionIsYAxis ? velocity.dy : velocity.dx;
         _dragExtent = flingVelocity.sign;
-        _dismissPerformance.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-      } else if (_dismissPerformance.progress > _kDismissCardThreshold) {
-        _dismissPerformance.forward();
+        _dismissController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
+      } else if (_dismissController.value > _kDismissCardThreshold) {
+        _dismissController.forward();
       } else {
-        _dismissPerformance.reverse();
+        _dismissController.reverse();
       }
     });
   }
@@ -250,20 +249,26 @@ class _DismissableState extends State<Dismissable> {
   }
 
   Widget build(BuildContext context) {
-    if (_resizePerformance != null) {
+    if (_resizeController != null) {
       // make sure you remove this widget once it's been dismissed!
-      assert(_resizePerformance.status == PerformanceStatus.forward);
+      assert(_resizeController.status == PerformanceStatus.forward);
 
-      AnimatedValue<double> squashAxisExtent = new AnimatedValue<double>(
-        _directionIsYAxis ? _size.width : _size.height,
-        end: 0.0,
+      Animated<double> squashAxisExtent = new Tween<double>(
+        begin: _directionIsYAxis ? _size.width : _size.height,
+        end: 0.0
+      ).animate(new CurvedAnimation(
+        parent: _resizeController,
         curve: _kCardResizeTimeCurve
-      );
+      ));
 
-      return new SquashTransition(
-        performance: _resizePerformance.view,
-        width: _directionIsYAxis ? squashAxisExtent : null,
-        height: !_directionIsYAxis ? squashAxisExtent : null
+      return new AnimatedBuilder(
+        animation: squashAxisExtent,
+        builder: (BuildContext context, Widget child) {
+          return new SizedBox(
+            width: _directionIsYAxis ? squashAxisExtent.value : null,
+            height: !_directionIsYAxis ? squashAxisExtent.value : null
+          );
+        }
       );
     }
 
@@ -278,11 +283,10 @@ class _DismissableState extends State<Dismissable> {
       child: new SizeObserver(
         onSizeChanged: _handleSizeChanged,
         child: new SlideTransition(
-          performance: _dismissPerformance.view,
-          position: new AnimatedValue<FractionalOffset>(
-            FractionalOffset.zero,
+          position: new Tween<FractionalOffset>(
+            begin: FractionalOffset.zero,
             end: _activeCardDragEndPoint
-          ),
+          ).animate(_dismissController),
           child: config.child
         )
       )
