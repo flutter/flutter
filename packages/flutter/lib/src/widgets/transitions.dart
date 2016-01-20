@@ -63,47 +63,47 @@ class _TransitionState extends State<TransitionComponent> {
   }
 }
 
-abstract class AnimationWatchingComponent extends StatefulComponent {
-  AnimationWatchingComponent({
+abstract class AnimatedComponent extends StatefulComponent {
+  AnimatedComponent({
     Key key,
-    this.watchable
+    this.animation
   }) : super(key: key) {
-    assert(watchable != null);
+    assert(animation != null);
   }
 
-  final Watchable watchable;
+  final Animated<Object> animation;
 
   Widget build(BuildContext context);
 
-  _AnimationWatchingComponentState createState() => new _AnimationWatchingComponentState();
+  _AnimatedComponentState createState() => new _AnimatedComponentState();
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('watchable: $watchable');
+    description.add('animation: $animation');
   }
 }
 
-class _AnimationWatchingComponentState extends State<AnimationWatchingComponent> {
+class _AnimatedComponentState extends State<AnimatedComponent> {
   void initState() {
     super.initState();
-    config.watchable.addListener(_handleTick);
+    config.animation.addListener(_handleTick);
   }
 
-  void didUpdateConfig(AnimationWatchingComponent oldConfig) {
-    if (config.watchable != oldConfig.watchable) {
-      oldConfig.watchable.removeListener(_handleTick);
-      config.watchable.addListener(_handleTick);
+  void didUpdateConfig(AnimatedComponent oldConfig) {
+    if (config.animation != oldConfig.animation) {
+      oldConfig.animation.removeListener(_handleTick);
+      config.animation.addListener(_handleTick);
     }
   }
 
   void dispose() {
-    config.watchable.removeListener(_handleTick);
+    config.animation.removeListener(_handleTick);
     super.dispose();
   }
 
   void _handleTick() {
     setState(() {
-      // The watchable's state is our build state, and it changed already.
+      // The animation's state is our build state, and it changed already.
     });
   }
 
@@ -146,24 +146,22 @@ class SlideTransition extends TransitionWithChild {
   }
 }
 
-class ScaleTransition extends TransitionWithChild {
+class ScaleTransition extends AnimatedComponent {
   ScaleTransition({
     Key key,
-    this.scale,
+    Animated<double> scale,
     this.alignment: const FractionalOffset(0.5, 0.5),
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
+    this.child
+  }) : scale = scale, super(key: key, animation: scale);
 
-  final AnimatedValue<double> scale;
+  final Animated<double> scale;
   final FractionalOffset alignment;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(scale);
+  Widget build(BuildContext context) {
+    double scaleValue = scale.value;
     Matrix4 transform = new Matrix4.identity()
-      ..scale(scale.value, scale.value);
+      ..scale(scaleValue, scaleValue);
     return new Transform(
       transform: transform,
       alignment: alignment,
@@ -172,21 +170,19 @@ class ScaleTransition extends TransitionWithChild {
   }
 }
 
-class RotationTransition extends TransitionWithChild {
+class RotationTransition extends AnimatedComponent {
   RotationTransition({
     Key key,
-    this.turns,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
+    Animated<double> turns,
+    this.child
+  }) : turns = turns, super(key: key, animation: turns);
 
-  final AnimatedValue<double> turns;
+  final Animated<double> turns;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(turns);
-    Matrix4 transform = new Matrix4.rotationZ(turns.value * math.PI * 2.0);
+  Widget build(BuildContext context) {
+    double turnsValue = turns.value;
+    Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
     return new Transform(
       transform: transform,
       alignment: const FractionalOffset(0.5, 0.5),
@@ -195,8 +191,8 @@ class RotationTransition extends TransitionWithChild {
   }
 }
 
-class FadeTransition extends TransitionWithChild {
-  FadeTransition({
+class OldFadeTransition extends TransitionWithChild {
+ OldFadeTransition({
     Key key,
     this.opacity,
     PerformanceView performance,
@@ -209,6 +205,21 @@ class FadeTransition extends TransitionWithChild {
 
   Widget buildWithChild(BuildContext context, Widget child) {
     performance.updateVariable(opacity);
+    return new Opacity(opacity: opacity.value, child: child);
+  }
+}
+
+class FadeTransition extends AnimatedComponent {
+  FadeTransition({
+    Key key,
+    Animated<double> opacity,
+    this.child
+  }) : opacity = opacity, super(key: key, animation: opacity);
+
+  final Animated<double> opacity;
+  final Widget child;
+
+  Widget build(BuildContext context) {
     return new Opacity(opacity: opacity.value, child: child);
   }
 }
@@ -294,9 +305,9 @@ class AlignTransition extends TransitionWithChild {
 /// This class specializes the interpolation of AnimatedValue<RelativeRect> to
 /// be appropriate for rectangles that are described in terms of offsets from
 /// other rectangles.
-class AnimatedRelativeRectValue extends AnimatedValue<RelativeRect> {
-  AnimatedRelativeRectValue(RelativeRect begin, { RelativeRect end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+class RelativeRectTween extends Tween<RelativeRect> {
+  RelativeRectTween({ RelativeRect begin, RelativeRect end })
+    : super(begin: begin, end: end);
 
   RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
 }
@@ -307,22 +318,19 @@ class AnimatedRelativeRectValue extends AnimatedValue<RelativeRect> {
 /// of the performance.
 ///
 /// Only works if it's the child of a [Stack].
-class PositionedTransition extends TransitionWithChild {
+class PositionedTransition extends AnimatedComponent {
   PositionedTransition({
     Key key,
-    this.rect,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child) {
+    Animated<RelativeRect> rect,
+    this.child
+  }) : rect = rect, super(key: key, animation: rect) {
     assert(rect != null);
   }
 
-  final AnimatedRelativeRectValue rect;
+  final Animated<RelativeRect> rect;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(rect);
+  Widget build(BuildContext context) {
     return new Positioned(
       top: rect.value.top,
       right: rect.value.right,
@@ -352,16 +360,20 @@ class BuilderTransition extends TransitionComponent {
   }
 }
 
-class AnimationWatchingBuilder extends AnimationWatchingComponent {
-  AnimationWatchingBuilder({
-    Key key,
-    Watchable watchable,
-    this.builder
-  }) : super(key: key, watchable: watchable);
+typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
-  final WidgetBuilder builder;
+class AnimatedBuilder extends AnimatedComponent {
+  AnimatedBuilder({
+    Key key,
+    Animated<Object> animation,
+    this.builder,
+    this.child
+  }) : super(key: key, animation: animation);
+
+  final TransitionBuilder builder;
+  final Widget child;
 
   Widget build(BuildContext context) {
-    return builder(context);
+    return builder(context, child);
   }
 }

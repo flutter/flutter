@@ -12,10 +12,10 @@ class PageSelectorDemo extends StatelessComponent {
     final ColorTween _previousColor = new ColorTween(begin: color, end: Colors.transparent);
     final TabBarSelectionState selection = TabBarSelection.of(context);
 
-    Animation animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
-    return new AnimationWatchingBuilder(
-      watchable: animation,
-      builder: (BuildContext context) {
+    CurvedAnimation animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
+    return new AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget child) {
         Color background = selection.value == iconName ? _selectedColor.end : _selectedColor.begin;
         if (selection.valueIsChanging) {
           // Then the selection's performance is animating from previousValue to value.

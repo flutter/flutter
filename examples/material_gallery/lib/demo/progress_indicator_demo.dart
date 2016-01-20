@@ -27,7 +27,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     });
   }
 
-  Animation animation;
+  Animated<double> animation;
   AnimationController controller;
 
   void handleTap() {
@@ -47,7 +47,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     controller.play(direction);
   }
 
-  Widget buildIndicators(BuildContext context) {
+  Widget buildIndicators(BuildContext context, Widget child) {
     List<Widget> indicators = <Widget>[
         new SizedBox(
           width: 200.0,
@@ -55,19 +55,19 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
         ),
         new LinearProgressIndicator(),
         new LinearProgressIndicator(),
-        new LinearProgressIndicator(value: animation.progress),
+        new LinearProgressIndicator(value: animation.value),
         new CircularProgressIndicator(),
         new SizedBox(
             width: 20.0,
             height: 20.0,
-            child: new CircularProgressIndicator(value: animation.progress)
+            child: new CircularProgressIndicator(value: animation.value)
         ),
         new SizedBox(
           width: 50.0,
           height: 30.0,
-          child: new CircularProgressIndicator(value: animation.progress)
+          child: new CircularProgressIndicator(value: animation.value)
         ),
-        new Text("${(animation.progress * 100.0).toStringAsFixed(1)}%" + (controller.isAnimating ? '' : ' (paused)'))
+        new Text("${(animation.value * 100.0).toStringAsFixed(1)}%" + (controller.isAnimating ? '' : ' (paused)'))
     ];
     return new Column(
       children: indicators
@@ -87,8 +87,8 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
           behavior: HitTestBehavior.opaque,
           child: new Container(
             padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-            child: new AnimationWatchingBuilder(
-              watchable: animation,
+            child: new AnimatedBuilder(
+              animation: animation,
               builder: buildIndicators
             )
           )

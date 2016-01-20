@@ -9,12 +9,12 @@ import 'framework.dart';
 abstract class StatusTransitionComponent extends StatefulComponent {
   StatusTransitionComponent({
     Key key,
-    this.performance
+    this.animation
   }) : super(key: key) {
-    assert(performance != null);
+    assert(animation != null);
   }
 
-  final PerformanceView performance;
+  final Animated<double> animation;
 
   Widget build(BuildContext context);
 
@@ -24,18 +24,18 @@ abstract class StatusTransitionComponent extends StatefulComponent {
 class _StatusTransitionState extends State<StatusTransitionComponent> {
   void initState() {
     super.initState();
-    config.performance.addStatusListener(_performanceStatusChanged);
+    config.animation.addStatusListener(_performanceStatusChanged);
   }
 
   void didUpdateConfig(StatusTransitionComponent oldConfig) {
-    if (config.performance != oldConfig.performance) {
-      oldConfig.performance.removeStatusListener(_performanceStatusChanged);
-      config.performance.addStatusListener(_performanceStatusChanged);
+    if (config.animation != oldConfig.animation) {
+      oldConfig.animation.removeStatusListener(_performanceStatusChanged);
+      config.animation.addStatusListener(_performanceStatusChanged);
     }
   }
 
   void dispose() {
-    config.performance.removeStatusListener(_performanceStatusChanged);
+    config.animation.removeStatusListener(_performanceStatusChanged);
     super.dispose();
   }
 

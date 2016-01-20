@@ -71,13 +71,13 @@ class Tooltip extends StatefulComponent {
 
 class _TooltipState extends State<Tooltip> {
 
-  Performance _performance;
+  AnimationController _controller;
   OverlayEntry _entry;
   Timer _timer;
 
   void initState() {
     super.initState();
-    _performance = new Performance(duration: config.fadeDuration)
+    _controller = new AnimationController(duration: config.fadeDuration)
       ..addStatusListener((PerformanceStatus status) {
         switch (status) {
           case PerformanceStatus.completed:
@@ -100,7 +100,7 @@ class _TooltipState extends State<Tooltip> {
   void didUpdateConfig(Tooltip oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (config.fadeDuration != oldConfig.fadeDuration)
-      _performance.duration = config.fadeDuration;
+      _controller.duration = config.fadeDuration;
     if (_entry != null &&
         (config.message != oldConfig.message ||
          config.backgroundColor != oldConfig.backgroundColor ||
@@ -117,7 +117,7 @@ class _TooltipState extends State<Tooltip> {
   }
 
   void resetShowTimer() {
-    assert(_performance.status == PerformanceStatus.completed);
+    assert(_controller.status == PerformanceStatus.completed);
     assert(_entry != null);
     _timer = new Timer(config.showDuration, hideTooltip);
   }
@@ -136,7 +136,10 @@ class _TooltipState extends State<Tooltip> {
           height: config.height,
           padding: config.padding,
           opacity: config.opacity,
-          performance: _performance,
+          animation: new CurvedAnimation(
+            parent: _controller,
+            curve: Curves.ease
+          ),
           target: target,
           verticalOffset: config.verticalOffset,
           screenEdgeMargin: config.screenEdgeMargin,
@@ -146,9 +149,9 @@ class _TooltipState extends State<Tooltip> {
       Overlay.of(context).insert(_entry);
     }
     _timer?.cancel();
-    if (_performance.status != PerformanceStatus.completed) {
+    if (_controller.status != PerformanceStatus.completed) {
       _timer = null;
-      _performance.forward();
+      _controller.forward();
     } else {
       resetShowTimer();
     }
@@ -158,7 +161,7 @@ class _TooltipState extends State<Tooltip> {
     assert(_entry != null);
     _timer?.cancel();
     _timer = null;
-    _performance.reverse();    
+    _controller.reverse();
   }
 
   void deactivate() {
@@ -232,7 +235,7 @@ class _TooltipOverlay extends StatelessComponent {
     this.height,
     this.padding,
     this.opacity,
-    this.performance,
+    this.animation,
     this.target,
     this.verticalOffset,
     this.screenEdgeMargin,
@@ -246,7 +249,7 @@ class _TooltipOverlay extends StatelessComponent {
   final double borderRadius;
   final double height;
   final EdgeDims padding;
-  final PerformanceView performance;
+  final Animated<double> animation;
   final Point target;
   final double verticalOffset;
   final EdgeDims screenEdgeMargin;
@@ -267,8 +270,7 @@ class _TooltipOverlay extends StatelessComponent {
             preferBelow: preferBelow
           ),
           child: new FadeTransition(
-            performance: performance,
-            opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease),
+            opacity: animation,
             child: new Opacity(
               opacity: opacity,
               child: new Container(

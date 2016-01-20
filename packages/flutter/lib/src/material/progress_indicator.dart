@@ -27,7 +27,7 @@ abstract class ProgressIndicator extends StatefulComponent {
   Color _getBackgroundColor(BuildContext context) => Theme.of(context).primarySwatch[200];
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
 
-  Widget _buildIndicator(BuildContext context, double performanceValue);
+  Widget _buildIndicator(BuildContext context, double animationValue);
 
   _ProgressIndicatorState createState() => new _ProgressIndicatorState();
 
@@ -38,36 +38,33 @@ abstract class ProgressIndicator extends StatefulComponent {
 }
 
 class _ProgressIndicatorState extends State<ProgressIndicator> {
-
-  ValuePerformance<double> _performance;
+  Animated<double> _animation;
+  AnimationController _controller;
 
   void initState() {
     super.initState();
-    _performance = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease),
+    _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500)
-    );
-    _performance.addStatusListener((PerformanceStatus status) {
+    )..addStatusListener((PerformanceStatus status) {
       if (status == PerformanceStatus.completed)
         _restartAnimation();
-    });
-    _performance.play();
+    })..forward();
+    _animation = new CurvedAnimation(parent: _controller, curve: Curves.ease);
   }
 
   void _restartAnimation() {
-    _performance.progress = 0.0;
-    _performance.play();
+    _controller.value = 0.0;
+    _controller.forward();
   }
 
   Widget build(BuildContext context) {
     if (config.value != null)
-      return config._buildIndicator(context, _performance.value);
+      return config._buildIndicator(context, _animation.value);
 
-    return new BuilderTransition(
-      variables: <AnimatedValue<double>>[_performance.variable],
-      performance: _performance.view,
-      builder: (BuildContext context) {
-        return config._buildIndicator(context, _performance.value);
+    return new AnimatedBuilder(
+      animation: _animation,
+      builder: (BuildContext context, Widget child) {
+        return config._buildIndicator(context, _animation.value);
       }
     );
   }
@@ -78,13 +75,13 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     this.backgroundColor,
     this.valueColor,
     this.value,
-    this.performanceValue
+    this.animationValue
   });
 
   final Color backgroundColor;
   final Color valueColor;
   final double value;
-  final double performanceValue;
+  final double animationValue;
 
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
@@ -97,7 +94,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       double width = value.clamp(0.0, 1.0) * size.width;
       canvas.drawRect(Point.origin & new Size(width, size.height), paint);
     } else {
-      double startX = size.width * (1.5 * performanceValue - 0.5);
+      double startX = size.width * (1.5 * animationValue - 0.5);
       double endX = startX + 0.5 * size.width;
       double x = startX.clamp(0.0, size.width);
       double width = endX.clamp(0.0, size.width) - x;
@@ -109,7 +106,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     return oldPainter.backgroundColor != backgroundColor
         || oldPainter.valueColor != valueColor
         || oldPainter.value != value
-        || oldPainter.performanceValue != performanceValue;
+        || oldPainter.animationValue != animationValue;
   }
 }
 
@@ -119,7 +116,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     double value
   }) : super(key: key, value: value);
 
-  Widget _buildIndicator(BuildContext context, double performanceValue) {
+  Widget _buildIndicator(BuildContext context, double animationValue) {
     return new Container(
       constraints: new BoxConstraints.tightFor(
         width: double.INFINITY,
@@ -130,7 +127,7 @@ class LinearProgressIndicator extends ProgressIndicator {
           backgroundColor: _getBackgroundColor(context),
           valueColor: _getValueColor(context),
           value: value,
-          performanceValue: performanceValue
+          animationValue: animationValue
         )
       )
     );
@@ -147,12 +144,12 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   const _CircularProgressIndicatorPainter({
     this.valueColor,
     this.value,
-    this.performanceValue
+    this.animationValue
   });
 
   final Color valueColor;
   final double value;
-  final double performanceValue;
+  final double animationValue;
 
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
@@ -166,7 +163,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
     } else {
-      double startAngle = _kTwoPI * (1.75 * performanceValue - 0.75);
+      double startAngle = _kTwoPI * (1.75 * animationValue - 0.75);
       double endAngle = startAngle + _kTwoPI * 0.75;
       double arcAngle = startAngle.clamp(0.0, _kTwoPI);
       double arcSweep = endAngle.clamp(0.0, _kTwoPI) - arcAngle;
@@ -179,7 +176,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
     return oldPainter.valueColor != valueColor
         || oldPainter.value != value
-        || oldPainter.performanceValue != performanceValue;
+        || oldPainter.animationValue != animationValue;
   }
 }
 
@@ -189,7 +186,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     double value
   }) : super(key: key, value: value);
 
-  Widget _buildIndicator(BuildContext context, double performanceValue) {
+  Widget _buildIndicator(BuildContext context, double animationValue) {
     return new Container(
       constraints: new BoxConstraints(
         minWidth: _kMinCircularProgressIndicatorSize,
@@ -199,7 +196,7 @@ class CircularProgressIndicator extends ProgressIndicator {
         painter: new _CircularProgressIndicatorPainter(
           valueColor: _getValueColor(context),
           value: value,
-          performanceValue: performanceValue
+          animationValue: animationValue
         )
       )
     );

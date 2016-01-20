@@ -21,11 +21,11 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   bool canTransitionTo(TransitionRoute nextRoute) => nextRoute is PageRoute;
   bool canTransitionFrom(TransitionRoute nextRoute) => nextRoute is PageRoute;
 
-  Performance createPerformanceController() {
-    Performance performance = super.createPerformanceController();
+  AnimationController createAnimationController() {
+    AnimationController controller = super.createAnimationController();
     if (settings.isInitialRoute)
-      performance.progress = 1.0;
-    return performance;
+      controller.value = 1.0;
+    return controller;
   }
 
   /// Subclasses can override this method to customize how heroes are inserted.

@@ -61,9 +61,12 @@ class _PopupMenu<T> extends StatelessComponent {
     for (int i = 0; i < route.items.length; ++i) {
       double start = (i + 1) * unit;
       double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      CurvedAnimation opacity = new CurvedAnimation(
+        parent: route.animation,
+        curve: new Interval(start, end)
+      );
       children.add(new FadeTransition(
-        performance: route.performance,
-        opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end)),
+        opacity: opacity,
         child: new InkWell(
           onTap: () => Navigator.pop(context, route.items[i].value),
           child: route.items[i]
@@ -71,42 +74,44 @@ class _PopupMenu<T> extends StatelessComponent {
       );
     }
 
-    final AnimatedValue<double> opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, 1.0 / 3.0));
-    final AnimatedValue<double> width = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit));
-    final AnimatedValue<double> height = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.0, unit * route.items.length));
+    final CurveTween opacity = new CurveTween(curve: new Interval(0.0, 1.0 / 3.0));
+    final CurveTween width = new CurveTween(curve: new Interval(0.0, unit));
+    final CurveTween height = new CurveTween(curve: new Interval(0.0, unit * route.items.length));
 
-    return new BuilderTransition(
-      performance: route.performance,
-      variables: <AnimatedValue<double>>[opacity, width, height],
-      builder: (BuildContext context) {
+    Widget child = new ConstrainedBox(
+      constraints: new BoxConstraints(
+        minWidth: _kMenuMinWidth,
+        maxWidth: _kMenuMaxWidth
+      ),
+      child: new IntrinsicWidth(
+        stepWidth: _kMenuWidthStep,
+        child: new Block(
+          children,
+          padding: const EdgeDims.symmetric(
+            vertical: _kMenuVerticalPadding
+          )
+        )
+      )
+    );
+
+    return new AnimatedBuilder(
+      animation: route.animation,
+      builder: (BuildContext context, Widget child) {
         return new Opacity(
-          opacity: opacity.value,
+          opacity: opacity.evaluate(route.animation),
           child: new Material(
             type: MaterialType.card,
             elevation: route.elevation,
             child: new Align(
               alignment: const FractionalOffset(1.0, 0.0),
-              widthFactor: width.value,
-              heightFactor: height.value,
-              child: new ConstrainedBox(
-                constraints: new BoxConstraints(
-                  minWidth: _kMenuMinWidth,
-                  maxWidth: _kMenuMaxWidth
-                ),
-                child: new IntrinsicWidth(
-                  stepWidth: _kMenuWidthStep,
-                  child: new Block(
-                    children,
-                    padding: const EdgeDims.symmetric(
-                      vertical: _kMenuVerticalPadding
-                    )
-                  )
-                )
-              )
+              widthFactor: width.evaluate(route.animation),
+              heightFactor: height.evaluate(route.animation),
+              child: child
             )
           )
         );
-      }
+      },
+      child: child
     );
   }
 }
@@ -127,18 +132,18 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     return position;
   }
 
-  PerformanceView createPerformance() {
-    return new CurvedPerformance(
-      super.createPerformance(),
+  Animated<double> createAnimation() {
+    return new CurvedAnimation(
+      parent: super.createAnimation(),
       reverseCurve: new Interval(0.0, _kMenuCloseIntervalEnd)
-     );
+    );
   }
 
   Duration get transitionDuration => _kMenuDuration;
   bool get barrierDismissable => true;
   Color get barrierColor => null;
 
-  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
     return new _PopupMenu(route: this);
   }
 }

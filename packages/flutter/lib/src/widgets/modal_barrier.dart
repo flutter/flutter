@@ -43,38 +43,23 @@ class ModalBarrier extends StatelessComponent {
 }
 
 /// Prevents the user from interacting with widgets behind itself.
-class AnimatedModalBarrier extends StatelessComponent {
+class AnimatedModalBarrier extends AnimatedComponent {
   AnimatedModalBarrier({
     Key key,
-    this.color,
-    this.performance,
+    Animated<Color> color,
     this.dismissable: true
-  }) : super(key: key);
+  }) : color = color, super(key: key, animation: color);
 
   /// If non-null, fill the barrier with this color.
-  ///
-  /// The barrier will animate this color according to the given [performance].
-  final AnimatedColorValue color;
-
-  /// The performance to use when animating the given [color].
-  final PerformanceView performance;
+  final Animated<Color> color;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
   final bool dismissable;
 
   Widget build(BuildContext context) {
-    return new BuilderTransition(
-      performance: performance,
-      variables: <AnimatedColorValue>[color],
-      builder: (BuildContext context) {
-        return new IgnorePointer(
-          ignoring: performance.status == PerformanceStatus.reverse,
-          child: new ModalBarrier(
-            color: color.value,
-            dismissable: dismissable
-          )
-        );
-      }
+    return new ModalBarrier(
+      color: color.value,
+      dismissable: dismissable
     );
   }
 }

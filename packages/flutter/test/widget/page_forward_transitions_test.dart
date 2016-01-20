@@ -7,21 +7,22 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart' hide TypeMatcher;
 
-class TestTransition extends TransitionComponent {
+class TestTransition extends AnimatedComponent {
   TestTransition({
     Key key,
     this.childFirstHalf,
     this.childSecondHalf,
-    PerformanceView performance
-  }) : super(key: key, performance: performance) {
-    assert(performance != null);
+    Animated<double> animation
+  }) : super(key: key, animation: animation) {
+    assert(animation != null);
   }
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
 
   Widget build(BuildContext context) {
-    if (performance.progress >= 0.5)
+    final Animated<double> animation = this.animation;
+    if (animation.value >= 0.5)
       return childSecondHalf;
     return childFirstHalf;
   }
@@ -32,7 +33,7 @@ class TestRoute<T> extends PageRoute<T> {
   final Widget child;
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
   Color get barrierColor => null;
-  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
     return child;
   }
 }
@@ -81,12 +82,12 @@ void main() {
                           new TestTransition(
                             childFirstHalf: new Text('A'),
                             childSecondHalf: new Text('B'),
-                            performance: route.performance
+                            animation: route.animation
                           ),
                           new TestTransition(
                             childFirstHalf: new Text('C'),
                             childSecondHalf: new Text('D'),
-                            performance: route.forwardPerformance
+                            animation: route.forwardAnimation
                           ),
                         ]
                       );

@@ -128,14 +128,16 @@ class _DialogRoute<T> extends PopupRoute<T> {
   bool get barrierDismissable => true;
   Color get barrierColor => Colors.black54;
 
-  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
     return child;
   }
 
-  Widget buildTransitions(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance, Widget child) {
+  Widget buildTransitions(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation, Widget child) {
     return new FadeTransition(
-      performance: performance,
-      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
+      opacity: new CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOut
+      ),
       child: child
     );
   }

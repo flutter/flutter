@@ -91,9 +91,9 @@ class _Entry {
   }
 }
 
-typedef Widget TransitionBuilderCallback(Animation animation, Widget child);
+typedef Widget TransitionBuilderCallback(Animated<double> animation, Widget child);
 
-Widget _identityTransition(Animation animation, Widget child) => child;
+Widget _identityTransition(Animated<double> animation, Widget child) => child;
 
 class EnterExitTransition extends StatefulComponent {
   EnterExitTransition({

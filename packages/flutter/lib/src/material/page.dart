@@ -7,31 +7,32 @@ import 'dart:async';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
-class _MaterialPageTransition extends TransitionWithChild {
+class _MaterialPageTransition extends AnimatedComponent {
   _MaterialPageTransition({
     Key key,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
+    Animated<double> animation,
+    this.child
+  }) : super(
+    key: key,
+    animation: new CurvedAnimation(parent: animation, curve: Curves.easeOut)
+  );
 
-  final AnimatedValue<Point> _position =
-     new AnimatedValue<Point>(const Point(0.0, 75.0), end: Point.origin, curve: Curves.easeOut);
+  final Widget child;
 
-  final AnimatedValue<double> _opacity =
-     new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut);
+  final Tween<Point> _position = new Tween<Point>(
+    begin: const Point(0.0, 75.0),
+    end: Point.origin
+  );
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(_position);
-    performance.updateVariable(_opacity);
+  Widget build(BuildContext context) {
+    Point position = _position.evaluate(animation);
     Matrix4 transform = new Matrix4.identity()
-      ..translate(_position.value.x, _position.value.y);
+      ..translate(position.x, position.y);
     return new Transform(
       transform: transform,
       // TODO(ianh): tell the transform to be un-transformed for hit testing
       child: new Opacity(
-        opacity: _opacity.value,
+        opacity: animation.value,
         child: child
       )
     );
@@ -56,7 +57,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Color get barrierColor => null;
   bool canTransitionFrom(TransitionRoute nextRoute) => false;
 
-  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
     Widget result = builder(context);
     assert(() {
       if (result == null)
@@ -67,9 +68,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
-  Widget buildTransitions(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance, Widget child) {
+  Widget buildTransitions(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation, Widget child) {
     return new _MaterialPageTransition(
-      performance: performance,
+      animation: animation,
       child: child
     );
   }

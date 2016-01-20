@@ -40,20 +40,29 @@ class FloatingActionButton extends StatefulComponent {
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
-  final Performance _childSegue = new Performance(duration: _kChildSegue);
+  Animated<double> _childSegue;
+  AnimationController _childSegueController;
 
   void initState() {
     super.initState();
-    _childSegue.play();
+    _childSegueController = new AnimationController(duration: _kChildSegue)
+      ..forward();
+    _childSegue = new Tween<double>(
+      begin: -0.125,
+      end: 0.0
+    ).animate(new CurvedAnimation(
+      parent: _childSegueController,
+      curve: _kChildSegueInterval
+    ));
   }
 
   void didUpdateConfig(FloatingActionButton oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (Widget.canUpdate(oldConfig.child, config.child) && config.backgroundColor == oldConfig.backgroundColor)
       return;
-    _childSegue
-      ..progress = 0.0
-      ..play();
+    _childSegueController
+      ..value = 0.0
+      ..forward();
   }
 
   bool _highlight = false;
@@ -87,8 +96,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
             child: new IconTheme(
               data: new IconThemeData(color: iconThemeColor),
               child: new RotationTransition(
-                performance: _childSegue,
-                turns: new AnimatedValue<double>(-0.125, end: 0.0, curve: _kChildSegueInterval),
+                turns: _childSegue,
                 child: config.child
               )
             )

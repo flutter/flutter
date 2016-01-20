@@ -13,18 +13,17 @@ void main() {
   test('Can animate position data', () {
     testWidgets((WidgetTester tester) {
 
-      final AnimatedRelativeRectValue rect = new AnimatedRelativeRectValue(
-        new RelativeRect.fromRect(
+      final RelativeRectTween rect = new RelativeRectTween(
+        begin: new RelativeRect.fromRect(
           new Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
           new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0)
         ),
         end: new RelativeRect.fromRect(
           new Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
           new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0)
-        ),
-        curve: Curves.linear
+        )
       );
-      final Performance performance = new Performance(
+      final AnimationController controller = new AnimationController(
         duration: const Duration(seconds: 10)
       );
       final List<Size> sizes = <Size>[];
@@ -46,8 +45,7 @@ void main() {
             child: new Stack(
               children: <Widget>[
                 new PositionedTransition(
-                  rect: rect,
-                  performance: performance,
+                  rect: rect.animate(controller),
                   child: new Container(
                     key: key
                   )
@@ -58,7 +56,7 @@ void main() {
         )
       ); // t=0
       recordMetrics();
-      performance.play();
+      controller.forward();
       tester.pump(); // t=0 again
       recordMetrics();
       tester.pump(const Duration(seconds: 1)); // t=1

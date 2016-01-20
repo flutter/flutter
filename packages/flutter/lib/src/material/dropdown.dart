@@ -62,7 +62,7 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
   _DropDownMenu({
     Key key,
     _DropDownRoute<T> route
-  }) : route = route, super(key: key, performance: route.performance);
+  }) : route = route, super(key: key, animation: route.animation);
 
   final _DropDownRoute<T> route;
 
@@ -79,16 +79,15 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
-      AnimatedValue<double> opacity;
+      CurvedAnimation opacity;
       if (itemIndex == route.selectedIndex) {
-        opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: const Interval(0.0, 0.001), reverseCurve: const Interval(0.75, 1.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: const Interval(0.0, 0.001), reverseCurve: const Interval(0.75, 1.0));
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-        opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end), reverseCurve: const Interval(0.75, 1.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: new Interval(start, end), reverseCurve: const Interval(0.75, 1.0));
       }
       children.add(new FadeTransition(
-        performance: route.performance,
         opacity: opacity,
         child: new InkWell(
           child: new Container(
@@ -103,44 +102,48 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
       ));
     }
 
-    final AnimatedValue<double> menuOpacity = new AnimatedValue<double>(0.0,
-      end: 1.0,
+    final CurvedAnimation opacity = new CurvedAnimation(
+      parent: route.animation,
       curve: const Interval(0.0, 0.25),
       reverseCurve: const Interval(0.75, 1.0)
     );
 
-    final AnimatedValue<double> menuTop = new AnimatedValue<double>(route.rect.top,
-      end: route.rect.top - route.selectedIndex * route.rect.height,
-      curve: const Interval(0.25, 0.5),
-      reverseCurve: const Interval(0.0, 0.001)
-    );
-    final AnimatedValue<double> menuBottom = new AnimatedValue<double>(route.rect.bottom,
-      end: menuTop.end + route.items.length * route.rect.height,
+    final CurvedAnimation resize = new CurvedAnimation(
+      parent: route.animation,
       curve: const Interval(0.25, 0.5),
       reverseCurve: const Interval(0.0, 0.001)
     );
 
+    final Tween<double> menuTop = new Tween<double>(
+      begin: route.rect.top,
+      end: route.rect.top - route.selectedIndex * route.rect.height
+    );
+    final Tween<double> menuBottom = new Tween<double>(
+      begin: route.rect.bottom,
+      end: menuTop.end + route.items.length * route.rect.height
+    );
+
+    Widget child = new Material(
+      type: MaterialType.transparency,
+      child: new Block(children)
+    );
     return new FadeTransition(
-      performance: route.performance,
-      opacity: menuOpacity,
-      child: new BuilderTransition(
-        performance: route.performance,
-        variables: <AnimatedValue<double>>[menuTop, menuBottom],
-        builder: (BuildContext context) {
+      opacity: opacity,
+      child: new AnimatedBuilder(
+        animation: resize,
+        builder: (BuildContext context, Widget child) {
           return new CustomPaint(
             painter: new _DropDownMenuPainter(
               color: Theme.of(context).canvasColor,
               elevation: route.elevation,
-              menuTop: menuTop.value,
-              menuBottom: menuBottom.value,
+              menuTop: menuTop.evaluate(resize),
+              menuBottom: menuBottom.evaluate(resize),
               renderBox: context.findRenderObject()
             ),
-            child: new Material(
-              type: MaterialType.transparency,
-              child: new Block(children)
-            )
+            child: child
           );
-        }
+        },
+        child: child
       )
     );
   }
@@ -190,7 +193,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
     );
   }
 
-  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
     return new _DropDownMenu(route: this);
   }
 }
