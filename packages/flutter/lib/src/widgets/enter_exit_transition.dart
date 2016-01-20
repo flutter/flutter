@@ -32,7 +32,7 @@ class SmoothlyResizingOverflowBox extends StatefulComponent {
 class _SmoothlyResizingOverflowBoxState extends State<SmoothlyResizingOverflowBox> {
   SizeTween _sizeTween;
   CurveTween _curveTween;
-  Animated<Size> _size;
+  Animation<Size> _size;
   AnimationController _sizeController;
 
   void initState() {
@@ -100,9 +100,9 @@ class _Entry {
   }
 }
 
-typedef Widget TransitionBuilderCallback(Animated<double> animation, Widget child);
+typedef Widget TransitionBuilderCallback(Animation<double> animation, Widget child);
 
-Widget _identityTransition(Animated<double> animation, Widget child) => child;
+Widget _identityTransition(Animation<double> animation, Widget child) => child;
 
 class EnterExitTransition extends StatefulComponent {
   EnterExitTransition({

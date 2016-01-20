@@ -193,7 +193,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
     );
   }
 
-  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return new _DropDownMenu(route: this);
   }
 }

@@ -14,55 +14,6 @@ import 'framework.dart';
 export 'package:flutter/animation.dart' show AnimationDirection;
 export 'package:flutter/rendering.dart' show RelativeRect;
 
-abstract class TransitionComponent extends StatefulComponent {
-  TransitionComponent({
-    Key key,
-    this.performance
-  }) : super(key: key) {
-    assert(performance != null);
-  }
-
-  final PerformanceView performance;
-
-  Widget build(BuildContext context);
-
-  _TransitionState createState() => new _TransitionState();
-
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('performance: $performance');
-  }
-}
-
-class _TransitionState extends State<TransitionComponent> {
-  void initState() {
-    super.initState();
-    config.performance.addListener(_performanceChanged);
-  }
-
-  void didUpdateConfig(TransitionComponent oldConfig) {
-    if (config.performance != oldConfig.performance) {
-      oldConfig.performance.removeListener(_performanceChanged);
-      config.performance.addListener(_performanceChanged);
-    }
-  }
-
-  void dispose() {
-    config.performance.removeListener(_performanceChanged);
-    super.dispose();
-  }
-
-  void _performanceChanged() {
-    setState(() {
-      // The performance's state is our build state, and it changed already.
-    });
-  }
-
-  Widget build(BuildContext context) {
-    return config.build(context);
-  }
-}
-
 abstract class AnimatedComponent extends StatefulComponent {
   AnimatedComponent({
     Key key,
@@ -71,7 +22,7 @@ abstract class AnimatedComponent extends StatefulComponent {
     assert(animation != null);
   }
 
-  final Animated<Object> animation;
+  final Animation<Object> animation;
 
   Widget build(BuildContext context);
 
@@ -112,30 +63,15 @@ class _AnimatedComponentState extends State<AnimatedComponent> {
   }
 }
 
-abstract class TransitionWithChild extends TransitionComponent {
-  TransitionWithChild({
-    Key key,
-    this.child,
-    PerformanceView performance
-  }) : super(key: key, performance: performance);
-
-  final Widget child;
-
-  Widget build(BuildContext context) => buildWithChild(context, child);
-
-  Widget buildWithChild(BuildContext context, Widget child);
-}
-
 class SlideTransition extends AnimatedComponent {
   SlideTransition({
     Key key,
-    Animated<FractionalOffset> position,
-    PerformanceView performance,
+    Animation<FractionalOffset> position,
     this.transformHitTests: true,
     this.child
   }) : position = position, super(key: key, animation: position);
 
-  final Animated<FractionalOffset> position;
+  final Animation<FractionalOffset> position;
   final bool transformHitTests;
   final Widget child;
 
@@ -151,12 +87,12 @@ class SlideTransition extends AnimatedComponent {
 class ScaleTransition extends AnimatedComponent {
   ScaleTransition({
     Key key,
-    Animated<double> scale,
+    Animation<double> scale,
     this.alignment: const FractionalOffset(0.5, 0.5),
     this.child
   }) : scale = scale, super(key: key, animation: scale);
 
-  final Animated<double> scale;
+  final Animation<double> scale;
   final FractionalOffset alignment;
   final Widget child;
 
@@ -175,11 +111,11 @@ class ScaleTransition extends AnimatedComponent {
 class RotationTransition extends AnimatedComponent {
   RotationTransition({
     Key key,
-    Animated<double> turns,
+    Animation<double> turns,
     this.child
   }) : turns = turns, super(key: key, animation: turns);
 
-  final Animated<double> turns;
+  final Animation<double> turns;
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -196,11 +132,11 @@ class RotationTransition extends AnimatedComponent {
 class FadeTransition extends AnimatedComponent {
   FadeTransition({
     Key key,
-    Animated<double> opacity,
+    Animation<double> opacity,
     this.child
   }) : opacity = opacity, super(key: key, animation: opacity);
 
-  final Animated<double> opacity;
+  final Animation<double> opacity;
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -211,71 +147,16 @@ class FadeTransition extends AnimatedComponent {
 class ColorTransition extends AnimatedComponent {
   ColorTransition({
     Key key,
-    Animated<Color> color,
+    Animation<Color> color,
     this.child
   }) : color = color, super(key: key, animation: color);
 
-  final Animated<Color> color;
+  final Animation<Color> color;
   final Widget child;
 
   Widget build(BuildContext context) {
     return new DecoratedBox(
       decoration: new BoxDecoration(backgroundColor: color.value),
-      child: child
-    );
-  }
-}
-
-class SquashTransition extends TransitionWithChild {
-  SquashTransition({
-    Key key,
-    this.width,
-    this.height,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
-
-  final AnimatedValue<double> width;
-  final AnimatedValue<double> height;
-
-  Widget buildWithChild(BuildContext context, Widget child) {
-    if (width != null)
-      performance.updateVariable(width);
-    if (height != null)
-      performance.updateVariable(height);
-    return new SizedBox(width: width?.value, height: height?.value, child: child);
-  }
-}
-
-class AlignTransition extends TransitionWithChild {
-  AlignTransition({
-    Key key,
-    this.alignment,
-    this.widthFactor,
-    this.heightFactor,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
-
-  final AnimatedValue<FractionalOffset> alignment;
-  final AnimatedValue<double> widthFactor;
-  final AnimatedValue<double> heightFactor;
-
-  Widget buildWithChild(BuildContext context, Widget child) {
-    if (alignment != null)
-      performance.updateVariable(alignment);
-    if (widthFactor != null)
-      performance.updateVariable(widthFactor);
-    if (heightFactor != null)
-      performance.updateVariable(heightFactor);
-    return new Align(
-      alignment: alignment?.value,
-      widthFactor: widthFactor?.value,
-      heightFactor: heightFactor?.value,
       child: child
     );
   }
@@ -302,13 +183,13 @@ class RelativeRectTween extends Tween<RelativeRect> {
 class PositionedTransition extends AnimatedComponent {
   PositionedTransition({
     Key key,
-    Animated<RelativeRect> rect,
+    Animation<RelativeRect> rect,
     this.child
   }) : rect = rect, super(key: key, animation: rect) {
     assert(rect != null);
   }
 
-  final Animated<RelativeRect> rect;
+  final Animation<RelativeRect> rect;
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -322,31 +203,12 @@ class PositionedTransition extends AnimatedComponent {
   }
 }
 
-class BuilderTransition extends TransitionComponent {
-  BuilderTransition({
-    Key key,
-    this.variables: const <AnimatedValue>[],
-    this.builder,
-    PerformanceView performance
-  }) : super(key: key,
-             performance: performance);
-
-  final List<AnimatedValue> variables;
-  final WidgetBuilder builder;
-
-  Widget build(BuildContext context) {
-    for (int i = 0; i < variables.length; ++i)
-      performance.updateVariable(variables[i]);
-    return builder(context);
-  }
-}
-
 typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
 class AnimatedBuilder extends AnimatedComponent {
   AnimatedBuilder({
     Key key,
-    Animated<Object> animation,
+    Animation<Object> animation,
     this.builder,
     this.child
   }) : super(key: key, animation: animation);

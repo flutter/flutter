@@ -4,56 +4,81 @@
 
 import 'dart:ui' show VoidCallback;
 
-import 'animated_value.dart';
+import 'animation.dart';
+import 'curves.dart';
 import 'listener_helpers.dart';
-import 'tween.dart';
 
-class AlwaysCompleteAnimation extends Animated<double> {
+class AlwaysCompleteAnimation extends Animation<double> {
   const AlwaysCompleteAnimation();
 
   void addListener(VoidCallback listener) { }
   void removeListener(VoidCallback listener) { }
-  void addStatusListener(PerformanceStatusListener listener) { }
-  void removeStatusListener(PerformanceStatusListener listener) { }
-  PerformanceStatus get status => PerformanceStatus.completed;
+  void addStatusListener(AnimationStatusListener listener) { }
+  void removeStatusListener(AnimationStatusListener listener) { }
+  AnimationStatus get status => AnimationStatus.completed;
   AnimationDirection get direction => AnimationDirection.forward;
   double get value => 1.0;
 }
 
 const AlwaysCompleteAnimation kAlwaysCompleteAnimation = const AlwaysCompleteAnimation();
 
-class AlwaysDismissedAnimation extends Animated<double> {
+class AlwaysDismissedAnimation extends Animation<double> {
   const AlwaysDismissedAnimation();
 
   void addListener(VoidCallback listener) { }
   void removeListener(VoidCallback listener) { }
-  void addStatusListener(PerformanceStatusListener listener) { }
-  void removeStatusListener(PerformanceStatusListener listener) { }
-  PerformanceStatus get status => PerformanceStatus.dismissed;
+  void addStatusListener(AnimationStatusListener listener) { }
+  void removeStatusListener(AnimationStatusListener listener) { }
+  AnimationStatus get status => AnimationStatus.dismissed;
   AnimationDirection get direction => AnimationDirection.forward;
   double get value => 0.0;
 }
 
 const AlwaysDismissedAnimation kAlwaysDismissedAnimation = const AlwaysDismissedAnimation();
 
-class ProxyAnimation extends Animated<double>
+class AlwaysStoppedAnimation extends Animation<double> {
+  const AlwaysStoppedAnimation(this.value);
+
+  final double value;
+
+  void addListener(VoidCallback listener) { }
+  void removeListener(VoidCallback listener) { }
+  void addStatusListener(AnimationStatusListener listener) { }
+  void removeStatusListener(AnimationStatusListener listener) { }
+  AnimationStatus get status => AnimationStatus.forward;
+  AnimationDirection get direction => AnimationDirection.forward;
+}
+
+abstract class ProxyAnimatedMixin {
+  Animation<double> get parent;
+
+  void addListener(VoidCallback listener) => parent.addListener(listener);
+  void removeListener(VoidCallback listener) => parent.removeListener(listener);
+  void addStatusListener(AnimationStatusListener listener) => parent.addStatusListener(listener);
+  void removeStatusListener(AnimationStatusListener listener) => parent.removeStatusListener(listener);
+
+  AnimationStatus get status => parent.status;
+  AnimationDirection get direction => parent.direction;
+}
+
+class ProxyAnimation extends Animation<double>
   with LazyListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
-  ProxyAnimation([Animated<double> animation]) {
+  ProxyAnimation([Animation<double> animation]) {
     _masterAnimation = animation;
     if (_masterAnimation == null) {
-      _status = PerformanceStatus.dismissed;
+      _status = AnimationStatus.dismissed;
       _direction = AnimationDirection.forward;
       _value = 0.0;
     }
   }
 
-  PerformanceStatus _status;
+  AnimationStatus _status;
   AnimationDirection _direction;
   double _value;
 
-  Animated<double> get masterAnimation => _masterAnimation;
-  Animated<double> _masterAnimation;
-  void set masterAnimation(Animated<double> value) {
+  Animation<double> get masterAnimation => _masterAnimation;
+  Animation<double> _masterAnimation;
+  void set masterAnimation(Animation<double> value) {
     if (value == _masterAnimation)
       return;
     if (_masterAnimation != null) {
@@ -91,16 +116,16 @@ class ProxyAnimation extends Animated<double>
     }
   }
 
-  PerformanceStatus get status => _masterAnimation != null ? _masterAnimation.status : _status;
+  AnimationStatus get status => _masterAnimation != null ? _masterAnimation.status : _status;
   AnimationDirection get direction => _masterAnimation != null ? _masterAnimation.direction : _direction;
   double get value => _masterAnimation != null ? _masterAnimation.value : _value;
 }
 
-class ReverseAnimation extends Animated<double>
+class ReverseAnimation extends Animation<double>
   with LazyListenerMixin, LocalPerformanceStatusListenersMixin {
   ReverseAnimation(this.masterAnimation);
 
-  final Animated<double> masterAnimation;
+  final Animation<double> masterAnimation;
 
   void addListener(VoidCallback listener) {
     didRegisterListener();
@@ -119,20 +144,20 @@ class ReverseAnimation extends Animated<double>
     masterAnimation.removeStatusListener(_statusChangeHandler);
   }
 
-  void _statusChangeHandler(PerformanceStatus status) {
+  void _statusChangeHandler(AnimationStatus status) {
     notifyStatusListeners(_reverseStatus(status));
   }
 
-  PerformanceStatus get status => _reverseStatus(masterAnimation.status);
+  AnimationStatus get status => _reverseStatus(masterAnimation.status);
   AnimationDirection get direction => _reverseDirection(masterAnimation.direction);
   double get value => 1.0 - masterAnimation.value;
 
-  PerformanceStatus _reverseStatus(PerformanceStatus status) {
+  AnimationStatus _reverseStatus(AnimationStatus status) {
     switch (status) {
-      case PerformanceStatus.forward: return PerformanceStatus.reverse;
-      case PerformanceStatus.reverse: return PerformanceStatus.forward;
-      case PerformanceStatus.completed: return PerformanceStatus.dismissed;
-      case PerformanceStatus.dismissed: return PerformanceStatus.completed;
+      case AnimationStatus.forward: return AnimationStatus.reverse;
+      case AnimationStatus.reverse: return AnimationStatus.forward;
+      case AnimationStatus.completed: return AnimationStatus.dismissed;
+      case AnimationStatus.dismissed: return AnimationStatus.completed;
     }
   }
 
@@ -141,6 +166,64 @@ class ReverseAnimation extends Animated<double>
       case AnimationDirection.forward: return AnimationDirection.reverse;
       case AnimationDirection.reverse: return AnimationDirection.forward;
     }
+  }
+}
+
+class CurvedAnimation extends Animation<double> with ProxyAnimatedMixin {
+  CurvedAnimation({
+    this.parent,
+    this.curve: Curves.linear,
+    this.reverseCurve
+  }) {
+    assert(parent != null);
+    assert(curve != null);
+    parent.addStatusListener(_handleStatusChanged);
+  }
+
+  final Animation<double> parent;
+
+  /// The curve to use in the forward direction.
+  Curve curve;
+
+  /// The curve to use in the reverse direction.
+  ///
+  /// If this field is null, uses [curve] in both directions.
+  Curve reverseCurve;
+
+  /// The direction used to select the current curve.
+  ///
+  /// The curve direction is only reset when we hit the beginning or the end of
+  /// the timeline to avoid discontinuities in the value of any variables this
+  /// a animation is used to animate.
+  AnimationDirection _curveDirection;
+
+  void _handleStatusChanged(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.completed:
+        _curveDirection = null;
+        break;
+      case AnimationStatus.forward:
+        _curveDirection ??= AnimationDirection.forward;
+        break;
+      case AnimationStatus.reverse:
+        _curveDirection ??= AnimationDirection.reverse;
+        break;
+    }
+  }
+
+  double get value {
+    final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.direction) == AnimationDirection.forward;
+    Curve activeCurve = useForwardCurve ? curve : reverseCurve;
+
+    double t = parent.value;
+    if (activeCurve == null)
+      return t;
+    if (t == 0.0 || t == 1.0) {
+      assert(activeCurve.transform(t).round() == t);
+      return t;
+    }
+    return activeCurve.transform(t);
   }
 }
 
@@ -156,7 +239,7 @@ enum _TrainHoppingMode { minimize, maximize }
 /// listeners of its own, instead of shutting down when all its listeners are
 /// removed, it exposes a [dispose()] method. Call this method to shut this
 /// object down.
-class TrainHoppingAnimation extends Animated<double>
+class TrainHoppingAnimation extends Animation<double>
   with EagerListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
     assert(_currentTrain != null);
@@ -178,15 +261,15 @@ class TrainHoppingAnimation extends Animated<double>
     assert(_mode != null);
   }
 
-  Animated<double> get currentTrain => _currentTrain;
-  Animated<double> _currentTrain;
-  Animated<double> _nextTrain;
+  Animation<double> get currentTrain => _currentTrain;
+  Animation<double> _currentTrain;
+  Animation<double> _nextTrain;
   _TrainHoppingMode _mode;
 
   VoidCallback onSwitchedTrain;
 
-  PerformanceStatus _lastStatus;
-  void _statusChangeHandler(PerformanceStatus status) {
+  AnimationStatus _lastStatus;
+  void _statusChangeHandler(AnimationStatus status) {
     assert(_currentTrain != null);
     if (status != _lastStatus) {
       notifyListeners();
@@ -195,7 +278,7 @@ class TrainHoppingAnimation extends Animated<double>
     assert(_lastStatus != null);
   }
 
-  PerformanceStatus get status => _currentTrain.status;
+  AnimationStatus get status => _currentTrain.status;
   AnimationDirection get direction => _currentTrain.direction;
 
   double _lastValue;

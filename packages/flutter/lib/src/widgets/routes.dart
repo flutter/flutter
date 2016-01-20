@@ -92,8 +92,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Duration get transitionDuration;
   bool get opaque;
 
-  Animated<double> get animation => _animation;
-  Animated<double> _animation;
+  Animation<double> get animation => _animation;
+  Animation<double> _animation;
   AnimationController _controller;
 
   /// Called to create the animation controller that will drive the transitions to
@@ -108,25 +108,25 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// Called to create the animation that exposes the current progress of
   /// the transition controlled by the animation controller created by
   /// [createAnimationController()].
-  Animated<double> createAnimation() {
+  Animation<double> createAnimation() {
     assert(_controller != null);
     return _controller.view;
   }
 
   T _result;
 
-  void handleStatusChanged(PerformanceStatus status) {
+  void handleStatusChanged(AnimationStatus status) {
     switch (status) {
-      case PerformanceStatus.completed:
+      case AnimationStatus.completed:
         if (overlayEntries.isNotEmpty)
           overlayEntries.first.opaque = opaque;
         break;
-      case PerformanceStatus.forward:
-      case PerformanceStatus.reverse:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
         if (overlayEntries.isNotEmpty)
           overlayEntries.first.opaque = false;
         break;
-      case PerformanceStatus.dismissed:
+      case AnimationStatus.dismissed:
         assert(!overlayEntries.first.opaque);
         finished(); // clear the overlays
         assert(overlayEntries.isEmpty);
@@ -134,7 +134,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
-  Animated<double> get forwardAnimation => _forwardAnimation;
+  Animation<double> get forwardAnimation => _forwardAnimation;
   final ProxyAnimation _forwardAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
 
   void install(OverlayEntry insertionPoint) {
@@ -177,7 +177,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   void _updateForwardAnimation(Route nextRoute) {
     if (nextRoute is TransitionRoute && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
-      Animated<double> current = _forwardAnimation.masterAnimation;
+      Animation<double> current = _forwardAnimation.masterAnimation;
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
@@ -320,7 +320,7 @@ class _ModalScopeState extends State<_ModalScope> {
     super.dispose();
   }
 
-  void _animationStatusChanged(PerformanceStatus status) {
+  void _animationStatusChanged(AnimationStatus status) {
     setState(() {
       // The animation's states are our build state, and they changed already.
     });
@@ -342,7 +342,7 @@ class _ModalScopeState extends State<_ModalScope> {
       contents = new Focus(
         key: new GlobalObjectKey(config.route),
         child: new IgnorePointer(
-          ignoring: config.route.animation?.status == PerformanceStatus.reverse,
+          ignoring: config.route.animation?.status == AnimationStatus.reverse,
           child: config.route.buildTransitions(
             context,
             config.route.animation,
@@ -396,8 +396,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // The API for subclasses to override - used by _ModalScope
 
   ModalPosition getPosition(BuildContext context) => null;
-  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation);
-  Widget buildTransitions(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation, Widget child) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation);
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     return child;
   }
 
@@ -442,7 +442,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget barrier;
     if (barrierColor != null) {
       assert(barrierColor != _kTransparent);
-      Animated<Color> color = new ColorTween(
+      Animation<Color> color = new ColorTween(
         begin: _kTransparent,
         end: barrierColor
       ).animate(new CurvedAnimation(
@@ -456,9 +456,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     } else {
       barrier = new ModalBarrier(dismissable: barrierDismissable);
     }
-    assert(animation.status != PerformanceStatus.dismissed);
+    assert(animation.status != AnimationStatus.dismissed);
     return new IgnorePointer(
-      ignoring: animation.status == PerformanceStatus.reverse,
+      ignoring: animation.status == AnimationStatus.reverse,
       child: barrier
     );
   }

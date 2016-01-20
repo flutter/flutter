@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 class _MaterialPageTransition extends AnimatedComponent {
   _MaterialPageTransition({
     Key key,
-    Animated<double> animation,
+    Animation<double> animation,
     this.child
   }) : super(
     key: key,
@@ -57,7 +57,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Color get barrierColor => null;
   bool canTransitionFrom(TransitionRoute nextRoute) => false;
 
-  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     Widget result = builder(context);
     assert(() {
       if (result == null)
@@ -68,7 +68,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
-  Widget buildTransitions(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     return new _MaterialPageTransition(
       animation: animation,
       child: child

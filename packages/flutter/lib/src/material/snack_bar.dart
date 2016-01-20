@@ -65,7 +65,7 @@ class SnackBar extends StatelessComponent {
   final Widget content;
   final List<SnackBarAction> actions;
   final Duration duration;
-  final Animated<double> animation;
+  final Animation<double> animation;
 
   Widget build(BuildContext context) {
     assert(animation != null);
@@ -130,7 +130,7 @@ class SnackBar extends StatelessComponent {
     );
   }
 
-  SnackBar withAnimation(Animated<double> newAnimation, { Key fallbackKey }) {
+  SnackBar withAnimation(Animation<double> newAnimation, { Key fallbackKey }) {
     return new SnackBar(
       key: key ?? fallbackKey,
       content: content,

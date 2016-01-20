@@ -350,7 +350,7 @@ class _DialState extends State<_Dial> {
   }
 
   Tween<double> _thetaTween;
-  Animated<double> _theta;
+  Animation<double> _theta;
   AnimationController _thetaController;
   bool _dragging = false;
 

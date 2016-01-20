@@ -12,7 +12,7 @@ class TestTransition extends AnimatedComponent {
     Key key,
     this.childFirstHalf,
     this.childSecondHalf,
-    Animated<double> animation
+    Animation<double> animation
   }) : super(key: key, animation: animation) {
     assert(animation != null);
   }
@@ -21,7 +21,7 @@ class TestTransition extends AnimatedComponent {
   final Widget childSecondHalf;
 
   Widget build(BuildContext context) {
-    final Animated<double> animation = this.animation;
+    final Animation<double> animation = this.animation;
     if (animation.value >= 0.5)
       return childSecondHalf;
     return childFirstHalf;
@@ -33,7 +33,7 @@ class TestRoute<T> extends PageRoute<T> {
   final Widget child;
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
   Color get barrierColor => null;
-  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return child;
   }
 }

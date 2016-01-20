@@ -132,7 +132,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     return position;
   }
 
-  Animated<double> createAnimation() {
+  Animation<double> createAnimation() {
     return new CurvedAnimation(
       parent: super.createAnimation(),
       reverseCurve: new Interval(0.0, _kMenuCloseIntervalEnd)
@@ -143,7 +143,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   bool get barrierDismissable => true;
   Color get barrierColor => null;
 
-  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return new _PopupMenu(route: this);
   }
 }

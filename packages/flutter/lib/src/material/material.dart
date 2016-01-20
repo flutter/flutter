@@ -367,10 +367,10 @@ class _InkSplash extends InkFeature implements InkSplash {
   final bool clipToReferenceBox;
   final bool repositionToReferenceBox;
 
-  Animated<double> _radius;
+  Animation<double> _radius;
   AnimationController _radiusController;
 
-  Animated<int> _alpha;
+  Animation<int> _alpha;
   AnimationController _alphaController;
 
   void confirm() {
@@ -385,8 +385,8 @@ class _InkSplash extends InkFeature implements InkSplash {
     _alphaController.forward();
   }
 
-  void _handleAlphaStatusChanged(PerformanceStatus status) {
-    if (status == PerformanceStatus.completed)
+  void _handleAlphaStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed)
       dispose();
   }
 
@@ -456,7 +456,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
   bool get active => _active;
   bool _active = true;
 
-  Animated<int> _alpha;
+  Animation<int> _alpha;
   AnimationController _alphaController;
 
   void activate() {
@@ -469,8 +469,8 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     _alphaController.reverse();
   }
 
-  void _handleAlphaStatusChanged(PerformanceStatus status) {
-    if (status == PerformanceStatus.dismissed && !_active)
+  void _handleAlphaStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed && !_active)
       dispose();
   }
 

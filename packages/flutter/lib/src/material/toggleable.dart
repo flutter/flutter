@@ -99,15 +99,15 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   AnimationController get reactionController => _reactionController;
   AnimationController _reactionController;
-  Animated<double> _reaction;
+  Animation<double> _reaction;
 
   TapGestureRecognizer _tap;
 
-  void _handlePositionStateChanged(PerformanceStatus status) {
+  void _handlePositionStateChanged(AnimationStatus status) {
     if (isInteractive) {
-      if (status == PerformanceStatus.completed && !_value)
+      if (status == AnimationStatus.completed && !_value)
         onChanged(true);
-      else if (status == PerformanceStatus.dismissed && _value)
+      else if (status == AnimationStatus.dismissed && _value)
         onChanged(false);
     }
   }

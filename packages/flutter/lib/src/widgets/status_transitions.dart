@@ -14,7 +14,7 @@ abstract class StatusTransitionComponent extends StatefulComponent {
     assert(animation != null);
   }
 
-  final Animated<double> animation;
+  final Animation<double> animation;
 
   Widget build(BuildContext context);
 
@@ -39,7 +39,7 @@ class _StatusTransitionState extends State<StatusTransitionComponent> {
     super.dispose();
   }
 
-  void _animationStatusChanged(PerformanceStatus status) {
+  void _animationStatusChanged(AnimationStatus status) {
     setState(() {
       // The animation's state is our build state, and it changed already.
     });

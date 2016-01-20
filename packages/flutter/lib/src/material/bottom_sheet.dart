@@ -167,7 +167,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     return BottomSheet.createAnimationController();
   }
 
-  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return new _ModalBottomSheet(route: this);
   }
 }

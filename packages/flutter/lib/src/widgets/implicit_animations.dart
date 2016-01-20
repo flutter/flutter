@@ -84,8 +84,8 @@ typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor
 abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends State<T> {
   AnimationController _controller;
 
-  Animated<double> get animation => _animation;
-  Animated<double> _animation;
+  Animation<double> get animation => _animation;
+  Animation<double> _animation;
 
   void initState() {
     super.initState();

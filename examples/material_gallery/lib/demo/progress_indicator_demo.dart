@@ -21,13 +21,13 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
       parent: controller,
       curve: new Interval(0.0, 0.9, curve: Curves.ease),
       reverseCurve: Curves.ease
-    )..addStatusListener((PerformanceStatus status) {
-      if (status == PerformanceStatus.dismissed || status == PerformanceStatus.completed)
+    )..addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed || status == AnimationStatus.completed)
         reverseValueAnimationDirection();
     });
   }
 
-  Animated<double> animation;
+  Animation<double> animation;
   AnimationController controller;
 
   void handleTap() {

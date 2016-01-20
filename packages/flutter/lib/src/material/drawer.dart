@@ -92,18 +92,18 @@ class DrawerControllerState extends State<DrawerController> {
     }
   }
 
-  void _animationStatusChanged(PerformanceStatus status) {
+  void _animationStatusChanged(AnimationStatus status) {
     switch (status) {
-      case PerformanceStatus.forward:
+      case AnimationStatus.forward:
         _ensureHistoryEntry();
         break;
-      case PerformanceStatus.reverse:
+      case AnimationStatus.reverse:
         _historyEntry?.remove();
         _historyEntry = null;
         break;
-      case PerformanceStatus.dismissed:
+      case AnimationStatus.dismissed:
         break;
-      case PerformanceStatus.completed:
+      case AnimationStatus.completed:
         break;
     }
   }
@@ -155,7 +155,7 @@ class DrawerControllerState extends State<DrawerController> {
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
   Widget build(BuildContext context) {
-    if (_controller.status == PerformanceStatus.dismissed) {
+    if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
         alignment: const FractionalOffset(0.0, 0.5),
         child: new GestureDetector(

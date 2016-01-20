@@ -4,22 +4,7 @@
 
 import 'dart:ui' show VoidCallback;
 
-/// The status of an animation
-enum PerformanceStatus {
-  /// The animation is stopped at the beginning
-  dismissed,
-
-  /// The animation is running from beginning to end
-  forward,
-
-  /// The animation is running backwards, from end to beginning
-  reverse,
-
-  /// The animation is stopped at the end
-  completed,
-}
-
-typedef void PerformanceStatusListener(PerformanceStatus status);
+import 'animation.dart';
 
 abstract class _ListenerMixin {
   void didRegisterListener();
@@ -71,18 +56,18 @@ abstract class LocalPerformanceListenersMixin extends _ListenerMixin {
 }
 
 abstract class LocalPerformanceStatusListenersMixin extends _ListenerMixin {
-  final List<PerformanceStatusListener> _statusListeners = <PerformanceStatusListener>[];
-  void addStatusListener(PerformanceStatusListener listener) {
+  final List<AnimationStatusListener> _statusListeners = <AnimationStatusListener>[];
+  void addStatusListener(AnimationStatusListener listener) {
     didRegisterListener();
     _statusListeners.add(listener);
   }
-  void removeStatusListener(PerformanceStatusListener listener) {
+  void removeStatusListener(AnimationStatusListener listener) {
     _statusListeners.remove(listener);
     didUnregisterListener();
   }
-  void notifyStatusListeners(PerformanceStatus status) {
-    List<PerformanceStatusListener> localListeners = new List<PerformanceStatusListener>.from(_statusListeners);
-    for (PerformanceStatusListener listener in localListeners)
+  void notifyStatusListeners(AnimationStatus status) {
+    List<AnimationStatusListener> localListeners = new List<AnimationStatusListener>.from(_statusListeners);
+    for (AnimationStatusListener listener in localListeners)
       listener(status);
   }
 }

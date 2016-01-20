@@ -123,7 +123,7 @@ class _RenderSlider extends RenderConstrainedBox {
 
   double get _trackLength => size.width - 2.0 * _kReactionRadius;
 
-  Animated<double> _reaction;
+  Animation<double> _reaction;
   AnimationController _reactionController;
 
   HorizontalDragGestureRecognizer _drag;
@@ -186,7 +186,7 @@ class _RenderSlider extends RenderConstrainedBox {
       canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
 
     Point activeLocation = new Point(trackActive, trackCenter);
-    if (_reaction.status != PerformanceStatus.dismissed) {
+    if (_reaction.status != AnimationStatus.dismissed) {
       Paint reactionPaint = new Paint()..color = _activeColor.withAlpha(kRadialReactionAlpha);
       canvas.drawCircle(activeLocation, _reaction.value, reactionPaint);
     }
