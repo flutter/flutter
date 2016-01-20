@@ -24,7 +24,9 @@ class JniClass : public RefCounted<JniClass>, public DartWrappable {
   ~JniClass() override;
 
   static PassRefPtr<JniClass> FromName(const char* className);
-  static PassRefPtr<JniClass> FromClassObject(const JniObject* classObject);
+  static PassRefPtr<JniClass> FromClassObject(const JniObject* clazz);
+
+  jclass java_class() const { return clazz_.obj(); }
 
   intptr_t GetFieldId(const char* name, const char* sig);
   intptr_t GetStaticFieldId(const char* name, const char* sig);

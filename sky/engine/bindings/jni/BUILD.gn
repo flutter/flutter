@@ -12,6 +12,8 @@ source_set("jni") {
     "jni_class.h",
     "jni_object.cc",
     "jni_object.h",
+    "jni_string.cc",
+    "jni_string.h",
   ]
 
   deps = [

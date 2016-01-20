@@ -7,6 +7,7 @@
 #include "base/strings/string_util.h"
 #include "sky/engine/bindings/jni/dart_jni.h"
 #include "sky/engine/bindings/jni/jni_array.h"
+#include "sky/engine/bindings/jni/jni_string.h"
 
 namespace blink {
 
@@ -31,11 +32,107 @@ PassRefPtr<JniObject> JniObject::Create(JNIEnv* env, jobject object) {
     result = new JniString(env, static_cast<jstring>(object));
   } else if (base::StartsWith(class_name, "[L", base::CompareCase::SENSITIVE)) {
     result = new JniObjectArray(env, static_cast<jobjectArray>(object));
+  } else if (class_name == "[Z") {
+    result = new JniBooleanArray(env, static_cast<jbooleanArray>(object));
+  } else if (class_name == "[B") {
+    result = new JniByteArray(env, static_cast<jbyteArray>(object));
+  } else if (class_name == "[C") {
+    result = new JniCharArray(env, static_cast<jcharArray>(object));
+  } else if (class_name == "[S") {
+    result = new JniShortArray(env, static_cast<jshortArray>(object));
+  } else if (class_name == "[I") {
+    result = new JniIntArray(env, static_cast<jintArray>(object));
+  } else if (class_name == "[J") {
+    result = new JniLongArray(env, static_cast<jlongArray>(object));
+  } else if (class_name == "[F") {
+    result = new JniFloatArray(env, static_cast<jfloatArray>(object));
+  } else if (class_name == "[D") {
+    result = new JniDoubleArray(env, static_cast<jdoubleArray>(object));
   } else {
     result = new JniObject(env, object);
   }
 
   return adoptRef(result);
+}
+
+PassRefPtr<JniObject> JniObject::GetObjectField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jobject obj = env->GetObjectField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return JniObject::Create(env, obj);
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return nullptr;
+}
+
+bool JniObject::GetBooleanField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jboolean result = env->GetBooleanField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result == JNI_TRUE;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return false;
+}
+
+int64_t JniObject::GetByteField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jbyte result = env->GetByteField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+int64_t JniObject::GetCharField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jchar result = env->GetCharField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+int64_t JniObject::GetShortField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jshort result = env->GetShortField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
 }
 
 int64_t JniObject::GetIntField(jfieldID fieldId) {
@@ -54,6 +151,200 @@ fail:
   return 0;
 }
 
+int64_t JniObject::GetLongField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jlong result = env->GetLongField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+double JniObject::GetFloatField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jfloat result = env->GetFloatField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+double JniObject::GetDoubleField(jfieldID fieldId) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jfloat result = env->GetDoubleField(java_object(), fieldId);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+void JniObject::SetObjectField(jfieldID fieldId, const JniObject* value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetObjectField(java_object(), fieldId,
+                        value ? value->java_object() : nullptr);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetBooleanField(jfieldID fieldId, bool value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetBooleanField(java_object(), fieldId,
+                         value ? JNI_TRUE : JNI_FALSE);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetByteField(jfieldID fieldId, int64_t value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetByteField(java_object(), fieldId, value);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetCharField(jfieldID fieldId, int64_t value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetCharField(java_object(), fieldId, value);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetShortField(jfieldID fieldId, int64_t value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetShortField(java_object(), fieldId, value);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetIntField(jfieldID fieldId, int64_t value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetIntField(java_object(), fieldId, value);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetLongField(jfieldID fieldId, int64_t value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetLongField(java_object(), fieldId, value);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetFloatField(jfieldID fieldId, double value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetFloatField(java_object(), fieldId, value);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
+void JniObject::SetDoubleField(jfieldID fieldId, double value) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    env->SetDoubleField(java_object(), fieldId, value);
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
+}
+
 PassRefPtr<JniObject> JniObject::CallObjectMethod(
     jmethodID methodId,
     const std::vector<Dart_Handle>& args) {
@@ -65,11 +356,11 @@ PassRefPtr<JniObject> JniObject::CallObjectMethod(
     java_args.Convert(env, args, &exception);
     if (exception) goto fail;
 
-    jobject result = env->CallObjectMethodA(java_object(), methodId,
-                                            java_args.jvalues());
+    jobject obj = env->CallObjectMethodA(java_object(), methodId,
+                                         java_args.jvalues());
     if (CheckJniException(env, &exception)) goto fail;
 
-    return JniObject::Create(env, result);
+    return JniObject::Create(env, obj);
   }
 fail:
   Dart_ThrowException(exception);
@@ -99,6 +390,72 @@ fail:
   return false;
 }
 
+int64_t JniObject::CallByteMethod(jmethodID methodId,
+                                  const std::vector<Dart_Handle>& args) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    JniMethodArgs java_args;
+    java_args.Convert(env, args, &exception);
+    if (exception) goto fail;
+
+    jbyte result = env->CallByteMethodA(java_object(), methodId,
+                                        java_args.jvalues());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+int64_t JniObject::CallCharMethod(jmethodID methodId,
+                                  const std::vector<Dart_Handle>& args) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    JniMethodArgs java_args;
+    java_args.Convert(env, args, &exception);
+    if (exception) goto fail;
+
+    jchar result = env->CallCharMethodA(java_object(), methodId,
+                                        java_args.jvalues());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+int64_t JniObject::CallShortMethod(jmethodID methodId,
+                                   const std::vector<Dart_Handle>& args) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    JniMethodArgs java_args;
+    java_args.Convert(env, args, &exception);
+    if (exception) goto fail;
+
+    jshort result = env->CallShortMethodA(java_object(), methodId,
+                                          java_args.jvalues());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
 int64_t JniObject::CallIntMethod(jmethodID methodId,
                                  const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
@@ -121,38 +478,91 @@ fail:
   return 0;
 }
 
-IMPLEMENT_WRAPPERTYPEINFO(jni, JniString);
-
-JniString::JniString(JNIEnv* env, jstring object)
-    : JniObject(env, object) {}
-
-JniString::~JniString() {
-}
-
-jstring JniString::java_string() {
-  return static_cast<jstring>(java_object());
-}
-
-Dart_Handle JniString::GetText() {
+int64_t JniObject::CallLongMethod(jmethodID methodId,
+                                  const std::vector<Dart_Handle>& args) {
   Dart_Handle exception = nullptr;
   {
     ENTER_JNI();
 
-    jsize length = env->GetStringLength(java_string());
-    if (CheckJniException(env, &exception)) goto fail;
+    JniMethodArgs java_args;
+    java_args.Convert(env, args, &exception);
+    if (exception) goto fail;
 
-    const jchar* chars = env->GetStringChars(java_string(), NULL);
+    jlong result = env->CallLongMethodA(java_object(), methodId,
+                                        java_args.jvalues());
     if (CheckJniException(env, &exception)) goto fail;
-
-    Dart_Handle result = Dart_NewStringFromUTF16(chars, length);
-    env->ReleaseStringChars(java_string(), chars);
 
     return result;
   }
 fail:
   Dart_ThrowException(exception);
   ASSERT_NOT_REACHED();
-  return Dart_Null();
+  return 0;
+}
+
+double JniObject::CallFloatMethod(jmethodID methodId,
+                                  const std::vector<Dart_Handle>& args) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    JniMethodArgs java_args;
+    java_args.Convert(env, args, &exception);
+    if (exception) goto fail;
+
+    jfloat result = env->CallFloatMethodA(java_object(), methodId,
+                                          java_args.jvalues());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+double JniObject::CallDoubleMethod(jmethodID methodId,
+                                   const std::vector<Dart_Handle>& args) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    JniMethodArgs java_args;
+    java_args.Convert(env, args, &exception);
+    if (exception) goto fail;
+
+    jdouble result = env->CallDoubleMethodA(java_object(), methodId,
+                                            java_args.jvalues());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return 0;
+}
+
+void JniObject::CallVoidMethod(jmethodID methodId,
+                               const std::vector<Dart_Handle>& args) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    JniMethodArgs java_args;
+    java_args.Convert(env, args, &exception);
+    if (exception) goto fail;
+
+    env->CallVoidMethodA(java_object(), methodId, java_args.jvalues());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return;
 }
 
 } // namespace blink
