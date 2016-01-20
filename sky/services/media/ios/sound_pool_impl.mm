@@ -9,7 +9,7 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 
-#import <Foundation/Foundation.h>
+#include <Foundation/Foundation.h>
 #include <AVFoundation/AVFoundation.h>
 
 @interface SoundPoolClient : NSObject
