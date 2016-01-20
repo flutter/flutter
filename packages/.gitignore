@@ -6,3 +6,4 @@
 build/
 packages
 pubspec.lock
+.atom/
