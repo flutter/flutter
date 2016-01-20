@@ -26,9 +26,9 @@ defineTests() {
       StreamController<Map> responses = new StreamController();
       daemon = new Daemon(
         commands.stream,
-        (Map result) => responses.add(result)
+        (Map<String, dynamic> result) => responses.add(result)
       );
-      commands.add({'id': 0, 'event': 'daemon.version'});
+      commands.add({'id': 0, 'method': 'daemon.version'});
       Map response = await responses.stream.first;
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
@@ -40,9 +40,9 @@ defineTests() {
       StreamController<Map> responses = new StreamController();
       daemon = new Daemon(
         commands.stream,
-        (Map result) => responses.add(result)
+        (Map<String, dynamic> result) => responses.add(result)
       );
-      commands.add({'id': 0, 'event': 'daemon.shutdown'});
+      commands.add({'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then((int code) {
         expect(code, 0);
       });
@@ -56,7 +56,7 @@ defineTests() {
       StreamController<Map> responses = new StreamController();
       daemon = new Daemon(
         commands.stream,
-        (Map result) => responses.add(result),
+        (Map<String, dynamic> result) => responses.add(result),
         daemonCommand: command
       );
 
@@ -71,10 +71,23 @@ defineTests() {
       when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
 
-      commands.add({'id': 0, 'event': 'app.stopAll'});
+      commands.add({'id': 0, 'method': 'app.stopAll'});
       Map response = await responses.stream.first;
       expect(response['id'], 0);
       expect(response['result'], true);
+    });
+
+    test('device.getDevices', () async {
+      StreamController<Map> commands = new StreamController();
+      StreamController<Map> responses = new StreamController();
+      daemon = new Daemon(
+        commands.stream,
+        (Map<String, dynamic> result) => responses.add(result)
+      );
+      commands.add({'id': 0, 'method': 'device.getDevices'});
+      Map response = await responses.stream.first;
+      expect(response['id'], 0);
+      expect(response['result'], isList);
     });
   });
 }
