@@ -73,7 +73,7 @@ class _HeroManifest {
 
 abstract class HeroHandle {
   bool get alwaysAnimate;
-  _HeroManifest _takeChild(Rect animationArea);
+  _HeroManifest _takeChild(Rect animationArea, Animated<double> currentAnimation);
 }
 
 class Hero extends StatefulComponent {
@@ -167,7 +167,7 @@ class HeroState extends State<Hero> implements HeroHandle {
 
   bool get alwaysAnimate => config.alwaysAnimate;
 
-  _HeroManifest _takeChild(Rect animationArea) {
+  _HeroManifest _takeChild(Rect animationArea, Animated<double> currentAnimation) {
     assert(_mode == _HeroMode.measured || _mode == _HeroMode.taken);
     final RenderBox renderObject = context.findRenderObject();
     final Point heroTopLeft = renderObject.localToGlobal(Point.origin);
@@ -256,14 +256,14 @@ class _HeroQuestState implements HeroHandle {
   final RelativeRect targetRect;
   final int targetTurns;
   final HeroState targetState;
-  final AnimatedRelativeRectValue currentRect;
-  final AnimatedValue<double> currentTurns;
+  final RelativeRectTween currentRect;
+  final Tween<double> currentTurns;
 
   bool get alwaysAnimate => true;
 
   bool get taken => _taken;
   bool _taken = false;
-  _HeroManifest _takeChild(Rect animationArea) {
+  _HeroManifest _takeChild(Rect animationArea, Animated<double> currentAnimation) {
     assert(!taken);
     _taken = true;
     Set<HeroState> states = sourceStates;
@@ -273,18 +273,16 @@ class _HeroQuestState implements HeroHandle {
       key: key,
       config: child,
       sourceStates: states,
-      currentRect: currentRect.value,
-      currentTurns: currentTurns.value
+      currentRect: currentRect.evaluate(currentAnimation),
+      currentTurns: currentTurns.evaluate(currentAnimation)
     );
   }
 
-  Widget build(BuildContext context, PerformanceView performance) {
+  Widget build(BuildContext context, Animated<double> animation) {
     return new PositionedTransition(
-      rect: currentRect,
-      performance: performance,
+      rect: currentRect.animate(animation),
       child: new RotationTransition(
-        turns: currentTurns,
-        performance: performance,
+        turns: currentTurns.animate(animation),
         child: new KeyedSubtree(
           key: key,
           child: child
@@ -317,16 +315,16 @@ class HeroParty {
     return result;
   }
 
-  AnimatedRelativeRectValue createAnimatedRelativeRect(RelativeRect begin, RelativeRect end, Curve curve) {
-    return new AnimatedRelativeRectValue(begin, end: end, curve: curve);
+  RelativeRectTween createRectTween(RelativeRect begin, RelativeRect end) {
+    return new RelativeRectTween(begin: begin, end: end);
   }
 
-  AnimatedValue<double> createAnimatedTurns(double begin, double end, Curve curve) {
+  Tween<double> createTurnsTween(double begin, double end) {
     assert(end.floor() == end);
-    return new AnimatedValue<double>(begin, end: end, curve: curve);
+    return new Tween<double>(begin: begin, end: end);
   }
 
-  void animate(Map<Object, HeroHandle> heroesFrom, Map<Object, HeroHandle> heroesTo, Rect animationArea, Curve curve) {
+  void animate(Map<Object, HeroHandle> heroesFrom, Map<Object, HeroHandle> heroesTo, Rect animationArea) {
     assert(!heroesFrom.containsKey(null));
     assert(!heroesTo.containsKey(null));
 
@@ -346,9 +344,9 @@ class HeroParty {
       if ((heroPair.from == null && !heroPair.to.alwaysAnimate) ||
           (heroPair.to == null && !heroPair.from.alwaysAnimate))
         continue;
-      _HeroManifest from = heroPair.from?._takeChild(animationArea);
+      _HeroManifest from = heroPair.from?._takeChild(animationArea, _currentAnimation);
       assert(heroPair.to == null || heroPair.to is HeroState);
-      _HeroManifest to = heroPair.to?._takeChild(animationArea);
+      _HeroManifest to = heroPair.to?._takeChild(animationArea, _currentAnimation);
       assert(from != null || to != null);
       assert(to == null || to.sourceStates.length == 1);
       assert(to == null || to.currentTurns.floor() == to.currentTurns);
@@ -369,8 +367,8 @@ class HeroParty {
         targetRect: targetRect,
         targetTurns: targetTurns.floor(),
         targetState: targetState,
-        currentRect: createAnimatedRelativeRect(sourceRect, targetRect, curve),
-        currentTurns: createAnimatedTurns(sourceTurns, targetTurns, curve)
+        currentRect: createRectTween(sourceRect, targetRect),
+        currentTurns: createTurnsTween(sourceTurns, targetTurns)
       ));
     }
 
@@ -378,19 +376,19 @@ class HeroParty {
     _heroes = _newHeroes;
   }
 
-  PerformanceView _currentPerformance;
+  Animated<double> _currentAnimation;
 
   void _clearCurrentPerformance() {
-    _currentPerformance?.removeStatusListener(_handleUpdate);
-    _currentPerformance = null;
+    _currentAnimation?.removeStatusListener(_handleUpdate);
+    _currentAnimation = null;
   }
 
-  void setPerformance(PerformanceView performance) {
-    assert(performance != null || _heroes.length == 0);
-    if (performance != _currentPerformance) {
+  void setAnimation(Animated<double> animation) {
+    assert(animation != null || _heroes.length == 0);
+    if (animation != _currentAnimation) {
       _clearCurrentPerformance();
-      _currentPerformance = performance;
-      _currentPerformance?.addStatusListener(_handleUpdate);
+      _currentAnimation = animation;
+      _currentAnimation?.addStatusListener(_handleUpdate);
     }
   }
 
@@ -419,7 +417,7 @@ class HeroController extends NavigatorObserver {
   }
 
   HeroParty _party;
-  PerformanceView _performance;
+  Animated<double> _animation;
   PageRoute _from;
   PageRoute _to;
 
@@ -429,11 +427,11 @@ class HeroController extends NavigatorObserver {
     assert(navigator != null);
     assert(route != null);
     if (route is PageRoute) {
-      assert(route.performance != null);
+      assert(route.animation != null);
       if (previousRoute is PageRoute) // could be null
         _from = previousRoute;
       _to = route;
-      _performance = route.performance;
+      _animation = route.animation;
       _checkForHeroQuest();
     }
   }
@@ -442,11 +440,11 @@ class HeroController extends NavigatorObserver {
     assert(navigator != null);
     assert(route != null);
     if (route is PageRoute) {
-      assert(route.performance != null);
+      assert(route.animation != null);
       if (previousRoute is PageRoute) {
         _to = previousRoute;
         _from = route;
-        _performance = route.performance;
+        _animation = route.animation;
         _checkForHeroQuest();
       }
     }
@@ -454,7 +452,7 @@ class HeroController extends NavigatorObserver {
 
   void _checkForHeroQuest() {
     if (_from != null && _to != null && _from != _to) {
-      _to.offstage = _to.performance.status != PerformanceStatus.completed;
+      _to.offstage = _to.animation.status != PerformanceStatus.completed;
       Scheduler.instance.addPostFrameCallback(_updateQuest);
     }
   }
@@ -463,7 +461,7 @@ class HeroController extends NavigatorObserver {
     _removeHeroesFromOverlay();
     _from = null;
     _to = null;
-    _performance = null;
+    _animation = null;
   }
 
   Rect _getAnimationArea(BuildContext context) {
@@ -481,7 +479,7 @@ class HeroController extends NavigatorObserver {
 
   void _addHeroToOverlay(Widget hero, Object tag, OverlayState overlay) {
     OverlayEntry entry = new OverlayEntry(builder: (_) => hero);
-    if (_performance.direction == AnimationDirection.forward)
+    if (_animation.direction == AnimationDirection.forward)
       _to.insertHeroOverlayEntry(entry, tag, overlay);
     else
       _from.insertHeroOverlayEntry(entry, tag, overlay);
@@ -507,18 +505,21 @@ class HeroController extends NavigatorObserver {
     Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext, mostValuableKeys);
     _to.offstage = false;
 
-    PerformanceView performance = _performance;
+    Animated<double> animation = _animation;
     Curve curve = Curves.ease;
-    if (performance.status == PerformanceStatus.reverse) {
-      performance = new ReversePerformance(performance);
-      curve = new Interval(performance.progress, 1.0, curve: curve);
+    if (animation.status == PerformanceStatus.reverse) {
+      animation = new ReverseAnimation(animation);
+      curve = new Interval(animation.value, 1.0, curve: curve);
     }
 
-    _party.animate(heroesFrom, heroesTo, _getAnimationArea(navigator.context), curve);
+    _party.animate(heroesFrom, heroesTo, _getAnimationArea(navigator.context));
     _removeHeroesFromOverlay();
-    _party.setPerformance(performance);
+    _party.setAnimation(new CurvedAnimation(
+      parent: animation,
+      curve: curve
+    ));
     for (_HeroQuestState hero in _party._heroes) {
-      Widget widget = hero.build(navigator.context, performance);
+      Widget widget = hero.build(navigator.context, animation);
       _addHeroToOverlay(widget, hero.tag, navigator.overlay);
     }
   }

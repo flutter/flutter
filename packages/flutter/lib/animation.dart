@@ -8,6 +8,7 @@
 library animation;
 
 export 'src/animation/animated_value.dart';
+export 'src/animation/animations.dart';
 export 'src/animation/clamped_simulation.dart';
 export 'src/animation/curves.dart';
 export 'src/animation/forces.dart';

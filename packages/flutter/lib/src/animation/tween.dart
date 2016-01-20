@@ -97,7 +97,7 @@ abstract class Evaluatable<T> {
 
   T evaluate(Animated<double> animation);
 
-  Animated<T> watch(Animated<double> parent) {
+  Animated<T> animate(Animated<double> parent) {
     return new _AnimatedEvaluation<T>(parent, this);
   }
 }
@@ -258,7 +258,11 @@ class _RepeatingSimulation extends Simulation {
 }
 
 class CurvedAnimation extends Animated<double> with ProxyAnimatedMixin {
-  CurvedAnimation({ this.parent, this.curve, this.reverseCurve }) {
+  CurvedAnimation({
+    this.parent,
+    this.curve: Curves.linear,
+    this.reverseCurve
+  }) {
     assert(parent != null);
     assert(curve != null);
     parent.addStatusListener(_handleStatusChanged);
@@ -372,4 +376,19 @@ class IntTween extends Tween<int> {
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
   int lerp(double t) => (begin + (end - begin) * t).round();
+}
+
+class CurveTween extends Evaluatable<double> {
+  CurveTween({ this.curve });
+
+  Curve curve;
+
+  double evaluate(Animated<double> animation) {
+    double t = animation.value;
+    if (t == 0.0 || t == 1.0) {
+      assert(curve.transform(t).round() == t);
+      return t;
+    }
+    return curve.transform(t);
+  }
 }

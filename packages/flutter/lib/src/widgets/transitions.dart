@@ -170,21 +170,19 @@ class ScaleTransition extends AnimatedComponent {
   }
 }
 
-class RotationTransition extends TransitionWithChild {
+class RotationTransition extends AnimatedComponent {
   RotationTransition({
     Key key,
-    this.turns,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
+    Animated<double> turns,
+    this.child
+  }) : turns = turns, super(key: key, animation: turns);
 
-  final AnimatedValue<double> turns;
+  final Animated<double> turns;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(turns);
-    Matrix4 transform = new Matrix4.rotationZ(turns.value * math.PI * 2.0);
+  Widget build(BuildContext context) {
+    double turnsValue = turns.value;
+    Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
     return new Transform(
       transform: transform,
       alignment: const FractionalOffset(0.5, 0.5),
@@ -307,9 +305,9 @@ class AlignTransition extends TransitionWithChild {
 /// This class specializes the interpolation of AnimatedValue<RelativeRect> to
 /// be appropriate for rectangles that are described in terms of offsets from
 /// other rectangles.
-class AnimatedRelativeRectValue extends AnimatedValue<RelativeRect> {
-  AnimatedRelativeRectValue(RelativeRect begin, { RelativeRect end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+class RelativeRectTween extends Tween<RelativeRect> {
+  RelativeRectTween({ RelativeRect begin, RelativeRect end })
+    : super(begin: begin, end: end);
 
   RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
 }
@@ -320,22 +318,19 @@ class AnimatedRelativeRectValue extends AnimatedValue<RelativeRect> {
 /// of the performance.
 ///
 /// Only works if it's the child of a [Stack].
-class PositionedTransition extends TransitionWithChild {
+class PositionedTransition extends AnimatedComponent {
   PositionedTransition({
     Key key,
-    this.rect,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child) {
+    Animated<RelativeRect> rect,
+    this.child
+  }) : rect = rect, super(key: key, animation: rect) {
     assert(rect != null);
   }
 
-  final AnimatedRelativeRectValue rect;
+  final Animated<RelativeRect> rect;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(rect);
+  Widget build(BuildContext context) {
     return new Positioned(
       top: rect.value.top,
       right: rect.value.right,

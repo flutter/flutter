@@ -145,7 +145,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
         scale: new Tween<double>(
           begin: 1.0,
           end: 0.0
-        ).watch(new CurvedAnimation(
+        ).animate(new CurvedAnimation(
           parent: controller,
           curve: const Interval(0.0, 0.5, curve: Curves.easeIn)
         )),

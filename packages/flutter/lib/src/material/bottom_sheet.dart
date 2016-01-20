@@ -129,41 +129,17 @@ class _ModalBottomSheet extends StatefulComponent {
 }
 
 class _ModalBottomSheetState extends State<_ModalBottomSheet> {
-  // TODO(abarth): Delete _controllerPerformanceAdaptor when navigator uses
-  // AnimationController and friends.
-  AnimationController _controllerPerformanceAdaptor;
-
-  void initState() {
-    super.initState();
-    _controllerPerformanceAdaptor = new AnimationController();
-    _updateControllerPerformanceAdaptor();
-  }
-
-  void didUpdateConfig(_ModalBottomSheet oldConfig) {
-    if (config.route.performance != oldConfig.route.performance)
-      _updateControllerPerformanceAdaptor();
-  }
-
-  void _updateControllerPerformanceAdaptor() {
-    Performance performance = config.route.performance;
-    _controllerPerformanceAdaptor
-      ..duration = performance.duration
-      ..value = performance.progress;
-    if (performance.isAnimating)
-      _controllerPerformanceAdaptor.play(performance.direction);
-  }
-
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
       child: new AnimatedBuilder(
-        animation: _controllerPerformanceAdaptor,
+        animation: config.route.animation,
         builder: (BuildContext context) {
           return new ClipRect(
             child: new CustomOneChildLayout(
-              delegate: new _ModalBottomSheetLayout(config.route.performance.progress),
+              delegate: new _ModalBottomSheetLayout(config.route.animation.value),
               child: new BottomSheet(
-                animationController: _controllerPerformanceAdaptor,
+                animationController: config.route.animation,
                 onClosing: () => Navigator.pop(context),
                 builder: config.route.builder
               )
@@ -191,7 +167,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     return BottomSheet.createAnimationController();
   }
 
-  Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {
+  Widget buildPage(BuildContext context, Animated<double> animation, Animated<double> forwardAnimation) {
     return new _ModalBottomSheet(route: this);
   }
 }
