@@ -8,8 +8,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'artifacts.dart';
-import 'build_configuration.dart';
 import 'base/process.dart';
+import 'build_configuration.dart';
 
 class Compiler {
   Compiler(this._path);

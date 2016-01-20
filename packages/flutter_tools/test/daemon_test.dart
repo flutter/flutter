@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';
