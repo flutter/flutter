@@ -38,15 +38,15 @@ abstract class ProgressIndicator extends StatefulComponent {
 }
 
 class _ProgressIndicatorState extends State<ProgressIndicator> {
-  Animated<double> _animation;
+  Animation<double> _animation;
   AnimationController _controller;
 
   void initState() {
     super.initState();
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500)
-    )..addStatusListener((PerformanceStatus status) {
-      if (status == PerformanceStatus.completed)
+    )..addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed)
         _restartAnimation();
     })..forward();
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.ease);

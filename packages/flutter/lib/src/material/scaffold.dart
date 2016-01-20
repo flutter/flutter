@@ -227,9 +227,9 @@ class ScaffoldState extends State<Scaffold> {
     return controller;
   }
 
-  void _handleSnackBarStatusChange(PerformanceStatus status) {
+  void _handleSnackBarStatusChange(AnimationStatus status) {
     switch (status) {
-      case PerformanceStatus.dismissed:
+      case AnimationStatus.dismissed:
         assert(_snackBars.isNotEmpty);
         setState(() {
           _snackBars.removeFirst();
@@ -237,21 +237,21 @@ class ScaffoldState extends State<Scaffold> {
         if (_snackBars.isNotEmpty)
           _snackBarController.forward();
         break;
-      case PerformanceStatus.completed:
+      case AnimationStatus.completed:
         setState(() {
           assert(_snackBarTimer == null);
           // build will create a new timer if necessary to dismiss the snack bar
         });
         break;
-      case PerformanceStatus.forward:
-      case PerformanceStatus.reverse:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
         break;
     }
   }
 
   void _hideSnackBar() {
-    assert(_snackBarController.status == PerformanceStatus.forward ||
-           _snackBarController.status == PerformanceStatus.completed);
+    assert(_snackBarController.status == AnimationStatus.forward ||
+           _snackBarController.status == AnimationStatus.completed);
     _snackBars.first._completer.complete();
     _snackBarController.reverse();
     _snackBarTimer = null;
@@ -449,7 +449,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
 
   void initState() {
     super.initState();
-    assert(config.animationController.status == PerformanceStatus.forward);
+    assert(config.animationController.status == AnimationStatus.forward);
     config.animationController.addStatusListener(_handleStatusChange);
   }
 
@@ -467,8 +467,8 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
     config.animationController.reverse();
   }
 
-  void _handleStatusChange(PerformanceStatus status) {
-    if (status == PerformanceStatus.dismissed && config.onDismissed != null)
+  void _handleStatusChange(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed && config.onDismissed != null)
       config.onDismissed();
   }
 

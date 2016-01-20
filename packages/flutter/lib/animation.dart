@@ -7,13 +7,13 @@
 /// This library depends only on core Dart libraries and the `newton` package.
 library animation;
 
-export 'src/animation/animated_value.dart';
+export 'src/animation/animation.dart';
+export 'src/animation/animation_controller.dart';
 export 'src/animation/animations.dart';
 export 'src/animation/clamped_simulation.dart';
 export 'src/animation/curves.dart';
 export 'src/animation/forces.dart';
 export 'src/animation/listener_helpers.dart';
-export 'src/animation/performance.dart';
 export 'src/animation/scroll_behavior.dart';
 export 'src/animation/simulation_stepper.dart';
 export 'src/animation/ticker.dart';

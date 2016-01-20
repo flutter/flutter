@@ -854,9 +854,8 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   }
 }
 
-class AnimatedFractionalOffsetValue extends AnimatedValue<FractionalOffset> {
-  AnimatedFractionalOffsetValue(FractionalOffset begin, { FractionalOffset end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+class FractionalOffsetTween extends Tween<FractionalOffset> {
+  FractionalOffsetTween({ FractionalOffset begin, FractionalOffset end }) : super(begin: begin, end: end);
 
   FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t);
 }

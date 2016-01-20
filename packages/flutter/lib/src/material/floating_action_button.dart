@@ -40,7 +40,7 @@ class FloatingActionButton extends StatefulComponent {
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
-  Animated<double> _childSegue;
+  Animation<double> _childSegue;
   AnimationController _childSegueController;
 
   void initState() {

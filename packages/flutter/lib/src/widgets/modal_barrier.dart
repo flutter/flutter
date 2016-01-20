@@ -46,12 +46,12 @@ class ModalBarrier extends StatelessComponent {
 class AnimatedModalBarrier extends AnimatedComponent {
   AnimatedModalBarrier({
     Key key,
-    Animated<Color> color,
+    Animation<Color> color,
     this.dismissable: true
   }) : color = color, super(key: key, animation: color);
 
   /// If non-null, fill the barrier with this color.
-  final Animated<Color> color;
+  final Animation<Color> color;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
   final bool dismissable;

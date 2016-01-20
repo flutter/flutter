@@ -18,7 +18,7 @@ class PageSelectorDemo extends StatelessComponent {
       builder: (BuildContext context, Widget child) {
         Color background = selection.value == iconName ? _selectedColor.end : _selectedColor.begin;
         if (selection.valueIsChanging) {
-          // Then the selection's performance is animating from previousValue to value.
+          // Then the selection's animation is animating from previousValue to value.
           if (selection.value == iconName)
             background = _selectedColor.evaluate(animation);
           else if (selection.previousValue == iconName)

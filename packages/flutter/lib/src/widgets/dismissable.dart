@@ -73,8 +73,8 @@ class _DismissableState extends State<Dismissable> {
   void initState() {
     super.initState();
     _dismissController = new AnimationController(duration: _kCardDismissDuration);
-    _dismissController.addStatusListener((PerformanceStatus status) {
-      if (status == PerformanceStatus.completed)
+    _dismissController.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed)
         _handleDismissCompleted();
     });
   }
@@ -251,9 +251,9 @@ class _DismissableState extends State<Dismissable> {
   Widget build(BuildContext context) {
     if (_resizeController != null) {
       // make sure you remove this widget once it's been dismissed!
-      assert(_resizeController.status == PerformanceStatus.forward);
+      assert(_resizeController.status == AnimationStatus.forward);
 
-      Animated<double> squashAxisExtent = new Tween<double>(
+      Animation<double> squashAxisExtent = new Tween<double>(
         begin: _directionIsYAxis ? _size.width : _size.height,
         end: 0.0
       ).animate(new CurvedAnimation(

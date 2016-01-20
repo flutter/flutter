@@ -73,7 +73,7 @@ class _HeroManifest {
 
 abstract class HeroHandle {
   bool get alwaysAnimate;
-  _HeroManifest _takeChild(Rect animationArea, Animated<double> currentAnimation);
+  _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation);
 }
 
 class Hero extends StatefulComponent {
@@ -167,7 +167,7 @@ class HeroState extends State<Hero> implements HeroHandle {
 
   bool get alwaysAnimate => config.alwaysAnimate;
 
-  _HeroManifest _takeChild(Rect animationArea, Animated<double> currentAnimation) {
+  _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation) {
     assert(_mode == _HeroMode.measured || _mode == _HeroMode.taken);
     final RenderBox renderObject = context.findRenderObject();
     final Point heroTopLeft = renderObject.localToGlobal(Point.origin);
@@ -263,7 +263,7 @@ class _HeroQuestState implements HeroHandle {
 
   bool get taken => _taken;
   bool _taken = false;
-  _HeroManifest _takeChild(Rect animationArea, Animated<double> currentAnimation) {
+  _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation) {
     assert(!taken);
     _taken = true;
     Set<HeroState> states = sourceStates;
@@ -278,7 +278,7 @@ class _HeroQuestState implements HeroHandle {
     );
   }
 
-  Widget build(BuildContext context, Animated<double> animation) {
+  Widget build(BuildContext context, Animation<double> animation) {
     return new PositionedTransition(
       rect: currentRect.animate(animation),
       child: new RotationTransition(
@@ -376,14 +376,14 @@ class HeroParty {
     _heroes = _newHeroes;
   }
 
-  Animated<double> _currentAnimation;
+  Animation<double> _currentAnimation;
 
   void _clearCurrentAnimation() {
     _currentAnimation?.removeStatusListener(_handleUpdate);
     _currentAnimation = null;
   }
 
-  void setAnimation(Animated<double> animation) {
+  void setAnimation(Animation<double> animation) {
     assert(animation != null || _heroes.length == 0);
     if (animation != _currentAnimation) {
       _clearCurrentAnimation();
@@ -392,9 +392,9 @@ class HeroParty {
     }
   }
 
-  void _handleUpdate(PerformanceStatus status) {
-    if (status == PerformanceStatus.completed ||
-        status == PerformanceStatus.dismissed) {
+  void _handleUpdate(AnimationStatus status) {
+    if (status == AnimationStatus.completed ||
+        status == AnimationStatus.dismissed) {
       for (_HeroQuestState hero in _heroes) {
         if (hero.targetState != null)
           hero.targetState._setChild(hero.key);
@@ -417,7 +417,7 @@ class HeroController extends NavigatorObserver {
   }
 
   HeroParty _party;
-  Animated<double> _animation;
+  Animation<double> _animation;
   PageRoute _from;
   PageRoute _to;
 
@@ -452,7 +452,7 @@ class HeroController extends NavigatorObserver {
 
   void _checkForHeroQuest() {
     if (_from != null && _to != null && _from != _to) {
-      _to.offstage = _to.animation.status != PerformanceStatus.completed;
+      _to.offstage = _to.animation.status != AnimationStatus.completed;
       Scheduler.instance.addPostFrameCallback(_updateQuest);
     }
   }
@@ -505,9 +505,9 @@ class HeroController extends NavigatorObserver {
     Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext, mostValuableKeys);
     _to.offstage = false;
 
-    Animated<double> animation = _animation;
+    Animation<double> animation = _animation;
     Curve curve = Curves.ease;
-    if (animation.status == PerformanceStatus.reverse) {
+    if (animation.status == AnimationStatus.reverse) {
       animation = new ReverseAnimation(animation);
       curve = new Interval(animation.value, 1.0, curve: curve);
     }

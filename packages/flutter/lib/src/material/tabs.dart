@@ -382,7 +382,7 @@ class _TabsScrollBehavior extends BoundedBehavior {
 }
 
 abstract class TabBarSelectionPerformanceListener {
-  void handleStatusChange(PerformanceStatus status);
+  void handleStatusChange(AnimationStatus status);
   void handleProgressChange();
   void handleSelectionDeactivate();
 }
@@ -415,7 +415,7 @@ class TabBarSelection<T> extends StatefulComponent {
 
 class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
-  Animated<double> get animation => _controller.view;
+  Animation<double> get animation => _controller.view;
   // Both the TabBar and TabBarView classes access _controller because they
   // alternately drive selection progress between tabs.
   final AnimationController _controller = new AnimationController(duration: _kTabBarScroll, value: 1.0);
@@ -481,7 +481,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     // the previous and current selection index.
 
     double value;
-    if (_controller.status == PerformanceStatus.completed)
+    if (_controller.status == AnimationStatus.completed)
       value = 0.0;
     else if (_previousValue == values.first)
       value = _controller.value;
@@ -584,11 +584,11 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     _selection = null;
   }
 
-  void handleStatusChange(PerformanceStatus status) {
+  void handleStatusChange(AnimationStatus status) {
     if (config.labels.length == 0)
       return;
 
-    if (_valueIsChanging && status == PerformanceStatus.completed) {
+    if (_valueIsChanging && status == AnimationStatus.completed) {
       _valueIsChanging = false;
       _indicatorTween
         ..begin = _tabIndicatorRect(math.max(0, _selection.index - 1))
@@ -868,7 +868,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     _updateScrollBehaviorForSelectedIndex(selectedIndex);
   }
 
-  void handleStatusChange(PerformanceStatus status) {
+  void handleStatusChange(AnimationStatus status) {
   }
 
   void handleProgressChange() {
@@ -876,14 +876,14 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
       return;
     // The TabBar is driving the TabBarSelection performance.
 
-    final Animated<double> animation = _selection.animation;
+    final Animation<double> animation = _selection.animation;
 
-    if (animation.status == PerformanceStatus.completed) {
+    if (animation.status == AnimationStatus.completed) {
       _updateItemsAndScrollBehavior();
       return;
     }
 
-    if (animation.status != PerformanceStatus.forward)
+    if (animation.status != AnimationStatus.forward)
       return;
 
     final int selectedIndex = _selection.index;
