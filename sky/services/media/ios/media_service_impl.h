@@ -10,6 +10,7 @@
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "sky/services/media/media.mojom.h"
 #include "sky/services/media/ios/media_player_impl.h"
+#include "sky/services/media/ios/sound_pool_impl.h"
 
 namespace sky {
 namespace services {
@@ -29,6 +30,7 @@ class MediaServiceImpl : public ::media::MediaService {
  private:
   mojo::StrongBinding<::media::MediaService> binding_;
   MediaPlayerFactory media_player_;
+  SoundPoolFactory sound_pool_;
 
   DISALLOW_COPY_AND_ASSIGN(MediaServiceImpl);
 };

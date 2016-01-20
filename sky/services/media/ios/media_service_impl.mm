@@ -23,7 +23,7 @@ void MediaServiceImpl::CreatePlayer(
 void MediaServiceImpl::CreateSoundPool(
     mojo::InterfaceRequest<::media::SoundPool> pool,
     int32_t max_streams) {
-  DCHECK(false);
+  sound_pool_.Create(nullptr, pool.Pass());
 }
 
 void MediaServiceFactory::Create(

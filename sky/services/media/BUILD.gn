@@ -46,6 +46,8 @@ if (is_android) {
       "ios/media_player_impl.mm",
       "ios/media_service_impl.h",
       "ios/media_service_impl.mm",
+      "ios/sound_pool_impl.h",
+      "ios/sound_pool_impl.mm",
     ]
 
     deps = [
