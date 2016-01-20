@@ -13,16 +13,16 @@ import 'forces.dart';
 import 'listener_helpers.dart';
 import 'simulation_stepper.dart';
 
-abstract class Watchable {
-  const Watchable();
+abstract class Animated<T> {
+  const Animated();
 
-  /// Calls the listener every time the progress of the performance changes.
+  /// Calls the listener every time the value of the animation changes.
   void addListener(VoidCallback listener);
-  /// Stop calling the listener every time the progress of the performance changes.
+  /// Stop calling the listener every time the value of the animation changes.
   void removeListener(VoidCallback listener);
-  /// Calls listener every time the status of the performance changes.
+  /// Calls listener every time the status of the animation changes.
   void addStatusListener(PerformanceStatusListener listener);
-  /// Stops calling the listener every time the status of the performance changes.
+  /// Stops calling the listener every time the status of the animation changes.
   void removeStatusListener(PerformanceStatusListener listener);
 
   /// The current status of this animation.
@@ -30,6 +30,9 @@ abstract class Watchable {
 
   /// The current direction of the animation.
   AnimationDirection get direction;
+
+  /// The current value of the animation.
+  T get value;
 
   /// Whether this animation is stopped at the beginning.
   bool get isDismissed => status == PerformanceStatus.dismissed;
@@ -77,8 +80,8 @@ abstract class Watchable {
   }
 }
 
-abstract class ProxyWatchableMixin implements Watchable {
-  Watchable get parent;
+abstract class ProxyAnimatedMixin {
+  Animated<double> get parent;
 
   void addListener(VoidCallback listener) => parent.addListener(listener);
   void removeListener(VoidCallback listener) => parent.removeListener(listener);
@@ -92,37 +95,30 @@ abstract class ProxyWatchableMixin implements Watchable {
 abstract class Evaluatable<T> {
   const Evaluatable();
 
-  T evaluate(Animation animation);
+  T evaluate(Animated<double> animation);
 
-  WatchableValue<T> watch(Animation parent) {
-    return new WatchableValue<T>(parent: parent, evaluatable: this);
+  Animated<T> watch(Animated<double> parent) {
+    return new _AnimatedEvaluation<T>(parent, this);
   }
 }
 
-class WatchableValue<T> extends Watchable with ProxyWatchableMixin {
-  WatchableValue({ this.parent, this.evaluatable });
+class _AnimatedEvaluation<T> extends Animated<T> with ProxyAnimatedMixin {
+  _AnimatedEvaluation(this.parent, this._evaluatable);
 
-  final Animation parent;
-  final Evaluatable<T> evaluatable;
+  /// The animation from which this value is derived.
+  final Animated<double> parent;
 
-  T get value => evaluatable.evaluate(parent);
+  final Evaluatable<T> _evaluatable;
+
+  T get value => _evaluatable.evaluate(parent);
 }
 
-abstract class Animation extends Watchable {
-  /// The current progress of this animation (a value from 0.0 to 1.0).
-  double get progress;
-
-  String toStringDetails() {
-    return '${super.toStringDetails()} ${progress.toStringAsFixed(3)}';
-  }
-}
-
-class AnimationController extends Animation
+class AnimationController extends Animated<double>
   with EagerListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
-  AnimationController({ this.duration, double progress, this.debugLabel }) {
+  AnimationController({ this.duration, double value, this.debugLabel }) {
     _timeline = new SimulationStepper(_tick);
-    if (progress != null)
-      _timeline.value = progress.clamp(0.0, 1.0);
+    if (value != null)
+      _timeline.value = value.clamp(0.0, 1.0);
   }
 
   /// A label that is used in the [toString] output. Intended to aid with
@@ -132,7 +128,7 @@ class AnimationController extends Animation
   /// Returns a [Animation] for this performance,
   /// so that a pointer to this object can be passed around without
   /// allowing users of that pointer to mutate the Performance state.
-  Animation get view => this;
+  Animated<double> get view => this;
 
   /// The length of time this performance should last.
   Duration duration;
@@ -144,8 +140,8 @@ class AnimationController extends Animation
   /// The progress of this performance along the timeline.
   ///
   /// Note: Setting this value stops the current animation.
-  double get progress => _timeline.value.clamp(0.0, 1.0);
-  void set progress(double t) {
+  double get value => _timeline.value.clamp(0.0, 1.0);
+  void set value(double t) {
     stop();
     _timeline.value = t.clamp(0.0, 1.0);
     _checkStatusChanged();
@@ -155,9 +151,9 @@ class AnimationController extends Animation
   bool get isAnimating => _timeline.isAnimating;
 
   PerformanceStatus get status {
-    if (!isAnimating && progress == 1.0)
+    if (!isAnimating && value == 1.0)
       return PerformanceStatus.completed;
-    if (!isAnimating && progress == 0.0)
+    if (!isAnimating && value == 0.0)
       return PerformanceStatus.dismissed;
     return _direction == AnimationDirection.forward ?
         PerformanceStatus.forward :
@@ -200,7 +196,7 @@ class AnimationController extends Animation
   Future fling({double velocity: 1.0, Force force}) {
     force ??= kDefaultSpringForce;
     _direction = velocity < 0.0 ? AnimationDirection.reverse : AnimationDirection.forward;
-    return _timeline.animateWith(force.release(progress, velocity));
+    return _timeline.animateWith(force.release(value, velocity));
   }
 
   /// Starts running this animation in the forward direction, and
@@ -234,7 +230,7 @@ class AnimationController extends Animation
   String toStringDetails() {
     String paused = _timeline.isAnimating ? '' : '; paused';
     String label = debugLabel == null ? '' : '; for $debugLabel';
-    String more = super.toStringDetails();
+    String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
     return '$more$paused$label';
   }
 }
@@ -261,14 +257,14 @@ class _RepeatingSimulation extends Simulation {
   bool isDone(double timeInSeconds) => false;
 }
 
-class CurvedAnimation extends Animation with ProxyWatchableMixin {
+class CurvedAnimation extends Animated<double> with ProxyAnimatedMixin {
   CurvedAnimation({ this.parent, this.curve, this.reverseCurve }) {
     assert(parent != null);
     assert(curve != null);
     parent.addStatusListener(_handleStatusChanged);
   }
 
-  final Animation parent;
+  final Animated<double> parent;
 
   /// The curve to use in the forward direction.
   Curve curve;
@@ -300,11 +296,11 @@ class CurvedAnimation extends Animation with ProxyWatchableMixin {
     }
   }
 
-  double get progress {
+  double get value {
     final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.direction) == AnimationDirection.forward;
     Curve activeCurve = useForwardCurve ? curve : reverseCurve;
 
-    double t = parent.progress;
+    double t = parent.value;
     if (activeCurve == null)
       return t;
     if (t == 0.0 || t == 1.0) {
@@ -327,10 +323,10 @@ class Tween<T extends dynamic> extends Evaluatable<T> {
   /// Returns the value this variable has at the given animation clock value.
   T lerp(double t) => begin + (end - begin) * t;
 
-  T evaluate(Animation animation) {
+  T evaluate(Animated<double> animation) {
     if (end == null)
       return begin;
-    double t = animation.progress;
+    double t = animation.value;
     if (t == 0.0)
       return begin;
     if (t == 1.0)

@@ -158,7 +158,7 @@ class _TooltipState extends State<Tooltip> {
     assert(_entry != null);
     _timer?.cancel();
     _timer = null;
-    _performance.reverse();    
+    _performance.reverse();
   }
 
   void deactivate() {
@@ -266,7 +266,7 @@ class _TooltipOverlay extends StatelessComponent {
             screenEdgeMargin: screenEdgeMargin,
             preferBelow: preferBelow
           ),
-          child: new FadeTransition(
+          child: new OldFadeTransition(
             performance: performance,
             opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease),
             child: new Opacity(

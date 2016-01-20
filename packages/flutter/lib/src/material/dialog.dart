@@ -133,7 +133,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
   }
 
   Widget buildTransitions(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance, Widget child) {
-    return new FadeTransition(
+    return new OldFadeTransition(
       performance: performance,
       opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.easeOut),
       child: child

@@ -21,24 +21,24 @@ const Color _kBarrierColor = Colors.black54;
 class BottomSheet extends StatefulComponent {
   BottomSheet({
     Key key,
-    this.performance,
+    this.animationController,
     this.onClosing,
     this.builder
   }) : super(key: key) {
     assert(onClosing != null);
   }
 
-  /// The performance that controls the bottom sheet's position. The BottomSheet
-  /// widget will manipulate the position of this performance, it is not just a
+  /// The animation that controls the bottom sheet's position. The BottomSheet
+  /// widget will manipulate the position of this animation, it is not just a
   /// passive observer.
-  final Performance performance;
+  final AnimationController animationController;
   final VoidCallback onClosing;
   final WidgetBuilder builder;
 
   _BottomSheetState createState() => new _BottomSheetState();
 
-  static Performance createPerformanceController() {
-    return new Performance(
+  static AnimationController createAnimationController() {
+    return new AnimationController(
       duration: _kBottomSheetDuration,
       debugLabel: 'BottomSheet'
     );
@@ -54,12 +54,12 @@ class _BottomSheetState extends State<BottomSheet> {
     return renderBox.size.height;
   }
 
-  bool get _dismissUnderway => config.performance.direction == AnimationDirection.reverse;
+  bool get _dismissUnderway => config.animationController.direction == AnimationDirection.reverse;
 
   void _handleDragUpdate(double delta) {
     if (_dismissUnderway)
       return;
-    config.performance.progress -= delta / (_childHeight ?? delta);
+    config.animationController.value -= delta / (_childHeight ?? delta);
   }
 
   void _handleDragEnd(Offset velocity) {
@@ -67,14 +67,14 @@ class _BottomSheetState extends State<BottomSheet> {
       return;
     if (velocity.dy > _kMinFlingVelocity) {
       double flingVelocity = -velocity.dy / _childHeight;
-      config.performance.fling(velocity: flingVelocity);
+      config.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
         config.onClosing();
-    } else if (config.performance.progress < _kCloseProgressThreshold) {
-      config.performance.fling(velocity: -1.0);
+    } else if (config.animationController.value < _kCloseProgressThreshold) {
+      config.animationController.fling(velocity: -1.0);
       config.onClosing();
     } else {
-      config.performance.forward();
+      config.animationController.forward();
     }
   }
 
@@ -129,17 +129,41 @@ class _ModalBottomSheet extends StatefulComponent {
 }
 
 class _ModalBottomSheetState extends State<_ModalBottomSheet> {
+  // TODO(abarth): Delete _controllerPerformanceAdaptor when navigator uses
+  // AnimationController and friends.
+  AnimationController _controllerPerformanceAdaptor;
+
+  void initState() {
+    super.initState();
+    _controllerPerformanceAdaptor = new AnimationController();
+    _updateControllerPerformanceAdaptor();
+  }
+
+  void didUpdateConfig(_ModalBottomSheet oldConfig) {
+    if (config.route.performance != oldConfig.route.performance)
+      _updateControllerPerformanceAdaptor();
+  }
+
+  void _updateControllerPerformanceAdaptor() {
+    Performance performance = config.route.performance;
+    _controllerPerformanceAdaptor
+      ..duration = performance.duration
+      ..value = performance.progress;
+    if (performance.isAnimating)
+      _controllerPerformanceAdaptor.play(performance.direction);
+  }
+
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
-      child: new BuilderTransition(
-        performance: config.route.performance,
+      child: new AnimatedBuilder(
+        animation: _controllerPerformanceAdaptor,
         builder: (BuildContext context) {
           return new ClipRect(
             child: new CustomOneChildLayout(
               delegate: new _ModalBottomSheetLayout(config.route.performance.progress),
               child: new BottomSheet(
-                performance: config.route.performance,
+                animationController: _controllerPerformanceAdaptor,
                 onClosing: () => Navigator.pop(context),
                 builder: config.route.builder
               )
@@ -163,8 +187,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   bool get barrierDismissable => true;
   Color get barrierColor => Colors.black54;
 
-  Performance createPerformanceController() {
-    return BottomSheet.createPerformanceController();
+  AnimationController createAnimationController() {
+    return BottomSheet.createAnimationController();
   }
 
   Widget buildPage(BuildContext context, PerformanceView performance, PerformanceView forwardPerformance) {

@@ -87,7 +87,7 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
         opacity = new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end), reverseCurve: const Interval(0.75, 1.0));
       }
-      children.add(new FadeTransition(
+      children.add(new OldFadeTransition(
         performance: route.performance,
         opacity: opacity,
         child: new InkWell(
@@ -120,7 +120,7 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
       reverseCurve: const Interval(0.0, 0.001)
     );
 
-    return new FadeTransition(
+    return new OldFadeTransition(
       performance: route.performance,
       opacity: menuOpacity,
       child: new BuilderTransition(

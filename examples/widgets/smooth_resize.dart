@@ -33,14 +33,14 @@ class CardTransition extends StatelessComponent {
   });
 
   final Widget child;
-  final Animation animation;
+  final Animated<double> animation;
   final Evaluatable<double> x;
   final Evaluatable<double> opacity;
   final Evaluatable<double> scale;
 
   Widget build(BuildContext context) {
-    return new AnimationWatchingBuilder(
-      watchable: animation,
+    return new AnimatedBuilder(
+      animation: animation,
       builder: (BuildContext context) {
         double currentScale = scale.evaluate(animation);
         Matrix4 transform = new Matrix4.identity()
@@ -62,7 +62,7 @@ class SmoothBlockState extends State<SmoothBlock> {
 
   double _height = 100.0;
 
-  Widget _handleEnter(Animation animation, Widget child) {
+  Widget _handleEnter(Animated<double> animation, Widget child) {
     return new CardTransition(
       x: new Tween<double>(begin: -200.0, end: 0.0),
       opacity: new Tween<double>(begin: 0.0, end: 1.0),
@@ -72,7 +72,7 @@ class SmoothBlockState extends State<SmoothBlock> {
     );
   }
 
-  Widget _handleExit(Animation animation, Widget child) {
+  Widget _handleExit(Animated<double> animation, Widget child) {
     return new CardTransition(
       x: new Tween<double>(begin: 0.0, end: 200.0),
       opacity: new Tween<double>(begin: 1.0, end: 0.0),

@@ -28,6 +28,7 @@ const Color _kSnackBackground = const Color(0xFF323232);
 const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
 const Duration kSnackBarShortDisplayDuration = const Duration(milliseconds: 1500);
 const Duration kSnackBarMediumDisplayDuration = const Duration(milliseconds: 2750);
+const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 class SnackBarAction extends StatelessComponent {
@@ -56,7 +57,7 @@ class SnackBar extends StatelessComponent {
     this.content,
     this.actions,
     this.duration: kSnackBarShortDisplayDuration,
-    this.performance
+    this.animation
   }) : super(key: key) {
     assert(content != null);
   }
@@ -64,10 +65,10 @@ class SnackBar extends StatelessComponent {
   final Widget content;
   final List<SnackBarAction> actions;
   final Duration duration;
-  final PerformanceView performance;
+  final Animated<double> animation;
 
   Widget build(BuildContext context) {
-    assert(performance != null);
+    assert(animation != null);
     List<Widget> children = <Widget>[
       new Flexible(
         child: new Container(
@@ -81,55 +82,61 @@ class SnackBar extends StatelessComponent {
     ];
     if (actions != null)
       children.addAll(actions);
+    CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
+    CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve);
     ThemeData theme = Theme.of(context);
-    return new ClipRect(
-      child: new AlignTransition(
-        performance: performance,
-        alignment: new AnimatedValue<FractionalOffset>(const FractionalOffset(0.0, 0.0)),
-        heightFactor: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.fastOutSlowIn),
-        child: new Material(
-          elevation: 6,
-          color: _kSnackBackground,
-          child: new Container(
-            margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
-            child: new Theme(
-              data: new ThemeData(
-                brightness: ThemeBrightness.dark,
-                accentColor: theme.accentColor,
-                accentColorBrightness: theme.accentColorBrightness,
-                text: Typography.white
-              ),
-              child: new FadeTransition(
-                performance: performance,
-                opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: _snackBarFadeCurve),
-                child: new Row(
-                  children: children,
-                  alignItems: FlexAlignItems.center
-                )
-              )
+    Widget child = new Material(
+      elevation: 6,
+      color: _kSnackBackground,
+      child: new Container(
+        margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
+        child: new Theme(
+          data: new ThemeData(
+            brightness: ThemeBrightness.dark,
+            accentColor: theme.accentColor,
+            accentColorBrightness: theme.accentColorBrightness,
+            text: Typography.white
+          ),
+          child: new FadeTransition(
+            opacity: fadeAnimation,
+            child: new Row(
+              children: children,
+              alignItems: FlexAlignItems.center
             )
           )
         )
+      )
+    );
+    return new ClipRect(
+      child: new AnimatedBuilder(
+        animation: heightAnimation,
+        builder: (BuildContext context) {
+          return new Align(
+            alignment: const FractionalOffset(0.0, 0.0),
+            heightFactor: heightAnimation.value,
+            child: child
+          );
+        }
       )
     );
   }
 
   // API for Scaffold.addSnackBar():
 
-  static Performance createPerformanceController() {
-    return new Performance(
+  static AnimationController createAnimationController() {
+    return new AnimationController(
       duration: _kSnackBarTransitionDuration,
       debugLabel: 'SnackBar'
     );
   }
 
-  SnackBar withPerformance(Performance newPerformance, { Key fallbackKey }) {
+  SnackBar withAnimation(Animated<double> newAnimation, { Key fallbackKey }) {
     return new SnackBar(
       key: key ?? fallbackKey,
       content: content,
       actions: actions,
       duration: duration,
-      performance: newPerformance
+      animation: newAnimation
     );
   }
 }

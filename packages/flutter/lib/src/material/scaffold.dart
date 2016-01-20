@@ -111,18 +111,18 @@ class _FloatingActionButtonTransition extends StatefulComponent {
 }
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> {
-  final Performance performance = new Performance(duration: _kFloatingActionButtonSegue);
+  final AnimationController controller = new AnimationController(duration: _kFloatingActionButtonSegue);
   Widget oldChild;
 
   void initState() {
     super.initState();
-    performance.play().then((_) {
+    controller.forward().then((_) {
       oldChild = null;
     });
   }
 
   void dispose() {
-    performance.stop();
+    controller.stop();
     super.dispose();
   }
 
@@ -130,9 +130,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     if (Widget.canUpdate(oldConfig.child, config.child))
       return;
     oldChild = oldConfig.child;
-    performance
-      ..progress = 0.0
-      ..play().then((_) {
+    controller
+      ..value = 0.0
+      ..forward().then((_) {
         oldChild = null;
       });
   }
@@ -141,15 +141,23 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final List<Widget> children = new List<Widget>();
     if (oldChild != null) {
       children.add(new ScaleTransition(
-        scale: new AnimatedValue<double>(1.0, end: 0.0, curve: new Interval(0.0, 0.5, curve: Curves.easeIn)),
-        performance: performance,
+        // TODO(abarth): We should use ReversedAnimation here.
+        scale: new Tween<double>(
+          begin: 1.0,
+          end: 0.0
+        ).watch(new CurvedAnimation(
+          parent: controller,
+          curve: const Interval(0.0, 0.5, curve: Curves.easeIn)
+        )),
         child: oldChild
       ));
     }
 
     children.add(new ScaleTransition(
-      scale: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(0.5, 1.0, curve: Curves.easeIn)),
-      performance: performance,
+      scale: new CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeIn)
+      ),
       child: config.child
     ));
 
@@ -190,22 +198,22 @@ class ScaffoldState extends State<Scaffold> {
   // SNACKBAR API
 
   Queue<ScaffoldFeatureController<SnackBar>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar>>();
-  Performance _snackBarPerformance;
+  AnimationController _snackBarController;
   Timer _snackBarTimer;
 
   ScaffoldFeatureController showSnackBar(SnackBar snackbar) {
-    _snackBarPerformance ??= SnackBar.createPerformanceController()
+    _snackBarController ??= SnackBar.createAnimationController()
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
-      assert(_snackBarPerformance.isDismissed);
-      _snackBarPerformance.forward();
+      assert(_snackBarController.isDismissed);
+      _snackBarController.forward();
     }
     ScaffoldFeatureController<SnackBar> controller;
     controller = new ScaffoldFeatureController<SnackBar>._(
       // We provide a fallback key so that if back-to-back snackbars happen to
       // match in structure, material ink splashes and highlights don't survive
       // from one to the next.
-      snackbar.withPerformance(_snackBarPerformance, fallbackKey: new UniqueKey()),
+      snackbar.withAnimation(_snackBarController, fallbackKey: new UniqueKey()),
       new Completer(),
       () {
         assert(_snackBars.first == controller);
@@ -227,7 +235,7 @@ class ScaffoldState extends State<Scaffold> {
           _snackBars.removeFirst();
         });
         if (_snackBars.isNotEmpty)
-          _snackBarPerformance.forward();
+          _snackBarController.forward();
         break;
       case PerformanceStatus.completed:
         setState(() {
@@ -242,10 +250,10 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   void _hideSnackBar() {
-    assert(_snackBarPerformance.status == PerformanceStatus.forward ||
-           _snackBarPerformance.status == PerformanceStatus.completed);
+    assert(_snackBarController.status == PerformanceStatus.forward ||
+           _snackBarController.status == PerformanceStatus.completed);
     _snackBars.first._completer.complete();
-    _snackBarPerformance.reverse();
+    _snackBarController.reverse();
     _snackBarTimer = null;
   }
 
@@ -262,7 +270,7 @@ class ScaffoldState extends State<Scaffold> {
     }
     Completer completer = new Completer();
     GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
-    Performance performance = BottomSheet.createPerformanceController()
+    AnimationController controller = BottomSheet.createAnimationController()
       ..forward();
     _PersistentBottomSheet bottomSheet;
     LocalHistoryEntry entry = new LocalHistoryEntry(
@@ -278,7 +286,7 @@ class ScaffoldState extends State<Scaffold> {
     );
     bottomSheet = new _PersistentBottomSheet(
       key: bottomSheetKey,
-      performance: performance,
+      animationController: controller,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         entry.remove();
@@ -307,8 +315,8 @@ class ScaffoldState extends State<Scaffold> {
   // INTERNALS
 
   void dispose() {
-    _snackBarPerformance?.stop();
-    _snackBarPerformance = null;
+    _snackBarController?.stop();
+    _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     super.dispose();
@@ -357,7 +365,7 @@ class ScaffoldState extends State<Scaffold> {
     if (_snackBars.length > 0) {
       ModalRoute route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
-        if (_snackBarPerformance.isCompleted && _snackBarTimer == null)
+        if (_snackBarController.isCompleted && _snackBarTimer == null)
           _snackBarTimer = new Timer(_snackBars.first._widget.duration, _hideSnackBar);
       } else {
         _snackBarTimer?.cancel();
@@ -420,13 +428,13 @@ class ScaffoldFeatureController<T extends Widget> {
 class _PersistentBottomSheet extends StatefulComponent {
   _PersistentBottomSheet({
     Key key,
-    this.performance,
+    this.animationController,
     this.onClosing,
     this.onDismissed,
     this.builder
   }) : super(key: key);
 
-  final Performance performance;
+  final AnimationController animationController;
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
@@ -441,22 +449,22 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
 
   void initState() {
     super.initState();
-    assert(config.performance.status == PerformanceStatus.forward);
-    config.performance.addStatusListener(_handleStatusChange);
+    assert(config.animationController.status == PerformanceStatus.forward);
+    config.animationController.addStatusListener(_handleStatusChange);
   }
 
   void didUpdateConfig(_PersistentBottomSheet oldConfig) {
     super.didUpdateConfig(oldConfig);
-    assert(config.performance == oldConfig.performance);
+    assert(config.animationController == oldConfig.animationController);
   }
 
   void dispose() {
-    config.performance.stop();
+    config.animationController.stop();
     super.dispose();
   }
 
   void close() {
-    config.performance.reverse();
+    config.animationController.reverse();
   }
 
   void _handleStatusChange(PerformanceStatus status) {
@@ -465,15 +473,20 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   }
 
   Widget build(BuildContext context) {
-    return new AlignTransition(
-      performance: config.performance,
-      alignment: new AnimatedValue<FractionalOffset>(const FractionalOffset(0.0, 0.0)),
-      heightFactor: new AnimatedValue<double>(0.0, end: 1.0),
-      child: new BottomSheet(
-        performance: config.performance,
-        onClosing: config.onClosing,
-        builder: config.builder
-      )
+    Widget child = new BottomSheet(
+      animationController: config.animationController,
+      onClosing: config.onClosing,
+      builder: config.builder
+    );
+    return new AnimatedBuilder(
+      animation: config.animationController,
+      builder: (BuildContext context) {
+        return new Align(
+          alignment: const FractionalOffset(0.0, 0.0),
+          heightFactor: config.animationController.value,
+          child: child
+        );
+      }
     );
   }
 

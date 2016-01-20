@@ -61,7 +61,7 @@ class _PopupMenu<T> extends StatelessComponent {
     for (int i = 0; i < route.items.length; ++i) {
       double start = (i + 1) * unit;
       double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-      children.add(new FadeTransition(
+      children.add(new OldFadeTransition(
         performance: route.performance,
         opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: new Interval(start, end)),
         child: new InkWell(

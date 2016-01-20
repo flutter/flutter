@@ -63,47 +63,47 @@ class _TransitionState extends State<TransitionComponent> {
   }
 }
 
-abstract class AnimationWatchingComponent extends StatefulComponent {
-  AnimationWatchingComponent({
+abstract class AnimatedComponent extends StatefulComponent {
+  AnimatedComponent({
     Key key,
-    this.watchable
+    this.animation
   }) : super(key: key) {
-    assert(watchable != null);
+    assert(animation != null);
   }
 
-  final Watchable watchable;
+  final Animated<Object> animation;
 
   Widget build(BuildContext context);
 
-  _AnimationWatchingComponentState createState() => new _AnimationWatchingComponentState();
+  _AnimatedComponentState createState() => new _AnimatedComponentState();
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('watchable: $watchable');
+    description.add('animation: $animation');
   }
 }
 
-class _AnimationWatchingComponentState extends State<AnimationWatchingComponent> {
+class _AnimatedComponentState extends State<AnimatedComponent> {
   void initState() {
     super.initState();
-    config.watchable.addListener(_handleTick);
+    config.animation.addListener(_handleTick);
   }
 
-  void didUpdateConfig(AnimationWatchingComponent oldConfig) {
-    if (config.watchable != oldConfig.watchable) {
-      oldConfig.watchable.removeListener(_handleTick);
-      config.watchable.addListener(_handleTick);
+  void didUpdateConfig(AnimatedComponent oldConfig) {
+    if (config.animation != oldConfig.animation) {
+      oldConfig.animation.removeListener(_handleTick);
+      config.animation.addListener(_handleTick);
     }
   }
 
   void dispose() {
-    config.watchable.removeListener(_handleTick);
+    config.animation.removeListener(_handleTick);
     super.dispose();
   }
 
   void _handleTick() {
     setState(() {
-      // The watchable's state is our build state, and it changed already.
+      // The animation's state is our build state, and it changed already.
     });
   }
 
@@ -146,24 +146,22 @@ class SlideTransition extends TransitionWithChild {
   }
 }
 
-class ScaleTransition extends TransitionWithChild {
+class ScaleTransition extends AnimatedComponent {
   ScaleTransition({
     Key key,
-    this.scale,
+    Animated<double> scale,
     this.alignment: const FractionalOffset(0.5, 0.5),
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
+    this.child
+  }) : scale = scale, super(key: key, animation: scale);
 
-  final AnimatedValue<double> scale;
+  final Animated<double> scale;
   final FractionalOffset alignment;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(scale);
+  Widget build(BuildContext context) {
+    double scaleValue = scale.value;
     Matrix4 transform = new Matrix4.identity()
-      ..scale(scale.value, scale.value);
+      ..scale(scaleValue, scaleValue);
     return new Transform(
       transform: transform,
       alignment: alignment,
@@ -195,8 +193,8 @@ class RotationTransition extends TransitionWithChild {
   }
 }
 
-class FadeTransition extends TransitionWithChild {
-  FadeTransition({
+class OldFadeTransition extends TransitionWithChild {
+ OldFadeTransition({
     Key key,
     this.opacity,
     PerformanceView performance,
@@ -209,6 +207,21 @@ class FadeTransition extends TransitionWithChild {
 
   Widget buildWithChild(BuildContext context, Widget child) {
     performance.updateVariable(opacity);
+    return new Opacity(opacity: opacity.value, child: child);
+  }
+}
+
+class FadeTransition extends AnimatedComponent {
+  FadeTransition({
+    Key key,
+    Animated<double> opacity,
+    this.child
+  }) : opacity = opacity, super(key: key, animation: opacity);
+
+  final Animated<double> opacity;
+  final Widget child;
+
+  Widget build(BuildContext context) {
     return new Opacity(opacity: opacity.value, child: child);
   }
 }
@@ -352,12 +365,12 @@ class BuilderTransition extends TransitionComponent {
   }
 }
 
-class AnimationWatchingBuilder extends AnimationWatchingComponent {
-  AnimationWatchingBuilder({
+class AnimatedBuilder extends AnimatedComponent {
+  AnimatedBuilder({
     Key key,
-    Watchable watchable,
+    Animated<Object> animation,
     this.builder
-  }) : super(key: key, watchable: watchable);
+  }) : super(key: key, animation: animation);
 
   final WidgetBuilder builder;
 
