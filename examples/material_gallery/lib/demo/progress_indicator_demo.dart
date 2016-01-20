@@ -5,11 +5,12 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
-class ProgressIndicatorApp extends StatefulComponent {
-  _ProgressIndicatorAppState createState() => new _ProgressIndicatorAppState();
+class ProgressIndicatorDemo extends StatefulComponent {
+  _ProgressIndicatorDemoState createState() => new _ProgressIndicatorDemoState();
 }
 
-class _ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
+class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
+
   void initState() {
     super.initState();
     controller = new AnimationController(
@@ -77,42 +78,22 @@ class _ProgressIndicatorAppState extends State<ProgressIndicatorApp> {
   }
 
   Widget build(BuildContext context) {
-    Widget body = new GestureDetector(
-      onTap: handleTap,
-      child: new Container(
-        padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-        child: new AnimationWatchingBuilder(
-          watchable: animation,
-          builder: buildIndicators
-        )
-      )
-    );
-
-    return new IconTheme(
-      data: const IconThemeData(color: IconThemeColor.white),
-      child: new Theme(
-        data: new ThemeData(
-          brightness: ThemeBrightness.light,
-          primarySwatch: Colors.blue,
-          accentColor: Colors.redAccent[200]
-        ),
-        child: new Scaffold(
-          toolBar: new ToolBar(center: new Text('Progress Indicators')),
-          body: new DefaultTextStyle(
-            style: Theme.of(context).text.title,
-            child: body
+    return new Scaffold(
+      toolBar: new ToolBar(center: new Text('Progress Indicators')),
+      body: new DefaultTextStyle(
+        style: Theme.of(context).text.title,
+        child: new GestureDetector(
+          onTap: handleTap,
+          behavior: HitTestBehavior.opaque,
+          child: new Container(
+            padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
+            child: new AnimationWatchingBuilder(
+              watchable: animation,
+              builder: buildIndicators
+            )
           )
         )
       )
     );
   }
-}
-
-void main() {
-  runApp(new MaterialApp(
-    title: 'Progress Indicators',
-    routes: {
-      '/': (RouteArguments args) => new ProgressIndicatorApp()
-    }
-  ));
 }

@@ -4,40 +4,35 @@
 
 import 'package:flutter/material.dart';
 
-import 'widget_demo.dart';
-
 class DropDownDemo extends StatefulComponent {
   _DropDownDemoState createState() => new _DropDownDemoState();
 }
 
 class _DropDownDemoState extends State<DropDownDemo> {
-  String _value = "Free";
+  String value = "Free";
 
-  List<DropDownMenuItem<String>> _buildItems() {
-    return ["One", "Two", "Free", "Four"].map((String value) {
+  List<DropDownMenuItem<String>> buildItems() {
+    return <String>["One", "Two", "Free", "Four"].map((String value) {
       return new DropDownMenuItem<String>(value: value, child: new Text(value));
     })
     .toList();
   }
 
   Widget build(BuildContext context) {
-    Widget dropdown = new DropDownButton<String>(
-      items: _buildItems(),
-      value: _value,
-      onChanged: (String newValue) {
-        setState(() {
-          if (newValue != null)
-            _value = newValue;
-        });
-      }
+    return new Scaffold(
+      toolBar: new ToolBar(center: new Text("Dropdown Button")),
+      body: new Center(
+        child: new DropDownButton<String>(
+          items: buildItems(),
+          value: value,
+          onChanged: (String newValue) {
+            setState(() {
+              if (newValue != null)
+                value = newValue;
+            });
+          }
+        )
+      )
     );
-
-    return new Center(child: dropdown);
   }
 }
-
-final WidgetDemo kDropDownDemo = new WidgetDemo(
-  title: 'Drop Down Button',
-  routeName: '/dropdown',
-  builder: (_) => new DropDownDemo()
-);

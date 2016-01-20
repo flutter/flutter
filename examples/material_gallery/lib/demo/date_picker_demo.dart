@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'widget_demo.dart';
-
 class DatePickerDemo extends StatefulComponent {
   _DatePickerDemoState createState() => new _DatePickerDemoState();
 }
@@ -31,21 +29,19 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
   }
 
   Widget build(BuildContext context) {
-    return new Column(
-      children: <Widget>[
-        new Text(new DateFormat.yMMMd().format(_selectedDate)),
-        new RaisedButton(
-          onPressed: _handleSelectDate,
-          child: new Text('SELECT DATE')
-        ),
-      ],
-      justifyContent: FlexJustifyContent.center
+    return
+      new Scaffold(
+      toolBar: new ToolBar(center: new Text("Date Picker")),
+      body: new Column(
+        children: <Widget>[
+          new Text(new DateFormat.yMMMd().format(_selectedDate)),
+          new RaisedButton(
+            onPressed: _handleSelectDate,
+            child: new Text('SELECT DATE')
+          ),
+        ],
+        justifyContent: FlexJustifyContent.center
+      )
     );
   }
 }
-
-final WidgetDemo kDatePickerDemo = new WidgetDemo(
-  title: 'Date Picker',
-  routeName: '/date-picker',
-  builder: (_) => new DatePickerDemo()
-);

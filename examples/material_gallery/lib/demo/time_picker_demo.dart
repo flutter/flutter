@@ -6,8 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'widget_demo.dart';
-
 class TimePickerDemo extends StatefulComponent {
   _TimePickerDemoState createState() => new _TimePickerDemoState();
 }
@@ -28,21 +26,18 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
   }
 
   Widget build(BuildContext context) {
-    return new Column(
-      children: <Widget>[
-        new Text('$_selectedTime'),
-        new RaisedButton(
-          onPressed: _handleSelectTime,
-          child: new Text('SELECT TIME')
-        ),
-      ],
-      justifyContent: FlexJustifyContent.center
+    return new Scaffold(
+      toolBar: new ToolBar(center: new Text("Time Picker")),
+      body: new Column(
+        children: <Widget>[
+          new Text('$_selectedTime'),
+          new RaisedButton(
+            onPressed: _handleSelectTime,
+            child: new Text('SELECT TIME')
+          ),
+        ],
+        justifyContent: FlexJustifyContent.center
+      )
     );
   }
 }
-
-final WidgetDemo kTimePickerDemo = new WidgetDemo(
-  title: 'Time Picker',
-  routeName: '/time-picker',
-  builder: (_) => new TimePickerDemo()
-);

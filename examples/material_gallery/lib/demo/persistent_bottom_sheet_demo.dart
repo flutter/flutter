@@ -4,8 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import 'widget_demo.dart';
-
 class PersistentBottomSheetDemo extends StatelessComponent {
 
   final TextStyle textStyle = new TextStyle(
@@ -14,7 +12,7 @@ class PersistentBottomSheetDemo extends StatelessComponent {
     textAlign: TextAlign.center
   );
 
-  void _showBottomSheet(BuildContext context) {
+  void showBottomSheet(BuildContext context) {
     Scaffold.of(context).showBottomSheet((_) {
       return new Container(
         decoration: new BoxDecoration(
@@ -28,28 +26,27 @@ class PersistentBottomSheetDemo extends StatelessComponent {
     });
   }
 
-  Widget build(BuildContext context) {
-    return new Center(
-      child: new Container(
-        width: 200.0,
-        height: 200.0,
-        child: new RaisedButton(
-          onPressed: () { _showBottomSheet(context); },
-          child: new Text('Show the persistent bottom sheet', style: textStyle)
-        )
+  Widget build(BuildContext notUsed) { // Can't find the Scaffold from this context.
+    return new Scaffold(
+      toolBar: new ToolBar(center: new Text("Persistent Bottom Sheet")),
+      floatingActionButton: new FloatingActionButton(
+        child: new Icon(icon: 'content/add'),
+        backgroundColor: Colors.redAccent[200]
+      ),
+      body: new Builder(
+        builder: (BuildContext context) {
+          return new Center(
+            child: new Container(
+              width: 200.0,
+              height: 200.0,
+              child: new RaisedButton(
+                onPressed: () { showBottomSheet(context); },
+                child: new Text('Show the persistent bottom sheet', style: textStyle)
+              )
+            )
+          );
+        }
       )
     );
   }
 }
-
-final WidgetDemo kPersistentBottomSheetDemo = new WidgetDemo(
-  title: 'Persistent Bottom Sheet',
-  routeName: '/persistentBottomSheet',
-  builder: (_) => new PersistentBottomSheetDemo(),
-  floatingActionButtonBuilder: (_) {
-    return new FloatingActionButton(
-      child: new Icon(icon: 'content/add'),
-      backgroundColor: Colors.redAccent[200]
-    );
-  }
-);
