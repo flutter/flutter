@@ -7,14 +7,13 @@ import "dart:io";
 
 import "package:path/path.dart" as path;
 
-import "../runner/flutter_command_runner.dart";
-import "../runner/flutter_command.dart";
 import "../artifacts.dart";
+import "../runner/flutter_command.dart";
+import "../runner/flutter_command_runner.dart";
 
 class IOSCommand extends FlutterCommand {
   final String name = "ios";
-
-  final String description = "Commands for creating and updating Flutter iOS projects";
+  final String description = "Commands for creating and updating Flutter iOS projects.";
 
   final bool requiresProjectRoot = true;
 

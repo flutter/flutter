@@ -9,7 +9,7 @@ import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
   final String name = 'logs';
-  final String description = 'Show logs for running Sky apps.';
+  final String description = 'Show logs for running Flutter apps.';
 
   LogsCommand() {
     argParser.addFlag('clear',
