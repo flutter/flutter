@@ -41,10 +41,9 @@ class Theme extends InheritedWidget {
   }
 }
 
-/// An animated value that interpolates [BoxConstraint]s.
-class AnimatedThemeDataValue extends AnimatedValue<ThemeData> {
-  AnimatedThemeDataValue(ThemeData begin, { ThemeData end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+/// An animated value that interpolates [ThemeData]s.
+class ThemeDataTween extends Tween<ThemeData> {
+  ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
 
   ThemeData lerp(double t) => ThemeData.lerp(begin, end, t);
 }
@@ -71,18 +70,18 @@ class AnimatedTheme extends AnimatedWidgetBase {
 }
 
 class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
-  AnimatedThemeDataValue _data;
+  ThemeDataTween _data;
 
-  void forEachVariable(VariableVisitor visitor) {
+  void forEachTween(TweenVisitor visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _data = visitor(_data, config.data, (dynamic value) => new AnimatedThemeDataValue(value));
+    _data = visitor(_data, config.data, (dynamic value) => new ThemeDataTween(begin: value));
     assert(_data != null);
   }
 
   Widget build(BuildContext context) {
     return new Theme(
       child: config.child,
-      data: _data.value
+      data: _data.evaluate(animation)
     );
   }
 

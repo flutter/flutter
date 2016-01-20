@@ -96,7 +96,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Animated<double> _animation;
   AnimationController _controller;
 
-  /// Called to create the Performance object that will drive the transitions to
+  /// Called to create the animation controller that will drive the transitions to
   /// this route from the previous one, and back to the previous route from this
   /// one.
   AnimationController createAnimationController() {
@@ -105,8 +105,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     return new AnimationController(duration: duration, debugLabel: debugLabel);
   }
 
-  /// Called to create the PerformanceView that exposes the current progress of
-  /// the transition controlled by the Performance object created by
+  /// Called to create the animation that exposes the current progress of
+  /// the transition controlled by the animation controller created by
   /// [createAnimationController()].
   Animated<double> createAnimation() {
     assert(_controller != null);
@@ -166,32 +166,32 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   void didPopNext(Route nextRoute) {
-    _updateForwardPerformance(nextRoute);
+    _updateForwardAnimation(nextRoute);
     super.didPopNext(nextRoute);
   }
 
   void didChangeNext(Route nextRoute) {
-    _updateForwardPerformance(nextRoute);
+    _updateForwardAnimation(nextRoute);
     super.didChangeNext(nextRoute);
   }
 
-  void _updateForwardPerformance(Route nextRoute) {
+  void _updateForwardAnimation(Route nextRoute) {
     if (nextRoute is TransitionRoute && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       Animated<double> current = _forwardAnimation.masterAnimation;
       if (current != null) {
         if (current is TrainHoppingAnimation) {
-          TrainHoppingAnimation newPerformance;
-          newPerformance = new TrainHoppingAnimation(
+          TrainHoppingAnimation newAnimation;
+          newAnimation = new TrainHoppingAnimation(
             current.currentTrain,
             nextRoute.animation,
             onSwitchedTrain: () {
-              assert(_forwardAnimation.masterAnimation == newPerformance);
-              assert(newPerformance.currentTrain == nextRoute.animation);
-              _forwardAnimation.masterAnimation = newPerformance.currentTrain;
-              newPerformance.dispose();
+              assert(_forwardAnimation.masterAnimation == newAnimation);
+              assert(newAnimation.currentTrain == nextRoute.animation);
+              _forwardAnimation.masterAnimation = newAnimation.currentTrain;
+              newAnimation.dispose();
             }
           );
-          _forwardAnimation.masterAnimation = newPerformance;
+          _forwardAnimation.masterAnimation = newAnimation;
           current.dispose();
         } else {
           _forwardAnimation.masterAnimation = new TrainHoppingAnimation(current, nextRoute.animation);
@@ -322,7 +322,7 @@ class _ModalScopeState extends State<_ModalScope> {
 
   void _animationStatusChanged(PerformanceStatus status) {
     setState(() {
-      // The performances' states are our build state, and they changed already.
+      // The animation's states are our build state, and they changed already.
     });
   }
 

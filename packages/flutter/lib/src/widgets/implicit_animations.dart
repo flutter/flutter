@@ -10,17 +10,15 @@ import 'framework.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 /// An animated value that interpolates [BoxConstraint]s.
-class AnimatedBoxConstraintsValue extends AnimatedValue<BoxConstraints> {
-  AnimatedBoxConstraintsValue(BoxConstraints begin, { BoxConstraints end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+class BoxConstraintsTween extends Tween<BoxConstraints> {
+  BoxConstraintsTween({ BoxConstraints begin, BoxConstraints end }) : super(begin: begin, end: end);
 
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
 /// An animated value that interpolates [Decoration]s.
-class AnimatedDecorationValue extends AnimatedValue<Decoration> {
-  AnimatedDecorationValue(Decoration begin, { Decoration end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+class DecorationTween extends Tween<Decoration> {
+  DecorationTween({ Decoration begin, Decoration end }) : super(begin: begin, end: end);
 
   Decoration lerp(double t) {
     if (begin == null && end == null)
@@ -32,9 +30,8 @@ class AnimatedDecorationValue extends AnimatedValue<Decoration> {
 }
 
 /// An animated value that interpolates [EdgeDims].
-class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
-  AnimatedEdgeDimsValue(EdgeDims begin, { EdgeDims end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+class EdgeDimsTween extends Tween<EdgeDims> {
+  EdgeDimsTween({ EdgeDims begin, EdgeDims end }) : super(begin: begin, end: end);
 
   EdgeDims lerp(double t) => EdgeDims.lerp(begin, end, t);
 }
@@ -42,9 +39,8 @@ class AnimatedEdgeDimsValue extends AnimatedValue<EdgeDims> {
 /// An animated value that interpolates [Matrix4]s.
 ///
 /// Currently this class works only for translations.
-class AnimatedMatrix4Value extends AnimatedValue<Matrix4> {
-  AnimatedMatrix4Value(Matrix4 begin, { Matrix4 end, Curve curve, Curve reverseCurve })
-    : super(begin, end: end, curve: curve, reverseCurve: reverseCurve);
+class Matrix4Tween extends Tween<Matrix4> {
+  Matrix4Tween({ Matrix4 begin, Matrix4 end }) : super(begin: begin, end: end);
 
   Matrix4 lerp(double t) {
     // TODO(mpcomplete): Animate the full matrix. Will animating the cells
@@ -82,113 +78,107 @@ abstract class AnimatedWidgetBase extends StatefulComponent {
   }
 }
 
-typedef AnimatedValue<T> VariableConstructor<T>(T targetValue);
-typedef AnimatedValue<T> VariableVisitor<T>(AnimatedValue<T> variable, T targetValue, VariableConstructor<T> constructor);
+typedef Tween<T> TweenConstructor<T>(T targetValue);
+typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends State<T> {
-  Performance _performanceController;
-  PerformanceView _performance;
+  AnimationController _controller;
+
+  Animated<double> get animation => _animation;
+  Animated<double> _animation;
 
   void initState() {
     super.initState();
-    _performanceController = new Performance(
+    _controller = new AnimationController(
       duration: config.duration,
       debugLabel: '${config.toStringShort()}'
-    );
+    )..addListener(_handleAnimationChanged);
     _updateCurve();
-    _configAllVariables();
+    _constructTweens();
   }
 
   void didUpdateConfig(T oldConfig) {
     if (config.curve != oldConfig.curve)
       _updateCurve();
-    _performanceController.duration = config.duration;
-    if (_configAllVariables()) {
-      forEachVariable((AnimatedValue variable, dynamic targetValue, VariableConstructor<T> constructor) {
-        _updateBeginValue(variable); return variable;
+    _controller.duration = config.duration;
+    if (_constructTweens()) {
+      forEachTween((Tween tween, dynamic targetValue, TweenConstructor<T> constructor) {
+        _updateTween(tween, targetValue);
+        return tween;
       });
-      _performanceController.progress = 0.0;
-      _performanceController.play();
+      _controller
+        ..value = 0.0
+        ..forward();
     }
   }
 
   void _updateCurve() {
-    _performance?.removeListener(_updateAllVariables);
     if (config.curve != null)
-      _performance = new CurvedPerformance(_performanceController, curve: config.curve);
+      _animation = new CurvedAnimation(parent: _controller, curve: config.curve);
     else
-      _performance = _performanceController;
-    _performance.addListener(_updateAllVariables);
+      _animation = _controller;
   }
 
   void dispose() {
-    _performanceController.stop();
+    _controller.stop();
     super.dispose();
   }
 
-  void _updateVariable(Animatable variable) {
-    if (variable != null)
-      _performance.updateVariable(variable);
+  void _handleAnimationChanged() {
+    setState(() { });
   }
 
-  void _updateAllVariables() {
-    setState(() {
-      forEachVariable((AnimatedValue variable, dynamic targetValue, VariableConstructor<T> constructor) {
-        _updateVariable(variable); return variable;
-      });
-    });
+  bool _shouldAnimateTween(Tween tween, dynamic targetValue) {
+    return targetValue != (tween.end ?? tween.begin);
   }
 
-  bool _updateEndValue(AnimatedValue variable, dynamic targetValue) {
-    if (targetValue == variable.end)
-      return false;
-    variable.end = targetValue;
-    return true;
+  void _updateTween(Tween tween, dynamic targetValue) {
+    if (tween == null)
+      return;
+    tween
+      ..begin = tween.evaluate(_animation)
+      ..end = targetValue;
   }
 
-  void _updateBeginValue(AnimatedValue variable) {
-    variable?.begin = variable.value;
-  }
-
-  bool _configAllVariables() {
-    bool startAnimation = false;
-    forEachVariable((AnimatedValue variable, dynamic targetValue, VariableConstructor<T> constructor) { 
+  bool _constructTweens() {
+    bool shouldStartAnimation = false;
+    forEachTween((Tween tween, dynamic targetValue, TweenConstructor<T> constructor) {
       if (targetValue != null) {
-        variable ??= constructor(targetValue);
-        if (_updateEndValue(variable, targetValue))
-          startAnimation = true;
+        tween ??= constructor(targetValue);
+        if (_shouldAnimateTween(tween, targetValue))
+          shouldStartAnimation = true;
       } else {
-        variable = null;
+        tween = null;
       }
-      return variable;
+      return tween;
     });
-    return startAnimation;
+    return shouldStartAnimation;
   }
 
   /// Subclasses must implement this function by running through the following
   /// steps for for each animatable facet in the class:
   ///
   /// 1. Call the visitor callback with three arguments, the first argument
-  /// being the current value of the AnimatedValue<T> object that represents the
-  /// variable (initially null), the second argument, of type T, being the value
+  /// being the current value of the Tween<T> object that represents the
+  /// tween (initially null), the second argument, of type T, being the value
   /// on the Widget (config) that represents the current target value of the
-  /// variable, and the third being a callback that takes a value T (which will
+  /// tween, and the third being a callback that takes a value T (which will
   /// be the second argument to the visitor callback), and that returns an
-  /// AnimatedValue<T> object for the variable, configured with the given value
+  /// Tween<T> object for the tween, configured with the given value
   /// as the begin value.
   ///
   /// 2. Take the value returned from the callback, and store it. This is the
-  /// value to use as the current value the next time that the forEachVariable()
+  /// value to use as the current value the next time that the forEachTween()
   /// method is called.
-  void forEachVariable(VariableVisitor visitor);
+  void forEachTween(TweenVisitor visitor);
 }
 
 /// A container that gradually changes its values over a period of time.
 ///
 /// This class is useful for generating simple implicit transitions between
 /// different parameters to [Container]. For more complex animations, you'll
-/// likely want to use a subclass of [Transition] or control a [Performance]
-/// yourself.
+/// likely want to use a subclass of [Transition] or use an
+/// [AnimationController] yourself.
 class AnimatedContainer extends AnimatedWidgetBase {
   AnimatedContainer({
     Key key,
@@ -260,38 +250,38 @@ class AnimatedContainer extends AnimatedWidgetBase {
 }
 
 class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer> {
-  AnimatedBoxConstraintsValue _constraints;
-  AnimatedDecorationValue _decoration;
-  AnimatedDecorationValue _foregroundDecoration;
-  AnimatedEdgeDimsValue _margin;
-  AnimatedEdgeDimsValue _padding;
-  AnimatedMatrix4Value _transform;
-  AnimatedValue<double> _width;
-  AnimatedValue<double> _height;
+  BoxConstraintsTween _constraints;
+  DecorationTween _decoration;
+  DecorationTween _foregroundDecoration;
+  EdgeDimsTween _margin;
+  EdgeDimsTween _padding;
+  Matrix4Tween _transform;
+  Tween<double> _width;
+  Tween<double> _height;
 
-  void forEachVariable(VariableVisitor visitor) {
+  void forEachTween(TweenVisitor visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _constraints = visitor(_constraints, config.constraints, (dynamic value) => new AnimatedBoxConstraintsValue(value));
-    _decoration = visitor(_decoration, config.decoration, (dynamic value) => new AnimatedDecorationValue(value));
-    _foregroundDecoration = visitor(_foregroundDecoration, config.foregroundDecoration, (dynamic value) => new AnimatedDecorationValue(value));
-    _margin = visitor(_margin, config.margin, (dynamic value) => new AnimatedEdgeDimsValue(value));
-    _padding = visitor(_padding, config.padding, (dynamic value) => new AnimatedEdgeDimsValue(value));
-    _transform = visitor(_transform, config.transform, (dynamic value) => new AnimatedMatrix4Value(value));
-    _width = visitor(_width, config.width, (dynamic value) => new AnimatedValue<double>(value));
-    _height = visitor(_height, config.height, (dynamic value) => new AnimatedValue<double>(value));
+    _constraints = visitor(_constraints, config.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
+    _decoration = visitor(_decoration, config.decoration, (dynamic value) => new DecorationTween(begin: value));
+    _foregroundDecoration = visitor(_foregroundDecoration, config.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
+    _margin = visitor(_margin, config.margin, (dynamic value) => new EdgeDimsTween(begin: value));
+    _padding = visitor(_padding, config.padding, (dynamic value) => new EdgeDimsTween(begin: value));
+    _transform = visitor(_transform, config.transform, (dynamic value) => new Matrix4Tween(begin: value));
+    _width = visitor(_width, config.width, (dynamic value) => new Tween<double>(begin: value));
+    _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));
   }
 
   Widget build(BuildContext context) {
     return new Container(
       child: config.child,
-      constraints: _constraints?.value,
-      decoration: _decoration?.value,
-      foregroundDecoration: _foregroundDecoration?.value,
-      margin: _margin?.value,
-      padding: _padding?.value,
-      transform: _transform?.value,
-      width: _width?.value,
-      height: _height?.value
+      constraints: _constraints?.evaluate(animation),
+      decoration: _decoration?.evaluate(animation),
+      foregroundDecoration: _foregroundDecoration?.evaluate(animation),
+      margin: _margin?.evaluate(animation),
+      padding: _padding?.evaluate(animation),
+      transform: _transform?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation)
     );
   }
 
@@ -381,32 +371,32 @@ class AnimatedPositioned extends AnimatedWidgetBase {
 }
 
 class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositioned> {
-  AnimatedValue<double> _left;
-  AnimatedValue<double> _top;
-  AnimatedValue<double> _right;
-  AnimatedValue<double> _bottom;
-  AnimatedValue<double> _width;
-  AnimatedValue<double> _height;
+  Tween<double> _left;
+  Tween<double> _top;
+  Tween<double> _right;
+  Tween<double> _bottom;
+  Tween<double> _width;
+  Tween<double> _height;
 
-  void forEachVariable(VariableVisitor visitor) {
+  void forEachTween(TweenVisitor visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _left = visitor(_left, config.left, (dynamic value) => new AnimatedValue<double>(value));
-    _top = visitor(_top, config.top, (dynamic value) => new AnimatedValue<double>(value));
-    _right = visitor(_right, config.right, (dynamic value) => new AnimatedValue<double>(value));
-    _bottom = visitor(_bottom, config.bottom, (dynamic value) => new AnimatedValue<double>(value));
-    _width = visitor(_width, config.width, (dynamic value) => new AnimatedValue<double>(value));
-    _height = visitor(_height, config.height, (dynamic value) => new AnimatedValue<double>(value));
+    _left = visitor(_left, config.left, (dynamic value) => new Tween<double>(begin: value));
+    _top = visitor(_top, config.top, (dynamic value) => new Tween<double>(begin: value));
+    _right = visitor(_right, config.right, (dynamic value) => new Tween<double>(begin: value));
+    _bottom = visitor(_bottom, config.bottom, (dynamic value) => new Tween<double>(begin: value));
+    _width = visitor(_width, config.width, (dynamic value) => new Tween<double>(begin: value));
+    _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));
   }
 
   Widget build(BuildContext context) {
     return new Positioned(
       child: config.child,
-      left: _left?.value,
-      top: _top?.value,
-      right: _right?.value,
-      bottom: _bottom?.value,
-      width: _width?.value,
-      height: _height?.value
+      left: _left?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      right: _right?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation)
     );
   }
 
