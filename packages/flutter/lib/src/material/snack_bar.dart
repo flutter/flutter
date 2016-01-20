@@ -85,38 +85,38 @@ class SnackBar extends StatelessComponent {
     CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve);
     ThemeData theme = Theme.of(context);
-    Widget child = new Material(
-      elevation: 6,
-      color: _kSnackBackground,
-      child: new Container(
-        margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
-        child: new Theme(
-          data: new ThemeData(
-            brightness: ThemeBrightness.dark,
-            accentColor: theme.accentColor,
-            accentColorBrightness: theme.accentColorBrightness,
-            text: Typography.white
-          ),
-          child: new FadeTransition(
-            opacity: fadeAnimation,
-            child: new Row(
-              children: children,
-              alignItems: FlexAlignItems.center
-            )
-          )
-        )
-      )
-    );
     return new ClipRect(
       child: new AnimatedBuilder(
         animation: heightAnimation,
-        builder: (BuildContext context) {
+        builder: (BuildContext context, Widget child) {
           return new Align(
             alignment: const FractionalOffset(0.0, 0.0),
             heightFactor: heightAnimation.value,
             child: child
           );
-        }
+        },
+        child: new Material(
+          elevation: 6,
+          color: _kSnackBackground,
+          child: new Container(
+            margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
+            child: new Theme(
+              data: new ThemeData(
+                brightness: ThemeBrightness.dark,
+                accentColor: theme.accentColor,
+                accentColorBrightness: theme.accentColorBrightness,
+                text: Typography.white
+              ),
+              child: new FadeTransition(
+                opacity: fadeAnimation,
+                child: new Row(
+                  children: children,
+                  alignItems: FlexAlignItems.center
+                )
+              )
+            )
+          )
+        )
       )
     );
   }

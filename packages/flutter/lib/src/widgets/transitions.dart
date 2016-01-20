@@ -360,16 +360,20 @@ class BuilderTransition extends TransitionComponent {
   }
 }
 
+typedef Widget TransitionBuilder(BuildContext context, Widget child);
+
 class AnimatedBuilder extends AnimatedComponent {
   AnimatedBuilder({
     Key key,
     Animated<Object> animation,
-    this.builder
+    this.builder,
+    this.child
   }) : super(key: key, animation: animation);
 
-  final WidgetBuilder builder;
+  final TransitionBuilder builder;
+  final Widget child;
 
   Widget build(BuildContext context) {
-    return builder(context);
+    return builder(context, child);
   }
 }

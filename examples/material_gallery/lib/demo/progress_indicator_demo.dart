@@ -47,7 +47,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     controller.play(direction);
   }
 
-  Widget buildIndicators(BuildContext context) {
+  Widget buildIndicators(BuildContext context, Widget child) {
     List<Widget> indicators = <Widget>[
         new SizedBox(
           width: 200.0,

@@ -131,7 +131,7 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
       opacity: opacity,
       child: new AnimatedBuilder(
         animation: resize,
-        builder: (BuildContext context) {
+        builder: (BuildContext context, Widget child) {
           return new CustomPaint(
             painter: new _DropDownMenuPainter(
               color: Theme.of(context).canvasColor,
@@ -142,7 +142,8 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
             ),
             child: child
           );
-        }
+        },
+        child: child
       )
     );
   }

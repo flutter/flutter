@@ -96,7 +96,7 @@ class _PopupMenu<T> extends StatelessComponent {
 
     return new AnimatedBuilder(
       animation: route.animation,
-      builder: (BuildContext context) {
+      builder: (BuildContext context, Widget child) {
         return new Opacity(
           opacity: opacity.evaluate(route.animation),
           child: new Material(
@@ -110,7 +110,8 @@ class _PopupMenu<T> extends StatelessComponent {
             )
           )
         );
-      }
+      },
+      child: child
     );
   }
 }

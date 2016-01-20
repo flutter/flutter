@@ -63,7 +63,7 @@ class _ProgressIndicatorState extends State<ProgressIndicator> {
 
     return new AnimatedBuilder(
       animation: _animation,
-      builder: (BuildContext context) {
+      builder: (BuildContext context, Widget child) {
         return config._buildIndicator(context, _animation.value);
       }
     );

@@ -134,7 +134,7 @@ class _ModalBottomSheetState extends State<_ModalBottomSheet> {
       onTap: () => Navigator.pop(context),
       child: new AnimatedBuilder(
         animation: config.route.animation,
-        builder: (BuildContext context) {
+        builder: (BuildContext context, Widget child) {
           return new ClipRect(
             child: new CustomOneChildLayout(
               delegate: new _ModalBottomSheetLayout(config.route.animation.value),

@@ -473,20 +473,20 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   }
 
   Widget build(BuildContext context) {
-    Widget child = new BottomSheet(
-      animationController: config.animationController,
-      onClosing: config.onClosing,
-      builder: config.builder
-    );
     return new AnimatedBuilder(
       animation: config.animationController,
-      builder: (BuildContext context) {
+      builder: (BuildContext context, Widget child) {
         return new Align(
           alignment: const FractionalOffset(0.0, 0.0),
           heightFactor: config.animationController.value,
           child: child
         );
-      }
+      },
+      child: new BottomSheet(
+        animationController: config.animationController,
+        onClosing: config.onClosing,
+        builder: config.builder
+      )
     );
   }
 

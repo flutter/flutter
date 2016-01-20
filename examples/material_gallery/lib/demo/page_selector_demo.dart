@@ -15,7 +15,7 @@ class PageSelectorDemo extends StatelessComponent {
     CurvedAnimation animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
     return new AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context) {
+      builder: (BuildContext context, Widget child) {
         Color background = selection.value == iconName ? _selectedColor.end : _selectedColor.begin;
         if (selection.valueIsChanging) {
           // Then the selection's performance is animating from previousValue to value.

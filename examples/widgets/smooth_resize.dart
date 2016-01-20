@@ -41,7 +41,7 @@ class CardTransition extends StatelessComponent {
   Widget build(BuildContext context) {
     return new AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context) {
+      builder: (BuildContext context, Widget child) {
         double currentScale = scale.evaluate(animation);
         Matrix4 transform = new Matrix4.identity()
           ..translate(x.evaluate(animation))
@@ -53,7 +53,8 @@ class CardTransition extends StatelessComponent {
             child: child
           )
         );
-      }
+      },
+      child: child
     );
   }
 }
