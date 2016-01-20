@@ -416,7 +416,7 @@ class TabBarSelection<T> extends StatefulComponent {
 class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   Animated<double> get animation => _controller.view;
-  // Both the TabBar and TabBarView classes access _performance because they
+  // Both the TabBar and TabBarView classes access _controller because they
   // alternately drive selection progress between tabs.
   final AnimationController _controller = new AnimationController(duration: _kTabBarScroll, value: 1.0);
   final Map<T, int> _valueToIndex = new Map<T, int>();
@@ -470,7 +470,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     _valueIsChanging = true;
 
     // If the selected value change was triggered by a drag gesture, the current
-    // value of _performance.progress will reflect where the gesture ended. While
+    // value of _controller.value will reflect where the gesture ended. While
     // the drag was underway progress indicates where the indicator and TabBarView
     // scrollPosition are vis the indices of the two tabs adjacent to the selected
     // one. So 0.5 means the drag didn't move at all, 0.0 means the drag extended

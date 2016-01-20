@@ -344,15 +344,21 @@ class _InkSplash extends InkFeature implements InkSplash {
     this.repositionToReferenceBox,
     VoidCallback onRemoved
   }) : super(renderer: renderer, referenceBox: referenceBox, onRemoved: onRemoved) {
-    _radius = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(_kSplashInitialSize, end: targetRadius),
-      duration: _kUnconfirmedSplashDuration
-    )..addListener(renderer.markNeedsPaint)
-     ..play();
-    _alpha = new ValuePerformance<int>(
-      variable: new AnimatedIntValue(color.alpha, end: 0),
-      duration: _kHighlightFadeDuration
-    )..addListener(_handleAlphaChange);
+    _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration)
+      ..addListener(renderer.markNeedsPaint)
+      ..forward();
+    _radius = new Tween<double>(
+      begin: _kSplashInitialSize,
+      end: targetRadius
+    ).animate(_radiusController);
+
+    _alphaController = new AnimationController(duration: _kHighlightFadeDuration)
+      ..addListener(renderer.markNeedsPaint)
+      ..addStatusListener(_handleAlphaStatusChanged);
+    _alpha = new IntTween(
+      begin: color.alpha,
+      end: 0
+    ).animate(_alphaController);
   }
 
   final Point position;
@@ -361,30 +367,32 @@ class _InkSplash extends InkFeature implements InkSplash {
   final bool clipToReferenceBox;
   final bool repositionToReferenceBox;
 
-  ValuePerformance<double> _radius;
-  ValuePerformance<int> _alpha;
+  Animated<double> _radius;
+  AnimationController _radiusController;
+
+  Animated<int> _alpha;
+  AnimationController _alphaController;
 
   void confirm() {
     int duration = (targetRadius / _kSplashConfirmedVelocity).floor();
-    _radius.duration = new Duration(milliseconds: duration);
-    _radius.play();
-    _alpha.play();
+    _radiusController
+      ..duration = new Duration(milliseconds: duration)
+      ..forward();
+    _alphaController.forward();
   }
 
   void cancel() {
-    _alpha.play();
+    _alphaController.forward();
   }
 
-  void _handleAlphaChange() {
-    if (_alpha.value == _alpha.variable.end)
+  void _handleAlphaStatusChanged(PerformanceStatus status) {
+    if (status == PerformanceStatus.completed)
       dispose();
-    else
-      renderer.markNeedsPaint();
   }
 
   void dispose() {
-    _radius.stop();
-    _alpha.stop();
+    _radiusController.stop();
+    _alphaController.stop();
     super.dispose();
   }
 
@@ -398,7 +406,7 @@ class _InkSplash extends InkFeature implements InkSplash {
       if (clipToReferenceBox)
         canvas.clipRect(Point.origin & referenceBox.size);
       if (repositionToReferenceBox)
-        center = Point.lerp(center, Point.origin, _radius.progress);
+        center = Point.lerp(center, Point.origin, _radiusController.value);
       canvas.drawCircle(center, _radius.value, paint);
       canvas.restore();
     } else {
@@ -407,7 +415,7 @@ class _InkSplash extends InkFeature implements InkSplash {
         canvas.clipRect(originOffset.toPoint() & referenceBox.size);
       }
       if (repositionToReferenceBox)
-        center = Point.lerp(center, referenceBox.size.center(Point.origin), _radius.progress);
+        center = Point.lerp(center, referenceBox.size.center(Point.origin), _radiusController.value);
       canvas.drawCircle(center + originOffset, _radius.value, paint);
       if (clipToReferenceBox)
         canvas.restore();
@@ -424,11 +432,14 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     VoidCallback onRemoved
   }) : _color = color,
        super(renderer: renderer, referenceBox: referenceBox, onRemoved: onRemoved) {
-    _alpha = new ValuePerformance<int>(
-      variable: new AnimatedIntValue(0, end: color.alpha),
-      duration: _kHighlightFadeDuration
-    )..addListener(_handleAlphaChange)
-     ..play();
+    _alphaController = new AnimationController(duration: _kHighlightFadeDuration)
+      ..addListener(renderer.markNeedsPaint)
+      ..addStatusListener(_handleAlphaStatusChanged)
+      ..forward();
+    _alpha = new IntTween(
+      begin: 0,
+      end: color.alpha
+    ).animate(_alphaController);
   }
 
   Color get color => _color;
@@ -444,27 +455,27 @@ class _InkHighlight extends InkFeature implements InkHighlight {
 
   bool get active => _active;
   bool _active = true;
-  ValuePerformance<int> _alpha;
+
+  Animated<int> _alpha;
+  AnimationController _alphaController;
 
   void activate() {
     _active = true;
-    _alpha.forward();
+    _alphaController.forward();
   }
 
   void deactivate() {
     _active = false;
-    _alpha.reverse();
+    _alphaController.reverse();
   }
 
-  void _handleAlphaChange() {
-    if (_alpha.value == 0.0 && !_active)
+  void _handleAlphaStatusChanged(PerformanceStatus status) {
+    if (status == PerformanceStatus.dismissed && !_active)
       dispose();
-    else
-      renderer.markNeedsPaint();
   }
 
   void dispose() {
-    _alpha.stop();
+    _alphaController.stop();
     super.dispose();
   }
 

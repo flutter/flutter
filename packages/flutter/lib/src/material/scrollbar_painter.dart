@@ -60,16 +60,17 @@ class ScrollbarPainter extends ScrollableListPainter {
     paintScrollbar(context, offset);
   }
 
-  ValuePerformance<double> _fade;
+  AnimationController _fade;
 
   Future scrollStarted() {
-    _fade ??= new ValuePerformance<double>()
-      ..duration = _kScrollbarThumbFadeDuration
-      ..variable = new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease)
-      ..addListener(() {
-        _opacity = _fade.value;
+    if (_fade == null) {
+      _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
+      CurvedAnimation curve = new CurvedAnimation(parent: _fade, curve: Curves.ease);
+      curve.addListener(() {
+        _opacity = curve.value;
         renderObject?.markNeedsPaint();
       });
+    }
     return _fade.forward();
   }
 

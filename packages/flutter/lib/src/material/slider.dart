@@ -90,10 +90,14 @@ class _RenderSlider extends RenderConstrainedBox {
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
-    _reaction = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(_kThumbRadius, end: _kReactionRadius, curve: Curves.ease),
-      duration: kRadialReactionDuration
-    )..addListener(markNeedsPaint);
+    _reactionController = new AnimationController(duration: kRadialReactionDuration);
+    _reaction = new Tween<double>(
+      begin: _kThumbRadius,
+      end: _kReactionRadius
+    ).animate(new CurvedAnimation(
+      parent: _reactionController,
+      curve: Curves.ease
+    ))..addListener(markNeedsPaint);
   }
 
   double get value => _value;
@@ -118,7 +122,9 @@ class _RenderSlider extends RenderConstrainedBox {
   ValueChanged<double> onChanged;
 
   double get _trackLength => size.width - 2.0 * _kReactionRadius;
-  ValuePerformance<double> _reaction;
+
+  Animated<double> _reaction;
+  AnimationController _reactionController;
 
   HorizontalDragGestureRecognizer _drag;
   bool _active = false;
@@ -129,7 +135,7 @@ class _RenderSlider extends RenderConstrainedBox {
       _active = true;
       _currentDragValue = (globalToLocal(globalPosition).x - _kReactionRadius) / _trackLength;
       onChanged(_currentDragValue.clamp(0.0, 1.0));
-      _reaction.forward();
+      _reactionController.forward();
       markNeedsPaint();
     }
   }
@@ -145,7 +151,7 @@ class _RenderSlider extends RenderConstrainedBox {
     if (_active) {
       _active = false;
       _currentDragValue = 0.0;
-      _reaction.reverse();
+      _reactionController.reverse();
       markNeedsPaint();
     }
   }

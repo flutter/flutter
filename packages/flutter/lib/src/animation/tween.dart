@@ -122,22 +122,22 @@ class AnimationController extends Animated<double>
   }
 
   /// A label that is used in the [toString] output. Intended to aid with
-  /// identifying performance instances in debug output.
+  /// identifying animation controller instances in debug output.
   final String debugLabel;
 
-  /// Returns a [Animation] for this performance,
+  /// Returns a [Animated<double>] for this animation controller,
   /// so that a pointer to this object can be passed around without
-  /// allowing users of that pointer to mutate the Performance state.
+  /// allowing users of that pointer to mutate the AnimationController state.
   Animated<double> get view => this;
 
-  /// The length of time this performance should last.
+  /// The length of time this animation should last.
   Duration duration;
 
   SimulationStepper _timeline;
   AnimationDirection get direction => _direction;
   AnimationDirection _direction = AnimationDirection.forward;
 
-  /// The progress of this performance along the timeline.
+  /// The progress of this animation along the timeline.
   ///
   /// Note: Setting this value stops the current animation.
   double get value => _timeline.value.clamp(0.0, 1.0);
@@ -282,7 +282,7 @@ class CurvedAnimation extends Animated<double> with ProxyAnimatedMixin {
   ///
   /// The curve direction is only reset when we hit the beginning or the end of
   /// the timeline to avoid discontinuities in the value of any variables this
-  /// performance is used to animate.
+  /// a animation is used to animate.
   AnimationDirection _curveDirection;
 
   void _handleStatusChanged(PerformanceStatus status) {

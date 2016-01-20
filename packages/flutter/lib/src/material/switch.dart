@@ -147,24 +147,24 @@ class _RenderSwitch extends RenderToggleable {
 
   void _handleDragStart(Point globalPosition) {
     if (onChanged != null)
-      reaction.forward();
+      reactionController.forward();
   }
 
   void _handleDragUpdate(double delta) {
     if (onChanged != null) {
-      position.variable
+      position
         ..curve = null
         ..reverseCurve = null;
-      position.progress += delta / _trackInnerLength;
+      positionController.value += delta / _trackInnerLength;
     }
   }
 
   void _handleDragEnd(Offset velocity) {
-    if (position.progress >= 0.5)
-      position.forward();
+    if (position.value >= 0.5)
+      positionController.forward();
     else
-      position.reverse();
-    reaction.reverse();
+      positionController.reverse();
+    reactionController.reverse();
   }
 
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -181,8 +181,8 @@ class _RenderSwitch extends RenderToggleable {
 
     final bool isActive = onChanged != null;
 
-    Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, position.progress) : inactiveColor;
-    Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, position.progress) : inactiveTrackColor;
+    Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, position.value) : inactiveColor;
+    Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, position.value) : inactiveTrackColor;
 
     // Paint the track
     Paint paint = new Paint()

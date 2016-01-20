@@ -34,16 +34,24 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       ..onTap = _handleTap
       ..onTapUp = _handleTapUp
       ..onTapCancel = _handleTapCancel;
-    _position = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(0.0, end: 1.0),
+
+    _positionController = new AnimationController(
       duration: _kToggleDuration,
-      progress: _value ? 1.0 : 0.0
+      value: _value ? 1.0 : 0.0
+    );
+    _position = new CurvedAnimation(
+      parent: _positionController
     )..addListener(markNeedsPaint)
      ..addStatusListener(_handlePositionStateChanged);
-    _reaction = new ValuePerformance<double>(
-      variable: new AnimatedValue<double>(minRadialReactionRadius, end: kRadialReactionRadius, curve: Curves.ease),
-      duration: kRadialReactionDuration
-    )..addListener(markNeedsPaint);
+
+    _reactionController = new AnimationController(duration: kRadialReactionDuration);
+    _reaction = new Tween<double>(
+      begin: minRadialReactionRadius,
+      end: kRadialReactionRadius
+    ).animate(new CurvedAnimation(
+      parent: _reactionController,
+      curve: Curves.ease
+    ))..addListener(markNeedsPaint);
   }
 
   bool get value => _value;
@@ -53,10 +61,10 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
-    _position.variable
+    _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
-    _position.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
+    _positionController.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
   }
 
   Color get activeColor => _activeColor;
@@ -83,11 +91,15 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   ValueChanged<bool> onChanged;
 
-  ValuePerformance<double> get position => _position;
-  ValuePerformance<double> _position;
+  CurvedAnimation get position => _position;
+  CurvedAnimation _position;
 
-  ValuePerformance<double> get reaction => _reaction;
-  ValuePerformance<double> _reaction;
+  AnimationController get positionController => _positionController;
+  AnimationController _positionController;
+
+  AnimationController get reactionController => _reactionController;
+  AnimationController _reactionController;
+  Animated<double> _reaction;
 
   TapGestureRecognizer _tap;
 
@@ -102,7 +114,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   void _handleTapDown(Point globalPosition) {
     if (isInteractive)
-      _reaction.forward();
+      _reactionController.forward();
   }
 
   void _handleTap() {
@@ -112,12 +124,12 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   void _handleTapUp(Point globalPosition) {
     if (isInteractive)
-      _reaction.reverse();
+      _reactionController.reverse();
   }
 
   void _handleTapCancel() {
     if (isInteractive)
-      _reaction.reverse();
+      _reactionController.reverse();
   }
 
   bool hitTestSelf(Point position) => true;
@@ -128,10 +140,10 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   }
 
   void paintRadialReaction(Canvas canvas, Offset offset) {
-    if (!reaction.isDismissed) {
+    if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.
       Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
-      canvas.drawCircle(offset.toPoint(), reaction.value, reactionPaint);
+      canvas.drawCircle(offset.toPoint(), _reaction.value, reactionPaint);
     }
   }
 }

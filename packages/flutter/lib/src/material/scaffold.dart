@@ -444,8 +444,8 @@ class _PersistentBottomSheet extends StatefulComponent {
 
 class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
 
-  // We take ownership of the performance given in the first configuration.
-  // We also share control of that performance with out BottomSheet widget.
+  // We take ownership of the animation controller given in the first configuration.
+  // We also share control of that animation with out BottomSheet widget.
 
   void initState() {
     super.initState();

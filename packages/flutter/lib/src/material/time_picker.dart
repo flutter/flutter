@@ -336,10 +336,12 @@ class _Dial extends StatefulComponent {
 class _DialState extends State<_Dial> {
   void initState() {
     super.initState();
-    _theta = new ValuePerformance(
-      variable: new AnimatedValue<double>(_getThetaForTime(config.selectedTime), curve: Curves.ease),
-      duration: _kDialAnimateDuration
-    )..addListener(() => setState(() { }));
+    _thetaController = new AnimationController(duration: _kDialAnimateDuration);
+    _thetaTween = new Tween<double>(begin: _getThetaForTime(config.selectedTime));
+    _theta = _thetaTween.animate(new CurvedAnimation(
+      parent: _thetaController,
+      curve: Curves.ease
+    ))..addListener(() => setState(() { }));
   }
 
   void didUpdateConfig(_Dial oldConfig) {
@@ -347,7 +349,9 @@ class _DialState extends State<_Dial> {
       _animateTo(_getThetaForTime(config.selectedTime));
   }
 
-  ValuePerformance<double> _theta;
+  Tween<double> _thetaTween;
+  Animated<double> _theta;
+  AnimationController _thetaController;
   bool _dragging = false;
 
   static double _nearest(double target, double a, double b) {
@@ -358,11 +362,12 @@ class _DialState extends State<_Dial> {
     double currentTheta = _theta.value;
     double beginTheta = _nearest(targetTheta, currentTheta, currentTheta + _kTwoPi);
     beginTheta = _nearest(targetTheta, beginTheta, currentTheta - _kTwoPi);
-    _theta
-      ..variable.begin = beginTheta
-      ..variable.end = targetTheta
-      ..progress = 0.0
-      ..play();
+    _thetaTween
+      ..begin = beginTheta
+      ..end = targetTheta;
+    _thetaController
+      ..value = 0.0
+      ..forward();
   }
 
   double _getThetaForTime(TimeOfDay time) {
@@ -397,7 +402,9 @@ class _DialState extends State<_Dial> {
   void _updateThetaForPan() {
     setState(() {
       Offset offset = _position - _center;
-      _theta.variable.value = (math.atan2(offset.dx, offset.dy) - math.PI / 2.0) % _kTwoPi;
+      _thetaTween
+        ..begin = (math.atan2(offset.dx, offset.dy) - math.PI / 2.0) % _kTwoPi
+        ..end = null;
     });
   }
 
