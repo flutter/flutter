@@ -70,30 +70,30 @@ class _SmoothlyResizingOverflowBoxState extends State<SmoothlyResizingOverflowBo
 class _Entry {
   _Entry({
     this.child,
-    this.enterPerformance,
+    this.enterController,
     this.enterTransition
   });
 
   final Widget child;
-  final Performance enterPerformance;
+  final AnimationController enterController;
   final Widget enterTransition;
 
   Size childSize = Size.zero;
 
-  Performance exitPerformance;
+  AnimationController exitController;
   Widget exitTransition;
 
   Widget get currentTransition => exitTransition ?? enterTransition;
 
   void dispose() {
-    enterPerformance?.stop();
-    exitPerformance?.stop();
+    enterController?.stop();
+    exitController?.stop();
   }
 }
 
-typedef Widget TransitionBuilderCallback(PerformanceView performance, Widget child);
+typedef Widget TransitionBuilderCallback(Animation animation, Widget child);
 
-Widget _identityTransition(PerformanceView performance, Widget child) => child;
+Widget _identityTransition(Animation animation, Widget child) => child;
 
 class EnterExitTransition extends StatefulComponent {
   EnterExitTransition({
@@ -129,11 +129,11 @@ class _EnterExitTransitionState extends State<EnterExitTransition> {
   }
 
   _Entry _createEnterTransition() {
-    Performance enterPerformance = new Performance(duration: config.duration)..play();
+    AnimationController enterController = new AnimationController(duration: config.duration)..forward();
     return new _Entry(
       child: config.child,
-      enterPerformance: enterPerformance,
-      enterTransition: config.onEnter(enterPerformance, new KeyedSubtree(
+      enterController: enterController,
+      enterTransition: config.onEnter(enterController, new KeyedSubtree(
         key: new GlobalKey(),
         child: config.child
       ))
@@ -141,11 +141,11 @@ class _EnterExitTransitionState extends State<EnterExitTransition> {
   }
 
   Future _createExitTransition(_Entry entry) async {
-    Performance exitPerformance = new Performance(duration: config.duration);
+    AnimationController exitController = new AnimationController(duration: config.duration);
     entry
-      ..exitPerformance = exitPerformance
-      ..exitTransition = config.onExit(exitPerformance, entry.enterTransition);
-    await exitPerformance.play();
+      ..exitController = exitController
+      ..exitTransition = config.onExit(exitController, entry.enterTransition);
+    await exitController.forward();
     if (!mounted)
       return;
     setState(() {

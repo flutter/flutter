@@ -12,21 +12,21 @@ final List<String> _iconNames = <String>["event", "home", "android", "alarm", "f
 class TabViewDemo extends StatelessComponent {
   Widget _buildTabIndicator(BuildContext context, String iconName) {
     final Color color = Theme.of(context).primaryColor;
-    final AnimatedColorValue _selectedColor = new AnimatedColorValue(Colors.transparent, end: color, curve: Curves.ease);
-    final AnimatedColorValue _previousColor = new AnimatedColorValue(color, end: Colors.transparent, curve: Curves.ease);
+    final ColorTween _selectedColor = new ColorTween(begin: Colors.transparent, end: color);
+    final ColorTween _previousColor = new ColorTween(begin: color, end: Colors.transparent);
     final TabBarSelectionState selection = TabBarSelection.of(context);
 
-    return new BuilderTransition(
-      performance: selection.performance,
-      variables: <AnimatedColorValue>[_selectedColor, _previousColor],
+    Animation animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
+    return new AnimationWatchingBuilder(
+      watchable: animation,
       builder: (BuildContext context) {
         Color background = selection.value == iconName ? _selectedColor.end : _selectedColor.begin;
         if (selection.valueIsChanging) {
           // Then the selection's performance is animating from previousValue to value.
           if (selection.value == iconName)
-            background = _selectedColor.value;
+            background = _selectedColor.evaluate(animation);
           else if (selection.previousValue == iconName)
-            background = _previousColor.value;
+            background = _previousColor.evaluate(animation);
         }
         return new Container(
           width: 12.0,

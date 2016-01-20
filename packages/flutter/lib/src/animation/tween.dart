@@ -92,7 +92,7 @@ abstract class ProxyWatchableMixin implements Watchable {
 abstract class Evaluatable<T> {
   const Evaluatable();
 
-  T evaluate(double t);
+  T evaluate(Animation animation);
 
   WatchableValue<T> watch(Animation parent) {
     return new WatchableValue<T>(parent: parent, evaluatable: this);
@@ -105,7 +105,7 @@ class WatchableValue<T> extends Watchable with ProxyWatchableMixin {
   final Animation parent;
   final Evaluatable<T> evaluatable;
 
-  T get value => evaluatable.evaluate(parent.progress);
+  T get value => evaluatable.evaluate(parent);
 }
 
 abstract class Animation extends Watchable {
@@ -261,9 +261,8 @@ class _RepeatingSimulation extends Simulation {
   bool isDone(double timeInSeconds) => false;
 }
 
-// TODO(abarth): Rename Curve to UnitTransform and ACurve to Curve.
-class ACurve extends Animation with ProxyWatchableMixin {
-  ACurve({ this.parent, this.curve, this.reverseCurve }) {
+class CurvedAnimation extends Animation with ProxyWatchableMixin {
+  CurvedAnimation({ this.parent, this.curve, this.reverseCurve }) {
     assert(parent != null);
     assert(curve != null);
     parent.addStatusListener(_handleStatusChanged);
@@ -317,9 +316,7 @@ class ACurve extends Animation with ProxyWatchableMixin {
 }
 
 class Tween<T extends dynamic> extends Evaluatable<T> {
-  Tween({ this.begin, this.end }) {
-    assert(begin != null);
-  }
+  Tween({ this.begin, this.end });
 
   /// The value this variable has at the beginning of the animation.
   T begin;
@@ -330,9 +327,10 @@ class Tween<T extends dynamic> extends Evaluatable<T> {
   /// Returns the value this variable has at the given animation clock value.
   T lerp(double t) => begin + (end - begin) * t;
 
-  T evaluate(double t) {
+  T evaluate(Animation animation) {
     if (end == null)
       return begin;
+    double t = animation.progress;
     if (t == 0.0)
       return begin;
     if (t == 1.0)

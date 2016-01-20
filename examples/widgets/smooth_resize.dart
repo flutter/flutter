@@ -26,29 +26,28 @@ class SmoothBlock extends StatefulComponent {
 class CardTransition extends StatelessComponent {
   CardTransition({
     this.child,
-    this.performance,
+    this.animation,
     this.x,
     this.opacity,
     this.scale
   });
 
   final Widget child;
-  final Performance performance;
-  final AnimatedValue<double> x;
-  final AnimatedValue<double> opacity;
-  final AnimatedValue<double> scale;
+  final Animation animation;
+  final Evaluatable<double> x;
+  final Evaluatable<double> opacity;
+  final Evaluatable<double> scale;
 
   Widget build(BuildContext context) {
-
-    return new BuilderTransition(
-      performance: performance,
-      variables: <AnimatedValue<double>>[x, opacity, scale],
+    return new AnimationWatchingBuilder(
+      watchable: animation,
       builder: (BuildContext context) {
+        double currentScale = scale.evaluate(animation);
         Matrix4 transform = new Matrix4.identity()
-          ..translate(x.value)
-          ..scale(scale.value, scale.value);
+          ..translate(x.evaluate(animation))
+          ..scale(currentScale, currentScale);
         return new Opacity(
-          opacity: opacity.value,
+          opacity: opacity.evaluate(animation),
           child: new Transform(
             transform: transform,
             child: child
@@ -63,22 +62,22 @@ class SmoothBlockState extends State<SmoothBlock> {
 
   double _height = 100.0;
 
-  Widget _handleEnter(PerformanceView performance, Widget child) {
+  Widget _handleEnter(Animation animation, Widget child) {
     return new CardTransition(
-      x: new AnimatedValue<double>(-200.0, end: 0.0, curve: Curves.ease),
-      opacity: new AnimatedValue<double>(0.0, end: 1.0, curve: Curves.ease),
-      scale: new AnimatedValue<double>(0.8, end: 1.0, curve: Curves.ease),
-      performance: performance,
+      x: new Tween<double>(begin: -200.0, end: 0.0),
+      opacity: new Tween<double>(begin: 0.0, end: 1.0),
+      scale: new Tween<double>(begin: 0.8, end: 1.0),
+      animation: new CurvedAnimation(parent: animation, curve: Curves.ease),
       child: child
     );
   }
 
-  Widget _handleExit(PerformanceView performance, Widget child) {
+  Widget _handleExit(Animation animation, Widget child) {
     return new CardTransition(
-      x: new AnimatedValue<double>(0.0, end: 200.0, curve: Curves.ease),
-      opacity: new AnimatedValue<double>(1.0, end: 0.0, curve: Curves.ease),
-      scale: new AnimatedValue<double>(1.0, end: 0.8, curve: Curves.ease),
-      performance: performance,
+      x: new Tween<double>(begin: 0.0, end: 200.0),
+      opacity: new Tween<double>(begin: 1.0, end: 0.0),
+      scale: new Tween<double>(begin: 1.0, end: 0.8),
+      animation: new CurvedAnimation(parent: animation, curve: Curves.ease),
       child: child
     );
   }

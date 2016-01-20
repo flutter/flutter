@@ -415,10 +415,10 @@ class TabBarSelection<T> extends StatefulComponent {
 
 class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
-  PerformanceView get performance => _performance.view;
+  Animation get animation => _controller.view;
   // Both the TabBar and TabBarView classes access _performance because they
   // alternately drive selection progress between tabs.
-  final _performance = new Performance(duration: _kTabBarScroll, progress: 1.0);
+  final AnimationController _controller = new AnimationController(duration: _kTabBarScroll, progress: 1.0);
   final Map<T, int> _valueToIndex = new Map<T, int>();
 
   void _initValueToIndex() {
@@ -442,7 +442,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   }
 
   void dispose() {
-    _performance.stop();
+    _controller.stop();
     PageStorage.of(context)?.writeState(context, _value);
     super.dispose();
   }
@@ -481,21 +481,21 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     // the previous and current selection index.
 
     double progress;
-    if (_performance.status == PerformanceStatus.completed)
+    if (_controller.status == PerformanceStatus.completed)
       progress = 0.0;
     else if (_previousValue == values.first)
-      progress = _performance.progress;
+      progress = _controller.progress;
     else if (_previousValue == values.last)
-      progress = 1.0 - _performance.progress;
+      progress = 1.0 - _controller.progress;
     else if (previousIndex < index)
-      progress = (_performance.progress - 0.5) * 2.0;
+      progress = (_controller.progress - 0.5) * 2.0;
     else
-      progress = 1.0 - _performance.progress * 2.0;
+      progress = 1.0 - _controller.progress * 2.0;
 
-    _performance
+    _controller
       ..progress = progress
       ..forward().then((_) {
-        if (_performance.progress == 1.0) {
+        if (_controller.progress == 1.0) {
           if (config.onChanged != null)
             config.onChanged(_value);
           _valueIsChanging = false;
@@ -507,14 +507,14 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   void registerPerformanceListener(TabBarSelectionPerformanceListener listener) {
     _performanceListeners.add(listener);
-    _performance
+    _controller
       ..addStatusListener(listener.handleStatusChange)
       ..addListener(listener.handleProgressChange);
   }
 
   void unregisterPerformanceListener(TabBarSelectionPerformanceListener listener) {
     _performanceListeners.remove(listener);
-    _performance
+    _controller
       ..removeStatusListener(listener.handleStatusChange)
       ..removeListener(listener.handleProgressChange);
   }
@@ -590,17 +590,11 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     if (_valueIsChanging && status == PerformanceStatus.completed) {
       _valueIsChanging = false;
-      double progress = 0.5;
-      if (_selection.index == 0)
-        progress = 0.0;
-      else if (_selection.index == config.labels.length - 1)
-        progress = 1.0;
+      _indicatorTween
+        ..begin = _tabIndicatorRect(math.max(0, _selection.index - 1))
+        ..end = _tabIndicatorRect(math.min(config.labels.length - 1, _selection.index + 1));
       setState(() {
-        _indicatorRect
-          ..begin = _tabIndicatorRect(math.max(0, _selection.index - 1))
-          ..end = _tabIndicatorRect(math.min(config.labels.length - 1, _selection.index + 1))
-          ..curve = null
-          ..setProgress(progress, AnimationDirection.forward);
+        _indicatorRect = _tabIndicatorRect(_selection.index);
       });
     }
   }
@@ -612,23 +606,32 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     if (!_valueIsChanging && _selection.valueIsChanging) {
       if (config.isScrollable)
         scrollTo(_centeredTabScrollOffset(_selection.index), duration: _kTabBarScroll);
-      _indicatorRect
-        ..begin = _indicatorRect.value ?? _tabIndicatorRect(_selection.previousIndex)
-        ..end = _tabIndicatorRect(_selection.index)
-        ..curve = Curves.ease;
+      _indicatorTween
+        ..begin = _indicatorRect ?? _tabIndicatorRect(_selection.previousIndex)
+        ..end = _tabIndicatorRect(_selection.index);
       _valueIsChanging = true;
     }
-    Rect oldRect = _indicatorRect.value;
-    _indicatorRect.setProgress(_selection.performance.progress, AnimationDirection.forward);
-    Rect newRect = _indicatorRect.value;
-    if (oldRect != newRect)
+    Rect oldRect = _indicatorRect;
+    double t = _selection.animation.progress;
+    if (_valueIsChanging) {
+      // When _valueIsChanging is true, we're animating based on a ticker and
+      // want to curve the animation. When _valueIsChanging is false, we're
+      // animating based on a pointer event and want linear feedback. It's
+      // possible we should move this curve into the selection animation.
+      t = Curves.ease.transform(t);
+    }
+    // TODO(abarth): If we've never gone through handleStatusChange before, we
+    // might not have set up our _indicatorTween yet.
+    _indicatorRect = _indicatorTween.lerp(t);
+    if (oldRect != _indicatorRect)
       setState(() { });
   }
 
   Size _viewportSize = Size.zero;
   Size _tabBarSize;
   List<double> _tabWidths;
-  AnimatedRectValue _indicatorRect = new AnimatedRectValue(null);
+  Rect _indicatorRect;
+  RectTween _indicatorTween = new RectTween();
 
   Rect _tabRect(int tabIndex) {
     assert(_tabBarSize != null);
@@ -673,9 +676,9 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       labelColor = isSelectedTab ? selectedColor : color;
       if (_selection.valueIsChanging) {
         if (isSelectedTab)
-          labelColor = Color.lerp(color, selectedColor, _selection.performance.progress);
+          labelColor = Color.lerp(color, selectedColor, _selection.animation.progress);
         else if (isPreviouslySelectedTab)
-          labelColor = Color.lerp(selectedColor, color, _selection.performance.progress);
+          labelColor = Color.lerp(selectedColor, color, _selection.animation.progress);
       }
     }
     return new _Tab(
@@ -749,7 +752,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
           children: tabs,
           selectedIndex: _selection?.index,
           indicatorColor: indicatorColor,
-          indicatorRect: _indicatorRect.value,
+          indicatorRect: _indicatorRect,
           textAndIcons: textAndIcons,
           isScrollable: config.isScrollable,
           onLayoutChanged: _layoutChanged
@@ -873,14 +876,14 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
       return;
     // The TabBar is driving the TabBarSelection performance.
 
-    final Performance performance = _selection.performance;
+    final Animation animation = _selection.animation;
 
-    if (performance.status == PerformanceStatus.completed) {
+    if (animation.status == PerformanceStatus.completed) {
       _updateItemsAndScrollBehavior();
       return;
     }
 
-    if (performance.status != PerformanceStatus.forward)
+    if (animation.status != PerformanceStatus.forward)
       return;
 
     final int selectedIndex = _selection.index;
@@ -895,9 +898,9 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     }
 
     if (_scrollDirection == AnimationDirection.forward)
-      scrollTo(performance.progress);
+      scrollTo(animation.progress);
     else
-      scrollTo(1.0 - performance.progress);
+      scrollTo(1.0 - animation.progress);
   }
 
   void dispatchOnScroll() {
@@ -905,12 +908,12 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
       return;
     // This class is driving the TabBarSelection's performance.
 
-    final Performance performance = _selection._performance;
+    final AnimationController controller = _selection._controller;
 
     if (_selection.index == 0 || _selection.index == _tabCount - 1)
-      performance.progress = scrollOffset;
+      controller.progress = scrollOffset;
     else
-      performance.progress = scrollOffset / 2.0;
+      controller.progress = scrollOffset / 2.0;
   }
 
   Future fling(Offset scrollVelocity) {
