@@ -12,8 +12,8 @@ import '../artifacts.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
+import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
-import 'build.dart';
 import 'start.dart';
 
 const String _kDefaultBundlePath = 'build/app.flx';
@@ -156,9 +156,11 @@ class RunMojoCommand extends FlutterCommand {
 
       String mainPath = StartCommandBase.findMainDartFile(argResults['target']);
 
-      BuildCommand builder = new BuildCommand();
-      builder.inheritFromParent(this);
-      int result = await builder.build(mainPath: mainPath, outputPath: bundlePath);
+      int result = await flx.build(
+        toolchain,
+        mainPath: mainPath,
+        outputPath: bundlePath
+      );
       if (result != 0)
         return result;
     }

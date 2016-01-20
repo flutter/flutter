@@ -13,8 +13,8 @@ import '../base/logging.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
+import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
-import 'build.dart';
 import 'start.dart';
 
 const String _kDefaultAndroidManifestPath = 'apk/AndroidManifest.xml';
@@ -305,10 +305,9 @@ class ApkCommand extends FlutterCommand {
       String mainPath = StartCommandBase.findMainDartFile(argResults['target']);
 
       // Build the FLX.
-      BuildCommand builder = new BuildCommand();
-      builder.inheritFromParent(this);
       int result;
-      await builder.buildInTempDir(
+      await flx.buildInTempDir(
+        toolchain,
         mainPath: mainPath,
         onBundleAvailable: (String localBundlePath) {
           result = _buildApk(components, localBundlePath);

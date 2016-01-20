@@ -11,8 +11,8 @@ import '../application_package.dart';
 import '../base/logging.dart';
 import '../build_configuration.dart';
 import '../device.dart';
+import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
-import 'build.dart';
 import 'install.dart';
 import 'stop.dart';
 
@@ -87,21 +87,22 @@ abstract class StartCommandBase extends FlutterCommand {
       logging.fine('Running build command for $device.');
 
       if (device.platform == TargetPlatform.android) {
-        BuildCommand builder = new BuildCommand();
-        builder.inheritFromParent(this);
-        await builder.buildInTempDir(
-            mainPath: mainPath,
-            onBundleAvailable: (String localBundlePath) {
-              logging.fine('Starting bundle for $device.');
-              final AndroidDevice androidDevice = device; // https://github.com/flutter/flutter/issues/1035
-              if (androidDevice.startBundle(package, localBundlePath,
-                  poke: poke,
-                  checked: argResults['checked'],
-                  traceStartup: argResults['trace-startup'],
-                  route: argResults['route'],
-                  clearLogs: clearLogs))
-                startedSomething = true;
+        await flx.buildInTempDir(
+          toolchain,
+          mainPath: mainPath,
+          onBundleAvailable: (String localBundlePath) {
+            logging.fine('Starting bundle for $device.');
+            final AndroidDevice androidDevice = device; // https://github.com/flutter/flutter/issues/1035
+            if (androidDevice.startBundle(package, localBundlePath,
+              poke: poke,
+              checked: argResults['checked'],
+              traceStartup: argResults['trace-startup'],
+              route: argResults['route'],
+              clearLogs: clearLogs
+            )) {
+              startedSomething = true;
             }
+          }
         );
       } else {
         bool result = await device.startApp(package);
