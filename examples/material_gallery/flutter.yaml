@@ -1,6 +1,12 @@
 name: material_gallery
 assets:
   - assets/flutter_logo.png
+  - assets/section_animation.png
+  - assets/section_style.png
+  - assets/section_layout.png
+  - assets/section_components.png
+  - assets/section_patterns.png
+  - assets/section_usability.png
 material-design-icons:
   - name: navigation/arrow_drop_down
   - name: navigation/arrow_forward

@@ -24,10 +24,11 @@ class GalleryDemo {
 }
 
 class GallerySection extends StatelessComponent {
-  GallerySection({ this.colors, this.title, this.demos });
+  GallerySection({ this.title, this.image, this.colors, this.demos });
 
-  final Map<int, Color> colors;
   final String title;
+  final String image;
+  final Map<int, Color> colors;
   final List<GalleryDemo> demos;
 
   void showDemo(GalleryDemo demo, BuildContext context, ThemeData theme) {
@@ -81,11 +82,27 @@ class GallerySection extends StatelessComponent {
           child: new Container(
             height: 256.0,
             margin: const EdgeDims.all(4.0),
-            padding: const EdgeDims.only(left: 16.0, bottom: 16.0),
             decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
-            child: new Align(
-              alignment: const FractionalOffset(0.0, 1.0),
-              child: new Text(title, style: theme.text.title)
+            child: new Column(
+              children: <Widget>[
+                new Flexible(
+                  child: new Padding(
+                    padding: const EdgeDims.symmetric(horizontal: 12.0),
+                    child: new AssetImage(
+                      name: image,
+                      alignment: const FractionalOffset(0.5, 0.5),
+                      fit: ImageFit.contain
+                    )
+                  )
+                ),
+                new Padding(
+                  padding: const EdgeDims.all(16.0),
+                  child: new Align(
+                    alignment: const FractionalOffset(0.0, 1.0),
+                    child: new Text(title, style: theme.text.title)
+                  )
+                )
+              ]
             )
           )
         )
@@ -113,15 +130,28 @@ class GalleryHome extends StatelessComponent {
           <Widget>[
             new Row(
               children: <Widget>[
-                new GallerySection(title: 'Animation', colors: Colors.purple),
-                new GallerySection(title: 'Style', colors: Colors.green)
+                new GallerySection(
+                  title: 'Animation',
+                  image: 'assets/section_animation.png',
+                  colors: Colors.purple
+                ),
+                new GallerySection(
+                  title: 'Style',
+                  image: 'assets/section_style.png',
+                  colors: Colors.green
+                )
               ]
             ),
             new Row(
               children: <Widget>[
-                new GallerySection(title: 'Layout', colors: Colors.pink),
+                new GallerySection(
+                  title: 'Layout',
+                  image: 'assets/section_layout.png',
+                  colors: Colors.pink
+                ),
                 new GallerySection(
                   title: 'Components',
+                  image: 'assets/section_components.png',
                   colors: Colors.amber,
                   demos: <GalleryDemo>[
                     new GalleryDemo(title: 'Modal Bottom Sheet', builder: (_) => new ModalBottomSheetDemo()),
@@ -141,8 +171,16 @@ class GalleryHome extends StatelessComponent {
             ),
             new Row(
               children: <Widget>[
-                new GallerySection(title: 'Pattern', colors: Colors.cyan),
-                new GallerySection(title: 'Usability', colors: Colors.lightGreen)
+                new GallerySection(
+                  title: 'Patterns',
+                  image: 'assets/section_patterns.png',
+                  colors: Colors.cyan
+                ),
+                new GallerySection(
+                  title: 'Usability',
+                  image: 'assets/section_usability.png',
+                  colors: Colors.lightGreen
+                )
               ]
             )
           ]
