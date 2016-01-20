@@ -312,7 +312,7 @@ class ArtifactStore {
     cacheDir.deleteSync(recursive: true);
   }
 
-  static Future populate() {
+  static Future<List<String>> populate() {
     return Future.wait(knownArtifacts.map((artifact) => getPath(artifact)));
   }
 }
