@@ -30,32 +30,41 @@ class SmoothlyResizingOverflowBox extends StatefulComponent {
 }
 
 class _SmoothlyResizingOverflowBoxState extends State<SmoothlyResizingOverflowBox> {
-  ValuePerformance<Size> _size;
+  SizeTween _sizeTween;
+  CurveTween _curveTween;
+  Animated<Size> _size;
+  AnimationController _sizeController;
 
   void initState() {
     super.initState();
-    _size = new ValuePerformance(
-      variable: new AnimatedSizeValue(config.size, curve: config.curve),
-      duration: config.duration
-    )..addListener(() {
-      setState(() {});
-    });
+    _sizeController = new AnimationController(duration: config.duration);
+    _sizeTween = new SizeTween(begin: config.size);
+    _curveTween = new CurveTween(curve: config.curve);
+    _size = _sizeTween.chain(_curveTween).animate(_sizeController)
+      ..addListener(() {
+        setState(() {});
+      });
   }
 
   void didUpdateConfig(SmoothlyResizingOverflowBox oldConfig) {
-    _size.duration = config.duration;
-    _size.variable.curve = config.curve;
+    bool needsAnimation = false;
     if (config.size != oldConfig.size) {
-      AnimatedSizeValue variable = _size.variable;
-      variable.begin = variable.value;
-      variable.end = config.size;
-      _size.progress = 0.0;
-      _size.play();
+      _sizeTween
+        ..begin = _size.value
+        ..end = config.size;
+      needsAnimation = true;
+    }
+    _sizeController.duration = config.duration;
+    _curveTween.curve = config.curve;
+    if (needsAnimation) {
+      _sizeController
+        ..value = 0.0
+        ..forward();
     }
   }
 
   void dispose() {
-    _size.stop();
+    _sizeController.stop();
     super.dispose();
   }
 

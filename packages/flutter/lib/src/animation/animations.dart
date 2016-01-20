@@ -11,7 +11,6 @@ import 'tween.dart';
 class AlwaysCompleteAnimation extends Animated<double> {
   const AlwaysCompleteAnimation();
 
-  // this performance never changes state
   void addListener(VoidCallback listener) { }
   void removeListener(VoidCallback listener) { }
   void addStatusListener(PerformanceStatusListener listener) { }
@@ -26,7 +25,6 @@ const AlwaysCompleteAnimation kAlwaysCompleteAnimation = const AlwaysCompleteAni
 class AlwaysDismissedAnimation extends Animated<double> {
   const AlwaysDismissedAnimation();
 
-  // this performance never changes state
   void addListener(VoidCallback listener) { }
   void removeListener(VoidCallback listener) { }
   void addStatusListener(PerformanceStatusListener listener) { }

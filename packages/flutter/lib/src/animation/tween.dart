@@ -100,6 +100,10 @@ abstract class Evaluatable<T> {
   Animated<T> animate(Animated<double> parent) {
     return new _AnimatedEvaluation<T>(parent, this);
   }
+
+  Evaluatable<T> chain(Evaluatable<double> parent) {
+    return new _ChainedEvaluation<T>(parent, this);
+  }
 }
 
 class _AnimatedEvaluation<T> extends Animated<T> with ProxyAnimatedMixin {
@@ -111,6 +115,31 @@ class _AnimatedEvaluation<T> extends Animated<T> with ProxyAnimatedMixin {
   final Evaluatable<T> _evaluatable;
 
   T get value => _evaluatable.evaluate(parent);
+}
+
+class AlwaysStoppedAnimation extends Animated<double> {
+  const AlwaysStoppedAnimation(this.value);
+
+  final double value;
+
+  void addListener(VoidCallback listener) { }
+  void removeListener(VoidCallback listener) { }
+  void addStatusListener(PerformanceStatusListener listener) { }
+  void removeStatusListener(PerformanceStatusListener listener) { }
+  PerformanceStatus get status => PerformanceStatus.forward;
+  AnimationDirection get direction => AnimationDirection.forward;
+}
+
+class _ChainedEvaluation<T> extends Evaluatable<T> {
+  _ChainedEvaluation(this._parent, this._evaluatable);
+
+  final Evaluatable<double> _parent;
+  final Evaluatable<T> _evaluatable;
+
+  T evaluate(Animated<double> animation) {
+    double value = _parent.evaluate(animation);
+    return _evaluatable.evaluate(new AlwaysStoppedAnimation(value));
+  }
 }
 
 class AnimationController extends Animated<double>

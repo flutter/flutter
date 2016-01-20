@@ -5,31 +5,32 @@
 import 'dart:async';
 
 import 'package:newton/newton.dart';
-import 'animated_value.dart';
 import 'curves.dart';
 import 'ticker.dart';
 
-/// A simulation that varies from [begin] to [end] over [duration] using [curve].
-///
-/// This class is an adaptor between the Simulation interface and the
-/// AnimatedValue interface.
+/// A simulation that varies from begin to end over duration using curve.
 class _TweenSimulation extends Simulation {
-  _TweenSimulation(double begin, double end, Duration duration, Curve curve)
-    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND,
-      _tween = new AnimatedValue<double>(begin, end: end, curve: curve) {
+  _TweenSimulation(this._begin, this._end, Duration duration, this._curve)
+    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
     assert(_durationInSeconds > 0.0);
-    assert(begin != null);
-    assert(end != null);
+    assert(_begin != null);
+    assert(_end != null);
   }
 
   final double _durationInSeconds;
-  final AnimatedValue<double> _tween;
+  final double _begin;
+  final double _end;
+  final Curve _curve;
 
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
-    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
-    _tween.setProgress(t, AnimationDirection.forward);
-    return _tween.value;
+    double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
+    if (t == 0.0)
+      return _begin;
+    else if (t == 1.0)
+      return _end;
+    else
+      return _begin + (_end - _begin) * _curve.transform(t);
   }
 
   double dx(double timeInSeconds) => 1.0;

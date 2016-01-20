@@ -193,24 +193,6 @@ class RotationTransition extends AnimatedComponent {
   }
 }
 
-class OldFadeTransition extends TransitionWithChild {
- OldFadeTransition({
-    Key key,
-    this.opacity,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
-
-  final AnimatedValue<double> opacity;
-
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(opacity);
-    return new Opacity(opacity: opacity.value, child: child);
-  }
-}
-
 class FadeTransition extends AnimatedComponent {
   FadeTransition({
     Key key,
@@ -226,20 +208,17 @@ class FadeTransition extends AnimatedComponent {
   }
 }
 
-class ColorTransition extends TransitionWithChild {
+class ColorTransition extends AnimatedComponent {
   ColorTransition({
     Key key,
-    this.color,
-    PerformanceView performance,
-    Widget child
-  }) : super(key: key,
-             performance: performance,
-             child: child);
+    Animated<Color> color,
+    this.child
+  }) : color = color, super(key: key, animation: color);
 
-  final AnimatedColorValue color;
+  final Animated<Color> color;
+  final Widget child;
 
-  Widget buildWithChild(BuildContext context, Widget child) {
-    performance.updateVariable(color);
+  Widget build(BuildContext context) {
     return new DecoratedBox(
       decoration: new BoxDecoration(backgroundColor: color.value),
       child: child
