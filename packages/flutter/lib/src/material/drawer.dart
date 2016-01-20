@@ -61,22 +61,22 @@ class DrawerController extends StatefulComponent {
 class DrawerControllerState extends State<DrawerController> {
   void initState() {
     super.initState();
-    _performance = new Performance(duration: _kBaseSettleDuration)
-      ..addListener(_performanceChanged)
-      ..addStatusListener(_performanceStatusChanged);
+    _controller = new AnimationController(duration: _kBaseSettleDuration)
+      ..addListener(_animationChanged)
+      ..addStatusListener(_animationStatusChanged);
   }
 
   void dispose() {
-    _performance
-      ..removeListener(_performanceChanged)
-      ..removeStatusListener(_performanceStatusChanged)
+    _controller
+      ..removeListener(_animationChanged)
+      ..removeStatusListener(_animationStatusChanged)
       ..stop();
     super.dispose();
   }
 
-  void _performanceChanged() {
+  void _animationChanged() {
     setState(() {
-      // The performance's state is our build state, and it changed already.
+      // The animation controller's state is our build state, and it changed already.
     });
   }
 
@@ -92,7 +92,7 @@ class DrawerControllerState extends State<DrawerController> {
     }
   }
 
-  void _performanceStatusChanged(PerformanceStatus status) {
+  void _animationStatusChanged(PerformanceStatus status) {
     switch (status) {
       case PerformanceStatus.forward:
         _ensureHistoryEntry();
@@ -113,7 +113,7 @@ class DrawerControllerState extends State<DrawerController> {
     close();
   }
 
-  Performance _performance;
+  AnimationController _controller;
   double _width = _kEdgeDragWidth;
 
   void _handleSizeChanged(Size newSize) {
@@ -123,20 +123,20 @@ class DrawerControllerState extends State<DrawerController> {
   }
 
   void _handlePointerDown(_) {
-    _performance.stop();
+    _controller.stop();
     _ensureHistoryEntry();
   }
 
   void _move(double delta) {
-    _performance.progress += delta / _width;
+    _controller.value += delta / _width;
   }
 
   void _settle(Offset velocity) {
-    if (_performance.isDismissed)
+    if (_controller.isDismissed)
       return;
     if (velocity.dx.abs() >= _kMinFlingVelocity) {
-      _performance.fling(velocity: velocity.dx / _width);
-    } else if (_performance.progress < 0.5) {
+      _controller.fling(velocity: velocity.dx / _width);
+    } else if (_controller.value < 0.5) {
       close();
     } else {
       open();
@@ -144,18 +144,18 @@ class DrawerControllerState extends State<DrawerController> {
   }
 
   void open() {
-    _performance.fling(velocity: 1.0);
+    _controller.fling(velocity: 1.0);
   }
 
   void close() {
-    _performance.fling(velocity: -1.0);
+    _controller.fling(velocity: -1.0);
   }
 
-  final AnimatedColorValue _color = new AnimatedColorValue(Colors.transparent, end: Colors.black54);
+  final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
   Widget build(BuildContext context) {
-    if (_performance.status == PerformanceStatus.dismissed) {
+    if (_controller.status == PerformanceStatus.dismissed) {
       return new Align(
         alignment: const FractionalOffset(0.0, 0.5),
         child: new GestureDetector(
@@ -167,7 +167,6 @@ class DrawerControllerState extends State<DrawerController> {
         )
       );
     } else {
-      _performance.updateVariable(_color);
       return new GestureDetector(
         key: _gestureDetectorKey,
         onHorizontalDragUpdate: _move,
@@ -179,7 +178,7 @@ class DrawerControllerState extends State<DrawerController> {
                 onTap: close,
                 child: new DecoratedBox(
                   decoration: new BoxDecoration(
-                    backgroundColor: _color.value
+                    backgroundColor: _color.evaluate(_controller)
                   ),
                   child: new Container()
                 )
@@ -190,7 +189,7 @@ class DrawerControllerState extends State<DrawerController> {
                   onPointerDown: _handlePointerDown,
                   child: new Align(
                     alignment: const FractionalOffset(1.0, 0.5),
-                    widthFactor: _performance.progress,
+                    widthFactor: _controller.value,
                     child: new SizeObserver(
                       onSizeChanged: _handleSizeChanged,
                       child: new RepaintBoundary(
