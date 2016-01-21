@@ -159,6 +159,11 @@ void FirebaseImpl::AuthWithOAuthToken(
   }];
 }
 
+void FirebaseImpl::SetValue(const mojo::String& jsonValue) {
+  // TODO(jackson): JSON deserialization
+  [client_ setValue:@(jsonValue.data())];
+}
+
 void FirebaseFactory::Create(
     mojo::ApplicationConnection* connection,
     mojo::InterfaceRequest<::firebase::Firebase> request) {

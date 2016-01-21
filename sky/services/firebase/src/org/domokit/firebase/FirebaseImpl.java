@@ -7,11 +7,17 @@ package org.domokit.firebase;
 import android.content.Context;
 import android.util.Log;
 
-import java.io.IOException;
-
+import com.firebase.client.AuthData;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Firebase.AuthResultHandler;
-import com.firebase.client.AuthData;
+import com.firebase.client.Firebase.CompletionListener;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.chromium.mojo.bindings.ConnectionErrorHandler;
 import org.chromium.mojo.bindings.InterfaceRequest;
@@ -20,6 +26,10 @@ import org.chromium.mojom.firebase.DataSnapshot;
 import org.chromium.mojom.firebase.EventType;
 import org.chromium.mojom.firebase.Firebase;
 import org.chromium.mojom.firebase.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     private static final String TAG = "FirebaseImpl";
@@ -149,27 +159,86 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
             responseCopy.call(null, mojoAuthData);
           }
           public void onAuthenticationError(FirebaseError error) {
-            org.chromium.mojom.firebase.Error mojoError =
-              new org.chromium.mojom.firebase.Error();
-            mojoError.code = error.getCode();
-            mojoError.message = error.getMessage();
-            responseCopy.call(mojoError, null);
+            responseCopy.call(toMojoError(error), null);
           }
         });
+    }
+
+    @Override
+    public void setValue(String jsonValue, SetValueResponse response) {
+        final SetValueResponse responseCopy = response;
+        try {
+          JSONObject root = new JSONObject(jsonValue);
+          Object value = toMap(root).get("value");
+          mClient.setValue(value, null, new CompletionListener() {
+              @Override
+              public void onComplete(FirebaseError error, com.firebase.client.Firebase ref) {
+                  responseCopy.call(toMojoError(error));
+              }
+          });
+        } catch(JSONException e) {
+          org.chromium.mojom.firebase.Error mojoError =
+            new org.chromium.mojom.firebase.Error();
+          mojoError.code = -1;
+          mojoError.message = "setValue JSONException";
+          Log.e(TAG, "setValue JSONException", e);
+          responseCopy.call(mojoError);
+        }
     }
 
     DataSnapshot toMojoSnapshot(com.firebase.client.DataSnapshot snapshot) {
         DataSnapshot mojoSnapshot = new DataSnapshot();
         mojoSnapshot.key = snapshot.getKey();
-        mojoSnapshot.value = (String)snapshot.getValue();
+        try {
+          JSONObject jsonObject = new JSONObject();
+          jsonObject.put("value", snapshot.getValue());
+          mojoSnapshot.jsonValue = jsonObject.toString();
+        } catch (JSONException e) {
+          Log.e(TAG, "toMojoSnapshot JSONException", e);
+        }
         return mojoSnapshot;
     }
 
     org.chromium.mojom.firebase.Error toMojoError(FirebaseError error) {
+        if (error == null)
+          return null;
         org.chromium.mojom.firebase.Error mojoError =
           new org.chromium.mojom.firebase.Error();
         mojoError.code = error.getCode();
         mojoError.message = error.getMessage();
         return mojoError;
+    }
+
+    // public domain code from https://gist.github.com/codebutler/2339666
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    static Map<String, Object> toMap(JSONObject object) throws JSONException {
+        Map<String, Object> map = new HashMap();
+        Iterator keys = object.keys();
+        while (keys.hasNext()) {
+            String key = (String) keys.next();
+            map.put(key, fromJson(object.get(key)));
+        }
+        return map;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    static List toList(JSONArray array) throws JSONException {
+        List list = new ArrayList();
+        for (int i = 0; i < array.length(); i++) {
+            list.add(fromJson(array.get(i)));
+        }
+        return list;
+    }
+
+    static Object fromJson(Object json) throws JSONException {
+        if (json == JSONObject.NULL) {
+            return null;
+        } else if (json instanceof JSONObject) {
+            return toMap((JSONObject) json);
+        } else if (json instanceof JSONArray) {
+            return toList((JSONArray) json);
+        } else {
+            return json;
+        }
     }
 }
