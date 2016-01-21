@@ -110,6 +110,10 @@ class AnimationController extends Animation<double>
     _ticker.stop();
   }
 
+  void dispose() {
+    stop();
+  }
+
   /// Flings the timeline with an optional force (defaults to a critically
   /// damped spring) and initial velocity. If velocity is positive, the
   /// animation will complete, otherwise it will dismiss.
