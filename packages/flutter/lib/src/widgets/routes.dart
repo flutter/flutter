@@ -177,7 +177,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   void _updateForwardAnimation(Route nextRoute) {
     if (nextRoute is TransitionRoute && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
-      Animation<double> current = _forwardAnimation.masterAnimation;
+      Animation<double> current = _forwardAnimation.parent;
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
@@ -185,22 +185,22 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
             current.currentTrain,
             nextRoute.animation,
             onSwitchedTrain: () {
-              assert(_forwardAnimation.masterAnimation == newAnimation);
+              assert(_forwardAnimation.parent == newAnimation);
               assert(newAnimation.currentTrain == nextRoute.animation);
-              _forwardAnimation.masterAnimation = newAnimation.currentTrain;
+              _forwardAnimation.parent = newAnimation.currentTrain;
               newAnimation.dispose();
             }
           );
-          _forwardAnimation.masterAnimation = newAnimation;
+          _forwardAnimation.parent = newAnimation;
           current.dispose();
         } else {
-          _forwardAnimation.masterAnimation = new TrainHoppingAnimation(current, nextRoute.animation);
+          _forwardAnimation.parent = new TrainHoppingAnimation(current, nextRoute.animation);
         }
       } else {
-        _forwardAnimation.masterAnimation = nextRoute.animation;
+        _forwardAnimation.parent = nextRoute.animation;
       }
     } else {
-      _forwardAnimation.masterAnimation = kAlwaysDismissedAnimation;
+      _forwardAnimation.parent = kAlwaysDismissedAnimation;
     }
   }
 

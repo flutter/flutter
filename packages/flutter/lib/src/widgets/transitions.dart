@@ -175,9 +175,8 @@ class RelativeRectTween extends Tween<RelativeRect> {
 }
 
 /// Animated version of [Positioned] which takes a specific
-/// [AnimatedRelativeRectValue] and a [PerformanceView] to transition the
-/// child's position from a start position to and end position over the lifetime
-/// of the performance.
+/// [Animation<RelativeRect>] to transition the child's position from a start
+/// position to and end position over the lifetime of the animation.
 ///
 /// Only works if it's the child of a [Stack].
 class PositionedTransition extends AnimatedComponent {
