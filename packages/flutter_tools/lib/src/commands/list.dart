@@ -49,9 +49,9 @@ class ListCommand extends FlutterCommand {
       }
     }
 
-    if (details) {
+    if (details)
       print('iOS Simulators:');
-    }
+
     for (IOSSimulator device in IOSSimulator.getAttachedDevices(devices.iOSSimulator)) {
       if (details) {
         print('${device.id}\t${device.name}');
