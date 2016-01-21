@@ -302,7 +302,7 @@ class ApkCommand extends FlutterCommand {
       await downloadToolchain();
 
       // Find the path to the main Dart file.
-      String mainPath = StartCommandBase.findMainDartFile(argResults['target']);
+      String mainPath = findMainDartFile(argResults['target']);
 
       // Build the FLX.
       int result;

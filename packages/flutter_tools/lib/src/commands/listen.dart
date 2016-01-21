@@ -34,7 +34,17 @@ class ListenCommand extends StartCommandBase {
     bool firstTime = true;
     do {
       logging.info('Updating running Flutter apps...');
-      result = await startApp(install: firstTime, stop: true);
+      result = await startApp(
+        devices,
+        applicationPackages,
+        toolchain,
+        target: argResults['target'],
+        install: firstTime,
+        stop: true,
+        checked: argResults['checked'],
+        traceStartup: argResults['trace-startup'],
+        route: argResults['route']
+      );
       firstTime = false;
     } while (!singleRun && result == 0 && _watchDirectory(watchCommand));
     return 0;

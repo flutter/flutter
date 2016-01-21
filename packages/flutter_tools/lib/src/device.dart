@@ -310,7 +310,7 @@ class IOSSimulator extends Device {
     String output = runCheckedSync([xcrunPath, 'simctl', 'list', 'devices']);
 
     Match match;
-    /// iPhone 6s Plus (8AC808E1-6BAE-4153-BBC5-77F83814D414) (Booted)
+    // iPhone 6s Plus (8AC808E1-6BAE-4153-BBC5-77F83814D414) (Booted)
     Iterable<Match> matches = new RegExp(
       r'[\W]*(.*) \(([^\)]+)\) \(Booted\)',
       multiLine: true

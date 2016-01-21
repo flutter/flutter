@@ -11,9 +11,11 @@ import '../base/logging.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 import 'start.dart';
-import 'stop.dart';
+import 'stop.dart' as stop;
 
 const String protocolVersion = '0.0.2';
+
+// TODO(devoncarew): Pass logging data back to the client.
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -132,6 +134,8 @@ abstract class Domain {
     _handlers[name] = handler;
   }
 
+  FlutterCommand get command => daemon.daemonCommand;
+
   String toString() => name;
 
   void handleCommand(String name, dynamic id, dynamic args) {
@@ -190,17 +194,23 @@ class AppDomain extends Domain {
     registerHandler('stopAll', stopAll);
   }
 
-  Future<dynamic> start(dynamic args) {
+  Future<dynamic> start(dynamic args) async {
     // TODO: Add the ability to pass args: target, http, checked
-    StartCommand startComand = new StartCommand();
-    startComand.inheritFromParent(daemon.daemonCommand);
-    return startComand.runInProject().then((_) => null);
+
+    await Future.wait([
+      command.downloadToolchain(),
+      command.downloadApplicationPackagesAndConnectToDevices(),
+    ], eagerError: true);
+
+    return startApp(
+      command.devices,
+      command.applicationPackages,
+      command.toolchain
+    ).then((int result) => null);
   }
 
   Future<bool> stopAll(dynamic args) {
-    StopCommand stopCommand = new StopCommand();
-    stopCommand.inheritFromParent(daemon.daemonCommand);
-    return stopCommand.stop();
+    return stop.stopAll(command.devices, command.applicationPackages);
   }
 }
 
