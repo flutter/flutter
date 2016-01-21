@@ -64,8 +64,8 @@ abstract class ProxyAnimatedMixin {
 class ProxyAnimation extends Animation<double>
   with LazyListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
   ProxyAnimation([Animation<double> animation]) {
-    _masterAnimation = animation;
-    if (_masterAnimation == null) {
+    _parent = animation;
+    if (_parent == null) {
       _status = AnimationStatus.dismissed;
       _direction = AnimationDirection.forward;
       _value = 0.0;
@@ -76,26 +76,26 @@ class ProxyAnimation extends Animation<double>
   AnimationDirection _direction;
   double _value;
 
-  Animation<double> get masterAnimation => _masterAnimation;
-  Animation<double> _masterAnimation;
-  void set masterAnimation(Animation<double> value) {
-    if (value == _masterAnimation)
+  Animation<double> get parent => _parent;
+  Animation<double> _parent;
+  void set parent(Animation<double> value) {
+    if (value == _parent)
       return;
-    if (_masterAnimation != null) {
-      _status = _masterAnimation.status;
-      _direction = _masterAnimation.direction;
-      _value = _masterAnimation.value;
+    if (_parent != null) {
+      _status = _parent.status;
+      _direction = _parent.direction;
+      _value = _parent.value;
       if (isListening)
         didStopListening();
     }
-    _masterAnimation = value;
-    if (_masterAnimation != null) {
+    _parent = value;
+    if (_parent != null) {
       if (isListening)
         didStartListening();
-      if (_value != _masterAnimation.value)
+      if (_value != _parent.value)
         notifyListeners();
-      if (_status != _masterAnimation.status)
-        notifyStatusListeners(_masterAnimation.status);
+      if (_status != _parent.status)
+        notifyStatusListeners(_parent.status);
       _status = null;
       _direction = null;
       _value = null;
@@ -103,54 +103,54 @@ class ProxyAnimation extends Animation<double>
   }
 
   void didStartListening() {
-    if (_masterAnimation != null) {
-      _masterAnimation.addListener(notifyListeners);
-      _masterAnimation.addStatusListener(notifyStatusListeners);
+    if (_parent != null) {
+      _parent.addListener(notifyListeners);
+      _parent.addStatusListener(notifyStatusListeners);
     }
   }
 
   void didStopListening() {
-    if (_masterAnimation != null) {
-      _masterAnimation.removeListener(notifyListeners);
-      _masterAnimation.removeStatusListener(notifyStatusListeners);
+    if (_parent != null) {
+      _parent.removeListener(notifyListeners);
+      _parent.removeStatusListener(notifyStatusListeners);
     }
   }
 
-  AnimationStatus get status => _masterAnimation != null ? _masterAnimation.status : _status;
-  AnimationDirection get direction => _masterAnimation != null ? _masterAnimation.direction : _direction;
-  double get value => _masterAnimation != null ? _masterAnimation.value : _value;
+  AnimationStatus get status => _parent != null ? _parent.status : _status;
+  AnimationDirection get direction => _parent != null ? _parent.direction : _direction;
+  double get value => _parent != null ? _parent.value : _value;
 }
 
 class ReverseAnimation extends Animation<double>
   with LazyListenerMixin, LocalPerformanceStatusListenersMixin {
-  ReverseAnimation(this.masterAnimation);
+  ReverseAnimation(this.parent);
 
-  final Animation<double> masterAnimation;
+  final Animation<double> parent;
 
   void addListener(VoidCallback listener) {
     didRegisterListener();
-    masterAnimation.addListener(listener);
+    parent.addListener(listener);
   }
   void removeListener(VoidCallback listener) {
-    masterAnimation.removeListener(listener);
+    parent.removeListener(listener);
     didUnregisterListener();
   }
 
   void didStartListening() {
-    masterAnimation.addStatusListener(_statusChangeHandler);
+    parent.addStatusListener(_statusChangeHandler);
   }
 
   void didStopListening() {
-    masterAnimation.removeStatusListener(_statusChangeHandler);
+    parent.removeStatusListener(_statusChangeHandler);
   }
 
   void _statusChangeHandler(AnimationStatus status) {
     notifyStatusListeners(_reverseStatus(status));
   }
 
-  AnimationStatus get status => _reverseStatus(masterAnimation.status);
-  AnimationDirection get direction => _reverseDirection(masterAnimation.direction);
-  double get value => 1.0 - masterAnimation.value;
+  AnimationStatus get status => _reverseStatus(parent.status);
+  AnimationDirection get direction => _reverseDirection(parent.direction);
+  double get value => 1.0 - parent.value;
 
   AnimationStatus _reverseStatus(AnimationStatus status) {
     switch (status) {
