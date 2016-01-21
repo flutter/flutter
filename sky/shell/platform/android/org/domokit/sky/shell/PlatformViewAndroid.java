@@ -6,6 +6,7 @@ package org.domokit.sky.shell;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -14,6 +15,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.WindowInsets;
 
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.InterfaceRequest;
@@ -51,47 +53,24 @@ public class PlatformViewAndroid extends SurfaceView {
     private SkyEngine.Proxy mSkyEngine;
     private PlatformServiceProvider mServiceProvider;
     private final SurfaceHolder.Callback mSurfaceCallback;
-    private final EdgeDims mPadding;
+    private final ViewportMetrics mMetrics;
     private final KeyboardServiceState mKeyboardState;
     private final RawKeyboardServiceState mRawKeyboardState;
 
-    /**
-     * Dimensions in each of the four cardinal directions.
-     */
-    public static class EdgeDims {
-        public double top = 0.0;
-        public double right = 0.0;
-        public double bottom = 0.0;
-        public double left = 0.0;
-    }
-
-    public PlatformViewAndroid(Context context, EdgeDims padding) {
+    public PlatformViewAndroid(Context context) {
         super(context);
-        mPadding = padding;
 
+        mMetrics = new ViewportMetrics();
+        mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;
         setFocusable(true);
         setFocusableInTouchMode(true);
 
         attach();
         assert mNativePlatformView != 0;
 
-        final float density = context.getResources().getDisplayMetrics().density;
-
         mSurfaceCallback = new SurfaceHolder.Callback() {
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                assert mSkyEngine != null;
-                ViewportMetrics metrics = new ViewportMetrics();
-                metrics.physicalWidth = width;
-                metrics.physicalHeight = height;
-                metrics.devicePixelRatio = density;
-                if (mPadding != null) {
-                    metrics.paddingTop = mPadding.top;
-                    metrics.paddingRight = mPadding.right;
-                    metrics.paddingBottom = mPadding.bottom;
-                    metrics.paddingLeft = mPadding.left;
-                }
-                mSkyEngine.onViewportMetricsChanged(metrics);
             }
 
             @Override
@@ -135,15 +114,6 @@ public class PlatformViewAndroid extends SurfaceView {
         getHolder().removeCallback(mSurfaceCallback);
         nativeDetach(mNativePlatformView);
         mNativePlatformView = 0;
-    }
-
-    @Override
-    protected void onWindowVisibilityChanged(int visibility) {
-        super.onWindowVisibilityChanged(visibility);
-        if (visibility == View.VISIBLE) {
-            requestFocusFromTouch();
-            requestFocus();
-        }
     }
 
     @Override
@@ -255,6 +225,24 @@ public class PlatformViewAndroid extends SurfaceView {
         mSkyEngine.onPointerPacket(packet);
 
         return true;
+    }
+
+    @Override
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        mMetrics.physicalWidth = width;
+        mMetrics.physicalHeight = height;
+        mSkyEngine.onViewportMetricsChanged(mMetrics);
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+    }
+
+    @Override
+    public final WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        mMetrics.physicalPaddingTop = insets.getSystemWindowInsetTop();
+        mMetrics.physicalPaddingRight = insets.getSystemWindowInsetRight();
+        mMetrics.physicalPaddingBottom = insets.getSystemWindowInsetBottom();
+        mMetrics.physicalPaddingLeft = insets.getSystemWindowInsetLeft();
+        mSkyEngine.onViewportMetricsChanged(mMetrics);
+        return super.onApplyWindowInsets(insets);
     }
 
     private void configureLocalServices(ServiceRegistry registry) {

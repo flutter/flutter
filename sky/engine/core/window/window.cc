@@ -54,19 +54,15 @@ void Window::UpdateWindowMetrics(const SkyDisplayMetrics& metrics) {
   if (!dart_state)
     return;
   DartState::Scope scope(dart_state);
-
   double device_pixel_ratio = metrics.device_pixel_ratio;
-  double width = metrics.physical_size.width / device_pixel_ratio;
-  double height = metrics.physical_size.height / device_pixel_ratio;
-
   DartInvokeField(library_.value(), "_updateWindowMetrics", {
     ToDart(device_pixel_ratio),
-    ToDart(width),
-    ToDart(height),
-    ToDart(metrics.padding_top),
-    ToDart(metrics.padding_right),
-    ToDart(metrics.padding_bottom),
-    ToDart(metrics.padding_left),
+    ToDart(metrics.physical_size.width / device_pixel_ratio),
+    ToDart(metrics.physical_size.height / device_pixel_ratio),
+    ToDart(metrics.physical_padding_top / device_pixel_ratio),
+    ToDart(metrics.physical_padding_right / device_pixel_ratio),
+    ToDart(metrics.physical_padding_bottom / device_pixel_ratio),
+    ToDart(metrics.physical_padding_left / device_pixel_ratio),
   });
 }
 

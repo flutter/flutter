@@ -132,11 +132,11 @@ static std::string TracesBasePath() {
   CGFloat scale = [UIScreen mainScreen].scale;
 
   sky::ViewportMetricsPtr metrics = sky::ViewportMetrics::New();
+  metrics->device_pixel_ratio = scale;
   metrics->physical_width = size.width * scale;
   metrics->physical_height = size.height * scale;
-  metrics->device_pixel_ratio = scale;
-  metrics->padding_top =
-      [UIApplication sharedApplication].statusBarFrame.size.height;
+  metrics->physical_padding_top =
+      [UIApplication sharedApplication].statusBarFrame.size.height * scale;
 
   _sky_engine->OnViewportMetricsChanged(metrics.Pass());
 }

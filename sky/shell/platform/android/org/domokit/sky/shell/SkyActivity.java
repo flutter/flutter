@@ -9,7 +9,9 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 
 import org.chromium.base.PathUtils;
@@ -57,23 +59,18 @@ public class SkyActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        PlatformViewAndroid.EdgeDims edgeDims = new PlatformViewAndroid.EdgeDims();
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            getWindow().setStatusBarColor(0x40000000);
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(0x40000000);
+            window.getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
-        // TODO(abarth): We should get this value from the Android framework somehow.
-        edgeDims.top = 25.0;
-        // TODO(abarth): Unclear if we want to use fullscreen if we don't have
-        // a transparent system bar.
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         String[] args = getArgsFromIntent(getIntent());
         SkyMain.ensureInitialized(getApplicationContext(), args);
-        mView = new PlatformViewAndroid(this, edgeDims);
+        mView = new PlatformViewAndroid(this);
         ActivityImpl.setCurrentActivity(this);
         setContentView(mView);
         mTracingController = new TracingController(this);
@@ -175,7 +172,7 @@ public class SkyActivity extends Activity {
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
-	super.onConfigurationChanged(newConfig);
+    	super.onConfigurationChanged(newConfig);
 
         Locale locale = getResources().getConfiguration().locale;
         mView.getEngine().onLocaleChanged(locale.getLanguage(),

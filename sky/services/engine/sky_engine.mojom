@@ -17,13 +17,13 @@ enum AppLifecycleState {
 };
 
 struct ViewportMetrics {
+  float device_pixel_ratio = 1.0;
   int32 physical_width;
   int32 physical_height;
-  float device_pixel_ratio = 1.0;
-  double padding_top;
-  double padding_right;
-  double padding_bottom;
-  double padding_left;
+  int32 physical_padding_top;
+  int32 physical_padding_right;
+  int32 physical_padding_bottom;
+  int32 physical_padding_left;
 };
 
 struct ServicesData {
