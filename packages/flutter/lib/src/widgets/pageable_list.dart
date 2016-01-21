@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'scroll_behavior.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 

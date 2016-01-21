@@ -5,10 +5,10 @@
 import 'dart:math' as math;
 
 import 'framework.dart';
+import 'scroll_behavior.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
 class ScrollableList extends Scrollable {
