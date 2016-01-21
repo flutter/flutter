@@ -14,7 +14,7 @@ import 'framework.dart';
 
 class BindingObserver {
   bool didPopRoute() => false;
-  void didChangeSize(Size size) { }
+  void didChangeMetrics() { }
   void didChangeLocale(ui.Locale locale) { }
   void didChangeAppLifecycleState(ui.AppLifecycleState state) { }
 }
@@ -62,7 +62,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Rendere
   void handleMetricsChanged() {
     super.handleMetricsChanged();
     for (BindingObserver observer in _observers)
-      observer.didChangeSize(ui.window.size);
+      observer.didChangeMetrics(ui.window.size);
   }
 
   void handleLocaleChanged() {
