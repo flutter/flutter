@@ -236,6 +236,7 @@ class StockHomeState extends State<StockHome> {
       ),
       center: new Input(
         key: searchFieldKey,
+        autofocus: true,
         placeholder: 'Search stocks',
         onChanged: _handleSearchQueryChanged
       ),
@@ -252,6 +253,7 @@ class StockHomeState extends State<StockHome> {
           children: <Widget>[
             new Input(
               key: companyNameKey,
+              autofocus: true,
               placeholder: 'Company Name'
             ),
           ]

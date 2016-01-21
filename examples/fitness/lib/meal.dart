@@ -89,6 +89,7 @@ class MealFragmentState extends State<MealFragment> {
         new Text(meal.displayDate),
         new Input(
           key: descriptionKey,
+          autofocus: true,
           placeholder: 'Describe meal',
           onChanged: _handleDescriptionChanged
         ),

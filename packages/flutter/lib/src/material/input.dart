@@ -12,6 +12,7 @@ import 'theme.dart';
 export 'package:flutter/rendering.dart' show ValueChanged;
 export 'package:flutter/services.dart' show KeyboardType;
 
+/// A material design text input widget.
 class Input extends Scrollable {
   Input({
     GlobalKey key,
@@ -19,6 +20,7 @@ class Input extends Scrollable {
     this.placeholder,
     this.hideText: false,
     this.isDense: false,
+    this.autofocus: false,
     this.onChanged,
     this.keyboardType: KeyboardType.text,
     this.onSubmitted
@@ -30,12 +32,28 @@ class Input extends Scrollable {
     assert(key != null);
   }
 
+  /// Initial editable text for the widget.
   final String initialValue;
+
+  /// The type of keyboard to use for editing the text.
   final KeyboardType keyboardType;
+
+  /// Hint text to show when the widget doesn't contain editable text.
   final String placeholder;
+
+  /// Whether to hide the text being edited (e.g., for passwords).
   final bool hideText;
+
+  /// Whether the input widget is part of a dense form (i.e., uses less vertical space).
   final bool isDense;
+
+  /// Whether this input widget should focus itself is nothing else is already focused.
+  final bool autofocus;
+
+  /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
+
+  /// Called when the user indicates that they are done editing the text in the widget.
   final ValueChanged<String> onSubmitted;
 
   InputState createState() => new InputState();
@@ -79,7 +97,7 @@ class InputState extends ScrollableState<Input> {
   Widget buildContent(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
-    bool focused = Focus.at(context);
+    bool focused = Focus.at(context, autofocus: config.autofocus);
 
     if (focused && !_keyboardHandle.attached) {
       _keyboardHandle = keyboard.show(_editableValue.stub, config.keyboardType);

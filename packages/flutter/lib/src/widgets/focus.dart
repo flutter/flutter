@@ -84,7 +84,7 @@ class Focus extends StatefulComponent {
 
   static GlobalKey debugOnlyFocusedKey;
 
-  static bool at(BuildContext context, { bool autofocus: true }) {
+  static bool at(BuildContext context, { bool autofocus: false }) {
     assert(context != null);
     assert(context.widget != null);
     assert(context.widget.key != null);
@@ -109,7 +109,7 @@ class Focus extends StatefulComponent {
     return true;
   }
 
-  static bool _atScope(BuildContext context, { bool autofocus: true }) {
+  static bool _atScope(BuildContext context, { bool autofocus: false }) {
     assert(context != null);
     assert(context.widget != null);
     assert(context.widget is Focus);
@@ -126,7 +126,7 @@ class Focus extends StatefulComponent {
 
   /// Focuses a particular widget, identified by its GlobalKey.
   /// The widget must be in the widget tree.
-  /// 
+  ///
   /// Don't call moveTo() from your build() functions, it's intended to be
   /// called from event listeners, e.g. in response to a finger tap or tab key.
   static void moveTo(GlobalKey key) {
@@ -138,7 +138,7 @@ class Focus extends StatefulComponent {
 
   /// Focuses a particular focus scope, identified by its GlobalKey. The widget
   /// must be in the widget tree.
-  /// 
+  ///
   /// Don't call moveScopeTo() from your build() functions, it's intended to be
   /// called from event listeners, e.g. in response to a finger tap or tab key.
   static void moveScopeTo(GlobalKey key) {

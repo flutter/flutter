@@ -141,6 +141,7 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
           ),
           new Input(
             key: weightKey,
+            autofocus: true,
             placeholder: 'Enter weight',
             keyboardType: KeyboardType.number,
             onChanged: _handleWeightChanged
