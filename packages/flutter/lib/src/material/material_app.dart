@@ -68,17 +68,24 @@ class MaterialApp extends StatefulComponent {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
+EdgeDims _getPadding(ui.Window window) {
+  ui.WindowPadding padding = ui.window.padding;
+  return new EdgeDims.TRBL(padding.top, padding.right, padding.bottom, padding.left);
+}
+
 class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
 
   GlobalObjectKey _navigator;
 
   Size _size;
+  EdgeDims _padding;
   LocaleQueryData _localeData;
 
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
     _size = ui.window.size;
+    _padding = _getPadding(ui.window);
     didChangeLocale(ui.window.locale);
     WidgetFlutterBinding.instance.addObserver(this);
   }
@@ -99,7 +106,12 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     return result;
   }
 
-  void didChangeSize(Size size) => setState(() { _size = size; });
+  void didChangeSize(Size size) {
+    setState(() {
+      _size = size;
+      _padding = _getPadding(ui.window);
+    });
+  }
 
   void didChangeLocale(ui.Locale locale) {
     if (config.onLocaleChanged != null) {
@@ -138,7 +150,7 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
 
     ThemeData theme = config.theme ?? new ThemeData.fallback();
     Widget result = new MediaQuery(
-      data: new MediaQueryData(size: _size),
+      data: new MediaQueryData(size: _size, padding: _padding),
       child: new LocaleQuery(
         data: _localeData,
         child: new AnimatedTheme(

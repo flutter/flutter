@@ -5,18 +5,17 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet.dart';
+import 'drawer.dart';
+import 'icon_button.dart';
 import 'material.dart';
 import 'snack_bar.dart';
 import 'tool_bar.dart';
-import 'drawer.dart';
-import 'icon_button.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 400);
@@ -31,6 +30,10 @@ enum _ScaffoldSlot {
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
+  _ScaffoldLayout({ this.padding });
+
+  final EdgeDims padding;
+
   void performLayout(Size size, BoxConstraints constraints) {
 
     BoxConstraints looseConstraints = constraints.loosen();
@@ -41,18 +44,19 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the toolbar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    Size toolBarSize = Size.zero;
+    double contentTop = padding.top;
+    double contentBottom = size.height - padding.bottom;
 
     if (isChild(_ScaffoldSlot.toolBar)) {
-      toolBarSize = layoutChild(_ScaffoldSlot.toolBar, fullWidthConstraints);
+      contentTop = layoutChild(_ScaffoldSlot.toolBar, fullWidthConstraints).height;
       positionChild(_ScaffoldSlot.toolBar, Offset.zero);
     }
 
     if (isChild(_ScaffoldSlot.body)) {
-      final double bodyHeight = size.height - toolBarSize.height;
+      final double bodyHeight = contentBottom - contentTop;
       final BoxConstraints bodyConstraints = fullWidthConstraints.tighten(height: bodyHeight);
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
-      positionChild(_ScaffoldSlot.body, new Offset(0.0, toolBarSize.height));
+      positionChild(_ScaffoldSlot.body, new Offset(0.0, contentTop));
     }
 
     // The BottomSheet and the SnackBar are anchored to the bottom of the parent,
@@ -69,22 +73,22 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (isChild(_ScaffoldSlot.bottomSheet)) {
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints);
-      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, size.height - bottomSheetSize.height));
+      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
     }
 
     if (isChild(_ScaffoldSlot.snackBar)) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
-      positionChild(_ScaffoldSlot.snackBar, new Offset(0.0, size.height - snackBarSize.height));
+      positionChild(_ScaffoldSlot.snackBar, new Offset(0.0, contentBottom - snackBarSize.height));
     }
 
     if (isChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
-      double fabY = size.height - fabSize.height - _kFloatingActionButtonMargin;
+      double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
       if (snackBarSize.height > 0.0)
-        fabY = math.min(fabY, size.height - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
+        fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
       if (bottomSheetSize.height > 0.0)
-        fabY = math.min(fabY, size.height - bottomSheetSize.height - fabSize.height / 2.0);
+        fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
       positionChild(_ScaffoldSlot.floatingActionButton, new Offset(fabX, fabY));
     }
 
@@ -94,7 +98,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
   }
 
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => false;
+  bool shouldRelayout(_ScaffoldLayout oldDelegate) {
+    return padding != oldDelegate.padding;
+  }
 }
 
 class _FloatingActionButtonTransition extends StatefulComponent {
@@ -329,11 +335,11 @@ class ScaffoldState extends State<Scaffold> {
 
   bool _shouldShowBackArrow;
 
-  Widget get _modifiedToolBar {
+  Widget _getModifiedToolBar(EdgeDims padding) {
     ToolBar toolBar = config.toolBar;
     if (toolBar == null)
       return null;
-    EdgeDims padding = new EdgeDims.only(top: ui.window.padding.top);
+    EdgeDims toolBarPadding = new EdgeDims.only(top: padding.top);
     Widget left = toolBar.left;
     if (left == null) {
       if (config.drawer != null) {
@@ -354,13 +360,13 @@ class ScaffoldState extends State<Scaffold> {
       }
     }
     return toolBar.copyWith(
-      padding: padding,
+      padding: toolBarPadding,
       left: left
     );
   }
 
   Widget build(BuildContext context) {
-    final Widget materialBody = config.body != null ? new Material(child: config.body) : null;
+    EdgeDims padding = MediaQuery.of(context).padding;
 
     if (_snackBars.length > 0) {
       ModalRoute route = ModalRoute.of(context);
@@ -373,9 +379,9 @@ class ScaffoldState extends State<Scaffold> {
       }
     }
 
-    final List<LayoutId>children = new List<LayoutId>();
-    _addIfNonNull(children, materialBody, _ScaffoldSlot.body);
-    _addIfNonNull(children, _modifiedToolBar, _ScaffoldSlot.toolBar);
+    final List<LayoutId> children = new List<LayoutId>();
+    _addIfNonNull(children, config.body, _ScaffoldSlot.body);
+    _addIfNonNull(children, _getModifiedToolBar(padding), _ScaffoldSlot.toolBar);
 
     if (_currentBottomSheet != null ||
         (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)) {
@@ -412,7 +418,14 @@ class ScaffoldState extends State<Scaffold> {
       ));
     }
 
-    return new CustomMultiChildLayout(children: children, delegate: new _ScaffoldLayout());
+    return new Material(
+      child: new CustomMultiChildLayout(
+        children: children,
+        delegate: new _ScaffoldLayout(
+          padding: padding
+        )
+      )
+    );
   }
 }
 
