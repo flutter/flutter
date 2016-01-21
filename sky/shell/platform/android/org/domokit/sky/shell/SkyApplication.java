@@ -5,7 +5,15 @@
 package org.domokit.sky.shell;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.util.Log;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import org.chromium.base.BaseChromiumApplication;
 import org.chromium.base.library_loader.LibraryLoader;
@@ -35,6 +43,7 @@ import org.domokit.vsync.VSyncProviderImpl;
 public class SkyApplication extends BaseChromiumApplication {
     static final String APP_BUNDLE = "app.flx";
     static final String MANIFEST = "flutter.yaml";
+    static final String SERVICES = "services.json";
 
     private static final String TAG = "SkyApplication";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
@@ -67,6 +76,8 @@ public class SkyApplication extends BaseChromiumApplication {
       * Override this function to register more services.
       */
     protected void onServiceRegistryAvailable(ServiceRegistry registry) {
+        parseServicesConfig(registry);
+
         registry.register(Activity.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
@@ -115,6 +126,55 @@ public class SkyApplication extends BaseChromiumApplication {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 VSyncProvider.MANAGER.bind(new VSyncProviderImpl(pipe), pipe);
+            }
+        });
+    }
+
+    /**
+     * Parses the auto-generated services.json file, which contains additional services to register.
+     */
+    private void parseServicesConfig(ServiceRegistry registry) {
+        final AssetManager manager = getResources().getAssets();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(manager.open(SERVICES)))) {
+            StringBuffer json = new StringBuffer();
+            while (true) {
+              String line = reader.readLine();
+              if (line == null)
+                  break;
+              json.append(line);
+            }
+
+            JSONObject object = (JSONObject) new JSONTokener(json.toString()).nextValue();
+            JSONArray services = object.getJSONArray("services");
+            for (int i = 0; i < services.length(); ++i) {
+                JSONObject service = services.getJSONObject(i);
+                String serviceName = service.getString("name");
+                String className = service.getString("class");
+                registerService(registry, serviceName, className);
+            }
+        } catch (FileNotFoundException e) {
+            // Not all apps will have a services.json file.
+            return;
+        } catch (Exception e) {
+            Log.e(TAG, "Failure parsing service configuration file", e);
+            return;
+        }
+    }
+
+    /**
+     * Registers a third-party service.
+     */
+    private void registerService(ServiceRegistry registry, final String serviceName, final String className) {
+        registry.register(serviceName, new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                try {
+                    Class.forName(className)
+                        .getMethod("connectToService", Context.class, Core.class, MessagePipeHandle.class)
+                        .invoke(null, context, core, pipe);
+                } catch(Exception e) {
+                    Log.e(TAG, "Failed to register service '" + serviceName + "'", e);
+                }
             }
         });
     }

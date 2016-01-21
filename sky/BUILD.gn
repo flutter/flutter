@@ -28,9 +28,17 @@ group("sky") {
 
   if (is_android) {
     deps += [ "//sky/services/activity" ]
+
+    # TODO(mpcomplete): This is temporary until we move GCM out of the engine
+    # repo.
+    deps += [
+      "//sky/services/gcm:gcm_lib",
+      "//sky/services/gcm:interfaces_java",
+    ]
   }
 
   if (!is_android) {
     deps += [ "//third_party/mesa:osmesa" ]
   }
+
 }

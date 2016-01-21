@@ -16,6 +16,8 @@ import com.google.android.gms.iid.InstanceID;
 import java.io.IOException;
 
 import org.chromium.base.ThreadUtils;
+import org.chromium.mojo.system.Core;
+import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.gcm.GcmListener;
 import org.chromium.mojom.gcm.GcmService;
@@ -35,6 +37,10 @@ public class RegistrationIntentService extends IntentService {
 
         public MojoService(Context context) {
             this.context = context;
+        }
+
+        public static void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+            GcmService.MANAGER.bind(new MojoService(context), pipe);
         }
 
         @Override
