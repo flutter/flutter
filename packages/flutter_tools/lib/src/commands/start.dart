@@ -9,9 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/logging.dart';
-import '../build_configuration.dart';
 import '../device.dart';
-import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 import 'install.dart';
@@ -138,31 +136,28 @@ Future<int> startApp(
 
     logging.fine('Running build command for $device.');
 
-    if (device.platform == TargetPlatform.android) {
-      await flx.buildInTempDir(
-        toolchain,
-        mainPath: mainPath,
-        onBundleAvailable: (String localBundlePath) {
-          logging.fine('Starting bundle for $device.');
-          final AndroidDevice androidDevice = device; // https://github.com/flutter/flutter/issues/1035
-          if (androidDevice.startBundle(package, localBundlePath,
-            poke: poke,
-            checked: checked,
-            traceStartup: traceStartup,
-            route: route,
-            clearLogs: clearLogs
-          )) {
-            startedSomething = true;
-          }
-        }
-      );
+    Map<String, dynamic> platformArgs = <String, dynamic>{};
+
+    if (poke != null)
+      platformArgs['poke'] = poke;
+    if (traceStartup != null)
+      platformArgs['trace-startup'] = traceStartup;
+    if (clearLogs != null)
+      platformArgs['clear-logs'] = clearLogs;
+
+    bool result = await device.startApp(
+      package,
+      toolchain,
+      mainPath: mainPath,
+      route: route,
+      checked: checked,
+      platformArgs: platformArgs
+    );
+
+    if (!result) {
+      logging.severe('Could not start \'${package.name}\' on \'${device.id}\'');
     } else {
-      bool result = await device.startApp(package);
-      if (!result) {
-        logging.severe('Could not start \'${package.name}\' on \'${device.id}\'');
-      } else {
-        startedSomething = true;
-      }
+      startedSomething = true;
     }
   }
 

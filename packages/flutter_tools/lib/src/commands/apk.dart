@@ -9,12 +9,12 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import '../android/device_android.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
-import '../device.dart';
 import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
 import 'start.dart';
@@ -392,16 +392,13 @@ class ApkCommand extends FlutterCommand {
       String mainPath = findMainDartFile(argResults['target']);
 
       // Build the FLX.
-      int result;
-      await flx.buildInTempDir(
-        toolchain,
-        mainPath: mainPath,
-        onBundleAvailable: (String localBundlePath) {
-          result = _buildApk(components, localBundlePath);
-        }
-      );
+      flx.DirectoryResult buildResult = await flx.buildInTempDir(toolchain, mainPath: mainPath);
 
-      return result;
+      try {
+        return _buildApk(components, buildResult.localBundlePath);
+      } finally {
+        buildResult.dispose();
+      }
     }
   }
 }
