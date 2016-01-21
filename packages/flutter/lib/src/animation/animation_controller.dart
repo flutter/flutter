@@ -3,22 +3,45 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show Color, Size, Rect, VoidCallback, lerpDouble;
+import 'dart:ui' show VoidCallback, lerpDouble;
 
 import 'package:newton/newton.dart';
 
 import 'animation.dart';
+import 'curves.dart';
 import 'forces.dart';
 import 'listener_helpers.dart';
-import 'simulation_stepper.dart';
+import 'ticker.dart';
 
 class AnimationController extends Animation<double>
   with EagerListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
-  AnimationController({ this.duration, double value, this.debugLabel }) {
-    _timeline = new SimulationStepper(_tick);
-    if (value != null)
-      _timeline.value = value.clamp(0.0, 1.0);
+  AnimationController({
+    double value,
+    this.duration,
+    this.debugLabel,
+    this.lowerBound: 0.0,
+    this.upperBound: 1.0
+  }) {
+    _value = (value ?? lowerBound).clamp(lowerBound, upperBound);
+    _ticker = new Ticker(_tick);
   }
+
+  AnimationController.unbounded({
+    double value: 0.0,
+    this.duration,
+    this.debugLabel
+  }) : lowerBound = double.NEGATIVE_INFINITY,
+       upperBound = double.INFINITY,
+       _value = value {
+    assert(value != null);
+    _ticker = new Ticker(_tick);
+  }
+
+  /// The value at which this animation is deemed to be dismissed.
+  final double lowerBound;
+
+  /// The value at which this animation is deemed to be completed.
+  final double upperBound;
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying animation controller instances in debug output.
@@ -32,27 +55,32 @@ class AnimationController extends Animation<double>
   /// The length of time this animation should last.
   Duration duration;
 
-  SimulationStepper _timeline;
   AnimationDirection get direction => _direction;
   AnimationDirection _direction = AnimationDirection.forward;
+
+  Ticker _ticker;
+  Simulation _simulation;
 
   /// The progress of this animation along the timeline.
   ///
   /// Note: Setting this value stops the current animation.
-  double get value => _timeline.value.clamp(0.0, 1.0);
-  void set value(double t) {
+  double get value => _value.clamp(lowerBound, upperBound);
+  double _value;
+  void set value(double newValue) {
+    assert(newValue != null);
     stop();
-    _timeline.value = t.clamp(0.0, 1.0);
+    _value = newValue.clamp(lowerBound, upperBound);
+    notifyListeners();
     _checkStatusChanged();
   }
 
   /// Whether this animation is currently animating in either the forward or reverse direction.
-  bool get isAnimating => _timeline.isAnimating;
+  bool get isAnimating => _ticker.isTicking;
 
   AnimationStatus get status {
-    if (!isAnimating && value == 1.0)
+    if (!isAnimating && value == upperBound)
       return AnimationStatus.completed;
-    if (!isAnimating && value == 0.0)
+    if (!isAnimating && value == lowerBound)
       return AnimationStatus.dismissed;
     return _direction == AnimationDirection.forward ?
         AnimationStatus.forward :
@@ -73,36 +101,35 @@ class AnimationController extends Animation<double>
 
   /// Resumes this animation in the most recent direction.
   Future resume() {
-    return _animateTo(_direction == AnimationDirection.forward ? 1.0 : 0.0);
+    return animateTo(_direction == AnimationDirection.forward ? upperBound : lowerBound);
   }
 
   /// Stops running this animation.
   void stop() {
-    _timeline.stop();
+    _simulation = null;
+    _ticker.stop();
   }
 
-  /// Releases any resources used by this object.
-  ///
-  /// Same as stop().
-  void dispose() {
-    stop();
-  }
-
-  ///
   /// Flings the timeline with an optional force (defaults to a critically
   /// damped spring) and initial velocity. If velocity is positive, the
   /// animation will complete, otherwise it will dismiss.
-  Future fling({double velocity: 1.0, Force force}) {
+  Future fling({ double velocity: 1.0, Force force }) {
     force ??= kDefaultSpringForce;
     _direction = velocity < 0.0 ? AnimationDirection.reverse : AnimationDirection.forward;
-    return _timeline.animateWith(force.release(value, velocity));
+    return animateWith(force.release(value, velocity));
   }
 
   /// Starts running this animation in the forward direction, and
   /// restarts the animation when it completes.
   Future repeat({ double min: 0.0, double max: 1.0, Duration period }) {
     period ??= duration;
-    return _timeline.animateWith(new _RepeatingSimulation(min, max, period));
+    return animateWith(new _RepeatingSimulation(min, max, period));
+  }
+
+  /// Drives the animation according to the given simulation.
+  Future animateWith(Simulation simulation) {
+    stop();
+    return _startSimulation(simulation);
   }
 
   AnimationStatus _lastStatus = AnimationStatus.dismissed;
@@ -113,25 +140,68 @@ class AnimationController extends Animation<double>
     _lastStatus = currentStatus;
   }
 
-  Future _animateTo(double target) {
-    Duration remainingDuration = duration * (target - _timeline.value).abs();
-    _timeline.stop();
+  Future animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
+    Duration remainingDuration = (duration ?? this.duration) * (target - _value).abs();
+    stop();
     if (remainingDuration == Duration.ZERO)
       return new Future.value();
-    return _timeline.animateTo(target, duration: remainingDuration);
+    assert(remainingDuration > Duration.ZERO);
+    assert(!isAnimating);
+    return _startSimulation(new _TweenSimulation(_value, target, remainingDuration, curve));
   }
 
-  void _tick(double t) {
+  Future _startSimulation(Simulation simulation) {
+    assert(simulation != null);
+    assert(!isAnimating);
+    _simulation = simulation;
+    _value = simulation.x(0.0);
+    return _ticker.start();
+  }
+
+  void _tick(Duration elapsed) {
+    double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
+    _value = _simulation.x(elapsedInSeconds);
+    if (_simulation.isDone(elapsedInSeconds))
+      stop();
     notifyListeners();
     _checkStatusChanged();
   }
 
   String toStringDetails() {
-    String paused = _timeline.isAnimating ? '' : '; paused';
+    String paused = isAnimating ? '' : '; paused';
     String label = debugLabel == null ? '' : '; for $debugLabel';
     String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
     return '$more$paused$label';
   }
+}
+
+class _TweenSimulation extends Simulation {
+  _TweenSimulation(this._begin, this._end, Duration duration, this._curve)
+    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
+    assert(_durationInSeconds > 0.0);
+    assert(_begin != null);
+    assert(_end != null);
+  }
+
+  final double _durationInSeconds;
+  final double _begin;
+  final double _end;
+  final Curve _curve;
+
+  double x(double timeInSeconds) {
+    assert(timeInSeconds >= 0.0);
+    double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
+    if (t == 0.0)
+      return _begin;
+    else if (t == 1.0)
+      return _end;
+    else
+      return _begin + (_end - _begin) * _curve.transform(t);
+  }
+
+  double dx(double timeInSeconds) => 1.0;
+
+  bool isDone(double timeInSeconds) => timeInSeconds > _durationInSeconds;
 }
 
 class _RepeatingSimulation extends Simulation {
