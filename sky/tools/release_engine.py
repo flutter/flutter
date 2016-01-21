@@ -48,8 +48,10 @@ ZIP_ARTIFACTS = {
         'icudtl.dat',
         'dist/shell/SkyShell.apk',
         'dist/shell/flutter.mojo',
-        'gen/sky/shell/shell/classes.dex',
+        'gen/sky/shell/shell/classes.dex.jar',
         'gen/sky/shell/shell/shell/libs/armeabi-v7a/libsky_shell.so',
+        # TODO(mpcomplete): obsolete. Remove after updating the flutter tool.
+        'gen/sky/shell/shell/classes.dex',
     ],
     'linux-x64': [
         'dist/shell/icudtl.dat',
