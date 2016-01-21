@@ -8,6 +8,7 @@
 #include <jni.h>
 
 #include "base/android/jni_android.h"
+#include "sky/engine/bindings/jni/jni_object.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
@@ -17,8 +18,9 @@ namespace blink {
 class JniObject;
 
 // Wrapper that exposes a JNI jclass to Dart
-class JniClass : public RefCounted<JniClass>, public DartWrappable {
+class JniClass : public JniObject {
   DEFINE_WRAPPERTYPEINFO();
+  friend class JniObject;
 
  public:
   ~JniClass() override;
@@ -26,7 +28,7 @@ class JniClass : public RefCounted<JniClass>, public DartWrappable {
   static PassRefPtr<JniClass> FromName(const char* className);
   static PassRefPtr<JniClass> FromClassObject(const JniObject* clazz);
 
-  jclass java_class() const { return clazz_.obj(); }
+  jclass java_class() const { return static_cast<jclass>(object_.obj()); }
 
   intptr_t GetFieldId(const char* name, const char* sig);
   intptr_t GetStaticFieldId(const char* name, const char* sig);
@@ -79,8 +81,6 @@ class JniClass : public RefCounted<JniClass>, public DartWrappable {
 
  private:
   JniClass(JNIEnv* env, jclass clazz);
-
-  base::android::ScopedJavaGlobalRef<jclass> clazz_;
 };
 
 } // namespace blink

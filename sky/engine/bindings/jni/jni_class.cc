@@ -5,7 +5,6 @@
 #include "sky/engine/bindings/jni/jni_class.h"
 
 #include "sky/engine/bindings/jni/dart_jni.h"
-#include "sky/engine/bindings/jni/jni_object.h"
 
 namespace blink {
 
@@ -14,8 +13,7 @@ using base::android::ScopedJavaLocalRef;
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniClass);
 
 JniClass::JniClass(JNIEnv* env, jclass clazz)
-    : clazz_(env, clazz) {
-}
+    : JniObject(env, clazz) {}
 
 JniClass::~JniClass() {
 }

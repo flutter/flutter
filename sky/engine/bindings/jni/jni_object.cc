@@ -30,6 +30,8 @@ PassRefPtr<JniObject> JniObject::Create(JNIEnv* env, jobject object) {
 
   if (class_name == "java.lang.String") {
     result = new JniString(env, static_cast<jstring>(object));
+  } else if (class_name == "java.lang.Class") {
+    result = new JniClass(env, static_cast<jclass>(object));
   } else if (base::StartsWith(class_name, "[L", base::CompareCase::SENSITIVE)) {
     result = new JniObjectArray(env, static_cast<jobjectArray>(object));
   } else if (class_name == "[Z") {

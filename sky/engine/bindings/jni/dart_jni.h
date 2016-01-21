@@ -37,6 +37,7 @@ class DartJni {
   static jstring DartToJavaString(JNIEnv* env, Dart_Handle dart_string,
                                   Dart_Handle* exception);
 
+  static jobject class_loader();
   static jclass class_clazz();
   static Dart_Handle jni_object_type();
   static Dart_Handle jni_float_type();
