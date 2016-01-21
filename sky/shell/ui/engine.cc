@@ -134,12 +134,12 @@ void Engine::SetServices(ServicesDataPtr services) {
 void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
   physical_size_.SetSize(metrics->physical_width, metrics->physical_height);
 
-  display_metrics_.physical_size = physical_size_;
   display_metrics_.device_pixel_ratio = metrics->device_pixel_ratio;
-  display_metrics_.padding_top = metrics->padding_top;
-  display_metrics_.padding_right = metrics->padding_right;
-  display_metrics_.padding_bottom = metrics->padding_bottom;
-  display_metrics_.padding_left = metrics->padding_left;
+  display_metrics_.physical_size = physical_size_;
+  display_metrics_.physical_padding_top = metrics->physical_padding_top;
+  display_metrics_.physical_padding_right = metrics->physical_padding_right;
+  display_metrics_.physical_padding_bottom = metrics->physical_padding_bottom;
+  display_metrics_.physical_padding_left = metrics->physical_padding_left;
 
   if (sky_view_)
     sky_view_->SetDisplayMetrics(display_metrics_);

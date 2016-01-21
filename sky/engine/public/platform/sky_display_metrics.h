@@ -10,12 +10,12 @@
 namespace blink {
 
 struct SkyDisplayMetrics {
-  WebSize physical_size;
   float device_pixel_ratio = 1.0;
-  double padding_top = 0.0;
-  double padding_right = 0.0;
-  double padding_bottom = 0.0;
-  double padding_left = 0.0;
+  WebSize physical_size;
+  int physical_padding_top = 0;
+  int physical_padding_right = 0;
+  int physical_padding_bottom = 0;
+  int physical_padding_left = 0;
 };
 
 } // namespace blink
