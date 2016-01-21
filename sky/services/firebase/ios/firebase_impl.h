@@ -35,13 +35,13 @@ class FirebaseImpl : public ::firebase::Firebase {
   void AddChildEventListener(
     ::firebase::ChildEventListenerPtr listener) override;
   void ObserveSingleEventOfType(
-      ::firebase::EventType eventType,
-      const ObserveSingleEventOfTypeCallback& callback) override;
+    ::firebase::EventType eventType,
+    const ObserveSingleEventOfTypeCallback& callback) override;
   void AuthWithOAuthToken(
     const mojo::String& provider,
     const mojo::String& credentials,
     const AuthWithOAuthTokenCallback& callback) override;
-  void FirebaseImpl::SetValue(const mojo::String& url);
+  void SetValue(const mojo::String& jsonValue);
 
  private:
   mojo::StrongBinding<::firebase::Firebase> binding_;
