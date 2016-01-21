@@ -62,7 +62,7 @@ abstract class ProxyAnimatedMixin {
 }
 
 class ProxyAnimation extends Animation<double>
-  with LazyListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
+  with LazyListenerMixin, LocalAnimationListenersMixin, LocalAnimationStatusListenersMixin {
   ProxyAnimation([Animation<double> animation]) {
     _parent = animation;
     if (_parent == null) {
@@ -122,7 +122,7 @@ class ProxyAnimation extends Animation<double>
 }
 
 class ReverseAnimation extends Animation<double>
-  with LazyListenerMixin, LocalPerformanceStatusListenersMixin {
+  with LazyListenerMixin, LocalAnimationStatusListenersMixin {
   ReverseAnimation(this.parent);
 
   final Animation<double> parent;
@@ -240,7 +240,7 @@ enum _TrainHoppingMode { minimize, maximize }
 /// removed, it exposes a [dispose()] method. Call this method to shut this
 /// object down.
 class TrainHoppingAnimation extends Animation<double>
-  with EagerListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
+  with EagerListenerMixin, LocalAnimationListenersMixin, LocalAnimationStatusListenersMixin {
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
     assert(_currentTrain != null);
     if (_nextTrain != null) {

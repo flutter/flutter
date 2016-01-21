@@ -14,7 +14,7 @@ import 'listener_helpers.dart';
 import 'ticker.dart';
 
 class AnimationController extends Animation<double>
-  with EagerListenerMixin, LocalPerformanceListenersMixin, LocalPerformanceStatusListenersMixin {
+  with EagerListenerMixin, LocalAnimationListenersMixin, LocalAnimationStatusListenersMixin {
   AnimationController({
     double value,
     this.duration,

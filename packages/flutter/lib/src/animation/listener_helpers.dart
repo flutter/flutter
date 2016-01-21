@@ -38,7 +38,7 @@ abstract class EagerListenerMixin implements _ListenerMixin {
   void dispose();
 }
 
-abstract class LocalPerformanceListenersMixin extends _ListenerMixin {
+abstract class LocalAnimationListenersMixin extends _ListenerMixin {
   final List<VoidCallback> _listeners = <VoidCallback>[];
   void addListener(VoidCallback listener) {
     didRegisterListener();
@@ -55,7 +55,7 @@ abstract class LocalPerformanceListenersMixin extends _ListenerMixin {
   }
 }
 
-abstract class LocalPerformanceStatusListenersMixin extends _ListenerMixin {
+abstract class LocalAnimationStatusListenersMixin extends _ListenerMixin {
   final List<AnimationStatusListener> _statusListeners = <AnimationStatusListener>[];
   void addStatusListener(AnimationStatusListener listener) {
     didRegisterListener();

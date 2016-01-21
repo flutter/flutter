@@ -381,7 +381,7 @@ class _TabsScrollBehavior extends BoundedBehavior {
   }
 }
 
-abstract class TabBarSelectionPerformanceListener {
+abstract class TabBarSelectionAnimationListener {
   void handleStatusChange(AnimationStatus status);
   void handleProgressChange();
   void handleSelectionDeactivate();
@@ -503,28 +503,28 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
       });
   }
 
-  final List<TabBarSelectionPerformanceListener> _performanceListeners = <TabBarSelectionPerformanceListener>[];
+  final List<TabBarSelectionAnimationListener> _animationListeners = <TabBarSelectionAnimationListener>[];
 
-  void registerPerformanceListener(TabBarSelectionPerformanceListener listener) {
-    _performanceListeners.add(listener);
+  void registerAnimationListener(TabBarSelectionAnimationListener listener) {
+    _animationListeners.add(listener);
     _controller
       ..addStatusListener(listener.handleStatusChange)
       ..addListener(listener.handleProgressChange);
   }
 
-  void unregisterPerformanceListener(TabBarSelectionPerformanceListener listener) {
-    _performanceListeners.remove(listener);
+  void unregisterAnimationListener(TabBarSelectionAnimationListener listener) {
+    _animationListeners.remove(listener);
     _controller
       ..removeStatusListener(listener.handleStatusChange)
       ..removeListener(listener.handleProgressChange);
   }
 
   void deactivate() {
-    for (TabBarSelectionPerformanceListener listener in _performanceListeners.toList()) {
+    for (TabBarSelectionAnimationListener listener in _animationListeners.toList()) {
       listener.handleSelectionDeactivate();
-      unregisterPerformanceListener(listener);
+      unregisterAnimationListener(listener);
     }
-    assert(_performanceListeners.isEmpty);
+    assert(_animationListeners.isEmpty);
   }
 
   Widget build(BuildContext context) {
@@ -552,15 +552,15 @@ class TabBar<T> extends Scrollable {
   _TabBarState createState() => new _TabBarState();
 }
 
-class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelectionPerformanceListener {
+class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelectionAnimationListener {
 
   TabBarSelectionState _selection;
   bool _valueIsChanging = false;
 
   void _initSelection(TabBarSelectionState<T> selection) {
-    _selection?.unregisterPerformanceListener(this);
+    _selection?.unregisterAnimationListener(this);
     _selection = selection;
-    _selection?.registerPerformanceListener(this);
+    _selection?.registerAnimationListener(this);
   }
 
   void initState() {
@@ -576,7 +576,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   void dispose() {
-    _selection?.unregisterPerformanceListener(this);
+    _selection?.unregisterAnimationListener(this);
     super.dispose();
   }
 
@@ -791,7 +791,7 @@ class TabBarView extends PageableList {
   _TabBarViewState createState() => new _TabBarViewState();
 }
 
-class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSelectionPerformanceListener {
+class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSelectionAnimationListener {
 
   TabBarSelectionState _selection;
   List<Widget> _items;
@@ -809,7 +809,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
   void _initSelection(TabBarSelectionState selection) {
     _selection = selection;
     if (_selection != null) {
-      _selection.registerPerformanceListener(this);
+      _selection.registerAnimationListener(this);
       _updateItemsAndScrollBehavior();
     }
   }
@@ -826,7 +826,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
   }
 
   void dispose() {
-    _selection?.unregisterPerformanceListener(this);
+    _selection?.unregisterAnimationListener(this);
     super.dispose();
   }
 
@@ -874,7 +874,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
   void handleProgressChange() {
     if (_selection == null || !_selection.valueIsChanging)
       return;
-    // The TabBar is driving the TabBarSelection performance.
+    // The TabBar is driving the TabBarSelection animation.
 
     final Animation<double> animation = _selection.animation;
 
@@ -906,7 +906,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
   void dispatchOnScroll() {
     if (_selection == null || _selection.valueIsChanging)
       return;
-    // This class is driving the TabBarSelection's performance.
+    // This class is driving the TabBarSelection's animation.
 
     final AnimationController controller = _selection._controller;
 
