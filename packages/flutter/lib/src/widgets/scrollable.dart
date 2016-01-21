@@ -18,6 +18,7 @@ import 'homogeneous_viewport.dart';
 import 'mixed_viewport.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
+import 'scroll_behavior.dart';
 
 // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
 const double _kMillisecondsPerSecond = 1000.0;

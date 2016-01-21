@@ -35,6 +35,7 @@ export 'src/widgets/routes.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollable_grid.dart';
 export 'src/widgets/scrollable_list.dart';
+export 'src/widgets/scroll_behavior.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/title.dart';
 export 'src/widgets/transitions.dart';
