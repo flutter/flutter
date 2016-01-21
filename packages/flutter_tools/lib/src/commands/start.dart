@@ -108,6 +108,8 @@ abstract class StartCommandBase extends FlutterCommand {
         bool result = await device.startApp(package);
         if (!result) {
           logging.severe('Could not start \'${package.name}\' on \'${device.id}\'');
+        } else {
+          startedSomething = true;
         }
       }
     }
