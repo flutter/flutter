@@ -99,6 +99,13 @@ class Instrumentation {
     return _getElementPoint(element, (Size size) => size.bottomRight(Point.origin));
   }
 
+  Size getSize(Element element) {
+    assert(element != null);
+    RenderBox box = element.renderObject as RenderBox;
+    assert(box != null);
+    return box.size;
+  }
+
   Point _getElementPoint(Element element, SizeToPointFunction sizeToPoint) {
     assert(element != null);
     RenderBox box = element.renderObject as RenderBox;

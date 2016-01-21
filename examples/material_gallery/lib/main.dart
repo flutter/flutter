@@ -15,6 +15,7 @@ import 'demo/toggle_controls_demo.dart';
 import 'demo/slider_demo.dart';
 import 'demo/tabs_demo.dart';
 import 'demo/time_picker_demo.dart';
+import 'demo/two_level_list_demo.dart';
 
 class GalleryDemo {
   GalleryDemo({ this.title, this.builder });
@@ -162,6 +163,7 @@ class GalleryHome extends StatelessComponent {
                     new GalleryDemo(title: 'Toggle Controls', builder: (_) => new ToggleControlsDemo()),
                     new GalleryDemo(title: 'Dropdown Button', builder: (_) => new DropDownDemo()),
                     new GalleryDemo(title: 'Tabs', builder: (_) => new TabsDemo()),
+                    new GalleryDemo(title: 'Expland/Collapse List Control', builder: (_) => new TwoLevelListDemo()),
                     new GalleryDemo(title: 'Page Selector', builder: (_) => new PageSelectorDemo()),
                     new GalleryDemo(title: 'Date Picker', builder: (_) => new DatePickerDemo()),
                     new GalleryDemo(title: 'Time Picker', builder: (_) => new TimePickerDemo())

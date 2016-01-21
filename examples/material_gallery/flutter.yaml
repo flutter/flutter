@@ -12,6 +12,8 @@ material-design-icons:
   - name: navigation/arrow_forward
   - name: navigation/arrow_back
   - name: navigation/cancel
+  - name: navigation/expand_less
+  - name: navigation/expand_more
   - name: navigation/menu
   - name: action/event
   - name: action/home
