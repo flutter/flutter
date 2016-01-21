@@ -16,10 +16,13 @@ enum Orientation {
 
 /// The result of a media query.
 class MediaQueryData {
-  const MediaQueryData({ this.size });
+  const MediaQueryData({ this.size, this.padding });
 
   /// The size of the media (e.g, the size of the screen).
   final Size size;
+
+  /// The padding around the edges of the media (e.g., the screen).
+  final EdgeDims padding;
 
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
@@ -30,7 +33,8 @@ class MediaQueryData {
     if (other.runtimeType != runtimeType)
       return false;
     MediaQueryData typedOther = other;
-    return typedOther.size == size;
+    return typedOther.size == size
+        && typedOther.padding == padding;
   }
 
   int get hashCode => size.hashCode;
