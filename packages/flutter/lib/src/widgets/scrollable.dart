@@ -109,11 +109,11 @@ abstract class Scrollable extends StatefulComponent {
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
   void initState() {
     super.initState();
-    _animation = new SimulationStepper(_setScrollOffset);
+    _controller = new AnimationController.unbounded()..addListener(_handleAnimationChanged);
     _scrollOffset = PageStorage.of(context)?.readState(context) ?? config.initialScrollOffset ?? 0.0;
   }
 
-  SimulationStepper _animation;
+  AnimationController _controller;
 
   double get scrollOffset => _scrollOffset;
   double _scrollOffset;
@@ -181,9 +181,9 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Widget buildContent(BuildContext context);
 
   Future _animateTo(double newScrollOffset, Duration duration, Curve curve) {
-    _animation.stop();
-    _animation.value = scrollOffset;
-    return _animation.animateTo(newScrollOffset, duration: duration, curve: curve);
+    _controller.stop();
+    _controller.value = scrollOffset;
+    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve);
   }
 
   bool _scrollOffsetIsInBounds(double offset) {
@@ -240,16 +240,20 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   Future _startToEndAnimation(Offset scrollVelocity) {
     double velocity = scrollDirectionVelocity(scrollVelocity);
-    _animation.stop();
+    _controller.stop();
     Simulation simulation = _createSnapSimulation(velocity) ?? _createFlingSimulation(velocity);
     if (simulation == null)
       return new Future.value();
-    return _animation.animateWith(simulation);
+    return _controller.animateWith(simulation);
   }
 
   void dispose() {
-    _animation.stop();
+    _controller.stop();
     super.dispose();
+  }
+
+  void _handleAnimationChanged() {
+    _setScrollOffset(_controller.value);
   }
 
   void _setScrollOffset(double newScrollOffset) {
@@ -268,7 +272,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       return new Future.value();
 
     if (duration == null) {
-      _animation.stop();
+      _controller.stop();
       _setScrollOffset(newScrollOffset);
       return new Future.value();
     }
@@ -284,7 +288,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Future fling(Offset scrollVelocity) {
     if (scrollVelocity != Offset.zero)
       return _startToEndAnimation(scrollVelocity);
-    if (!_animation.isAnimating)
+    if (!_controller.isAnimating)
       return settleScrollOffset();
     return new Future.value();
   }
@@ -310,7 +314,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handlePointerDown(_) {
-    _animation.stop();
+    _controller.stop();
   }
 
   void _handleDragStart(_) {
