@@ -1577,7 +1577,7 @@ template("android_apk") {
   }
 
   final_deps += [ ":$final_dex_target_name" ]
-  dex("$final_dex_target_name") {
+  dex("${final_dex_target_name}_jar") {
     deps = [
       ":$build_config_target",
       ":$java_target",
@@ -1588,9 +1588,19 @@ template("android_apk") {
     inputs = [
       _build_config,
     ]
-    output = final_dex_path
+    output = "${final_dex_path}.jar"
     dex_arg_key = "${_rebased_build_config}:final_dex:dependency_dex_files"
     args = [ "--inputs=@FileArg($dex_arg_key)" ]
+  }
+
+  dex("$final_dex_target_name") {
+    deps = [
+      ":${final_dex_target_name}_jar",
+    ]
+    sources = [
+      "${final_dex_path}.jar",
+    ]
+    output = final_dex_path
   }
 
   if (_native_libs != []) {
