@@ -18,6 +18,8 @@ class ListCommand extends FlutterCommand {
         help: 'Log additional details about attached devices.');
   }
 
+  bool get requiresProjectRoot => false;
+
   @override
   Future<int> runInProject() async {
     connectToDevices();

@@ -18,17 +18,19 @@ class StopCommand extends FlutterCommand {
     return await stop() ? 0 : 2;
   }
 
-  Future<bool> stop() async {
-    bool stoppedSomething = false;
+  Future<bool> stop() => stopAll(devices, applicationPackages);
+}
 
-    for (Device device in devices.all) {
-      ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-      if (package == null || !device.isConnected())
-        continue;
-      if (await device.stopApp(package))
-        stoppedSomething = true;
-    }
+Future<bool> stopAll(DeviceStore devices, ApplicationPackageStore applicationPackages) async {
+  bool stoppedSomething = false;
 
-    return stoppedSomething;
+  for (Device device in devices.all) {
+    ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+    if (package == null || !device.isConnected())
+      continue;
+    if (await device.stopApp(package))
+      stoppedSomething = true;
   }
+
+  return stoppedSomething;
 }

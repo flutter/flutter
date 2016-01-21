@@ -47,12 +47,6 @@ abstract class FlutterCommand extends Command {
     connectToDevices();
   }
 
-  void inheritFromParent(FlutterCommand other) {
-    applicationPackages = other.applicationPackages;
-    toolchain = other.toolchain;
-    devices = other.devices;
-  }
-
   Future<int> run() async {
     if (requiresProjectRoot && !validateProjectRoot())
       return 1;
