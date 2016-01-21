@@ -19,7 +19,6 @@ import 'image_resource.dart';
 import 'shell.dart';
 
 abstract class AssetBundle {
-  void close();
   ImageResource loadImage(String key);
   Future<String> loadString(String key);
   Future<core.MojoDataPipeConsumer> load(String key);
@@ -29,8 +28,6 @@ class NetworkAssetBundle extends AssetBundle {
   NetworkAssetBundle(Uri baseUrl) : _baseUrl = baseUrl;
 
   final Uri _baseUrl;
-
-  void close() { }
 
   String _urlFromKey(String key) => _baseUrl.resolve(key).toString();
 
@@ -65,12 +62,6 @@ class MojoAssetBundle extends AssetBundle {
   AssetBundleProxy _bundle;
   Map<String, ImageResource> _imageCache = new Map<String, ImageResource>();
   Map<String, Future<String>> _stringCache = new Map<String, Future<String>>();
-
-  void close() {
-    _bundle.close();
-    _bundle = null;
-    _imageCache = null;
-  }
 
   Future<ui.Image> _fetchImage(String key) async {
     return await decodeImageFromDataPipe(await load(key));
