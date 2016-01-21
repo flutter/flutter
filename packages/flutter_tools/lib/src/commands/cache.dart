@@ -32,9 +32,19 @@ class _PopulateCommand extends Command {
   final String name = 'populate';
   final String description = 'Populates the cache with all known artifacts.';
 
+  _PopulateCommand() {
+    // ArtifactStore would require refactoring to make list a separate command.
+    argParser.addFlag('list', help: 'List cache contents after populating.');
+  }
+
   @override
   Future<int> run() async {
-    await ArtifactStore.populate();
+    List<String> paths = await ArtifactStore.populate();
+    if (argResults['list']) {
+      for (String path in paths) {
+        print(path);
+      }
+    }
     return 0;
   }
 }
