@@ -4,7 +4,8 @@
 
 import 'dart:async';
 
-import '../device.dart';
+import '../android/device_android.dart';
+import '../ios/device_ios.dart';
 import '../runner/flutter_command.dart';
 
 class ListCommand extends FlutterCommand {
@@ -29,6 +30,8 @@ class ListCommand extends FlutterCommand {
     if (details)
       print('Android Devices:');
 
+    // TODO(devoncarew): We should have a more generic mechanism for device discovery.
+    // DeviceDiscoveryService? DeviceDiscoveryParticipant?
     for (AndroidDevice device in AndroidDevice.getAttachedDevices(devices.android)) {
       if (details) {
         print('${device.id}\t'

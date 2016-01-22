@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../android/adb.dart';
+import '../android/device_android.dart';
 import '../base/logging.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';

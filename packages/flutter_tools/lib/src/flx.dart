@@ -114,28 +114,38 @@ ArchiveFile _createSnapshotFile(String snapshotPath) {
   return new ArchiveFile(_kSnapshotKey, content.length, content);
 }
 
-Future<int> buildInTempDir(
+/// Build the flx in a temp dir and return `localBundlePath` on success.
+Future<DirectoryResult> buildInTempDir(
   Toolchain toolchain, {
-  String mainPath: defaultMainPath,
-  void onBundleAvailable(String bundlePath)
+  String mainPath: defaultMainPath
 }) async {
   int result;
   Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
-  try {
-    String localBundlePath = path.join(tempDir.path, 'app.flx');
-    String localSnapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
-    result = await build(
-      toolchain,
-      snapshotPath: localSnapshotPath,
-      outputPath: localBundlePath,
-      mainPath: mainPath
-    );
-    if (result == 0)
-      onBundleAvailable(localBundlePath);
-  } finally {
-    tempDir.deleteSync(recursive: true);
+  String localBundlePath = path.join(tempDir.path, 'app.flx');
+  String localSnapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
+  result = await build(
+    toolchain,
+    snapshotPath: localSnapshotPath,
+    outputPath: localBundlePath,
+    mainPath: mainPath
+  );
+  if (result == 0)
+    return new DirectoryResult(tempDir, localBundlePath);
+  else
+    throw result;
+}
+
+/// The result from [buildInTempDir]. Note that this object should be disposed after use.
+class DirectoryResult {
+  final Directory directory;
+  final String localBundlePath;
+
+  DirectoryResult(this.directory, this.localBundlePath);
+
+  /// Call this to delete the temporary directory.
+  void dispose() {
+    directory.deleteSync(recursive: true);
   }
-  return result;
 }
 
 Future<int> build(

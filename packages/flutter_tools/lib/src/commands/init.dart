@@ -9,10 +9,10 @@ import 'package:args/command_runner.dart';
 import 'package:mustache4dart/mustache4dart.dart' as mustache;
 import 'package:path/path.dart' as path;
 
+import '../android/android.dart' as android;
 import '../artifacts.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
-import '../device.dart';
 
 class InitCommand extends Command {
   final String name = 'init';
@@ -247,7 +247,7 @@ final String _apkManifest = '''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.{{projectName}}">
 
-    <uses-sdk android:minSdkVersion="${AndroidDevice.minApiLevel}" android:targetSdkVersion="21" />
+    <uses-sdk android:minSdkVersion="${android.minApiLevel}" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application android:name="org.domokit.sky.shell.SkyApplication" android:label="{{projectName}}">
