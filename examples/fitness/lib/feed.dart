@@ -64,7 +64,7 @@ class FeedFragmentState extends State<FeedFragment> {
 
   Widget _buildDrawer() {
     return new Drawer(
-      child: new Block(<Widget>[
+      child: new Block(children: <Widget>[
         new DrawerHeader(child: new Text('Fitness')),
         new DrawerItem(
           icon: 'action/view_list',
@@ -239,7 +239,7 @@ class AddItemDialogState extends State<AddItemDialog> {
     }
     return new Dialog(
       title: new Text("What are you doing?"),
-      content: new Block(menuItems),
+      content: new Block(children: menuItems),
       actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),

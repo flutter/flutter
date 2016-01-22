@@ -53,10 +53,12 @@ class PostDemoState extends State<PostDemo> {
       ),
       body: new Material(
         child: new Block(
-          [new Text(
-            "${_response ?? 'Loading...'}",
-            style: Typography.black.body1
-          )]
+          children: <Widget>[
+            new Text(
+              "${_response ?? 'Loading...'}",
+              style: Typography.black.body1
+            )
+          ]
         )
       ),
       floatingActionButton: new FloatingActionButton(

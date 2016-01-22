@@ -12,13 +12,15 @@ void main() {
   test('Cannot scroll a non-overflowing block', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(
-        new Block(<Widget>[
-          new Container(
-            height: 200.0, // less than 600, the height of the test area
-            child: new Text('Hello')
-          )
-        ],
-        key: blockKey)
+        new Block(
+          key: blockKey,
+          children: <Widget>[
+            new Container(
+              height: 200.0, // less than 600, the height of the test area
+              child: new Text('Hello')
+            )
+          ]
+        )
       );
       tester.pump(); // for SizeObservers
 
@@ -39,13 +41,15 @@ void main() {
   test('Can scroll an overflowing block', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(
-        new Block(<Widget>[
-          new Container(
-            height: 2000.0, // more than 600, the height of the test area
-            child: new Text('Hello')
-          )
-        ],
-        key: blockKey)
+        new Block(
+          key: blockKey,
+          children: <Widget>[
+            new Container(
+              height: 2000.0, // more than 600, the height of the test area
+              child: new Text('Hello')
+            )
+          ]
+        )
       );
       tester.pump(); // for SizeObservers
 

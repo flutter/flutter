@@ -125,7 +125,7 @@ class _DropDownMenu<T> extends StatusTransitionComponent {
 
     Widget child = new Material(
       type: MaterialType.transparency,
-      child: new Block(children)
+      child: new Block(children: children)
     );
     return new FadeTransition(
       opacity: opacity,

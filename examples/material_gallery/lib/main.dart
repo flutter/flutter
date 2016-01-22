@@ -128,7 +128,7 @@ class GalleryHome extends StatelessComponent {
       body: new Padding(
         padding: const EdgeDims.all(4.0),
         child: new Block(
-          <Widget>[
+          children: <Widget>[
             new Row(
               children: <Widget>[
                 new GallerySection(

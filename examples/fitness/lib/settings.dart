@@ -87,7 +87,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
   }
 
   Widget buildSettingsPane(BuildContext context) {
-    return new Block(<Widget>[
+    return new Block(children: <Widget>[
         new DrawerItem(
           onPressed: () { _handleBackupChanged(!(config.userData.backupMode == BackupMode.enabled)); },
           child: new Row(

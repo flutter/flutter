@@ -37,12 +37,14 @@ class _ChipDemoState extends State<ChipDemo> {
 
     return new Scaffold(
       toolBar: new ToolBar(center: new Text("Chips")),
-      body: new Block(chips.map((Widget widget) {
-        return new Container(
-          height: 100.0,
-          child: new Center(child: widget)
-        );
-      }).toList())
+      body: new Block(
+        children: chips.map((Widget widget) {
+          return new Container(
+            height: 100.0,
+            child: new Center(child: widget)
+          );
+        }).toList()
+      )
     );
   }
 }

@@ -88,7 +88,7 @@ class _MimicDemoState extends State<MimicDemo> {
     return new GestureDetector(
       onTap: _handleTap,
       onLongPress: _reset,
-      child: new Block(children)
+      child: new Block(children: children)
     );
   }
 }
