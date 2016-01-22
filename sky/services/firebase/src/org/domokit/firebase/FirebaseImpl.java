@@ -21,6 +21,8 @@ import java.util.HashMap;
 
 import org.chromium.mojo.bindings.ConnectionErrorHandler;
 import org.chromium.mojo.bindings.InterfaceRequest;
+import org.chromium.mojo.system.Core;
+import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.firebase.DataSnapshot;
 import org.chromium.mojom.firebase.EventType;
@@ -41,6 +43,10 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
             com.firebase.client.Firebase.setAndroidContext(context);
         mContext = context;
         Log.v(TAG, "constructed");
+    }
+
+    public static void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+        Firebase.MANAGER.bind(new FirebaseImpl(context), pipe);
     }
 
     @Override
