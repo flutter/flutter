@@ -155,5 +155,5 @@ class TwoLevelList extends StatelessComponent {
   final List<Widget> items;
   final MaterialListType type;
 
-  Widget build(BuildContext context) => new Block(items);
+  Widget build(BuildContext context) => new Block(children: items);
 }

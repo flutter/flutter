@@ -86,7 +86,7 @@ class _PopupMenu<T> extends StatelessComponent {
       child: new IntrinsicWidth(
         stepWidth: _kMenuWidthStep,
         child: new Block(
-          children,
+          children: children,
           padding: const EdgeDims.symmetric(
             vertical: _kMenuVerticalPadding
           )

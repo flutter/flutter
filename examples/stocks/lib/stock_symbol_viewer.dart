@@ -59,12 +59,14 @@ class StockSymbolPage extends StatelessComponent {
       toolBar: new ToolBar(
         center: new Text(stock.name)
       ),
-      body: new Block(<Widget>[
-        new Container(
-          margin: new EdgeDims.all(20.0),
-          child: new Card(child: new StockSymbolView(stock: stock))
-        )
-      ])
+      body: new Block(
+        children: <Widget>[
+          new Container(
+            margin: new EdgeDims.all(20.0),
+            child: new Card(child: new StockSymbolView(stock: stock))
+          )
+        ]
+      )
     );
   }
 }

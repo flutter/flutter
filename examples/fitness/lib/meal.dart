@@ -85,7 +85,7 @@ class MealFragmentState extends State<MealFragment> {
 
   Widget buildBody() {
     Meal meal = new Meal(when: new DateTime.now());
-    return new Block(<Widget>[
+    return new Block(children: <Widget>[
         new Text(meal.displayDate),
         new Input(
           key: descriptionKey,

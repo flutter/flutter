@@ -107,7 +107,7 @@ class Dialog extends StatelessComponent {
             color: _getColor(context),
             type: MaterialType.card,
             child: new IntrinsicWidth(
-              child: new Block(dialogBody)
+              child: new Block(children: dialogBody)
             )
           )
         )

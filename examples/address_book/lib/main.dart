@@ -56,7 +56,7 @@ class AddressBookHome extends StatelessComponent {
   static final GlobalKey noteKey = new GlobalKey(debugLabel: 'note field');
 
   Widget buildBody(BuildContext context) {
-    return new Block(<Widget>[
+    return new Block(children: <Widget>[
       new AspectRatio(
         aspectRatio: 16.0 / 9.0,
         child: new Container(

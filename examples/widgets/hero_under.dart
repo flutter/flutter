@@ -95,7 +95,7 @@ class CrabPage extends StatelessComponent {
     return new Material(
       color: const Color(0x00000000),
       child: new Block(
-        <Widget>[
+        children: <Widget>[
           new Stack(
             children: <Widget>[
               new HeroImage(

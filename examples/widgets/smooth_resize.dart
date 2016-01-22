@@ -106,7 +106,7 @@ class SmoothBlockState extends State<SmoothBlock> {
 
 class SmoothResizeDemo extends StatelessComponent {
   Widget build(BuildContext context) {
-    return new Block(_kColors.map((Map<int, Color> color) => new SmoothBlock(color: color)).toList());
+    return new Block(children: _kColors.map((Map<int, Color> color) => new SmoothBlock(color: color)).toList());
   }
 }
 

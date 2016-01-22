@@ -436,8 +436,9 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 /// fixed number of children that you wish to arrange in a block layout and that
 /// might exceed the height of its container (and therefore need to scroll).
 class Block extends StatelessComponent {
-  Block(this.children, {
+  Block({
     Key key,
+    this.children,
     this.padding,
     this.initialScrollOffset,
     this.scrollDirection: Axis.vertical,

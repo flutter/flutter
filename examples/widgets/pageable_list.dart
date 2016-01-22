@@ -79,7 +79,7 @@ class PageableListAppState extends State<PageableListApp> {
 
   Widget _buildDrawer() {
     return new Drawer(
-      child: new Block(<Widget>[
+      child: new Block(children: <Widget>[
         new DrawerHeader(child: new Text('Options')),
         new DrawerItem(
           icon: 'navigation/more_horiz',

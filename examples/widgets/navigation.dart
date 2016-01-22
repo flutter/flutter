@@ -8,7 +8,8 @@ class Home extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Material(
       child: new Center(
-        child: new Block(<Widget>[
+        child: new Block(
+          children: <Widget>[
             new Text(
               'You are at home.',
               style: Theme.of(context).text.display2.copyWith(textAlign: TextAlign.center)
@@ -34,7 +35,8 @@ class Shopping extends StatelessComponent {
     return new Material(
       color: Colors.deepPurple[300],
       child: new Center(
-        child: new Block(<Widget>[
+        child: new Block(
+          children: <Widget>[
             new Text(
               'Village Shop',
               style: Theme.of(context).text.display2.copyWith(textAlign: TextAlign.center)
@@ -60,7 +62,8 @@ class Adventure extends StatelessComponent {
     return new Material(
       color: Colors.red[300],
       child: new Center(
-        child: new Block(<Widget>[
+        child: new Block(
+          children: <Widget>[
             new Text(
               'Monster\'s Lair',
               style: Theme.of(context).text.display2.copyWith(textAlign: TextAlign.center)
