@@ -24,55 +24,56 @@ class RenderParagraph extends RenderBox {
 
   RenderParagraph(
     TextSpan text
-  ) : textPainter = new TextPainter(text) {
+  ) : _textPainter = new TextPainter(text) {
     assert(text != null);
   }
 
-  final TextPainter textPainter;
+  final TextPainter _textPainter;
 
   BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
 
   /// The text to display
-  TextSpan get text => textPainter.text;
+  TextSpan get text => _textPainter.text;
   void set text(TextSpan value) {
-    if (textPainter.text == value)
+    if (_textPainter.text == value)
       return;
-    textPainter.text = value;
+    _textPainter.text = value;
     _constraintsForCurrentLayout = null;
     markNeedsLayout();
   }
 
-  void layoutText(BoxConstraints constraints) {
+  // TODO(abarth): This logic should live in TextPainter and be shared with RenderEditableLine.
+  void _layoutText(BoxConstraints constraints) {
     assert(constraints != null);
     assert(constraints.isNormalized);
     if (_constraintsForCurrentLayout == constraints)
       return; // already cached this layout
-    textPainter.maxWidth = constraints.maxWidth;
-    textPainter.minWidth = constraints.minWidth;
-    textPainter.minHeight = constraints.minHeight;
-    textPainter.maxHeight = constraints.maxHeight;
-    textPainter.layout();
+    _textPainter.maxWidth = constraints.maxWidth;
+    _textPainter.minWidth = constraints.minWidth;
+    _textPainter.minHeight = constraints.minHeight;
+    _textPainter.maxHeight = constraints.maxHeight;
+    _textPainter.layout();
     // By default, we shrinkwrap to the intrinsic width.
-    double width = constraints.constrainWidth(textPainter.maxIntrinsicWidth);
-    textPainter.minWidth = width;
-    textPainter.maxWidth = width;
-    textPainter.layout();
+    double width = constraints.constrainWidth(_textPainter.maxIntrinsicWidth);
+    _textPainter.minWidth = width;
+    _textPainter.maxWidth = width;
+    _textPainter.layout();
     _constraintsForCurrentLayout = constraints;
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    layoutText(constraints);
-    return constraints.constrainWidth(textPainter.minIntrinsicWidth);
+    _layoutText(constraints);
+    return constraints.constrainWidth(_textPainter.minIntrinsicWidth);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    layoutText(constraints);
-    return constraints.constrainWidth(textPainter.maxIntrinsicWidth);
+    _layoutText(constraints);
+    return constraints.constrainWidth(_textPainter.maxIntrinsicWidth);
   }
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
-    layoutText(constraints);
-    return constraints.constrainHeight(textPainter.size.height);
+    _layoutText(constraints);
+    return constraints.constrainHeight(_textPainter.size.height);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
@@ -87,15 +88,15 @@ class RenderParagraph extends RenderBox {
 
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
-    layoutText(constraints);
-    return textPainter.computeDistanceToActualBaseline(baseline);
+    _layoutText(constraints);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
   bool hitTestSelf(Point position) => true;
 
   void performLayout() {
-    layoutText(constraints);
-    size = constraints.constrain(textPainter.size);
+    _layoutText(constraints);
+    size = constraints.constrain(_textPainter.size);
   }
 
   void paint(PaintingContext context, Offset offset) {
@@ -106,8 +107,8 @@ class RenderParagraph extends RenderBox {
     //
     // TODO(abarth): Make computing the min/max intrinsic width/height
     // a non-destructive operation.
-    layoutText(constraints);
-    textPainter.paint(context.canvas, offset);
+    _layoutText(constraints);
+    _textPainter.paint(context.canvas, offset);
   }
 
   // we should probably expose a way to do precise (inter-glpyh) hit testing

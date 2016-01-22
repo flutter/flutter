@@ -140,8 +140,8 @@ class EditableString implements KeyboardClient {
   }
 }
 
-class EditableText extends StatefulComponent {
-  EditableText({
+class RawEditableLine extends StatefulComponent {
+  RawEditableLine({
     Key key,
     this.value,
     this.focused: false,
@@ -160,10 +160,12 @@ class EditableText extends StatefulComponent {
   final SizeChangedCallback onContentSizeChanged;
   final Offset scrollOffset;
 
-  EditableTextState createState() => new EditableTextState();
+  RawEditableTextState createState() => new RawEditableTextState();
 }
 
-class EditableTextState extends State<EditableText> {
+class RawEditableTextState extends State<RawEditableLine> {
+  // TODO(abarth): Move the cursor timer into RenderEditableLine so we can
+  // remove this extra widget.
   Timer _cursorTimer;
   bool _showCursor = false;
 
@@ -209,25 +211,20 @@ class EditableTextState extends State<EditableText> {
     else if (!config.focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    return new SizedBox(
-      width: double.INFINITY,
-      child: new _EditableTextWidget(
-        value: config.value,
-        style: config.style,
-        cursorColor: config.cursorColor,
-        showCursor: _showCursor,
-        hideText: config.hideText,
-        onContentSizeChanged: config.onContentSizeChanged,
-        scrollOffset: config.scrollOffset
-      )
+    return new _EditableLineWidget(
+      value: config.value,
+      style: config.style,
+      cursorColor: config.cursorColor,
+      showCursor: _showCursor,
+      hideText: config.hideText,
+      onContentSizeChanged: config.onContentSizeChanged,
+      scrollOffset: config.scrollOffset
     );
   }
 }
 
-final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
-
-class _EditableTextWidget extends LeafRenderObjectWidget {
-  _EditableTextWidget({
+class _EditableLineWidget extends LeafRenderObjectWidget {
+  _EditableLineWidget({
     Key key,
     this.value,
     this.style,
@@ -246,9 +243,9 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
   final SizeChangedCallback onContentSizeChanged;
   final Offset scrollOffset;
 
-  RenderEditableParagraph createRenderObject() {
-    return new RenderEditableParagraph(
-      text: _buildTextSpan(),
+  RenderEditableLine createRenderObject() {
+    return new RenderEditableLine(
+      text: _styledTextSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
       onContentSizeChanged: onContentSizeChanged,
@@ -256,17 +253,16 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
     );
   }
 
-  void updateRenderObject(RenderEditableParagraph renderObject,
-                          _EditableTextWidget oldWidget) {
-    renderObject.text = _buildTextSpan();
+  void updateRenderObject(RenderEditableLine renderObject,
+                          _EditableLineWidget oldWidget) {
+    renderObject.text = _styledTextSpan;
     renderObject.cursorColor = cursorColor;
     renderObject.showCursor = showCursor;
     renderObject.onContentSizeChanged = onContentSizeChanged;
     renderObject.scrollOffset = scrollOffset;
   }
 
-  // Construct a TextSpan that renders the EditableString using the chosen style.
-  TextSpan _buildTextSpan() {
+  StyledTextSpan get _styledTextSpan {
     if (!hideText && value.composing.isValid) {
       TextStyle composingStyle = style.merge(
         const TextStyle(decoration: TextDecoration.underline)
@@ -284,8 +280,6 @@ class _EditableTextWidget extends LeafRenderObjectWidget {
     String text = value.text;
     if (hideText)
       text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
-    return new StyledTextSpan(style, <TextSpan>[
-      new PlainTextSpan(text.isEmpty ? _kZeroWidthSpace : text)
-    ]);
+    return new StyledTextSpan(style, <TextSpan>[ new PlainTextSpan(text) ]);
   }
 }
