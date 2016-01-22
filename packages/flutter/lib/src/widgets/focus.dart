@@ -25,7 +25,7 @@ class _FocusScope extends InheritedWidget {
     Widget child
   }) : super(key: key, child: child);
 
-  final FocusState focusState;
+  final _FocusState focusState;
   final bool scopeFocused;
 
   // These are mutable because we implicitly change them when they're null in
@@ -144,6 +144,12 @@ class Focus extends StatefulComponent {
     }
   }
 
+  static void clear(BuildContext context) {
+    _FocusScope focusScope = context.ancestorWidgetOfExactType(_FocusScope);
+    if (focusScope != null)
+      focusScope.focusState._clearFocusedWidget();
+  }
+
   /// Focuses a particular focus scope, identified by its GlobalKey. The widget
   /// must be in the widget tree.
   ///
@@ -157,10 +163,10 @@ class Focus extends StatefulComponent {
       focusScope.focusState._setFocusedScope(key);
   }
 
-  FocusState createState() => new FocusState();
+  _FocusState createState() => new _FocusState();
 }
 
-class FocusState extends State<Focus> {
+class _FocusState extends State<Focus> {
   GlobalKey _focusedWidget; // when null, the first component to ask if it's focused will get the focus
   GlobalKey _currentlyRegisteredWidgetRemovalListenerKey;
 
@@ -181,12 +187,19 @@ class FocusState extends State<Focus> {
     }
   }
 
+  void _clearFocusedWidget() {
+    if (_focusedWidget != null) {
+      _updateWidgetRemovalListener(null);
+      setState(() {
+        _focusedWidget = null;
+      });
+    }
+  }
+
   void _handleWidgetRemoved(GlobalKey key) {
+    assert(key != null);
     assert(_focusedWidget == key);
-    _updateWidgetRemovalListener(null);
-    setState(() {
-      _focusedWidget = null;
-    });
+    _clearFocusedWidget();
   }
 
   void _updateWidgetRemovalListener(GlobalKey key) {

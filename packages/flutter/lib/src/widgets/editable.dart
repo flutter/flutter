@@ -136,6 +136,7 @@ class EditableString implements KeyboardClient {
   }
 
   void submit(SubmitAction action) {
+    composing = const TextRange.empty();
     onSubmitted();
   }
 }

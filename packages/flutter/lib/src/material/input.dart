@@ -90,6 +90,7 @@ class InputState extends ScrollableState<Input> {
   }
 
   void _handleTextSubmitted() {
+    Focus.clear(context);
     if (config.onSubmitted != null)
       config.onSubmitted(_value);
   }
