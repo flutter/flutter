@@ -77,15 +77,11 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
 
   GlobalObjectKey _navigator;
 
-  Size _size;
-  EdgeDims _padding;
   LocaleQueryData _localeData;
 
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
-    _size = ui.window.size;
-    _padding = _getPadding(ui.window);
     didChangeLocale(ui.window.locale);
     WidgetFlutterBinding.instance.addObserver(this);
   }
@@ -106,10 +102,10 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     return result;
   }
 
-  void didChangeSize(Size size) {
+  void didChangeMetrics() {
     setState(() {
-      _size = size;
-      _padding = _getPadding(ui.window);
+      // The properties of ui.window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
     });
   }
 
@@ -150,7 +146,11 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
 
     ThemeData theme = config.theme ?? new ThemeData.fallback();
     Widget result = new MediaQuery(
-      data: new MediaQueryData(size: _size, padding: _padding),
+      data: new MediaQueryData(
+        size: ui.window.size,
+        devicePixelRatio: ui.window.devicePixelRatio,
+        padding: _getPadding(ui.window)
+      ),
       child: new LocaleQuery(
         data: _localeData,
         child: new AnimatedTheme(
