@@ -131,6 +131,7 @@ TEST_F(FontLanguageTest, ScriptMatchTest) {
         { "zh-Hani", "Hani", SUPPORTED },
         { "ko-Kore", "Kore", SUPPORTED },
         { "ko-Hang", "Hang", SUPPORTED },
+        { "zh-Hanb", "Hanb", SUPPORTED },
 
         // Japanese supports Hiragana, Katakanara, etc.
         { "ja-Jpan", "Hira", SUPPORTED },
@@ -142,6 +143,10 @@ TEST_F(FontLanguageTest, ScriptMatchTest) {
         // Chinese supports Han.
         { "zh-Hans", "Hani", SUPPORTED },
         { "zh-Hant", "Hani", SUPPORTED },
+        { "zh-Hanb", "Hani", SUPPORTED },
+
+        // Hanb supports Bopomofo.
+        { "zh-Hanb", "Bopo", SUPPORTED },
 
         // Korean supports Hangul.
         { "ko-Kore", "Hang", SUPPORTED },
@@ -176,12 +181,19 @@ TEST_F(FontLanguageTest, ScriptMatchTest) {
         // Kanji doesn't support Chinese, etc.
         { "zh-Hani", "Hant", NOT_SUPPORTED },
         { "zh-Hani", "Hans", NOT_SUPPORTED },
+        { "zh-Hani", "Hanb", NOT_SUPPORTED },
 
         // Hangul doesn't support Korean, etc.
         { "ko-Hang", "Kore", NOT_SUPPORTED },
         { "ko-Hani", "Kore", NOT_SUPPORTED },
         { "ko-Hani", "Hang", NOT_SUPPORTED },
         { "ko-Hang", "Hani", NOT_SUPPORTED },
+
+        // Han with botomofo doesn't support simplified Chinese, etc.
+        { "zh-Hanb", "Hant", NOT_SUPPORTED },
+        { "zh-Hanb", "Hans", NOT_SUPPORTED },
+        { "zh-Hanb", "Jpan", NOT_SUPPORTED },
+        { "zh-Hanb", "Kore", NOT_SUPPORTED },
     };
 
     for (auto testCase : testCases) {
