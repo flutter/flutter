@@ -39,10 +39,15 @@ class MediaQueryData {
       return false;
     MediaQueryData typedOther = other;
     return typedOther.size == size
-        && typedOther.padding == padding;
+        && typedOther.padding == padding
+        && typedOther.devicePixelRatio == devicePixelRatio;
   }
 
-  int get hashCode => size.hashCode;
+  int get hashCode => hashValues(
+    size.hashCode,
+    padding.hashCode,
+    devicePixelRatio.hashCode
+  );
 
   String toString() => '$runtimeType($size, $orientation)';
 }

@@ -62,7 +62,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Rendere
   void handleMetricsChanged() {
     super.handleMetricsChanged();
     for (BindingObserver observer in _observers)
-      observer.didChangeMetrics(ui.window.size);
+      observer.didChangeMetrics();
   }
 
   void handleLocaleChanged() {
