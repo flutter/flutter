@@ -61,18 +61,18 @@ class Input extends Scrollable {
 
 class InputState extends ScrollableState<Input> {
   String _value;
-  EditableString _editableValue;
+  EditableString _editableString;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
 
   double _contentWidth = 0.0;
   double _containerWidth = 0.0;
 
-  EditableString get editableValue => _editableValue;
+  EditableString get editableValue => _editableString;
 
   void initState() {
     super.initState();
     _value = config.initialValue;
-    _editableValue = new EditableString(
+    _editableString = new EditableString(
       text: _value,
       onUpdated: _handleTextUpdated,
       onSubmitted: _handleTextSubmitted
@@ -80,9 +80,9 @@ class InputState extends ScrollableState<Input> {
   }
 
   void _handleTextUpdated() {
-    if (_value != _editableValue.text) {
+    if (_value != _editableString.text) {
       setState(() {
-        _value = _editableValue.text;
+        _value = _editableString.text;
       });
       if (config.onChanged != null)
         config.onChanged(_value);
@@ -100,10 +100,10 @@ class InputState extends ScrollableState<Input> {
     bool focused = Focus.at(context, autofocus: config.autofocus);
 
     if (focused && !_keyboardHandle.attached) {
-      _keyboardHandle = keyboard.show(_editableValue.stub, config.keyboardType);
-      _keyboardHandle.setText(_editableValue.text);
-      _keyboardHandle.setSelection(_editableValue.selection.start,
-                                   _editableValue.selection.end);
+      _keyboardHandle = keyboard.show(_editableString.stub, config.keyboardType);
+      _keyboardHandle.setText(_editableString.text);
+      _keyboardHandle.setSelection(_editableString.selection.start,
+                                   _editableString.selection.end);
     } else if (!focused && _keyboardHandle.attached) {
       _keyboardHandle.release();
     }
@@ -127,8 +127,8 @@ class InputState extends ScrollableState<Input> {
       focusHighlightColor = focused ? themeData.primarySwatch[400] : themeData.hintColor;
     }
 
-    textChildren.add(new EditableText(
-      value: _editableValue,
+    textChildren.add(new RawEditableLine(
+      value: _editableString,
       focused: focused,
       style: textStyle,
       hideText: config.hideText,

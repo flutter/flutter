@@ -31,7 +31,7 @@ void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
   serviceMocker.registerMockService(KeyboardService.serviceName, mockKeyboard);
 
-  test('Editable text has consistent width', () {
+  test('Editable text has consistent size', () {
     testWidgets((WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
       String inputValue;
@@ -53,17 +53,21 @@ void main() {
       Element input = tester.findElementByKey(inputKey);
       Size emptyInputSize = (input.renderObject as RenderBox).size;
 
-      // Simulate entry of text through the keyboard.
-      expect(mockKeyboard.client, isNotNull);
-      const String testValue = 'Test';
-      mockKeyboard.client.setComposingText(testValue, testValue.length);
+      void enterText(String testValue) {
+        // Simulate entry of text through the keyboard.
+        expect(mockKeyboard.client, isNotNull);
+        mockKeyboard.client.setComposingText(testValue, testValue.length);
 
-      // Check that the onChanged event handler fired.
-      expect(inputValue, equals(testValue));
+        // Check that the onChanged event handler fired.
+        expect(inputValue, equals(testValue));
 
-      tester.pumpWidget(builder());
+        tester.pumpWidget(builder());
+      }
 
-      // Check that the Input with text has the same size as the empty Input.
+      enterText(' ');
+      expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
+
+      enterText('Test');
       expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
     });
   });
@@ -85,7 +89,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      EditableTextState editableText = tester.findStateOfType(EditableTextState);
+      RawEditableTextState editableText = tester.findStateOfType(RawEditableTextState);
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {
