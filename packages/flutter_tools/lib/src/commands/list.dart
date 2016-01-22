@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import '../android/device_android.dart';
 import '../ios/device_ios.dart';
@@ -43,25 +44,27 @@ class ListCommand extends FlutterCommand {
       }
     }
 
-    if (details)
-      print('iOS Devices:');
+    if (Platform.isMacOS) {
+      if (details)
+        print('iOS Devices:');
 
-    for (IOSDevice device in IOSDevice.getAttachedDevices(devices.iOS)) {
-      if (details) {
-        print('${device.id}\t${device.name}');
-      } else {
-        print(device.id);
+      for (IOSDevice device in IOSDevice.getAttachedDevices(devices.iOS)) {
+        if (details) {
+          print('${device.id}\t${device.name}');
+        } else {
+          print(device.id);
+        }
       }
-    }
 
-    if (details)
-      print('iOS Simulators:');
+      if (details)
+        print('iOS Simulators:');
 
-    for (IOSSimulator device in IOSSimulator.getAttachedDevices(devices.iOSSimulator)) {
-      if (details) {
-        print('${device.id}\t${device.name}');
-      } else {
-        print(device.id);
+      for (IOSSimulator device in IOSSimulator.getAttachedDevices(devices.iOSSimulator)) {
+        if (details) {
+          print('${device.id}\t${device.name}');
+        } else {
+          print(device.id);
+        }
       }
     }
 

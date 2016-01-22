@@ -21,10 +21,6 @@ class IOSDevice extends Device {
       'To work with iOS devices, please install ideviceinstaller. '
       'If you use homebrew, you can install it with '
       '"\$ brew install ideviceinstaller".';
-  static const String _linuxInstructions =
-      'To work with iOS devices, please install ideviceinstaller. '
-      'On Ubuntu or Debian, you can install it with '
-      '"\$ apt-get install ideviceinstaller".';
 
   String _installerPath;
   String get installerPath => _installerPath;
@@ -100,19 +96,16 @@ class IOSDevice extends Device {
   static final Map<String, String> _commandMap = {};
   static String _checkForCommand(
     String command, [
-    String macInstructions = _macInstructions,
-    String linuxInstructions = _linuxInstructions
+    String macInstructions = _macInstructions
   ]) {
     return _commandMap.putIfAbsent(command, () {
       try {
         command = runCheckedSync(['which', command]).trim();
       } catch (e) {
         if (Platform.isMacOS) {
-          logging.severe(macInstructions);
-        } else if (Platform.isLinux) {
-          logging.severe(linuxInstructions);
+          logging.severe('$command not found. $macInstructions');
         } else {
-          logging.severe('$command is not available on your platform.');
+          logging.severe('Cannot control iOS devices or simulators.  $command is not available on your platform.');
         }
       }
       return command;
@@ -331,9 +324,12 @@ class IOSSimulator extends Device {
 
   static List<IOSSimulator> getAttachedDevices([IOSSimulator mockIOS]) {
     List<IOSSimulator> devices = [];
-    _IOSSimulatorInfo deviceInfo = _getRunningSimulatorInfo(mockIOS);
-    if (deviceInfo != null)
-      devices.add(new IOSSimulator(id: deviceInfo.id, name: deviceInfo.name));
+    try {
+      _IOSSimulatorInfo deviceInfo = _getRunningSimulatorInfo(mockIOS);
+      if (deviceInfo != null)
+        devices.add(new IOSSimulator(id: deviceInfo.id, name: deviceInfo.name));
+    } catch (e) {
+    }
     return devices;
   }
 
