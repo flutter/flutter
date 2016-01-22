@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
+import 'scrollable.dart';
 
 // _noFocusedScope is used by Focus to track the case where none of the Focus
 // component's subscopes (e.g. dialogs) are focused. This is distinct from the
@@ -130,10 +135,13 @@ class Focus extends StatefulComponent {
   /// Don't call moveTo() from your build() functions, it's intended to be
   /// called from event listeners, e.g. in response to a finger tap or tab key.
   static void moveTo(GlobalKey key) {
-    assert(key.currentContext != null);
+    BuildContext focusedContext = key.currentContext;
+    assert(focusedContext != null);
     _FocusScope focusScope = key.currentContext.ancestorWidgetOfExactType(_FocusScope);
-    if (focusScope != null)
+    if (focusScope != null) {
       focusScope.focusState._setFocusedWidget(key);
+      Scrollable.ensureVisible(focusedContext);
+    }
   }
 
   /// Focuses a particular focus scope, identified by its GlobalKey. The widget
@@ -239,7 +247,30 @@ class FocusState extends State<Focus> {
     super.dispose();
   }
 
+  Size _mediaSize;
+  EdgeDims _mediaPadding;
+
+  void _ensureVisibleIfFocused() {
+    if (!Focus._atScope(context))
+      return;
+    BuildContext focusedContext = _focusedWidget?.currentContext;
+    if (focusedContext == null)
+      return;
+    Scrollable.ensureVisible(focusedContext);
+  }
+
   Widget build(BuildContext context) {
+    MediaQueryData data = MediaQuery.of(context);
+    if (data != null) {
+      Size newMediaSize = data.size;
+      EdgeDims newMediaPadding = data.padding;
+      if (newMediaSize != _mediaSize || newMediaPadding != _mediaPadding) {
+        _mediaSize = newMediaSize;
+        _mediaPadding = newMediaPadding;
+        scheduleMicrotask(_ensureVisibleIfFocused);
+      }
+    }
+
     return new _FocusScope(
       focusState: this,
       scopeFocused: Focus._atScope(context),

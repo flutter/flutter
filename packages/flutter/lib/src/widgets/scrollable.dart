@@ -64,7 +64,7 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   /// Scrolls the closest enclosing scrollable to make the given context visible.
-  static Future ensureVisible(BuildContext context, { Duration duration, Curve curve }) {
+  static Future ensureVisible(BuildContext context, { Duration duration, Curve curve: Curves.ease }) {
     assert(context.findRenderObject() is RenderBox);
     // TODO(abarth): This function doesn't handle nested scrollable widgets.
 
@@ -80,18 +80,41 @@ abstract class Scrollable extends StatefulComponent {
     assert(scrollableBox.attached);
     Size scrollableSize = scrollableBox.size;
 
-    double scrollOffsetDelta;
+    double targetMin;
+    double targetMax;
+    double scrollableMin;
+    double scrollableMax;
+
     switch (scrollable.config.scrollDirection) {
       case Axis.vertical:
-        Point targetCenter = targetBox.localToGlobal(new Point(0.0, targetSize.height / 2.0));
-        Point scrollableCenter = scrollableBox.localToGlobal(new Point(0.0, scrollableSize.height / 2.0));
-        scrollOffsetDelta = targetCenter.y - scrollableCenter.y;
+        targetMin = targetBox.localToGlobal(Point.origin).y;
+        targetMax = targetBox.localToGlobal(new Point(0.0, targetSize.height)).y;
+        scrollableMin = scrollableBox.localToGlobal(Point.origin).y;
+        scrollableMax = scrollableBox.localToGlobal(new Point(0.0, scrollableSize.height)).y;
         break;
       case Axis.horizontal:
-        Point targetCenter = targetBox.localToGlobal(new Point(targetSize.width / 2.0, 0.0));
-        Point scrollableCenter = scrollableBox.localToGlobal(new Point(scrollableSize.width / 2.0, 0.0));
-        scrollOffsetDelta = targetCenter.x - scrollableCenter.x;
+        targetMin = targetBox.localToGlobal(Point.origin).x;
+        targetMax = targetBox.localToGlobal(new Point(targetSize.width, 0.0)).x;
+        scrollableMin = scrollableBox.localToGlobal(Point.origin).x;
+        scrollableMax = scrollableBox.localToGlobal(new Point(scrollableSize.width, 0.0)).x;
         break;
+    }
+
+    double scrollOffsetDelta;
+    if (targetMin < scrollableMin) {
+      if (targetMax > scrollableMax) {
+        // The target is to big to fit inside the scrollable. The best we can do
+        // is to center the target.
+        double targetCenter = (targetMin + targetMax) / 2.0;
+        double scrollableCenter = (scrollableMin + scrollableMax) / 2.0;
+        scrollOffsetDelta = targetCenter - scrollableCenter;
+      } else {
+        scrollOffsetDelta = targetMin - scrollableMin;
+      }
+    } else if (targetMax > scrollableMax) {
+      scrollOffsetDelta = targetMax - scrollableMax;
+    } else {
+      return new Future.value();
     }
 
     ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
@@ -281,7 +304,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return _animateTo(newScrollOffset, duration, curve);
   }
 
-  Future scrollBy(double scrollDelta, { Duration duration, Curve curve }) {
+  Future scrollBy(double scrollDelta, { Duration duration, Curve curve: Curves.ease }) {
     double newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
     return scrollTo(newScrollOffset, duration: duration, curve: curve);
   }

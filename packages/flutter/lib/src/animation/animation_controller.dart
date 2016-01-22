@@ -145,13 +145,22 @@ class AnimationController extends Animation<double>
   }
 
   Future animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
-    Duration remainingDuration = (duration ?? this.duration) * (target - _value).abs();
+    Duration simulationDuration = duration;
+    if (simulationDuration == null) {
+      double range = upperBound - lowerBound;
+      if (range.isFinite) {
+        double remainingFraction = (target - _value).abs() / range;
+        simulationDuration = this.duration * remainingFraction;
+      }
+    }
     stop();
-    if (remainingDuration == Duration.ZERO)
+    if (simulationDuration == Duration.ZERO) {
+      assert(value == target);
       return new Future.value();
-    assert(remainingDuration > Duration.ZERO);
+    }
+    assert(simulationDuration > Duration.ZERO);
     assert(!isAnimating);
-    return _startSimulation(new _TweenSimulation(_value, target, remainingDuration, curve));
+    return _startSimulation(new _TweenSimulation(_value, target, simulationDuration, curve));
   }
 
   Future _startSimulation(Simulation simulation) {

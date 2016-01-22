@@ -366,7 +366,7 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   Widget build(BuildContext context) {
-    EdgeDims padding = MediaQuery.of(context).padding;
+    EdgeDims padding = MediaQuery.of(context)?.padding ?? EdgeDims.zero;
 
     if (_snackBars.length > 0) {
       ModalRoute route = ModalRoute.of(context);
