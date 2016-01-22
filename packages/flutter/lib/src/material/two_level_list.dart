@@ -117,7 +117,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
               turns: _iconTurns,
               child: new Icon(
                 icon: 'navigation/expand_more',
-                colorFilter: new ColorFilter.mode(_iconColor.evaluate(_easeInAnimation), TransferMode.srcATop)
+                color: _iconColor.evaluate(_easeInAnimation)
               )
             )
           ),

@@ -13,15 +13,15 @@ class IconButton extends StatelessComponent {
   const IconButton({
     Key key,
     this.icon,
+    this.colorTheme,
     this.color,
-    this.colorFilter,
     this.onPressed,
     this.tooltip
   }) : super(key: key);
 
   final String icon;
-  final IconThemeColor color;
-  final ColorFilter colorFilter;
+  final IconThemeColor colorTheme;
+  final Color color;
   final VoidCallback onPressed;
   final String tooltip;
 
@@ -32,8 +32,8 @@ class IconButton extends StatelessComponent {
         padding: const EdgeDims.all(8.0),
         child: new Icon(
           icon: icon,
-          color: color,
-          colorFilter: colorFilter
+          colorTheme: colorTheme,
+          color: color
         )
       )
     );
@@ -51,8 +51,8 @@ class IconButton extends StatelessComponent {
     description.add('$icon');
     if (onPressed == null)
       description.add('disabled');
-    if (color != null)
-      description.add('$color');
+    if (colorTheme != null)
+      description.add('$colorTheme');
     if (tooltip != null)
       description.add('tooltip: "$tooltip"');
   }

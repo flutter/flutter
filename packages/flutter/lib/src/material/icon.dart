@@ -27,8 +27,8 @@ class Icon extends StatelessComponent {
     Key key,
     this.size: IconSize.s24,
     this.icon: '',
-    this.color,
-    this.colorFilter
+    this.colorTheme,
+    this.color
   }) : super(key: key) {
     assert(size != null);
     assert(icon != null);
@@ -36,11 +36,11 @@ class Icon extends StatelessComponent {
 
   final IconSize size;
   final String icon;
-  final IconThemeColor color;
-  final ColorFilter colorFilter;
+  final IconThemeColor colorTheme;
+  final Color color;
 
   String _getColorSuffix(BuildContext context) {
-    IconThemeColor iconThemeColor = color;
+    IconThemeColor iconThemeColor = colorTheme;
     if (iconThemeColor == null) {
       IconThemeData iconThemeData = IconTheme.of(context);
       iconThemeColor = iconThemeData == null ? null : iconThemeData.color;
@@ -74,7 +74,7 @@ class Icon extends StatelessComponent {
       name: '$category/$density/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
       width: iconSize.toDouble(),
       height: iconSize.toDouble(),
-      colorFilter: colorFilter
+      color: color
     );
   }
 
