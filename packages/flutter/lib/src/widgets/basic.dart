@@ -1482,7 +1482,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.image,
     this.width,
     this.height,
-    this.colorFilter,
+    this.color,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -1504,8 +1504,8 @@ class RawImage extends LeafRenderObjectWidget {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, apply this color filter to the image before painint.
-  final ColorFilter colorFilter;
+  /// If non-null, apply this color filter to the image before painting.
+  final Color color;
 
   /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
@@ -1533,7 +1533,7 @@ class RawImage extends LeafRenderObjectWidget {
     image: image,
     width: width,
     height: height,
-    colorFilter: colorFilter,
+    color: color,
     fit: fit,
     alignment: alignment,
     repeat: repeat,
@@ -1543,7 +1543,7 @@ class RawImage extends LeafRenderObjectWidget {
     renderObject.image = image;
     renderObject.width = width;
     renderObject.height = height;
-    renderObject.colorFilter = colorFilter;
+    renderObject.color = color;
     renderObject.alignment = alignment;
     renderObject.fit = fit;
     renderObject.repeat = repeat;
@@ -1566,7 +1566,7 @@ class RawImageResource extends StatefulComponent {
     this.image,
     this.width,
     this.height,
-    this.colorFilter,
+    this.color,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -1590,8 +1590,8 @@ class RawImageResource extends StatefulComponent {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, apply this color filter to the image before painint.
-  final ColorFilter colorFilter;
+  /// If non-null, apply this color filter to the image before painting.
+  final Color color;
 
   /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
@@ -1649,7 +1649,7 @@ class _ImageListenerState extends State<RawImageResource> {
       image: _resolvedImage,
       width: config.width,
       height: config.height,
-      colorFilter: config.colorFilter,
+      color: config.color,
       fit: config.fit,
       alignment: config.alignment,
       repeat: config.repeat,
@@ -1665,7 +1665,7 @@ class NetworkImage extends StatelessComponent {
     this.src,
     this.width,
     this.height,
-    this.colorFilter,
+    this.color,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -1687,8 +1687,8 @@ class NetworkImage extends StatelessComponent {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, apply this color filter to the image before painint.
-  final ColorFilter colorFilter;
+  /// If non-null, apply this color filter to the image before painting.
+  final Color color;
 
   /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
@@ -1717,7 +1717,7 @@ class NetworkImage extends StatelessComponent {
       image: imageCache.load(src),
       width: width,
       height: height,
-      colorFilter: colorFilter,
+      color: color,
       fit: fit,
       alignment: alignment,
       repeat: repeat,
@@ -1763,7 +1763,7 @@ class AsyncImage extends StatelessComponent {
     this.provider,
     this.width,
     this.height,
-    this.colorFilter,
+    this.color,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -1785,8 +1785,8 @@ class AsyncImage extends StatelessComponent {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, apply this color filter to the image before painint.
-  final ColorFilter colorFilter;
+  /// If non-null, apply this color filter to the image before painting.
+  final Color color;
 
   /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
@@ -1815,7 +1815,7 @@ class AsyncImage extends StatelessComponent {
       image: imageCache.loadProvider(provider),
       width: width,
       height: height,
-      colorFilter: colorFilter,
+      color: color,
       fit: fit,
       alignment: alignment,
       repeat: repeat,
@@ -1837,7 +1837,7 @@ class AssetImage extends StatelessComponent {
     this.bundle,
     this.width,
     this.height,
-    this.colorFilter,
+    this.color,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -1865,8 +1865,8 @@ class AssetImage extends StatelessComponent {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, apply this color filter to the image before painint.
-  final ColorFilter colorFilter;
+  /// If non-null, apply this color filter to the image before painting.
+  final Color color;
 
   /// How to inscribe the image into the place allocated during layout.
   final ImageFit fit;
@@ -1895,7 +1895,7 @@ class AssetImage extends StatelessComponent {
       image: (bundle ?? DefaultAssetBundle.of(context)).loadImage(name),
       width: width,
       height: height,
-      colorFilter: colorFilter,
+      color: color,
       fit: fit,
       alignment: alignment,
       repeat: repeat,

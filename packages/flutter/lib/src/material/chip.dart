@@ -19,9 +19,6 @@ const TextStyle _kLabelStyle = const TextStyle(
   textBaseline: TextBaseline.alphabetic
 );
 
-final ColorFilter _kIconColorFilter = new ColorFilter.mode(
-  Colors.black54, TransferMode.dstIn);
-
 class Chip extends StatelessComponent {
   const Chip({
     Key key,
@@ -66,7 +63,7 @@ class Chip extends StatelessComponent {
           child: new Icon(
             icon: 'navigation/cancel',
             size: IconSize.s18,
-            colorFilter: _kIconColorFilter
+            color: Colors.black54
           )
         )
       ));

@@ -23,13 +23,13 @@ class DrawerItem extends StatelessComponent {
   final VoidCallback onPressed;
   final bool selected;
 
-  ColorFilter _getIconColorFilter(ThemeData themeData) {
+  Color _getIconColor(ThemeData themeData) {
     if (selected) {
       if (themeData.brightness == ThemeBrightness.dark)
-        return new ColorFilter.mode(themeData.accentColor, TransferMode.srcATop);
-      return new ColorFilter.mode(themeData.primaryColor, TransferMode.srcATop);
+        return themeData.accentColor;
+      return themeData.primaryColor;
     }
-    return new ColorFilter.mode(Colors.black45, TransferMode.dstIn);
+    return Colors.black45;
   }
 
   TextStyle _getTextStyle(ThemeData themeData) {
@@ -53,7 +53,7 @@ class DrawerItem extends StatelessComponent {
           padding: const EdgeDims.symmetric(horizontal: 16.0),
           child: new Icon(
             icon: icon,
-            colorFilter: _getIconColorFilter(themeData)
+            color: _getIconColor(themeData)
           )
         )
       );

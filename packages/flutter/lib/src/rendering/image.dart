@@ -22,7 +22,7 @@ class RenderImage extends RenderBox {
     ui.Image image,
     double width,
     double height,
-    ColorFilter colorFilter,
+    Color color,
     ImageFit fit,
     FractionalOffset alignment,
     ImageRepeat repeat: ImageRepeat.noRepeat,
@@ -30,11 +30,13 @@ class RenderImage extends RenderBox {
   }) : _image = image,
       _width = width,
       _height = height,
-      _colorFilter = colorFilter,
+      _color = color,
       _fit = fit,
       _alignment = alignment,
       _repeat = repeat,
-      _centerSlice = centerSlice;
+      _centerSlice = centerSlice {
+    _updateColorFilter();
+  }
 
   /// The image to display.
   ui.Image get image => _image;
@@ -74,13 +76,24 @@ class RenderImage extends RenderBox {
     markNeedsLayout();
   }
 
-  /// If non-null, apply this color filter to the image before painint.
-  ColorFilter get colorFilter => _colorFilter;
   ColorFilter _colorFilter;
-  void set colorFilter (ColorFilter value) {
-    if (value == _colorFilter)
+
+  // Should we make the transfer mode configurable?
+  void _updateColorFilter() {
+    if (_color == null)
+      _colorFilter = null;
+    else
+      _colorFilter = new ColorFilter.mode(_color, TransferMode.srcIn);
+  }
+
+  /// If non-null, apply this color filter to the image before painting.
+  Color get color => _color;
+  Color _color;
+  void set color (Color value) {
+    if (value == _color)
       return;
-    _colorFilter = value;
+    _color = value;
+    _updateColorFilter();
     markNeedsPaint();
   }
 
