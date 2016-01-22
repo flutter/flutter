@@ -14,7 +14,7 @@ enum MaterialListType {
   threeLine
 }
 
-Map<MaterialListType, double> _kItemExtent = const <MaterialListType, double>{
+Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>{
   MaterialListType.oneLine: kOneLineListItemHeight,
   MaterialListType.oneLineWithAvatar: kOneLineListItemWithAvatarHeight,
   MaterialListType.twoLine: kTwoLineListItemHeight,
@@ -46,7 +46,7 @@ class _MaterialListState extends State<MaterialList> {
       initialScrollOffset: config.initialScrollOffset,
       scrollDirection: Axis.vertical,
       onScroll: config.onScroll,
-      itemExtent: _kItemExtent[config.type],
+      itemExtent: kListItemExtent[config.type],
       padding: const EdgeDims.symmetric(vertical: 8.0),
       scrollableListPainter: _scrollbarPainter,
       children: config.children
