@@ -175,5 +175,6 @@ initGcm() async {
 }
 
 main() {
+  initGcm();
   runApp(new FitnessApp());
 }

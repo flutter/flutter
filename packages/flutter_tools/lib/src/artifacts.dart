@@ -47,7 +47,7 @@ enum ArtifactType {
   snapshot,
   shell,
   mojo,
-  androidClassesDex,
+  androidClassesJar,
   androidIcuData,
   androidKeystore,
   androidLibSkyShell,
@@ -124,8 +124,8 @@ class ArtifactStore {
     ),
     const Artifact._(
       name: 'Compiled Java code',
-      fileName: 'classes.dex',
-      type: ArtifactType.androidClassesDex,
+      fileName: 'classes.dex.jar',
+      type: ArtifactType.androidClassesJar,
       targetPlatform: TargetPlatform.android
     ),
     const Artifact._(
@@ -219,14 +219,12 @@ class ArtifactStore {
     );
   }
 
-  /// Download the artifacts.zip archive for the given platform from GCS
-  /// and extract it to the local cache.
-  static Future _doDownloadArtifactsFromZip(String platform) async {
-    String url = getCloudStorageBaseUrl(platform) + 'artifacts.zip';
+  /// Download a file from the given URL and return the bytes.
+  static Future<List<int>> _downloadFile(Uri url) async {
     logging.info('Downloading $url.');
 
     HttpClient httpClient = new HttpClient();
-    HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
+    HttpClientRequest request = await httpClient.getUrl(url);
     HttpClientResponse response = await request.close();
     logging.fine('Received response statusCode=${response.statusCode}');
     if (response.statusCode != 200)
@@ -237,13 +235,29 @@ class ArtifactStore {
       responseBody.add(chunk);
     }
 
-    Archive archive = new ZipDecoder().decodeBytes(responseBody.takeBytes());
+    return responseBody.takeBytes();
+  }
+
+  /// Download a file from the given url and write it to the cache.
+  static Future _downloadFileToCache(Uri url, File cachedFile) async {
+    if (!cachedFile.parent.existsSync())
+      cachedFile.parent.createSync(recursive: true);
+
+    List<int> fileBytes = await _downloadFile(url);
+    cachedFile.writeAsBytesSync(fileBytes, flush: true);
+  }
+
+  /// Download the artifacts.zip archive for the given platform from GCS
+  /// and extract it to the local cache.
+  static Future _doDownloadArtifactsFromZip(String platform) async {
+    String url = getCloudStorageBaseUrl(platform) + 'artifacts.zip';
+    List<int> zipBytes = await _downloadFile(Uri.parse(url));
+
+    Archive archive = new ZipDecoder().decodeBytes(zipBytes);
     Directory cacheDir = _getCacheDirForPlatform(platform);
     for (ArchiveFile archiveFile in archive) {
       File cacheFile = new File(path.join(cacheDir.path, archiveFile.name));
-      IOSink sink = cacheFile.openWrite();
-      sink.add(archiveFile.content);
-      await sink.close();
+      cacheFile.writeAsBytesSync(archiveFile.content, flush: true);
     }
 
     for (Artifact artifact in knownArtifacts) {
@@ -300,6 +314,23 @@ class ArtifactStore {
       await _downloadArtifactsFromZip(artifact.platform);
       if (!cachedFile.existsSync()) {
         logging.severe('File not found in the platform artifacts: ${cachedFile.path}');
+        throw new ProcessExit(2);
+      }
+    }
+    return cachedFile.path;
+  }
+
+  static Future<String> getThirdPartyFile(String urlStr, String cacheSubdir) async {
+    Uri url = Uri.parse(urlStr);
+    Directory baseDir = _getBaseCacheDir();
+    Directory cacheDir = new Directory(path.join(
+        baseDir.path, 'third_party', cacheSubdir));
+    File cachedFile = new File(
+        path.join(cacheDir.path, url.pathSegments[url.pathSegments.length-1]));
+    if (!cachedFile.existsSync()) {
+      await _downloadFileToCache(url, cachedFile);
+      if (!cachedFile.existsSync()) {
+        logging.severe('Unable to fetch third-party artifact: $url');
         throw new ProcessExit(2);
       }
     }
