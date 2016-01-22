@@ -7,11 +7,19 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 class TestFocusable extends StatelessComponent {
-  TestFocusable(this.no, this.yes, GlobalKey key) : super(key: key);
+  TestFocusable({
+    GlobalKey key,
+    this.no,
+    this.yes,
+    this.autofocus: true
+  }) : super(key: key);
+
   final String no;
   final String yes;
+  final bool autofocus;
+
   Widget build(BuildContext context) {
-    bool focused = Focus.at(context, autofocus: true);
+    bool focused = Focus.at(context, autofocus: autofocus);
     return new GestureDetector(
       onTap: () { Focus.moveTo(key); },
       child: new Text(focused ? yes : no)
@@ -29,8 +37,16 @@ void main() {
           child: new Column(
             children: <Widget>[
               // reverse these when you fix https://github.com/flutter/engine/issues/1495
-              new TestFocusable('b', 'B FOCUSED', keyB),
-              new TestFocusable('a', 'A FOCUSED', keyA),
+              new TestFocusable(
+                key: keyB,
+                no: 'b',
+                yes: 'B FOCUSED'
+              ),
+              new TestFocusable(
+                key: keyA,
+                no: 'a',
+                yes: 'A FOCUSED'
+              ),
             ]
           )
         )
@@ -63,6 +79,37 @@ void main() {
       expect(tester.findText('A FOCUSED'), isNotNull);
       expect(tester.findText('b'),         isNotNull);
       expect(tester.findText('B FOCUSED'), isNull);
+    });
+  });
+
+  test('Can blur', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey keyA = new GlobalKey();
+      tester.pumpWidget(
+        new Focus(
+          child: new TestFocusable(
+            key: keyA,
+            no: 'a',
+            yes: 'A FOCUSED',
+            autofocus: false
+          )
+        )
+      );
+
+      expect(tester.findText('a'),         isNotNull);
+      expect(tester.findText('A FOCUSED'), isNull);
+
+      Focus.moveTo(keyA);
+      tester.pump();
+
+      expect(tester.findText('a'),         isNull);
+      expect(tester.findText('A FOCUSED'), isNotNull);
+
+      Focus.clear(keyA.currentContext);
+      tester.pump();
+
+      expect(tester.findText('a'),         isNotNull);
+      expect(tester.findText('A FOCUSED'), isNull);
     });
   });
 }
