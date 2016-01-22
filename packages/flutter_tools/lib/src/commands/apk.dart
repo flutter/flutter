@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -20,6 +22,9 @@ import 'start.dart';
 const String _kDefaultAndroidManifestPath = 'apk/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
 const String _kDefaultResourcesPath = 'apk/res';
+
+const String _kFlutterManifestPath = 'flutter.yaml';
+const String _kPubspecYamlPath = 'pubspec.yaml';
 
 // Alias of the key provided in the Chromium debug keystore
 const String _kDebugKeystoreKeyAlias = "chromiumdebugkey";
@@ -56,6 +61,7 @@ class _ApkBuilder {
 
   File _androidJar;
   File _aapt;
+  File _dx;
   File _zipalign;
   String _jarsigner;
 
@@ -64,12 +70,25 @@ class _ApkBuilder {
 
     String buildTools = '$androidSdk/build-tools/$_kBuildToolsVersion';
     _aapt = new File('$buildTools/aapt');
+    _dx = new File('$buildTools/dx');
     _zipalign = new File('$buildTools/zipalign');
     _jarsigner = 'jarsigner';
   }
 
   bool checkSdkPath() {
-    return (_androidJar.existsSync() && _aapt.existsSync() && _zipalign.existsSync());
+    return (_androidJar.existsSync() && _aapt.existsSync() && _dx.existsSync() && _zipalign.existsSync());
+  }
+
+  void compileClassesDex(File classesDex, List<File> jars) {
+    List<String> packageArgs = [_dx.path,
+      '--dex',
+      '--force-jumbo',
+      '--output', classesDex.path
+    ];
+
+    packageArgs.addAll(jars.map((File f) => f.path));
+
+    runCheckedSync(packageArgs);
   }
 
   void package(File outputApk, File androidManifest, Directory assets, Directory artifacts, Directory resources) {
@@ -106,10 +125,19 @@ class _ApkComponents {
   Directory androidSdk;
   File manifest;
   File icuData;
-  File classesDex;
+  List<File> jars;
+  List<Map<String, String>> services = [];
   File libSkyShell;
   File debugKeystore;
   Directory resources;
+}
+
+// TODO(mpcomplete): find a better home for this.
+dynamic _loadYamlFile(String path) {
+  if (!FileSystemEntity.isFileSync(path))
+    return null;
+  String manifestString = new File(path).readAsStringSync();
+  return loadYaml(manifestString);
 }
 
 class ApkCommand extends FlutterCommand {
@@ -151,6 +179,36 @@ class ApkCommand extends FlutterCommand {
         help: 'Password for the entry within the keystore.');
   }
 
+  Future _findServices(_ApkComponents components) async {
+    if (!ArtifactStore.isPackageRootValid)
+      return;
+
+    dynamic manifest = _loadYamlFile(_kFlutterManifestPath);
+    if (manifest['services'] == null)
+      return;
+
+    for (String service in manifest['services']) {
+      String serviceRoot = '${ArtifactStore.packageRoot}/$service/apk';
+      dynamic serviceConfig = _loadYamlFile('$serviceRoot/config.yaml');
+      if (serviceConfig == null || serviceConfig['jars'] == null)
+        continue;
+      components.services.addAll(serviceConfig['services']);
+      for (String jar in serviceConfig['jars']) {
+        // Jar might refer to an android SDK jar, or URL to download.
+        if (jar.startsWith("android-sdk:")) {
+          jar = jar.replaceAll('android-sdk:', '${components.androidSdk.path}/');
+          components.jars.add(new File(jar));
+        } else if (jar.startsWith("http")) {
+          String cachePath = await ArtifactStore.getThirdPartyFile(jar, service);
+          components.jars.add(new File(cachePath));
+        } else {
+          logging.severe('Service depends on a jar in an unrecognized format: $jar');
+          throw new ProcessExit(2);
+        }
+      }
+    }
+  }
+
   Future<_ApkComponents> _findApkComponents(BuildConfiguration config) async {
     String androidSdkPath;
     List<String> artifactPaths;
@@ -158,7 +216,7 @@ class ApkCommand extends FlutterCommand {
       androidSdkPath = '${runner.enginePath}/third_party/android_tools/sdk';
       artifactPaths = [
         '${runner.enginePath}/third_party/icu/android/icudtl.dat',
-        '${config.buildDir}/gen/sky/shell/shell/classes.dex',
+        '${config.buildDir}/gen/sky/shell/shell/classes.dex.jar',
         '${config.buildDir}/gen/sky/shell/shell/shell/libs/armeabi-v7a/libsky_shell.so',
         '${runner.enginePath}/build/android/ant/chromium-debug.keystore',
       ];
@@ -169,7 +227,7 @@ class ApkCommand extends FlutterCommand {
       }
       List<ArtifactType> artifactTypes = <ArtifactType>[
         ArtifactType.androidIcuData,
-        ArtifactType.androidClassesDex,
+        ArtifactType.androidClassesJar,
         ArtifactType.androidLibSkyShell,
         ArtifactType.androidKeystore,
       ];
@@ -183,10 +241,12 @@ class ApkCommand extends FlutterCommand {
     components.androidSdk = new Directory(androidSdkPath);
     components.manifest = new File(argResults['manifest']);
     components.icuData = new File(artifactPaths[0]);
-    components.classesDex = new File(artifactPaths[1]);
+    components.jars = [new File(artifactPaths[1])];
     components.libSkyShell = new File(artifactPaths[2]);
     components.debugKeystore = new File(artifactPaths[3]);
     components.resources = new Directory(argResults['resources']);
+
+    await _findServices(components);
 
     if (!components.resources.existsSync()) {
       // TODO(eseidel): This level should be higher when path is manually set.
@@ -204,8 +264,9 @@ class ApkCommand extends FlutterCommand {
       logging.severe('and version $_kBuildToolsVersion of the build tools.');
       return null;
     }
-    for (File f in [components.manifest, components.icuData, components.classesDex,
-                    components.libSkyShell, components.debugKeystore]) {
+    for (File f in [components.manifest, components.icuData,
+                    components.libSkyShell, components.debugKeystore]
+                    ..addAll(components.jars)) {
       if (!f.existsSync()) {
         logging.severe('Can not locate file: ${f.path}');
         return null;
@@ -215,18 +276,44 @@ class ApkCommand extends FlutterCommand {
     return components;
   }
 
+  // Outputs a services.json file for the flutter engine to read. Format:
+  // {
+  //   services: [
+  //     { name: string, class: string },
+  //     ...
+  //   ]
+  // }
+  void _generateServicesConfig(File servicesConfig, List<Map<String, String>> servicesIn) {
+    List<Map<String, String>> services =
+        servicesIn.map((Map<String, String> service) => {
+          'name': service['name'],
+          'class': service['registration-class']
+        }).toList();
+
+    Map<String, dynamic> json = { 'services': services };
+    servicesConfig.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
+  }
+
   int _buildApk(_ApkComponents components, String flxPath) {
     Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
     try {
+      _ApkBuilder builder = new _ApkBuilder(components.androidSdk.path);
+
+      File classesDex = new File('${tempDir.path}/classes.dex');
+      builder.compileClassesDex(classesDex, components.jars);
+
+      File servicesConfig = new File('${tempDir.path}/services.json');
+      _generateServicesConfig(servicesConfig, components.services);
+
       _AssetBuilder assetBuilder = new _AssetBuilder(tempDir, 'assets');
       assetBuilder.add(components.icuData, 'icudtl.dat');
       assetBuilder.add(new File(flxPath), 'app.flx');
+      assetBuilder.add(servicesConfig, 'services.json');
 
       _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
-      artifactBuilder.add(components.classesDex, 'classes.dex');
+      artifactBuilder.add(classesDex, 'classes.dex');
       artifactBuilder.add(components.libSkyShell, 'lib/armeabi-v7a/libsky_shell.so');
 
-      _ApkBuilder builder = new _ApkBuilder(components.androidSdk.path);
       File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
       builder.package(unalignedApk, components.manifest, assetBuilder.directory,
                       artifactBuilder.directory, components.resources);

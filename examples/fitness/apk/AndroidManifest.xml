@@ -13,12 +13,12 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <!-- Supposedly this permission prevents other apps from receiving our
     messages, but it doesn't seem to have any effect. -->
-    <permission android:name="org.domokit.sky.shell.permission.C2D_MESSAGE"
+    <permission android:name="org.domokit.fitness.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="org.domokit.sky.shell.permission.C2D_MESSAGE" />
+    <uses-permission android:name="org.domokit.fitness.permission.C2D_MESSAGE" />
     <!-- end for GCM -->
 
-    <application android:icon="@mipmap/ic_launcher" android:label="Fitness" android:name="org.domokit.fitness.FitnessApplication">
+    <application android:icon="@mipmap/ic_launcher" android:label="Fitness" android:name="org.domokit.sky.shell.SkyApplication">
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize" android:hardwareAccelerated="true" android:launchMode="singleTask" android:name="org.domokit.sky.shell.SkyActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

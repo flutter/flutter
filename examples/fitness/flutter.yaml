@@ -13,3 +13,5 @@ material-design-icons:
   - name: navigation/close
   - name: navigation/menu
   - name: navigation/more_vert
+services:
+  - gcm
