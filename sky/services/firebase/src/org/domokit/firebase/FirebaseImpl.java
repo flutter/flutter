@@ -189,13 +189,9 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     DataSnapshot toMojoSnapshot(com.firebase.client.DataSnapshot snapshot) {
         DataSnapshot mojoSnapshot = new DataSnapshot();
         mojoSnapshot.key = snapshot.getKey();
-        try {
-          JSONObject jsonObject = new JSONObject();
-          jsonObject.put("value", snapshot.getValue());
-          mojoSnapshot.jsonValue = jsonObject.toString();
-        } catch (JSONException e) {
-          Log.e(TAG, "toMojoSnapshot JSONException", e);
-        }
+        Map<String, Object> jsonValue = new HashMap<String, Object>();
+        jsonValue.put("value", snapshot.getValue());
+        mojoSnapshot.jsonValue = new JSONObject(jsonValue).toString();
         return mojoSnapshot;
     }
 
