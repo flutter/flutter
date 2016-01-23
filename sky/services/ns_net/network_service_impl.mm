@@ -9,14 +9,11 @@
 namespace mojo {
 
 NetworkServiceImpl::NetworkServiceImpl(InterfaceRequest<NetworkService> request)
-    : binding_(this, request.Pass()) {
-}
+    : binding_(this, request.Pass()) {}
 
-NetworkServiceImpl::~NetworkServiceImpl() {
-}
+NetworkServiceImpl::~NetworkServiceImpl() {}
 
-void NetworkServiceImpl::CreateURLLoader(
-    InterfaceRequest<URLLoader> loader) {
+void NetworkServiceImpl::CreateURLLoader(InterfaceRequest<URLLoader> loader) {
   new URLLoaderImpl(loader.Pass());
 }
 
@@ -25,8 +22,7 @@ void NetworkServiceImpl::GetCookieStore(
   DCHECK(false);
 }
 
-void NetworkServiceImpl::CreateWebSocket(
-    InterfaceRequest<WebSocket> socket) {
+void NetworkServiceImpl::CreateWebSocket(InterfaceRequest<WebSocket> socket) {
   DCHECK(false);
 }
 
@@ -46,8 +42,7 @@ void NetworkServiceImpl::CreateTCPConnectedSocket(
   DCHECK(false);
 }
 
-void NetworkServiceImpl::CreateUDPSocket(
-    InterfaceRequest<UDPSocket> socket) {
+void NetworkServiceImpl::CreateUDPSocket(InterfaceRequest<UDPSocket> socket) {
   DCHECK(false);
 }
 
@@ -59,11 +54,12 @@ void NetworkServiceImpl::CreateHttpServer(
 }
 
 void NetworkServiceImpl::RegisterURLLoaderInterceptor(
-                        URLLoaderInterceptorFactoryPtr factory) {
+    URLLoaderInterceptorFactoryPtr factory) {
   DCHECK(false);
 }
 
-void NetworkServiceImpl::CreateHostResolver(InterfaceRequest<HostResolver> host_resolver) {
+void NetworkServiceImpl::CreateHostResolver(
+    InterfaceRequest<HostResolver> host_resolver) {
   DCHECK(false);
 }
 
