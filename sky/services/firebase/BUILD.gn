@@ -7,17 +7,17 @@
 
 import("//mojo/public/tools/bindings/mojom.gni")
 
-declare_args() {                                                                
-  enable_firebase = false                                                 
-}
-
 group("firebase") {
   deps = [
     ":interfaces",
   ]
 
-  if (enable_firebase && (is_ios || is_android)) {
+  if (is_ios || is_android) {
     deps += [ ":firebase_lib" ]
+  }
+
+  if (is_android) {
+    deps += [ ":interfaces_java" ]
   }
 }
 
@@ -26,8 +26,6 @@ mojom("interfaces") {
     "firebase.mojom",
   ]
 }
-
-if (enable_firebase) {
 
 if (is_android) {
   import("//build/config/android/config.gni")
@@ -86,6 +84,4 @@ if (is_ios) {
       "-ObjC",
     ]
   }
-}
-
 }

@@ -181,7 +181,6 @@ if (is_android) {
       "//sky/services/activity:activity_lib",
       "//sky/services/activity:interfaces_java",
       "//sky/services/engine:interfaces_java",
-      "//sky/services/firebase:interfaces_java",
       "//sky/services/media:interfaces_java",
       "//sky/services/media:media_lib",
       "//sky/services/oknet",
