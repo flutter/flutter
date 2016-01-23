@@ -15,7 +15,7 @@ export 'package:flutter/rendering.dart' show ValueChanged;
 export 'package:flutter/services.dart' show KeyboardType;
 
 /// A material design text input field.
-class Input extends Scrollable {
+class Input extends StatefulComponent {
   Input({
     GlobalKey key,
     this.initialValue: '',
@@ -30,11 +30,7 @@ class Input extends Scrollable {
     this.autofocus: false,
     this.onChanged,
     this.onSubmitted
-  }) : super(
-    key: key,
-    initialScrollOffset: 0.0,
-    scrollDirection: Axis.horizontal
-  ) {
+  }) : super(key: key) {
     assert(key != null);
   }
 
@@ -74,17 +70,15 @@ class Input extends Scrollable {
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
 
-  InputState createState() => new InputState();
+  _InputState createState() => new _InputState();
 }
 
-class InputState extends ScrollableState<Input> {
+class _InputState extends State<Input> {
   String _value;
   EditableString _editableString;
   KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
 
-  double _contentWidth = 0.0;
-  double _containerWidth = 0.0;
-
+  // Used by tests.
   EditableString get editableValue => _editableString;
 
   void initState() {
@@ -95,6 +89,23 @@ class InputState extends ScrollableState<Input> {
       onUpdated: _handleTextUpdated,
       onSubmitted: _handleTextSubmitted
     );
+  }
+
+  void dispose() {
+    if (_keyboardHandle.attached)
+      _keyboardHandle.release();
+    super.dispose();
+  }
+
+  void _attachOrDetachKeyboard(bool focused) {
+    if (focused && !_keyboardHandle.attached) {
+      _keyboardHandle = keyboard.show(_editableString.stub, config.keyboardType);
+      _keyboardHandle.setText(_editableString.text);
+      _keyboardHandle.setSelection(_editableString.selection.start,
+                                   _editableString.selection.end);
+    } else if (!focused && _keyboardHandle.attached) {
+      _keyboardHandle.release();
+    }
   }
 
   void _handleTextUpdated() {
@@ -113,70 +124,12 @@ class InputState extends ScrollableState<Input> {
       config.onSubmitted(_value);
   }
 
-  Widget _buildEditableField({
-    ThemeData themeData,
-    bool focused,
-    Color focusHighlightColor,
-    TextStyle textStyle,
-    double topPadding
-  }) {
-    Color cursorColor = themeData.primarySwatch == null ?
-      themeData.accentColor :
-      themeData.primarySwatch[200];
-
-    EdgeDims margin = new EdgeDims.only(bottom: config.isDense ? 4.0 : 8.0);
-    EdgeDims padding = new EdgeDims.only(top: topPadding, bottom: 8.0);
-    Color borderColor = focusHighlightColor;
-    double borderWidth = focused ? 2.0 : 1.0;
-
-    if (config.errorText != null) {
-      borderColor = Colors.red[700];
-      borderWidth = 2.0;
-      if (!config.isDense) {
-        margin = const EdgeDims.only(bottom: 15.0);
-        padding = new EdgeDims.only(top: topPadding, bottom: 1.0);
-      }
-    }
-
-    return new Container(
-      margin: margin,
-      padding: padding,
-      decoration: new BoxDecoration(
-        border: new Border(
-          bottom: new BorderSide(
-            color: borderColor,
-            width: borderWidth
-          )
-        )
-      ),
-      child: new SizeObserver(
-        onSizeChanged: _handleContainerSizeChanged,
-        child: new RawEditableLine(
-          value: _editableString,
-          focused: focused,
-          style: textStyle,
-          hideText: config.hideText,
-          cursorColor: cursorColor,
-          onContentSizeChanged: _handleContentSizeChanged,
-          scrollOffset: scrollOffsetVector
-        )
-      )
-    );
-  }
-
-  Widget buildContent(BuildContext context) {
+  Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     bool focused = Focus.at(context, autofocus: config.autofocus);
 
-    if (focused && !_keyboardHandle.attached) {
-      _keyboardHandle = keyboard.show(_editableString.stub, config.keyboardType);
-      _keyboardHandle.setText(_editableString.text);
-      _keyboardHandle.setSelection(_editableString.selection.start,
-                                   _editableString.selection.end);
-    } else if (!focused && _keyboardHandle.attached) {
-      _keyboardHandle.release();
-    }
+    _attachOrDetachKeyboard(focused);
 
     TextStyle textStyle = config.style ?? themeData.text.subhead;
     Color focusHighlightColor = themeData.accentColor;
@@ -205,12 +158,42 @@ class InputState extends ScrollableState<Input> {
       ));
     }
 
-    stackChildren.add(_buildEditableField(
-      themeData: themeData,
-      focused: focused,
-      focusHighlightColor: focusHighlightColor,
-      textStyle: textStyle,
-      topPadding: topPadding
+    Color cursorColor = themeData.primarySwatch == null ?
+      themeData.accentColor :
+      themeData.primarySwatch[200];
+
+    EdgeDims margin = new EdgeDims.only(bottom: config.isDense ? 4.0 : 8.0);
+    EdgeDims padding = new EdgeDims.only(top: topPadding, bottom: 8.0);
+    Color borderColor = focusHighlightColor;
+    double borderWidth = focused ? 2.0 : 1.0;
+
+    if (config.errorText != null) {
+      borderColor = Colors.red[700];
+      borderWidth = 2.0;
+      if (!config.isDense) {
+        margin = const EdgeDims.only(bottom: 15.0);
+        padding = new EdgeDims.only(top: topPadding, bottom: 1.0);
+      }
+    }
+
+    stackChildren.add(new Container(
+      margin: margin,
+      padding: padding,
+      decoration: new BoxDecoration(
+        border: new Border(
+          bottom: new BorderSide(
+            color: borderColor,
+            width: borderWidth
+          )
+        )
+      ),
+      child: new RawEditableLine(
+        value: _editableString,
+        focused: focused,
+        style: textStyle,
+        hideText: config.hideText,
+        cursorColor: cursorColor
+      )
     ));
 
     if (config.errorText != null && !config.isDense) {
@@ -260,34 +243,5 @@ class InputState extends ScrollableState<Input> {
         child: child
       )
     );
-  }
-
-  void dispose() {
-    if (_keyboardHandle.attached)
-      _keyboardHandle.release();
-    super.dispose();
-  }
-
-  ScrollBehavior createScrollBehavior() => new BoundedBehavior();
-  BoundedBehavior get scrollBehavior => super.scrollBehavior;
-
-  void _handleContainerSizeChanged(Size newSize) {
-    _containerWidth = newSize.width;
-    _updateScrollBehavior();
-  }
-
-  void _handleContentSizeChanged(Size newSize) {
-    _contentWidth = newSize.width;
-    _updateScrollBehavior();
-  }
-
-  void _updateScrollBehavior() {
-    // Set the scroll offset to match the content width so that the cursor
-    // (which is always at the end of the text) will be visible.
-    scrollTo(scrollBehavior.updateExtents(
-      contentExtent: _contentWidth,
-      containerExtent: _containerWidth,
-      scrollOffset: _contentWidth
-    ));
   }
 }

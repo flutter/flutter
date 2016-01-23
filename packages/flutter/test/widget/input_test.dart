@@ -133,7 +133,7 @@ void main() {
 
       const String testValue = 'ABC';
       mockKeyboard.client.commitText(testValue, testValue.length);
-      InputState input = tester.findStateOfType(InputState);
+      dynamic input = inputKey.currentState;
 
       // Delete characters and verify that the selection follows the length
       // of the text.
