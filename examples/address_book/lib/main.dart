@@ -4,79 +4,41 @@
 
 import 'package:flutter/material.dart';
 
-class Field extends StatelessComponent {
-  Field({
-    Key key,
-    this.inputKey,
-    this.icon,
-    this.placeholder
-  }) : super(key: key);
-
-  final GlobalKey inputKey;
-  final String icon;
-  final String placeholder;
-
-  Widget build(BuildContext context) {
-    return new Row(
-      children: <Widget>[
-        new Padding(
-          padding: const EdgeDims.symmetric(horizontal: 16.0),
-          child: new Icon(icon: icon)
-        ),
-        new Flexible(
-          child: new Input(
-            key: inputKey,
-            placeholder: placeholder
-          )
-        )
-      ]
-    );
-  }
-}
+final GlobalKey _kNameKey = new GlobalKey(debugLabel: 'name field');
+final GlobalKey _kPhoneKey = new GlobalKey(debugLabel: 'phone field');
+final GlobalKey _kEmailKey = new GlobalKey(debugLabel: 'email field');
+final GlobalKey _kAddressKey = new GlobalKey(debugLabel: 'address field');
+final GlobalKey _kRingtoneKey = new GlobalKey(debugLabel: 'ringtone field');
+final GlobalKey _kNoteKey = new GlobalKey(debugLabel: 'note field');
 
 class AddressBookHome extends StatelessComponent {
-  Widget buildToolBar(BuildContext context) {
-    return new ToolBar(
-      right: <Widget>[new IconButton(icon: "navigation/check")]
-    );
-  }
-
-  Widget buildFloatingActionButton(BuildContext context) {
-    return new FloatingActionButton(
-      child: new Icon(icon: 'image/photo_camera'),
-      backgroundColor: Theme.of(context).accentColor
-    );
-  }
-
-  static final GlobalKey nameKey = new GlobalKey(debugLabel: 'name field');
-  static final GlobalKey phoneKey = new GlobalKey(debugLabel: 'phone field');
-  static final GlobalKey emailKey = new GlobalKey(debugLabel: 'email field');
-  static final GlobalKey addressKey = new GlobalKey(debugLabel: 'address field');
-  static final GlobalKey ringtoneKey = new GlobalKey(debugLabel: 'ringtone field');
-  static final GlobalKey noteKey = new GlobalKey(debugLabel: 'note field');
-
-  Widget buildBody(BuildContext context) {
-    return new Block(children: <Widget>[
-      new AspectRatio(
-        aspectRatio: 16.0 / 9.0,
-        child: new Container(
-          decoration: new BoxDecoration(backgroundColor: Colors.purple[300])
-        )
-      ),
-      new Field(inputKey: nameKey, icon: "social/person", placeholder: "Name"),
-      new Field(inputKey: phoneKey, icon: "communication/phone", placeholder: "Phone"),
-      new Field(inputKey: emailKey, icon: "communication/email", placeholder: "Email"),
-      new Field(inputKey: addressKey, icon: "maps/place", placeholder: "Address"),
-      new Field(inputKey: ringtoneKey, icon: "av/volume_up", placeholder: "Ringtone"),
-      new Field(inputKey: noteKey, icon: "content/add", placeholder: "Add note"),
-    ]);
-  }
-
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: buildToolBar(context),
-      body: buildBody(context),
-      floatingActionButton: buildFloatingActionButton(context)
+      toolBar: new ToolBar(
+        center: new Text('Edit contact'),
+        right: <Widget>[
+          new IconButton(icon: 'navigation/check')
+        ]
+      ),
+      body: new Block(
+        children: <Widget>[
+          new AspectRatio(
+            aspectRatio: 16.0 / 9.0,
+            child: new Container(
+              decoration: new BoxDecoration(backgroundColor: Colors.purple[300])
+            )
+          ),
+          new Input(key: _kNameKey, icon: 'social/person', labelText: 'Name', style: Typography.black.display1),
+          new Input(key: _kPhoneKey, icon: 'communication/phone', hintText: 'Phone'),
+          new Input(key: _kEmailKey, icon: 'communication/email', hintText: 'Email'),
+          new Input(key: _kAddressKey, icon: 'maps/place', hintText: 'Address'),
+          new Input(key: _kRingtoneKey, icon: 'av/volume_up', hintText: 'Ringtone'),
+          new Input(key: _kNoteKey, icon: 'content/add', hintText: 'Add note'),
+        ]
+      ),
+      floatingActionButton: new FloatingActionButton(
+        child: new Icon(icon: 'image/photo_camera')
+      )
     );
   }
 }

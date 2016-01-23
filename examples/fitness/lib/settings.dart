@@ -63,7 +63,7 @@ class SettingsFragmentState extends State<SettingsFragment> {
         content: new Input(
           key: weightGoalKey,
           autofocus: true,
-          placeholder: 'Goal weight in lbs',
+          hintText: 'Goal weight in lbs',
           keyboardType: KeyboardType.number,
           onChanged: _handleGoalWeightChanged
         ),

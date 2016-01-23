@@ -237,7 +237,7 @@ class StockHomeState extends State<StockHome> {
       center: new Input(
         key: searchFieldKey,
         autofocus: true,
-        placeholder: 'Search stocks',
+        hintText: 'Search stocks',
         onChanged: _handleSearchQueryChanged
       ),
       backgroundColor: Theme.of(context).canvasColor
@@ -254,7 +254,7 @@ class StockHomeState extends State<StockHome> {
             new Input(
               key: companyNameKey,
               autofocus: true,
-              placeholder: 'Company Name'
+              hintText: 'Company Name'
             ),
           ]
         );
