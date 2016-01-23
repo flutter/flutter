@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -73,6 +74,9 @@ class Input extends StatefulComponent {
   _InputState createState() => new _InputState();
 }
 
+const Duration _kTransitionDuration = const Duration(milliseconds: 200);
+const Curve _kTransitionCurve = Curves.ease;
+
 class _InputState extends State<Input> {
   String _value;
   EditableString _editableString;
@@ -139,21 +143,34 @@ class _InputState extends State<Input> {
 
     List<Widget> stackChildren = <Widget>[];
 
+    bool hasInlineLabel = config.labelText != null && !focused && !_value.isNotEmpty;
+
     if (config.labelText != null) {
-      TextStyle labelStyle = themeData.text.caption.copyWith(color: focused ? focusHighlightColor : themeData.hintColor);
-      stackChildren.add(new Positioned(
+      TextStyle labelStyle = hasInlineLabel ?
+        themeData.text.subhead.copyWith(color: themeData.hintColor) :
+        themeData.text.caption.copyWith(color: focused ? focusHighlightColor : themeData.hintColor);
+
+      double topPaddingIncrement = themeData.text.caption.fontSize + (config.isDense ? 4.0 : 8.0);
+      double top = topPadding;
+      if (hasInlineLabel)
+        top += topPaddingIncrement + textStyle.fontSize - labelStyle.fontSize;
+
+      stackChildren.add(new AnimatedPositioned(
         left: 0.0,
-        top: topPadding,
+        top: top,
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
         child: new Text(config.labelText, style: labelStyle)
       ));
-      topPadding += labelStyle.fontSize + (config.isDense ? 4.0 : 8.0);
+
+      topPadding += topPaddingIncrement;
     }
 
-    if (config.hintText != null && _value.isEmpty) {
-      TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
+    if (config.hintText != null && _value.isEmpty && !hasInlineLabel) {
+      TextStyle hintStyle = themeData.text.subhead.copyWith(color: themeData.hintColor);
       stackChildren.add(new Positioned(
         left: 0.0,
-        top: topPadding,
+        top: topPadding + textStyle.fontSize - hintStyle.fontSize,
         child: new Text(config.hintText, style: hintStyle)
       ));
     }
@@ -176,9 +193,11 @@ class _InputState extends State<Input> {
       }
     }
 
-    stackChildren.add(new Container(
+    stackChildren.add(new AnimatedContainer(
       margin: margin,
       padding: padding,
+      duration: _kTransitionDuration,
+      curve: _kTransitionCurve,
       decoration: new BoxDecoration(
         border: new Border(
           bottom: new BorderSide(
