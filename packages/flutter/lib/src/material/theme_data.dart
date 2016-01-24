@@ -46,6 +46,7 @@ class ThemeData {
     this.indicatorColor,
     this.hintColor,
     this.hintOpacity,
+    this.errorColor,
     this.text,
     this.primaryTextTheme,
     this.primaryIconTheme
@@ -66,6 +67,7 @@ class ThemeData {
     assert(indicatorColor != null);
     assert(hintColor != null);
     assert(hintOpacity != null);
+    assert(errorColor != null);
     assert(text != null);
     assert(primaryTextTheme != null);
     assert(primaryIconTheme != null);
@@ -88,6 +90,7 @@ class ThemeData {
     Color indicatorColor,
     Color hintColor,
     double hintOpacity,
+    Color errorColor,
     TextTheme text,
     TextTheme primaryTextTheme,
     IconThemeData primaryIconTheme
@@ -108,6 +111,7 @@ class ThemeData {
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     hintOpacity ??= hintColor != null ? hintColor.alpha / 0xFF : isDark ? 0.26 : 0.30;
+    errorColor ??= Colors.red[700];
     text ??= isDark ? Typography.white : Typography.black;
     primaryTextTheme ??= primaryColorBrightness == ThemeBrightness.dark ? Typography.white : Typography.black;
     primaryIconTheme ??= primaryColorBrightness == ThemeBrightness.dark ? const IconThemeData(color: IconThemeColor.white) : const IconThemeData(color: IconThemeColor.black);
@@ -128,6 +132,7 @@ class ThemeData {
       indicatorColor: indicatorColor,
       hintColor: hintColor,
       hintOpacity: hintOpacity,
+      errorColor: errorColor,
       text: text,
       primaryTextTheme: primaryTextTheme,
       primaryIconTheme: primaryIconTheme
@@ -182,6 +187,9 @@ class ThemeData {
   final Color hintColor;
   final double hintOpacity;
 
+  /// The color to use for input validation errors.
+  final Color errorColor;
+
   /// Text with a color that contrasts with the card and canvas colors.
   final TextTheme text;
 
@@ -217,6 +225,7 @@ class ThemeData {
       indicatorColor: Color.lerp(begin.indicatorColor, end.indicatorColor, t),
       hintColor: Color.lerp(begin.hintColor, end.hintColor, t),
       hintOpacity: lerpDouble(begin.hintOpacity, end.hintOpacity, t),
+      errorColor: Color.lerp(begin.errorColor, end.errorColor, t),
       text: TextTheme.lerp(begin.text, end.text, t),
       primaryTextTheme: TextTheme.lerp(begin.primaryTextTheme, end.primaryTextTheme, t),
       primaryIconTheme: IconThemeData.lerp(begin.primaryIconTheme, end.primaryIconTheme, t)
@@ -243,6 +252,7 @@ class ThemeData {
            (otherData.indicatorColor == indicatorColor) &&
            (otherData.hintColor == hintColor) &&
            (otherData.hintOpacity == hintOpacity) &&
+           (otherData.errorColor == errorColor) &&
            (otherData.text == text) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme);
@@ -263,12 +273,15 @@ class ThemeData {
       disabledColor,
       accentColor,
       accentColorBrightness,
-      indicatorColor,
-      hintColor,
-      hintOpacity,
-      text,
-      primaryTextTheme,
-      primaryIconTheme
+      hashValues( // Too many values.
+        indicatorColor,
+        hintColor,
+        hintOpacity,
+        errorColor,
+        text,
+        primaryTextTheme,
+        primaryIconTheme
+      )
     );
   }
 

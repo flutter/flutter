@@ -185,7 +185,7 @@ class _InputState extends State<Input> {
     double borderWidth = focused ? 2.0 : 1.0;
 
     if (config.errorText != null) {
-      borderColor = Colors.red[700];
+      borderColor = themeData.errorColor;
       borderWidth = 2.0;
       if (!config.isDense) {
         margin = const EdgeDims.only(bottom: 15.0);
@@ -216,7 +216,7 @@ class _InputState extends State<Input> {
     ));
 
     if (config.errorText != null && !config.isDense) {
-      TextStyle errorStyle = themeData.text.caption.copyWith(color: Colors.red[700]);
+      TextStyle errorStyle = themeData.text.caption.copyWith(color: themeData.errorColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         bottom: 0.0,
