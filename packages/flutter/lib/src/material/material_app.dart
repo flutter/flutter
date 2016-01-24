@@ -68,8 +68,7 @@ class MaterialApp extends StatefulComponent {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
-EdgeDims _getPadding(ui.Window window) {
-  ui.WindowPadding padding = ui.window.padding;
+EdgeDims _getPadding(ui.WindowPadding padding) {
   return new EdgeDims.TRBL(padding.top, padding.right, padding.bottom, padding.left);
 }
 
@@ -149,7 +148,7 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
       data: new MediaQueryData(
         size: ui.window.size,
         devicePixelRatio: ui.window.devicePixelRatio,
-        padding: _getPadding(ui.window)
+        padding: _getPadding(ui.window.padding)
       ),
       child: new LocaleQuery(
         data: _localeData,
