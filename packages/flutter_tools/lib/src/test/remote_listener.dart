@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -32,7 +33,7 @@ class RemoteListener {
 
   final Suite _suite;
   final WebSocket _socket;
-  final Set<LiveTest> _liveTests = new Set<LiveTest>();
+  final Set<LiveTest> _liveTests = new HashSet<LiveTest>();
 
   static Future start(String server, Metadata metadata, Function getMain()) async {
     WebSocket socket = await WebSocket.connect(server);

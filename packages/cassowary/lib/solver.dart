@@ -146,13 +146,11 @@ class Solver {
 
   Result removeEditVariable(Variable variable) {
     _EditInfo info = _edits[variable];
-    if (info == null) {
+    if (info == null)
       return Result.unknownEditVariable;
-    }
 
-    if (removeConstraint(info.constraint) != Result.success) {
+    if (removeConstraint(info.constraint) != Result.success)
       return Result.internalSolverError;
-    }
 
     _edits.remove(variable);
     return Result.success;
@@ -173,7 +171,7 @@ class Solver {
   }
 
   Set flushUpdates() {
-    Set updates = new Set();
+    Set updates = new HashSet<dynamic>();
 
     for (Variable variable in _vars.keys) {
       _Symbol symbol = _vars[variable];
@@ -183,10 +181,8 @@ class Solver {
 
       if (variable._applyUpdate(updatedValue) && variable._owner != null) {
         dynamic context = variable._owner.context;
-
-        if (context != null) {
+        if (context != null)
           updates.add(context);
-        }
       }
     }
 
@@ -212,9 +208,8 @@ class Solver {
     }
 
     if (needsCleanup) {
-      for (dynamic item in applied.reversed) {
+      for (dynamic item in applied.reversed)
         undoer(item);
-      }
     }
 
     return result;
@@ -223,9 +218,8 @@ class Solver {
   _Symbol _symbolForVariable(Variable variable) {
     _Symbol symbol = _vars[variable];
 
-    if (symbol != null) {
+    if (symbol != null)
       return symbol;
-    }
 
     symbol = new _Symbol(_SymbolType.external, tick++);
     _vars[variable] = symbol;

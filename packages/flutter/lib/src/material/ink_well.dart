@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -85,7 +87,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
         } // else we're probably in deactivate()
       }
     );
-    _splashes ??= new Set<InkSplash>();
+    _splashes ??= new HashSet<InkSplash>();
     _splashes.add(splash);
     _currentSplash = splash;
     updateHighlight(true);

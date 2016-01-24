@@ -105,6 +105,18 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Rendere
     _dirtyElements.add(element);
   }
 
+  static int _elementSort(BuildableElement a, BuildableElement b) {
+    if (a.depth < b.depth)
+      return -1;
+    if (b.depth < a.depth)
+      return 1;
+    if (b.dirty && !a.dirty)
+      return -1;
+    if (a.dirty && !b.dirty)
+      return 1;
+    return 0;
+  }
+
   /// Builds all the elements that were marked as dirty using schedule(), in depth order.
   /// If elements are marked as dirty while this runs, they must be deeper than the algorithm
   /// has yet reached.
@@ -114,14 +126,14 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Rendere
       return;
     Timeline.startSync('Build');
     BuildableElement.lockState(() {
-      _dirtyElements.sort((BuildableElement a, BuildableElement b) => a.depth - b.depth);
+      _dirtyElements.sort(_elementSort);
       int dirtyCount = _dirtyElements.length;
       int index = 0;
       while (index < dirtyCount) {
         _dirtyElements[index].rebuild();
         index += 1;
         if (dirtyCount < _dirtyElements.length) {
-          _dirtyElements.sort((BuildableElement a, BuildableElement b) => a.depth - b.depth);
+          _dirtyElements.sort(_elementSort);
           dirtyCount = _dirtyElements.length;
         }
       }

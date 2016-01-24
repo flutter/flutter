@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:developer';
 import 'dart:ui' as ui;
 
@@ -142,7 +143,7 @@ abstract class Scheduler extends BindingBase {
 
   int _nextFrameCallbackId = 0; // positive
   Map<int, FrameCallback> _transientCallbacks = <int, FrameCallback>{};
-  final Set<int> _removedIds = new Set<int>();
+  final Set<int> _removedIds = new HashSet<int>();
 
   int get transientCallbackCount => _transientCallbacks.length;
 
