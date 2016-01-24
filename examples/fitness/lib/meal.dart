@@ -90,7 +90,7 @@ class MealFragmentState extends State<MealFragment> {
         new Input(
           key: descriptionKey,
           autofocus: true,
-          placeholder: 'Describe meal',
+          hintText: 'Describe meal',
           onChanged: _handleDescriptionChanged
         ),
       ],

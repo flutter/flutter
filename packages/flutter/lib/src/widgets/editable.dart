@@ -11,26 +11,39 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'scrollable.dart';
+import 'scroll_behavior.dart';
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
 /// A range of characters in a string of tet.
 class TextRange {
   const TextRange({ this.start, this.end });
+
+  /// A text range that starts and ends at position.
   const TextRange.collapsed(int position)
     : start = position,
       end = position;
+
+  /// A text range that contains nothing and is not in the text.
   const TextRange.empty()
     : start = -1,
       end = -1;
 
+  /// The index of the first character in the range.
   final int start;
+
+  /// The next index after the characters in this range.
   final int end;
 
+  /// Whether this range represents a valid position in the text.
   bool get isValid => start >= 0 && end >= 0;
+
+  /// Whether this range is empty (but still potentially placed inside the text).
   bool get isCollapsed => start == end;
 }
 
+/// A string that can be manipulated by a keyboard.
 class EditableString implements KeyboardClient {
   EditableString({this.text: '', this.onUpdated, this.onSubmitted}) {
     assert(onUpdated != null);
@@ -39,23 +52,35 @@ class EditableString implements KeyboardClient {
     selection = new TextRange(start: text.length, end: text.length);
   }
 
+  /// The current text being edited.
   String text;
+
+  // The range of text that is still being composed.
   TextRange composing = const TextRange.empty();
+
+  /// The range of text that is currently selected.
   TextRange selection;
 
+  /// Called whenever the text changes.
   final VoidCallback onUpdated;
+
+  /// Called whenever the user indicates they are done editing the string.
   final VoidCallback onSubmitted;
 
+  /// A keyboard client stub that can be attached to a keyboard service.
   KeyboardClientStub stub;
 
+  /// The text before the given range.
   String textBefore(TextRange range) {
     return text.substring(0, range.start);
   }
 
+  /// The text after the given range.
   String textAfter(TextRange range) {
     return text.substring(range.end);
   }
 
+  /// The text inside the given range.
   String textInside(TextRange range) {
     return text.substring(range.start, range.end);
   }
@@ -141,34 +166,71 @@ class EditableString implements KeyboardClient {
   }
 }
 
-class RawEditableLine extends StatefulComponent {
+/// A basic single-line input control.
+///
+/// This control is not intended to be used directly. Instead, consider using
+/// [Input], which provides focus management and material design.
+class RawEditableLine extends Scrollable {
   RawEditableLine({
     Key key,
     this.value,
     this.focused: false,
     this.hideText: false,
     this.style,
-    this.cursorColor,
-    this.onContentSizeChanged,
-    this.scrollOffset
-  }) : super(key: key);
+    this.cursorColor
+  }) : super(
+    key: key,
+    initialScrollOffset: 0.0,
+    scrollDirection: Axis.horizontal
+  );
 
+  /// The editable string being displayed in this widget.
   final EditableString value;
+
+  /// Whether this widget is focused.
   final bool focused;
+
+  /// Whether to hide the text being edited (e.g., for passwords).
   final bool hideText;
+
+  /// The text style to use for the editable text.
   final TextStyle style;
+
+  /// The color to use when painting the cursor.
   final Color cursorColor;
-  final SizeChangedCallback onContentSizeChanged;
-  final Offset scrollOffset;
 
   RawEditableTextState createState() => new RawEditableTextState();
 }
 
-class RawEditableTextState extends State<RawEditableLine> {
-  // TODO(abarth): Move the cursor timer into RenderEditableLine so we can
-  // remove this extra widget.
+class RawEditableTextState extends ScrollableState<RawEditableLine> {
   Timer _cursorTimer;
   bool _showCursor = false;
+
+  double _contentWidth = 0.0;
+  double _containerWidth = 0.0;
+
+  ScrollBehavior createScrollBehavior() => new BoundedBehavior();
+  BoundedBehavior get scrollBehavior => super.scrollBehavior;
+
+  void _handleContainerSizeChanged(Size newSize) {
+    _containerWidth = newSize.width;
+    _updateScrollBehavior();
+  }
+
+  void _handleContentSizeChanged(Size newSize) {
+    _contentWidth = newSize.width;
+    _updateScrollBehavior();
+  }
+
+  void _updateScrollBehavior() {
+    // Set the scroll offset to match the content width so that the cursor
+    // (which is always at the end of the text) will be visible.
+    scrollTo(scrollBehavior.updateExtents(
+      contentExtent: _contentWidth,
+      containerExtent: _containerWidth,
+      scrollOffset: _contentWidth
+    ));
+  }
 
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
@@ -202,7 +264,7 @@ class RawEditableTextState extends State<RawEditableLine> {
     _showCursor = false;
   }
 
-  Widget build(BuildContext context) {
+  Widget buildContent(BuildContext context) {
     assert(config.style != null);
     assert(config.focused != null);
     assert(config.cursorColor != null);
@@ -212,14 +274,17 @@ class RawEditableTextState extends State<RawEditableLine> {
     else if (!config.focused && _cursorTimer != null)
       _stopCursorTimer();
 
-    return new _EditableLineWidget(
-      value: config.value,
-      style: config.style,
-      cursorColor: config.cursorColor,
-      showCursor: _showCursor,
-      hideText: config.hideText,
-      onContentSizeChanged: config.onContentSizeChanged,
-      scrollOffset: config.scrollOffset
+    return new SizeObserver(
+      onSizeChanged: _handleContainerSizeChanged,
+      child: new _EditableLineWidget(
+        value: config.value,
+        style: config.style,
+        cursorColor: config.cursorColor,
+        showCursor: _showCursor,
+        hideText: config.hideText,
+        onContentSizeChanged: _handleContentSizeChanged,
+        paintOffset: new Offset(-scrollOffset, 0.0)
+      )
     );
   }
 }
@@ -233,7 +298,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     this.showCursor,
     this.hideText,
     this.onContentSizeChanged,
-    this.scrollOffset
+    this.paintOffset
   }) : super(key: key);
 
   final EditableString value;
@@ -242,7 +307,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final bool showCursor;
   final bool hideText;
   final SizeChangedCallback onContentSizeChanged;
-  final Offset scrollOffset;
+  final Offset paintOffset;
 
   RenderEditableLine createRenderObject() {
     return new RenderEditableLine(
@@ -250,7 +315,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       cursorColor: cursorColor,
       showCursor: showCursor,
       onContentSizeChanged: onContentSizeChanged,
-      scrollOffset: scrollOffset
+      paintOffset: paintOffset
     );
   }
 
@@ -260,7 +325,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     renderObject.cursorColor = cursorColor;
     renderObject.showCursor = showCursor;
     renderObject.onContentSizeChanged = onContentSizeChanged;
-    renderObject.scrollOffset = scrollOffset;
+    renderObject.paintOffset = paintOffset;
   }
 
   StyledTextSpan get _styledTextSpan {

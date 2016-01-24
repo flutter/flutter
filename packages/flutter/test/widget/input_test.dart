@@ -41,7 +41,7 @@ void main() {
           child: new Material(
             child: new Input(
               key: inputKey,
-              placeholder: 'Placeholder',
+              hintText: 'Placeholder',
               onChanged: (String value) { inputValue = value; }
             )
           )
@@ -81,7 +81,7 @@ void main() {
           child: new Material(
             child: new Input(
               key: inputKey,
-              placeholder: 'Placeholder'
+              hintText: 'Placeholder'
             )
           )
         );
@@ -123,7 +123,7 @@ void main() {
           child: new Material(
             child: new Input(
               key: inputKey,
-              placeholder: 'Placeholder'
+              hintText: 'Placeholder'
             )
           )
         );
@@ -133,7 +133,7 @@ void main() {
 
       const String testValue = 'ABC';
       mockKeyboard.client.commitText(testValue, testValue.length);
-      InputState input = tester.findStateOfType(InputState);
+      dynamic input = inputKey.currentState;
 
       // Delete characters and verify that the selection follows the length
       // of the text.
@@ -159,7 +159,7 @@ void main() {
             child: new Input(
               key: inputKey,
               hideText: true,
-              placeholder: 'Placeholder'
+              hintText: 'Placeholder'
             )
           )
         );

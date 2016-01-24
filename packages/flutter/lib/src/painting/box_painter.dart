@@ -29,6 +29,25 @@ class BorderSide {
   /// A black border side of zero width.
   static const none = const BorderSide(width: 0.0);
 
+  BorderSide copyWith({
+    Color color,
+    double width
+  }) {
+    return new BorderSide(
+      color: color ?? this.color,
+      width: width ?? this.width
+    );
+  }
+
+  static BorderSide lerp(BorderSide a, BorderSide b, double t) {
+    assert(a != null);
+    assert(b != null);
+    return new BorderSide(
+      color: Color.lerp(a.color, b.color, t),
+      width: ui.lerpDouble(a.width, b.width, t)
+    );
+  }
+
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -77,6 +96,30 @@ class Border {
   /// The widths of the sides of this border represented as an EdgeDims.
   EdgeDims get dimensions {
     return new EdgeDims.TRBL(top.width, right.width, bottom.width, left.width);
+  }
+
+  Border scale(double t) {
+    return new Border(
+      top: top.copyWith(width: t * top.width),
+      right: right.copyWith(width: t * right.width),
+      bottom: bottom.copyWith(width: t * bottom.width),
+      left: left.copyWith(width: t * left.width)
+    );
+  }
+
+  static Border lerp(Border a, Border b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
+    return new Border(
+      top: BorderSide.lerp(a.top, b.top, t),
+      right: BorderSide.lerp(a.right, b.right, t),
+      bottom: BorderSide.lerp(a.bottom, b.bottom, t),
+      left: BorderSide.lerp(a.left, b.left, t)
+    );
   }
 
   bool operator ==(dynamic other) {
@@ -718,7 +761,7 @@ class BoxDecoration extends Decoration {
     return new BoxDecoration(
       backgroundColor: Color.lerp(null, backgroundColor, factor),
       backgroundImage: backgroundImage,
-      border: border,
+      border: Border.lerp(null, border, factor),
       borderRadius: ui.lerpDouble(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
@@ -740,7 +783,7 @@ class BoxDecoration extends Decoration {
     return new BoxDecoration(
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       backgroundImage: b.backgroundImage,
-      border: b.border,
+      border: Border.lerp(a.border, b.border, t),
       borderRadius: ui.lerpDouble(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,

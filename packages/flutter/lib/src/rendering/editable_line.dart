@@ -22,13 +22,14 @@ class RenderEditableLine extends RenderBox {
   RenderEditableLine({
     StyledTextSpan text,
     Color cursorColor,
-    bool showCursor,
-    this.onContentSizeChanged,
-    Offset scrollOffset
+    bool showCursor: false,
+    Offset paintOffset: Offset.zero,
+    this.onContentSizeChanged
   }) : _textPainter = new TextPainter(text),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
-       _scrollOffset = scrollOffset {
+       _paintOffset = paintOffset {
+  assert(!showCursor || cursorColor != null);
   // TODO(abarth): These min/max values should be the default for TextPainter.
   _textPainter
     ..minWidth = 0.0
@@ -71,12 +72,12 @@ class RenderEditableLine extends RenderBox {
     markNeedsPaint();
   }
 
-  Offset get scrollOffset => _scrollOffset;
-  Offset _scrollOffset;
-  void set scrollOffset(Offset value) {
-    if (_scrollOffset == value)
+  Offset get paintOffset => _paintOffset;
+  Offset _paintOffset;
+  void set paintOffset(Offset value) {
+    if (_paintOffset == value)
       return;
-    _scrollOffset = value;
+    _paintOffset = value;
     markNeedsPaint();
   }
 
@@ -155,12 +156,12 @@ class RenderEditableLine extends RenderBox {
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    _textPainter.paint(context.canvas, offset - _scrollOffset);
+    _textPainter.paint(context.canvas, offset + _paintOffset);
 
     if (_showCursor) {
       Rect cursorRect =  new Rect.fromLTWH(
-        offset.dx + _contentSize.width - _kCursorWidth - _scrollOffset.dx,
-        offset.dy + _kCursorHeightOffset - _scrollOffset.dy,
+        offset.dx + _paintOffset.dx + _contentSize.width - _kCursorWidth,
+        offset.dy + _paintOffset.dy + _kCursorHeightOffset,
         _kCursorWidth,
         size.height - 2.0 * _kCursorHeightOffset
       );
