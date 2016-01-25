@@ -6,6 +6,8 @@ source_set("jni") {
   sources = [
     "dart_jni.cc",
     "dart_jni.h",
+    "jni_api.cc",
+    "jni_api.h",
     "jni_array.cc",
     "jni_array.h",
     "jni_class.cc",

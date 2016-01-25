@@ -7,6 +7,7 @@
 #include "base/logging.h"
 #include "base/android/jni_android.h"
 #include "base/android/jni_string.h"
+#include "sky/engine/bindings/jni/jni_api.h"
 #include "sky/engine/bindings/jni/jni_array.h"
 #include "sky/engine/bindings/jni/jni_class.h"
 #include "sky/engine/bindings/jni/jni_object.h"
@@ -93,6 +94,10 @@ bool CheckDartException(Dart_Handle result, Dart_Handle* exception) {
   return true;
 }
 
+DART_NATIVE_CALLBACK_STATIC(JniApi, FromReflectedField);
+DART_NATIVE_CALLBACK_STATIC(JniApi, FromReflectedMethod);
+DART_NATIVE_CALLBACK_STATIC(JniApi, GetApplicationContext);
+DART_NATIVE_CALLBACK_STATIC(JniApi, GetClassLoader);
 DART_NATIVE_CALLBACK_STATIC(JniBooleanArray, Create);
 DART_NATIVE_CALLBACK_STATIC(JniByteArray, Create);
 DART_NATIVE_CALLBACK_STATIC(JniCharArray, Create);
@@ -196,6 +201,10 @@ void DartJni::InitForGlobal() {
     g_natives = new DartLibraryNatives();
 
     g_natives->Register({
+      DART_REGISTER_NATIVE_STATIC(JniApi, FromReflectedField)
+      DART_REGISTER_NATIVE_STATIC(JniApi, FromReflectedMethod)
+      DART_REGISTER_NATIVE_STATIC(JniApi, GetApplicationContext)
+      DART_REGISTER_NATIVE_STATIC(JniApi, GetClassLoader)
       DART_REGISTER_NATIVE_STATIC(JniBooleanArray, Create)
       DART_REGISTER_NATIVE_STATIC(JniByteArray, Create)
       DART_REGISTER_NATIVE_STATIC(JniCharArray, Create)
@@ -304,6 +313,10 @@ jstring DartJni::DartToJavaString(JNIEnv* env, Dart_Handle dart_string,
   jstring java_string = env->NewString(string_data.data(), length);
   CheckJniException(env, exception);
   return java_string;
+}
+
+jobject DartJni::class_loader() {
+  return g_jvm_data->class_loader.obj();
 }
 
 jclass DartJni::class_clazz() {
