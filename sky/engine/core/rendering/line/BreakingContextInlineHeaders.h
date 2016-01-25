@@ -99,6 +99,8 @@ public:
     }
 
 private:
+    void skipTrailingWhitespace(InlineIterator&, const LineInfo&);
+
     InlineBidiResolver& m_resolver;
 
     InlineIterator m_current;
@@ -181,6 +183,18 @@ inline bool requiresLineBox(const InlineIterator& it, const LineInfo& lineInfo =
     UChar current = it.current();
     bool notJustWhitespace = current != ' ' && current != '\t' && current != softHyphen && (current != '\n' || it.object()->preservesNewline());
     return notJustWhitespace || isEmptyInline(it.object());
+}
+
+// FIXME: The entire concept of the skipTrailingWhitespace function is flawed, since we really need to be building
+// line boxes even for containers that may ultimately collapse away. Otherwise we'll never get positioned
+// elements quite right. In other words, we need to build this function's work into the normal line
+// object iteration process.
+// NB. this function will insert any floating elements that would otherwise
+// be skipped but it will not position them.
+inline void BreakingContext::skipTrailingWhitespace(InlineIterator& iterator, const LineInfo& lineInfo)
+{
+    while (!iterator.atEnd() && !requiresLineBox(iterator, lineInfo, TrailingWhitespace))
+        iterator.increment();
 }
 
 inline void BreakingContext::initializeForCurrentObject()
@@ -551,6 +565,7 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
                     if (!m_width.fitsOnLine(charWidth)) {
                         lineWasTooWide = true;
                         m_lineBreak.moveTo(m_current.object(), m_current.offset(), m_current.nextBreakablePosition());
+                        skipTrailingWhitespace(m_lineBreak, m_lineInfo);
                     }
                 }
                 if (lineWasTooWide || !m_width.fitsOnLine()) {
