@@ -26,9 +26,11 @@ class TextRange {
       end = position;
 
   /// A text range that contains nothing and is not in the text.
-  const TextRange.empty()
+  const TextRange._empty()
     : start = -1,
       end = -1;
+
+  static const TextRange empty = const TextRange._empty();
 
   /// The index of the first character in the range.
   final int start;
@@ -56,7 +58,7 @@ class EditableString implements KeyboardClient {
   String text;
 
   // The range of text that is still being composed.
-  TextRange composing = const TextRange.empty();
+  TextRange composing = TextRange.empty;
 
   /// The range of text that is currently selected.
   TextRange selection;
@@ -124,7 +126,7 @@ class EditableString implements KeyboardClient {
     // TODO(abarth): Why is |newCursorPosition| always 1?
     TextRange committedRange = _replaceOrAppend(composing, text);
     selection = new TextRange.collapsed(committedRange.end);
-    composing = const TextRange.empty();
+    composing = TextRange.empty;
     onUpdated();
   }
 
@@ -161,7 +163,7 @@ class EditableString implements KeyboardClient {
   }
 
   void submit(SubmitAction action) {
-    composing = const TextRange.empty();
+    composing = TextRange.empty;
     onSubmitted();
   }
 }
