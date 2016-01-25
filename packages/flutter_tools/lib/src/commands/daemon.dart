@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:logging/logging.dart';
+
 import '../android/adb.dart';
 import '../android/device_android.dart';
 import '../base/logging.dart';
@@ -14,9 +16,7 @@ import '../runner/flutter_command.dart';
 import 'start.dart';
 import 'stop.dart' as stop;
 
-const String protocolVersion = '0.0.2';
-
-// TODO(devoncarew): Pass logging data back to the client.
+const String protocolVersion = '0.1.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -27,6 +27,8 @@ const String protocolVersion = '0.0.2';
 class DaemonCommand extends FlutterCommand {
   final String name = 'daemon';
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
+
+  bool get requiresProjectRoot => false;
 
   Future<int> runInProject() async {
     print('Starting device daemon...');
@@ -39,8 +41,6 @@ class DaemonCommand extends FlutterCommand {
         line = line.substring(1, line.length - 1);
         return JSON.decode(line);
       });
-
-    await downloadApplicationPackagesAndConnectToDevices();
 
     Daemon daemon = new Daemon(commandStream, (Map command) {
       stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
@@ -139,11 +139,11 @@ abstract class Domain {
 
   String toString() => name;
 
-  void handleCommand(String name, dynamic id, dynamic args) {
+  void handleCommand(String command, dynamic id, dynamic args) {
     new Future.sync(() {
-      if (_handlers.containsKey(name))
-        return _handlers[name](args);
-      throw 'command not understood: $name';
+      if (_handlers.containsKey(command))
+        return _handlers[command](args);
+      throw 'command not understood: $name.$command';
     }).then((result) {
       if (result == null) {
         _send({'id': id});
@@ -152,12 +152,12 @@ abstract class Domain {
       }
     }).catchError((error, trace) {
       _send({'id': id, 'error': _toJsonable(error)});
-      logging.warning('error handling $name', error, trace);
+      logging.warning("error handling '$name.$command'", error, trace);
     });
   }
 
   void sendEvent(String name, [dynamic args]) {
-    Map<String, dynamic> map = { 'method': name };
+    Map<String, dynamic> map = { 'event': name };
     if (args != null)
       map['params'] = _toJsonable(args);
     _send(map);
@@ -169,11 +169,32 @@ abstract class Domain {
 }
 
 /// This domain responds to methods like [version] and [shutdown].
+///
+/// This domain fires the `daemon.logMessage` event.
 class DaemonDomain extends Domain {
   DaemonDomain(Daemon daemon) : super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
+
+    _subscription = Logger.root.onRecord.listen((LogRecord record) {
+      String message = record.error == null ? record.message : '${record.message}: ${record.error}';
+
+      if (record.stackTrace != null) {
+        sendEvent('daemon.logMessage', {
+          'level': record.level.name.toLowerCase(),
+          'message': message,
+          'stackTrace': record.stackTrace.toString()
+        });
+      } else {
+        sendEvent('daemon.logMessage', {
+          'level': record.level.name.toLowerCase(),
+          'message': message
+        });
+      }
+    });
   }
+
+  StreamSubscription<LogRecord> _subscription;
 
   Future<String> version(dynamic args) {
     return new Future.value(protocolVersion);
@@ -182,6 +203,10 @@ class DaemonDomain extends Domain {
   Future shutdown(dynamic args) {
     Timer.run(() => daemon.shutdown());
     return new Future.value();
+  }
+
+  void dispose() {
+    _subscription?.cancel();
   }
 }
 
@@ -195,19 +220,46 @@ class AppDomain extends Domain {
     registerHandler('stopAll', stopAll);
   }
 
-  Future<dynamic> start(dynamic args) async {
-    // TODO: Add the ability to pass args: target, http, checked
+  Future<dynamic> start(Map<String, dynamic> args) async {
+    // TODO(devoncarew): We need to be able to specify the target device.
 
-    await Future.wait([
-      command.downloadToolchain(),
-      command.downloadApplicationPackagesAndConnectToDevices(),
-    ], eagerError: true);
+    if (args['projectDirectory'] is! String)
+      throw "A 'projectDirectory' is required";
 
-    return startApp(
-      command.devices,
-      command.applicationPackages,
-      command.toolchain
-    ).then((int result) => null);
+    String projectDirectory = args['projectDirectory'];
+    if (!FileSystemEntity.isDirectorySync(projectDirectory))
+      throw "The '$projectDirectory' does not exist";
+
+    // We change the current working directory for the duration of the `start`
+    // command. This would have race conditions with other commands happening in
+    // parallel and doesn't play well with the caching built into `FlutterCommand`.
+    // TODO(devoncarew): Make flutter_tools work better with commands run from any directory.
+    // TODO(devoncarew): Use less (or more explicit) caching.
+    Directory cwd = Directory.current;
+    Directory.current = new Directory(projectDirectory);
+
+    try {
+      await Future.wait([
+        command.downloadToolchain(),
+        command.downloadApplicationPackagesAndConnectToDevices(),
+      ], eagerError: true);
+
+      int result = await startApp(
+        command.devices,
+        command.applicationPackages,
+        command.toolchain,
+        target: args['target'],
+        route: args['route'],
+        checked: args['checked'] ?? true
+      );
+
+      if (result != 0)
+        throw 'Error starting app: $result';
+    } finally {
+      Directory.current = cwd;
+    }
+
+    return null;
   }
 
   Future<bool> stopAll(dynamic args) {
@@ -328,6 +380,7 @@ class AndroidDeviceDiscovery {
 Map<String, dynamic> _deviceToMap(Device device) {
   return <String, dynamic>{
     'id': device.id,
+    'name': device.name,
     'platform': _enumToString(device.platform),
     'available': device.isConnected()
   };
