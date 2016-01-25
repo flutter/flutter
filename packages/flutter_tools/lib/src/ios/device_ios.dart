@@ -509,7 +509,35 @@ class _IOSSimulatorInfo {
   _IOSSimulatorInfo(this.id, this.name);
 }
 
+final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
+final String _xcodeRequirement = 'Xcode 7.0 or greater is required to develop for iOS.';
+
+bool _checkXcodeVersion() {
+  if (!Platform.isMacOS)
+    return false;
+  try {
+    String version = runCheckedSync(['xcodebuild', '-version']);
+    Match match = _xcodeVersionRegExp.firstMatch(version);
+    if (int.parse(match[1]) < 7) {
+      logging.severe('Found "${match[0]}". $_xcodeRequirement');
+      return false;
+    }
+  } catch (e) {
+    logging.severe('Cannot find "xcodebuid". $_xcodeRequirement');
+    return false;
+  }
+  return true;
+}
+
 Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async {
+  if (!FileSystemEntity.isDirectorySync(app.localPath)) {
+    logging.severe('Path "${path.absolute(app.localPath)}" does not exist.\nDid you run `flutter ios --init`?');
+    return false;
+  }
+
+  if (!_checkXcodeVersion())
+    return false;
+
   List<String> command = [
     '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
   ];
