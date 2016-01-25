@@ -56,18 +56,18 @@ TEST_F(FontLanguageListCacheTest, getById) {
     FontLanguage english = FontLanguageListCache::getById(enLangId)[0];
     FontLanguage japanese = FontLanguageListCache::getById(jpLangId)[0];
 
-    FontLanguages defLangs = FontLanguageListCache::getById(0);
-    EXPECT_EQ(1UL, defLangs.size());
-    EXPECT_TRUE(defLangs[0].isUnsupported());
+    const FontLanguages& defLangs = FontLanguageListCache::getById(0);
+    EXPECT_TRUE(defLangs.empty());
 
-    FontLanguages langs = FontLanguageListCache::getById(FontLanguageListCache::getId("en"));
+    const FontLanguages& langs = FontLanguageListCache::getById(FontLanguageListCache::getId("en"));
     ASSERT_EQ(1UL, langs.size());
     EXPECT_EQ(english, langs[0]);
 
-    langs = FontLanguageListCache::getById(FontLanguageListCache::getId("en,jp"));
-    ASSERT_EQ(2UL, langs.size());
-    EXPECT_EQ(english, langs[0]);
-    EXPECT_EQ(japanese, langs[1]);
+    const FontLanguages& langs2 =
+            FontLanguageListCache::getById(FontLanguageListCache::getId("en,jp"));
+    ASSERT_EQ(2UL, langs2.size());
+    EXPECT_EQ(english, langs2[0]);
+    EXPECT_EQ(japanese, langs2[1]);
 }
 
 }  // android

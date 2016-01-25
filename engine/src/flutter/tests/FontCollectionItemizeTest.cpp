@@ -698,72 +698,104 @@ TEST_F(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
 TEST_F(FontCollectionItemizeTest, itemize_LanguageScore) {
     struct TestCase {
         std::string userPreferredLanguages;
-        std::string fontLanguages;
+        std::vector<std::string> fontLanguages;
         int selectedFontIndex;
     } testCases[] = {
+        // Font can specify empty language.
+        { "und", { "", "" }, 0 },
+        { "und", { "", "en-Latn" }, 0 },
+        { "en-Latn", { "", "" }, 0 },
+        { "en-Latn", { "", "en-Latn" }, 1 },
+
         // Single user preferred language.
         // Exact match case
-        { "en-Latn", "en-Latn,ja-Jpan", 0 },
-        { "ja-Jpan", "en-Latn,ja-Jpan", 1 },
-        { "en-Latn", "en-Latn,nl-Latn,es-Latn", 0 },
-        { "nl-Latn", "en-Latn,nl-Latn,es-Latn", 1 },
-        { "es-Latn", "en-Latn,nl-Latn,es-Latn", 2 },
-        { "es-Latn", "en-Latn,en-Latn,nl-Latn", 0 },
+        { "en-Latn", { "en-Latn", "ja-Jpan" }, 0 },
+        { "ja-Jpan", { "en-Latn", "ja-Jpan" }, 1 },
+        { "en-Latn", { "en-Latn", "nl-Latn", "es-Latn" }, 0 },
+        { "nl-Latn", { "en-Latn", "nl-Latn", "es-Latn" }, 1 },
+        { "es-Latn", { "en-Latn", "nl-Latn", "es-Latn" }, 2 },
+        { "es-Latn", { "en-Latn", "en-Latn", "nl-Latn" }, 0 },
 
         // Exact script match case
-        { "en-Latn", "nl-Latn,be-Latn", 0 },
-        { "en-Arab", "nl-Latn,ar-Arab", 1 },
-        { "en-Latn", "be-Latn,ar-Arab,bd-Beng", 0 },
-        { "en-Arab", "be-Latn,ar-Arab,bd-Beng", 1 },
-        { "en-Beng", "be-Latn,ar-Arab,bd-Beng", 2 },
-        { "en-Beng", "be-Latn,ar-Beng,bd-Beng", 1 },
-        { "zh-Hant", "zh-Hant,zh-Hans", 0 },
-        { "zh-Hans", "zh-Hant,zh-Hans", 1 },
+        { "en-Latn", { "nl-Latn", "e-Latn" }, 0 },
+        { "en-Arab", { "nl-Latn", "ar-Arab" }, 1 },
+        { "en-Latn", { "be-Latn", "ar-Arab", "d-Beng" }, 0 },
+        { "en-Arab", { "be-Latn", "ar-Arab", "d-Beng" }, 1 },
+        { "en-Beng", { "be-Latn", "ar-Arab", "d-Beng" }, 2 },
+        { "en-Beng", { "be-Latn", "ar-Beng", "d-Beng" }, 1 },
+        { "zh-Hant", { "zh-Hant", "zh-Hans" }, 0 },
+        { "zh-Hans", { "zh-Hant", "zh-Hans" }, 1 },
 
         // Subscript match case, e.g. Jpan supports Hira.
-        { "en-Hira", "ja-Jpan", 0 },
-        { "zh-Hani", "zh-Hans,zh-Hant", 0 },
-        { "zh-Hani", "zh-Hant,zh-Hans", 0 },
-        { "en-Hira", "zh-Hant,ja-Jpan,ja-Jpan", 1 },
+        { "en-Hira", { "ja-Jpan" }, 0 },
+        { "zh-Hani", { "zh-Hans", "zh-Hant" }, 0 },
+        { "zh-Hani", { "zh-Hant", "zh-Hans" }, 0 },
+        { "en-Hira", { "zh-Hant", "ja-Jpan", "ja-Jpan" }, 1 },
 
         // Language match case
-        { "ja-Latn", "zh-Latn,ja-Latn", 1 },
-        { "zh-Latn", "zh-Latn,ja-Latn", 0 },
-        { "ja-Latn", "zh-Latn,ja-Latn", 1 },
-        { "ja-Latn", "zh-Latn,ja-Latn,ja-Latn", 1 },
+        { "ja-Latn", { "zh-Latn", "ja-Latn" }, 1 },
+        { "zh-Latn", { "zh-Latn", "ja-Latn" }, 0 },
+        { "ja-Latn", { "zh-Latn", "ja-Latn" }, 1 },
+        { "ja-Latn", { "zh-Latn", "ja-Latn", "ja-Latn" }, 1 },
 
         // Mixed case
         // Script/subscript match is strongest.
-        { "ja-Jpan", "en-Latn,ja-Latn,en-Jpan", 2 },
-        { "ja-Hira", "en-Latn,ja-Latn,en-Jpan", 2 },
-        { "ja-Hira", "en-Latn,ja-Latn,en-Jpan,en-Jpan", 2 },
+        { "ja-Jpan", { "en-Latn", "ja-Latn", "en-Jpan" }, 2 },
+        { "ja-Hira", { "en-Latn", "ja-Latn", "en-Jpan" }, 2 },
+        { "ja-Hira", { "en-Latn", "ja-Latn", "en-Jpan", "en-Jpan" }, 2 },
 
         // Language match only happens if the script matches.
-        { "ja-Hira", "en-Latn,ja-Latn", 0 },
-        { "ja-Hira", "en-Jpan,ja-Jpan", 1 },
+        { "ja-Hira", { "en-Latn", "ja-Latn" }, 0 },
+        { "ja-Hira", { "en-Jpan", "ja-Jpan" }, 1 },
 
         // Multiple languages.
         // Even if all fonts have the same score, use the 2nd language for better selection.
-        { "en-Latn,ja-Jpan", "zh-Hant,zh-Hans,ja-Jpan", 2 },
-        { "en-Latn,nl-Latn", "es-Latn,be-Latn,nl-Latn", 2 },
-        { "en-Latn,br-Latn,nl-Latn", "es-Latn,be-Latn,nl-Latn", 2 },
-        { "en-Latn,br-Latn,nl-Latn", "es-Latn,be-Latn,nl-Latn,nl-Latn", 2 },
+        { "en-Latn,ja-Jpan", { "zh-Hant", "zh-Hans", "ja-Jpan" }, 2 },
+        { "en-Latn,nl-Latn", { "es-Latn", "be-Latn", "nl-Latn" }, 2 },
+        { "en-Latn,br-Latn,nl-Latn", { "es-Latn", "be-Latn", "nl-Latn" }, 2 },
+        { "en-Latn,br-Latn,nl-Latn", { "es-Latn", "be-Latn", "nl-Latn", "nl-Latn" }, 2 },
 
         // Script score.
-        { "en-Latn,ja-Jpan", "en-Arab,en-Jpan", 1 },
-        { "en-Latn,ja-Jpan", "en-Arab,en-Jpan,en-Jpan", 1 },
+        { "en-Latn,ja-Jpan", { "en-Arab", "en-Jpan" }, 1 },
+        { "en-Latn,ja-Jpan", { "en-Arab", "en-Jpan", "en-Jpan" }, 1 },
 
         // Language match case
-        { "en-Latn,ja-Latn", "bd-Latn,ja-Latn", 1 },
-        { "en-Latn,ja-Latn", "bd-Latn,ja-Latn,ja-Latn", 1 },
+        { "en-Latn,ja-Latn", { "bd-Latn", "ja-Latn" }, 1 },
+        { "en-Latn,ja-Latn", { "bd-Latn", "ja-Latn", "ja-Latn" }, 1 },
 
         // Language match only happens if the script matches.
-        { "en-Latn,ar-Arab", "en-Beng,ar-Arab", 1 },
+        { "en-Latn,ar-Arab", { "en-Beng", "ar-Arab" }, 1 },
+
+        // Multiple languages in the font settings.
+        { "ko-Jamo", { "ja-Jpan", "ko-Kore", "ko-Kore,ko-Jamo"}, 2 },
+        { "en-Latn", { "ja-Jpan", "en-Latn,ja-Jpan"}, 1 },
+        { "en-Latn", { "ja-Jpan", "ja-Jpan,en-Latn"}, 1 },
+        { "en-Latn", { "ja-Jpan,zh-Hant", "en-Latn,ja-Jpan", "en-Latn"}, 1 },
+        { "en-Latn", { "zh-Hant,ja-Jpan", "ja-Jpan,en-Latn", "en-Latn"}, 1 },
+
+        // Kore = Hang + Hani, etc.
+        { "ko-Kore", { "ko-Hang", "ko-Jamo,ko-Hani", "ko-Hang,ko-Hani"}, 2 },
+        { "ja-Hrkt", { "ja-Hira", "ja-Kana", "ja-Hira,ja-Kana"}, 2 },
+        { "ja-Jpan", { "ja-Hira", "ja-Kana", "ja-Hani", "ja-Hira,ja-Kana,ja-Hani"}, 3 },
+        { "zh-Hanb", { "zh-Hant", "zh-Bopo", "zh-Hant,zh-Bopo"}, 2 },
+        { "zh-Hanb", { "ja-Hanb", "zh-Hant,zh-Bopo"}, 1 },
+
+        // Language match with unified subscript bits.
+        { "zh-Hanb", { "zh-Hant", "zh-Bopo", "ja-Hant,ja-Bopo", "zh-Hant,zh-Bopo"}, 3 },
+        { "zh-Hanb", { "zh-Hant", "zh-Bopo", "ja-Hant,zh-Bopo", "zh-Hant,zh-Bopo"}, 3 },
     };
 
     for (auto testCase : testCases) {
+        std::string fontLanguagesStr = "{";
+        for (size_t i = 0; i < testCase.fontLanguages.size(); ++i) {
+            if (i != 0) {
+                fontLanguagesStr += ", ";
+            }
+            fontLanguagesStr += "\"" + testCase.fontLanguages[i] + "\"";
+        }
+        fontLanguagesStr += "}";
         SCOPED_TRACE("Test of user preferred languages: \"" + testCase.userPreferredLanguages +
-                     "\" with font languages: " + testCase.fontLanguages);
+                     "\" with font languages: " + fontLanguagesStr);
 
         std::vector<FontFamily*> families;
 
@@ -778,12 +810,10 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageScore) {
         // Each font family is associated with a specified language. All font families except for
         // the first font support U+9AA8.
         std::unordered_map<MinikinFont*, int> fontLangIdxMap;
-        const FontLanguages& fontLanguages = registerAndGetFontLanguages(testCase.fontLanguages);
 
-        for (size_t i = 0; i < fontLanguages.size(); ++i) {
-            const FontLanguage& fontLanguage = fontLanguages[i];
+        for (size_t i = 0; i < testCase.fontLanguages.size(); ++i) {
             FontFamily* family = new FontFamily(
-                    FontStyle::registerLanguageList(fontLanguage.getString()), 0 /* variant */);
+                    FontStyle::registerLanguageList(testCase.fontLanguages[i]), 0 /* variant */);
             MinikinFont* minikin_font = new MinikinFontForTest(kJAFont);
             family->addFont(minikin_font);
             families.push_back(family);
