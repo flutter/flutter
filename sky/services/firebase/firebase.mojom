@@ -51,5 +51,6 @@ interface Firebase {
   AddChildEventListener(ChildEventListener listener);
   ObserveSingleEventOfType(EventType eventType) => (DataSnapshot snapshot);
   AuthWithOAuthToken(string provider, string credentials) => (Error? error, AuthData? authData);
+  AuthWithPassword(string email, string password) => (Error? error, AuthData? authData);
   SetValue(string jsonValue) => (Error? error);
 };
