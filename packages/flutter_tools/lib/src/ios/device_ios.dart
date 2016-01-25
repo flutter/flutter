@@ -539,14 +539,14 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
     return false;
 
   List<String> command = [
-    '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
+    'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
   ];
 
   if (!isDevice) {
     command.addAll(['-sdk', 'iphonesimulator']);
   }
 
-  int result = await runCommandAndStreamOutput(command,
+  ProcessResult result = await Process.runSync('/usr/bin/env', command,
       workingDirectory: app.localPath);
-  return result == 0;
+  return result.exitCode == 0;
 }
