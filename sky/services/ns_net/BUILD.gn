@@ -12,6 +12,7 @@ source_set("ns_net") {
 
   deps = [
     "//base:base",
+    "//mojo/data_pipe_utils",
     "//mojo/public/cpp/application",
     "//mojo/services/network/interfaces",
   ]

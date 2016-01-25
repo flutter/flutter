@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef SKY_SERVICES_NSNET_NETWORK_SERVICE_IMPL_H_
+#define SKY_SERVICES_NSNET_NETWORK_SERVICE_IMPL_H_
+
+#include "base/macros.h"
 #include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/network/interfaces/network_service.mojom.h"
@@ -31,11 +35,14 @@ class NetworkServiceImpl : public NetworkService {
                         HttpServerDelegatePtr delegate,
                         const CreateHttpServerCallback& callback) override;
   void RegisterURLLoaderInterceptor(
-                        URLLoaderInterceptorFactoryPtr factory) override;
-  void CreateHostResolver(InterfaceRequest<HostResolver> host_resolver) override;
+      URLLoaderInterceptorFactoryPtr factory) override;
+  void CreateHostResolver(
+      InterfaceRequest<HostResolver> host_resolver) override;
 
  private:
   StrongBinding<NetworkService> binding_;
+
+  DISALLOW_COPY_AND_ASSIGN(NetworkServiceImpl);
 };
 
 class NetworkServiceFactory : public InterfaceFactory<NetworkService> {
@@ -45,3 +52,5 @@ class NetworkServiceFactory : public InterfaceFactory<NetworkService> {
 };
 
 }  // namespace mojo
+
+#endif  // SKY_SERVICES_NSNET_NETWORK_SERVICE_IMPL_H_
