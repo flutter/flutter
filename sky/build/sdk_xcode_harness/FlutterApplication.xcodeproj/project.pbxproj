@@ -337,7 +337,6 @@
 			);
 			name = "Run FLX Packager + Optional Script Snapshotter";
 			outputPaths = (
-				"${SRCROOT}/FlutterApplication/Generated/app.flx",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
