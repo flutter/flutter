@@ -328,9 +328,10 @@ class ArtifactStore {
     File cachedFile = new File(
         path.join(cacheDir.path, url.pathSegments[url.pathSegments.length-1]));
     if (!cachedFile.existsSync()) {
-      await _downloadFileToCache(url, cachedFile);
-      if (!cachedFile.existsSync()) {
-        logging.severe('Unable to fetch third-party artifact: $url');
+      try {
+        await _downloadFileToCache(url, cachedFile);
+      } catch (e) {
+        logging.severe('Failed to fetch third-party artifact: $url: $e');
         throw new ProcessExit(2);
       }
     }

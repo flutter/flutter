@@ -194,16 +194,17 @@ class ApkCommand extends FlutterCommand {
         continue;
       components.services.addAll(serviceConfig['services']);
       for (String jar in serviceConfig['jars']) {
-        // Jar might refer to an android SDK jar, or URL to download.
         if (jar.startsWith("android-sdk:")) {
+          // Jar is something shipped in the standard android SDK.
           jar = jar.replaceAll('android-sdk:', '${components.androidSdk.path}/');
           components.jars.add(new File(jar));
         } else if (jar.startsWith("http")) {
+          // Jar is a URL to download.
           String cachePath = await ArtifactStore.getThirdPartyFile(jar, service);
           components.jars.add(new File(cachePath));
         } else {
-          logging.severe('Service depends on a jar in an unrecognized format: $jar');
-          throw new ProcessExit(2);
+          // Assume jar is a path relative to the service's root dir.
+          components.jars.add(new File(path.join(serviceRoot, jar)));
         }
       }
     }
