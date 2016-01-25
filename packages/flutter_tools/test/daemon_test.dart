@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/logging.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -29,10 +30,28 @@ defineTests() {
         (Map<String, dynamic> result) => responses.add(result)
       );
       commands.add({'id': 0, 'method': 'daemon.version'});
-      Map response = await responses.stream.first;
+      Map response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
       expect(response['result'] is String, true);
+    });
+
+    test('daemon.logMessage', () async {
+      StreamController<Map> commands = new StreamController();
+      StreamController<Map> responses = new StreamController();
+      daemon = new Daemon(
+        commands.stream,
+        (Map<String, dynamic> result) => responses.add(result)
+      );
+      logging.warning('daemon.logMessage test');
+      Map response = await responses.stream.where((Map<String, dynamic> map) {
+        return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'warning';
+      }).first;
+      expect(response['id'], isNull);
+      expect(response['event'], 'daemon.logMessage');
+      Map<String, String> logMessage = response['params'];
+      expect(logMessage['level'], 'warning');
+      expect(logMessage['message'], 'daemon.logMessage test');
     });
 
     test('daemon.shutdown', () async {
@@ -72,7 +91,7 @@ defineTests() {
       when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
 
       commands.add({'id': 0, 'method': 'app.stopAll'});
-      Map response = await responses.stream.first;
+      Map response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['result'], true);
     });
@@ -85,9 +104,11 @@ defineTests() {
         (Map<String, dynamic> result) => responses.add(result)
       );
       commands.add({'id': 0, 'method': 'device.getDevices'});
-      Map response = await responses.stream.first;
+      Map response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['result'], isList);
     });
   });
 }
+
+bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
