@@ -11,8 +11,11 @@ import 'start.dart';
 
 class ListenCommand extends StartCommandBase {
   final String name = 'listen';
-  final String description = 'Listen for changes to files and reload the running app on all connected devices (Android only).'
-      ' By default, only listens to "./" and "./lib/". To listen to additional directories, list them on the command line.';
+  final String description =
+      'Listen for changes to files and reload the running app on all\n'
+      'connected devices (Android only). By default, only listens to\n'
+      '"./" and "./lib/". To listen to additional directories, list them on\n'
+      'the command line.';
 
   /// Only run once.  Used for testing.
   final bool singleRun;

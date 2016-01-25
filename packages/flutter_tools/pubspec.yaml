@@ -10,7 +10,7 @@ environment:
 dependencies:
   analyzer: '>=0.26.1+17' # see note below
   archive: ^1.0.20
-  args: ^0.13.0
+  args: ^0.13.2+1
   crypto: ^0.9.1
   den_api: ^0.1.0
   mustache4dart: ^1.0.0
