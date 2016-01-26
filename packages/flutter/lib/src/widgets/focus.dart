@@ -34,19 +34,13 @@ class _FocusScope extends InheritedWidget {
   GlobalKey focusedScope;
   GlobalKey focusedWidget;
 
-  // The ...IfUnset() methods don't need to notify descendants because by
-  // definition they are only going to make a change the very first time that
-  // our state is checked.
+  // The _setFocusedWidgetIfUnset() methodsdon't need to notify descendants
+  // because by definition they are only going to make a change the very first
+  // time that our state is checked.
 
   void _setFocusedWidgetIfUnset(GlobalKey key) {
     focusState._setFocusedWidgetIfUnset(key);
     focusedWidget = focusState._focusedWidget;
-    focusedScope = focusState._focusedScope == _noFocusedScope ? null : focusState._focusedScope;
-  }
-
-  void _setFocusedScopeIfUnset(GlobalKey key) {
-    focusState._setFocusedScopeIfUnset(key);
-    assert(focusedWidget == focusState._focusedWidget);
     focusedScope = focusState._focusedScope == _noFocusedScope ? null : focusState._focusedScope;
   }
 
@@ -77,14 +71,12 @@ class _FocusScope extends InheritedWidget {
 
 class Focus extends StatefulComponent {
   Focus({
-    GlobalKey key, // key is required if this is a nested Focus scope
-    this.autofocus: false,
+    GlobalKey key,
     this.child
   }) : super(key: key) {
-    assert(!autofocus || key != null);
+    assert(key != null);
   }
 
-  final bool autofocus;
   final Widget child;
 
   static GlobalKey debugOnlyFocusedKey;
@@ -114,15 +106,13 @@ class Focus extends StatefulComponent {
     return true;
   }
 
-  static bool _atScope(BuildContext context, { bool autofocus: false }) {
+  static bool _atScope(BuildContext context) {
     assert(context != null);
     assert(context.widget != null);
     assert(context.widget is Focus);
+    assert(context.widget.key != null);
     _FocusScope focusScope = context.inheritFromWidgetOfExactType(_FocusScope);
     if (focusScope != null) {
-      assert(context.widget.key != null);
-      if (autofocus)
-        focusScope._setFocusedScopeIfUnset(context.widget.key);
       return focusScope.scopeFocused &&
              focusScope.focusedScope == context.widget.key;
     }
@@ -150,15 +140,20 @@ class Focus extends StatefulComponent {
       focusScope.focusState._clearFocusedWidget();
   }
 
-  /// Focuses a particular focus scope, identified by its GlobalKey. The widget
-  /// must be in the widget tree.
+  /// Focuses a particular focus scope, identified by its GlobalKey.
   ///
   /// Don't call moveScopeTo() from your build() functions, it's intended to be
   /// called from event listeners, e.g. in response to a finger tap or tab key.
-  static void moveScopeTo(GlobalKey key) {
-    assert(key.currentWidget is Focus);
-    assert(key.currentContext != null);
-    _FocusScope focusScope = key.currentContext.ancestorWidgetOfExactType(_FocusScope);
+  static void moveScopeTo(GlobalKey key, { BuildContext context }) {
+    _FocusScope focusScope;
+    BuildContext searchContext = key.currentContext;
+    if (searchContext != null) {
+      assert(key.currentWidget is Focus);
+      focusScope = searchContext.ancestorWidgetOfExactType(_FocusScope);
+      assert(context == null || focusScope == context.ancestorWidgetOfExactType(_FocusScope));
+    } else {
+      focusScope = context.ancestorWidgetOfExactType(_FocusScope);
+    }
     if (focusScope != null)
       focusScope.focusState._setFocusedScope(key);
   }
@@ -167,6 +162,18 @@ class Focus extends StatefulComponent {
 }
 
 class _FocusState extends State<Focus> {
+  void initState() {
+    super.initState();
+    _updateWidgetRemovalListener(_focusedWidget);
+    _updateScopeRemovalListener(_focusedScope);
+  }
+
+  void dispose() {
+    _updateWidgetRemovalListener(null);
+    _updateScopeRemovalListener(null);
+    super.dispose();
+  }
+
   GlobalKey _focusedWidget; // when null, the first component to ask if it's focused will get the focus
   GlobalKey _currentlyRegisteredWidgetRemovalListenerKey;
 
@@ -222,13 +229,6 @@ class _FocusState extends State<Focus> {
     _updateScopeRemovalListener(key);
   }
 
-  void _setFocusedScopeIfUnset(GlobalKey key) {
-    if (_focusedScope == null) {
-      _focusedScope = key;
-      _updateScopeRemovalListener(key);
-    }
-  }
-
   void _scopeRemoved(GlobalKey key) {
     assert(_focusedScope == key);
     GlobalKey.unregisterRemoveListener(_currentlyRegisteredScopeRemovalListenerKey, _scopeRemoved);
@@ -246,18 +246,6 @@ class _FocusState extends State<Focus> {
         GlobalKey.registerRemoveListener(key, _scopeRemoved);
       _currentlyRegisteredScopeRemovalListenerKey = key;
     }
-  }
-
-  void initState() {
-    super.initState();
-    _updateWidgetRemovalListener(_focusedWidget);
-    _updateScopeRemovalListener(_focusedScope);
-  }
-
-  void dispose() {
-    _updateWidgetRemovalListener(null);
-    _updateScopeRemovalListener(null);
-    super.dispose();
   }
 
   Size _mediaSize;

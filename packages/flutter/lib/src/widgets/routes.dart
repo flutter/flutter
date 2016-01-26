@@ -339,20 +339,20 @@ class _ModalScopeState extends State<_ModalScope> {
     if (config.route.offstage) {
       contents = new OffStage(child: contents);
     } else {
-      contents = new Focus(
-        key: new GlobalObjectKey(config.route),
-        child: new IgnorePointer(
-          ignoring: config.route.animation?.status == AnimationStatus.reverse,
-          child: config.route.buildTransitions(
-            context,
-            config.route.animation,
-            config.route.forwardAnimation,
-            contents
-          )
+      contents = new IgnorePointer(
+        ignoring: config.route.animation?.status == AnimationStatus.reverse,
+        child: config.route.buildTransitions(
+          context,
+          config.route.animation,
+          config.route.forwardAnimation,
+          contents
         )
       );
     }
-    contents = new RepaintBoundary(child: contents);
+    contents = new Focus(
+      key: new GlobalObjectKey(config.route),
+      child: new RepaintBoundary(child: contents)
+    );
     ModalPosition position = config.route.getPosition(context);
     if (position == null)
       return contents;
@@ -401,6 +401,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
+  void didPush() {
+    Focus.moveScopeTo(new GlobalObjectKey(this), context: navigator.context);
+    super.didPush();
+  }
 
   // The API for subclasses to override - used by this class
 
