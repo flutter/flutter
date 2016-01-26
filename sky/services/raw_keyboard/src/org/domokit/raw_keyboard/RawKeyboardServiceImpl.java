@@ -20,12 +20,7 @@ public class RawKeyboardServiceImpl implements RawKeyboardService {
 
     @Override
     public void addListener(RawKeyboardListener listener) {
-        mViewState.addListener(listener);
-    }
-
-    @Override
-    public void removeListener(RawKeyboardListener listener) {
-        mViewState.removeListener(listener);
+        mViewState.addListener((RawKeyboardListener.Proxy) listener);
     }
 
     @Override

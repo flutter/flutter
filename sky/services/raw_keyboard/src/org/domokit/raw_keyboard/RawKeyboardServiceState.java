@@ -10,6 +10,7 @@ import android.view.View;
 
 import java.util.ArrayList;
 
+import org.chromium.mojo.bindings.ConnectionErrorHandler;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.raw_keyboard.RawKeyboardListener;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
@@ -23,18 +24,19 @@ import org.chromium.mojom.sky.KeyData;
 public class RawKeyboardServiceState implements View.OnKeyListener {
     private static final String TAG = "RawKeyboardServiceState";
 
-    private ArrayList<RawKeyboardListener> mListeners = new ArrayList<RawKeyboardListener>();
+    private ArrayList<RawKeyboardListener.Proxy> mListeners = new ArrayList<RawKeyboardListener.Proxy>();
 
     public RawKeyboardServiceState() {
     }
 
-    public void addListener(RawKeyboardListener listener) {
+    public void addListener(final RawKeyboardListener.Proxy listener) {
         mListeners.add(listener);
-    }
-
-    public void removeListener(RawKeyboardListener listener) {
-        mListeners.remove(listener);
-        listener.close();
+        listener.getProxyHandler().setErrorHandler(new ConnectionErrorHandler() {
+            @Override
+            public void onConnectionError(MojoException e) {
+                mListeners.remove(listener);
+            }
+        });
     }
 
     public void close() {
