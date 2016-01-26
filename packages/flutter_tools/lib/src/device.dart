@@ -99,7 +99,8 @@ class DeviceStore {
       device = devices[0];
     } else if (devices.length > 1) {
       // Step 3: D:
-      logging.severe('Warning: Multiple devices are connected, but no device ID was specified.');
+      logging.fine('Multiple devices are connected, but no device ID was specified.');
+      logging.fine('Attempting to launch on all connected devices.');
     }
 
     return device;
