@@ -18,6 +18,7 @@
 		9E0FB06E1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */; };
 		9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */; };
 		9E40465D1C1B6E9200A4B87C /* icudtl.dat in Resources */ = {isa = PBXBuildFile; fileRef = 9E4046541C1B6A3600A4B87C /* icudtl.dat */; };
+		9E627AD91C582ABB000D800D /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E627AD81C582ABB000D800D /* app.flx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		9E4046591C1B6A3600A4B87C /* FlutterRunner */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlutterRunner; sourceTree = "<group>"; };
 		9E40465A1C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 		9E40465E1C1B6F7900A4B87C /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		9E627AD81C582ABB000D800D /* app.flx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 		9E07CF881BE7F4D200BCD8DE /* FlutterApplication */ = {
 			isa = PBXGroup;
 			children = (
+				9E627AD71C582AB1000D800D /* Resources */,
 				9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */,
 				9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */,
 				9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */,
@@ -180,6 +183,14 @@
 				9E40465A1C1B6A3600A4B87C /* Snapshotter */,
 			);
 			path = iphonesimulator;
+			sourceTree = "<group>";
+		};
+		9E627AD71C582AB1000D800D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9E627AD81C582ABB000D800D /* app.flx */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -278,6 +289,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E627AD91C582ABB000D800D /* app.flx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

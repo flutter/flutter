@@ -8,6 +8,7 @@
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/EAGLDrawable.h>
 
+#include "base/logging.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
@@ -199,6 +200,9 @@ static std::string TracesBasePath() {
   _sky_engine->SetServices(services.Pass());
 
   mojo::String bundle_path([self flxBundlePath]);
+
+  CHECK(bundle_path.size() != 0)
+      << "There must be a valid FLX bundle to run the application";
 
 #if TARGET_IPHONE_SIMULATOR
   _sky_engine->RunFromBundle(bundle_path);
