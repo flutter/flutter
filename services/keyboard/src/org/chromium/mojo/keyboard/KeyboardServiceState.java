@@ -59,6 +59,9 @@ public class KeyboardServiceState {
     }
 
     public void setSelection(int start, int end) {
+        int length = mActiveEditable.length();
+        start = Math.max(Math.min(start, length), 0);
+        end = Math.max(Math.min(end, length), 0);
         Selection.setSelection(mActiveEditable, start, end);
     }
 }
