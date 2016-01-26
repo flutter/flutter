@@ -53,9 +53,7 @@ LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
 LOCAL_CLANG := true
 LOCAL_SANITIZE := signed-integer-overflow
 # b/26432628.
-ifeq ($(filter x86%,$(TARGET_ARCH)),)
-  LOCAL_SANITIZE += unsigned-integer-overflow
-endif
+#LOCAL_SANITIZE += unsigned-integer-overflow
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -70,9 +68,7 @@ LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
 LOCAL_CLANG := true
 LOCAL_SANITIZE := signed-integer-overflow
 # b/26432628.
-ifeq ($(filter x86%,$(TARGET_ARCH)),)
-  LOCAL_SANITIZE += unsigned-integer-overflow
-endif
+#LOCAL_SANITIZE += unsigned-integer-overflow
 
 include $(BUILD_STATIC_LIBRARY)
 
