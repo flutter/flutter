@@ -122,7 +122,9 @@ class IOSCommand extends FlutterCommand {
     // Step 2: Inflate the archive into the user project directory
     bool result = await _inflateXcodeArchive(xcodeprojPath, archiveBytes);
     if (!result) {
-      print("Could not fetch the Xcode project from the cloud...");
+      print("Error: Could not init the Xcode project: the 'ios' directory already exists.");
+      print("To proceed, remove the 'ios' directory and try again.");
+      print("Warning: You may have made manual changes to files in the 'ios' directory.");
       return -1;
     }
 
