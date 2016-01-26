@@ -552,14 +552,12 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     if (haveChildren) {
       // Place all our children in our RenderObject.
       // All the children we are placing are in builtChildren and newChildren.
-      // We will walk them backwards so we can set the slots at the same time.
-      Element nextSibling = null;
-      while (index > startIndex) {
-        index -= 1;
-        final Element element = builtChildren[index];
-        if (element.slot != nextSibling)
-          updateSlotForChild(element, nextSibling);
-        nextSibling = element;
+      Element previousChild = null;
+      for (int i = startIndex; i < index; ++i) {
+        final Element element = builtChildren[i];
+        if (element.slot != previousChild)
+          updateSlotForChild(element, previousChild);
+        previousChild = element;
       }
     }
 
@@ -577,20 +575,19 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     if (slot == _omit)
       return;
     assert(slot == null || slot is Element);
-    RenderObject nextSibling = slot?.renderObject;
-    renderObject.add(child, before: nextSibling);
+    renderObject.insert(child, after: slot?.renderObject);
   }
 
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     if (slot == _omit)
       return;
     assert(slot == null || slot is Element);
-    RenderObject nextSibling = slot?.renderObject;
-    assert(nextSibling == null || nextSibling.parent == renderObject);
+    RenderObject previousSibling = slot?.renderObject;
+    assert(previousSibling == null || previousSibling.parent == renderObject);
     if (child.parent == renderObject)
-      renderObject.move(child, before: nextSibling);
+      renderObject.move(child, after: previousSibling);
     else
-      renderObject.add(child, before: nextSibling);
+      renderObject.insert(child, after: previousSibling);
   }
 
   void removeChildRenderObject(RenderObject child) {

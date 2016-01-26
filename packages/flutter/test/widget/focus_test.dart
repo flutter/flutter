@@ -36,16 +36,15 @@ void main() {
         new Focus(
           child: new Column(
             children: <Widget>[
-              // reverse these when you fix https://github.com/flutter/engine/issues/1495
-              new TestFocusable(
-                key: keyB,
-                no: 'b',
-                yes: 'B FOCUSED'
-              ),
               new TestFocusable(
                 key: keyA,
                 no: 'a',
                 yes: 'A FOCUSED'
+              ),
+              new TestFocusable(
+                key: keyB,
+                no: 'b',
+                yes: 'B FOCUSED'
               ),
             ]
           )

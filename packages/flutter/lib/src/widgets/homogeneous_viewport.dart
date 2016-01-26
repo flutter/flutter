@@ -118,14 +118,12 @@ abstract class _ViewportBaseElement<T extends _ViewportBase> extends RenderObjec
   }
 
   void insertChildRenderObject(RenderObject child, Element slot) {
-    RenderObject nextSibling = slot?.renderObject;
-    renderObject.add(child, before: nextSibling);
+    renderObject.insert(child, after: slot?.renderObject);
   }
 
   void moveChildRenderObject(RenderObject child, Element slot) {
     assert(child.parent == renderObject);
-    RenderObject nextSibling = slot?.renderObject;
-    renderObject.move(child, before: nextSibling);
+    renderObject.move(child, after: slot?.renderObject);
   }
 
   void removeChildRenderObject(RenderObject child) {
