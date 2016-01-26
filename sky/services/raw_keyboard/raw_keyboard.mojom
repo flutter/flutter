@@ -15,5 +15,4 @@ interface RawKeyboardListener {
 [ServiceName="raw_keyboard::RawKeyboardService"]
 interface RawKeyboardService {
   AddListener(RawKeyboardListener listener);
-  RemoveListener(RawKeyboardListener listener);
 };
