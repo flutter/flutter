@@ -42,7 +42,6 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
         if (context != mContext)
             com.firebase.client.Firebase.setAndroidContext(context);
         mContext = context;
-        Log.v(TAG, "constructed");
     }
 
     public static void connectToService(Context context, Core core, MessagePipeHandle pipe) {
@@ -135,12 +134,11 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     }
 
     @Override
-    public void observeSingleEventOfType(int eventType, ObserveSingleEventOfTypeResponse response) {
-        final ObserveSingleEventOfTypeResponse responseCopy = response;
+    public void observeSingleEventOfType(int eventType, final ObserveSingleEventOfTypeResponse response) {
         mClient.addListenerForSingleValueEvent(new com.firebase.client.ValueEventListener() {
             @Override
             public void onDataChange(com.firebase.client.DataSnapshot snapshot) {
-                responseCopy.call(toMojoSnapshot(snapshot));
+                response.call(toMojoSnapshot(snapshot));
             }
 
             @Override
@@ -151,35 +149,40 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     }
 
     @Override
-    public void authWithOAuthToken(String provider, String credentials, AuthWithOAuthTokenResponse response) {
-        final AuthWithOAuthTokenResponse responseCopy = response;
-        Log.v(TAG, "Authenticating " + mContext + " " + provider + " " + credentials);
+    public void authWithOAuthToken(String provider, String credentials, final AuthWithOAuthTokenResponse response) {
         mClient.authWithOAuthToken(provider, credentials, new AuthResultHandler() {
-          @Override
-          public void onAuthenticated(AuthData authData) {
-            org.chromium.mojom.firebase.AuthData mojoAuthData =
-              new org.chromium.mojom.firebase.AuthData();
-            mojoAuthData.uid = authData.getUid();
-            mojoAuthData.provider = authData.getProvider();
-            mojoAuthData.token = authData.getToken();
-            responseCopy.call(null, mojoAuthData);
-          }
-          public void onAuthenticationError(FirebaseError error) {
-            responseCopy.call(toMojoError(error), null);
-          }
+            @Override
+            public void onAuthenticated(AuthData authData) {
+                response.call(null, toMojoAuthData(authData));
+            }
+            public void onAuthenticationError(FirebaseError error) {
+                response.call(toMojoError(error), null);
+            }
         });
     }
 
     @Override
-    public void setValue(String jsonValue, SetValueResponse response) {
-        final SetValueResponse responseCopy = response;
+    public void authWithPassword(String email, String password, final AuthWithPasswordResponse response) {
+        mClient.authWithPassword(email, password, new AuthResultHandler() {
+            @Override
+            public void onAuthenticated(AuthData authData) {
+                response.call(null, toMojoAuthData(authData));
+            }
+            public void onAuthenticationError(FirebaseError error) {
+                response.call(toMojoError(error), null);
+            }
+        });
+    }
+
+    @Override
+    public void setValue(String jsonValue, final SetValueResponse response) {
         try {
           JSONObject root = new JSONObject(jsonValue);
           Object value = toMap(root).get("value");
           mClient.setValue(value, null, new CompletionListener() {
               @Override
               public void onComplete(FirebaseError error, com.firebase.client.Firebase ref) {
-                  responseCopy.call(toMojoError(error));
+                  response.call(toMojoError(error));
               }
           });
         } catch(JSONException e) {
@@ -188,7 +191,7 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
           mojoError.code = -1;
           mojoError.message = "setValue JSONException";
           Log.e(TAG, "setValue JSONException", e);
-          responseCopy.call(mojoError);
+          response.call(mojoError);
         }
     }
 
@@ -209,6 +212,15 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
         mojoError.code = error.getCode();
         mojoError.message = error.getMessage();
         return mojoError;
+    }
+
+    org.chromium.mojom.firebase.AuthData toMojoAuthData(AuthData authData) {
+      org.chromium.mojom.firebase.AuthData mojoAuthData =
+        new org.chromium.mojom.firebase.AuthData();
+      mojoAuthData.uid = authData.getUid();
+      mojoAuthData.provider = authData.getProvider();
+      mojoAuthData.token = authData.getToken();
+      return mojoAuthData;
     }
 
     // public domain code from https://gist.github.com/codebutler/2339666
