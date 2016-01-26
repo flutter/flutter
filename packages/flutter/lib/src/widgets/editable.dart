@@ -64,7 +64,6 @@ class _KeyboardClientImpl implements KeyboardClient {
   }) {
     assert(onUpdated != null);
     assert(onSubmitted != null);
-    stub = new KeyboardClientStub.unbound()..impl = this;
     selection = new TextRange(start: text.length, end: text.length);
   }
 
@@ -84,7 +83,9 @@ class _KeyboardClientImpl implements KeyboardClient {
   TextRange selection = TextRange.empty;
 
   /// A keyboard client stub that can be attached to a keyboard service.
-  KeyboardClientStub stub;
+  KeyboardClientStub createStub() {
+    return new KeyboardClientStub.unbound()..impl = this;
+  }
 
   void _delete(TextRange range) {
     if (range.isCollapsed || !range.isValid) return;
@@ -196,7 +197,7 @@ class EditableString {
   /// A keyboard client stub that can be attached to a keyboard service.
   ///
   /// See [Keyboard].
-  KeyboardClientStub get stub => _client.stub;
+  KeyboardClientStub createStub() => _client.createStub();
 
   void didDetachKeyboard() {
     _client.composing = TextRange.empty;
