@@ -235,7 +235,7 @@ class IOSDevice extends Device {
       return 2;
     }
     return await runCommandAndStreamOutput([loggerPath],
-        prefix: 'iOS dev: ', filter: new RegExp(r'.*SkyShell.*'));
+        prefix: 'iOS: ', filter: new RegExp('FlutterRunner'));
   }
 }
 
