@@ -109,7 +109,7 @@ class _InputState extends State<Input> {
                                    _editableString.selection.end);
     } else if (!focused && _keyboardHandle.attached) {
       _keyboardHandle.release();
-      _editableString.composing = TextRange.empty;
+      _editableString.didDetachKeyboard();
     }
   }
 

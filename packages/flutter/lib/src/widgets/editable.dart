@@ -26,11 +26,7 @@ class TextRange {
       end = position;
 
   /// A text range that contains nothing and is not in the text.
-  const TextRange._empty()
-    : start = -1,
-      end = -1;
-
-  static const TextRange empty = const TextRange._empty();
+  static const TextRange empty = const TextRange(start: -1, end: -1);
 
   /// The index of the first character in the range.
   final int start;
@@ -43,11 +39,29 @@ class TextRange {
 
   /// Whether this range is empty (but still potentially placed inside the text).
   bool get isCollapsed => start == end;
+
+  /// The text before this range.
+  String textBefore(String text) {
+    return text.substring(0, start);
+  }
+
+  /// The text after this range.
+  String textAfter(String text) {
+    return text.substring(end);
+  }
+
+  /// The text inside this range.
+  String textInside(String text) {
+    return text.substring(start, end);
+  }
 }
 
-/// A string that can be manipulated by a keyboard.
-class EditableString implements KeyboardClient {
-  EditableString({this.text: '', this.onUpdated, this.onSubmitted}) {
+class _KeyboardClientImpl implements KeyboardClient {
+  _KeyboardClientImpl({
+    this.text: '',
+    this.onUpdated,
+    this.onSubmitted
+  }) {
     assert(onUpdated != null);
     assert(onSubmitted != null);
     stub = new KeyboardClientStub.unbound()..impl = this;
@@ -57,39 +71,24 @@ class EditableString implements KeyboardClient {
   /// The current text being edited.
   String text;
 
-  // The range of text that is still being composed.
-  TextRange composing = TextRange.empty;
-
-  /// The range of text that is currently selected.
-  TextRange selection;
-
   /// Called whenever the text changes.
   final VoidCallback onUpdated;
 
   /// Called whenever the user indicates they are done editing the string.
   final VoidCallback onSubmitted;
 
+  // The range of text that is still being composed.
+  TextRange composing = TextRange.empty;
+
+  /// The range of text that is currently selected.
+  TextRange selection = TextRange.empty;
+
   /// A keyboard client stub that can be attached to a keyboard service.
   KeyboardClientStub stub;
 
-  /// The text before the given range.
-  String textBefore(TextRange range) {
-    return text.substring(0, range.start);
-  }
-
-  /// The text after the given range.
-  String textAfter(TextRange range) {
-    return text.substring(range.end);
-  }
-
-  /// The text inside the given range.
-  String textInside(TextRange range) {
-    return text.substring(range.start, range.end);
-  }
-
   void _delete(TextRange range) {
     if (range.isCollapsed || !range.isValid) return;
-    text = textBefore(range) + textAfter(range);
+    text = range.textBefore(text) + range.textAfter(text);
   }
 
   TextRange _append(String newText) {
@@ -101,8 +100,8 @@ class EditableString implements KeyboardClient {
   TextRange _replace(TextRange range, String newText) {
     assert(range.isValid);
 
-    String before = textBefore(range);
-    String after = textAfter(range);
+    String before = range.textBefore(text);
+    String after = range.textAfter(text);
 
     text = before + newText + after;
     return new TextRange(
@@ -165,6 +164,42 @@ class EditableString implements KeyboardClient {
   void submit(SubmitAction action) {
     composing = TextRange.empty;
     onSubmitted();
+  }
+}
+
+/// A string that can be manipulated by a keyboard.
+///
+/// Can be displayed with [RawEditableLine]. For a more featureful input widget,
+/// consider using [Input].
+class EditableString {
+  EditableString({
+    String text: '',
+    VoidCallback onUpdated,
+    VoidCallback onSubmitted
+  }) : _client = new _KeyboardClientImpl(
+      text: text,
+      onUpdated: onUpdated,
+      onSubmitted: onSubmitted
+    );
+
+  final _KeyboardClientImpl _client;
+
+  /// The current text being edited.
+  String get text => _client.text;
+
+  // The range of text that is still being composed.
+  TextRange get composing => _client.composing;
+
+  /// The range of text that is currently selected.
+  TextRange get selection => _client.selection;
+
+  /// A keyboard client stub that can be attached to a keyboard service.
+  ///
+  /// See [Keyboard].
+  KeyboardClientStub get stub => _client.stub;
+
+  void didDetachKeyboard() {
+    _client.composing = TextRange.empty;
   }
 }
 
@@ -337,11 +372,11 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       );
 
       return new StyledTextSpan(style, <TextSpan>[
-        new PlainTextSpan(value.textBefore(value.composing)),
+        new PlainTextSpan(value.composing.textBefore(value.text)),
         new StyledTextSpan(composingStyle, <TextSpan>[
-          new PlainTextSpan(value.textInside(value.composing))
+          new PlainTextSpan(value.composing.textInside(value.text))
         ]),
-        new PlainTextSpan(value.textAfter(value.composing))
+        new PlainTextSpan(value.composing.textAfter(value.text))
       ]);
     }
 
