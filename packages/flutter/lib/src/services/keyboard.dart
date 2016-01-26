@@ -23,8 +23,10 @@ class _KeyboardConnection {
   static final _KeyboardConnection instance = new _KeyboardConnection();
 }
 
+/// An interface to the system's keyboard.
+///
+/// Most clients will want to use the [keyboard] singleton instance.
 class Keyboard {
-
   Keyboard(this.service);
 
   // The service is exposed in case you need direct access.
