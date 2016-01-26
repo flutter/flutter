@@ -38,8 +38,8 @@ class PostDemoState extends State<PostDemo> {
     });
     http.Response response = await http.post(
       "http://httpbin.org/post",
-      body: "asdf=42",
-      headers: { "foo": "bar" }
+      body: '{"foo": "bar"}',
+      headers: { "Content-Type": "application/json", "baz": "qux" }
     );
     setState(() {
       _response = response.body;
