@@ -158,6 +158,17 @@ public class UrlLoaderImpl implements UrlLoader {
                 return;
             }
 
+            Request.Builder builder = new Request.Builder().url(url);
+
+            String contentType = null;
+            if (mRequest.headers != null) {
+                for (HttpHeader header : mRequest.headers) {
+                    if (header.name.toLowerCase().equals("content-type"))
+                        contentType = header.value;
+                    builder.addHeader(header.name, header.value);
+                }
+            }
+
             RequestBody body = null;
             if (mRequest.body != null && mRequest.body[0] != null) {
                 if (mRequest.body.length > 1) {
@@ -186,19 +197,13 @@ public class UrlLoaderImpl implements UrlLoader {
                         }
                     }
                 } while (true);
-                String contentType = "application/x-www-form-urlencoded; charset=utf8";
+                if (contentType == null)
+                    contentType = "application/x-www-form-urlencoded; charset=utf8";
                 MediaType mediaType = MediaType.parse(contentType);
                 body = RequestBody.create(mediaType, bodyStream.toByteArray());
             }
 
-            Request.Builder builder =
-                    new Request.Builder().url(url).method(mRequest.method, body);
-
-            if (mRequest.headers != null) {
-                for (HttpHeader header : mRequest.headers) {
-                    builder.addHeader(header.name, header.value);
-                }
-            }
+            builder.method(mRequest.method, body);
 
             // TODO(abarth): responseBodyBufferSize, autoFollowRedirects, bypassCache.
             Call call = mClient.newCall(builder.build());
