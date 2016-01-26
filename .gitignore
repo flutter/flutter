@@ -39,6 +39,7 @@ Thumbs.db
 /third_party/colorama/src/
 /third_party/dart-sdk/
 /third_party/dejavu-fonts-ttf-2.34/ttf/*.ttf
+/third_party/firebase
 /third_party/freetype-android/src
 /third_party/go/tool/
 /third_party/icu/
