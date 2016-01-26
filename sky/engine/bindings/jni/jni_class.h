@@ -15,8 +15,6 @@
 
 namespace blink {
 
-class JniObject;
-
 // Wrapper that exposes a JNI jclass to Dart
 class JniClass : public JniObject {
   DEFINE_WRAPPERTYPEINFO();
@@ -37,6 +35,8 @@ class JniClass : public JniObject {
 
   PassRefPtr<JniObject> NewObject(jmethodID methodId,
                                   const std::vector<Dart_Handle>& args);
+
+  bool IsAssignable(const JniClass* clazz);
 
   PassRefPtr<JniObject> GetStaticObjectField(jfieldID fieldId);
   bool GetStaticBooleanField(jfieldID fieldId);

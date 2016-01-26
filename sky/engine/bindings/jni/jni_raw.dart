@@ -19,6 +19,9 @@ class JniApi {
 
 /// Wrapper for a Java object accessed via JNI.
 class JniObject extends NativeFieldWrapperClass2 {
+  JniClass getObjectClass()
+      native 'JniObject_GetObjectClass';
+
   JniObject getObjectField(int fieldId)
       native 'JniObject_GetObjectField';
   bool getBooleanField(int fieldId)
@@ -97,6 +100,9 @@ class JniClass extends JniObject {
 
   JniObject newObject(int methodId, List args)
       native 'JniClass_NewObject';
+
+  bool isAssignable(JniClass clazz)
+      native 'JniClass_IsAssignable';
 
   JniObject getStaticObjectField(int fieldId)
       native 'JniClass_GetStaticObjectField';

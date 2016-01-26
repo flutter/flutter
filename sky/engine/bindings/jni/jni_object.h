@@ -14,6 +14,8 @@
 
 namespace blink {
 
+class JniClass;
+
 // Wrapper that exposes a JNI jobject to Dart
 class JniObject : public RefCounted<JniObject>, public DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
@@ -24,6 +26,8 @@ class JniObject : public RefCounted<JniObject>, public DartWrappable {
   static PassRefPtr<JniObject> Create(JNIEnv* env, jobject object);
 
   jobject java_object() const { return object_.obj(); }
+
+  PassRefPtr<JniClass> GetObjectClass();
 
   PassRefPtr<JniObject> GetObjectField(jfieldID fieldId);
   bool GetBooleanField(jfieldID fieldId);

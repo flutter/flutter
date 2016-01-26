@@ -7,6 +7,7 @@
 #include "base/strings/string_util.h"
 #include "sky/engine/bindings/jni/dart_jni.h"
 #include "sky/engine/bindings/jni/jni_array.h"
+#include "sky/engine/bindings/jni/jni_class.h"
 #include "sky/engine/bindings/jni/jni_string.h"
 
 namespace blink {
@@ -55,6 +56,22 @@ PassRefPtr<JniObject> JniObject::Create(JNIEnv* env, jobject object) {
   }
 
   return adoptRef(result);
+}
+
+PassRefPtr<JniClass> JniObject::GetObjectClass() {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jclass clazz = env->GetObjectClass(java_object());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return adoptRef(new JniClass(env, clazz));
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return nullptr;
 }
 
 PassRefPtr<JniObject> JniObject::GetObjectField(jfieldID fieldId) {

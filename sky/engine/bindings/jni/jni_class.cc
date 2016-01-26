@@ -142,6 +142,22 @@ fail:
   return nullptr;
 }
 
+bool JniClass::IsAssignable(const JniClass* clazz) {
+  Dart_Handle exception = nullptr;
+  {
+    ENTER_JNI();
+
+    jboolean result = env->IsAssignableFrom(java_class(), clazz->java_class());
+    if (CheckJniException(env, &exception)) goto fail;
+
+    return result == JNI_TRUE;
+  }
+fail:
+  Dart_ThrowException(exception);
+  ASSERT_NOT_REACHED();
+  return false;
+}
+
 PassRefPtr<JniObject> JniClass::GetStaticObjectField(jfieldID fieldId) {
   Dart_Handle exception = nullptr;
   {
