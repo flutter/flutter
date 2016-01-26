@@ -80,7 +80,7 @@ const Curve _kTransitionCurve = Curves.ease;
 class _InputState extends State<Input> {
   String _value;
   EditableString _editableString;
-  KeyboardHandle _keyboardHandle = KeyboardHandle.unattached;
+  KeyboardHandle _keyboardHandle;
 
   // Used by tests.
   EditableString get editableValue => _editableString;
@@ -96,19 +96,22 @@ class _InputState extends State<Input> {
   }
 
   void dispose() {
-    if (_keyboardHandle.attached)
+    if (_isAttachedToKeyboard)
       _keyboardHandle.release();
     super.dispose();
   }
 
+  bool get _isAttachedToKeyboard => _keyboardHandle != null && _keyboardHandle.attached;
+
   void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_keyboardHandle.attached) {
-      _keyboardHandle = keyboard.show(_editableString.stub, config.keyboardType);
+    if (focused && !_isAttachedToKeyboard) {
+      _keyboardHandle = keyboard.show(_editableString.createStub(), config.keyboardType);
       _keyboardHandle.setText(_editableString.text);
       _keyboardHandle.setSelection(_editableString.selection.start,
                                    _editableString.selection.end);
-    } else if (!focused && _keyboardHandle.attached) {
+    } else if (!focused && _isAttachedToKeyboard) {
       _keyboardHandle.release();
+      _keyboardHandle = null;
       _editableString.didDetachKeyboard();
     }
   }
@@ -251,7 +254,7 @@ class _InputState extends State<Input> {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         if (Focus.at(context)) {
-          assert(_keyboardHandle.attached);
+          assert(_isAttachedToKeyboard);
           _keyboardHandle.showByRequest();
         } else {
           Focus.moveTo(config.key);
