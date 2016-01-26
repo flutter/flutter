@@ -26,6 +26,7 @@ class _JavaReflect {
   int methodGetReturnType;
   int objectGetClass;
   int objectToString;
+  JniClass stringClazz;
 
   int modifierStatic;
 
@@ -63,6 +64,8 @@ class _JavaReflect {
     JniClass objectClazz = JniClass.fromName('java.lang.Object');
     objectGetClass = objectClazz.getMethodId('getClass', '()Ljava/lang/Class;');
     objectToString = objectClazz.getMethodId('toString', '()Ljava/lang/String;');
+
+    stringClazz = JniClass.fromName('java.lang.String');
   }
 }
 
@@ -70,25 +73,32 @@ final _JavaReflect _reflect = new _JavaReflect();
 
 class _JavaType {
   final String name;
+  final JniClass clazz;
+  final bool isPrimitive;
 
-  _JavaType(this.name);
+  _JavaType(this.name, this.clazz)
+      : isPrimitive = false;
+
+  _JavaType._primitive(this.name)
+      : clazz = null,
+        isPrimitive = true;
 
   String toString() => 'JavaType:$name';
 }
 
 class _JavaPrimitive {
-  static final _JavaType jvoid = new _JavaType('void');
-  static final _JavaType jboolean = new _JavaType('boolean');
-  static final _JavaType jbyte = new _JavaType('byte');
-  static final _JavaType jchar = new _JavaType('char');
-  static final _JavaType jshort = new _JavaType('short');
-  static final _JavaType jint = new _JavaType('int');
-  static final _JavaType jlong = new _JavaType('long');
-  static final _JavaType jfloat = new _JavaType('float');
-  static final _JavaType jdouble = new _JavaType('double');
+  static final _JavaType jvoid = new _JavaType._primitive('void');
+  static final _JavaType jboolean = new _JavaType._primitive('boolean');
+  static final _JavaType jbyte = new _JavaType._primitive('byte');
+  static final _JavaType jchar = new _JavaType._primitive('char');
+  static final _JavaType jshort = new _JavaType._primitive('short');
+  static final _JavaType jint = new _JavaType._primitive('int');
+  static final _JavaType jlong = new _JavaType._primitive('long');
+  static final _JavaType jfloat = new _JavaType._primitive('float');
+  static final _JavaType jdouble = new _JavaType._primitive('double');
 }
 
-Map<String, _JavaType> _primitiveMap = <String, _JavaType>{
+final Map<String, _JavaType> _typeCache = <String, _JavaType>{
   'void': _JavaPrimitive.jvoid,
   'boolean': _JavaPrimitive.jboolean,
   'byte': _JavaPrimitive.jbyte,
@@ -100,14 +110,16 @@ Map<String, _JavaType> _primitiveMap = <String, _JavaType>{
   'double': _JavaPrimitive.jdouble,
 };
 
-_JavaType _javaTypeForClass(JniObject clazz) {
+_JavaType _javaTypeForClass(JniClass clazz) {
   String className = JniString.unwrap(clazz.callObjectMethod(_reflect.classGetName, []));
 
-  _JavaType primitive = _primitiveMap[className];
-  if (primitive != null)
-    return primitive;
+  _JavaType type = _typeCache[className];
+  if (type != null)
+    return type;
 
-  return new _JavaType(className);
+  type = new _JavaType(className, clazz);
+  _typeCache[className] = type;
+  return type;
 }
 
 class _JavaField {
@@ -130,18 +142,19 @@ class _JavaField {
 abstract class _HasArguments {
   String get name;
   List<_JavaType> get argTypes;
+  int get methodId;
 }
 
 class _JavaMethod implements _HasArguments {
   String _name;
-  int methodId;
+  int _methodId;
   _JavaType returnType;
   int modifiers;
   List<_JavaType> _argTypes;
 
   _JavaMethod(JniObject method) {
     _name = JniString.unwrap(method.callObjectMethod(_reflect.memberGetName, []));
-    methodId = JniApi.fromReflectedMethod(method);
+    _methodId = JniApi.fromReflectedMethod(method);
     returnType = _javaTypeForClass(
         method.callObjectMethod(_reflect.methodGetReturnType, []));
     modifiers = method.callIntMethod(_reflect.memberGetModifiers, []);
@@ -155,18 +168,19 @@ class _JavaMethod implements _HasArguments {
 
   String get name => _name;
   List<_JavaType> get argTypes => _argTypes;
+  int get methodId => _methodId;
 
   bool get isStatic => (modifiers & _reflect.modifierStatic) != 0;
 }
 
 class _JavaConstructor implements _HasArguments {
   String _name;
-  int methodId;
+  int _methodId;
   List<_JavaType> _argTypes;
 
   _JavaConstructor(JniObject ctor) {
     _name = JniString.unwrap(ctor.callObjectMethod(_reflect.memberGetName, []));
-    methodId = JniApi.fromReflectedMethod(ctor);
+    _methodId = JniApi.fromReflectedMethod(ctor);
 
     JniObjectArray argClasses = ctor.callObjectMethod(
         _reflect.constructorGetParameterTypes, []);
@@ -178,21 +192,59 @@ class _JavaConstructor implements _HasArguments {
 
   String get name => _name;
   List<_JavaType> get argTypes => _argTypes;
+  int get methodId => _methodId;
+}
+
+// Determines whether a Dart value can be used as a method argument declared as
+// the given Java type.
+bool _typeCompatible(dynamic value, _JavaType type) {
+  if (type.isPrimitive) {
+    if (type == _JavaPrimitive.jboolean) {
+      return (value is bool);
+    } else {
+      return (value is num || value is bool || value is JniFloat);
+    }
+  }
+
+  if (value == null)
+    return true;
+
+  if (value is JavaObject)
+    return value.javaClass.jniClass.isAssignable(type.clazz);
+
+  if (value is JniObject)
+    return value.getObjectClass().isAssignable(type.clazz);
+
+  if (value is String) {
+    if (type.isPrimitive)
+      return false;
+    return _reflect.stringClazz.isAssignable(type.clazz);
+  }
+
+  return false;
 }
 
 // Given a list of overloaded methods, select one that is the best match for
 // the provided arguments.
 _HasArguments _findMatchingMethod(List<_HasArguments> overloads, List args) {
-  if (overloads.length == 1) {
-    if (overloads[0].argTypes.length == args.length)
-      return overloads[0];
-    throw new JavaError('Argument mismatch when invoking method ${overloads[0].name}');
+  List<_HasArguments> matches = new List<_HasArguments>();
+  for (_HasArguments overload in overloads) {
+    if (overload.argTypes.length == args.length)
+      matches.add(overload);
   }
 
-  for (_HasArguments overload in overloads) {
-    if (overload.argTypes.length == args.length) {
-      return overload;
+  if (matches.length == 1)
+    return matches[0];
+
+  if (matches.isEmpty)
+    throw new JavaError('Argument mismatch when invoking method ${overloads[0].name}');
+
+  outer: for (_HasArguments match in matches) {
+    for (int i = 0; i < args.length; i++) {
+      if (!_typeCompatible(args[i], match.argTypes[i]))
+        continue outer;
     }
+    return match;
   }
 
   throw new JavaError('Unable to find matching method for ${overloads[0].name}');
@@ -209,11 +261,33 @@ dynamic _javaObjectToDart(JniObject object) {
   if (object is JniClass)
     return Java.wrapClassObject(object);
 
+  if (object is JniArray)
+    return object;
+
   return new JavaObject(object);
 }
 
 // Convert a Dart object to a type suitable for passing to JNI.
-dynamic _dartObjectToJava(dynamic object) {
+dynamic _dartObjectToJava(dynamic object, _JavaType javaType) {
+  if (javaType.isPrimitive) {
+    if (javaType == _JavaPrimitive.jboolean) {
+      if (object is bool)
+        return object;
+      throw new JavaError('Unable to convert Dart object to Java boolean: $object');
+    }
+    if (javaType == _JavaPrimitive.jfloat) {
+      if (object is JniFloat)
+        return object;
+      if (object is num)
+        return new JniFloat(object);
+      throw new JavaError('Unable to convert Dart object to Java float: $object');
+    }
+
+    if (object is num)
+      return object;
+    throw new JavaError('Unable to convert Dart object to Java primitive type: $object');
+  }
+
   if (object == null)
     return object;
 
@@ -223,13 +297,18 @@ dynamic _dartObjectToJava(dynamic object) {
   if (object is JavaObject)
     return object.jniObject;
 
-  if (object is num || object is bool || object is JniFloat)
-    return object;
-
   if (object is String)
     return JniString.create(object);
 
   throw new JavaError('Unable to convert Dart object to Java: $object');
+}
+
+List _convertArgumentsToJava(List dartArgs, _HasArguments method) {
+  List result = new List();
+  for (int i = 0; i < dartArgs.length; i++) {
+    result.add(_dartObjectToJava(dartArgs[i], method.argTypes[i]));
+  }
+  return result;
 }
 
 class Java {
@@ -338,36 +417,41 @@ class JavaClass {
 
   dynamic noSuchMethod(Invocation invocation) {
     if (invocation.isMethod) {
-      List args = invocation.positionalArguments.map(_dartObjectToJava).toList();
-
-      if (invocation.memberName == _newInstanceSymbol) {
-        _JavaConstructor ctor = _findMatchingMethod(_constructors, args);
-        return new JavaObject(_clazz.newObject(ctor.methodId, args));
+      List<_HasArguments> overloads;
+      bool isConstructor = (invocation.memberName == _newInstanceSymbol);
+      if (isConstructor) {
+        overloads = _constructors;
+      } else {
+        overloads = _staticMethods[invocation.memberName];
+        if (overloads == null)
+          throw new JavaError('Static method ${invocation.memberName} not found');
       }
 
-      List<_JavaMethod> overloads = _staticMethods[invocation.memberName];
-      if (overloads == null)
-        throw new JavaError('Static method ${invocation.memberName} not found');
+      _HasArguments method = _findMatchingMethod(overloads, invocation.positionalArguments);
+      List args = _convertArgumentsToJava(invocation.positionalArguments, method);
 
-      _JavaMethod method = _findMatchingMethod(overloads, args);
+      if (isConstructor) {
+        return new JavaObject(_clazz.newObject(method.methodId, args));
+      }
 
-      if (method.returnType == _JavaPrimitive.jvoid) {
+      _JavaType returnType = (method as _JavaMethod).returnType;
+      if (returnType == _JavaPrimitive.jvoid) {
         return _clazz.callStaticVoidMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jboolean) {
+      } else if (returnType == _JavaPrimitive.jboolean) {
         return _clazz.callStaticBooleanMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jbyte) {
+      } else if (returnType == _JavaPrimitive.jbyte) {
         return _clazz.callStaticByteMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jchar) {
+      } else if (returnType == _JavaPrimitive.jchar) {
         return _clazz.callStaticCharMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jshort) {
+      } else if (returnType == _JavaPrimitive.jshort) {
         return _clazz.callStaticShortMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jint) {
+      } else if (returnType == _JavaPrimitive.jint) {
         return _clazz.callStaticIntMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jlong) {
+      } else if (returnType == _JavaPrimitive.jlong) {
         return _clazz.callStaticLongMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jfloat) {
+      } else if (returnType == _JavaPrimitive.jfloat) {
         return _clazz.callStaticFloatMethod(method.methodId, args);
-      } else if (method.returnType == _JavaPrimitive.jdouble) {
+      } else if (returnType == _JavaPrimitive.jdouble) {
         return _clazz.callStaticDoubleMethod(method.methodId, args);
       } else {
         return _javaObjectToDart(
@@ -425,7 +509,7 @@ class JavaClass {
       } else if (field.type == _JavaPrimitive.jdouble) {
         _clazz.setStaticDoubleField(field.fieldId, value);
       } else {
-        _clazz.setStaticObjectField(field.fieldId, _dartObjectToJava(value));
+        _clazz.setStaticObjectField(field.fieldId, _dartObjectToJava(value, field.type));
       }
 
       return null;
@@ -450,13 +534,12 @@ class JavaObject {
 
   dynamic noSuchMethod(Invocation invocation) {
     if (invocation.isMethod) {
-      List args = invocation.positionalArguments.map(_dartObjectToJava).toList();
-
       List<_JavaMethod> overloads = _clazz._methods[invocation.memberName];
       if (overloads == null)
         throw new JavaError('Method ${invocation.memberName} not found');
 
-      _JavaMethod method = _findMatchingMethod(overloads, args);
+      _JavaMethod method = _findMatchingMethod(overloads, invocation.positionalArguments);
+      List args = _convertArgumentsToJava(invocation.positionalArguments, method);
 
       if (method.returnType == _JavaPrimitive.jvoid) {
         return _object.callVoidMethod(method.methodId, args);
@@ -532,7 +615,7 @@ class JavaObject {
       } else if (field.type == _JavaPrimitive.jdouble) {
         _object.setDoubleField(field.fieldId, value);
       } else {
-        _object.setObjectField(field.fieldId, _dartObjectToJava(value));
+        _object.setObjectField(field.fieldId, _dartObjectToJava(value, field.type));
       }
 
       return null;
@@ -542,7 +625,12 @@ class JavaObject {
   }
 
   String toString() {
-    return JniString.unwrap(_object.callObjectMethod(_reflect.objectToString, []));
+    String result = JniString.unwrap(_object.callObjectMethod(_reflect.objectToString, []));
+    if (!result.isEmpty) {
+      return result;
+    } else {
+      return 'JavaObject(${_clazz.className})';
+    }
   }
 
   JavaClass get javaClass => _clazz;

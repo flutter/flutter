@@ -5,6 +5,7 @@
 #ifndef SKY_ENGINE_BINDINGS_JNI_JNI_API_H_
 #define SKY_ENGINE_BINDINGS_JNI_JNI_API_H_
 
+#include "sky/engine/bindings/jni/jni_class.h"
 #include "sky/engine/bindings/jni/jni_object.h"
 
 namespace blink {

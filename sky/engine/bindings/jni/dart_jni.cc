@@ -129,7 +129,6 @@ DART_NATIVE_CALLBACK_STATIC(JniString, Create);
   V(JniClass, CallStaticObjectMethod) \
   V(JniClass, CallStaticShortMethod) \
   V(JniClass, CallStaticVoidMethod) \
-  V(JniClass, NewObject) \
   V(JniClass, GetFieldId) \
   V(JniClass, GetMethodId) \
   V(JniClass, GetStaticBooleanField) \
@@ -143,6 +142,8 @@ DART_NATIVE_CALLBACK_STATIC(JniString, Create);
   V(JniClass, GetStaticMethodId) \
   V(JniClass, GetStaticObjectField) \
   V(JniClass, GetStaticShortField) \
+  V(JniClass, IsAssignable) \
+  V(JniClass, NewObject) \
   V(JniClass, SetStaticBooleanField) \
   V(JniClass, SetStaticByteField) \
   V(JniClass, SetStaticCharField) \
@@ -177,6 +178,7 @@ DART_NATIVE_CALLBACK_STATIC(JniString, Create);
   V(JniObject, GetFloatField) \
   V(JniObject, GetIntField) \
   V(JniObject, GetLongField) \
+  V(JniObject, GetObjectClass) \
   V(JniObject, GetObjectField) \
   V(JniObject, GetShortField) \
   V(JniObject, SetBooleanField) \
