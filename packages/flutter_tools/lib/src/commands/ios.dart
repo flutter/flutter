@@ -134,9 +134,9 @@ class IOSCommand extends FlutterCommand {
     }
 
     // Step 4: Launch Xcode and let the user edit plist, resources, provisioning, etc.
-    print("Launching project in Xcode...");
-    ProcessResult launch = await Process.run("/usr/bin/open", ["ios/FlutterApplication.xcodeproj"]);
-    return launch.exitCode;
+    print("An Xcode project has been placed in 'ios/'.");
+    print("You may edit it to modify iOS specific configuration.");
+    return 0;
   }
 
   @override
