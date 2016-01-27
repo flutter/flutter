@@ -3,71 +3,33 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
-import '../android/device_android.dart';
-import '../ios/device_ios.dart';
+import '../device.dart';
 import '../runner/flutter_command.dart';
 
 class ListCommand extends FlutterCommand {
   final String name = 'list';
   final String description = 'List all connected devices.';
 
-  ListCommand() {
-    argParser.addFlag('details',
-        abbr: 'd',
-        negatable: false,
-        help: 'Log additional details about attached devices.');
-  }
-
   bool get requiresProjectRoot => false;
 
-  @override
   Future<int> runInProject() async {
-    connectToDevices();
+    DeviceManager deviceManager = new DeviceManager();
 
-    bool details = argResults['details'];
+    List<Device> devices = await deviceManager.getDevices();
 
-    if (details)
-      print('Android Devices:');
-
-    // TODO(devoncarew): We should have a more generic mechanism for device discovery.
-    // DeviceDiscoveryService? DeviceDiscoveryParticipant?
-    for (AndroidDevice device in AndroidDevice.getAttachedDevices(devices.android)) {
-      if (details) {
-        print('${device.id}\t'
-            '${device.modelID}\t'
-            '${device.productID}\t'
-            '${device.deviceCodeName}');
-      } else {
-        print(device.id);
-      }
-    }
-
-    if (Platform.isMacOS) {
-      if (details)
-        print('iOS Devices:');
-
-      for (IOSDevice device in IOSDevice.getAttachedDevices(devices.iOS)) {
-        if (details) {
-          print('${device.id}\t${device.name}');
-        } else {
-          print(device.id);
-        }
-      }
-
-      if (details)
-        print('iOS Simulators:');
-
-      for (IOSSimulator device in IOSSimulator.getAttachedDevices(devices.iOSSimulator)) {
-        if (details) {
-          print('${device.id}\t${device.name}');
-        } else {
-          print(device.id);
-        }
+    if (devices.isEmpty) {
+      print('No connected devices.');
+    } else {
+      print('${devices.length} connected ${pluralize('device', devices.length)}:');
+      print('');
+      for (Device device in devices) {
+        print('${device.name} (${device.id})');
       }
     }
 
     return 0;
   }
 }
+
+String pluralize(String word, int count) => count == 1 ? word : word + 's';

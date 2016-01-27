@@ -11,6 +11,46 @@ import 'build_configuration.dart';
 import 'ios/device_ios.dart';
 import 'toolchain.dart';
 
+/// A class to get all available devices.
+class DeviceManager {
+  DeviceManager() {
+    // Init the known discoverers.
+    _deviceDiscoverers.add(new AndroidDeviceDiscovery());
+    _deviceDiscoverers.add(new IOSDeviceDiscovery());
+    _deviceDiscoverers.add(new IOSSimulatorDiscovery());
+
+    Future.forEach(_deviceDiscoverers, (DeviceDiscovery discoverer) {
+      if (!discoverer.supportsPlatform)
+        return null;
+      return discoverer.init();
+    }).then((_) {
+      _initedCompleter.complete();
+    }).catchError((error, stackTrace) {
+      _initedCompleter.completeError(error, stackTrace);
+    });
+  }
+
+  List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
+
+  Completer _initedCompleter = new Completer();
+
+  Future<List<Device>> getDevices() async {
+    await _initedCompleter.future;
+
+    return _deviceDiscoverers
+      .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform)
+      .expand((DeviceDiscovery discoverer) => discoverer.devices)
+      .toList();
+  }
+}
+
+/// An abstract class to discover and enumerate a specific type of devices.
+abstract class DeviceDiscovery {
+  bool get supportsPlatform;
+  Future init();
+  List<Device> get devices;
+}
+
 abstract class Device {
   final String id;
   static Map<String, Device> _deviceCache = {};
@@ -59,6 +99,7 @@ abstract class Device {
   String toString() => '$runtimeType $id';
 }
 
+// TODO(devoncarew): Unify this with [DeviceManager].
 class DeviceStore {
   final AndroidDevice android;
   final IOSDevice iOS;
@@ -115,7 +156,7 @@ class DeviceStore {
       switch (config.targetPlatform) {
         case TargetPlatform.android:
           assert(android == null);
-          android = _deviceForConfig(config, AndroidDevice.getAttachedDevices());
+          android = _deviceForConfig(config, getAdbDevices());
           break;
         case TargetPlatform.iOS:
           assert(iOS == null);

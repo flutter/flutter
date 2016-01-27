@@ -14,6 +14,32 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../toolchain.dart';
 
+class IOSDeviceDiscovery extends DeviceDiscovery {
+  List<Device> _devices = <Device>[];
+
+  bool get supportsPlatform => Platform.isMacOS;
+
+  Future init() {
+    _devices = IOSDevice.getAttachedDevices();
+    return new Future.value();
+  }
+
+  List<Device> get devices => _devices;
+}
+
+class IOSSimulatorDiscovery extends DeviceDiscovery {
+  List<Device> _devices = <Device>[];
+
+  bool get supportsPlatform => Platform.isMacOS;
+
+  Future init() {
+    _devices = IOSSimulator.getAttachedDevices();
+    return new Future.value();
+  }
+
+  List<Device> get devices => _devices;
+}
+
 class IOSDevice extends Device {
   static final String defaultDeviceID = 'default_ios_id';
 
@@ -90,7 +116,7 @@ class IOSDevice extends Device {
     String informerPath = (mockIOS != null)
         ? mockIOS.informerPath
         : _checkForCommand('ideviceinfo');
-    return runSync([informerPath, '-k', 'DeviceName', '-u', deviceID]);
+    return runSync([informerPath, '-k', 'DeviceName', '-u', deviceID]).trim();
   }
 
   static final Map<String, String> _commandMap = {};

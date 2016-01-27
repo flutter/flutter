@@ -325,7 +325,7 @@ class AndroidDeviceDiscovery {
 
   void _initAdb() {
     if (_adb == null) {
-      _adb = new Adb(AndroidDevice.getAdbPath());
+      _adb = new Adb(getAdbPath());
       if (!_adb.exists())
         _adb = null;
     }
