@@ -18,19 +18,21 @@ class ContainerApp extends StatelessComponent {
             height: 300.0
           )
         ),
-        new Container(
-          decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFF00)),
-          padding: new EdgeDims.symmetric(horizontal: 50.0, vertical: 75.0),
-          child: new Row(
-            children: <Widget>[
-              new RaisedButton(
-                child: new Text('PRESS ME'),
-                onPressed: () => print("Hello World")
-              ),
-              new RaisedButton(
-                child: new Text('DISABLED')
-              )
-            ]
+        new Material(
+          color: const Color(0xFFFFFF00),
+          child: new Container(
+            padding: new EdgeDims.symmetric(horizontal: 50.0, vertical: 75.0),
+            child: new Row(
+              children: <Widget>[
+                new RaisedButton(
+                  child: new Text('PRESS ME'),
+                  onPressed: () => print("Hello World")
+                ),
+                new RaisedButton(
+                  child: new Text('DISABLED')
+                )
+              ]
+            )
           )
         ),
         new Flexible(
