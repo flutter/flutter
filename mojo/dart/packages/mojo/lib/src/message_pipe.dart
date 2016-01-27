@@ -33,8 +33,8 @@ class MojoMessagePipeQueryAndReadState {
 
   MojoMessagePipeQueryAndReadState();
 
-  void queryAndRead(int handle, int flags) {
-    MojoMessagePipeNatives.MojoQueryAndReadMessage(handle, flags, _result);
+  void queryAndRead(MojoHandle handle, int flags) {
+    MojoMessagePipeNatives.MojoQueryAndReadMessage(handle.h, flags, _result);
 
     if (handlesLength == 0) {
       _handles = null;
@@ -162,7 +162,7 @@ class MojoMessagePipeEndpoint {
       return null;
     }
 
-    _queryAndReadState.queryAndRead(handle.h, flags);
+    _queryAndReadState.queryAndRead(handle, flags);
     status = _queryAndReadState.status;
     return _queryAndReadState;
   }

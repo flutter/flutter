@@ -7,11 +7,12 @@
 #include <utility>
 
 #include "base/logging.h"
-#include "base/threading/platform_thread.h"
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint_client.h"
 #include "mojo/public/cpp/system/macros.h"
 
+using mojo::platform::ThreadYield;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
 
@@ -211,7 +212,7 @@ void ChannelEndpoint::OnReadMessageForClient(
       break;
     }
 
-    base::PlatformThread::YieldCurrentThread();
+    ThreadYield();
   }
 }
 

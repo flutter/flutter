@@ -17,7 +17,6 @@
 
 using LogClientTest = mojo::test::ApplicationTestBase;
 using mojo::Environment;
-using mojo::internal::ValidationError;
 
 namespace mojo {
 namespace {
@@ -31,20 +30,15 @@ class TestLogServiceImpl : public log::Log {
     binding_.set_connection_error_handler([this]() {
       FAIL() << "Log service lost connection to the log client.";
     });
-    validation_observer_.set_last_error(ValidationError::NONE);
   }
   void AddEntry(mojo::log::EntryPtr entry) override {
     entry_msgs_.insert(entry->message.To<std::string>());
   }
   const std::set<std::string>& entries() { return entry_msgs_; }
-  mojo::internal::ValidationError previous_validation_error() {
-    return validation_observer_.last_error();
-  }
 
  private:
   mojo::StrongBinding<log::Log> binding_;
   std::set<std::string> entry_msgs_;
-  mojo::internal::ValidationErrorObserverForTesting validation_observer_;
 };
 
 MojoLogLevel g_fallback_logger_level;
@@ -97,7 +91,6 @@ TEST_F(LogClientTest, ConcurrentAddEntry) {
   mojo::RunLoop::current()->RunUntilIdle();
 
   EXPECT_EQ(expected_entries, log_impl->entries());
-  EXPECT_EQ(ValidationError::NONE, log_impl->previous_validation_error());
 
   // We kill our binding, closing the connection to the log client and
   // causing the log client to revert to using its fallback logger.

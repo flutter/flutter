@@ -19,7 +19,7 @@ namespace mojo {
 namespace platform {
 namespace {
 
-TEST(AlignedAlloc, RawAlignedAlloc) {
+TEST(AlignedAllocTest, RawAlignedAlloc) {
   for (size_t alignment = sizeof(void*); alignment <= 4096u; alignment <<= 1u) {
     for (size_t size = 1u; size <= 256u; size <<= 1u) {
       SCOPED_TRACE(testing::Message() << "alignment = " << alignment
@@ -46,7 +46,7 @@ TEST(AlignedAlloc, RawAlignedAlloc) {
   }
 }
 
-TEST(AlignedAlloc, AlignedAlloc) {
+TEST(AlignedAllocTest, AlignedAlloc) {
   for (size_t alignment = sizeof(void*); alignment <= 4096u; alignment <<= 1u) {
     for (size_t n = 1u; n <= 16u; n++) {
       SCOPED_TRACE(testing::Message() << "alignment = " << alignment

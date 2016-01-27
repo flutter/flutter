@@ -4,6 +4,10 @@
 
 import("../mojo_edk.gni")
 
+# Library of basic things not provided by the C/C++ standard libraries. (These
+# are mostly platform independent. Note: This must not depend on
+# //mojo/edk/platform. TODO(vtl): Maybe the things that aren't really platform
+# independent should be moved to //mojo/edk/platform.)
 mojo_edk_source_set("util") {
   sources = [
     "command_line.cc",
@@ -33,7 +37,13 @@ mojo_edk_source_set("util") {
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
 }
 
-mojo_edk_unittests("mojo_edk_util_unittests") {
+# Unit tests for :util. For testing purposes, allow dependence on
+# //mojo/edk/platform; however, using //mojo/edk/platform requires choosing an
+# implementation to get a test binary, which is done below in
+# :mojo_edk_util_unittests.
+mojo_edk_source_set("unittests") {
+  testonly = true
+
   sources = [
     "command_line_unittest.cc",
     "cond_var_unittest.cc",
@@ -53,7 +63,21 @@ mojo_edk_unittests("mojo_edk_util_unittests") {
 
   mojo_sdk_deps = [ "mojo/public/cpp/system" ]
 
-  mojo_edk_deps = [ "mojo/edk/system/test" ]
+  mojo_edk_deps = [
+    "mojo/edk/platform",
+    "mojo/edk/platform:test_platform",
+    "mojo/edk/system/test",
+  ]
+}
+
+# Test binary for :util, using //mojo/edk/base_edk. TODO(vtl): Maybe this target
+# should be in //mojo/edk/base_edk/BUILD.gn instead.
+mojo_edk_unittests("mojo_edk_util_unittests") {
+  deps = [
+    ":unittests",
+  ]
+
+  mojo_edk_deps = [ "mojo/edk/base_edk" ]
 }
 
 mojo_edk_source_set("perftests") {
@@ -70,6 +94,7 @@ mojo_edk_source_set("perftests") {
   ]
 
   mojo_edk_deps = [
+    "mojo/edk/platform:test_platform",
     "mojo/edk/system/test",
     "mojo/edk/system/test:perf",
   ]

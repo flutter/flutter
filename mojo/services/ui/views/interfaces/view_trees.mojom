@@ -5,8 +5,24 @@
 [DartPackage="mojo_services"]
 module mojo.ui;
 
+import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/services/ui/views/interfaces/layouts.mojom";
 import "mojo/services/ui/views/interfaces/views.mojom";
+
+// A view tree token is an opaque transferable reference to a view tree.
+//
+// The ViewManager provides each view tree with a unique view tree token when
+// it is registered.  The token can subsequently be passed to other
+// applications and used as a way to refer to the tree.
+//
+// View tree tokens should be kept secret and should only be shared with
+// trusted services.
+//
+// TODO(jeffbrown): This implementation is a temporary placeholder until
+// we extend Mojo to provide a way to create tokens which cannot be forged.
+struct ViewTreeToken {
+  uint32 value;
+};
 
 // A view tree is a top-level container for a hierarchy of views.
 //
@@ -46,6 +62,14 @@ interface ViewTree {
 // ViewManager.  To unregister the view tree, close its view tree
 // and/or view tree host message pipes.
 interface ViewTreeHost {
+  // Gets a service provider to access services which are associated with
+  // the view tree such as input, accessibility and editing capabilities.
+  // The view tree service provider is private to the view tree and should
+  // not be shared with anyone else.
+  //
+  // See |mojo.ui.InputDispatcher|.
+  GetServiceProvider(mojo.ServiceProvider& service_provider);
+
   // Requests that the view tree's OnLayout() method be called to compute a
   // new layout due to a change in the view tree's layout information.
   RequestLayout();

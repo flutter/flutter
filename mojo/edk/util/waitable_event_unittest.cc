@@ -12,18 +12,17 @@
 #include <type_traits>
 #include <vector>
 
-#include "mojo/edk/system/test/sleep.h"
-#include "mojo/edk/system/test/stopwatch.h"
+#include "mojo/edk/platform/test_stopwatch.h"
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::test::Stopwatch;
+using mojo::platform::ThreadSleep;
 using mojo::system::test::ActionTimeout;
 using mojo::system::test::DeadlineFromMilliseconds;
 using mojo::system::test::EpsilonTimeout;
-using mojo::system::test::Sleep;
-using mojo::system::test::SleepMilliseconds;
-using mojo::system::test::Stopwatch;
 using mojo::system::test::TinyTimeout;
 
 namespace mojo {
@@ -32,7 +31,7 @@ namespace {
 
 // Sleeps for a "very small" amount of time.
 void EpsilonRandomSleep() {
-  SleepMilliseconds(static_cast<unsigned>(rand()) % 20u);
+  ThreadSleep(DeadlineFromMilliseconds(static_cast<unsigned>(rand()) % 20u));
 }
 
 // We'll use |MojoDeadline| with |uint64_t| (for |WaitWithTimeout()|'s timeout
@@ -92,7 +91,7 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
     // Unfortunately, we can't really wait for the threads to be waiting, so we
     // just sleep for a bit, and count on them having started and advanced to
     // waiting.
-    Sleep(2 * TinyTimeout());
+    ThreadSleep(2 * TinyTimeout());
 
     for (size_t j = 0u; j < threads.size(); j++) {
       unsigned old_wake_count = wake_count.load();
@@ -103,13 +102,13 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
 
       // Poll for |wake_count| to change.
       while (wake_count.load() == old_wake_count)
-        Sleep(EpsilonTimeout());
+        ThreadSleep(EpsilonTimeout());
 
       EXPECT_FALSE(ev.IsSignaledForTest());
 
       // And once it's changed, wait a little longer, to see if any other
       // threads are awoken (they shouldn't be).
-      Sleep(EpsilonTimeout());
+      ThreadSleep(EpsilonTimeout());
 
       EXPECT_EQ(old_wake_count + 1u, wake_count.load());
 
@@ -118,7 +117,7 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
 
     // Having done that, if we signal |ev| now, it should stay signaled.
     ev.Signal();
-    Sleep(EpsilonTimeout());
+    ThreadSleep(EpsilonTimeout());
     EXPECT_TRUE(ev.IsSignaledForTest());
 
     for (auto& thread : threads)
@@ -223,7 +222,7 @@ TEST(ManualResetWaitableEventTest, SignalMultipleWaitReset) {
     // Unfortunately, we can't really wait for the threads to be waiting, so we
     // just sleep for a bit, and count on them having started and advanced to
     // waiting.
-    Sleep(2 * TinyTimeout());
+    ThreadSleep(2 * TinyTimeout());
 
     ev.Signal();
 

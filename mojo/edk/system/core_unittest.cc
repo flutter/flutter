@@ -8,10 +8,13 @@
 
 #include <limits>
 
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/awakable.h"
 #include "mojo/edk/system/core_test_base.h"
-#include "mojo/edk/system/test/sleep.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/public/cpp/system/macros.h"
+
+using mojo::platform::ThreadSleep;
 
 namespace mojo {
 namespace system {
@@ -29,7 +32,7 @@ TEST_F(CoreTest, GetTimeTicksNow) {
   const MojoTimeTicks start = core()->GetTimeTicksNow();
   EXPECT_NE(static_cast<MojoTimeTicks>(0), start)
       << "GetTimeTicksNow should return nonzero value";
-  test::SleepMilliseconds(15u);
+  ThreadSleep(test::DeadlineFromMilliseconds(15u));
   const MojoTimeTicks finish = core()->GetTimeTicksNow();
   // Allow for some fuzz in sleep.
   EXPECT_GE((finish - start), static_cast<MojoTimeTicks>(8000))

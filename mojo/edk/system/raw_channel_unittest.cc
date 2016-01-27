@@ -15,12 +15,13 @@
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/platform/platform_handle.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/test/random.h"
 #include "mojo/edk/system/test/scoped_test_dir.h"
 #include "mojo/edk/system/test/simple_test_thread.h"
-#include "mojo/edk/system/test/sleep.h"
 #include "mojo/edk/system/test/test_io_thread.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/transport_data.h"
 #include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/make_unique.h"
@@ -32,6 +33,7 @@
 
 using mojo::platform::PlatformHandle;
 using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::ThreadSleep;
 using mojo::util::AutoResetWaitableEvent;
 using mojo::util::MakeUnique;
 using mojo::util::Mutex;
@@ -173,7 +175,7 @@ class TestMessageReaderAndChecker {
 
       if (static_cast<size_t>(read_size) < sizeof(buffer)) {
         i++;
-        test::SleepMilliseconds(kMessageReaderSleepMs);
+        ThreadSleep(test::DeadlineFromMilliseconds(kMessageReaderSleepMs));
       }
     }
 
@@ -400,7 +402,7 @@ TEST_F(RawChannelTest, WriteMessageAndOnReadMessage) {
 
   // Sleep a bit, to let any extraneous reads be processed. (There shouldn't be
   // any, but we want to know about them.)
-  test::SleepMilliseconds(100u);
+  ThreadSleep(test::DeadlineFromMilliseconds(100u));
 
   // Wait for reading to finish.
   reader_delegate.Wait();
@@ -488,7 +490,7 @@ TEST_F(RawChannelTest, OnError) {
 
   // Sleep a bit, to make sure we don't get another |OnError()|
   // notification. (If we actually get another one, |OnError()| crashes.)
-  test::SleepMilliseconds(20u);
+  ThreadSleep(test::DeadlineFromMilliseconds(20u));
 
   io_thread()->PostTaskAndWait([&rc]() { rc->Shutdown(); });
 }

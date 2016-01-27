@@ -176,6 +176,7 @@ mojo_edk_unittests("mojo_edk_system_unittests") {
   mojo_edk_deps = [
     "mojo/edk/base_edk",
     "mojo/edk/base_edk:test_base_edk",
+    "mojo/edk/platform:test_platform",
     "mojo/edk/system/test",
     "mojo/edk/test:test_support",
     "mojo/edk/util",
@@ -199,6 +200,8 @@ mojo_edk_perftests("mojo_edk_system_perftests") {
     # TODO(vtl): Add separate test targets for this.
     "mojo/edk/util:perftests",
 
+    "mojo/edk/base_edk",
+    "mojo/edk/base_edk:test_base_edk",
     "mojo/edk/system/test",
     "mojo/edk/system/test:perf",
     "mojo/edk/test:test_support",

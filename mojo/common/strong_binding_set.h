@@ -44,6 +44,16 @@ class StrongBindingSet {
     });
   }
 
+  // Removes all bindings for the specified interface implementation.
+  // The implementation object is not destroyed.
+  void RemoveBindings(Interface* impl) {
+    bindings_.erase(
+        std::remove_if(bindings_.begin(), bindings_.end(),
+                       [impl](const std::unique_ptr<Binding<Interface>>& b) {
+                         return (b->impl() == impl);
+                       }));
+  }
+
   // Closes all bindings and deletes their associated interfaces.
   void CloseAllBindings() {
     for (auto it = bindings_.begin(); it != bindings_.end(); ++it) {

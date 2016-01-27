@@ -6,14 +6,15 @@
 
 #include <utility>
 
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe.h"
-#include "mojo/edk/system/test/sleep.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
 
 using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::ThreadSleep;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
 
@@ -66,7 +67,7 @@ void ChannelThread::Stop() {
     // TODO(vtl): Remove this once |Channel| has a
     // |FlushWriteBufferAndShutdown()| (or whatever).
     while (!channel_->IsWriteBufferEmpty())
-      test::Sleep(test::EpsilonTimeout());
+      ThreadSleep(test::EpsilonTimeout());
 
     test_io_thread_.PostTaskAndWait([this] {
       channel_->Shutdown();

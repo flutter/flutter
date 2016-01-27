@@ -4,6 +4,10 @@
 
 import("../mojo_edk.gni")
 
+# Declares/defines platform-dependent things. Some things are left
+# unimplemented, and the final binary must include a separate implementation
+# (e.g., //mojo/edk/base_edk, which implements these platform-dependent things
+# using //base).
 mojo_edk_source_set("platform") {
   sources = [
     "io_thread.h",
@@ -14,42 +18,65 @@ mojo_edk_source_set("platform") {
     "scoped_platform_handle.h",
     "task_runner.h",
     "thread.h",
+    "thread_utils.h",
+    "time_ticks.h",
   ]
 
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
 
   mojo_edk_public_deps = [ "mojo/edk/util" ]
-
-  # TODO(vtl): Remove this dependency.
-  deps = [
-    "//base",
-  ]
 }
 
+# Functionality to be used by tests (both those merely using :platform as well
+# as those implementing the unimplemented parts of :platform).
 mojo_edk_source_set("test_platform") {
   testonly = true
-  sources = [
-    "test_message_loops.h",
-  ]
 
-  mojo_edk_public_deps = [ "mojo/edk/util" ]
+  sources = [
+    "message_loop_test_helper.cc",
+    "message_loop_test_helper.h",
+    "platform_handle_watcher_test_helper.cc",
+    "platform_handle_watcher_test_helper.h",
+    "test_message_loops.h",
+    "test_stopwatch.cc",
+    "test_stopwatch.h",
+  ]
 
   public_deps = [
     ":platform",
   ]
+
+  mojo_edk_public_deps = [ "mojo/edk/util" ]
+
+  deps = [
+    "//testing/gtest",
+  ]
 }
 
-# Note: This doesn't include tests of things that are to be implemented by the
-# embedder.
-mojo_edk_unittests("mojo_edk_platform_unittests") {
+# Tests for both :platform and :test_platform. Actually linking these tests into
+# a test binary will require an implementation of :platform and :test_platform
+# (e.g., this is done by //mojo/edk/base_edk:mojo_edk_platform_unittests).
+mojo_edk_source_set("unittests") {
+  testonly = true
+
   sources = [
     "aligned_alloc_unittest.cc",
+    "io_thread_unittest.cc",
+    "test_message_loops_unittest.cc",
+    "test_stopwatch_unittest.cc",
+    "thread_utils_unittest.cc",
+    "time_ticks_unittest.cc",
   ]
 
   deps = [
     ":platform",
+    ":test_platform",
     "//testing/gtest",
   ]
+
+  # TODO(vtl): This is a suboptimal dependency, but we have to get timeouts from
+  # somewhere.
+  mojo_edk_deps = [ "mojo/edk/system/test" ]
 
   mojo_sdk_deps = [ "mojo/public/cpp/system" ]
 }
