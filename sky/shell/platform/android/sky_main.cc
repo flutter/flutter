@@ -31,7 +31,7 @@ namespace shell {
 
 namespace {
 
-LazyInstance<scoped_ptr<base::MessageLoop>> g_java_message_loop =
+LazyInstance<std::unique_ptr<base::MessageLoop>> g_java_message_loop =
     LAZY_INSTANCE_INITIALIZER;
 
 void InitializeLogging() {

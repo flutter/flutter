@@ -83,14 +83,14 @@ void Animator::BeginFrame(int64_t time_stamp) {
   base::TimeTicks frame_time = time_stamp ?
       base::TimeTicks::FromInternalValue(time_stamp) : base::TimeTicks::Now();
 
-  scoped_ptr<flow::LayerTree> layer_tree =
-      make_scoped_ptr(engine_->BeginFrame(frame_time).release());
+  std::unique_ptr<flow::LayerTree> layer_tree = engine_->BeginFrame(frame_time);
 
   if (!layer_tree) {
     OnFrameComplete();
     return;
   }
 
+  // TODO(abarth): Doesn't this leak if OnFrameComplete never runs?
   rasterizer_->Draw(reinterpret_cast<uint64_t>(layer_tree.release()),
       base::Bind(&Animator::OnFrameComplete, weak_factory_.GetWeakPtr()));
 }

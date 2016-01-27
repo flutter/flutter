@@ -91,7 +91,7 @@ class TouchMapper {
   CGPoint _lastScrollTranslation;
 
   sky::SkyEnginePtr _sky_engine;
-  scoped_ptr<sky::shell::ShellView> _shell_view;
+  std::unique_ptr<sky::shell::ShellView> _shell_view;
   TouchMapper _touch_mapper;
 }
 

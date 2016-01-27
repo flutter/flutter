@@ -15,7 +15,7 @@ namespace sky {
 namespace shell {
 
 static jlong CheckForUpdates(JNIEnv* env, jobject jcaller) {
-  scoped_ptr<UpdateTaskAndroid> task(new UpdateTaskAndroid(env, jcaller));
+  std::unique_ptr<UpdateTaskAndroid> task(new UpdateTaskAndroid(env, jcaller));
   task->Start();
   return reinterpret_cast<jlong>(task.release());
 }

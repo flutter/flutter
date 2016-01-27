@@ -21,7 +21,7 @@ namespace shell {
 static jlong Attach(JNIEnv* env, jclass clazz, jint skyEngineHandle) {
   ShellView* shell_view = new ShellView(Shell::Shared());
   auto view = static_cast<PlatformViewAndroid*>(shell_view->view());
-  view->SetShellView(make_scoped_ptr(shell_view));
+  view->SetShellView(std::unique_ptr<ShellView>(shell_view));
   view->ConnectToEngine(
       mojo::MakeRequest<SkyEngine>(mojo::ScopedMessagePipeHandle(
           mojo::MessagePipeHandle(skyEngineHandle))));
@@ -70,9 +70,9 @@ void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   ReleaseWindow();
 }
 
-void PlatformViewAndroid::SetShellView(scoped_ptr<ShellView> shell_view) {
+void PlatformViewAndroid::SetShellView(std::unique_ptr<ShellView> shell_view) {
   DCHECK(!shell_view_);
-  shell_view_ = shell_view.Pass();
+  shell_view_ = std::move(shell_view);
 }
 
 void PlatformViewAndroid::ReleaseWindow() {

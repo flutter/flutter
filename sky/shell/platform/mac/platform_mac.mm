@@ -72,7 +72,7 @@ int PlatformMacMain(int argc,
   // marker that can be used as a reference for startup.
   TRACE_EVENT_INSTANT0("flutter", "main", TRACE_EVENT_SCOPE_PROCESS);
 
-  scoped_ptr<base::MessageLoopForUI> message_loop(new base::MessageLoopForUI());
+  std::unique_ptr<base::MessageLoopForUI> message_loop(new base::MessageLoopForUI());
 
 #if TARGET_OS_IPHONE
   // One cannot start the message loop on the platform main thread. Instead,

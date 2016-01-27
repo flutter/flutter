@@ -27,8 +27,8 @@ namespace shell {
 
 static const double kOneFrameDuration = 1e3 / 60.0;
 
-scoped_ptr<Rasterizer> Rasterizer::Create() {
-  return make_scoped_ptr(new RasterizerDirect());
+std::unique_ptr<Rasterizer> Rasterizer::Create() {
+  return std::unique_ptr<Rasterizer>(new RasterizerDirect());
 }
 
 RasterizerDirect::RasterizerDirect()
@@ -67,13 +67,13 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
                             const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerDirect::Draw");
 
+  std::unique_ptr<flow::LayerTree> layer_tree(
+      reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
+
   if (!surface_) {
     callback.Run();
     return;
   }
-
-  scoped_ptr<flow::LayerTree> layer_tree(
-      reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
   gfx::Size size(layer_tree->frame_size().width(),
                  layer_tree->frame_size().height());
