@@ -34,6 +34,21 @@ struct RectF {
   float height;
 };
 
+struct RRect {
+  int32 x;
+  int32 y;
+  int32 width;
+  int32 height;
+  int32 top_left_radius_x;
+  int32 top_left_radius_y;
+  int32 top_right_radius_x;
+  int32 top_right_radius_y;
+  int32 bottom_left_radius_x;
+  int32 bottom_left_radius_y;
+  int32 bottom_right_radius_x;
+  int32 bottom_right_radius_y;
+};
+
 struct Transform {
   // Row major order.
   array<float, 16> matrix;

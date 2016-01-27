@@ -9,10 +9,12 @@
 #include <thread>
 
 #include "build/build_config.h"
-#include "mojo/edk/system/test/sleep.h"
+#include "mojo/edk/platform/thread_utils.h"
+#include "mojo/edk/system/test/timeouts.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
-using mojo::system::test::SleepMilliseconds;
+using mojo::platform::ThreadSleep;
+using mojo::system::test::DeadlineFromMilliseconds;
 
 namespace mojo {
 namespace util {
@@ -20,7 +22,7 @@ namespace {
 
 // Sleeps for a "very small" amount of time.
 void EpsilonRandomSleep() {
-  SleepMilliseconds(static_cast<unsigned>(rand()) % 20u);
+  ThreadSleep(DeadlineFromMilliseconds(static_cast<unsigned>(rand()) % 20u));
 }
 
 // Basic test to make sure that Lock()/Unlock()/TryLock() don't crash ----------

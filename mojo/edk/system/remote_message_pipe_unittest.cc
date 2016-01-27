@@ -15,6 +15,7 @@
 #include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/channel_endpoint_id.h"
@@ -25,7 +26,6 @@
 #include "mojo/edk/system/raw_channel.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 #include "mojo/edk/system/test/scoped_test_dir.h"
-#include "mojo/edk/system/test/sleep.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
@@ -36,6 +36,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 using mojo::platform::ScopedPlatformHandle;
+using mojo::platform::ThreadSleep;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
 
@@ -1125,18 +1126,18 @@ TEST_F(RemoteMessagePipeTest, RacingClosesStress) {
     BootstrapChannelEndpointNoWait(1, std::move(ep1));
 
     if (i & 1u) {
-      io_thread()->PostTask([delay]() { test::Sleep(delay); });
+      io_thread()->PostTask([delay]() { ThreadSleep(delay); });
     }
     if (i & 2u)
-      test::Sleep(delay);
+      ThreadSleep(delay);
 
     mp0->Close(0);
 
     if (i & 4u) {
-      io_thread()->PostTask([delay]() { test::Sleep(delay); });
+      io_thread()->PostTask([delay]() { ThreadSleep(delay); });
     }
     if (i & 8u)
-      test::Sleep(delay);
+      ThreadSleep(delay);
 
     mp1->Close(1);
 

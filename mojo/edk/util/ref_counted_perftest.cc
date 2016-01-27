@@ -4,15 +4,15 @@
 
 #include <stdint.h>
 
+#include "mojo/edk/platform/test_stopwatch.h"
 #include "mojo/edk/system/test/perf_log.h"
-#include "mojo/edk/system/test/stopwatch.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/util/ref_counted.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::test::Stopwatch;
 using mojo::system::test::DeadlineFromMilliseconds;
 using mojo::system::test::LogPerfResult;
-using mojo::system::test::Stopwatch;
 
 namespace mojo {
 namespace util {

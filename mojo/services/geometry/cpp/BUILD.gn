@@ -9,6 +9,9 @@ mojo_sdk_source_set("cpp") {
   restrict_external_deps = false
   public_configs = [ "../../public/build/config:mojo_services" ]
   sources = [
+    "formatting.cc",
+    "formatting.h",
+    "geometry_util.cc",
     "geometry_util.h",
   ]
 

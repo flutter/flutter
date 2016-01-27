@@ -1,0 +1,49 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.gfx.composition;
+
+import "mojo/services/geometry/interfaces/geometry.mojom";
+import "mojo/services/gfx/composition/interfaces/scene_token.mojom";
+
+// Indicates that hit testing is not needed for a given node.
+const uint32 kHitIdNone = 0;
+
+// Provides information about the point of intersection of a hit test with
+// a node in a scene graph.
+struct Hit {
+  // The scene token of the scene which was hit.
+  SceneToken scene_token;
+
+  // The version of the scene which was consulted as part of evaluating the
+  // hit test.
+  uint32 scene_version;
+
+  // The node id of the node which was hit.
+  uint32 node_id;
+
+  // The hit test id of the node which was hit.
+  uint32 hit_id;
+
+  // The coordinates of the hit within the node's content space.
+  mojo.Point intersection;
+};
+
+// The result of a hit test operation.
+struct HitTestResult {
+  // A sorted list of hits in dispatch order from the top-most hit node
+  // to the nodes underneath it and containing it, or an empty array if none.
+  // Omits nodes for which the hit_id was |kHitIdNone|.
+  array<Hit> hits;
+};
+
+// A hit testing service for scene graphs.
+interface HitTester {
+  // Performs a hit test on the specified point.
+  //
+  // TODO(jeffbrown): Specify a timestamp to allow for hit-tests of geometry
+  // as it appeared in the recent past.
+  HitTest(mojo.Point point) => (HitTestResult result);
+};

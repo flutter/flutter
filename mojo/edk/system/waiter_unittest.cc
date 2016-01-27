@@ -11,14 +11,16 @@
 
 #include <stdint.h>
 
+#include "mojo/edk/platform/test_stopwatch.h"
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/test/simple_test_thread.h"
-#include "mojo/edk/system/test/sleep.h"
-#include "mojo/edk/system/test/stopwatch.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/util/mutex.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::test::Stopwatch;
+using mojo::platform::ThreadSleep;
 using mojo::util::Mutex;
 using mojo::util::MutexLocker;
 
@@ -54,7 +56,7 @@ class WaitingThread : public test::SimpleTestThread {
         }
       }
 
-      test::SleepMilliseconds(kPollTimeMs);
+      ThreadSleep(test::DeadlineFromMilliseconds(kPollTimeMs));
     }
   }
 
@@ -62,7 +64,7 @@ class WaitingThread : public test::SimpleTestThread {
 
  private:
   void Run() override {
-    test::Stopwatch stopwatch;
+    Stopwatch stopwatch;
     MojoResult result;
     uint32_t context = static_cast<uint32_t>(-1);
     MojoDeadline elapsed;
@@ -125,7 +127,7 @@ TEST(WaiterTest, Basic) {
   {
     WaitingThread thread(10 * test::EpsilonTimeout());
     thread.Start();
-    test::Sleep(2 * test::EpsilonTimeout());
+    ThreadSleep(2 * test::EpsilonTimeout());
     thread.waiter()->Awake(1, 3);
     thread.WaitUntilDone(&result, &context, &elapsed);
     EXPECT_EQ(1u, result);
@@ -138,7 +140,7 @@ TEST(WaiterTest, Basic) {
   {
     WaitingThread thread(10 * test::EpsilonTimeout());
     thread.Start();
-    test::Sleep(5 * test::EpsilonTimeout());
+    ThreadSleep(5 * test::EpsilonTimeout());
     thread.waiter()->Awake(2, 4);
     thread.WaitUntilDone(&result, &context, &elapsed);
     EXPECT_EQ(2u, result);
@@ -186,7 +188,7 @@ TEST(WaiterTest, Basic) {
   {
     WaitingThread thread(MOJO_DEADLINE_INDEFINITE);
     thread.Start();
-    test::Sleep(2 * test::EpsilonTimeout());
+    ThreadSleep(2 * test::EpsilonTimeout());
     thread.waiter()->Awake(1, 7);
     thread.WaitUntilDone(&result, &context, &elapsed);
     EXPECT_EQ(1u, result);
@@ -199,7 +201,7 @@ TEST(WaiterTest, Basic) {
   {
     WaitingThread thread(MOJO_DEADLINE_INDEFINITE);
     thread.Start();
-    test::Sleep(5 * test::EpsilonTimeout());
+    ThreadSleep(5 * test::EpsilonTimeout());
     thread.waiter()->Awake(2, 8);
     thread.WaitUntilDone(&result, &context, &elapsed);
     EXPECT_EQ(2u, result);
@@ -210,7 +212,7 @@ TEST(WaiterTest, Basic) {
 }
 
 TEST(WaiterTest, TimeOut) {
-  test::Stopwatch stopwatch;
+  Stopwatch stopwatch;
   MojoDeadline elapsed;
 
   Waiter waiter;
@@ -274,7 +276,7 @@ TEST(WaiterTest, MultipleAwakes) {
     WaitingThread thread(MOJO_DEADLINE_INDEFINITE);
     thread.Start();
     thread.waiter()->Awake(10, 5);
-    test::Sleep(2 * test::EpsilonTimeout());
+    ThreadSleep(2 * test::EpsilonTimeout());
     thread.waiter()->Awake(20, 6);
     thread.WaitUntilDone(&result, &context, &elapsed);
     EXPECT_EQ(10u, result);
@@ -285,9 +287,9 @@ TEST(WaiterTest, MultipleAwakes) {
   {
     WaitingThread thread(10 * test::EpsilonTimeout());
     thread.Start();
-    test::Sleep(1 * test::EpsilonTimeout());
+    ThreadSleep(1 * test::EpsilonTimeout());
     thread.waiter()->Awake(MOJO_RESULT_FAILED_PRECONDITION, 7);
-    test::Sleep(2 * test::EpsilonTimeout());
+    ThreadSleep(2 * test::EpsilonTimeout());
     thread.waiter()->Awake(MOJO_RESULT_OK, 8);
     thread.WaitUntilDone(&result, &context, &elapsed);
     EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);

@@ -6,7 +6,11 @@
 module mojo.ui;
 
 import "mojo/services/ui/views/interfaces/views.mojom";
+import "mojo/services/ui/views/interfaces/view_associates.mojom";
 import "mojo/services/ui/views/interfaces/view_trees.mojom";
+
+// Maximum length for a view or view tree label.
+const uint32 kLabelMaxLength = 32;
 
 // The view manager is a service which manages trees of views.
 //
@@ -31,11 +35,15 @@ interface ViewManager {
   // eventually be passed back through the container's view host interface
   // as an argument to AddChild().
   //
+  // The |label| is an optional name to associate with the view for
+  // diagnostic purposes.  The label will be truncated if it is longer
+  // than |kLabelMaxLength|.
+  //
   // To unregister the view and cause it to be removed from the view tree,
   // simply close the |view| and/or |view_host| message pipes.
   RegisterView(mojo.ui.View view,
-               mojo.ui.ViewHost& view_host) =>
-                   (mojo.ui.ViewToken view_token);
+               mojo.ui.ViewHost& view_host,
+               string? label) => (mojo.ui.ViewToken view_token);
 
   // Registers a view tree with the view manager.
   //
@@ -43,8 +51,16 @@ interface ViewManager {
   // with the views it contains.  The view tree host is private to the view
   // and should not be shared with anyone else.
   //
+  // The |label| is an optional name to associate with the view tree for
+  // diagnostic purposes.  The label will be truncated if it is longer
+  // than |kLabelMaxLength|.
+  //
+  // The |view_tree_token| is used as a transferable reference which can
+  // be passed to trusted services to reference the view tree.
+  //
   // To unregister the view tree simply close the |view_tree| and/or
   // |view_tree_host| message pipes.
   RegisterViewTree(mojo.ui.ViewTree view_tree,
-                   mojo.ui.ViewTreeHost& view_tree_host) => ();
+                   mojo.ui.ViewTreeHost& view_tree_host,
+                   string? label) => (mojo.ui.ViewTreeToken view_tree_token);
 };

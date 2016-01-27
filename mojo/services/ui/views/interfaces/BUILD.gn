@@ -8,6 +8,7 @@ import("$mojo_sdk_root/mojo/public/tools/bindings/mojom.gni")
 mojom("interfaces") {
   sources = [
     "layouts.mojom",
+    "view_associates.mojom",
     "view_manager.mojom",
     "view_provider.mojom",
     "view_trees.mojom",
@@ -18,6 +19,6 @@ mojom("interfaces") {
 
   deps = [
     "../../../geometry/interfaces",
-    "../../../surfaces/interfaces:surface_id",
+    "../../../gfx/composition/interfaces",
   ]
 }

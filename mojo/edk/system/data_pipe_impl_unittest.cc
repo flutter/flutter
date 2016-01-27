@@ -15,6 +15,7 @@
 #include "base/logging.h"
 #include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe.h"
@@ -23,7 +24,6 @@
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_pipe.h"
 #include "mojo/edk/system/raw_channel.h"
-#include "mojo/edk/system/test/sleep.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
@@ -31,6 +31,7 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::ThreadSleep;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
 
@@ -1547,7 +1548,7 @@ TYPED_TEST(DataPipeImplTest, AllOrNone) {
     if (num_bytes >= 10u * sizeof(int32_t))
       break;
 
-    test::Sleep(test::EpsilonTimeout());
+    ThreadSleep(test::EpsilonTimeout());
   }
   EXPECT_EQ(10u * sizeof(int32_t), num_bytes);
 
@@ -1734,7 +1735,7 @@ TYPED_TEST(DataPipeImplTest, WrapAround) {
       EXPECT_EQ(MOJO_RESULT_OUT_OF_RANGE, result);
     }
 
-    test::Sleep(test::EpsilonTimeout());
+    ThreadSleep(test::EpsilonTimeout());
   }
   EXPECT_EQ(90u, total_num_bytes);
 
@@ -1747,7 +1748,7 @@ TYPED_TEST(DataPipeImplTest, WrapAround) {
     if (num_bytes >= 100u)
       break;
 
-    test::Sleep(test::EpsilonTimeout());
+    ThreadSleep(test::EpsilonTimeout());
   }
   EXPECT_EQ(100u, num_bytes);
 
@@ -1825,7 +1826,7 @@ TYPED_TEST(DataPipeImplTest, WriteCloseProducerRead) {
     if (num_bytes >= 2u * kTestDataSize)
       break;
 
-    test::Sleep(test::EpsilonTimeout());
+    ThreadSleep(test::EpsilonTimeout());
   }
   EXPECT_EQ(2u * kTestDataSize, num_bytes);
 
@@ -2309,7 +2310,7 @@ TYPED_TEST(DataPipeImplTest, TwoPhaseMoreInvalidArguments) {
 
   // Wait a bit, to make sure that if a signal were (incorrectly) sent, it'd
   // have time to propagate.
-  test::Sleep(test::EpsilonTimeout());
+  ThreadSleep(test::EpsilonTimeout());
 
   // Still no data.
   num_bytes = 1000u;
@@ -2331,7 +2332,7 @@ TYPED_TEST(DataPipeImplTest, TwoPhaseMoreInvalidArguments) {
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, this->ProducerEndWriteData(0u));
 
   // Wait a bit (as above).
-  test::Sleep(test::EpsilonTimeout());
+  ThreadSleep(test::EpsilonTimeout());
 
   // Still no data.
   num_bytes = 1000u;
@@ -2353,7 +2354,7 @@ TYPED_TEST(DataPipeImplTest, TwoPhaseMoreInvalidArguments) {
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, this->ProducerEndWriteData(0u));
 
   // Wait a bit (as above).
-  test::Sleep(test::EpsilonTimeout());
+  ThreadSleep(test::EpsilonTimeout());
 
   // Still no data.
   num_bytes = 1000u;
@@ -2469,7 +2470,7 @@ TYPED_TEST(DataPipeImplTest, WriteCloseProducerTwoPhaseReadAllData) {
     if (num_bytes >= kTestDataSize)
       break;
 
-    test::Sleep(test::EpsilonTimeout());
+    ThreadSleep(test::EpsilonTimeout());
   }
   EXPECT_EQ(kTestDataSize, num_bytes);
 
@@ -2490,7 +2491,7 @@ TYPED_TEST(DataPipeImplTest, WriteCloseProducerTwoPhaseReadAllData) {
   // |ConsumerEndReadData()| below) we want |producer_open()| to be false but
   // the call to |channel_endpoint_->EnqueueMessage()| to fail. (This race can
   // occur without the sleep, but is much less likely.)
-  test::Sleep(10u);
+  ThreadSleep(10u);
 
   EXPECT_EQ(MOJO_RESULT_OK, this->ConsumerEndReadData(num_bytes));
 

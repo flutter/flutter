@@ -5,7 +5,7 @@
 #ifndef MOJO_SERVICES_GEOMETRY_CPP_GEOMETRY_UTIL_H_
 #define MOJO_SERVICES_GEOMETRY_CPP_GEOMETRY_UTIL_H_
 
-#include "geometry/interfaces/geometry.mojom.h"
+#include "mojo/services/geometry/interfaces/geometry.mojom.h"
 
 namespace mojo {
 
@@ -33,6 +33,9 @@ inline bool operator==(const Point& lhs, const Point& rhs) {
 inline bool operator!=(const Point& lhs, const Point& rhs) {
   return !(lhs == rhs);
 }
+
+void SetIdentityTransform(Transform* transform);
+void SetTranslationTransform(Transform* transform, float x, float y, float z);
 
 }  // namespace mojo
 

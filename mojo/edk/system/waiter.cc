@@ -5,8 +5,9 @@
 #include "mojo/edk/system/waiter.h"
 
 #include "base/logging.h"
-#include "base/time/time.h"
+#include "mojo/edk/platform/time_ticks.h"
 
+using mojo::platform::GetTimeTicks;
 using mojo::util::MutexLocker;
 
 namespace mojo {
@@ -61,7 +62,7 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
     // We may get spurious wakeups, so record the start time and track the
     // remaining timeout.
     uint64_t wait_remaining = deadline;
-    auto start = base::TimeTicks::Now();
+    MojoTimeTicks start = GetTimeTicks();
     while (true) {
       // NOTE(vtl): Possibly, we should add a version of |WaitWithTimeout()|
       // that takes an absolute deadline, since that's what pthreads takes.
@@ -73,9 +74,9 @@ MojoResult Waiter::Wait(MojoDeadline deadline, uint32_t* context) {
         break;
 
       // Or the wakeup may have been spurious.
-      auto now = base::TimeTicks::Now();
+      MojoTimeTicks now = GetTimeTicks();
       DCHECK_GE(now, start);
-      uint64_t elapsed = static_cast<uint64_t>((now - start).InMicroseconds());
+      uint64_t elapsed = static_cast<uint64_t>(now - start);
       // It's possible that the deadline has passed anyway.
       if (elapsed >= deadline)
         return MOJO_RESULT_DEADLINE_EXCEEDED;

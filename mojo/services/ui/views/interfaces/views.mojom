@@ -6,6 +6,7 @@
 module mojo.ui;
 
 import "mojo/public/interfaces/application/service_provider.mojom";
+import "mojo/services/gfx/composition/interfaces/scenes.mojom";
 import "mojo/services/ui/views/interfaces/layouts.mojom";
 
 // A view token is an opaque transferable reference to a view.
@@ -69,14 +70,14 @@ interface View {
   //
   // Recursive layout happens in any of the following circumstances:
   //
-  //   1. If the resulting surface has changed since the last layout.
+  //   1. If the resulting scene has changed since the last layout.
   //   2. If the resulting size has changed since the last layout.
   //
-  // It is an error to return a malformed |info| which does not satisfy
+  // It is an error to return a malformed |result| which does not satisfy
   // the requested |layout_params|, such as by returning a size which
   // exceeds the requested constraints; the view's connection will be closed.
   OnLayout(mojo.ui.ViewLayoutParams layout_params,
-    array<uint32> children_needing_layout) => (mojo.ui.ViewLayoutInfo info);
+    array<uint32> children_needing_layout) => (mojo.ui.ViewLayoutResult result);
 
   // Called when a child view has become unavailable.
   //
@@ -103,7 +104,20 @@ interface ViewHost {
   // the view such as input, accessibility and editing capabilities.
   // The view service provider is private to the view and should not be
   // shared with anyone else.
+  //
+  // See |mojo.ui.InputConnection|.
   GetServiceProvider(mojo.ServiceProvider& service_provider);
+
+  // Creates the view's scene, replacing any previous scene the view
+  // might have had.
+  //
+  // The |scene| is used to supply content for the scene.  The scene pipe
+  // is private to the scene and should not be shared with anyone else.
+  //
+  // To destroy the scene, simply close the |scene| message pipe.
+  //
+  // See also: |mojo.gfx.composition.Compositor.CreateScene()|.
+  CreateScene(mojo.gfx.composition.Scene& scene);
 
   // Requests that the view's OnLayout() method be called to compute a
   // new layout due to a change in the view's layout information.

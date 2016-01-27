@@ -4,6 +4,8 @@
 
 import("../mojo_edk.gni")
 
+# "Completes" the implementation of //mojo/edk/platform (i.e., implements those
+# things that //mojo/edk/platform declares but doesn't define), using //base.
 mojo_edk_source_set("base_edk") {
   sources = [
     "io_thread.cc",
@@ -15,6 +17,8 @@ mojo_edk_source_set("base_edk") {
     "platform_message_loop_impl.h",
     "platform_task_runner_impl.cc",
     "platform_task_runner_impl.h",
+    "thread_utils.cc",
+    "time_ticks.cc",
   ]
 
   deps = [
@@ -24,6 +28,7 @@ mojo_edk_source_set("base_edk") {
   mojo_edk_public_deps = [ "mojo/edk/platform" ]
 }
 
+# "Completes" the implementation of //mojo/edk/platform:test_platform.
 mojo_edk_source_set("test_base_edk") {
   testonly = true
 
@@ -41,16 +46,13 @@ mojo_edk_source_set("test_base_edk") {
   ]
 }
 
+# Direct tests of parts of :base_edk. Note that other parts are tested using the
+# combination of //mojo/edk/platform:unittests and
+# //mojo/edk/platform:mojo_edk_platform_unittests.
 mojo_edk_unittests("mojo_edk_base_edk_unittests") {
   sources = [
-    "io_thread_unittest.cc",
-    "message_loop_test_helper.cc",
-    "message_loop_test_helper.h",
-    "platform_handle_watcher_test_helper.cc",
-    "platform_handle_watcher_test_helper.h",
     "platform_message_loop_for_io_impl_unittest.cc",
     "platform_message_loop_impl_unittest.cc",
-    "test_message_loops_unittest.cc",
   ]
 
   deps = [
@@ -62,6 +64,18 @@ mojo_edk_unittests("mojo_edk_base_edk_unittests") {
 
   mojo_edk_deps = [
     "mojo/edk/platform",
+    "mojo/edk/platform:test_platform",
     "mojo/edk/util",
   ]
+}
+
+# Tests //mojo/edk/platform and //mojo/edk/platform:test_platform using the
+# implementation of :platform provided by :base_edk and :test_base_edk.
+mojo_edk_unittests("mojo_edk_platform_unittests") {
+  deps = [
+    ":base_edk",
+    ":test_base_edk",
+  ]
+
+  mojo_edk_deps = [ "mojo/edk/platform:unittests" ]
 }

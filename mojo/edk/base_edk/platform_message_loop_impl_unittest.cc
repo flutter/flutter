@@ -6,10 +6,11 @@
 
 #include "base/message_loop/message_loop.h"
 #include "base/message_loop/message_pump_default.h"
-#include "mojo/edk/base_edk/message_loop_test_helper.h"
+#include "mojo/edk/platform/message_loop_test_helper.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 using mojo::platform::MessageLoop;
+using mojo::platform::test::MessageLoopTestHelper;
 
 namespace base_edk {
 namespace {
@@ -18,14 +19,14 @@ TEST(PlatformMessageLoopImplTest, TypeDefault) {
   PlatformMessageLoopImpl message_loop;
   EXPECT_EQ(base::MessageLoop::TYPE_DEFAULT,
             message_loop.base_message_loop().type());
-  test::MessageLoopTestHelper(&message_loop);
+  MessageLoopTestHelper(&message_loop);
 }
 
 TEST(PlatformMessageLoopImplTest, TypeIO) {
   PlatformMessageLoopImpl message_loop(base::MessageLoop::TYPE_IO);
   EXPECT_EQ(base::MessageLoop::TYPE_IO,
             message_loop.base_message_loop().type());
-  test::MessageLoopTestHelper(&message_loop);
+  MessageLoopTestHelper(&message_loop);
 }
 
 TEST(PlatformMessageLoopImplTest, TypeCustom) {
@@ -33,7 +34,7 @@ TEST(PlatformMessageLoopImplTest, TypeCustom) {
       make_scoped_ptr(new base::MessagePumpDefault()));
   EXPECT_EQ(base::MessageLoop::TYPE_CUSTOM,
             message_loop.base_message_loop().type());
-  test::MessageLoopTestHelper(&message_loop);
+  MessageLoopTestHelper(&message_loop);
 }
 
 }  // namespace
