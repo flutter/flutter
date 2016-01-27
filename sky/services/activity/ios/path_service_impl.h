@@ -14,10 +14,10 @@ namespace sky {
 namespace services {
 namespace path {
 
-class PathServiceImpl : public activity::PathService {
+class PathServiceImpl : public ::activity::PathService {
  public:
   explicit PathServiceImpl(
-      mojo::InterfaceRequest<activity::PathService> request);
+      mojo::InterfaceRequest<::activity::PathService> request);
   ~PathServiceImpl() override;
 
   void GetAppDataDir(const GetAppDataDirCallback& callback) override;
@@ -25,16 +25,16 @@ class PathServiceImpl : public activity::PathService {
   void GetCacheDir(const GetCacheDirCallback& callback) override;
 
  private:
-  mojo::StrongBinding<activity::PathService> binding_;
+  mojo::StrongBinding<::activity::PathService> binding_;
 
   DISALLOW_COPY_AND_ASSIGN(PathServiceImpl);
 };
 
 class PathServiceFactory
-    : public mojo::InterfaceFactory<activity::PathService> {
+    : public mojo::InterfaceFactory<::activity::PathService> {
  public:
   void Create(mojo::ApplicationConnection* connection,
-              mojo::InterfaceRequest<activity::PathService> request) override;
+              mojo::InterfaceRequest<::activity::PathService> request) override;
 };
 
 }  // namespace path

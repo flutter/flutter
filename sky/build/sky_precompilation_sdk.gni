@@ -75,10 +75,11 @@ template("sky_precompilation_sdk") {
   executable_gen_target_name = target_name + "_runner"
   executable(executable_gen_target_name) {
     libs = [
-      "UIKit.framework",
+      "AudioToolbox.framework",
       "AVFoundation.framework",
-      "QuartzCore.framework",
       "OpenGLES.framework",
+      "QuartzCore.framework",
+      "UIKit.framework",
     ]
     deps = [  "//sky/shell:ios_scaffolding"  ]
   }

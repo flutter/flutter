@@ -146,10 +146,11 @@ template("ios_app") {
 
   executable(bin_gen_target_name) {
     libs = [
-      "UIKit.framework",
+      "AudioToolbox.framework",
       "AVFoundation.framework",
+      "OpenGLES.framework",
       "QuartzCore.framework",
-      "OpenGLES.framework"
+      "UIKit.framework",
     ]
     deps = invoker.deps
     output_name = app_name
