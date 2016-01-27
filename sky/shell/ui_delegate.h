@@ -7,7 +7,6 @@
 
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/sky_engine.mojom.h"
-#include "ui/gfx/geometry/size.h"
 #include "ui/gfx/native_widget_types.h"
 #include "base/callback.h"
 

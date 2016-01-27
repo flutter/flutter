@@ -10,7 +10,6 @@
 #include "flow/paint_context.h"
 #include "sky/shell/gpu/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
-#include "ui/gfx/geometry/size.h"
 #include "ui/gfx/native_widget_types.h"
 
 namespace gfx {
@@ -43,7 +42,6 @@ class RasterizerDirect : public Rasterizer {
   void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
 
   void EnsureGLContext();
-  void EnsureGaneshSurface(intptr_t window_fbo, const gfx::Size& size);
 
   scoped_refptr<gfx::GLShareGroup> share_group_;
   scoped_refptr<gfx::GLSurface> surface_;

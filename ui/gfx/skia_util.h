@@ -24,7 +24,6 @@ namespace gfx {
 class ImageSkiaRep;
 class Rect;
 class RectF;
-class ShadowValue;
 class Transform;
 
 // Convert between Skia and gfx rect types.
@@ -66,12 +65,6 @@ GFX_EXPORT skia::RefPtr<SkShader> CreateGradientShader(int start_point,
                                                        int end_point,
                                                        SkColor start_color,
                                                        SkColor end_color);
-
-// Creates a draw looper to generate |shadows|. The caller owns the draw looper.
-// NULL is returned if |shadows| is empty since no draw looper is needed in
-// this case.
-GFX_EXPORT skia::RefPtr<SkDrawLooper> CreateShadowDrawLooper(
-    const std::vector<ShadowValue>& shadows);
 
 // Returns true if the two bitmaps contain the same pixels.
 GFX_EXPORT bool BitmapsAreEqual(const SkBitmap& bitmap1,

@@ -23,7 +23,6 @@
 #include "sky/shell/rasterizer.h"
 #include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
-#include "ui/gfx/geometry/size.h"
 
 namespace sky {
 class PlatformImpl;
@@ -94,7 +93,6 @@ class Engine : public UIDelegate,
   scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
 
-  gfx::Size physical_size_;
   std::string initial_route_;
   blink::SkyDisplayMetrics display_metrics_;
   std::string language_code_;

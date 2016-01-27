@@ -1,6 +1,0 @@
-This directory contains discrete components used to build Chromium's user
-interface.
-
-Each subdirectory must be an isolated component that lists its dependencies in
-a DEPS file. See subdirectory README.chromium files for specific information
-about each component.
