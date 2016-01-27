@@ -1507,79 +1507,80 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     // Widgets without keys might be synced but there is no guarantee.
 
     // The general approach is to sync the entire new list backwards, as follows:
-    // 1. Walk the lists from the top until you no longer have
-    //    matching nodes. We don't sync these yet, but we now know to
-    //    skip them below. We do this because at each sync we need to
-    //    pass the pointer to the new next widget as the slot, which
-    //    we can't do until we've synced the next child.
-    // 2. Walk the lists from the bottom, syncing nodes, until you no
-    //    longer have matching nodes.
+    // 1. Walk the lists from the top, syncing nodes, until you no longer have
+    //    matching nodes.
+    // 2. Walk the lists from the bottom, without syncing nodes, until you no
+    //    longer have matching nodes. We'll sync these nodes at the end. We
+    //    don't sync them now because we want to sync all the nodes in order
+    //    from beginning ot end.
     // At this point we narrowed the old and new lists to the point
     // where the nodes no longer match.
     // 3. Walk the narrowed part of the old list to get the list of
     //    keys and sync null with non-keyed items.
-    // 4. Walk the narrowed part of the new list backwards:
+    // 4. Walk the narrowed part of the new list forwards:
     //     * Sync unkeyed items with null
     //     * Sync keyed items with the source if it exists, else with null.
-    // 5. Walk the top list again but backwards, syncing the nodes.
+    // 5. Walk the bottom of the list again, syncing the nodes.
     // 6. Sync null with any items in the list of keys that are still
     //    mounted.
 
-    int childrenTop = 0;
+    int newChildrenTop = 0;
+    int oldChildrenTop = 0;
     int newChildrenBottom = newWidgets.length - 1;
     int oldChildrenBottom = oldChildren.length - 1;
-
-    // top of the lists
-    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
-      Element oldChild = oldChildren[childrenTop];
-      Widget newWidget = newWidgets[childrenTop];
-      assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
-      if (!Widget.canUpdate(oldChild.widget, newWidget))
-        break;
-      childrenTop += 1;
-    }
 
     List<Element> newChildren = oldChildren.length == newWidgets.length ?
         oldChildren : new List<Element>(newWidgets.length);
 
-    Element nextSibling;
+    Element previousChild;
 
-    // bottom of the lists
-    while ((childrenTop <= oldChildrenBottom) && (childrenTop <= newChildrenBottom)) {
+    // Update the top of the list.
+    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
+      Element oldChild = oldChildren[oldChildrenTop];
+      Widget newWidget = newWidgets[newChildrenTop];
+      assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
+      if (!Widget.canUpdate(oldChild.widget, newWidget))
+        break;
+      Element newChild = updateChild(oldChild, newWidget, previousChild);
+      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
+      newChildren[newChildrenTop] = newChild;
+      previousChild = newChild;
+      newChildrenTop += 1;
+      oldChildrenTop += 1;
+    }
+
+    // Scan the bottom of the list.
+    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
       Element oldChild = oldChildren[oldChildrenBottom];
       Widget newWidget = newWidgets[newChildrenBottom];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       if (!Widget.canUpdate(oldChild.widget, newWidget))
         break;
-      Element newChild = updateChild(oldChild, newWidget, nextSibling);
-      assert(newChild._debugLifecycleState == _ElementLifecycle.active);
-      newChildren[newChildrenBottom] = newChild;
-      nextSibling = newChild;
       oldChildrenBottom -= 1;
       newChildrenBottom -= 1;
     }
 
-    // middle of the lists - old list
-    bool haveOldNodes = childrenTop <= oldChildrenBottom;
+    // Scan the old children in the middle of the list.
+    bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
     Map<Key, Element> oldKeyedChildren;
-    if (haveOldNodes) {
+    if (haveOldChildren) {
       oldKeyedChildren = new Map<Key, Element>();
-      while (childrenTop <= oldChildrenBottom) {
-        Element oldChild = oldChildren[oldChildrenBottom];
+      while (oldChildrenTop <= oldChildrenBottom) {
+        Element oldChild = oldChildren[oldChildrenTop];
         assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
         if (oldChild.widget.key != null)
           oldKeyedChildren[oldChild.widget.key] = oldChild;
         else
           _deactivateChild(oldChild);
-        oldChildrenBottom -= 1;
+        oldChildrenTop += 1;
       }
     }
 
-    // middle of the lists - new list
-    while (childrenTop <= newChildrenBottom) {
+    // Update the middle of the list.
+    while (newChildrenTop <= newChildrenBottom) {
       Element oldChild;
-      Widget newWidget = newWidgets[newChildrenBottom];
-      if (haveOldNodes) {
+      Widget newWidget = newWidgets[newChildrenTop];
+      if (haveOldChildren) {
         Key key = newWidget.key;
         if (key != null) {
           oldChild = oldKeyedChildren[newWidget.key];
@@ -1596,32 +1597,38 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      Element newChild = updateChild(oldChild, newWidget, nextSibling);
+      Element newChild = updateChild(oldChild, newWidget, previousChild);
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
-      newChildren[newChildrenBottom] = newChild;
-      nextSibling = newChild;
-      newChildrenBottom -= 1;
+      newChildren[newChildrenTop] = newChild;
+      previousChild = newChild;
+      newChildrenTop += 1;
     }
-    assert(oldChildrenBottom == newChildrenBottom);
-    assert(childrenTop == newChildrenBottom + 1);
 
-    // now sync the top of the list
-    while (childrenTop > 0) {
-      childrenTop -= 1;
-      Element oldChild = oldChildren[childrenTop];
+    // We've scaned the whole list.
+    assert(oldChildrenTop == oldChildrenBottom + 1);
+    assert(newChildrenTop == newChildrenBottom + 1);
+    assert(newWidgets.length - newChildrenTop == oldChildren.length - oldChildrenTop);
+    newChildrenBottom = newWidgets.length - 1;
+    oldChildrenBottom = oldChildren.length - 1;
+
+    // Update the bottom of the list.
+    while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
+      Element oldChild = oldChildren[oldChildrenTop];
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
-      Widget newWidget = newWidgets[childrenTop];
+      Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      Element newChild = updateChild(oldChild, newWidget, nextSibling);
+      Element newChild = updateChild(oldChild, newWidget, previousChild);
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
-      newChildren[childrenTop] = newChild;
-      nextSibling = newChild;
+      newChildren[newChildrenTop] = newChild;
+      previousChild = newChild;
+      newChildrenTop += 1;
+      oldChildrenTop += 1;
     }
 
     // clean up any of the remaining middle nodes from the old list
-    if (haveOldNodes && !oldKeyedChildren.isEmpty) {
+    if (haveOldChildren && !oldKeyedChildren.isEmpty) {
       for (Element oldChild in oldKeyedChildren.values)
         _deactivateChild(oldChild);
     }
@@ -1755,15 +1762,13 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
 
   void insertChildRenderObject(RenderObject child, Element slot) {
     final ContainerRenderObjectMixin renderObject = this.renderObject;
-    final RenderObject nextSibling = slot?.renderObject;
-    renderObject.add(child, before: nextSibling);
+    renderObject.insert(child, after: slot?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     final ContainerRenderObjectMixin renderObject = this.renderObject;
-    final RenderObject nextSibling = slot?.renderObject;
-    renderObject.move(child, before: nextSibling);
+    renderObject.move(child, after: slot?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
@@ -1797,7 +1802,7 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
     super.mount(parent, newSlot);
     _children = new List<Element>(widget.children.length);
     Element previousChild;
-    for (int i = _children.length - 1; i >= 0; --i) {
+    for (int i = 0; i < _children.length; ++i) {
       Element newChild = _inflateWidget(widget.children[i], previousChild);
       _children[i] = newChild;
       previousChild = newChild;

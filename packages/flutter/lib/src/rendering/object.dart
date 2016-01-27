@@ -1294,59 +1294,62 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
 
   ChildType _firstChild;
   ChildType _lastChild;
-  void _addToChildList(ChildType child, { ChildType before }) {
+  void _insertIntoChildList(ChildType child, { ChildType after }) {
     final ParentDataType childParentData = child.parentData;
     assert(childParentData.nextSibling == null);
     assert(childParentData.previousSibling == null);
     _childCount += 1;
     assert(_childCount > 0);
-    if (before == null) {
-      // append at the end (_lastChild)
-      childParentData.previousSibling = _lastChild;
-      if (_lastChild != null) {
-        final ParentDataType _lastChildParentData = _lastChild.parentData;
-        _lastChildParentData.nextSibling = child;
+    if (after == null) {
+      // insert at the start (_firstChild)
+      childParentData.nextSibling = _firstChild;
+      if (_firstChild != null) {
+        final ParentDataType _firstChildParentData = _firstChild.parentData;
+        _firstChildParentData.previousSibling = child;
       }
-      _lastChild = child;
-      if (_firstChild == null)
-        _firstChild = child;
+      _firstChild = child;
+      if (_lastChild == null)
+        _lastChild = child;
     } else {
       assert(_firstChild != null);
       assert(_lastChild != null);
-      assert(_debugUltimatePreviousSiblingOf(before, equals: _firstChild));
-      assert(_debugUltimateNextSiblingOf(before, equals: _lastChild));
-      final ParentDataType beforeParentData = before.parentData;
-      if (beforeParentData.previousSibling == null) {
-        // insert at the start (_firstChild); we'll end up with two or more children
-        assert(before == _firstChild);
-        childParentData.nextSibling = before;
-        beforeParentData.previousSibling = child;
-        _firstChild = child;
+      assert(_debugUltimatePreviousSiblingOf(after, equals: _firstChild));
+      assert(_debugUltimateNextSiblingOf(after, equals: _lastChild));
+      final ParentDataType afterParentData = after.parentData;
+      if (afterParentData.nextSibling == null) {
+        // insert at the end (_lastChild); we'll end up with two or more children
+        assert(after == _lastChild);
+        childParentData.previousSibling = after;
+        afterParentData.nextSibling = child;
+        _lastChild = child;
       } else {
         // insert in the middle; we'll end up with three or more children
         // set up links from child to siblings
-        childParentData.previousSibling = beforeParentData.previousSibling;
-        childParentData.nextSibling = before;
+        childParentData.nextSibling = afterParentData.nextSibling;
+        childParentData.previousSibling = after;
         // set up links from siblings to child
         final ParentDataType childPreviousSiblingParentData = childParentData.previousSibling.parentData;
         final ParentDataType childNextSiblingParentData = childParentData.nextSibling.parentData;
         childPreviousSiblingParentData.nextSibling = child;
         childNextSiblingParentData.previousSibling = child;
-        assert(beforeParentData.previousSibling == child);
+        assert(afterParentData.nextSibling == child);
       }
     }
   }
-  /// Insert child into this render object's child list before the given child.
-  ///
-  /// To insert a child at the end of the child list, omit the before parameter.
-  void add(ChildType child, { ChildType before }) {
+  /// Insert child into this render object's child list after the given child.
+  void insert(ChildType child, { ChildType after }) {
     assert(child != this);
-    assert(before != this);
-    assert(child != before);
+    assert(after != this);
+    assert(child != after);
     assert(child != _firstChild);
     assert(child != _lastChild);
     adoptChild(child);
-    _addToChildList(child, before: before);
+    _insertIntoChildList(child, after: after);
+  }
+
+  /// Append child to the end of this render object's child list.
+  void add(ChildType child) {
+    insert(child, after: _lastChild);
   }
 
   /// Add all the children to the end of this render object's child list.
@@ -1411,16 +1414,16 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   /// More efficient than removing and re-adding the child. Requires the child
   /// to already be in the child list at some position. Pass null for before to
   /// move the child to the end of the child list.
-  void move(ChildType child, { ChildType before }) {
+  void move(ChildType child, { ChildType after }) {
     assert(child != this);
-    assert(before != this);
-    assert(child != before);
+    assert(after != this);
+    assert(child != after);
     assert(child.parent == this);
     final ParentDataType childParentData = child.parentData;
-    if (childParentData.nextSibling == before)
+    if (childParentData.previousSibling == after)
       return;
     _removeFromChildList(child);
-    _addToChildList(child, before: before);
+    _insertIntoChildList(child, after: after);
   }
 
   void attach() {
