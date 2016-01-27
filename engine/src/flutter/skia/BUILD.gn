@@ -260,8 +260,6 @@ component("skia") {
     "ext/SkDiscardableMemory_chrome.cc",
     "ext/SkDiscardableMemory_chrome.h",
     "ext/SkMemory_new_handler.cpp",
-    "ext/analysis_canvas.cc",
-    "ext/analysis_canvas.h",
     "ext/bitmap_platform_device.h",
     "ext/convolver.cc",
     "ext/convolver.h",
@@ -319,29 +317,11 @@ component("skia") {
 
   # Remove unused util files include in utils.gypi
   sources -= [
-    "//third_party/skia/include/utils/SkBoundaryPatch.h",
-    "//third_party/skia/include/utils/SkCamera.h",
-    "//third_party/skia/include/utils/SkCanvasStateUtils.h",
-    "//third_party/skia/include/utils/SkCubicInterval.h",
-    "//third_party/skia/include/utils/SkCullPoints.h",
-    "//third_party/skia/include/utils/SkDebugUtils.h",
-    "//third_party/skia/include/utils/SkDumpCanvas.h",
-    "//third_party/skia/include/utils/SkEventTracer.h",
-    "//third_party/skia/include/utils/SkFrontBufferedStream.h",
-    "//third_party/skia/include/utils/SkInterpolator.h",
-    "//third_party/skia/include/utils/SkLayer.h",
-    "//third_party/skia/include/utils/SkMeshUtils.h",
-    "//third_party/skia/include/utils/SkNinePatch.h",
-    "//third_party/skia/include/utils/SkParsePaint.h",
-    "//third_party/skia/include/utils/SkParsePath.h",
-    "//third_party/skia/include/utils/SkRandom.h",
     "//third_party/skia/src/utils/SkBitmapHasher.cpp",
     "//third_party/skia/src/utils/SkBitmapHasher.h",
     "//third_party/skia/src/utils/SkBoundaryPatch.cpp",
     "//third_party/skia/src/utils/SkCamera.cpp",
     "//third_party/skia/src/utils/SkCanvasStack.h",
-    "//third_party/skia/src/utils/SkCubicInterval.cpp",
-    "//third_party/skia/src/utils/SkCullPoints.cpp",
     "//third_party/skia/src/utils/SkDumpCanvas.cpp",
     "//third_party/skia/src/utils/SkFloatUtils.h",
     "//third_party/skia/src/utils/SkFrontBufferedStream.cpp",
@@ -627,7 +607,6 @@ source_set("skia_opts") {
 
 test("skia_unittests") {
   sources = [
-    "ext/analysis_canvas_unittest.cc",
     "ext/bitmap_platform_device_mac_unittest.cc",
     "ext/convolver_unittest.cc",
     "ext/image_operations_unittest.cc",
