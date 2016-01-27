@@ -17,8 +17,22 @@ import '../flx.dart' as flx;
 import '../toolchain.dart';
 import 'android.dart';
 
+const String _defaultAdbPath = 'adb';
+
+class AndroidDeviceDiscovery extends DeviceDiscovery {
+  List<Device> _devices = <Device>[];
+
+  bool get supportsPlatform => true;
+
+  Future init() {
+    _devices = getAdbDevices();
+    return new Future.value();
+  }
+
+  List<Device> get devices => _devices;
+}
+
 class AndroidDevice extends Device {
-  static const String _defaultAdbPath = 'adb';
   static const int _observatoryPort = 8181;
 
   static final String defaultDeviceID = 'default_android_device';
@@ -64,79 +78,6 @@ class AndroidDevice extends Device {
     }
   }
 
-  /// mockAndroid argument is only to facilitate testing with mocks, so that
-  /// we don't have to rely on the test setup having adb available to it.
-  static List<AndroidDevice> getAttachedDevices([AndroidDevice mockAndroid]) {
-    List<AndroidDevice> devices = [];
-    String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : getAdbPath();
-
-    try {
-      runCheckedSync([adbPath, 'version']);
-    } catch (e) {
-      logging.severe('Unable to find adb. Is "adb" in your path?');
-      return devices;
-    }
-
-    List<String> output = runSync([adbPath, 'devices', '-l']).trim().split('\n');
-
-    // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-    RegExp deviceRegex1 = new RegExp(
-        r'^(\S+)\s+device\s+.*product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
-
-    // 0149947A0D01500C       device usb:340787200X
-    RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
-    RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized\s+\S+$');
-    RegExp offlineRegex = new RegExp(r'^(\S+)\s+offline\s+\S+$');
-
-    // Skip first line, which is always 'List of devices attached'.
-    for (String line in output.skip(1)) {
-      // Skip lines like:
-      // * daemon not running. starting it now on port 5037 *
-      // * daemon started successfully *
-      if (line.startsWith('* daemon '))
-        continue;
-
-      if (line.startsWith('List of devices'))
-        continue;
-
-      if (deviceRegex1.hasMatch(line)) {
-        Match match = deviceRegex1.firstMatch(line);
-        String deviceID = match[1];
-        String productID = match[2];
-        String modelID = match[3];
-        String deviceCodeName = match[4];
-
-        devices.add(new AndroidDevice(
-            id: deviceID,
-            productID: productID,
-            modelID: modelID,
-            deviceCodeName: deviceCodeName
-        ));
-      } else if (deviceRegex2.hasMatch(line)) {
-        Match match = deviceRegex2.firstMatch(line);
-        String deviceID = match[1];
-        devices.add(new AndroidDevice(id: deviceID));
-      } else if (unauthorizedRegex.hasMatch(line)) {
-        Match match = unauthorizedRegex.firstMatch(line);
-        String deviceID = match[1];
-        logging.warning(
-          'Device $deviceID is not authorized.\n'
-          'You might need to check your device for an authorization dialog.'
-        );
-      } else if (offlineRegex.hasMatch(line)) {
-        Match match = offlineRegex.firstMatch(line);
-        String deviceID = match[1];
-        logging.warning('Device $deviceID is offline.');
-      } else {
-        logging.warning(
-          'Unexpected failure parsing device information from adb output:\n'
-          '$line\n'
-          'Please report a bug at https://github.com/flutter/flutter/issues/new');
-      }
-    }
-    return devices;
-  }
-
   static String getAndroidSdkPath() {
     if (Platform.environment.containsKey('ANDROID_HOME')) {
       String androidHomeDir = Platform.environment['ANDROID_HOME'];
@@ -153,25 +94,6 @@ class AndroidDevice extends Device {
     } else {
       logging.warning('Android SDK not found. The ANDROID_HOME variable must be set.');
       return null;
-    }
-  }
-
-  static String getAdbPath() {
-    if (Platform.environment.containsKey('ANDROID_HOME')) {
-      String androidHomeDir = Platform.environment['ANDROID_HOME'];
-      String adbPath1 = path.join(androidHomeDir, 'sdk', 'platform-tools', 'adb');
-      String adbPath2 = path.join(androidHomeDir, 'platform-tools', 'adb');
-      if (FileSystemEntity.isFileSync(adbPath1)) {
-        return adbPath1;
-      } else if (FileSystemEntity.isFileSync(adbPath2)) {
-        return adbPath2;
-      } else {
-        logging.info('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
-            'using default path "$_defaultAdbPath"');
-        return _defaultAdbPath;
-      }
-    } else {
-      return _defaultAdbPath;
     }
   }
 
@@ -513,5 +435,101 @@ class AndroidDevice extends Device {
 
   void setConnected(bool value) {
     _connected = value;
+  }
+}
+
+/// The [mockAndroid] argument is only to facilitate testing with mocks, so that
+/// we don't have to rely on the test setup having adb available to it.
+List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
+  List<AndroidDevice> devices = [];
+  String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : getAdbPath();
+
+  try {
+    runCheckedSync([adbPath, 'version']);
+  } catch (e) {
+    logging.severe('Unable to find adb. Is "adb" in your path?');
+    return devices;
+  }
+
+  List<String> output = runSync([adbPath, 'devices', '-l']).trim().split('\n');
+
+  // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
+  RegExp deviceRegex1 = new RegExp(
+      r'^(\S+)\s+device\s+.*product:(\S+)\s+model:(\S+)\s+device:(\S+)$');
+
+  // 0149947A0D01500C       device usb:340787200X
+  RegExp deviceRegex2 = new RegExp(r'^(\S+)\s+device\s+\S+$');
+  RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized\s+\S+$');
+  RegExp offlineRegex = new RegExp(r'^(\S+)\s+offline\s+\S+$');
+
+  // Skip first line, which is always 'List of devices attached'.
+  for (String line in output.skip(1)) {
+    // Skip lines like:
+    // * daemon not running. starting it now on port 5037 *
+    // * daemon started successfully *
+    if (line.startsWith('* daemon '))
+      continue;
+
+    if (line.startsWith('List of devices'))
+      continue;
+
+    if (deviceRegex1.hasMatch(line)) {
+      Match match = deviceRegex1.firstMatch(line);
+      String deviceID = match[1];
+      String productID = match[2];
+      String modelID = match[3];
+      String deviceCodeName = match[4];
+
+      // Convert `Nexus_7` / `Nexus_5X` style names to `Nexus 7` ones.
+      if (modelID != null)
+        modelID = modelID.replaceAll('_', ' ');
+
+      devices.add(new AndroidDevice(
+          id: deviceID,
+          productID: productID,
+          modelID: modelID,
+          deviceCodeName: deviceCodeName
+      ));
+    } else if (deviceRegex2.hasMatch(line)) {
+      Match match = deviceRegex2.firstMatch(line);
+      String deviceID = match[1];
+      devices.add(new AndroidDevice(id: deviceID));
+    } else if (unauthorizedRegex.hasMatch(line)) {
+      Match match = unauthorizedRegex.firstMatch(line);
+      String deviceID = match[1];
+      logging.warning(
+        'Device $deviceID is not authorized.\n'
+        'You might need to check your device for an authorization dialog.'
+      );
+    } else if (offlineRegex.hasMatch(line)) {
+      Match match = offlineRegex.firstMatch(line);
+      String deviceID = match[1];
+      logging.warning('Device $deviceID is offline.');
+    } else {
+      logging.warning(
+        'Unexpected failure parsing device information from adb output:\n'
+        '$line\n'
+        'Please report a bug at https://github.com/flutter/flutter/issues/new');
+    }
+  }
+  return devices;
+}
+
+String getAdbPath() {
+  if (Platform.environment.containsKey('ANDROID_HOME')) {
+    String androidHomeDir = Platform.environment['ANDROID_HOME'];
+    String adbPath1 = path.join(androidHomeDir, 'sdk', 'platform-tools', 'adb');
+    String adbPath2 = path.join(androidHomeDir, 'platform-tools', 'adb');
+    if (FileSystemEntity.isFileSync(adbPath1)) {
+      return adbPath1;
+    } else if (FileSystemEntity.isFileSync(adbPath2)) {
+      return adbPath2;
+    } else {
+      logging.info('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
+          'using default path "$_defaultAdbPath"');
+      return _defaultAdbPath;
+    }
+  } else {
+    return _defaultAdbPath;
   }
 }
