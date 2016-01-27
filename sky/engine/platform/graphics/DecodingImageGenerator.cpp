@@ -45,7 +45,7 @@ DecodingImageGenerator::~DecodingImageGenerator()
 {
 }
 
-SkData* DecodingImageGenerator::onRefEncodedData()
+SkData* DecodingImageGenerator::onRefEncodedData(GrContext* ctx)
 {
     // FIXME: If the image has been clipped or scaled, do not return the original
     // encoded data, since on playback it will not be known how the clipping/scaling

@@ -50,7 +50,7 @@
     '../third_party/skia/src/ports/SkFontMgr_android_factory.cpp',
     '../third_party/skia/src/ports/SkFontMgr_android_parser.cpp',
     '../third_party/skia/src/ports/SkFontMgr_win_dw.cpp',
-    '../third_party/skia/src/ports/SkGlobalInitialization_chromium.cpp',
+    '../third_party/skia/src/ports/SkGlobalInitialization_default.cpp',
     '../third_party/skia/src/ports/SkOSFile_posix.cpp',
     '../third_party/skia/src/ports/SkOSFile_stdio.cpp',
     '../third_party/skia/src/ports/SkOSFile_win.cpp',
