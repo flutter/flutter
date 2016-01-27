@@ -35,8 +35,6 @@
 
 #if INSIDE_BLINK
 #include "sky/engine/platform/geometry/IntPoint.h"
-#else
-#include "ui/gfx/geometry/point.h"
 #endif
 
 namespace blink {
@@ -74,24 +72,6 @@ struct WebPoint {
     operator IntPoint() const
     {
         return IntPoint(x, y);
-    }
-#else
-    WebPoint(const gfx::Point& p)
-        : x(p.x())
-        , y(p.y())
-    {
-    }
-
-    WebPoint& operator=(const gfx::Point& p)
-    {
-        x = p.x();
-        y = p.y();
-        return *this;
-    }
-
-    operator gfx::Point() const
-    {
-        return gfx::Point(x, y);
     }
 #endif
 };

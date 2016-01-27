@@ -90,8 +90,8 @@ std::unique_ptr<flow::LayerTree> Engine::BeginFrame(
   std::unique_ptr<flow::LayerTree> layer_tree =
       sky_view_->BeginFrame(frame_time);
   if (layer_tree) {
-    layer_tree->set_frame_size(
-        SkISize::Make(physical_size_.width(), physical_size_.height()));
+    layer_tree->set_frame_size(SkISize::Make(display_metrics_.physical_width,
+                                             display_metrics_.physical_height));
     layer_tree->set_construction_time(base::TimeTicks::Now() - begin_time);
   }
   return layer_tree;
@@ -132,10 +132,9 @@ void Engine::SetServices(ServicesDataPtr services) {
 }
 
 void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
-  physical_size_.SetSize(metrics->physical_width, metrics->physical_height);
-
   display_metrics_.device_pixel_ratio = metrics->device_pixel_ratio;
-  display_metrics_.physical_size = physical_size_;
+  display_metrics_.physical_width = metrics->physical_width;
+  display_metrics_.physical_height = metrics->physical_height;
   display_metrics_.physical_padding_top = metrics->physical_padding_top;
   display_metrics_.physical_padding_right = metrics->physical_padding_right;
   display_metrics_.physical_padding_bottom = metrics->physical_padding_bottom;

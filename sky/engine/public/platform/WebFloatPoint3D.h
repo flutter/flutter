@@ -10,8 +10,6 @@
 
 #if INSIDE_BLINK
 #include "sky/engine/platform/geometry/FloatPoint3D.h"
-#else
-#include "ui/gfx/geometry/point3_f.h"
 #endif
 
 namespace blink {
@@ -55,26 +53,6 @@ struct WebFloatPoint3D {
     {
         return FloatPoint3D(x, y, z);
     }
-#else
-    WebFloatPoint3D(const gfx::Point3F& p)
-        : x(p.x())
-        , y(p.y())
-        , z(p.z())
-    {
-    }
-
-    WebFloatPoint3D& operator=(const gfx::Point3F& p)
-    {
-        x = p.x();
-        y = p.y();
-        return *this;
-    }
-
-    operator gfx::Point3F() const
-    {
-        return gfx::Point3F(x, y, z);
-    }
-
 #endif
 };
 

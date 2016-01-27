@@ -35,11 +35,6 @@
 
 #if INSIDE_BLINK
 #include "sky/engine/platform/geometry/IntSize.h"
-#else
-#include <algorithm>
-#include <cmath>
-#include "ui/gfx/geometry/size.h"
-#include "ui/gfx/geometry/vector2d.h"
 #endif
 
 namespace blink {
@@ -79,42 +74,6 @@ struct WebSize {
     operator IntSize() const
     {
         return IntSize(width, height);
-    }
-#else
-    WebSize(const gfx::Size& s)
-        : width(s.width())
-        , height(s.height())
-    {
-    }
-
-    WebSize(const gfx::Vector2d& v)
-        : width(v.x())
-        , height(v.y())
-    {
-    }
-
-    WebSize& operator=(const gfx::Size& s)
-    {
-        width = s.width();
-        height = s.height();
-        return *this;
-    }
-
-    WebSize& operator=(const gfx::Vector2d& v)
-    {
-        width = v.x();
-        height = v.y();
-        return *this;
-    }
-
-    operator gfx::Size() const
-    {
-        return gfx::Size(std::max(0, width), std::max(0, height));
-    }
-
-    operator gfx::Vector2d() const
-    {
-        return gfx::Vector2d(width, height);
     }
 #endif
 };

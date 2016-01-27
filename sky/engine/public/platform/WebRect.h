@@ -35,10 +35,6 @@
 
 #if INSIDE_BLINK
 #include "sky/engine/platform/geometry/IntRect.h"
-#else
-#include <algorithm>
-#include <cmath>
-#include "ui/gfx/rect.h"
 #endif
 
 namespace blink {
@@ -88,28 +84,6 @@ struct WebRect {
     operator IntRect() const
     {
         return IntRect(x, y, width, height);
-    }
-#else
-    WebRect(const gfx::Rect& r)
-        : x(r.x())
-        , y(r.y())
-        , width(r.width())
-        , height(r.height())
-    {
-    }
-
-    WebRect& operator=(const gfx::Rect& r)
-    {
-        x = r.x();
-        y = r.y();
-        width = r.width();
-        height = r.height();
-        return *this;
-    }
-
-    operator gfx::Rect() const
-    {
-        return gfx::Rect(x, y, std::max(0, width), std::max(0, height));
     }
 #endif
 };

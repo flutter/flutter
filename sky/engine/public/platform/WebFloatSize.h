@@ -36,10 +36,6 @@
 
 #if INSIDE_BLINK
 #include "sky/engine/platform/geometry/FloatSize.h"
-#else
-#include <cmath>
-#include "ui/gfx/geometry/size_f.h"
-#include "ui/gfx/vector2d_f.h"
 #endif
 
 namespace blink {
@@ -79,42 +75,6 @@ struct WebFloatSize {
     operator FloatSize() const
     {
         return FloatSize(width, height);
-    }
-#else
-    WebFloatSize(const gfx::SizeF& s)
-        : width(s.width())
-        , height(s.height())
-    {
-    }
-
-    WebFloatSize(const gfx::Vector2dF& v)
-        : width(v.x())
-        , height(v.y())
-    {
-    }
-
-    WebFloatSize& operator=(const gfx::SizeF& s)
-    {
-        width = s.width();
-        height = s.height();
-        return *this;
-    }
-
-    WebFloatSize& operator=(const gfx::Vector2dF& v)
-    {
-        width = v.x();
-        height = v.y();
-        return *this;
-    }
-
-    operator gfx::SizeF() const
-    {
-        return gfx::SizeF(std::max(0.f, width), std::max(0.f, height));
-    }
-
-    operator gfx::Vector2dF() const
-    {
-        return gfx::Vector2dF(width, height);
     }
 #endif
 };
