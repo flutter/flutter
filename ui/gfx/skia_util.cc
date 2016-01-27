@@ -15,7 +15,6 @@
 #include "ui/gfx/geometry/quad_f.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/rect_f.h"
-#include "ui/gfx/shadow_value.h"
 #include "ui/gfx/transform.h"
 
 namespace gfx {
@@ -82,50 +81,6 @@ skia::RefPtr<SkShader> CreateGradientShader(int start_point,
 
   return skia::AdoptRef(SkGradientShader::CreateLinear(
       grad_points, grad_colors, NULL, 2, SkShader::kRepeat_TileMode));
-}
-
-static SkScalar RadiusToSigma(double radius) {
-  // This captures historically what skia did under the hood. Now skia accepts
-  // sigma, not radius, so we perform the conversion.
-  return radius > 0 ? SkDoubleToScalar(0.57735f * radius + 0.5) : 0;
-}
-
-skia::RefPtr<SkDrawLooper> CreateShadowDrawLooper(
-    const std::vector<ShadowValue>& shadows) {
-  if (shadows.empty())
-    return skia::RefPtr<SkDrawLooper>();
-
-  SkLayerDrawLooper::Builder looper_builder;
-
-  looper_builder.addLayer();  // top layer of the original.
-
-  SkLayerDrawLooper::LayerInfo layer_info;
-  layer_info.fPaintBits |= SkLayerDrawLooper::kMaskFilter_Bit;
-  layer_info.fPaintBits |= SkLayerDrawLooper::kColorFilter_Bit;
-  layer_info.fColorMode = SkXfermode::kSrc_Mode;
-
-  for (size_t i = 0; i < shadows.size(); ++i) {
-    const ShadowValue& shadow = shadows[i];
-
-    layer_info.fOffset.set(SkIntToScalar(shadow.x()),
-                           SkIntToScalar(shadow.y()));
-
-    // SkBlurMaskFilter's blur radius defines the range to extend the blur from
-    // original mask, which is half of blur amount as defined in ShadowValue.
-    skia::RefPtr<SkMaskFilter> blur_mask =
-        skia::AdoptRef(SkBlurMaskFilter::Create(
-            kNormal_SkBlurStyle, RadiusToSigma(shadow.blur() / 2),
-            SkBlurMaskFilter::kHighQuality_BlurFlag));
-    skia::RefPtr<SkColorFilter> color_filter =
-        skia::AdoptRef(SkColorFilter::CreateModeFilter(
-            shadow.color(), SkXfermode::kSrcIn_Mode));
-
-    SkPaint* paint = looper_builder.addLayer(layer_info);
-    paint->setMaskFilter(blur_mask.get());
-    paint->setColorFilter(color_filter.get());
-  }
-
-  return skia::AdoptRef<SkDrawLooper>(looper_builder.detachLooper());
 }
 
 bool BitmapsAreEqual(const SkBitmap& bitmap1, const SkBitmap& bitmap2) {
