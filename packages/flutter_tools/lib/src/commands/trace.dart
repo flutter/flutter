@@ -43,17 +43,18 @@ class TraceCommand extends FlutterCommand {
       devices.android.startTracing(androidApp);
       await new Future.delayed(
           new Duration(seconds: int.parse(argResults['duration'])),
-          () => _stopTracing(devices.android, androidApp));
+          () => _stopTracing(devices.android, androidApp)
+      );
     } else if (argResults['stop']) {
-      _stopTracing(devices.android, androidApp);
+      await _stopTracing(devices.android, androidApp);
     } else {
       devices.android.startTracing(androidApp);
     }
     return 0;
   }
 
-  void _stopTracing(AndroidDevice android, AndroidApk androidApp) {
-    String tracePath = android.stopTracing(androidApp, outPath: argResults['out']);
+  Future _stopTracing(AndroidDevice android, AndroidApk androidApp) async {
+    String tracePath = await android.stopTracing(androidApp, outPath: argResults['out']);
     if (tracePath == null) {
       logging.warning('No trace file saved.');
     } else {
