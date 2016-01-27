@@ -108,8 +108,11 @@ Internals::Internals(ServicesDataPtr services,
         services_->services_provided_by_embedder.get());
   }
   service_provider_impl_.AddService<mojo::asset_bundle::AssetUnpacker>(this);
-
-  services_provided_to_embedder_ = GetProxy(&services_from_dart_);
+  if (services_ && services_->services_provided_to_embedder.is_pending()) {
+    services_provided_to_embedder_ = services_->services_provided_to_embedder.Pass();
+  } else {
+    services_provided_to_embedder_ = GetProxy(&services_from_dart_);
+  }
 }
 
 Internals::~Internals() {

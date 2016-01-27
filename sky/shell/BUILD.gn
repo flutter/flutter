@@ -57,6 +57,7 @@ source_set("common") {
     "//sky/services/platform",
     "//sky/services/pointer:interfaces",
     "//sky/services/rasterizer:interfaces",
+    "//sky/services/semantics:interfaces",
     "//sky/shell/dart",
     "//ui/gfx",
   ]
@@ -154,6 +155,7 @@ if (is_android) {
 
   android_library("java") {
     java_files = [
+      "platform/android/org/domokit/sky/shell/FlutterSemanticsToAndroidAccessibilityBridge.java",
       "platform/android/org/domokit/sky/shell/PlatformServiceProvider.java",
       "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
       "platform/android/org/domokit/sky/shell/ResourceCleaner.java",
@@ -191,6 +193,7 @@ if (is_android) {
       "//sky/services/pointer:interfaces_java",
       "//sky/services/raw_keyboard:interfaces_java",
       "//sky/services/raw_keyboard:raw_keyboard_lib",
+      "//sky/services/semantics:interfaces_java",
       "//sky/services/updater:interfaces_java",
       "//sky/services/vsync:vsync_lib",
     ]

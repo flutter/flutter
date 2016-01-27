@@ -5,6 +5,8 @@
 package org.domokit.sky.shell;
 
 import android.content.Context;
+import android.opengl.Matrix;
+import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -13,16 +15,21 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.view.WindowInsets;
 
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.InterfaceRequest;
 import org.chromium.mojo.system.Core;
-import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojo.system.MessagePipeHandle;
+import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.Pair;
+import org.chromium.mojo.system.impl.CoreImpl;
+import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.editing.Keyboard;
 import org.chromium.mojom.mojo.ServiceProvider;
 import org.chromium.mojom.pointer.Pointer;
@@ -30,32 +37,43 @@ import org.chromium.mojom.pointer.PointerKind;
 import org.chromium.mojom.pointer.PointerPacket;
 import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
+import org.chromium.mojom.semantics.SemanticsListener;
+import org.chromium.mojom.semantics.SemanticsNode;
+import org.chromium.mojom.semantics.SemanticsServer;
 import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.domokit.editing.KeyboardImpl;
 import org.domokit.editing.KeyboardViewState;
 import org.domokit.raw_keyboard.RawKeyboardServiceImpl;
 import org.domokit.raw_keyboard.RawKeyboardServiceState;
 
+import org.domokit.sky.shell.FlutterSemanticsToAndroidAccessibilityBridge;
+
 /**
  * A view containing Sky
  */
 @JNINamespace("sky::shell")
-public class PlatformViewAndroid extends SurfaceView {
+public class PlatformViewAndroid extends SurfaceView
+  implements AccessibilityManager.AccessibilityStateChangeListener,
+             AccessibilityManager.TouchExplorationStateChangeListener {
     private static final String TAG = "PlatformViewAndroid";
 
     private long mNativePlatformView;
     private SkyEngine.Proxy mSkyEngine;
     private PlatformServiceProvider mServiceProvider;
+    private ServiceProvider.Proxy mDartServiceProvider;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
     private final KeyboardViewState mKeyboardState;
     private final RawKeyboardServiceState mRawKeyboardState;
+    private final AccessibilityManager mAccessibilityManager;
 
     public PlatformViewAndroid(Context context) {
         super(context);
@@ -89,6 +107,8 @@ public class PlatformViewAndroid extends SurfaceView {
 
         mKeyboardState = new KeyboardViewState(this);
         mRawKeyboardState = new RawKeyboardServiceState();
+
+        mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
     }
 
     @Override
@@ -107,6 +127,10 @@ public class PlatformViewAndroid extends SurfaceView {
 
     SkyEngine getEngine() {
         return mSkyEngine;
+    }
+
+    float getDevicePixelRatio() {
+        return mMetrics.devicePixelRatio;
     }
 
     void destroy() {
@@ -279,9 +303,16 @@ public class PlatformViewAndroid extends SurfaceView {
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
         ServiceProvider.MANAGER.bind(mServiceProvider, serviceProvider.second);
 
+        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> dartServiceProvider =
+                ServiceProvider.MANAGER.getInterfaceRequest(core);
+        mDartServiceProvider = dartServiceProvider.first;
+
         ServicesData services = new ServicesData();
         services.servicesProvidedByEmbedder = serviceProvider.first;
+        services.servicesProvidedToEmbedder = dartServiceProvider.second;
         mSkyEngine.setServices(services);
+
+        resetAccessibilityTree();
 
         mSkyEngine.runFromBundle(path);
     }
@@ -291,4 +322,61 @@ public class PlatformViewAndroid extends SurfaceView {
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
                                                     Surface surface);
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
+
+
+    // ACCESSIBILITY
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (mAccessibilityManager.isEnabled() || mAccessibilityManager.isTouchExplorationEnabled())
+          ensureAccessibilityEnabled();
+        mAccessibilityManager.addAccessibilityStateChangeListener(this);
+        mAccessibilityManager.addTouchExplorationStateChangeListener(this);
+    }
+
+    @Override
+    public void onAccessibilityStateChanged(boolean enabled) {
+        if (enabled)
+            ensureAccessibilityEnabled();
+    }
+
+    @Override
+    public void onTouchExplorationStateChanged(boolean enabled) {
+        if (enabled)
+            ensureAccessibilityEnabled();
+        // TODO(ianh): else, actually discard the state for exploration
+    }
+
+    private FlutterSemanticsToAndroidAccessibilityBridge mAccessibilityNodeProvider;
+    private SemanticsServer.Proxy mSemanticsServer;
+
+    void ensureAccessibilityEnabled() {
+        if (mAccessibilityNodeProvider == null) {
+            mAccessibilityNodeProvider = new FlutterSemanticsToAndroidAccessibilityBridge(this);
+            Core core = CoreImpl.getInstance();
+            Pair<SemanticsServer.Proxy, InterfaceRequest<SemanticsServer>> server =
+                      SemanticsServer.MANAGER.getInterfaceRequest(core);
+            mSemanticsServer = server.first;
+            mDartServiceProvider.connectToService(SemanticsServer.MANAGER.getName(), server.second.passHandle());
+            mSemanticsServer.addSemanticsListener(mAccessibilityNodeProvider);
+        }
+        assert mSemanticsServer != null;
+    }
+
+    @Override
+    public AccessibilityNodeProvider getAccessibilityNodeProvider() {
+        ensureAccessibilityEnabled();
+        return mAccessibilityNodeProvider;
+    }
+
+    // TODO(ianh): implement touch exploration
+
+    // TODO(ianh): implement accessibility focus
+
+    void resetAccessibilityTree() {
+        if (mAccessibilityNodeProvider != null)
+            mAccessibilityNodeProvider.reset();
+    }
+
 }
