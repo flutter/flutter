@@ -14,12 +14,6 @@
 
 namespace sky {
 namespace shell {
-namespace {
-
-template<typename T>
-void Drop(scoped_ptr<T> ptr) { }
-
-}  // namespace
 
 ShellView::ShellView(Shell& shell)
     : shell_(shell) {
@@ -30,10 +24,8 @@ ShellView::ShellView(Shell& shell)
 
 ShellView::~ShellView() {
   view_ = nullptr;
-  shell_.gpu_task_runner()->PostTask(FROM_HERE,
-      base::Bind(&Drop<Rasterizer>, base::Passed(&rasterizer_)));
-  shell_.ui_task_runner()->PostTask(FROM_HERE,
-      base::Bind(&Drop<Engine>, base::Passed(&engine_)));
+  shell_.gpu_task_runner()->DeleteSoon(FROM_HERE, rasterizer_.release());
+  shell_.ui_task_runner()->DeleteSoon(FROM_HERE, engine_.release());
 }
 
 void ShellView::CreateEngine() {

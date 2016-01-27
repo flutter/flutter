@@ -20,8 +20,8 @@ void ContextLostThunk(void* closure) {
 
 }  // namespace
 
-scoped_ptr<Rasterizer> Rasterizer::Create() {
-  return make_scoped_ptr(new RasterizerMojo());
+std::unique_ptr<Rasterizer> Rasterizer::Create() {
+  return std::unique_ptr<Rasterizer>(new RasterizerMojo());
 }
 
 RasterizerMojo::RasterizerMojo() : binding_(this), weak_factory_(this) {
@@ -46,13 +46,14 @@ void RasterizerMojo::ConnectToRasterizer (
 void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
                           const DrawCallback& callback) {
   TRACE_EVENT0("flutter", "RasterizerMojo::Draw");
+
+  std::unique_ptr<flow::LayerTree> layer_tree(
+      reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
+
   if (!MGLGetCurrentContext()) {
     callback.Run();
     return;
   }
-
-  scoped_ptr<flow::LayerTree> layer_tree(
-      reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
 
   if (layer_tree->frame_size().isEmpty()) {
     callback.Run();

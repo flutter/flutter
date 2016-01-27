@@ -6,9 +6,9 @@
 #define SKY_SHELL_ANDROID_UPDATE_SERVICE_ANDROID_H_
 
 #include <jni.h>
+#include <memory>
 
 #include "base/android/scoped_java_ref.h"
-#include "base/memory/scoped_ptr.h"
 #include "sky/engine/public/sky/sky_headless.h"
 
 namespace sky {
@@ -31,7 +31,7 @@ class UpdateTaskAndroid : public blink::SkyHeadless::Client {
   // SkyHeadless::Client:
   void DidCreateIsolate(Dart_Isolate isolate) override;
 
-  scoped_ptr<blink::SkyHeadless> headless_;
+  std::unique_ptr<blink::SkyHeadless> headless_;
   base::android::ScopedJavaGlobalRef<jobject> update_service_;
 };
 

@@ -5,9 +5,10 @@
 #ifndef SKY_SHELL_SHELL_VIEW_H_
 #define SKY_SHELL_SHELL_VIEW_H_
 
+#include <memory>
+
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "base/memory/scoped_ptr.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 
 namespace sky {
@@ -29,9 +30,9 @@ class ShellView {
   void CreatePlatformView();
 
   Shell& shell_;
-  scoped_ptr<PlatformView> view_;
-  scoped_ptr<Rasterizer> rasterizer_;
-  scoped_ptr<Engine> engine_;
+  std::unique_ptr<PlatformView> view_;
+  std::unique_ptr<Rasterizer> rasterizer_;
+  std::unique_ptr<Engine> engine_;
 
   DISALLOW_COPY_AND_ASSIGN(ShellView);
 };

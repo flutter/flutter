@@ -45,7 +45,7 @@ class SkyApplicationImpl : public mojo::Application {
   mojo::URLResponsePtr initial_response_;
   mojo::ShellPtr shell_;
   mojo::asset_bundle::AssetBundlePtr bundle_;
-  scoped_ptr<ShellView> shell_view_;
+  std::unique_ptr<ShellView> shell_view_;
 };
 
 }  // namespace shell

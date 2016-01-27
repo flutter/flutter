@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "base/callback.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "flow/layer_tree.h"
@@ -25,7 +24,7 @@ class Rasterizer : public rasterizer::Rasterizer {
   virtual base::WeakPtr<::sky::shell::Rasterizer> GetWeakRasterizerPtr() = 0;
 
   // Implemented by each GPU backend.
-  static scoped_ptr<Rasterizer> Create();
+  static std::unique_ptr<Rasterizer> Create();
 };
 
 }  // namespace shell

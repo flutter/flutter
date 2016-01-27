@@ -7,7 +7,6 @@
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
 #include "sky/shell/tracing_controller.h"
@@ -46,9 +45,9 @@ class Shell {
   void InitGPU(const base::Thread::Options& options);
   void InitUI(const base::Thread::Options& options);
 
-  scoped_ptr<base::Thread> gpu_thread_;
-  scoped_ptr<base::Thread> ui_thread_;
-  scoped_ptr<base::Thread> io_thread_;
+  std::unique_ptr<base::Thread> gpu_thread_;
+  std::unique_ptr<base::Thread> ui_thread_;
+  std::unique_ptr<base::Thread> io_thread_;
 
   scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner_;
   scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner_;

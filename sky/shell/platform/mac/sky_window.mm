@@ -45,7 +45,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
 
 @implementation SkyWindow {
   sky::SkyEnginePtr _sky_engine;
-  scoped_ptr<sky::shell::ShellView> _shell_view;
+  std::unique_ptr<sky::shell::ShellView> _shell_view;
 }
 
 @synthesize renderSurface = _renderSurface;

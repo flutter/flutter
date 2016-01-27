@@ -37,7 +37,7 @@ class NonDiscardableMemory : public base::DiscardableMemory {
   void* data() const override { return data_.get(); }
 
  private:
-  scoped_ptr<uint8_t[]> data_;
+  std::unique_ptr<uint8_t[]> data_;
 };
 
 class NonDiscardableMemoryAllocator : public base::DiscardableMemoryAllocator {

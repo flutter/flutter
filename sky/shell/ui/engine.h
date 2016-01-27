@@ -7,7 +7,6 @@
 
 #include "base/files/file_path.h"
 #include "base/macros.h"
-#include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "base/single_thread_task_runner.h"
 #include "mojo/public/cpp/bindings/binding.h"
@@ -86,11 +85,11 @@ class Engine : public UIDelegate,
   void StartAnimatorIfPossible();
 
   Config config_;
-  scoped_ptr<Animator> animator_;
+  std::unique_ptr<Animator> animator_;
 
   ServicesDataPtr services_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
-  scoped_ptr<blink::DartLibraryProvider> dart_library_provider_;
+  std::unique_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
 
   std::string initial_route_;

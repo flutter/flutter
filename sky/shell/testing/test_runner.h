@@ -5,6 +5,7 @@
 #ifndef SKY_SHELL_TESTING_TEST_RUNNER_H_
 #define SKY_SHELL_TESTING_TEST_RUNNER_H_
 
+#include <memory>
 #include <string>
 
 #include "base/macros.h"
@@ -32,7 +33,7 @@ class TestRunner {
   TestRunner();
   ~TestRunner();
 
-  scoped_ptr<ShellView> shell_view_;
+  std::unique_ptr<ShellView> shell_view_;
   SkyEnginePtr sky_engine_;
 
   base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
