@@ -108,7 +108,7 @@ bool IsServiceIsolateURL(const char* url_name) {
 Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    const char* main,
                                    const char* package_root,
-                                   const char** package_map,
+                                   const char* package_config,
                                    Dart_IsolateFlags* flags,
                                    void* callback_data,
                                    char** error) {
@@ -315,7 +315,8 @@ void InitDartVM() {
                           PrecompiledInstructionsSymbolIfPresent(),
                           IsolateCreateCallback,
                           nullptr,  // Isolate interrupt callback.
-                          nullptr, IsolateShutdownCallback,
+                          nullptr,
+                          IsolateShutdownCallback,
                           // File IO callbacks.
                           nullptr, nullptr, nullptr, nullptr,
                           // Entroy source
