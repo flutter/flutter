@@ -45,12 +45,24 @@ interface ChildEventListener {
 [ServiceName="firebase::Firebase"]
 interface Firebase {
   InitWithUrl(string url);
-  GetRoot(Firebase& root);
-  GetChild(string path, Firebase& child);
   AddValueEventListener(ValueEventListener listener);
   AddChildEventListener(ChildEventListener listener);
   ObserveSingleEventOfType(EventType eventType) => (DataSnapshot snapshot);
+  AuthWithCustomToken(string token) => (Error? error, AuthData? authData);
+  AuthAnonymously() => (Error? error, AuthData? authData);
   AuthWithOAuthToken(string provider, string credentials) => (Error? error, AuthData? authData);
   AuthWithPassword(string email, string password) => (Error? error, AuthData? authData);
-  SetValue(string jsonValue) => (Error? error);
+  Unauth() => (Error? error);
+  GetChild(string path, Firebase& child);
+  GetParent(Firebase& parent);
+  GetRoot(Firebase& root);
+  SetValue(string jsonValue, int32 priority, bool hasPriority) => (Error? error);
+  RemoveValue() => (Error? error);
+  Push(Firebase& child) => (string key);
+  SetPriority(int32 priority) => (Error? error);
+  CreateUser(string email, string password) => (Error? error, string? jsonValue);
+  ChangeEmail(string oldEmail, string password, string newEmail) => (Error? error);
+  ChangePassword(string newPassword, string email, string oldPassword) => (Error? error);
+  RemoveUser(string email, string password) => (Error? error);
+  ResetPassword(string email) => (Error? error);
 };

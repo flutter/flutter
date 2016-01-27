@@ -11,6 +11,8 @@ import com.firebase.client.AuthData;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Firebase.AuthResultHandler;
 import com.firebase.client.Firebase.CompletionListener;
+import com.firebase.client.Firebase.ResultHandler;
+import com.firebase.client.Firebase.ValueResultHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,20 +59,6 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     @Override
     public void initWithUrl(String url) {
         mClient = new com.firebase.client.Firebase(url);
-    }
-
-    @Override
-    public void getRoot(InterfaceRequest<Firebase> request) {
-        FirebaseImpl root = new FirebaseImpl(mContext);
-        root.mClient = mClient.getRoot();
-        Firebase.MANAGER.bind(root, request);
-    }
-
-    @Override
-    public void getChild(String path, InterfaceRequest<Firebase> request) {
-        FirebaseImpl child = new FirebaseImpl(mContext);
-        child.mClient = mClient.child(path);
-        Firebase.MANAGER.bind(child, request);
     }
 
     @Override
@@ -149,6 +137,32 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     }
 
     @Override
+    public void authWithCustomToken(String token, final AuthWithCustomTokenResponse response) {
+      mClient.authWithCustomToken(token, new AuthResultHandler() {
+          @Override
+          public void onAuthenticated(AuthData authData) {
+              response.call(null, toMojoAuthData(authData));
+          }
+          public void onAuthenticationError(FirebaseError error) {
+              response.call(toMojoError(error), null);
+          }
+      });
+    }
+
+    @Override
+    public void authAnonymously(final AuthAnonymouslyResponse response) {
+      mClient.authAnonymously(new AuthResultHandler() {
+          @Override
+          public void onAuthenticated(AuthData authData) {
+              response.call(null, toMojoAuthData(authData));
+          }
+          public void onAuthenticationError(FirebaseError error) {
+              response.call(toMojoError(error), null);
+          }
+      });
+    }
+
+    @Override
     public void authWithOAuthToken(String provider, String credentials, final AuthWithOAuthTokenResponse response) {
         mClient.authWithOAuthToken(provider, credentials, new AuthResultHandler() {
             @Override
@@ -175,11 +189,42 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
     }
 
     @Override
-    public void setValue(String jsonValue, final SetValueResponse response) {
+    public void unauth(final UnauthResponse response) {
+      mClient.unauth(new CompletionListener() {
+          @Override
+          public void onComplete(FirebaseError error, com.firebase.client.Firebase ref) {
+              response.call(toMojoError(error));
+          }
+      });
+    }
+
+    @Override
+    public void getChild(String path, InterfaceRequest<Firebase> request) {
+        FirebaseImpl child = new FirebaseImpl(mContext);
+        child.mClient = mClient.child(path);
+        Firebase.MANAGER.bind(child, request);
+    }
+
+    @Override
+    public void getParent(InterfaceRequest<Firebase> request) {
+        FirebaseImpl parent = new FirebaseImpl(mContext);
+        parent.mClient = mClient.getParent();
+        Firebase.MANAGER.bind(parent, request);
+    }
+
+    @Override
+    public void getRoot(InterfaceRequest<Firebase> request) {
+        FirebaseImpl root = new FirebaseImpl(mContext);
+        root.mClient = mClient.getRoot();
+        Firebase.MANAGER.bind(root, request);
+    }
+
+    @Override
+    public void setValue(String jsonValue, int priority, boolean hasPriority, final SetValueResponse response) {
         try {
           JSONObject root = new JSONObject(jsonValue);
           Object value = toMap(root).get("value");
-          mClient.setValue(value, null, new CompletionListener() {
+          mClient.setValue(value, hasPriority ? priority : null, new CompletionListener() {
               @Override
               public void onComplete(FirebaseError error, com.firebase.client.Firebase ref) {
                   response.call(toMojoError(error));
@@ -193,6 +238,104 @@ public class FirebaseImpl implements org.chromium.mojom.firebase.Firebase {
           Log.e(TAG, "setValue JSONException", e);
           response.call(mojoError);
         }
+    }
+
+    @Override
+    public void removeValue(final RemoveValueResponse response) {
+      mClient.removeValue(new CompletionListener() {
+          @Override
+          public void onComplete(FirebaseError error, com.firebase.client.Firebase ref) {
+              response.call(toMojoError(error));
+          }
+      });
+    }
+
+    @Override
+    public void push(InterfaceRequest<Firebase> request, final PushResponse response) {
+        FirebaseImpl child = new FirebaseImpl(mContext);
+        child.mClient = mClient.push();
+        Firebase.MANAGER.bind(child, request);
+        response.call(child.mClient.getKey());
+    }
+
+    @Override
+    public void setPriority(int priority, final SetPriorityResponse response) {
+      mClient.setPriority(priority, new CompletionListener() {
+          @Override
+          public void onComplete(FirebaseError error, com.firebase.client.Firebase ref) {
+              response.call(toMojoError(error));
+          }
+      });
+    }
+
+    @Override
+    public void createUser(String email, String password, final CreateUserResponse response) {
+      mClient.createUser(email, password, new ValueResultHandler<Map<String,Object>>() {
+          @Override
+          public void onError(FirebaseError error) {
+              response.call(toMojoError(error), null);
+          }
+          @Override
+          public void onSuccess(Map<String,Object> result) {
+              response.call(null, new JSONObject(result).toString());
+          }
+      });
+    }
+
+    @Override
+    public void changeEmail(String oldEmail, String password, String newExample, final ChangeEmailResponse response) {
+      mClient.changeEmail(oldEmail, password, newExample, new ResultHandler() {
+          @Override
+          public void onError(FirebaseError error) {
+              response.call(toMojoError(error));
+          }
+          @Override
+          public void onSuccess() {
+              response.call(null);
+          }
+      });
+    }
+
+    @Override
+    public void changePassword(String newPassword, String email, String oldPassword, final ChangePasswordResponse response) {
+      mClient.changePassword(newPassword, email, oldPassword, new ResultHandler() {
+          @Override
+          public void onError(FirebaseError error) {
+              response.call(toMojoError(error));
+          }
+          @Override
+          public void onSuccess() {
+              response.call(null);
+          }
+      });
+    }
+
+    @Override
+    public void removeUser(String email, String password, final RemoveUserResponse response) {
+      mClient.removeUser(email, password, new ResultHandler() {
+          @Override
+          public void onError(FirebaseError error) {
+              response.call(toMojoError(error));
+          }
+          @Override
+          public void onSuccess() {
+              response.call(null);
+          }
+      });
+    }
+
+    @Override
+    public void resetPassword(String email, final ResetPasswordResponse response) {
+      mClient.resetPassword(email, new ResultHandler() {
+          @Override
+          public void onError(FirebaseError error) {
+              response.call(toMojoError(error));
+          }
+          @Override
+          public void onSuccess() {
+              response.call(null);
+          }
+      });
     }
 
     DataSnapshot toMojoSnapshot(com.firebase.client.DataSnapshot snapshot) {
