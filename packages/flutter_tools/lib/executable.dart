@@ -14,8 +14,8 @@ import 'src/commands/analyze.dart';
 import 'src/commands/apk.dart';
 import 'src/commands/build.dart';
 import 'src/commands/cache.dart';
+import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
-import 'src/commands/init.dart';
 import 'src/commands/install.dart';
 import 'src/commands/ios.dart';
 import 'src/commands/list.dart';
@@ -60,8 +60,8 @@ Future main(List<String> args) async {
     ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CacheCommand())
+    ..addCommand(new CreateCommand())
     ..addCommand(new DaemonCommand())
-    ..addCommand(new InitCommand())
     ..addCommand(new InstallCommand())
     ..addCommand(new IOSCommand())
     ..addCommand(new ListCommand())
@@ -75,6 +75,11 @@ Future main(List<String> args) async {
     ..addCommand(new UpgradeCommand());
 
   return Chain.capture(() async {
+    // Convert `flutter init` invocations to `flutter create` ones.
+    // TODO(devoncarew): Remove this after a few releases.
+    if (args.isNotEmpty && args[0] == 'init')
+      args[0] = 'create';
+
     dynamic result = await runner.run(args);
     if (result is int)
       exit(result);
