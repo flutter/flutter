@@ -40,27 +40,28 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
       child: new Column(
         children: <Widget>[
           new Rectangle(const Color(0xFF00FFFF)),
-          new Container(
-            padding: new EdgeDims.all(10.0),
-            margin: new EdgeDims.all(10.0),
-            decoration: new BoxDecoration(backgroundColor: const Color(0xFFCCCCCC)),
-            child: new Row(
-              children: <Widget>[
-                new RaisedButton(
-                  child: new Row(
-                    children: <Widget>[
-                      new NetworkImage(src: "http://flutter.io/favicon.ico"),
-                      new Text('PRESS ME'),
-                    ]
+          new Material(
+            child: new Container(
+              padding: new EdgeDims.all(10.0),
+              margin: new EdgeDims.all(10.0),
+              child: new Row(
+                children: <Widget>[
+                  new RaisedButton(
+                    child: new Row(
+                      children: <Widget>[
+                        new NetworkImage(src: "http://flutter.io/favicon.ico"),
+                        new Text('PRESS ME'),
+                      ]
+                    ),
+                    onPressed: () {
+                      value = value == null ? 0.1 : (value + 0.1) % 1.0;
+                      attachWidgetTreeToRenderTree(container);
+                    }
                   ),
-                  onPressed: () {
-                    value = value == null ? 0.1 : (value + 0.1) % 1.0;
-                    attachWidgetTreeToRenderTree(container);
-                  }
-                ),
-                new CircularProgressIndicator(value: value),
-              ],
-              justifyContent: FlexJustifyContent.spaceAround
+                  new CircularProgressIndicator(value: value),
+                ],
+                justifyContent: FlexJustifyContent.spaceAround
+              )
             )
           ),
           new Rectangle(const Color(0xFFFFFF00)),
@@ -86,6 +87,7 @@ void rotate(Duration timeStamp) {
 }
 
 void main() {
+  WidgetFlutterBinding.ensureInitialized();
   RenderProxyBox proxy = new RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 
@@ -97,7 +99,6 @@ void main() {
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);
 
-  WidgetFlutterBinding.ensureInitialized()
-   ..renderView.child = root
-   ..addPersistentFrameCallback(rotate);
+  WidgetFlutterBinding.instance.renderView.child = root;
+  WidgetFlutterBinding.instance.addPersistentFrameCallback(rotate);
 }

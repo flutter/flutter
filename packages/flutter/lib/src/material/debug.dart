@@ -8,11 +8,14 @@ import 'material.dart';
 
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
-    if (context.widget is Material || context.ancestorWidgetOfExactType(Material) != null)
-      return true;
-    Element element = context;
-    debugPrint('${context.widget} needs to be placed inside a Material widget. Ownership chain:\n${element.debugGetOwnershipChain(10)}');
-    return false;
+    if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
+      Element element = context;
+      throw new WidgetError(
+        'Missing Material widget.',
+        '${context.widget} needs to be placed inside a Material widget. Ownership chain:\n${element.debugGetOwnershipChain(10)}'
+      );
+    }
+    return true;
   });
   return true;
 }
