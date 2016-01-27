@@ -26,6 +26,7 @@ abstract class AnimatedComponent extends StatefulComponent {
 
   Widget build(BuildContext context);
 
+  /// Subclasses typically do not override this method.
   _AnimatedComponentState createState() => new _AnimatedComponentState();
 
   void debugFillDescription(List<String> description) {
