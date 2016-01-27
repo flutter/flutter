@@ -264,8 +264,6 @@ source_set("platform") {
     "graphics/filters/FESpecularLighting.h",
     "graphics/filters/FETile.cpp",
     "graphics/filters/FETile.h",
-    "graphics/filters/FETurbulence.cpp",
-    "graphics/filters/FETurbulence.h",
     "graphics/filters/Filter.h",
     "graphics/filters/FilterEffect.cpp",
     "graphics/filters/FilterEffect.h",
