@@ -6,6 +6,7 @@ import 'package:flutter/painting.dart';
 
 import 'box.dart';
 import 'object.dart';
+import 'semantics.dart';
 
 export 'package:flutter/painting.dart' show
   FontStyle,
@@ -111,7 +112,11 @@ class RenderParagraph extends RenderBox {
     _textPainter.paint(context.canvas, offset);
   }
 
-  // we should probably expose a way to do precise (inter-glpyh) hit testing
+  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+    yield (SemanticsNode node) {
+      node.label = text.toPlainText();
+    };
+  }
 
   String debugDescribeChildren(String prefix) {
     return '$prefix \u2558\u2550\u2566\u2550\u2550 text \u2550\u2550\u2550\n'

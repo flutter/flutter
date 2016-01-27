@@ -271,13 +271,15 @@ class _FocusState extends State<Focus> {
         scheduleMicrotask(_ensureVisibleIfFocused);
       }
     }
-
-    return new _FocusScope(
-      focusState: this,
-      scopeFocused: Focus._atScope(context),
-      focusedScope: _focusedScope == _noFocusedScope ? null : _focusedScope,
-      focusedWidget: _focusedWidget,
-      child: config.child
+    return new Semantics(
+      container: true,
+      child: new _FocusScope(
+        focusState: this,
+        scopeFocused: Focus._atScope(context),
+        focusedScope: _focusedScope == _noFocusedScope ? null : _focusedScope,
+        focusedWidget: _focusedWidget,
+        child: config.child
+      )
     );
   }
 }

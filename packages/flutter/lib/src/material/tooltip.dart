@@ -67,6 +67,13 @@ class Tooltip extends StatefulComponent {
   final Widget child;
 
   _TooltipState createState() => new _TooltipState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('"$message"');
+    description.add('vertical offset: $verticalOffset');
+    description.add('position: ${preferBelow ? "below" : "above"}');
+  }
 }
 
 class _TooltipState extends State<Tooltip> {
@@ -175,7 +182,11 @@ class _TooltipState extends State<Tooltip> {
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: showTooltip,
-      child: config.child
+      excludeFromSemantics: true,
+      child: new Semantics(
+        label: config.message,
+        child: config.child
+      )
     );
   }
 }

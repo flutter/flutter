@@ -44,11 +44,14 @@ class Radio<T> extends StatelessComponent {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
-    return new _RadioRenderObjectWidget(
-      selected: value == groupValue,
-      activeColor: activeColor ?? themeData.accentColor,
-      inactiveColor: _getInactiveColor(themeData),
-      onChanged: _enabled ? _handleChanged : null
+    return new Semantics(
+      checked: value == groupValue,
+      child: new _RadioRenderObjectWidget(
+        selected: value == groupValue,
+        activeColor: activeColor ?? themeData.accentColor,
+        inactiveColor: _getInactiveColor(themeData),
+        onChanged: _enabled ? _handleChanged : null
+      )
     );
   }
 }

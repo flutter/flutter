@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
+import 'tooltip.dart';
 
 const double _kChipHeight = 32.0;
 const double _kAvatarDiamater = _kChipHeight;
@@ -41,11 +42,13 @@ class Chip extends StatelessComponent {
 
     if (avatar != null) {
       leftPadding = 0.0;
-      children.add(new Container(
-        margin: const EdgeDims.only(right: 8.0),
-        width: _kAvatarDiamater,
-        height: _kAvatarDiamater,
-        child: avatar
+      children.add(new ExcludeSemantics(
+        child: new Container(
+          margin: const EdgeDims.only(right: 8.0),
+          width: _kAvatarDiamater,
+          height: _kAvatarDiamater,
+          child: avatar
+        )
       ));
     }
 
@@ -58,27 +61,33 @@ class Chip extends StatelessComponent {
       rightPadding = 0.0;
       children.add(new GestureDetector(
         onTap: onDeleted,
-        child: new Container(
-          padding: const EdgeDims.symmetric(horizontal: 4.0),
-          child: new Icon(
-            icon: 'navigation/cancel',
-            size: IconSize.s18,
-            color: Colors.black54
+        child: new Tooltip(
+          message: 'Delete "$label"',
+          child: new Container(
+            padding: const EdgeDims.symmetric(horizontal: 4.0),
+            child: new Icon(
+              icon: 'navigation/cancel',
+              size: IconSize.s18,
+              color: Colors.black54
+            )
           )
         )
       ));
     }
 
-    return new Container(
-      height: _kChipHeight,
-      padding: new EdgeDims.only(left: leftPadding, right: rightPadding),
-      decoration: new BoxDecoration(
-        backgroundColor: Colors.grey[300],
-        borderRadius: 16.0
-      ),
-      child: new Row(
-        children: children,
-        justifyContent: FlexJustifyContent.collapse
+    return new Semantics(
+      container: true,
+      child: new Container(
+        height: _kChipHeight,
+        padding: new EdgeDims.only(left: leftPadding, right: rightPadding),
+        decoration: new BoxDecoration(
+          backgroundColor: Colors.grey[300],
+          borderRadius: 16.0
+        ),
+        child: new Row(
+          children: children,
+          justifyContent: FlexJustifyContent.collapse
+        )
       )
     );
   }

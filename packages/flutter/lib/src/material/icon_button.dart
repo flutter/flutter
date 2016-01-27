@@ -26,15 +26,12 @@ class IconButton extends StatelessComponent {
   final String tooltip;
 
   Widget build(BuildContext context) {
-    Widget result = new InkResponse(
-      onTap: onPressed,
-      child: new Padding(
-        padding: const EdgeDims.all(8.0),
-        child: new Icon(
-          icon: icon,
-          colorTheme: colorTheme,
-          color: color
-        )
+    Widget result = new Padding(
+      padding: const EdgeDims.all(8.0),
+      child: new Icon(
+        icon: icon,
+        colorTheme: colorTheme,
+        color: color
       )
     );
     if (tooltip != null) {
@@ -43,7 +40,10 @@ class IconButton extends StatelessComponent {
         child: result
       );
     }
-    return result;
+    return new InkResponse(
+      onTap: onPressed,
+      child: result
+    );
   }
 
   void debugFillDescription(List<String> description) {

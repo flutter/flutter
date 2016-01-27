@@ -404,6 +404,8 @@ abstract class RenderStackBase extends RenderBox
       paintStack(context, offset);
     }
   }
+
+  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
 }
 
 /// Implements the stack layout algorithm

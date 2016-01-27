@@ -141,6 +141,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   Rect get paintBounds => Point.origin & size;
+  Rect get semanticBounds => Point.origin & size;
 
   void debugDescribeSettings(List<String> settings) {
     // call to ${super.debugDescribeSettings(prefix)} is omitted because the root superclasses don't include any interesting information for this class

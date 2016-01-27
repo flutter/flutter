@@ -70,11 +70,13 @@ class DrawerItem extends StatelessComponent {
       )
     );
 
-    return new Container(
-      height: 48.0,
-      child: new InkWell(
-        onTap: onPressed,
-        child: new Row(children: children)
+    return new MergeSemantics(
+      child: new Container(
+        height: 48.0,
+        child: new InkWell(
+          onTap: onPressed,
+          child: new Row(children: children)
+        )
       )
     );
   }

@@ -125,7 +125,7 @@ class DrawerControllerState extends State<DrawerController> {
     });
   }
 
-  void _handlePointerDown(_) {
+  void _handleTapDown(Point position) {
     _controller.stop();
     _ensureHistoryEntry();
   }
@@ -166,6 +166,7 @@ class DrawerControllerState extends State<DrawerController> {
           onHorizontalDragUpdate: _move,
           onHorizontalDragEnd: _settle,
           behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
           child: new Container(width: _kEdgeDragWidth)
         )
       );
@@ -188,8 +189,8 @@ class DrawerControllerState extends State<DrawerController> {
               ),
               new Align(
                 alignment: const FractionalOffset(0.0, 0.5),
-                child: new Listener(
-                  onPointerDown: _handlePointerDown,
+                child: new GestureDetector(
+                  onTapDown: _handleTapDown,
                   child: new Align(
                     alignment: const FractionalOffset(1.0, 0.5),
                     widthFactor: _controller.value,

@@ -7,11 +7,13 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 import 'view.dart';
+import 'semantics.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
@@ -39,6 +41,8 @@ abstract class Renderer extends Scheduler
     if (renderView == null) {
       renderView = new RenderView();
       renderView.scheduleInitialFrame();
+      if (_semanticsClient != null)
+        renderView.scheduleInitialSemantics();
     }
     handleMetricsChanged(); // configures renderView's metrics
   }
@@ -61,6 +65,14 @@ abstract class Renderer extends Scheduler
     renderView.configuration = new ViewConfiguration(size: ui.window.size);
   }
 
+  mojom.SemanticsClient _semanticsClient;
+  void setSemanticsClient(mojom.SemanticsClient client) {
+    assert(_semanticsClient == null);
+    _semanticsClient = client;
+    if (renderView != null)
+      renderView.scheduleInitialSemantics();
+  }
+
   void _handlePersistentFrameCallback(Duration timeStamp) {
     beginFrame();
   }
@@ -71,7 +83,11 @@ abstract class Renderer extends Scheduler
     RenderObject.flushLayout();
     RenderObject.flushCompositingBits();
     RenderObject.flushPaint();
-    renderView.compositeFrame();
+    renderView.compositeFrame(); // this sends the bits to the GPU
+    if (_semanticsClient != null) {
+      RenderObject.flushSemantics();
+      SemanticsNode.sendSemanticsTreeTo(_semanticsClient);
+    }
   }
 
   void hitTest(HitTestResult result, Point position) {
@@ -89,6 +105,13 @@ void debugDumpRenderTree() {
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
   debugPrint(Renderer.instance?.renderView?.layer?.toStringDeep());
+}
+
+/// Prints a textual representation of the entire semantics tree.
+/// This will only work if there is a semantics client attached.
+/// Otherwise, the tree is empty and this will print "null".
+void debugDumpSemanticsTree() {
+  debugPrint(Renderer.instance?.renderView?.debugSemantics?.toStringDeep());
 }
 
 /// A concrete binding for applications that use the Rendering framework

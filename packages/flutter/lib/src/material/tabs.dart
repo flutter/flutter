@@ -405,7 +405,7 @@ class TabBarSelection<T> extends StatefulComponent {
   final ValueChanged<T> onChanged;
   final Widget child;
 
-  TabBarSelectionState createState() => new TabBarSelectionState<T>();
+  TabBarSelectionState<T> createState() => new TabBarSelectionState<T>();
 
   static TabBarSelectionState of(BuildContext context) {
     return context.ancestorStateOfType(const TypeMatcher<TabBarSelectionState>());
@@ -949,6 +949,55 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
       startOffset: scrollOffset,
       overlayPainter: config.scrollableListPainter,
       children: _items
+    );
+  }
+}
+
+class TabPageSelector<T> extends StatelessComponent {
+  const TabPageSelector({ Key key }) : super(key: key);
+
+  Widget _buildTabIndicator(TabBarSelectionState<T> selection, T tab, Animation animation, ColorTween selectedColor, ColorTween previousColor) {
+    Color background;
+    if (selection.valueIsChanging) {
+      // The selection's animation is animating from previousValue to value.
+      if (selection.value == tab)
+        background = selectedColor.evaluate(animation);
+      else if (selection.previousValue == tab)
+        background = previousColor.evaluate(animation);
+      else
+        background = selectedColor.begin;
+    } else {
+      background = selection.value == tab ? selectedColor.end : selectedColor.begin;
+    }
+    return new Container(
+      width: 12.0,
+      height: 12.0,
+      margin: new EdgeDims.all(4.0),
+      decoration: new BoxDecoration(
+        backgroundColor: background,
+        border: new Border.all(color: selectedColor.end),
+        shape: BoxShape.circle
+      )
+    );
+  }
+
+  Widget build(BuildContext context) {
+    final TabBarSelectionState selection = TabBarSelection.of(context);
+    final Color color = Theme.of(context).primaryColor;
+    final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
+    final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
+    Animation<double> animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
+    return new AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget child) {
+        return new Semantics(
+          label: 'Page ${selection.index + 1} of ${selection.values.length}',
+          child: new Row(
+            children: selection.values.map((T tab) => _buildTabIndicator(selection, tab, animation, selectedColor, previousColor)).toList(),
+            justifyContent: FlexJustifyContent.collapse
+          )
+        );
+      }
     );
   }
 }
