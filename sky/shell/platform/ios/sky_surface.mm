@@ -86,6 +86,10 @@ class TouchMapper {
   std::map<uintptr_t, int> touch_map_;
 };
 
+@interface SkySurface ()<UIInputViewAudioFeedback>
+
+@end
+
 @implementation SkySurface {
   BOOL _platformViewInitialized;
   CGPoint _lastScrollTranslation;
@@ -287,6 +291,12 @@ static std::string TracesBasePath() {
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
   [self dispatchTouches:touches phase:UITouchPhaseCancelled];
+}
+
+#pragma mark - Input Clicks
+
+- (BOOL)enableInputClicksWhenVisible {
+  return YES;
 }
 
 #pragma mark - Misc.

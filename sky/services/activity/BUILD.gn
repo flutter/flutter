@@ -43,8 +43,12 @@ if (is_android) {
 if (is_ios) {
   source_set("activity_lib") {
     sources = [
+      "ios/activity_impl.h",
+      "ios/activity_impl.mm",
       "ios/path_service_impl.h",
       "ios/path_service_impl.mm",
+      "ios/user_feedback_impl.h",
+      "ios/user_feedback_impl.mm",
     ]
     deps = [
       "//base:base",

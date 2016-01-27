@@ -9,18 +9,16 @@ namespace shell {
 
 PlatformServiceProvider::PlatformServiceProvider(
     mojo::InterfaceRequest<mojo::ServiceProvider> request)
-  : binding_(this, request.Pass()) {
-}
+    : binding_(this, request.Pass()) {}
 
-PlatformServiceProvider::~PlatformServiceProvider() {
-}
+PlatformServiceProvider::~PlatformServiceProvider() {}
 
 void PlatformServiceProvider::ConnectToService(
     const mojo::String& service_name,
     mojo::ScopedMessagePipeHandle client_handle) {
   if (service_name == mojo::NetworkService::Name_) {
-    network_.Create(nullptr, mojo::MakeRequest<mojo::NetworkService>(
-                                 client_handle.Pass()));
+    network_.Create(
+        nullptr, mojo::MakeRequest<mojo::NetworkService>(client_handle.Pass()));
   }
 #if TARGET_OS_IPHONE
   if (service_name == ::keyboard::KeyboardService::Name_) {
@@ -28,8 +26,8 @@ void PlatformServiceProvider::ConnectToService(
                                   client_handle.Pass()));
   }
   if (service_name == ::media::MediaPlayer::Name_) {
-    media_player_.Create(nullptr, mojo::MakeRequest<::media::MediaPlayer>(
-                                      client_handle.Pass()));
+    media_player_.Create(
+        nullptr, mojo::MakeRequest<::media::MediaPlayer>(client_handle.Pass()));
   }
   if (service_name == ::media::MediaService::Name_) {
     media_service_.Create(nullptr, mojo::MakeRequest<::media::MediaService>(
@@ -42,6 +40,10 @@ void PlatformServiceProvider::ConnectToService(
   if (service_name == ::activity::PathService::Name_) {
     path_.Create(nullptr, mojo::MakeRequest<::activity::PathService>(
                               client_handle.Pass()));
+  }
+  if (service_name == ::activity::Activity::Name_) {
+    activity_.Create(
+        nullptr, mojo::MakeRequest<::activity::Activity>(client_handle.Pass()));
   }
 #endif
 }

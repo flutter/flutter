@@ -12,7 +12,7 @@ namespace services {
 namespace path {
 
 PathServiceImpl::PathServiceImpl(
-    mojo::InterfaceRequest<activity::PathService> request)
+    mojo::InterfaceRequest<::activity::PathService> request)
     : binding_(this, request.Pass()) {}
 
 PathServiceImpl::~PathServiceImpl() {}
@@ -49,7 +49,7 @@ void PathServiceImpl::GetCacheDir(const GetCacheDirCallback& callback) {
 
 void PathServiceFactory::Create(
     mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<activity::PathService> request) {
+    mojo::InterfaceRequest<::activity::PathService> request) {
   new PathServiceImpl(request.Pass());
 }
 
