@@ -7,14 +7,14 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/commands/init.dart';
+import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();
 
 defineTests() {
-  group('init', () {
+  group('create', () {
     Directory temp;
 
     setUp(() {
@@ -31,17 +31,18 @@ defineTests() {
       // Verify that we create a project that is well-formed.
       test('flutter-simple', () async {
         ArtifactStore.flutterRoot = '../..';
-        InitCommand command = new InitCommand();
+        CreateCommand command = new CreateCommand();
         CommandRunner runner = new CommandRunner('test_flutter', '')
           ..addCommand(command);
-        await runner.run(['init', '--out', temp.path])
+        await runner.run(['create', '--out', temp.path])
             .then((int code) => expect(code, equals(0)));
 
         String mainPath = path.join(temp.path, 'lib', 'main.dart');
         expect(new File(mainPath).existsSync(), true);
         ProcessResult exec = Process.runSync(
-            sdkBinaryName('dartanalyzer'), ['--fatal-warnings', mainPath],
-            workingDirectory: temp.path);
+          sdkBinaryName('dartanalyzer'), ['--fatal-warnings', mainPath],
+          workingDirectory: temp.path
+        );
         if (exec.exitCode != 0) {
           print(exec.stdout);
           print(exec.stderr);

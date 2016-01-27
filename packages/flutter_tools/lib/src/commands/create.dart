@@ -14,11 +14,11 @@ import '../artifacts.dart';
 import '../base/logging.dart';
 import '../base/process.dart';
 
-class InitCommand extends Command {
-  final String name = 'init';
+class CreateCommand extends Command {
+  final String name = 'create';
   final String description = 'Create a new Flutter project.';
 
-  InitCommand() {
+  CreateCommand() {
     argParser.addOption('out', abbr: 'o', help: 'The output directory.');
     argParser.addFlag('pub',
         defaultsTo: true,
@@ -46,7 +46,6 @@ class InitCommand extends Command {
       return 2;
     }
 
-    // TODO: Confirm overwrite of an existing directory with the user.
     Directory out = new Directory(argResults['out']);
 
     new FlutterSimpleTemplate().generateInto(out, flutterPackagePath);
