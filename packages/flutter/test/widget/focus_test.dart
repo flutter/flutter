@@ -30,10 +30,12 @@ class TestFocusable extends StatelessComponent {
 void main() {
   test('Can have multiple focused children and they update accordingly', () {
     testWidgets((WidgetTester tester) {
+      GlobalKey keyFocus = new GlobalKey();
       GlobalKey keyA = new GlobalKey();
       GlobalKey keyB = new GlobalKey();
       tester.pumpWidget(
         new Focus(
+          key: keyFocus,
           child: new Column(
             children: <Widget>[
               // reverse these when you fix https://github.com/flutter/engine/issues/1495
@@ -84,9 +86,11 @@ void main() {
 
   test('Can blur', () {
     testWidgets((WidgetTester tester) {
+      GlobalKey keyFocus = new GlobalKey();
       GlobalKey keyA = new GlobalKey();
       tester.pumpWidget(
         new Focus(
+          key: keyFocus,
           child: new TestFocusable(
             key: keyA,
             no: 'a',
@@ -110,6 +114,91 @@ void main() {
 
       expect(tester.findText('a'),         isNotNull);
       expect(tester.findText('A FOCUSED'), isNull);
+    });
+  });
+
+  test('Can move focus to scope', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey keyParentFocus = new GlobalKey();
+      GlobalKey keyChildFocus = new GlobalKey();
+      GlobalKey keyA = new GlobalKey();
+      tester.pumpWidget(
+        new Focus(
+          key: keyParentFocus,
+          child: new Row(
+            children: [
+              new TestFocusable(
+                key: keyA,
+                no: 'a',
+                yes: 'A FOCUSED',
+                autofocus: false
+              )
+            ]
+          )
+        )
+      );
+
+      expect(tester.findText('a'),         isNotNull);
+      expect(tester.findText('A FOCUSED'), isNull);
+
+      Focus.moveTo(keyA);
+      tester.pump();
+
+      expect(tester.findText('a'),         isNull);
+      expect(tester.findText('A FOCUSED'), isNotNull);
+
+      Focus.moveScopeTo(keyChildFocus, context: keyA.currentContext);
+
+      tester.pumpWidget(
+        new Focus(
+          key: keyParentFocus,
+          child: new Row(
+            children: [
+              new TestFocusable(
+                key: keyA,
+                no: 'a',
+                yes: 'A FOCUSED',
+                autofocus: false
+              ),
+              new Focus(
+                key: keyChildFocus,
+                child: new Container(
+                  width: 50.0,
+                  height: 50.0
+                )
+              )
+            ]
+          )
+        )
+      );
+
+      expect(tester.findText('a'),         isNotNull);
+      expect(tester.findText('A FOCUSED'), isNull);
+
+      tester.pumpWidget(
+        new Focus(
+          key: keyParentFocus,
+          child: new Row(
+            children: [
+              new TestFocusable(
+                key: keyA,
+                no: 'a',
+                yes: 'A FOCUSED',
+                autofocus: false
+              )
+            ]
+          )
+        )
+      );
+
+      // Focus has received the removal notification but we haven't rebuilt yet.
+      expect(tester.findText('a'),         isNotNull);
+      expect(tester.findText('A FOCUSED'), isNull);
+
+      tester.pump();
+
+      expect(tester.findText('a'),         isNull);
+      expect(tester.findText('A FOCUSED'), isNotNull);
     });
   });
 }

@@ -81,6 +81,8 @@ class DrawerControllerState extends State<DrawerController> {
   }
 
   LocalHistoryEntry _historyEntry;
+  // TODO(abarth): This should be a GlobalValueKey when those exist.
+  GlobalKey get _focusKey => new GlobalObjectKey(config.key);
 
   void _ensureHistoryEntry() {
     if (_historyEntry == null) {
@@ -88,6 +90,7 @@ class DrawerControllerState extends State<DrawerController> {
       if (route != null) {
         _historyEntry = new LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
         route.addLocalHistoryEntry(_historyEntry);
+        Focus.moveScopeTo(_focusKey, context: context);
       }
     }
   }
@@ -194,7 +197,7 @@ class DrawerControllerState extends State<DrawerController> {
                       onSizeChanged: _handleSizeChanged,
                       child: new RepaintBoundary(
                         child: new Focus(
-                          key: new GlobalObjectKey(config.key),
+                          key: _focusKey,
                           child: config.child
                         )
                       )
