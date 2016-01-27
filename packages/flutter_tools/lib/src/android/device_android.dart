@@ -447,47 +447,20 @@ class AndroidDevice extends Device {
     ]));
   }
 
-  static String _threeDigits(int n) {
-    if (n >= 100) return "$n";
-    if (n >= 10) return "0$n";
-    return "00$n";
+  // Return the most recent timestamp in the Android log.  The format can be
+  // passed to logcat's -T option.
+  String lastLogcatTimestamp() {
+    String output = runCheckedSync(adbCommandForDevice(['logcat', '-v', 'time', '-t', '1']));
+
+    RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
+    Match timeMatch = timeRegExp.firstMatch(output);
+    return timeMatch[0];
   }
 
-  static String _twoDigits(int n) {
-    if (n >= 10) return "$n";
-    return "0$n";
-  }
-
-  static String _logcatDateFormat(DateTime dt) {
-    // Doing this manually, instead of using package:intl for simplicity.
-    // adb logcat -T wants "%m-%d %H:%M:%S.%3q"
-    String m = _twoDigits(dt.month);
-    String d = _twoDigits(dt.day);
-    String H = _twoDigits(dt.hour);
-    String M = _twoDigits(dt.minute);
-    String S = _twoDigits(dt.second);
-    String q = _threeDigits(dt.millisecond);
-    return "$m-$d $H:$M:$S.$q";
-  }
-
-  // TODO(eseidel): This is fragile, there must be a better way!
-  DateTime timeOnDevice() {
-    // Careful: Android's date command is super-lame, any arguments are taken as
-    // attempts to set the timezone and will screw your device.
-    String output = runCheckedSync(adbCommandForDevice(['shell', 'date'])).trim();
-    // format: Fri Dec 18 13:22:07 PST 2015
-    // intl doesn't handle timezones: https://github.com/dart-lang/intl/issues/93
-    // So we use the local date command to parse dates for us.
-    String seconds = runSync(['date', '--date', output, '+%s']);
-    // Although '%s' is supposed to be UTC, date appears to be ignoring the
-    // timezone in the passed string, so using isUTC: false here.
-    return new DateTime.fromMillisecondsSinceEpoch(int.parse(seconds) * 1000, isUtc: false);
-  }
-
-  String stopTracing(AndroidApk apk, { String outPath: null }) {
+  Future<String> stopTracing(AndroidApk apk, { String outPath: null }) async {
     // Workaround for logcat -c not always working:
     // http://stackoverflow.com/questions/25645012/logcat-on-android-l-not-clearing-after-unplugging-and-reconnecting
-    String beforeStop = _logcatDateFormat(timeOnDevice());
+    String beforeStop = lastLogcatTimestamp();
     runCheckedSync(adbCommandForDevice([
       'shell',
       'am',
@@ -512,10 +485,23 @@ class AndroidDevice extends Device {
 
     if (tracePath != null) {
       String localPath = (outPath != null) ? outPath : path.basename(tracePath);
-      runCheckedSync(adbCommandForDevice(['root']));
-      runSync(adbCommandForDevice(['shell', 'run-as', apk.id, 'chmod', '777', tracePath]));
-      runCheckedSync(adbCommandForDevice(['pull', tracePath, localPath]));
-      runSync(adbCommandForDevice(['shell', 'rm', tracePath]));
+
+      // Run cat via ADB to print the captured trace file.  (adb pull will be unable
+      // to access the file if it does not have root permissions)
+      IOSink catOutput = new File(localPath).openWrite();
+      List<String> catCommand = adbCommandForDevice(
+          <String>['shell', 'run-as', apk.id, 'cat', tracePath]
+      );
+      Process catProcess = await Process.start(catCommand[0],
+          catCommand.getRange(1, catCommand.length).toList());
+      catProcess.stdout.pipe(catOutput);
+      int exitCode = await catProcess.exitCode;
+      if (exitCode != 0)
+        throw 'Error code $exitCode returned when running ${catCommand.join(" ")}';
+
+      runSync(adbCommandForDevice(
+          <String>['shell', 'run-as', apk.id, 'rm', tracePath]
+      ));
       return localPath;
     }
     logging.warning('No trace file detected. '
