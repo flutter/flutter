@@ -5,18 +5,18 @@
 import 'dart:async';
 
 import 'package:stack_trace/stack_trace.dart';
+import 'package:test/src/backend/group.dart';
 import 'package:test/src/backend/live_test.dart';
 import 'package:test/src/backend/live_test_controller.dart';
 import 'package:test/src/backend/metadata.dart';
 import 'package:test/src/backend/operating_system.dart';
-import 'package:test/src/backend/group.dart';
 import 'package:test/src/backend/state.dart';
 import 'package:test/src/backend/suite.dart';
 import 'package:test/src/backend/test.dart';
 import 'package:test/src/backend/test_platform.dart';
 import 'package:test/src/util/remote_exception.dart';
 
-import 'package:flutter_tools/src/test/json_socket.dart';
+import 'json_socket.dart';
 
 class RemoteTest extends Test {
   RemoteTest(this.name, this.metadata, this._socket, this._index);

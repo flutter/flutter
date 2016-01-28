@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
+import '../base/context.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../toolchain.dart';
@@ -55,7 +56,7 @@ abstract class FlutterCommand extends Command {
 
   bool validateProjectRoot() {
     if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-      stderr.writeln(projectRootValidationErrorMessage);
+      printError(projectRootValidationErrorMessage);
       return false;
     }
     return true;

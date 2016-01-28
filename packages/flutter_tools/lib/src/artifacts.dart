@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
-import 'base/logging.dart';
+import 'base/context.dart';
 import 'base/os.dart';
 import 'base/process.dart';
 import 'build_configuration.dart';
@@ -187,7 +187,7 @@ class ArtifactStore {
         else
           message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
       }
-      stderr.writeln(message);
+      printError(message);
       throw new ProcessExit(2);
     }
   }
@@ -195,7 +195,7 @@ class ArtifactStore {
   static void ensureHasSkyEnginePackage() {
     Directory skyEnginePackage = new Directory(path.join(packageRoot, 'sky_engine'));
     if (!skyEnginePackage.existsSync()) {
-      stderr.writeln("Cannot locate the sky_engine package; did you include 'flutter' in your pubspec.yaml file?");
+      printError("Cannot locate the sky_engine package; did you include 'flutter' in your pubspec.yaml file?");
       throw new ProcessExit(2);
     }
   }
@@ -221,12 +221,12 @@ class ArtifactStore {
 
   /// Download a file from the given URL and return the bytes.
   static Future<List<int>> _downloadFile(Uri url) async {
-    logging.info('Downloading $url.');
+    printStatus('Downloading $url.');
 
     HttpClient httpClient = new HttpClient();
     HttpClientRequest request = await httpClient.getUrl(url);
     HttpClientResponse response = await request.close();
-    logging.fine('Received response statusCode=${response.statusCode}');
+    printTrace('Received response statusCode=${response.statusCode}');
     if (response.statusCode != 200)
       throw new Exception(response.reasonPhrase);
 
@@ -276,7 +276,7 @@ class ArtifactStore {
     if (_pendingZipDownloads.containsKey(platform)) {
       return _pendingZipDownloads[platform];
     }
-    print('Downloading $platform artifacts from the cloud, one moment please...');
+    printStatus('Downloading $platform artifacts from the cloud, one moment please...');
     Future future = _doDownloadArtifactsFromZip(platform);
     _pendingZipDownloads[platform] = future;
     return future.then((_) => _pendingZipDownloads.remove(platform));
@@ -286,7 +286,7 @@ class ArtifactStore {
 
   static Directory _getBaseCacheDir() {
     if (flutterRoot == null) {
-      logging.severe('FLUTTER_ROOT not specified. Cannot find artifact cache.');
+      printError('FLUTTER_ROOT not specified. Cannot find artifact cache.');
       throw new ProcessExit(2);
     }
     Directory cacheDir = new Directory(path.join(flutterRoot, 'bin', 'cache', 'artifacts'));
@@ -313,7 +313,7 @@ class ArtifactStore {
     if (!cachedFile.existsSync()) {
       await _downloadArtifactsFromZip(artifact.platform);
       if (!cachedFile.existsSync()) {
-        logging.severe('File not found in the platform artifacts: ${cachedFile.path}');
+        printError('File not found in the platform artifacts: ${cachedFile.path}');
         throw new ProcessExit(2);
       }
     }
@@ -331,7 +331,7 @@ class ArtifactStore {
       try {
         await _downloadFileToCache(url, cachedFile);
       } catch (e) {
-        logging.severe('Failed to fetch third-party artifact: $url: $e');
+        printError('Failed to fetch third-party artifact: $url: $e');
         throw new ProcessExit(2);
       }
     }
@@ -340,7 +340,7 @@ class ArtifactStore {
 
   static void clear() {
     Directory cacheDir = _getBaseCacheDir();
-    logging.fine('Clearing cache directory ${cacheDir.path}');
+    printTrace('Clearing cache directory ${cacheDir.path}');
     cacheDir.deleteSync(recursive: true);
   }
 

@@ -5,11 +5,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../flx.dart' as flx;
@@ -119,12 +118,8 @@ class RunMojoCommand extends FlutterCommand {
     if (useDevtools) {
       final String buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
       args.add(buildFlag);
-      if (logging.level <= Level.INFO) {
+      if (context.verbose)
         args.add('--verbose');
-        if (logging.level <= Level.FINE) {
-          args.add('--verbose');
-        }
-      }
     }
 
     if (argResults['checked']) {
@@ -132,19 +127,19 @@ class RunMojoCommand extends FlutterCommand {
     }
 
     args.addAll(argResults.rest);
-    print(args);
+    printStatus('$args');
     return args;
   }
 
   @override
   Future<int> runInProject() async {
     if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
-      logging.severe('Must specify either --mojo-path or --devtools-path.');
+      printError('Must specify either --mojo-path or --devtools-path.');
       return 1;
     }
 
     if (argResults['mojo-debug'] && argResults['mojo-release']) {
-      logging.severe('Cannot specify both --mojo-debug and --mojo-release');
+      printError('Cannot specify both --mojo-debug and --mojo-release');
       return 1;
     }
 

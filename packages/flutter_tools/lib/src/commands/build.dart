@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../flx.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
@@ -45,9 +45,9 @@ class BuildCommand extends FlutterCommand {
       precompiledSnapshot: argResults['precompiled']
     ).then((int result) {
       if (result == 0)
-        print('Built $outputPath.');
+        printStatus('Built $outputPath.');
       else
-        logging.severe('Error building $outputPath: $result.');
+        printError('Error building $outputPath: $result.');
       return result;
     });
   }

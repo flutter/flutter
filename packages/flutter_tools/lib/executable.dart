@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'src/base/context.dart';
 import 'src/base/process.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/apk.dart';
@@ -33,28 +33,6 @@ import 'src/runner/flutter_command_runner.dart';
 ///
 /// This function is intended to be used from the [flutter] command line tool.
 Future main(List<String> args) async {
-  DateTime startTime = new DateTime.now();
-
-  // This level can be adjusted by users through the `--verbose` option.
-  Logger.root.level = Level.WARNING;
-  Logger.root.onRecord.listen((LogRecord record) {
-    String prefix = '';
-    if (Logger.root.level <= Level.FINE) {
-      Duration elapsed = record.time.difference(startTime);
-      prefix = '[${elapsed.inMilliseconds.toString().padLeft(4)} ms] ';
-    }
-    String level = record.level.name.toLowerCase();
-    if (record.level >= Level.WARNING) {
-      stderr.writeln('$prefix$level: ${record.message}');
-    } else {
-      print('$prefix$level: ${record.message}');
-    }
-    if (record.error != null)
-      stderr.writeln(record.error);
-    if (record.stackTrace != null)
-      stderr.writeln(record.stackTrace);
-  });
-
   FlutterCommandRunner runner = new FlutterCommandRunner()
     ..addCommand(new AnalyzeCommand())
     ..addCommand(new ApkCommand())
@@ -92,8 +70,7 @@ Future main(List<String> args) async {
       // We've caught an exit code.
       exit(error.exitCode);
     } else {
-      stderr.writeln(error);
-      Logger.root.log(Level.SEVERE, '\nException:', null, chain.terse.toTrace());
+      printError(error, chain.terse.toTrace());
       exit(1);
     }
   });

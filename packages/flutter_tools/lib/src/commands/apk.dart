@@ -11,8 +11,8 @@ import 'package:yaml/yaml.dart';
 
 import '../android/device_android.dart';
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/logging.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../flx.dart' as flx;
@@ -251,25 +251,25 @@ class ApkCommand extends FlutterCommand {
 
     if (!components.resources.existsSync()) {
       // TODO(eseidel): This level should be higher when path is manually set.
-      logging.info('Can not locate Resources: ${components.resources}, ignoring.');
+      printStatus('Can not locate Resources: ${components.resources}, ignoring.');
       components.resources = null;
     }
 
     if (!components.androidSdk.existsSync()) {
-      logging.severe('Can not locate Android SDK: $androidSdkPath');
+      printError('Can not locate Android SDK: $androidSdkPath');
       return null;
     }
     if (!(new _ApkBuilder(components.androidSdk.path).checkSdkPath())) {
-      logging.severe('Can not locate expected Android SDK tools at $androidSdkPath');
-      logging.severe('You must install version $_kAndroidPlatformVersion of the SDK platform');
-      logging.severe('and version $_kBuildToolsVersion of the build tools.');
+      printError('Can not locate expected Android SDK tools at $androidSdkPath');
+      printError('You must install version $_kAndroidPlatformVersion of the SDK platform');
+      printError('and version $_kBuildToolsVersion of the build tools.');
       return null;
     }
     for (File f in [components.manifest, components.icuData,
                     components.libSkyShell, components.debugKeystore]
                     ..addAll(components.jars)) {
       if (!f.existsSync()) {
-        logging.severe('Can not locate file: ${f.path}');
+        printError('Can not locate file: ${f.path}');
         return null;
       }
     }
@@ -327,7 +327,7 @@ class ApkCommand extends FlutterCommand {
       ensureDirectoryExists(finalApk.path);
       builder.align(unalignedApk, finalApk);
 
-      print('APK generated: ${finalApk.path}');
+      printStatus('APK generated: ${finalApk.path}');
 
       return 0;
     } finally {
@@ -342,7 +342,7 @@ class ApkCommand extends FlutterCommand {
     String keyPassword;
 
     if (argResults['keystore'].isEmpty) {
-      logging.warning('Signing the APK using the debug keystore');
+      printError('Signing the APK using the debug keystore');
       keystore = components.debugKeystore;
       keystorePassword = _kDebugKeystorePassword;
       keyAlias = _kDebugKeystoreKeyAlias;
@@ -352,7 +352,7 @@ class ApkCommand extends FlutterCommand {
       keystorePassword = argResults['keystore-password'];
       keyAlias = argResults['keystore-key-alias'];
       if (keystorePassword.isEmpty || keyAlias.isEmpty) {
-        logging.severe('Must provide a keystore password and a key alias');
+        printError('Must provide a keystore password and a key alias');
         return 1;
       }
       keyPassword = argResults['keystore-key-password'];
@@ -373,7 +373,7 @@ class ApkCommand extends FlutterCommand {
 
     _ApkComponents components = await _findApkComponents(config);
     if (components == null) {
-      logging.severe('Unable to build APK.');
+      printError('Unable to build APK.');
       return 1;
     }
 
@@ -381,8 +381,8 @@ class ApkCommand extends FlutterCommand {
 
     if (!flxPath.isEmpty) {
       if (!FileSystemEntity.isFileSync(flxPath)) {
-        logging.severe('FLX does not exist: $flxPath');
-        logging.severe('(Omit the --flx option to build the FLX automatically)');
+        printError('FLX does not exist: $flxPath');
+        printError('(Omit the --flx option to build the FLX automatically)');
         return 1;
       }
       return _buildApk(components, flxPath);

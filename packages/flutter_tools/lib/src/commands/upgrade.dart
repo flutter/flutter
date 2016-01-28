@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import '../runner/flutter_command.dart';
 
@@ -19,7 +20,7 @@ class UpgradeCommand extends FlutterCommand {
         'git', 'rev-parse', '@{u}'
       ], workingDirectory: ArtifactStore.flutterRoot);
     } catch (e) {
-      print('Unable to upgrade Flutter. No upstream repository configured for Flutter.');
+      printError('Unable to upgrade Flutter. No upstream repository configured for Flutter.');
       return 1;
     }
 

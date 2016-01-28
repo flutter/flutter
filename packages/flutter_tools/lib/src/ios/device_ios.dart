@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
@@ -129,9 +129,9 @@ class IOSDevice extends Device {
         command = runCheckedSync(['which', command]).trim();
       } catch (e) {
         if (Platform.isMacOS) {
-          logging.severe('$command not found. $macInstructions');
+          printError('$command not found. $macInstructions');
         } else {
-          logging.severe('Cannot control iOS devices or simulators.  $command is not available on your platform.');
+          printError('Cannot control iOS devices or simulators.  $command is not available on your platform.');
         }
       }
       return command;
@@ -187,13 +187,13 @@ class IOSDevice extends Device {
     Map<String, dynamic> platformArgs
   }) async {
     // TODO: Use checked, mainPath, route
-    logging.fine('Building ${app.name} for $id');
+    printTrace('Building ${app.name} for $id');
 
     // Step 1: Install the precompiled application if necessary
     bool buildResult = await _buildIOSXcodeProject(app, true);
 
     if (!buildResult) {
-      logging.severe('Could not build the precompiled application for the device');
+      printError('Could not build the precompiled application for the device');
       return false;
     }
 
@@ -202,7 +202,7 @@ class IOSDevice extends Device {
 
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
-      logging.severe('Could not find the built application bundle at ${bundle.path}');
+      printError('Could not find the built application bundle at ${bundle.path}');
       return false;
     }
 
@@ -217,11 +217,11 @@ class IOSDevice extends Device {
     ]);
 
     if (installationResult != 0) {
-      logging.severe('Could not install ${bundle.path} on $id');
+      printError('Could not install ${bundle.path} on $id');
       return false;
     }
 
-    logging.fine('Installation successful');
+    printTrace('Installation successful');
     return true;
   }
 
@@ -311,13 +311,13 @@ class IOSSimulator extends Device {
       // More than one simulator is listed as booted, which is not allowed but
       // sometimes happens erroneously.  Kill them all because we don't know
       // which one is actually running.
-      logging.warning('Multiple running simulators were detected, '
+      printError('Multiple running simulators were detected, '
           'which is not supposed to happen.');
       for (Match match in matches) {
         if (match.groupCount > 0) {
           // TODO: We're killing simulator devices inside an accessor method;
           // we probably shouldn't be changing state here.
-          logging.warning('Killing simulator ${match.group(1)}');
+          printError('Killing simulator ${match.group(1)}');
           runSync([xcrunPath, 'simctl', 'shutdown', match.group(2)]);
         }
       }
@@ -328,7 +328,7 @@ class IOSSimulator extends Device {
     if (match != null && match.groupCount > 0) {
       return new _IOSSimulatorInfo(match.group(2), match.group(1));
     } else {
-      logging.info('No running simulators found');
+      printTrace('No running simulators found');
       return null;
     }
   }
@@ -368,11 +368,11 @@ class IOSSimulator extends Device {
       runDetached([iOSSimPath]);
       Future<bool> checkConnection([int attempts = 20]) async {
         if (attempts == 0) {
-          logging.info('Timed out waiting for iOS Simulator $id to boot.');
+          printStatus('Timed out waiting for iOS Simulator $id to boot.');
           return false;
         }
         if (!isConnected()) {
-          logging.info('Waiting for iOS Simulator $id to boot...');
+          printStatus('Waiting for iOS Simulator $id to boot...');
           return await new Future.delayed(new Duration(milliseconds: 500),
               () => checkConnection(attempts - 1));
         }
@@ -383,7 +383,7 @@ class IOSSimulator extends Device {
       try {
         runCheckedSync([xcrunPath, 'simctl', 'boot', id]);
       } catch (e) {
-        logging.warning('Unable to boot iOS Simulator $id: ', e);
+        printError('Unable to boot iOS Simulator $id: ', e);
         return false;
       }
     }
@@ -441,12 +441,12 @@ class IOSSimulator extends Device {
     Map<String, dynamic> platformArgs
   }) async {
     // TODO: Use checked, mainPath, route
-    logging.fine('Building ${app.name} for $id');
+    printTrace('Building ${app.name} for $id');
 
     // Step 1: Build the Xcode project
     bool buildResult = await _buildIOSXcodeProject(app, false);
     if (!buildResult) {
-      logging.severe('Could not build the application for the simulator');
+      printError('Could not build the application for the simulator');
       return false;
     }
 
@@ -454,7 +454,7 @@ class IOSSimulator extends Device {
     Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphonesimulator', 'Runner.app'));
     bool bundleExists = await bundle.exists();
     if (!bundleExists) {
-      logging.severe('Could not find the built application bundle at ${bundle.path}');
+      printError('Could not find the built application bundle at ${bundle.path}');
       return false;
     }
 
@@ -468,7 +468,7 @@ class IOSSimulator extends Device {
     ]);
 
     if (installResult != 0) {
-      logging.severe('Could not install the application bundle on the simulator');
+      printError('Could not install the application bundle on the simulator');
       return false;
     }
 
@@ -482,11 +482,11 @@ class IOSSimulator extends Device {
     ]);
 
     if (launchResult != 0) {
-      logging.severe('Could not launch the freshly installed application on the simulator');
+      printError('Could not launch the freshly installed application on the simulator');
       return false;
     }
 
-    logging.fine('Successfully started ${app.name} on $id');
+    printTrace('Successfully started ${app.name} on $id');
     return true;
   }
 
@@ -545,11 +545,11 @@ bool _checkXcodeVersion() {
     String version = runCheckedSync(['xcodebuild', '-version']);
     Match match = _xcodeVersionRegExp.firstMatch(version);
     if (int.parse(match[1]) < 7) {
-      logging.severe('Found "${match[0]}". $_xcodeRequirement');
+      printError('Found "${match[0]}". $_xcodeRequirement');
       return false;
     }
   } catch (e) {
-    logging.severe('Cannot find "xcodebuid". $_xcodeRequirement');
+    printError('Cannot find "xcodebuid". $_xcodeRequirement');
     return false;
   }
   return true;
@@ -557,7 +557,7 @@ bool _checkXcodeVersion() {
 
 Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async {
   if (!FileSystemEntity.isDirectorySync(app.localPath)) {
-    logging.severe('Path "${path.absolute(app.localPath)}" does not exist.\nDid you run `flutter ios --init`?');
+    printError('Path "${path.absolute(app.localPath)}" does not exist.\nDid you run `flutter ios --init`?');
     return false;
   }
 

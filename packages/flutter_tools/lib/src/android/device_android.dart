@@ -9,7 +9,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
@@ -74,7 +74,7 @@ class AndroidDevice extends Device {
     _hasValidAndroid = _checkForSupportedAndroidVersion();
 
     if (!_hasAdb || !_hasValidAndroid) {
-      logging.warning('Unable to run on Android.');
+      printError('Unable to run on Android.');
     }
   }
 
@@ -88,11 +88,11 @@ class AndroidDevice extends Device {
           path.join(androidHomeDir, 'sdk', 'platform-tools'))) {
         return path.join(androidHomeDir, 'sdk');
       } else {
-        logging.warning('Android SDK not found at $androidHomeDir');
+        printError('Android SDK not found at $androidHomeDir');
         return null;
       }
     } else {
-      logging.warning('Android SDK not found. The ANDROID_HOME variable must be set.');
+      printError('Android SDK not found. The ANDROID_HOME variable must be set.');
       return null;
     }
   }
@@ -125,7 +125,7 @@ class AndroidDevice extends Device {
       }
       return false;
     }
-    logging.warning(
+    printError(
         'Unrecognized adb version string $adbVersion. Skipping version check.');
     return true;
   }
@@ -138,16 +138,15 @@ class AndroidDevice extends Device {
       }
 
       String locatedAdbPath = runCheckedSync(['which', 'adb']);
-      logging.severe('"$locatedAdbPath" is too old. '
+      printError('"$locatedAdbPath" is too old. '
           'Please install version 1.0.32 or later.\n'
           'Try setting ANDROID_HOME to the path to your Android SDK install. '
           'Android builds are unavailable.');
-    } catch (e, stack) {
-      logging.severe('"adb" not found in \$PATH. '
+    } catch (e) {
+      printError('"adb" not found in \$PATH. '
           'Please install the Android SDK or set ANDROID_HOME '
           'to the path of your Android SDK install.');
-      logging.info(e);
-      logging.info(stack);
+      printTrace('$e');
     }
     return false;
   }
@@ -162,7 +161,7 @@ class AndroidDevice extends Device {
 
       String ready = runSync(adbCommandForDevice(['shell', 'echo', 'ready']));
       if (ready.trim() != 'ready') {
-        logging.info('Android device not found.');
+        printTrace('Android device not found.');
         return false;
       }
 
@@ -174,18 +173,18 @@ class AndroidDevice extends Device {
       int sdkVersionParsed =
           int.parse(sdkVersion, onError: (String source) => null);
       if (sdkVersionParsed == null) {
-        logging.severe('Unexpected response from getprop: "$sdkVersion"');
+        printError('Unexpected response from getprop: "$sdkVersion"');
         return false;
       }
       if (sdkVersionParsed < minApiLevel) {
-        logging.severe(
+        printError(
           'The Android version ($sdkVersion) on the target device is too old. Please '
           'use a $minVersionName (version $minApiLevel / $minVersionText) device or later.');
         return false;
       }
       return true;
     } catch (e) {
-      logging.severe('Unexpected failure from adb: ', e);
+      printError('Unexpected failure from adb: $e');
     }
     return false;
   }
@@ -213,12 +212,11 @@ class AndroidDevice extends Device {
       return false;
     }
     if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])) == '') {
-      logging.info(
-          'TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
+      printTrace('TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
       return false;
     }
     if (_getDeviceApkSha1(app) != _getSourceSha1(app)) {
-      logging.info(
+      printTrace(
           'TODO(iansf): move this log to the caller. ${app.name} is out of date. Installing now...');
       return false;
     }
@@ -228,17 +226,17 @@ class AndroidDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     if (!isConnected()) {
-      logging.info('Android device not connected. Not installing.');
+      printTrace('Android device not connected. Not installing.');
       return false;
     }
     if (!FileSystemEntity.isFileSync(app.localPath)) {
-      logging.severe('"${app.localPath}" does not exist.');
+      printError('"${app.localPath}" does not exist.');
       return false;
     }
 
-    print('Installing ${app.name} on device.');
-    runCheckedSync(adbCommandForDevice(['install', '-r', app.localPath]));
-    runCheckedSync(adbCommandForDevice(['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
+    printStatus('Installing ${app.name} on device.');
+    runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
+    runCheckedSync(adbCommandForDevice(<String>['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
     return true;
   }
 
@@ -246,9 +244,9 @@ class AndroidDevice extends Device {
     // Set up port forwarding for observatory.
     String portString = 'tcp:$_observatoryPort';
     try {
-      runCheckedSync(adbCommandForDevice(['forward', portString, portString]));
+      runCheckedSync(adbCommandForDevice(<String>['forward', portString, portString]));
     } catch (e) {
-      logging.warning('Unable to forward observatory port ($_observatoryPort):\n$e');
+      printError('Unable to forward observatory port ($_observatoryPort):\n$e');
     }
   }
 
@@ -259,10 +257,10 @@ class AndroidDevice extends Device {
     String route,
     bool clearLogs: false
   }) {
-    logging.fine('$this startBundle');
+    printTrace('$this startBundle');
 
     if (!FileSystemEntity.isFileSync(bundlePath)) {
-      logging.severe('Cannot find $bundlePath');
+      printError('Cannot find $bundlePath');
       return false;
     }
 
@@ -303,7 +301,7 @@ class AndroidDevice extends Device {
       toolchain,
       mainPath: mainPath
     ).then((flx.DirectoryResult buildResult) {
-      logging.fine('Starting bundle for $this.');
+      printTrace('Starting bundle for $this.');
 
       try {
         if (startBundle(
@@ -426,7 +424,7 @@ class AndroidDevice extends Device {
       ));
       return localPath;
     }
-    logging.warning('No trace file detected. '
+    printError('No trace file detected. '
         'Did you remember to start the trace before stopping it?');
     return null;
   }
@@ -447,7 +445,7 @@ List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
   try {
     runCheckedSync([adbPath, 'version']);
   } catch (e) {
-    logging.severe('Unable to find adb. Is "adb" in your path?');
+    printError('Unable to find adb. Is "adb" in your path?');
     return devices;
   }
 
@@ -497,16 +495,16 @@ List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
     } else if (unauthorizedRegex.hasMatch(line)) {
       Match match = unauthorizedRegex.firstMatch(line);
       String deviceID = match[1];
-      logging.warning(
+      printError(
         'Device $deviceID is not authorized.\n'
         'You might need to check your device for an authorization dialog.'
       );
     } else if (offlineRegex.hasMatch(line)) {
       Match match = offlineRegex.firstMatch(line);
       String deviceID = match[1];
-      logging.warning('Device $deviceID is offline.');
+      printError('Device $deviceID is offline.');
     } else {
-      logging.warning(
+      printError(
         'Unexpected failure parsing device information from adb output:\n'
         '$line\n'
         'Please report a bug at https://github.com/flutter/flutter/issues/new');
@@ -525,7 +523,7 @@ String getAdbPath() {
     } else if (FileSystemEntity.isFileSync(adbPath2)) {
       return adbPath2;
     } else {
-      logging.info('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
+      printTrace('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
           'using default path "$_defaultAdbPath"');
       return _defaultAdbPath;
     }

@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'base/logging.dart';
+import 'base/context.dart';
 
 enum BuildType {
   prebuilt,
@@ -32,7 +32,7 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.mac;
   if (Platform.isLinux)
     return HostPlatform.linux;
-  logging.warning('Unsupported host platform, defaulting to Linux');
+  printError('Unsupported host platform, defaulting to Linux');
   return HostPlatform.linux;
 }
 
@@ -41,7 +41,7 @@ TargetPlatform getCurrentHostPlatformAsTarget() {
     return TargetPlatform.mac;
   if (Platform.isLinux)
     return TargetPlatform.linux;
-  logging.warning('Unsupported host platform, defaulting to Linux');
+  printError('Unsupported host platform, defaulting to Linux');
   return TargetPlatform.linux;
 }
 

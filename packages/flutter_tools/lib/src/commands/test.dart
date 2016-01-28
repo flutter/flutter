@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable;
 
 import '../artifacts.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../build_configuration.dart';
 import '../runner/flutter_command.dart';
 import '../test/loader.dart' as loader;
@@ -105,7 +105,7 @@ class TestCommand extends FlutterCommand {
       foundOne = true;
       loader.shellPath = path.absolute(await _getShellPath(config));
       if (!FileSystemEntity.isFileSync(loader.shellPath)) {
-          logging.severe('Cannot find Flutter shell at ${loader.shellPath}');
+          printError('Cannot find Flutter shell at ${loader.shellPath}');
         return 1;
       }
       await _runTests(testArgs, testDir);
@@ -113,7 +113,7 @@ class TestCommand extends FlutterCommand {
         return exitCode;
     }
     if (!foundOne) {
-      stderr.writeln('At least one of --debug or --release must be set, to specify the local build products to test.');
+      printError('At least one of --debug or --release must be set, to specify the local build products to test.');
       return 1;
     }
 

@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import 'start.dart';
 
@@ -36,7 +36,7 @@ class ListenCommand extends StartCommandBase {
     int result = 0;
     bool firstTime = true;
     do {
-      logging.info('Updating running Flutter apps...');
+      printStatus('Updating running Flutter apps...');
       result = await startApp(
         devices,
         applicationPackages,
@@ -58,7 +58,7 @@ class ListenCommand extends StartCommandBase {
       try {
         runCheckedSync(<String>['which', 'fswatch']);
       } catch (e) {
-        logging.severe('"listen" command is only useful if you have installed '
+        printError('"listen" command is only useful if you have installed '
             'fswatch on Mac.  Run "brew install fswatch" to install it with '
             'homebrew.');
         return null;
@@ -68,7 +68,7 @@ class ListenCommand extends StartCommandBase {
       try {
         runCheckedSync(<String>['which', 'inotifywait']);
       } catch (e) {
-        logging.severe('"listen" command is only useful if you have installed '
+        printError('"listen" command is only useful if you have installed '
             'inotifywait on Linux.  Run "apt-get install inotify-tools" or '
             'equivalent to install it.');
         return null;
@@ -82,18 +82,18 @@ class ListenCommand extends StartCommandBase {
         'modify,close_write,move,create,delete',
       ]..addAll(directories);
     } else {
-      logging.severe('"listen" command is only available on Mac and Linux.');
+      printError('"listen" command is only available on Mac and Linux.');
     }
     return null;
   }
 
   bool _watchDirectory(List<String> watchCommand) {
-    logging.info('Attempting to listen to these directories: ${watchCommand.join(", ")}');
+    printStatus('Attempting to listen to these directories: ${watchCommand.join(", ")}');
     assert(watchCommand != null);
     try {
       runCheckedSync(watchCommand);
     } catch (e) {
-      logging.warning('Watching directories failed.', e);
+      printError('Watching directories failed.', e);
       return false;
     }
     return true;

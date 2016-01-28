@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/commands/trace.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';
