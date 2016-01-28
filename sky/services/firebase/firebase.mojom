@@ -36,9 +36,9 @@ interface ValueEventListener {
 
 interface ChildEventListener {
   OnCancelled(Error error);
-  OnChildAdded(DataSnapshot snapshot, string previousChildName);
-  OnChildChanged(DataSnapshot snapshot, string previousChildName);
-  OnChildMoved(DataSnapshot snapshot, string previousChildName);
+  OnChildAdded(DataSnapshot snapshot, string? previousChildName);
+  OnChildChanged(DataSnapshot snapshot, string? previousChildName);
+  OnChildMoved(DataSnapshot snapshot, string? previousChildName);
   OnChildRemoved(DataSnapshot snapshot);
 };
 
