@@ -200,7 +200,7 @@ class IOSDevice extends Device {
     // Step 2: Check that the application exists at the specified path
     Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
 
-    bool bundleExists = await bundle.exists();
+    bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       logging.severe('Could not find the built application bundle at ${bundle.path}');
       return false;
@@ -572,7 +572,7 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
     command.addAll(['-sdk', 'iphonesimulator']);
   }
 
-  ProcessResult result = await Process.runSync('/usr/bin/env', command,
+  ProcessResult result = Process.runSync('/usr/bin/env', command,
       workingDirectory: app.localPath);
   return result.exitCode == 0;
 }
