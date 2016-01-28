@@ -15,7 +15,7 @@
 
 - (void)loadView {
   auto shell_view = new sky::shell::ShellView(sky::shell::Shell::Shared());
-  SkySurface* surface = [[SkySurface alloc] initWithShellView: shell_view];
+  SkySurface* surface = [[SkySurface alloc] initWithShellView:shell_view];
 
   surface.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -23,6 +23,19 @@
   self.view = surface;
 
   [surface release];
+}
+
+- (SkySurface*)surface {
+  DCHECK([self isViewLoaded]);
+  return reinterpret_cast<SkySurface*>(self.view);
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [self.surface visibilityDidChange:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [self.surface visibilityDidChange:NO];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
