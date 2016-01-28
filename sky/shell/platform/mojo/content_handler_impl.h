@@ -5,9 +5,8 @@
 #ifndef SKY_SHELL_PLATFORM_MOJO_CONTENT_HANDLER_IMPL_H_
 #define SKY_SHELL_PLATFORM_MOJO_CONTENT_HANDLER_IMPL_H_
 
-#include "base/message_loop/message_loop.h"
+#include "base/macros.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
-#include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 
 namespace sky {

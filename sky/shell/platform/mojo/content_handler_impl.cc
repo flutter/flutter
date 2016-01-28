@@ -4,7 +4,7 @@
 
 #include "sky/shell/platform/mojo/content_handler_impl.h"
 
-#include "sky/shell/platform/mojo/sky_application_impl.h"
+#include "sky/shell/platform/mojo/application_impl.h"
 
 namespace sky {
 namespace shell {
@@ -20,7 +20,7 @@ ContentHandlerImpl::~ContentHandlerImpl() {
 void ContentHandlerImpl::StartApplication(
     mojo::InterfaceRequest<mojo::Application> application,
     mojo::URLResponsePtr response) {
-  new SkyApplicationImpl(application.Pass(), response.Pass());
+  new ApplicationImpl(application.Pass(), response.Pass());
 }
 
 }  // namespace shell

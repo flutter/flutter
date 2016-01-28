@@ -1,11 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_PLATFORM_MOJO_SKY_APPLICATION_IMPL_H_
-#define SKY_SHELL_PLATFORM_MOJO_SKY_APPLICATION_IMPL_H_
+#ifndef SKY_SHELL_PLATFORM_MOJO_APPLICATION_IMPL_H_
+#define SKY_SHELL_PLATFORM_MOJO_APPLICATION_IMPL_H_
 
-#include "base/message_loop/message_loop.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
@@ -14,14 +13,19 @@
 #include "sky/shell/platform/mojo/platform_view_mojo.h"
 #include "sky/shell/shell_view.h"
 
+#include "mojo/services/ui/views/interfaces/view_provider.mojom.h"
+#include "mojo/common/binding_set.h"
+
 namespace sky {
 namespace shell {
 
-class SkyApplicationImpl : public mojo::Application {
+class ApplicationImpl : public mojo::Application,
+                        public mojo::ServiceProvider,
+                        public mojo::ui::ViewProvider {
  public:
-  SkyApplicationImpl(mojo::InterfaceRequest<mojo::Application> application,
-                     mojo::URLResponsePtr response);
-  ~SkyApplicationImpl() override;
+  ApplicationImpl(mojo::InterfaceRequest<mojo::Application> application,
+                  mojo::URLResponsePtr response);
+  ~ApplicationImpl() override;
 
  private:
   // mojo::Application
@@ -35,20 +39,28 @@ class SkyApplicationImpl : public mojo::Application {
       const mojo::String& resolved_url) override;
   void RequestQuit() override;
 
-  PlatformViewMojo* platform_view() {
-    return static_cast<PlatformViewMojo*>(shell_view_->view());
-  }
+  // mojo::ServiceProvider
+  void ConnectToService(const mojo::String& service_name,
+                        mojo::ScopedMessagePipeHandle client_handle) override;
+
+  // mojo::ui::ViewProvider
+  void CreateView(
+      mojo::InterfaceRequest<mojo::ServiceProvider> services,
+      mojo::ServiceProviderPtr exposed_services,
+      const mojo::ui::ViewProvider::CreateViewCallback& callback) override;
 
   void UnpackInitialResponse(mojo::Shell* shell);
 
   mojo::StrongBinding<mojo::Application> binding_;
   mojo::URLResponsePtr initial_response_;
+  mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
+  mojo::BindingSet<mojo::ui::ViewProvider> view_provider_bindings_;
+  std::string url_;
   mojo::ShellPtr shell_;
   mojo::asset_bundle::AssetBundlePtr bundle_;
-  std::unique_ptr<ShellView> shell_view_;
 };
 
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_PLATFORM_MOJO_SKY_APPLICATION_IMPL_H_
+#endif  // SKY_SHELL_PLATFORM_MOJO_APPLICATION_IMPL_H_
