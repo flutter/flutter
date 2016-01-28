@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
@@ -64,7 +64,7 @@ class StartCommand extends StartCommandBase {
 
   @override
   Future<int> runInProject() async {
-    logging.fine('Downloading toolchain.');
+    printTrace('Downloading toolchain.');
 
     await Future.wait([
       downloadToolchain(),
@@ -89,7 +89,7 @@ class StartCommand extends StartCommandBase {
       clearLogs: clearLogs
     );
 
-    logging.fine('Finished start command.');
+    printTrace('Finished start command.');
     return result;
   }
 }
@@ -113,17 +113,17 @@ Future<int> startApp(
     String message = 'Tried to run $mainPath, but that file does not exist.';
     if (target == null)
       message += '\nConsider using the -t option to specify the Dart file to start.';
-    logging.severe(message);
+    printError(message);
     return 1;
   }
 
   if (stop) {
-    logging.fine('Running stop command.');
+    printTrace('Running stop command.');
     stopAll(devices, applicationPackages);
   }
 
   if (install) {
-    logging.fine('Running install command.');
+    printTrace('Running install command.');
     installApp(devices, applicationPackages);
   }
 
@@ -134,7 +134,7 @@ Future<int> startApp(
     if (package == null || !device.isConnected())
       continue;
 
-    logging.fine('Running build command for $device.');
+    printTrace('Running build command for $device.');
 
     Map<String, dynamic> platformArgs = <String, dynamic>{};
 
@@ -155,7 +155,7 @@ Future<int> startApp(
     );
 
     if (!result) {
-      logging.severe('Could not start \'${package.name}\' on \'${device.id}\'');
+      printError('Could not start \'${package.name}\' on \'${device.id}\'');
     } else {
       startedSomething = true;
     }
@@ -163,9 +163,9 @@ Future<int> startApp(
 
   if (!startedSomething) {
     if (!devices.all.any((device) => device.isConnected())) {
-      logging.severe('Unable to run application - no connected devices.');
+      printError('Unable to run application - no connected devices.');
     } else {
-      logging.severe('Unable to run application.');
+      printError('Unable to run application.');
     }
   }
 

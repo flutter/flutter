@@ -11,7 +11,7 @@ import 'package:den_api/den_api.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../runner/flutter_command.dart';
@@ -188,7 +188,7 @@ class AnalyzeCommand extends FlutterCommand {
         String packageName = pubSpecYaml.name;
         String packagePath = path.normalize(path.absolute(path.join(directory.path, 'lib')));
         if (packages.containsKey(packageName) && packages[packageName] != packagePath) {
-          logging.warning('Inconsistent requirements for $packageName; using $packagePath (and not ${packages[packageName]}).');
+          printError('Inconsistent requirements for $packageName; using $packagePath (and not ${packages[packageName]}).');
           hadInconsistentRequirements = true;
         }
         packages[packageName] = packagePath;
@@ -208,7 +208,7 @@ class AnalyzeCommand extends FlutterCommand {
         for (String package in dependencies.keys) {
           if (packages.containsKey(package)) {
             if (packages[package] != dependencies[package]) {
-              logging.warning('Inconsistent requirements for $package; using ${packages[package]} (and not ${dependencies[package]}).');
+              printError('Inconsistent requirements for $package; using ${packages[package]} (and not ${dependencies[package]}).');
               hadInconsistentRequirements = true;
             }
           } else {
@@ -219,9 +219,9 @@ class AnalyzeCommand extends FlutterCommand {
     }
     if (hadInconsistentRequirements) {
       if (foundAnyInFlutterRepo)
-        logging.warning('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))} --upgrade".');
+        printError('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))} --upgrade".');
       if (foundAnyInCurrentDirectory)
-        logging.warning('You may need to run "pub upgrade".');
+        printError('You may need to run "pub upgrade".');
     }
 
     String buildDir = buildConfigurations.firstWhere((BuildConfiguration config) => config.testable, orElse: () => null)?.buildDir;
@@ -256,7 +256,7 @@ class AnalyzeCommand extends FlutterCommand {
       mainFile.path
     ];
 
-    logging.info(cmd.join(' '));
+    printStatus(cmd.join(' '));
     Process process = await Process.start(
       cmd[0],
       cmd.sublist(1),
@@ -270,7 +270,7 @@ class AnalyzeCommand extends FlutterCommand {
     process.stderr.transform(UTF8.decoder).listen((String data) {
       // dartanalyzer doesn't seem to ever output anything on stderr
       errorCount += 1;
-      print(data);
+      printError(data);
     });
 
     int exitCode = await process.exitCode;
@@ -336,7 +336,7 @@ class AnalyzeCommand extends FlutterCommand {
           if (shouldIgnore)
             continue;
         }
-        print(errorLine);
+        printError(errorLine);
         errorCount += 1;
       }
     }
@@ -349,7 +349,7 @@ class AnalyzeCommand extends FlutterCommand {
     if (errorCount > 0)
       return 1; // Doesn't this mean 'hints' per the above comment?
     if (argResults['congratulate'])
-      print('No analyzer warnings! (ran in ${elapsed}s)');
+      printStatus('No analyzer warnings! (ran in ${elapsed}s)');
     return 0;
   }
 }

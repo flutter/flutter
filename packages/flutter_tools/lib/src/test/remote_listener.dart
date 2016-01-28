@@ -14,8 +14,8 @@ import 'package:test/src/backend/live_test.dart';
 import 'package:test/src/backend/metadata.dart';
 import 'package:test/src/backend/operating_system.dart';
 import 'package:test/src/backend/suite.dart';
-import 'package:test/src/backend/test_platform.dart';
 import 'package:test/src/backend/test.dart';
+import 'package:test/src/backend/test_platform.dart';
 import 'package:test/src/util/remote_exception.dart';
 
 final OperatingSystem currentOS = (() {

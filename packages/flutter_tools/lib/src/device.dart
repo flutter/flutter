@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'android/device_android.dart';
 import 'application_package.dart';
-import 'base/logging.dart';
+import 'base/context.dart';
 import 'build_configuration.dart';
 import 'ios/device_ios.dart';
 import 'toolchain.dart';
@@ -132,7 +132,7 @@ class DeviceStore {
           (Device dev) => (dev.id == config.deviceId),
           orElse: () => null);
       if (device == null) {
-        logging.severe('Warning: Device ID ${config.deviceId} not found');
+        printError('Warning: Device ID ${config.deviceId} not found');
       }
     } else if (devices.length == 1) {
       // Step 2: If no identifier is specified and there is only one connected
@@ -140,8 +140,8 @@ class DeviceStore {
       device = devices[0];
     } else if (devices.length > 1) {
       // Step 3: D:
-      logging.fine('Multiple devices are connected, but no device ID was specified.');
-      logging.fine('Attempting to launch on all connected devices.');
+      printTrace('Multiple devices are connected, but no device ID was specified.');
+      printTrace('Attempting to launch on all connected devices.');
     }
 
     return device;

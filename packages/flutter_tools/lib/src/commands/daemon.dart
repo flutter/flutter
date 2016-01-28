@@ -6,11 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:logging/logging.dart';
-
 import '../android/adb.dart';
 import '../android/device_android.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 import 'start.dart';
@@ -30,29 +28,32 @@ class DaemonCommand extends FlutterCommand {
 
   bool get requiresProjectRoot => false;
 
-  Future<int> runInProject() async {
-    print('Starting device daemon...');
+  Future<int> runInProject() {
+    printStatus('Starting device daemon...');
 
-    Stream<Map> commandStream = stdin
-      .transform(UTF8.decoder)
-      .transform(const LineSplitter())
-      .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
-      .map((String line) {
-        line = line.substring(1, line.length - 1);
-        return JSON.decode(line);
-      });
+    NotifyingAppContext appContext = new NotifyingAppContext();
 
-    Daemon daemon = new Daemon(commandStream, (Map command) {
-      stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
-    }, daemonCommand: this);
+    return runZoned(() {
+      Stream<Map<String, dynamic>> commandStream = stdin
+        .transform(UTF8.decoder)
+        .transform(const LineSplitter())
+        .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
+        .map((String line) {
+          line = line.substring(1, line.length - 1);
+          return JSON.decode(line);
+        });
 
-    return await daemon.onExit;
+      Daemon daemon = new Daemon(commandStream, (Map command) {
+        stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+      }, daemonCommand: this, appContext: appContext);
+
+      return daemon.onExit;
+    }, zoneValues: {'context': appContext});
   }
 
   dynamic _jsonEncodeObject(dynamic object) {
     if (object is Device)
       return _deviceToMap(object);
-
     return object;
   }
 }
@@ -62,7 +63,10 @@ typedef void DispatchComand(Map<String, dynamic> command);
 typedef Future<dynamic> CommandHandler(dynamic args);
 
 class Daemon {
-  Daemon(Stream<Map> commandStream, this.sendCommand, {this.daemonCommand}) {
+  Daemon(Stream<Map> commandStream, this.sendCommand, {
+    this.daemonCommand,
+    this.appContext
+  }) {
     // Set up domains.
     _registerDomain(new DaemonDomain(this));
     _registerDomain(new AppDomain(this));
@@ -77,6 +81,7 @@ class Daemon {
 
   final DispatchComand sendCommand;
   final DaemonCommand daemonCommand;
+  final NotifyingAppContext appContext;
 
   final Completer<int> _onExitCompleter = new Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -94,7 +99,7 @@ class Daemon {
     dynamic id = request['id'];
 
     if (id == null) {
-      logging.severe('no id for request: $request');
+      stderr.writeln('no id for request: $request');
       return;
     }
 
@@ -111,7 +116,8 @@ class Daemon {
       _domainMap[prefix].handleCommand(name, id, request['params']);
     } catch (error, trace) {
       _send({'id': id, 'error': _toJsonable(error)});
-      logging.warning('error handling $request', error, trace);
+      stderr.writeln('error handling $request: $error');
+      stderr.writeln(trace);
     }
   }
 
@@ -152,7 +158,8 @@ abstract class Domain {
       }
     }).catchError((error, trace) {
       _send({'id': id, 'error': _toJsonable(error)});
-      logging.warning("error handling '$name.$command'", error, trace);
+      stderr.writeln("error handling '$name.$command': $error");
+      stderr.writeln(trace);
     });
   }
 
@@ -176,25 +183,23 @@ class DaemonDomain extends Domain {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
 
-    _subscription = Logger.root.onRecord.listen((LogRecord record) {
-      String message = record.error == null ? record.message : '${record.message}: ${record.error}';
-
-      if (record.stackTrace != null) {
+    _subscription = daemon.appContext.onMessage.listen((LogMessage message) {
+      if (message.stackTrace != null) {
         sendEvent('daemon.logMessage', {
-          'level': record.level.name.toLowerCase(),
-          'message': message,
-          'stackTrace': record.stackTrace.toString()
+          'level': message.level,
+          'message': message.message,
+          'stackTrace': message.stackTrace.toString()
         });
       } else {
         sendEvent('daemon.logMessage', {
-          'level': record.level.name.toLowerCase(),
-          'message': message
+          'level': message.level,
+          'message': message.message
         });
       }
     });
   }
 
-  StreamSubscription<LogRecord> _subscription;
+  StreamSubscription<LogMessage> _subscription;
 
   Future<String> version(dynamic args) {
     return new Future.value(protocolVersion);
@@ -402,4 +407,32 @@ dynamic _toJsonable(dynamic obj) {
   if (obj is Device)
     return obj;
   return '$obj';
+}
+
+class NotifyingAppContext implements AppContext {
+  StreamController<LogMessage> _messageController = new StreamController<LogMessage>.broadcast();
+
+  Stream<LogMessage> get onMessage => _messageController.stream;
+
+  bool verbose = false;
+
+  void printError(String message, [StackTrace stackTrace]) {
+    _messageController.add(new LogMessage('error', message, stackTrace));
+  }
+
+  void printStatus(String message) {
+    _messageController.add(new LogMessage('status', message));
+  }
+
+  void printTrace(String message) {
+    _messageController.add(new LogMessage('trace', message));
+  }
+}
+
+class LogMessage {
+  final String level;
+  final String message;
+  final StackTrace stackTrace;
+
+  LogMessage(this.level, this.message, [this.stackTrace]);
 }

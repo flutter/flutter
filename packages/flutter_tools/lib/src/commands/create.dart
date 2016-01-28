@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
 import '../artifacts.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 
 class CreateCommand extends Command {
@@ -28,21 +28,21 @@ class CreateCommand extends Command {
   @override
   Future<int> run() async {
     if (!argResults.wasParsed('out')) {
-      print('No option specified for the output directory.');
-      print(argParser.usage);
+      printStatus('No option specified for the output directory.');
+      printStatus(argParser.usage);
       return 2;
     }
 
     if (ArtifactStore.flutterRoot == null) {
-      stderr.writeln('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment');
-      stderr.writeln('variable was specified. Unable to find package:flutter.');
+      printError('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment');
+      printError('variable was specified. Unable to find package:flutter.');
       return 2;
     }
     String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
     String flutterPackagePath = path.join(flutterRoot, 'packages', 'flutter');
     if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml'))) {
-      print('Unable to find package:flutter in $flutterPackagePath');
+      printError('Unable to find package:flutter in $flutterPackagePath');
       return 2;
     }
 
@@ -50,7 +50,7 @@ class CreateCommand extends Command {
 
     new FlutterSimpleTemplate().generateInto(out, flutterPackagePath);
 
-    print('');
+    printStatus('');
 
     String message = '''All done! To run your application:
 
@@ -64,7 +64,7 @@ class CreateCommand extends Command {
         return code;
     }
 
-    print(message);
+    printStatus(message);
     return 0;
   }
 
@@ -80,13 +80,13 @@ class CreateCommand extends Command {
     if (!pubSpecYaml.existsSync()) {
       if (skipIfAbsent)
         return 0;
-      logging.severe('$directory: no pubspec.yaml found');
+      printError('$directory: no pubspec.yaml found');
       return 1;
     }
 
     if (!pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
       if (verbose)
-        print("Running pub get in $directory...");
+        printStatus("Running pub get in $directory...");
       int code = await runCommandAndStreamOutput(
         [sdkBinaryName('pub'), 'get'],
         workingDirectory: directory
@@ -99,7 +99,7 @@ class CreateCommand extends Command {
         (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())))
       return 0;
 
-    logging.severe('$directory: pubspec.yaml, pubspec.lock, and .packages are in an inconsistent state');
+    printError('$directory: pubspec.yaml, pubspec.lock, and .packages are in an inconsistent state');
     return 1;
   }
 }
@@ -115,7 +115,7 @@ abstract class Template {
   void generateInto(Directory dir, String flutterPackagePath) {
     String dirPath = path.normalize(dir.absolute.path);
     String projectName = _normalizeProjectName(path.basename(dirPath));
-    print('Creating ${path.basename(projectName)}...');
+    printStatus('Creating ${path.basename(projectName)}...');
     dir.createSync(recursive: true);
 
     String relativeFlutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
@@ -131,7 +131,7 @@ abstract class Template {
       File file = new File(path.join(dir.path, filePath));
       file.parent.createSync();
       file.writeAsStringSync(contents);
-      print(file.path);
+      printStatus(file.path);
     });
   }
 

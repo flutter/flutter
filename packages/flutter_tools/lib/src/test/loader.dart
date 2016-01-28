@@ -7,8 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:flutter_tools/src/test/json_socket.dart';
-import 'package:flutter_tools/src/test/remote_test.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:test/src/backend/group.dart';
 import 'package:test/src/backend/metadata.dart';
@@ -20,6 +18,9 @@ import 'package:test/src/runner/runner_suite.dart';
 import 'package:test/src/runner/vm/environment.dart';
 import 'package:test/src/util/io.dart';
 import 'package:test/src/util/remote_exception.dart';
+
+import 'json_socket.dart';
+import 'remote_test.dart';
 
 void installHook() {
   hack.loadVMFileHook = _loadVMFile;

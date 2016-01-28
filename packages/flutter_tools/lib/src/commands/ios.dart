@@ -8,7 +8,7 @@ import "dart:io";
 import "package:path/path.dart" as path;
 
 import "../artifacts.dart";
-import "../base/logging.dart";
+import "../base/context.dart";
 import "../base/process.dart";
 import "../runner/flutter_command.dart";
 import "../runner/flutter_command_runner.dart";
@@ -29,12 +29,12 @@ class IOSCommand extends FlutterCommand {
   }
 
   Future<List<int>> _fetchXcodeArchive() async {
-    print("Fetching the Xcode project archive from the cloud...");
+    printStatus("Fetching the Xcode project archive from the cloud...");
 
     HttpClient client = new HttpClient();
 
     Uri xcodeProjectUri = _xcodeProjectUri(ArtifactStore.engineRevision);
-    logging.info("Downloading $xcodeProjectUri...");
+    printStatus("Downloading $xcodeProjectUri...");
     HttpClientRequest request = await client.getUrl(xcodeProjectUri);
     HttpClientResponse response = await request.close();
 
@@ -49,7 +49,7 @@ class IOSCommand extends FlutterCommand {
   }
 
   Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) async {
-    print("Unzipping Xcode project to local directory...");
+    printStatus("Unzipping Xcode project to local directory...");
 
     // We cannot use ArchiveFile because this archive contains files that are exectuable
     // and there is currently no provision to modify file permissions during
@@ -117,16 +117,16 @@ class IOSCommand extends FlutterCommand {
     List<int> archiveBytes = await _fetchXcodeArchive();
 
     if (archiveBytes.isEmpty) {
-      print("Error: No archive bytes received.");
+      printError("Error: No archive bytes received.");
       return 1;
     }
 
     // Step 2: Inflate the archive into the user project directory
     bool result = await _inflateXcodeArchive(xcodeprojPath, archiveBytes);
     if (!result) {
-      print("Error: Could not init the Xcode project: the 'ios' directory already exists.");
-      print("To proceed, remove the 'ios' directory and try again.");
-      print("Warning: You may have made manual changes to files in the 'ios' directory.");
+      printError("Error: Could not init the Xcode project: the 'ios' directory already exists.");
+      printError("To proceed, remove the 'ios' directory and try again.");
+      printError("Warning: You may have made manual changes to files in the 'ios' directory.");
       return 1;
     }
 
@@ -134,22 +134,22 @@ class IOSCommand extends FlutterCommand {
     _setupXcodeProjXcconfig(path.join(xcodeprojPath, "Local.xcconfig"));
 
     // Step 4: Tell the user the location of the generated project.
-    print("An Xcode project has been placed in 'ios/'.");
-    print("You may edit it to modify iOS specific configuration.");
+    printStatus("An Xcode project has been placed in 'ios/'.");
+    printStatus("You may edit it to modify iOS specific configuration.");
     return 0;
   }
 
   @override
   Future<int> runInProject() async {
     if (!Platform.isMacOS) {
-      print("iOS specific commands may only be run on a Mac.");
+      printStatus("iOS specific commands may only be run on a Mac.");
       return 1;
     }
 
     if (argResults['init'])
       return await _runInitCommand();
 
-    print("No flags specified.");
+    printError("No flags specified.");
     return 1;
   }
 }

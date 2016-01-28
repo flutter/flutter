@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../android/device_android.dart';
 import '../application_package.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../runner/flutter_command.dart';
 
 class TraceCommand extends FlutterCommand {
@@ -30,7 +30,7 @@ class TraceCommand extends FlutterCommand {
     await downloadApplicationPackagesAndConnectToDevices();
 
     if (!devices.android.isConnected()) {
-      logging.warning('No device connected, so no trace was completed.');
+      printError('No device connected, so no trace was completed.');
       return 1;
     }
 
@@ -56,9 +56,9 @@ class TraceCommand extends FlutterCommand {
   Future _stopTracing(AndroidDevice android, AndroidApk androidApp) async {
     String tracePath = await android.stopTracing(androidApp, outPath: argResults['out']);
     if (tracePath == null) {
-      logging.warning('No trace file saved.');
+      printError('No trace file saved.');
     } else {
-      print('Trace file saved to $tracePath');
+      printStatus('Trace file saved to $tracePath');
     }
   }
 }

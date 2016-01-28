@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/logging.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -16,6 +16,11 @@ main() => defineTests();
 defineTests() {
   group('daemon', () {
     Daemon daemon;
+    NotifyingAppContext appContext;
+
+    setUp(() {
+      appContext = new NotifyingAppContext();
+    });
 
     tearDown(() {
       if (daemon != null)
@@ -23,11 +28,12 @@ defineTests() {
     });
 
     test('daemon.version', () async {
-      StreamController<Map> commands = new StreamController();
-      StreamController<Map> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController();
+      StreamController<Map<String, dynamic>> responses = new StreamController();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result)
+        (Map<String, dynamic> result) => responses.add(result),
+        appContext: appContext
       );
       commands.add({'id': 0, 'method': 'daemon.version'});
       Map response = await responses.stream.where(_notEvent).first;
@@ -36,30 +42,34 @@ defineTests() {
       expect(response['result'] is String, true);
     });
 
-    test('daemon.logMessage', () async {
-      StreamController<Map> commands = new StreamController();
-      StreamController<Map> responses = new StreamController();
-      daemon = new Daemon(
-        commands.stream,
-        (Map<String, dynamic> result) => responses.add(result)
-      );
-      logging.warning('daemon.logMessage test');
-      Map response = await responses.stream.where((Map<String, dynamic> map) {
-        return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'warning';
-      }).first;
-      expect(response['id'], isNull);
-      expect(response['event'], 'daemon.logMessage');
-      Map<String, String> logMessage = response['params'];
-      expect(logMessage['level'], 'warning');
-      expect(logMessage['message'], 'daemon.logMessage test');
+    test('daemon.logMessage', () {
+      return runZoned(() async {
+        StreamController<Map<String, dynamic>> commands = new StreamController();
+        StreamController<Map<String, dynamic>> responses = new StreamController();
+        daemon = new Daemon(
+          commands.stream,
+          (Map<String, dynamic> result) => responses.add(result),
+          appContext: appContext
+        );
+        printError('daemon.logMessage test');
+        Map<String, dynamic> response = await responses.stream.where((Map<String, dynamic> map) {
+          return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
+        }).first;
+        expect(response['id'], isNull);
+        expect(response['event'], 'daemon.logMessage');
+        Map<String, String> logMessage = response['params'];
+        expect(logMessage['level'], 'error');
+        expect(logMessage['message'], 'daemon.logMessage test');
+      }, zoneValues: {'context': appContext});
     });
 
     test('daemon.shutdown', () async {
-      StreamController<Map> commands = new StreamController();
-      StreamController<Map> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController();
+      StreamController<Map<String, dynamic>> responses = new StreamController();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result)
+        (Map<String, dynamic> result) => responses.add(result),
+        appContext: appContext
       );
       commands.add({'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then((int code) {
@@ -71,12 +81,13 @@ defineTests() {
       DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
-      StreamController<Map> commands = new StreamController();
-      StreamController<Map> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController();
+      StreamController<Map<String, dynamic>> responses = new StreamController();
       daemon = new Daemon(
         commands.stream,
         (Map<String, dynamic> result) => responses.add(result),
-        daemonCommand: command
+        daemonCommand: command,
+        appContext: appContext
       );
 
       MockDeviceStore mockDevices = command.devices;
@@ -97,11 +108,12 @@ defineTests() {
     });
 
     test('device.getDevices', () async {
-      StreamController<Map> commands = new StreamController();
-      StreamController<Map> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController();
+      StreamController<Map<String, dynamic>> responses = new StreamController();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result)
+        (Map<String, dynamic> result) => responses.add(result),
+        appContext: appContext
       );
       commands.add({'id': 0, 'method': 'device.getDevices'});
       Map response = await responses.stream.where(_notEvent).first;

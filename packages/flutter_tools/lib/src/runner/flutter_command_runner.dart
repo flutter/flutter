@@ -7,11 +7,10 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import 'version.dart';
@@ -29,10 +28,6 @@ class FlutterCommandRunner extends CommandRunner {
         abbr: 'v',
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.');
-    argParser.addFlag('very-verbose',
-        negatable: false,
-        help: 'Very noisy logging, including the output of all '
-            'shell commands executed.');
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
@@ -141,10 +136,7 @@ class FlutterCommandRunner extends CommandRunner {
 
   Future<int> runCommand(ArgResults globalResults) {
     if (globalResults['verbose'])
-      Logger.root.level = Level.INFO;
-
-    if (globalResults['very-verbose'])
-      Logger.root.level = Level.FINE;
+      context.verbose = true;
 
     _globalResults = globalResults;
     ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
@@ -152,7 +144,7 @@ class FlutterCommandRunner extends CommandRunner {
       ArtifactStore.packageRoot = path.normalize(path.absolute(globalResults['package-root']));
 
     if (globalResults['version']) {
-      print(getVersion(ArtifactStore.flutterRoot));
+      printStatus(getVersion(ArtifactStore.flutterRoot));
       return new Future<int>.value(0);
     }
 
@@ -186,7 +178,7 @@ class FlutterCommandRunner extends CommandRunner {
         engineSourcePath = _tryEnginePath(path.join(ArtifactStore.flutterRoot, '../engine/src'));
 
       if (engineSourcePath == null) {
-        stderr.writeln('Unable to detect local Flutter engine build directory.\n'
+        printError('Unable to detect local Flutter engine build directory.\n'
             'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and\n'
             'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or\n'
             'use --engine-src-path to specify the path to the root of your flutter/engine repository.');
@@ -195,7 +187,7 @@ class FlutterCommandRunner extends CommandRunner {
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
-      stderr.writeln('Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
+      printError('Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
           'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that\n'
           'you have compiled the engine in that directory, which should produce an \'out\' directory');
       throw new ProcessExit(2);
@@ -240,7 +232,7 @@ class FlutterCommandRunner extends CommandRunner {
       }
     } else {
       if (!FileSystemEntity.isDirectorySync(enginePath))
-        logging.warning('$enginePath is not a valid directory');
+        printError('$enginePath is not a valid directory');
 
       if (!isDebug && !isRelease)
         isDebug = true;

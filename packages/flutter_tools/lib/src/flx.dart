@@ -12,8 +12,8 @@ import 'package:flx/signing.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/logging.dart';
 import 'toolchain.dart';
 
 const String defaultMainPath = 'lib/main.dart';
@@ -158,7 +158,7 @@ Future<int> build(
   String privateKeyPath: defaultPrivateKeyPath,
   bool precompiledSnapshot: false
 }) async {
-  logging.fine('Building $outputPath');
+  printTrace('Building $outputPath');
 
   Map manifestDescriptor = _loadManifest(manifestPath);
 
@@ -174,7 +174,7 @@ Future<int> build(
     // content equivalents
     int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath);
     if (result != 0) {
-      logging.severe('Failed to run the Flutter compiler. Exit code: $result');
+      printError('Failed to run the Flutter compiler. Exit code: $result');
       return result;
     }
 
@@ -184,7 +184,7 @@ Future<int> build(
   for (_Asset asset in assets) {
     ArchiveFile file = _createFile(asset.key, asset.base);
     if (file == null) {
-      stderr.writeln('Cannot find asset "${asset.key}" in directory "${path.absolute(asset.base)}".');
+      printError('Cannot find asset "${asset.key}" in directory "${path.absolute(asset.base)}".');
       return 1;
     }
     archive.addFile(file);

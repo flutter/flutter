@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../base/logging.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 
 // https://android.googlesource.com/platform/system/core/+/android-4.4_r1/adb/OVERVIEW.TXT
@@ -83,11 +83,11 @@ class Adb {
     controller = new StreamController(
       onListen: () async {
         socket = await Socket.connect(InternetAddress.LOOPBACK_IP_V4, adbServerPort);
-        logging.fine('--> host:track-devices');
+        printTrace('--> host:track-devices');
         socket.add(_createAdbRequest('host:track-devices'));
         socket.listen((List<int> data) {
           String stringResult = new String.fromCharCodes(data);
-          logging.fine('<-- ${stringResult.trim()}');
+          printTrace('<-- ${stringResult.trim()}');
           _AdbServerResponse response = new _AdbServerResponse(
             stringResult,
             noStatus: !isFirstNotification
@@ -116,14 +116,14 @@ class Adb {
     Socket socket = await Socket.connect(InternetAddress.LOOPBACK_IP_V4, adbServerPort);
 
     try {
-      logging.fine('--> $command');
+      printTrace('--> $command');
       socket.add(_createAdbRequest(command));
       List<List<int>> result = await socket.toList();
       List<int> data = result.fold(<int>[], (List<int> previous, List<int> element) {
         return previous..addAll(element);
       });
       String stringResult = new String.fromCharCodes(data);
-      logging.fine('<-- ${stringResult.trim()}');
+      printTrace('<-- ${stringResult.trim()}');
       return stringResult;
     } finally {
       socket.destroy();

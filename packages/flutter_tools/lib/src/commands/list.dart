@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
@@ -19,12 +20,13 @@ class ListCommand extends FlutterCommand {
     List<Device> devices = await deviceManager.getDevices();
 
     if (devices.isEmpty) {
-      print('No connected devices.');
+      printStatus('No connected devices.');
     } else {
-      print('${devices.length} connected ${pluralize('device', devices.length)}:');
-      print('');
+      printStatus('${devices.length} connected ${pluralize('device', devices.length)}:');
+      printStatus('');
+
       for (Device device in devices) {
-        print('${device.name} (${device.id})');
+        printStatus('${device.name} (${device.id})');
       }
     }
 
