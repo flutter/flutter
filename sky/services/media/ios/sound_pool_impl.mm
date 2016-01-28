@@ -87,7 +87,9 @@
 }
 
 - (BOOL)play:(int32_t)stream {
-  return [[self playerForID:stream] playAtTime:0.0];
+  AVAudioPlayer *player = [self playerForID:stream];
+  player.currentTime = 0.0;
+  return [player play];
 }
 
 - (BOOL)play:(int32_t)stream
@@ -111,10 +113,12 @@
   player.volume = volume;
   player.numberOfLoops = loop ? -1 : 0;
   player.rate = rate;
-  return [player playAtTime:0.0];
+  player.currentTime = 0.0;
+  return [player play];
 }
 
 - (BOOL)resume:(int32_t)stream {
+  // Unlike a play (from beginning), we don't set the current time to 0
   return [[self playerForID:stream] play];
 }
 
@@ -248,7 +252,10 @@ void SoundPoolImpl::Play(int32_t sound_id,
                          float rate,
                          const ::media::SoundPool::PlayCallback& callback) {
   base::mac::ScopedNSAutoreleasePool pool;
-  BOOL playResult = [sound_pool_ play:stream_id
+  // To match Android semantics, during the load operation, we return the
+  // ID used to key the audio player in the sound pool map as the stream ID.
+  // The caller is returning that ID to us as the sound ID.
+  BOOL playResult = [sound_pool_ play:sound_id
                                volume:AverageVolume(channel_volumes)
                                  loop:loop
                                  rate:rate];
