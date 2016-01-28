@@ -34,7 +34,7 @@ class _AnimatedEvaluation<T> extends Animation<T> with ProxyAnimatedMixin {
 }
 
 class _ChainedEvaluation<T> extends Animatable<T> {
-  _ChainedEvaluation(this._parent, this._evaluatable);
+  const _ChainedEvaluation(this._parent, this._evaluatable);
 
   final Animatable<double> _parent;
   final Animatable<T> _evaluatable;
@@ -45,14 +45,14 @@ class _ChainedEvaluation<T> extends Animatable<T> {
   }
 }
 
-class Tween<T extends dynamic> extends Animatable<T> {
-  Tween({ this.begin, this.end });
+abstract class TweenBase<T extends dynamic> extends Animatable<T> {
+  const TweenBase();
 
   /// The value this variable has at the beginning of the animation.
-  T begin;
+  T get begin;
 
   /// The value this variable has at the end of the animation.
-  T end;
+  T get end;
 
   /// Returns the value this variable has at the given animation clock value.
   T lerp(double t) => begin + (end - begin) * t;
@@ -67,6 +67,27 @@ class Tween<T extends dynamic> extends Animatable<T> {
       return end;
     return lerp(t);
   }
+}
+
+/// Immutable variant of Tween for use in const expressions.
+class ConstTween<T extends dynamic> extends TweenBase<T> {
+  const ConstTween({ this.begin, this.end });
+
+  /// The value this variable has at the beginning of the animation.
+  final T begin;
+
+  /// The value this variable has at the end of the animation.
+  final T end;
+}
+
+class Tween<T extends dynamic> extends TweenBase<T> {
+  Tween({ this.begin, this.end });
+
+  /// The value this variable has at the beginning of the animation.
+  T begin;
+
+  /// The value this variable has at the end of the animation.
+  T end;
 }
 
 /// An animated variable containing a color.
