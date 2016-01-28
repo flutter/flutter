@@ -9,61 +9,80 @@
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace mojo {
-namespace {
+namespace skia {
 
 // The limit of the number of GPU resources we hold in the GrContext's
 // GPU cache.
-const int kMaxGaneshResourceCacheCount = 2048;
+constexpr int kMaxGaneshResourceCacheCount = 2048;
 
 // The limit of the bytes allocated toward GPU resources in the GrContext's
 // GPU cache.
-const size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
-
-}
-
-GaneshContext::Scope::Scope(GaneshContext* context)
-    : previous_(MGLGetCurrentContext()) {
-  context->gl_context_->MakeCurrent();
-}
-
-GaneshContext::Scope::~Scope() {
-  MGLMakeCurrent(previous_);
-}
+constexpr size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
 
 GaneshContext::GaneshContext(base::WeakPtr<GLContext> gl_context)
     : gl_context_(gl_context) {
   DCHECK(gl_context_);
   gl_context_->AddObserver(this);
+
   Scope scope(this);
 
-  skia::RefPtr<GrGLInterface> interface =
-      skia::AdoptRef(skia_bindings::CreateMojoSkiaGLBinding());
+  ::skia::RefPtr<GrGLInterface> interface =
+      ::skia::AdoptRef(CreateMojoSkiaGLBinding());
   DCHECK(interface);
 
-  context_ = skia::AdoptRef(GrContext::Create(
+  gr_context_ = ::skia::AdoptRef(GrContext::Create(
       kOpenGL_GrBackend, reinterpret_cast<GrBackendContext>(interface.get())));
-  DCHECK(context_);
-  context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
-                                   kMaxGaneshResourceCacheBytes);
+  DCHECK(gr_context_);
+
+  gr_context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
+                                      kMaxGaneshResourceCacheBytes);
 }
 
 GaneshContext::~GaneshContext() {
-  if (context_) {
-    Scope scope(this);
-    context_.clear();
-  }
-  if (gl_context_.get())
+  if (gl_context_)
     gl_context_->RemoveObserver(this);
-}
 
-bool GaneshContext::InScope() const {
-  return gl_context_->IsCurrent();
+  ReleaseContext();
 }
 
 void GaneshContext::OnContextLost() {
-  context_->abandonContext();
-  context_.clear();
+  ReleaseContext();
+}
+
+void GaneshContext::ReleaseContext() {
+  Scope(this);
+  gr_context_->abandonContext();
+  gr_context_.clear();
   gl_context_.reset();
 }
 
+void GaneshContext::EnterScope() {
+  CHECK(!scope_entered_);
+  scope_entered_ = true;
+
+  if (gl_context_) {
+    previous_mgl_context_ = MGLGetCurrentContext();
+    gl_context_->MakeCurrent();
+
+    // Reset the Ganesh context when entering its scope in case the caller
+    // performed low-level GL operations which might interfere with Ganesh's
+    // state expectations.
+    if (gr_context_)
+      gr_context_->resetContext();
+  }
+}
+
+void GaneshContext::ExitScope() {
+  CHECK(scope_entered_);
+  scope_entered_ = false;
+
+  // Flush the Ganesh context when exiting its scope.
+  if (gr_context_)
+    gr_context_->flush();
+
+  MGLMakeCurrent(previous_mgl_context_);
+  previous_mgl_context_ = MGL_NO_CONTEXT;
+}
+
+}  // namespace skia
 }  // namespace mojo
