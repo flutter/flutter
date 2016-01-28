@@ -90,8 +90,14 @@ class TestCommand extends FlutterCommand {
 
     Directory testDir = runFlutterTests ? _flutterUnitTestDir : _currentPackageTestDir;
 
-    if (testArgs.isEmpty)
+    if (testArgs.isEmpty) {
+      if (!testDir.existsSync()) {
+        printError("Test directory '${testDir.path}' not found.");
+        return 1;
+      }
+
       testArgs.addAll(_findTests(testDir));
+    }
 
     testArgs.insert(0, '--');
     if (Platform.environment['TERM'] == 'dumb')
