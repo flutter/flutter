@@ -7,7 +7,7 @@ import 'dart:collection';
 import 'dart:developer';
 import 'dart:ui' as ui;
 
-import 'package:collection/priority_queue.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 
 /// Slows down animations by this factor to help in development.
