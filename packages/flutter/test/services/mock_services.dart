@@ -1,4 +1,4 @@
-import 'package:flutter/src/services/shell.dart' as shell;
+import 'package:flutter/src/services/shell.dart';
 import 'package:mojo/bindings.dart' as bindings;
 
 // Tests can use ServiceMocker to register replacement implementations
