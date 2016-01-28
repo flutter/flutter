@@ -131,17 +131,14 @@ class DeviceStore {
       device = devices.firstWhere(
           (Device dev) => (dev.id == config.deviceId),
           orElse: () => null);
-      if (device == null) {
-        printError('Warning: Device ID ${config.deviceId} not found');
-      }
     } else if (devices.length == 1) {
       // Step 2: If no identifier is specified and there is only one connected
       // device, pick that one.
       device = devices[0];
     } else if (devices.length > 1) {
       // Step 3: D:
-      printTrace('Multiple devices are connected, but no device ID was specified.');
-      printTrace('Attempting to launch on all connected devices.');
+      printStatus('Multiple devices are connected, but no device ID was specified.');
+      printStatus('Attempting to launch on all connected devices.');
     }
 
     return device;

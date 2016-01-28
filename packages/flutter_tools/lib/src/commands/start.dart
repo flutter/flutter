@@ -28,8 +28,6 @@ String findMainDartFile([String target]) {
   }
 }
 
-// We don't yet support iOS here. https://github.com/flutter/flutter/issues/1036
-
 abstract class StartCommandBase extends FlutterCommand {
   StartCommandBase() {
     argParser.addFlag('checked',
@@ -51,7 +49,7 @@ abstract class StartCommandBase extends FlutterCommand {
 class StartCommand extends StartCommandBase {
   final String name = 'start';
   final String description = 'Start your Flutter app on an attached device '
-                             '(defaults to checked/debug mode) (Android only).';
+                             '(defaults to checked/debug mode).';
 
   StartCommand() {
     argParser.addFlag('full-restart',
@@ -138,6 +136,8 @@ Future<int> startApp(
       platformArgs['trace-startup'] = traceStartup;
     if (clearLogs != null)
       platformArgs['clear-logs'] = clearLogs;
+
+    printStatus('Starting $mainPath on ${device.name}...');
 
     bool result = await device.startApp(
       package,

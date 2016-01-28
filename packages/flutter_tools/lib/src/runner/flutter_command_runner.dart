@@ -42,8 +42,9 @@ class FlutterCommandRunner extends CommandRunner {
         help: 'The root directory of the Flutter repository. Defaults to \$$kFlutterRootEnvironmentVariableName if set,\n'
               'otherwise defaults to a value derived from the location of this tool.', defaultsTo: _defaultFlutterRoot);
 
-    argParser.addOption('android-device-id',
-        help: 'Serial number of the target Android device.');
+    argParser.addOption('device-id',
+        abbr: 'd',
+        help: 'Target device id.');
 
     argParser.addSeparator('Local build selection options (not normally required):');
     argParser.addFlag('debug',
@@ -208,7 +209,7 @@ class FlutterCommandRunner extends CommandRunner {
       configs.add(new BuildConfiguration.prebuilt(
         hostPlatform: hostPlatform,
         targetPlatform: TargetPlatform.android,
-        deviceId: globalResults['android-device-id']
+        deviceId: globalResults['device-id']
       ));
 
       if (hostPlatform == HostPlatform.linux) {
@@ -222,12 +223,14 @@ class FlutterCommandRunner extends CommandRunner {
       if (hostPlatform == HostPlatform.mac) {
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.iOS
+          targetPlatform: TargetPlatform.iOS,
+          deviceId: globalResults['device-id']
         ));
 
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.iOSSimulator
+          targetPlatform: TargetPlatform.iOSSimulator,
+          deviceId: globalResults['device-id']
         ));
       }
     } else {
@@ -244,7 +247,7 @@ class FlutterCommandRunner extends CommandRunner {
           targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
           buildPath: globalResults['android-debug-build-path'],
-          deviceId: globalResults['android-device-id']
+          deviceId: globalResults['device-id']
         ));
 
         configs.add(new BuildConfiguration.local(
@@ -262,7 +265,8 @@ class FlutterCommandRunner extends CommandRunner {
             hostPlatform: hostPlatform,
             targetPlatform: TargetPlatform.iOS,
             enginePath: enginePath,
-            buildPath: globalResults['ios-debug-build-path']
+            buildPath: globalResults['ios-debug-build-path'],
+            deviceId: globalResults['device-id']
           ));
 
           configs.add(new BuildConfiguration.local(
@@ -270,7 +274,8 @@ class FlutterCommandRunner extends CommandRunner {
             hostPlatform: hostPlatform,
             targetPlatform: TargetPlatform.iOSSimulator,
             enginePath: enginePath,
-            buildPath: globalResults['ios-sim-debug-build-path']
+            buildPath: globalResults['ios-sim-debug-build-path'],
+            deviceId: globalResults['device-id']
           ));
         }
       }
@@ -282,7 +287,7 @@ class FlutterCommandRunner extends CommandRunner {
           targetPlatform: TargetPlatform.android,
           enginePath: enginePath,
           buildPath: globalResults['android-release-build-path'],
-          deviceId: globalResults['android-device-id']
+          deviceId: globalResults['device-id']
         ));
 
         configs.add(new BuildConfiguration.local(
@@ -300,7 +305,8 @@ class FlutterCommandRunner extends CommandRunner {
             hostPlatform: hostPlatform,
             targetPlatform: TargetPlatform.iOS,
             enginePath: enginePath,
-            buildPath: globalResults['ios-release-build-path']
+            buildPath: globalResults['ios-release-build-path'],
+            deviceId: globalResults['device-id']
           ));
 
           configs.add(new BuildConfiguration.local(
@@ -308,7 +314,8 @@ class FlutterCommandRunner extends CommandRunner {
             hostPlatform: hostPlatform,
             targetPlatform: TargetPlatform.iOSSimulator,
             enginePath: enginePath,
-            buildPath: globalResults['ios-sim-release-build-path']
+            buildPath: globalResults['ios-sim-release-build-path'],
+            deviceId: globalResults['device-id']
           ));
         }
       }
