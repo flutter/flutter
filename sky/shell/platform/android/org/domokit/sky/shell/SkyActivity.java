@@ -138,7 +138,7 @@ public class SkyActivity extends Activity {
         File dataDir = new File(PathUtils.getDataDirectory(this));
         File appBundle = new File(dataDir, SkyApplication.APP_BUNDLE);
         if (appBundle.exists()) {
-            mView.getEngine().runFromBundle(appBundle.getPath());
+            mView.runFromBundle(appBundle.getPath());
             return;
         }
     }
@@ -151,7 +151,7 @@ public class SkyActivity extends Activity {
         String action = intent.getAction();
 
         if (Intent.ACTION_RUN.equals(action)) {
-            mView.getEngine().runFromBundle(intent.getDataString());
+            mView.runFromBundle(intent.getDataString());
             String route = intent.getStringExtra("route");
             if (route != null)
                 mView.getEngine().pushRoute(route);
@@ -167,7 +167,7 @@ public class SkyActivity extends Activity {
         if (!bundle.exists()) {
             return false;
         }
-        mView.getEngine().runFromBundle(bundle.getPath());
+        mView.runFromBundle(bundle.getPath());
         return true;
     }
 
