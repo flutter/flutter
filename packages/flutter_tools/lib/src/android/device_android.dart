@@ -251,7 +251,6 @@ class AndroidDevice extends Device {
   }
 
   bool startBundle(AndroidApk apk, String bundlePath, {
-    bool poke: false,
     bool checked: true,
     bool traceStartup: false,
     String route,
@@ -264,8 +263,7 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    if (!poke)
-      _forwardObservatoryPort();
+    _forwardObservatoryPort();
 
     if (clearLogs)
       this.clearLogs();
@@ -276,6 +274,7 @@ class AndroidDevice extends Device {
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
       '-d', deviceTmpPath,
+      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
     ]);
     if (checked)
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
@@ -307,7 +306,6 @@ class AndroidDevice extends Device {
         if (startBundle(
           package,
           buildResult.localBundlePath,
-          poke: platformArgs['poke'],
           checked: checked,
           traceStartup: platformArgs['trace-startup'],
           route: route,

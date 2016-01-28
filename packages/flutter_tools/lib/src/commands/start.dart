@@ -54,9 +54,9 @@ class StartCommand extends StartCommandBase {
                              '(defaults to checked/debug mode) (Android only).';
 
   StartCommand() {
-    argParser.addFlag('poke',
-        negatable: false,
-        help: 'Restart the connection to the server.');
+    argParser.addFlag('full-restart',
+        defaultsTo: true,
+        help: 'Stop any currently running application process before starting the app.');
     argParser.addFlag('clear-logs',
         defaultsTo: true,
         help: 'Clear log history before starting the app.');
@@ -71,21 +71,18 @@ class StartCommand extends StartCommandBase {
       downloadApplicationPackagesAndConnectToDevices(),
     ], eagerError: true);
 
-    bool poke = argResults['poke'];
     bool clearLogs = argResults['clear-logs'];
 
-    // Only stop and reinstall if the user did not specify a poke.
     int result = await startApp(
       devices,
       applicationPackages,
       toolchain,
       target: argResults['target'],
-      install: !poke,
-      stop: !poke,
+      install: true,
+      stop: argResults['full-restart'],
       checked: argResults['checked'],
       traceStartup: argResults['trace-startup'],
       route: argResults['route'],
-      poke: poke,
       clearLogs: clearLogs
     );
 
@@ -104,7 +101,6 @@ Future<int> startApp(
   bool checked: true,
   bool traceStartup: false,
   String route,
-  bool poke: false,
   bool clearLogs: false
 }) async {
 
@@ -138,8 +134,6 @@ Future<int> startApp(
 
     Map<String, dynamic> platformArgs = <String, dynamic>{};
 
-    if (poke != null)
-      platformArgs['poke'] = poke;
     if (traceStartup != null)
       platformArgs['trace-startup'] = traceStartup;
     if (clearLogs != null)
