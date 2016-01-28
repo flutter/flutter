@@ -271,14 +271,20 @@ public class PlatformViewAndroid extends SurfaceView {
         ServiceRegistry localRegistry = new ServiceRegistry();
         configureLocalServices(localRegistry);
 
+        mServiceProvider = new PlatformServiceProvider(core, getContext(), localRegistry);
+    }
+
+    void runFromBundle(String path) {
+        Core core = CoreImpl.getInstance();
         Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
-        mServiceProvider = new PlatformServiceProvider(core, getContext(), localRegistry);
         ServiceProvider.MANAGER.bind(mServiceProvider, serviceProvider.second);
 
         ServicesData services = new ServicesData();
         services.servicesProvidedByEmbedder = serviceProvider.first;
         mSkyEngine.setServices(services);
+
+        mSkyEngine.runFromBundle(path);
     }
 
     private static native long nativeAttach(int inputObserverHandle);
