@@ -7,6 +7,8 @@
 
 @interface SkySurface : UIView
 
--(instancetype) initWithShellView:(sky::shell::ShellView *) shellView;
+- (instancetype)initWithShellView:(sky::shell::ShellView*)shellView;
+
+- (void)visibilityDidChange:(BOOL)visible;
 
 @end

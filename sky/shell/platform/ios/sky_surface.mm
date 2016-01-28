@@ -111,12 +111,23 @@ static std::string TracesBasePath() {
   if (self) {
     base::FilePath tracesPath =
         base::FilePath::FromUTF8Unsafe(TracesBasePath());
-    sky::shell::Shell::Shared()
-        .tracing_controller()
-        .set_traces_base_path(tracesPath);
+    sky::shell::Shell::Shared().tracing_controller().set_traces_base_path(
+        tracesPath);
 
     _shell_view.reset(shellView);
     self.multipleTouchEnabled = YES;
+
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+           selector:@selector(applicationBecameActive:)
+               name:UIApplicationDidBecomeActiveNotification
+             object:nil];
+
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+           selector:@selector(applicationWillResignActive:)
+               name:UIApplicationWillResignActiveNotification
+             object:nil];
   }
   return self;
 }
@@ -163,7 +174,6 @@ static std::string TracesBasePath() {
 
   _platformViewInitialized = YES;
 
-  [self notifySurfaceCreation];
   [self connectToEngineAndLoad];
 }
 
@@ -173,12 +183,7 @@ static std::string TracesBasePath() {
   return view;
 }
 
-- (void)notifySurfaceCreation {
-  TRACE_EVENT0("flutter", "notifySurfaceCreation");
-  self.platformView->SurfaceCreated(self.acceleratedWidget);
-}
-
--(const char *) flxBundlePath {
+- (const char*)flxBundlePath {
   // In case this runner is part of the precompilation SDK, the FLX bundle is
   // present in the application bundle instead of the runner bundle. Attempt
   // to resolve the path there first.
@@ -213,11 +218,6 @@ static std::string TracesBasePath() {
 #else
   _sky_engine->RunFromPrecompiledSnapshot(bundle_path);
 #endif
-}
-
-- (void)notifySurfaceDestruction {
-  TRACE_EVENT0("flutter", "notifySurfaceDestruction");
-  self.platformView->SurfaceDestroyed();
 }
 
 #pragma mark - UIResponder overrides for raw touches
@@ -299,6 +299,38 @@ static std::string TracesBasePath() {
   return YES;
 }
 
+#pragma mark - Surface Lifecycle
+
+- (void)notifySurfaceCreation {
+  TRACE_EVENT0("flutter", "notifySurfaceCreation");
+  self.platformView->SurfaceCreated(self.acceleratedWidget);
+}
+
+- (void)notifySurfaceDestruction {
+  TRACE_EVENT0("flutter", "notifySurfaceDestruction");
+  self.platformView->SurfaceDestroyed();
+}
+
+- (void)visibilityDidChange:(BOOL)visible {
+  if (visible) {
+    [self notifySurfaceCreation];
+  } else {
+    [self notifySurfaceDestruction];
+  }
+}
+
+- (void)applicationBecameActive:(NSNotification*)notification {
+  if (_sky_engine) {
+    _sky_engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::RESUMED);
+  }
+}
+
+- (void)applicationWillResignActive:(NSNotification*)notification {
+  if (_sky_engine) {
+    _sky_engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::PAUSED);
+  }
+}
+
 #pragma mark - Misc.
 
 + (Class)layerClass {
@@ -306,7 +338,8 @@ static std::string TracesBasePath() {
 }
 
 - (void)dealloc {
-  [self notifySurfaceDestruction];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+
   [super dealloc];
 }
 
