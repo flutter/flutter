@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'src/base/context.dart';
 import 'src/base/process.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/apk.dart';
@@ -70,7 +69,8 @@ Future main(List<String> args) async {
       // We've caught an exit code.
       exit(error.exitCode);
     } else {
-      printError(error, chain.terse.toTrace());
+      stderr.writeln(error);
+      stderr.writeln(chain.terse);
       exit(1);
     }
   });
