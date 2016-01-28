@@ -16,6 +16,8 @@ source_set("flow") {
     "color_filter_layer.h",
     "container_layer.cc",
     "container_layer.h",
+    "child_scene_layer.cc",
+    "child_scene_layer.h",
     "instrumentation.cc",
     "instrumentation.h",
     "layer.cc",
@@ -41,5 +43,6 @@ source_set("flow") {
   deps = [
     "//base",
     "//skia",
+    "//mojo/services/gfx/composition/interfaces",
   ]
 }

@@ -24,6 +24,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
 
   void addPerformanceOverlay(int enabledOptions, Rect bounds) native "SceneBuilder_addPerformanceOverlay";
   void addPicture(Offset offset, Picture picture) native "SceneBuilder_addPicture";
+  void addChildScene(Offset offset,
+                     int physicalWidth,
+                     int physicalHeight,
+                     int sceneToken) native "SceneBuilder_addChildScene";
   void setRasterizerTracingThreshold(int frameInterval) native "SceneBuilder_setRasterizerTracingThreshold";
 
   Scene build() native "SceneBuilder_build";
