@@ -6,6 +6,7 @@
 #define SKY_SHELL_UI_ANIMATOR_H_
 
 #include "base/memory/weak_ptr.h"
+#include "mojo/services/gfx/composition/interfaces/scheduling.mojom.h"
 #include "mojo/services/vsync/interfaces/vsync.mojom.h"
 #include "sky/shell/ui/engine.h"
 
@@ -24,11 +25,17 @@ class Animator {
   void Start();
   void Stop();
 
+  void set_scene_scheduler(
+      mojo::gfx::composition::SceneSchedulerPtr scene_scheduler) {
+    scene_scheduler_ = scene_scheduler.Pass();
+  }
+
   void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
     vsync_provider_ = vsync_provider.Pass();
   }
 
  private:
+  void Animate(mojo::gfx::composition::FrameInfoPtr frame_info);
   void BeginFrame(int64_t time_stamp);
   void OnFrameComplete();
   bool AwaitVSync();
@@ -36,6 +43,7 @@ class Animator {
   Engine::Config config_;
   rasterizer::RasterizerPtr rasterizer_;
   Engine* engine_;
+  mojo::gfx::composition::SceneSchedulerPtr scene_scheduler_;
   vsync::VSyncProviderPtr vsync_provider_;
   int outstanding_requests_;
   bool did_defer_frame_request_;

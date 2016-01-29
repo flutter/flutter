@@ -9,11 +9,13 @@
 
 namespace mojo {
 class GLContext;
+class ApplicationConnector;
 class Shell;
 
 class GLContextOwner {
  public:
-  explicit GLContextOwner(mojo::Shell* shell);
+  explicit GLContextOwner(ApplicationConnector* connector);
+
   ~GLContextOwner();
 
   const base::WeakPtr<mojo::GLContext>& context() const { return context_; }

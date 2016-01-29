@@ -9,13 +9,17 @@ mojo_native_application("mojo") {
   output_name = "flutter"
 
   sources = [
+    "application_impl.cc",
+    "application_impl.h",
     "content_handler_impl.cc",
     "content_handler_impl.h",
     "main_mojo.cc",
     "platform_view_mojo.cc",
     "platform_view_mojo.h",
-    "sky_application_impl.cc",
-    "sky_application_impl.h",
+    "pointer_converter_mojo.cc",
+    "pointer_converter_mojo.h",
+    "view_impl.cc",
+    "view_impl.h",
   ]
 
   deps = [
@@ -30,10 +34,11 @@ mojo_native_application("mojo") {
     "//mojo/public/interfaces/application",
     "//mojo/services/asset_bundle/interfaces",
     "//mojo/services/content_handler/interfaces",
-    "//mojo/services/gpu/interfaces",
-    "//mojo/services/keyboard/interfaces",
-    "//mojo/services/native_viewport/interfaces",
+    "//mojo/services/gfx/composition/interfaces",
+    "//mojo/services/input_events/interfaces",
     "//mojo/services/service_registry/interfaces",
+    "//mojo/services/ui/input/interfaces",
+    "//mojo/services/ui/views/interfaces",
     "//services/asset_bundle:lib",
     "//skia",
     "//sky/engine/public/sky",

@@ -16,6 +16,7 @@
 #include "flow/picture_layer.h"
 #include "flow/performance_overlay_layer.h"
 #include "flow/shader_mask_layer.h"
+#include "flow/child_scene_layer.h"
 #include "flow/transform_layer.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
@@ -50,6 +51,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushShaderMask) \
   V(SceneBuilder, pop) \
   V(SceneBuilder, addPicture) \
+  V(SceneBuilder, addChildScene) \
   V(SceneBuilder, addPerformanceOverlay) \
   V(SceneBuilder, setRasterizerTracingThreshold) \
   V(SceneBuilder, build)
@@ -159,6 +161,21 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture)
     std::unique_ptr<flow::PictureLayer> layer(new flow::PictureLayer());
     layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
     layer->set_picture(picture->toSkia());
+    m_currentLayer->Add(std::move(layer));
+}
+
+void SceneBuilder::addChildScene(const Offset& offset,
+                                 int physical_width,
+                                 int physical_height,
+                                 uint32_t scene_token) {
+    if (!m_currentLayer)
+        return;
+    std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
+    layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
+    layer->set_physical_size(SkISize::Make(physical_width, physical_height));
+    mojo::gfx::composition::SceneTokenPtr token = mojo::gfx::composition::SceneToken::New();
+    token->value = scene_token;
+    layer->set_scene_token(token.Pass());
     m_currentLayer->Add(std::move(layer));
 }
 

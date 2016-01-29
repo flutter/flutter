@@ -44,6 +44,7 @@ source_set("common") {
     "//mojo/public/cpp/application",
     "//mojo/public/interfaces/application",
     "//mojo/services/asset_bundle/interfaces",
+    "//mojo/services/gfx/composition/interfaces",
     "//mojo/services/keyboard/interfaces",
     "//mojo/services/navigation/interfaces",
     "//mojo/services/vsync/interfaces",
@@ -76,17 +77,17 @@ source_set("gpu_direct") {
 
 source_set("gpu_mojo") {
   sources = [
+    "gpu/mojo/gl_texture_recycler.cc",
+    "gpu/mojo/gl_texture_recycler.h",
     "gpu/mojo/rasterizer_mojo.cc",
     "gpu/mojo/rasterizer_mojo.h",
   ]
 
   deps = [
-    ":common",
+    "//mojo/gpu",
     "//mojo/public/c/gpu",
-    "//mojo/public/c/gpu:gpu_onscreen",
-    "//mojo/services/gpu/interfaces",
-    "//mojo/services/native_viewport/interfaces",
-    "//mojo/skia:skia_bindings",
+    "//mojo/skia",
+    ":common",
   ]
 }
 

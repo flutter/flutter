@@ -9,8 +9,12 @@
 #include "base/memory/weak_ptr.h"
 #include "base/observer_list.h"
 #include "mojo/public/c/gpu/MGL/mgl.h"
+#include "mojo/public/cpp/bindings/interface_ptr.h"
 
 namespace mojo {
+class ApplicationConnector;
+class CommandBuffer;
+using CommandBufferPtr = InterfacePtr<CommandBuffer>;
 class Shell;
 
 class GLContext {
@@ -23,7 +27,13 @@ class GLContext {
     virtual ~Observer();
   };
 
-  static base::WeakPtr<GLContext> Create(Shell* shell);
+  // Creates an offscreen GL context.
+  static base::WeakPtr<GLContext> CreateOffscreen(
+      ApplicationConnector* connector);
+
+  // Creates a GL context from a command buffer.
+  static base::WeakPtr<GLContext> CreateFromCommandBuffer(
+      CommandBufferPtr command_buffer);
 
   void MakeCurrent();
   bool IsCurrent();
@@ -33,7 +43,7 @@ class GLContext {
   void RemoveObserver(Observer* observer);
 
  private:
-  explicit GLContext(Shell* shell);
+  explicit GLContext(CommandBufferPtr command_buffer);
   ~GLContext();
 
   static void ContextLostThunk(void* self);

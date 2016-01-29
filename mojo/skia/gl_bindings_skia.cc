@@ -12,14 +12,13 @@
 #include "mojo/public/c/gpu/GLES2/gl2extmojo.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
-namespace skia_bindings {
+namespace mojo {
+namespace skia {
 
 GrGLInterface* CreateMojoSkiaGLBinding() {
   GrGLInterface* interface = new GrGLInterface;
   interface->fStandard = kGLES_GrGLStandard;
-  interface->fExtensions.init(kGLES_GrGLStandard,
-                              glGetString,
-                              nullptr,
+  interface->fExtensions.init(kGLES_GrGLStandard, glGetString, nullptr,
                               glGetIntegerv);
 
   GrGLInterface::Functions* functions = &interface->fFunctions;
@@ -145,8 +144,11 @@ GrGLInterface* CreateMojoSkiaGLBinding() {
   functions->fBindUniformLocation = glBindUniformLocationCHROMIUM;
   functions->fBlitFramebuffer = nullptr;  // TODO: Implement.
   functions->fGenerateMipmap = glGenerateMipmap;
+  functions->fMatrixLoadf = nullptr;         // TODO: Implement.
+  functions->fMatrixLoadIdentity = nullptr;  // TODO: Implement.
 
   return interface;
 }
 
 }  // namespace skia
+}  // namespace mojo

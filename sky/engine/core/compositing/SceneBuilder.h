@@ -45,6 +45,10 @@ public:
 
     void addPerformanceOverlay(uint64_t enabledOptions, const Rect& bounds);
     void addPicture(const Offset& offset, Picture* picture);
+    void addChildScene(const Offset& offset,
+                       int physical_width,
+                       int physical_height,
+                       uint32_t scene_token);
 
     void setRasterizerTracingThreshold(uint32_t frameInterval);
 

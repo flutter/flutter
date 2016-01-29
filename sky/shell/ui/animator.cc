@@ -67,6 +67,10 @@ void Animator::Start() {
   RequestFrame();
 }
 
+void Animator::Animate(mojo::gfx::composition::FrameInfoPtr frame_info) {
+  BeginFrame(frame_info->frame_time);
+}
+
 void Animator::BeginFrame(int64_t time_stamp) {
   TRACE_EVENT_ASYNC_END0("flutter", "Frame request pending", this);
   DCHECK(engine_requested_frame_);
@@ -110,11 +114,16 @@ void Animator::OnFrameComplete() {
 }
 
 bool Animator::AwaitVSync() {
-  if (!vsync_provider_)
-    return false;
-  vsync_provider_->AwaitVSync(
-      base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr()));
-  return true;
+  if (scene_scheduler_) {
+    scene_scheduler_->ScheduleFrame(
+        base::Bind(&Animator::Animate, weak_factory_.GetWeakPtr()));
+    return true;
+  } else if (vsync_provider_) {
+    vsync_provider_->AwaitVSync(
+        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr()));
+    return true;
+  }
+  return false;
 }
 
 }  // namespace shell
