@@ -52,7 +52,8 @@ class CreateCommand extends Command {
 
     printStatus('');
 
-    String message = '''All done! To run your application:
+    String message = '''
+All done! To run your application:
 
   \$ cd ${out.path}
   \$ flutter start
@@ -64,14 +65,14 @@ class CreateCommand extends Command {
         return code;
     }
 
+    printStatus('');
     printStatus(message);
     return 0;
   }
 
   Future<int> pubGet({
     String directory: '',
-    bool skipIfAbsent: false,
-    bool verbose: true
+    bool skipIfAbsent: false
   }) async {
     File pubSpecYaml = new File(path.join(directory, 'pubspec.yaml'));
     File pubSpecLock = new File(path.join(directory, 'pubspec.lock'));
@@ -85,10 +86,9 @@ class CreateCommand extends Command {
     }
 
     if (!pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
-      if (verbose)
-        printStatus("Running pub get in $directory...");
+      printStatus("Running 'pub get' in '$directory'...");
       int code = await runCommandAndStreamOutput(
-        [sdkBinaryName('pub'), 'get'],
+        <String>[sdkBinaryName('pub'), '--verbosity=warning', 'get'],
         workingDirectory: directory
       );
       if (code != 0)
@@ -131,7 +131,7 @@ abstract class Template {
       File file = new File(path.join(dir.path, filePath));
       file.parent.createSync();
       file.writeAsStringSync(contents);
-      printStatus(file.path);
+      printStatus('  ${file.path}');
     });
   }
 
