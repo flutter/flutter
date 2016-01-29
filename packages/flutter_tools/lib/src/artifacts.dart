@@ -192,10 +192,13 @@ class ArtifactStore {
     }
   }
 
-  static void ensureHasSkyEnginePackage() {
-    Directory skyEnginePackage = new Directory(path.join(packageRoot, 'sky_engine'));
-    if (!skyEnginePackage.existsSync()) {
+  static void validateSkyEnginePackage() {
+    if (engineRevision == null) {
       printError("Cannot locate the sky_engine package; did you include 'flutter' in your pubspec.yaml file?");
+      throw new ProcessExit(2);
+    }
+    if (engineRevision != expectedEngineRevision) {
+      printError("Error: incompatible sky_engine package; please run 'pub get' to get the correct one.\n");
       throw new ProcessExit(2);
     }
   }
@@ -209,6 +212,18 @@ class ArtifactStore {
         _engineRevision = revisionFile.readAsStringSync();
     }
     return _engineRevision;
+  }
+
+  static String _expectedEngineRevision;
+
+  static String get expectedEngineRevision {
+    if (_expectedEngineRevision == null) {
+      // TODO(jackson): Parse the .packages file and use the path from there instead
+      File revisionFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'packages', 'sky_engine', 'REVISION'));
+      if (revisionFile.existsSync())
+        _expectedEngineRevision = revisionFile.readAsStringSync();
+    }
+    return _expectedEngineRevision;
   }
 
   static String getCloudStorageBaseUrl(String platform) {
@@ -295,7 +310,7 @@ class ArtifactStore {
   }
 
   static Directory _getCacheDirForPlatform(String platform) {
-    ensureHasSkyEnginePackage();
+    validateSkyEnginePackage();
     Directory baseDir = _getBaseCacheDir();
     // TODO(jamesr): Add support for more configurations.
     String config = 'Release';
