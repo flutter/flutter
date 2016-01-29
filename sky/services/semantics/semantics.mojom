@@ -53,7 +53,7 @@ struct SemanticGeometry {
 };
 
 [ServiceName="semantics::SemanticsClient"]
-interface SemanticsClient {
+interface SemanticsListener {
   // The OS side, invoked from the app.
   UpdateSemanticsTree(array<SemanticsNode> nodes);
 };
@@ -61,6 +61,7 @@ interface SemanticsClient {
 [ServiceName="semantics::SemanticsServer"]
 interface SemanticsServer {
   // The app side, invoked from the engine.
+  AddSemanticsListener(SemanticsListener listener);
   Tap(uint32 nodeID);
   LongPress(uint32 nodeID);
   ScrollLeft(uint32 nodeID);
