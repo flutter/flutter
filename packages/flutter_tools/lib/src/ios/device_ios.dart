@@ -131,7 +131,7 @@ class IOSDevice extends Device {
         if (Platform.isMacOS) {
           printError('$command not found. $macInstructions');
         } else {
-          printError('Cannot control iOS devices or simulators.  $command is not available on your platform.');
+          printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
         }
       }
       return command;
@@ -261,7 +261,7 @@ class IOSDevice extends Device {
       return 2;
     }
     return await runCommandAndStreamOutput([loggerPath],
-        prefix: 'iOS: ', filter: new RegExp('FlutterRunner'));
+        prefix: 'iOS: ', filter: new RegExp(r'(FlutterRunner|flutter.runner.Runner)'));
   }
 }
 
@@ -315,8 +315,8 @@ class IOSSimulator extends Device {
           'which is not supposed to happen.');
       for (Match match in matches) {
         if (match.groupCount > 0) {
-          // TODO: We're killing simulator devices inside an accessor method;
-          // we probably shouldn't be changing state here.
+          // TODO(devoncarew): We're killing simulator devices inside an accessor
+          // method; we probably shouldn't be changing state here.
           printError('Killing simulator ${match.group(1)}');
           runSync([xcrunPath, 'simctl', 'shutdown', match.group(2)]);
         }
@@ -518,12 +518,21 @@ class IOSSimulator extends Device {
     String logFilePath = path.join(
       homeDirectory, 'Library', 'Logs', 'CoreSimulator', simulatorDeviceID, 'system.log'
     );
+
     if (clear)
       runSync(['rm', logFilePath]);
+
+    // TODO(devoncarew): The log message prefix could be shortened or removed.
+    // Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]:
+    // TODO(devoncarew): This truncates multi-line messages like:
+    // Jan 29 01:31:43 devoncarew-macbookpro3 CoreSimulatorBridge[96656]: Requesting... {
+    //     environment =     {
+    //     };
+    //   }
     return await runCommandAndStreamOutput(
       ['tail', '-f', logFilePath],
-      prefix: 'iOS sim: ',
-      filter: new RegExp(r'.*SkyShell.*')
+      prefix: 'iOS: ',
+      filter: new RegExp(r'(FlutterRunner|flutter.runner.Runner)')
     );
   }
 }

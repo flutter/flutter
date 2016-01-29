@@ -137,7 +137,7 @@ Future<int> startApp(
     if (clearLogs != null)
       platformArgs['clear-logs'] = clearLogs;
 
-    printStatus('Starting $mainPath on ${device.name}...');
+    printStatus('Starting ${_getDisplayPath(mainPath)} on ${device.name}...');
 
     bool result = await device.startApp(
       package,
@@ -149,7 +149,7 @@ Future<int> startApp(
     );
 
     if (!result) {
-      printError('Could not start \'${package.name}\' on \'${device.id}\'');
+      printError('Error starting application on ${device.name}.');
     } else {
       startedSomething = true;
     }
@@ -164,4 +164,13 @@ Future<int> startApp(
   }
 
   return startedSomething ? 0 : 2;
+}
+
+/// Return a relative path if [fullPath] is contained by the cwd, else return an
+/// absolute path.
+String _getDisplayPath(String fullPath) {
+  String cwd = Directory.current.path + Platform.pathSeparator;
+  if (fullPath.startsWith(cwd))
+    return fullPath.substring(cwd.length);
+  return fullPath;
 }
