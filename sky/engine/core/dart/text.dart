@@ -394,6 +394,89 @@ class ParagraphStyle {
   }
 }
 
+/// A direction in which text flows.
+enum TextDirection {
+  /// The text flows from right to left (e.g. Arabic, Hebrew).
+  rtl,
+
+  /// The text flows from left to right (e.g., English, French).
+  ltr
+}
+
+/// A rectangle enclosing a run of text.
+class TextBox {
+  const TextBox.fromLTRBD(
+    this.left,
+    this.top,
+    this.right,
+    this.bottom,
+    this.direction
+  );
+
+  TextBox._(
+    this.left,
+    this.top,
+    this.right,
+    this.bottom,
+    int directionIndex
+  ) : direction = TextDirection.values[directionIndex];
+
+  /// The left edge of the text box, irrespective of direction.
+  final double left;
+
+  /// The top edge of the text box.
+  final double top;
+
+  /// The right edge of the text box, irrespective of direction.
+  final double right;
+
+  /// The bottom edge of the text box.
+  final double bottom;
+
+  /// The direction in which text inside this box flows.
+  final TextDirection direction;
+
+  /// Returns a rect of the same size as this box.
+  Rect toRect() => new Rect.fromLTRB(left, top, right, bottom);
+
+  /// The left edge of the box for ltr text; the right edge of the box for rtl text.
+  double get start {
+    switch (direction) {
+      case TextDirection.rtl:
+        return right;
+      case TextDirection.ltr:
+        return left;
+    }
+  }
+
+  /// The right edge of the box for ltr text; the left edge of the box for rtl text.
+  double get end {
+    switch (direction) {
+      case TextDirection.rtl:
+        return left;
+      case TextDirection.ltr:
+        return right;
+    }
+  }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! TextBox)
+      return false;
+    final TextBox typedOther = other;
+    return typedOther.left == left
+        && typedOther.top == top
+        && typedOther.right == right
+        && typedOther.bottom == bottom
+        && typedOther.direction == direction;
+  }
+
+  int get hashCode => hashValues(left, top, right, bottom, direction);
+
+  String toString() => "TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)";
+}
+
 abstract class Paragraph extends NativeFieldWrapperClass2 {
   double get minWidth native "Paragraph_minWidth";
   void set minWidth(double value) native "Paragraph_setMinWidth";
@@ -413,7 +496,7 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   void layout() native "Paragraph_layout";
   void paint(Canvas canvas, Offset offset) native "Paragraph_paint";
 
-  List<Rect> getRectsForRange(int start, int end) native "Paragraph_getRectsForRange";
+  List<TextBox> getBoxesForRange(int start, int end) native "Paragraph_getRectsForRange";
 }
 
 class ParagraphBuilder extends NativeFieldWrapperClass2 {

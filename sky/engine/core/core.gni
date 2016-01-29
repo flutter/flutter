@@ -214,6 +214,8 @@ sky_core_files = [
   "text/Paragraph.h",
   "text/ParagraphBuilder.cpp",
   "text/ParagraphBuilder.h",
+  "text/TextBox.cpp",
+  "text/TextBox.h",
   "window/window.cc",
   "window/window.h",
 ]

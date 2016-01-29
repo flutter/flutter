@@ -36,6 +36,7 @@ dart:ui,RRect,RRect.
 dart:ui,Scene,Scene.
 dart:ui,SceneBuilder,SceneBuilder.
 dart:ui,Shader,Shader.
+dart:ui,TextBox,TextBox._
 dart:ui,Tracing,Tracing.
 dart:ui,VelocityTracker,VelocityTracker.
 dart:ui,WheelEvent,WheelEvent.
