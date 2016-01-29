@@ -751,6 +751,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
             debugPrint('a manner consistent with the constraints provided, and, in addition, that');
             debugPrint('the getMinIntrinsicWidth(), getMaxIntrinsicWidth(), etc, functions all');
             debugPrint('return consistent values within the same constraints.');
+            debugPrint('If you are not writing your own RenderObject subclass, then this is not');
+            debugPrint('your fault. Contact support: https://github.com/flutter/flutter/issues/new');
           }
           return true;
         });
