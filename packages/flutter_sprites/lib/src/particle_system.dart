@@ -151,6 +151,8 @@ class ParticleSystem extends Node {
   double _emitCounter;
   int _numEmittedParticles = 0;
 
+  double opacity = 1.0;
+
   static Paint _paint = new Paint()
     ..filterQuality = ui.FilterQuality.low
     ..isAntiAlias = false;
@@ -358,6 +360,7 @@ class ParticleSystem extends Node {
   }
 
   void paint(Canvas canvas) {
+    if (opacity == 0.0) return;
 
     List<ui.RSTransform> transforms = <ui.RSTransform>[];
     List<Rect> rects = <Rect>[];
@@ -394,7 +397,7 @@ class ParticleSystem extends Node {
       // Color
       if (particle.simpleColorSequence != null) {
         Color particleColor = new Color.fromARGB(
-          particle.simpleColorSequence[0].toInt().clamp(0, 255),
+          (particle.simpleColorSequence[0] * opacity).toInt().clamp(0, 255),
           particle.simpleColorSequence[1].toInt().clamp(0, 255),
           particle.simpleColorSequence[2].toInt().clamp(0, 255),
           particle.simpleColorSequence[3].toInt().clamp(0, 255));
@@ -405,6 +408,9 @@ class ParticleSystem extends Node {
           particleColor = particle.colorSequence.colorAtPosition(particle.colorPos);
         } else {
           particleColor = colorSequence.colorAtPosition(particle.colorPos);
+        }
+        if (opacity != 1.0) {
+          particleColor = particleColor.withAlpha((particleColor.alpha * opacity).toInt().clamp(0, 255));
         }
         colors.add(particleColor);
       }
