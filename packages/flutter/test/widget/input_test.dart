@@ -28,6 +28,7 @@ class MockKeyboard implements KeyboardService {
 }
 
 void main() {
+  WidgetFlutterBinding.ensureInitialized(); // for serviceMocker
   MockKeyboard mockKeyboard = new MockKeyboard();
   serviceMocker.registerMockService(KeyboardService.serviceName, mockKeyboard);
 

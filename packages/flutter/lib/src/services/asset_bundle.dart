@@ -16,7 +16,7 @@ import 'fetch.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
-import 'shell.dart';
+import 'binding.dart';
 
 abstract class AssetBundle {
   ImageResource loadImage(String key);

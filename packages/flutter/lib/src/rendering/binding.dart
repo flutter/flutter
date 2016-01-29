@@ -18,7 +18,7 @@ import 'semantics.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-abstract class Renderer extends Scheduler
+abstract class Renderer extends Object with Scheduler, MojoShell
   implements HitTestable {
 
   void initInstances() {
@@ -116,7 +116,7 @@ void debugDumpSemanticsTree() {
 
 /// A concrete binding for applications that use the Rendering framework
 /// directly. This is the glue that binds the framework to the Flutter engine.
-class RenderingFlutterBinding extends BindingBase with Scheduler, Gesturer, Renderer {
+class RenderingFlutterBinding extends BindingBase with Scheduler, Gesturer, MojoShell, Renderer {
   RenderingFlutterBinding({ RenderBox root }) {
     assert(renderView != null);
     renderView.child = root;

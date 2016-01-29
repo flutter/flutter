@@ -21,4 +21,4 @@ export 'src/services/image_resource.dart';
 export 'src/services/keyboard.dart';
 export 'src/services/print.dart';
 export 'src/services/service_registry.dart';
-export 'src/services/shell.dart';
+
