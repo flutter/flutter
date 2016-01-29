@@ -412,6 +412,8 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
 
   void layout() native "Paragraph_layout";
   void paint(Canvas canvas, Offset offset) native "Paragraph_paint";
+
+  List<Rect> getRectsForRange(int start, int end) native "Paragraph_getRectsForRange";
 }
 
 class ParagraphBuilder extends NativeFieldWrapperClass2 {

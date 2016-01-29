@@ -257,6 +257,11 @@ struct DartConverter<std::vector<T>> {
     return list;
   }
 
+  static void SetReturnValue(Dart_NativeArguments args,
+                             const std::vector<ValueType>& val) {
+    Dart_SetReturnValue(args, ToDart(val));
+  }
+
   static std::vector<ValueType> FromDart(Dart_Handle handle) {
     std::vector<ValueType> result;
 

@@ -13,12 +13,16 @@ namespace blink {
 // Very simple wrapper for SkRect to add a null state.
 class Rect {
  public:
+  Rect() : is_null(true) { }
+  explicit Rect(SkRect r) : sk_rect(std::move(r)), is_null(false) { }
+
   SkRect sk_rect;
   bool is_null;
 };
 
 template <>
 struct DartConverter<Rect> {
+  static Dart_Handle ToDart(const Rect& val);
   static Rect FromDart(Dart_Handle handle);
   static Rect FromArguments(Dart_NativeArguments args,
                             int index,

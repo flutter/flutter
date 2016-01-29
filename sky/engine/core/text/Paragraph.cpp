@@ -4,7 +4,9 @@
 
 #include "sky/engine/core/text/ParagraphBuilder.h"
 
+#include "sky/engine/core/painting/Rect.h"
 #include "sky/engine/core/rendering/PaintInfo.h"
+#include "sky/engine/core/rendering/RenderText.h"
 #include "sky/engine/core/rendering/style/RenderStyle.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/graphics/GraphicsContext.h"
@@ -33,6 +35,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, alphabeticBaseline) \
   V(Paragraph, ideographicBaseline) \
   V(Paragraph, layout) \
+  V(Paragraph, getRectsForRange) \
   V(Paragraph, paint)
 
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
@@ -105,6 +108,35 @@ void Paragraph::paint(Canvas* canvas, const Offset& offset)
     // TODO(abarth): Remove the concept of RenderLayers.
 
     skCanvas->translate(-offset.sk_size.width(), -offset.sk_size.height());
+}
+
+std::vector<Rect> Paragraph::getRectsForRange(unsigned start, unsigned end) {
+  if (end <= start || start == end)
+    return std::vector<Rect>();
+
+  unsigned offset = 0;
+  Vector<IntRect> rects;
+  for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
+    if (!object->isText())
+      continue;
+    RenderText* text = toRenderText(object);
+    unsigned length = text->textLength();
+    if (offset + length > start) {
+      unsigned startOffset = offset > start ? 0 : start - offset;
+      unsigned endOffset = end - offset;
+      text->absoluteRectsForRange(rects, startOffset, endOffset);
+    }
+    offset += length;
+    if (offset >= end)
+      break;
+  }
+
+  std::vector<Rect> result;
+  result.reserve(rects.size());
+  for (auto& rect : rects)
+    result.emplace_back(rect);
+
+  return result;
 }
 
 } // namespace blink

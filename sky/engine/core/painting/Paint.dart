@@ -33,7 +33,8 @@ class Paint {
     // The most common usage is a Paint with no options besides a color and
     // anti-aliasing.  In this case, save time by just returning the color
     // as an int.
-    if (strokeWidth == null &&
+    if (color != null &&
+        strokeWidth == null &&
         isAntiAlias &&
         colorFilter == null &&
         drawLooper == null &&

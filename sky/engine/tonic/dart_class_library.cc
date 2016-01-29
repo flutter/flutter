@@ -19,18 +19,37 @@ DartClassLibrary::~DartClassLibrary() {
 }
 
 Dart_PersistentHandle DartClassLibrary::GetClass(const DartWrapperInfo& info) {
-  const auto& result = cache_.insert(std::make_pair(&info, nullptr));
+  const auto& result = info_cache_.insert(std::make_pair(&info, nullptr));
   if (!result.second) {
     // Already present, return value.
     return result.first->second;
   }
+  return GetAndCacheClass(
+      info.library_name, info.interface_name, &result.first->second);
+}
 
-  auto it = providers_.find(info.library_name);
+Dart_PersistentHandle DartClassLibrary::GetClass(
+    const std::string& library_name, const std::string& interface_name) {
+  auto key = std::make_pair(library_name, interface_name);
+  const auto& result = name_cache_.insert(std::make_pair(key, nullptr));
+  if (!result.second) {
+    // Already present, return value.
+    return result.first->second;
+  }
+  return GetAndCacheClass(
+      library_name.c_str(), interface_name.c_str(), &result.first->second);
+}
+
+Dart_PersistentHandle DartClassLibrary::GetAndCacheClass(
+    const char* library_name,
+    const char* interface_name,
+    Dart_PersistentHandle* cache_slot) {
+  auto it = providers_.find(library_name);
   DCHECK(it != providers_.end());
 
-  Dart_Handle class_handle = it->second->GetClassByName(info.interface_name);
-  result.first->second = Dart_NewPersistentHandle(class_handle);
-  return result.first->second;
+  Dart_Handle class_handle = it->second->GetClassByName(interface_name);
+  *cache_slot = Dart_NewPersistentHandle(class_handle);
+  return *cache_slot;
 }
 
 }  // namespace blink
