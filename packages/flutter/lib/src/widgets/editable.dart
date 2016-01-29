@@ -14,57 +14,19 @@ import 'framework.dart';
 import 'scrollable.dart';
 import 'scroll_behavior.dart';
 
+export 'package:flutter/painting.dart' show TextSelection;
+
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
-
-/// A range of characters in a string of tet.
-class TextRange {
-  const TextRange({ this.start, this.end });
-
-  /// A text range that starts and ends at position.
-  const TextRange.collapsed(int position)
-    : start = position,
-      end = position;
-
-  /// A text range that contains nothing and is not in the text.
-  static const TextRange empty = const TextRange(start: -1, end: -1);
-
-  /// The index of the first character in the range.
-  final int start;
-
-  /// The next index after the characters in this range.
-  final int end;
-
-  /// Whether this range represents a valid position in the text.
-  bool get isValid => start >= 0 && end >= 0;
-
-  /// Whether this range is empty (but still potentially placed inside the text).
-  bool get isCollapsed => start == end;
-
-  /// The text before this range.
-  String textBefore(String text) {
-    return text.substring(0, start);
-  }
-
-  /// The text after this range.
-  String textAfter(String text) {
-    return text.substring(end);
-  }
-
-  /// The text inside this range.
-  String textInside(String text) {
-    return text.substring(start, end);
-  }
-}
 
 class _KeyboardClientImpl implements KeyboardClient {
   _KeyboardClientImpl({
-    this.text: '',
+    String text: '',
+    TextSelection selection,
     this.onUpdated,
     this.onSubmitted
-  }) {
+  }) : text = text, selection = selection ?? new TextSelection.collapsed(offset: text.length) {
     assert(onUpdated != null);
     assert(onSubmitted != null);
-    selection = new TextRange(start: text.length, end: text.length);
   }
 
   /// The current text being edited.
@@ -80,7 +42,7 @@ class _KeyboardClientImpl implements KeyboardClient {
   TextRange composing = TextRange.empty;
 
   /// The range of text that is currently selected.
-  TextRange selection = TextRange.empty;
+  TextSelection selection;
 
   /// A keyboard client stub that can be attached to a keyboard service.
   KeyboardClientStub createStub() {
@@ -125,7 +87,7 @@ class _KeyboardClientImpl implements KeyboardClient {
   void commitText(String text, int newCursorPosition) {
     // TODO(abarth): Why is |newCursorPosition| always 1?
     TextRange committedRange = _replaceOrAppend(composing, text);
-    selection = new TextRange.collapsed(committedRange.end);
+    selection = new TextSelection.collapsed(offset: committedRange.end);
     composing = TextRange.empty;
     onUpdated();
   }
@@ -138,9 +100,9 @@ class _KeyboardClientImpl implements KeyboardClient {
         new TextRange(start: selection.end, end: afterRangeEnd);
     _delete(afterRange);
     _delete(beforeRange);
-    selection = new TextRange(
-      start: math.max(selection.start - beforeLength, 0),
-      end: math.max(selection.end - beforeLength, 0)
+    selection = new TextSelection(
+      baseOffset: math.max(selection.start - beforeLength, 0),
+      extentOffset: math.max(selection.end - beforeLength, 0)
     );
     onUpdated();
   }
@@ -153,12 +115,12 @@ class _KeyboardClientImpl implements KeyboardClient {
   void setComposingText(String text, int newCursorPosition) {
     // TODO(abarth): Why is |newCursorPosition| always 1?
     composing = _replaceOrAppend(composing, text);
-    selection = new TextRange.collapsed(composing.end);
+    selection = new TextSelection.collapsed(offset: composing.end);
     onUpdated();
   }
 
   void setSelection(int start, int end) {
-    selection = new TextRange(start: start, end: end);
+    selection = new TextSelection(baseOffset: start, extentOffset: end);
     onUpdated();
   }
 
@@ -175,10 +137,12 @@ class _KeyboardClientImpl implements KeyboardClient {
 class EditableString {
   EditableString({
     String text: '',
+    TextSelection selection,
     VoidCallback onUpdated,
     VoidCallback onSubmitted
   }) : _client = new _KeyboardClientImpl(
       text: text,
+      selection: selection,
       onUpdated: onUpdated,
       onSubmitted: onSubmitted
     );
@@ -192,7 +156,7 @@ class EditableString {
   TextRange get composing => _client.composing;
 
   /// The range of text that is currently selected.
-  TextRange get selection => _client.selection;
+  TextSelection get selection => _client.selection;
 
   /// A keyboard client stub that can be attached to a keyboard service.
   ///
@@ -215,7 +179,8 @@ class RawEditableLine extends Scrollable {
     this.focused: false,
     this.hideText: false,
     this.style,
-    this.cursorColor
+    this.cursorColor,
+    this.selectionColor
   }) : super(
     key: key,
     initialScrollOffset: 0.0,
@@ -236,6 +201,9 @@ class RawEditableLine extends Scrollable {
 
   /// The color to use when painting the cursor.
   final Color cursorColor;
+
+  /// The color to use when painting the selection.
+  final Color selectionColor;
 
   RawEditableTextState createState() => new RawEditableTextState();
 }
@@ -307,9 +275,9 @@ class RawEditableTextState extends ScrollableState<RawEditableLine> {
     assert(config.focused != null);
     assert(config.cursorColor != null);
 
-    if (config.focused && _cursorTimer == null)
+    if (_cursorTimer == null && config.focused && config.value.selection.isCollapsed)
       _startCursorTimer();
-    else if (!config.focused && _cursorTimer != null)
+    else if (_cursorTimer != null && (!config.focused || !config.value.selection.isCollapsed))
       _stopCursorTimer();
 
     return new SizeObserver(
@@ -319,6 +287,7 @@ class RawEditableTextState extends ScrollableState<RawEditableLine> {
         style: config.style,
         cursorColor: config.cursorColor,
         showCursor: _showCursor,
+        selectionColor: config.selectionColor,
         hideText: config.hideText,
         onContentSizeChanged: _handleContentSizeChanged,
         paintOffset: new Offset(-scrollOffset, 0.0)
@@ -334,6 +303,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     this.style,
     this.cursorColor,
     this.showCursor,
+    this.selectionColor,
     this.hideText,
     this.onContentSizeChanged,
     this.paintOffset
@@ -343,6 +313,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final TextStyle style;
   final Color cursorColor;
   final bool showCursor;
+  final Color selectionColor;
   final bool hideText;
   final SizeChangedCallback onContentSizeChanged;
   final Offset paintOffset;
@@ -352,6 +323,8 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       text: _styledTextSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
+      selectionColor: selectionColor,
+      selection: value.selection,
       onContentSizeChanged: onContentSizeChanged,
       paintOffset: paintOffset
     );
@@ -362,6 +335,8 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     renderObject.text = _styledTextSpan;
     renderObject.cursorColor = cursorColor;
     renderObject.showCursor = showCursor;
+    renderObject.selectionColor = selectionColor;
+    renderObject.selection = value.selection;
     renderObject.onContentSizeChanged = onContentSizeChanged;
     renderObject.paintOffset = paintOffset;
   }

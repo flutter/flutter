@@ -20,6 +20,7 @@ class Input extends StatefulComponent {
   Input({
     GlobalKey key,
     this.initialValue: '',
+    this.initialSelection,
     this.keyboardType: KeyboardType.text,
     this.icon,
     this.labelText,
@@ -35,8 +36,11 @@ class Input extends StatefulComponent {
     assert(key != null);
   }
 
-  /// Initial editable text for the input field.
+  /// The initial editable text for the input field.
   final String initialValue;
+
+  /// The initial selection for this input field.
+  final TextSelection initialSelection;
 
   /// The type of keyboard to use for editing the text.
   final KeyboardType keyboardType;
@@ -90,6 +94,7 @@ class _InputState extends State<Input> {
     _value = config.initialValue;
     _editableString = new EditableString(
       text: _value,
+      selection: config.initialSelection,
       onUpdated: _handleTextUpdated,
       onSubmitted: _handleTextSubmitted
     );
@@ -215,7 +220,8 @@ class _InputState extends State<Input> {
         focused: focused,
         style: textStyle,
         hideText: config.hideText,
-        cursorColor: cursorColor
+        cursorColor: cursorColor,
+        selectionColor: cursorColor
       )
     ));
 
