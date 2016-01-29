@@ -46,6 +46,8 @@ public:
     void layout();
     void paint(Canvas* canvas, const Offset& offset);
 
+    std::vector<Rect> getRectsForRange(unsigned start, unsigned end);
+
     RenderView* renderView() const { return m_renderView.get(); }
 
     static void RegisterNatives(DartLibraryNatives* natives);
