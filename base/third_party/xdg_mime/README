@@ -1,8 +1,0 @@
-This module is a simple module that parses the proposed MIME spec listed
-at http://freedesktop.org/.  It is currently targetted at version 0.12.
-There are no formal releases planned for this module, and it is not
-intended to be installed at this time.  Rather, it is meant to be used
-by other libraries or applications to add support for the MIME system.
-
-It is dual-licensed under the terms of the GNU Lesser General Public
-License, and the Academic Free License, version 2.0.

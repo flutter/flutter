@@ -1,6 +1,0 @@
-Prefs is a general-purpose key-value store for application preferences.
-
-The Prefs code lives in base/prefs but is not part of the
-'base/base.gyp:base' library because of a desire to keep its use
-optional. If you use Prefs, you should add a GYP dependency on
-base/base.gyp:base_prefs.

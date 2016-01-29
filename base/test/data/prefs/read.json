@@ -1,8 +1,0 @@
-{
-  "homepage": "http://www.cnn.com",
-  "some_directory": "/usr/local/",
-  "tabs": {
-    "new_windows_in_tabs": true,
-    "max_tabs": 20
-  }
-}

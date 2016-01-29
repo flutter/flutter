@@ -1,0 +1,14 @@
+diff --git a/third_party/libxml/src/include/win32config.h b/third_party/libxml/src/include/win32config.h
+index 3fc9be5..5112ce6 100644
+--- a/third_party/libxml/src/include/win32config.h
++++ b/third_party/libxml/src/include/win32config.h
+@@ -95,7 +95,9 @@ static int isnan (double d) {
+ 
+ #if defined(_MSC_VER)
+ #define mkdir(p,m) _mkdir(p)
++#if _MSC_VER < 1900
+ #define snprintf _snprintf
++#endif
+ #if _MSC_VER < 1500
+ #define vsnprintf(b,c,f,a) _vsnprintf(b,c,f,a)
+ #endif
