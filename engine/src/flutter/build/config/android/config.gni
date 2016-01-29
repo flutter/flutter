@@ -201,4 +201,6 @@ if (is_android) {
   } else {
     assert(false, "Unknown Android ABI: " + current_cpu)
   }
+
+  android_log_tag = "\"flutter\""
 }
