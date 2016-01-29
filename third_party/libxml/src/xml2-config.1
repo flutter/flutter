@@ -1,0 +1,31 @@
+.TH GNOME-XML 1 "3 July 1999" Version 1.1.0
+.SH NAME
+xml-config - script to get information about the installed version of GNOME-XML
+.SH SYNOPSIS
+.B xml-config
+[\-\-prefix\fI[=DIR]\fP] [\-\-libs] [\-\-cflags] [\-\-version] [\-\-help]
+.SH DESCRIPTION
+\fIxml-config\fP is a tool that is used to determine the compile and
+linker flags that should be used to compile and link programs that use
+\fIGNOME-XML\fP.
+.SH OPTIONS
+.l
+\fIxml-config\fP accepts the following options:
+.TP 8
+.B  \-\-version
+Print the currently installed version of \fIGNOME-XML\fP on the standard output.
+.TP 8
+.B  \-\-libs
+Print the linker flags that are necessary to link a \fIGNOME-XML\fP program.
+.TP 8
+.B  \-\-cflags
+Print the compiler flags that are necessary to compile a \fIGNOME-XML\fP program.
+.TP 8
+.B  \-\-prefix=PREFIX
+If specified, use PREFIX instead of the installation prefix that
+\fIGNOME-XML\fP was built with when computing the output for the
+\-\-cflags and \-\-libs options. This option must be specified before
+any \-\-libs or \-\-cflags options.
+.SH AUTHOR
+This manual page was written by Fredrik Hallenberg <hallon@lysator.liu.se>,
+for the Debian GNU/linux system (but may be used by others).

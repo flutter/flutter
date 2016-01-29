@@ -1,3 +1,0 @@
-per-file trace_event*=nduca@chromium.org
-per-file trace_event*=dsinclair@chromium.org
-per-file trace_event_android.cc=wangxianzhu@chromium.org

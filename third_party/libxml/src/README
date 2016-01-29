@@ -1,0 +1,39 @@
+
+                  XML toolkit from the GNOME project
+
+Full documentation is available on-line at
+    http://xmlsoft.org/
+
+This code is released under the MIT Licence see the Copyright file.
+
+To build on an Unixised setup:
+   ./configure ; make ; make install
+To build on Windows:
+   see instructions on win32/Readme.txt
+
+To assert build quality:
+   on an Unixised setup:
+      run make tests
+   otherwise:
+       There is 3 standalone tools runtest.c runsuite.c testapi.c, which
+       should compile as part of the build or as any application would.
+       Launch them from this directory to get results, runtest checks 
+       the proper functionning of libxml2 main APIs while testapi does
+       a full coverage check. Report failures to the list.
+
+To report bugs, follow the instructions at: 
+  http://xmlsoft.org/bugs.html
+
+A mailing-list xml@gnome.org is available, to subscribe:
+    http://mail.gnome.org/mailman/listinfo/xml
+
+The list archive is at:
+    http://mail.gnome.org/archives/xml/
+
+All technical answers asked privately will be automatically answered on
+the list and archived for public access unless pricacy is explicitely
+required and justified.
+
+Daniel Veillard
+
+$Id$

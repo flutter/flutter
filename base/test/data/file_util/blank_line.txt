@@ -1,3 +1,0 @@
-The next line is blank.
-
-But this one isn't.

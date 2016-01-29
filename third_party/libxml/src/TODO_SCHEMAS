@@ -1,0 +1,31 @@
+- implement counted transitions at the automata level
+
+- Unicode:
+  + upgrade to 3.2
+  + improve the python script to generate better test
+    expressions to check the list of ranges.
+
+- Implement the interface at the SAX level
+
+- Implement the missing parts in the Structure part
+   + all content model
+   + enumerations
+   + countless others c.f. the TODO scattered in the code
+
+- Complete the Built-In datatype collections and Facets implementations
+
+- Regression tests based on
+  + the primer:
+    http://www.w3.org/TR/xmlschema-0/
+  + the Schemas Test Collection:
+    http://www.w3.org/2001/05/xmlschema-test-collection/
+  + archives of the schemas-dev list
+
+- Integrity constraints:
+  + what's that ? How need to read about it
+
+- "formal" checking, i.e. go through the full Structure spec and
+  bind code and associated parts of the Schemas spec
+
+- go though the erratas
+  http://www.w3.org/2001/05/xmlschema-errata
