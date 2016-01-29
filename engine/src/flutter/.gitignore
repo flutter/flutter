@@ -21,6 +21,7 @@ Thumbs.db
 .idea
 
 # directories pulled in via deps or hooks
+/base/
 /build/linux/bin/eu-strip
 /buildtools/
 /dart/
