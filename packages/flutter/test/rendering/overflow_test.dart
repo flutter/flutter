@@ -30,7 +30,8 @@ void main() {
       child: new RenderCustomPaint(
         child: child = new RenderOverflowBox(
           child: text = new RenderParagraph(new PlainTextSpan('Hello World')),
-          maxHeight: height1 / 2.0
+          maxHeight: height1 / 2.0,
+          alignment: const FractionalOffset(0.0, 0.0)
         ),
         painter: new TestCallbackPainter(
           onPaint: () {
