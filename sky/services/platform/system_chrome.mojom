@@ -1,0 +1,113 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="sky_services"]
+module flutter.platform;
+
+/// Specifies an acceptable orientation for the interface to be in.
+/// A mask of acceptable interface orientations is created by or'ing individual
+/// options.
+enum /* options */ InterfaceOrientation {
+  Portrait  = 1,
+  Landscape = 2,
+};
+
+/// Specifies a particular device orientation. A mask of device interface
+/// orientations is created by or'ing individual options.
+///
+/// Discussion:
+/// To determine which values correspond to which orientations, first position
+/// the device in its default orientation (this is the orientation that the
+/// system first uses for its boot logo, or the orientation in which the
+/// hardware logos or markings are upright, or the orientation in which the
+/// cameras are at the top). If this is a portrait orientation, then this is
+/// PortraitUp. Otherwise, it's LandscapeLeft. As you rotate the device by 90
+/// degrees in a counter-clockwise direction around the axis that traverses the
+/// screen, you step through each value in this enum in the order given. (For a
+/// device with a landscape default orientation, the orientation obtained by
+/// rotating the device 90 degrees clockwise from its default orientation is
+/// PortraitUp.)
+enum /* options*/ DeviceOrientation {
+  PortraitUp      = 1,
+  LandscapeLeft   = 2,
+  PortraitDown    = 4,
+  LandscapeRight  = 8,
+};
+
+/// Specifies a system overlay at a particular location. Certain platforms
+/// may not use all overlays specified here.
+enum SystemUIOverlay {
+  /// The status bar provided by the embedder on the top of the application
+  /// surface (optional)
+  Top    = 1,
+
+  /// The status bar provided by the embedder on the bottom of the application
+  /// surface (optional)
+  Bottom = 2,
+};
+
+/// Controls specific aspects of the embedder interface.
+interface SystemChrome {
+  /// Specifies the set of orientations the application interface can
+  /// be displayed in.
+  ///
+  /// Both arguments to this method are masks prepared by or'ing enum values
+  /// In both cases, the value 0 is synonymous with having all options enabled.
+  ///
+  /// Discussion:
+  /// The primary option is the interface orientation mask. This specifies
+  /// the interface orientations the application was designed to function in.
+  /// For example, if the application cannot function in landscape, the
+  /// option would be `InterfaceOrientation::Portrait`. In such a case,
+  /// the embedder will refuse the respect orientation updates from the
+  /// platform that would cause the interface to be in landscape mode.
+  /// If on the other hand, the application can function in both portrait and
+  /// landscape, the option would have to be `(::Portrait | ::Landscape)` or 0
+  ///
+  /// Sometimes, the application developer may require more fine grained control
+  /// over the interface orientation. Say the application can function when the
+  /// device is in landscape mode. But the developer wants to prevent the
+  /// interface orientation from switching between landscape left and right
+  /// as the user interacts with the device. In that case, the mask may be
+  /// `(::LandscapeLeft | ::Portrait...)` which will cause the embedder to
+  /// refuse interface updates that are caused by the device switching to
+  /// landscape right.
+  ///
+  /// If the current interface orientation is not in one of the preferred
+  /// orientations when this method is called, the orientation switches to
+  /// the nearest match immediately.
+  ///
+  /// If the masks specify an impossible configuration
+  /// (InterfaceOrientation::Portrait with DeviceOrientation::LandscapeLeft for
+  /// example), the call is ignored and false is returned.
+  ///
+  /// Arguments:
+  ///   interface_orientation_mask: A mask of `InterfaceOrientation` enum
+  ///                               values.
+  ///      device_orientation_mask: A mask of `DeviceOrientation` enum values.
+  ///
+  /// Return Value:
+  ///   boolean indicating if the orientation masks are valid and the changes
+  ///   could be conveyed successfully to the embedder.
+  SetPreferredOrientations(uint32 interface_orientation_mask,
+                           uint32 device_orientation_mask) => (bool success);
+
+
+  /// Specifies the set of overlays visible on the embedder when the
+  /// application is running. The embedder may choose to ignore unsupported
+  /// overlays
+  ///
+  /// Arguments:
+  ///   style: A mask of `SystemUIOverlay` enum values that denotes the overlays
+  ///          to show.
+  ///
+  /// Return Value:
+  ///   boolean indicating if the preference was conveyed successfully to the
+  ///   embedder.
+  ///
+  /// Platform Specific Notes:
+  ///   If the overlay is unsupported on the platform, enabling or disabling
+  ///   that overlay is a no-op and always return true.
+  SetEnabledSystemUIOverlays(uint32 overlays) => (bool success);
+};
