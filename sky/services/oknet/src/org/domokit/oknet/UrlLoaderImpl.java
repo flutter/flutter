@@ -37,6 +37,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.concurrent.Executor;
 
 import okio.BufferedSource;
@@ -248,9 +249,13 @@ public class UrlLoaderImpl implements UrlLoader {
                     MediaType mediaType = body.contentType();
                     if (mediaType != null) {
                         urlResponse.mimeType = mediaType.type() + "/" + mediaType.subtype();
-                        Charset charset = mediaType.charset();
-                        if (charset != null) {
-                            urlResponse.charset = charset.displayName();
+                        try {
+                          Charset charset = mediaType.charset();
+                          if (charset != null) {
+                              urlResponse.charset = charset.displayName();
+                          }
+                        } catch (UnsupportedCharsetException e) {
+                          Log.e(TAG, "Unsupported charset", e);
                         }
                     }
 
