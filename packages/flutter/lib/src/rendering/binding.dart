@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:mojo/core.dart' as core;
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 import 'box.dart';
@@ -26,6 +27,7 @@ abstract class Renderer extends Object with Scheduler, MojoShell
     _instance = this;
     ui.window.onMetricsChanged = handleMetricsChanged;
     initRenderView();
+    initSemantics();
     assert(renderView != null);
     assert(() {
       initServiceExtensions();
@@ -41,8 +43,6 @@ abstract class Renderer extends Object with Scheduler, MojoShell
     if (renderView == null) {
       renderView = new RenderView();
       renderView.scheduleInitialFrame();
-      if (_semanticsClient != null)
-        renderView.scheduleInitialSemantics();
     }
     handleMetricsChanged(); // configures renderView's metrics
   }
@@ -65,12 +65,11 @@ abstract class Renderer extends Object with Scheduler, MojoShell
     renderView.configuration = new ViewConfiguration(size: ui.window.size);
   }
 
-  mojom.SemanticsListener _semanticsClient;
-  void setSemanticsClient(mojom.SemanticsListener client) {
-    assert(_semanticsClient == null);
-    _semanticsClient = client;
-    if (renderView != null)
-      renderView.scheduleInitialSemantics();
+  void initSemantics() {
+    SemanticsNode.onSemanticsEnabled = renderView.scheduleInitialSemantics;
+    provideService(mojom.SemanticsServer.serviceName, (core.MojoMessagePipeEndpoint endpoint) {
+      return new SemanticsServer();
+    });
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
@@ -84,9 +83,9 @@ abstract class Renderer extends Object with Scheduler, MojoShell
     RenderObject.flushCompositingBits();
     RenderObject.flushPaint();
     renderView.compositeFrame(); // this sends the bits to the GPU
-    if (_semanticsClient != null) {
+    if (SemanticsNode.hasListeners) {
       RenderObject.flushSemantics();
-      SemanticsNode.sendSemanticsTreeTo(_semanticsClient);
+      SemanticsNode.sendSemanticsTree();
     }
   }
 

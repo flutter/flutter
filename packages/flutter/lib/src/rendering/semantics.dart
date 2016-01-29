@@ -333,7 +333,18 @@ class SemanticsNode extends AbstractNode {
     return result;
   }
 
-  static void sendSemanticsTreeTo(mojom.SemanticsListener client) {
+  static List<mojom.SemanticsListener> _listeners;
+  static bool get hasListeners => _listeners != null && _listeners.length > 0;
+  static VoidCallback onSemanticsEnabled; // set by the binding
+  static void addListener(mojom.SemanticsListener listener) {
+    if (!hasListeners)
+      onSemanticsEnabled();
+    _listeners ??= <mojom.SemanticsListener>[];
+    _listeners.add(listener);
+  }
+
+  static void sendSemanticsTree() {
+    assert(hasListeners);
     for (SemanticsNode oldNode in _detachedNodes) {
       // The other side will have forgotten this node if we even send
       // it again, so make sure to mark it dirty so that it'll get
@@ -377,7 +388,8 @@ class SemanticsNode extends AbstractNode {
       if (node._dirty && node.attached)
         updatedNodes.add(node._serialize());
     }
-    client.updateSemanticsTree(updatedNodes);
+    for (mojom.SemanticsListener listener in _listeners)
+      listener.updateSemanticsTree(updatedNodes);
     _dirtyNodes.clear();
   }
 
@@ -428,6 +440,7 @@ class SemanticsNode extends AbstractNode {
 
 class SemanticsServer extends mojom.SemanticsServer {
   void addSemanticsListener(mojom.SemanticsListener listener) {
+    SemanticsNode.addListener(listener);
   }
   void tap(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeTapped)?.handleSemanticTap();

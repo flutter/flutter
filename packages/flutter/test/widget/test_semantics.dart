@@ -7,7 +7,7 @@ import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 class TestSemanticsListener implements mojom.SemanticsListener {
   TestSemanticsListener() {
-    Renderer.instance.setSemanticsClient(this);
+    SemanticsNode.addListener(this);
   }
   final List<mojom.SemanticsNode> updates = <mojom.SemanticsNode>[];
   updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
