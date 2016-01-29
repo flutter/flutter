@@ -123,7 +123,7 @@ class _SemanticsDebuggerEntry {
   int findDepth() {
     if (children == null || children.isEmpty)
       return 1;
-    return children.map((_SemanticsDebuggerEntry e) => e.findDepth()).reduce(math.max) + 1;
+    return children.map((_SemanticsDebuggerEntry e) => e.findDepth()).reduce(math.max/*<int>*/) + 1;
   }
 
   static const TextStyle textStyles = const TextStyle(
