@@ -356,6 +356,158 @@ class RenderPositionedBox extends RenderShiftedBox {
   }
 }
 
+/// A render object that imposes different constraints on its child than it gets
+/// from its parent, possibly allowing the child to overflow the parent.
+///
+/// A render overflow box proxies most functions in the render box protocol to
+/// its child, except that when laying out its child, it passes constraints
+/// based on the minWidth, maxWidth, minHeight, and maxHeight fields instead of
+/// just passing the parent's constraints in. Specifically, it overrides any of
+/// the equivalent fields on the constraints given by the parent with the
+/// constraints given by these fields for each such field that is not null. It
+/// then sizes itself based on the parent's constraints' maxWidth and maxHeight,
+/// ignoring the child's dimensions.
+///
+/// For example, if you wanted a box to always render 50 pixels high, regardless
+/// of where it was rendered, you would wrap it in a RenderOverflow with
+/// minHeight and maxHeight set to 50.0. Generally speaking, to avoid confusing
+/// behaviour around hit testing, a RenderOverflowBox should usually be wrapped
+/// in a RenderClipRect.
+///
+/// The child is positioned at the top left of the box. To position a smaller
+/// child inside a larger parent, use [RenderPositionedBox] and
+/// [RenderConstrainedBox] rather than RenderOverflowBox.
+class RenderOverflowBox extends RenderShiftedBox {
+  RenderOverflowBox({
+    RenderBox child,
+    double minWidth,
+    double maxWidth,
+    double minHeight,
+    double maxHeight,
+    FractionalOffset alignment: const FractionalOffset(0.5, 0.5)
+  }) : _minWidth = minWidth,
+       _maxWidth = maxWidth,
+       _minHeight = minHeight,
+       _maxHeight = maxHeight,
+       _alignment = alignment,
+       super(child);
+
+  /// The minimum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get minWidth => _minWidth;
+  double _minWidth;
+  void set minWidth (double value) {
+    if (_minWidth == value)
+      return;
+    _minWidth = value;
+    markNeedsLayout();
+  }
+
+  /// The maximum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get maxWidth => _maxWidth;
+  double _maxWidth;
+  void set maxWidth (double value) {
+    if (_maxWidth == value)
+      return;
+    _maxWidth = value;
+    markNeedsLayout();
+  }
+
+  /// The minimum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get minHeight => _minHeight;
+  double _minHeight;
+  void set minHeight (double value) {
+    if (_minHeight == value)
+      return;
+    _minHeight = value;
+    markNeedsLayout();
+  }
+
+  /// The maximum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  double get maxHeight => _maxHeight;
+  double _maxHeight;
+  void set maxHeight (double value) {
+    if (_maxHeight == value)
+      return;
+    _maxHeight = value;
+    markNeedsLayout();
+  }
+
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  void set alignment (FractionalOffset newAlignment) {
+    assert(newAlignment != null && newAlignment.dx != null && newAlignment.dy != null);
+    if (_alignment == newAlignment)
+      return;
+    _alignment = newAlignment;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    return new BoxConstraints(
+      minWidth: _minWidth ?? constraints.minWidth,
+      maxWidth: _maxWidth ?? constraints.maxWidth,
+      minHeight: _minHeight ?? constraints.minHeight,
+      maxHeight: _maxHeight ?? constraints.maxHeight
+    );
+  }
+
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
+    return constraints.minWidth;
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
+    return constraints.minWidth;
+  }
+
+  double getMinIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
+    return constraints.minHeight;
+  }
+
+  double getMaxIntrinsicHeight(BoxConstraints constraints) {
+    assert(constraints.isNormalized);
+    return constraints.minHeight;
+  }
+
+  bool get sizedByParent => true;
+
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  void performLayout() {
+    if (child != null) {
+      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
+      final BoxParentData childParentData = child.parentData;
+      childParentData.offset = _alignment.alongOffset(size - child.size);
+    }
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('minWidth: ${minWidth ?? "use parent minWidth constraint"}');
+    settings.add('maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}');
+    settings.add('minHeight: ${minHeight ?? "use parent minHeight constraint"}');
+    settings.add('maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}');
+    settings.add('alignment: $alignment');
+  }
+}
+
 /// A delegate for computing the layout of a render object with a single child.
 class OneChildLayoutDelegate {
   /// Returns the size of this object given the incoming constraints.
