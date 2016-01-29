@@ -110,9 +110,9 @@ void Paragraph::paint(Canvas* canvas, const Offset& offset)
     skCanvas->translate(-offset.sk_size.width(), -offset.sk_size.height());
 }
 
-std::vector<Rect> Paragraph::getRectsForRange(unsigned start, unsigned end) {
+std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
   if (end <= start || start == end)
-    return std::vector<Rect>();
+    return std::vector<TextBox>();
 
   unsigned offset = 0;
   Vector<IntRect> rects;
@@ -131,10 +131,12 @@ std::vector<Rect> Paragraph::getRectsForRange(unsigned start, unsigned end) {
       break;
   }
 
-  std::vector<Rect> result;
+  std::vector<TextBox> result;
   result.reserve(rects.size());
-  for (auto& rect : rects)
-    result.emplace_back(rect);
+  for (auto& rect : rects) {
+    // TODO(abarth): Actually figure out the direction of the box.
+    result.emplace_back(rect, LTR);
+  }
 
   return result;
 }

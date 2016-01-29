@@ -11,6 +11,7 @@
 #include "sky/engine/core/painting/Canvas.h"
 #include "sky/engine/core/painting/Offset.h"
 #include "sky/engine/core/rendering/RenderView.h"
+#include "sky/engine/core/text/TextBox.h"
 
 namespace blink {
 class DartLibraryNatives;
@@ -46,7 +47,7 @@ public:
     void layout();
     void paint(Canvas* canvas, const Offset& offset);
 
-    std::vector<Rect> getRectsForRange(unsigned start, unsigned end);
+    std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
 
     RenderView* renderView() const { return m_renderView.get(); }
 
