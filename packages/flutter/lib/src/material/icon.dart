@@ -65,13 +65,10 @@ class Icon extends StatelessComponent {
       category = parts[0];
       subtype = parts[1];
     }
-    // TODO(eseidel): This clearly isn't correct.  Not sure what would be.
-    // Should we use the ios images on ios?
-    String density = 'drawable-xxhdpi';
     String colorSuffix = _getColorSuffix(context);
     int iconSize = _kIconSize[size];
     return new AssetImage(
-      name: '$category/$density/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
+      name: '$category/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
       width: iconSize.toDouble(),
       height: iconSize.toDouble(),
       color: color

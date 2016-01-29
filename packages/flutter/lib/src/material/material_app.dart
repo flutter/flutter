@@ -160,8 +160,9 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
           duration: kThemeAnimationDuration,
           child: new DefaultTextStyle(
             style: _errorTextStyle,
-            child: new DefaultAssetBundle(
+            child: new AssetVendor(
               bundle: _defaultBundle,
+              devicePixelRatio: ui.window.devicePixelRatio,
               child: new Title(
                 title: config.title,
                 color: theme.primaryColor,

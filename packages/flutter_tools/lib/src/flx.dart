@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -24,42 +25,77 @@ const String defaultSnapshotPath = 'build/snapshot_blob.bin';
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
-const List<String> _kDensities = const ['drawable-xxhdpi'];
+Map<String, double> _kIconDensities = {
+  'mdpi': 1.0,
+  'hdpi' : 1.5,
+  'xhdpi' : 2.0,
+  'xxhdpi' : 3.0,
+  'xxxhdpi' : 4.0
+};
 const List<String> _kThemes = const ['white', 'black'];
 const List<int> _kSizes = const [18, 24, 36, 48];
 
 class _Asset {
+  final String source;
   final String base;
   final String key;
 
-  _Asset({ this.base, this.key });
+  _Asset({ this.source, this.base, this.key });
 }
 
-Iterable<_Asset> _parseAssets(Map manifestDescriptor, String manifestPath) sync* {
-  if (manifestDescriptor == null || !manifestDescriptor.containsKey('assets'))
-    return;
+Map<_Asset, List<_Asset>> _parseAssets(Map manifestDescriptor, String manifestPath) {
+  Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
+  if (manifestDescriptor == null)
+    return result;
   String basePath = path.dirname(path.absolute(manifestPath));
-  for (String asset in manifestDescriptor['assets'])
-    yield new _Asset(base: basePath, key: asset);
+  if (manifestDescriptor.containsKey('assets')) {
+    for (String asset in manifestDescriptor['assets']) {
+      _Asset baseAsset = new _Asset(base: basePath, key: asset);
+      List<_Asset> variants = <_Asset>[];
+      result[baseAsset] = variants;
+      // Find asset variants
+      String assetPath = path.join(basePath, asset);
+      String assetFilename = path.basename(assetPath);
+      Directory assetDir = new Directory(path.dirname(assetPath));
+      List<FileSystemEntity> files = assetDir.listSync(recursive: true);
+      for (FileSystemEntity entity in files) {
+        if (path.basename(entity.path) == assetFilename &&
+            FileSystemEntity.isFileSync(entity.path) &&
+            entity.path != assetPath) {
+          String key = path.relative(entity.path, from: basePath);
+          variants.add(new _Asset(base: basePath, key: key));
+        }
+      }
+    }
+  }
+  return result;
 }
 
-class _MaterialAsset {
+class _MaterialAsset extends _Asset {
   final String name;
   final String density;
   final String theme;
   final int size;
 
-  _MaterialAsset(Map descriptor)
-    : name = descriptor['name'],
-      density = descriptor['density'],
-      theme = descriptor['theme'],
-      size = descriptor['size'];
+  _MaterialAsset(this.name, this.density, this.theme, this.size, String assetBase)
+    : super(base: assetBase);
+
+  String get source {
+    List<String> parts = name.split('/');
+    String category = parts[0];
+    String subtype = parts[1];
+    return '$category/drawable-$density/ic_${subtype}_${theme}_${size}dp.png';
+  }
 
   String get key {
     List<String> parts = name.split('/');
     String category = parts[0];
     String subtype = parts[1];
-    return '$category/$density/ic_${subtype}_${theme}_${size}dp.png';
+    double devicePixelRatio = _kIconDensities[density];
+    if (devicePixelRatio == 1.0)
+      return '$category/ic_${subtype}_${theme}_${size}dp.png';
+    else
+      return '$category/${devicePixelRatio}x/ic_${subtype}_${theme}_${size}dp.png';
   }
 }
 
@@ -69,28 +105,30 @@ List _generateValues(Map assetDescriptor, String key, List defaults) {
   return defaults;
 }
 
-Iterable<_MaterialAsset> _generateMaterialAssets(Map assetDescriptor) sync* {
-  Map currentAssetDescriptor = new Map.from(assetDescriptor);
-  for (String density in _generateValues(assetDescriptor, 'density', _kDensities)) {
-    currentAssetDescriptor['density'] = density;
-    for (String theme in _generateValues(assetDescriptor, 'theme', _kThemes)) {
-      currentAssetDescriptor['theme'] = theme;
-      for (int size in _generateValues(assetDescriptor, 'size', _kSizes)) {
-        currentAssetDescriptor['size'] = size;
-        yield new _MaterialAsset(currentAssetDescriptor);
+void _accumulateMaterialAssets(Map<_Asset, List<_Asset>> result, Map assetDescriptor, String assetBase) {
+  String name = assetDescriptor['name'];
+  for (String theme in _generateValues(assetDescriptor, 'theme', _kThemes)) {
+    for (int size in _generateValues(assetDescriptor, 'size', _kSizes)) {
+      _MaterialAsset main = new _MaterialAsset(name, 'mdpi', theme, size, assetBase);
+      List<_Asset> variants = <_Asset>[];
+      result[main] = variants;
+      for (String density in _generateValues(assetDescriptor, 'density', _kIconDensities.keys)) {
+        if (density == 'mdpi')
+          continue;
+        variants.add(new _MaterialAsset(name, density, theme, size, assetBase));
       }
     }
   }
 }
 
-Iterable<_MaterialAsset> _parseMaterialAssets(Map manifestDescriptor) sync* {
+Map<_Asset, List<_Asset>> _parseMaterialAssets(Map manifestDescriptor, String assetBase) {
+  Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
   if (manifestDescriptor == null || !manifestDescriptor.containsKey('material-design-icons'))
-    return;
+    return result;
   for (Map assetDescriptor in manifestDescriptor['material-design-icons']) {
-    for (_MaterialAsset asset in _generateMaterialAssets(assetDescriptor)) {
-      yield asset;
-    }
+    _accumulateMaterialAssets(result, assetDescriptor, assetBase);
   }
+  return result;
 }
 
 dynamic _loadManifest(String manifestPath) {
@@ -100,11 +138,30 @@ dynamic _loadManifest(String manifestPath) {
   return loadYaml(manifestDescriptor);
 }
 
-ArchiveFile _createFile(String key, String assetBase) {
-  File file = new File('$assetBase/$key');
-  if (!file.existsSync())
-    return null;
+bool _addAssetFile(Archive archive, _Asset asset) {
+  String source = asset.source ?? asset.key;
+  File file = new File('${asset.base}/$source');
+  if (!file.existsSync()) {
+    printError('Cannot find asset "$source" in directory "${path.absolute(asset.base)}".');
+    return false;
+  }
   List<int> content = file.readAsBytesSync();
+  archive.addFile(
+    new ArchiveFile.noCompress(asset.key, content.length, content)
+  );
+  return true;
+}
+
+ArchiveFile _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
+  String key = 'AssetManifest.json';
+  Map<String, List<String>> json = <String, List<String>>{};
+  for (_Asset main in assets.keys) {
+    List<String> variants = <String>[];
+    for (_Asset variant in assets[main])
+      variants.add(variant.key);
+    json[main.key] = variants;
+  }
+  List<int> content = UTF8.encode(JSON.encode(json));
   return new ArchiveFile.noCompress(key, content.length, content);
 }
 
@@ -162,8 +219,8 @@ Future<int> build(
 
   Map manifestDescriptor = _loadManifest(manifestPath);
 
-  Iterable<_Asset> assets = _parseAssets(manifestDescriptor, manifestPath);
-  Iterable<_MaterialAsset> materialAssets = _parseMaterialAssets(manifestDescriptor);
+  Map<_Asset, List<_Asset>> assets = _parseAssets(manifestDescriptor, manifestPath);
+  assets.addAll(_parseMaterialAssets(manifestDescriptor, assetBase));
 
   Archive archive = new Archive();
 
@@ -181,20 +238,16 @@ Future<int> build(
     archive.addFile(_createSnapshotFile(snapshotPath));
   }
 
-  for (_Asset asset in assets) {
-    ArchiveFile file = _createFile(asset.key, asset.base);
-    if (file == null) {
-      printError('Cannot find asset "${asset.key}" in directory "${path.absolute(asset.base)}".');
+  for (_Asset asset in assets.keys) {
+    if (!_addAssetFile(archive, asset))
       return 1;
+    for (_Asset variant in assets[asset]) {
+      if (!_addAssetFile(archive, variant))
+        return 1;
     }
-    archive.addFile(file);
   }
 
-  for (_MaterialAsset asset in materialAssets) {
-    ArchiveFile file = _createFile(asset.key, assetBase);
-    if (file != null)
-      archive.addFile(file);
-  }
+  archive.addFile(_createAssetManifest(assets));
 
   await CipherParameters.get().seedRandom();
 
