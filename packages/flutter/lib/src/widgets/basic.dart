@@ -1826,7 +1826,7 @@ class AsyncImage extends StatelessComponent {
 
 /// Displays an image from an [AssetBundle].
 ///
-/// By default, asset image will load the image from the cloest enclosing
+/// By default, asset image will load the image from the closest enclosing
 /// [DefaultAssetBundle].
 class AssetImage extends StatelessComponent {
   // Don't add asserts here unless absolutely necessary, since it will

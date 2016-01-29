@@ -1,4 +1,6 @@
 name: widgets
+assets:
+  - assets/starcircle.png
 material-design-icons:
   - name: action/account_circle
   - name: action/alarm

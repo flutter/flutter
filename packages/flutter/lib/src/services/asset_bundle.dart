@@ -42,24 +42,7 @@ class NetworkAssetBundle extends AssetBundle {
   }
 }
 
-Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
-  core.MojoDataPipeConsumer bundleData = (await fetchUrl(relativeUrl)).body;
-  AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
-  shell.connectToService("mojo:asset_bundle", unpacker);
-  unpacker.ptr.unpackZipStream(bundleData, bundle);
-  unpacker.close();
-}
-
-class MojoAssetBundle extends AssetBundle {
-  MojoAssetBundle(this._bundle);
-
-  factory MojoAssetBundle.fromNetwork(String relativeUrl) {
-    AssetBundleProxy bundle = new AssetBundleProxy.unbound();
-    _fetchAndUnpackBundle(relativeUrl, bundle);
-    return new MojoAssetBundle(bundle);
-  }
-
-  AssetBundleProxy _bundle;
+abstract class CachingAssetBundle extends AssetBundle {
   Map<String, ImageResource> _imageCache = new Map<String, ImageResource>();
   Map<String, Future<String>> _stringCache = new Map<String, Future<String>>();
 
@@ -79,12 +62,32 @@ class MojoAssetBundle extends AssetBundle {
     return new String.fromCharCodes(new Uint8List.view(data.buffer));
   }
 
-  Future<core.MojoDataPipeConsumer> load(String key) async {
-    return (await _bundle.ptr.getAsStream(key)).assetData;
-  }
-
   Future<String> loadString(String key) {
     return _stringCache.putIfAbsent(key, () => _fetchString(key));
+  }
+}
+
+class MojoAssetBundle extends CachingAssetBundle {
+  MojoAssetBundle(this._bundle);
+
+  factory MojoAssetBundle.fromNetwork(String relativeUrl) {
+    AssetBundleProxy bundle = new AssetBundleProxy.unbound();
+    _fetchAndUnpackBundle(relativeUrl, bundle);
+    return new MojoAssetBundle(bundle);
+  }
+
+  static Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
+    core.MojoDataPipeConsumer bundleData = (await fetchUrl(relativeUrl)).body;
+    AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
+    shell.connectToService("mojo:asset_bundle", unpacker);
+    unpacker.ptr.unpackZipStream(bundleData, bundle);
+    unpacker.close();
+  }
+
+  AssetBundleProxy _bundle;
+
+  Future<core.MojoDataPipeConsumer> load(String key) async {
+    return (await _bundle.ptr.getAsStream(key)).assetData;
   }
 }
 

@@ -5,6 +5,7 @@
 /// The Flutter widget framework.
 library widgets;
 
+export 'src/widgets/asset_vendor.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
 export 'src/widgets/dismissable.dart';
