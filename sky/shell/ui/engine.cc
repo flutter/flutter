@@ -119,6 +119,7 @@ void Engine::SetServices(ServicesDataPtr services) {
   services_ = services.Pass();
 
   if (services_->scene_scheduler) {
+    animator_->Reset();
     animator_->set_scene_scheduler(services_->scene_scheduler.Pass());
   } else {
 #if defined(OS_ANDROID) || defined(OS_IOS)
@@ -130,6 +131,7 @@ void Engine::SetServices(ServicesDataPtr services) {
       mojo::ConnectToService(services_->services_provided_by_embedder.get(),
                              &vsync_provider);
     }
+    animator_->Reset();
     animator_->set_vsync_provider(vsync_provider.Pass());
 #endif
   }

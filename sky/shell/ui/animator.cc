@@ -126,5 +126,19 @@ bool Animator::AwaitVSync() {
   return false;
 }
 
+void Animator::Reset() {
+  weak_factory_.InvalidateWeakPtrs();
+
+  outstanding_requests_ = 0;
+  did_defer_frame_request_ = false;
+  engine_requested_frame_ = false;
+  paused_ = false;
+}
+
+void Animator::set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
+  DCHECK(!engine_requested_frame_);
+  vsync_provider_ = vsync_provider.Pass();
+}
+
 }  // namespace shell
 }  // namespace sky

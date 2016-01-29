@@ -24,15 +24,15 @@ class Animator {
 
   void Start();
   void Stop();
+  void Reset();
+
+  void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider);
 
   void set_scene_scheduler(
       mojo::gfx::composition::SceneSchedulerPtr scene_scheduler) {
     scene_scheduler_ = scene_scheduler.Pass();
   }
 
-  void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
-    vsync_provider_ = vsync_provider.Pass();
-  }
 
  private:
   void Animate(mojo::gfx::composition::FrameInfoPtr frame_info);
