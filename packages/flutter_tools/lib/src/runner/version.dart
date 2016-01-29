@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../artifacts.dart';
 import '../base/process.dart';
 
 String getVersion(String flutterRoot) {
@@ -20,5 +21,12 @@ String getVersion(String flutterRoot) {
   String revision = runSync([
     'git', 'log', '-n', '1', '--pretty=format:%H (%ar)'
   ], workingDirectory: flutterRoot).trim();
-  return 'Flutter\nRepository: $repository\nBranch: $upstream\nRevision: $revision';
+
+  String version = 'Flutter from $repository (on $upstream)\nflutter revision: $revision';
+
+  String engineRevision = ArtifactStore.engineRevision;
+  if (engineRevision != null)
+    version += '\nengine revision : $engineRevision';
+
+  return version;
 }

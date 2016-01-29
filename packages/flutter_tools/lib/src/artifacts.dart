@@ -204,7 +204,6 @@ class ArtifactStore {
 
   static String get engineRevision {
     if (_engineRevision == null) {
-      ensurePackageRootIsValid();
       File revisionFile = new File(path.join(packageRoot, 'sky_engine', 'REVISION'));
       if (revisionFile.existsSync())
         _engineRevision = revisionFile.readAsStringSync();
