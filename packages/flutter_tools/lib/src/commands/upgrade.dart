@@ -8,6 +8,7 @@ import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../runner/flutter_command.dart';
+import '../runner/version.dart';
 
 class UpgradeCommand extends FlutterCommand {
   final String name = 'upgrade';
@@ -15,6 +16,8 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    printStatus(getVersion(ArtifactStore.flutterRoot));
+
     try {
       runCheckedSync(<String>[
         'git', 'rev-parse', '@{u}'
@@ -24,6 +27,9 @@ class UpgradeCommand extends FlutterCommand {
       return 1;
     }
 
+    printStatus('');
+    printStatus('Upgrading Flutter...');
+
     int code = await runCommandAndStreamOutput(<String>[
       'git', 'pull', '--ff-only'
     ], workingDirectory: ArtifactStore.flutterRoot);
@@ -31,6 +37,15 @@ class UpgradeCommand extends FlutterCommand {
     if (code != 0)
       return code;
 
-    return await runCommandAndStreamOutput([sdkBinaryName('pub'), 'upgrade']);
+    printStatus('');
+    code = await runCommandAndStreamOutput([sdkBinaryName('pub'), 'upgrade']);
+
+    if (code != 0)
+      return code;
+
+    printStatus('');
+    printStatus(getVersion(ArtifactStore.flutterRoot));
+
+    return 0;
   }
 }
