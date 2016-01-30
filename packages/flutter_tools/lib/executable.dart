@@ -32,7 +32,10 @@ import 'src/runner/flutter_command_runner.dart';
 ///
 /// This function is intended to be used from the [flutter] command line tool.
 Future main(List<String> args) async {
-  FlutterCommandRunner runner = new FlutterCommandRunner()
+  bool help = args.contains('-h') || args.contains('--help');
+  bool verbose = args.contains('-v') || args.contains('--verbose');
+
+  FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: help && verbose)
     ..addCommand(new AnalyzeCommand())
     ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())

@@ -22,15 +22,21 @@ const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter
 const String kFlutterEnginePackageName = 'sky_engine';
 
 class FlutterCommandRunner extends CommandRunner {
-  FlutterCommandRunner()
-      : super('flutter', 'Manage your Flutter app development.') {
+  FlutterCommandRunner({ bool verboseHelp: false }) : super(
+    'flutter',
+    'Manage your Flutter app development.'
+  ) {
     argParser.addFlag('verbose',
         abbr: 'v',
         negatable: false,
         help: 'Noisy logging, including all shell commands executed.');
+    argParser.addOption('device-id',
+        abbr: 'd',
+        help: 'Target device id.');
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
+
     String packagesHelp;
     if (ArtifactStore.isPackageRootValid)
       packagesHelp = '\n(defaults to "${ArtifactStore.packageRoot}")';
@@ -42,63 +48,72 @@ class FlutterCommandRunner extends CommandRunner {
         help: 'The root directory of the Flutter repository. Defaults to \$$kFlutterRootEnvironmentVariableName if set,\n'
               'otherwise defaults to a value derived from the location of this tool.', defaultsTo: _defaultFlutterRoot);
 
-    argParser.addOption('device-id',
-        abbr: 'd',
-        help: 'Target device id.');
+    if (verboseHelp)
+      argParser.addSeparator('Local build selection options (not normally required):');
 
-    argParser.addSeparator('Local build selection options (not normally required):');
     argParser.addFlag('debug',
         negatable: false,
+        hide: !verboseHelp,
         help:
             'Set this if you are building Flutter locally and want to use the debug build products.\n'
             'Defaults to true if --engine-src-path is specified and --release is not, otherwise false.');
     argParser.addFlag('release',
         negatable: false,
+        hide: !verboseHelp,
         help:
             'Set this if you are building Flutter locally and want to use the release build products.\n'
             'The --release option is not compatible with the listen command on iOS devices and simulators.');
     argParser.addOption('engine-src-path',
+        hide: !verboseHelp,
         help:
             'Path to your engine src directory, if you are building Flutter locally.\n'
             'Defaults to \$$kFlutterEngineEnvironmentVariableName if set, otherwise defaults to the path given in your pubspec.yaml\n'
             'dependency_overrides for $kFlutterEnginePackageName, if any, or, failing that, tries to guess at the location\n'
             'based on the value of the --flutter-root option.');
-    argParser.addOption('host-debug-build-path', hide: true,
+    argParser.addOption('host-debug-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your host Debug out directory (i.e. the one that runs on your workstation, not a device), if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/Debug/');
-    argParser.addOption('host-release-build-path', hide: true,
+    argParser.addOption('host-release-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your host Release out directory (i.e. the one that runs on your workstation, not a device), if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/Release/');
-    argParser.addOption('android-debug-build-path', hide: true,
+    argParser.addOption('android-debug-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your Android Debug out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/android_Debug/');
-    argParser.addOption('android-release-build-path', hide: true,
+    argParser.addOption('android-release-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your Android Release out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/android_Release/');
-    argParser.addOption('ios-debug-build-path', hide: true,
+    argParser.addOption('ios-debug-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your iOS Debug out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/ios_Debug/');
-    argParser.addOption('ios-release-build-path', hide: true,
+    argParser.addOption('ios-release-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your iOS Release out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/ios_Release/');
-    argParser.addOption('ios-sim-debug-build-path', hide: true,
+    argParser.addOption('ios-sim-debug-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your iOS Simulator Debug out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',
         defaultsTo: 'out/ios_sim_Debug/');
-    argParser.addOption('ios-sim-release-build-path', hide: true,
+    argParser.addOption('ios-sim-release-build-path',
+        hide: !verboseHelp,
         help:
             'Path to your iOS Simulator Release out directory, if you are building Flutter locally.\n'
             'This path is relative to --engine-src-path. Not normally required.',

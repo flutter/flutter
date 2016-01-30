@@ -11,11 +11,11 @@ import '../runner/flutter_command.dart';
 
 class TraceCommand extends FlutterCommand {
   final String name = 'trace';
-  final String description = 'Start and stop tracing for a running Flutter app '
-      '(Android only).\n'
-      'To start a trace, wait, then stop the trace, don\'t set any flags '
-      'except (optionally) duration.\n'
-      'Otherwise, specify either start or stop to manually control the trace.';
+  final String description = 'Start and stop tracing for a running Flutter app (Android only).';
+  final String usageFooter =
+    '\`trace\` called with no arguments will automatically start tracing, delay a set amount of\n'
+    'time (controlled by --duration), and stop tracing. To explicitly control tracing, call trace\n'
+    'with --start and later with --stop.';
 
   TraceCommand() {
     argParser.addFlag('start', negatable: false, help: 'Start tracing.');
