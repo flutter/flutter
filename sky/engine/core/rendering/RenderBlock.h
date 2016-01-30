@@ -132,6 +132,8 @@ public:
 
     LayoutUnit textIndentOffset() const;
 
+    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override;
+
     // Block flows subclass availableWidth to handle multi column layout (shrinking the width available to children when laying out.)
     virtual LayoutUnit availableLogicalWidth() const override final;
 
@@ -274,6 +276,8 @@ private:
     virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
     virtual LayoutRect localCaretRect(InlineBox*, int caretOffset, LayoutUnit* extraWidthToEndOfLine = 0) override final;
+
+    PositionWithAffinity positionForPointWithInlineChildren(const LayoutPoint&);
 
     void removeFromGlobalMaps();
     bool widthAvailableToChildrenHasChanged();

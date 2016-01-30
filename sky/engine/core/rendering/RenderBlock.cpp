@@ -952,6 +952,112 @@ bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& 
     return false;
 }
 
+static PositionWithAffinity positionForPointInChild(RenderBox* child, const LayoutPoint& pointInParentCoordinates)
+{
+    LayoutPoint childLocation = child->location();
+
+    // FIXME: This is wrong if the child's writing-mode is different from the parent's.
+    LayoutPoint pointInChildCoordinates(toLayoutPoint(pointInParentCoordinates - childLocation));
+    return child->positionForPoint(pointInChildCoordinates);
+}
+
+PositionWithAffinity RenderBlock::positionForPointWithInlineChildren(const LayoutPoint& pointInLogicalContents)
+{
+    ASSERT(isRenderParagraph());
+
+    if (!firstRootBox())
+        return createPositionWithAffinity(0, DOWNSTREAM);
+
+    // look for the closest line box in the root box which is at the passed-in y coordinate
+    InlineBox* closestBox = 0;
+    RootInlineBox* firstRootBoxWithChildren = 0;
+    RootInlineBox* lastRootBoxWithChildren = 0;
+    for (RootInlineBox* root = firstRootBox(); root; root = root->nextRootBox()) {
+        if (!root->firstLeafChild())
+            continue;
+        if (!firstRootBoxWithChildren)
+            firstRootBoxWithChildren = root;
+
+        lastRootBoxWithChildren = root;
+
+        // check if this root line box is located at this y coordinate
+        if (pointInLogicalContents.y() < root->selectionBottom()) {
+            closestBox = root->closestLeafChildForLogicalLeftPosition(pointInLogicalContents.x());
+            if (closestBox)
+                break;
+        }
+    }
+
+    if (!closestBox && lastRootBoxWithChildren) {
+        // y coordinate is below last root line box, pretend we hit it
+        closestBox = lastRootBoxWithChildren->closestLeafChildForLogicalLeftPosition(pointInLogicalContents.x());
+    }
+
+    if (closestBox) {
+        // pass the box a top position that is inside it
+        LayoutPoint point(pointInLogicalContents.x(), closestBox->root().blockDirectionPointInLine());
+        if (closestBox->renderer().isReplaced())
+            return positionForPointInChild(&toRenderBox(closestBox->renderer()), point);
+        return closestBox->renderer().positionForPoint(point);
+    }
+
+    // Can't reach this. We have a root line box, but it has no kids.
+    // FIXME: This should ASSERT_NOT_REACHED(), but clicking on placeholder text
+    // seems to hit this code path.
+    return createPositionWithAffinity(0, DOWNSTREAM);
+}
+
+static inline bool isChildHitTestCandidate(RenderBox* box)
+{
+    return box->height() && !box->isFloatingOrOutOfFlowPositioned();
+}
+
+PositionWithAffinity RenderBlock::positionForPoint(const LayoutPoint& point)
+{
+    if (isReplaced()) {
+        // FIXME: This seems wrong when the object's writing-mode doesn't match the line's writing-mode.
+        LayoutUnit pointLogicalLeft = point.x();
+        LayoutUnit pointLogicalTop = point.y();
+
+        if (pointLogicalLeft < 0)
+            return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
+        if (pointLogicalLeft >= logicalWidth())
+            return createPositionWithAffinity(caretMaxOffset(), DOWNSTREAM);
+        if (pointLogicalTop < 0)
+            return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
+        if (pointLogicalTop >= logicalHeight())
+            return createPositionWithAffinity(caretMaxOffset(), DOWNSTREAM);
+    }
+
+    LayoutPoint pointInContents = point;
+    LayoutPoint pointInLogicalContents(pointInContents);
+
+    if (isRenderParagraph())
+        return positionForPointWithInlineChildren(pointInLogicalContents);
+
+    RenderBox* lastCandidateBox = lastChildBox();
+    while (lastCandidateBox && !isChildHitTestCandidate(lastCandidateBox))
+        lastCandidateBox = lastCandidateBox->previousSiblingBox();
+
+    if (lastCandidateBox) {
+        if (pointInLogicalContents.y() > logicalTopForChild(lastCandidateBox)
+            || (pointInLogicalContents.y() == logicalTopForChild(lastCandidateBox)))
+            return positionForPointInChild(lastCandidateBox, pointInContents);
+
+        for (RenderBox* childBox = firstChildBox(); childBox; childBox = childBox->nextSiblingBox()) {
+            if (!isChildHitTestCandidate(childBox))
+                continue;
+            LayoutUnit childLogicalBottom = logicalTopForChild(childBox) + logicalHeightForChild(childBox);
+            // We hit child if our click is above the bottom of its padding box (like IE6/7 and FF3).
+            if (isChildHitTestCandidate(childBox) && (pointInLogicalContents.y() < childLogicalBottom))
+                return positionForPointInChild(childBox, pointInContents);
+        }
+    }
+
+    // We only get here if there are no hit test candidate children below the click.
+    return RenderBox::positionForPoint(point);
+}
+
 LayoutUnit RenderBlock::availableLogicalWidth() const
 {
     return RenderBox::availableLogicalWidth();

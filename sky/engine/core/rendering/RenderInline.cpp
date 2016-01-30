@@ -370,6 +370,23 @@ bool RenderInline::hitTestCulledInline(const HitTestRequest& request, HitTestRes
     return false;
 }
 
+PositionWithAffinity RenderInline::positionForPoint(const LayoutPoint& point)
+{
+    // FIXME(sky): Now that we don't have continuations, can this whole function just be the following?
+    // return containingBlock()->positionForPoint(point);
+
+    // FIXME: Does not deal with relative positioned inlines (should it?)
+    RenderBlock* cb = containingBlock();
+    if (firstLineBox()) {
+        // This inline actually has a line box.  We must have clicked in the border/padding of one of these boxes.  We
+        // should try to find a result by asking our containing block.
+        return cb->positionForPoint(point);
+    }
+
+    // Translate the coords from the pre-anonymous block to the post-anonymous block.
+    return RenderBoxModelObject::positionForPoint(point);
+}
+
 namespace {
 
 class LinesBoundingBoxGeneratorContext {

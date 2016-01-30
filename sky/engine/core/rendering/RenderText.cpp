@@ -276,6 +276,169 @@ void RenderText::absoluteQuadsForRange(Vector<FloatQuad>& quads, unsigned start,
 
 enum ShouldAffinityBeDownstream { AlwaysDownstream, AlwaysUpstream, UpstreamIfPositionIsNotAtStart };
 
+static bool lineDirectionPointFitsInBox(int pointLineDirection, InlineTextBox* box, ShouldAffinityBeDownstream& shouldAffinityBeDownstream)
+{
+    shouldAffinityBeDownstream = AlwaysDownstream;
+
+    // the x coordinate is equal to the left edge of this box
+    // the affinity must be downstream so the position doesn't jump back to the previous line
+    // except when box is the first box in the line
+    if (pointLineDirection <= box->logicalLeft()) {
+        shouldAffinityBeDownstream = !box->prevLeafChild() ? UpstreamIfPositionIsNotAtStart : AlwaysDownstream;
+        return true;
+    }
+
+    // and the x coordinate is to the left of the right edge of this box
+    // check to see if position goes in this box
+    if (pointLineDirection < box->logicalRight()) {
+        shouldAffinityBeDownstream = UpstreamIfPositionIsNotAtStart;
+        return true;
+    }
+
+    // box is first on line
+    // and the x coordinate is to the left of the first text box left edge
+    if (!box->prevLeafChildIgnoringLineBreak() && pointLineDirection < box->logicalLeft())
+        return true;
+
+    if (!box->nextLeafChildIgnoringLineBreak()) {
+        // box is last on line
+        // and the x coordinate is to the right of the last text box right edge
+        // generate VisiblePosition, use UPSTREAM affinity if possible
+        shouldAffinityBeDownstream = UpstreamIfPositionIsNotAtStart;
+        return true;
+    }
+
+    return false;
+}
+
+static PositionWithAffinity createPositionWithAffinityForBox(const InlineBox* box, int offset, ShouldAffinityBeDownstream shouldAffinityBeDownstream)
+{
+    EAffinity affinity = VP_DEFAULT_AFFINITY;
+    switch (shouldAffinityBeDownstream) {
+    case AlwaysDownstream:
+        affinity = DOWNSTREAM;
+        break;
+    case AlwaysUpstream:
+        affinity = VP_UPSTREAM_IF_POSSIBLE;
+        break;
+    case UpstreamIfPositionIsNotAtStart:
+        affinity = offset > box->caretMinOffset() ? VP_UPSTREAM_IF_POSSIBLE : DOWNSTREAM;
+        break;
+    }
+    int textStartOffset = box->renderer().isText() ? toRenderText(box->renderer()).textStartOffset() : 0;
+    return box->renderer().createPositionWithAffinity(offset + textStartOffset, affinity);
+}
+
+static PositionWithAffinity createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(const InlineTextBox* box, int offset, ShouldAffinityBeDownstream shouldAffinityBeDownstream)
+{
+    ASSERT(box);
+    ASSERT(offset >= 0);
+
+    if (offset && static_cast<unsigned>(offset) < box->len())
+        return createPositionWithAffinityForBox(box, box->start() + offset, shouldAffinityBeDownstream);
+
+    bool positionIsAtStartOfBox = !offset;
+    if (positionIsAtStartOfBox == box->isLeftToRightDirection()) {
+        // offset is on the left edge
+
+        const InlineBox* prevBox = box->prevLeafChildIgnoringLineBreak();
+        if ((prevBox && prevBox->bidiLevel() == box->bidiLevel())
+            || box->renderer().containingBlock()->style()->direction() == box->direction()) // FIXME: left on 12CBA
+            return createPositionWithAffinityForBox(box, box->caretLeftmostOffset(), shouldAffinityBeDownstream);
+
+        if (prevBox && prevBox->bidiLevel() > box->bidiLevel()) {
+            // e.g. left of B in aDC12BAb
+            const InlineBox* leftmostBox;
+            do {
+                leftmostBox = prevBox;
+                prevBox = leftmostBox->prevLeafChildIgnoringLineBreak();
+            } while (prevBox && prevBox->bidiLevel() > box->bidiLevel());
+            return createPositionWithAffinityForBox(leftmostBox, leftmostBox->caretRightmostOffset(), shouldAffinityBeDownstream);
+        }
+
+        if (!prevBox || prevBox->bidiLevel() < box->bidiLevel()) {
+            // e.g. left of D in aDC12BAb
+            const InlineBox* rightmostBox;
+            const InlineBox* nextBox = box;
+            do {
+                rightmostBox = nextBox;
+                nextBox = rightmostBox->nextLeafChildIgnoringLineBreak();
+            } while (nextBox && nextBox->bidiLevel() >= box->bidiLevel());
+            return createPositionWithAffinityForBox(rightmostBox,
+                box->isLeftToRightDirection() ? rightmostBox->caretMaxOffset() : rightmostBox->caretMinOffset(), shouldAffinityBeDownstream);
+        }
+
+        return createPositionWithAffinityForBox(box, box->caretRightmostOffset(), shouldAffinityBeDownstream);
+    }
+
+    const InlineBox* nextBox = box->nextLeafChildIgnoringLineBreak();
+    if ((nextBox && nextBox->bidiLevel() == box->bidiLevel())
+        || box->renderer().containingBlock()->style()->direction() == box->direction())
+        return createPositionWithAffinityForBox(box, box->caretRightmostOffset(), shouldAffinityBeDownstream);
+
+    // offset is on the right edge
+    if (nextBox && nextBox->bidiLevel() > box->bidiLevel()) {
+        // e.g. right of C in aDC12BAb
+        const InlineBox* rightmostBox;
+        do {
+            rightmostBox = nextBox;
+            nextBox = rightmostBox->nextLeafChildIgnoringLineBreak();
+        } while (nextBox && nextBox->bidiLevel() > box->bidiLevel());
+        return createPositionWithAffinityForBox(rightmostBox, rightmostBox->caretLeftmostOffset(), shouldAffinityBeDownstream);
+    }
+
+    if (!nextBox || nextBox->bidiLevel() < box->bidiLevel()) {
+        // e.g. right of A in aDC12BAb
+        const InlineBox* leftmostBox;
+        const InlineBox* prevBox = box;
+        do {
+            leftmostBox = prevBox;
+            prevBox = leftmostBox->prevLeafChildIgnoringLineBreak();
+        } while (prevBox && prevBox->bidiLevel() >= box->bidiLevel());
+        return createPositionWithAffinityForBox(leftmostBox,
+            box->isLeftToRightDirection() ? leftmostBox->caretMinOffset() : leftmostBox->caretMaxOffset(), shouldAffinityBeDownstream);
+    }
+
+    return createPositionWithAffinityForBox(box, box->caretLeftmostOffset(), shouldAffinityBeDownstream);
+}
+
+PositionWithAffinity RenderText::positionForPoint(const LayoutPoint& point)
+{
+    if (!firstTextBox() || textLength() == 0)
+        return createPositionWithAffinity(0, DOWNSTREAM);
+
+    LayoutUnit pointLineDirection = point.x();
+    LayoutUnit pointBlockDirection = point.y();
+
+    InlineTextBox* lastBox = 0;
+    for (InlineTextBox* box = firstTextBox(); box; box = box->nextTextBox()) {
+        if (box->isLineBreak() && !box->prevLeafChild() && box->nextLeafChild() && !box->nextLeafChild()->isLineBreak())
+            box = box->nextTextBox();
+
+        RootInlineBox& rootBox = box->root();
+        LayoutUnit top = std::min(rootBox.selectionTop(), rootBox.lineTop());
+        if (pointBlockDirection > top || pointBlockDirection == top) {
+            LayoutUnit bottom = rootBox.selectionBottom();
+            if (rootBox.nextRootBox())
+                bottom = std::min(bottom, rootBox.nextRootBox()->lineTop());
+
+            if (pointBlockDirection < bottom) {
+                ShouldAffinityBeDownstream shouldAffinityBeDownstream;
+                if (lineDirectionPointFitsInBox(pointLineDirection, box, shouldAffinityBeDownstream))
+                    return createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(box, box->offsetForPosition(pointLineDirection.toFloat()), shouldAffinityBeDownstream);
+            }
+        }
+        lastBox = box;
+    }
+
+    if (lastBox) {
+        ShouldAffinityBeDownstream shouldAffinityBeDownstream;
+        lineDirectionPointFitsInBox(pointLineDirection, lastBox, shouldAffinityBeDownstream);
+        return createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(lastBox, lastBox->offsetForPosition(pointLineDirection.toFloat()) + lastBox->start(), shouldAffinityBeDownstream);
+    }
+    return createPositionWithAffinity(0, DOWNSTREAM);
+}
+
 LayoutRect RenderText::localCaretRect(InlineBox* inlineBox, int caretOffset, LayoutUnit* extraWidthToEndOfLine)
 {
     if (!inlineBox)

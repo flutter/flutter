@@ -374,6 +374,26 @@ void RenderReplaced::computePreferredLogicalWidths()
     clearPreferredLogicalWidthsDirty();
 }
 
+PositionWithAffinity RenderReplaced::positionForPoint(const LayoutPoint& point)
+{
+    // FIXME: This code is buggy if the replaced element is relative positioned.
+    InlineBox* box = inlineBoxWrapper();
+    RootInlineBox* rootBox = box ? &box->root() : 0;
+
+    LayoutUnit top = rootBox ? rootBox->selectionTop() : logicalTop();
+    LayoutUnit bottom = rootBox ? rootBox->selectionBottom() : logicalBottom();
+
+    LayoutUnit blockDirectionPosition = point.y() + y();
+
+    if (blockDirectionPosition < top)
+        return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM); // coordinates are above
+
+    if (blockDirectionPosition >= bottom)
+        return createPositionWithAffinity(caretMaxOffset(), DOWNSTREAM); // coordinates are below
+
+    return RenderBox::positionForPoint(point);
+}
+
 LayoutRect RenderReplaced::localSelectionRect(bool checkWhetherSelected) const
 {
     if (checkWhetherSelected && !isSelected())

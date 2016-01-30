@@ -36,6 +36,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, ideographicBaseline) \
   V(Paragraph, layout) \
   V(Paragraph, getRectsForRange) \
+  V(Paragraph, getPositionForOffset) \
   V(Paragraph, paint)
 
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
@@ -132,6 +133,30 @@ std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
   }
 
   return boxes;
+}
+
+int Paragraph::absoluteOffsetForPosition(const PositionWithAffinity& position) {
+  DCHECK(position.renderer());
+  unsigned offset = 0;
+  for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
+    if (object == position.renderer())
+      return offset + position.offset();
+    if (object->isText()) {
+      RenderText* text = toRenderText(object);
+      offset += text->textLength();
+    }
+  }
+  DCHECK(false);
+  return 0;
+}
+
+Dart_Handle Paragraph::getPositionForOffset(const Offset& offset) {
+  LayoutPoint point(offset.sk_size.width(), offset.sk_size.height());
+  PositionWithAffinity position = m_renderView->positionForPoint(point);
+  Dart_Handle result = Dart_NewList(2);
+  Dart_ListSetAt(result, 0, ToDart(absoluteOffsetForPosition(position)));
+  Dart_ListSetAt(result, 1, ToDart(static_cast<int>(position.affinity())));
+  return result;
 }
 
 } // namespace blink

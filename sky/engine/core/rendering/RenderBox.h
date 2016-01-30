@@ -435,6 +435,8 @@ public:
         return true;
     }
 
+    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override;
+
     void removeFloatingOrPositionedChildFromBlockLists();
 
     RenderLayer* enclosingFloatPaintingLayer() const;
