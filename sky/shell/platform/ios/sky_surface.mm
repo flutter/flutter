@@ -346,14 +346,14 @@ static std::string TracesBasePath() {
 }
 
 - (void)applicationBecameActive:(NSNotification*)notification {
-  if (_sky_engine) {
-    _sky_engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::RESUMED);
+  if (_engine) {
+    _engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::RESUMED);
   }
 }
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
-  if (_sky_engine) {
-    _sky_engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::PAUSED);
+  if (_engine) {
+    _engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::PAUSED);
   }
 }
 
