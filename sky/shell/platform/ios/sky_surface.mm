@@ -93,8 +93,9 @@ class TouchMapper {
 @implementation SkySurface {
   BOOL _platformViewInitialized;
   CGPoint _lastScrollTranslation;
+  sky::ViewportMetricsPtr _viewportMetrics;
 
-  sky::SkyEnginePtr _sky_engine;
+  sky::SkyEnginePtr _engine;
   std::unique_ptr<sky::shell::ShellView> _shell_view;
   TouchMapper _touch_mapper;
 }
@@ -109,6 +110,8 @@ static std::string TracesBasePath() {
   TRACE_EVENT0("flutter", "initWithShellView");
   self = [super init];
   if (self) {
+    _viewportMetrics = sky::ViewportMetrics::New();
+
     base::FilePath tracesPath =
         base::FilePath::FromUTF8Unsafe(TracesBasePath());
     sky::shell::Shell::Shared().tracing_controller().set_traces_base_path(
@@ -128,12 +131,36 @@ static std::string TracesBasePath() {
            selector:@selector(applicationWillResignActive:)
                name:UIApplicationWillResignActiveNotification
              object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+        selector:@selector(keyboardWasShown:)
+        name:UIKeyboardDidShowNotification object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+         selector:@selector(keyboardWillBeHidden:)
+         name:UIKeyboardWillHideNotification object:nil];
   }
   return self;
 }
 
 - (gfx::AcceleratedWidget)acceleratedWidget {
   return (gfx::AcceleratedWidget)self.layer;
+}
+
+- (void)keyboardWasShown:(NSNotification*)notification
+{
+    NSDictionary* info = [notification userInfo];
+    CGFloat bottom =
+        CGRectGetHeight([[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue]);
+    CGFloat scale = [UIScreen mainScreen].scale;
+    _viewportMetrics->physical_padding_bottom = bottom * scale;
+    _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
+}
+
+- (void)keyboardWillBeHidden:(NSNotification*)notification
+{
+    _viewportMetrics->physical_padding_bottom = 0.0;
+    _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
 }
 
 - (void)layoutSubviews {
@@ -147,14 +174,13 @@ static std::string TracesBasePath() {
   CGSize size = self.bounds.size;
   CGFloat scale = [UIScreen mainScreen].scale;
 
-  sky::ViewportMetricsPtr metrics = sky::ViewportMetrics::New();
-  metrics->device_pixel_ratio = scale;
-  metrics->physical_width = size.width * scale;
-  metrics->physical_height = size.height * scale;
-  metrics->physical_padding_top =
+  _viewportMetrics->device_pixel_ratio = scale;
+  _viewportMetrics->physical_width = size.width * scale;
+  _viewportMetrics->physical_height = size.height * scale;
+  _viewportMetrics->physical_padding_top =
       [UIApplication sharedApplication].statusBarFrame.size.height * scale;
 
-  _sky_engine->OnViewportMetricsChanged(metrics.Pass());
+  _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
 }
 
 - (void)configureLayerDefaults {
@@ -200,13 +226,13 @@ static std::string TracesBasePath() {
 
 - (void)connectToEngineAndLoad {
   TRACE_EVENT0("flutter", "connectToEngineAndLoad");
-  self.platformView->ConnectToEngine(mojo::GetProxy(&_sky_engine));
+  self.platformView->ConnectToEngine(mojo::GetProxy(&_engine));
 
   mojo::ServiceProviderPtr service_provider;
   new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider));
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->services_provided_by_embedder = service_provider.Pass();
-  _sky_engine->SetServices(services.Pass());
+  _engine->SetServices(services.Pass());
 
   mojo::String bundle_path([self flxBundlePath]);
 
@@ -214,9 +240,9 @@ static std::string TracesBasePath() {
       << "There must be a valid FLX bundle to run the application";
 
 #if TARGET_IPHONE_SIMULATOR
-  _sky_engine->RunFromBundle(bundle_path);
+  _engine->RunFromBundle(bundle_path);
 #else
-  _sky_engine->RunFromPrecompiledSnapshot(bundle_path);
+  _engine->RunFromPrecompiledSnapshot(bundle_path);
 #endif
 }
 
@@ -274,7 +300,7 @@ static std::string TracesBasePath() {
     pointer_packet->pointers.push_back(pointer_data.Pass());
   }
 
-  _sky_engine->OnPointerPacket(pointer_packet.Pass());
+  _engine->OnPointerPacket(pointer_packet.Pass());
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
@@ -338,8 +364,8 @@ static std::string TracesBasePath() {
 }
 
 - (void)dealloc {
+  [self notifySurfaceDestruction];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-
   [super dealloc];
 }
 
