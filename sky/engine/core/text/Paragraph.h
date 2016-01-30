@@ -48,6 +48,7 @@ public:
     void paint(Canvas* canvas, const Offset& offset);
 
     std::vector<TextBox> getRectsForRange(unsigned start, unsigned end);
+    Dart_Handle getPositionForOffset(const Offset& offset);
 
     RenderView* renderView() const { return m_renderView.get(); }
 
@@ -55,6 +56,8 @@ public:
 
 private:
     RenderBox* firstChildBox() const { return m_renderView->firstChildBox(); }
+
+    int absoluteOffsetForPosition(const PositionWithAffinity& position);
 
     LayoutUnit m_minWidth;
     LayoutUnit m_maxWidth;

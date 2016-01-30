@@ -26,6 +26,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDEROBJECT_H_
 
+#include "sky/engine/core/editing/PositionWithAffinity.h"
 #include "sky/engine/core/rendering/HitTestRequest.h"
 #include "sky/engine/core/rendering/RenderObjectChildList.h"
 #include "sky/engine/core/rendering/SubtreeLayoutScope.h"
@@ -389,6 +390,10 @@ public:
     bool hitTest(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
     virtual void updateHitTestResult(HitTestResult&, const LayoutPoint&);
     virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset);
+
+    virtual PositionWithAffinity positionForPoint(const LayoutPoint&);
+    PositionWithAffinity createPositionWithAffinity(int offset, EAffinity);
+    PositionWithAffinity createPositionWithAffinity(const Position&);
 
     virtual void dirtyLinesFromChangedChild(RenderObject*);
 

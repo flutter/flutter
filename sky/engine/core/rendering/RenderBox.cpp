@@ -2610,6 +2610,73 @@ LayoutRect RenderBox::localCaretRect(InlineBox* box, int caretOffset, LayoutUnit
     return rect;
 }
 
+PositionWithAffinity RenderBox::positionForPoint(const LayoutPoint& point)
+{
+    // no children...return this render object's element, if there is one, and offset 0
+    RenderObject* firstChild = slowFirstChild();
+    if (!firstChild)
+        return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
+
+    // Pass off to the closest child.
+    LayoutUnit minDist = LayoutUnit::max();
+    RenderBox* closestRenderer = 0;
+    LayoutPoint adjustedPoint = point;
+
+    for (RenderObject* renderObject = firstChild; renderObject; renderObject = renderObject->nextSibling()) {
+        if (!renderObject->slowFirstChild() && !renderObject->isInline() && !renderObject->isRenderParagraph())
+            continue;
+
+        if (!renderObject->isBox())
+            continue;
+
+        RenderBox* renderer = toRenderBox(renderObject);
+
+        LayoutUnit top = renderer->borderTop() + renderer->paddingTop() + renderer->y();
+        LayoutUnit bottom = top + renderer->contentHeight();
+        LayoutUnit left = renderer->borderLeft() + renderer->paddingLeft() + renderer->x();
+        LayoutUnit right = left + renderer->contentWidth();
+
+        if (point.x() <= right && point.x() >= left && point.y() <= top && point.y() >= bottom)
+            return renderer->positionForPoint(point - renderer->locationOffset());
+
+        // Find the distance from (x, y) to the box.  Split the space around the box into 8 pieces
+        // and use a different compare depending on which piece (x, y) is in.
+        LayoutPoint cmp;
+        if (point.x() > right) {
+            if (point.y() < top)
+                cmp = LayoutPoint(right, top);
+            else if (point.y() > bottom)
+                cmp = LayoutPoint(right, bottom);
+            else
+                cmp = LayoutPoint(right, point.y());
+        } else if (point.x() < left) {
+            if (point.y() < top)
+                cmp = LayoutPoint(left, top);
+            else if (point.y() > bottom)
+                cmp = LayoutPoint(left, bottom);
+            else
+                cmp = LayoutPoint(left, point.y());
+        } else {
+            if (point.y() < top)
+                cmp = LayoutPoint(point.x(), top);
+            else
+                cmp = LayoutPoint(point.x(), bottom);
+        }
+
+        LayoutSize difference = cmp - point;
+
+        LayoutUnit dist = difference.width() * difference.width() + difference.height() * difference.height();
+        if (dist < minDist) {
+            closestRenderer = renderer;
+            minDist = dist;
+        }
+    }
+
+    if (closestRenderer)
+        return closestRenderer->positionForPoint(adjustedPoint - closestRenderer->locationOffset());
+    return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
+}
+
 void RenderBox::addVisualEffectOverflow()
 {
     if (!style()->hasVisualOverflowingEffect())

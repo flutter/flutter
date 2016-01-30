@@ -116,6 +116,8 @@ private:
 
     virtual void mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
 
+    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override final;
+
     virtual IntRect borderBoundingBox() const override final
     {
         IntRect boundingBox = linesBoundingBox();

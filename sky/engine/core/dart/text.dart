@@ -474,7 +474,44 @@ class TextBox {
 
   int get hashCode => hashValues(left, top, right, bottom, direction);
 
-  String toString() => "TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)";
+  String toString() => 'TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)';
+}
+
+/// Whether a [TextPosition] is visually upstream or downstream of its offset.
+///
+/// For example, when a text position exists at a line break, a single offset has
+/// two visual positions, one prior to the line break (at the end of the first
+/// line) and one after the line break (at the start of the second line). A text
+/// affinity disambiguates between those cases. (Something similar happens with
+/// between runs of bidirectional text.)
+enum TextAffinity {
+  /// The position has affinity for the upstream side of the text position.
+  ///
+  /// For example, if the offset of the text position is a line break, the
+  /// position represents the end of the first line.
+  upstream,
+
+  /// The position has affinity for the downstream side of the text position.
+  ///
+  /// For example, if the offset of the text position is a line break, the
+  /// position represents the start of the second line.
+  downstream
+}
+
+/// A visual position in a string of text.
+class TextPosition {
+  const TextPosition({ this.offset, this.affinity: TextAffinity.downstream });
+
+  /// The index of the character just prior to the position.
+  final int offset;
+
+  /// If the offset has more than one visual location (e.g., occurs at a line
+  /// break), which of the two locations is represented by this position.
+  final TextAffinity affinity;
+
+  String toString() {
+    return '$runtimeType(offset: $offset, affinity: $affinity)';
+  }
 }
 
 abstract class Paragraph extends NativeFieldWrapperClass2 {
@@ -496,7 +533,16 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   void layout() native "Paragraph_layout";
   void paint(Canvas canvas, Offset offset) native "Paragraph_paint";
 
+  /// Returns a list of text boxes that enclose the given text range.
   List<TextBox> getBoxesForRange(int start, int end) native "Paragraph_getRectsForRange";
+
+  List<int> _getPositionForOffset(Offset offset) native "Paragraph_getPositionForOffset";
+
+  /// Returns the text position closest to the given offset.
+  TextPosition getPositionForOffset(Offset offset) {
+    List<int> encoded = _getPositionForOffset(offset);
+    return new TextPosition(offset: encoded[0], affinity: TextAffinity.values[encoded[1]]);
+  }
 }
 
 class ParagraphBuilder extends NativeFieldWrapperClass2 {

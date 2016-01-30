@@ -65,6 +65,8 @@ public:
     enum ClippingOption { NoClipping, ClipToEllipsis };
     void absoluteQuads(Vector<FloatQuad>&, ClippingOption = NoClipping) const;
 
+    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override;
+
     bool is8Bit() const { return m_text.is8Bit(); }
     const LChar* characters8() const { return m_text.impl()->characters8(); }
     const UChar* characters16() const { return m_text.impl()->characters16(); }

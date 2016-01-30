@@ -1402,6 +1402,11 @@ void RenderObject::postDestroy()
     delete this;
 }
 
+PositionWithAffinity RenderObject::positionForPoint(const LayoutPoint&)
+{
+    return createPositionWithAffinity(caretMinOffset(), DOWNSTREAM);
+}
+
 // FIXME(sky): Change the callers to use nodeAtPoint direclty and remove this function.
 // Or, rename nodeAtPoint to hitTest?
 bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset)
@@ -1525,6 +1530,11 @@ bool RenderObject::supportsTouchAction() const
     if (isInline() && !isReplaced())
         return false;
     return true;
+}
+
+PositionWithAffinity RenderObject::createPositionWithAffinity(int offset, EAffinity affinity)
+{
+    return PositionWithAffinity(this, offset, affinity);
 }
 
 bool RenderObject::canUpdateSelectionOnRootLineBoxes()
