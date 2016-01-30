@@ -40,12 +40,12 @@ class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<R
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.isNormalized);
-    return constraints.constrainWidth(_requestedSize.height);
+    return constraints.constrainHeight(_requestedSize.height);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.isNormalized);
-    return constraints.constrainWidth(_requestedSize.height);
+    return constraints.constrainHeight(_requestedSize.height);
   }
 
   double computeDistanceToActualBaseline(TextBaseline baseline) {
