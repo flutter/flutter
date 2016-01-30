@@ -2,38 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Whether a [TextPosition] is visually upstream or downstream of its offset.
-///
-/// For example, when a text position exists at a line break, a single offset has
-/// two visual positions, one prior to the line break (at the end of the first
-/// line) and one after the line break (at the start of the second line). A text
-/// affinity disambiguates between those cases. (Something similar happens with
-/// between runs of bidirectional text.)
-enum TextAffinity {
-  /// The position has affinity for the upstream side of the text position.
-  ///
-  /// For example, if the offset of the text position is a line break, the
-  /// position represents the end of the first line.
-  upstream,
+import 'dart:ui' show TextAffinity, TextPosition;
 
-  /// The position has affinity for the downstream side of the text position.
-  ///
-  /// For example, if the offset of the text position is a line break, the
-  /// position represents the start of the second line.
-  downstream
-}
-
-/// A visual position in a string of text.
-class TextPosition {
-  const TextPosition({ this.offset, this.affinity: TextAffinity.downstream });
-
-  /// The index of the character just prior to the position.
-  final int offset;
-
-  /// If the offset has more than one visual location (e.g., occurs at a line
-  /// break), which of the two locations is represented by this position.
-  final TextAffinity affinity;
-}
+export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of characters in a string of text.
 class TextRange {
@@ -97,9 +68,15 @@ class TextSelection extends TextRange {
 
   const TextSelection.collapsed({
     int offset,
-    this.affinity: TextAffinity.downstream,
-    this.isDirectional: false
-  }) : baseOffset = offset, extentOffset = offset, super.collapsed(offset);
+    this.affinity: TextAffinity.downstream
+  }) : baseOffset = offset, extentOffset = offset, isDirectional = false, super.collapsed(offset);
+
+  TextSelection.fromPosition(TextPosition position)
+    : baseOffset = position.offset,
+      extentOffset = position.offset,
+      affinity = position.affinity,
+      isDirectional = false,
+      super.collapsed(position.offset);
 
   /// The offset at which the selection originates.
   ///
@@ -141,4 +118,8 @@ class TextSelection extends TextRange {
   ///
   /// Might be larger than, smaller than, or equal to base.
   TextPosition get extent => new TextPosition(offset: extentOffset, affinity: affinity);
+
+  String toString() {
+    return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
+  }
 }

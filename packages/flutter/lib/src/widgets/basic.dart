@@ -819,7 +819,7 @@ class SizeObserver extends OneChildRenderObjectWidget {
   }
 
   /// The callback to call whenever the child's layout size changes
-  final SizeChangedCallback onSizeChanged;
+  final ValueChanged<Size> onSizeChanged;
 
   RenderSizeObserver createRenderObject() => new RenderSizeObserver(onSizeChanged: onSizeChanged);
 

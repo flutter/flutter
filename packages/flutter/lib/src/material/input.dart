@@ -121,6 +121,16 @@ class _InputState extends State<Input> {
     }
   }
 
+  void _requestKeyboard() {
+    if (Focus.at(context)) {
+      assert(_isAttachedToKeyboard);
+      _keyboardHandle.showByRequest();
+    } else {
+      Focus.moveTo(config.key);
+      // we'll get told to rebuild and we'll take care of the keyboard then
+    }
+  }
+
   void _handleTextUpdated() {
     if (_value != _editableString.text) {
       setState(() {
@@ -135,6 +145,15 @@ class _InputState extends State<Input> {
     Focus.clear(context);
     if (config.onSubmitted != null)
       config.onSubmitted(_value);
+  }
+
+  void _handleSelectionChanged(TextSelection selection) {
+    if (_isAttachedToKeyboard) {
+      _keyboardHandle.setSelection(selection.start, selection.end);
+    } else {
+      _editableString.setSelection(selection);
+      _requestKeyboard();
+    }
   }
 
   Widget build(BuildContext context) {
@@ -221,7 +240,8 @@ class _InputState extends State<Input> {
         style: textStyle,
         hideText: config.hideText,
         cursorColor: cursorColor,
-        selectionColor: cursorColor
+        selectionColor: cursorColor,
+        onSelectionChanged: _handleSelectionChanged
       )
     ));
 
@@ -258,15 +278,7 @@ class _InputState extends State<Input> {
 
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        if (Focus.at(context)) {
-          assert(_isAttachedToKeyboard);
-          _keyboardHandle.showByRequest();
-        } else {
-          Focus.moveTo(config.key);
-          // we'll get told to rebuild and we'll take care of the keyboard then
-        }
-      },
+      onTap: _requestKeyboard,
       child: new Padding(
         padding: const EdgeDims.symmetric(horizontal: 16.0),
         child: child
