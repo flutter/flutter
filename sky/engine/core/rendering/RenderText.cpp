@@ -24,12 +24,13 @@
 
 #include "sky/engine/core/rendering/RenderText.h"
 
+#include "sky/engine/core/rendering/break_lines.h"
 #include "sky/engine/core/rendering/InlineTextBox.h"
 #include "sky/engine/core/rendering/RenderBlock.h"
 #include "sky/engine/core/rendering/RenderLayer.h"
 #include "sky/engine/core/rendering/RenderView.h"
 #include "sky/engine/core/rendering/TextRunConstructor.h"
-#include "sky/engine/core/rendering/break_lines.h"
+#include "sky/engine/core/text/TextBox.h"
 #include "sky/engine/platform/fonts/Character.h"
 #include "sky/engine/platform/fonts/FontCache.h"
 #include "sky/engine/platform/geometry/FloatQuad.h"
@@ -204,7 +205,7 @@ static FloatRect localQuadForTextBox(InlineTextBox* box, unsigned start, unsigne
     return FloatRect();
 }
 
-void RenderText::absoluteRectsForRange(Vector<IntRect>& rects, unsigned start, unsigned end, bool useSelectionHeight)
+void RenderText::appendAbsoluteTextBoxesForRange(std::vector<TextBox>& boxes, unsigned start, unsigned end)
 {
     // Work around signed/unsigned issues. This function takes unsigneds, and is often passed UINT_MAX
     // to mean "all the way to the end". InlineTextBox coordinates are unsigneds, so changing this
@@ -220,20 +221,15 @@ void RenderText::absoluteRectsForRange(Vector<IntRect>& rects, unsigned start, u
         // Note: box->end() returns the index of the last character, not the index past it
         if (start <= box->start() && box->end() < end) {
             FloatRect r = box->calculateBoundaries();
-            if (useSelectionHeight) {
-                LayoutRect selectionRect = box->localSelectionRect(start, end);
-                r.setHeight(selectionRect.height().toFloat());
-                r.setY(selectionRect.y().toFloat());
-            }
-            rects.append(localToAbsoluteQuad(r, 0).enclosingBoundingBox());
+            boxes.emplace_back(localToAbsoluteQuad(r).enclosingBoundingBox(), box->direction());
         } else {
-            // FIXME: This code is wrong. It's converting local to absolute twice. http://webkit.org/b/65722
-            FloatRect rect = localQuadForTextBox(box, start, end, useSelectionHeight);
+            FloatRect rect = localQuadForTextBox(box, start, end, /* useSelectionHeight */ false);
             if (!rect.isZero())
-                rects.append(localToAbsoluteQuad(rect, 0).enclosingBoundingBox());
+                boxes.emplace_back(localToAbsoluteQuad(rect).enclosingBoundingBox(), box->direction());
         }
     }
 }
+
 
 void RenderText::absoluteQuads(Vector<FloatQuad>& quads, ClippingOption option) const
 {

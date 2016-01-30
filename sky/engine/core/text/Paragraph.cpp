@@ -115,7 +115,7 @@ std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
     return std::vector<TextBox>();
 
   unsigned offset = 0;
-  Vector<IntRect> rects;
+  std::vector<TextBox> boxes;
   for (RenderObject* object = m_renderView.get(); object; object = object->nextInPreOrder()) {
     if (!object->isText())
       continue;
@@ -124,21 +124,14 @@ std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
     if (offset + length > start) {
       unsigned startOffset = offset > start ? 0 : start - offset;
       unsigned endOffset = end - offset;
-      text->absoluteRectsForRange(rects, startOffset, endOffset);
+      text->appendAbsoluteTextBoxesForRange(boxes, startOffset, endOffset);
     }
     offset += length;
     if (offset >= end)
       break;
   }
 
-  std::vector<TextBox> result;
-  result.reserve(rects.size());
-  for (auto& rect : rects) {
-    // TODO(abarth): Actually figure out the direction of the box.
-    result.emplace_back(rect, LTR);
-  }
-
-  return result;
+  return boxes;
 }
 
 } // namespace blink

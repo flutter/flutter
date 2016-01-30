@@ -23,6 +23,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERTEXT_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERTEXT_H_
 
+#include <vector>
+
 #include "sky/engine/core/rendering/RenderObject.h"
 #include "sky/engine/platform/LengthFunctions.h"
 #include "sky/engine/platform/text/TextPath.h"
@@ -30,8 +32,8 @@
 #include "sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
-
 class InlineTextBox;
+class TextBox;
 
 class RenderText : public RenderObject {
 public:
@@ -55,7 +57,7 @@ public:
     InlineTextBox* createInlineTextBox();
     void dirtyLineBoxes(bool fullLayout);
 
-    void absoluteRectsForRange(Vector<IntRect>&, unsigned startOffset = 0, unsigned endOffset = INT_MAX, bool useSelectionHeight = false);
+    void appendAbsoluteTextBoxesForRange(std::vector<TextBox>&, unsigned startOffset = 0, unsigned endOffset = INT_MAX);
 
     virtual void absoluteQuads(Vector<FloatQuad>&) const override final;
     void absoluteQuadsForRange(Vector<FloatQuad>&, unsigned startOffset = 0, unsigned endOffset = INT_MAX, bool useSelectionHeight = false);
