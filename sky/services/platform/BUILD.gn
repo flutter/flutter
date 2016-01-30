@@ -6,8 +6,10 @@ import("//mojo/public/tools/bindings/mojom.gni")
 
 mojom("interfaces") {
   sources = [
-    "system_chrome.mojom",
+    "haptic_feedback.mojom",
     "path_provider.mojom",
+    "system_chrome.mojom",
+    "system_sound.mojom",
   ]
 }
 
