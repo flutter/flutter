@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'basic_types.dart';
+import 'text_editing.dart';
 import 'text_style.dart';
 
 /// An immutable span of text.
@@ -215,4 +216,53 @@ class TextPainter {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
     _paragraph.paint(canvas, offset);
   }
+
+  Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
+    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset - 1, offset);
+    if (boxes.isEmpty)
+      return null;
+    ui.TextBox box = boxes[0];
+    double caretEnd = box.end;
+    double dx = box.direction == ui.TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
+    return new Offset(dx, 0.0);
+  }
+
+  Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
+    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, offset + 1);
+    if (boxes.isEmpty)
+      return null;
+    ui.TextBox box = boxes[0];
+    double caretStart = box.start;
+    double dx = box.direction == ui.TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
+    return new Offset(dx, 0.0);
+  }
+
+  /// Returns the offset at which to paint the caret.
+  Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
+    assert(!_needsLayout);
+    int offset = position.offset;
+    // TODO(abarth): Handle the directionality of the text painter itself.
+    const Offset emptyOffset = Offset.zero;
+    switch (position.affinity) {
+      case TextAffinity.upstream:
+        return _getOffsetFromUpstream(offset, caretPrototype)
+            ?? _getOffsetFromDownstream(offset, caretPrototype)
+            ?? emptyOffset;
+      case TextAffinity.downstream:
+        return _getOffsetFromDownstream(offset, caretPrototype)
+            ?? _getOffsetFromUpstream(offset, caretPrototype)
+            ?? emptyOffset;
+    }
+  }
+
+  /// Returns a list of rects that bound the given selection.
+  ///
+  /// A given selection might have more than one rect if this text painter
+  /// contains bidirectional text because logically contiguous text might not be
+  /// visually contiguous.
+  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+    assert(!_needsLayout);
+    return _paragraph.getBoxesForRange(selection.start, selection.end);
+  }
+
 }

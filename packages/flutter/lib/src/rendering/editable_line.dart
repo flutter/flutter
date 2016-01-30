@@ -11,9 +11,9 @@ import 'object.dart';
 import 'paragraph.dart';
 import 'proxy_box.dart' show SizeChangedCallback;
 
-const _kCursorGap = 1.0; // pixels
-const _kCursorHeightOffset = 2.0; // pixels
-const _kCursorWidth = 1.0; // pixels
+const _kCaretGap = 1.0; // pixels
+const _kCaretHeightOffset = 2.0; // pixels
+const _kCaretWidth = 1.0; // pixels
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 
@@ -23,11 +23,14 @@ class RenderEditableLine extends RenderBox {
     StyledTextSpan text,
     Color cursorColor,
     bool showCursor: false,
+    Color selectionColor,
+    TextSelection selection,
     Offset paintOffset: Offset.zero,
     this.onContentSizeChanged
   }) : _textPainter = new TextPainter(text),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
+       _selection = selection,
        _paintOffset = paintOffset {
   assert(!showCursor || cursorColor != null);
   // TODO(abarth): These min/max values should be the default for TextPainter.
@@ -69,6 +72,27 @@ class RenderEditableLine extends RenderBox {
     if (_showCursor == value)
       return;
     _showCursor = value;
+    markNeedsPaint();
+  }
+
+  Color get selectionColor => _selectionColor;
+  Color _selectionColor;
+  void set selectionColor(Color value) {
+    if (_selectionColor == value)
+      return;
+    _selectionColor = value;
+    markNeedsPaint();
+  }
+
+  List<ui.TextBox> _selectionRects;
+
+  TextSelection get selection => _selection;
+  TextSelection _selection;
+  void set selection(TextSelection value) {
+    if (_selection == value)
+      return;
+    _selection = value;
+    _selectionRects = null;
     markNeedsPaint();
   }
 
@@ -144,10 +168,14 @@ class RenderEditableLine extends RenderBox {
     _constraintsForCurrentLayout = constraints;
   }
 
+  Rect _caretPrototype;
+
   void performLayout() {
     size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight));
+    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, size.height - 2.0 * _kCaretHeightOffset);
+    _selectionRects = null;
     _layoutText(new BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight));
-    Size contentSize = new Size(_textPainter.width + _kCursorGap + _kCursorWidth, _textPainter.height);
+    Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
     if (_contentSize != contentSize) {
       _contentSize = contentSize;
       if (onContentSizeChanged != null)
@@ -155,18 +183,39 @@ class RenderEditableLine extends RenderBox {
     }
   }
 
-  void _paintContents(PaintingContext context, Offset offset) {
-    _textPainter.paint(context.canvas, offset + _paintOffset);
+  void _paintCaret(Canvas canvas, Offset effectiveOffset) {
+    Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
+    Paint paint = new Paint()..color = _cursorColor;
+    canvas.drawRect(_caretPrototype.shift(caretOffset + effectiveOffset), paint);
+  }
 
-    if (_showCursor) {
-      Rect cursorRect =  new Rect.fromLTWH(
-        offset.dx + _paintOffset.dx + _contentSize.width - _kCursorWidth,
-        offset.dy + _paintOffset.dy + _kCursorHeightOffset,
-        _kCursorWidth,
-        size.height - 2.0 * _kCursorHeightOffset
+  void _paintSelection(Canvas canvas, Offset effectiveOffset) {
+    assert(_selectionRects != null);
+    Paint paint = new Paint()..color = _selectionColor;
+    for (ui.TextBox box in _selectionRects) {
+      Rect selectionRect = new Rect.fromLTWH(
+        effectiveOffset.dx + box.left,
+        effectiveOffset.dy + _kCaretHeightOffset,
+        box.right - box.left,
+        size.height - 2.0 * _kCaretHeightOffset
       );
-      context.canvas.drawRect(cursorRect, new Paint()..color = _cursorColor);
+      canvas.drawRect(selectionRect, paint);
     }
+  }
+
+  void _paintContents(PaintingContext context, Offset offset) {
+    Offset effectiveOffset = offset + _paintOffset;
+
+    if (_selection != null) {
+      if (_selection.isCollapsed && _showCursor && cursorColor != null) {
+        _paintCaret(context.canvas, effectiveOffset);
+      } else if (!_selection.isCollapsed && _selectionColor != null) {
+        _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
+        _paintSelection(context.canvas, effectiveOffset);
+      }
+    }
+
+    _textPainter.paint(context.canvas, effectiveOffset);
   }
 
   bool get _hasVisualOverflow => _contentSize.width > size.width;
