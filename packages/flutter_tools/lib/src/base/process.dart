@@ -21,26 +21,20 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     cmd.sublist(1),
     workingDirectory: workingDirectory
   );
-  process.stdout.transform(UTF8.decoder).listen((String data) {
-    List<String> dataLines = data.trimRight().split('\n');
-    if (filter != null) {
-      // TODO(ianh): This doesn't handle IO buffering (where the data might be split half-way through a line)
-      dataLines = dataLines.where((String s) => filter.hasMatch(s)).toList();
-    }
-    if (dataLines.length > 0) {
-      printStatus('$prefix${dataLines.join('\n$prefix')}');
-    }
-  });
-  process.stderr.transform(UTF8.decoder).listen((String data) {
-    List<String> dataLines = data.trimRight().split('\n');
-    if (filter != null) {
-      // TODO(ianh): This doesn't handle IO buffering (where the data might be split half-way through a line)
-      dataLines = dataLines.where((String s) => filter.hasMatch(s));
-    }
-    if (dataLines.length > 0) {
-      printError('$prefix${dataLines.join('\n$prefix')}');
-    }
-  });
+  process.stdout
+    .transform(UTF8.decoder)
+    .transform(const LineSplitter())
+    .where((String line) => filter == null ? true : filter.hasMatch(line))
+    .listen((String line) {
+      printStatus('$prefix$line');
+    });
+  process.stderr
+    .transform(UTF8.decoder)
+    .transform(const LineSplitter())
+    .where((String line) => filter == null ? true : filter.hasMatch(line))
+    .listen((String line) {
+      printError('$prefix$line');
+    });
   return await process.exitCode;
 }
 
