@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_COLOR_FILTER_LAYER_H_
-#define FLOW_COLOR_FILTER_LAYER_H_
+#ifndef FLOW_LAYERS_COLOR_FILTER_LAYER_H_
+#define FLOW_LAYERS_COLOR_FILTER_LAYER_H_
 
-#include "flow/container_layer.h"
+#include "flow/layers/container_layer.h"
 
 namespace flow {
 
@@ -33,4 +33,4 @@ class ColorFilterLayer : public ContainerLayer {
 
 }  // namespace flow
 
-#endif  // FLOW_COLOR_FILTER_LAYER_H_
+#endif  // FLOW_LAYERS_COLOR_FILTER_LAYER_H_

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_CHILD_SCENE_LAYER_H_
-#define FLOW_CHILD_SCENE_LAYER_H_
+#ifndef FLOW_LAYERS_CHILD_SCENE_LAYER_H_
+#define FLOW_LAYERS_CHILD_SCENE_LAYER_H_
 
-#include "flow/layer.h"
+#include "flow/layers/layer.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
 
 namespace flow {
@@ -37,4 +37,4 @@ class ChildSceneLayer : public Layer {
 
 }  // namespace flow
 
-#endif  // FLOW_CHILD_SCENE_LAYER_H_
+#endif  // FLOW_LAYERS_CHILD_SCENE_LAYER_H_

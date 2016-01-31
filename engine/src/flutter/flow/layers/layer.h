@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_LAYER_H_
-#define FLOW_LAYER_H_
+#ifndef FLOW_LAYERS_LAYER_H_
+#define FLOW_LAYERS_LAYER_H_
 
 #include <memory>
 #include <vector>
@@ -64,4 +64,4 @@ class Layer {
 
 }  // namespace flow
 
-#endif  // FLOW_LAYER_H_
+#endif  // FLOW_LAYERS_LAYER_H_
