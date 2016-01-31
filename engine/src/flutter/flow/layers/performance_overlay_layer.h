@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_PERFORMANCE_OVERLAY_LAYER_H_
-#define FLOW_PERFORMANCE_OVERLAY_LAYER_H_
+#ifndef FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_
+#define FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_
 
 #include "base/macros.h"
-#include "flow/layer.h"
+#include "flow/layers/layer.h"
 
 namespace flow {
 
@@ -29,4 +29,4 @@ class PerformanceOverlayLayer : public Layer {
 
 }  // namespace flow
 
-#endif  // FLOW_PERFORMANCE_OVERLAY_LAYER_H_
+#endif  // FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_

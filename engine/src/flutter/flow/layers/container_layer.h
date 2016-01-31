@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_CONTAINER_LAYER_H_
-#define FLOW_CONTAINER_LAYER_H_
+#ifndef FLOW_LAYERS_CONTAINER_LAYER_H_
+#define FLOW_LAYERS_CONTAINER_LAYER_H_
 
 #include <vector>
-#include "flow/layer.h"
+#include "flow/layers/layer.h"
 
 namespace flow {
 
@@ -32,4 +32,4 @@ class ContainerLayer : public Layer {
 
 }  // namespace flow
 
-#endif  // FLOW_CONTAINER_LAYER_H_
+#endif  // FLOW_LAYERS_CONTAINER_LAYER_H_

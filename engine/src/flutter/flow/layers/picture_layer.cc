@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/picture_layer.h"
+#include "flow/layers/picture_layer.h"
 
 #include "base/logging.h"
 #include "flow/checkerboard.h"

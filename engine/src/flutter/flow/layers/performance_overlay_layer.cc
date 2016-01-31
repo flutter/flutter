@@ -6,7 +6,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "flow/performance_overlay_layer.h"
+#include "flow/layers/performance_overlay_layer.h"
 
 namespace flow {
 

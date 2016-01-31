@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_LAYER_TREE_H_
-#define FLOW_LAYER_TREE_H_
+#ifndef FLOW_LAYERS_LAYER_TREE_H_
+#define FLOW_LAYERS_LAYER_TREE_H_
 
 #include <stdint.h>
 #include <memory>
 
 #include "base/macros.h"
 #include "base/time/time.h"
-#include "flow/layer.h"
+#include "flow/layers/layer.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flow {
@@ -63,4 +63,4 @@ class LayerTree {
 
 }  // namespace flow
 
-#endif  // FLOW_LAYER_TREE_H_
+#endif  // FLOW_LAYERS_LAYER_TREE_H_
