@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_PICTURE_LAYER_H_
-#define FLOW_PICTURE_LAYER_H_
+#ifndef FLOW_LAYERS_PICTURE_LAYER_H_
+#define FLOW_LAYERS_PICTURE_LAYER_H_
 
-#include "flow/layer.h"
+#include "flow/layers/layer.h"
 
 namespace flow {
 
@@ -35,4 +35,4 @@ class PictureLayer : public Layer {
 
 }  // namespace flow
 
-#endif  // FLOW_PICTURE_LAYER_H_
+#endif  // FLOW_LAYERS_PICTURE_LAYER_H_

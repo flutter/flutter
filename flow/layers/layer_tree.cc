@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/layer_tree.h"
+#include "flow/layers/layer_tree.h"
 
 #include "base/trace_event/trace_event.h"
-#include "flow/layer.h"
+#include "flow/layers/layer.h"
 
 namespace flow {
 

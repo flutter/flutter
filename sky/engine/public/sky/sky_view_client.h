@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "flow/layer_tree.h"
+#include "flow/layers/layer_tree.h"
 
 typedef struct _Dart_Isolate* Dart_Isolate;
 

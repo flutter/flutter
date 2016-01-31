@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/clip_rrect_layer.h"
+#include "flow/layers/clip_path_layer.h"
 
 namespace flow {
 
-ClipRRectLayer::ClipRRectLayer() {
+ClipPathLayer::ClipPathLayer() {
 }
 
-ClipRRectLayer::~ClipRRectLayer() {
+ClipPathLayer::~ClipPathLayer() {
 }
 
-void ClipRRectLayer::Paint(PaintContext::ScopedFrame& frame) {
+void ClipPathLayer::Paint(PaintContext::ScopedFrame& frame) {
   SkCanvas& canvas = frame.canvas();
   SkAutoCanvasRestore save(&canvas, false);
-  canvas.saveLayer(&clip_rrect_.getBounds(), nullptr);
-  canvas.clipRRect(clip_rrect_);
+  canvas.saveLayer(&clip_path_.getBounds(), nullptr);
+  canvas.clipPath(clip_path_);
   PaintChildren(frame);
 }
 

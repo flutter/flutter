@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <memory>
 
-#include "flow/layer.h"
+#include "flow/layers/container_layer.h"
 #include "sky/engine/bindings/exception_state.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/painting/CanvasPath.h"

@@ -6,8 +6,8 @@
 #define SKY_SHELL_GPU_DIRECT_RASTERIZER_H_
 
 #include "base/memory/weak_ptr.h"
-#include "skia/ext/refptr.h"
 #include "flow/paint_context.h"
+#include "skia/ext/refptr.h"
 #include "sky/shell/gpu/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
 #include "ui/gfx/native_widget_types.h"

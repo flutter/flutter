@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_SHADER_MASK_LAYER_H_
-#define FLOW_SHADER_MASK_LAYER_H_
+#ifndef FLOW_LAYERS_SHADER_MASK_LAYER_H_
+#define FLOW_LAYERS_SHADER_MASK_LAYER_H_
 
-#include "flow/container_layer.h"
+#include "flow/layers/container_layer.h"
 
 #include "third_party/skia/include/core/SkShader.h"
 
@@ -40,4 +40,4 @@ class ShaderMaskLayer : public ContainerLayer {
 
 }  // namespace flow
 
-#endif  // FLOW_SHADER_MASK_LAYER_H_
+#endif  // FLOW_LAYERS_SHADER_MASK_LAYER_H_
