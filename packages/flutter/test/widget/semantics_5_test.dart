@@ -12,7 +12,7 @@ import 'test_semantics.dart';
 void main() {
   test('Semantics 5', () {
     testWidgets((WidgetTester tester) {
-      TestSemanticsClient client = new TestSemanticsClient();
+      TestSemanticsListener client = new TestSemanticsListener();
 
       tester.pumpWidget(
         new Stack(

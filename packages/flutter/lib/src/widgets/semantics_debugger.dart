@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as engine;
+import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -22,11 +22,11 @@ class SemanticsDebugger extends StatefulComponent {
 class _SemanticsDebuggerState extends State<SemanticsDebugger> {
   void initState() {
     super.initState();
-    _SemanticsDebuggerClient.ensureInstantiated();
-    _SemanticsDebuggerClient.instance.addListener(_update);
+    _SemanticsDebuggerListener.ensureInstantiated();
+    _SemanticsDebuggerListener.instance.addListener(_update);
   }
   void dispose() {
-    _SemanticsDebuggerClient.instance.removeListener(_update);
+    _SemanticsDebuggerListener.instance.removeListener(_update);
     super.dispose();
   }
   void _update() {
@@ -42,28 +42,28 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
   }
   void _handleTap() {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerClient.instance.handleTap(_lastPointerDownLocation);
+    _SemanticsDebuggerListener.instance.handleTap(_lastPointerDownLocation);
     setState(() {
       _lastPointerDownLocation = null;
     });
   }
   void _handleLongPress() {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerClient.instance.handleLongPress(_lastPointerDownLocation);
+    _SemanticsDebuggerListener.instance.handleLongPress(_lastPointerDownLocation);
     setState(() {
       _lastPointerDownLocation = null;
     });
   }
   void _handlePanEnd(Offset velocity) {
     assert(_lastPointerDownLocation != null);
-    _SemanticsDebuggerClient.instance.handlePanEnd(_lastPointerDownLocation, velocity);
+    _SemanticsDebuggerListener.instance.handlePanEnd(_lastPointerDownLocation, velocity);
     setState(() {
       _lastPointerDownLocation = null;
     });
   }
   Widget build(BuildContext context) {
     return new CustomPaint(
-      foregroundPainter: new _SemanticsDebuggerPainter(_SemanticsDebuggerClient.instance.generation, _lastPointerDownLocation),
+      foregroundPainter: new _SemanticsDebuggerPainter(_SemanticsDebuggerListener.instance.generation, _lastPointerDownLocation),
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _handleTap,
@@ -233,16 +233,16 @@ class _SemanticsDebuggerEntry {
   }
 }
 
-class _SemanticsDebuggerClient implements engine.SemanticsClient {
-  _SemanticsDebuggerClient._() {
+class _SemanticsDebuggerListener implements mojom.SemanticsListener {
+  _SemanticsDebuggerListener._() {
     Renderer.instance.setSemanticsClient(this);
   }
 
-  static _SemanticsDebuggerClient instance;
-  static engine.SemanticsServer _server;
-  static void ensureInstantiated({ engine.SemanticsServer server }) {
+  static _SemanticsDebuggerListener instance;
+  static mojom.SemanticsServer _server;
+  static void ensureInstantiated({ mojom.SemanticsServer server }) {
     _server = server ?? new SemanticsServer();
-    instance ??= new _SemanticsDebuggerClient._();
+    instance ??= new _SemanticsDebuggerListener._();
   }
 
   Set<VoidCallback> _listeners = new Set<VoidCallback>();
@@ -256,7 +256,7 @@ class _SemanticsDebuggerClient implements engine.SemanticsClient {
 
   Map<int, _SemanticsDebuggerEntry> nodes = <int, _SemanticsDebuggerEntry>{};
 
-  _SemanticsDebuggerEntry _updateNode(engine.SemanticsNode node) {
+  _SemanticsDebuggerEntry _updateNode(mojom.SemanticsNode node) {
     _SemanticsDebuggerEntry entry = nodes.putIfAbsent(node.id, () => new _SemanticsDebuggerEntry(node.id));
     if (node.flags != null) {
       entry.canBeTapped = node.flags.canBeTapped;
@@ -295,7 +295,7 @@ class _SemanticsDebuggerClient implements engine.SemanticsClient {
       Set oldChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children ?? const <_SemanticsDebuggerEntry>[]);
       entry.children?.clear();
       entry.children ??= new List<_SemanticsDebuggerEntry>();
-      for (engine.SemanticsNode child in node.children)
+      for (mojom.SemanticsNode child in node.children)
         entry.children.add(_updateNode(child));
       Set newChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children);
       Set<_SemanticsDebuggerEntry> removedChildren = oldChildren.difference(newChildren);
@@ -307,9 +307,9 @@ class _SemanticsDebuggerClient implements engine.SemanticsClient {
 
   int generation = 0;
 
-  updateSemanticsTree(List<engine.SemanticsNode> nodes) {
+  updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
     generation += 1;
-    for (engine.SemanticsNode node in nodes)
+    for (mojom.SemanticsNode node in nodes)
       _updateNode(node);
     for (VoidCallback listener in _listeners)
       listener();
@@ -347,9 +347,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   final int generation;
   final Point pointerPosition;
   void paint(Canvas canvas, Size size) {
-    _SemanticsDebuggerClient.instance.nodes[0]?.paint(
+    _SemanticsDebuggerListener.instance.nodes[0]?.paint(
       canvas,
-      _SemanticsDebuggerClient.instance.nodes[0].findDepth()
+      _SemanticsDebuggerListener.instance.nodes[0].findDepth()
     );
     if (pointerPosition != null) {
       Paint paint = new Paint();

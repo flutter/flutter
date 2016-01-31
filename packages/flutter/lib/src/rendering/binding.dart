@@ -65,8 +65,8 @@ abstract class Renderer extends Scheduler
     renderView.configuration = new ViewConfiguration(size: ui.window.size);
   }
 
-  mojom.SemanticsClient _semanticsClient;
-  void setSemanticsClient(mojom.SemanticsClient client) {
+  mojom.SemanticsListener _semanticsClient;
+  void setSemanticsClient(mojom.SemanticsListener client) {
     assert(_semanticsClient == null);
     _semanticsClient = client;
     if (renderView != null)
