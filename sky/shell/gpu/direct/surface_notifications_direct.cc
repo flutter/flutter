@@ -6,9 +6,9 @@
 
 #include "base/bind.h"
 #include "base/location.h"
-#include "sky/shell/shell.h"
 #include "base/single_thread_task_runner.h"
 #include "sky/shell/gpu/direct/rasterizer_direct.h"
+#include "sky/shell/shell.h"
 
 namespace sky {
 namespace shell {

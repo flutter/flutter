@@ -6,10 +6,6 @@
 
 #include "base/trace_event/trace_event.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "flow/container_layer.h"
-#include "flow/layer.h"
-#include "flow/paint_context.h"
-#include "flow/picture_layer.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/shell/gpu/picture_serializer.h"

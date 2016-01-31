@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/shader_mask_layer.h"
+#include "flow/layers/shader_mask_layer.h"
 
 namespace flow {
 

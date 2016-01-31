@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/opacity_layer.h"
+#include "flow/layers/color_filter_layer.h"
 
 namespace flow {
 
-OpacityLayer::OpacityLayer() {
+ColorFilterLayer::ColorFilterLayer() {
 }
 
-OpacityLayer::~OpacityLayer() {
+ColorFilterLayer::~ColorFilterLayer() {
 }
 
-void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+void ColorFilterLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   ContainerLayer::Preroll(context, matrix);
   set_paint_bounds(context->child_paint_bounds);
 }
 
-void OpacityLayer::Paint(PaintContext::ScopedFrame& frame) {
+void ColorFilterLayer::Paint(PaintContext::ScopedFrame& frame) {
+  skia::RefPtr<SkColorFilter> color_filter =
+      skia::AdoptRef(SkColorFilter::CreateModeFilter(color_, transfer_mode_));
   SkPaint paint;
-  paint.setColor(SkColorSetARGB(alpha_, 0, 0, 0));
-  paint.setXfermodeMode(SkXfermode::kSrcOver_Mode);
+  paint.setColorFilter(color_filter.get());
 
   SkCanvas& canvas = frame.canvas();
   SkAutoCanvasRestore save(&canvas, false);

@@ -8,8 +8,7 @@
 #include <stdint.h>
 #include <memory>
 
-#include "flow/layer.h"
-#include "flow/layer_tree.h"
+#include "flow/layers/layer_tree.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefCounted.h"
