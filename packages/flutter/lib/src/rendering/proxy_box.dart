@@ -1115,9 +1115,6 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 }
 
-/// Called when a size changes.
-typedef void SizeChangedCallback(Size newSize);
-
 /// Calls [onSizeChanged] whenever the child's layout size changes
 ///
 /// Because size observer calls its callback during layout, you cannot modify
@@ -1131,7 +1128,7 @@ class RenderSizeObserver extends RenderProxyBox {
   }
 
   /// The callback to call whenever the child's layout size changes
-  SizeChangedCallback onSizeChanged;
+  ValueChanged<Size> onSizeChanged;
 
   void performLayout() {
     Size oldSize = hasSize ? size : null;
@@ -1540,7 +1537,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
   /// If 'container' is true, this RenderObject will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors.
-  /// 
+  ///
   /// The 'container' flag is implicitly set to true on the immediate
   /// semantics-providing descendants of a node where multiple
   /// children have semantics or have descendants providing semantics.

@@ -265,4 +265,9 @@ class TextPainter {
     return _paragraph.getBoxesForRange(selection.start, selection.end);
   }
 
+  TextPosition getPositionForOffset(Offset offset) {
+    assert(!_needsLayout);
+    return _paragraph.getPositionForOffset(offset);
+  }
+
 }

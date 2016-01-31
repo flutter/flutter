@@ -4,12 +4,12 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 
 import 'box.dart';
 import 'object.dart';
 import 'paragraph.dart';
-import 'proxy_box.dart' show SizeChangedCallback;
 
 const _kCaretGap = 1.0; // pixels
 const _kCaretHeightOffset = 2.0; // pixels
@@ -26,22 +26,28 @@ class RenderEditableLine extends RenderBox {
     Color selectionColor,
     TextSelection selection,
     Offset paintOffset: Offset.zero,
+    this.onSelectionChanged,
     this.onContentSizeChanged
   }) : _textPainter = new TextPainter(text),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
        _selection = selection,
        _paintOffset = paintOffset {
-  assert(!showCursor || cursorColor != null);
-  // TODO(abarth): These min/max values should be the default for TextPainter.
-  _textPainter
-    ..minWidth = 0.0
-    ..maxWidth = double.INFINITY
-    ..minHeight = 0.0
-    ..maxHeight = double.INFINITY;
+    assert(!showCursor || cursorColor != null);
+    // TODO(abarth): These min/max values should be the default for TextPainter.
+    _textPainter
+      ..minWidth = 0.0
+      ..maxWidth = double.INFINITY
+      ..minHeight = 0.0
+      ..maxHeight = double.INFINITY;
+    _tap = new TapGestureRecognizer(router: Gesturer.instance.pointerRouter, gestureArena: Gesturer.instance.gestureArena)
+      ..onTapDown = _handleTapDown
+      ..onTap = _handleTap
+      ..onTapCancel = _handleTapCancel;
   }
 
-  SizeChangedCallback onContentSizeChanged;
+  ValueChanged<Size> onContentSizeChanged;
+  ValueChanged<TextSelection> onSelectionChanged;
 
   /// The text to display
   StyledTextSpan get text => _textPainter.text;
@@ -146,6 +152,31 @@ class RenderEditableLine extends RenderBox {
   }
 
   bool hitTestSelf(Point position) => true;
+
+  TapGestureRecognizer _tap;
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent && onSelectionChanged != null)
+      _tap.addPointer(event);
+  }
+
+  Point _lastTapDownPosition;
+  void _handleTapDown(Point globalPosition) {
+    _lastTapDownPosition = globalPosition;
+  }
+
+  void _handleTap() {
+    assert(_lastTapDownPosition != null);
+    final Point global = _lastTapDownPosition;
+    _lastTapDownPosition = null;
+    if (onSelectionChanged != null) {
+      TextPosition position = _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
+      onSelectionChanged(new TextSelection.fromPosition(position));
+    }
+  }
+
+  void _handleTapCancel() {
+    _lastTapDownPosition = null;
+  }
 
   BoxConstraints _constraintsForCurrentLayout; // when null, we don't have a current layout
 

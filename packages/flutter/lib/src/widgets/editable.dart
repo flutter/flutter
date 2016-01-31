@@ -158,6 +158,10 @@ class EditableString {
   /// The range of text that is currently selected.
   TextSelection get selection => _client.selection;
 
+  void setSelection(TextSelection selection) {
+    _client.selection = selection;
+  }
+
   /// A keyboard client stub that can be attached to a keyboard service.
   ///
   /// See [Keyboard].
@@ -180,7 +184,8 @@ class RawEditableLine extends Scrollable {
     this.hideText: false,
     this.style,
     this.cursorColor,
-    this.selectionColor
+    this.selectionColor,
+    this.onSelectionChanged
   }) : super(
     key: key,
     initialScrollOffset: 0.0,
@@ -204,6 +209,9 @@ class RawEditableLine extends Scrollable {
 
   /// The color to use when painting the selection.
   final Color selectionColor;
+
+  /// Called when the user requests a change to the selection.
+  final ValueChanged<TextSelection> onSelectionChanged;
 
   RawEditableTextState createState() => new RawEditableTextState();
 }
@@ -290,6 +298,7 @@ class RawEditableTextState extends ScrollableState<RawEditableLine> {
         selectionColor: config.selectionColor,
         hideText: config.hideText,
         onContentSizeChanged: _handleContentSizeChanged,
+        onSelectionChanged: config.onSelectionChanged,
         paintOffset: new Offset(-scrollOffset, 0.0)
       )
     );
@@ -306,6 +315,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     this.selectionColor,
     this.hideText,
     this.onContentSizeChanged,
+    this.onSelectionChanged,
     this.paintOffset
   }) : super(key: key);
 
@@ -315,7 +325,8 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final bool showCursor;
   final Color selectionColor;
   final bool hideText;
-  final SizeChangedCallback onContentSizeChanged;
+  final ValueChanged<Size> onContentSizeChanged;
+  final ValueChanged<TextSelection> onSelectionChanged;
   final Offset paintOffset;
 
   RenderEditableLine createRenderObject() {
@@ -326,19 +337,22 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       selectionColor: selectionColor,
       selection: value.selection,
       onContentSizeChanged: onContentSizeChanged,
+      onSelectionChanged: onSelectionChanged,
       paintOffset: paintOffset
     );
   }
 
   void updateRenderObject(RenderEditableLine renderObject,
                           _EditableLineWidget oldWidget) {
-    renderObject.text = _styledTextSpan;
-    renderObject.cursorColor = cursorColor;
-    renderObject.showCursor = showCursor;
-    renderObject.selectionColor = selectionColor;
-    renderObject.selection = value.selection;
-    renderObject.onContentSizeChanged = onContentSizeChanged;
-    renderObject.paintOffset = paintOffset;
+    renderObject
+      ..text = _styledTextSpan
+      ..cursorColor = cursorColor
+      ..showCursor = showCursor
+      ..selectionColor = selectionColor
+      ..selection = value.selection
+      ..onContentSizeChanged = onContentSizeChanged
+      ..onSelectionChanged = onSelectionChanged
+      ..paintOffset = paintOffset;
   }
 
   StyledTextSpan get _styledTextSpan {
