@@ -6,8 +6,8 @@ jars:
   - android-sdk:extras/android/support/v13/android-support-v13.jar
   - android-sdk:extras/android/support/v7/appcompat/libs/android-support-v7-appcompat.jar
   - android-sdk:extras/android/support/v7/mediarouter/libs/android-support-v7-mediarouter.jar
-  - https://storage.googleapis.com/mojo_infra/flutter/c03a5dda7e78c50d74fe5e5ed72eed1de6ae993d/android-arm/gcm/gcm_lib.dex.jar
-  - https://storage.googleapis.com/mojo_infra/flutter/c03a5dda7e78c50d74fe5e5ed72eed1de6ae993d/android-arm/gcm/interfaces_java.dex.jar
+  - https://storage.googleapis.com/mojo_infra/flutter/7bce54b79ef9ee57999cc8e258d664a88723d56d/android-arm/gcm/gcm_lib.dex.jar
+  - https://storage.googleapis.com/mojo_infra/flutter/7bce54b79ef9ee57999cc8e258d664a88723d56d/android-arm/gcm/interfaces_java.dex.jar
 todo: >
   Maybe we should link to a URL to download the jars. Might need different
   versions per platform, etc.
