@@ -18,12 +18,13 @@ import '../runner/flutter_command.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   String get name => 'analyze';
-  String get description => 'Runs a carefully configured dartanalyzer over the current project\'s dart code.';
+  String get description => 'Runs a carefully configured dartanalyzer over the current project\'s Dart code.';
 
   AnalyzeCommand() {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
+    argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
   }
 
@@ -256,7 +257,14 @@ class AnalyzeCommand extends FlutterCommand {
       mainFile.path
     ];
 
-    printStatus(cmd.join(' '));
+    if (argResults['preamble']) {
+      if (dartFiles.length == 1) {
+        printStatus('Analyzing ${dartFiles.first}...');
+      } else {
+        printStatus('Analyzing ${dartFiles.length} files...');
+      }
+    }
+
     Process process = await Process.start(
       cmd[0],
       cmd.sublist(1),
