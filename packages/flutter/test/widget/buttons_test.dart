@@ -12,7 +12,7 @@ import 'test_semantics.dart';
 void main() {
   test('Does FlatButton contribute semantics', () {
     testWidgets((WidgetTester tester) {
-      TestSemanticsClient client = new TestSemanticsClient();
+      TestSemanticsListener client = new TestSemanticsListener();
       tester.pumpWidget(
         new Material(
           child: new Center(

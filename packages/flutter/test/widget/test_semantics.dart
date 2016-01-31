@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as engine;
+import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
-class TestSemanticsClient implements engine.SemanticsClient {
-  TestSemanticsClient() {
+class TestSemanticsListener implements mojom.SemanticsListener {
+  TestSemanticsListener() {
     Renderer.instance.setSemanticsClient(this);
   }
-  final List<engine.SemanticsNode> updates = <engine.SemanticsNode>[];
-  updateSemanticsTree(List<engine.SemanticsNode> nodes) {
-    assert(!nodes.any((engine.SemanticsNode node) => node == null));
+  final List<mojom.SemanticsNode> updates = <mojom.SemanticsNode>[];
+  updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
+    assert(!nodes.any((mojom.SemanticsNode node) => node == null));
     updates.addAll(nodes);
     updates.add(null);
   }

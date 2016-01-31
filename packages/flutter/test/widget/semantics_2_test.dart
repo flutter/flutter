@@ -13,7 +13,7 @@ import 'test_semantics.dart';
 void main() {
   test('Semantics 2', () {
     testWidgets((WidgetTester tester) {
-      TestSemanticsClient client = new TestSemanticsClient();
+      TestSemanticsListener client = new TestSemanticsListener();
 
       // this test is the same as the test in Semantics 1, but
       // starting with the second branch being ignored and then

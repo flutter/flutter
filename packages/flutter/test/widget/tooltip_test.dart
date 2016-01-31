@@ -359,7 +359,7 @@ void main() {
 
   test('Does tooltip contribute semantics', () {
     testWidgets((WidgetTester tester) {
-      TestSemanticsClient client = new TestSemanticsClient();
+      TestSemanticsListener client = new TestSemanticsListener();
       GlobalKey key = new GlobalKey();
       tester.pumpWidget(
         new Overlay(

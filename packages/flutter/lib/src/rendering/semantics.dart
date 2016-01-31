@@ -208,7 +208,7 @@ class SemanticsNode extends AbstractNode {
         if (child.parent != this) {
           if (child.parent != null) {
             // we're rebuilding the tree from the bottom up, so it's possible
-            // that our child was, in the last pass, a child of one of our      
+            // that our child was, in the last pass, a child of one of our
             // ancestors. In that case, we drop the child eagerly here.
             // TODO(ianh): Find a way to assert that the same node didn't
             // actually appear in the tree in two places.
@@ -333,7 +333,7 @@ class SemanticsNode extends AbstractNode {
     return result;
   }
 
-  static void sendSemanticsTreeTo(mojom.SemanticsClient client) {
+  static void sendSemanticsTreeTo(mojom.SemanticsListener client) {
     for (SemanticsNode oldNode in _detachedNodes) {
       // The other side will have forgotten this node if we even send
       // it again, so make sure to mark it dirty so that it'll get
@@ -359,7 +359,7 @@ class SemanticsNode extends AbstractNode {
             child.mergeAllDescendantsIntoThisNode = true; // this can add the node to the dirty list
       }
       assert(_dirtyNodes[index] == node); // make sure nothing went in front of us in the list
-    }    
+    }
     _dirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
     List<mojom.SemanticsNode> updatedNodes = <mojom.SemanticsNode>[];
     for (SemanticsNode node in _dirtyNodes) {
@@ -427,6 +427,8 @@ class SemanticsNode extends AbstractNode {
 }
 
 class SemanticsServer extends mojom.SemanticsServer {
+  void addSemanticsListener(mojom.SemanticsListener listener) {
+  }
   void tap(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeTapped)?.handleSemanticTap();
   }
