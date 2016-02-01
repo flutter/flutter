@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:mojo/core.dart' as core;
