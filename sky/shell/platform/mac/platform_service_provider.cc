@@ -57,7 +57,6 @@ void PlatformServiceProvider::ConnectToService(
 
   LOG(INFO) << "The platform service provider cannot find a service for '"
             << service_name.data() << "'";
-  mojo::Close(client_handle.Pass());
 }
 
 }  // namespace shell
