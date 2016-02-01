@@ -6,6 +6,7 @@
 module flutter.platform;
 
 /// Returns commonly used locations on the filesystem.
+[ServiceName="flutter::platform::PathProvider"]
 interface PathProvider {
   /// Path to the temporary directory on the device. Files in this directory
   /// may be cleared at any time. This does *not* return a new temporary

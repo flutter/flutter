@@ -9,6 +9,7 @@ module flutter.platform;
 /// intentionally terse since it invokes default platform behavior. It is not
 /// suitable for use if you require more flexible access to device sensors and
 /// peripherals.
+[ServiceName="flutter::platform::HapticFeedback"]
 interface HapticFeedback {
   /// Provides haptic feedback to the user for a short duration.
   ///
