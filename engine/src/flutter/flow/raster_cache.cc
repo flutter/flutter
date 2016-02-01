@@ -112,4 +112,8 @@ void RasterCache::SweepAfterFrame() {
     cache_.erase(it);
 }
 
+void RasterCache::Clear() {
+  cache_.clear();
+}
+
 }  // namespace flow
