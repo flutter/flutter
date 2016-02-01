@@ -1508,7 +1508,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.image,
     this.width,
     this.height,
-    this.scale,
+    this.scale: 1.0,
     this.color,
     this.fit,
     this.alignment,
@@ -1658,16 +1658,11 @@ class _ImageListenerState extends State<RawImageResource> {
     config.image.addListener(_handleImageChanged);
   }
 
-  // Note, we remember the resolved image and the scale together. If the
-  // source image resource is updated, we shouldn't grab its scale until
-  // it provides the associated resolved image.
-  ui.Image _resolvedImage;
-  double _scale;
+  ImageInfo _resolvedImage;
 
-  void _handleImageChanged(ui.Image resolvedImage) {
+  void _handleImageChanged(ImageInfo resolvedImage) {
     setState(() {
       _resolvedImage = resolvedImage;
-      _scale = config.image.scale;
     });
   }
 
@@ -1685,10 +1680,10 @@ class _ImageListenerState extends State<RawImageResource> {
 
   Widget build(BuildContext context) {
     return new RawImage(
-      image: _resolvedImage,
+      image: _resolvedImage?.image,
       width: config.width,
       height: config.height,
-      scale: _scale,
+      scale: _resolvedImage == null ? 1.0 : _resolvedImage.scale,
       color: config.color,
       fit: config.fit,
       alignment: config.alignment,

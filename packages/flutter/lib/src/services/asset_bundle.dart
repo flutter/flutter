@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'dart:ui_internals' as internals;
 import 'dart:typed_data';
 
@@ -48,8 +47,8 @@ abstract class CachingAssetBundle extends AssetBundle {
   final Map<String, Future<String>> _stringCache =
     new Map<String, Future<String>>();
 
-  Future<ui.Image> fetchImage(String key) async {
-    return await decodeImageFromDataPipe(await load(key));
+  Future<ImageInfo> fetchImage(String key) async {
+    return new ImageInfo(image: await decodeImageFromDataPipe(await load(key)));
   }
 
   ImageResource loadImage(String key) {

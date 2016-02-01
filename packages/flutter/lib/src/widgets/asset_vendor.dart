@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:mojo/core.dart' as core;
@@ -51,13 +50,15 @@ class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
 
   _ResolutionAwareAssetResolver get resolver => super.resolver;
 
-  Future<ui.Image> fetchImage(String key) async {
+  Future<ImageInfo> fetchImage(String key) async {
     core.MojoDataPipeConsumer pipe = await load(key);
     // At this point the key should be in our key cache, and the image
     // resource should be in our image cache
     double scale = resolver.getScale(keyCache[key]);
-    imageResourceCache[key].scale = scale;
-    return await decodeImageFromDataPipe(pipe);
+    return new ImageInfo(
+      image: await decodeImageFromDataPipe(pipe),
+      scale: scale
+    );
   }
 }
 
