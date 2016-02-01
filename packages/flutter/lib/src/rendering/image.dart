@@ -78,7 +78,7 @@ class RenderImage extends RenderBox {
     markNeedsLayout();
   }
 
-  /// If non-null, specify the image's scale.
+  /// Specifies the image's scale.
   ///
   /// Used when determining the best display size for the image.
   double get scale => _scale;

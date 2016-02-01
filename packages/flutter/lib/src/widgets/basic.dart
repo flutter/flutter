@@ -1531,7 +1531,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, specify the image's scale.
+  /// Specifies the image's scale.
   ///
   /// Used when determining the best display size for the image.
   final double scale;
@@ -1700,6 +1700,7 @@ class NetworkImage extends StatelessComponent {
     this.src,
     this.width,
     this.height,
+    this.scale : 1.0,
     this.color,
     this.fit,
     this.alignment,
@@ -1721,6 +1722,11 @@ class NetworkImage extends StatelessComponent {
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
   final double height;
+
+  /// Specifies the image's scale.
+  ///
+  /// Used when determining the best display size for the image.
+  final double scale;
 
   /// If non-null, apply this color filter to the image before painting.
   final Color color;
@@ -1749,7 +1755,7 @@ class NetworkImage extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new RawImageResource(
-      image: imageCache.load(src),
+      image: imageCache.load(src, scale: scale),
       width: width,
       height: height,
       color: color,
