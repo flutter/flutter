@@ -16,13 +16,14 @@ typedef void ImageListener(ui.Image image);
 /// image object might change over time, either because the image is animating
 /// or because the underlying image resource was mutated.
 class ImageResource {
-  ImageResource(this._futureImage) {
+  ImageResource(this._futureImage, { this.scale : 1.0 }) {
     _futureImage.then(_handleImageLoaded, onError: (exception, stack) => _handleImageError('Failed to load image:', exception, stack));
   }
 
   bool _resolved = false;
   Future<ui.Image> _futureImage;
   ui.Image _image;
+  double scale;
   final List<ImageListener> _listeners = new List<ImageListener>();
 
   /// The first concrete [ui.Image] object represented by this handle.

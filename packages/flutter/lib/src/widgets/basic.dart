@@ -1508,6 +1508,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.image,
     this.width,
     this.height,
+    this.scale,
     this.color,
     this.fit,
     this.alignment,
@@ -1529,6 +1530,11 @@ class RawImage extends LeafRenderObjectWidget {
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
   final double height;
+
+  /// If non-null, specify the image's scale.
+  ///
+  /// Used when determining the best display size for the image.
+  final double scale;
 
   /// If non-null, apply this color filter to the image before painting.
   final Color color;
@@ -1559,6 +1565,7 @@ class RawImage extends LeafRenderObjectWidget {
     image: image,
     width: width,
     height: height,
+    scale: scale,
     color: color,
     fit: fit,
     alignment: alignment,
@@ -1569,6 +1576,7 @@ class RawImage extends LeafRenderObjectWidget {
     renderObject.image = image;
     renderObject.width = width;
     renderObject.height = height;
+    renderObject.scale = scale;
     renderObject.color = color;
     renderObject.alignment = alignment;
     renderObject.fit = fit;
@@ -1650,11 +1658,16 @@ class _ImageListenerState extends State<RawImageResource> {
     config.image.addListener(_handleImageChanged);
   }
 
+  // Note, we remember the resolved image and the scale together. If the
+  // source image resource is updated, we shouldn't grab its scale until
+  // it provides the associated resolved image.
   ui.Image _resolvedImage;
+  double _scale;
 
   void _handleImageChanged(ui.Image resolvedImage) {
     setState(() {
       _resolvedImage = resolvedImage;
+      _scale = config.image.scale;
     });
   }
 
@@ -1675,6 +1688,7 @@ class _ImageListenerState extends State<RawImageResource> {
       image: _resolvedImage,
       width: config.width,
       height: config.height,
+      scale: _scale,
       color: config.color,
       fit: config.fit,
       alignment: config.alignment,

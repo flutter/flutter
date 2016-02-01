@@ -43,16 +43,16 @@ class NetworkAssetBundle extends AssetBundle {
 }
 
 abstract class CachingAssetBundle extends AssetBundle {
-  Map<String, ImageResource> _imageCache = new Map<String, ImageResource>();
+  Map<String, ImageResource> imageCache = new Map<String, ImageResource>();
   Map<String, Future<String>> _stringCache = new Map<String, Future<String>>();
 
-  Future<ui.Image> _fetchImage(String key) async {
+  Future<ui.Image> fetchImage(String key) async {
     return await decodeImageFromDataPipe(await load(key));
   }
 
   ImageResource loadImage(String key) {
-    return _imageCache.putIfAbsent(key, () {
-      return new ImageResource(_fetchImage(key));
+    return imageCache.putIfAbsent(key, () {
+      return new ImageResource(fetchImage(key));
     });
   }
 
