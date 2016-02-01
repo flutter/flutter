@@ -34,6 +34,19 @@ class DeviceManager {
 
   Completer _initedCompleter = new Completer();
 
+  /// Return the device with the matching ID; else, complete the Future with
+  /// `null`.
+  ///
+  /// This does a case insentitive compare with `deviceId`.
+  Future<Device> getDeviceById(String deviceId) async {
+    deviceId = deviceId.toLowerCase();
+    List<Device> devices = await getDevices();
+    return devices.firstWhere(
+      (Device device) => device.id.toLowerCase() == deviceId,
+      orElse: () => null
+    );
+  }
+
   Future<List<Device>> getDevices() async {
     await _initedCompleter.future;
 
@@ -78,7 +91,7 @@ abstract class Device {
 
   TargetPlatform get platform;
 
-  Future<int> logs({bool clear: false});
+  DeviceLogReader createLogReader();
 
   /// Start an app package on the current device.
   ///
@@ -90,6 +103,7 @@ abstract class Device {
     String mainPath,
     String route,
     bool checked: true,
+    bool clearLogs: false,
     Map<String, dynamic> platformArgs
   });
 
@@ -97,6 +111,21 @@ abstract class Device {
   Future<bool> stopApp(ApplicationPackage app);
 
   String toString() => '$runtimeType $id';
+}
+
+/// Read the log for a particular device. Subclasses must implement `hashCode`
+/// and `operator ==` so that log readers that read from the same location can be
+/// de-duped. For example, two Android devices will both try and log using
+/// `adb logcat`; we don't want to display two identical log streams.
+abstract class DeviceLogReader {
+  String get name;
+
+  Future<int> logs({ bool clear: false });
+
+  int get hashCode;
+  bool operator ==(dynamic other);
+
+  String toString() => name;
 }
 
 // TODO(devoncarew): Unify this with [DeviceManager].

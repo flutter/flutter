@@ -17,8 +17,6 @@ class IOSCommand extends FlutterCommand {
   final String name = "ios";
   final String description = "Commands for creating and updating Flutter iOS projects.";
 
-  final bool requiresProjectRoot = true;
-
   IOSCommand() {
     argParser.addFlag('init', help: 'Initialize the Xcode project for building the iOS application');
   }

@@ -134,8 +134,6 @@ Future<int> startApp(
 
     if (traceStartup != null)
       platformArgs['trace-startup'] = traceStartup;
-    if (clearLogs != null)
-      platformArgs['clear-logs'] = clearLogs;
 
     printStatus('Starting ${_getDisplayPath(mainPath)} on ${device.name}...');
 
@@ -145,6 +143,7 @@ Future<int> startApp(
       mainPath: mainPath,
       route: route,
       checked: checked,
+      clearLogs: clearLogs,
       platformArgs: platformArgs
     );
 

@@ -142,11 +142,16 @@ class FlutterCommandRunner extends CommandRunner {
   String get _defaultFlutterRoot {
     if (Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
       return Platform.environment[kFlutterRootEnvironmentVariableName];
-    String script = Platform.script.toFilePath();
-    if (path.basename(script) == kSnapshotFileName)
-      return path.dirname(path.dirname(path.dirname(script)));
-    if (path.basename(script) == kFlutterToolsScriptFileName)
-      return path.dirname(path.dirname(path.dirname(path.dirname(script))));
+
+    try {
+      String script = Platform.script.toFilePath();
+      if (path.basename(script) == kSnapshotFileName)
+        return path.dirname(path.dirname(path.dirname(script)));
+      if (path.basename(script) == kFlutterToolsScriptFileName)
+        return path.dirname(path.dirname(path.dirname(path.dirname(script))));
+    } catch (error) {
+      printTrace('Unable to locate fluter root: $error');
+    }
     return '.';
   }
 

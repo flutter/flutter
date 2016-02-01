@@ -294,6 +294,7 @@ class AndroidDevice extends Device {
     String mainPath,
     String route,
     bool checked: true,
+    bool clearLogs: false,
     Map<String, dynamic> platformArgs
   }) {
     return flx.buildInTempDir(
@@ -309,7 +310,7 @@ class AndroidDevice extends Device {
           checked: checked,
           traceStartup: platformArgs['trace-startup'],
           route: route,
-          clearLogs: platformArgs['clear-logs']
+          clearLogs: clearLogs
         )) {
           return true;
         } else {
@@ -334,26 +335,7 @@ class AndroidDevice extends Device {
     runSync(adbCommandForDevice(['logcat', '-c']));
   }
 
-  Future<int> logs({bool clear: false}) async {
-    if (!isConnected()) {
-      return 2;
-    }
-
-    if (clear) {
-      clearLogs();
-    }
-
-    return await runCommandAndStreamOutput(adbCommandForDevice([
-      'logcat',
-      '-v',
-      'tag', // Only log the tag and the message
-      '-s',
-      'flutter:V',
-      'ActivityManager:W',
-      'System.err:W',
-      '*:F',
-    ]), prefix: 'android: ');
-  }
+  DeviceLogReader createLogReader() => new _AdbLogReader(this);
 
   void startTracing(AndroidApk apk) {
     runCheckedSync(adbCommandForDevice([
@@ -527,5 +509,43 @@ String getAdbPath() {
     }
   } else {
     return _defaultAdbPath;
+  }
+}
+
+/// A log reader that logs from `adb logcat`. This will have the same output as
+/// another copy of [_AdbLogReader], and the two instances will be equivalent.
+class _AdbLogReader extends DeviceLogReader {
+  _AdbLogReader(this.device);
+
+  final AndroidDevice device;
+
+  String get name => 'Android';
+
+  Future<int> logs({bool clear: false}) async {
+    if (!device.isConnected())
+      return 2;
+
+    if (clear)
+      device.clearLogs();
+
+    return await runCommandAndStreamOutput(device.adbCommandForDevice(<String>[
+      'logcat',
+      '-v',
+      'tag', // Only log the tag and the message
+      '-s',
+      'flutter:V',
+      'ActivityManager:W',
+      'System.err:W',
+      '*:F',
+    ]), prefix: '[Android] ');
+  }
+
+  // Intentionally constant; overridden because we've overridden the `operator ==` method below.
+  int get hashCode => name.hashCode;
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    return other is _AdbLogReader;
   }
 }

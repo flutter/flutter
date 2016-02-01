@@ -4,7 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';
@@ -13,18 +13,13 @@ main() => defineTests();
 
 defineTests() {
   group('logs', () {
-    test('returns 0 when no device is connected', () {
+    test('fail with a bad device id', () {
       LogsCommand command = new LogsCommand();
       applyMocksToCommand(command);
-      MockDeviceStore mockDevices = command.devices;
-
-      when(mockDevices.android.isConnected()).thenReturn(false);
-      when(mockDevices.iOS.isConnected()).thenReturn(false);
-      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
-
-      CommandRunner runner = new CommandRunner('test_flutter', '')
-        ..addCommand(command);
-      runner.run(['logs']).then((int code) => expect(code, equals(0)));
+      CommandRunner runner = new FlutterCommandRunner()..addCommand(command);
+      runner.run(<String>['-d', 'abc123', 'logs']).then((int code) {
+        expect(code, equals(1));
+      });
     });
   });
 }

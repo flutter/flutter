@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
@@ -13,25 +14,52 @@ class LogsCommand extends FlutterCommand {
 
   LogsCommand() {
     argParser.addFlag('clear',
-        negatable: false,
-        abbr: 'c',
-        help: 'Clear log history before reading from logs (Android only).');
+      negatable: false,
+      abbr: 'c',
+      help: 'Clear log history before reading from logs.'
+    );
   }
 
   bool get requiresProjectRoot => false;
 
-  @override
   Future<int> runInProject() async {
-    connectToDevices();
+    DeviceManager deviceManager = new DeviceManager();
+    List<Device> devices;
+
+    String deviceId = globalResults['device-id'];
+    if (deviceId != null) {
+      Device device = await deviceManager.getDeviceById(deviceId);
+      if (device == null) {
+        printError("No device found with id '$deviceId'.");
+        return 1;
+      }
+      devices = <Device>[device];
+    } else {
+      devices = await deviceManager.getDevices();
+    }
+
+    if (devices.isEmpty) {
+      printStatus('No connected devices.');
+      return 0;
+    }
 
     bool clear = argResults['clear'];
 
-    Iterable<Future<int>> results = devices.all.map(
-        (Device device) => device.logs(clear: clear));
+    Set<DeviceLogReader> readers = new Set<DeviceLogReader>();
+    for (Device device in devices) {
+      readers.add(device.createLogReader());
+    }
 
-    for (Future<int> result in results)
-      await result;
+    printStatus('Logging for ${readers.join(', ')}...');
 
-    return 0;
+    List<int> results = await Future.wait(readers.map((DeviceLogReader reader) async {
+      int result = await reader.logs(clear: clear);
+      if (result != 0)
+        printError('Error listening to $reader logs.');
+      return result;
+    }));
+
+    // If all readers failed, return an error.
+    return results.every((int result) => result != 0) ? 1 : 0;
   }
 }
