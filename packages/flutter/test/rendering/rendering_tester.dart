@@ -26,7 +26,7 @@ enum EnginePhase {
   composite
 }
 
-class TestRenderingFlutterBinding extends BindingBase with Scheduler, Renderer, Gesturer {
+class TestRenderingFlutterBinding extends BindingBase with Scheduler, MojoShell, Renderer, Gesturer {
   void initRenderView() {
     if (renderView == null) {
       renderView = new TestRenderView();

@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/src/services/shell.dart';
+import 'package:flutter/services.dart';
 import 'package:mojo_services/mojo/network_service.mojom.dart' as mojo;
 import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojo;
 import 'package:mojo/core.dart' as mojo;

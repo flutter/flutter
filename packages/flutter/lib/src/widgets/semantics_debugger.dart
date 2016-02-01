@@ -31,7 +31,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
   }
   void _update() {
     setState(() {
-      // the generation of the _SemanticsDebuggerClient has changed
+      // the generation of the _SemanticsDebuggerListener has changed
     });
   }
   Point _lastPointerDownLocation;
@@ -214,9 +214,10 @@ class _SemanticsDebuggerEntry {
 
   _SemanticsDebuggerEntry hitTest(Point position, _SemanticsDebuggerEntryFilter filter) {
     if (transform != null) {
-      if (transform.determinant == 0.0)
+      Matrix4 invertedTransform = new Matrix4.identity();
+      double determinant = invertedTransform.copyInverse(transform);
+      if (determinant == 0.0)
         return null;
-      Matrix4 invertedTransform = new Matrix4.inverted(transform);
       position = MatrixUtils.transformPoint(invertedTransform, position);
     }
     if (!rect.contains(position))
@@ -235,13 +236,12 @@ class _SemanticsDebuggerEntry {
 
 class _SemanticsDebuggerListener implements mojom.SemanticsListener {
   _SemanticsDebuggerListener._() {
-    Renderer.instance.setSemanticsClient(this);
+    SemanticsNode.addListener(this);
   }
 
   static _SemanticsDebuggerListener instance;
-  static mojom.SemanticsServer _server;
-  static void ensureInstantiated({ mojom.SemanticsServer server }) {
-    _server = server ?? new SemanticsServer();
+  static final SemanticsServer _server = new SemanticsServer();
+  static void ensureInstantiated() {
     instance ??= new _SemanticsDebuggerListener._();
   }
 

@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:mojo_services/keyboard/keyboard.mojom.dart';
 
-import 'shell.dart';
+import 'binding.dart';
 
 export 'package:mojo_services/keyboard/keyboard.mojom.dart';
 
