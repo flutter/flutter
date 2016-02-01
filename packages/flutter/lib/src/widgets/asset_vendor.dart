@@ -30,7 +30,7 @@ class _ResolvingAssetBundle extends CachingAssetBundle {
   final AssetBundle bundle;
   final _AssetResolver resolver;
 
-  Map<String, String> keyCache = <String, String>{};
+  final Map<String, String> keyCache = <String, String>{};
 
   Future<core.MojoDataPipeConsumer> load(String key) async {
     if (!keyCache.containsKey(key))
@@ -56,7 +56,7 @@ class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
     // At this point the key should be in our key cache, and the image
     // resource should be in our image cache
     double scale = resolver.getScale(keyCache[key]);
-    this.imageCache[key].scale = scale;
+    imageResourceCache[key].scale = scale;
     return await decodeImageFromDataPipe(pipe);
   }
 }
@@ -110,9 +110,8 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 
   double getScale(String key) {
     Match match = _extractRatioRegExp.firstMatch(key);
-    if (match != null && match.groupCount > 0) {
+    if (match != null && match.groupCount > 0)
       return double.parse(match.group(1));
-    }
     return 1.0;
   }
 
@@ -134,9 +133,8 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 
   String chooseVariant(String main, List<String> candidates) {
     SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
-    for (String candidate in candidates) {
+    for (String candidate in candidates)
       mapping[getScale(candidate)] = candidate;
-    }
     mapping[_naturalResolution] = main;
     return _findNearest(mapping, devicePixelRatio);
   }
