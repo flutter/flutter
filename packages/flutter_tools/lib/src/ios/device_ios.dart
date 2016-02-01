@@ -184,9 +184,10 @@ class IOSDevice extends Device {
     String mainPath,
     String route,
     bool checked: true,
+    bool clearLogs: false,
     Map<String, dynamic> platformArgs
   }) async {
-    // TODO: Use checked, mainPath, route
+    // TODO(chinmaygarde): Use checked, mainPath, route, clearLogs.
     printTrace('Building ${app.name} for $id');
 
     // Step 1: Install the precompiled application if necessary
@@ -231,8 +232,7 @@ class IOSDevice extends Device {
     return false;
   }
 
-  Future<bool> pushFile(
-      ApplicationPackage app, String localFile, String targetFile) async {
+  Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
     if (Platform.isMacOS) {
       runSync([
         pusherPath,
@@ -255,14 +255,7 @@ class IOSDevice extends Device {
   @override
   TargetPlatform get platform => TargetPlatform.iOS;
 
-  /// Note that clear is not supported on iOS at this time.
-  Future<int> logs({bool clear: false}) async {
-    if (!isConnected()) {
-      return 2;
-    }
-    return await runCommandAndStreamOutput([loggerPath],
-        prefix: 'iOS: ', filter: new RegExp(r'(FlutterRunner|flutter.runner.Runner)'));
-  }
+  DeviceLogReader createLogReader() => new _IOSDeviceLogReader(this);
 }
 
 class IOSSimulator extends Device {
@@ -335,10 +328,9 @@ class IOSSimulator extends Device {
 
   String _getSimulatorPath() {
     String deviceID = id == defaultDeviceID ? _getRunningSimulatorInfo()?.id : id;
-    String homeDirectory = path.absolute(Platform.environment['HOME']);
     if (deviceID == null)
       return null;
-    return path.join(homeDirectory, 'Library', 'Developer', 'CoreSimulator', 'Devices', deviceID);
+    return path.join(_homeDirectory, 'Library', 'Developer', 'CoreSimulator', 'Devices', deviceID);
   }
 
   String _getSimulatorAppHomeDirectory(ApplicationPackage app) {
@@ -438,10 +430,14 @@ class IOSSimulator extends Device {
     String mainPath,
     String route,
     bool checked: true,
+    bool clearLogs: false,
     Map<String, dynamic> platformArgs
   }) async {
-    // TODO: Use checked, mainPath, route
+    // TODO(chinmaygarde): Use checked, mainPath, route.
     printTrace('Building ${app.name} for $id');
+
+    if (clearLogs)
+      this.clearLogs();
 
     // Step 1: Build the Xcode project
     bool buildResult = await _buildIOSXcodeProject(app, false);
@@ -506,34 +502,122 @@ class IOSSimulator extends Device {
     return false;
   }
 
+  String get logFilePath {
+    return path.join(_homeDirectory, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+  }
+
   @override
   TargetPlatform get platform => TargetPlatform.iOSSimulator;
 
-  Future<int> logs({bool clear: false}) async {
-    if (!isConnected())
+  DeviceLogReader createLogReader() => new _IOSSimulatorLogReader(this);
+
+  void clearLogs() {
+    File logFile = new File(logFilePath);
+    if (logFile.existsSync())
+      logFile.delete();
+  }
+}
+
+class _IOSDeviceLogReader extends DeviceLogReader {
+  _IOSDeviceLogReader(this.device);
+
+  final IOSDevice device;
+
+  String get name => device.name;
+
+  // TODO(devoncarew): Support [clear].
+  Future<int> logs({ bool clear: false }) async {
+    if (!device.isConnected())
       return 2;
 
-    String homeDirectory = path.absolute(Platform.environment['HOME']);
-    String simulatorDeviceID = _getRunningSimulatorInfo().id;
-    String logFilePath = path.join(
-      homeDirectory, 'Library', 'Logs', 'CoreSimulator', simulatorDeviceID, 'system.log'
-    );
-
-    if (clear)
-      runSync(['rm', logFilePath]);
-
-    // TODO(devoncarew): The log message prefix could be shortened or removed.
-    // Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]:
-    // TODO(devoncarew): This truncates multi-line messages like:
-    // Jan 29 01:31:43 devoncarew-macbookpro3 CoreSimulatorBridge[96656]: Requesting... {
-    //     environment =     {
-    //     };
-    //   }
     return await runCommandAndStreamOutput(
-      ['tail', '-f', logFilePath],
-      prefix: 'iOS: ',
+      [device.loggerPath],
+      prefix: '[$name] ',
       filter: new RegExp(r'(FlutterRunner|flutter.runner.Runner)')
     );
+  }
+
+  int get hashCode => name.hashCode;
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! _IOSDeviceLogReader)
+      return false;
+    return other.name == name;
+  }
+}
+
+class _IOSSimulatorLogReader extends DeviceLogReader {
+  _IOSSimulatorLogReader(this.device);
+
+  final IOSSimulator device;
+
+  String get name => device.name;
+
+  Future<int> logs({bool clear: false}) async {
+    if (!device.isConnected())
+      return 2;
+
+    if (clear)
+      device.clearLogs();
+
+    // Match the log prefix (in order to shorten it):
+    //   'Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]: ...'
+    RegExp mapRegex = new RegExp(r'\S+ +\S+ +\S+ \S+ (.+)\[\d+\]\)?: (.*)$');
+    // Jan 31 19:23:28 --- last message repeated 1 time ---
+    RegExp lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ (--- .* ---)$');
+
+    // This filter matches many Flutter lines in the log:
+    // new RegExp(r'(FlutterRunner|flutter.runner.Runner|$id)'), but it misses
+    // a fair number, including ones that would be useful in diagnosing crashes.
+    // For now, we're not filtering the log file (but do clear it with each run).
+
+    Future<int> result = runCommandAndStreamOutput(
+      <String>['tail', '-n', '+0', '-F', device.logFilePath],
+      prefix: '[$name] ',
+      mapFunction: (String string) {
+        Match match = mapRegex.matchAsPrefix(string);
+        if (match != null) {
+          // Filter out some messages that clearly aren't related to Flutter.
+          if (string.contains(': could not find icon for representation -> com.apple.'))
+            return null;
+          String category = match.group(1);
+          String content = match.group(2);
+          if (category == 'Game Center' || category == 'itunesstored' || category == 'nanoregistrylaunchd')
+            return null;
+          return '$category: $content';
+        }
+        match = lastMessageRegex.matchAsPrefix(string);
+        if (match != null)
+          return match.group(1);
+        return string;
+      }
+    );
+
+    // Track system.log crashes.
+    // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
+    runCommandAndStreamOutput(
+      <String>['tail', '-F', '/private/var/log/system.log'],
+      prefix: '[$name] ',
+      filter: new RegExp(r' FlutterRunner\[\d+\] '),
+      mapFunction: (String string) {
+        Match match = mapRegex.matchAsPrefix(string);
+        return match == null ? string : '${match.group(1)}: ${match.group(2)}';
+      }
+    );
+
+    return result;
+  }
+
+  int get hashCode => device.logFilePath.hashCode;
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! _IOSSimulatorLogReader)
+      return false;
+    return other.device.logFilePath == device.logFilePath;
   }
 }
 
@@ -546,6 +630,8 @@ class _IOSSimulatorInfo {
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
 final String _xcodeRequirement = 'Xcode 7.0 or greater is required to develop for iOS.';
+
+String get _homeDirectory => path.absolute(Platform.environment['HOME']);
 
 bool _checkXcodeVersion() {
   if (!Platform.isMacOS)
@@ -573,15 +659,18 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
   if (!_checkXcodeVersion())
     return false;
 
-  List<String> command = [
-    'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
+  List<String> commands = [
+    '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
   ];
 
   if (!isDevice) {
-    command.addAll(['-sdk', 'iphonesimulator']);
+    commands.addAll(['-sdk', 'iphonesimulator']);
   }
 
-  ProcessResult result = Process.runSync('/usr/bin/env', command,
-      workingDirectory: app.localPath);
-  return result.exitCode == 0;
+  try {
+    runCheckedSync(commands, workingDirectory: app.localPath);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }

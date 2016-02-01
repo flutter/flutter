@@ -8,12 +8,15 @@ import 'dart:io';
 
 import 'context.dart';
 
+typedef String StringConverter(String string);
+
 /// This runs the command and streams stdout/stderr from the child process to
 /// this process' stdout/stderr.
 Future<int> runCommandAndStreamOutput(List<String> cmd, {
+  String workingDirectory,
   String prefix: '',
   RegExp filter,
-  String workingDirectory
+  StringConverter mapFunction
 }) async {
   printTrace(cmd.join(' '));
   Process process = await Process.start(
@@ -26,14 +29,20 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
-      printStatus('$prefix$line');
+      if (mapFunction != null)
+        line = mapFunction(line);
+      if (line != null)
+        printStatus('$prefix$line');
     });
   process.stderr
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
-      printError('$prefix$line');
+      if (mapFunction != null)
+        line = mapFunction(line);
+      if (line != null)
+        printError('$prefix$line');
     });
   return await process.exitCode;
 }
@@ -57,7 +66,7 @@ Future<Process> runDetached(List<String> cmd) {
 /// Run cmd and return stdout.
 /// Throws an error if cmd exits with a non-zero value.
 String runCheckedSync(List<String> cmd, { String workingDirectory }) {
-  return _runWithLoggingSync(cmd, workingDirectory: workingDirectory, checked: true);
+  return _runWithLoggingSync(cmd, workingDirectory: workingDirectory, checked: true, noisyErrors: true);
 }
 
 /// Run cmd and return stdout.
@@ -73,6 +82,7 @@ String sdkBinaryName(String name) {
 
 String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
+  bool noisyErrors: false,
   String workingDirectory
 }) {
   printTrace(cmd.join(' '));
@@ -82,8 +92,13 @@ String _runWithLoggingSync(List<String> cmd, {
     String errorDescription = 'Error code ${results.exitCode} '
         'returned when attempting to run command: ${cmd.join(' ')}';
     printTrace(errorDescription);
-    if (results.stderr.length > 0)
-      printTrace('Errors logged: ${results.stderr.trim()}');
+    if (results.stderr.length > 0) {
+      if (noisyErrors) {
+        printError(results.stderr.trim());
+      } else {
+        printTrace('Errors logged: ${results.stderr.trim()}');
+      }
+    }
     if (checked)
       throw errorDescription;
   }
