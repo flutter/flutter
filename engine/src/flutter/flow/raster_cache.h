@@ -25,6 +25,8 @@ class RasterCache {
       GrContext* context, SkPicture* picture, const SkMatrix& ctm);
   void SweepAfterFrame();
 
+  void Clear();
+
  private:
   struct Entry {
     Entry();
