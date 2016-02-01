@@ -63,7 +63,7 @@ void Animator::Stop() {
 }
 
 void Animator::Start() {
-  paused_ = false;
+  Reset();
   RequestFrame();
 }
 
