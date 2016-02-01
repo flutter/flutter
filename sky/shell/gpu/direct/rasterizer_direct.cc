@@ -130,6 +130,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
 void RasterizerDirect::OnOutputSurfaceDestroyed() {
   if (context_) {
     CHECK(context_->MakeCurrent(surface_.get()));
+    paint_context_.OnGrContextDestroyed();
     ganesh_canvas_.SetGrGLInterface(nullptr);
     context_ = nullptr;
   }

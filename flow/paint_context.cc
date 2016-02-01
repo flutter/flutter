@@ -49,4 +49,8 @@ PaintContext::ScopedFrame::~ScopedFrame() {
 PaintContext::~PaintContext() {
 }
 
+void PaintContext::OnGrContextDestroyed() {
+  raster_cache_.Clear();
+}
+
 }  // namespace flow

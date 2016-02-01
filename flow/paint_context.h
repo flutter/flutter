@@ -51,6 +51,8 @@ class PaintContext {
                            SkCanvas& canvas,
                            bool instrumentation_enabled = true);
 
+  void OnGrContextDestroyed();
+
   RasterCache& raster_cache() { return raster_cache_; }
   const instrumentation::Counter& frame_count() const { return frame_count_; }
   const instrumentation::Stopwatch& frame_time() const { return frame_time_; }
