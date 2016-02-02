@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
+import 'colors.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'theme.dart';
 
 enum IconSize {
   s18,
@@ -39,7 +40,7 @@ class Icon extends StatelessComponent {
   final IconThemeColor colorTheme;
   final Color color;
 
-  String _getColorSuffix(BuildContext context) {
+  IconThemeColor _getIconThemeColor(BuildContext context) {
     IconThemeColor iconThemeColor = colorTheme;
     if (iconThemeColor == null) {
       IconThemeData iconThemeData = IconTheme.of(context);
@@ -49,12 +50,7 @@ class Icon extends StatelessComponent {
       ThemeBrightness themeBrightness = Theme.of(context).brightness;
       iconThemeColor = themeBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
     }
-    switch(iconThemeColor) {
-      case IconThemeColor.white:
-        return "white";
-      case IconThemeColor.black:
-        return "black";
-    }
+    return iconThemeColor;
   }
 
   Widget build(BuildContext context) {
@@ -65,13 +61,41 @@ class Icon extends StatelessComponent {
       category = parts[0];
       subtype = parts[1];
     }
-    String colorSuffix = _getColorSuffix(context);
-    int iconSize = _kIconSize[size];
+    final IconThemeColor iconThemeColor = _getIconThemeColor(context);
+    final int iconSize = _kIconSize[size];
+
+    String colorSuffix;
+    switch(iconThemeColor) {
+      case IconThemeColor.black:
+        colorSuffix = "black";
+        break;
+      case IconThemeColor.white:
+        colorSuffix = "white";
+        break;
+    }
+
+    Color iconColor = color;
+    final int iconAlpha = (255.0 * (IconTheme.of(context)?.clampedOpacity ?? 1.0)).round();
+    if (iconAlpha != 255) {
+      if (color != null)
+        iconColor = color.withAlpha(iconAlpha);
+      else {
+        switch(iconThemeColor) {
+          case IconThemeColor.black:
+            iconColor = Colors.black.withAlpha(iconAlpha);
+            break;
+          case IconThemeColor.white:
+            iconColor = Colors.white.withAlpha(iconAlpha);
+            break;
+        }
+      }
+    }
+
     return new AssetImage(
       name: '$category/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
       width: iconSize.toDouble(),
       height: iconSize.toDouble(),
-      color: color
+      color: iconColor
     );
   }
 

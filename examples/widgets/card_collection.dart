@@ -272,18 +272,21 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget _buildToolBar() {
+  Widget _buildToolBar(BuildContext context) {
     return new ToolBar(
       right: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ],
-      bottom: new Padding(
-        padding: const EdgeDims.only(left: 72.0),
-        child: new Align(
-          alignment: const FractionalOffset(0.0, 0.5),
-          child: new Text('Swipe Away: ${_cardModels.length}')
-        )
-      )
+      flexibleSpace: (_) {
+        return new Container(
+          padding: const EdgeDims.only(left: 72.0),
+          height: 128.0,
+          child: new Align(
+            alignment: const FractionalOffset(0.0, 0.75),
+            child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title)
+          )
+        );
+      }
     );
   }
 
@@ -456,7 +459,7 @@ class CardCollectionState extends State<CardCollection> {
         primarySwatch: _primaryColor
       ),
       child: new Scaffold(
-        toolBar: _buildToolBar(),
+        toolBar: _buildToolBar(context),
         drawer: _buildDrawer(),
         body: body
       )
