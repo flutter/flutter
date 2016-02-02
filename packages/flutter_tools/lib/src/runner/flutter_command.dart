@@ -10,21 +10,18 @@ import 'package:args/command_runner.dart';
 import '../application_package.dart';
 import '../base/context.dart';
 import '../build_configuration.dart';
+import '../artifacts.dart';
 import '../device.dart';
 import '../toolchain.dart';
 import 'flutter_command_runner.dart';
+
+typedef bool Validator();
 
 abstract class FlutterCommand extends Command {
   FlutterCommandRunner get runner => super.runner;
 
   /// Whether this command needs to be run from the root of a project.
   bool get requiresProjectRoot => true;
-
-  String get projectRootValidationErrorMessage {
-    return 'Error: No pubspec.yaml file found.\n'
-      'This command should be run from the root of your Flutter project. Do not run\n'
-      'this command from the root of your git clone of Flutter.';
-  }
 
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
@@ -49,18 +46,22 @@ abstract class FlutterCommand extends Command {
   }
 
   Future<int> run() async {
-    if (requiresProjectRoot && !validateProjectRoot())
+    if (requiresProjectRoot && !projectRootValidator())
       return 1;
     return await runInProject();
   }
 
-  bool validateProjectRoot() {
+  // This is a field so that you can modify the value for testing.
+  Validator projectRootValidator = () {
     if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-      printError(projectRootValidationErrorMessage);
+      printError('Error: No pubspec.yaml file found.\n'
+        'This command should be run from the root of your Flutter project.\n'
+        'Do not run this command from the root of your git clone of Flutter.');
       return false;
     }
+    ArtifactStore.validateSkyEnginePackage();
     return true;
-  }
+  };
 
   Future<int> runInProject();
 

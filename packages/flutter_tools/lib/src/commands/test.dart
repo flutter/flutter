@@ -20,13 +20,18 @@ class TestCommand extends FlutterCommand {
 
   bool get requiresProjectRoot => false;
 
-  String get projectRootValidationErrorMessage {
-    return 'Error: No pubspec.yaml file found.\n'
-      'If you wish to run the tests in the Flutter repository\'s \'flutter\' package,\n'
-      'pass --flutter-repo before any test paths. Otherwise, run this command from the\n'
-      'root of your project. Test files must be called *_test.dart and must reside in\n'
-      'the package\'s \'test\' directory (or one of its subdirectories).';
-  }
+  @override
+  Validator projectRootValidator = () {
+    if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
+      printError('Error: No pubspec.yaml file found.\n'
+        'If you wish to run the tests in the Flutter repository\'s \'flutter\' package,\n'
+        'pass --flutter-repo before any test paths. Otherwise, run this command from the\n'
+        'root of your project. Test files must be called *_test.dart and must reside in\n'
+        'the package\'s \'test\' directory (or one of its subdirectories).');
+      return false;
+    }
+    return true;
+  };
 
   Future<String> _getShellPath(BuildConfiguration config) async {
     if (config.type == BuildType.prebuilt) {
@@ -80,7 +85,7 @@ class TestCommand extends FlutterCommand {
     List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
 
     final bool runFlutterTests = argResults['flutter-repo'];
-    if (!runFlutterTests && !validateProjectRoot())
+    if (!runFlutterTests && !projectRootValidator())
       return 1;
 
     // If we're running the flutter tests, we want to use the packages directory

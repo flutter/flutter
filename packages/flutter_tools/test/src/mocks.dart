@@ -48,5 +48,6 @@ void applyMocksToCommand(FlutterCommand command) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
     ..toolchain = new MockToolchain()
-    ..devices = new MockDeviceStore();
+    ..devices = new MockDeviceStore()
+    ..projectRootValidator = () => true;
 }

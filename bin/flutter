@@ -7,6 +7,7 @@ set -e
 
 export FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
+FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
 STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
 SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
@@ -18,6 +19,7 @@ REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
 if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
   echo Updating flutter tool...
   (cd "$FLUTTER_TOOLS_DIR"; pub get > /dev/null)
+  (cd "$FLUTTER_DIR"; pub get > /dev/null)  # Allows us to check if sky_engine's REVISION is correct
   $DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
   echo -n $REVISION > "$STAMP_PATH"
 fi
