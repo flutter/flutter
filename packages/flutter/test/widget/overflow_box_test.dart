@@ -32,4 +32,20 @@ void main() {
       expect(box.size, equals(const Size(100.0, 50.0)));
     });
   });
+
+  test('OverflowBox implements debugFillDescription', () {
+    List<String> description = <String>[];
+    new OverflowBox(
+      minWidth: 1.0,
+      maxWidth: 2.0,
+      minHeight: 3.0,
+      maxHeight: 4.0
+    ).debugFillDescription(description);
+    expect(description, [
+      'minWidth: 1.0',
+      'maxWidth: 2.0',
+      'minHeight: 3.0',
+      'maxHeight: 4.0',
+    ]);
+  });
 }
