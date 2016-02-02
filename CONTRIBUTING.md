@@ -134,7 +134,8 @@ If you made multiple commits for a single pull request, either make sure each on
 message explaining that specific commit, or squash your commits into one single checkin with a
 detailed message before sending the pull request.
 
-To submit your changes to the `master` branch, use one of the following methods:
+Once you've gotten an LGTM from a project maintainer, submit your changes to the
+`master` branch using one of the following methods:
 
 * Wait for one of the project maintainers to submit it for you
 * Click the green "Merge pull request" button on the GitHub UI of your pull
