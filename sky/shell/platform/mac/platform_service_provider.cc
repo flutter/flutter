@@ -23,8 +23,8 @@ void PlatformServiceProvider::ConnectToService(
     return;
   }
 #if TARGET_OS_IPHONE
-  if (service_name == ::keyboard::KeyboardService::Name_) {
-    keyboard_.Create(nullptr, mojo::MakeRequest<::keyboard::KeyboardService>(
+  if (service_name == ::editing::Keyboard::Name_) {
+    keyboard_.Create(nullptr, mojo::MakeRequest<::editing::Keyboard>(
                                   client_handle.Pass()));
     return;
   }
