@@ -114,10 +114,14 @@ public:
             mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
             mSize(paint.size), mScaleX(paint.scaleX), mSkewX(paint.skewX),
             mLetterSpacing(paint.letterSpacing),
-            mPaintFlags(paint.paintFlags), mHyphenEdit(paint.hyphenEdit), mIsRtl(dir) {
+            mPaintFlags(paint.paintFlags), mHyphenEdit(paint.hyphenEdit), mIsRtl(dir),
+            mHash(computeHash()) {
     }
     bool operator==(const LayoutCacheKey &other) const;
-    hash_t hash() const;
+
+    hash_t hash() const {
+        return mHash;
+    }
 
     void copyText() {
         uint16_t* charsCopy = new uint16_t[mNchars];
@@ -152,6 +156,9 @@ private:
     bool mIsRtl;
     // Note: any fields added to MinikinPaint must also be reflected here.
     // TODO: language matching (possibly integrate into style)
+    hash_t mHash;
+
+    hash_t computeHash() const;
 };
 
 class LayoutCache : private OnEntryRemoved<LayoutCacheKey, Layout*> {
@@ -230,7 +237,7 @@ bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
             && !memcmp(mChars, other.mChars, mNchars * sizeof(uint16_t));
 }
 
-hash_t LayoutCacheKey::hash() const {
+hash_t LayoutCacheKey::computeHash() const {
     uint32_t hash = JenkinsHashMix(0, mId);
     hash = JenkinsHashMix(hash, mStart);
     hash = JenkinsHashMix(hash, mCount);
