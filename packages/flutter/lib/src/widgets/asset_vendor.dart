@@ -29,12 +29,36 @@ class _ResolvingAssetBundle extends CachingAssetBundle {
   final AssetBundle bundle;
   final _AssetResolver resolver;
 
-  Map<String, String> _keyCache = <String, String>{};
+  final Map<String, String> keyCache = <String, String>{};
 
   Future<core.MojoDataPipeConsumer> load(String key) async {
-    if (!_keyCache.containsKey(key))
-      _keyCache[key] = await resolver.resolve(key);
-    return await bundle.load(_keyCache[key]);
+    if (!keyCache.containsKey(key))
+      keyCache[key] = await resolver.resolve(key);
+    return await bundle.load(keyCache[key]);
+  }
+}
+
+// Asset bundle that understands how specific asset keys represent image scale.
+class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
+  _ResolutionAwareAssetBundle({
+    AssetBundle bundle,
+    _ResolutionAwareAssetResolver resolver
+  }) : super(
+    bundle: bundle,
+    resolver: resolver
+  );
+
+  _ResolutionAwareAssetResolver get resolver => super.resolver;
+
+  Future<ImageInfo> fetchImage(String key) async {
+    core.MojoDataPipeConsumer pipe = await load(key);
+    // At this point the key should be in our key cache, and the image
+    // resource should be in our image cache
+    double scale = resolver.getScale(keyCache[key]);
+    return new ImageInfo(
+      image: await decodeImageFromDataPipe(pipe),
+      scale: scale
+    );
   }
 }
 
@@ -58,7 +82,7 @@ abstract class _VariantAssetResolver extends _AssetResolver {
   Future<String> resolve(String name) async {
     _initializer ??= _loadManifest();
     await _initializer;
-    // If there's no asset manifest, just return the main asset always
+    // If there's no asset manifest, just return the main asset
     if (_assetManifest == null)
       return name;
     // Allow references directly to variants: if the supplied name is not a
@@ -81,18 +105,15 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 
   final double devicePixelRatio;
 
-  static final RegExp extractRatioRegExp = new RegExp(r"/?(\d+(\.\d*)?)x/");
+  // We assume the main asset is designed for a device pixel ratio of 1.0
+  static const double _naturalResolution = 1.0;
+  static final RegExp _extractRatioRegExp = new RegExp(r"/?(\d+(\.\d*)?)x/");
 
-  SplayTreeMap<double, String> _buildMapping(List<String> candidates) {
-    SplayTreeMap<double, String> result = new SplayTreeMap<double, String>();
-    for (String candidate in candidates) {
-      Match match = extractRatioRegExp.firstMatch(candidate);
-      if (match != null && match.groupCount > 0) {
-        double resolution = double.parse(match.group(1));
-        result[resolution] = candidate;
-      }
-    }
-    return result;
+  double getScale(String key) {
+    Match match = _extractRatioRegExp.firstMatch(key);
+    if (match != null && match.groupCount > 0)
+      return double.parse(match.group(1));
+    return 1.0;
   }
 
   // Return the value for the key in a [SplayTreeMap] nearest the provided key.
@@ -112,9 +133,10 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
   }
 
   String chooseVariant(String main, List<String> candidates) {
-    SplayTreeMap<double, String> mapping = _buildMapping(candidates);
-    // We assume the main asset is designed for a device pixel ratio of 1.0
-    mapping[1.0] = main;
+    SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
+    for (String candidate in candidates)
+      mapping[getScale(candidate)] = candidate;
+    mapping[_naturalResolution] = main;
     return _findNearest(mapping, devicePixelRatio);
   }
 }
@@ -172,7 +194,7 @@ class _AssetVendorState extends State<AssetVendor> {
 
   void initState() {
     super.initState();
-    _bundle = new _ResolvingAssetBundle(
+    _bundle = new _ResolutionAwareAssetBundle(
       bundle: config.bundle,
       resolver: new _ResolutionAwareAssetResolver(
         bundle: config.bundle,
@@ -184,7 +206,7 @@ class _AssetVendorState extends State<AssetVendor> {
   void didUpdateConfig(AssetVendor oldConfig) {
     if (config.bundle != oldConfig.bundle ||
         config.devicePixelRatio != oldConfig.devicePixelRatio) {
-      _bundle = new _ResolvingAssetBundle(
+      _bundle = new _ResolutionAwareAssetBundle(
         bundle: config.bundle,
         resolver: new _ResolutionAwareAssetResolver(
           bundle: config.bundle,

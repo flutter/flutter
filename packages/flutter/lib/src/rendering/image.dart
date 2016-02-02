@@ -22,6 +22,7 @@ class RenderImage extends RenderBox {
     ui.Image image,
     double width,
     double height,
+    double scale: 1.0,
     Color color,
     ImageFit fit,
     FractionalOffset alignment,
@@ -30,6 +31,7 @@ class RenderImage extends RenderBox {
   }) : _image = image,
       _width = width,
       _height = height,
+      _scale = scale,
       _color = color,
       _fit = fit,
       _alignment = alignment,
@@ -73,6 +75,19 @@ class RenderImage extends RenderBox {
     if (value == _height)
       return;
     _height = value;
+    markNeedsLayout();
+  }
+
+  /// Specifies the image's scale.
+  ///
+  /// Used when determining the best display size for the image.
+  double get scale => _scale;
+  double _scale;
+  void set scale (double value) {
+    assert(value != null);
+    if (value == _scale)
+      return;
+    _scale = value;
     markNeedsLayout();
   }
 
@@ -161,8 +176,8 @@ class RenderImage extends RenderBox {
     if (constraints.isTight || _image == null)
       return constraints.smallest;
 
-    double width = _image.width.toDouble();
-    double height = _image.height.toDouble();
+    double width = _image.width.toDouble() / _scale;
+    double height = _image.height.toDouble() / _scale;
     assert(width > 0.0);
     assert(height > 0.0);
     double aspectRatio = width / height;

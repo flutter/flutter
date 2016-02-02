@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui' show hashValues;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
 import 'package:quiver/collection.dart';
@@ -15,25 +15,32 @@ import 'image_resource.dart';
 /// Implements a way to retrieve an image, for example by fetching it from the network.
 /// Also used as a key in the image cache.
 abstract class ImageProvider {
-  Future<ui.Image> loadImage();
+  Future<ImageInfo> loadImage();
 }
 
 class _UrlFetcher implements ImageProvider {
   final String _url;
+  final double _scale;
 
-  _UrlFetcher(this._url);
+  _UrlFetcher(this._url, this._scale);
 
-  Future<ui.Image> loadImage() async {
+  Future<ImageInfo> loadImage() async {
     UrlResponse response = await fetchUrl(_url);
     if (response.statusCode >= 400) {
       print("Failed (${response.statusCode}) to load image $_url");
       return null;
     }
-    return await decodeImageFromDataPipe(response.body);
+    return new ImageInfo(
+      image: await decodeImageFromDataPipe(response.body),
+      scale: _scale
+    );
   }
 
-  bool operator ==(other) => other is _UrlFetcher && _url == other._url;
-  int get hashCode => _url.hashCode;
+  bool operator ==(other) {
+    return other is _UrlFetcher && _url == other._url && _scale == other._scale;
+  }
+
+  int get hashCode => hashValues(_url, _scale);
 }
 
 const int _kDefaultSize = 1000;
@@ -53,8 +60,8 @@ class _ImageCache {
     });
   }
 
-  ImageResource load(String url) {
-    return loadProvider(new _UrlFetcher(url));
+  ImageResource load(String url, { double scale: 1.0 }) {
+    return loadProvider(new _UrlFetcher(url, scale));
   }
 }
 

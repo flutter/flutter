@@ -7,8 +7,14 @@ import 'dart:ui' as ui;
 
 import 'print.dart';
 
+class ImageInfo {
+  ImageInfo({ this.image, this.scale: 1.0 });
+  final ui.Image image;
+  final double scale;
+}
+
 /// A callback for when the image is available.
-typedef void ImageListener(ui.Image image);
+typedef void ImageListener(ImageInfo image);
 
 /// A handle to an image resource
 ///
@@ -21,15 +27,15 @@ class ImageResource {
   }
 
   bool _resolved = false;
-  Future<ui.Image> _futureImage;
-  ui.Image _image;
+  Future<ImageInfo> _futureImage;
+  ImageInfo _image;
   final List<ImageListener> _listeners = new List<ImageListener>();
 
   /// The first concrete [ui.Image] object represented by this handle.
   ///
   /// Instead of receivingly only the first image, most clients will want to
   /// [addListener] to be notified whenever a a concrete image is available.
-  Future<ui.Image> get first => _futureImage;
+  Future<ImageInfo> get first => _futureImage;
 
   /// Adds a listener callback that is called whenever a concrete [ui.Image]
   /// object is available. Note: If a concrete image is available currently,
@@ -50,7 +56,7 @@ class ImageResource {
     _listeners.remove(listener);
   }
 
-  void _handleImageLoaded(ui.Image image) {
+  void _handleImageLoaded(ImageInfo image) {
     _image = image;
     _resolved = true;
     _notifyListeners();

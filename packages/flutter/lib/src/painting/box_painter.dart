@@ -668,10 +668,10 @@ class BackgroundImage {
       _imageResource.removeListener(_handleImageChanged);
   }
 
-  void _handleImageChanged(ui.Image resolvedImage) {
+  void _handleImageChanged(ImageInfo resolvedImage) {
     if (resolvedImage == null)
       return;
-    _image = resolvedImage;
+    _image = resolvedImage.image;
     final List<VoidCallback> localListeners =
       new List<VoidCallback>.from(_listeners);
     for (VoidCallback listener in localListeners)

@@ -82,8 +82,8 @@ void main() {
 
   // Resizeable image
   image = new RenderImageGrow(null, new Size(100.0, null));
-  imageCache.load("http://flutter.io/favicon.ico").first.then((ui.Image dartLogo) {
-    image.image = dartLogo;
+  imageCache.load("http://flutter.io/favicon.ico").first.then((ImageInfo dartLogo) {
+    image.image = dartLogo.image;
   });
 
   row.add(new RenderPadding(padding: const EdgeDims.all(10.0), child: image));
