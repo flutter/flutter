@@ -5,14 +5,6 @@
 [DartPackage="sky_services"]
 module flutter.platform;
 
-/// Specifies an acceptable orientation for the interface to be in.
-/// A mask of acceptable interface orientations is created by or'ing individual
-/// options.
-enum /* options */ InterfaceOrientation {
-  Portrait  = 1,
-  Landscape = 2,
-};
-
 /// Specifies a particular device orientation. A mask of device interface
 /// orientations is created by or'ing individual options.
 ///
@@ -53,46 +45,14 @@ interface SystemChrome {
   /// Specifies the set of orientations the application interface can
   /// be displayed in.
   ///
-  /// Both arguments to this method are masks prepared by or'ing enum values
-  /// In both cases, the value 0 is synonymous with having all options enabled.
-  ///
-  /// Discussion:
-  /// The primary option is the interface orientation mask. This specifies
-  /// the interface orientations the application was designed to function in.
-  /// For example, if the application cannot function in landscape, the
-  /// option would be `InterfaceOrientation::Portrait`. In such a case,
-  /// the embedder will refuse the respect orientation updates from the
-  /// platform that would cause the interface to be in landscape mode.
-  /// If on the other hand, the application can function in both portrait and
-  /// landscape, the option would have to be `(::Portrait | ::Landscape)` or 0
-  ///
-  /// Sometimes, the application developer may require more fine grained control
-  /// over the interface orientation. Say the application can function when the
-  /// device is in landscape mode. But the developer wants to prevent the
-  /// interface orientation from switching between landscape left and right
-  /// as the user interacts with the device. In that case, the mask may be
-  /// `(::LandscapeLeft | ::Portrait...)` which will cause the embedder to
-  /// refuse interface updates that are caused by the device switching to
-  /// landscape right.
-  ///
-  /// If the current interface orientation is not in one of the preferred
-  /// orientations when this method is called, the orientation switches to
-  /// the nearest match immediately.
-  ///
-  /// If the masks specify an impossible configuration
-  /// (InterfaceOrientation::Portrait with DeviceOrientation::LandscapeLeft for
-  /// example), the call is ignored and false is returned.
-  ///
+  /// The value 0 is synonymous with having all options enabled.
   /// Arguments:
-  ///   interface_orientation_mask: A mask of `InterfaceOrientation` enum
-  ///                               values.
   ///      device_orientation_mask: A mask of `DeviceOrientation` enum values.
   ///
   /// Return Value:
-  ///   boolean indicating if the orientation masks are valid and the changes
+  ///   boolean indicating if the orientation mask is valid and the changes
   ///   could be conveyed successfully to the embedder.
-  SetPreferredOrientations(uint32 interface_orientation_mask,
-                           uint32 device_orientation_mask) => (bool success);
+  SetPreferredOrientations(uint32 device_orientation_mask) => (bool success);
 
 
   /// Specifies the set of overlays visible on the embedder when the

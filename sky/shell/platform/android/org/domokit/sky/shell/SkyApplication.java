@@ -25,6 +25,10 @@ import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojom.activity.Activity;
 import org.chromium.mojom.activity.PathService;
+import org.chromium.mojom.flutter.platform.HapticFeedback;
+import org.chromium.mojom.flutter.platform.PathProvider;
+import org.chromium.mojom.flutter.platform.SystemChrome;
+import org.chromium.mojom.flutter.platform.SystemSound;
 import org.chromium.mojom.media.MediaService;
 import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.sensors.SensorService;
@@ -33,6 +37,10 @@ import org.domokit.activity.ActivityImpl;
 import org.domokit.activity.PathServiceImpl;
 import org.domokit.media.MediaServiceImpl;
 import org.domokit.oknet.NetworkServiceImpl;
+import org.domokit.platform.HapticFeedbackImpl;
+import org.domokit.platform.PathProviderImpl;
+import org.domokit.platform.SystemChromeImpl;
+import org.domokit.platform.SystemSoundImpl;
 import org.domokit.vsync.VSyncProviderImpl;
 
 /**
@@ -125,6 +133,34 @@ public class SkyApplication extends BaseChromiumApplication {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 VSyncProvider.MANAGER.bind(new VSyncProviderImpl(pipe), pipe);
+            }
+        });
+
+        registry.register(HapticFeedback.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                HapticFeedback.MANAGER.bind(new HapticFeedbackImpl(), pipe);
+            }
+        });
+
+        registry.register(PathProvider.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                PathProvider.MANAGER.bind(new PathProviderImpl(context), pipe);
+            }
+        });
+
+        registry.register(SystemChrome.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                SystemChrome.MANAGER.bind(new SystemChromeImpl(), pipe);
+            }
+        });
+
+        registry.register(SystemSound.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                SystemSound.MANAGER.bind(new SystemSoundImpl(), pipe);
             }
         });
     }

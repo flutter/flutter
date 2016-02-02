@@ -185,6 +185,8 @@ if (is_android) {
       "//sky/services/media:interfaces_java",
       "//sky/services/media:media_lib",
       "//sky/services/oknet",
+      "//sky/services/platform:interfaces_java",
+      "//sky/services/platform:platform_lib",
       "//sky/services/pointer:interfaces_java",
       "//sky/services/raw_keyboard:interfaces_java",
       "//sky/services/raw_keyboard:raw_keyboard_lib",
