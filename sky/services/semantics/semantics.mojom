@@ -7,10 +7,12 @@ module semantics;
 
 struct SemanticsNode {
   uint32 id;
+
+  // A null field means "unchanged since last time".
   SemanticFlags? flags;
   SemanticStrings? strings;
   SemanticGeometry? geometry;
-  array<SemanticsNode> children;
+  array<SemanticsNode>? children;
 };
 
 struct SemanticFlags {
@@ -39,7 +41,7 @@ struct SemanticGeometry {
   // a 4x4 matrix, with values in column-major order. The array must
   // have exactly 16 values.
   // This can be left unset to imply the identity matrix.
-  array<float> transform;
+  array<float, 16>? transform;
 
   // The position and size of the potentially interactive rectangle in the
   // SemanticsNode's coordinate space.
@@ -52,7 +54,6 @@ struct SemanticGeometry {
   float height;
 };
 
-[ServiceName="semantics::SemanticsClient"]
 interface SemanticsListener {
   // The OS side, invoked from the app.
   UpdateSemanticsTree(array<SemanticsNode> nodes);
