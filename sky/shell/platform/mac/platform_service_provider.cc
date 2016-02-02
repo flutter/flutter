@@ -53,6 +53,30 @@ void PlatformServiceProvider::ConnectToService(
         nullptr, mojo::MakeRequest<::activity::Activity>(client_handle.Pass()));
     return;
   }
+  if (service_name == flutter::platform::HapticFeedback::Name_) {
+    haptic_feedback_.Create(
+        nullptr, mojo::MakeRequest<flutter::platform::HapticFeedback>(
+                     client_handle.Pass()));
+    return;
+  }
+  if (service_name == flutter::platform::PathProvider::Name_) {
+    path_provider_.Create(nullptr,
+                          mojo::MakeRequest<flutter::platform::PathProvider>(
+                              client_handle.Pass()));
+    return;
+  }
+  if (service_name == flutter::platform::SystemChrome::Name_) {
+    system_chrome_.Create(nullptr,
+                          mojo::MakeRequest<flutter::platform::SystemChrome>(
+                              client_handle.Pass()));
+    return;
+  }
+  if (service_name == flutter::platform::SystemSound::Name_) {
+    system_sound_.Create(nullptr,
+                         mojo::MakeRequest<flutter::platform::SystemSound>(
+                             client_handle.Pass()));
+    return;
+  }
 #endif
 
   LOG(INFO) << "The platform service provider cannot find a service for '"

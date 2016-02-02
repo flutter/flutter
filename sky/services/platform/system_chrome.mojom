@@ -48,6 +48,7 @@ enum SystemUIOverlay {
 };
 
 /// Controls specific aspects of the embedder interface.
+[ServiceName="flutter::platform::SystemChrome"]
 interface SystemChrome {
   /// Specifies the set of orientations the application interface can
   /// be displayed in.

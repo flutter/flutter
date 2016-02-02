@@ -12,6 +12,7 @@ enum SystemSoundType {
 
 /// Allows easy access to the library of short system specific sounds for
 /// common tasks.
+[ServiceName="flutter::platform::SystemSound"]
 interface SystemSound {
   /// Play the specified system sound. If that sound is not present on the
   /// system, this method is a no-op and returns `true`.

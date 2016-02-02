@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_PLATFORM_MAC_SERVICE_PROVIDER_H_
-#define SKY_SHELL_PLATFORM_MAC_SERVICE_PROVIDER_H_
+#ifndef SKY_SHELL_PLATFORM_MAC_PLATFORM_SERVICE_PROVIDER_H_
+#define SKY_SHELL_PLATFORM_MAC_PLATFORM_SERVICE_PROVIDER_H_
 
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -15,6 +15,10 @@
 #include "sky/services/editing/ios/keyboard_impl.h"
 #include "sky/services/media/ios/media_player_impl.h"
 #include "sky/services/media/ios/media_service_impl.h"
+#include "sky/services/platform/ios/haptic_feedback_impl.h"
+#include "sky/services/platform/ios/path_provider_impl.h"
+#include "sky/services/platform/ios/system_chrome_impl.h"
+#include "sky/services/platform/ios/system_sound_impl.h"
 #include "sky/services/vsync/ios/vsync_provider_impl.h"
 #endif
 
@@ -27,7 +31,8 @@ namespace shell {
 
 class PlatformServiceProvider : public mojo::ServiceProvider {
  public:
-  PlatformServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request);
+  PlatformServiceProvider(
+      mojo::InterfaceRequest<mojo::ServiceProvider> request);
   ~PlatformServiceProvider() override;
 
   void ConnectToService(const mojo::String& service_name,
@@ -37,6 +42,10 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
   mojo::NetworkServiceFactory network_;
 #if TARGET_OS_IPHONE
+  flutter::platform::HapticFeedbackFactory haptic_feedback_;
+  flutter::platform::PathProviderFactory path_provider_;
+  flutter::platform::SystemChromeFactory system_chrome_;
+  flutter::platform::SystemSoundFactory system_sound_;
   sky::services::activity::ActivityFactory activity_;
   sky::services::editing::KeyboardFactory keyboard_;
   sky::services::media::MediaPlayerFactory media_player_;
@@ -51,4 +60,4 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_PLATFORM_MAC_SERVICE_PROVIDER_H_
+#endif  // SKY_SHELL_PLATFORM_MAC_PLATFORM_SERVICE_PROVIDER_H_

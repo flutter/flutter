@@ -54,6 +54,7 @@ source_set("common") {
     "//sky/engine/wtf",
     "//sky/services/editing:interfaces",
     "//sky/services/engine:interfaces",
+    "//sky/services/platform",
     "//sky/services/pointer:interfaces",
     "//sky/services/rasterizer:interfaces",
     "//sky/shell/dart",

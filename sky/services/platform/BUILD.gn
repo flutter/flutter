@@ -13,8 +13,31 @@ mojom("interfaces") {
   ]
 }
 
+if (is_ios) {
+  source_set("platform_lib") {
+    sources = [
+      "ios/haptic_feedback_impl.h",
+      "ios/haptic_feedback_impl.mm",
+      "ios/path_provider_impl.h",
+      "ios/path_provider_impl.mm",
+      "ios/system_chrome_impl.h",
+      "ios/system_chrome_impl.mm",
+      "ios/system_sound_impl.h",
+      "ios/system_sound_impl.mm",
+    ]
+    deps = [
+      "//base:base",
+      "//mojo/public/cpp/application",
+      ":interfaces",
+    ]
+  }
+}
+
 group("platform") {
   deps = [
     ":interfaces"
   ]
+  if (is_ios) {
+    deps += [ ":platform_lib" ]
+  }
 }
