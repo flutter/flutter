@@ -9,7 +9,9 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/context.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
@@ -33,8 +35,6 @@ class AndroidDeviceDiscovery extends DeviceDiscovery {
 }
 
 class AndroidDevice extends Device {
-  static const int _observatoryPort = 8181;
-
   static final String defaultDeviceID = 'default_android_device';
 
   String productID;
@@ -240,22 +240,37 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  void _forwardObservatoryPort() {
-    // Set up port forwarding for observatory.
-    String portString = 'tcp:$_observatoryPort';
+  Future _forwardObservatoryPort(int port) async {
+    bool portWasZero = port == 0;
+
+    if (port == 0) {
+      // Auto-bind to a port. Set up forwarding for that port. Emit a stdout
+      // message similar to the command-line VM, so that tools can parse the output.
+      // "Observatory listening on http://127.0.0.1:52111"
+      port = await findAvailablePort();
+    }
+
     try {
-      runCheckedSync(adbCommandForDevice(<String>['forward', portString, portString]));
+      // Set up port forwarding for observatory.
+      runCheckedSync(adbCommandForDevice(<String>[
+        'forward', 'tcp:$port', 'tcp:$observatoryDefaultPort'
+      ]));
+
+      if (portWasZero)
+        printStatus('Observatory listening on http://127.0.0.1:$port');
     } catch (e) {
-      printError('Unable to forward observatory port ($_observatoryPort):\n$e');
+      printError('Unable to forward Observatory port $port: $e');
     }
   }
 
-  bool startBundle(AndroidApk apk, String bundlePath, {
+  Future<bool> startBundle(AndroidApk apk, String bundlePath, {
     bool checked: true,
     bool traceStartup: false,
     String route,
-    bool clearLogs: false
-  }) {
+    bool clearLogs: false,
+    bool startPaused: false,
+    int debugPort: observatoryDefaultPort
+  }) async {
     printTrace('$this startBundle');
 
     if (!FileSystemEntity.isFileSync(bundlePath)) {
@@ -263,7 +278,7 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    _forwardObservatoryPort();
+    await _forwardObservatoryPort(debugPort);
 
     if (clearLogs)
       this.clearLogs();
@@ -280,6 +295,8 @@ class AndroidDevice extends Device {
       cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
     if (traceStartup)
       cmd.addAll(['--ez', 'trace-startup', 'true']);
+    if (startPaused)
+      cmd.addAll(['--ez', 'start-paused', 'true']);
     if (route != null)
       cmd.addAll(['--es', 'route', route]);
     cmd.add(apk.launchActivity);
@@ -295,31 +312,35 @@ class AndroidDevice extends Device {
     String route,
     bool checked: true,
     bool clearLogs: false,
+    bool startPaused: false,
+    int debugPort: observatoryDefaultPort,
     Map<String, dynamic> platformArgs
-  }) {
-    return flx.buildInTempDir(
+  }) async {
+    flx.DirectoryResult buildResult = await flx.buildInTempDir(
       toolchain,
       mainPath: mainPath
-    ).then((flx.DirectoryResult buildResult) {
-      printTrace('Starting bundle for $this.');
+    );
 
-      try {
-        if (startBundle(
-          package,
-          buildResult.localBundlePath,
-          checked: checked,
-          traceStartup: platformArgs['trace-startup'],
-          route: route,
-          clearLogs: clearLogs
-        )) {
-          return true;
-        } else {
-          return false;
-        }
-      } finally {
-        buildResult.dispose();
+    printTrace('Starting bundle for $this.');
+
+    try {
+      if (await startBundle(
+        package,
+        buildResult.localBundlePath,
+        checked: checked,
+        traceStartup: platformArgs['trace-startup'],
+        route: route,
+        clearLogs: clearLogs,
+        startPaused: startPaused,
+        debugPort: debugPort
+      )) {
+        return true;
+      } else {
+        return false;
       }
-    });
+    } finally {
+      buildResult.dispose();
+    }
   }
 
   Future<bool> stopApp(ApplicationPackage app) async {
