@@ -83,6 +83,7 @@ void Shell::InitStandalone() {
   blink::SkySettings settings;
   settings.enable_observatory =
       !command_line.HasSwitch(switches::kNonInteractive);
+  settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
   blink::SkySettings::Set(settings);

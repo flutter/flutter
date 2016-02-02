@@ -45,6 +45,9 @@ public class SkyActivity extends Activity {
         if (intent.getBooleanExtra("trace-startup", false)) {
             args.add("--trace-startup");
         }
+        if (intent.getBooleanExtra("start-paused", false)) {
+            args.add("--start-paused");
+        }
         if (!args.isEmpty()) {
             String[] argsArray = new String[args.size()];
             return args.toArray(argsArray);

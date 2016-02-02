@@ -9,6 +9,7 @@ namespace blink {
 
 struct SkySettings {
   bool enable_observatory = false;
+  bool start_paused = false;
   bool enable_dart_checked_mode = false;
 
   static const SkySettings& Get();

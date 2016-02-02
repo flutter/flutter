@@ -32,7 +32,7 @@ static const char* ObservatoryInvoke(const char* method,
                                      intptr_t num_params,
                                      void* user_data) {
   if (user_data == nullptr) {
-    // During the desctruction on the tracing controller, the user data is
+    // During the destruction of the tracing controller, the user data is
     // cleared. Make sure that observatory requests to service calls are not
     // attempted after tracing controller destruction.
     return strdup(kObservatoryResultFail);
@@ -54,8 +54,7 @@ static const char* ObservatoryInvoke(const char* method,
       // Flushing the trace log requires an active message loop. However,
       // observatory callbacks are made on a dart worker thread. We setup a
       // message loop manually and tell the flush completion handler to
-      // terminate
-      // the loop when done
+      // terminate the loop when done
       base::MessageLoop worker_thread_loop;
 
       base::FilePath temp_dir;

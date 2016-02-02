@@ -93,6 +93,10 @@ static const char* kDartCheckedModeArgs[] = {
     "--error_on_bad_override",
 };
 
+static const char* kDartStartPausedArgs[]{
+    "--pause_isolates_on_start",
+};
+
 void IsolateShutdownCallback(void* callback_data) {
   // TODO(dart)
 }
@@ -294,6 +298,9 @@ void InitDartVM() {
 
   if (enable_checked_mode)
     args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
+
+  if (SkySettings::Get().start_paused)
+    args.append(kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
 
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
 

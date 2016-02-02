@@ -16,6 +16,7 @@ extern const char kFLX[];
 extern const char kHelp[];
 extern const char kNonInteractive[];
 extern const char kPackageRoot[];
+extern const char kStartPaused[];
 extern const char kTraceStartup[];
 
 void PrintUsage(const std::string& executable_name);
