@@ -68,7 +68,8 @@ abstract class Renderer extends Object with Scheduler, MojoShell
   void initSemantics() {
     SemanticsNode.onSemanticsEnabled = renderView.scheduleInitialSemantics;
     provideService(mojom.SemanticsServer.serviceName, (core.MojoMessagePipeEndpoint endpoint) {
-      return new SemanticsServer();
+      mojom.SemanticsServerStub server = new mojom.SemanticsServerStub.fromEndpoint(endpoint);
+      server.impl = new SemanticsServer();
     });
   }
 
