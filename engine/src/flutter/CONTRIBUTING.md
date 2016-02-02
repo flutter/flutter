@@ -49,10 +49,10 @@ target_os = ["android"]
  * Add `.../engine/src/third_party/dart-sdk/dart-sdk/bin/` to your path so that you can run the `pub` tool more easily.
  * Add `.../engine/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
  * Make sure you are still in the `src` directory that the `gclient sync` step created earlier.
- * If you're on Linux, run `sudo ./build/install-build-deps-android.sh` 
- * If you're on Linux, run `sudo ./build/install-build-deps.sh` 
+ * If you're on Linux, run `sudo ./build/install-build-deps-android.sh`
+ * If you're on Linux, run `sudo ./build/install-build-deps.sh`
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
- * If you're on Mac, install `ant`: `brew install ant` 
+ * If you're on Mac, install `ant`: `brew install ant`
 
 Building and running the code
 -----------------------------
@@ -117,6 +117,13 @@ To send us a pull request:
  * `git pull-request` (if you are using [Hub](http://github.com/github/hub/)) or
    go to `https://github.com/flutter/engine` and click the
    "Compare & pull request" button
+
+To submit your changes to the `master` branch, use one of the following methods:
+
+* Wait for one of the project maintainers to submit it for you
+* Click the green "Merge pull request" button on the GitHub UI of your pull
+  request (requires commit access)
+* `git push upstream name_of_your_branch:master` (requires commit access)
 
 Please make sure all your checkins have detailed commit messages explaining the patch.
 If you made multiple commits for a single pull request, either make sure each one has a detailed
