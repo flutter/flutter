@@ -177,7 +177,8 @@ const SparseBitSet* FontFamily::getCoverage() {
             ALOGE("Unexpected failure to read cmap table!\n");
             return nullptr;
         }
-        CmapCoverage::getCoverage(mCoverage, cmapData.get(), cmapSize);  // TODO: Error check?
+        // TODO: Error check?
+        CmapCoverage::getCoverage(mCoverage, cmapData.get(), cmapSize, &mHasVSTable);
 #ifdef VERBOSE_DEBUG
         ALOGD("font coverage length=%d, first ch=%x\n", mCoverage.length(),
                 mCoverage.nextSetBit(0));
@@ -189,11 +190,20 @@ const SparseBitSet* FontFamily::getCoverage() {
 
 bool FontFamily::hasVariationSelector(uint32_t codepoint, uint32_t variationSelector) {
     assertMinikinLocked();
+    if (!mHasVSTable) {
+        return false;
+    }
+
     const FontStyle defaultStyle;
     MinikinFont* minikinFont = getClosestMatch(defaultStyle).font;
     hb_font_t* font = getHbFontLocked(minikinFont);
     uint32_t unusedGlyph;
     return hb_font_get_glyph(font, codepoint, variationSelector, &unusedGlyph);
+}
+
+bool FontFamily::hasVSTable() const {
+    LOG_ALWAYS_FATAL_IF(!mCoverageValid, "Do not call this method before getCoverage() call");
+    return mHasVSTable;
 }
 
 }  // namespace android
