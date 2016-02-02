@@ -134,6 +134,13 @@ If you made multiple commits for a single pull request, either make sure each on
 message explaining that specific commit, or squash your commits into one single checkin with a
 detailed message before sending the pull request.
 
+To submit your changes to the `master` branch, use one of the following methods:
+
+* Wait for one of the project maintainers to submit it for you
+* Click the green "Merge pull request" button on the GitHub UI of your pull
+  request (requires commit access)
+* `git push upstream name_of_your_branch:master` (requires commit access)
+
 You must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).
 You can do this online, and it only takes a minute.
