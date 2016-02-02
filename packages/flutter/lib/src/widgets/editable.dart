@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
-import 'package:mojo_services/keyboard/keyboard.mojom.dart';
+import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 
@@ -18,7 +17,16 @@ export 'package:flutter/painting.dart' show TextSelection;
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
-class _KeyboardClientImpl implements KeyboardClient {
+TextSelection _getTextSelectionFromEditingState(mojom.EditingState state) {
+  return new TextSelection(
+    baseOffset: state.selectionBase,
+    extentOffset: state.selectionExtent,
+    affinity: TextAffinity.values[state.selectionAffinity.mojoEnumValue],
+    isDirectional: state.selectionIsDirectional
+  );
+}
+
+class _KeyboardClientImpl implements mojom.KeyboardClient {
   _KeyboardClientImpl({
     String text: '',
     TextSelection selection,
@@ -45,86 +53,29 @@ class _KeyboardClientImpl implements KeyboardClient {
   TextSelection selection;
 
   /// A keyboard client stub that can be attached to a keyboard service.
-  KeyboardClientStub createStub() {
-    return new KeyboardClientStub.unbound()..impl = this;
+  mojom.KeyboardClientStub createStub() {
+    return new mojom.KeyboardClientStub.unbound()..impl = this;
   }
 
-  void _delete(TextRange range) {
-    if (range.isCollapsed || !range.isValid) return;
-    text = range.textBefore(text) + range.textAfter(text);
+  mojom.EditingState get editingState {
+    return new mojom.EditingState()
+      ..text = text
+      ..selectionBase = selection.baseOffset
+      ..selectionExtent = selection.extentOffset
+      ..selectionAffinity = mojom.TextAffinity.values[selection.affinity.index]
+      ..selectionIsDirectional = selection.isDirectional
+      ..composingBase = composing.start
+      ..composingExtent = composing.end;
   }
 
-  TextRange _append(String newText) {
-    int start = text.length;
-    text += newText;
-    return new TextRange(start: start, end: start + newText.length);
-  }
-
-  TextRange _replace(TextRange range, String newText) {
-    assert(range.isValid);
-
-    String before = range.textBefore(text);
-    String after = range.textAfter(text);
-
-    text = before + newText + after;
-    return new TextRange(
-        start: before.length, end: before.length + newText.length);
-  }
-
-  TextRange _replaceOrAppend(TextRange range, String newText) {
-    if (!range.isValid) return _append(newText);
-    return _replace(range, newText);
-  }
-
-  void commitCompletion(CompletionData completion) {
-    // TODO(abarth): Not implemented.
-  }
-
-  void commitCorrection(CorrectionData correction) {
-    // TODO(abarth): Not implemented.
-  }
-
-  void commitText(String text, int newCursorPosition) {
-    // TODO(abarth): Why is |newCursorPosition| always 1?
-    TextRange committedRange = _replaceOrAppend(composing, text);
-    selection = new TextSelection.collapsed(offset: committedRange.end);
-    composing = TextRange.empty;
+  void updateEditingState(mojom.EditingState state) {
+    text = state.text;
+    selection = _getTextSelectionFromEditingState(state);
+    composing = new TextRange(start: state.composingBase, end: state.composingExtent);
     onUpdated();
   }
 
-  void deleteSurroundingText(int beforeLength, int afterLength) {
-    TextRange beforeRange = new TextRange(
-        start: selection.start - beforeLength, end: selection.start);
-    int afterRangeEnd = math.min(selection.end + afterLength, text.length);
-    TextRange afterRange =
-        new TextRange(start: selection.end, end: afterRangeEnd);
-    _delete(afterRange);
-    _delete(beforeRange);
-    selection = new TextSelection(
-      baseOffset: math.max(selection.start - beforeLength, 0),
-      extentOffset: math.max(selection.end - beforeLength, 0)
-    );
-    onUpdated();
-  }
-
-  void setComposingRegion(int start, int end) {
-    composing = new TextRange(start: start, end: end);
-    onUpdated();
-  }
-
-  void setComposingText(String text, int newCursorPosition) {
-    // TODO(abarth): Why is |newCursorPosition| always 1?
-    composing = _replaceOrAppend(composing, text);
-    selection = new TextSelection.collapsed(offset: composing.end);
-    onUpdated();
-  }
-
-  void setSelection(int start, int end) {
-    selection = new TextSelection(baseOffset: start, extentOffset: end);
-    onUpdated();
-  }
-
-  void submit(SubmitAction action) {
+  void submit(mojom.SubmitAction action) {
     composing = TextRange.empty;
     onSubmitted();
   }
@@ -162,10 +113,12 @@ class EditableString {
     _client.selection = selection;
   }
 
+  mojom.EditingState get editingState => _client.editingState;
+
   /// A keyboard client stub that can be attached to a keyboard service.
   ///
   /// See [Keyboard].
-  KeyboardClientStub createStub() => _client.createStub();
+  mojom.KeyboardClientStub createStub() => _client.createStub();
 
   void didDetachKeyboard() {
     _client.composing = TextRange.empty;

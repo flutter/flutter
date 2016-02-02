@@ -5,31 +5,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:mojo_services/keyboard/keyboard.mojom.dart';
+import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 import 'package:test/test.dart';
 
 import '../services/mock_services.dart';
 
-class MockKeyboard implements KeyboardService {
-  KeyboardClient client;
+class MockKeyboard implements mojom.Keyboard {
+  mojom.KeyboardClient client;
 
-  void show(KeyboardClientStub client, KeyboardType type) {
+  void setClient(mojom.KeyboardClientStub client, mojom.KeyboardConfiguration configuraiton) {
     this.client = client.impl;
   }
 
-  void showByRequest() {}
+  void show() {}
 
   void hide() {}
 
-  void setText(String text) {}
-
-  void setSelection(int start, int end) {}
+  void setEditingState(mojom.EditingState state) {}
 }
 
 void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
-  serviceMocker.registerMockService(KeyboardService.serviceName, mockKeyboard);
+  serviceMocker.registerMockService(mojom.Keyboard.serviceName, mockKeyboard);
 
   test('Editable text has consistent size', () {
     testWidgets((WidgetTester tester) {
@@ -56,7 +53,10 @@ void main() {
       void enterText(String testValue) {
         // Simulate entry of text through the keyboard.
         expect(mockKeyboard.client, isNotNull);
-        mockKeyboard.client.setComposingText(testValue, testValue.length);
+        mockKeyboard.client.updateEditingState(new mojom.EditingState()
+          ..text = testValue
+          ..composingBase = 0
+          ..composingExtent = testValue.length);
 
         // Check that the onChanged event handler fired.
         expect(inputValue, equals(testValue));
@@ -109,43 +109,11 @@ void main() {
       checkCursorToggle();
 
       // Try the test again with a nonempty EditableText.
-      mockKeyboard.client.setComposingText('X', 1);
+      mockKeyboard.client.updateEditingState(new mojom.EditingState()
+        ..text = 'X'
+        ..selectionBase = 1
+        ..selectionExtent = 1);
       checkCursorToggle();
-    });
-  });
-
-  test('Selection remains valid', () {
-    testWidgets((WidgetTester tester) {
-      GlobalKey inputKey = new GlobalKey();
-
-      Widget builder() {
-        return new Center(
-          child: new Material(
-            child: new Input(
-              key: inputKey,
-              hintText: 'Placeholder'
-            )
-          )
-        );
-      }
-
-      tester.pumpWidget(builder());
-
-      const String testValue = 'ABC';
-      mockKeyboard.client.commitText(testValue, testValue.length);
-      dynamic input = inputKey.currentState;
-
-      // Delete characters and verify that the selection follows the length
-      // of the text.
-      for (int i = 0; i < testValue.length; i++) {
-        mockKeyboard.client.deleteSurroundingText(1, 0);
-        expect(input.editableValue.selection.start, equals(testValue.length - i - 1));
-      }
-
-      // Delete a characters when the text is empty.  The selection should
-      // remain at zero.
-      mockKeyboard.client.deleteSurroundingText(1, 0);
-      expect(input.editableValue.selection.start, equals(0));
     });
   });
 
@@ -168,7 +136,10 @@ void main() {
       tester.pumpWidget(builder());
 
       const String testValue = 'ABC';
-      mockKeyboard.client.commitText(testValue, testValue.length);
+      mockKeyboard.client.updateEditingState(new mojom.EditingState()
+        ..text = testValue
+        ..selectionBase = testValue.length
+        ..selectionExtent = testValue.length);
 
       tester.pump();
     });

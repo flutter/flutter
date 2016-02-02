@@ -6,6 +6,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
 import 'colors.dart';
 import 'debug.dart';
@@ -13,7 +14,7 @@ import 'icon.dart';
 import 'theme.dart';
 
 export 'package:flutter/rendering.dart' show ValueChanged;
-export 'package:flutter/services.dart' show KeyboardType;
+export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 
 /// A material design text input field.
 class Input extends StatefulComponent {
@@ -110,10 +111,11 @@ class _InputState extends State<Input> {
 
   void _attachOrDetachKeyboard(bool focused) {
     if (focused && !_isAttachedToKeyboard) {
-      _keyboardHandle = keyboard.show(_editableString.createStub(), config.keyboardType);
-      _keyboardHandle.setText(_editableString.text);
-      _keyboardHandle.setSelection(_editableString.selection.start,
-                                   _editableString.selection.end);
+      _keyboardHandle = keyboard.attach(_editableString.createStub(),
+                                        new mojom.KeyboardConfiguration()
+                                          ..type = config.keyboardType);
+      _keyboardHandle.setEditingState(_editableString.editingState);
+      _keyboardHandle.show();
     } else if (!focused && _isAttachedToKeyboard) {
       _keyboardHandle.release();
       _keyboardHandle = null;
@@ -124,7 +126,7 @@ class _InputState extends State<Input> {
   void _requestKeyboard() {
     if (Focus.at(context)) {
       assert(_isAttachedToKeyboard);
-      _keyboardHandle.showByRequest();
+      _keyboardHandle.show();
     } else {
       Focus.moveTo(config.key);
       // we'll get told to rebuild and we'll take care of the keyboard then
@@ -149,7 +151,8 @@ class _InputState extends State<Input> {
 
   void _handleSelectionChanged(TextSelection selection) {
     if (_isAttachedToKeyboard) {
-      _keyboardHandle.setSelection(selection.start, selection.end);
+      _editableString.setSelection(selection);
+      _keyboardHandle.setEditingState(_editableString.editingState);
     } else {
       _editableString.setSelection(selection);
       _requestKeyboard();

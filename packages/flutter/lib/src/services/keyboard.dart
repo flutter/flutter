@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
-import 'package:mojo_services/keyboard/keyboard.mojom.dart';
+import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
 import 'shell.dart';
 
-export 'package:mojo_services/keyboard/keyboard.mojom.dart';
+export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 
 /// An interface to the system's keyboard.
 ///
@@ -19,22 +19,24 @@ class Keyboard {
   // The service is exposed in case you need direct access.
   // However, as a general rule, you should be able to do
   // most of what you need using only this class.
-  final KeyboardService service;
+  final mojom.Keyboard service;
 
   KeyboardHandle _currentHandle;
 
   bool _hidePending = false;
 
-  KeyboardHandle show(KeyboardClientStub stub, KeyboardType keyboardType) {
+  KeyboardHandle attach(mojom.KeyboardClientStub stub, mojom.KeyboardConfiguration configuration) {
     assert(stub != null);
     _currentHandle?.release();
     assert(_currentHandle == null);
-    _currentHandle = new KeyboardHandle._show(this, stub, keyboardType);
+    _currentHandle = new KeyboardHandle._(this);
+    service.setClient(stub, configuration);
     return _currentHandle;
   }
 
   void _scheduleHide() {
-    if (_hidePending) return;
+    if (_hidePending)
+      return;
     _hidePending = true;
 
     // Schedule a deferred task that hides the keyboard.  If someone else shows
@@ -50,21 +52,17 @@ class Keyboard {
 }
 
 class KeyboardHandle {
-
-  KeyboardHandle._show(Keyboard keyboard, KeyboardClientStub stub, KeyboardType keyboardType) : _keyboard = keyboard {
-    _keyboard.service.show(stub, keyboardType);
-    _attached = true;
-  }
+  KeyboardHandle._(Keyboard keyboard) : _keyboard = keyboard, _attached = true;
 
   final Keyboard _keyboard;
 
   bool _attached;
   bool get attached => _attached;
 
-  void showByRequest() {
+  void show() {
     assert(_attached);
     assert(_keyboard._currentHandle == this);
-    _keyboard.service.showByRequest();
+    _keyboard.service.show();
   }
 
   void release() {
@@ -77,25 +75,18 @@ class KeyboardHandle {
     assert(_keyboard._currentHandle != this);
   }
 
-  void setText(String text) {
+  void setEditingState(mojom.EditingState state) {
     assert(_attached);
     assert(_keyboard._currentHandle == this);
-    _keyboard.service.setText(text);
+    _keyboard.service.setEditingState(state);
   }
-
-  void setSelection(int start, int end) {
-    assert(_attached);
-    assert(_keyboard._currentHandle == this);
-    _keyboard.service.setSelection(start, end);
-  }
-
 }
 
-KeyboardServiceProxy _initKeyboardProxy() {
-  KeyboardServiceProxy proxy = new KeyboardServiceProxy.unbound();
+mojom.KeyboardProxy _initKeyboardProxy() {
+  mojom.KeyboardProxy proxy = new mojom.KeyboardProxy.unbound();
   shell.connectToService(null, proxy);
   return proxy;
 }
 
-final KeyboardServiceProxy _keyboardProxy = _initKeyboardProxy();
+final mojom.KeyboardProxy _keyboardProxy = _initKeyboardProxy();
 final Keyboard keyboard = new Keyboard(_keyboardProxy.ptr);
