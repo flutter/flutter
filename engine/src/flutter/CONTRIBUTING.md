@@ -118,7 +118,8 @@ To send us a pull request:
    go to `https://github.com/flutter/engine` and click the
    "Compare & pull request" button
 
-To submit your changes to the `master` branch, use one of the following methods:
+Once you've gotten an LGTM from a project maintainer, submit your changes to the
+`master` branch using one of the following methods:
 
 * Wait for one of the project maintainers to submit it for you
 * Click the green "Merge pull request" button on the GitHub UI of your pull
