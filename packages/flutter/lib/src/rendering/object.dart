@@ -69,7 +69,7 @@ class PaintingContext {
   static void repaintCompositedChild(RenderObject child) {
     assert(child.isRepaintBoundary);
     assert(child.needsPaint);
-    child._layer ??= new ContainerLayer();
+    child._layer ??= new OffsetLayer();
     child._layer.removeAllChildren();
     assert(() {
       child._layer.debugOwner = child.debugOwner ?? child.runtimeType;
@@ -110,12 +110,12 @@ class PaintingContext {
         return true;
       });
     }
-    _appendLayer(child._layer, offset);
+    child._layer.offset = offset;
+    _appendLayer(child._layer);
   }
 
-  void _appendLayer(Layer layer, Offset offset) {
+  void _appendLayer(Layer layer) {
     assert(!_isRecording);
-    layer.offset = offset;
     _containerLayer.append(layer);
   }
 
@@ -190,11 +190,11 @@ class PaintingContext {
   void pushPerformanceOverlay(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
     _stopRecordingIfNeeded();
     PerformanceOverlayLayer performanceOverlayLayer = new PerformanceOverlayLayer(
-      overlayRect: new Rect.fromLTWH(0.0, 0.0, size.width, size.height),
+      overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       optionsMask: optionsMask,
       rasterizerThreshold: rasterizerThreshold
     );
-    _appendLayer(performanceOverlayLayer, offset);
+    _appendLayer(performanceOverlayLayer);
   }
 
   /// Push a rectangular clip rect.
@@ -203,12 +203,13 @@ class PaintingContext {
   /// is clipped by the given clip. The given clip should not incorporate the
   /// painting offset.
   void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
+    Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipRectLayer clipLayer = new ClipRectLayer(clipRect: clipRect);
-      _appendLayer(clipLayer, offset);
-      PaintingContext childContext = new PaintingContext._(clipLayer, clipRect);
-      painter(childContext, Offset.zero);
+      ClipRectLayer clipLayer = new ClipRectLayer(clipRect: offsetClipRect);
+      _appendLayer(clipLayer);
+      PaintingContext childContext = new PaintingContext._(clipLayer, offsetClipRect);
+      painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
       canvas.save();
@@ -224,16 +225,18 @@ class PaintingContext {
   /// is clipped by the given clip. The given clip should not incorporate the
   /// painting offset.
   void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, ui.RRect clipRRect, PaintingContextCallback painter) {
+    Rect offsetBounds = bounds.shift(offset);
+    ui.RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: clipRRect);
-      _appendLayer(clipLayer, offset);
-      PaintingContext childContext = new PaintingContext._(clipLayer, bounds);
-      painter(childContext, Offset.zero);
+      ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: offsetClipRRect);
+      _appendLayer(clipLayer);
+      PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
+      painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
-      canvas.saveLayer(bounds.shift(offset), _disableAntialias);
-      canvas.clipRRect(clipRRect.shift(offset));
+      canvas.saveLayer(offsetBounds, _disableAntialias);
+      canvas.clipRRect(offsetClipRRect);
       painter(this, offset);
       canvas.restore();
     }
@@ -245,12 +248,14 @@ class PaintingContext {
   /// is clipped by the given clip. The given clip should not incorporate the
   /// painting offset.
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+    Rect offsetBounds = bounds.shift(offset);
+    Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipPathLayer clipLayer = new ClipPathLayer(clipPath: clipPath);
-      _appendLayer(clipLayer, offset);
-      PaintingContext childContext = new PaintingContext._(clipLayer, bounds);
-      painter(childContext, Offset.zero);
+      ClipPathLayer clipLayer = new ClipPathLayer(clipPath: offsetClipPath);
+      _appendLayer(clipLayer);
+      PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
+      painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
       canvas.saveLayer(bounds.shift(offset), _disableAntialias);
@@ -268,8 +273,9 @@ class PaintingContext {
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      TransformLayer transformLayer = new TransformLayer(transform: transform);
-      _appendLayer(transformLayer, offset);
+      TransformLayer transformLayer = new TransformLayer(offset: offset, transform: transform);
+      _appendLayer(transformLayer);
+      // TODO(abarth): We need to run _paintBounds through the inverse of transform.
       PaintingContext childContext = new PaintingContext._(transformLayer, _paintBounds);
       painter(childContext, Offset.zero);
       childContext._stopRecordingIfNeeded();
@@ -290,9 +296,9 @@ class PaintingContext {
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
-    _appendLayer(opacityLayer, offset);
+    _appendLayer(opacityLayer);
     PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
-    painter(childContext, Offset.zero);
+    painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
 
@@ -307,9 +313,9 @@ class PaintingContext {
       maskRect: maskRect,
       transferMode: transferMode
     );
-    _appendLayer(shaderLayer, offset);
+    _appendLayer(shaderLayer);
     PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
-    painter(childContext, Offset.zero);
+    painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
 }
@@ -1156,11 +1162,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// getter changes.
   bool get alwaysNeedsCompositing => false;
 
-  ContainerLayer _layer;
+  OffsetLayer _layer;
   /// The compositing layer that this render object uses to repaint.
   ///
   /// Call only when [isRepaintBoundary] is true.
-  ContainerLayer get layer {
+  OffsetLayer get layer {
     assert(isRepaintBoundary);
     assert(!_needsPaint);
     return _layer;
@@ -1522,7 +1528,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
         _nodesNeedingSemantics.add(node);
-      }      
+      }
     } else {
       // The shape of the semantics tree around us may have changed.
       // The worst case is that we may have removed a branch of the
@@ -1541,7 +1547,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
         _nodesNeedingSemantics.add(node);
-      }      
+      }
     }
   }
 

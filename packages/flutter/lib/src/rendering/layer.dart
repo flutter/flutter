@@ -17,11 +17,6 @@ export 'basic_types.dart';
 /// are uploaded into the engine and displayed by the compositor. This class is
 /// the base class for all composited layers.
 abstract class Layer {
-  Layer({ this.offset: Offset.zero });
-
-  /// Offset from parent in the parent's coordinate system.
-  Offset offset;
-
   /// This layer's parent in the layer tree
   ContainerLayer get parent => _parent;
   ContainerLayer _parent;
@@ -95,7 +90,6 @@ abstract class Layer {
   void debugDescribeSettings(List<String> settings) {
     if (debugOwner != null)
       settings.add('owner: $debugOwner');
-    settings.add('offset: $offset');
   }
 
   String debugDescribeChildren(String prefix) => '';
@@ -103,16 +97,13 @@ abstract class Layer {
 
 /// A composited layer containing a [Picture]
 class PictureLayer extends Layer {
-  PictureLayer({ Offset offset: Offset.zero })
-    : super(offset: offset);
-
   /// The picture recorded for this layer
   ///
   /// The picture's coodinate system matches this layer's coodinate system
   ui.Picture picture;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.addPicture(offset + layerOffset, picture);
+    builder.addPicture(layerOffset, picture);
   }
 }
 
@@ -120,11 +111,10 @@ class PictureLayer extends Layer {
 /// certain performance statistics within it.
 class PerformanceOverlayLayer extends Layer {
   PerformanceOverlayLayer({
-    Offset offset: Offset.zero,
     this.overlayRect,
     this.optionsMask,
     this.rasterizerThreshold
-  }) : super(offset: offset);
+  });
 
   /// The rectangle in this layer's coodinate system that the overlay should occupy.
   Rect overlayRect;
@@ -136,7 +126,7 @@ class PerformanceOverlayLayer extends Layer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
-    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(offset + layerOffset));
+    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
   }
 }
@@ -144,8 +134,6 @@ class PerformanceOverlayLayer extends Layer {
 
 /// A composited layer that has a list of children
 class ContainerLayer extends Layer {
-  ContainerLayer({ Offset offset: Offset.zero }) : super(offset: offset);
-
   /// The first composited layer in this layer's child list
   Layer get firstChild => _firstChild;
   Layer _firstChild;
@@ -230,7 +218,7 @@ class ContainerLayer extends Layer {
   }
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    addChildrenToScene(builder, offset + layerOffset);
+    addChildrenToScene(builder, layerOffset);
   }
 
   /// Uploads all of this layer's children to the engine
@@ -261,9 +249,26 @@ class ContainerLayer extends Layer {
   }
 }
 
+class OffsetLayer extends ContainerLayer {
+  OffsetLayer({ this.offset: Offset.zero });
+
+  /// Offset from parent in the parent's coordinate system.
+  Offset offset;
+
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    addChildrenToScene(builder, offset + layerOffset);
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('offset: $offset');
+  }
+}
+
+
 /// A composite layer that clips its children using a rectangle
 class ClipRectLayer extends ContainerLayer {
-  ClipRectLayer({ Offset offset: Offset.zero, this.clipRect }) : super(offset: offset);
+  ClipRectLayer({ this.clipRect });
 
   /// The rectangle to clip in the parent's coordinate system
   Rect clipRect;
@@ -271,9 +276,8 @@ class ClipRectLayer extends ContainerLayer {
   // instead of in the coordinate system of this layer?
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    Offset childOffset = offset + layerOffset;
-    builder.pushClipRect(clipRect.shift(childOffset));
-    addChildrenToScene(builder, childOffset);
+    builder.pushClipRect(clipRect.shift(layerOffset));
+    addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
@@ -285,7 +289,7 @@ class ClipRectLayer extends ContainerLayer {
 
 /// A composite layer that clips its children using a rounded rectangle
 class ClipRRectLayer extends ContainerLayer {
-  ClipRRectLayer({ Offset offset: Offset.zero, this.clipRRect }) : super(offset: offset);
+  ClipRRectLayer({ this.clipRRect });
 
   /// The rounded-rect to clip in the parent's coordinate system
   ui.RRect clipRRect;
@@ -293,9 +297,8 @@ class ClipRRectLayer extends ContainerLayer {
   // instead of in the coordinate system of this layer?
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    Offset childOffset = offset + layerOffset;
-    builder.pushClipRRect(clipRRect.shift(childOffset));
-    addChildrenToScene(builder, childOffset);
+    builder.pushClipRRect(clipRRect.shift(layerOffset));
+    addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
@@ -307,7 +310,7 @@ class ClipRRectLayer extends ContainerLayer {
 
 /// A composite layer that clips its children using a path
 class ClipPathLayer extends ContainerLayer {
-  ClipPathLayer({ Offset offset: Offset.zero, this.clipPath }) : super(offset: offset);
+  ClipPathLayer({ this.clipPath });
 
   /// The path to clip in the parent's coordinate system
   Path clipPath;
@@ -315,9 +318,8 @@ class ClipPathLayer extends ContainerLayer {
   // in the coordinate system of this layer?
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    Offset childOffset = offset + layerOffset;
-    builder.pushClipPath(clipPath.shift(childOffset));
-    addChildrenToScene(builder, childOffset);
+    builder.pushClipPath(clipPath.shift(layerOffset));
+    addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
@@ -328,8 +330,8 @@ class ClipPathLayer extends ContainerLayer {
 }
 
 /// A composited layer that applies a transformation matrix to its children
-class TransformLayer extends ContainerLayer {
-  TransformLayer({ Offset offset: Offset.zero, this.transform }) : super(offset: offset);
+class TransformLayer extends OffsetLayer {
+  TransformLayer({ Offset offset: Offset.zero, this.transform }): super(offset: offset);
 
   /// The matrix to apply
   Matrix4 transform;
@@ -351,7 +353,7 @@ class TransformLayer extends ContainerLayer {
 
 /// A composited layer that makes its children partially transparent
 class OpacityLayer extends ContainerLayer {
-  OpacityLayer({ Offset offset: Offset.zero, this.alpha }) : super(offset: offset);
+  OpacityLayer({ this.alpha });
 
   /// The amount to multiply into the alpha channel
   ///
@@ -360,9 +362,8 @@ class OpacityLayer extends ContainerLayer {
   int alpha;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    Offset childOffset = offset + layerOffset;
     builder.pushOpacity(alpha);
-    addChildrenToScene(builder, childOffset);
+    addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
@@ -374,7 +375,7 @@ class OpacityLayer extends ContainerLayer {
 
 /// A composited layer that applies a shader to hits children.
 class ShaderMaskLayer extends ContainerLayer {
-  ShaderMaskLayer({ Offset offset: Offset.zero, this.shader, this.maskRect, this.transferMode }) : super(offset: offset);
+  ShaderMaskLayer({ this.shader, this.maskRect, this.transferMode });
 
   /// The shader to apply to the children.
   ui.Shader shader;
@@ -386,9 +387,8 @@ class ShaderMaskLayer extends ContainerLayer {
   TransferMode transferMode;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    Offset childOffset = offset + layerOffset;
-    builder.pushShaderMask(shader, maskRect.shift(childOffset), transferMode);
-    addChildrenToScene(builder, childOffset);
+    builder.pushShaderMask(shader, maskRect.shift(layerOffset), transferMode);
+    addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
