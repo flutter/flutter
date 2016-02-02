@@ -39,19 +39,20 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mo
   }
 
   void dispose() {
-    _detachKeyboard();
+    _detachKeyboardIfAttached();
     super.dispose();
   }
 
   void _attachOrDetachKeyboard() {
-    if (config.focused && _stub == null)
-      _attachKeyboard();
-    else if (!config.focused && _stub != null)
-      _detachKeyboard();
+    if (config.focused)
+      _attachKeyboardIfDetached();
+    else
+      _detachKeyboardIfAttached();
   }
 
-  void _attachKeyboard() {
-    assert(_stub == null);
+  void _attachKeyboardIfDetached() {
+    if (_stub != null)
+      return;
     _stub = new mojom.RawKeyboardListenerStub.unbound()..impl = this;
     mojom.RawKeyboardServiceProxy keyboard = new mojom.RawKeyboardServiceProxy.unbound();
     shell.connectToService(null, keyboard);
@@ -59,9 +60,8 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mo
     keyboard.close();
   }
 
-  void _detachKeyboard() {
-    assert(_stub != null);
-    _stub.close();
+  void _detachKeyboardIfAttached() {
+    _stub?.close();
     _stub = null;
   }
 
