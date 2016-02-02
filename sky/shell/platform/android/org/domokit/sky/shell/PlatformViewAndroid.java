@@ -19,26 +19,26 @@ import android.view.WindowInsets;
 
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.InterfaceRequest;
-import org.chromium.mojo.keyboard.KeyboardServiceImpl;
-import org.chromium.mojo.keyboard.KeyboardServiceState;
 import org.chromium.mojo.system.Core;
+import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.Pair;
-import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojom.keyboard.KeyboardService;
+import org.chromium.mojom.editing.Keyboard;
+import org.chromium.mojom.mojo.ServiceProvider;
 import org.chromium.mojom.pointer.Pointer;
 import org.chromium.mojom.pointer.PointerKind;
 import org.chromium.mojom.pointer.PointerPacket;
 import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
+import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
-import org.chromium.mojom.sky.ServicesData;
-import org.chromium.mojom.mojo.ServiceProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.domokit.editing.KeyboardImpl;
+import org.domokit.editing.KeyboardViewState;
 import org.domokit.raw_keyboard.RawKeyboardServiceImpl;
 import org.domokit.raw_keyboard.RawKeyboardServiceState;
 
@@ -54,7 +54,7 @@ public class PlatformViewAndroid extends SurfaceView {
     private PlatformServiceProvider mServiceProvider;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
-    private final KeyboardServiceState mKeyboardState;
+    private final KeyboardViewState mKeyboardState;
     private final RawKeyboardServiceState mRawKeyboardState;
 
     public PlatformViewAndroid(Context context) {
@@ -87,8 +87,7 @@ public class PlatformViewAndroid extends SurfaceView {
         };
         getHolder().addCallback(mSurfaceCallback);
 
-        mKeyboardState = new KeyboardServiceState(this);
-
+        mKeyboardState = new KeyboardViewState(this);
         mRawKeyboardState = new RawKeyboardServiceState();
     }
 
@@ -246,10 +245,10 @@ public class PlatformViewAndroid extends SurfaceView {
     }
 
     private void configureLocalServices(ServiceRegistry registry) {
-        registry.register(KeyboardService.MANAGER.getName(), new ServiceFactory() {
+        registry.register(Keyboard.MANAGER.getName(), new ServiceFactory() {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                KeyboardService.MANAGER.bind(new KeyboardServiceImpl(context, mKeyboardState), pipe);
+                Keyboard.MANAGER.bind(new KeyboardImpl(context, mKeyboardState), pipe);
             }
         });
 
