@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
@@ -58,6 +59,13 @@ class StartCommand extends StartCommandBase {
     argParser.addFlag('clear-logs',
         defaultsTo: true,
         help: 'Clear log history before starting the app.');
+    argParser.addFlag('start-paused',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Start in a paused mode and wait for a debugger to connect.');
+    argParser.addOption('debug-port',
+        defaultsTo: observatoryDefaultPort.toString(),
+        help: 'Listen to the given port for a debug connection.');
   }
 
   @override
@@ -71,6 +79,15 @@ class StartCommand extends StartCommandBase {
 
     bool clearLogs = argResults['clear-logs'];
 
+    int debugPort;
+
+    try {
+      debugPort = int.parse(argResults['debug-port']);
+    } catch (error) {
+      printError('Invalid port for `--debug-port`: $error');
+      return 1;
+    }
+
     int result = await startApp(
       devices,
       applicationPackages,
@@ -81,7 +98,9 @@ class StartCommand extends StartCommandBase {
       checked: argResults['checked'],
       traceStartup: argResults['trace-startup'],
       route: argResults['route'],
-      clearLogs: clearLogs
+      clearLogs: clearLogs,
+      startPaused: argResults['start-paused'],
+      debugPort: debugPort
     );
 
     printTrace('Finished start command.');
@@ -99,7 +118,9 @@ Future<int> startApp(
   bool checked: true,
   bool traceStartup: false,
   String route,
-  bool clearLogs: false
+  bool clearLogs: false,
+  bool startPaused: false,
+  int debugPort: observatoryDefaultPort
 }) async {
 
   String mainPath = findMainDartFile(target);
@@ -144,6 +165,8 @@ Future<int> startApp(
       route: route,
       checked: checked,
       clearLogs: clearLogs,
+      startPaused: startPaused,
+      debugPort: debugPort,
       platformArgs: platformArgs
     );
 

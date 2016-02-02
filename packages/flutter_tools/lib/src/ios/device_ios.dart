@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
@@ -185,9 +186,12 @@ class IOSDevice extends Device {
     String route,
     bool checked: true,
     bool clearLogs: false,
+    bool startPaused: false,
+    int debugPort: observatoryDefaultPort,
     Map<String, dynamic> platformArgs
   }) async {
     // TODO(chinmaygarde): Use checked, mainPath, route, clearLogs.
+    // TODO(devoncarew): Handle startPaused, debugPort.
     printTrace('Building ${app.name} for $id');
 
     // Step 1: Install the precompiled application if necessary
@@ -431,9 +435,12 @@ class IOSSimulator extends Device {
     String route,
     bool checked: true,
     bool clearLogs: false,
+    bool startPaused: false,
+    int debugPort: observatoryDefaultPort,
     Map<String, dynamic> platformArgs
   }) async {
     // TODO(chinmaygarde): Use checked, mainPath, route.
+    // TODO(devoncarew): Handle startPaused, debugPort.
     printTrace('Building ${app.name} for $id');
 
     if (clearLogs)

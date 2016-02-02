@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 final OperatingSystemUtils os = new OperatingSystemUtils._();
@@ -30,4 +31,11 @@ class _WindowsUtils implements OperatingSystemUtils {
   ProcessResult makeExecutable(File file) {
     return new ProcessResult(0, 0, null, null);
   }
+}
+
+Future<int> findAvailablePort() async {
+  ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+  int port = socket.port;
+  await socket.close();
+  return port;
 }

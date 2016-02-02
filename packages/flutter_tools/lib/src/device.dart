@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'android/device_android.dart';
 import 'application_package.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'build_configuration.dart';
 import 'ios/device_ios.dart';
@@ -104,6 +105,8 @@ abstract class Device {
     String route,
     bool checked: true,
     bool clearLogs: false,
+    bool startPaused: false,
+    int debugPort: observatoryDefaultPort,
     Map<String, dynamic> platformArgs
   });
 
