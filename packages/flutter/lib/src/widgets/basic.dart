@@ -655,6 +655,18 @@ class OverflowBox extends OneChildRenderObjectWidget {
       ..maxHeight = maxHeight
       ..alignment = alignment;
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (minWidth != null)
+      description.add('minWidth: $minWidth');
+    if (maxWidth != null)
+      description.add('maxWidth: $maxWidth');
+    if (minHeight != null)
+      description.add('minHeight: $minHeight');
+    if (maxHeight != null)
+      description.add('maxHeight: $maxHeight');
+  }
 }
 
 class SizedOverflowBox extends OneChildRenderObjectWidget {
