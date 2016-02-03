@@ -37,6 +37,10 @@ public class ActivityImpl implements Activity {
         sCurrentActivity = activity;
     }
 
+    public static android.app.Activity getCurrentActivity() {
+        return sCurrentActivity;
+    }
+
     public static void onResumeActivity(android.app.Activity activity) {
         updateSystemUiVisibility(activity);
     }

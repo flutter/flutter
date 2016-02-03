@@ -13,6 +13,29 @@ mojom("interfaces") {
   ]
 }
 
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+
+  android_library("platform_lib") {
+    java_files = [
+      "src/org/domokit/platform/HapticFeedbackImpl.java",
+      "src/org/domokit/platform/PathProviderImpl.java",
+      "src/org/domokit/platform/SystemChromeImpl.java",
+      "src/org/domokit/platform/SystemSoundImpl.java",
+    ]
+
+    deps = [
+      "//base:base_java",
+      "//mojo/public/java:bindings",
+      "//mojo/public/java:system",
+      "//sky/services/activity:activity_lib",
+      "//sky/services/activity:interfaces_java",
+      ":interfaces_java",
+    ]
+  }
+}
+
 if (is_ios) {
   source_set("platform_lib") {
     sources = [
@@ -37,7 +60,7 @@ group("platform") {
   deps = [
     ":interfaces"
   ]
-  if (is_ios) {
+  if (is_android || is_ios) {
     deps += [ ":platform_lib" ]
   }
 }
