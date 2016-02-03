@@ -614,7 +614,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       }
     );
 
-    return result;
+    return await result;
   }
 
   int get hashCode => device.logFilePath.hashCode;

@@ -41,6 +41,7 @@ class ListenCommand extends StartCommandBase {
         devices,
         applicationPackages,
         toolchain,
+        buildConfigurations,
         target: argResults['target'],
         install: firstTime,
         stop: true,

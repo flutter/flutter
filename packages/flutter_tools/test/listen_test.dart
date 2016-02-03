@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/commands/listen.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -22,8 +23,7 @@ defineTests() {
       when(mockDevices.iOS.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
 
-      CommandRunner runner = new CommandRunner('test_flutter', '')
-        ..addCommand(command);
+      CommandRunner runner = new FlutterCommandRunner()..addCommand(command);
       runner.run(['listen']).then((int code) => expect(code, equals(0)));
     });
   });
