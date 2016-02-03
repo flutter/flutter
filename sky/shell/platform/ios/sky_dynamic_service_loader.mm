@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "sky_dynamic_service_loader.h"
+#include "sky/shell/platform/ios/sky_dynamic_service_loader.h"
+#include "mojo/public/platform/native/system_thunks.h"
 
 #include <dlfcn.h>
 
 typedef void (*SkyDynamicServiceHandler)(
     mojo::ScopedMessagePipeHandle client_handle);
+
+static const char* const kMojoSetSystemThunksFnName = "MojoSetSystemThunks";
 
 @interface SkyServiceDefinition : NSObject
 
@@ -24,6 +27,48 @@ typedef void (*SkyDynamicServiceHandler)(
 - (SkyDynamicServiceHandler)serviceEntryPoint;
 
 @end
+
+enum class InstallSystemThunksResult {
+  Failure,
+  EmbedderOlder,
+  EmbedderNewer,
+  Success,
+};
+
+static InstallSystemThunksResult InstallSystemThunksInLibrary(
+    void* library_handle) {
+  if (library_handle == NULL) {
+    return InstallSystemThunksResult::Failure;
+  }
+
+  dlerror();
+  MojoSetSystemThunksFn set_thunks_fn = reinterpret_cast<MojoSetSystemThunksFn>(
+      dlsym(library_handle, kMojoSetSystemThunksFnName));
+
+  if (set_thunks_fn == NULL || dlerror() != NULL) {
+    return InstallSystemThunksResult::Failure;
+  }
+
+  MojoSystemThunks embedder_thunks = MojoMakeSystemThunks();
+
+  size_t result = set_thunks_fn(&embedder_thunks);
+
+  if (result > sizeof(MojoSystemThunks)) {
+    // The dylib expects to use a system thunks table that is larger than what
+    // is currently supported by the embedder. This indicates that the embedder
+    // is older than the dylib.
+    return InstallSystemThunksResult::EmbedderOlder;
+  }
+
+  if (result < sizeof(MojoSystemThunks)) {
+    // The dylib expect to use the system thunks table to be smaller than
+    // what is currently supported by the embedder. The exisiting entries in
+    // the table are stable.
+    return InstallSystemThunksResult::EmbedderNewer;
+  }
+
+  return InstallSystemThunksResult::Success;
+}
 
 @implementation SkyServiceDefinition {
   void* _libraryHandle;
@@ -56,8 +101,9 @@ typedef void (*SkyDynamicServiceHandler)(
   NSBundle* bundle = [NSBundle bundleWithIdentifier:_containerFramework];
 
   if (bundle == nil) {
-    NSLog(@"Could not load the framework bundle ('%@') for '%@'",
-          _containerFramework, _serviceName);
+    DLOG(INFO) << "Could not load the framework bundle ('"
+               << _containerFramework.UTF8String << "') for '"
+               << _serviceName.UTF8String << "'";
     return;
   }
 
@@ -66,13 +112,41 @@ typedef void (*SkyDynamicServiceHandler)(
 
   if (_libraryHandle == NULL || dlerror() != NULL) {
     _libraryHandle = NULL;
-    NSLog(@"Could not open library at '%@' to resolve service request for '%@'",
-          bundle.executablePath, _serviceName);
+    DLOG(INFO) << "Could not open library at '"
+               << bundle.executablePath.UTF8String
+               << "' to resolve service request for '"
+               << _serviceName.UTF8String << "'";
     return;
   }
 
-  NSLog(@"Opened framework '%@' to service '%@'", _containerFramework,
-        _serviceName);
+  bool success = false;
+  switch (InstallSystemThunksInLibrary(_libraryHandle)) {
+    case InstallSystemThunksResult::Failure:
+      LOG(INFO) << "Could not register the service library for '"
+                << _serviceName.UTF8String
+                << "'. The library is not prepared correctly.";
+      break;
+    case InstallSystemThunksResult::EmbedderOlder:
+      LOG(INFO) << "The service library for '" << _serviceName.UTF8String
+                << "' is too new to be used with this embedder. Flutter needs "
+                   "to be upgraded.";
+      break;
+    case InstallSystemThunksResult::EmbedderNewer:
+    case InstallSystemThunksResult::Success:
+      success = true;
+      break;
+  }
+
+  if (!success) {
+    dlerror();
+    dlclose(_libraryHandle);
+    _libraryHandle = NULL;
+    LOG(INFO) << "The service library for '" << _serviceName.UTF8String
+              << "' is unusable";
+  }
+
+  LOG(INFO) << "Opened framework '" << _containerFramework.UTF8String
+            << "' to service '" << _serviceName.UTF8String << "'";
 }
 
 - (SkyDynamicServiceHandler)serviceEntryPoint {
@@ -86,9 +160,10 @@ typedef void (*SkyDynamicServiceHandler)(
   void* entry = dlsym(_libraryHandle, _entryFunction.UTF8String);
 
   if (entry == NULL || dlerror() != NULL) {
-    NSLog(@"Could not find service entry point '%@' in library '%@' for "
-          @"service name '%@'",
-          _entryFunction, _containerFramework, _serviceName);
+    LOG(INFO) << "Could not find service entry point '"
+              << _entryFunction.UTF8String << "' in library '"
+              << _containerFramework.UTF8String << "' for service name '"
+              << _serviceName.UTF8String << "'";
     [self closeIfNecessary];
     return NULL;
   }
@@ -133,7 +208,7 @@ typedef void (*SkyDynamicServiceHandler)(
 
     [self populateServiceDefinitions];
 
-    NSLog(@"%zu custom service definitions registered", _services.count);
+    LOG(INFO) << _services.count << " custom service definitions registered";
   }
 
   return self;
@@ -142,7 +217,7 @@ typedef void (*SkyDynamicServiceHandler)(
 - (void)resolveService:(NSString*)serviceName
                 handle:(mojo::ScopedMessagePipeHandle)handle {
   if (serviceName.length == 0) {
-    NSLog(@"Invalid service name");
+    LOG(INFO) << "Invalid service name";
     return;
   }
 
@@ -150,7 +225,8 @@ typedef void (*SkyDynamicServiceHandler)(
       [_services[serviceName] serviceEntryPoint];
 
   if (entryPoint == NULL) {
-    NSLog(@"A valid service entry point must be present for '%@'", serviceName);
+    LOG(INFO) << "A valid service entry point must be present for '"
+              << serviceName.UTF8String << "'";
     return;
   }
 
@@ -164,16 +240,16 @@ typedef void (*SkyDynamicServiceHandler)(
                ofType:@"json"];
 
   if (definitionsPath.length == 0) {
-    NSLog(@"Could not find the service definitions manifest. No custom "
-          @"services will be available.");
+    LOG(INFO) << "Could not find the service definitions manifest. No custom "
+                 "services will be available.";
     return;
   }
 
   NSData* data = [NSData dataWithContentsOfFile:definitionsPath];
 
   if (data.length == 0) {
-    NSLog(@"The service definitions manifest could not be read. No custom "
-          @"services will be available.");
+    LOG(INFO) << "The service definitions manifest could not be read. No "
+                 "custom services will be available.";
     return;
   }
 
@@ -182,8 +258,8 @@ typedef void (*SkyDynamicServiceHandler)(
       [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
 
   if (error != nil || ![servicesData isKindOfClass:[NSDictionary class]]) {
-    NSLog(@"Corrupt service definitions manifest. No custom services will be "
-          @"available");
+    LOG(INFO) << "Corrupt service definitions manifest. No custom services "
+                 "will be available";
     return;
   }
 

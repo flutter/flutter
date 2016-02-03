@@ -227,13 +227,24 @@ if (is_android) {
   import("//build/config/ios/ios_sdk.gni")
   import("//sky/build/sky_precompilation_sdk.gni")
 
+  source_set("dynamic_service_loader") {
+    sources = [
+      "platform/ios/sky_dynamic_service_loader.h",
+      "platform/ios/sky_dynamic_service_loader.mm",
+    ]
+
+    # In order for the embedder to access the routine that prepares the
+    # the thunk for dylib, It needs access to system_thunks.h. This is included
+    # in a target that includes mojo symbols already present on the embedder.
+    # This works around header checks just for these files.
+    check_includes = false
+  }
+
   source_set("ios_scaffolding") {
     sources = [
       "platform/ios/main_ios.mm",
       "platform/ios/sky_app_delegate.h",
       "platform/ios/sky_app_delegate.mm",
-      "platform/ios/sky_dynamic_service_loader.h",
-      "platform/ios/sky_dynamic_service_loader.mm",
       "platform/ios/sky_surface.h",
       "platform/ios/sky_surface.mm",
       "platform/ios/sky_view_controller.h",
@@ -261,6 +272,7 @@ if (is_android) {
       "//sky/services/vsync",
       "//ui/gl",
       ":common",
+      ":dynamic_service_loader",
       ":gpu_direct",
     ]
   }
