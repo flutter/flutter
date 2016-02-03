@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 #include "sky/shell/platform/ios/sky_dynamic_service_loader.h"
+#include "mojo/public/c/system/types.h"
 #include "mojo/public/platform/native/system_thunks.h"
 
 #include <dlfcn.h>
 
-typedef void (*SkyDynamicServiceHandler)(
-    mojo::ScopedMessagePipeHandle client_handle);
+typedef MojoResult (*SkyDynamicServiceHandler)(MojoHandle client_handle,
+                                               const char* service_name);
 
 static const char* const kMojoSetSystemThunksFnName = "MojoSetSystemThunks";
 
@@ -231,7 +232,15 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
   }
 
   // Hand off to the dynamically resolved service vendor.
-  entryPoint(handle.Pass());
+  mojo::MessagePipeHandle rawMessageHandle = handle.release();
+  MojoResult result =
+      entryPoint(rawMessageHandle.value(), serviceName.UTF8String);
+  if (result != MOJO_RESULT_OK) {
+    // In case of success, the raw message handle ownership has been
+    // successfully acquired by the service implementation in the dylib. In case
+    // of failure however, we need to cleanup as the handle is no longer scoped.
+    mojo::CloseRaw(rawMessageHandle);
+  }
 }
 
 - (void)populateServiceDefinitions {
