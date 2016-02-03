@@ -35,6 +35,7 @@ class Internals
   mojo::Handle TakeServicesProvidedByEmbedder();
   mojo::Handle TakeServicesProvidedToEmbedder();
   mojo::Handle TakeRootBundleHandle();
+  mojo::Handle TakeViewHostHandle();
 
  private:
   explicit Internals(ServicesDataPtr services,

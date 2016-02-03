@@ -51,6 +51,11 @@ void TakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
       args, GetInternals()->TakeServicesProvidedToEmbedder().value());
 }
 
+void TakeViewHostHandle(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(
+      args, GetInternals()->TakeViewHostHandle().value());
+}
+
 static DartLibraryNatives* g_natives;
 
 void EnsureNatives() {
@@ -63,6 +68,7 @@ void EnsureNatives() {
     {"takeServicesProvidedByEmbedder", TakeServicesProvidedByEmbedder, 0, true},
     {"takeServicesProvidedToEmbedder", TakeServicesProvidedToEmbedder, 0, true},
     {"takeShellProxyHandle", TakeShellProxyHandle, 0, true},
+    {"takeViewHostHandle", TakeViewHostHandle, 0, true},
   });
 }
 
@@ -134,6 +140,10 @@ mojo::Handle Internals::TakeRootBundleHandle() {
 
 mojo::Handle Internals::TakeServicesProvidedToEmbedder() {
   return services_provided_to_embedder_.PassMessagePipe().release();
+}
+
+mojo::Handle Internals::TakeViewHostHandle() {
+  return services_ ? services_->view_host.PassInterface().PassHandle().release() : mojo::Handle();
 }
 
 }  // namespace shell

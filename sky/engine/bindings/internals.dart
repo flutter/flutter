@@ -11,3 +11,4 @@ int takeServiceRegistry() native "takeServiceRegistry";
 int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
 int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
 int takeShellProxyHandle() native "takeShellProxyHandle";
+int takeViewHostHandle() native "takeViewHostHandle";
