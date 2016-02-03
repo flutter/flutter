@@ -20,4 +20,8 @@ Layer::~Layer() {
 void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
+void Layer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
+                        mojo::gfx::composition::Node* container) {
+}
+
 }  // namespace flow

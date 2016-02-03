@@ -37,4 +37,10 @@ void ContainerLayer::PaintChildren(PaintContext::ScopedFrame& frame) const {
     layer->Paint(frame);
 }
 
+void ContainerLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
+                                 mojo::gfx::composition::Node* container) {
+  for (auto& layer : layers_)
+    layer->UpdateScene(update, container);
+}
+
 }  // namespace flow

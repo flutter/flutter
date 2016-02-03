@@ -25,12 +25,16 @@ class ChildSceneLayer : public Layer {
     scene_token_ = scene_token.Pass();
   }
 
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext::ScopedFrame& frame) override;
+  void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
+                   mojo::gfx::composition::Node* container) override;
 
  private:
   SkPoint offset_;
   SkISize physical_size_;
   mojo::gfx::composition::SceneTokenPtr scene_token_;
+  SkMatrix transform_;
 
   DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
 };

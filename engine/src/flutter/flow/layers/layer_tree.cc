@@ -17,15 +17,21 @@ LayerTree::~LayerTree() {
 
 void LayerTree::Raster(PaintContext::ScopedFrame& frame) {
   {
-    TRACE_EVENT0("flutter", "LayerTree::Preroll")
+    TRACE_EVENT0("flutter", "LayerTree::Preroll");
     Layer::PrerollContext context = { frame, SkRect::MakeEmpty() };
     root_layer_->Preroll(&context, SkMatrix());
   }
 
   {
-    TRACE_EVENT0("flutter", "LayerTree::Paint")
+    TRACE_EVENT0("flutter", "LayerTree::Paint");
     root_layer_->Paint(frame);
   }
+}
+
+void LayerTree::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
+                            mojo::gfx::composition::Node* container) {
+  TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
+  root_layer_->UpdateScene(update, container);
 }
 
 }  // namespace flow
