@@ -84,6 +84,8 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   DCHECK(resource);
 
   auto update = mojo::gfx::composition::SceneUpdate::New();
+  update->clear_resources = true;
+  update->clear_nodes = true;
   update->resources.insert(kContentImageResourceId, resource.Pass());
   auto root_node = mojo::gfx::composition::Node::New();
   root_node->op = mojo::gfx::composition::NodeOp::New();
@@ -93,6 +95,8 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   root_node->op->get_image()->content_rect->height = size.height;
   root_node->op->get_image()->image_resource_id = kContentImageResourceId;
   update->nodes.insert(kRootNodeId, root_node.Pass());
+
+  layer_tree->UpdateScene(update.get(), root_node.get());
 
   scene_->Update(update.Pass());
   scene_->Publish(nullptr);

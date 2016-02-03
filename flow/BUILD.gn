@@ -42,7 +42,8 @@ source_set("flow") {
 
   deps = [
     "//base",
-    "//skia",
     "//mojo/services/gfx/composition/interfaces",
+    "//mojo/skia",
+    "//skia",
   ]
 }

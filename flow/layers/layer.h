@@ -10,8 +10,9 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "skia/ext/refptr.h"
 #include "flow/paint_context.h"
+#include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
+#include "skia/ext/refptr.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -37,6 +38,9 @@ class Layer {
 
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
   virtual void Paint(PaintContext::ScopedFrame& frame) = 0;
+
+  virtual void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
+                           mojo::gfx::composition::Node* container);
 
   ContainerLayer* parent() const { return parent_; }
 
