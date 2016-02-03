@@ -173,7 +173,7 @@ class GalleryHome extends StatelessComponent {
                     new GalleryDemo(title: 'Chips', builder: (_) => new ChipDemo()),
                     new GalleryDemo(title: 'Progress Indicators', builder: (_) => new ProgressIndicatorDemo()),
                     new GalleryDemo(title: 'Sliders', builder: (_) => new SliderDemo()),
-                    new GalleryDemo(title: 'Toggle Controls', builder: (_) => new ToggleControlsDemo()),
+                    new GalleryDemo(title: 'Selection Controls', builder: (_) => new ToggleControlsDemo()),
                     new GalleryDemo(title: 'Dropdown Button', builder: (_) => new DropDownDemo()),
                     new GalleryDemo(title: 'Tabs', builder: (_) => new TabsDemo()),
                     new GalleryDemo(title: 'Expland/Collapse List Control', builder: (_) => new TwoLevelListDemo()),
