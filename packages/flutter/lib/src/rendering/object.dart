@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -189,12 +190,16 @@ class PaintingContext {
   /// compositor.
   void pushPerformanceOverlay(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
     _stopRecordingIfNeeded();
-    PerformanceOverlayLayer performanceOverlayLayer = new PerformanceOverlayLayer(
+    _appendLayer(new PerformanceOverlayLayer(
       overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       optionsMask: optionsMask,
       rasterizerThreshold: rasterizerThreshold
-    );
-    _appendLayer(performanceOverlayLayer);
+    ));
+  }
+
+  void pushChildScene(Offset offset, mojom.ViewLayoutInfo layoutInfo) {
+    _stopRecordingIfNeeded();
+    _appendLayer(new ChildSceneLayer(offset: offset, layoutInfo: layoutInfo));
   }
 
   /// Push a rectangular clip rect.
