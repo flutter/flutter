@@ -15,6 +15,10 @@
 #include "sky/shell/switches.h"
 #include "sky/shell/ui_delegate.h"
 
+static void DynamicServiceResolve(const mojo::String& service_name,
+                                  mojo::ScopedMessagePipeHandle handle) {
+}
+
 @interface SkyWindow ()<NSWindowDelegate>
 
 @property(assign) IBOutlet NSOpenGLView* renderSurface;
@@ -80,7 +84,8 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
   self.platformView->ConnectToEngine(mojo::GetProxy(&_sky_engine));
 
   mojo::ServiceProviderPtr service_provider;
-  new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider));
+  new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider),
+                                          base::Bind(DynamicServiceResolve));
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->services_provided_by_embedder = service_provider.Pass();
   _sky_engine->SetServices(services.Pass());
