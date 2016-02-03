@@ -27,27 +27,24 @@ static constexpr bool IsSet(uint32_t mask, T orientation) {
 }
 
 void SystemChromeImpl::SetPreferredOrientations(
-    uint32_t interface,
-    uint32_t device,
+    uint32_t device_mask,
     const SetPreferredOrientationsCallback& callback) {
   UIInterfaceOrientationMask mask = 0;
 
-  if (IsSet(interface, InterfaceOrientation::Portrait)) {
-    if (IsSet(device, DeviceOrientation::PortraitUp)) {
-      mask |= UIInterfaceOrientationMaskPortrait;
-    }
-    if (IsSet(device, DeviceOrientation::PortraitDown)) {
-      mask |= UIInterfaceOrientationMaskPortraitUpsideDown;
-    }
+  if (device_mask == 0) {
+    mask |= UIInterfaceOrientationMaskAll;
   }
-
-  if (IsSet(interface, InterfaceOrientation::Landscape)) {
-    if (IsSet(device, DeviceOrientation::LandscapeLeft)) {
-      mask |= UIInterfaceOrientationMaskLandscapeLeft;
-    }
-    if (IsSet(device, DeviceOrientation::LandscapeRight)) {
-      mask |= UIInterfaceOrientationMaskLandscapeRight;
-    }
+  if (IsSet(device_mask, DeviceOrientation::PortraitUp)) {
+    mask |= UIInterfaceOrientationMaskPortrait;
+  }
+  if (IsSet(device_mask, DeviceOrientation::PortraitDown)) {
+    mask |= UIInterfaceOrientationMaskPortraitUpsideDown;
+  }
+  if (IsSet(device_mask, DeviceOrientation::LandscapeLeft)) {
+    mask |= UIInterfaceOrientationMaskLandscapeLeft;
+  }
+  if (IsSet(device_mask, DeviceOrientation::LandscapeRight)) {
+    mask |= UIInterfaceOrientationMaskLandscapeRight;
   }
 
   if (mask == 0) {

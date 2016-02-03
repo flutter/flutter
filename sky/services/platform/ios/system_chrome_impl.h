@@ -20,7 +20,6 @@ class SystemChromeImpl : public SystemChrome {
   ~SystemChromeImpl() override;
 
   void SetPreferredOrientations(
-      uint32_t interface_orientation_mask,
       uint32_t device_orientation_mask,
       const SetPreferredOrientationsCallback& callback) override;
 
