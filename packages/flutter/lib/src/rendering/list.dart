@@ -151,7 +151,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
         break;
       case Axis.horizontal:
         itemWidth = itemExtent ?? size.width;
-        itemHeight = math.max(0, size.height - (padding == null ? 0.0 : padding.vertical));
+        itemHeight = math.max(0.0, size.height - (padding == null ? 0.0 : padding.vertical));
         x = padding != null ? padding.left : 0.0;
         dx = itemWidth;
         break;

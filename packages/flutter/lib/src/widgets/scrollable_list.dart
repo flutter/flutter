@@ -158,11 +158,12 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
   void layout(BoxConstraints constraints) {
     final int length = renderObject.virtualChildCount;
     final double itemExtent = widget.itemExtent;
+    final EdgeDims padding = widget.padding ?? EdgeDims.zero;
 
-    double contentExtent = widget.itemExtent * length;
+    double contentExtent = widget.itemExtent * length + padding.top + padding.bottom;
     double containerExtent = _getContainerExtentFromRenderObject();
 
-    _materializedChildBase = math.max(0, widget.startOffset ~/ itemExtent);
+    _materializedChildBase = math.max(0, (widget.startOffset - padding.top) ~/ itemExtent);
     int materializedChildLimit = math.max(0, ((widget.startOffset + containerExtent) / itemExtent).ceil());
 
     if (!widget.itemsWrap) {

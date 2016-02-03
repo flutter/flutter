@@ -377,12 +377,16 @@ class ScrollableViewport extends Scrollable {
     this.child,
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
-    ScrollListener onScroll
+    ScrollListener onScrollStart,
+    ScrollListener onScroll,
+    ScrollListener onScrollEnd
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
     initialScrollOffset: initialScrollOffset,
-    onScroll: onScroll
+    onScrollStart: onScrollStart,
+    onScroll: onScroll,
+    onScrollEnd: onScrollEnd
   );
 
   final Widget child;

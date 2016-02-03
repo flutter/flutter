@@ -27,13 +27,17 @@ class MaterialList extends StatefulComponent {
     this.initialScrollOffset,
     this.onScroll,
     this.type: MaterialListType.twoLine,
-    this.children
+    this.children,
+    this.scrollablePadding: EdgeDims.zero,
+    this.scrollableKey
   }) : super(key: key);
 
   final double initialScrollOffset;
   final ScrollListener onScroll;
   final MaterialListType type;
   final Iterable<Widget> children;
+  final EdgeDims scrollablePadding;
+  final Key scrollableKey;
 
   _MaterialListState createState() => new _MaterialListState();
 }
@@ -43,11 +47,12 @@ class _MaterialListState extends State<MaterialList> {
 
   Widget build(BuildContext context) {
     return new ScrollableList(
+      key: config.scrollableKey,
       initialScrollOffset: config.initialScrollOffset,
       scrollDirection: Axis.vertical,
       onScroll: config.onScroll,
       itemExtent: kListItemExtent[config.type],
-      padding: const EdgeDims.symmetric(vertical: 8.0),
+      padding: const EdgeDims.symmetric(vertical: 8.0) + config.scrollablePadding,
       scrollableListPainter: _scrollbarPainter,
       children: config.children
     );

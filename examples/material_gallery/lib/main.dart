@@ -46,14 +46,23 @@ class GallerySection extends StatelessComponent {
       brightness: ThemeBrightness.light,
       primarySwatch: colors
     );
+    final appBarHeight = 200.0;
+    final scrollableKey = new ValueKey<String>(title); // assume section titles differ
     Navigator.push(context, new MaterialPageRoute(
       builder: (BuildContext context) {
         return new Theme(
           data: theme,
           child: new Scaffold(
-            toolBar: new ToolBar(center: new Text(title)),
+            appBarHeight: appBarHeight,
+            appBarBehavior: AppBarBehavior.scroll,
+            scrollableKey: scrollableKey,
+            toolBar: new ToolBar(
+              flexibleSpace: (BuildContext context) => new FlexibleSpaceBar(title: new Text(title))
+            ),
             body: new Material(
               child: new MaterialList(
+                scrollableKey: scrollableKey,
+                scrollablePadding: new EdgeDims.only(top: appBarHeight),
                 type: MaterialListType.oneLine,
                 children: (demos ?? <GalleryDemo>[]).map((GalleryDemo demo) {
                   return new ListItem(
@@ -116,14 +125,18 @@ class GalleryHome extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBarHeight: 128.0,
       toolBar: new ToolBar(
-        bottom: new Container(
-          padding: const EdgeDims.only(left: 16.0, bottom: 24.0),
-          child: new Align(
-            alignment: const FractionalOffset(0.0, 1.0),
-            child: new Text('Flutter Gallery', style: Typography.white.headline)
-          )
-        )
+        flexibleSpace: (BuildContext context) {
+          return new Container(
+            padding: const EdgeDims.only(left: 16.0, bottom: 24.0),
+            height: 128.0,
+            child: new Align(
+              alignment: const FractionalOffset(0.0, 1.0),
+              child: new Text('Flutter Gallery', style: Typography.white.headline)
+            )
+          );
+        }
       ),
       body: new Padding(
         padding: const EdgeDims.all(4.0),

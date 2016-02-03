@@ -17,18 +17,23 @@ class ToolBar extends StatelessComponent {
     this.left,
     this.center,
     this.right,
-    this.bottom,
+    this.flexibleSpace,
+    this.foregroundOpacity: 1.0,
     this.tabBar,
     this.elevation: 4,
     this.backgroundColor,
     this.textTheme,
     this.padding: EdgeDims.zero
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert((flexibleSpace != null) ? tabBar == null : true);
+    assert((tabBar != null) ? flexibleSpace == null : true);
+  }
 
   final Widget left;
   final Widget center;
   final List<Widget> right;
-  final Widget bottom;
+  final WidgetBuilder flexibleSpace;
+  final double foregroundOpacity;
   final Widget tabBar;
   final int elevation;
   final Color backgroundColor;
@@ -40,7 +45,8 @@ class ToolBar extends StatelessComponent {
     Widget left,
     Widget center,
     List<Widget> right,
-    Widget bottom,
+    WidgetBuilder flexibleSpace,
+    double foregroundOpacity,
     int elevation,
     Color backgroundColor,
     TextTheme textTheme,
@@ -51,7 +57,8 @@ class ToolBar extends StatelessComponent {
       left: left ?? this.left,
       center: center ?? this.center,
       right: right ?? this.right,
-      bottom: bottom ?? this.bottom,
+      flexibleSpace: flexibleSpace ?? this.flexibleSpace,
+      foregroundOpacity: foregroundOpacity ?? this.foregroundOpacity,
       tabBar: tabBar ?? this.tabBar,
       elevation: elevation ?? this.elevation,
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -76,10 +83,24 @@ class ToolBar extends StatelessComponent {
       sideStyle ??= primaryTextTheme.body2;
     }
 
-    final List<Widget> firstRow = <Widget>[];
+    if (foregroundOpacity != 1.0) {
+      final int alpha = (foregroundOpacity.clamp(0.0, 1.0) * 255.0).round();
+      if (centerStyle?.color != null)
+        centerStyle = centerStyle.copyWith(color: centerStyle.color.withAlpha(alpha));
+      if (sideStyle?.color != null)
+        sideStyle = sideStyle.copyWith(color: sideStyle.color.withAlpha(alpha));
+      if (iconThemeData != null) {
+        iconThemeData = new IconThemeData(
+          opacity: foregroundOpacity * iconThemeData.clampedOpacity,
+          color: iconThemeData.color
+        );
+      }
+    }
+
+    final List<Widget> toolBarRow = <Widget>[];
     if (left != null)
-      firstRow.add(left);
-    firstRow.add(
+      toolBarRow.add(left);
+    toolBarRow.add(
       new Flexible(
         child: new Padding(
           padding: new EdgeDims.only(left: 24.0),
@@ -88,45 +109,55 @@ class ToolBar extends StatelessComponent {
       )
     );
     if (right != null)
-      firstRow.addAll(right);
-
-    final List<Widget> rows = <Widget>[
-      new Container(
-        height: kToolBarHeight,
-        child: new DefaultTextStyle(
-          style: sideStyle,
-          child: new Row(children: firstRow)
-        )
-      )
-    ];
-    if (bottom != null) {
-      rows.add(
-        new DefaultTextStyle(
-          style: centerStyle,
-          child: new Container(
-            height: kExtendedToolBarHeight - kToolBarHeight,
-            child: bottom
-          )
-        )
-      );
-    }
-    if (tabBar != null)
-      rows.add(tabBar);
+      toolBarRow.addAll(right);
 
     EdgeDims combinedPadding = new EdgeDims.symmetric(horizontal: 8.0);
     if (padding != null)
       combinedPadding += padding;
 
+    // If the toolBar's height shrinks below toolBarHeight, it will be clipped and bottom
+    // justified. This is so that the toolbar appears to move upwards as its height is reduced.
+    final double toolBarHeight = kToolBarHeight + combinedPadding.top + combinedPadding.bottom;
+    final Widget toolBar = new ConstrainedBox(
+      constraints: new BoxConstraints(maxHeight: toolBarHeight),
+      child: new Padding(
+        padding: new EdgeDims.only(left: combinedPadding.left, right: combinedPadding.right),
+        child: new ClipRect(
+          child: new OverflowBox(
+            alignment: const FractionalOffset(0.0, 1.0), // bottom justify
+            minHeight: toolBarHeight,
+            maxHeight: toolBarHeight,
+            child: new DefaultTextStyle(
+              style: sideStyle,
+              child: new Padding(
+                padding: new EdgeDims.only(top: combinedPadding.top, bottom: combinedPadding.bottom),
+                child: new Row(children: toolBarRow)
+              )
+            )
+          )
+        )
+      )
+    );
+
+    Widget appBar = toolBar;
+    if (tabBar != null) {
+      appBar = new Column(
+        justifyContent: FlexJustifyContent.collapse,
+        children: <Widget>[toolBar, tabBar]
+      );
+    } else if (flexibleSpace != null) {
+      appBar = new Stack(
+        children: <Widget>[
+          flexibleSpace(context),
+          new Align(child: toolBar, alignment: const FractionalOffset(0.0, 0.0))
+        ]
+      );
+    }
+
     Widget contents = new Material(
       color: color,
       elevation: elevation,
-      child: new Container(
-        padding: combinedPadding,
-        child: new Column(
-          children: rows,
-          justifyContent: FlexJustifyContent.collapse
-        )
-      )
+      child: appBar
     );
 
     if (iconThemeData != null)
