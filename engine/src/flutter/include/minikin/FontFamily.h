@@ -100,11 +100,11 @@ struct FakedFont {
 
 class FontFamily : public MinikinRefCounted {
 public:
-    FontFamily() : mHbFont(nullptr) { }
+    FontFamily() {}
 
     FontFamily(int variant);
 
-    FontFamily(uint32_t langId, int variant) : mLangId(langId), mVariant(variant), mHbFont(nullptr) {
+    FontFamily(uint32_t langId, int variant) : mLangId(langId), mVariant(variant) {
     }
 
     ~FontFamily();
@@ -131,11 +131,6 @@ public:
     // Caller should acquire a lock before calling the method.
     bool hasVariationSelector(uint32_t codepoint, uint32_t variationSelector);
 
-    // Purges cached mHbFont.
-    // hb_font_t keeps a reference to hb_face_t which is managed by HbFaceCache. Thus,
-    // it is good to purge hb_font_t once it is no longer necessary.
-    // Caller should acquire a lock before calling the method.
-    void purgeHbFontCache();
 private:
     void addFontLocked(MinikinFont* typeface, FontStyle style);
 
@@ -152,8 +147,6 @@ private:
 
     SparseBitSet mCoverage;
     bool mCoverageValid;
-
-    hb_font_t* mHbFont;
 };
 
 }  // namespace android

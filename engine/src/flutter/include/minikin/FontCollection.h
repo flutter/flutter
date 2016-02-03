@@ -53,9 +53,6 @@ public:
 
     uint32_t getId() const;
 
-    // Calls each managed font family's FontFamily::purgeHbFontCache method.
-    // Caller should acquire a lock before calling the method.
-    void purgeFontFamilyHbFontCache() const;
 private:
     static const int kLogCharsPerPage = 8;
     static const int kPageMask = (1 << kLogCharsPerPage) - 1;

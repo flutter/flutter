@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef MINIKIN_HBFACE_CACHE_H
-#define MINIKIN_HBFACE_CACHE_H
+#ifndef MINIKIN_HBFONT_CACHE_H
+#define MINIKIN_HBFONT_CACHE_H
 
-struct hb_face_t;
+struct hb_font_t;
 
 namespace android {
 class MinikinFont;
 
-void purgeHbFaceCacheLocked();
-hb_face_t* getHbFaceLocked(MinikinFont* minikinFont);
+void purgeHbFontCacheLocked();
+hb_font_t* getHbFontLocked(MinikinFont* minikinFont);
 
 }  // namespace android
-#endif  // MINIKIN_HBFACE_CACHE_H
+#endif  // MINIKIN_HBFONT_CACHE_H

@@ -37,7 +37,7 @@
 #include "FontLanguage.h"
 #include "FontLanguageListCache.h"
 #include "LayoutUtils.h"
-#include "HbFaceCache.h"
+#include "HbFontCache.h"
 #include "MinikinInternal.h"
 #include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
@@ -98,7 +98,7 @@ struct LayoutContext {
 
     void clearHbFonts() {
         for (size_t i = 0; i < hbFonts.size(); i++) {
-            hb_font_destroy(hbFonts[i]);
+            hb_font_set_funcs(hbFonts[i], nullptr, nullptr, nullptr);
         }
         hbFonts.clear();
     }
@@ -133,7 +133,6 @@ public:
         layout->setFontCollection(collection);
         layout->mAdvances.resize(mCount, 0);
         ctx->clearHbFonts();
-        collection->purgeFontFamilyHbFontCache();
         layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx);
     }
 
@@ -306,21 +305,6 @@ hb_font_funcs_t* getHbFontFuncs() {
     return hbFontFuncs;
 }
 
-static hb_font_t* create_hb_font(MinikinFont* minikinFont, MinikinPaint* minikinPaint) {
-    hb_face_t* face = getHbFaceLocked(minikinFont);
-    hb_font_t* parent_font = hb_font_create(face);
-    hb_ot_font_set_funcs(parent_font);
-
-    unsigned int upem = hb_face_get_upem(face);
-    hb_font_set_scale(parent_font, upem, upem);
-
-    hb_font_t* font = hb_font_create_sub_font(parent_font);
-    hb_font_destroy(parent_font);
-
-    hb_font_set_funcs(font, getHbFontFuncs(), minikinPaint, 0);
-    return font;
-}
-
 static float HBFixedToFloat(hb_position_t v)
 {
     return scalbnf (v, -8);
@@ -349,7 +333,8 @@ int Layout::findFace(FakedFont face, LayoutContext* ctx) {
     // Note: ctx == NULL means we're copying from the cache, no need to create
     // corresponding hb_font object.
     if (ctx != NULL) {
-        hb_font_t* font = create_hb_font(face.font, &ctx->paint);
+        hb_font_t* font = getHbFontLocked(face.font);
+        hb_font_set_funcs(font, getHbFontFuncs(), &ctx->paint, 0);
         ctx->hbFonts.push_back(font);
     }
     return ix;
@@ -599,7 +584,6 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
                 start, mCollection, this, NULL);
     }
     ctx.clearHbFonts();
-    mCollection->purgeFontFamilyHbFontCache();
 }
 
 float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
@@ -976,7 +960,7 @@ void Layout::purgeCaches() {
     AutoMutex _l(gMinikinLock);
     LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
     layoutCache.clear();
-    purgeHbFaceCacheLocked();
+    purgeHbFontCacheLocked();
 }
 
 }  // namespace android
