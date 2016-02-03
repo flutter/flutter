@@ -17,7 +17,11 @@ class BuildCommand extends FlutterCommand {
     argParser.addFlag('precompiled', negatable: false);
     argParser.addOption('asset-base', defaultsTo: defaultAssetBase);
     argParser.addOption('compiler');
-    argParser.addOption('main', defaultsTo: defaultMainPath);
+    argParser.addOption('target',
+      abbr: 't',
+      defaultsTo: defaultMainPath,
+      help: 'Target app path / main entry-point file.'
+    );
     argParser.addOption('manifest', defaultsTo: defaultManifestPath);
     argParser.addOption('private-key', defaultsTo: defaultPrivateKeyPath);
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);

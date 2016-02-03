@@ -159,8 +159,8 @@ class ApkCommand extends FlutterCommand {
         help: 'Output APK file.');
     argParser.addOption('target',
         abbr: 't',
-        defaultsTo: '',
-        help: 'Target app path or filename used to build the FLX.');
+        defaultsTo: flx.defaultMainPath,
+        help: 'Target app path / main entry-point file.');
     argParser.addOption('flx',
         abbr: 'f',
         defaultsTo: '',
