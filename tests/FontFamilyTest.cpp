@@ -378,18 +378,4 @@ TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     expectVSGlyphs(&family, kNotSupportedChar, std::set<uint32_t>());
 }
 
-TEST_F(FontFamilyTest, hasVariationSelectorWorksAfterpurgeHbFontCache) {
-    MinikinFontForTest minikinFont(kVsTestFont);
-    FontFamily family;
-    family.addFont(&minikinFont);
-
-    const uint32_t kVS1 = 0xFE00;
-    const uint32_t kSupportedChar1 = 0x82A6;
-
-    AutoMutex _l(gMinikinLock);
-    EXPECT_TRUE(family.hasVariationSelector(kSupportedChar1, kVS1));
-
-    family.purgeHbFontCache();
-    EXPECT_TRUE(family.hasVariationSelector(kSupportedChar1, kVS1));
-}
 }  // namespace android

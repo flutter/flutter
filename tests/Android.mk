@@ -75,9 +75,9 @@ LOCAL_SRC_FILES += \
     FontFamilyTest.cpp \
     FontLanguageListCacheTest.cpp \
     FontTestUtils.cpp \
+    HbFontCacheTest.cpp \
     MinikinFontForTest.cpp \
     GraphemeBreakTests.cpp \
-    HbFaceCacheTest.cpp \
     LayoutUtilsTest.cpp \
     UnicodeUtils.cpp
 

@@ -24,7 +24,7 @@ minikin_src_files := \
     FontLanguage.cpp \
     FontLanguageListCache.cpp \
     GraphemeBreak.cpp \
-    HbFaceCache.cpp \
+    HbFontCache.cpp \
     Hyphenator.cpp \
     Layout.cpp \
     LayoutUtils.cpp \

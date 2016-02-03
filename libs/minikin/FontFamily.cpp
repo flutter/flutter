@@ -28,7 +28,7 @@
 
 #include "FontLanguage.h"
 #include "FontLanguageListCache.h"
-#include "HbFaceCache.h"
+#include "HbFontCache.h"
 #include "MinikinInternal.h"
 #include <minikin/MinikinFont.h>
 #include <minikin/AnalyzeStyle.h>
@@ -189,23 +189,11 @@ const SparseBitSet* FontFamily::getCoverage() {
 
 bool FontFamily::hasVariationSelector(uint32_t codepoint, uint32_t variationSelector) {
     assertMinikinLocked();
-    if (!mHbFont) {
-        const FontStyle defaultStyle;
-        MinikinFont* minikinFont = getClosestMatch(defaultStyle).font;
-        hb_face_t* face = getHbFaceLocked(minikinFont);
-        mHbFont = hb_font_create(face);
-        hb_ot_font_set_funcs(mHbFont);
-    }
+    const FontStyle defaultStyle;
+    MinikinFont* minikinFont = getClosestMatch(defaultStyle).font;
+    hb_font_t* font = getHbFontLocked(minikinFont);
     uint32_t unusedGlyph;
-    return hb_font_get_glyph(mHbFont, codepoint, variationSelector, &unusedGlyph);
-}
-
-void FontFamily::purgeHbFontCache() {
-    assertMinikinLocked();
-    if (mHbFont) {
-        hb_font_destroy(mHbFont);
-        mHbFont = nullptr;
-    }
+    return hb_font_get_glyph(font, codepoint, variationSelector, &unusedGlyph);
 }
 
 }  // namespace android
