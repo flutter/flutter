@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:vector_math/vector_math_64.dart';
+import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
 
 import 'basic_types.dart';
 import 'debug.dart';
@@ -104,6 +105,30 @@ class PictureLayer extends Layer {
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addPicture(layerOffset, picture);
+  }
+}
+
+class ChildSceneLayer extends Layer {
+  ChildSceneLayer({ this.offset, this.layoutInfo });
+
+  Offset offset;
+  mojom.ViewLayoutInfo layoutInfo;
+
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    builder.addChildScene(
+      offset + layerOffset,
+      layoutInfo.size.width,
+      layoutInfo.size.height,
+      layoutInfo.sceneToken.value
+    );
+  }
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('offset: $offset');
+    settings.add('physicalWidth: ${layoutInfo.size.width}');
+    settings.add('physicalHeight: ${layoutInfo.size.height}');
+    settings.add('sceneToken.value: ${layoutInfo.sceneToken.value}');
   }
 }
 
