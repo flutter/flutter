@@ -41,7 +41,7 @@ class BuildCommand extends FlutterCommand {
     return await build(
       toolchain,
       assetBase: argResults['asset-base'],
-      mainPath: argResults['main'],
+      mainPath: argResults['target'],
       manifestPath: argResults['manifest'],
       outputPath: outputPath,
       snapshotPath: argResults['snapshot'],
