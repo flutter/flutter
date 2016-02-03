@@ -64,7 +64,7 @@ PackageProject() {
 
   RunCommand ${FLUTTER_ROOT}/bin/flutter build                                 \
       --asset-base ${icons_path}                                               \
-      --main ${dart_main}                                                      \
+      --target ${dart_main}                                                    \
       --output-file ${derived_dir}/app.flx                                     \
       --package-root ${package_root}                                           \
       --compiler ${src_dir}/ScriptSnapshotter                                  \
