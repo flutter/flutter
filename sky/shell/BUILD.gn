@@ -233,6 +233,10 @@ if (is_android) {
       "platform/ios/sky_dynamic_service_loader.mm",
     ]
 
+    deps = [
+      ":common",
+    ]
+
     # In order for the embedder to access the routine that prepares the
     # the thunk for dylib, It needs access to system_thunks.h. This is included
     # in a target that includes mojo symbols already present on the embedder.
