@@ -11,13 +11,15 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+
+import org.domokit.common.ResourcePaths;
 
 /**
  * A class to clean up orphaned resource directories after unclean shutdowns.
  **/
 public class ResourceCleaner {
     private static final String TAG = "ResourceCleaner";
-    private static final String TEMPORARY_RESOURCE_PREFIX = ".org.chromium.Chromium.";
     private static final long DELAY_MS = 5000;
 
     private class CleanTask extends AsyncTask<Void, Void, Void> {
@@ -67,7 +69,7 @@ public class ResourceCleaner {
         final CleanTask task = new CleanTask(cacheDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                boolean result = name.startsWith(TEMPORARY_RESOURCE_PREFIX);
+                boolean result = name.startsWith(ResourcePaths.TEMPORARY_RESOURCE_PREFIX);
                 return result;
             }
         }));
