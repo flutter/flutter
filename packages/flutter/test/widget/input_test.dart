@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 import 'package:test/test.dart';
 
-import '../services/mock_services.dart';
-
 class MockKeyboard implements mojom.Keyboard {
   mojom.KeyboardClient client;
 
