@@ -439,8 +439,8 @@ class SemanticsNode extends AbstractNode {
 }
 
 class SemanticsServer extends mojom.SemanticsServer {
-  void addSemanticsListener(mojom.SemanticsListener listener) {
-    SemanticsNode.addListener(listener);
+  void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
+    SemanticsNode.addListener(listener.ptr);
   }
   void tap(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeTapped)?.handleSemanticTap();
