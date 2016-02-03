@@ -17,7 +17,13 @@ class BuildCommand extends FlutterCommand {
     argParser.addFlag('precompiled', negatable: false);
     argParser.addOption('asset-base', defaultsTo: defaultAssetBase);
     argParser.addOption('compiler');
-    argParser.addOption('main', defaultsTo: defaultMainPath);
+    argParser.addOption('target',
+      abbr: 't',
+      defaultsTo: defaultMainPath,
+      help: 'Target app path / main entry-point file.'
+    );
+    // TODO(devoncarew): Remove this once the xcode project is switched over.
+    argParser.addOption('main', hide: true);
     argParser.addOption('manifest', defaultsTo: defaultManifestPath);
     argParser.addOption('private-key', defaultsTo: defaultPrivateKeyPath);
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
@@ -37,7 +43,7 @@ class BuildCommand extends FlutterCommand {
     return await build(
       toolchain,
       assetBase: argResults['asset-base'],
-      mainPath: argResults['main'],
+      mainPath: argResults.wasParsed('main') ? argResults['main'] : argResults['target'],
       manifestPath: argResults['manifest'],
       outputPath: outputPath,
       snapshotPath: argResults['snapshot'],

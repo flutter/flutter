@@ -11,6 +11,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../device.dart';
+import '../flx.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 import 'install.dart';
@@ -41,7 +42,8 @@ abstract class StartCommandBase extends FlutterCommand {
         help: 'Start tracing during startup.');
     argParser.addOption('target',
         abbr: 't',
-        help: 'Target app path or filename to start.');
+        defaultsTo: defaultMainPath,
+        help: 'Target app path / main entry-point file.');
     argParser.addOption('route',
         help: 'Which route to load when starting the app.');
   }
