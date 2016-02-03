@@ -253,6 +253,7 @@ class AppDomain extends Domain {
         command.devices,
         command.applicationPackages,
         command.toolchain,
+        command.buildConfigurations,
         target: args['target'],
         route: args['route'],
         checked: args['checked'] ?? true

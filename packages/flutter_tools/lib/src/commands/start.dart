@@ -10,9 +10,11 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../build_configuration.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
+import 'apk.dart';
 import 'install.dart';
 import 'stop.dart';
 
@@ -92,7 +94,9 @@ class StartCommand extends StartCommandBase {
       devices,
       applicationPackages,
       toolchain,
+      buildConfigurations,
       target: argResults['target'],
+      enginePath: runner.enginePath,
       install: true,
       stop: argResults['full-restart'],
       checked: argResults['checked'],
@@ -111,8 +115,10 @@ class StartCommand extends StartCommandBase {
 Future<int> startApp(
   DeviceStore devices,
   ApplicationPackageStore applicationPackages,
-  Toolchain toolchain, {
+  Toolchain toolchain,
+  List<BuildConfiguration> configs, {
   String target,
+  String enginePath,
   bool stop: true,
   bool install: true,
   bool checked: true,
@@ -130,6 +136,14 @@ Future<int> startApp(
       message += '\nConsider using the -t option to specify the Dart file to start.';
     printError(message);
     return 1;
+  }
+
+  if (install) {
+    printTrace('Running build command.');
+    applicationPackages = await buildAll(
+      devices, applicationPackages, toolchain, configs,
+      enginePath: enginePath,
+      target: target);
   }
 
   if (stop) {
