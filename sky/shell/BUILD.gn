@@ -179,6 +179,7 @@ if (is_android) {
       "//services/sensors:sensors_lib",
       "//sky/services/activity:activity_lib",
       "//sky/services/activity:interfaces_java",
+      "//sky/services/common:common_lib",
       "//sky/services/editing:editing_lib",
       "//sky/services/editing:interfaces_java",
       "//sky/services/engine:interfaces_java",

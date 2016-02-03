@@ -12,6 +12,7 @@ import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.DataPipe;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.media.MediaPlayer;
+import org.domokit.common.ResourcePaths;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class MediaPlayerImpl implements MediaPlayer, android.media.MediaPlayer.O
         File outputDir = mContext.getCacheDir();
         mPrepareResponse = callback;
         try {
-            mTempFile = File.createTempFile("sky_media_player", "temp", outputDir);
+            mTempFile = ResourcePaths.createTempFile(mContext, "mediaPlayer");
         } catch (IOException e) {
             Log.e(TAG, "Failed to create temporary file", e);
             callback.call(false);
