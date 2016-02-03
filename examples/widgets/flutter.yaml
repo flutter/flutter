@@ -1,7 +1,6 @@
 name: widgets
 assets:
   - assets/starcircle.png
-  - assets/ali_connors.png
 material-design-icons:
   - name: action/account_circle
   - name: action/alarm

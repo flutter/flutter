@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui_internals' as internals;
 
 import 'package:flutter/services.dart';
 import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
@@ -10,20 +11,39 @@ import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/view_provider.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/views.mojom.dart' as mojom;
 import 'package:mojo/application.dart';
+import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/service_provider.mojom.dart' as mojom;
 
 import 'box.dart';
 import 'object.dart';
 
-// TODO(abarth): Populate the view host.
-final mojom.ViewHost _viewHost = null;
+mojom.ViewHostProxy _initViewHostProxy() {
+  int viewHost = internals.takeViewHostHandle();
+  assert(() {
+    if (viewHost == 0)
+      debugPrint('Child view are supported only when running in Mojo shell.');
+    return true;
+  });
+  return new mojom.ViewHostProxy.fromHandle(new core.MojoHandle(viewHost));
+}
+
+// TODO(abarth): The view host is a unique resource. We should structure how we
+// take the handle from the engine so that multiple libraries can interact with
+// the view host safely. Unfortunately, the view host has a global namespace of
+// view keys, which means any scheme for sharing the view host also needs to
+// provide a mechanism for coordinating about view keys.
+final mojom.ViewHostProxy _viewHostProxy = _initViewHostProxy();
+final mojom.ViewHost _viewHost = _viewHostProxy?.ptr;
 
 class ChildViewConnection {
   ChildViewConnection({ this.url }) {
     mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.unbound();
     mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.unbound();
+    assert(_viewToken == null);
+    mojom.ViewProviderProxy viewProvider = new mojom.ViewProviderProxy.unbound();
+    shell.connectToService(url, viewProvider);
+    _unresolvedViewToken = _awaitResponse(viewProvider.ptr.createView(incomingServices, outgoingServices), viewProvider);
     _connection = new ApplicationConnection(outgoingServices, incomingServices);
-    _unresolvedViewToken = _connectToView(incomingServices, outgoingServices);
   }
 
   final String url;
@@ -34,14 +54,11 @@ class ChildViewConnection {
   Future<mojom.ViewToken> _unresolvedViewToken;
   mojom.ViewToken _viewToken;
 
-  Future<mojom.ViewToken> _connectToView(
-    mojom.ServiceProviderProxy incomingServices,
-    mojom.ServiceProviderStub outgoingServices
+  Future<mojom.ViewToken> _awaitResponse(
+    Future<mojom.ViewProviderCreateViewResponseParams> response,
+    mojom.ViewProviderProxy viewProvider
   ) async {
-    assert(_viewToken == null);
-    mojom.ViewProviderProxy viewProvider = new mojom.ViewProviderProxy.unbound();
-    shell.connectToService(url, proxy);
-    mojom.ViewToken viewToken = (await viewProvider.ptr.createView(incomingServices, outgoingServices)).viewToken;
+    mojom.ViewToken viewToken = (await response).viewToken;
     viewProvider.close();
     assert(_viewToken == null);
     _viewToken = viewToken;
@@ -125,7 +142,10 @@ class RenderChildView extends RenderBox {
   RenderChildView({
     ChildViewConnection child,
     double scale
-  }) : _child = child, _scale = scale;
+  }) : _child = child, _scale = scale {
+    if (_child != null)
+      _awaitViewToken();
+  }
 
   ChildViewConnection get child => _child;
   ChildViewConnection _child;
@@ -150,8 +170,12 @@ class RenderChildView extends RenderBox {
       // repaint now (to remove any old child view), and we need to watch for
       // the view token resolving before attempting layout.
       markNeedsPaint();
-      _child._unresolvedViewToken.then(_handleViewTokenResolved);
+      _awaitViewToken();
     }
+  }
+
+  void _awaitViewToken() {
+    _child._unresolvedViewToken.then(_handleViewTokenResolved);
   }
 
   double get scale => _scale;
@@ -182,7 +206,7 @@ class RenderChildView extends RenderBox {
   }
 
   void performLayout() {
-    if (_child != null)
+    if (_child != null && _child._viewToken != null)
       _child._layout(size: size, scale: scale).then(_handleLayoutInfoChanged);
   }
 
@@ -199,6 +223,8 @@ class RenderChildView extends RenderBox {
     if (attached && _child?._viewToken == viewToken)
       markNeedsLayout();
   }
+
+  bool hitTestSelf(Point position) => true;
 
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);

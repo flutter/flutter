@@ -15,6 +15,7 @@ class ChildView extends StatelessComponent {
   final ChildViewConnection child;
 
   Widget build(BuildContext context) {
+    assert(MediaQuery.of(context) != null);
     return new _ChildViewWidget(
       child: child,
       scale: MediaQuery.of(context).devicePixelRatio
