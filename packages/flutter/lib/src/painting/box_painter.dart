@@ -706,7 +706,7 @@ enum BoxShape {
 
   /// A circle centered in the middle of the box into which the BoxDecoration is
   /// painted. The diameter of the circle is the shortest dimension of the box,
-  /// either the width of the height, such that the circle touches the edges of
+  /// either the width or the height, such that the circle touches the edges of
   /// the box.
   circle
 }
