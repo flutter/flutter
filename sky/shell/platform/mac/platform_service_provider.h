@@ -5,6 +5,7 @@
 #ifndef SKY_SHELL_PLATFORM_MAC_PLATFORM_SERVICE_PROVIDER_H_
 #define SKY_SHELL_PLATFORM_MAC_PLATFORM_SERVICE_PROVIDER_H_
 
+#include "base/bind.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
 #include "sky/services/ns_net/network_service_impl.h"
@@ -31,14 +32,19 @@ namespace shell {
 
 class PlatformServiceProvider : public mojo::ServiceProvider {
  public:
-  PlatformServiceProvider(
-      mojo::InterfaceRequest<mojo::ServiceProvider> request);
+  using DynamicServiceProviderCallback =
+      base::Callback<void(const mojo::String& service_name,
+                          mojo::ScopedMessagePipeHandle)>;
+
+  PlatformServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request,
+                          DynamicServiceProviderCallback callback);
   ~PlatformServiceProvider() override;
 
   void ConnectToService(const mojo::String& service_name,
                         mojo::ScopedMessagePipeHandle client_handle) override;
 
  private:
+  DynamicServiceProviderCallback dynamic_service_provider_;
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
   mojo::NetworkServiceFactory network_;
 #if TARGET_OS_IPHONE

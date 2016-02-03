@@ -9,8 +9,9 @@ namespace sky {
 namespace shell {
 
 PlatformServiceProvider::PlatformServiceProvider(
-    mojo::InterfaceRequest<mojo::ServiceProvider> request)
-    : binding_(this, request.Pass()) {}
+    mojo::InterfaceRequest<mojo::ServiceProvider> request,
+    DynamicServiceProviderCallback callback)
+    : dynamic_service_provider_(callback), binding_(this, request.Pass()) {}
 
 PlatformServiceProvider::~PlatformServiceProvider() {}
 
@@ -24,8 +25,8 @@ void PlatformServiceProvider::ConnectToService(
   }
 #if TARGET_OS_IPHONE
   if (service_name == ::editing::Keyboard::Name_) {
-    keyboard_.Create(nullptr, mojo::MakeRequest<::editing::Keyboard>(
-                                  client_handle.Pass()));
+    keyboard_.Create(
+        nullptr, mojo::MakeRequest<::editing::Keyboard>(client_handle.Pass()));
     return;
   }
   if (service_name == ::media::MediaPlayer::Name_) {
@@ -79,8 +80,7 @@ void PlatformServiceProvider::ConnectToService(
   }
 #endif
 
-  LOG(INFO) << "The platform service provider cannot find a service for '"
-            << service_name.data() << "'";
+  dynamic_service_provider_.Run(service_name, client_handle.Pass());
 }
 
 }  // namespace shell

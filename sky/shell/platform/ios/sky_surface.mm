@@ -14,6 +14,7 @@
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
+#include "sky/shell/platform/ios/sky_dynamic_service_loader.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/shell.h"
@@ -86,6 +87,15 @@ class TouchMapper {
   std::map<uintptr_t, int> touch_map_;
 };
 
+static void DynamicServiceResolve(void* baton,
+                                  const mojo::String& service_name,
+                                  mojo::ScopedMessagePipeHandle handle) {
+  @autoreleasepool {
+    auto loader = reinterpret_cast<SkyDynamicServiceLoader*>(baton);
+    [loader resolveService:@(service_name.data()) handle:handle.Pass()];
+  }
+}
+
 @interface SkySurface ()<UIInputViewAudioFeedback>
 
 @end
@@ -96,6 +106,7 @@ class TouchMapper {
   sky::ViewportMetricsPtr _viewportMetrics;
 
   sky::SkyEnginePtr _engine;
+  SkyDynamicServiceLoader* _dynamic_service_loader;
   std::unique_ptr<sky::shell::ShellView> _shell_view;
   TouchMapper _touch_mapper;
 }
@@ -132,13 +143,17 @@ static std::string TracesBasePath() {
                name:UIApplicationWillResignActiveNotification
              object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-        selector:@selector(keyboardWasShown:)
-        name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+           selector:@selector(keyboardWasShown:)
+               name:UIKeyboardDidShowNotification
+             object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-         selector:@selector(keyboardWillBeHidden:)
-         name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+           selector:@selector(keyboardWillBeHidden:)
+               name:UIKeyboardWillHideNotification
+             object:nil];
   }
   return self;
 }
@@ -147,20 +162,18 @@ static std::string TracesBasePath() {
   return (gfx::AcceleratedWidget)self.layer;
 }
 
-- (void)keyboardWasShown:(NSNotification*)notification
-{
-    NSDictionary* info = [notification userInfo];
-    CGFloat bottom =
-        CGRectGetHeight([[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue]);
-    CGFloat scale = [UIScreen mainScreen].scale;
-    _viewportMetrics->physical_padding_bottom = bottom * scale;
-    _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
+- (void)keyboardWasShown:(NSNotification*)notification {
+  NSDictionary* info = [notification userInfo];
+  CGFloat bottom = CGRectGetHeight(
+      [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue]);
+  CGFloat scale = [UIScreen mainScreen].scale;
+  _viewportMetrics->physical_padding_bottom = bottom * scale;
+  _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
 }
 
-- (void)keyboardWillBeHidden:(NSNotification*)notification
-{
-    _viewportMetrics->physical_padding_bottom = 0.0;
-    _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
+- (void)keyboardWillBeHidden:(NSNotification*)notification {
+  _viewportMetrics->physical_padding_bottom = 0.0;
+  _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
 }
 
 - (void)layoutSubviews {
@@ -228,8 +241,12 @@ static std::string TracesBasePath() {
   TRACE_EVENT0("flutter", "connectToEngineAndLoad");
   self.platformView->ConnectToEngine(mojo::GetProxy(&_engine));
 
+  _dynamic_service_loader = [[SkyDynamicServiceLoader alloc] init];
+  void* baton = _dynamic_service_loader;
   mojo::ServiceProviderPtr service_provider;
-  new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider));
+  new sky::shell::PlatformServiceProvider(
+      mojo::GetProxy(&service_provider),
+      base::Bind(&DynamicServiceResolve, base::Unretained(baton)));
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->services_provided_by_embedder = service_provider.Pass();
   _engine->SetServices(services.Pass());
@@ -364,6 +381,7 @@ static std::string TracesBasePath() {
 }
 
 - (void)dealloc {
+  [_dynamic_service_loader release];
   [self notifySurfaceDestruction];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
