@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:mojo/core.dart' as core;
 
+import 'media_query.dart';
 import 'basic.dart';
 import 'framework.dart';
 
@@ -146,7 +147,7 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 /// Given a main asset and a set of variants, AssetVendor chooses the most
 /// appropriate asset for the current context. The current asset resolution
 /// strategy knows how to find the asset most closely matching the current
-/// device pixel ratio, as given by [MediaQueryData].
+/// device pixel ratio - see [MediaQuery].
 ///
 /// Main assets are presumed to match a nominal pixel ratio of 1.0. To specify
 /// assets targeting different pixel ratios, place the variant assets in
@@ -158,9 +159,11 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 /// as 1.5 and 2.0 pixel ratios (variants). The asset bundle should then contain
 /// the following assets:
 ///
+/// ```
 /// heart.png
 /// 1.5x/heart.png
 /// 2.0x/heart.png
+/// ```
 ///
 /// On a device with a 1.0 device pixel ratio, the image chosen would be
 /// heart.png; on a device with a 1.3 device pixel ratio, the image chosen
@@ -170,9 +173,11 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 /// at the equivalent level; that is, the following is also a valid bundle
 /// structure:
 ///
+/// ```
 /// icons/heart.png
 /// icons/1.5x/heart.png
 /// icons/2.0x/heart.png
+/// ```
 class AssetVendor extends StatefulComponent {
   AssetVendor({
     Key key,
