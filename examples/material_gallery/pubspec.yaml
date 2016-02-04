@@ -4,3 +4,6 @@ dependencies:
 
   flutter:
     path: ../../packages/flutter
+  flutter_sprites:
+    path: ../../packages/flutter_sprites
+  flutter_gallery_assets: '0.0.2'

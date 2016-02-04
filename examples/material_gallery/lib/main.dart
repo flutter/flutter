@@ -16,6 +16,7 @@ import 'demo/slider_demo.dart';
 import 'demo/tabs_demo.dart';
 import 'demo/time_picker_demo.dart';
 import 'demo/two_level_list_demo.dart';
+import 'demo/weathers_demo.dart';
 
 class GalleryDemo {
   GalleryDemo({ this.title, this.builder });
@@ -147,7 +148,10 @@ class GalleryHome extends StatelessComponent {
                 new GallerySection(
                   title: 'Animation',
                   image: 'assets/section_animation.png',
-                  colors: Colors.purple
+                  colors: Colors.purple,
+                  demos: <GalleryDemo>[
+                    new GalleryDemo(title: 'Weathers', builder: (BuildContext context) => new WeathersDemo())
+                  ]
                 ),
                 new GallerySection(
                   title: 'Style',
