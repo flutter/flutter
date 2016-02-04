@@ -446,7 +446,8 @@ class Block extends StatelessComponent {
     this.padding,
     this.initialScrollOffset,
     this.scrollDirection: Axis.vertical,
-    this.onScroll
+    this.onScroll,
+    this.scrollableKey
   }) : super(key: key) {
     assert(!children.any((Widget child) => child == null));
   }
@@ -456,12 +457,14 @@ class Block extends StatelessComponent {
   final double initialScrollOffset;
   final Axis scrollDirection;
   final ScrollListener onScroll;
+  final Key scrollableKey;
 
   Widget build(BuildContext context) {
     Widget contents = new BlockBody(children: children, direction: scrollDirection);
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
     return new ScrollableViewport(
+      key: scrollableKey,
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
       onScroll: onScroll,

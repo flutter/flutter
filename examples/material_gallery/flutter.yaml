@@ -1,5 +1,6 @@
 name: material_gallery
 assets:
+  - assets/ali_connors.png
   - assets/flutter_logo.png
   - assets/section_animation.png
   - assets/section_style.png
@@ -25,11 +26,17 @@ material-design-icons:
   - name: navigation/expand_less
   - name: navigation/expand_more
   - name: navigation/menu
+  - name: navigation/more_horiz
+  - name: navigation/more_vert
   - name: action/event
   - name: action/home
   - name: action/android
   - name: action/alarm
   - name: action/face
   - name: action/language
+  - name: communication/call
+  - name: communication/email
+  - name: communication/location_on
+  - name: communication/message
   - name: content/add
   - name: content/create
