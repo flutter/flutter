@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -163,6 +164,18 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     public void updateSemanticsTree(SemanticsNode[] nodes) {
         for (SemanticsNode node : nodes) {
             updateSemanticsNode(node);
+            sendAccessibilityEvent(node.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        }
+    }
+
+    private void sendAccessibilityEvent(int virtualViewId, int eventType) {
+        if (virtualViewId == 0) {
+            mOwner.sendAccessibilityEvent(eventType);
+        } else {
+            AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
+            event.setPackageName(mOwner.getContext().getPackageName());
+            event.setSource(mOwner, virtualViewId);
+            mOwner.getParent().requestSendAccessibilityEvent(mOwner, event);
         }
     }
 
@@ -250,7 +263,6 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 // since they also get marked dirty
                 invalidateGlobalGeometry();
             }
-            // TODO(ianh): Notify Android that our tree is dirty
         }
 
         // fields that we pass straight to the Android accessibility API
