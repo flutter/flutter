@@ -37,8 +37,6 @@ import org.chromium.mojom.pointer.PointerKind;
 import org.chromium.mojom.pointer.PointerPacket;
 import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
-import org.chromium.mojom.semantics.SemanticsListener;
-import org.chromium.mojom.semantics.SemanticsNode;
 import org.chromium.mojom.semantics.SemanticsServer;
 import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
@@ -298,6 +296,14 @@ public class PlatformViewAndroid extends SurfaceView
     }
 
     void runFromBundle(String path) {
+
+        if (mServiceProvider != null) {
+            mServiceProvider.close();
+        }
+        if (mDartServiceProvider != null) {
+            mDartServiceProvider.close();
+        }
+
         Core core = CoreImpl.getInstance();
         Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
@@ -348,35 +354,36 @@ public class PlatformViewAndroid extends SurfaceView
         // TODO(ianh): else, actually discard the state for exploration
     }
 
-    private FlutterSemanticsToAndroidAccessibilityBridge mAccessibilityNodeProvider;
-    private SemanticsServer.Proxy mSemanticsServer;
-
-    void ensureAccessibilityEnabled() {
-        if (mAccessibilityNodeProvider == null) {
-            mAccessibilityNodeProvider = new FlutterSemanticsToAndroidAccessibilityBridge(this);
-            Core core = CoreImpl.getInstance();
-            Pair<SemanticsServer.Proxy, InterfaceRequest<SemanticsServer>> server =
-                      SemanticsServer.MANAGER.getInterfaceRequest(core);
-            mSemanticsServer = server.first;
-            mDartServiceProvider.connectToService(SemanticsServer.MANAGER.getName(), server.second.passHandle());
-            mSemanticsServer.addSemanticsListener(mAccessibilityNodeProvider);
-        }
-        assert mSemanticsServer != null;
-    }
-
     @Override
     public AccessibilityNodeProvider getAccessibilityNodeProvider() {
         ensureAccessibilityEnabled();
         return mAccessibilityNodeProvider;
     }
 
+    private FlutterSemanticsToAndroidAccessibilityBridge mAccessibilityNodeProvider;
+
+    void ensureAccessibilityEnabled() {
+        if (mAccessibilityNodeProvider == null) {
+            mAccessibilityNodeProvider = new FlutterSemanticsToAndroidAccessibilityBridge(this, createSemanticsServer());
+        }
+    }
+
+    private SemanticsServer.Proxy createSemanticsServer() {
+        Core core = CoreImpl.getInstance();
+        Pair<SemanticsServer.Proxy, InterfaceRequest<SemanticsServer>> server =
+                  SemanticsServer.MANAGER.getInterfaceRequest(core);
+        mDartServiceProvider.connectToService(SemanticsServer.MANAGER.getName(), server.second.passHandle());
+        return server.first;
+    }
+
+    void resetAccessibilityTree() {
+        if (mAccessibilityNodeProvider != null) {
+            mAccessibilityNodeProvider.reset(createSemanticsServer());
+        }
+    }
+
     // TODO(ianh): implement touch exploration
 
     // TODO(ianh): implement accessibility focus
-
-    void resetAccessibilityTree() {
-        if (mAccessibilityNodeProvider != null)
-            mAccessibilityNodeProvider.reset();
-    }
 
 }

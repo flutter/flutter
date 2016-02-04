@@ -6,6 +6,7 @@ package org.domokit.sky.shell;
 
 import android.graphics.Rect;
 import android.opengl.Matrix;
+import android.os.Bundle;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -26,10 +27,15 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                                                           implements SemanticsListener {
     private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
     private PlatformViewAndroid mOwner;
+    private SemanticsServer.Proxy mSemanticsServer;
 
-    FlutterSemanticsToAndroidAccessibilityBridge(PlatformViewAndroid view) {
-        mOwner = view;
+    FlutterSemanticsToAndroidAccessibilityBridge(PlatformViewAndroid owner, SemanticsServer.Proxy semanticsServer) {
+        assert owner != null;
+        assert semanticsServer != null;
+        mOwner = owner;
         mTreeNodes = new HashMap<Integer, PersistentAccessibilityNode>();
+        mSemanticsServer = semanticsServer;
+        mSemanticsServer.addSemanticsListener(this);
     }
 
     @Override
@@ -71,22 +77,86 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         }
         result.setBoundsInScreen(bounds);
         result.setVisibleToUser(true);
+        result.setEnabled(true); // TODO(ianh): Expose disabled subtrees
 
-        // TODO(ianh): Add support for interactivity:
-        // private boolean canBeTapped;
-        // private boolean canBeLongPressed;
-        // private boolean canBeScrolledHorizontally;
-        // private boolean canBeScrolledVertically;
+        if (node.canBeTapped) {
+            result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+            result.setClickable(true);
+        }
+        if (node.canBeLongPressed) {
+            result.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+            result.setLongClickable(true);
+        }
+        if ((node.canBeScrolledHorizontally && !node.canBeScrolledVertically) ||
+            (!node.canBeScrolledHorizontally && node.canBeScrolledVertically)) {
+            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        }
+        if (node.canBeScrolledHorizontally || node.canBeScrolledVertically) {
+            // TODO(ianh): Figure out how to enable panning. SDK v23
+            // has AccessibilityAction.ACTION_SCROLL_LEFT and company,
+            // but earlier versions do not. Right now we only forward
+            // scroll actions if it's unidirectional.
+            result.setScrollable(true);
+        }
 
         result.setCheckable(node.hasCheckedState);
         result.setChecked(node.isChecked);
         result.setText(node.label);
+
+        // TODO(ianh): use setTraversalBefore/setTraversalAfter to set
+        // the relative order of the views. For each set of siblings,
+        // the views should be ordered top-to-bottom, tie-breaking
+        // left-to-right (right-to-left in rtl environments), height,
+        // width, and finally by list order.
 
         for (PersistentAccessibilityNode child : node.children) {
             result.addChild(mOwner, child.id);
         }
 
         return result;
+    }
+
+    @Override
+    public boolean performAction(int virtualViewId, int action, Bundle arguments) {
+        if (!mTreeNodes.containsKey(virtualViewId))
+            return false;
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_CLICK: {
+                mSemanticsServer.tap(virtualViewId);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                mSemanticsServer.longPress(virtualViewId);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
+                if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    // TODO(ianh): bidi support
+                    mSemanticsServer.scrollLeft(virtualViewId);
+                } else if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    mSemanticsServer.scrollUp(virtualViewId);
+                } else {
+                    return false;
+                }
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
+                if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    // TODO(ianh): bidi support
+                    mSemanticsServer.scrollRight(virtualViewId);
+                } else if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    mSemanticsServer.scrollDown(virtualViewId);
+                } else {
+                    return false;
+                }
+                return true;
+            }
+        }
+        // TODO(ianh): Implement left/right/up/down scrolling
+        return false;
     }
 
     @Override
@@ -114,8 +184,11 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         mTreeNodes.remove(node.id);
     }
 
-    public void reset() {
+    public void reset(SemanticsServer.Proxy newSemanticsServer) {
         mTreeNodes.clear();
+        mSemanticsServer.close();
+        mSemanticsServer = newSemanticsServer;
+        mSemanticsServer.addSemanticsListener(this);
     }
 
     private class PersistentAccessibilityNode {
