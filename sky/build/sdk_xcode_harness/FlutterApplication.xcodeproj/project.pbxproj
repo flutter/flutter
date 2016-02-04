@@ -236,7 +236,7 @@
 				9E07CF971BE8280A00BCD8DE /* Frameworks */,
 				9E07CF981BE8280A00BCD8DE /* Resources */,
 				9E07CFB91BE82D2600BCD8DE /* Embed Frameworks */,
-				9E40465C1C1B6DEC00A4B87C /* Copy Flutter Runner Executable And Resources */,
+				9E40465C1C1B6DEC00A4B87C /* Replace Fake Runner with Actual Flutter Runner */,
 			);
 			buildRules = (
 			);
@@ -336,19 +336,19 @@
 			shellScript = "${SOURCE_ROOT}/Tools/common/PackagerInvoke ${FLUTTER_APPLICATION_PATH}";
 			showEnvVarsInLog = 0;
 		};
-		9E40465C1C1B6DEC00A4B87C /* Copy Flutter Runner Executable And Resources */ = {
+		9E40465C1C1B6DEC00A4B87C /* Replace Fake Runner with Actual Flutter Runner */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Flutter Runner Executable And Resources";
+			name = "Replace Fake Runner with Actual Flutter Runner";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cp ${FLUTTER_ARCH_TOOLS_PATH}/FlutterRunner ${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/FlutterRunner";
+			shellScript = "rm ${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Runner; cp ${FLUTTER_ARCH_TOOLS_PATH}/FlutterRunner ${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Runner";
 			showEnvVarsInLog = 0;
 		};
 		9EBB2F351BF675C200177634 /* Ensure `pub get` */ = {
