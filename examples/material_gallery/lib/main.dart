@@ -12,17 +12,20 @@ import 'demo/page_selector_demo.dart';
 import 'demo/persistent_bottom_sheet_demo.dart';
 import 'demo/progress_indicator_demo.dart';
 import 'demo/toggle_controls_demo.dart';
+import 'demo/scrolling_techniques_demo.dart';
 import 'demo/slider_demo.dart';
 import 'demo/tabs_demo.dart';
 import 'demo/time_picker_demo.dart';
 import 'demo/two_level_list_demo.dart';
 import 'demo/weathers_demo.dart';
 
+typedef Widget GalleryDemoBuilder();
+
 class GalleryDemo {
   GalleryDemo({ this.title, this.builder });
 
   final String title;
-  final WidgetBuilder builder;
+  final GalleryDemoBuilder builder;
 }
 
 class GallerySection extends StatelessComponent {
@@ -36,7 +39,7 @@ class GallerySection extends StatelessComponent {
   void showDemo(GalleryDemo demo, BuildContext context, ThemeData theme) {
     Navigator.push(context, new MaterialPageRoute(
       builder: (BuildContext context) {
-        Widget child = (demo.builder == null) ? null : demo.builder(context);
+        Widget child = (demo.builder == null) ? null : demo.builder();
         return new Theme(data: theme, child: child);
       }
     ));
@@ -150,7 +153,7 @@ class GalleryHome extends StatelessComponent {
                   image: 'assets/section_animation.png',
                   colors: Colors.purple,
                   demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Weathers', builder: (BuildContext context) => new WeathersDemo())
+                    new GalleryDemo(title: 'Weathers', builder: () => new WeathersDemo())
                   ]
                 ),
                 new GallerySection(
@@ -172,18 +175,18 @@ class GalleryHome extends StatelessComponent {
                   image: 'assets/section_components.png',
                   colors: Colors.amber,
                   demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Modal Bottom Sheet', builder: (_) => new ModalBottomSheetDemo()),
-                    new GalleryDemo(title: 'Persistent Bottom Sheet', builder: (_) => new PersistentBottomSheetDemo()),
-                    new GalleryDemo(title: 'Chips', builder: (_) => new ChipDemo()),
-                    new GalleryDemo(title: 'Progress Indicators', builder: (_) => new ProgressIndicatorDemo()),
-                    new GalleryDemo(title: 'Sliders', builder: (_) => new SliderDemo()),
-                    new GalleryDemo(title: 'Selection Controls', builder: (_) => new ToggleControlsDemo()),
-                    new GalleryDemo(title: 'Dropdown Button', builder: (_) => new DropDownDemo()),
-                    new GalleryDemo(title: 'Tabs', builder: (_) => new TabsDemo()),
-                    new GalleryDemo(title: 'Expland/Collapse List Control', builder: (_) => new TwoLevelListDemo()),
-                    new GalleryDemo(title: 'Page Selector', builder: (_) => new PageSelectorDemo()),
-                    new GalleryDemo(title: 'Date Picker', builder: (_) => new DatePickerDemo()),
-                    new GalleryDemo(title: 'Time Picker', builder: (_) => new TimePickerDemo())
+                    new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
+                    new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
+                    new GalleryDemo(title: 'Chips', builder: () => new ChipDemo()),
+                    new GalleryDemo(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
+                    new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
+                    new GalleryDemo(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
+                    new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
+                    new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
+                    new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
+                    new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
+                    new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
+                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo())
                   ]
                 )
               ]
@@ -193,7 +196,10 @@ class GalleryHome extends StatelessComponent {
                 new GallerySection(
                   title: 'Patterns',
                   image: 'assets/section_patterns.png',
-                  colors: Colors.cyan
+                  colors: Colors.cyan,
+                  demos: <GalleryDemo>[
+                    new GalleryDemo(title: 'Scrolling Techniques', builder: () => new ScrollingTechniquesDemo())
+                  ]
                 ),
                 new GallerySection(
                   title: 'Usability',
