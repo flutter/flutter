@@ -15,6 +15,7 @@ import 'demo/toggle_controls_demo.dart';
 import 'demo/scrolling_techniques_demo.dart';
 import 'demo/slider_demo.dart';
 import 'demo/tabs_demo.dart';
+import 'demo/tabs_fab_demo.dart';
 import 'demo/time_picker_demo.dart';
 import 'demo/two_level_list_demo.dart';
 import 'demo/weathers_demo.dart';
@@ -186,7 +187,8 @@ class GalleryHome extends StatelessComponent {
                     new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
                     new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
                     new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
-                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo())
+                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
+                    new GalleryDemo(title: 'Floation Action Button', builder: () => new TabsFabDemo())
                   ]
                 )
               ]
