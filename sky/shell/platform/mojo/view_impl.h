@@ -49,7 +49,6 @@ class ViewImpl : public mojo::ui::View,
   mojo::StrongBinding<mojo::ui::View> binding_;
   std::string url_;
   mojo::ui::ViewManagerPtr view_manager_;
-  mojo::ui::ViewHostPtr view_host_;
   mojo::ServiceProviderPtr view_service_provider_;
   mojo::ui::InputConnectionPtr input_connection_;
   mojo::Binding<mojo::ui::InputListener> listener_binding_;
