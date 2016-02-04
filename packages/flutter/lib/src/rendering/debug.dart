@@ -87,27 +87,11 @@ void initServiceExtensions() {
   _extensionsInitialized = true;
 
   assert(() {
-    developer.registerExtension('flutter', _flutter);
     developer.registerExtension('flutter.debugPaint', _debugPaint);
     developer.registerExtension('flutter.timeDilation', _timeDilation);
 
-    // Emit an info level log message; this tells the debugger that the Flutter
-    // service extensions are registered.
-    developer.log('Flutter initialized', name: 'flutter', level: 800);
-
     return true;
   });
-}
-
-/// Just respond to the request. Clients can use the existence of this call to
-/// know that the debug client is a Flutter app.
-Future<developer.ServiceExtensionResponse> _flutter(String method, Map<String, String> parameters) {
-  return new Future<developer.ServiceExtensionResponse>.value(
-    new developer.ServiceExtensionResponse.result(JSON.encode({
-      'type': '_extensionType',
-      'method': method
-    }))
-  );
 }
 
 /// Toggle the [debugPaintSizeEnabled] setting.
