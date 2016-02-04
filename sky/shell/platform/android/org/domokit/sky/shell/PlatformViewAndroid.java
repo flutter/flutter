@@ -382,6 +382,10 @@ public class PlatformViewAndroid extends SurfaceView
         }
     }
 
+    // TODO(ianh): implement findAccessibilityNodeInfosByText()
+
+    // TODO(ianh): implement findFocus()
+
     // TODO(ianh): implement touch exploration
 
     // TODO(ianh): implement accessibility focus

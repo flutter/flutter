@@ -29,6 +29,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
     private PlatformViewAndroid mOwner;
     private SemanticsServer.Proxy mSemanticsServer;
+    private PersistentAccessibilityNode mFocusedNode;
 
     FlutterSemanticsToAndroidAccessibilityBridge(PlatformViewAndroid owner, SemanticsServer.Proxy semanticsServer) {
         assert owner != null;
@@ -111,6 +112,13 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         // left-to-right (right-to-left in rtl environments), height,
         // width, and finally by list order.
 
+        // Accessibility Focus
+        if (mFocusedNode != null && mFocusedNode.id == virtualViewId) {
+            result.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+        } else {
+            result.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+        }
+
         for (PersistentAccessibilityNode child : node.children) {
             result.addChild(mOwner, child.id);
         }
@@ -120,7 +128,8 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
 
     @Override
     public boolean performAction(int virtualViewId, int action, Bundle arguments) {
-        if (!mTreeNodes.containsKey(virtualViewId))
+        PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
+        if (node == null)
             return false;
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
@@ -132,7 +141,6 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
                 if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
                     // TODO(ianh): bidi support
                     mSemanticsServer.scrollLeft(virtualViewId);
@@ -144,7 +152,6 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
                 if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
                     // TODO(ianh): bidi support
                     mSemanticsServer.scrollRight(virtualViewId);
@@ -153,6 +160,16 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 } else {
                     return false;
                 }
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+                sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+                mFocusedNode = null;
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
+                sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
+                mFocusedNode = node;
                 return true;
             }
         }
@@ -195,6 +212,9 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         assert mTreeNodes.containsKey(node.id);
         assert mTreeNodes.get(node.id).parent == null;
         mTreeNodes.remove(node.id);
+        for (PersistentAccessibilityNode child : node.children) {
+            removePersistentNode(child);
+        }
     }
 
     public void reset(SemanticsServer.Proxy newSemanticsServer) {
@@ -290,6 +310,8 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 return;
             }
             geometryDirty = true;
+            // TODO(ianh): if we are the FlutterSemanticsToAndroidAccessibilityBridge.this.mFocusedNode
+            // then we may have to unfocus and refocus ourselves to get Android to update the focus rect
             for (PersistentAccessibilityNode child : children) {
                 child.invalidateGlobalGeometry();
             }
