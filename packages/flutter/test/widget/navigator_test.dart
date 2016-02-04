@@ -40,6 +40,29 @@ class SecondComponentState extends State<SecondComponent> {
   }
 }
 
+typedef void ExceptionCallback(exception);
+
+class ThirdComponent extends StatelessComponent {
+  ThirdComponent({ this.targetKey, this.onException });
+
+  final Key targetKey;
+  final ExceptionCallback onException;
+
+  Widget build(BuildContext context) {
+    return new GestureDetector(
+      key: targetKey,
+      onTap: () {
+        try {
+          Navigator.openTransaction(context, (_) { });
+        } catch (e) {
+          onException(e);
+        }
+      },
+      behavior: HitTestBehavior.opaque
+    );
+  }
+}
+
 void main() {
   test('Can navigator navigate to and from a stateful component', () {
     testWidgets((WidgetTester tester) {
@@ -71,6 +94,23 @@ void main() {
 
       expect(tester.findText('X'), isNotNull);
       expect(tester.findText('Y'), isNull);
+    });
+  });
+
+  test('Navigator.openTransaction fails gracefully when not found in context', () {
+    testWidgets((WidgetTester tester) {
+      Key targetKey = new Key('foo');
+      dynamic exception;
+      Widget widget = new ThirdComponent(
+        targetKey: targetKey,
+        onException: (e) {
+          exception = e;
+        }
+      );
+      tester.pumpWidget(widget);
+      tester.tap(tester.findElementByKey(targetKey));
+      expect(exception, new isInstanceOf<WidgetError>());
+      expect('$exception', startsWith('openTransaction called with a context'));
     });
   });
 }
