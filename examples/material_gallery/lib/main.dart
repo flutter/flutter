@@ -188,7 +188,7 @@ class GalleryHome extends StatelessComponent {
                     new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
                     new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
                     new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
-                    new GalleryDemo(title: 'Floation Action Button', builder: () => new TabsFabDemo())
+                    new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo())
                   ]
                 )
               ]
