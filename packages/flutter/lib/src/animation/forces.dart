@@ -10,6 +10,7 @@ export 'package:newton/newton.dart' show SpringDescription;
 abstract class Force {
   const Force();
 
+  /// Creates a new physics simulation with the given initial conditions.
   Simulation release(double position, double velocity);
 }
 
