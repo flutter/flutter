@@ -12,6 +12,7 @@
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "services/asset_bundle/asset_unpacker_job.h"
+#include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
@@ -47,6 +48,7 @@ PlatformImpl* g_platform_impl = nullptr;
 }  // namespace
 
 using mojo::asset_bundle::AssetUnpackerJob;
+using mojo::asset_bundle::ZipAssetBundle;
 
 Engine::Config::Config() {
 }
@@ -222,10 +224,11 @@ void Engine::RunFromFile(const mojo::String& main,
 
 void Engine::RunFromBundle(const mojo::String& path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
-  AssetUnpackerJob* unpacker = new AssetUnpackerJob(
-      mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));
   std::string path_str = path;
-  unpacker->Unpack(Fetch(base::FilePath(path_str)));
+  ZipAssetBundle::Create(mojo::GetProxy(&root_bundle_),
+                         base::FilePath(path_str),
+                         base::WorkerPool::GetTaskRunner(true));
+
   root_bundle_->GetAsStream(kSnapshotKey,
                             base::Bind(&Engine::RunFromSnapshotStream,
                                        weak_factory_.GetWeakPtr(), path_str));
