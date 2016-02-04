@@ -18,7 +18,7 @@ import sys
 # How to roll the dart sdk: Just change this url! We write this to the stamp
 # file after we download, and then check the stamp file for differences.
 SDK_URL_BASE = ('http://gsdview.appspot.com/dart-archive/channels/stable/raw/'
-                '1.13.0/sdk/')
+                '1.14.1/sdk/')
 
 LINUX_64_SDK = 'dartsdk-linux-x64-release.zip'
 MACOS_64_SDK = 'dartsdk-macos-x64-release.zip'
