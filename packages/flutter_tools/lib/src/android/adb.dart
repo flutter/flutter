@@ -19,6 +19,8 @@ class Adb {
 
   final String adbPath;
 
+  Map<String, String> _idToNameCache = <String, String>{};
+
   bool exists() {
     try {
       runCheckedSync([adbPath, 'version']);
@@ -85,7 +87,7 @@ class Adb {
         socket = await Socket.connect(InternetAddress.LOOPBACK_IP_V4, adbServerPort);
         printTrace('--> host:track-devices');
         socket.add(_createAdbRequest('host:track-devices'));
-        socket.listen((List<int> data) {
+        socket.listen((List<int> data) async {
           String stringResult = new String.fromCharCodes(data);
           printTrace('<-- ${stringResult.trim()}');
           _AdbServerResponse response = new _AdbServerResponse(
@@ -99,9 +101,13 @@ class Adb {
           if (devicesText.isEmpty) {
             controller.add(<AdbDevice>[]);
           } else {
-            controller.add(devicesText.split('\n').map((String deviceInfo) {
+            List<AdbDevice> devices = devicesText.split('\n').map((String deviceInfo) {
               return new AdbDevice(deviceInfo);
-            }).toList());
+            }).toList();
+
+            await _populateDeviceNames(devices);
+
+            controller.add(devices);
           }
         });
         socket.done.then((_) => controller.close());
@@ -110,6 +116,26 @@ class Adb {
     );
 
     return controller.stream;
+  }
+
+  Future _populateDeviceNames(List<AdbDevice> devices) async {
+    for (AdbDevice device in devices) {
+      if (device.modelID == null) {
+        // If we don't have a name of a device in our cache, call `device -l` to populate it.
+        if (_idToNameCache[device.id] == null)
+          await _populateDeviceCache();
+
+        // Set the device name from the cached name. Adb device notifications only
+        // have IDs, not names. We get the name by calling `listDevices()`.
+        device.modelID = _idToNameCache[device.id];
+      }
+    }
+  }
+
+  Future _populateDeviceCache() async {
+    List<AdbDevice> devices = await listDevices();
+    for (AdbDevice device in devices)
+      _idToNameCache[device.id] = device.modelID;
   }
 
   Future<String> _sendAdbServerCommand(String command) async {
@@ -151,6 +177,10 @@ class AdbDevice {
         }
       }
     }
+
+    // Convert `Nexus_7` / `Nexus_5X` style names to `Nexus 7` ones.
+    if (modelID != null)
+      modelID = modelID.replaceAll('_', ' ');
   }
 
   static final RegExp deviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
@@ -167,6 +197,10 @@ class AdbDevice {
 
   /// Device model; can be null. `XT1045`, `Nexus_7`
   String get modelID => _info['model'];
+
+  set modelID(String value) {
+    _info['model'] = value;
+  }
 
   /// Device code name; can be null. `peregrine`, `grouper`
   String get deviceCodeName => _info['device'];
