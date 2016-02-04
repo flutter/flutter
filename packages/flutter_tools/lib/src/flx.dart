@@ -18,7 +18,8 @@ import 'base/file_system.dart';
 import 'toolchain.dart';
 
 const String defaultMainPath = 'lib/main.dart';
-const String defaultAssetBase = 'packages/material_design_icons/icons';
+const String defaultAssetBasePath = '.';
+const String defaultMaterialAssetBasePath = 'packages/material_design_icons/icons';
 const String defaultManifestPath = 'flutter.yaml';
 const String defaultFlxOutputPath = 'build/app.flx';
 const String defaultSnapshotPath = 'build/snapshot_blob.bin';
@@ -43,18 +44,17 @@ class _Asset {
   _Asset({ this.source, this.base, this.key });
 }
 
-Map<_Asset, List<_Asset>> _parseAssets(Map manifestDescriptor, String manifestPath) {
+Map<_Asset, List<_Asset>> _parseAssets(Map manifestDescriptor, String assetBase) {
   Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
   if (manifestDescriptor == null)
     return result;
-  String basePath = path.dirname(path.absolute(manifestPath));
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
-      _Asset baseAsset = new _Asset(base: basePath, key: asset);
+      _Asset baseAsset = new _Asset(base: assetBase, key: asset);
       List<_Asset> variants = <_Asset>[];
       result[baseAsset] = variants;
       // Find asset variants
-      String assetPath = path.join(basePath, asset);
+      String assetPath = path.join(assetBase, asset);
       String assetFilename = path.basename(assetPath);
       Directory assetDir = new Directory(path.dirname(assetPath));
       List<FileSystemEntity> files = assetDir.listSync(recursive: true);
@@ -62,8 +62,8 @@ Map<_Asset, List<_Asset>> _parseAssets(Map manifestDescriptor, String manifestPa
         if (path.basename(entity.path) == assetFilename &&
             FileSystemEntity.isFileSync(entity.path) &&
             entity.path != assetPath) {
-          String key = path.relative(entity.path, from: basePath);
-          variants.add(new _Asset(base: basePath, key: key));
+          String key = path.relative(entity.path, from: assetBase);
+          variants.add(new _Asset(base: assetBase, key: key));
         }
       }
     }
@@ -207,7 +207,7 @@ class DirectoryResult {
 
 Future<int> build(
   Toolchain toolchain, {
-  String assetBase: defaultAssetBase,
+  String materialAssetBasePath: defaultMaterialAssetBasePath,
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
   String outputPath: defaultFlxOutputPath,
@@ -215,15 +215,10 @@ Future<int> build(
   String privateKeyPath: defaultPrivateKeyPath,
   bool precompiledSnapshot: false
 }) async {
-  printTrace('Building $outputPath');
-
   Map manifestDescriptor = _loadManifest(manifestPath);
+  String assetBasePath = path.dirname(path.absolute(manifestPath));
 
-  Map<_Asset, List<_Asset>> assets = _parseAssets(manifestDescriptor, manifestPath);
-  assets.addAll(_parseMaterialAssets(manifestDescriptor, assetBase));
-
-  Archive archive = new Archive();
-
+  ArchiveFile snapshotFile = null;
   if (!precompiledSnapshot) {
     ensureDirectoryExists(snapshotPath);
 
@@ -235,8 +230,41 @@ Future<int> build(
       return result;
     }
 
-    archive.addFile(_createSnapshotFile(snapshotPath));
+    snapshotFile = _createSnapshotFile(snapshotPath);
   }
+
+  return assemble(
+      manifestDescriptor: manifestDescriptor,
+      snapshotFile: snapshotFile,
+      assetBasePath: assetBasePath,
+      materialAssetBasePath: materialAssetBasePath,
+      outputPath: outputPath,
+      privateKeyPath: privateKeyPath
+  );
+}
+
+/// Assembles a Flutter .flx file from a pre-existing manifest descriptor
+/// and a pre-compiled snapshot.
+///
+/// This may be called by external build toolchains, so practice caution
+/// when changing this method signature (alert flutter-dev).
+Future<int> assemble({
+  Map manifestDescriptor: const {},
+  ArchiveFile snapshotFile: null,
+  String assetBasePath: defaultAssetBasePath,
+  String materialAssetBasePath: defaultMaterialAssetBasePath,
+  String outputPath: defaultFlxOutputPath,
+  String privateKeyPath: defaultPrivateKeyPath
+}) async {
+  printTrace('Building $outputPath');
+
+  Map<_Asset, List<_Asset>> assets = _parseAssets(manifestDescriptor, assetBasePath);
+  assets.addAll(_parseMaterialAssets(manifestDescriptor, materialAssetBasePath));
+
+  Archive archive = new Archive();
+
+  if (snapshotFile != null)
+    archive.addFile(snapshotFile);
 
   for (_Asset asset in assets.keys) {
     if (!_addAssetFile(archive, asset))
