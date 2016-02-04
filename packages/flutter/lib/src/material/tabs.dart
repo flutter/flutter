@@ -280,21 +280,19 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   }
 }
 
+typedef Widget TabLabelIconBuilder(BuildContext context, Color color);
+
+/// Each TabBar tab can display either a title [text], an icon, or both. An icon
+/// can be specified by either the icon or iconBuilder parameters. In either case
+/// the icon will occupy a 24x24 box above the title text. If iconBuilder is
+/// specified its color parameter is the color that an ordinary icon would have
+/// been drawn with. The color reflects that tab's selection state.
 class TabLabel {
-  const TabLabel({ this.text, this.icon });
+  const TabLabel({ this.text, this.icon, this.iconBuilder });
 
   final String text;
   final String icon;
-
-  String toString() {
-    if (text != null && icon != null)
-      return '"$text" ($icon)';
-    if (text != null)
-      return '"$text"';
-    if (icon != null)
-      return '$icon';
-    return 'EMPTY TAB LABEL';
-  }
+  final TabLabelIconBuilder iconBuilder;
 }
 
 class _Tab extends StatelessComponent {
@@ -304,7 +302,7 @@ class _Tab extends StatelessComponent {
     this.label,
     this.color
   }) : super(key: key) {
-    assert(label.text != null || label.icon != null);
+    assert(label.text != null || label.icon != null || label.iconBuilder != null);
   }
 
   final VoidCallback onSelected;
@@ -317,22 +315,30 @@ class _Tab extends StatelessComponent {
     return new Text(label.text, style: style);
   }
 
-  Widget _buildLabelIcon() {
-    assert(label.icon != null);
-    return new Icon(icon: label.icon, color: color);
+  Widget _buildLabelIcon(BuildContext context) {
+    assert(label.icon != null || label.iconBuilder != null);
+    if (label.icon != null) {
+      return new Icon(icon: label.icon, color: color);
+    } else {
+      return new SizedBox(
+        width: 24.0,
+        height: 24.0,
+        child: label.iconBuilder(context, color)
+      );
+    }
   }
 
   Widget build(BuildContext context) {
     Widget labelContent;
-    if (label.icon == null) {
+    if (label.icon == null && label.iconBuilder == null) {
       labelContent = _buildLabelText();
     } else if (label.text == null) {
-      labelContent = _buildLabelIcon();
+      labelContent = _buildLabelIcon(context);
     } else {
       labelContent = new Column(
         children: <Widget>[
           new Container(
-            child: _buildLabelIcon(),
+            child: _buildLabelIcon(context),
             margin: const EdgeDims.only(bottom: 10.0)
           ),
           _buildLabelText()
@@ -733,13 +739,14 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     TextStyle textStyle = themeData.primaryTextTheme.body1;
     IconThemeData iconTheme = themeData.primaryIconTheme;
+    Color textColor = themeData.primaryTextTheme.body1.color.withAlpha(0xB2); // 70% alpha
 
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;
     int tabIndex = 0;
     for (TabLabel label in config.labels.values) {
-      tabs.add(_toTab(label, tabIndex++, textStyle.color, indicatorColor));
-      if (label.text != null && label.icon != null)
+      tabs.add(_toTab(label, tabIndex++, textColor, indicatorColor));
+      if (label.text != null && (label.icon != null || label.iconBuilder != null))
         textAndIcons = true;
     }
 
