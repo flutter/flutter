@@ -476,18 +476,13 @@ class IOSSimulator extends Device {
     }
 
     // Step 4: Launch the updated application in the simulator
-    int launchResult = await runCommandAndStreamOutput([
+    runCheckedSync([
       xcrunPath,
       'simctl',
       'launch',
       id == defaultDeviceID ? 'booted' : id,
       app.id
     ]);
-
-    if (launchResult != 0) {
-      printError('Could not launch the freshly installed application on the simulator');
-      return false;
-    }
 
     printTrace('Successfully started ${app.name} on $id');
     return true;
