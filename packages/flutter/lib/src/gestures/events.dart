@@ -6,17 +6,30 @@ import 'dart:ui' show Point, Offset;
 
 export 'dart:ui' show Point, Offset;
 
-enum PointerDeviceKind { touch, stylus, invertedStylus, mouse }
+/// The kind of pointer device.
+enum PointerDeviceKind {
+  /// A touch-based pointer device.
+  touch,
 
-const int primaryMouseButton = 0x01;
-const int secondaryMouseButton = 0x02;
-const int primaryStylusButton = 0x02;
-const int middleMouseButton = 0x04;
-const int secondaryStylusButton = 0x04;
-const int backMouseButton = 0x08;
+  /// A pointer device with a stylus.
+  stylus,
+
+  /// A pointer device with a stylus that has been inverted.
+  invertedStylus,
+
+  /// A mouse-based pointer device.
+  mouse
+}
+
+const int kPrimaryMouseButton = 0x01;
+const int kSecondaryMouseButton = 0x02;
+const int kPrimaryStylusButton = 0x02;
+const int kMiddleMouseButton = 0x04;
+const int kSecondaryStylusButton = 0x04;
+const int kBackMouseButton = 0x08;
 const int forwardMouseButton = 0x10;
-int nthMouseButton(int number) => primaryMouseButton << (number - 1);
-int nthStylusButton(int number) => primaryStylusButton << (number - 1);
+int nthMouseButton(int number) => kPrimaryMouseButton << (number - 1);
+int nthStylusButton(int number) => kPrimaryStylusButton << (number - 1);
 
 /// Base class for touch, stylus, or mouse events.
 abstract class PointerEvent {
@@ -186,6 +199,10 @@ abstract class PointerEvent {
   }
 }
 
+/// The device has started tracking the pointer.
+///
+/// For example, the pointer might be hovering above the device, having not yet
+/// made contact with the surface of the device.
 class PointerAddedEvent extends PointerEvent {
   const PointerAddedEvent({
     Duration timeStamp: Duration.ZERO,
@@ -218,6 +235,10 @@ class PointerAddedEvent extends PointerEvent {
   );
 }
 
+/// The device is no longer tracking the pointer.
+///
+/// For example, the pointer might have drifted out of the device's hover
+/// detection range or might have been disconnected from the system entirely.
 class PointerRemovedEvent extends PointerEvent {
   const PointerRemovedEvent({
     Duration timeStamp: Duration.ZERO,
@@ -243,6 +264,7 @@ class PointerRemovedEvent extends PointerEvent {
   );
 }
 
+/// The pointer has made contact with the device.
 class PointerDownEvent extends PointerEvent {
   const PointerDownEvent({
     Duration timeStamp: Duration.ZERO,
@@ -283,6 +305,7 @@ class PointerDownEvent extends PointerEvent {
   );
 }
 
+/// The pointer has moved with respect to the device.
 class PointerMoveEvent extends PointerEvent {
   const PointerMoveEvent({
     Duration timeStamp: Duration.ZERO,
@@ -327,6 +350,7 @@ class PointerMoveEvent extends PointerEvent {
   );
 }
 
+/// The pointer has stopped making contact with the device.
 class PointerUpEvent extends PointerEvent {
   const PointerUpEvent({
     Duration timeStamp: Duration.ZERO,
@@ -361,6 +385,7 @@ class PointerUpEvent extends PointerEvent {
   );
 }
 
+/// The input from the pointer is no longer directed towards this receiver.
 class PointerCancelEvent extends PointerEvent {
   const PointerCancelEvent({
     Duration timeStamp: Duration.ZERO,

@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Whether the gesture was accepted or rejected.
 enum GestureDisposition {
+  /// This gesture was accepted as the interpretation of the user's input.
   accepted,
-  rejected
+
+  /// This gesture was rejected as the interpretation  of the user's input.
+  rejected,
 }
 
 /// Represents an object participating in an arena.
@@ -61,26 +65,33 @@ class _GestureArenaState {
 }
 
 /// The first member to accept or the last member to not to reject wins.
+///
+/// See [https://flutter.io/gestures/#gesture-disambiguation] for more
+/// information about the role this class plays in the gesture system.
 class GestureArena {
   final Map<Object, _GestureArenaState> _arenas = new Map<Object, _GestureArenaState>();
 
-  GestureArenaEntry add(Object key, GestureArenaMember member) {
-    _GestureArenaState state = _arenas.putIfAbsent(key, () => new _GestureArenaState());
+  /// Adds a new member (e.g., gesture recognizer) to the arena.
+  GestureArenaEntry add(Object arenaKey, GestureArenaMember member) {
+    _GestureArenaState state = _arenas.putIfAbsent(arenaKey, () => new _GestureArenaState());
     state.add(member);
-    return new GestureArenaEntry._(this, key, member);
+    return new GestureArenaEntry._(this, arenaKey, member);
   }
 
-  void close(Object key) {
-    _GestureArenaState state = _arenas[key];
+  /// Prevents new members from entering the arena.
+  ///
+  /// Called after the framework has finished dispatching the pointer down event.
+  void close(Object arenaKey) {
+    _GestureArenaState state = _arenas[arenaKey];
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     state.isOpen = false;
-    _tryToResolveArena(key, state);
+    _tryToResolveArena(arenaKey, state);
   }
 
-  /// Forces resolution on this arena, giving the win to the first member.
-  void sweep(Object key) {
-    _GestureArenaState state = _arenas[key];
+  /// Forces resolution of the arena, giving the win to the first member.
+  void sweep(Object arenaKey) {
+    _GestureArenaState state = _arenas[arenaKey];
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     assert(!state.isOpen);
@@ -88,13 +99,13 @@ class GestureArena {
       state.hasPendingSweep = true;
       return;  // This arena is being held for a long-lived member
     }
-    _arenas.remove(key);
+    _arenas.remove(arenaKey);
     if (!state.members.isEmpty) {
       // First member wins
-      state.members.first.acceptGesture(key);
+      state.members.first.acceptGesture(arenaKey);
       // Give all the other members the bad news
       for (int i = 1; i < state.members.length; i++)
-        state.members[i].rejectGesture(key);
+        state.members[i].rejectGesture(arenaKey);
     }
   }
 
@@ -110,58 +121,58 @@ class GestureArena {
   ///
   /// If a sweep was attempted on a held arena, the sweep will be done
   /// on release.
-  void release(Object key) {
-    _GestureArenaState state = _arenas[key];
+  void release(Object arenaKey) {
+    _GestureArenaState state = _arenas[arenaKey];
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     state.isHeld = false;
     if (state.hasPendingSweep)
-      sweep(key);
+      sweep(arenaKey);
   }
 
-  void _tryToResolveArena(Object key, _GestureArenaState state) {
-    assert(_arenas[key] == state);
+  void _tryToResolveArena(Object arenaKey, _GestureArenaState state) {
+    assert(_arenas[arenaKey] == state);
     assert(!state.isOpen);
     if (state.members.length == 1) {
-      _arenas.remove(key);
-      state.members.first.acceptGesture(key);
+      _arenas.remove(arenaKey);
+      state.members.first.acceptGesture(arenaKey);
     } else if (state.members.isEmpty) {
-      _arenas.remove(key);
+      _arenas.remove(arenaKey);
     } else if (state.eagerWinner != null) {
-      _resolveInFavorOf(key, state, state.eagerWinner);
+      _resolveInFavorOf(arenaKey, state, state.eagerWinner);
     }
   }
 
-  void _resolve(Object key, GestureArenaMember member, GestureDisposition disposition) {
-    _GestureArenaState state = _arenas[key];
+  void _resolve(Object arenaKey, GestureArenaMember member, GestureDisposition disposition) {
+    _GestureArenaState state = _arenas[arenaKey];
     if (state == null)
       return;  // This arena has already resolved.
     assert(state.members.contains(member));
     if (disposition == GestureDisposition.rejected) {
       state.members.remove(member);
-      member.rejectGesture(key);
+      member.rejectGesture(arenaKey);
       if (!state.isOpen)
-        _tryToResolveArena(key, state);
+        _tryToResolveArena(arenaKey, state);
     } else {
       assert(disposition == GestureDisposition.accepted);
       if (state.isOpen) {
         state.eagerWinner ??= member;
       } else {
-        _resolveInFavorOf(key, state, member);
+        _resolveInFavorOf(arenaKey, state, member);
       }
     }
   }
 
-  void _resolveInFavorOf(Object key, _GestureArenaState state, GestureArenaMember member) {
-    assert(state == _arenas[key]);
+  void _resolveInFavorOf(Object arenaKey, _GestureArenaState state, GestureArenaMember member) {
+    assert(state == _arenas[arenaKey]);
     assert(state != null);
     assert(state.eagerWinner == null || state.eagerWinner == member);
     assert(!state.isOpen);
-    _arenas.remove(key);
+    _arenas.remove(arenaKey);
     for (GestureArenaMember rejectedMember in state.members) {
       if (rejectedMember != member)
-        rejectedMember.rejectGesture(key);
+        rejectedMember.rejectGesture(arenaKey);
     }
-    member.acceptGesture(key);
+    member.acceptGesture(arenaKey);
   }
 }

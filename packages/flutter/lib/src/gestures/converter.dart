@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky_services/pointer/pointer.mojom.dart';
+import 'package:sky_services/pointer/pointer.mojom.dart' as mojom;
 
 import 'events.dart';
 
@@ -31,18 +31,20 @@ class _PointerState {
   Point lastPosition;
 }
 
+/// Converts from engine pointer data to framework pointer events.
 class PointerEventConverter {
   // Map from platform pointer identifiers to PointerEvent pointer identifiers.
   static Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
-  static Iterable<PointerEvent> expand(Iterable<Pointer> packet) sync* {
-    for (Pointer datum in packet) {
+  /// Expand the given packet of pointer data into a sequence of framework pointer events.
+  static Iterable<PointerEvent> expand(Iterable<mojom.Pointer> packet) sync* {
+    for (mojom.Pointer datum in packet) {
       Point position = new Point(datum.x, datum.y);
       Duration timeStamp = new Duration(microseconds: datum.timeStamp);
       assert(_pointerKindMap.containsKey(datum.kind));
       PointerDeviceKind kind = _pointerKindMap[datum.kind];
       switch (datum.type) {
-        case PointerType.down:
+        case mojom.PointerType.down:
           assert(!_pointers.containsKey(datum.pointer));
           _PointerState state = _pointers.putIfAbsent(
             datum.pointer,
@@ -84,7 +86,7 @@ class PointerEventConverter {
             tilt: datum.tilt
           );
           break;
-        case PointerType.move:
+        case mojom.PointerType.move:
           // If the service starts supporting hover pointers, then it must also
           // start sending us ADDED and REMOVED data points.
           // See also: https://github.com/flutter/flutter/issues/720
@@ -114,14 +116,14 @@ class PointerEventConverter {
             tilt: datum.tilt
           );
           break;
-        case PointerType.up:
-        case PointerType.cancel:
+        case mojom.PointerType.up:
+        case mojom.PointerType.cancel:
           assert(_pointers.containsKey(datum.pointer));
           _PointerState state = _pointers[datum.pointer];
           assert(state.down);
           assert(position == state.lastPosition);
           state.setUp();
-          if (datum.type == PointerType.up) {
+          if (datum.type == mojom.PointerType.up) {
             yield new PointerUpEvent(
               timeStamp: timeStamp,
               pointer: state.pointer,
@@ -174,10 +176,10 @@ class PointerEventConverter {
     }
   }
 
-  static const Map<PointerKind, PointerDeviceKind> _pointerKindMap = const <PointerKind, PointerDeviceKind>{
-    PointerKind.touch: PointerDeviceKind.touch,
-    PointerKind.mouse: PointerDeviceKind.mouse,
-    PointerKind.stylus: PointerDeviceKind.stylus,
-    PointerKind.invertedStylus: PointerDeviceKind.invertedStylus,
+  static const Map<mojom.PointerKind, PointerDeviceKind> _pointerKindMap = const <mojom.PointerKind, PointerDeviceKind>{
+    mojom.PointerKind.touch: PointerDeviceKind.touch,
+    mojom.PointerKind.mouse: PointerDeviceKind.mouse,
+    mojom.PointerKind.stylus: PointerDeviceKind.stylus,
+    mojom.PointerKind.invertedStylus: PointerDeviceKind.invertedStylus,
   };
 }

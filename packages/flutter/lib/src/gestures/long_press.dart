@@ -10,6 +10,7 @@ import 'recognizer.dart';
 
 typedef void GestureLongPressCallback();
 
+/// The user has pressed down at this location for a long period of time.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   LongPressGestureRecognizer({
     PointerRouter router,
