@@ -90,7 +90,7 @@ class MatrixUtils {
 
   static Point transformPoint(Matrix4 transform, Point point) {
     Vector3 position3 = new Vector3(point.x, point.y, 0.0);
-    Vector3 transformed3 = transform.transform3(position3);
+    Vector3 transformed3 = transform.perspectiveTransform(position3);
     return new Point(transformed3.x, transformed3.y);
   }
 
