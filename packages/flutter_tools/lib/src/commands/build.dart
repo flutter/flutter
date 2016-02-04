@@ -15,7 +15,7 @@ class BuildCommand extends FlutterCommand {
 
   BuildCommand() {
     argParser.addFlag('precompiled', negatable: false);
-    argParser.addOption('asset-base', defaultsTo: defaultAssetBase);
+    argParser.addOption('asset-base', defaultsTo: defaultMaterialAssetBasePath);
     argParser.addOption('compiler');
     argParser.addOption('target',
       abbr: 't',
@@ -42,7 +42,7 @@ class BuildCommand extends FlutterCommand {
 
     return await build(
       toolchain,
-      assetBase: argResults['asset-base'],
+      materialAssetBasePath: argResults['asset-base'],
       mainPath: argResults.wasParsed('main') ? argResults['main'] : argResults['target'],
       manifestPath: argResults['manifest'],
       outputPath: outputPath,
