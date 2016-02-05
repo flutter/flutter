@@ -14,6 +14,11 @@ import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../toolchain.dart';
+import 'simulator.dart';
+
+const String _ideviceinstallerInstructions =
+    'To work with iOS devices, please install ideviceinstaller.\n'
+    'If you use homebrew, you can install it with "\$ brew install ideviceinstaller".';
 
 class IOSDeviceDiscovery extends DeviceDiscovery {
   List<Device> _devices = <Device>[];
@@ -43,11 +48,6 @@ class IOSSimulatorDiscovery extends DeviceDiscovery {
 
 class IOSDevice extends Device {
   static final String defaultDeviceID = 'default_ios_id';
-
-  static const String _macInstructions =
-      'To work with iOS devices, please install ideviceinstaller. '
-      'If you use homebrew, you can install it with '
-      '"\$ brew install ideviceinstaller".';
 
   String _installerPath;
   String get installerPath => _installerPath;
@@ -123,7 +123,7 @@ class IOSDevice extends Device {
   static final Map<String, String> _commandMap = {};
   static String _checkForCommand(
     String command, [
-    String macInstructions = _macInstructions
+    String macInstructions = _ideviceinstallerInstructions
   ]) {
     return _commandMap.putIfAbsent(command, () {
       try {
@@ -263,78 +263,27 @@ class IOSDevice extends Device {
 }
 
 class IOSSimulator extends Device {
-  static final String defaultDeviceID = 'default_ios_sim_id';
-
-  static const String _macInstructions =
-      'To work with iOS devices, please install ideviceinstaller. '
-      'If you use homebrew, you can install it with '
-      '"\$ brew install ideviceinstaller".';
-
-  static String _xcrunPath = path.join('/usr', 'bin', 'xcrun');
-
-  String _iOSSimPath;
-  String get iOSSimPath => _iOSSimPath;
-
-  String get xcrunPath => _xcrunPath;
-
-  String _name;
-  String get name => _name;
-
-  factory IOSSimulator({String id, String name, String iOSSimulatorPath}) {
-    IOSSimulator device = Device.unique(id ?? defaultDeviceID, (String id) => new IOSSimulator.fromId(id));
+  factory IOSSimulator({String id, String name}) {
+    IOSSimulator device = Device.unique(id, (String id) => new IOSSimulator.fromId(id));
     device._name = name;
-    if (iOSSimulatorPath == null) {
-      iOSSimulatorPath = path.join(
-        '/Applications', 'iOS Simulator.app', 'Contents', 'MacOS', 'iOS Simulator'
-      );
-    }
-    device._iOSSimPath = iOSSimulatorPath;
     return device;
+  }
+
+  static List<IOSSimulator> getAttachedDevices() {
+    return SimControl.getConnectedDevices().map((SimDevice device) {
+      return new IOSSimulator(id: device.udid, name: device.name);
+    }).toList();
   }
 
   IOSSimulator.fromId(String id) : super.fromId(id);
 
-  static _IOSSimulatorInfo _getRunningSimulatorInfo([IOSSimulator mockIOS]) {
-    String xcrunPath = mockIOS != null ? mockIOS.xcrunPath : _xcrunPath;
-    String output = runCheckedSync([xcrunPath, 'simctl', 'list', 'devices']);
+  String _name;
+  String get name => _name;
 
-    Match match;
-    // iPhone 6s Plus (8AC808E1-6BAE-4153-BBC5-77F83814D414) (Booted)
-    Iterable<Match> matches = new RegExp(
-      r'[\W]*(.*) \(([^\)]+)\) \(Booted\)',
-      multiLine: true
-    ).allMatches(output);
-    if (matches.length > 1) {
-      // More than one simulator is listed as booted, which is not allowed but
-      // sometimes happens erroneously.  Kill them all because we don't know
-      // which one is actually running.
-      printError('Multiple running simulators were detected, '
-          'which is not supposed to happen.');
-      for (Match match in matches) {
-        if (match.groupCount > 0) {
-          // TODO(devoncarew): We're killing simulator devices inside an accessor
-          // method; we probably shouldn't be changing state here.
-          printError('Killing simulator ${match.group(1)}');
-          runSync([xcrunPath, 'simctl', 'shutdown', match.group(2)]);
-        }
-      }
-    } else if (matches.length == 1) {
-      match = matches.first;
-    }
-
-    if (match != null && match.groupCount > 0) {
-      return new _IOSSimulatorInfo(match.group(2), match.group(1));
-    } else {
-      printTrace('No running simulators found');
-      return null;
-    }
-  }
+  String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
 
   String _getSimulatorPath() {
-    String deviceID = id == defaultDeviceID ? _getRunningSimulatorInfo()?.id : id;
-    if (deviceID == null)
-      return null;
-    return path.join(_homeDirectory, 'Library', 'Developer', 'CoreSimulator', 'Devices', deviceID);
+    return path.join(_homeDirectory, 'Library', 'Developer', 'CoreSimulator', 'Devices', id);
   }
 
   String _getSimulatorAppHomeDirectory(ApplicationPackage app) {
@@ -344,59 +293,13 @@ class IOSSimulator extends Device {
     return path.join(simulatorPath, 'data');
   }
 
-  static List<IOSSimulator> getAttachedDevices([IOSSimulator mockIOS]) {
-    List<IOSSimulator> devices = [];
-    try {
-      _IOSSimulatorInfo deviceInfo = _getRunningSimulatorInfo(mockIOS);
-      if (deviceInfo != null)
-        devices.add(new IOSSimulator(id: deviceInfo.id, name: deviceInfo.name));
-    } catch (e) {
-    }
-    return devices;
-  }
-
-  Future<bool> boot() async {
-    if (!Platform.isMacOS)
-      return false;
-    if (isConnected())
-      return true;
-    if (id == defaultDeviceID) {
-      runDetached([iOSSimPath]);
-      Future<bool> checkConnection([int attempts = 20]) async {
-        if (attempts == 0) {
-          printStatus('Timed out waiting for iOS Simulator $id to boot.');
-          return false;
-        }
-        if (!isConnected()) {
-          printStatus('Waiting for iOS Simulator $id to boot...');
-          return await new Future.delayed(new Duration(milliseconds: 500),
-              () => checkConnection(attempts - 1));
-        }
-        return true;
-      }
-      return await checkConnection();
-    } else {
-      try {
-        runCheckedSync([xcrunPath, 'simctl', 'boot', id]);
-      } catch (e) {
-        printError('Unable to boot iOS Simulator $id: ', e);
-        return false;
-      }
-    }
-    return false;
-  }
-
   @override
   bool installApp(ApplicationPackage app) {
     if (!isConnected())
       return false;
 
     try {
-      if (id == defaultDeviceID) {
-        runCheckedSync([xcrunPath, 'simctl', 'install', 'booted', app.localPath]);
-      } else {
-        runCheckedSync([xcrunPath, 'simctl', 'install', id, app.localPath]);
-      }
+      SimControl.install(id, app.localPath);
       return true;
     } catch (e) {
       return false;
@@ -407,14 +310,7 @@ class IOSSimulator extends Device {
   bool isConnected() {
     if (!Platform.isMacOS)
       return false;
-    _IOSSimulatorInfo deviceInfo = _getRunningSimulatorInfo();
-    if (deviceInfo == null) {
-      return false;
-    } else if (deviceInfo.id == defaultDeviceID) {
-      return true;
-    } else {
-      return _getRunningSimulatorInfo()?.id == id;
-    }
+    return SimControl.getConnectedDevices().any((SimDevice device) => device.udid == id);
   }
 
   @override
@@ -462,29 +358,13 @@ class IOSSimulator extends Device {
     }
 
     // Step 3: Install the updated bundle to the simulator
-    int installResult = await runCommandAndStreamOutput([
-      xcrunPath,
-      'simctl',
-      'install',
-      id == defaultDeviceID ? 'booted' : id,
-      path.absolute(bundle.path)
-    ]);
-
-    if (installResult != 0) {
-      printError('Could not install the application bundle on the simulator');
-      return false;
-    }
+    SimControl.install(id, path.absolute(bundle.path));
 
     // Step 4: Launch the updated application in the simulator
-    runCheckedSync([
-      xcrunPath,
-      'simctl',
-      'launch',
-      id == defaultDeviceID ? 'booted' : id,
-      app.id
-    ]);
+    SimControl.launch(id, app.id);
 
     printTrace('Successfully started ${app.name} on $id');
+
     return true;
   }
 
@@ -621,13 +501,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       return false;
     return other.device.logFilePath == device.logFilePath;
   }
-}
-
-class _IOSSimulatorInfo {
-  final String id;
-  final String name;
-
-  _IOSSimulatorInfo(this.id, this.name);
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
