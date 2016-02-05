@@ -1,6 +1,5 @@
 name: material_gallery
 assets:
-  - assets/ali_connors.png
   - assets/flutter_logo.png
   - assets/section_animation.png
   - assets/section_style.png
@@ -8,6 +7,7 @@ assets:
   - assets/section_components.png
   - assets/section_patterns.png
   - assets/section_usability.png
+  - packages/flutter_gallery_assets/ali_connors.png
   - packages/flutter_gallery_assets/sun.png
   - packages/flutter_gallery_assets/clouds-0.png
   - packages/flutter_gallery_assets/clouds-1.png
@@ -19,20 +19,12 @@ assets:
   - packages/flutter_gallery_assets/icon-rain.png
   - packages/flutter_gallery_assets/icon-snow.png
 material-design-icons:
-  - name: navigation/arrow_drop_down
-  - name: navigation/arrow_forward
-  - name: navigation/arrow_back
-  - name: navigation/cancel
-  - name: navigation/expand_less
-  - name: navigation/expand_more
-  - name: navigation/menu
-  - name: navigation/more_horiz
-  - name: navigation/more_vert
-  - name: action/event
-  - name: action/home
-  - name: action/android
   - name: action/alarm
+  - name: action/android
+  - name: action/event
   - name: action/face
+  - name: action/home
+  - name: action/hourglass_empty
   - name: action/language
   - name: communication/call
   - name: communication/email
@@ -40,3 +32,14 @@ material-design-icons:
   - name: communication/message
   - name: content/add
   - name: content/create
+  - name: image/brightness_5
+  - name: image/brightness_7
+  - name: navigation/arrow_back
+  - name: navigation/arrow_drop_down
+  - name: navigation/arrow_forward
+  - name: navigation/cancel
+  - name: navigation/expand_less
+  - name: navigation/expand_more
+  - name: navigation/menu
+  - name: navigation/more_horiz
+  - name: navigation/more_vert

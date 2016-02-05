@@ -100,7 +100,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
             return new FlexibleSpaceBar(
               title : new Text('Ali Connors'),
               image: new AssetImage(
-                name: 'assets/ali_connors.png',
+                name: 'packages/flutter_gallery_assets/ali_connors.png',
                 fit: ImageFit.cover,
                 height: appBarHeight
               )
