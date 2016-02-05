@@ -342,13 +342,15 @@ public class PlatformViewAndroid extends SurfaceView
 
     // ACCESSIBILITY
 
+    private boolean mAccessibilityEnabled = false;
     private boolean mTouchExplorationEnabled = false;
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mAccessibilityEnabled = mAccessibilityManager.isEnabled();
         mTouchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
-        if (mAccessibilityManager.isEnabled() || mTouchExplorationEnabled)
+        if (mAccessibilityEnabled || mTouchExplorationEnabled)
           ensureAccessibilityEnabled();
         mAccessibilityManager.addAccessibilityStateChangeListener(this);
         mAccessibilityManager.addTouchExplorationStateChangeListener(this);
@@ -356,8 +358,15 @@ public class PlatformViewAndroid extends SurfaceView
 
     @Override
     public void onAccessibilityStateChanged(boolean enabled) {
-        if (enabled)
+        if (enabled) {
+            mAccessibilityEnabled = true;
             ensureAccessibilityEnabled();
+        } else {
+            mAccessibilityEnabled = false;
+        }
+        if (mAccessibilityNodeProvider != null) {
+            mAccessibilityNodeProvider.setAccessibilityEnabled(mAccessibilityEnabled);
+        }
     }
 
     @Override

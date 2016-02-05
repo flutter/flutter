@@ -29,6 +29,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
     private PlatformViewAndroid mOwner;
     private SemanticsServer.Proxy mSemanticsServer;
+    private boolean mAccessilibilyEnabled;
     private PersistentAccessibilityNode mFocusedNode;
     private PersistentAccessibilityNode mHoveredNode;
 
@@ -39,6 +40,10 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         mTreeNodes = new HashMap<Integer, PersistentAccessibilityNode>();
         mSemanticsServer = semanticsServer;
         mSemanticsServer.addSemanticsListener(this);
+    }
+
+    public void setAccessibilityEnabled(boolean accessibilityEnabled) {
+        mAccessilibilyEnabled = accessibilityEnabled;
     }
 
     @Override
@@ -213,6 +218,9 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     }
 
     private void sendAccessibilityEvent(int virtualViewId, int eventType) {
+        if (!mAccessilibilyEnabled) {
+            return;
+        }
         if (virtualViewId == 0) {
             mOwner.sendAccessibilityEvent(eventType);
         } else {
