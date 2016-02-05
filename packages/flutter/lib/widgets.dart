@@ -12,7 +12,6 @@ export 'src/widgets/child_view.dart';
 export 'src/widgets/dismissable.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/editable.dart';
-export 'src/widgets/enter_exit_transition.dart';
 export 'src/widgets/focus.dart';
 export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';
