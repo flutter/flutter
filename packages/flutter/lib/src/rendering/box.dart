@@ -98,7 +98,7 @@ class BoxConstraints extends Constraints {
   /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
-    assert(isNormalized);
+    assert(debugAssertIsNormalized);
     double horizontal = edges.left + edges.right;
     double vertical = edges.top + edges.bottom;
     double deflatedMinWidth = math.max(0.0, minWidth - horizontal);
@@ -113,7 +113,7 @@ class BoxConstraints extends Constraints {
 
   /// Returns new box constraints that remove the minimum width and height requirements.
   BoxConstraints loosen() {
-    assert(isNormalized);
+    assert(debugAssertIsNormalized);
     return new BoxConstraints(
       minWidth: 0.0,
       maxWidth: maxWidth,
@@ -154,14 +154,14 @@ class BoxConstraints extends Constraints {
   /// Returns the width that both satisfies the constraints and is as close as
   /// possible to the given width.
   double constrainWidth([double width = double.INFINITY]) {
-    assert(isNormalized);
+    assert(debugAssertIsNormalized);
     return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
   double constrainHeight([double height = double.INFINITY]) {
-    assert(isNormalized);
+    assert(debugAssertIsNormalized);
     return height.clamp(minHeight, maxHeight);
   }
 
@@ -192,9 +192,15 @@ class BoxConstraints extends Constraints {
   /// Whether there is exactly one size that satifies the constraints.
   bool get isTight => hasTightWidth && hasTightHeight;
 
+  /// Whether there is an upper bound on the maximum width.
+  bool get hasBoundedWidth => maxWidth < double.INFINITY;
+
+  /// Whether there is an upper bound on the maximum height.
+  bool get hasBoundedHeight => maxHeight < double.INFINITY;
+
   /// Whether the given size satisfies the constraints.
   bool isSatisfiedBy(Size size) {
-    assert(isNormalized);
+    assert(debugAssertIsNormalized);
     return (minWidth <= size.width) && (size.width <= maxWidth) &&
            (minHeight <= size.height) && (size.height <= maxHeight);
   }
@@ -245,8 +251,8 @@ class BoxConstraints extends Constraints {
       return b * t;
     if (b == null)
       return a * (1.0 - t);
-    assert(a.isNormalized);
-    assert(b.isNormalized);
+    assert(a.debugAssertIsNormalized);
+    assert(b.debugAssertIsNormalized);
     return new BoxConstraints(
       minWidth: ui.lerpDouble(a.minWidth, b.minWidth, t),
       maxWidth: ui.lerpDouble(a.maxWidth, b.maxWidth, t),
@@ -255,7 +261,33 @@ class BoxConstraints extends Constraints {
     );
   }
 
+  /// Returns whether the object's constraints are normalized.
+  /// Constraints are normalised if the minimums are less than or
+  /// equal to the corresponding maximums.
+  ///
+  /// For example, a BoxConstraints object with a minWidth of 100.0
+  /// and a maxWidth of 90.0 is not normalized.
+  ///
+  /// Most of the APIs on BoxConstraints expect the constraints to be
+  /// normalized and have undefined behavior when they are not. In
+  /// checked mode, many of these APIs will assert if the constraints
+  /// are not normalized.
   bool get isNormalized => minWidth <= maxWidth && minHeight <= maxHeight;
+
+  /// Same as [isNormalized] but, in checked mode, throws an exception
+  /// if isNormalized is false.
+  bool get debugAssertIsNormalized {
+    assert(() {
+      if (maxWidth < minWidth && maxHeight < minHeight)
+        throw new RenderingError('BoxConstraints has both width and height constraints non-normalized.\n$this');
+      if (maxWidth < minWidth)
+        throw new RenderingError('BoxConstraints has non-normalized width constraints.\n$this');
+      if (maxHeight < minHeight)
+        throw new RenderingError('BoxConstraints has non-normalized height constraints.\n$this');
+      return isNormalized;
+    });
+    return isNormalized;
+  }
 
   BoxConstraints normalize() {
     return new BoxConstraints(
@@ -267,13 +299,13 @@ class BoxConstraints extends Constraints {
   }
 
   bool operator ==(dynamic other) {
-    assert(isNormalized);
+    assert(debugAssertIsNormalized);
     if (identical(this, other))
       return true;
     if (other is! BoxConstraints)
       return false;
     final BoxConstraints typedOther = other;
-    assert(typedOther.isNormalized);
+    assert(typedOther.debugAssertIsNormalized);
     return minWidth == typedOther.minWidth &&
            maxWidth == typedOther.maxWidth &&
            minHeight == typedOther.minHeight &&
@@ -281,7 +313,7 @@ class BoxConstraints extends Constraints {
   }
 
   int get hashCode {
-    assert(isNormalized);
+    assert(debugAssertIsNormalized);
     return hashValues(minWidth, maxWidth, minHeight, maxHeight);
   }
 
@@ -362,7 +394,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(0.0);
   }
 
@@ -371,7 +403,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(0.0);
   }
 
@@ -380,7 +412,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(0.0);
   }
 
@@ -393,7 +425,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(0.0);
   }
 
@@ -447,7 +479,7 @@ abstract class RenderBox extends RenderObject {
       _size = new _DebugSize(_size, this, debugCanParentUseSize);
       return true;
     });
-    assert(debugDoesMeetConstraints());
+    assert(() { debugAssertDoesMeetConstraints(); return true; });
   }
 
   Rect get semanticBounds => Point.origin & size;
@@ -532,32 +564,91 @@ abstract class RenderBox extends RenderObject {
 
   /// The box constraints most recently received from the parent.
   BoxConstraints get constraints => super.constraints;
-  bool debugDoesMeetConstraints() {
-    assert(!RenderObject.debugInDebugDoesMeetConstraints);
-    RenderObject.debugInDebugDoesMeetConstraints = true;
+  void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
-    // verify that the size is not infinite
     assert(_size != null);
-    assert(() {
-      'See https://flutter.io/layout/#unbounded-constraints';
-      return !_size.isInfinite;
-    });
+    // verify that the size is not infinite
+    if (_size.isInfinite) {
+      StringBuffer information = new StringBuffer();
+      if (!constraints.hasBoundedWidth) {
+        RenderBox node = this;
+        while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
+          node = node.parent;
+        information.writeln('The nearest ancestor providing an unbounded width constraint is:');
+        information.writeln('  $node');
+        List<String> settings = <String>[];
+        node.debugDescribeSettings(settings);
+        for (String line in settings)
+        information.writeln('  $line');
+      }
+      if (!constraints.hasBoundedHeight) {
+        RenderBox node = this;
+        while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
+          node = node.parent;
+        information.writeln('The nearest ancestor providing an unbounded height constraint is:');
+        information.writeln('  $node');
+        List<String> settings = <String>[];
+        node.debugDescribeSettings(settings);
+        for (String line in settings)
+        information.writeln('  $line');
+      }
+      throw new RenderingError(
+        '$runtimeType object was given an infinite size during layout.\n'
+        'This probably means that it is a render object that tries to be\n'
+        'as big as possible, but it was put inside another render object\n'
+        'that allows its children to pick their own size.\n'
+        '$information'
+        'See https://flutter.io/layout/ for more information.'
+      );
+    }
     // verify that the size is within the constraints
-    bool result = constraints.isSatisfiedBy(_size);
-    if (!result)
-      debugPrint("${this.runtimeType} does not meet its constraints. Constraints: $constraints, size: $_size");
+    if (!constraints.isSatisfiedBy(_size)) {
+      throw new RenderingError(
+        '$runtimeType does not meet its constraints.\n'
+        'Constraints: $constraints\n'
+        'Size: $_size\n'
+        'If you are not writing your own RenderBox subclass, then this is not\n'
+        'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+      );
+    }
     // verify that the intrinsics are also within the constraints
+    assert(!RenderObject.debugCheckingIntrinsics);
+    RenderObject.debugCheckingIntrinsics = true;
     double intrinsic;
+    StringBuffer failures = new StringBuffer();
+    int failureCount = 0;
     intrinsic = getMinIntrinsicWidth(constraints);
-    assert(intrinsic == constraints.constrainWidth(intrinsic));
+    if (intrinsic != constraints.constrainWidth(intrinsic)) {
+      failures.writeln(' * getMinIntrinsicWidth() -- returned: w=$intrinsic');
+      failureCount += 1;
+    }
     intrinsic = getMaxIntrinsicWidth(constraints);
-    assert(intrinsic == constraints.constrainWidth(intrinsic));
+    if (intrinsic != constraints.constrainWidth(intrinsic)) {
+      failures.writeln(' * getMaxIntrinsicWidth() -- returned: w=$intrinsic');
+      failureCount += 1;
+    }
     intrinsic = getMinIntrinsicHeight(constraints);
-    assert(intrinsic == constraints.constrainHeight(intrinsic));
+    if (intrinsic != constraints.constrainHeight(intrinsic)) {
+      failures.writeln(' * getMinIntrinsicHeight() -- returned: h=$intrinsic');
+      failureCount += 1;
+    }
     intrinsic = getMaxIntrinsicHeight(constraints);
-    assert(intrinsic == constraints.constrainHeight(intrinsic));
-    RenderObject.debugInDebugDoesMeetConstraints = false;
-    return result;
+    if (intrinsic != constraints.constrainHeight(intrinsic)) {
+      failures.writeln(' * getMaxIntrinsicHeight() -- returned: h=$intrinsic');
+      failureCount += 1;
+    }
+    RenderObject.debugCheckingIntrinsics = false;
+    if (failures.isNotEmpty) {
+      assert(failureCount > 0);
+      throw new RenderingError(
+        'The intrinsic dimension methods of the $runtimeType class returned values that violate the given constraints.\n'
+        'The constraints were: $constraints\n'
+        'The following method${failureCount > 1 ? "s" : ""} returned values outside of those constraints:\n'
+        '$failures'
+        'If you are not writing your own RenderBox subclass, then this is not\n'
+        'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
+      );
+    }
   }
 
   void markNeedsLayout() {

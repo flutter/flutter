@@ -78,7 +78,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
-  bool debugDoesMeetConstraints() { assert(false); return false; }
+  void debugAssertDoesMeetConstraints() { assert(false); }
 
   void performResize() {
     assert(false);

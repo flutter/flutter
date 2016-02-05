@@ -350,8 +350,9 @@ class RenderBlockViewport extends RenderBlockBase {
     double result;
     if (intrinsicCallback == null) {
       assert(() {
-        'RenderBlockViewport does not support returning intrinsic dimensions if the relevant callbacks have not been specified.';
-        return RenderObject.debugInDebugDoesMeetConstraints;
+        if (!RenderObject.debugCheckingIntrinsics)
+          throw new UnsupportedError('$runtimeType does not support returning intrinsic dimensions if the relevant callbacks have not been specified.');
+        return true;
       });
       return constrainer(0.0);
     }

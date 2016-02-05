@@ -724,52 +724,45 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void visitChildren(RenderObjectVisitor visitor) { }
 
   dynamic debugOwner;
+  static int _debugPrintedExceptionCount = 0;
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     try {
       if (debugRenderingExceptionHandler != null) {
         debugRenderingExceptionHandler(this, method, exception, stack);
       } else {
-        debugPrint('-- EXCEPTION CAUGHT BY RENDERING LIBRARY -------------------------------');
-        debugPrint('The following exception was raised during $method():');
-        debugPrint('$exception');
-        debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
-        if (debugOwner != null)
-          debugPrint('This RenderObject had the following owner:\n$debugOwner');
-        int depth = 0;
-        List<String> descendants = <String>[];
-        const int maxDepth = 5;
-        void visitor(RenderObject child) {
-          descendants.add('${"  " * depth}$child');
-          depth += 1;
-          if (depth < maxDepth)
-            child.visitChildren(visitor);
-          depth -= 1;
-        }
-        visitChildren(visitor);
-        if (descendants.length > 1) {
-          debugPrint('This RenderObject had the following descendants (showing up to depth $maxDepth):');
-        } else if (descendants.length == 1) {
-          debugPrint('This RenderObject had the following child:');
-        } else {
-          debugPrint('This RenderObject has no descendants.');
-        }
-        descendants.forEach(debugPrint);
-        assert(() {
-          if (debugInDebugDoesMeetConstraints) {
-            debugPrint('This exception was thrown while debugDoesMeetConstraints() was running.');
-            debugPrint('debugDoesMeetConstraints() verifies that some invariants are not being');
-            debugPrint('violated. For example, it verifies that RenderBox objects are sized in');
-            debugPrint('a manner consistent with the constraints provided, and, in addition, that');
-            debugPrint('the getMinIntrinsicWidth(), getMaxIntrinsicWidth(), etc, functions all');
-            debugPrint('return consistent values within the same constraints.');
-            debugPrint('If you are not writing your own RenderObject subclass, then this is not');
-            debugPrint('your fault. Contact support: https://github.com/flutter/flutter/issues/new');
+        _debugPrintedExceptionCount += 1;
+        if (_debugPrintedExceptionCount == 1) {
+          debugPrint('-- EXCEPTION CAUGHT BY RENDERING LIBRARY -------------------------------');
+          debugPrint('The following exception was raised during $method():');
+          debugPrint('$exception');
+          debugPrint('The following RenderObject was being processed when the exception was fired:\n${this}');
+          if (debugOwner != null)
+            debugPrint('This RenderObject had the following owner:\n$debugOwner');
+          int depth = 0;
+          List<String> descendants = <String>[];
+          const int maxDepth = 5;
+          void visitor(RenderObject child) {
+            descendants.add('${"  " * depth}$child');
+            depth += 1;
+            if (depth < maxDepth)
+              child.visitChildren(visitor);
+            depth -= 1;
           }
-          return true;
-        });
-        debugPrint('Stack trace:');
-        debugPrint('$stack');
-        debugPrint('------------------------------------------------------------------------');
+          visitChildren(visitor);
+          if (descendants.length > 1) {
+            debugPrint('This RenderObject had the following descendants (showing up to depth $maxDepth):');
+          } else if (descendants.length == 1) {
+            debugPrint('This RenderObject had the following child:');
+          } else {
+            debugPrint('This RenderObject has no descendants.');
+          }
+          descendants.forEach(debugPrint);
+          debugPrint('Stack trace:');
+          debugPrint('$stack');
+          debugPrint('------------------------------------------------------------------------');
+        } else {
+          debugPrint('Another exception was raised: ${exception.toString().split("\n")[0]}');
+        }
       }
     } catch (exception) {
       debugPrint('(exception during exception handler: $exception)');
@@ -809,15 +802,23 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   Constraints _constraints;
   /// The layout constraints most recently supplied by the parent.
   Constraints get constraints => _constraints;
-  /// Override this function in a subclass to verify that your state matches the constraints object.
-  bool debugDoesMeetConstraints();
-  /// When true, debugDoesMeetConstraints() is currently executing.
+  /// Verify that the object's constraints are being met. Override
+  /// this function in a subclass to verify that your state matches
+  /// the constraints object. This function is only called in checked
+  /// mode. If the constraints are not met, it should assert or throw
+  /// an exception.
+  void debugAssertDoesMeetConstraints();
+
+  /// When true, debugAssertDoesMeetConstraints() is currently
+  /// executing asserts for verifying the consistent behaviour of
+  /// intrinsic dimensions methods.
   ///
-  /// This should be set by implementations of debugDoesMeetConstraints() so that
-  /// tests can selectively ignore custom layout callbacks. It should not be set
-  /// outside of debugDoesMeetConstraints() implementations and should not be used
-  /// for purposes other than tests.
-  static bool debugInDebugDoesMeetConstraints = false;
+  /// This should only be set by debugAssertDoesMeetConstraints()
+  /// implementations. It is used by tests to selectively ignore
+  /// custom layout callbacks. It should not be set outside of
+  /// debugAssertDoesMeetConstraints(), and should not be checked in
+  /// release mode (where it will always be false).
+  static bool debugCheckingIntrinsics = false;
   bool debugAncestorsAlreadyMarkedNeedsLayout() {
     if (_relayoutSubtreeRoot == null)
       return true; // we haven't yet done layout even once, so there's nothing for us to do
@@ -1022,7 +1023,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(() { _debugDoingThisResize = true; return true; });
       try {
         performResize();
-        assert(debugDoesMeetConstraints());
+        assert(() { debugAssertDoesMeetConstraints(); return true; });
       } catch (e, stack) {
         _debugReportException('performResize', e, stack);
       }
@@ -1038,7 +1039,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     try {
       performLayout();
       markNeedsSemanticsUpdate();
-      assert(debugDoesMeetConstraints());
+      assert(() { debugAssertDoesMeetConstraints(); return true; });
     } catch (e, stack) {
       _debugReportException('performLayout', e, stack);
     }
@@ -2022,4 +2023,11 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
     return result;
   }
+}
+
+/// Error thrown when the rendering library encounters a contract violation.
+class RenderingError extends AssertionError {
+  RenderingError(this.message);
+  final String message;
+  String toString() => message;
 }
