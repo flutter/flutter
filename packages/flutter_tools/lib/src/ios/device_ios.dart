@@ -557,9 +557,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   String get name => device.name;
 
-  Future<int> logs({bool clear: false}) async {
+  Future<int> logs({bool clear: false}) {
     if (!device.isConnected())
-      return 2;
+      return new Future<int>.value(2);
 
     if (clear)
       device.clearLogs();
