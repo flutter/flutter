@@ -249,6 +249,16 @@ public class PlatformViewAndroid extends SurfaceView
     }
 
     @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        boolean handled = handleAccessibilityHoverEvent(event);
+        if (!handled) {
+            // TODO(ianh): Expose hover events to the platform,
+            // implementing ADD, REMOVE, etc.
+        }
+        return handled;
+    }
+
+    @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         mMetrics.physicalWidth = width;
         mMetrics.physicalHeight = height;
@@ -332,10 +342,13 @@ public class PlatformViewAndroid extends SurfaceView
 
     // ACCESSIBILITY
 
+    private boolean mTouchExplorationEnabled = false;
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mAccessibilityManager.isEnabled() || mAccessibilityManager.isTouchExplorationEnabled())
+        mTouchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
+        if (mAccessibilityManager.isEnabled() || mTouchExplorationEnabled)
           ensureAccessibilityEnabled();
         mAccessibilityManager.addAccessibilityStateChangeListener(this);
         mAccessibilityManager.addTouchExplorationStateChangeListener(this);
@@ -349,9 +362,15 @@ public class PlatformViewAndroid extends SurfaceView
 
     @Override
     public void onTouchExplorationStateChanged(boolean enabled) {
-        if (enabled)
+        if (enabled) {
+            mTouchExplorationEnabled = true;
             ensureAccessibilityEnabled();
-        // TODO(ianh): else, actually discard the state for exploration
+        } else {
+            mTouchExplorationEnabled = false;
+            if (mAccessibilityNodeProvider != null) {
+                mAccessibilityNodeProvider.handleTouchExplorationExit();
+            }
+        }
     }
 
     @Override
@@ -382,12 +401,15 @@ public class PlatformViewAndroid extends SurfaceView
         }
     }
 
-    // TODO(ianh): implement findAccessibilityNodeInfosByText()
-
-    // TODO(ianh): implement findFocus()
-
-    // TODO(ianh): implement touch exploration
-
-    // TODO(ianh): implement accessibility focus
+    private boolean handleAccessibilityHoverEvent(MotionEvent event) {
+        if (!mTouchExplorationEnabled)
+            return false;
+        if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+            mAccessibilityNodeProvider.handleTouchExplorationExit();
+        } else {
+            mAccessibilityNodeProvider.handleTouchExploration(event.getX(), event.getY());
+        }
+        return true;
+    }
 
 }

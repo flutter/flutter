@@ -30,6 +30,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     private PlatformViewAndroid mOwner;
     private SemanticsServer.Proxy mSemanticsServer;
     private PersistentAccessibilityNode mFocusedNode;
+    private PersistentAccessibilityNode mHoveredNode;
 
     FlutterSemanticsToAndroidAccessibilityBridge(PlatformViewAndroid owner, SemanticsServer.Proxy semanticsServer) {
         assert owner != null;
@@ -177,6 +178,32 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         return false;
     }
 
+    // TODO(ianh): implement findAccessibilityNodeInfosByText()
+    // TODO(ianh): implement findFocus()
+
+    public void handleTouchExplorationExit() {
+        if (mHoveredNode != null) {
+            sendAccessibilityEvent(mHoveredNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+            mHoveredNode = null;
+        }
+    }
+
+    public void handleTouchExploration(float x, float y) {
+        if (mTreeNodes.isEmpty())
+            return;
+        assert mTreeNodes.containsKey(0);
+        PersistentAccessibilityNode newNode = mTreeNodes.get(0).hitTest(Math.round(x), Math.round(y));
+        if (newNode != mHoveredNode) {
+            if (newNode != null) {
+                sendAccessibilityEvent(newNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+            }
+            if (mHoveredNode != null) {
+                sendAccessibilityEvent(mHoveredNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+            }
+            mHoveredNode = newNode;
+        }
+    }
+
     @Override
     public void updateSemanticsTree(SemanticsNode[] nodes) {
         for (SemanticsNode node : nodes) {
@@ -212,6 +239,12 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         assert mTreeNodes.containsKey(node.id);
         assert mTreeNodes.get(node.id).parent == null;
         mTreeNodes.remove(node.id);
+        if (mFocusedNode == node) {
+            mFocusedNode = null;
+        }
+        if (mHoveredNode == node) {
+            mHoveredNode = null;
+        }
         for (PersistentAccessibilityNode child : node.children) {
             removePersistentNode(child);
         }
@@ -219,7 +252,10 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
 
     public void reset(SemanticsServer.Proxy newSemanticsServer) {
         mTreeNodes.clear();
+        mFocusedNode = null;
+        mHoveredNode = null;
         mSemanticsServer.close();
+        sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         mSemanticsServer = newSemanticsServer;
         mSemanticsServer.addSemanticsListener(this);
     }
@@ -374,6 +410,20 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 );
             }
             return globalRect;
+        }
+
+        public PersistentAccessibilityNode hitTest(int x, int y) {
+            Rect rect = getGlobalRect();
+            if (!rect.contains(x, y))
+                return null;
+            for (int index = children.size()-1; index >= 0; index -= 1) {
+                PersistentAccessibilityNode child = children.get(index);
+                PersistentAccessibilityNode result = child.hitTest(x, y);
+                if (result != null) {
+                    return result;
+                }
+            }
+            return this;
         }
     }
 
