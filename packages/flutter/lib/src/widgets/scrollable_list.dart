@@ -88,18 +88,16 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
   }
 }
 
-class ListViewport extends VirtualViewport {
-  ListViewport({
-    Key key,
+class _VirtualListViewport extends VirtualViewport {
+  _VirtualListViewport(
     this.onExtentsChanged,
-    this.startOffset: 0.0,
-    this.scrollDirection: Axis.vertical,
+    this.startOffset,
+    this.scrollDirection,
     this.itemExtent,
-    this.itemsWrap: false,
+    this.itemsWrap,
     this.padding,
-    this.overlayPainter,
-    this.children
-  }) {
+    this.overlayPainter
+  ) {
     assert(scrollDirection != null);
     assert(itemExtent != null);
   }
@@ -111,15 +109,14 @@ class ListViewport extends VirtualViewport {
   final bool itemsWrap;
   final EdgeDims padding;
   final Painter overlayPainter;
-  final Iterable<Widget> children;
 
   RenderList createRenderObject() => new RenderList(itemExtent: itemExtent);
 
-  _ListViewportElement createElement() => new _ListViewportElement(this);
+  _VirtualListViewportElement createElement() => new _VirtualListViewportElement(this);
 }
 
-class _ListViewportElement extends VirtualViewportElement<ListViewport> {
-  _ListViewportElement(ListViewport widget) : super(widget);
+class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListViewport> {
+  _VirtualListViewportElement(VirtualViewport widget) : super(widget);
 
   RenderList get renderObject => super.renderObject;
 
@@ -135,11 +132,12 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
   double get startOffsetLimit =>_startOffsetLimit;
   double _startOffsetLimit;
 
-  void updateRenderObject(ListViewport oldWidget) {
-    renderObject.scrollDirection = widget.scrollDirection;
-    renderObject.itemExtent = widget.itemExtent;
-    renderObject.padding = widget.padding;
-    renderObject.overlayPainter = widget.overlayPainter;
+  void updateRenderObject(_VirtualListViewport oldWidget) {
+    renderObject
+      ..scrollDirection = widget.scrollDirection
+      ..itemExtent = widget.itemExtent
+      ..padding = widget.padding
+      ..overlayPainter = widget.overlayPainter;
     super.updateRenderObject(oldWidget);
   }
 
@@ -160,13 +158,13 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
     final double itemExtent = widget.itemExtent;
     final EdgeDims padding = widget.padding ?? EdgeDims.zero;
 
-    double contentExtent = widget.itemExtent * length + padding.top + padding.bottom;
+    double contentExtent = length == null ? double.INFINITY : widget.itemExtent * length + padding.top + padding.bottom;
     double containerExtent = _getContainerExtentFromRenderObject();
 
     _materializedChildBase = math.max(0, (widget.startOffset - padding.top) ~/ itemExtent);
     int materializedChildLimit = math.max(0, ((widget.startOffset + containerExtent) / itemExtent).ceil());
 
-    if (!widget.itemsWrap) {
+    if (!widget.itemsWrap && length != null) {
       _materializedChildBase = math.min(length, _materializedChildBase);
       materializedChildLimit = math.min(length, materializedChildLimit);
     } else if (length == 0) {
@@ -185,4 +183,134 @@ class _ListViewportElement extends VirtualViewportElement<ListViewport> {
       widget.onExtentsChanged(_contentExtent, _containerExtent);
     }
   }
+}
+
+class ListViewport extends _VirtualListViewport with VirtualViewportIterableMixin {
+  ListViewport({
+    ExtentsChangedCallback onExtentsChanged,
+    double startOffset: 0.0,
+    Axis scrollDirection: Axis.vertical,
+    double itemExtent,
+    bool itemsWrap: false,
+    EdgeDims padding,
+    Painter overlayPainter,
+    this.children
+  }) : super(
+    onExtentsChanged,
+    startOffset,
+    scrollDirection,
+    itemExtent,
+    itemsWrap,
+    padding,
+    overlayPainter
+  );
+
+  final Iterable<Widget> children;
+}
+
+/// An optimized scrollable widget for a large number of children that are all
+/// the same size (extent) in the scrollDirection. For example for
+/// ScrollDirection.vertical itemExtent is the height of each item. Use this
+/// widget when you have a large number of children or when you are concerned
+// about offscreen widgets consuming resources.
+class ScrollableLazyList extends Scrollable {
+  ScrollableLazyList({
+    Key key,
+    double initialScrollOffset,
+    Axis scrollDirection: Axis.vertical,
+    ScrollListener onScroll,
+    SnapOffsetCallback snapOffsetCallback,
+    double snapAlignmentOffset: 0.0,
+    this.itemExtent,
+    this.itemCount,
+    this.itemBuilder,
+    this.padding,
+    this.scrollableListPainter
+  }) : super(
+    key: key,
+    initialScrollOffset: initialScrollOffset,
+    scrollDirection: scrollDirection,
+    onScroll: onScroll,
+    snapOffsetCallback: snapOffsetCallback,
+    snapAlignmentOffset: snapAlignmentOffset
+  ) {
+    assert(itemExtent != null);
+    assert(itemBuilder != null);
+  }
+
+  final double itemExtent;
+  final int itemCount;
+  final ItemListBuilder itemBuilder;
+  final EdgeDims padding;
+  final ScrollableListPainter scrollableListPainter;
+
+  ScrollableState createState() => new _ScrollableLazyListState();
+}
+
+class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+  ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
+
+  void _handleExtentsChanged(double contentExtent, double containerExtent) {
+    config.scrollableListPainter?.contentExtent = contentExtent;
+    setState(() {
+      scrollTo(scrollBehavior.updateExtents(
+        contentExtent: contentExtent,
+        containerExtent: containerExtent,
+        scrollOffset: scrollOffset
+      ));
+    });
+  }
+
+  void dispatchOnScrollStart() {
+    super.dispatchOnScrollStart();
+    config.scrollableListPainter?.scrollStarted();
+  }
+
+  void dispatchOnScroll() {
+    super.dispatchOnScroll();
+    config.scrollableListPainter?.scrollOffset = scrollOffset;
+  }
+
+  void dispatchOnScrollEnd() {
+    super.dispatchOnScrollEnd();
+    config.scrollableListPainter?.scrollEnded();
+  }
+
+  Widget buildContent(BuildContext context) {
+    return new LazyListViewport(
+      onExtentsChanged: _handleExtentsChanged,
+      startOffset: scrollOffset,
+      scrollDirection: config.scrollDirection,
+      itemExtent: config.itemExtent,
+      itemCount: config.itemCount,
+      itemBuilder: config.itemBuilder,
+      padding: config.padding,
+      overlayPainter: config.scrollableListPainter
+    );
+  }
+}
+
+class LazyListViewport extends _VirtualListViewport with VirtualViewportLazyMixin {
+  LazyListViewport({
+    ExtentsChangedCallback onExtentsChanged,
+    double startOffset: 0.0,
+    Axis scrollDirection: Axis.vertical,
+    double itemExtent,
+    EdgeDims padding,
+    Painter overlayPainter,
+    this.itemCount,
+    this.itemBuilder
+  }) : super(
+    onExtentsChanged,
+    startOffset,
+    scrollDirection,
+    itemExtent,
+    false, // Don't support wrapping yet.
+    padding,
+    overlayPainter
+  );
+
+  final int itemCount;
+  final ItemListBuilder itemBuilder;
 }

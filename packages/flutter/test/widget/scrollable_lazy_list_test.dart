@@ -18,8 +18,8 @@ void main() {
 
       Widget builder() {
         return new FlipComponent(
-          left: new HomogeneousViewport(
-            builder: (BuildContext context, int start, int count) {
+          left: new ScrollableLazyList(
+            itemBuilder: (BuildContext context, int start, int count) {
               List<Widget> result = <Widget>[];
               for (int index = start; index < start + count; index += 1) {
                 callbackTracker.add(index);
@@ -31,7 +31,6 @@ void main() {
               }
               return result;
             },
-            startOffset: 0.0,
             itemExtent: 100.0
           ),
           right: new Text('Not Today')
@@ -67,9 +66,7 @@ void main() {
       // so if our widget is 200 pixels tall, it should fit exactly 3 times.
       // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
 
-      double offset = 300.0;
-
-      ListBuilder itemBuilder = (BuildContext context, int start, int count) {
+      ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
         List<Widget> result = <Widget>[];
         for (int index = start; index < start + count; index += 1) {
           callbackTracker.add(index);
@@ -83,28 +80,27 @@ void main() {
         return result;
       };
 
-      FlipComponent testComponent;
-      Widget builder() {
-        testComponent = new FlipComponent(
-          left: new HomogeneousViewport(
-            builder: itemBuilder,
-            startOffset: offset,
-            itemExtent: 200.0
-          ),
-          right: new Text('Not Today')
-        );
-        return testComponent;
-      }
+      GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+      FlipComponent testComponent = new FlipComponent(
+        left: new ScrollableLazyList(
+          key: scrollableKey,
+          itemBuilder: itemBuilder,
+          itemExtent: 200.0,
+          initialScrollOffset: 300.0
+        ),
+        right: new Text('Not Today')
+      );
 
-      tester.pumpWidget(builder());
+      tester.pumpWidget(testComponent);
 
       expect(callbackTracker, equals([1, 2, 3, 4]));
 
       callbackTracker.clear();
 
-      offset = 400.0; // now only 3 should fit, numbered 2-4.
+      scrollableKey.currentState.scrollTo(400.0);
+      // now only 3 should fit, numbered 2-4.
 
-      tester.pumpWidget(builder());
+      tester.pumpWidget(testComponent);
 
       expect(callbackTracker, equals([2, 3, 4]));
 
@@ -120,9 +116,7 @@ void main() {
       // so if our widget is 200 pixels wide, it should fit exactly 4 times.
       // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
 
-      double offset = 300.0;
-
-      ListBuilder itemBuilder = (BuildContext context, int start, int count) {
+      ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
         List<Widget> result = <Widget>[];
         for (int index = start; index < start + count; index += 1) {
           callbackTracker.add(index);
@@ -136,29 +130,28 @@ void main() {
         return result;
       };
 
-      FlipComponent testComponent;
-      Widget builder() {
-        testComponent = new FlipComponent(
-          left: new HomogeneousViewport(
-            builder: itemBuilder,
-            startOffset: offset,
-            itemExtent: 200.0,
-            direction: Axis.horizontal
-          ),
-          right: new Text('Not Today')
-        );
-        return testComponent;
-      }
+      GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+      FlipComponent testComponent = new FlipComponent(
+        left: new ScrollableLazyList(
+          key: scrollableKey,
+          itemBuilder: itemBuilder,
+          itemExtent: 200.0,
+          initialScrollOffset: 300.0,
+          scrollDirection: Axis.horizontal
+        ),
+        right: new Text('Not Today')
+      );
 
-      tester.pumpWidget(builder());
+      tester.pumpWidget(testComponent);
 
       expect(callbackTracker, equals([1, 2, 3, 4, 5]));
 
       callbackTracker.clear();
 
-      offset = 400.0; // now only 4 should fit, numbered 2-5.
+      scrollableKey.currentState.scrollTo(400.0);
+      // now only 4 should fit, numbered 2-5.
 
-      tester.pumpWidget(builder());
+      tester.pumpWidget(testComponent);
 
       expect(callbackTracker, equals([2, 3, 4, 5]));
 

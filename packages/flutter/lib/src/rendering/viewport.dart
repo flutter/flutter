@@ -192,7 +192,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
        _callback = callback,
        _overlayPainter = overlayPainter;
 
-  int get virtualChildCount => _virtualChildCount ?? childCount;
+  int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;
   void set virtualChildCount(int value) {
     if (_virtualChildCount == value)

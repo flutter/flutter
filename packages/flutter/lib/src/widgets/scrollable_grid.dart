@@ -65,9 +65,8 @@ class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
   }
 }
 
-class GridViewport extends VirtualViewport {
+class GridViewport extends VirtualViewport with VirtualViewportIterableMixin {
   GridViewport({
-    Key key,
     this.startOffset,
     this.delegate,
     this.onExtentsChanged,

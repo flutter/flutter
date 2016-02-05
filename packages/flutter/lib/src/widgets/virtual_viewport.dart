@@ -14,7 +14,15 @@ typedef void ExtentsChangedCallback(double contentExtent, double containerExtent
 abstract class VirtualViewport extends RenderObjectWidget {
   double get startOffset;
   Axis get scrollDirection;
-  Iterable<Widget> get children;
+
+  _WidgetProvider _createWidgetProvider();
+}
+
+abstract class _WidgetProvider {
+  void didUpdateWidget(VirtualViewport oldWidget, VirtualViewport newWidget);
+  int get virtualChildCount;
+  void prepareChildren(VirtualViewportElement context, int base, int count);
+  Widget getChild(int i);
 }
 
 abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderObjectElement<T> {
@@ -38,10 +46,12 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
       visitor(child);
   }
 
+  _WidgetProvider _widgetProvider;
+
   void mount(Element parent, dynamic newSlot) {
+    _widgetProvider = widget._createWidgetProvider();
+    _widgetProvider.didUpdateWidget(null, widget);
     super.mount(parent, newSlot);
-    _iterator = null;
-    _widgets = <Widget>[];
     renderObject.callback = layout;
     updateRenderObject(null);
   }
@@ -52,11 +62,8 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   }
 
   void update(T newWidget) {
-    if (widget.children != newWidget.children) {
-      _iterator = null;
-      _widgets = <Widget>[];
-    }
     T oldWidget = widget;
+    _widgetProvider.didUpdateWidget(oldWidget, newWidget);
     super.update(newWidget);
     updateRenderObject(oldWidget);
     if (!renderObject.needsLayout)
@@ -75,7 +82,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   }
 
   void updateRenderObject(T oldWidget) {
-    renderObject.virtualChildCount = widget.children.length;
+    renderObject.virtualChildCount = _widgetProvider.virtualChildCount;
 
     if (startOffsetBase != null) {
       _updatePaintOffset();
@@ -111,37 +118,16 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     BuildableElement.lockState(_materializeChildren, building: true);
   }
 
-  Iterator<Widget> _iterator;
-  List<Widget> _widgets;
-
-  void _populateWidgets(int limit) {
-    if (limit <= _widgets.length)
-      return;
-    if (widget.children is List<Widget>) {
-      _widgets = widget.children;
-      return;
-    }
-    _iterator ??= widget.children.iterator;
-    while (_widgets.length < limit) {
-      bool moved = _iterator.moveNext();
-      assert(moved);
-      Widget current = _iterator.current;
-      assert(current != null);
-      _widgets.add(current);
-    }
-  }
-
   void _materializeChildren() {
     int base = materializedChildBase;
     int count = materializedChildCount;
-    int length = renderObject.virtualChildCount;
     assert(base != null);
     assert(count != null);
-    _populateWidgets(base < 0 ? length : math.min(length, base + count));
+    _widgetProvider.prepareChildren(this, base, count);
     List<Widget> newWidgets = new List<Widget>(count);
     for (int i = 0; i < count; ++i) {
       int childIndex = base + i;
-      Widget child = _widgets[(childIndex % length).abs()];
+      Widget child = _widgetProvider.getChild(childIndex);
       Key key = new ValueKey(child.key ?? childIndex);
       newWidgets[i] = new RepaintBoundary(key: key, child: child);
     }
@@ -160,5 +146,86 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   void removeChildRenderObject(RenderObject child) {
     assert(child.parent == renderObject);
     renderObject.remove(child);
+  }
+}
+
+abstract class VirtualViewportIterableMixin extends VirtualViewport {
+  Iterable<Widget> get children;
+
+  _IterableWidgetProvider _createWidgetProvider() => new _IterableWidgetProvider();
+}
+
+class _IterableWidgetProvider extends _WidgetProvider {
+  int _length;
+  Iterator<Widget> _iterator;
+  List<Widget> _widgets;
+
+  void didUpdateWidget(VirtualViewportIterableMixin oldWidget, VirtualViewportIterableMixin newWidget) {
+    if (oldWidget == null || newWidget.children != oldWidget.children) {
+      _iterator = null;
+      _widgets = <Widget>[];
+      _length = newWidget.children.length;
+    }
+  }
+
+  int get virtualChildCount => _length;
+
+  void prepareChildren(VirtualViewportElement context, int base, int count) {
+    int limit = base < 0 ? _length : math.min(_length, base + count);
+    if (limit <= _widgets.length)
+      return;
+    VirtualViewportIterableMixin widget = context.widget;
+    if (widget.children is List<Widget>) {
+      _widgets = widget.children;
+      return;
+    }
+    _iterator ??= widget.children.iterator;
+    while (_widgets.length < limit) {
+      bool moved = _iterator.moveNext();
+      assert(moved);
+      Widget current = _iterator.current;
+      assert(current != null);
+      _widgets.add(current);
+    }
+  }
+
+  Widget getChild(int i) => _widgets[(i % _length).abs()];
+}
+
+typedef List<Widget> ItemListBuilder(BuildContext context, int start, int count);
+
+abstract class VirtualViewportLazyMixin extends VirtualViewport {
+  int get itemCount;
+  ItemListBuilder get itemBuilder;
+
+  _LazyWidgetProvider _createWidgetProvider() => new _LazyWidgetProvider();
+}
+
+class _LazyWidgetProvider extends _WidgetProvider {
+  int _length;
+  int _base;
+  List<Widget> _widgets;
+
+  void didUpdateWidget(VirtualViewportLazyMixin oldWidget, VirtualViewportLazyMixin newWidget) {
+    if (_length != newWidget.itemCount || oldWidget?.itemBuilder != newWidget.itemBuilder) {
+      _length = newWidget.itemCount;
+      _base = null;
+      _widgets = null;
+    }
+  }
+
+  int get virtualChildCount => _length;
+
+  void prepareChildren(VirtualViewportElement context, int base, int count) {
+    if (_widgets != null && _widgets.length == count && _base == base)
+      return;
+    VirtualViewportLazyMixin widget = context.widget;
+    _base = base;
+    _widgets = widget.itemBuilder(context, base, count);
+  }
+
+  Widget getChild(int i) {
+    int n = _length ?? _widgets.length;
+    return _widgets[(i % n).abs()];
   }
 }
