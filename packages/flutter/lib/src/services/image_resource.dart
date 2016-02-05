@@ -22,7 +22,7 @@ typedef void ImageListener(ImageInfo image);
 /// image object might change over time, either because the image is animating
 /// or because the underlying image resource was mutated.
 class ImageResource {
-  ImageResource(this._futureImage) {
+  ImageResource(this._futureImage, { this.scale : 1.0 }) {
     _futureImage.then(_handleImageLoaded, onError: (exception, stack) => _handleImageError('Failed to load image:', exception, stack));
   }
 

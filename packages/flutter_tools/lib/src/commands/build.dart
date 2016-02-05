@@ -4,8 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/flx.dart' as flx;
+
 import '../base/context.dart';
-import '../flx.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 
@@ -15,19 +16,19 @@ class BuildCommand extends FlutterCommand {
 
   BuildCommand() {
     argParser.addFlag('precompiled', negatable: false);
-    argParser.addOption('asset-base', defaultsTo: defaultMaterialAssetBasePath);
+    argParser.addOption('asset-base', defaultsTo: flx.defaultMaterialAssetBasePath);
     argParser.addOption('compiler');
     argParser.addOption('target',
       abbr: 't',
-      defaultsTo: defaultMainPath,
+      defaultsTo: flx.defaultMainPath,
       help: 'Target app path / main entry-point file.'
     );
     // TODO(devoncarew): Remove this once the xcode project is switched over.
     argParser.addOption('main', hide: true);
-    argParser.addOption('manifest', defaultsTo: defaultManifestPath);
-    argParser.addOption('private-key', defaultsTo: defaultPrivateKeyPath);
-    argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
-    argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
+    argParser.addOption('manifest', defaultsTo: flx.defaultManifestPath);
+    argParser.addOption('private-key', defaultsTo: flx.defaultPrivateKeyPath);
+    argParser.addOption('output-file', abbr: 'o', defaultsTo: flx.defaultFlxOutputPath);
+    argParser.addOption('snapshot', defaultsTo: flx.defaultSnapshotPath);
   }
 
   Future<int> runInProject() async {
@@ -40,7 +41,7 @@ class BuildCommand extends FlutterCommand {
 
     String outputPath = argResults['output-file'];
 
-    return await build(
+    return await flx.build(
       toolchain,
       materialAssetBasePath: argResults['asset-base'],
       mainPath: argResults.wasParsed('main') ? argResults['main'] : argResults['target'],

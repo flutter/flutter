@@ -1675,6 +1675,7 @@ class _ImageListenerState extends State<RawImageResource> {
   void _handleImageChanged(ImageInfo resolvedImage) {
     setState(() {
       _resolvedImage = resolvedImage;
+      _scale = config.image.scale;
     });
   }
 

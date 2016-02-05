@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/flx.dart' as flx;
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
@@ -12,7 +13,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../build_configuration.dart';
 import '../device.dart';
-import '../flx.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 import 'apk.dart';
@@ -44,7 +44,7 @@ abstract class StartCommandBase extends FlutterCommand {
         help: 'Start tracing during startup.');
     argParser.addOption('target',
         abbr: 't',
-        defaultsTo: defaultMainPath,
+        defaultsTo: flx.defaultMainPath,
         help: 'Target app path / main entry-point file.');
     argParser.addOption('route',
         help: 'Which route to load when starting the app.');

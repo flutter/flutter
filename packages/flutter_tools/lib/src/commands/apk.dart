@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_tools/flx.dart' as flx;
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import 'package:xml/xml.dart' as xml;
@@ -18,7 +19,6 @@ import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
-import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 import 'start.dart';
