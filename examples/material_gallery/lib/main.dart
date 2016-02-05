@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';// show timeDilation;
 
 import 'demo/chip_demo.dart';
 import 'demo/date_picker_demo.dart';
@@ -48,7 +49,7 @@ class GallerySection extends StatelessComponent {
 
   void showDemos(BuildContext context) {
     final theme = new ThemeData(
-      brightness: ThemeBrightness.light,
+      brightness: Theme.of(context).brightness,
       primarySwatch: colors
     );
     final appBarHeight = 200.0;
@@ -85,40 +86,40 @@ class GallerySection extends StatelessComponent {
 
   Widget build (BuildContext context) {
     final theme = new ThemeData(
-      brightness: ThemeBrightness.dark,
+      brightness: Theme.of(context).brightness,
       primarySwatch: colors
     );
-    return new Theme(
-      data: theme,
-      child: new Flexible(
-        child: new GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () { showDemos(context); },
-          child: new Container(
-            height: 256.0,
-            margin: const EdgeDims.all(4.0),
-            decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
-            child: new Column(
-              children: <Widget>[
-                new Flexible(
-                  child: new Padding(
-                    padding: const EdgeDims.symmetric(horizontal: 12.0),
-                    child: new AssetImage(
-                      name: image,
-                      alignment: const FractionalOffset(0.5, 0.5),
-                      fit: ImageFit.contain
-                    )
-                  )
-                ),
-                new Padding(
-                  padding: const EdgeDims.all(16.0),
-                  child: new Align(
-                    alignment: const FractionalOffset(0.0, 1.0),
-                    child: new Text(title, style: theme.text.title)
+    final titleTextStyle = theme.text.title.copyWith(
+      color: theme.brightness == ThemeBrightness.dark ?  Colors.black : Colors.white
+    );
+    return new Flexible(
+      child: new GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () { showDemos(context); },
+        child: new Container(
+          height: 256.0,
+          margin: const EdgeDims.all(4.0),
+          decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+          child: new Column(
+            children: <Widget>[
+              new Flexible(
+                child: new Padding(
+                  padding: const EdgeDims.symmetric(horizontal: 12.0),
+                  child: new AssetImage(
+                    name: image,
+                    alignment: const FractionalOffset(0.5, 0.5),
+                    fit: ImageFit.contain
                   )
                 )
-              ]
-            )
+              ),
+              new Padding(
+                padding: const EdgeDims.all(16.0),
+                child: new Align(
+                  alignment: const FractionalOffset(0.0, 1.0),
+                  child: new Text(title, style: titleTextStyle)
+                )
+              )
+            ]
           )
         )
       )
@@ -126,7 +127,20 @@ class GallerySection extends StatelessComponent {
   }
 }
 
-class GalleryHome extends StatelessComponent {
+class GalleryHome extends StatefulComponent {
+  GalleryHomeState createState() => new GalleryHomeState();
+}
+
+class GalleryHomeState extends State<GalleryHome> {
+  void _changeTheme(BuildContext context, bool value) {
+    GalleryApp.of(context).lightTheme = value;
+  }
+
+  void _toggleAnimationSpeed() {
+    setState((){
+      timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
+    });
+  }
 
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -142,6 +156,58 @@ class GalleryHome extends StatelessComponent {
             )
           );
         }
+      ),
+      drawer: new Drawer(
+        child: new Block(
+          children: <Widget>[
+            new DrawerHeader(child: new Text('Flutter Gallery')),
+            new DrawerItem(
+              icon: 'image/brightness_5',
+              onPressed: () { _changeTheme(context, true); },
+              selected: GalleryApp.of(context).lightTheme,
+              child: new Row(
+                children: <Widget>[
+                  new Flexible(child: new Text('Light')),
+                  new Radio<bool>(
+                    value: true,
+                    groupValue: GalleryApp.of(context).lightTheme,
+                    onChanged: (bool value) { _changeTheme(context, value); }
+                  )
+                ]
+              )
+            ),
+            new DrawerItem(
+              icon: 'image/brightness_7',
+              onPressed: () { _changeTheme(context, false); },
+              selected: !GalleryApp.of(context).lightTheme,
+              child: new Row(
+                children: <Widget>[
+                  new Flexible(child: new Text('Dark')),
+                  new Radio<bool>(
+                    value: false,
+                    groupValue: GalleryApp.of(context).lightTheme,
+                    onChanged: (bool value) { _changeTheme(context, value); }
+                  )
+                ]
+              )
+            ),
+            new DrawerDivider(),
+            new DrawerItem(
+              icon: 'action/hourglass_empty',
+              selected: timeDilation != 1.0,
+              onPressed: () { _toggleAnimationSpeed(); },
+              child: new Row(
+                children: <Widget>[
+                  new Flexible(child: new Text('Animate Slowly')),
+                  new Checkbox(
+                    value: timeDilation != 1.0,
+                    onChanged: (bool value) { _toggleAnimationSpeed(); }
+                  )
+                ]
+              )
+            )
+          ]
+        )
       ),
       body: new Padding(
         padding: const EdgeDims.all(4.0),
@@ -217,11 +283,32 @@ class GalleryHome extends StatelessComponent {
   }
 }
 
+class GalleryApp extends StatefulComponent {
+  static GalleryAppState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<GalleryAppState>());
+
+  GalleryAppState createState() => new GalleryAppState();
+}
+
+class GalleryAppState extends State<GalleryApp> {
+  bool _lightTheme = true;
+  bool get lightTheme => _lightTheme;
+  void set lightTheme(bool value) {
+    setState(() {
+      _lightTheme = value;
+    });
+  }
+
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: 'Flutter Material Gallery',
+      theme: lightTheme ? new ThemeData.light() : new ThemeData.dark(),
+      routes: {
+        '/': (RouteArguments args) => new GalleryHome()
+      }
+    );
+  }
+}
+
 void main() {
-  runApp(new MaterialApp(
-    title: 'Material Gallery',
-    routes: {
-      '/': (RouteArguments args) => new GalleryHome()
-    }
-  ));
+  runApp(new GalleryApp());
 }
