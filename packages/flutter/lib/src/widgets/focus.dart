@@ -69,6 +69,28 @@ class _FocusScope extends InheritedWidget {
   }
 }
 
+/// A scope for managing the focus state of descendant widgets.
+///
+/// The focus represents where the user's attention is directed. If the use
+/// interacts with the system in a way that isn't visually directed at a
+/// particular widget (e.g., by typing on a keyboard), the interaction is
+/// directed to the currently focused widget.
+///
+/// The focus system consists of a tree of Focus widgets, which is embedded in
+/// the widget tree. Focus widgets themselves can be focused in their enclosing
+/// Focus widget, which means that their subtree is the one that has the current
+/// focus. For example, a dialog creates a Focus widget to maintain focus
+/// within the dialog.  When the dialog closes, its Focus widget is removed from
+/// the tree and focus is restored to whichever other part of the Focus tree
+/// previously had focus.
+///
+/// In addition to tracking which enclosed Focus widget has focus, each Focus
+/// widget also tracks a GlobalKey, which represents the currently focused
+/// widget in this part of the focus tree. If this Focus widget is the currently
+/// focused subtree of the focus system (i.e., the path from it to the root is
+/// focused at each level and it hasn't focused any of its enclosed Focus
+/// widgets), then the widget this this global key actually has the focus in the
+/// entire system.
 class Focus extends StatefulComponent {
   Focus({
     GlobalKey key,
@@ -79,8 +101,15 @@ class Focus extends StatefulComponent {
 
   final Widget child;
 
+  /// The key that currently has focus globally in the entire focus tree.
+  ///
+  /// This field is always null except in checked mode.
   static GlobalKey debugOnlyFocusedKey;
 
+  /// Whether the focus is current at the given context.
+  ///
+  /// If autofocus is true, the given context will become focused if no other
+  /// widget is already focused.
   static bool at(BuildContext context, { bool autofocus: false }) {
     assert(context != null);
     assert(context.widget != null);
@@ -134,6 +163,8 @@ class Focus extends StatefulComponent {
     }
   }
 
+  /// Unfocuses the currently focused widget (if any) in the Focus that most
+  /// tightly encloses the given context.
   static void clear(BuildContext context) {
     _FocusScope focusScope = context.ancestorWidgetOfExactType(_FocusScope);
     if (focusScope != null)

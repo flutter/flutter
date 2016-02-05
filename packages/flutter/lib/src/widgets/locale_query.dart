@@ -7,6 +7,7 @@ import 'framework.dart';
 /// Superclass for locale-specific data provided by the application.
 class LocaleQueryData { }
 
+/// Establishes a subtree in which locale queries resolve to the given data.
 class LocaleQuery<T extends LocaleQueryData> extends InheritedWidget {
   LocaleQuery({
     Key key,
@@ -16,6 +17,7 @@ class LocaleQuery<T extends LocaleQueryData> extends InheritedWidget {
     assert(child != null);
   }
 
+  /// The locale data for this subtree.
   final T data;
 
   /// The data from the closest instance of this class that encloses the given context.

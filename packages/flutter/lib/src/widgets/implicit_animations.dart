@@ -9,14 +9,14 @@ import 'framework.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
-/// An animated value that interpolates [BoxConstraint]s.
+/// An interpolation between two [BoxConstraint]s.
 class BoxConstraintsTween extends Tween<BoxConstraints> {
   BoxConstraintsTween({ BoxConstraints begin, BoxConstraints end }) : super(begin: begin, end: end);
 
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
-/// An animated value that interpolates [Decoration]s.
+/// An interpolation between two [Decoration]s.
 class DecorationTween extends Tween<Decoration> {
   DecorationTween({ Decoration begin, Decoration end }) : super(begin: begin, end: end);
 
@@ -29,14 +29,14 @@ class DecorationTween extends Tween<Decoration> {
   }
 }
 
-/// An animated value that interpolates [EdgeDims].
+/// An interpolation between two [EdgeDims]s.
 class EdgeDimsTween extends Tween<EdgeDims> {
   EdgeDimsTween({ EdgeDims begin, EdgeDims end }) : super(begin: begin, end: end);
 
   EdgeDims lerp(double t) => EdgeDims.lerp(begin, end, t);
 }
 
-/// An animated value that interpolates [Matrix4]s.
+/// An interpolation between two [Matrix4]s.
 ///
 /// Currently this class works only for translations.
 class Matrix4Tween extends Tween<Matrix4> {
@@ -78,12 +78,17 @@ abstract class AnimatedWidgetBase extends StatefulComponent {
   }
 }
 
+/// Used by [AnimatedWidgetBaseState].
 typedef Tween<T> TweenConstructor<T>(T targetValue);
+
+/// Used by [AnimatedWidgetBaseState].
 typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
+/// A base class for widgets with implicit animations.
 abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends State<T> {
   AnimationController _controller;
 
+  /// The animation driving this widget's implicit animations.
   Animation<double> get animation => _animation;
   Animation<double> _animation;
 

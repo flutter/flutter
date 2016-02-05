@@ -37,6 +37,10 @@ class _StorageEntryIdentifier {
   }
 }
 
+/// A storage bucket associated with a page in an app.
+///
+/// Useful for storing per-page state that persists across navigations from one
+/// page to another.
 class PageStorageBucket {
   _StorageEntryIdentifier _computeStorageIdentifier(BuildContext context) {
     _StorageEntryIdentifier result = new _StorageEntryIdentifier();
@@ -62,15 +66,22 @@ class PageStorageBucket {
   }
 
   Map<_StorageEntryIdentifier, dynamic> _storage;
+
+  /// Write the given data into this page storage bucket using an identifier
+  /// computed from the given context.
   void writeState(BuildContext context, dynamic data) {
     _storage ??= <_StorageEntryIdentifier, dynamic>{};
     _storage[_computeStorageIdentifier(context)] = data;
   }
+
+  /// Read given data from into this page storage bucket using an identifier
+  /// computed from the given context.
   dynamic readState(BuildContext context) {
     return _storage != null ? _storage[_computeStorageIdentifier(context)] : null;
   }
 }
 
+/// Establishes a page storage bucket for this widget subtree.
 class PageStorage extends StatelessComponent {
   PageStorage({
     Key key,
@@ -79,6 +90,8 @@ class PageStorage extends StatelessComponent {
   }) : super(key: key);
 
   final Widget child;
+
+  /// The page storage bucket to use for this subtree.
   final PageStorageBucket bucket;
 
   /// The bucket from the closest instance of this class that encloses the given context.

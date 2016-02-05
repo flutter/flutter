@@ -5,11 +5,18 @@
 import 'framework.dart';
 import 'overlay.dart';
 
+/// An abstraction for an entry managed by a [Navigator].
+///
+/// This class defines an abstract interface between the navigator and the
+/// "routes" that are pushed on and popped off the navigator. Most routes have
+/// visual affordances, which they place in the navigators [Overlay] using one
+/// or more [OverlayEntry] objects.
 abstract class Route<T> {
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
 
+  /// The overlay entries for this route.
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
 
   /// Called when the route is inserted into the navigator.
@@ -66,6 +73,7 @@ abstract class Route<T> {
   }
 }
 
+/// Data that might be useful in constructing a [Route].
 class RouteSettings {
   const RouteSettings({
     this.name,
@@ -73,8 +81,20 @@ class RouteSettings {
     this.isInitialRoute: false
   });
 
+  /// The name of the route (e.g., "/settings").
   final String name;
+
+  /// The set of keys that are most relevant for constructoring [Hero]
+  /// transitions. For example, if the current route contains a list of music
+  /// albums and the user triggered this navigation by tapping one of the
+  /// albums, the most valuable album cover is the one associated with the album
+  /// the user tapped and is the one that should heroically transition when
+  /// opening the details page for that album.
   final Set<Key> mostValuableKeys;
+
+  /// Whether this route is the very first route being pushed onto this [Navigator].
+  ///
+  /// The initial route typically skips any entrance transition to speed startup.
   final bool isInitialRoute;
 
   String toString() {
@@ -88,17 +108,33 @@ class RouteSettings {
   }
 }
 
+/// Creates a route for the given route settings.
 typedef Route RouteFactory(RouteSettings settings);
+
+/// A callback in during which you can perform a number of navigator operations (e.g., pop, push) that happen atomically.
 typedef void NavigatorTransactionCallback(NavigatorTransaction transaction);
 
+/// An interface for observing the behavior of a [Navigator].
 class NavigatorObserver {
   /// The navigator that the observer is observing, if any.
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
+
+  /// The [Navigator] pushed the given route.
   void didPush(Route route, Route previousRoute) { }
+
+  /// THe [Navigator] popped the given route.
   void didPop(Route route, Route previousRoute) { }
 }
 
+/// Manages a set of child widgets with a stack discipline.
+///
+/// Many apps have a navigator near the top of their widget hierarchy in order
+/// to display their logical history using an [Overlay] with the most recently
+/// visited pages visually on top of the older pages. Using this pattern lets
+/// the navigator visually transition from one page to another by the widgets
+/// around in the overlay. Similarly, the navigator can be used to show a dialog
+/// by positioning the dialog widget above the current page.
 class Navigator extends StatefulComponent {
   Navigator({
     Key key,
@@ -110,25 +146,72 @@ class Navigator extends StatefulComponent {
     assert(onGenerateRoute != null);
   }
 
+  /// The name of the first route to show.
   final String initialRoute;
+
+  /// Called to generate a route for a given [RouteSettings].
   final RouteFactory onGenerateRoute;
+
+  /// Called when [onGenerateRoute] fails to generate a route.
+  ///
+  /// This callback is typically used for error handling. For example, this
+  /// callback might always generate a "not found" page that describes the route
+  /// that wasn't found.
+  ///
+  /// Unknown routes can arise either from errors in the app or from external
+  /// requests to push routes, such as from Android intents.
   final RouteFactory onUnknownRoute;
+
+  /// An observer for this navigator.
   final NavigatorObserver observer;
 
+  /// The default name for the initial route.
   static const String defaultRouteName = '/';
 
+  /// Push a named route onto the navigator that most tightly encloses the given context.
+  ///
+  /// The route name will be passed to that navigator's [onGenerateRoute]
+  /// callback. The returned route will be pushed into the navigator. The set of
+  /// most valuable keys will be used to construct an appropriate [Hero] transition.
+  ///
+  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void pushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
     openTransaction(context, (NavigatorTransaction transaction) {
       transaction.pushNamed(routeName, mostValuableKeys: mostValuableKeys);
     });
   }
 
+  /// Push a route onto the navigator that most tightly encloses the given context.
+  ///
+  /// Adds the given route to the Navigator's history, and transitions to it.
+  /// The route will have didPush() and didChangeNext() called on it; the
+  /// previous route, if any, will have didChangeNext() called on it; and the
+  /// Navigator observer, if any, will have didPush() called on it.
+  ///
+  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void push(BuildContext context, Route route) {
     openTransaction(context, (NavigatorTransaction transaction) {
       transaction.push(route);
     });
   }
 
+  /// Pop a route off the navigator that most tightly encloses the given context.
+  ///
+  /// Tries to removes the current route, calling its didPop() method. If that
+  /// method returns false, then nothing else happens. Otherwise, the observer
+  /// (if any) is notified using its didPop() method, and the previous route is
+  /// notified using [Route.didChangeNext].
+  ///
+  /// If non-null, [result] will be used as the result of the route. Routes
+  /// such as dialogs or popup menus typically use this mechanism to return the
+  /// value selected by the user to the widget that created their route. The
+  /// type of [result], if provided, must match the type argument of the class
+  /// of the current route. (In practice, this is usually "dynamic".)
+  ///
+  /// Returns true if a route was popped; returns false if there are no further
+  /// previous routes.
+  ///
+  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static bool pop(BuildContext context, [ dynamic result ]) {
     bool returnValue;
     openTransaction(context, (NavigatorTransaction transaction) {
@@ -137,17 +220,30 @@ class Navigator extends StatefulComponent {
     return returnValue;
   }
 
+  /// Calls pop() repeatedly until the given route is the current route.
+  /// If it is already the current route, nothing happens.
+  ///
+  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void popUntil(BuildContext context, Route targetRoute) {
     openTransaction(context, (NavigatorTransaction transaction) {
       transaction.popUntil(targetRoute);
     });
   }
 
+  /// Whether the navigator that most tightly encloses the given context can be popped.
+  ///
+  /// The initial route cannot be popped off the navigator, which implies that
+  /// this function returns true only if popping the navigator would not remove
+  /// the initial route.
   static bool canPop(BuildContext context) {
     NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     return navigator != null && navigator.canPop();
   }
 
+  /// Executes a simple transaction that both pops the current route off and
+  /// pushes a named route into the navigator that most tightly encloses the given context.
+  ///
+  /// Uses [openTransaction()]. Only one transaction will be executed per frame.
   static void popAndPushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
     openTransaction(context, (NavigatorTransaction transaction) {
       transaction.pop();
@@ -155,6 +251,12 @@ class Navigator extends StatefulComponent {
     });
   }
 
+  /// Calls callback immediately to create a navigator transaction.
+  ///
+  /// To avoid race conditions, a navigator will execute at most one operation
+  /// per animation frame. If you wish to perform a compound change to the
+  /// navigator's state, you can use a navigator transaction to execute all the
+  /// changes atomically by making the changes inside the given callback.
   static void openTransaction(BuildContext context, NavigatorTransactionCallback callback) {
     NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
@@ -168,6 +270,7 @@ class Navigator extends StatefulComponent {
   NavigatorState createState() => new NavigatorState();
 }
 
+/// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
   final List<Route> _history = new List<Route>();
@@ -202,7 +305,7 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
-  // Used by Routes and NavigatorObservers
+  /// The overlay this navigator uses for its visual presentation.
   OverlayState get overlay => _overlayKey.currentState;
 
   OverlayEntry get _currentOverlayEntry {
@@ -344,6 +447,10 @@ class NavigatorState extends State<Navigator> {
       _pop();
   }
 
+  /// Whether this navigator can be popped.
+  ///
+  /// The only route that cannot be popped off the navigator is the initial
+  /// route.
   bool canPop() {
     assert(_history.length > 0);
     return _history.length > 1 || _history[0].willHandlePopInternally;
@@ -351,6 +458,12 @@ class NavigatorState extends State<Navigator> {
 
   bool _hadTransaction = true;
 
+  /// Calls callback immediately to create a navigator transaction.
+  ///
+  /// To avoid race conditions, a navigator will execute at most one operation
+  /// per animation frame. If you wish to perform a compound change to the
+  /// navigator's state, you can use a navigator transaction to execute all the
+  /// changes atomically by making the changes inside the given callback.
   bool openTransaction(NavigatorTransactionCallback callback) {
     assert(callback != null);
     if (_hadTransaction)
@@ -375,6 +488,7 @@ class NavigatorState extends State<Navigator> {
   }
 }
 
+/// A sequence of [Navigator] operations that are executed atomically.
 class NavigatorTransaction {
   NavigatorTransaction._(this._navigator) {
     assert(_navigator != null);
@@ -382,8 +496,9 @@ class NavigatorTransaction {
   NavigatorState _navigator;
   bool _debugOpen = true;
 
-  /// Invokes the Navigator's onGenerateRoute callback to create a route with
-  /// the given name, then calls [push()] with that route.
+  /// The route name will be passed to the navigator's [onGenerateRoute]
+  /// callback. The returned route will be pushed into the navigator. The set of
+  /// most valuable keys will be used to construct an appropriate [Hero] transition.
   void pushNamed(String name, { Set<Key> mostValuableKeys }) {
     assert(_debugOpen);
     _navigator._pushNamed(name, mostValuableKeys: mostValuableKeys);
@@ -439,9 +554,11 @@ class NavigatorTransaction {
   /// (if any) is notified using its didPop() method, and the previous route is
   /// notified using [Route.didChangeNext].
   ///
-  /// The type of the result argument, if provided, must match the type argument
-  /// of the class of the current route. (In practice, this is usually
-  /// "dynamic".)
+  /// If non-null, [result] will be used as the result of the route. Routes
+  /// such as dialogs or popup menus typically use this mechanism to return the
+  /// value selected by the user to the widget that created their route. The
+  /// type of [result], if provided, must match the type argument of the class
+  /// of the current route. (In practice, this is usually "dynamic".)
   ///
   /// Returns true if a route was popped; returns false if there are no further
   /// previous routes.
