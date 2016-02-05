@@ -56,10 +56,18 @@ class GridPaper extends StatelessComponent {
     this.child
   }) : super(key: key);
 
+  /// The color to draw the lines in the grid.
   final Color color;
+
+  /// The distance between the primary lines in the grid, in logical pixels.
   final double interval;
+
+  /// The number of major divisions within each primary grid cell.
   final int divisions;
+
+  /// The number of minor divisions within each major division.
   final int subDivisions;
+
   final Widget child;
 
   Widget build(BuildContext context) {

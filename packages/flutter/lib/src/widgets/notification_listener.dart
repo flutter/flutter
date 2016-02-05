@@ -7,7 +7,9 @@ import 'framework.dart';
 /// Return true to cancel the notification bubbling.
 typedef bool NotificationListenerCallback<T extends Notification>(T notification);
 
+/// A notification that can bubble up the widget tree.
 abstract class Notification {
+  /// Start bubbling this notification at the given build context.
   void dispatch(BuildContext target) {
     target.visitAncestorElements((Element element) {
       if (element is StatelessComponentElement &&
@@ -21,6 +23,7 @@ abstract class Notification {
   }
 }
 
+/// Listens for [Notification]s bubbling up the tree.
 class NotificationListener<T extends Notification> extends StatelessComponent {
   NotificationListener({
     Key key,
@@ -29,6 +32,8 @@ class NotificationListener<T extends Notification> extends StatelessComponent {
   }) : super(key: key);
 
   final Widget child;
+
+  /// Called when a notification of the appropriate type arrives at this location in the tree.
   final NotificationListenerCallback<T> onNotification;
 
   bool _dispatch(Notification notification) {

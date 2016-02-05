@@ -144,6 +144,9 @@ class Mimicable extends StatefulComponent {
   MimicableState createState() => new MimicableState();
 }
 
+/// The state for a [Mimicable].
+///
+/// Exposes an API for starting and stopping mimicking.
 class MimicableState extends State<Mimicable> {
   Size _size;
   bool _beingMimicked = false;
