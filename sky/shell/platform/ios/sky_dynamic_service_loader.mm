@@ -5,12 +5,14 @@
 #include "sky/shell/platform/ios/sky_dynamic_service_loader.h"
 #include "mojo/public/c/system/types.h"
 #include "mojo/public/platform/native/system_thunks.h"
+#include <Foundation/Foundation.h>
 
 #include <dlfcn.h>
 
 typedef MojoResult (*SkyDynamicServiceHandler)(MojoHandle client_handle,
                                                const char* service_name);
 
+static const char* const kFlutterServiceMainFunctionName = "FlutterServiceMain";
 static const char* const kMojoSetSystemThunksFnName = "MojoSetSystemThunks";
 
 @interface SkyServiceDefinition : NSObject
@@ -19,11 +21,7 @@ static const char* const kMojoSetSystemThunksFnName = "MojoSetSystemThunks";
 
 @property(nonatomic, readonly) NSString* containerFramework;
 
-@property(nonatomic, readonly) NSString* entryFunction;
-
-- (instancetype)initWithName:(NSString*)name
-                   framework:(NSString*)framework
-                    function:(NSString*)function;
+- (instancetype)initWithName:(NSString*)name framework:(NSString*)framework;
 
 - (SkyDynamicServiceHandler)serviceEntryPoint;
 
@@ -75,20 +73,17 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
   void* _libraryHandle;
 }
 
-- (instancetype)initWithName:(NSString*)name
-                   framework:(NSString*)framework
-                    function:(NSString*)function {
+- (instancetype)initWithName:(NSString*)name framework:(NSString*)framework {
   self = [super init];
 
   if (self) {
-    if (name.length == 0 || framework.length == 0 || function.length == 0) {
+    if (name.length == 0 || framework.length == 0) {
       [self release];
       return nil;
     }
 
     _serviceName = [name copy];
     _containerFramework = [framework copy];
-    _entryFunction = [function copy];
   }
 
   return self;
@@ -99,22 +94,25 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
     return;
   }
 
-  NSBundle* bundle = [NSBundle bundleWithIdentifier:_containerFramework];
+  NSBundle* embedderBundle =
+      [NSBundle bundleForClass:[SkyDynamicServiceLoader class]];
 
-  if (bundle == nil) {
-    DLOG(INFO) << "Could not load the framework bundle ('"
-               << _containerFramework.UTF8String << "') for '"
-               << _serviceName.UTF8String << "'";
-    return;
+  NSString* executablePath = [embedderBundle pathForResource:_containerFramework
+                                                      ofType:@"dylib"
+                                                 inDirectory:@"Frameworks"];
+
+  if (executablePath.length == 0) {
+    DLOG(INFO) << "The service definitions manifest specified a framework for "
+               << _serviceName.UTF8String
+               << " that is not present in the application";
   }
 
   dlerror();
-  _libraryHandle = dlopen(bundle.executablePath.UTF8String, RTLD_NOW);
+  _libraryHandle = dlopen(executablePath.UTF8String, RTLD_NOW);
 
   if (_libraryHandle == NULL || dlerror() != NULL) {
     _libraryHandle = NULL;
-    DLOG(INFO) << "Could not open library at '"
-               << bundle.executablePath.UTF8String
+    DLOG(INFO) << "Could not open library at '" << executablePath.UTF8String
                << "' to resolve service request for '"
                << _serviceName.UTF8String << "'";
     return;
@@ -158,11 +156,11 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
   }
 
   dlerror();
-  void* entry = dlsym(_libraryHandle, _entryFunction.UTF8String);
+  void* entry = dlsym(_libraryHandle, kFlutterServiceMainFunctionName);
 
   if (entry == NULL || dlerror() != NULL) {
     LOG(INFO) << "Could not find service entry point '"
-              << _entryFunction.UTF8String << "' in library '"
+              << kFlutterServiceMainFunctionName << "' in library '"
               << _containerFramework.UTF8String << "' for service name '"
               << _serviceName.UTF8String << "'";
     [self closeIfNecessary];
@@ -190,7 +188,6 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
 
   [_serviceName release];
   [_containerFramework release];
-  [_entryFunction release];
 
   [super dealloc];
 };
@@ -287,8 +284,7 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
 
     SkyServiceDefinition* definition =
         [[SkyServiceDefinition alloc] initWithName:serviceName
-                                         framework:service[@"framework"]
-                                          function:service[@"function"]];
+                                         framework:service[@"framework"]];
 
     if (definition != nil) {
       _services[serviceName] = definition;
