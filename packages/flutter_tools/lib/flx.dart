@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library flutter_tools.flx;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -13,9 +15,9 @@ import 'package:flx/signing.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import 'base/context.dart';
-import 'base/file_system.dart';
-import 'toolchain.dart';
+import 'src/base/context.dart';
+import 'src/base/file_system.dart';
+import 'src/toolchain.dart';
 
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
@@ -245,9 +247,6 @@ Future<int> build(
 
 /// Assembles a Flutter .flx file from a pre-existing manifest descriptor
 /// and a pre-compiled snapshot.
-///
-/// This may be called by external build toolchains, so practice caution
-/// when changing this method signature (alert flutter-dev).
 Future<int> assemble({
   Map manifestDescriptor: const {},
   ArchiveFile snapshotFile: null,

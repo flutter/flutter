@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/flx.dart' as flx;
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
-import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
 import 'start.dart';
 
