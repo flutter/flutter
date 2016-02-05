@@ -6,7 +6,9 @@ package org.domokit.sky.shell;
 
 import android.graphics.Rect;
 import android.opengl.Matrix;
+import android.os.Bundle;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -26,10 +28,17 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                                                           implements SemanticsListener {
     private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
     private PlatformViewAndroid mOwner;
+    private SemanticsServer.Proxy mSemanticsServer;
+    private PersistentAccessibilityNode mFocusedNode;
+    private PersistentAccessibilityNode mHoveredNode;
 
-    FlutterSemanticsToAndroidAccessibilityBridge(PlatformViewAndroid view) {
-        mOwner = view;
+    FlutterSemanticsToAndroidAccessibilityBridge(PlatformViewAndroid owner, SemanticsServer.Proxy semanticsServer) {
+        assert owner != null;
+        assert semanticsServer != null;
+        mOwner = owner;
         mTreeNodes = new HashMap<Integer, PersistentAccessibilityNode>();
+        mSemanticsServer = semanticsServer;
+        mSemanticsServer.addSemanticsListener(this);
     }
 
     @Override
@@ -71,16 +80,45 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         }
         result.setBoundsInScreen(bounds);
         result.setVisibleToUser(true);
+        result.setEnabled(true); // TODO(ianh): Expose disabled subtrees
 
-        // TODO(ianh): Add support for interactivity:
-        // private boolean canBeTapped;
-        // private boolean canBeLongPressed;
-        // private boolean canBeScrolledHorizontally;
-        // private boolean canBeScrolledVertically;
+        if (node.canBeTapped) {
+            result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+            result.setClickable(true);
+        }
+        if (node.canBeLongPressed) {
+            result.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+            result.setLongClickable(true);
+        }
+        if ((node.canBeScrolledHorizontally && !node.canBeScrolledVertically) ||
+            (!node.canBeScrolledHorizontally && node.canBeScrolledVertically)) {
+            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        }
+        if (node.canBeScrolledHorizontally || node.canBeScrolledVertically) {
+            // TODO(ianh): Figure out how to enable panning. SDK v23
+            // has AccessibilityAction.ACTION_SCROLL_LEFT and company,
+            // but earlier versions do not. Right now we only forward
+            // scroll actions if it's unidirectional.
+            result.setScrollable(true);
+        }
 
         result.setCheckable(node.hasCheckedState);
         result.setChecked(node.isChecked);
         result.setText(node.label);
+
+        // TODO(ianh): use setTraversalBefore/setTraversalAfter to set
+        // the relative order of the views. For each set of siblings,
+        // the views should be ordered top-to-bottom, tie-breaking
+        // left-to-right (right-to-left in rtl environments), height,
+        // width, and finally by list order.
+
+        // Accessibility Focus
+        if (mFocusedNode != null && mFocusedNode.id == virtualViewId) {
+            result.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+        } else {
+            result.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+        }
 
         for (PersistentAccessibilityNode child : node.children) {
             result.addChild(mOwner, child.id);
@@ -90,9 +128,98 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     }
 
     @Override
+    public boolean performAction(int virtualViewId, int action, Bundle arguments) {
+        PersistentAccessibilityNode node = mTreeNodes.get(virtualViewId);
+        if (node == null)
+            return false;
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_CLICK: {
+                mSemanticsServer.tap(virtualViewId);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                mSemanticsServer.longPress(virtualViewId);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    // TODO(ianh): bidi support
+                    mSemanticsServer.scrollLeft(virtualViewId);
+                } else if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    mSemanticsServer.scrollUp(virtualViewId);
+                } else {
+                    return false;
+                }
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    // TODO(ianh): bidi support
+                    mSemanticsServer.scrollRight(virtualViewId);
+                } else if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                    mSemanticsServer.scrollDown(virtualViewId);
+                } else {
+                    return false;
+                }
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+                sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+                mFocusedNode = null;
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
+                sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
+                mFocusedNode = node;
+                return true;
+            }
+        }
+        // TODO(ianh): Implement left/right/up/down scrolling
+        return false;
+    }
+
+    // TODO(ianh): implement findAccessibilityNodeInfosByText()
+    // TODO(ianh): implement findFocus()
+
+    public void handleTouchExplorationExit() {
+        if (mHoveredNode != null) {
+            sendAccessibilityEvent(mHoveredNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+            mHoveredNode = null;
+        }
+    }
+
+    public void handleTouchExploration(float x, float y) {
+        if (mTreeNodes.isEmpty())
+            return;
+        assert mTreeNodes.containsKey(0);
+        PersistentAccessibilityNode newNode = mTreeNodes.get(0).hitTest(Math.round(x), Math.round(y));
+        if (newNode != mHoveredNode) {
+            if (newNode != null) {
+                sendAccessibilityEvent(newNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+            }
+            if (mHoveredNode != null) {
+                sendAccessibilityEvent(mHoveredNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+            }
+            mHoveredNode = newNode;
+        }
+    }
+
+    @Override
     public void updateSemanticsTree(SemanticsNode[] nodes) {
         for (SemanticsNode node : nodes) {
             updateSemanticsNode(node);
+            sendAccessibilityEvent(node.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        }
+    }
+
+    private void sendAccessibilityEvent(int virtualViewId, int eventType) {
+        if (virtualViewId == 0) {
+            mOwner.sendAccessibilityEvent(eventType);
+        } else {
+            AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
+            event.setPackageName(mOwner.getContext().getPackageName());
+            event.setSource(mOwner, virtualViewId);
+            mOwner.getParent().requestSendAccessibilityEvent(mOwner, event);
         }
     }
 
@@ -112,10 +239,25 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         assert mTreeNodes.containsKey(node.id);
         assert mTreeNodes.get(node.id).parent == null;
         mTreeNodes.remove(node.id);
+        if (mFocusedNode == node) {
+            mFocusedNode = null;
+        }
+        if (mHoveredNode == node) {
+            mHoveredNode = null;
+        }
+        for (PersistentAccessibilityNode child : node.children) {
+            removePersistentNode(child);
+        }
     }
 
-    public void reset() {
+    public void reset(SemanticsServer.Proxy newSemanticsServer) {
         mTreeNodes.clear();
+        mFocusedNode = null;
+        mHoveredNode = null;
+        mSemanticsServer.close();
+        sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        mSemanticsServer = newSemanticsServer;
+        mSemanticsServer.addSemanticsListener(this);
     }
 
     private class PersistentAccessibilityNode {
@@ -177,7 +319,6 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 // since they also get marked dirty
                 invalidateGlobalGeometry();
             }
-            // TODO(ianh): Notify Android that our tree is dirty
         }
 
         // fields that we pass straight to the Android accessibility API
@@ -205,6 +346,8 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 return;
             }
             geometryDirty = true;
+            // TODO(ianh): if we are the FlutterSemanticsToAndroidAccessibilityBridge.this.mFocusedNode
+            // then we may have to unfocus and refocus ourselves to get Android to update the focus rect
             for (PersistentAccessibilityNode child : children) {
                 child.invalidateGlobalGeometry();
             }
@@ -267,6 +410,20 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 );
             }
             return globalRect;
+        }
+
+        public PersistentAccessibilityNode hitTest(int x, int y) {
+            Rect rect = getGlobalRect();
+            if (!rect.contains(x, y))
+                return null;
+            for (int index = children.size()-1; index >= 0; index -= 1) {
+                PersistentAccessibilityNode child = children.get(index);
+                PersistentAccessibilityNode result = child.hitTest(x, y);
+                if (result != null) {
+                    return result;
+                }
+            }
+            return this;
         }
     }
 

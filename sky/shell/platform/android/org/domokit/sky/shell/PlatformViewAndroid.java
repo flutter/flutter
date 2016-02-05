@@ -37,8 +37,6 @@ import org.chromium.mojom.pointer.PointerKind;
 import org.chromium.mojom.pointer.PointerPacket;
 import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
-import org.chromium.mojom.semantics.SemanticsListener;
-import org.chromium.mojom.semantics.SemanticsNode;
 import org.chromium.mojom.semantics.SemanticsServer;
 import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
@@ -251,6 +249,16 @@ public class PlatformViewAndroid extends SurfaceView
     }
 
     @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        boolean handled = handleAccessibilityHoverEvent(event);
+        if (!handled) {
+            // TODO(ianh): Expose hover events to the platform,
+            // implementing ADD, REMOVE, etc.
+        }
+        return handled;
+    }
+
+    @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         mMetrics.physicalWidth = width;
         mMetrics.physicalHeight = height;
@@ -298,6 +306,14 @@ public class PlatformViewAndroid extends SurfaceView
     }
 
     void runFromBundle(String path) {
+
+        if (mServiceProvider != null) {
+            mServiceProvider.close();
+        }
+        if (mDartServiceProvider != null) {
+            mDartServiceProvider.close();
+        }
+
         Core core = CoreImpl.getInstance();
         Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
@@ -326,10 +342,13 @@ public class PlatformViewAndroid extends SurfaceView
 
     // ACCESSIBILITY
 
+    private boolean mTouchExplorationEnabled = false;
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mAccessibilityManager.isEnabled() || mAccessibilityManager.isTouchExplorationEnabled())
+        mTouchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
+        if (mAccessibilityManager.isEnabled() || mTouchExplorationEnabled)
           ensureAccessibilityEnabled();
         mAccessibilityManager.addAccessibilityStateChangeListener(this);
         mAccessibilityManager.addTouchExplorationStateChangeListener(this);
@@ -343,25 +362,15 @@ public class PlatformViewAndroid extends SurfaceView
 
     @Override
     public void onTouchExplorationStateChanged(boolean enabled) {
-        if (enabled)
+        if (enabled) {
+            mTouchExplorationEnabled = true;
             ensureAccessibilityEnabled();
-        // TODO(ianh): else, actually discard the state for exploration
-    }
-
-    private FlutterSemanticsToAndroidAccessibilityBridge mAccessibilityNodeProvider;
-    private SemanticsServer.Proxy mSemanticsServer;
-
-    void ensureAccessibilityEnabled() {
-        if (mAccessibilityNodeProvider == null) {
-            mAccessibilityNodeProvider = new FlutterSemanticsToAndroidAccessibilityBridge(this);
-            Core core = CoreImpl.getInstance();
-            Pair<SemanticsServer.Proxy, InterfaceRequest<SemanticsServer>> server =
-                      SemanticsServer.MANAGER.getInterfaceRequest(core);
-            mSemanticsServer = server.first;
-            mDartServiceProvider.connectToService(SemanticsServer.MANAGER.getName(), server.second.passHandle());
-            mSemanticsServer.addSemanticsListener(mAccessibilityNodeProvider);
+        } else {
+            mTouchExplorationEnabled = false;
+            if (mAccessibilityNodeProvider != null) {
+                mAccessibilityNodeProvider.handleTouchExplorationExit();
+            }
         }
-        assert mSemanticsServer != null;
     }
 
     @Override
@@ -370,13 +379,37 @@ public class PlatformViewAndroid extends SurfaceView
         return mAccessibilityNodeProvider;
     }
 
-    // TODO(ianh): implement touch exploration
+    private FlutterSemanticsToAndroidAccessibilityBridge mAccessibilityNodeProvider;
 
-    // TODO(ianh): implement accessibility focus
+    void ensureAccessibilityEnabled() {
+        if (mAccessibilityNodeProvider == null) {
+            mAccessibilityNodeProvider = new FlutterSemanticsToAndroidAccessibilityBridge(this, createSemanticsServer());
+        }
+    }
+
+    private SemanticsServer.Proxy createSemanticsServer() {
+        Core core = CoreImpl.getInstance();
+        Pair<SemanticsServer.Proxy, InterfaceRequest<SemanticsServer>> server =
+                  SemanticsServer.MANAGER.getInterfaceRequest(core);
+        mDartServiceProvider.connectToService(SemanticsServer.MANAGER.getName(), server.second.passHandle());
+        return server.first;
+    }
 
     void resetAccessibilityTree() {
-        if (mAccessibilityNodeProvider != null)
-            mAccessibilityNodeProvider.reset();
+        if (mAccessibilityNodeProvider != null) {
+            mAccessibilityNodeProvider.reset(createSemanticsServer());
+        }
+    }
+
+    private boolean handleAccessibilityHoverEvent(MotionEvent event) {
+        if (!mTouchExplorationEnabled)
+            return false;
+        if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+            mAccessibilityNodeProvider.handleTouchExplorationExit();
+        } else {
+            mAccessibilityNodeProvider.handleTouchExploration(event.getX(), event.getY());
+        }
+        return true;
     }
 
 }
