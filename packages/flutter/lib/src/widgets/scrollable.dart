@@ -442,13 +442,14 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 class Block extends StatelessComponent {
   Block({
     Key key,
-    this.children,
+    this.children: const <Widget>[],
     this.padding,
     this.initialScrollOffset,
     this.scrollDirection: Axis.vertical,
     this.onScroll,
     this.scrollableKey
   }) : super(key: key) {
+    assert(children != null);
     assert(!children.any((Widget child) => child == null));
   }
 

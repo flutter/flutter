@@ -14,13 +14,13 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   Size childSizeFromGetPositionForChild;
 
   Size getSize(BoxConstraints constraints) {
-    if (!RenderObject.debugInDebugDoesMeetConstraints)
+    if (!RenderObject.debugCheckingIntrinsics)
       constraintsFromGetSize = constraints;
     return new Size(200.0, 300.0);
   }
 
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    assert(!RenderObject.debugInDebugDoesMeetConstraints);
+    assert(!RenderObject.debugCheckingIntrinsics);
     constraintsFromGetConstraintsForChild = constraints;
     return new BoxConstraints(
       minWidth: 100.0,
@@ -31,7 +31,7 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   }
 
   Offset getPositionForChild(Size size, Size childSize) {
-    assert(!RenderObject.debugInDebugDoesMeetConstraints);
+    assert(!RenderObject.debugCheckingIntrinsics);
     sizeFromGetPositionForChild = size;
     childSizeFromGetPositionForChild = childSize;
     return Offset.zero;
@@ -40,7 +40,7 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   bool shouldRelayoutCalled = false;
   bool shouldRelayoutValue = false;
   bool shouldRelayout(_) {
-    assert(!RenderObject.debugInDebugDoesMeetConstraints);
+    assert(!RenderObject.debugCheckingIntrinsics);
     shouldRelayoutCalled = true;
     return shouldRelayoutValue;
   }

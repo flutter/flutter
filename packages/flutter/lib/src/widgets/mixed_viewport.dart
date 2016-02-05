@@ -155,10 +155,14 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
 
   double _noIntrinsicExtent(BoxConstraints constraints) {
     assert(() {
-      'MixedViewport does not support returning intrinsic dimensions. ' +
-      'Calculating the intrinsic dimensions would require walking the entire child list, ' +
-      'which defeats the entire point of having a lazily-built list of children.';
-      return RenderObject.debugInDebugDoesMeetConstraints;
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw new UnsupportedError(
+          'MixedViewport does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require walking the entire child list,\n'
+          'which defeats the entire point of having a lazily-built list of children.'
+        );
+      }
+      return true;
     });
     return null;
   }
