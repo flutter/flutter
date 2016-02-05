@@ -242,19 +242,19 @@ class GalleryHomeState extends State<GalleryHome> {
                   image: 'assets/section_components.png',
                   colors: Colors.amber,
                   demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
-                    new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
                     new GalleryDemo(title: 'Chips', builder: () => new ChipDemo()),
-                    new GalleryDemo(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
-                    new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
-                    new GalleryDemo(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
-                    new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
-                    new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
-                    new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
-                    new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
                     new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
-                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
-                    new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo())
+                    new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
+                    new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
+                    new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo()),
+                    new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
+                    new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
+                    new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
+                    new GalleryDemo(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
+                    new GalleryDemo(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
+                    new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
+                    new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
+                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo())
                   ]
                 )
               ]
