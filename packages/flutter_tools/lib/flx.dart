@@ -245,8 +245,6 @@ Future<int> build(
   );
 }
 
-/// Assembles a Flutter .flx file from a pre-existing manifest descriptor
-/// and a pre-compiled snapshot.
 Future<int> assemble({
   Map manifestDescriptor: const {},
   ArchiveFile snapshotFile: null,
