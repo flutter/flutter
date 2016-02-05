@@ -18,6 +18,7 @@ import 'pointer_router.dart';
 
 typedef void GesturerExceptionHandler(PointerEvent event, HitTestTarget target, dynamic exception, StackTrace stack);
 
+/// A binding for the gesture subsystem.
 abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestable {
 
   void initInstances() {
@@ -26,8 +27,9 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
     ui.window.onPointerPacket = _handlePointerPacket;
   }
 
-  static Gesturer _instance;
+  /// The singleton instance of this object.
   static Gesturer get instance => _instance;
+  static Gesturer _instance;
 
   void _handlePointerPacket(ByteData serializedPacket) {
     final mojo_bindings.Message message = new mojo_bindings.Message(
