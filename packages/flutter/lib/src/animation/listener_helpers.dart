@@ -11,6 +11,7 @@ abstract class _ListenerMixin {
   void didUnregisterListener();
 }
 
+/// A mixin that helps listen to another object only when this object has registered listeners.
 abstract class LazyListenerMixin implements _ListenerMixin {
   int _listenerCounter = 0;
   void didRegisterListener() {
@@ -30,6 +31,8 @@ abstract class LazyListenerMixin implements _ListenerMixin {
   bool get isListening => _listenerCounter > 0;
 }
 
+/// A mixin that replaces the didRegisterListener/didUnregisterListener contract
+/// with a dispose contract.
 abstract class EagerListenerMixin implements _ListenerMixin {
   void didRegisterListener() { }
   void didUnregisterListener() { }
@@ -38,7 +41,9 @@ abstract class EagerListenerMixin implements _ListenerMixin {
   void dispose();
 }
 
-abstract class LocalAnimationListenersMixin extends _ListenerMixin {
+/// A mixin that implements the addListener/removeListener protocol and notifies
+/// all the registered listeners when notifyListeners is invoked.
+abstract class LocalListenersMixin extends _ListenerMixin {
   final List<VoidCallback> _listeners = <VoidCallback>[];
   void addListener(VoidCallback listener) {
     didRegisterListener();
@@ -55,6 +60,9 @@ abstract class LocalAnimationListenersMixin extends _ListenerMixin {
   }
 }
 
+/// A mixin that implements the addStatusListener/removeStatusListener protocol
+/// and notifies all the registered listeners when notifyStatusListeners is
+/// invoked.
 abstract class LocalAnimationStatusListenersMixin extends _ListenerMixin {
   final List<AnimationStatusListener> _statusListeners = <AnimationStatusListener>[];
   void addStatusListener(AnimationStatusListener listener) {

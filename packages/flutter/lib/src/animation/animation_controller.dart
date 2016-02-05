@@ -13,8 +13,22 @@ import 'forces.dart';
 import 'listener_helpers.dart';
 import 'ticker.dart';
 
+/// A controller for an animation.
+///
+/// An animation controller can drive an animation forward or backward and can
+/// set the animation to a particular value. The controller also defines the
+/// bounds of the animation and can drive an animation using a physics
+/// simulation.
 class AnimationController extends Animation<double>
-  with EagerListenerMixin, LocalAnimationListenersMixin, LocalAnimationStatusListenersMixin {
+  with EagerListenerMixin, LocalListenersMixin, LocalAnimationStatusListenersMixin {
+
+  /// Creates an animation controller.
+  ///
+  /// * value is the initial value of the animation.
+  /// * duration is the length of time this animation should last.
+  /// * debugLabel is a string to help identify this animation during debugging (used by toString).
+  /// * lowerBound is the smallest value this animation can obtain and the value at which this animation is deemed to be dismissed.
+  /// * upperBound is the largest value this animation can obtain and the value at which this animation is deemed to be completed.
   AnimationController({
     double value,
     this.duration,
@@ -22,10 +36,20 @@ class AnimationController extends Animation<double>
     this.lowerBound: 0.0,
     this.upperBound: 1.0
   }) {
+    assert(upperBound >= lowerBound);
     _value = (value ?? lowerBound).clamp(lowerBound, upperBound);
     _ticker = new Ticker(_tick);
   }
 
+  /// Creates an animation controller with no upper or lower bound for its value.
+  ///
+  /// * value is the initial value of the animation.
+  /// * duration is the length of time this animation should last.
+  /// * debugLabel is a string to help identify this animation during debugging (used by toString).
+  ///
+  /// This constructor is most useful for animations that will be driven using a
+  /// physics simulation, especially when the physics simulation as no
+  /// pre-determined bounds.
   AnimationController.unbounded({
     double value: 0.0,
     this.duration,
@@ -47,7 +71,7 @@ class AnimationController extends Animation<double>
   /// identifying animation controller instances in debug output.
   final String debugLabel;
 
-  /// Returns a [Animated<double>] for this animation controller,
+  /// Returns an [Animated<double>] for this animation controller,
   /// so that a pointer to this object can be passed around without
   /// allowing users of that pointer to mutate the AnimationController state.
   Animation<double> get view => this;
@@ -61,9 +85,9 @@ class AnimationController extends Animation<double>
   Ticker _ticker;
   Simulation _simulation;
 
-  /// The progress of this animation along the timeline.
+  /// The current value of the animation.
   ///
-  /// Note: Setting this value stops the current animation.
+  /// Setting this value stops the current animation.
   double get value => _value.clamp(lowerBound, upperBound);
   double _value;
   void set value(double newValue) {
@@ -110,6 +134,7 @@ class AnimationController extends Animation<double>
     _ticker.stop();
   }
 
+  /// Stops running this animation.
   void dispose() {
     stop();
   }
@@ -144,6 +169,7 @@ class AnimationController extends Animation<double>
     _lastStatus = currentStatus;
   }
 
+  /// Drives the animation from its current value to target.
   Future animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {

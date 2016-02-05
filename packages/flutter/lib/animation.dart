@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The Flutter animation engine.
+/// The Flutter animation system.
+///
+/// See [https://flutter.io/animations/] for an overview.
 ///
 /// This library depends only on core Dart libraries and the `newton` package.
 library animation;

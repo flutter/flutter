@@ -8,8 +8,8 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
-class AlwaysCompleteAnimation extends Animation<double> {
-  const AlwaysCompleteAnimation();
+class _AlwaysCompleteAnimation extends Animation<double> {
+  const _AlwaysCompleteAnimation();
 
   void addListener(VoidCallback listener) { }
   void removeListener(VoidCallback listener) { }
@@ -20,10 +20,15 @@ class AlwaysCompleteAnimation extends Animation<double> {
   double get value => 1.0;
 }
 
-const AlwaysCompleteAnimation kAlwaysCompleteAnimation = const AlwaysCompleteAnimation();
+/// An animation that is always complete.
+///
+/// Using this constant involves less overhead than building an
+/// [AnimationController] with an initial value of 1.0. This is useful when an
+/// API expects an animation but you don't actually want to animate anything.
+const Animation<double> kAlwaysCompleteAnimation = const _AlwaysCompleteAnimation();
 
-class AlwaysDismissedAnimation extends Animation<double> {
-  const AlwaysDismissedAnimation();
+class _AlwaysDismissedAnimation extends Animation<double> {
+  const _AlwaysDismissedAnimation();
 
   void addListener(VoidCallback listener) { }
   void removeListener(VoidCallback listener) { }
@@ -34,8 +39,14 @@ class AlwaysDismissedAnimation extends Animation<double> {
   double get value => 0.0;
 }
 
-const AlwaysDismissedAnimation kAlwaysDismissedAnimation = const AlwaysDismissedAnimation();
+/// An animation that is always dismissed.
+///
+/// Using this constant involves less overhead than building an
+/// [AnimationController] with an initial value of 0.0. This is useful when an
+/// API expects an animation but you don't actually want to animate anything.
+const Animation<double> kAlwaysDismissedAnimation = const _AlwaysDismissedAnimation();
 
+/// An animation that is always stopped at a given value.
 class AlwaysStoppedAnimation extends Animation<double> {
   const AlwaysStoppedAnimation(this.value);
 
@@ -49,8 +60,16 @@ class AlwaysStoppedAnimation extends Animation<double> {
   AnimationDirection get direction => AnimationDirection.forward;
 }
 
-abstract class ProxyAnimatedMixin {
-  Animation<double> get parent;
+/// Implements most of the [Animation] interface, by deferring its behavior to a
+/// given [parent] Animation. To implement an [Animation] that proxies to a
+/// parent, this class plus implementing "T get value" is all that is necessary.
+abstract class ProxyAnimatedMixin<T> {
+  /// The animation whose value this animation will proxy.
+  ///
+  /// This animation must remain the same for the lifetime of this object. If
+  /// you wish to proxy a different animation at different times, conside using
+  /// [ProxyAnimation].
+  Animation<T> get parent;
 
   void addListener(VoidCallback listener) => parent.addListener(listener);
   void removeListener(VoidCallback listener) => parent.removeListener(listener);
@@ -61,8 +80,14 @@ abstract class ProxyAnimatedMixin {
   AnimationDirection get direction => parent.direction;
 }
 
+/// An animation that is a proxy for another animation.
+///
+/// A proxy animation is useful because the parent animation can be mutated. For
+/// example, one object can create a proxy animation, hand the proxy to another
+/// object, and then later change the animation from which the proxy receieves
+/// its value.
 class ProxyAnimation extends Animation<double>
-  with LazyListenerMixin, LocalAnimationListenersMixin, LocalAnimationStatusListenersMixin {
+  with LazyListenerMixin, LocalListenersMixin, LocalAnimationStatusListenersMixin {
   ProxyAnimation([Animation<double> animation]) {
     _parent = animation;
     if (_parent == null) {
@@ -76,6 +101,10 @@ class ProxyAnimation extends Animation<double>
   AnimationDirection _direction;
   double _value;
 
+  /// The animation whose value this animation will proxy.
+  ///
+  /// This value is mutable. When mutated, the listeners on the proxy animation
+  /// will be transparently updated to be listening to the new parent animation.
   Animation<double> get parent => _parent;
   Animation<double> _parent;
   void set parent(Animation<double> value) {
@@ -121,10 +150,18 @@ class ProxyAnimation extends Animation<double>
   double get value => _parent != null ? _parent.value : _value;
 }
 
+/// An animation that is the reverse of another animation.
+///
+/// If the parent animation is running forward from 0.0 to 1.0, this animation
+/// is running in reverse from 1.0 to 0.0. Notice that using a ReverseAnimation
+/// is different from simply using a [Tween] with a begin of 1.0 and an end of
+/// 0.0 because the tween does not change the status or direction of the
+/// animation.
 class ReverseAnimation extends Animation<double>
   with LazyListenerMixin, LocalAnimationStatusListenersMixin {
   ReverseAnimation(this.parent);
 
+  /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
 
   void addListener(VoidCallback listener) {
@@ -169,7 +206,12 @@ class ReverseAnimation extends Animation<double>
   }
 }
 
-class CurvedAnimation extends Animation<double> with ProxyAnimatedMixin {
+/// An animation that applies a curve to another animation.
+///
+/// [CurvedAnimation] is useful when you wish to apply a [Curve] and you already
+/// have the underlying animation object. If you don't yet have an animation and
+/// want to apply a [Curve] to a [Tween], consider using [CurveTween].
+class CurvedAnimation extends Animation<double> with ProxyAnimatedMixin<double> {
   CurvedAnimation({
     this.parent,
     this.curve: Curves.linear,
@@ -180,6 +222,7 @@ class CurvedAnimation extends Animation<double> with ProxyAnimatedMixin {
     parent.addStatusListener(_handleStatusChanged);
   }
 
+  /// The animation to which this animation applies a curve.
   final Animation<double> parent;
 
   /// The curve to use in the forward direction.
@@ -240,7 +283,7 @@ enum _TrainHoppingMode { minimize, maximize }
 /// removed, it exposes a [dispose()] method. Call this method to shut this
 /// object down.
 class TrainHoppingAnimation extends Animation<double>
-  with EagerListenerMixin, LocalAnimationListenersMixin, LocalAnimationStatusListenersMixin {
+  with EagerListenerMixin, LocalListenersMixin, LocalAnimationStatusListenersMixin {
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
     assert(_currentTrain != null);
     if (_nextTrain != null) {
@@ -261,11 +304,13 @@ class TrainHoppingAnimation extends Animation<double>
     assert(_mode != null);
   }
 
+  /// The animation that is current driving this animation.
   Animation<double> get currentTrain => _currentTrain;
   Animation<double> _currentTrain;
   Animation<double> _nextTrain;
   _TrainHoppingMode _mode;
 
+  /// Called when this animation switches to be driven by a different animation.
   VoidCallback onSwitchedTrain;
 
   AnimationStatus _lastStatus;
@@ -298,6 +343,9 @@ class TrainHoppingAnimation extends Animation<double>
         _currentTrain.removeStatusListener(_statusChangeHandler);
         _currentTrain.removeListener(_valueChangeHandler);
         _currentTrain = _nextTrain;
+        // TODO(hixie): This should be setting a status listener on the next
+        // train, not a value listener, and it should pass in _statusChangeHandler,
+        // not _valueChangeHandler
         _nextTrain.addListener(_valueChangeHandler);
         _statusChangeHandler(_nextTrain.status);
       }

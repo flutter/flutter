@@ -30,15 +30,32 @@ enum AnimationStatus {
 
 typedef void AnimationStatusListener(AnimationStatus status);
 
+/// An animation with a value of type T
+///
+/// An animation consists of a value (of type T) together with a status. The
+/// status indicates whether the animation is conceptually running from
+/// beginning to end or from the end back to the beginning, although the actual
+/// value of the animation might not change monotonically (e.g., if the
+/// animation uses a curve that bounces).
+///
+/// Animations also let other objects listen for changes to either their value
+/// or their status. These callbacks are called during the "animation" phase of
+/// the pipeline, just prior to rebuilding widgets.
+///
+/// To create a new animation that you can run forward and backward, consider
+/// using [AnimationController].
 abstract class Animation<T> {
   const Animation();
 
   /// Calls the listener every time the value of the animation changes.
   void addListener(VoidCallback listener);
+
   /// Stop calling the listener every time the value of the animation changes.
   void removeListener(VoidCallback listener);
+
   /// Calls listener every time the status of the animation changes.
   void addStatusListener(AnimationStatusListener listener);
+
   /// Stops calling the listener every time the status of the animation changes.
   void removeStatusListener(AnimationStatusListener listener);
 
