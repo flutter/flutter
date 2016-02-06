@@ -6,6 +6,7 @@ import 'package:flutter/animation.dart';
 
 import 'framework.dart';
 
+/// A component that rebuilds when the given animation changes status.
 abstract class StatusTransitionComponent extends StatefulComponent {
   StatusTransitionComponent({
     Key key,
@@ -14,6 +15,7 @@ abstract class StatusTransitionComponent extends StatefulComponent {
     assert(animation != null);
   }
 
+  /// The animation to which this component is listening.
   final Animation<double> animation;
 
   Widget build(BuildContext context);

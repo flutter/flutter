@@ -216,7 +216,7 @@ class RenderPadding extends RenderShiftedBox {
 /// By default, sizes to be as big as possible in both axes. If either axis is
 /// unconstrained, then in that direction it will be sized to fit the child's
 /// dimensions. Using widthFactor and heightFactor you can force this latter
-/// behaviour in all cases.
+/// behavior in all cases.
 class RenderPositionedBox extends RenderShiftedBox {
   RenderPositionedBox({
     RenderBox child,
@@ -371,7 +371,7 @@ class RenderPositionedBox extends RenderShiftedBox {
 /// For example, if you wanted a box to always render 50 pixels high, regardless
 /// of where it was rendered, you would wrap it in a RenderOverflow with
 /// minHeight and maxHeight set to 50.0. Generally speaking, to avoid confusing
-/// behaviour around hit testing, a RenderOverflowBox should usually be wrapped
+/// behavior around hit testing, a RenderOverflowBox should usually be wrapped
 /// in a RenderClipRect.
 ///
 /// The child is positioned at the top left of the box. To position a smaller

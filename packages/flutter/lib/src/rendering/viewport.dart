@@ -115,7 +115,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 
   // We don't override computeDistanceToActualBaseline(), because we
-  // want the default behaviour (returning null). Otherwise, as you
+  // want the default behavior (returning null). Otherwise, as you
   // scroll the RenderViewport, it would shift in its parent if the
   // parent was baseline-aligned, which makes no sense.
 
