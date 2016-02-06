@@ -62,8 +62,10 @@ class _OverlayEntryState extends State<_OverlayEntry> {
 class Overlay extends StatefulComponent {
   Overlay({
     Key key,
-    this.initialEntries
-  }) : super(key: key);
+    this.initialEntries: const <OverlayEntry>[]
+  }) : super(key: key) {
+    assert(initialEntries != null);
+  }
 
   /// The entries to include in the overlay initially.
   final List<OverlayEntry> initialEntries;
@@ -103,6 +105,8 @@ class OverlayState extends State<Overlay> {
   /// Otherwise, the entries are inserted on top.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above }) {
     assert(above == null || (above._overlay == this && _entries.contains(above)));
+    if (entries.isEmpty)
+      return;
     for (OverlayEntry entry in entries) {
       assert(entry._overlay == null);
       entry._overlay = this;
