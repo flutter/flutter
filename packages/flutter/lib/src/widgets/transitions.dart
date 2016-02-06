@@ -195,30 +195,6 @@ class FadeTransition extends AnimatedComponent {
   }
 }
 
-/// Animates the background color of a widget.
-class ColorTransition extends AnimatedComponent {
-  ColorTransition({
-    Key key,
-    Animation<Color> color,
-    this.child
-  }) : color = color, super(key: key, animation: color);
-
-  /// The animation that controls the color of the background.
-  ///
-  /// If the current value of the color animation is c, this widget will paint
-  /// a rectangular background behind the child widget of color c.
-  final Animation<Color> color;
-
-  final Widget child;
-
-  Widget build(BuildContext context) {
-    return new DecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: color.value),
-      child: child
-    );
-  }
-}
-
 /// An interpolation between two relative rects.
 ///
 /// This class specializes the interpolation of Tween<RelativeRect> to be
