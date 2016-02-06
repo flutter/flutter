@@ -439,7 +439,7 @@ bool _needsRebuild(String apkPath, String manifest) {
   // Note: This list of dependencies is imperfect, but will do for now. We
   // purposely don't include the .dart files, because we can load those
   // over the network without needing to rebuild (at least on Android).
-  List<FileStat> dependenciesStat = [
+  Iterable<FileStat> dependenciesStat = [
     manifest,
     _kFlutterManifestPath,
     _kPackagesStatusPath
