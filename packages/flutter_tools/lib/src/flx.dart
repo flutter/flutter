@@ -99,10 +99,12 @@ class _MaterialAsset extends _Asset {
   }
 }
 
-List _generateValues(Map assetDescriptor, String key, List defaults) {
-  if (assetDescriptor.containsKey(key))
-    return [assetDescriptor[key]];
-  return defaults;
+Iterable/*<T>*/ _generateValues/*<T>*/(
+  Map/*<String, T>*/ assetDescriptor,
+  String key,
+  Iterable/*<T>*/ defaults
+) {
+  return assetDescriptor.containsKey(key) ? /*<T>*/[assetDescriptor[key]] : defaults;
 }
 
 void _accumulateMaterialAssets(Map<_Asset, List<_Asset>> result, Map assetDescriptor, String assetBase) {
