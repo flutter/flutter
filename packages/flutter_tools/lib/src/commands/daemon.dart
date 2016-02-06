@@ -10,6 +10,8 @@ import '../android/adb.dart';
 import '../android/device_android.dart';
 import '../base/context.dart';
 import '../device.dart';
+import '../ios/device_ios.dart';
+import '../ios/simulator.dart';
 import '../runner/flutter_command.dart';
 import 'start.dart';
 import 'stop.dart' as stop;
@@ -291,18 +293,32 @@ class DeviceDomain extends Domain {
     _androidDeviceDiscovery.onChanged.listen((Device device) {
       sendEvent('device.changed', _deviceToMap(device));
     });
+
+    if (Platform.isMacOS) {
+      _iosSimulatorDeviceDiscovery = new IOSSimulatorDeviceDiscovery();
+      _iosSimulatorDeviceDiscovery.onAdded.listen((Device device) {
+        sendEvent('device.added', _deviceToMap(device));
+      });
+      _iosSimulatorDeviceDiscovery.onRemoved.listen((Device device) {
+        sendEvent('device.removed', _deviceToMap(device));
+      });
+    }
   }
 
   AndroidDeviceDiscovery _androidDeviceDiscovery;
+  IOSSimulatorDeviceDiscovery _iosSimulatorDeviceDiscovery;
 
   Future<List<Device>> getDevices(dynamic args) {
     List<Device> devices = <Device>[];
     devices.addAll(_androidDeviceDiscovery.getDevices());
+    if (_iosSimulatorDeviceDiscovery != null)
+      devices.addAll(_iosSimulatorDeviceDiscovery.getDevices());
     return new Future.value(devices);
   }
 
   void dispose() {
     _androidDeviceDiscovery.dispose();
+    _iosSimulatorDeviceDiscovery?.dispose();
   }
 }
 
@@ -311,7 +327,7 @@ class AndroidDeviceDiscovery {
     _initAdb();
 
     if (_adb != null) {
-      _subscription = _adb.trackDevices().listen(_handleNewDevices);
+      _subscription = _adb.trackDevices().listen(_handleUpdatedDevices);
     }
   }
 
@@ -337,7 +353,7 @@ class AndroidDeviceDiscovery {
     }
   }
 
-  void _handleNewDevices(List<AdbDevice> newDevices) {
+  void _handleUpdatedDevices(List<AdbDevice> newDevices) {
     List<AndroidDevice> currentDevices = new List.from(getDevices());
 
     for (AdbDevice device in newDevices) {
@@ -372,6 +388,54 @@ class AndroidDeviceDiscovery {
       // I don't know the purpose of this cache or if it's a good idea. We should
       // probably have a DeviceManager singleton class to coordinate known devices
       // and different device discovery mechanisms.
+      Device.removeFromCache(device.id);
+
+      removedController.add(device);
+    }
+  }
+
+  void dispose() {
+    _subscription?.cancel();
+  }
+}
+
+class IOSSimulatorDeviceDiscovery {
+  IOSSimulatorDeviceDiscovery() {
+    _subscription = SimControl.trackDevices().listen(_handleUpdatedDevices);
+  }
+
+  StreamSubscription<List<SimDevice>> _subscription;
+
+  Map<String, IOSSimulator> _devices = new Map<String, IOSSimulator>();
+
+  StreamController<Device> addedController = new StreamController<Device>.broadcast();
+  StreamController<Device> removedController = new StreamController<Device>.broadcast();
+
+  List<Device> getDevices() => _devices.values.toList();
+
+  Stream<Device> get onAdded => addedController.stream;
+  Stream<Device> get onRemoved => removedController.stream;
+
+  void _handleUpdatedDevices(List<SimDevice> newDevices) {
+    List<IOSSimulator> currentDevices = new List.from(getDevices());
+
+    for (SimDevice device in newDevices) {
+      IOSSimulator androidDevice = _devices[device.udid];
+
+      if (androidDevice == null) {
+        // device added
+        androidDevice = new IOSSimulator(id: device.udid, name: device.name);
+        _devices[androidDevice.id] = androidDevice;
+        addedController.add(androidDevice);
+      } else {
+        currentDevices.remove(androidDevice);
+      }
+    }
+
+    // device removed
+    for (IOSSimulator device in currentDevices) {
+      _devices.remove(device.id);
+
       Device.removeFromCache(device.id);
 
       removedController.add(device);

@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import '../application_package.dart';
 import '../device.dart';
+import '../ios/simulator.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
@@ -19,7 +21,7 @@ class InstallCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
-    bool installedAny = installApp(
+    bool installedAny = await installApp(
       devices,
       applicationPackages,
       boot: argResults['boot']
@@ -28,13 +30,13 @@ class InstallCommand extends FlutterCommand {
   }
 }
 
-bool installApp(
+Future<bool> installApp(
   DeviceStore devices,
   ApplicationPackageStore applicationPackages, {
   bool boot: false
-}) {
-  if (boot)
-    devices.iOSSimulator?.boot();
+}) async {
+  if (boot && Platform.isMacOS)
+    await SimControl.boot();
 
   bool installedSomewhere = false;
 
