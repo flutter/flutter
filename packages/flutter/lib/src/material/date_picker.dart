@@ -268,15 +268,15 @@ class DayPicker extends StatelessComponent {
   }
 }
 
-// Scrollable list of DayPickers to allow choosing a month
-class MonthPicker extends ScrollableWidgetList {
+class MonthPicker extends StatefulComponent {
   MonthPicker({
+    Key key,
     this.selectedDate,
     this.onChanged,
     this.firstDate,
     this.lastDate,
-    double itemExtent
-  }) : super(itemExtent: itemExtent) {
+    this.itemExtent
+  }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
     assert(lastDate.isAfter(firstDate));
@@ -286,11 +286,12 @@ class MonthPicker extends ScrollableWidgetList {
   final ValueChanged<DateTime> onChanged;
   final DateTime firstDate;
   final DateTime lastDate;
+  final double itemExtent;
 
   _MonthPickerState createState() => new _MonthPickerState();
 }
 
-class _MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
+class _MonthPickerState extends State<MonthPicker> {
   void initState() {
     super.initState();
     _updateCurrentDate();
@@ -313,8 +314,6 @@ class _MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
     });
   }
 
-  int get itemCount => (config.lastDate.year - config.firstDate.year) * 12 + config.lastDate.month - config.firstDate.month + 1;
-
   List<Widget> buildItems(BuildContext context, int start, int count) {
     List<Widget> result = new List<Widget>();
     DateTime startDate = new DateTime(config.firstDate.year + start ~/ 12, config.firstDate.month + start % 12);
@@ -335,6 +334,14 @@ class _MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
     return result;
   }
 
+  Widget build(BuildContext context) {
+    return new ScrollableLazyList(
+      itemExtent: config.itemExtent,
+      itemCount: (config.lastDate.year - config.firstDate.year) * 12 + config.lastDate.month - config.firstDate.month + 1,
+      itemBuilder: buildItems
+    );
+  }
+
   void dispose() {
     if (_timer != null)
       _timer.cancel();
@@ -343,13 +350,14 @@ class _MonthPickerState extends ScrollableWidgetListState<MonthPicker> {
 }
 
 // Scrollable list of years to allow picking a year
-class YearPicker extends ScrollableWidgetList {
+class YearPicker extends StatefulComponent {
   YearPicker({
+    Key key,
     this.selectedDate,
     this.onChanged,
     this.firstDate,
     this.lastDate
-  }) : super(itemExtent: 50.0) {
+  }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
     assert(lastDate.isAfter(firstDate));
@@ -363,8 +371,8 @@ class YearPicker extends ScrollableWidgetList {
   _YearPickerState createState() => new _YearPickerState();
 }
 
-class _YearPickerState extends ScrollableWidgetListState<YearPicker> {
-  int get itemCount => config.lastDate.year - config.firstDate.year + 1;
+class _YearPickerState extends State<YearPicker> {
+  static const double _itemExtent = 50.0;
 
   List<Widget> buildItems(BuildContext context, int start, int count) {
     TextStyle style = Theme.of(context).text.body1.copyWith(color: Colors.black54);
@@ -379,7 +387,7 @@ class _YearPickerState extends ScrollableWidgetListState<YearPicker> {
           config.onChanged(result);
         },
         child: new Container(
-          height: config.itemExtent,
+          height: _itemExtent,
           decoration: year == config.selectedDate.year ? new BoxDecoration(
             backgroundColor: Theme.of(context).primarySwatch[100],
             shape: BoxShape.circle
@@ -392,5 +400,13 @@ class _YearPickerState extends ScrollableWidgetListState<YearPicker> {
       items.add(item);
     }
     return items;
+  }
+
+  Widget build(BuildContext context) {
+    return new ScrollableLazyList(
+      itemExtent: _itemExtent,
+      itemCount: config.lastDate.year - config.firstDate.year + 1,
+      itemBuilder: buildItems
+    );
   }
 }

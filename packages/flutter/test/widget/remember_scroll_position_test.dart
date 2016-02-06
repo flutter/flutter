@@ -6,25 +6,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
-class ThePositiveNumbers extends ScrollableWidgetList {
-  ThePositiveNumbers() : super(itemExtent: 100.0);
-  ThePositiveNumbersState createState() => new ThePositiveNumbersState();
-}
-
-class ThePositiveNumbersState extends ScrollableWidgetListState<ThePositiveNumbers> {
-
-  ScrollBehavior createScrollBehavior() => new UnboundedBehavior();
-
-  int get itemCount => null;
-
-  List<Widget> buildItems(BuildContext context, int start, int count) {
-    List<Widget> result = new List<Widget>();
-    for (int index = start; index < start + count; index += 1)
-      result.add(new Text('$index', key: new ValueKey<int>(index)));
-    return result;
+class ThePositiveNumbers extends StatelessComponent {
+  Widget build(BuildContext context) {
+    return new ScrollableLazyList(
+      itemExtent: 100.0,
+      itemBuilder: (BuildContext context, int start, int count) {
+        List<Widget> result = new List<Widget>();
+        for (int index = start; index < start + count; index += 1)
+          result.add(new Text('$index', key: new ValueKey<int>(index)));
+        return result;
+      }
+    );
   }
 }
-
 
 void main() {
   test('whether we remember our scroll position', () {
@@ -53,8 +47,8 @@ void main() {
       expect(tester.findText('10'), isNull);
       expect(tester.findText('100'), isNull);
 
-      StatefulComponentElement<ThePositiveNumbers, ThePositiveNumbersState> target =
-        tester.findElement((Element element) => element.widget is ThePositiveNumbers);
+      StatefulComponentElement<ScrollableLazyList, ScrollableState<ScrollableLazyList>> target =
+        tester.findElement((Element element) => element.widget is ScrollableLazyList);
       target.state.scrollTo(1000.0);
       tester.pump(new Duration(seconds: 1));
 

@@ -344,6 +344,8 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     _delegate = newDelegate;
   }
 
+  int get virtualChildCount => super.virtualChildCount ?? childCount;
+
   /// The virtual index of the first child.
   ///
   /// When asking the delegate for the position of each child, the grid will add

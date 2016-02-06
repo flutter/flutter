@@ -76,7 +76,10 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
   double get _preferredExtent {
     if (itemExtent == null)
       return double.INFINITY;
-    double extent = itemExtent * virtualChildCount;
+    int count = virtualChildCount;
+    if (count == null)
+      return double.INFINITY;
+    double extent = itemExtent * count;
     if (padding != null)
       extent += _scrollAxisPadding;
     return extent;
