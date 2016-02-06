@@ -14,15 +14,16 @@ export 'package:flutter/gestures.dart' show
   GestureTapCallback,
   GestureTapCancelCallback,
   GestureLongPressCallback,
+  GestureDragDownCallback,
   GestureDragStartCallback,
   GestureDragUpdateCallback,
   GestureDragEndCallback,
-  GestureDragStartCallback,
-  GestureDragUpdateCallback,
-  GestureDragEndCallback,
+  GestureDragCancelCallback,
+  GesturePanDownCallback,
   GesturePanStartCallback,
   GesturePanUpdateCallback,
   GesturePanEndCallback,
+  GesturePanCancelCallback,
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback;
@@ -46,15 +47,21 @@ class GestureDetector extends StatefulComponent {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
     this.onVerticalDragEnd,
+    this.onVerticalDragCancel,
+    this.onHorizontalDragDown,
     this.onHorizontalDragStart,
     this.onHorizontalDragUpdate,
     this.onHorizontalDragEnd,
+    this.onHorizontalDragCancel,
+    this.onPanDown,
     this.onPanStart,
     this.onPanUpdate,
     this.onPanEnd,
+    this.onPanCancel,
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
@@ -88,6 +95,9 @@ class GestureDetector extends StatefulComponent {
   final GestureLongPressCallback onLongPress;
 
   /// A pointer has contacted the screen and might begin to move vertically.
+  final GestureDragDownCallback onVerticalDragDown;
+
+  /// A pointer has contacted the screen and has begun to move vertically.
   final GestureDragStartCallback onVerticalDragStart;
 
   /// A pointer that is in contact with the screen and moving vertically has
@@ -99,7 +109,14 @@ class GestureDetector extends StatefulComponent {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onVerticalDragEnd;
 
+  /// A pointer that previously triggered an onVerticalDragDown callback did not
+  /// end up moving vertically.
+  final GestureDragCancelCallback onVerticalDragCancel;
+
   /// A pointer has contacted the screen and might begin to move horizontally.
+  final GestureDragDownCallback onHorizontalDragDown;
+
+  /// A pointer has contacted the screen and has begun to move horizontally.
   final GestureDragStartCallback onHorizontalDragStart;
 
   /// A pointer that is in contact with the screen and moving horizontally has
@@ -111,9 +128,15 @@ class GestureDetector extends StatefulComponent {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onHorizontalDragEnd;
 
+  /// A pointer that previously triggered an onHorizontalDragDown callback did
+  /// not end up moving horizontally.
+  final GestureDragCancelCallback onHorizontalDragCancel;
+
+  final GesturePanDownCallback onPanDown;
   final GesturePanStartCallback onPanStart;
   final GesturePanUpdateCallback onPanUpdate;
   final GesturePanEndCallback onPanEnd;
+  final GesturePanCancelCallback onPanCancel;
 
   final GestureScaleStartCallback onScaleStart;
   final GestureScaleUpdateCallback onScaleUpdate;
@@ -205,39 +228,57 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   void _syncVerticalDrag() {
-    if (config.onVerticalDragStart == null && config.onVerticalDragUpdate == null && config.onVerticalDragEnd == null) {
+    if (config.onVerticalDragDown == null &&
+        config.onVerticalDragStart == null &&
+        config.onVerticalDragUpdate == null &&
+        config.onVerticalDragEnd == null &&
+        config.onVerticalDragCancel == null) {
       _verticalDrag = _ensureDisposed(_verticalDrag);
     } else {
       _verticalDrag ??= new VerticalDragGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _verticalDrag
+        ..onDown = config.onVerticalDragDown
         ..onStart = config.onVerticalDragStart
         ..onUpdate = config.onVerticalDragUpdate
-        ..onEnd = config.onVerticalDragEnd;
+        ..onEnd = config.onVerticalDragEnd
+        ..onCancel = config.onVerticalDragCancel;
     }
   }
 
   void _syncHorizontalDrag() {
-    if (config.onHorizontalDragStart == null && config.onHorizontalDragUpdate == null && config.onHorizontalDragEnd == null) {
+    if (config.onHorizontalDragDown == null &&
+        config.onHorizontalDragStart == null &&
+        config.onHorizontalDragUpdate == null &&
+        config.onHorizontalDragEnd == null &&
+        config.onHorizontalDragCancel == null) {
       _horizontalDrag = _ensureDisposed(_horizontalDrag);
     } else {
       _horizontalDrag ??= new HorizontalDragGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _horizontalDrag
+        ..onDown = config.onHorizontalDragDown
         ..onStart = config.onHorizontalDragStart
         ..onUpdate = config.onHorizontalDragUpdate
-        ..onEnd = config.onHorizontalDragEnd;
+        ..onEnd = config.onHorizontalDragEnd
+        ..onCancel = config.onHorizontalDragCancel;
     }
   }
 
   void _syncPan() {
-    if (config.onPanStart == null && config.onPanUpdate == null && config.onPanEnd == null) {
+    if (config.onPanDown == null &&
+        config.onPanStart == null &&
+        config.onPanUpdate == null &&
+        config.onPanEnd == null &&
+        config.onPanCancel == null) {
       _pan = _ensureDisposed(_pan);
     } else {
       assert(_scale == null);  // Scale is a superset of pan; just use scale
       _pan ??= new PanGestureRecognizer(router: _router, gestureArena: Gesturer.instance.gestureArena);
       _pan
+        ..onDown = config.onPanStart
         ..onStart = config.onPanStart
         ..onUpdate = config.onPanUpdate
-        ..onEnd = config.onPanEnd;
+        ..onEnd = config.onPanEnd
+        ..onCancel = config.onPanCancel;
     }
   }
 

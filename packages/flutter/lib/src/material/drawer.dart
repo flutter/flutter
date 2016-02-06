@@ -125,7 +125,7 @@ class DrawerControllerState extends State<DrawerController> {
     });
   }
 
-  void _handleTapDown(Point position) {
+  void _down(Point position) {
     _controller.stop();
     _ensureHistoryEntry();
   }
@@ -140,6 +140,16 @@ class DrawerControllerState extends State<DrawerController> {
     if (velocity.dx.abs() >= _kMinFlingVelocity) {
       _controller.fling(velocity: velocity.dx / _width);
     } else if (_controller.value < 0.5) {
+      close();
+    } else {
+      open();
+    }
+  }
+
+  void _cancel() {
+    if (_controller.isDismissed)
+      return;
+    if (_controller.value < 0.5) {
       close();
     } else {
       open();
@@ -173,8 +183,10 @@ class DrawerControllerState extends State<DrawerController> {
     } else {
       return new GestureDetector(
         key: _gestureDetectorKey,
+        onHorizontalDragDown: _down,
         onHorizontalDragUpdate: _move,
         onHorizontalDragEnd: _settle,
+        onHorizontalDragCancel: _cancel,
         child: new RepaintBoundary(
           child: new Stack(
             children: <Widget>[
@@ -189,18 +201,15 @@ class DrawerControllerState extends State<DrawerController> {
               ),
               new Align(
                 alignment: const FractionalOffset(0.0, 0.5),
-                child: new GestureDetector(
-                  onTapDown: _handleTapDown,
-                  child: new Align(
-                    alignment: const FractionalOffset(1.0, 0.5),
-                    widthFactor: _controller.value,
-                    child: new SizeObserver(
-                      onSizeChanged: _handleSizeChanged,
-                      child: new RepaintBoundary(
-                        child: new Focus(
-                          key: _focusKey,
-                          child: config.child
-                        )
+                child: new Align(
+                  alignment: const FractionalOffset(1.0, 0.5),
+                  widthFactor: _controller.value,
+                  child: new SizeObserver(
+                    onSizeChanged: _handleSizeChanged,
+                    child: new RepaintBoundary(
+                      child: new Focus(
+                        key: _focusKey,
+                        child: config.child
                       )
                     )
                   )
