@@ -23,4 +23,12 @@ executable("sky_snapshot") {
     "//sky/engine/bindings:snapshot_cc",
     "//third_party/zlib",
   ]
+
+  ldflags = [
+    # libgcc_s is not a DT_NEEDED library; it normally gets loaded implicitly.
+    # This flag ensures that rpath is referenced when searching for
+    # the so, which in turn gets the resulting sky_snapshot binary
+    # closer to being able to run in Google's production environment. 
+    "-lgcc_s",
+  ]
 }
