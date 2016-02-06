@@ -670,7 +670,7 @@ abstract class RenderBox extends RenderObject {
     super.markNeedsLayout();
   }
   void performResize() {
-    // default behaviour for subclasses that have sizedByParent = true
+    // default behavior for subclasses that have sizedByParent = true
     size = constraints.constrain(Size.zero);
     assert(!size.isInfinite);
   }

@@ -13,9 +13,15 @@ import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 
+/// Visualizes the semantics for the child.
+///
+/// This widget is useful for understand how an app presents itself to
+/// accessibility technology.
 class SemanticsDebugger extends StatefulComponent {
   const SemanticsDebugger({ Key key, this.child }) : super(key: key);
+
   final Widget child;
+
   _SemanticsDebuggerState createState() => new _SemanticsDebuggerState();
 }
 

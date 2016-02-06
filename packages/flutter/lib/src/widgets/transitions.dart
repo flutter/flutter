@@ -14,6 +14,13 @@ import 'framework.dart';
 export 'package:flutter/animation.dart' show AnimationDirection;
 export 'package:flutter/rendering.dart' show RelativeRect;
 
+/// A component that rebuilds when the given animation changes value.
+///
+/// AnimatedComponent is most useful for stateless animated widgets. To use
+/// AnimatedComponent, simply subclass it and implement the build function.
+///
+/// For more complex case involving additional state, consider using
+/// [AnimatedBuilder].
 abstract class AnimatedComponent extends StatefulComponent {
   AnimatedComponent({
     Key key,
@@ -22,8 +29,11 @@ abstract class AnimatedComponent extends StatefulComponent {
     assert(animation != null);
   }
 
+  /// The animation to which this component is listening.
   final Animation<Object> animation;
 
+  /// Override this function to build widgets that depend on the current value
+  /// of the animation.
   Widget build(BuildContext context);
 
   /// Subclasses typically do not override this method.
@@ -64,6 +74,7 @@ class _AnimatedComponentState extends State<AnimatedComponent> {
   }
 }
 
+/// Animates the position of a widget relative to its normal position.
 class SlideTransition extends AnimatedComponent {
   SlideTransition({
     Key key,
@@ -72,8 +83,21 @@ class SlideTransition extends AnimatedComponent {
     this.child
   }) : position = position, super(key: key, animation: position);
 
+  /// The animation that controls the position of the child.
+  ///
+  /// If the current value of the position animation is (dx, dy), the child will
+  /// be translated horizontally by width * dx and vertically by height * dy.
   final Animation<FractionalOffset> position;
+
+
+  /// Whether hit testing should be affected by the slide animation.
+  ///
+  /// If false, hit testing will proceed as if the child was not translated at
+  /// all. Setting this value to false is useful for fast animations where you
+  /// expect the user to commonly interact with the child widget in its final
+  /// location and you want the user to benefit from "muscle memory".
   final bool transformHitTests;
+
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -85,6 +109,7 @@ class SlideTransition extends AnimatedComponent {
   }
 }
 
+/// Animates the size of a widget.
 class ScaleTransition extends AnimatedComponent {
   ScaleTransition({
     Key key,
@@ -93,8 +118,19 @@ class ScaleTransition extends AnimatedComponent {
     this.child
   }) : scale = scale, super(key: key, animation: scale);
 
+  /// The animation that controls the scale of the child.
+  ///
+  /// If the current value of the scale animation is v, the child will be
+  /// painted v times its normal size.
   final Animation<double> scale;
+
+  /// The alignment of the origin of the coordainte system in which the scale
+  /// takes place, relative to the size of the box.
+  ///
+  /// For example, to set the origin of the scale to bottom middle, you can use
+  /// an alignment of (0.5, 1.0).
   final FractionalOffset alignment;
+
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -109,6 +145,7 @@ class ScaleTransition extends AnimatedComponent {
   }
 }
 
+/// Animates the rotation of a widget.
 class RotationTransition extends AnimatedComponent {
   RotationTransition({
     Key key,
@@ -116,7 +153,12 @@ class RotationTransition extends AnimatedComponent {
     this.child
   }) : turns = turns, super(key: key, animation: turns);
 
+  /// The animation that controls the rotation of the child.
+  ///
+  /// If the current value of the turns animation is v, the child will be
+  /// rotated v * 2 * pi radians before being painted.
   final Animation<double> turns;
+
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -130,6 +172,7 @@ class RotationTransition extends AnimatedComponent {
   }
 }
 
+/// Animates the opacity of a widget.
 class FadeTransition extends AnimatedComponent {
   FadeTransition({
     Key key,
@@ -137,7 +180,14 @@ class FadeTransition extends AnimatedComponent {
     this.child
   }) : opacity = opacity, super(key: key, animation: opacity);
 
+  /// The animation that controls the opacity of the child.
+  ///
+  /// If the current value of the opacity animation is v, the child will be
+  /// painted with an opacity of v. For example, if v is 0.5, the child will be
+  /// blended 50% with its background. Similarly, if v is 0.0, the child will be
+  /// completely transparent.
   final Animation<double> opacity;
+
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -145,6 +195,7 @@ class FadeTransition extends AnimatedComponent {
   }
 }
 
+/// Animates the background color of a widget.
 class ColorTransition extends AnimatedComponent {
   ColorTransition({
     Key key,
@@ -152,7 +203,12 @@ class ColorTransition extends AnimatedComponent {
     this.child
   }) : color = color, super(key: key, animation: color);
 
+  /// The animation that controls the color of the background.
+  ///
+  /// If the current value of the color animation is c, this widget will paint
+  /// a rectangular background behind the child widget of color c.
   final Animation<Color> color;
+
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -163,10 +219,10 @@ class ColorTransition extends AnimatedComponent {
   }
 }
 
-/// An animated variable containing a RelativeRectangle
+/// An interpolation between two relative rects.
 ///
-/// This class specializes the interpolation of AnimatedValue<RelativeRect> to
-/// be appropriate for rectangles that are described in terms of offsets from
+/// This class specializes the interpolation of Tween<RelativeRect> to be
+/// appropriate for rectangles that are described in terms of offsets from
 /// other rectangles.
 class RelativeRectTween extends Tween<RelativeRect> {
   RelativeRectTween({ RelativeRect begin, RelativeRect end })
@@ -189,7 +245,9 @@ class PositionedTransition extends AnimatedComponent {
     assert(rect != null);
   }
 
+  /// The animation that controls the child's size and position.
   final Animation<RelativeRect> rect;
+
   final Widget child;
 
   Widget build(BuildContext context) {
@@ -203,8 +261,28 @@ class PositionedTransition extends AnimatedComponent {
   }
 }
 
+/// A builder that builds a widget given a child.
 typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
+/// A general-purpose widget for building animations.
+///
+/// AnimatedBuilder is useful for more complex components that wish to include
+/// an animation as part of a larger build function. To use AnimatedBuilder,
+/// simply construct the widget and pass it a builder function.
+///
+/// If your [builder] function contains a subtree that does not depend on the
+/// animation, it's more efficient to build that subtree once instead of
+/// rebuilding it on every animation tick.
+///
+/// If you pass the pre-built subtree as the [child] parameter, the
+/// AnimatedBuilder will pass it back to your builder function so that you
+/// can incorporate it into your build.
+///
+/// Using this pre-built child is entirely optional, but can improve
+/// performance significantly in some cases and is therefore a good practice.
+///
+/// For simple cases without additional state, consider using
+/// [AnimatedComponent].
 class AnimatedBuilder extends AnimatedComponent {
   AnimatedBuilder({
     Key key,
@@ -213,7 +291,19 @@ class AnimatedBuilder extends AnimatedComponent {
     this.child
   }) : super(key: key, animation: animation);
 
+  /// Called every time the animation changes value.
   final TransitionBuilder builder;
+
+  /// If your builder function contains a subtree that does not depend on the
+  /// animation, it's more efficient to build that subtree once instead of
+  /// rebuilding it on every animation tick.
+  ///
+  /// If you pass the pre-built subtree as the [child] parameter, the
+  /// AnimatedBuilder will pass it back to your builder function so that you
+  /// can incorporate it into your build.
+  ///
+  /// Using this pre-built child is entirely optional, but can improve
+  /// performance significantly in some cases and is therefore a good practice.
   final Widget child;
 
   Widget build(BuildContext context) {

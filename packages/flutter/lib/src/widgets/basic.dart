@@ -364,7 +364,7 @@ class Padding extends OneChildRenderObjectWidget {
 /// By default, sizes to be as big as possible in both axes. If either axis is
 /// unconstrained, then in that direction it will be sized to fit the child's
 /// dimensions. Using widthFactor and heightFactor you can force this latter
-/// behaviour in all cases.
+/// behavior in all cases.
 class Align extends OneChildRenderObjectWidget {
   Align({
     Key key,

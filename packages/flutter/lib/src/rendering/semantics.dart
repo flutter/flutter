@@ -158,7 +158,7 @@ class SemanticsNode extends AbstractNode {
     _newChildren ??= <SemanticsNode>[];
     _newChildren.addAll(children);
     // we do the asserts afterwards because children is an Iterable
-    // and doing the asserts before would mean the behaviour is
+    // and doing the asserts before would mean the behavior is
     // different in checked mode vs release mode (if you walk an
     // iterator after having reached the end, it'll just start over;
     // the values are not cached).

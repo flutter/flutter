@@ -810,7 +810,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void debugAssertDoesMeetConstraints();
 
   /// When true, debugAssertDoesMeetConstraints() is currently
-  /// executing asserts for verifying the consistent behaviour of
+  /// executing asserts for verifying the consistent behavior of
   /// intrinsic dimensions methods.
   ///
   /// This should only be set by debugAssertDoesMeetConstraints()

@@ -1834,7 +1834,7 @@ typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTra
 /// the exception occurred, and may include additional details such as
 /// descriptions of the objects involved. The 'exception' argument contains the
 /// object that was thrown, and the 'stack' argument contains the stack trace.
-/// If no callback is set, then a default behaviour consisting of dumping the
+/// If no callback is set, then a default behavior consisting of dumping the
 /// context, exception, and stack trace to the console is used instead.
 WidgetsExceptionHandler debugWidgetsExceptionHandler;
 void _debugReportException(String context, dynamic exception, StackTrace stack) {

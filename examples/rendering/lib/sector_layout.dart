@@ -91,7 +91,7 @@ abstract class RenderSector extends RenderObject {
     assert(deltaTheta <= math.max(constraints.minDeltaTheta, constraints.maxDeltaTheta));
   }
   void performResize() {
-    // default behaviour for subclasses that have sizedByParent = true
+    // default behavior for subclasses that have sizedByParent = true
     deltaRadius = constraints.constrainDeltaRadius(0.0);
     deltaTheta = constraints.constrainDeltaTheta(0.0);
   }

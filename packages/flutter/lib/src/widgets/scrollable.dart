@@ -25,6 +25,7 @@ const double _kMillisecondsPerSecond = 1000.0;
 const double _kMinFlingVelocity = -kMaxFlingVelocity * _kMillisecondsPerSecond;
 const double _kMaxFlingVelocity = kMaxFlingVelocity * _kMillisecondsPerSecond;
 
+/// The accuracy to which scrolling is computed.
 final Tolerance kPixelScrollTolerance = new Tolerance(
   velocity: 1.0 / (0.050 * ui.window.devicePixelRatio),  // logical pixels per second
   distance: 1.0 / ui.window.devicePixelRatio  // logical pixels
@@ -33,8 +34,13 @@ final Tolerance kPixelScrollTolerance = new Tolerance(
 typedef void ScrollListener(double scrollOffset);
 typedef double SnapOffsetCallback(double scrollOffset);
 
-/// A base class for scrollable widgets that reacts to user input and generates
-/// a scrollOffset.
+/// A base class for scrollable widgets.
+///
+/// Commonly used subclasses include [ScrollableList], [ScrollableGrid], and
+/// [ScrollableViewport].
+///
+/// Widgets that subclass [Scrollable] typically use state objects that subclass
+/// [ScrollableState].
 abstract class Scrollable extends StatefulComponent {
   Scrollable({
     Key key,
@@ -50,13 +56,25 @@ abstract class Scrollable extends StatefulComponent {
            scrollDirection == Axis.horizontal);
   }
 
+  /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
+
+  /// The axis along which this widget should scroll.
   final Axis scrollDirection;
+
+  /// Called whenever this widget starts to scroll.
   final ScrollListener onScrollStart;
+
+  /// Called whenever this widget's scroll offset changes.
   final ScrollListener onScroll;
+
+  /// Called whenever this widget stops scrolling.
   final ScrollListener onScrollEnd;
+
+  /// Called to determine the offset to which scrolling should snap.
   final SnapOffsetCallback snapOffsetCallback;
-  final double snapAlignmentOffset;
+
+  final double snapAlignmentOffset; // What does this do?
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScrollableState of(BuildContext context) {
@@ -130,6 +148,10 @@ abstract class Scrollable extends StatefulComponent {
   ScrollableState createState();
 }
 
+/// Contains the state for common scrolling behaviors.
+///
+/// Widgets that subclass [Scrollable] typically use state objects that subclass
+/// [ScrollableState].
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
   void initState() {
     super.initState();
@@ -139,14 +161,13 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   AnimationController _controller;
 
+  /// The current scroll offset.
+  ///
+  /// The scroll offset is applied to the child widget along the scroll
+  /// direction before painting. A positive scroll offset indicates that
+  /// more content in the preferred reading direction is visible.
   double get scrollOffset => _scrollOffset;
   double _scrollOffset;
-
-  Offset get scrollOffsetVector {
-    if (config.scrollDirection == Axis.horizontal)
-      return new Offset(scrollOffset, 0.0);
-    return new Offset(0.0, scrollOffset);
-  }
 
   /// Convert a position or velocity measured in terms of pixels to a scrollOffset.
   /// Scrollable gesture handlers convert their incoming values with this method.
@@ -154,6 +175,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// override this method.
   double pixelToScrollOffset(double pixelValue) => pixelValue;
 
+  /// Returns the component of the given velocity in the scroll direction.
   double scrollDirectionVelocity(Offset scrollVelocity) {
     return config.scrollDirection == Axis.horizontal
       ? -scrollVelocity.dx
@@ -161,7 +183,16 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   ScrollBehavior _scrollBehavior;
+
+  /// Subclasses should override this function to create the [ScrollBehavior]
+  /// they desire.
   ScrollBehavior createScrollBehavior();
+
+  /// The current scroll behavior of this widget.
+  ///
+  /// Scroll behaviors control where the boundaries of the scrollable are placed
+  /// and how the scrolling physics should behave near those boundaries and
+  /// after the user stops directly manipulating the scrollable.
   ScrollBehavior get scrollBehavior {
     if (_scrollBehavior == null)
       _scrollBehavior = createScrollBehavior();
@@ -202,6 +233,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     );
   }
 
+  /// Subclasses should override this function to build the interior of their
+  /// scrollable widget. Scrollable wraps the returned widget in a
+  /// [GestureDetector] to observe the user's interaction with this widget and
+  /// to adjust the scroll offset accordingly.
   Widget buildContent(BuildContext context);
 
   Future _animateTo(double newScrollOffset, Duration duration, Curve curve) {
@@ -227,10 +262,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return simulation;
   }
 
-  double snapScrollOffset(double value) {
-    return config.snapOffsetCallback == null ? value : config.snapOffsetCallback(value);
+  /// Returns the snapped offset closest to the given scroll offset.
+  double snapScrollOffset(double scrollOffset) {
+    return config.snapOffsetCallback == null ? scrollOffset : config.snapOffsetCallback(scrollOffset);
   }
 
+  /// Whether this scrollable should attempt to snap scroll offsets.
   bool get snapScrollOffsetChanges => config.snapOffsetCallback != null;
 
   Simulation _createSnapSimulation(double velocity) {
@@ -291,6 +328,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     dispatchOnScroll();
   }
 
+  /// Scroll this widget to the given scroll offset.
+  ///
+  /// If a non-null [duration] is provided, the widget will animate to the new
+  /// scroll offset over the given duration with the given curve.
   Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
     if (newScrollOffset == _scrollOffset)
       return new Future.value();
@@ -304,11 +345,20 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return _animateTo(newScrollOffset, duration, curve);
   }
 
+  /// Scroll this widget by the given scroll delta.
+  ///
+  /// If a non-null [duration] is provided, the widget will animate to the new
+  /// scroll offset over the given duration with the given curve.
   Future scrollBy(double scrollDelta, { Duration duration, Curve curve: Curves.ease }) {
     double newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
     return scrollTo(newScrollOffset, duration: duration, curve: curve);
   }
 
+  /// Fling the scroll offset with the given velocity.
+  ///
+  /// Calling this function starts a physics-based animation of the scroll
+  /// offset with the given value as the initial velocity. The physics
+  /// simulation used is determined by the scroll behavior.
   Future fling(Offset scrollVelocity) {
     if (scrollVelocity != Offset.zero)
       return _startToEndAnimation(scrollVelocity);
@@ -317,21 +367,34 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return new Future.value();
   }
 
+  /// Animate the scroll offset to a value with a local minima of energy.
+  ///
+  /// Calling this function starts a physics-based animation of the scroll
+  /// offset either to a snap point or to within the scrolling bounds. The
+  /// physics simulation used is determined by the scroll behavior.
   Future settleScrollOffset() {
     return _startToEndAnimation(Offset.zero);
   }
 
+  /// Calls the onScrollStart callback.
+  ///
+  /// Subclasses can override this function to hook the scroll start callback.
   void dispatchOnScrollStart() {
     if (config.onScrollStart != null)
       config.onScrollStart(_scrollOffset);
   }
 
-  // Derived classes can override this method and call super.dispatchOnScroll()
+  /// Calls the onScroll callback.
+  ///
+  /// Subclasses can override this function to hook the scroll callback.
   void dispatchOnScroll() {
     if (config.onScroll != null)
       config.onScroll(_scrollOffset);
   }
 
+  /// Calls the dispatchOnScrollEnd callback.
+  ///
+  /// Subclasses can override this function to hook the scroll end callback.
   void dispatchOnScrollEnd() {
     if (config.onScrollEnd != null)
       config.onScrollEnd(_scrollOffset);
@@ -363,10 +426,15 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 }
 
+/// Indicates that a descendant scrollable has scrolled.
 class ScrollNotification extends Notification {
-  ScrollNotification(this.scrollable, this.position);
+  ScrollNotification(this.scrollable, this.scrollOffset);
+
+  /// The scrollable that scrolled.
   final ScrollableState scrollable;
-  final double position;
+
+  /// The new scroll offset that the scrollable obtained.
+  final double scrollOffset;
 }
 
 /// A simple scrollable widget that has a single child. Use this component if
@@ -391,10 +459,10 @@ class ScrollableViewport extends Scrollable {
 
   final Widget child;
 
-  ScrollableViewportState createState() => new ScrollableViewportState();
+  ScrollableState createState() => new _ScrollableViewportState();
 }
 
-class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
+class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
   ScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
   OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
 
@@ -421,11 +489,17 @@ class ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     ));
   }
 
+  Offset get _scrollOffsetVector {
+    if (config.scrollDirection == Axis.horizontal)
+      return new Offset(scrollOffset, 0.0);
+    return new Offset(0.0, scrollOffset);
+  }
+
   Widget buildContent(BuildContext context) {
     return new SizeObserver(
       onSizeChanged: _handleViewportSizeChanged,
       child: new Viewport(
-        scrollOffset: scrollOffsetVector,
+        scrollOffset: _scrollOffsetVector,
         scrollDirection: config.scrollDirection,
         child: new SizeObserver(
           onSizeChanged: _handleChildSizeChanged,
