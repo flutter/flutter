@@ -20,7 +20,10 @@ assets:
   - packages/flutter_gallery_assets/icon-snow.png
   - packages/flutter_gallery_assets/kangaroo_valley_safari.png
   - packages/flutter_gallery_assets/top_10_australian_beaches.png
+  - packages/flutter_gallery_assets/jumpingjack.json
+  - packages/flutter_gallery_assets/jumpingjack.png
 material-design-icons:
+  - name: action/accessibility
   - name: action/account_circle
   - name: action/alarm
   - name: action/android
@@ -29,6 +32,8 @@ material-design-icons:
   - name: action/home
   - name: action/hourglass_empty
   - name: action/language
+  - name: av/play_arrow
+  - name: av/stop
   - name: communication/call
   - name: communication/email
   - name: communication/location_on
@@ -39,6 +44,8 @@ material-design-icons:
   - name: content/create
   - name: image/brightness_5
   - name: image/brightness_7
+  - name: image/flash_on
+  - name: image/timer
   - name: navigation/arrow_back
   - name: navigation/arrow_drop_down
   - name: navigation/arrow_forward
