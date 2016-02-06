@@ -9,22 +9,10 @@ main() => defineTests();
 
 defineTests() {
   group('android_device', () {
-    test('uses the correct default ID', () {
-      AndroidDevice android = new AndroidDevice();
-      expect(android.id, equals(AndroidDevice.defaultDeviceID));
-    });
-
     test('stores the requested id', () {
       String deviceId = '1234';
-      AndroidDevice android = new AndroidDevice(id: deviceId);
-      expect(android.id, equals(deviceId));
-    });
-
-    test('correctly creates only one of each requested device id', () {
-      String deviceID = '1234';
-      AndroidDevice a1 = new AndroidDevice(id: deviceID);
-      AndroidDevice a2 = new AndroidDevice(id: deviceID);
-      expect(a1, equals(a2));
+      AndroidDevice device = new AndroidDevice(deviceId);
+      expect(device.id, equals(deviceId));
     });
   });
 }

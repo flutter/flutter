@@ -366,7 +366,7 @@ int _buildApk(
     ensureDirectoryExists(finalApk.path);
     builder.align(unalignedApk, finalApk);
 
-    printStatus('APK generated: ${finalApk.path}');
+    printStatus('Generated APK to ${finalApk.path}.');
 
     return 0;
   } finally {
@@ -520,7 +520,7 @@ Future<ApplicationPackageStore> buildAll(
     // TODO(mpcomplete): Temporary hack. We only support the apk builder atm.
     if (package == applicationPackages.android) {
       if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
-        printStatus('Using pre-built SkyShell.apk');
+        printStatus('Using pre-built SkyShell.apk.');
         continue;
       }
 

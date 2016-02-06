@@ -35,36 +35,16 @@ class AndroidDeviceDiscovery extends DeviceDiscovery {
 }
 
 class AndroidDevice extends Device {
-  static final String defaultDeviceID = 'default_android_device';
-
-  String productID;
-  String modelID;
-  String deviceCodeName;
-
-  bool _connected;
-  String _adbPath;
-  String get adbPath => _adbPath;
-  bool _hasAdb = false;
-  bool _hasValidAndroid = false;
-
-  factory AndroidDevice({
-    String id: null,
-    String productID: null,
-    String modelID: null,
-    String deviceCodeName: null,
+  AndroidDevice(
+    String id, {
+    this.productID,
+    this.modelID,
+    this.deviceCodeName,
     bool connected
-  }) {
-    AndroidDevice device = Device.unique(id ?? defaultDeviceID, (String id) => new AndroidDevice.fromId(id));
-    device.productID = productID;
-    device.modelID = modelID;
-    device.deviceCodeName = deviceCodeName;
+  }) : super(id) {
     if (connected != null)
-      device._connected = connected;
-    return device;
-  }
+      _connected = connected;
 
-  /// This constructor is intended as protected access; prefer [AndroidDevice].
-  AndroidDevice.fromId(id) : super.fromId(id) {
     _adbPath = getAdbPath();
     _hasAdb = _checkForAdb();
 
@@ -77,6 +57,16 @@ class AndroidDevice extends Device {
       printError('Unable to run on Android.');
     }
   }
+
+  final String productID;
+  final String modelID;
+  final String deviceCodeName;
+
+  bool _connected;
+  String _adbPath;
+  String get adbPath => _adbPath;
+  bool _hasAdb = false;
+  bool _hasValidAndroid = false;
 
   static String getAndroidSdkPath() {
     if (Platform.environment.containsKey('ANDROID_HOME')) {
@@ -98,12 +88,7 @@ class AndroidDevice extends Device {
   }
 
   List<String> adbCommandForDevice(List<String> args) {
-    List<String> result = <String>[adbPath];
-    if (id != defaultDeviceID) {
-      result.addAll(['-s', id]);
-    }
-    result.addAll(args);
-    return result;
+    return <String>[adbPath, '-s', id]..addAll(args);
   }
 
   bool _isValidAdbVersion(String adbVersion) {
@@ -132,12 +117,12 @@ class AndroidDevice extends Device {
 
   bool _checkForAdb() {
     try {
-      String adbVersion = runCheckedSync([adbPath, 'version']);
+      String adbVersion = runCheckedSync(<String>[adbPath, 'version']);
       if (_isValidAdbVersion(adbVersion)) {
         return true;
       }
 
-      String locatedAdbPath = runCheckedSync(['which', 'adb']);
+      String locatedAdbPath = runCheckedSync(<String>['which', 'adb']);
       printError('"$locatedAdbPath" is too old. '
           'Please install version 1.0.32 or later.\n'
           'Try setting ANDROID_HOME to the path to your Android SDK install. '
@@ -157,18 +142,18 @@ class AndroidDevice extends Device {
       // output lines like this, which we want to ignore:
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
-      runCheckedSync(adbCommandForDevice(['start-server']));
+      runCheckedSync(adbCommandForDevice(<String>['start-server']));
 
-      String ready = runSync(adbCommandForDevice(['shell', 'echo', 'ready']));
+      String ready = runSync(adbCommandForDevice(<String>['shell', 'echo', 'ready']));
       if (ready.trim() != 'ready') {
         printTrace('Android device not found.');
         return false;
       }
 
       // Sample output: '22'
-      String sdkVersion =
-          runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.build.version.sdk']))
-              .trimRight();
+      String sdkVersion = runCheckedSync(
+        adbCommandForDevice(<String>['shell', 'getprop', 'ro.build.version.sdk'])
+      ).trimRight();
 
       int sdkVersionParsed =
           int.parse(sdkVersion, onError: (String source) => null);
@@ -194,7 +179,7 @@ class AndroidDevice extends Device {
   }
 
   String _getDeviceApkSha1(ApplicationPackage app) {
-    return runCheckedSync(adbCommandForDevice(['shell', 'cat', _getDeviceSha1Path(app)]));
+    return runCheckedSync(adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(app)]));
   }
 
   String _getSourceSha1(ApplicationPackage app) {
@@ -208,10 +193,10 @@ class AndroidDevice extends Device {
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
-    if (!isConnected()) {
+    if (!isConnected())
       return false;
-    }
-    if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])) == '') {
+
+    if (runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'path', app.id])) == '') {
       printTrace('TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
       return false;
     }
@@ -284,21 +269,21 @@ class AndroidDevice extends Device {
       this.clearLogs();
 
     String deviceTmpPath = '/data/local/tmp/dev.flx';
-    runCheckedSync(adbCommandForDevice(['push', bundlePath, deviceTmpPath]));
-    List<String> cmd = adbCommandForDevice([
+    runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, deviceTmpPath]));
+    List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
       '-d', deviceTmpPath,
       '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
     ]);
     if (checked)
-      cmd.addAll(['--ez', 'enable-checked-mode', 'true']);
+      cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
     if (traceStartup)
-      cmd.addAll(['--ez', 'trace-startup', 'true']);
+      cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
     if (startPaused)
-      cmd.addAll(['--ez', 'start-paused', 'true']);
+      cmd.addAll(<String>['--ez', 'start-paused', 'true']);
     if (route != null)
-      cmd.addAll(['--es', 'route', route]);
+      cmd.addAll(<String>['--es', 'route', route]);
     cmd.add(apk.launchActivity);
     runCheckedSync(cmd);
     return true;
@@ -345,7 +330,7 @@ class AndroidDevice extends Device {
 
   Future<bool> stopApp(ApplicationPackage app) async {
     final AndroidApk apk = app;
-    runSync(adbCommandForDevice(['shell', 'am', 'force-stop', apk.id]));
+    runSync(adbCommandForDevice(<String>['shell', 'am', 'force-stop', apk.id]));
     return true;
   }
 
@@ -353,13 +338,13 @@ class AndroidDevice extends Device {
   TargetPlatform get platform => TargetPlatform.android;
 
   void clearLogs() {
-    runSync(adbCommandForDevice(['logcat', '-c']));
+    runSync(adbCommandForDevice(<String>['logcat', '-c']));
   }
 
   DeviceLogReader createLogReader() => new _AdbLogReader(this);
 
   void startTracing(AndroidApk apk) {
-    runCheckedSync(adbCommandForDevice([
+    runCheckedSync(adbCommandForDevice(<String>[
       'shell',
       'am',
       'broadcast',
@@ -371,18 +356,18 @@ class AndroidDevice extends Device {
   // Return the most recent timestamp in the Android log.  The format can be
   // passed to logcat's -T option.
   String lastLogcatTimestamp() {
-    String output = runCheckedSync(adbCommandForDevice(['logcat', '-v', 'time', '-t', '1']));
+    String output = runCheckedSync(adbCommandForDevice(<String>['logcat', '-v', 'time', '-t', '1']));
 
     RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
     Match timeMatch = timeRegExp.firstMatch(output);
     return timeMatch[0];
   }
 
-  Future<String> stopTracing(AndroidApk apk, { String outPath: null }) async {
+  Future<String> stopTracing(AndroidApk apk, { String outPath }) async {
     // Workaround for logcat -c not always working:
     // http://stackoverflow.com/questions/25645012/logcat-on-android-l-not-clearing-after-unplugging-and-reconnecting
     String beforeStop = lastLogcatTimestamp();
-    runCheckedSync(adbCommandForDevice([
+    runCheckedSync(adbCommandForDevice(<String>[
       'shell',
       'am',
       'broadcast',
@@ -396,7 +381,7 @@ class AndroidDevice extends Device {
     String tracePath = null;
     bool isComplete = false;
     while (!isComplete) {
-      String logs = runCheckedSync(adbCommandForDevice(['logcat', '-d', '-T', beforeStop]));
+      String logs = runCheckedSync(adbCommandForDevice(<String>['logcat', '-d', '-T', beforeStop]));
       Match fileMatch = traceRegExp.firstMatch(logs);
       if (fileMatch != null && fileMatch[1] != null) {
         tracePath = fileMatch[1];
@@ -430,7 +415,7 @@ class AndroidDevice extends Device {
     return null;
   }
 
-  bool isConnected() => _connected != null ? _connected : _hasValidAndroid;
+  bool isConnected() => _connected ?? _hasValidAndroid;
 
   void setConnected(bool value) {
     _connected = value;
@@ -444,13 +429,13 @@ List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
   String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : getAdbPath();
 
   try {
-    runCheckedSync([adbPath, 'version']);
+    runCheckedSync(<String>[adbPath, 'version']);
   } catch (e) {
     printError('Unable to find adb. Is "adb" in your path?');
     return devices;
   }
 
-  List<String> output = runSync([adbPath, 'devices', '-l']).trim().split('\n');
+  List<String> output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
   RegExp deviceRegex1 = new RegExp(
@@ -461,7 +446,7 @@ List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
   RegExp unauthorizedRegex = new RegExp(r'^(\S+)\s+unauthorized\s+\S+$');
   RegExp offlineRegex = new RegExp(r'^(\S+)\s+offline\s+\S+$');
 
-  // Skip first line, which is always 'List of devices attached'.
+  // Skip the first line, which is always 'List of devices attached'.
   for (String line in output.skip(1)) {
     // Skip lines like:
     // * daemon not running. starting it now on port 5037 *
@@ -484,15 +469,16 @@ List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
         modelID = modelID.replaceAll('_', ' ');
 
       devices.add(new AndroidDevice(
-          id: deviceID,
-          productID: productID,
-          modelID: modelID,
-          deviceCodeName: deviceCodeName
+        deviceID,
+        productID: productID,
+        modelID: modelID,
+        deviceCodeName: deviceCodeName,
+        connected: true
       ));
     } else if (deviceRegex2.hasMatch(line)) {
       Match match = deviceRegex2.firstMatch(line);
       String deviceID = match[1];
-      devices.add(new AndroidDevice(id: deviceID));
+      devices.add(new AndroidDevice(deviceID, connected: true));
     } else if (unauthorizedRegex.hasMatch(line)) {
       Match match = unauthorizedRegex.firstMatch(line);
       String deviceID = match[1];

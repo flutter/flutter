@@ -362,7 +362,7 @@ class AndroidDeviceDiscovery {
       if (androidDevice == null) {
         // device added
         androidDevice = new AndroidDevice(
-          id: device.id,
+          device.id,
           productID: device.productID,
           modelID: device.modelID,
           deviceCodeName: device.deviceCodeName,
@@ -384,11 +384,6 @@ class AndroidDeviceDiscovery {
     // device removed
     for (AndroidDevice device in currentDevices) {
       _devices.remove(device.id);
-
-      // I don't know the purpose of this cache or if it's a good idea. We should
-      // probably have a DeviceManager singleton class to coordinate known devices
-      // and different device discovery mechanisms.
-      Device.removeFromCache(device.id);
 
       removedController.add(device);
     }
@@ -424,7 +419,7 @@ class IOSSimulatorDeviceDiscovery {
 
       if (androidDevice == null) {
         // device added
-        androidDevice = new IOSSimulator(id: device.udid, name: device.name);
+        androidDevice = new IOSSimulator(device.udid, name: device.name);
         _devices[androidDevice.id] = androidDevice;
         addedController.add(androidDevice);
       } else {
@@ -435,8 +430,6 @@ class IOSSimulatorDeviceDiscovery {
     // device removed
     for (IOSSimulator device in currentDevices) {
       _devices.remove(device.id);
-
-      Device.removeFromCache(device.id);
 
       removedController.add(device);
     }

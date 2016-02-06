@@ -66,18 +66,9 @@ abstract class DeviceDiscovery {
 }
 
 abstract class Device {
+  Device(this.id);
+
   final String id;
-  static Map<String, Device> _deviceCache = {};
-
-  static Device unique(String id, Device constructor(String id)) {
-    return _deviceCache.putIfAbsent(id, () => constructor(id));
-  }
-
-  static void removeFromCache(String id) {
-    _deviceCache.remove(id);
-  }
-
-  Device.fromId(this.id);
 
   String get name;
 
@@ -133,6 +124,12 @@ abstract class DeviceLogReader {
 
 // TODO(devoncarew): Unify this with [DeviceManager].
 class DeviceStore {
+  DeviceStore({
+    this.android,
+    this.iOS,
+    this.iOSSimulator
+  });
+
   final AndroidDevice android;
   final IOSDevice iOS;
   final IOSSimulator iOSSimulator;
@@ -147,12 +144,6 @@ class DeviceStore {
       result.add(iOSSimulator);
     return result;
   }
-
-  DeviceStore({
-    this.android,
-    this.iOS,
-    this.iOSSimulator
-  });
 
   static Device _deviceForConfig(BuildConfiguration config, List<Device> devices) {
     Device device = null;
@@ -194,10 +185,6 @@ class DeviceStore {
         case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
           iOSSimulator = _deviceForConfig(config, IOSSimulator.getAttachedDevices());
-          if (iOSSimulator == null) {
-            // Creates a simulator with the default identifier
-            iOSSimulator = new IOSSimulator();
-          }
           break;
         case TargetPlatform.mac:
         case TargetPlatform.linux:
