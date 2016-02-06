@@ -33,8 +33,8 @@ Map<String, double> _kIconDensities = {
   'xxhdpi' : 3.0,
   'xxxhdpi' : 4.0
 };
-const List<String> _kThemes = const ['white', 'black'];
-const List<int> _kSizes = const [18, 24, 36, 48];
+const List<String> _kThemes = const <String>['white', 'black'];
+const List<int> _kSizes = const <int>[18, 24, 36, 48];
 
 class _Asset {
   final String source;

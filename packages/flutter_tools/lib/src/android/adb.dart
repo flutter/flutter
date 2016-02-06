@@ -19,7 +19,7 @@ class Adb {
 
   final String adbPath;
 
-  Map<String, String> _idToNameCache = <String, String>{};
+  final Map<String, String> _idToNameCache = <String, String>{};
 
   bool exists() {
     try {

@@ -47,7 +47,19 @@ class IOSSimulatorDiscovery extends DeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  static final String defaultDeviceID = 'default_ios_id';
+  IOSDevice(String id, { this.name }) : super(id) {
+    _installerPath = _checkForCommand('ideviceinstaller');
+    _listerPath = _checkForCommand('idevice_id');
+    _informerPath = _checkForCommand('ideviceinfo');
+    _debuggerPath = _checkForCommand('idevicedebug');
+    _loggerPath = _checkForCommand('idevicesyslog');
+    _pusherPath = _checkForCommand(
+        'ios-deploy',
+        'To copy files to iOS devices, please install ios-deploy. '
+        'You can do this using homebrew as follows:\n'
+        '\$ brew tap flutter/flutter\n'
+        '\$ brew install ios-deploy');
+  }
 
   String _installerPath;
   String get installerPath => _installerPath;
@@ -67,50 +79,25 @@ class IOSDevice extends Device {
   String _pusherPath;
   String get pusherPath => _pusherPath;
 
-  String _name;
-  String get name => _name;
-
-  factory IOSDevice({String id, String name}) {
-    IOSDevice device = Device.unique(id ?? defaultDeviceID, (String id) => new IOSDevice.fromId(id));
-    device._name = name;
-    return device;
-  }
-
-  IOSDevice.fromId(String id) : super.fromId(id) {
-    _installerPath = _checkForCommand('ideviceinstaller');
-    _listerPath = _checkForCommand('idevice_id');
-    _informerPath = _checkForCommand('ideviceinfo');
-    _debuggerPath = _checkForCommand('idevicedebug');
-    _loggerPath = _checkForCommand('idevicesyslog');
-    _pusherPath = _checkForCommand(
-        'ios-deploy',
-        'To copy files to iOS devices, please install ios-deploy. '
-        'You can do this using homebrew as follows:\n'
-        '\$ brew tap flutter/flutter\n'
-        '\$ brew install ios-deploy');
-  }
+  final String name;
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
     List<IOSDevice> devices = [];
     for (String id in _getAttachedDeviceIDs(mockIOS)) {
       String name = _getDeviceName(id, mockIOS);
-      devices.add(new IOSDevice(id: id, name: name));
+      devices.add(new IOSDevice(id, name: name));
     }
     return devices;
   }
 
   static Iterable<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
-    String listerPath =
-        (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
-    String output;
+    String listerPath = (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
     try {
-      output = runSync([listerPath, '-l']);
+      String output = runSync([listerPath, '-l']);
+      return output.trim().split('\n').where((String s) => s != null && s.isNotEmpty);
     } catch (e) {
-      return [];
+      return <String>[];
     }
-    return output.trim()
-                 .split('\n')
-                 .where((String s) => s != null && s.length > 0);
   }
 
   static String _getDeviceName(String deviceID, [IOSDevice mockIOS]) {
@@ -142,11 +129,7 @@ class IOSDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     try {
-      if (id == defaultDeviceID) {
-        runCheckedSync([installerPath, '-i', app.localPath]);
-      } else {
-        runCheckedSync([installerPath, '-u', id, '-i', app.localPath]);
-      }
+      runCheckedSync([installerPath, '-i', app.localPath]);
       return true;
     } catch (e) {
       return false;
@@ -155,15 +138,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool isConnected() {
-    Iterable<String> ids = _getAttachedDeviceIDs();
-    for (String id in ids) {
-      if (id == this.id || this.id == defaultDeviceID) {
-        return true;
-      }
-    }
-    return false;
-  }
+  bool isConnected() => _getAttachedDeviceIDs().contains(id);
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
@@ -238,7 +213,7 @@ class IOSDevice extends Device {
 
   Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
     if (Platform.isMacOS) {
-      runSync([
+      runSync(<String>[
         pusherPath,
         '-t',
         '1',
@@ -263,22 +238,15 @@ class IOSDevice extends Device {
 }
 
 class IOSSimulator extends Device {
-  factory IOSSimulator({String id, String name}) {
-    IOSSimulator device = Device.unique(id, (String id) => new IOSSimulator.fromId(id));
-    device._name = name;
-    return device;
-  }
+  IOSSimulator(String id, { this.name }) : super(id);
 
   static List<IOSSimulator> getAttachedDevices() {
     return SimControl.getConnectedDevices().map((SimDevice device) {
-      return new IOSSimulator(id: device.udid, name: device.name);
+      return new IOSSimulator(device.udid, name: device.name);
     }).toList();
   }
 
-  IOSSimulator.fromId(String id) : super.fromId(id);
-
-  String _name;
-  String get name => _name;
+  final String name;
 
   String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
 
@@ -378,7 +346,7 @@ class IOSSimulator extends Device {
       ApplicationPackage app, String localFile, String targetFile) async {
     if (Platform.isMacOS) {
       String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
-      runCheckedSync(['cp', localFile, path.join(simulatorHomeDirectory, targetFile)]);
+      runCheckedSync(<String>['cp', localFile, path.join(simulatorHomeDirectory, targetFile)]);
       return true;
     }
     return false;
@@ -413,7 +381,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
       return 2;
 
     return await runCommandAndStreamOutput(
-      [device.loggerPath],
+      <String>[device.loggerPath],
       prefix: '[$name] ',
       filter: new RegExp(r'(FlutterRunner|flutter.runner.Runner)')
     );
@@ -512,7 +480,7 @@ bool _checkXcodeVersion() {
   if (!Platform.isMacOS)
     return false;
   try {
-    String version = runCheckedSync(['xcodebuild', '-version']);
+    String version = runCheckedSync(<String>['xcodebuild', '-version']);
     Match match = _xcodeVersionRegExp.firstMatch(version);
     if (int.parse(match[1]) < 7) {
       printError('Found "${match[0]}". $_xcodeRequirement');
@@ -534,12 +502,12 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
   if (!_checkXcodeVersion())
     return false;
 
-  List<String> commands = [
+  List<String> commands = <String>[
     '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
   ];
 
   if (!isDevice) {
-    commands.addAll(['-sdk', 'iphonesimulator']);
+    commands.addAll(<String>['-sdk', 'iphonesimulator']);
   }
 
   try {
