@@ -9,6 +9,8 @@ import 'dart:io';
 import '../android/adb.dart';
 import '../android/device_android.dart';
 import '../base/context.dart';
+import '../base/globals.dart';
+import '../base/logger.dart';
 import '../device.dart';
 import '../ios/device_ios.dart';
 import '../ios/simulator.dart';
@@ -33,9 +35,11 @@ class DaemonCommand extends FlutterCommand {
   Future<int> runInProject() {
     printStatus('Starting device daemon...');
 
-    NotifyingAppContext appContext = new NotifyingAppContext();
+    AppContext appContext = new AppContext();
+    NotifyingLogger notifyingLogger = new NotifyingLogger();
+    appContext[Logger] = notifyingLogger;
 
-    return runZoned(() {
+    return appContext.runInZone(() {
       Stream<Map<String, dynamic>> commandStream = stdin
         .transform(UTF8.decoder)
         .transform(const LineSplitter())
@@ -47,10 +51,10 @@ class DaemonCommand extends FlutterCommand {
 
       Daemon daemon = new Daemon(commandStream, (Map command) {
         stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
-      }, daemonCommand: this, appContext: appContext);
+      }, daemonCommand: this, notifyingLogger: notifyingLogger);
 
       return daemon.onExit;
-    }, zoneValues: {'context': appContext});
+    });
   }
 
   dynamic _jsonEncodeObject(dynamic object) {
@@ -67,7 +71,7 @@ typedef Future<dynamic> CommandHandler(dynamic args);
 class Daemon {
   Daemon(Stream<Map> commandStream, this.sendCommand, {
     this.daemonCommand,
-    this.appContext
+    this.notifyingLogger
   }) {
     // Set up domains.
     _registerDomain(new DaemonDomain(this));
@@ -83,7 +87,7 @@ class Daemon {
 
   final DispatchComand sendCommand;
   final DaemonCommand daemonCommand;
-  final NotifyingAppContext appContext;
+  final NotifyingLogger notifyingLogger;
 
   final Completer<int> _onExitCompleter = new Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -185,7 +189,7 @@ class DaemonDomain extends Domain {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
 
-    _subscription = daemon.appContext.onMessage.listen((LogMessage message) {
+    _subscription = daemon.notifyingLogger.onMessage.listen((LogMessage message) {
       if (message.stackTrace != null) {
         sendEvent('daemon.logMessage', {
           'level': message.level,
@@ -467,12 +471,10 @@ dynamic _toJsonable(dynamic obj) {
   return '$obj';
 }
 
-class NotifyingAppContext implements AppContext {
+class NotifyingLogger extends Logger {
   StreamController<LogMessage> _messageController = new StreamController<LogMessage>.broadcast();
 
   Stream<LogMessage> get onMessage => _messageController.stream;
-
-  bool verbose = false;
 
   void printError(String message, [StackTrace stackTrace]) {
     _messageController.add(new LogMessage('error', message, stackTrace));

@@ -8,9 +8,9 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
-import '../base/context.dart';
-import '../build_configuration.dart';
 import '../artifacts.dart';
+import '../base/globals.dart';
+import '../build_configuration.dart';
 import '../device.dart';
 import '../toolchain.dart';
 import 'flutter_command_runner.dart';

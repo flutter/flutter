@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
-final AppContext _defaultContext = new _DefaultAppContext();
+final AppContext _defaultContext = new AppContext();
 
 /// A singleton for application functionality. This singleton can be different
 /// on a per-Zone basis.
@@ -14,57 +13,42 @@ AppContext get context {
   return currentContext == null ? _defaultContext : currentContext;
 }
 
-/// Display an error level message to the user. Commands should use this if they
-/// fail in some way.
-void printError(String message, [StackTrace stackTrace]) => context.printError(message, stackTrace);
+class AppContext {
+  Map<Type, dynamic> _instances = <Type, dynamic>{};
 
-/// Display normal output of the command. This should be used for things like
-/// progress messages, success messages, or just normal command output.
-void printStatus(String message) => context.printStatus(message);
+  dynamic getVariable(Type type) {
+    if (_instances.containsKey(type))
+      return _instances[type];
 
-/// Use this for verbose tracing output. Users can turn this output on in order
-/// to help diagnose issues with the toolchain or with their setup.
-void printTrace(String message) => context.printTrace(message);
-
-abstract class AppContext {
-  bool get verbose;
-  set verbose(bool value);
-
-  void printError(String message, [StackTrace stackTrace]);
-  void printStatus(String message);
-  void printTrace(String message);
-}
-
-class _DefaultAppContext implements AppContext {
-  DateTime _startTime = new DateTime.now();
-
-  bool _verbose = false;
-
-  bool get verbose => _verbose;
-
-  set verbose(bool value) {
-    _verbose = value;
+    AppContext parent = _calcParent(Zone.current);
+    return parent?.getVariable(type);
   }
 
-  void printError(String message, [StackTrace stackTrace]) {
-    stderr.writeln(_prefix + message);
-    if (stackTrace != null)
-      stderr.writeln(stackTrace);
+  void setVariable(Type type, dynamic instance) {
+    _instances[type] = instance;
   }
 
-  void printStatus(String message) {
-    print(_prefix + message);
+  dynamic operator[](Type type) => getVariable(type);
+
+  void operator[]=(Type type, dynamic instance) => setVariable(type, instance);
+
+  AppContext _calcParent(Zone zone) {
+    if (this == _defaultContext)
+      return null;
+
+    Zone parentZone = zone.parent;
+    if (parentZone == null)
+      return _defaultContext;
+
+    AppContext deps = parentZone['context'];
+    if (deps == this) {
+      return _calcParent(parentZone);
+    } else {
+      return deps != null ? deps : _defaultContext;
+    }
   }
 
-  void printTrace(String message) {
-    if (_verbose)
-      print('$_prefix- $message');
-  }
-
-  String get _prefix {
-    if (!_verbose)
-      return '';
-    Duration elapsed = new DateTime.now().difference(_startTime);
-    return '[${elapsed.inMilliseconds.toString().padLeft(4)} ms] ';
+  dynamic runInZone(dynamic method()) {
+    return runZoned(method, zoneValues: {'context': this});
   }
 }

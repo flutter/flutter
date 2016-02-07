@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 
 // https://android.googlesource.com/platform/system/core/+/android-4.4_r1/adb/OVERVIEW.TXT

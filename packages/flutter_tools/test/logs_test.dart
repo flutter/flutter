@@ -8,16 +8,17 @@ import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';
+import 'src/test_context.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('logs', () {
-    test('fail with a bad device id', () {
+    testUsingContext('fail with a bad device id', () {
       LogsCommand command = new LogsCommand();
       applyMocksToCommand(command);
       CommandRunner runner = new FlutterCommandRunner()..addCommand(command);
-      runner.run(<String>['-d', 'abc123', 'logs']).then((int code) {
+      return runner.run(<String>['-d', 'abc123', 'logs']).then((int code) {
         expect(code, equals(1));
       });
     });

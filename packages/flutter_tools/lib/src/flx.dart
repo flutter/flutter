@@ -13,7 +13,7 @@ import 'package:flx/signing.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
-import 'base/context.dart';
+import 'base/globals.dart';
 import 'base/file_system.dart';
 import 'toolchain.dart';
 

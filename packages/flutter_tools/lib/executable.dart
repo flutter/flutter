@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'src/base/context.dart';
+import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/apk.dart';
@@ -27,6 +29,7 @@ import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/upgrade.dart';
+import 'src/device.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
@@ -62,7 +65,12 @@ Future main(List<String> args) async {
     if (args.isNotEmpty && args[0] == 'init')
       args[0] = 'create';
 
+    // Initialize globals.
+    context[Logger] = new StdoutLogger();
+    context[DeviceManager] = new DeviceManager();
+
     dynamic result = await runner.run(args);
+
     if (result is int)
       exit(result);
   }, onError: (error, Chain chain) {

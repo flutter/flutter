@@ -29,7 +29,7 @@ defineTests() {
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
-      runner.run(['stop']).then((int code) => expect(code, equals(0)));
+      return runner.run(['stop']).then((int code) => expect(code, equals(0)));
     });
 
     test('returns 0 when iOS is connected and ready to be stopped', () {
@@ -48,7 +48,7 @@ defineTests() {
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
-      runner.run(['stop']).then((int code) => expect(code, equals(0)));
+      return runner.run(['stop']).then((int code) => expect(code, equals(0)));
     });
   });
 }

@@ -5,11 +5,13 @@
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/test.dart';
 
+import 'src/test_context.dart';
+
 main() => defineTests();
 
 defineTests() {
   group('DeviceManager', () {
-    test('getDevices', () async {
+    testUsingContext('getDevices', () async {
       // Test that DeviceManager.getDevices() doesn't throw.
       DeviceManager deviceManager = new DeviceManager();
       List<Device> devices = await deviceManager.getDevices();

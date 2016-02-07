@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/context.dart' hide context;
+import 'package:flutter_tools/src/base/globals.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();
@@ -12,55 +12,45 @@ main() => defineTests();
 defineTests() {
   group('DeviceManager', () {
     test('error', () async {
-      MockContext mockContext = new MockContext();
+      AppContext context = new AppContext();
+      BufferLogger mockLogger = new BufferLogger();
+      context[Logger] = mockLogger;
 
-      runZoned(() {
+      context.runInZone(() {
         printError('foo bar');
-      }, zoneValues: {'context': mockContext});
+      });
 
-      expect(mockContext.errorText, 'foo bar\n');
-      expect(mockContext.statusText, '');
-      expect(mockContext.traceText, '');
+      expect(mockLogger.errorText, 'foo bar\n');
+      expect(mockLogger.statusText, '');
+      expect(mockLogger.traceText, '');
     });
 
     test('status', () async {
-      MockContext mockContext = new MockContext();
+      AppContext context = new AppContext();
+      BufferLogger mockLogger = new BufferLogger();
+      context[Logger] = mockLogger;
 
-      runZoned(() {
+      context.runInZone(() {
         printStatus('foo bar');
-      }, zoneValues: {'context': mockContext});
+      });
 
-      expect(mockContext.errorText, '');
-      expect(mockContext.statusText, 'foo bar\n');
-      expect(mockContext.traceText, '');
+      expect(mockLogger.errorText, '');
+      expect(mockLogger.statusText, 'foo bar\n');
+      expect(mockLogger.traceText, '');
     });
 
     test('trace', () async {
-      MockContext mockContext = new MockContext();
+      AppContext context = new AppContext();
+      BufferLogger mockLogger = new BufferLogger();
+      context[Logger] = mockLogger;
 
-      runZoned(() {
+      context.runInZone(() {
         printTrace('foo bar');
-      }, zoneValues: {'context': mockContext});
+      });
 
-      expect(mockContext.errorText, '');
-      expect(mockContext.statusText, '');
-      expect(mockContext.traceText, 'foo bar\n');
+      expect(mockLogger.errorText, '');
+      expect(mockLogger.statusText, '');
+      expect(mockLogger.traceText, 'foo bar\n');
     });
   });
-}
-
-class MockContext implements AppContext {
-  bool verbose = false;
-
-  StringBuffer _error = new StringBuffer();
-  StringBuffer _status = new StringBuffer();
-  StringBuffer _trace = new StringBuffer();
-
-  String get errorText => _error.toString();
-  String get statusText => _status.toString();
-  String get traceText => _trace.toString();
-
-  void printError(String message, [StackTrace stackTrace]) => _error.writeln(message);
-  void printStatus(String message) => _status.writeln(message);
-  void printTrace(String message) => _trace.writeln(message);
 }

@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
 import '../artifacts.dart';
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 
 class CreateCommand extends Command {

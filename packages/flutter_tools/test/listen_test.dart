@@ -9,12 +9,13 @@ import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';
+import 'src/test_context.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('listen', () {
-    test('returns 0 when no device is connected', () {
+    testUsingContext('returns 0 when no device is connected', () {
       ListenCommand command = new ListenCommand(singleRun: true);
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
@@ -24,7 +25,7 @@ defineTests() {
       when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
 
       CommandRunner runner = new FlutterCommandRunner()..addCommand(command);
-      runner.run(['listen']).then((int code) => expect(code, equals(0)));
+      return runner.run(['listen']).then((int code) => expect(code, equals(0)));
     });
   });
 }

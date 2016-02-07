@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
-import 'base/context.dart';
+import 'base/globals.dart';
 import 'base/os.dart';
 import 'base/process.dart';
 import 'build_configuration.dart';
