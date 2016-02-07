@@ -357,9 +357,11 @@
 			files = (
 			);
 			inputPaths = (
+			  "${FLUTTER_APPLICATION_PATH}/pubspec.yaml"
 			);
 			name = "Ensure `pub get`";
 			outputPaths = (
+			  "${FLUTTER_APPLICATION_PATH}/.packages"
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
