@@ -12,6 +12,8 @@ source_set("lib") {
     "asset_unpacker_impl.h",
     "asset_unpacker_job.cc",
     "asset_unpacker_job.h",
+    "zip_asset_bundle.cc",
+    "zip_asset_bundle.h",
   ]
 
   deps = [
