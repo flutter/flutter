@@ -352,8 +352,20 @@ public class PlatformViewAndroid extends SurfaceView
         mTouchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
         if (mAccessibilityEnabled || mTouchExplorationEnabled)
           ensureAccessibilityEnabled();
+        resetWillNotDraw();
         mAccessibilityManager.addAccessibilityStateChangeListener(this);
         mAccessibilityManager.addTouchExplorationStateChangeListener(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mAccessibilityManager.removeAccessibilityStateChangeListener(this);
+        mAccessibilityManager.removeTouchExplorationStateChangeListener(this);
+    }
+
+    private void resetWillNotDraw() {
+        setWillNotDraw(!(mAccessibilityEnabled || mTouchExplorationEnabled));
     }
 
     @Override
@@ -367,6 +379,7 @@ public class PlatformViewAndroid extends SurfaceView
         if (mAccessibilityNodeProvider != null) {
             mAccessibilityNodeProvider.setAccessibilityEnabled(mAccessibilityEnabled);
         }
+        resetWillNotDraw();
     }
 
     @Override
@@ -380,6 +393,7 @@ public class PlatformViewAndroid extends SurfaceView
                 mAccessibilityNodeProvider.handleTouchExplorationExit();
             }
         }
+        resetWillNotDraw();
     }
 
     @Override
@@ -413,10 +427,14 @@ public class PlatformViewAndroid extends SurfaceView
     private boolean handleAccessibilityHoverEvent(MotionEvent event) {
         if (!mTouchExplorationEnabled)
             return false;
-        if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+        if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER ||
+                   event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
+            mAccessibilityNodeProvider.handleTouchExploration(event.getX(), event.getY());
+        } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
             mAccessibilityNodeProvider.handleTouchExplorationExit();
         } else {
-            mAccessibilityNodeProvider.handleTouchExploration(event.getX(), event.getY());
+            Log.d("flutter", "unexpected accessibility hover event: " + event);
+            return false;
         }
         return true;
     }

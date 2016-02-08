@@ -29,7 +29,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
     private Map<Integer, PersistentAccessibilityNode> mTreeNodes;
     private PlatformViewAndroid mOwner;
     private SemanticsServer.Proxy mSemanticsServer;
-    private boolean mAccessilibilyEnabled;
+    private boolean mAccessilibilyEnabled = true;
     private PersistentAccessibilityNode mFocusedNode;
     private PersistentAccessibilityNode mHoveredNode;
 
@@ -88,23 +88,20 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         result.setEnabled(true); // TODO(ianh): Expose disabled subtrees
 
         if (node.canBeTapped) {
-            result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
             result.setClickable(true);
         }
         if (node.canBeLongPressed) {
-            result.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
             result.setLongClickable(true);
         }
-        if ((node.canBeScrolledHorizontally && !node.canBeScrolledVertically) ||
-            (!node.canBeScrolledHorizontally && node.canBeScrolledVertically)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-        }
         if (node.canBeScrolledHorizontally || node.canBeScrolledVertically) {
-            // TODO(ianh): Figure out how to enable panning. SDK v23
-            // has AccessibilityAction.ACTION_SCROLL_LEFT and company,
-            // but earlier versions do not. Right now we only forward
-            // scroll actions if it's unidirectional.
+            // TODO(ianh): Once we're on SDK v23+, call addAction to
+            // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
+            // _UP, and _DOWN when appropriate.
+            // TODO(ianh): Only include the actions if you can actually scroll that way.
+            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
             result.setScrollable(true);
         }
 
@@ -120,9 +117,9 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
 
         // Accessibility Focus
         if (mFocusedNode != null && mFocusedNode.id == virtualViewId) {
-            result.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
         } else {
-            result.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
         }
 
         for (PersistentAccessibilityNode child : node.children) {
@@ -147,22 +144,22 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                if (node.canBeScrolledVertically) {
+                    mSemanticsServer.scrollUp(virtualViewId);
+                } else if (node.canBeScrolledHorizontally) {
                     // TODO(ianh): bidi support
                     mSemanticsServer.scrollLeft(virtualViewId);
-                } else if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
-                    mSemanticsServer.scrollUp(virtualViewId);
                 } else {
                     return false;
                 }
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
+                if (node.canBeScrolledVertically) {
+                    mSemanticsServer.scrollDown(virtualViewId);
+                } else if (node.canBeScrolledHorizontally) {
                     // TODO(ianh): bidi support
                     mSemanticsServer.scrollRight(virtualViewId);
-                } else if (node.canBeScrolledHorizontally && !node.canBeScrolledVertically) {
-                    mSemanticsServer.scrollDown(virtualViewId);
                 } else {
                     return false;
                 }
@@ -175,6 +172,12 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
             }
             case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
                 sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
+                if (mFocusedNode == null) {
+                    // When Android focuses a node, it doesn't invalidate the view.
+                    // (It does when it sends ACTION_CLEAR_ACCESSIBILITY_FOCUS, so
+                    // we only have to worry about this when the focused node is null.)
+                    mOwner.invalidate();
+                }
                 mFocusedNode = node;
                 return true;
             }
@@ -199,6 +202,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         assert mTreeNodes.containsKey(0);
         PersistentAccessibilityNode newNode = mTreeNodes.get(0).hitTest(Math.round(x), Math.round(y));
         if (newNode != mHoveredNode) {
+            // sending ENTER before EXIT is how Android wants it
             if (newNode != null) {
                 sendAccessibilityEvent(newNode.id, AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
             }
@@ -248,6 +252,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
         assert mTreeNodes.get(node.id).parent == null;
         mTreeNodes.remove(node.id);
         if (mFocusedNode == node) {
+            sendAccessibilityEvent(mFocusedNode.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
             mFocusedNode = null;
         }
         if (mHoveredNode == node) {
@@ -260,6 +265,7 @@ public class FlutterSemanticsToAndroidAccessibilityBridge extends AccessibilityN
 
     public void reset(SemanticsServer.Proxy newSemanticsServer) {
         mTreeNodes.clear();
+        sendAccessibilityEvent(mFocusedNode.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
         mFocusedNode = null;
         mHoveredNode = null;
         mSemanticsServer.close();
