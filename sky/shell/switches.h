@@ -18,6 +18,7 @@ extern const char kNonInteractive[];
 extern const char kPackageRoot[];
 extern const char kStartPaused[];
 extern const char kTraceStartup[];
+extern const char kDeviceObservatoryPort[];
 
 void PrintUsage(const std::string& executable_name);
 

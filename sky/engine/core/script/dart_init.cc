@@ -136,9 +136,10 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       DartJni::InitForIsolate();
 #endif
       DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate);
-      if (SkySettings::Get().enable_observatory) {
+      const SkySettings& settings = SkySettings::Get();
+      if (settings.enable_observatory) {
         std::string ip = "127.0.0.1";
-        const intptr_t port = 8181;
+        const intptr_t port = settings.observatory_port;
         const bool service_isolate_booted = DartServiceIsolate::Startup(
             ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(), error);
         CHECK(service_isolate_booted) << error;

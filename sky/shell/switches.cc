@@ -17,6 +17,7 @@ const char kNonInteractive[] = "non-interactive";
 const char kPackageRoot[] = "package-root";
 const char kStartPaused[] = "start-paused";
 const char kTraceStartup[] = "trace-startup";
+const char kDeviceObservatoryPort[] = "observatory-port";
 
 void PrintUsage(const std::string& executable_name) {
   std::cerr << "Usage: " << executable_name
@@ -26,6 +27,7 @@ void PrintUsage(const std::string& executable_name) {
             << " --" << kTraceStartup
             << " --" << kFLX << "=FLX"
             << " --" << kPackageRoot << "=PACKAGE_ROOT"
+            << " --" << kDeviceObservatoryPort << "=8181"
             << " [ MAIN_DART ]" << std::endl;
 }
 
