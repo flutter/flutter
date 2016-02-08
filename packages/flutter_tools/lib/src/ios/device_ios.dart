@@ -19,7 +19,6 @@ import 'simulator.dart';
 const String _ideviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller.\n'
     'If you use homebrew, you can install it with "\$ brew install ideviceinstaller".';
-const String _flutterToolsFlagPrefix = "flutter_tools_";
 
 class IOSDeviceDiscovery extends DeviceDiscovery {
   List<Device> _devices = <Device>[];
@@ -332,15 +331,15 @@ class IOSSimulator extends Device {
     List<String> args = [];
 
     if (checked) {
-      args.add("--${_flutterToolsFlagPrefix}checked");
+      args.add("--enable-checked-mode");
     }
 
     if (startPaused) {
-      args.add("--${_flutterToolsFlagPrefix}startPaused");
+      args.add("--start-paused");
     }
 
     if (debugPort != observatoryDefaultPort) {
-      args.add("--${_flutterToolsFlagPrefix}debugPort=$debugPort");
+      args.add("--observatory-port=$debugPort");
     }
 
     // Step 5: Launch the updated application in the simulator
