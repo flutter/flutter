@@ -164,22 +164,6 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
     left = value.left;
   }
 
-  void merge(StackParentData other) {
-    if (other.top != null)
-      top = other.top;
-    if (other.right != null)
-      right = other.right;
-    if (other.bottom != null)
-      bottom = other.bottom;
-    if (other.left != null)
-      left = other.left;
-    if (other.width != null)
-      width = other.width;
-    if (other.height != null)
-      height = other.height;
-    super.merge(other);
-  }
-
   /// Whether this child is considered positioned
   ///
   /// A child is positioned if any of the top, right, bottom, or left offsets

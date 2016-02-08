@@ -291,12 +291,6 @@ class GridParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// Opaque data passed to the getChildPlacement method of the grid's [GridDelegate].
   Object placementData;
 
-  void merge(GridParentData other) {
-    if (other.placementData != null)
-      placementData = other.placementData;
-    super.merge(other);
-  }
-
   String toString() => '${super.toString()}; placementData=$placementData';
 }
 

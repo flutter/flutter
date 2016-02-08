@@ -30,12 +30,6 @@ class ParentData {
   /// Called when the RenderObject is removed from the tree.
   void detach() { }
 
-  /// Override this function in subclasses to merge in data from other instance
-  /// into this instance.
-  void merge(ParentData other) {
-    assert(other.runtimeType == this.runtimeType);
-  }
-
   String toString() => '<none>';
 }
 
