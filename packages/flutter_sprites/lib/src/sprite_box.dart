@@ -42,6 +42,7 @@ class SpriteBox extends RenderBox {
 
     // Update the value
     _rootNode = value;
+    _actionControllers = null;
 
     // Add new references
     _addSpriteBoxReference(_rootNode);
