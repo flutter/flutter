@@ -93,6 +93,9 @@ void Shell::InitStandalone() {
     uint32_t port = 0;
     if (stream >> port) {
       settings.observatory_port = port;
+    } else {
+      LOG(INFO)
+          << "Observatory port specified was malformed. Will default to 8181";
     }
   }
   // Start Paused
