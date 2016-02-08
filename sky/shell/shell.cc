@@ -5,6 +5,7 @@
 #include "sky/shell/shell.h"
 
 #include <memory>
+#include <sstream>
 
 #include "base/bind.h"
 #include "base/command_line.h"
@@ -81,9 +82,25 @@ void Shell::InitStandalone() {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
   blink::SkySettings settings;
+  // Enable Observatory
   settings.enable_observatory =
       !command_line.HasSwitch(switches::kNonInteractive);
+  // Set Observatory Port
+  if (command_line.HasSwitch(switches::kDeviceObservatoryPort)) {
+    auto port_string =
+        command_line.GetSwitchValueASCII(switches::kDeviceObservatoryPort);
+    std::stringstream stream(port_string);
+    uint32_t port = 0;
+    if (stream >> port) {
+      settings.observatory_port = port;
+    } else {
+      LOG(INFO)
+          << "Observatory port specified was malformed. Will default to 8181";
+    }
+  }
+  // Start Paused
   settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
+  // Set Checked Mode
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
   blink::SkySettings::Set(settings);

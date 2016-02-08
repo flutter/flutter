@@ -5,10 +5,13 @@
 #ifndef SKY_ENGINE_PUBLIC_PLATFORM_SKY_SETTINGS_H_
 #define SKY_ENGINE_PUBLIC_PLATFORM_SKY_SETTINGS_H_
 
+#include <stdint.h>
+
 namespace blink {
 
 struct SkySettings {
   bool enable_observatory = false;
+  uint32_t observatory_port = 8181;
   bool start_paused = false;
   bool enable_dart_checked_mode = false;
 
@@ -16,6 +19,6 @@ struct SkySettings {
   static void Set(const SkySettings& settings);
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PUBLIC_PLATFORM_SKY_SETTINGS_H_
