@@ -19,6 +19,7 @@ ChildSceneLayer::~ChildSceneLayer() {
 
 void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   transform_ = matrix;
+  transform_.postTranslate(offset_.x(), offset_.y());
 }
 
 void ChildSceneLayer::Paint(PaintContext::ScopedFrame& frame) {
