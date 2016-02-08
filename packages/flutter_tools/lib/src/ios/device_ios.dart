@@ -19,6 +19,7 @@ import 'simulator.dart';
 const String _ideviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller.\n'
     'If you use homebrew, you can install it with "\$ brew install ideviceinstaller".';
+const String _flutterToolsFlagPrefix = "flutter_tools_";
 
 class IOSDeviceDiscovery extends DeviceDiscovery {
   List<Device> _devices = <Device>[];
@@ -303,8 +304,7 @@ class IOSSimulator extends Device {
     int debugPort: observatoryDefaultPort,
     Map<String, dynamic> platformArgs
   }) async {
-    // TODO(chinmaygarde): Use checked, mainPath, route.
-    // TODO(devoncarew): Handle startPaused, debugPort.
+    // TODO(chinmaygarde): Use mainPath, route.
     printTrace('Building ${app.name} for $id');
 
     if (clearLogs)
@@ -328,8 +328,23 @@ class IOSSimulator extends Device {
     // Step 3: Install the updated bundle to the simulator
     SimControl.install(id, path.absolute(bundle.path));
 
-    // Step 4: Launch the updated application in the simulator
-    SimControl.launch(id, app.id);
+    // Step 4: Prepare launch arguments
+    List<String> args = [];
+
+    if (checked) {
+      args.add("--${_flutterToolsFlagPrefix}checked");
+    }
+
+    if (startPaused) {
+      args.add("--${_flutterToolsFlagPrefix}startPaused");
+    }
+
+    if (debugPort != observatoryDefaultPort) {
+      args.add("--${_flutterToolsFlagPrefix}debugPort=$debugPort");
+    }
+
+    // Step 5: Launch the updated application in the simulator
+    SimControl.launch(id, app.id, args);
 
     printTrace('Successfully started ${app.name} on $id');
 
