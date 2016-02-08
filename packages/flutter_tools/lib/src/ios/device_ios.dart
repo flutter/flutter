@@ -522,7 +522,7 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
   ];
 
   if (!isDevice) {
-    commands.addAll(<String>['-sdk', 'iphonesimulator']);
+    commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
   try {
