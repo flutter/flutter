@@ -3,17 +3,11 @@
 // found in the LICENSE file.
 
 #include "sky/shell/platform/ios/sky_dynamic_service_loader.h"
-#include "mojo/public/c/system/types.h"
-#include "mojo/public/platform/native/system_thunks.h"
+#include "sky/services/dynamic/dynamic_service_embedder.h"
+#include "sky/services/dynamic/dynamic_service_definition.h"
 #include <Foundation/Foundation.h>
 
 #include <dlfcn.h>
-
-typedef MojoResult (*SkyDynamicServiceHandler)(MojoHandle client_handle,
-                                               const char* service_name);
-
-static const char* const kFlutterServiceMainFunctionName = "FlutterServiceMain";
-static const char* const kMojoSetSystemThunksFnName = "MojoSetSystemThunks";
 
 @interface SkyServiceDefinition : NSObject
 
@@ -23,54 +17,14 @@ static const char* const kMojoSetSystemThunksFnName = "MojoSetSystemThunks";
 
 - (instancetype)initWithName:(NSString*)name framework:(NSString*)framework;
 
-- (SkyDynamicServiceHandler)serviceEntryPoint;
+- (void)invokeService:(NSString*)serviceName
+               handle:(mojo::ScopedMessagePipeHandle)handle;
 
 @end
 
-enum class InstallSystemThunksResult {
-  Failure,
-  EmbedderOlder,
-  EmbedderNewer,
-  Success,
-};
-
-static InstallSystemThunksResult InstallSystemThunksInLibrary(
-    void* library_handle) {
-  if (library_handle == NULL) {
-    return InstallSystemThunksResult::Failure;
-  }
-
-  dlerror();
-  MojoSetSystemThunksFn set_thunks_fn = reinterpret_cast<MojoSetSystemThunksFn>(
-      dlsym(library_handle, kMojoSetSystemThunksFnName));
-
-  if (set_thunks_fn == NULL || dlerror() != NULL) {
-    return InstallSystemThunksResult::Failure;
-  }
-
-  MojoSystemThunks embedder_thunks = MojoMakeSystemThunks();
-
-  size_t result = set_thunks_fn(&embedder_thunks);
-
-  if (result > sizeof(MojoSystemThunks)) {
-    // The dylib expects to use a system thunks table that is larger than what
-    // is currently supported by the embedder. This indicates that the embedder
-    // is older than the dylib.
-    return InstallSystemThunksResult::EmbedderOlder;
-  }
-
-  if (result < sizeof(MojoSystemThunks)) {
-    // The dylib expect to use the system thunks table to be smaller than
-    // what is currently supported by the embedder. The exisiting entries in
-    // the table are stable.
-    return InstallSystemThunksResult::EmbedderNewer;
-  }
-
-  return InstallSystemThunksResult::Success;
-}
-
 @implementation SkyServiceDefinition {
-  void* _libraryHandle;
+  std::unique_ptr<sky::services::DynamicServiceDefinition> _definition;
+  BOOL _initializationAttempted;
 }
 
 - (instancetype)initWithName:(NSString*)name framework:(NSString*)framework {
@@ -90,97 +44,35 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
 }
 
 - (void)openIfNecessary {
-  if (_libraryHandle != NULL) {
+  if (_definition || _initializationAttempted) {
     return;
   }
 
-  NSBundle* embedderBundle =
-      [NSBundle bundleForClass:[SkyDynamicServiceLoader class]];
+  mojo::String dylib_path(
+      [[NSBundle bundleForClass:[SkyDynamicServiceLoader class]]
+          pathForResource:_containerFramework
+                   ofType:@"dylib"
+              inDirectory:@"Frameworks"]
+          .UTF8String);
 
-  NSString* executablePath = [embedderBundle pathForResource:_containerFramework
-                                                      ofType:@"dylib"
-                                                 inDirectory:@"Frameworks"];
+  _definition = sky::services::DynamicServiceDefinition::Initialize(dylib_path);
 
-  if (executablePath.length == 0) {
-    DLOG(INFO) << "The service definitions manifest specified a framework for "
-               << _serviceName.UTF8String
-               << " that is not present in the application";
-  }
-
-  dlerror();
-  _libraryHandle = dlopen(executablePath.UTF8String, RTLD_NOW);
-
-  if (_libraryHandle == NULL || dlerror() != NULL) {
-    _libraryHandle = NULL;
-    DLOG(INFO) << "Could not open library at '" << executablePath.UTF8String
-               << "' to resolve service request for '"
-               << _serviceName.UTF8String << "'";
-    return;
-  }
-
-  bool success = false;
-  switch (InstallSystemThunksInLibrary(_libraryHandle)) {
-    case InstallSystemThunksResult::Failure:
-      LOG(INFO) << "Could not register the service library for '"
-                << _serviceName.UTF8String
-                << "'. The library is not prepared correctly.";
-      break;
-    case InstallSystemThunksResult::EmbedderOlder:
-      LOG(INFO) << "The service library for '" << _serviceName.UTF8String
-                << "' is too new to be used with this embedder. Flutter needs "
-                   "to be upgraded.";
-      break;
-    case InstallSystemThunksResult::EmbedderNewer:
-    case InstallSystemThunksResult::Success:
-      success = true;
-      break;
-  }
-
-  if (!success) {
-    dlerror();
-    dlclose(_libraryHandle);
-    _libraryHandle = NULL;
-    LOG(INFO) << "The service library for '" << _serviceName.UTF8String
-              << "' is unusable";
-  }
-
-  LOG(INFO) << "Opened framework '" << _containerFramework.UTF8String
-            << "' to service '" << _serviceName.UTF8String << "'";
+  // All known services are in the application bundle. If the service cannot
+  // be initialized once, dont attempt any more loads.
+  _initializationAttempted = YES;
 }
 
-- (SkyDynamicServiceHandler)serviceEntryPoint {
+- (void)invokeService:(NSString*)serviceName
+               handle:(mojo::ScopedMessagePipeHandle)handle {
   [self openIfNecessary];
-
-  if (_libraryHandle == NULL) {
-    return NULL;
+  if (_definition) {
+    _definition->InvokeServiceHandler(handle.Pass(), serviceName.UTF8String);
   }
-
-  dlerror();
-  void* entry = dlsym(_libraryHandle, kFlutterServiceMainFunctionName);
-
-  if (entry == NULL || dlerror() != NULL) {
-    LOG(INFO) << "Could not find service entry point '"
-              << kFlutterServiceMainFunctionName << "' in library '"
-              << _containerFramework.UTF8String << "' for service name '"
-              << _serviceName.UTF8String << "'";
-    [self closeIfNecessary];
-    return NULL;
-  }
-
-  return reinterpret_cast<SkyDynamicServiceHandler>(entry);
 }
 
 - (void)closeIfNecessary {
-  if (_libraryHandle == NULL) {
-    return;
-  }
-
-  dlerror();
-  dlclose(_libraryHandle);
-
-  if (dlerror() == NULL) {
-    _libraryHandle = NULL;
-  }
+  _definition = nullptr;
+  _initializationAttempted = NO;
 }
 
 - (void)dealloc {
@@ -219,25 +111,7 @@ static InstallSystemThunksResult InstallSystemThunksInLibrary(
     return;
   }
 
-  SkyDynamicServiceHandler entryPoint =
-      [_services[serviceName] serviceEntryPoint];
-
-  if (entryPoint == NULL) {
-    LOG(INFO) << "A valid service entry point must be present for '"
-              << serviceName.UTF8String << "'";
-    return;
-  }
-
-  // Hand off to the dynamically resolved service vendor.
-  mojo::MessagePipeHandle rawMessageHandle = handle.release();
-  MojoResult result =
-      entryPoint(rawMessageHandle.value(), serviceName.UTF8String);
-  if (result != MOJO_RESULT_OK) {
-    // In case of success, the raw message handle ownership has been
-    // successfully acquired by the service implementation in the dylib. In case
-    // of failure however, we need to cleanup as the handle is no longer scoped.
-    mojo::CloseRaw(rawMessageHandle);
-  }
+  [_services[serviceName] invokeService:serviceName handle:handle.Pass()];
 }
 
 - (void)populateServiceDefinitions {
