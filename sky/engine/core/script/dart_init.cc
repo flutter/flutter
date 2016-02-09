@@ -78,7 +78,7 @@ static const char* kDartArgs[] = {
 #if (WTF_OS_IOS || WTF_OS_MACOSX)
     // On platforms where LLDB is the primary debugger, SIGPROF signals
     // overwhelm LLDB.
-    "--no-profile",
+    "--no-profiler",
 #endif
 };
 
