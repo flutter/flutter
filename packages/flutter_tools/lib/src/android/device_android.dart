@@ -21,6 +21,12 @@ import 'android.dart';
 
 const String _defaultAdbPath = 'adb';
 
+// Path where the FLX bundle will be copied on the device.
+const String _deviceBundlePath = '/data/local/tmp/dev.flx';
+
+// Path where the snapshot will be copied on the device.
+const String _deviceSnapshotPath = '/data/local/tmp/dev_snapshot.bin';
+
 class AndroidDeviceDiscovery extends DeviceDiscovery {
   List<Device> _devices = <Device>[];
 
@@ -268,12 +274,11 @@ class AndroidDevice extends Device {
     if (clearLogs)
       this.clearLogs();
 
-    String deviceTmpPath = '/data/local/tmp/dev.flx';
-    runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, deviceTmpPath]));
+    runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
-      '-d', deviceTmpPath,
+      '-d', _deviceBundlePath,
       '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
     ]);
     if (checked)
@@ -419,6 +424,26 @@ class AndroidDevice extends Device {
 
   void setConnected(bool value) {
     _connected = value;
+  }
+
+  Future<bool> refreshSnapshot(AndroidApk apk, String snapshotPath) async {
+    if (!FileSystemEntity.isFileSync(snapshotPath)) {
+      printError('Cannot find $snapshotPath');
+      return false;
+    }
+
+    runCheckedSync(adbCommandForDevice(<String>['push', snapshotPath, _deviceSnapshotPath]));
+
+    List<String> cmd = adbCommandForDevice(<String>[
+      'shell', 'am', 'start',
+      '-a', 'android.intent.action.RUN',
+      '-d', _deviceBundlePath,
+      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+      '--es', 'snapshot', _deviceSnapshotPath,
+      apk.launchActivity,
+    ]);
+    runCheckedSync(cmd);
+    return true;
   }
 }
 
