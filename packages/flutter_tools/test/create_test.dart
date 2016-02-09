@@ -27,7 +27,9 @@ defineTests() {
 
     // This test consistently times out on our windows bot. The code is already
     // covered on the linux one.
-    if (!Platform.isWindows) {
+    // Also fails on mac, with create --out returning '69'
+    // TODO(devoncarew): https://github.com/flutter/flutter/issues/1709
+    if (Platform.isLinux) {
       // Verify that we create a project that is well-formed.
       test('flutter-simple', () async {
         ArtifactStore.flutterRoot = '../..';
