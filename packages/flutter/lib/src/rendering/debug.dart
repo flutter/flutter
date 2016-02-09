@@ -87,8 +87,8 @@ void initServiceExtensions() {
   _extensionsInitialized = true;
 
   assert(() {
-    developer.registerExtension('flutter.debugPaint', _debugPaint);
-    developer.registerExtension('flutter.timeDilation', _timeDilation);
+    developer.registerExtension('ext.flutter.debugPaint', _debugPaint);
+    developer.registerExtension('ext.flutter.timeDilation', _timeDilation);
 
     return true;
   });
