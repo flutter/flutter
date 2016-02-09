@@ -17,12 +17,6 @@ class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// according to the flex factors of the flexible children.
   int flex;
 
-  void merge(FlexParentData other) {
-    if (other.flex != null)
-      flex = other.flex;
-    super.merge(other);
-  }
-
   String toString() => '${super.toString()}; flex=$flex';
 }
 

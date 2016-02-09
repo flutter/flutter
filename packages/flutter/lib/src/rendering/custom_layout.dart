@@ -11,12 +11,6 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
   /// An object representing the identity of this child.
   Object id;
 
-  void merge(MultiChildLayoutParentData other) {
-    if (other.id != null)
-      id = other.id;
-    super.merge(other);
-  }
-
   String toString() => '${super.toString()}; id=$id';
 }
 
