@@ -8,6 +8,7 @@ library widgets;
 export 'src/widgets/asset_vendor.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
+export 'src/widgets/checked_mode_banner.dart';
 export 'src/widgets/child_view.dart';
 export 'src/widgets/dismissable.dart';
 export 'src/widgets/drag_target.dart';

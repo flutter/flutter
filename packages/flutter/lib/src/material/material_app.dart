@@ -50,7 +50,8 @@ class MaterialApp extends StatefulComponent {
     this.onLocaleChanged,
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
-    this.showSemanticsDebugger: false
+    this.showSemanticsDebugger: false,
+    this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
     assert(routes != null);
     assert(routes.containsKey(Navigator.defaultRouteName) || onGenerateRoute != null);
@@ -59,14 +60,54 @@ class MaterialApp extends StatefulComponent {
     assert(showSemanticsDebugger != null);
   }
 
+  /// A one-line description of this app for use in the window manager.
   final String title;
+
+  /// The colors to use for the application's widgets.
   final ThemeData theme;
+
+  /// The default table of routes for the application. When the
+  /// [Navigator] is given a named route, the name will be looked up
+  /// in this table first. If the name is not available, then
+  /// [onGenerateRoute] will be called instead.
   final Map<String, RouteBuilder> routes;
+
+  /// The route generator callback used when the app is navigated to a
+  /// named route but the name is not in the [routes] table.
   final RouteFactory onGenerateRoute;
+
+  /// Callback that is invoked when the operating system changes the
+  /// current locale.
   final LocaleChangedCallback onLocaleChanged;
+
+  /// Turns on a [GridPaper] overlay that paints a baseline grid
+  /// Material apps:
+  /// https://www.google.com/design/spec/layout/metrics-keylines.html
+  /// Only available in checked mode.
   final bool debugShowMaterialGrid;
+
+  /// Turns on a performance overlay.
+  /// https://flutter.io/debugging/#performanceoverlay
   final bool showPerformanceOverlay;
+
+  /// Turns on an overlay that shows the accessibility information
+  /// reported by the framework.
   final bool showSemanticsDebugger;
+
+  /// Turns on a "SLOW MODE" little banner in checked mode to indicate
+  /// that the app is in checked mode. This is on by default (in
+  /// checked mode), to turn it off, set the constructor argument to
+  /// false. In release mode this has no effect.
+  ///
+  /// To get this banner in your application if you're not using
+  /// MaterialApp, include a [CheckedModeBanner] widget in your app.
+  ///
+  /// This banner is intended to avoid people complaining that your
+  /// app is slow when it's in checked mode. In checked mode, Flutter
+  /// enables a large number of expensive diagnostics to aid in
+  /// development, and so performance in checked mode is not
+  /// representative of what will happen in release mode.
+  final bool debugShowCheckedModeBanner;
 
   _MaterialAppState createState() => new _MaterialAppState();
 }
@@ -203,6 +244,14 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
         child: result
       );
     }
+    assert(() {
+      if (config.debugShowCheckedModeBanner) {
+        result = new CheckedModeBanner(
+          child: result
+        );
+      }
+      return true;
+    });
     return result;
   }
 
