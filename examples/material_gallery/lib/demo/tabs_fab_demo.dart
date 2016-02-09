@@ -11,7 +11,7 @@ class _Page {
   final Map<int, Color> colors;
   final String icon;
 
-  TabLabel get tabLabel => new TabLabel(text: label);
+  TabLabel get tabLabel => new TabLabel(text: label.toUpperCase());
   Color get labelColor => colors != null ? colors[300] : Colors.grey[300];
   bool get fabDefined => colors != null && icon != null;
   Color get fabColor => colors[400];
@@ -31,7 +31,7 @@ class TabsFabDemo extends StatefulComponent {
 
 class _TabsFabDemoState extends State<TabsFabDemo> {
   final GlobalKey scaffoldKey = new GlobalKey();
-  final List<_Page> _pages = <_Page>[
+  final List<_Page> pages = <_Page>[
     new _Page(label: 'Blue', colors: Colors.indigo, icon: 'content/add'),
     new _Page(label: 'Too', colors: Colors.indigo, icon: 'content/add'),
     new _Page(label: 'Eco', colors: Colors.green, icon: 'content/create'),
@@ -43,7 +43,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
 
   void initState() {
     super.initState();
-    selectedPage = _pages[0];
+    selectedPage = pages[0];
   }
 
   void _handleTabSelection(_Page page) {
@@ -90,14 +90,14 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
 
   Widget build(BuildContext context) {
     return new TabBarSelection<_Page>(
-      values: _pages,
+      values: pages,
       onChanged: _handleTabSelection,
       child: new Scaffold(
         key: scaffoldKey,
         toolBar: new ToolBar(
           center: new Text("FAB per Tab"),
           tabBar: new TabBar<_Page>(
-            labels: new Map.fromIterable(_pages, value: (_Page page) => page.tabLabel)
+            labels: new Map.fromIterable(pages, value: (_Page page) => page.tabLabel)
           )
         ),
         floatingActionButton: !selectedPage.fabDefined ? null : new FloatingActionButton(
@@ -106,7 +106,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
           child: selectedPage.fabIcon,
           onPressed: _showExplanatoryText
         ),
-        body: new TabBarView(children: _pages.map(buildTabView).toList())
+        body: new TabBarView(children: pages.map(buildTabView).toList())
       )
     );
   }
