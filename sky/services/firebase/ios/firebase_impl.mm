@@ -15,7 +15,15 @@ namespace firebase {
 ::firebase::DataSnapshotPtr toMojoSnapshot(FDataSnapshot* snapshot) {
   ::firebase::DataSnapshotPtr mojoSnapshot(::firebase::DataSnapshot::New());
   mojoSnapshot->key = base::SysNSStringToUTF8(snapshot.key);
-  mojoSnapshot->value = base::SysNSStringToUTF8(snapshot.value);
+  NSDictionary *valueDictionary = @{@"value": snapshot.value};
+  NSData *data = [NSJSONSerialization dataWithJSONObject:valueDictionary
+                                                 options:0
+                                                   error:nil];
+  if (data != nil) {
+    NSString *jsonValue = [[NSString alloc] initWithData:data
+                                                encoding:NSUTF8StringEncoding];
+    mojoSnapshot->jsonValue = base::SysNSStringToUTF8(jsonValue);
+  }
   return mojoSnapshot.Pass();
 }
 
@@ -24,6 +32,14 @@ namespace firebase {
   mojoError->code = error.code;
   mojoError->message = base::SysNSStringToUTF8(error.description);
   return mojoError.Pass();
+}
+
+::firebase::AuthDataPtr toMojoAuthData(FAuthData* authData) {
+  ::firebase::AuthDataPtr mojoAuthData(::firebase::AuthData::New());
+  mojoAuthData->uid = base::SysNSStringToUTF8(authData.uid);
+  mojoAuthData->provider = base::SysNSStringToUTF8(authData.provider);
+  mojoAuthData->token = base::SysNSStringToUTF8(authData.token);
+  return mojoAuthData.Pass();
 }
 
 FirebaseImpl::FirebaseImpl(mojo::InterfaceRequest<::firebase::Firebase> request)
@@ -35,18 +51,6 @@ FirebaseImpl::~FirebaseImpl() {
 
 void FirebaseImpl::InitWithUrl(const mojo::String& url) {
   client_ = [[[::Firebase alloc] initWithUrl:@(url.data())] retain];
-}
-
-void FirebaseImpl::GetRoot(mojo::InterfaceRequest<::firebase::Firebase> request) {
-  FirebaseImpl *root = new FirebaseImpl(request.Pass());
-  root->client_ = [[client_ root] retain];
-}
-
-void FirebaseImpl::GetChild(
-    const mojo::String& path,
-    mojo::InterfaceRequest<Firebase> request) {
-  FirebaseImpl *child = new FirebaseImpl(request.Pass());
-  child->client_ = [[client_ childByAppendingPath:@(path.data())] retain];
 }
 
 void FirebaseImpl::AddValueEventListener(::firebase::ValueEventListenerPtr ptr) {
@@ -134,6 +138,21 @@ void FirebaseImpl::ObserveSingleEventOfType(
   }];
 }
 
+void FirebaseImpl::AuthWithCustomToken(
+  const mojo::String& token,
+  const AuthWithCustomTokenCallback& callback) {
+}
+
+void FirebaseImpl::AuthAnonymously(
+  const AuthAnonymouslyCallback& callback) {
+  AuthAnonymouslyCallback *copyCallback =
+    new AuthAnonymouslyCallback(callback);
+  [client_ authAnonymouslyWithCompletionBlock:^(NSError *error, FAuthData *authData) {
+    copyCallback->Run(toMojoError(error), toMojoAuthData(authData));
+    delete copyCallback;
+  }];
+}
+
 void FirebaseImpl::AuthWithOAuthToken(
   const mojo::String& provider,
   const mojo::String& credentials,
@@ -143,25 +162,178 @@ void FirebaseImpl::AuthWithOAuthToken(
   [client_ authWithOAuthProvider:@(provider.data())
                            token:@(credentials.data())
              withCompletionBlock:^(NSError *error, FAuthData *authData) {
-    ::firebase::ErrorPtr mojoError;
-    ::firebase::AuthDataPtr mojoAuthData;
-    if (error == nullptr) {
-      mojoAuthData = ::firebase::AuthData::New();
-      mojoAuthData->uid = base::SysNSStringToUTF8(authData.uid);
-      mojoAuthData->provider = base::SysNSStringToUTF8(authData.provider);
-      mojoAuthData->token = base::SysNSStringToUTF8(authData.token);
-    } else {
-      mojoError = ::firebase::Error::New();
-      mojoError->code = error.code;
-      mojoError->message = base::SysNSStringToUTF8(error.description);
-    }
-    copyCallback->Run(mojoError.Pass(), mojoAuthData.Pass());
+    copyCallback->Run(toMojoError(error), toMojoAuthData(authData));
+    delete copyCallback;
   }];
 }
 
-void FirebaseImpl::SetValue(const mojo::String& jsonValue) {
-  // TODO(jackson): JSON deserialization
-  [client_ setValue:@(jsonValue.data())];
+void FirebaseImpl::AuthWithPassword(
+  const mojo::String& email,
+  const mojo::String& password,
+  const AuthWithPasswordCallback& callback) {
+  AuthWithPasswordCallback *copyCallback =
+    new AuthWithPasswordCallback(callback);
+  [client_      authUser:@(email.data())
+                password:@(password.data())
+     withCompletionBlock:^(NSError *error, FAuthData *authData) {
+    copyCallback->Run(toMojoError(error), toMojoAuthData(authData));
+    delete copyCallback;
+  }];
+}
+
+void FirebaseImpl::Unauth(const UnauthCallback& callback) {
+  [client_ unauth];
+  callback.Run(toMojoError(nullptr));
+}
+
+void FirebaseImpl::GetChild(
+    const mojo::String& path,
+    mojo::InterfaceRequest<Firebase> request) {
+  FirebaseImpl *child = new FirebaseImpl(request.Pass());
+  child->client_ = [[client_ childByAppendingPath:@(path.data())] retain];
+}
+
+void FirebaseImpl::GetParent(mojo::InterfaceRequest<Firebase> request) {
+  FirebaseImpl *parent = new FirebaseImpl(request.Pass());
+  parent->client_ = [[client_ parent] retain];
+}
+
+void FirebaseImpl::GetRoot(mojo::InterfaceRequest<::firebase::Firebase> request) {
+  FirebaseImpl *root = new FirebaseImpl(request.Pass());
+  root->client_ = [[client_ root] retain];
+}
+
+void FirebaseImpl::SetValue(const mojo::String& jsonValue,
+    int32_t priority,
+    bool hasPriority,
+    const SetValueCallback& callback) {
+  SetValueCallback *copyCallback =
+    new SetValueCallback(callback);
+  NSData *data = [@(jsonValue.data()) dataUsingEncoding:NSUTF8StringEncoding];
+  NSError *error;
+  NSDictionary *valueDictionary = [NSJSONSerialization JSONObjectWithData:data
+                                                                  options:0
+                                                                    error:&error];
+  id value = [valueDictionary valueForKey:@"value"];
+  void (^completionBlock)(NSError *, ::Firebase* ref) = ^(NSError* error, ::Firebase* ref) {
+    copyCallback->Run(toMojoError(error));
+    delete copyCallback;
+  };
+  if (valueDictionary != nil) {
+    if (hasPriority) {
+      [client_     setValue:value
+                andPriority:@(priority)
+        withCompletionBlock:completionBlock];
+    } else {
+      [client_ setValue:value withCompletionBlock:completionBlock];
+    }
+  } else {
+    completionBlock(error, client_);
+  }
+}
+
+void FirebaseImpl::RemoveValue(const RemoveValueCallback& callback) {
+  RemoveValueCallback *copyCallback =
+    new RemoveValueCallback(callback);
+  [client_ removeValueWithCompletionBlock:^(NSError *error, ::Firebase *ref) {
+    copyCallback->Run(toMojoError(error));
+    delete copyCallback;
+  }];
+}
+
+void FirebaseImpl::Push(mojo::InterfaceRequest<Firebase> request,
+  const PushCallback& callback) {
+  FirebaseImpl *child = new FirebaseImpl(request.Pass());
+  child->client_ = [[client_ childByAutoId] retain];
+  callback.Run(base::SysNSStringToUTF8(child->client_.key));
+}
+
+void FirebaseImpl::SetPriority(int32_t priority,
+  const SetPriorityCallback& callback) {
+  SetPriorityCallback *copyCallback =
+    new SetPriorityCallback(callback);
+  [client_  setPriority:@(priority)
+    withCompletionBlock:^(NSError *error, ::Firebase *ref) {
+    copyCallback->Run(toMojoError(error));
+    delete copyCallback;
+  }];
+}
+
+void FirebaseImpl::CreateUser(const mojo::String& email,
+  const mojo::String& password,
+  const CreateUserCallback& callback) {
+  CreateUserCallback *copyCallback =
+    new CreateUserCallback(callback);
+  [client_   createUser:@(email.data())
+               password:@(password.data())
+    withValueCompletionBlock:^(NSError *error, NSDictionary *valueDictionary) {
+    NSData *data = [NSJSONSerialization dataWithJSONObject:valueDictionary
+                                                   options:0
+                                                     error:nil];
+    if (data != nil) {
+      NSString *jsonValue = [[NSString alloc] initWithData:data
+                                                  encoding:NSUTF8StringEncoding];
+      copyCallback->Run(toMojoError(error), base::SysNSStringToUTF8(jsonValue));
+    } else {
+      copyCallback->Run(toMojoError(error), nullptr);
+    }
+    delete copyCallback;
+  }];
+}
+
+void FirebaseImpl::ChangeEmail(const mojo::String& oldEmail,
+  const mojo::String& password,
+  const mojo::String& newEmail,
+  const ChangeEmailCallback& callback) {
+  ChangeEmailCallback *copyCallback =
+    new ChangeEmailCallback(callback);
+  [client_ changeEmailForUser:@(oldEmail.data())
+                     password:@(password.data())
+                   toNewEmail:@(newEmail.data())
+          withCompletionBlock:^(NSError *error) {
+    copyCallback->Run(toMojoError(error));
+    delete copyCallback;
+  }];
+}
+
+void FirebaseImpl::ChangePassword(
+  const mojo::String& newPassword,
+  const mojo::String& email,
+  const mojo::String& oldPassword,
+  const ChangePasswordCallback& callback) {
+  ChangePasswordCallback *copyCallback =
+    new ChangePasswordCallback(callback);
+  [client_ changePasswordForUser:@(email.data())
+                         fromOld:@(oldPassword.data())
+                           toNew:@(newPassword.data())
+             withCompletionBlock:^(NSError *error) {
+    copyCallback->Run(toMojoError(error));
+    delete copyCallback;
+  }];
+}
+
+void FirebaseImpl::RemoveUser(const mojo::String& email,
+  const mojo::String& password,
+  const RemoveUserCallback& callback) {
+  RemoveUserCallback *copyCallback =
+    new RemoveUserCallback(callback);
+  [client_  removeUser:@(email.data())
+               password:@(password.data())
+    withCompletionBlock:^(NSError *error) {
+    copyCallback->Run(toMojoError(error));
+    delete copyCallback;
+  }];
+}
+
+void FirebaseImpl::ResetPassword(const mojo::String& email,
+  const ResetPasswordCallback& callback) {
+  ResetPasswordCallback *copyCallback =
+    new ResetPasswordCallback(callback);
+  [client_  resetPasswordForUser:@(email.data())
+             withCompletionBlock:^(NSError *error) {
+    copyCallback->Run(toMojoError(error));
+    delete copyCallback;
+  }];
 }
 
 void FirebaseFactory::Create(
