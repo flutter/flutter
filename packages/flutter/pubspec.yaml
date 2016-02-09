@@ -26,7 +26,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     path: ../flutter_test
-  stocks:
+  stocks: # for the benchmarks
     path: ../../examples/stocks
 
 environment:
