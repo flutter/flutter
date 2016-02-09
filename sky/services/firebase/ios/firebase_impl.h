@@ -26,10 +26,6 @@ class FirebaseImpl : public ::firebase::Firebase {
   ~FirebaseImpl() override;
 
   void InitWithUrl(const mojo::String& url) override;
-  void GetRoot(mojo::InterfaceRequest<Firebase> root) override;
-  void GetChild(
-      const mojo::String& path,
-      mojo::InterfaceRequest<Firebase> child) override;
   void AddValueEventListener(
     ::firebase::ValueEventListenerPtr listener) override;
   void AddChildEventListener(
@@ -37,12 +33,52 @@ class FirebaseImpl : public ::firebase::Firebase {
   void ObserveSingleEventOfType(
     ::firebase::EventType eventType,
     const ObserveSingleEventOfTypeCallback& callback) override;
+  void AuthWithCustomToken(
+    const mojo::String& token,
+    const AuthWithCustomTokenCallback& callback) override;
+  void AuthAnonymously(
+    const AuthAnonymouslyCallback& callback) override;
   void AuthWithOAuthToken(
     const mojo::String& provider,
     const mojo::String& credentials,
     const AuthWithOAuthTokenCallback& callback) override;
-  void SetValue(const mojo::String& jsonValue);
-
+  void AuthWithPassword(
+    const mojo::String& email,
+    const mojo::String& password,
+    const AuthWithPasswordCallback& callback) override;
+  void Unauth(const UnauthCallback& callback) override;
+  void GetChild(
+      const mojo::String& path,
+      mojo::InterfaceRequest<Firebase> child) override;
+  void GetParent(mojo::InterfaceRequest<Firebase> parent) override;
+  void GetRoot(mojo::InterfaceRequest<Firebase> root) override;
+  void RemoveValue(const RemoveValueCallback& callback) override;
+  void SetValue(
+    const mojo::String& jsonValue,
+    int32_t priority,
+    bool hasPriority,
+    const SetValueCallback& callback) override;
+  void Push(mojo::InterfaceRequest<Firebase> child,
+    const PushCallback& callback) override;
+  void SetPriority(int32_t priority,
+    const SetPriorityCallback& callback) override;
+  void CreateUser(const mojo::String& email,
+    const mojo::String& password,
+    const CreateUserCallback& callback) override;
+  void ChangeEmail(const mojo::String& oldEmail,
+    const mojo::String& password,
+    const mojo::String& newEmail,
+    const ChangeEmailCallback& callback) override;
+  void ChangePassword(
+    const mojo::String& newPassword,
+    const mojo::String& email,
+    const mojo::String& oldPassword,
+    const ChangePasswordCallback& callback) override;
+  void RemoveUser(const mojo::String& email,
+    const mojo::String& password,
+    const RemoveUserCallback& callback) override;
+  void ResetPassword(const mojo::String& email,
+    const ResetPasswordCallback& callback) override;
  private:
   mojo::StrongBinding<::firebase::Firebase> binding_;
   ::Firebase* client_;
