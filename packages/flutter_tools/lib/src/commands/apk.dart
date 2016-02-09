@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
-import 'package:xml/xml.dart' as xml;
 
 import '../android/device_android.dart';
 import '../application_package.dart';
@@ -406,33 +405,6 @@ int _signApk(
   return 0;
 }
 
-// Creates a new ApplicationPackage from the Android manifest.
-AndroidApk _getApplicationPackage(String apkPath, String manifest) {
-  if (!FileSystemEntity.isFileSync(manifest))
-    return null;
-  String manifestString = new File(manifest).readAsStringSync();
-  xml.XmlDocument document = xml.parse(manifestString);
-
-  Iterable<xml.XmlElement> manifests = document.findElements('manifest');
-  if (manifests.isEmpty)
-    return null;
-  String id = manifests.toList()[0].getAttribute('package');
-
-  String launchActivity;
-  for (xml.XmlElement category in document.findAllElements('category')) {
-    if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
-      xml.XmlElement activity = category.parent.parent as xml.XmlElement;
-      String activityName = activity.getAttribute('android:name');
-      launchActivity = "$id/$activityName";
-      break;
-    }
-  }
-  if (id == null || launchActivity == null)
-    return null;
-
-  return new AndroidApk(localPath: apkPath, id: id, launchActivity: launchActivity);
-}
-
 // Returns true if the apk is out of date and needs to be rebuilt.
 bool _needsRebuild(String apkPath, String manifest) {
   FileStat apkStat = FileStat.statSync(apkPath);
@@ -504,7 +476,8 @@ Future<int> buildAndroid({
   }
 }
 
-Future<ApplicationPackageStore> buildAll(
+// TODO(mpcomplete): move this to Device?
+Future buildAll(
   DeviceStore devices,
   ApplicationPackageStore applicationPackages,
   Toolchain toolchain,
@@ -531,13 +504,6 @@ Future<ApplicationPackageStore> buildAll(
         force: false,
         target: target
       );
-      // Replace our pre-built AndroidApk with this custom-built one.
-      applicationPackages = new ApplicationPackageStore(
-        android: _getApplicationPackage(_kDefaultOutputPath, _kDefaultAndroidManifestPath),
-        iOS: applicationPackages.iOS,
-        iOSSimulator: applicationPackages.iOSSimulator
-      );
     }
   }
-  return applicationPackages;
 }
