@@ -103,6 +103,9 @@ class Adb {
           } else {
             List<AdbDevice> devices = devicesText.split('\n').map((String deviceInfo) {
               return new AdbDevice(deviceInfo);
+            }).where((AdbDevice device) {
+              // Filter unauthorized devices - we can't connect to them.
+              return !device.isUnauthorized && !device.isOffline;
             }).toList();
 
             await _populateDeviceNames(devices);
@@ -194,6 +197,10 @@ class AdbDevice {
   final Map<String, String> _info = <String, String>{};
 
   bool get isAvailable => status == 'device';
+
+  bool get isUnauthorized => status == 'unauthorized';
+
+  bool get isOffline => status == 'offline';
 
   /// Device model; can be null. `XT1045`, `Nexus_7`
   String get modelID => _info['model'];
