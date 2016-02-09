@@ -134,7 +134,8 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
     return new Container(
       height: 36.0,
       constraints: new BoxConstraints(minWidth: 88.0),
-      margin: new EdgeDims.all(8.0),
+      padding: const EdgeDims.symmetric(horizontal: 8.0),
+      margin: const EdgeDims.all(8.0),
       child: contents
     );
   }

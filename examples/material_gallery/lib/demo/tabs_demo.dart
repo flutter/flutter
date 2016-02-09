@@ -17,7 +17,7 @@ class TabsDemo extends StatelessComponent {
             isScrollable: true,
             labels: new Map.fromIterable(
               iconNames,
-              value: (String iconName) => new TabLabel(text: iconName, icon: "action/$iconName")
+              value: (String iconName) => new TabLabel(text: iconName.toUpperCase(), icon: "action/$iconName")
             )
           )
         ),

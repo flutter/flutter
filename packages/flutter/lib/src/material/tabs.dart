@@ -436,6 +436,12 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   void initState() {
     super.initState();
     _value = config.value ?? PageStorage.of(context)?.readState(context) ?? values.first;
+
+    // If the selection's values have changed since the selected value was saved with
+    // PageStorage.writeState() then use the default.
+    if (!values.contains(_value))
+      _value = values.first;
+
     _previousValue = _value;
     _initValueToIndex();
   }
@@ -870,6 +876,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
   void _updateItemsAndScrollBehavior() {
     assert(_selection != null);
     final int selectedIndex = _selection.index;
+    assert(selectedIndex != null);
     _updateItemsForSelectedIndex(selectedIndex);
     _updateScrollBehaviorForSelectedIndex(selectedIndex);
   }
