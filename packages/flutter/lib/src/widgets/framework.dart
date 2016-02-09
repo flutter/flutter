@@ -334,7 +334,21 @@ abstract class State<T extends StatefulComponent> {
   /// component will not be scheduled for rebuilding, meaning that its rendering
   /// will not be updated.
   void setState(VoidCallback fn) {
-    assert(_debugLifecycleState != _StateLifecycle.defunct);
+    assert(() {
+      if (_debugLifecycleState == _StateLifecycle.defunct) {
+        throw new WidgetError(
+          'setState() called after dipose(): $this\n'
+          'This error happens if you call setState() on State object for a widget that\n'
+          'no longer appears in the widget tree (e.g., whose parent widget no longer\n'
+          'includes the widget in its build). This error can occur when code calls\n'
+          'setState() from a timer or an animation callback. The preferred solution is\n'
+          'to cancel the timer or stop listening to the animation in the dispose()\n'
+          'callback. Another solution is to check the "mounted" property of this\n'
+          'object before calling setState() to ensure the object is still in the tree.'
+        );
+      }
+      return true;
+    });
     fn();
     _element.markNeedsBuild();
   }
