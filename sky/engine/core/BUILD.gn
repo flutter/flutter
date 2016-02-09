@@ -44,13 +44,17 @@ source_set("prerequisites") {
   ]
 }
 
+vmservice_sources_gypi =
+  exec_script("//build/gypi_to_gn.py",
+      [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ],
+      "scope",
+      [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ])
+
 dart_embedder_resources("generate_sky_embedder_service_isolate_resources_cc") {
-  inputs = [
-    "//sky/engine/core/script/dart_service_isolate/loader.dart",
-    "//sky/engine/core/script/dart_service_isolate/main.dart",
-    "//sky/engine/core/script/dart_service_isolate/server.dart",
-  ]
-  root_prefix = "//sky/engine/core/script/"
+  inputs = rebase_path(vmservice_sources_gypi.sources,
+                       "",
+                       "//dart/runtime/bin/vmservice")
+  root_prefix = "//dart/runtime/bin/"
   output = "$target_gen_dir/sky_embedder_service_isolate_resources.cc"
   table_name = "sky_embedder_service_isolate"
 }
