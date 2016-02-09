@@ -51,10 +51,10 @@ class MealFragment extends StatefulComponent {
 }
 
 class MealFragmentState extends State<MealFragment> {
-  String _description = "";
+  InputValue _description = InputValue.empty;
 
   void _handleSave() {
-    config.onCreated(new Meal(when: new DateTime.now(), description: _description));
+    config.onCreated(new Meal(when: new DateTime.now(), description: _description.text));
     Navigator.pop(context);
   }
 
@@ -75,7 +75,7 @@ class MealFragmentState extends State<MealFragment> {
     );
   }
 
-  void _handleDescriptionChanged(String description) {
+  void _handleDescriptionChanged(InputValue description) {
     setState(() {
       _description = description;
     });

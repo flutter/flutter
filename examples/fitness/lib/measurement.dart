@@ -63,13 +63,13 @@ class MeasurementFragment extends StatefulComponent {
 }
 
 class MeasurementFragmentState extends State<MeasurementFragment> {
-  String _weight = "";
+  InputValue _weight = InputValue.empty;
   DateTime _when = new DateTime.now();
 
   void _handleSave() {
     double parsedWeight;
     try {
-      parsedWeight = double.parse(_weight);
+      parsedWeight = double.parse(_weight.text);
     } on FormatException catch(e) {
       print("Exception $e");
       Scaffold.of(context).showSnackBar(new SnackBar(
@@ -97,7 +97,7 @@ class MeasurementFragmentState extends State<MeasurementFragment> {
     );
   }
 
-  void _handleWeightChanged(String weight) {
+  void _handleWeightChanged(InputValue weight) {
     setState(() {
       _weight = weight;
     });

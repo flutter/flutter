@@ -33,14 +33,14 @@ class StockHomeState extends State<StockHome> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool _isSearching = false;
-  String _searchQuery;
+  InputValue _searchQuery = InputValue.empty;
 
   void _handleSearchBegin() {
     ModalRoute.of(context).addLocalHistoryEntry(new LocalHistoryEntry(
       onRemove: () {
         setState(() {
           _isSearching = false;
-          _searchQuery = null;
+          _searchQuery = InputValue.empty;
         });
       }
     ));
@@ -53,7 +53,7 @@ class StockHomeState extends State<StockHome> {
     Navigator.pop(context);
   }
 
-  void _handleSearchQueryChanged(String query) {
+  void _handleSearchQueryChanged(InputValue query) {
     setState(() {
       _searchQuery = query;
     });
@@ -197,9 +197,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
-    if (_searchQuery == null)
+    if (_searchQuery.text.isEmpty)
       return stocks;
-    RegExp regexp = new RegExp(_searchQuery, caseSensitive: false);
+    RegExp regexp = new RegExp(_searchQuery.text, caseSensitive: false);
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
 
@@ -254,6 +254,7 @@ class StockHomeState extends State<StockHome> {
         tooltip: 'Back'
       ),
       center: new Input(
+        value: _searchQuery,
         key: searchFieldKey,
         autofocus: true,
         hintText: 'Search stocks',

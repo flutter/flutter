@@ -30,15 +30,16 @@ void main() {
   test('Editable text has consistent size', () {
     testWidgets((WidgetTester tester) {
       GlobalKey inputKey = new GlobalKey();
-      String inputValue;
+      InputValue inputValue = InputValue.empty;
 
       Widget builder() {
         return new Center(
           child: new Material(
             child: new Input(
+              value: inputValue,
               key: inputKey,
               hintText: 'Placeholder',
-              onChanged: (String value) { inputValue = value; }
+              onChanged: (InputValue value) { inputValue = value; }
             )
           )
         );
@@ -58,7 +59,7 @@ void main() {
           ..composingExtent = testValue.length);
 
         // Check that the onChanged event handler fired.
-        expect(inputValue, equals(testValue));
+        expect(inputValue.text, equals(testValue));
 
         tester.pumpWidget(builder());
       }
@@ -88,7 +89,7 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      RawEditableTextState editableText = tester.findStateOfType(RawEditableTextState);
+      RawInputLineState editableText = tester.findStateOfType(RawInputLineState);
 
       // Check that the cursor visibility toggles after each blink interval.
       void checkCursorToggle() {

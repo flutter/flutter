@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show TextAffinity, TextPosition;
+import 'dart:ui' show hashValues, TextAffinity, TextPosition;
 
 export 'dart:ui' show TextAffinity, TextPosition;
 
@@ -50,6 +50,22 @@ class TextRange {
     assert(isNormalized);
     return text.substring(start, end);
   }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! TextRange)
+      return false;
+    TextRange typedOther = other;
+    return typedOther.start == start
+        && typedOther.end == end;
+  }
+
+  int get hashCode => hashValues(
+    start.hashCode,
+    end.hashCode
+  );
+
 }
 
 /// A range of text that represents a selection.
@@ -122,4 +138,23 @@ class TextSelection extends TextRange {
   String toString() {
     return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
   }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! TextSelection)
+      return false;
+    TextSelection typedOther = other;
+    return typedOther.baseOffset == baseOffset
+        && typedOther.extentOffset == extentOffset
+        && typedOther.affinity == affinity
+        && typedOther.isDirectional == isDirectional;
+  }
+
+  int get hashCode => hashValues(
+    baseOffset.hashCode,
+    extentOffset.hashCode,
+    affinity.hashCode,
+    isDirectional.hashCode
+  );
 }
