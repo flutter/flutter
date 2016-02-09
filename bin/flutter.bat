@@ -13,11 +13,6 @@ SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 REM TODO: Don't require dart to be on the user's path
 SET dart=dart
 
-IF "%FLUTTER_DEV%" == "" GOTO no_flutter_dev
-CALL %dart% --checked --package-root="%flutter_tools_dir%\packages" "%script_path%" %*
-EXIT /B %ERRORLEVEL%
-:no_flutter_dev
-
 REM Set current working directory to the flutter directory
 PUSHD %flutter_root%
 REM IF doesn't have an "or". Instead, just use GOTO
