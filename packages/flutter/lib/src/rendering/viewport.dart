@@ -9,6 +9,11 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'object.dart';
 
+enum ViewportAnchor {
+  start,
+  end,
+}
+
 abstract class HasScrollDirection {
   Axis get scrollDirection;
 }

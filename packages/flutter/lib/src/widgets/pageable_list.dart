@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -65,12 +64,25 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   int get itemCount => config.children?.length ?? 0;
   int _previousItemCount;
 
-  double pixelToScrollOffset(double value) {
+  double get _pixelsPerScrollUnit {
     final RenderBox box = context.findRenderObject();
     if (box == null || !box.hasSize)
       return 0.0;
-    final double pixelScrollExtent = config.scrollDirection == Axis.vertical ? box.size.height : box.size.width;
-    return pixelScrollExtent == 0.0 ? 0.0 : value / pixelScrollExtent;
+    switch (config.scrollDirection) {
+      case Axis.horizontal:
+        return box.size.width;
+      case Axis.vertical:
+        return box.size.height;
+    }
+  }
+
+  double pixelOffsetToScrollOffset(double pixelOffset) {
+    final double pixelsPerScrollUnit = _pixelsPerScrollUnit;
+    return super.pixelOffsetToScrollOffset(pixelsPerScrollUnit == 0.0 ? 0.0 : pixelOffset / pixelsPerScrollUnit);
+  }
+
+  double scrollOffsetToPixelOffset(double scrollOffset) {
+    return super.scrollOffsetToPixelOffset(scrollOffset * _pixelsPerScrollUnit);
   }
 
   void initState() {
@@ -143,7 +155,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 
   ScrollBehavior createScrollBehavior() => scrollBehavior;
 
-  bool get snapScrollOffsetChanges => config.itemsSnapAlignment == ItemsSnapAlignment.item;
+  bool get shouldSnapScrollOffset => config.itemsSnapAlignment == ItemsSnapAlignment.item;
 
   double snapScrollOffset(double newScrollOffset) {
     final double previousItemOffset = newScrollOffset.floorToDouble();
@@ -152,20 +164,19 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  Future _flingToAdjacentItem(Offset velocity) {
-    final double scrollVelocity = scrollDirectionVelocity(velocity);
+  Future _flingToAdjacentItem(double scrollVelocity) {
     final double newScrollOffset = snapScrollOffset(scrollOffset + scrollVelocity.sign)
       .clamp(snapScrollOffset(scrollOffset - 0.5), snapScrollOffset(scrollOffset + 0.5));
     return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve)
       .then(_notifyPageChanged);
   }
 
-  Future fling(Offset velocity) {
+  Future fling(double scrollVelocity) {
     switch(config.itemsSnapAlignment) {
       case ItemsSnapAlignment.adjacentItem:
-        return _flingToAdjacentItem(velocity);
+        return _flingToAdjacentItem(scrollVelocity);
       default:
-        return super.fling(velocity).then(_notifyPageChanged);
+        return super.fling(scrollVelocity).then(_notifyPageChanged);
     }
   }
 
