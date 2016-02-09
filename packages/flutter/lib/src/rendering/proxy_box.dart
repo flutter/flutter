@@ -91,6 +91,61 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   }
 }
 
+/// How to behave during hit tests.
+enum HitTestBehavior {
+  /// Targets that defer to their children receive events within their bounds
+  /// only if one of their children is hit by the hit test.
+  deferToChild,
+
+  /// Opaque targets can be hit by hit tests, causing them to both receive
+  /// events within their bounds and prevent targets visually behind them from
+  /// also receiving events.
+  opaque,
+
+  /// Translucent targets both receive events within their bounds and permit
+  /// targets visually behind them to also receive events.
+  translucent,
+}
+
+/// A RenderProxyBox subclass that allows you to customize the
+/// hit-testing behavior.
+abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
+  RenderProxyBoxWithHitTestBehavior({
+    this.behavior: HitTestBehavior.deferToChild,
+    RenderBox child
+  }) : super(child);
+
+  HitTestBehavior behavior;
+
+  bool hitTest(HitTestResult result, { Point position }) {
+    bool hitTarget = false;
+    if (position.x >= 0.0 && position.x < size.width &&
+        position.y >= 0.0 && position.y < size.height) {
+      hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
+      if (hitTarget || behavior == HitTestBehavior.translucent)
+        result.add(new BoxHitTestEntry(this, position));
+    }
+    return hitTarget;
+  }
+
+  bool hitTestSelf(Point position) => behavior == HitTestBehavior.opaque;
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    switch (behavior) {
+      case HitTestBehavior.translucent:
+        settings.add('behavior: translucent');
+        break;
+      case HitTestBehavior.opaque:
+        settings.add('behavior: opaque');
+        break;
+      case HitTestBehavior.deferToChild:
+        settings.add('behavior: defer-to-child');
+        break;
+    }
+  }
+}
+
 /// Imposes additional constraints on its child.
 ///
 /// A render constrained box proxies most functions in the render box protocol
@@ -1231,51 +1286,21 @@ typedef void PointerMoveEventListener(PointerMoveEvent event);
 typedef void PointerUpEventListener(PointerUpEvent event);
 typedef void PointerCancelEventListener(PointerCancelEvent event);
 
-/// How to behave during hit tests.
-enum HitTestBehavior {
-  /// Targets that defer to their children receive events within their bounds
-  /// only if one of their children is hit by the hit test.
-  deferToChild,
-
-  /// Opaque targets can be hit by hit tests, causing them to both receive
-  /// events within their bounds and prevent targets visually behind them from
-  /// also receiving events.
-  opaque,
-
-  /// Translucent targets both receive events within their bounds and permit
-  /// targets visually behind them to also receive events.
-  translucent,
-}
-
 /// Invokes the callbacks in response to pointer events.
-class RenderPointerListener extends RenderProxyBox {
+class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   RenderPointerListener({
     this.onPointerDown,
     this.onPointerMove,
     this.onPointerUp,
     this.onPointerCancel,
-    this.behavior: HitTestBehavior.deferToChild,
+    HitTestBehavior behavior: HitTestBehavior.deferToChild,
     RenderBox child
-  }) : super(child);
+  }) : super(behavior: behavior, child: child);
 
   PointerDownEventListener onPointerDown;
   PointerMoveEventListener onPointerMove;
   PointerUpEventListener onPointerUp;
   PointerCancelEventListener onPointerCancel;
-  HitTestBehavior behavior;
-
-  bool hitTest(HitTestResult result, { Point position }) {
-    bool hitTarget = false;
-    if (position.x >= 0.0 && position.x < size.width &&
-        position.y >= 0.0 && position.y < size.height) {
-      hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
-      if (hitTarget || behavior == HitTestBehavior.translucent)
-        result.add(new BoxHitTestEntry(this, position));
-    }
-    return hitTarget;
-  }
-
-  bool hitTestSelf(Point position) => behavior == HitTestBehavior.opaque;
 
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (onPointerDown != null && event is PointerDownEvent)
@@ -1302,17 +1327,6 @@ class RenderPointerListener extends RenderProxyBox {
     if (listeners.isEmpty)
       listeners.add('<none>');
     settings.add('listeners: ${listeners.join(", ")}');
-    switch (behavior) {
-      case HitTestBehavior.translucent:
-        settings.add('behavior: translucent');
-        break;
-      case HitTestBehavior.opaque:
-        settings.add('behavior: opaque');
-        break;
-      case HitTestBehavior.deferToChild:
-        settings.add('behavior: defer-to-child');
-        break;
-    }
   }
 }
 
@@ -1392,12 +1406,21 @@ class RenderIgnorePointer extends RenderProxyBox {
   }
 }
 
-/// Holds opaque meta data in the render tree
-class RenderMetaData extends RenderProxyBox {
-  RenderMetaData({ RenderBox child, this.metaData }) : super(child);
+/// Holds opaque meta data in the render tree.
+class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
+  RenderMetaData({
+    this.metaData,
+    HitTestBehavior behavior: HitTestBehavior.deferToChild,
+    RenderBox child
+  }) : super(behavior: behavior, child: child);
 
   /// Opaque meta data ignored by the render tree
   dynamic metaData;
+
+  void debugDescribeSettings(List<String> settings) {
+    super.debugDescribeSettings(settings);
+    settings.add('metaData: $metaData');
+  }
 }
 
 /// Listens for the specified gestures from the semantics server (e.g.

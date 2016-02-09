@@ -11,7 +11,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       TestPointer pointer = new TestPointer(7);
 
-      List accepted = [];
+      List<dynamic> accepted = <dynamic>[];
 
       tester.pumpWidget(new MaterialApp(
         routes: <String, RouteBuilder>{
@@ -68,6 +68,107 @@ void main() {
       expect(tester.findText('Source'), isNotNull);
       expect(tester.findText('Dragging'), isNull);
       expect(tester.findText('Target'), isNotNull);
+    });
+  });
+
+  test('Drag and drop - dragging over button', () {
+    testWidgets((WidgetTester tester) {
+      TestPointer pointer = new TestPointer(7);
+
+      List<String> events = <String>[];
+      Point firstLocation, secondLocation;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) { return new Column(
+            children: <Widget>[
+              new Draggable(
+                data: 1,
+                child: new Text('Source'),
+                feedback: new Text('Dragging')
+              ),
+              new Stack(
+                children: <Widget>[
+                  new GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      events.add('tap');
+                    },
+                    child: new Container(
+                      child: new Text('Button')
+                    )
+                  ),
+                  new DragTarget(
+                    builder: (context, data, rejects) {
+                      return new IgnorePointer(
+                        child: new Container(
+                          child: new Text('Target')
+                        )
+                      );
+                    },
+                    onAccept: (data) {
+                      events.add('drop');
+                    }
+                  ),
+                ]
+              ),
+            ]);
+          },
+        }
+      ));
+
+      expect(events, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(tester.findText('Button'), isNotNull);
+
+      // taps (we check both to make sure the test is consistent)
+
+      expect(events, isEmpty);
+      tester.tap(tester.findText('Button'));
+      expect(events, equals(<String>['tap']));
+      events.clear();
+
+      expect(events, isEmpty);
+      tester.tap(tester.findText('Target'));
+      expect(events, equals(<String>['tap']));
+      events.clear();
+
+      // drag and drop
+
+      firstLocation = tester.getCenter(tester.findText('Source'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+
+      expect(events, isEmpty);
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop']));
+      events.clear();
+
+      // drag and tap and drop
+
+      firstLocation = tester.getCenter(tester.findText('Source'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+
+      expect(events, isEmpty);
+      tester.tap(tester.findText('Button'));
+      tester.tap(tester.findText('Target'));
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['tap', 'tap', 'drop']));
+      events.clear();
+
     });
   });
 }

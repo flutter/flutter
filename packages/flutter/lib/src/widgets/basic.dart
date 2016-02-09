@@ -2193,20 +2193,31 @@ class ExcludeSemantics extends OneChildRenderObjectWidget {
 }
 
 class MetaData extends OneChildRenderObjectWidget {
-  MetaData({ Key key, Widget child, this.metaData })
-    : super(key: key, child: child);
+  MetaData({
+    Key key,
+    Widget child,
+    this.metaData,
+    this.behavior: HitTestBehavior.deferToChild
+  }) : super(key: key, child: child);
 
   final dynamic metaData;
+  final HitTestBehavior behavior;
 
-  RenderMetaData createRenderObject() => new RenderMetaData(metaData: metaData);
+  RenderMetaData createRenderObject() => new RenderMetaData(
+    metaData: metaData,
+    behavior: behavior
+  );
 
   void updateRenderObject(RenderMetaData renderObject, MetaData oldWidget) {
-    renderObject.metaData = metaData;
+    renderObject
+      ..metaData = metaData
+      ..behavior = behavior;
   }
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('$metaData');
+    description.add('behavior: $behavior');
+    description.add('metaData: $metaData');
   }
 }
 

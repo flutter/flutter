@@ -288,6 +288,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   Widget build(BuildContext context) {
     return new MetaData(
       metaData: this,
+      behavior: HitTestBehavior.translucent,
       child: config.builder(context,
                             new UnmodifiableListView<T>(_candidateData),
                             new UnmodifiableListView<dynamic>(_rejectedData)
