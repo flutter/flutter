@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+
 #include "base/task_runner.h"
 #include "base/files/file_path.h"
 #include "base/memory/weak_ptr.h"
@@ -18,15 +20,19 @@ namespace asset_bundle {
 // ZIP archive.
 class ZipAssetBundle : public AssetBundle {
  public:
-  static void Create(InterfaceRequest<AssetBundle> request,
-                     const base::FilePath& zip_path,
-                     scoped_refptr<base::TaskRunner> worker_runner);
+  static ZipAssetBundle* Create(InterfaceRequest<AssetBundle> request,
+                                const base::FilePath& zip_path,
+                                scoped_refptr<base::TaskRunner> worker_runner);
   ~ZipAssetBundle() override;
 
   // AssetBundle implementation
   void GetAsStream(
       const String& asset_name,
       const Callback<void(ScopedDataPipeConsumerHandle)>& callback) override;
+
+  // Serve this asset from another file instead of using the ZIP contents.
+  void AddOverlayFile(const std::string& asset_name,
+                      const base::FilePath& file_path);
 
  private:
   ZipAssetBundle(InterfaceRequest<AssetBundle> request,
@@ -36,6 +42,7 @@ class ZipAssetBundle : public AssetBundle {
   StrongBinding<AssetBundle> binding_;
   const base::FilePath zip_path_;
   scoped_refptr<base::TaskRunner> worker_runner_;
+  std::map<String, base::FilePath> overlay_files_;
 
   DISALLOW_COPY_AND_ASSIGN(ZipAssetBundle);
 };
@@ -46,9 +53,9 @@ class ZipAssetHandler {
 
  public:
   ZipAssetHandler(const base::FilePath& zip_path,
-                    const std::string& asset_name,
-                    ScopedDataPipeProducerHandle producer,
-                    scoped_refptr<base::TaskRunner> worker_runner);
+                  const std::string& asset_name,
+                  ScopedDataPipeProducerHandle producer,
+                  scoped_refptr<base::TaskRunner> worker_runner);
   ~ZipAssetHandler();
 
   void Start();

@@ -305,7 +305,7 @@ public class PlatformViewAndroid extends SurfaceView
         mServiceProvider = new PlatformServiceProvider(core, getContext(), localRegistry);
     }
 
-    void runFromBundle(String path) {
+    void runFromBundle(String bundlePath, String snapshotPath) {
 
         if (mServiceProvider != null) {
             mServiceProvider.close();
@@ -330,7 +330,11 @@ public class PlatformViewAndroid extends SurfaceView
 
         resetAccessibilityTree();
 
-        mSkyEngine.runFromBundle(path);
+        if (snapshotPath != null) {
+            mSkyEngine.runFromBundleAndSnapshot(bundlePath, snapshotPath);
+        } else {
+            mSkyEngine.runFromBundle(bundlePath);
+        }
     }
 
     private static native long nativeAttach(int inputObserverHandle);

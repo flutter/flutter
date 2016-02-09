@@ -67,6 +67,8 @@ class Engine : public UIDelegate,
   void RunFromBundle(const mojo::String& path) override;
   void RunFromAssetBundle(const mojo::String& url,
                           mojo::asset_bundle::AssetBundlePtr bundle) override;
+  void RunFromBundleAndSnapshot(const mojo::String& bundle_path,
+                                const mojo::String& snapshot_path) override;
   void PushRoute(const mojo::String& route) override;
   void PopRoute() override;
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state) override;
