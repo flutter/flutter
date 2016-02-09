@@ -244,6 +244,25 @@ void Engine::RunFromAssetBundle(const mojo::String& url,
                                        weak_factory_.GetWeakPtr(), url_str));
 }
 
+void Engine::RunFromBundleAndSnapshot(const mojo::String& bundle_path,
+                                      const mojo::String& snapshot_path) {
+  TRACE_EVENT0("flutter", "Engine::RunFromBundleAndSnapshot");
+  std::string bundle_path_str = bundle_path;
+  ZipAssetBundle* asset_bundle = ZipAssetBundle::Create(
+      mojo::GetProxy(&root_bundle_),
+      base::FilePath(bundle_path_str),
+      base::WorkerPool::GetTaskRunner(true));
+
+  std::string snapshot_path_str = snapshot_path;
+  asset_bundle->AddOverlayFile(kSnapshotKey,
+                               base::FilePath(snapshot_path_str));
+
+  root_bundle_->GetAsStream(kSnapshotKey,
+                            base::Bind(&Engine::RunFromSnapshotStream,
+                                       weak_factory_.GetWeakPtr(),
+                                       bundle_path_str));
+}
+
 void Engine::PushRoute(const mojo::String& route) {
   if (sky_view_)
     sky_view_->PushRoute(route);

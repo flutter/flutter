@@ -6,18 +6,26 @@
 
 #include "base/bind.h"
 #include "base/location.h"
-#include "base/message_loop/message_loop.h"
 #include "base/task_runner.h"
+#include "base/message_loop/message_loop.h"
+#include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "third_party/zlib/contrib/minizip/unzip.h"
 
 namespace mojo {
 namespace asset_bundle {
 
-void ZipAssetBundle::Create(
+namespace {
+
+void Ignored(bool) {
+}
+
+}  // namespace
+
+ZipAssetBundle* ZipAssetBundle::Create(
     InterfaceRequest<AssetBundle> request,
     const base::FilePath& zip_path,
     scoped_refptr<base::TaskRunner> worker_runner) {
-  new ZipAssetBundle(request.Pass(), zip_path, worker_runner.Pass());
+  return new ZipAssetBundle(request.Pass(), zip_path, worker_runner.Pass());
 }
 
 ZipAssetBundle::ZipAssetBundle(
@@ -32,11 +40,26 @@ ZipAssetBundle::ZipAssetBundle(
 ZipAssetBundle::~ZipAssetBundle() {
 }
 
+void ZipAssetBundle::AddOverlayFile(const std::string& asset_name,
+                                    const base::FilePath& file_path) {
+  overlay_files_.insert(std::make_pair(String(asset_name), file_path));
+}
+
 void ZipAssetBundle::GetAsStream(
     const String& asset_name,
     const Callback<void(ScopedDataPipeConsumerHandle)>& callback) {
   DataPipe pipe;
   callback.Run(pipe.consumer_handle.Pass());
+
+  auto overlay = overlay_files_.find(asset_name);
+  if (overlay != overlay_files_.end()) {
+    common::CopyFromFile(overlay->second,
+                         pipe.producer_handle.Pass(),
+                         0,
+                         worker_runner_.get(),
+                         base::Bind(&Ignored));
+    return;
+  }
 
   ZipAssetHandler* handler = new ZipAssetHandler(
       zip_path_,
