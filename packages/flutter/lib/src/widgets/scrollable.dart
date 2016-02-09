@@ -467,15 +467,17 @@ class ScrollNotification extends Notification {
 class ScrollableViewport extends Scrollable {
   ScrollableViewport({
     Key key,
-    this.child,
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     ScrollListener onScrollStart,
     ScrollListener onScroll,
-    ScrollListener onScrollEnd
+    ScrollListener onScrollEnd,
+    this.child
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
+    scrollAnchor: scrollAnchor,
     initialScrollOffset: initialScrollOffset,
     onScrollStart: onScrollStart,
     onScroll: onScroll,
@@ -514,18 +516,12 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     ));
   }
 
-  Offset get _scrollOffsetVector {
-    if (config.scrollDirection == Axis.horizontal)
-      return new Offset(scrollOffset, 0.0);
-    return new Offset(0.0, scrollOffset);
-  }
-
   Widget buildContent(BuildContext context) {
     return new SizeObserver(
       onSizeChanged: _handleViewportSizeChanged,
       child: new Viewport(
-        scrollOffset: _scrollOffsetVector,
         scrollDirection: config.scrollDirection,
+        paintOffset: scrollOffsetToPixelDelta(scrollOffset),
         child: new SizeObserver(
           onSizeChanged: _handleChildSizeChanged,
           child: config.child

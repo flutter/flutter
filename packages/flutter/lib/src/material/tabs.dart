@@ -771,7 +771,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
         onSizeChanged: _handleViewportSizeChanged,
         child: new Viewport(
           scrollDirection: Axis.horizontal,
-          scrollOffset: new Offset(scrollOffset, 0.0),
+          paintOffset: scrollOffsetToPixelDelta(scrollOffset),
           child: contents
         )
       );

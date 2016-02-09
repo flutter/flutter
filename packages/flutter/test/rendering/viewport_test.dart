@@ -24,7 +24,7 @@ void main() {
       ),
       child: size);
 
-    RenderViewport viewport = new RenderViewport(child: red, scrollOffset: new Offset(0.0, -10.0));
+    RenderViewport viewport = new RenderViewport(child: red, paintOffset: new Offset(0.0, 10.0));
     layout(viewport);
 
     HitTestResult result;

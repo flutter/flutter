@@ -18,26 +18,22 @@ abstract class HasScrollDirection {
   Axis get scrollDirection;
 }
 
-/// A render object that's bigger on the inside.
+/// A base class for render objects that are bigger on the inside.
 ///
-/// The child of a viewport can layout to a larger size than the viewport
-/// itself. If that happens, only a portion of the child will be visible through
-/// the viewport. The portion of the child that is visible is controlled by the
-/// scroll offset.
-///
-/// Viewport is the core scrolling primitive in the system, but it can be used
-/// in other situations.
-class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox>
-    implements HasScrollDirection {
-
-  RenderViewport({
-    RenderBox child,
-    Offset scrollOffset: Offset.zero,
-    Axis scrollDirection: Axis.vertical
-  }) : _scrollOffset = scrollOffset,
-       _scrollDirection = scrollDirection {
-    assert(_offsetIsSane(scrollOffset, scrollDirection));
-    this.child = child;
+/// This class holds the common fields for viewport render objects but does not
+/// have a child model. See [RenderViewport] for a viewport with a single child
+/// and [RenderVirtualViewport] for a viewport with multiple children.
+class RenderViewportBase extends RenderBox implements HasScrollDirection {
+  RenderViewportBase(
+    Offset paintOffset,
+    Axis scrollDirection,
+    Painter overlayPainter
+  ) : _paintOffset = paintOffset,
+      _scrollDirection = scrollDirection,
+      _overlayPainter = overlayPainter {
+    assert(paintOffset != null);
+    assert(scrollDirection != null);
+    assert(_offsetIsSane(_paintOffset, scrollDirection));
   }
 
   bool _offsetIsSane(Offset offset, Axis direction) {
@@ -52,13 +48,14 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   /// The offset at which to paint the child.
   ///
   /// The offset can be non-zero only in the [scrollDirection].
-  Offset get scrollOffset => _scrollOffset;
-  Offset _scrollOffset;
-  void set scrollOffset(Offset value) {
-    if (value == _scrollOffset)
+  Offset get paintOffset => _paintOffset;
+  Offset _paintOffset;
+  void set paintOffset(Offset value) {
+    assert(value != null);
+    if (value == _paintOffset)
       return;
     assert(_offsetIsSane(value, scrollDirection));
-    _scrollOffset = value;
+    _paintOffset = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -71,11 +68,67 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   Axis get scrollDirection => _scrollDirection;
   Axis _scrollDirection;
   void set scrollDirection(Axis value) {
+    assert(value != null);
     if (value == _scrollDirection)
       return;
-    assert(_offsetIsSane(scrollOffset, value));
+    assert(_offsetIsSane(_paintOffset, value));
     _scrollDirection = value;
     markNeedsLayout();
+  }
+
+  Painter get overlayPainter => _overlayPainter;
+  Painter _overlayPainter;
+  void set overlayPainter(Painter value) {
+    if (_overlayPainter == value)
+      return;
+    if (attached)
+      _overlayPainter?.detach();
+    _overlayPainter = value;
+    if (attached)
+      _overlayPainter?.attach(this);
+    markNeedsPaint();
+  }
+
+  void attach() {
+    super.attach();
+    _overlayPainter?.attach(this);
+  }
+
+  void detach() {
+    super.detach();
+    _overlayPainter?.detach();
+  }
+
+  Offset get _paintOffsetRoundedToIntegerDevicePixels {
+    final double devicePixelRatio = ui.window.devicePixelRatio;
+    int dxInDevicePixels = (_paintOffset.dx * devicePixelRatio).round();
+    int dyInDevicePixels = (_paintOffset.dy * devicePixelRatio).round();
+    return new Offset(dxInDevicePixels / devicePixelRatio,
+                      dyInDevicePixels / devicePixelRatio);
+  }
+
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    final Offset effectivePaintOffset = _paintOffsetRoundedToIntegerDevicePixels;
+    super.applyPaintTransform(child, transform.translate(effectivePaintOffset.dx, effectivePaintOffset.dy));
+  }
+
+}
+
+/// A render object that's bigger on the inside.
+///
+/// The child of a viewport can layout to a larger size than the viewport
+/// itself. If that happens, only a portion of the child will be visible through
+/// the viewport. The portion of the child that is visible is controlled by the
+/// paint offset.
+class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<RenderBox> {
+
+  RenderViewport({
+    RenderBox child,
+    Offset paintOffset: Offset.zero,
+    Axis scrollDirection: Axis.vertical,
+    Painter overlayPainter
+  }) : super(paintOffset, scrollDirection, overlayPainter) {
+    this.child = child;
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
@@ -135,41 +188,30 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
     }
   }
 
-  Offset get _scrollOffsetRoundedToIntegerDevicePixels {
-    double devicePixelRatio = ui.window.devicePixelRatio;
-    int dxInDevicePixels = (scrollOffset.dx * devicePixelRatio).round();
-    int dyInDevicePixels = (scrollOffset.dy * devicePixelRatio).round();
-    return new Offset(dxInDevicePixels / devicePixelRatio,
-                      dyInDevicePixels / devicePixelRatio);
-  }
-
-  bool _wouldNeedClipAtOffset(Offset offset) {
+  bool _shouldClipAtPaintOffset(Offset paintOffset) {
     assert(child != null);
-    return offset < Offset.zero || !(Offset.zero & size).contains(((Offset.zero - offset) & child.size).bottomRight);
+    return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & child.size).bottomRight);
   }
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      Offset roundedScrollOffset = _scrollOffsetRoundedToIntegerDevicePixels;
-      bool _needsClip = _wouldNeedClipAtOffset(roundedScrollOffset);
-      if (_needsClip) {
-        context.pushClipRect(needsCompositing, offset, Point.origin & size, (PaintingContext context, Offset offset) {
-          context.paintChild(child, offset - roundedScrollOffset);
-        });
+      final Offset effectivePaintOffset = _paintOffsetRoundedToIntegerDevicePixels;
+
+      void paintContents(PaintingContext context, Offset offset) {
+        context.paintChild(child, offset + effectivePaintOffset);
+        _overlayPainter?.paint(context, offset);
+      }
+
+      if (_shouldClipAtPaintOffset(effectivePaintOffset)) {
+        context.pushClipRect(needsCompositing, offset, Point.origin & size, paintContents);
       } else {
-        context.paintChild(child, offset - roundedScrollOffset);
+        paintContents(context, offset);
       }
     }
   }
 
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(-scrollOffset.dx, -scrollOffset.dy);
-    super.applyPaintTransform(child, transform);
-  }
-
   Rect describeApproximatePaintClip(RenderObject child) {
-    if (child != null &&
-        _wouldNeedClipAtOffset(_scrollOffsetRoundedToIntegerDevicePixels))
+    if (child != null && _shouldClipAtPaintOffset(_paintOffsetRoundedToIntegerDevicePixels))
       return Point.origin & size;
     return null;
   }
@@ -177,7 +219,7 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
-      Point transformed = position + _scrollOffsetRoundedToIntegerDevicePixels;
+      Point transformed = position + -_paintOffsetRoundedToIntegerDevicePixels;
       return child.hitTest(result, position: transformed);
     }
     return false;
@@ -185,17 +227,17 @@ class RenderViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox
 }
 
 abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<RenderBox>>
-    extends RenderBox with ContainerRenderObjectMixin<RenderBox, T>,
-                           RenderBoxContainerDefaultsMixin<RenderBox, T> {
+    extends RenderViewportBase with ContainerRenderObjectMixin<RenderBox, T>,
+                                    RenderBoxContainerDefaultsMixin<RenderBox, T> {
   RenderVirtualViewport({
     int virtualChildCount,
-    Offset paintOffset,
     LayoutCallback callback,
+    Offset paintOffset: Offset.zero,
+    Axis scrollDirection: Axis.vertical,
     Painter overlayPainter
   }) : _virtualChildCount = virtualChildCount,
-       _paintOffset = paintOffset,
        _callback = callback,
-       _overlayPainter = overlayPainter;
+       super(paintOffset, scrollDirection, overlayPainter);
 
   int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;
@@ -206,21 +248,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     markNeedsLayout();
   }
 
-  /// The offset at which to paint the first item.
-  ///
-  /// Note: you can modify this property from within [callback], if necessary.
-  Offset get paintOffset => _paintOffset;
-  Offset _paintOffset;
-  void set paintOffset(Offset value) {
-    assert(value != null);
-    if (value == _paintOffset)
-      return;
-    _paintOffset = value;
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
-  }
-
-  /// Called during [layout] to determine the grid's children.
+  /// Called during [layout] to determine the render object's children.
   ///
   /// Typically the callback will mutate the child list appropriately, for
   /// example so the child list contains only visible children.
@@ -233,39 +261,12 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     markNeedsLayout();
   }
 
-  Painter get overlayPainter => _overlayPainter;
-  Painter _overlayPainter;
-  void set overlayPainter(Painter value) {
-    if (_overlayPainter == value)
-      return;
-    if (attached)
-      _overlayPainter?.detach();
-    _overlayPainter = value;
-    if (attached)
-      _overlayPainter?.attach(this);
-    markNeedsPaint();
-  }
-
-  void attach() {
-    super.attach();
-    _overlayPainter?.attach(this);
-  }
-
-  void detach() {
-    super.detach();
-    _overlayPainter?.detach();
-  }
-
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    super.applyPaintTransform(child, transform.translate(paintOffset.dx, paintOffset.dy));
-  }
-
   bool hitTestChildren(HitTestResult result, { Point position }) {
-    return defaultHitTestChildren(result, position: position + -paintOffset);
+    return defaultHitTestChildren(result, position: position + -_paintOffsetRoundedToIntegerDevicePixels);
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset + paintOffset);
+    defaultPaint(context, offset + _paintOffsetRoundedToIntegerDevicePixels);
     _overlayPainter?.paint(context, offset);
   }
 

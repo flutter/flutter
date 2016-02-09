@@ -797,11 +797,12 @@ class Viewport extends OneChildRenderObjectWidget {
   Viewport({
     Key key,
     this.scrollDirection: Axis.vertical,
-    this.scrollOffset: Offset.zero,
+    this.paintOffset: Offset.zero,
+    this.overlayPainter,
     Widget child
   }) : super(key: key, child: child) {
     assert(scrollDirection != null);
-    assert(scrollOffset != null);
+    assert(paintOffset != null);
   }
 
   /// The direction in which the child is permitted to be larger than the viewport
@@ -814,14 +815,25 @@ class Viewport extends OneChildRenderObjectWidget {
   /// The offset at which to paint the child.
   ///
   /// The offset can be non-zero only in the [scrollDirection].
-  final Offset scrollOffset;
+  final Offset paintOffset;
 
-  RenderViewport createRenderObject() => new RenderViewport(scrollDirection: scrollDirection, scrollOffset: scrollOffset);
+  /// Paints an overlay over the viewport.
+  ///
+  /// Often used to paint scroll bars.
+  final Painter overlayPainter;
+
+  RenderViewport createRenderObject() => new RenderViewport(
+    scrollDirection: scrollDirection,
+    paintOffset: paintOffset,
+    overlayPainter: overlayPainter
+  );
 
   void updateRenderObject(RenderViewport renderObject, Viewport oldWidget) {
     // Order dependency: RenderViewport validates scrollOffset based on scrollDirection.
-    renderObject.scrollDirection = scrollDirection;
-    renderObject.scrollOffset = scrollOffset;
+    renderObject
+      ..scrollDirection = scrollDirection
+      ..paintOffset = paintOffset
+      ..overlayPainter = overlayPainter;
   }
 }
 

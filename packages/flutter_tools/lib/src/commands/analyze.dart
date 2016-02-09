@@ -298,6 +298,7 @@ class AnalyzeCommand extends FlutterCommand {
       new RegExp(r'\[lint\] Prefer using lowerCamelCase for constant names.'), // sometimes we have no choice (e.g. when matching other platforms)
       new RegExp(r'\[lint\] Avoid defining a one-member abstract class when a simple function will do.'), // too many false-positives; code review should catch real instances
       new RegExp(r'\[info\] TODO.+'),
+      new RegExp('\\[warning\\] Missing concrete implementation of \'RenderObject\\.applyPaintTransform\''), // https://github.com/dart-lang/sdk/issues/25232
       new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
       new RegExp(r'^$'),
     ];
