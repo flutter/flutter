@@ -520,8 +520,9 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     return new SizeObserver(
       onSizeChanged: _handleViewportSizeChanged,
       child: new Viewport(
-        scrollDirection: config.scrollDirection,
         paintOffset: scrollOffsetToPixelDelta(scrollOffset),
+        scrollDirection: config.scrollDirection,
+        scrollAnchor: config.scrollAnchor,
         child: new SizeObserver(
           onSizeChanged: _handleChildSizeChanged,
           child: config.child
@@ -541,6 +542,7 @@ class Block extends StatelessComponent {
     this.padding,
     this.initialScrollOffset,
     this.scrollDirection: Axis.vertical,
+    this.scrollAnchor: ViewportAnchor.start,
     this.onScroll,
     this.scrollableKey
   }) : super(key: key) {
@@ -552,6 +554,7 @@ class Block extends StatelessComponent {
   final EdgeDims padding;
   final double initialScrollOffset;
   final Axis scrollDirection;
+  final ViewportAnchor scrollAnchor;
   final ScrollListener onScroll;
   final Key scrollableKey;
 
@@ -563,6 +566,7 @@ class Block extends StatelessComponent {
       key: scrollableKey,
       initialScrollOffset: initialScrollOffset,
       scrollDirection: scrollDirection,
+      scrollAnchor: scrollAnchor,
       onScroll: onScroll,
       child: contents
     );

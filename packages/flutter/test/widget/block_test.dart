@@ -66,4 +66,53 @@ void main() {
       tester.dispatchEvent(pointer.up(), target);
     });
   });
+
+  test('Scroll anchor', () {
+    testWidgets((WidgetTester tester) {
+      int first = 0;
+      int second = 0;
+
+      Widget buildBlock(ViewportAnchor scrollAnchor) {
+        return new Block(
+          key: new UniqueKey(),
+          scrollAnchor: scrollAnchor,
+          children: <Widget>[
+            new GestureDetector(
+              onTap: () { ++first; },
+              child: new Container(
+                height: 2000.0, // more than 600, the height of the test area
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFF00FF00)
+                )
+              )
+            ),
+            new GestureDetector(
+              onTap: () { ++second; },
+              child: new Container(
+                height: 2000.0, // more than 600, the height of the test area
+                decoration: new BoxDecoration(
+                  backgroundColor: new Color(0xFF0000FF)
+                )
+              )
+            )
+          ]
+        );
+      }
+
+      tester.pumpWidget(buildBlock(ViewportAnchor.end));
+      tester.pump(); // for SizeObservers
+
+      Point target = const Point(200.0, 200.0);
+      tester.tapAt(target);
+      expect(first, equals(0));
+      expect(second, equals(1));
+
+      tester.pumpWidget(buildBlock(ViewportAnchor.start));
+      tester.pump(); // for SizeObservers
+
+      tester.tapAt(target);
+      expect(first, equals(1));
+      expect(second, equals(1));
+    });
+  });
 }
