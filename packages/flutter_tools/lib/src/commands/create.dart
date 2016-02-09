@@ -119,18 +119,18 @@ abstract class Template {
     printStatus('Creating ${path.basename(projectName)}...');
     dir.createSync(recursive: true);
 
-    // If there's a good relative path use it; else fall back to an absolute path.
-    if (_hasRelativePath(flutterPackagePath, dirPath)) {
-      flutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
-    } else {
-      flutterPackagePath = path.absolute(flutterPackagePath);
-    }
+    String pubspecPath = path.relative(flutterPackagePath, from: dirPath);
+
+    // If we can't validate the relative path, use an absolute one.
+    String resolvedPath = path.join(dirPath, pubspecPath);
+    if (!FileSystemEntity.isDirectorySync(resolvedPath))
+      pubspecPath = path.absolute(flutterPackagePath);
 
     files.forEach((String filePath, String contents) {
       Map m = {
         'projectName': projectName,
         'description': description,
-        'flutterPackagePath': flutterPackagePath
+        'flutterPackagePath': pubspecPath
       };
       contents = mustache.render(contents, m);
       filePath = filePath.replaceAll('/', Platform.pathSeparator);
@@ -139,16 +139,6 @@ abstract class Template {
       file.writeAsStringSync(contents);
       printStatus('  ${file.path}');
     });
-  }
-
-  bool _hasRelativePath(String path1, String path2) {
-    List<String> parts1 = path.split(path1);
-    List<String> parts2 = path.split(path2);
-
-    if (parts1.length < 2 || parts2.length < 2)
-      return false;
-
-    return (path1[0] == path2[0]) && (path1[1] == path2[1]);
   }
 
   String toString() => name;
