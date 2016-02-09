@@ -40,6 +40,7 @@ abstract class SemanticActionHandler {
 
 enum _SemanticFlags {
   mergeAllDescendantsIntoThisNode,
+  inheritedMergeAllDescendantsIntoThisNode, // whether an ancestor had mergeAllDescendantsIntoThisNode set
   canBeTapped,
   canBeLongPressed,
   canBeScrolledHorizontally,
@@ -119,6 +120,11 @@ class SemanticsNode extends AbstractNode {
   bool get mergeAllDescendantsIntoThisNode => _flags[_SemanticFlags.mergeAllDescendantsIntoThisNode];
   void set mergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.mergeAllDescendantsIntoThisNode, value);
 
+  bool get _inheritedMergeAllDescendantsIntoThisNode => _flags[_SemanticFlags.inheritedMergeAllDescendantsIntoThisNode];
+  void set _inheritedMergeAllDescendantsIntoThisNode(bool value) => _setFlag(_SemanticFlags.inheritedMergeAllDescendantsIntoThisNode, value);
+
+  bool get _shouldMergeAllDescendantsIntoThisNode => mergeAllDescendantsIntoThisNode || _inheritedMergeAllDescendantsIntoThisNode;
+
   bool get canBeTapped => _flags[_SemanticFlags.canBeTapped];
   void set canBeTapped(bool value) => _setFlag(_SemanticFlags.canBeTapped, value, needsHandler: true);
 
@@ -148,7 +154,10 @@ class SemanticsNode extends AbstractNode {
   }
 
   void reset() {
+    bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _flags.reset();
+    if (hadInheritedMergeAllDescendantsIntoThisNode)
+      _inheritedMergeAllDescendantsIntoThisNode = true;
     _label = '';
     _markDirty();
   }
@@ -257,6 +266,8 @@ class SemanticsNode extends AbstractNode {
     assert(!_nodes.containsKey(_id));
     _nodes[_id] = this;
     _detachedNodes.remove(this);
+    if (parent != null)
+      _inheritedMergeAllDescendantsIntoThisNode = parent._shouldMergeAllDescendantsIntoThisNode;
     if (_children != null) {
       for (SemanticsNode child in _children)
         child.attach();
@@ -308,7 +319,7 @@ class SemanticsNode extends AbstractNode {
       result.strings = new mojom.SemanticStrings();
       result.strings.label = label;
       List<mojom.SemanticsNode> children = <mojom.SemanticsNode>[];
-      if (mergeAllDescendantsIntoThisNode) {
+      if (_shouldMergeAllDescendantsIntoThisNode) {
         _visitDescendants((SemanticsNode node) {
           result.flags.canBeTapped = result.flags.canBeTapped || node.canBeTapped;
           result.flags.canBeLongPressed = result.flags.canBeLongPressed || node.canBeLongPressed;
@@ -318,6 +329,7 @@ class SemanticsNode extends AbstractNode {
           result.flags.isChecked = result.flags.isChecked || node.isChecked;
           if (node.label != '')
             result.strings.label = result.strings.label.isNotEmpty ? '${result.strings.label}\n${node.label}' : node.label;
+          node._dirty = false;
           return true; // continue walk
         });
         // and we pretend to have no children
@@ -359,16 +371,32 @@ class SemanticsNode extends AbstractNode {
       // we mutate the list as we walk it here, which is why we use an index instead of an iterator
       SemanticsNode node = _dirtyNodes[index];
       assert(node._dirty);
-      assert(node.parent == null || !node.parent.mergeAllDescendantsIntoThisNode || node.mergeAllDescendantsIntoThisNode);
-      if (node.mergeAllDescendantsIntoThisNode) {
-        // if we're merged into our parent, make sure our parent is added to the list
-        if (node.parent != null && node.parent.mergeAllDescendantsIntoThisNode)
-          node.parent._markDirty(); // this can add the node to the dirty list
-        // make sure all the descendants are also marked, so that if one gets marked dirty later we know to walk up then too
-        if (node._children != null)
-          for (SemanticsNode child in node._children)
-            child.mergeAllDescendantsIntoThisNode = true; // this can add the node to the dirty list
-      }
+      assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode || node._inheritedMergeAllDescendantsIntoThisNode);
+      if (node._shouldMergeAllDescendantsIntoThisNode) {
+        assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
+        if (node.mergeAllDescendantsIntoThisNode ||
+            node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode) {
+          // if we're merged into our parent, make sure our parent is added to the list
+          if (node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode)
+            node.parent._markDirty(); // this can add the node to the dirty list
+          // make sure all the descendants are also marked, so that if one gets marked dirty later we know to walk up then too
+          if (node._children != null) {
+            for (SemanticsNode child in node._children)
+              child._inheritedMergeAllDescendantsIntoThisNode = true; // this can add the node to the dirty list
+          }
+        } else {
+          // we previously were being merged but aren't any more
+          // update our bits and all our descendants'
+          assert(node._inheritedMergeAllDescendantsIntoThisNode);
+          assert(!node.mergeAllDescendantsIntoThisNode);
+          assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode);
+          node._inheritedMergeAllDescendantsIntoThisNode = false;
+          if (node._children != null) {
+            for (SemanticsNode child in node._children)
+              child._inheritedMergeAllDescendantsIntoThisNode = false; // this can add the node to the dirty list
+          }
+        }
+      } 
       assert(_dirtyNodes[index] == node); // make sure nothing went in front of us in the list
     }
     _dirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
@@ -396,7 +424,7 @@ class SemanticsNode extends AbstractNode {
   static SemanticActionHandler getSemanticActionHandlerForId(int id, { _SemanticFlags neededFlag }) {
     assert(neededFlag != null);
     SemanticsNode result = _nodes[id];
-    if (result != null && result.mergeAllDescendantsIntoThisNode && !result._canHandle(neededFlag)) {
+    if (result != null && result._shouldMergeAllDescendantsIntoThisNode && !result._canHandle(neededFlag)) {
       result._visitDescendants((SemanticsNode node) {
         if (node._actionHandler != null && node._flags[neededFlag]) {
           result = node;
@@ -412,8 +440,8 @@ class SemanticsNode extends AbstractNode {
 
   String toString() {
     return '$runtimeType($_id'
-             '${_dirty ? " (dirty)" : ""}'
-             '${mergeAllDescendantsIntoThisNode ? " (leaf merge)" : ""}'
+             '${_dirty ? " (${ _dirtyNodes.contains(this) ? 'dirty' : 'STALE' })" : ""}'
+             '${_shouldMergeAllDescendantsIntoThisNode ? " (leaf merge)" : ""}'
              '; $rect'
              '${wasAffectedByClip ? " (clipped)" : ""}'
              '${canBeTapped ? "; canBeTapped" : ""}'
