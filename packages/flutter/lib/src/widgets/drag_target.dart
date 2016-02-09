@@ -44,18 +44,28 @@ abstract class DraggableBase<T> extends StatefulComponent {
     Key key,
     this.data,
     this.child,
+    this.childWhenDragging,
     this.feedback,
     this.feedbackOffset: Offset.zero,
-    this.dragAnchor: DragAnchor.child
+    this.dragAnchor: DragAnchor.child,
+    this.maxSimultaneousDrags
   }) : super(key: key) {
     assert(child != null);
     assert(feedback != null);
+    assert(maxSimultaneousDrags == null || maxSimultaneousDrags > 0);
   }
 
   final T data;
   final Widget child;
 
-  /// The widget to show when a drag is under way.
+  /// The widget to show instead of [child] when a drag is under way.
+  ///
+  /// If this is null, then [child] will be used instead (and so the
+  /// drag source representation will change while a drag is under
+  /// way).
+  final Widget childWhenDragging;
+
+  /// The widget to show under the pointer when a drag is under way.
   final Widget feedback;
 
   /// The feedbackOffset can be used to set the hit test target point for the
@@ -65,6 +75,11 @@ abstract class DraggableBase<T> extends StatefulComponent {
 
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
+
+  /// How many simultaneous drags to support. When null, no limit is applied.
+  /// Set this to 1 if you want to only allow the drag source to have one item
+  /// dragged at a time.
+  final int maxSimultaneousDrags;
 
   /// Should return a GestureRecognizer instance that is configured to call the starter
   /// argument when the drag is to begin. The arena for the pointer must not yet have
@@ -81,16 +96,20 @@ class Draggable<T> extends DraggableBase<T> {
     Key key,
     T data,
     Widget child,
+    Widget childWhenDragging,
     Widget feedback,
     Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child
+    DragAnchor dragAnchor: DragAnchor.child,
+    int maxSimultaneousDrags
   }) : super(
     key: key,
     data: data,
     child: child,
+    childWhenDragging: childWhenDragging,
     feedback: feedback,
     feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor
+    dragAnchor: dragAnchor,
+    maxSimultaneousDrags: maxSimultaneousDrags
   );
 
   GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
@@ -108,16 +127,20 @@ class LongPressDraggable<T> extends DraggableBase<T> {
     Key key,
     T data,
     Widget child,
+    Widget childWhenDragging,
     Widget feedback,
     Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child
+    DragAnchor dragAnchor: DragAnchor.child,
+    int maxSimultaneousDrags
   }) : super(
     key: key,
     data: data,
     child: child,
+    childWhenDragging: childWhenDragging,
     feedback: feedback,
     feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor
+    dragAnchor: dragAnchor,
+    maxSimultaneousDrags: maxSimultaneousDrags
   );
 
   GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
@@ -144,6 +167,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
 
   GestureRecognizer _recognizer;
   Map<int, GestureArenaEntry> _activePointers = <int, GestureArenaEntry>{};
+  int _activeCount = 0;
 
   void _routePointer(PointerEvent event) {
     _activePointers[event.pointer] = Gesturer.instance.gestureArena.add(event.pointer, this);
@@ -159,6 +183,8 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
   }
 
   void _startDrag(Point position, int pointer) {
+    if (config.maxSimultaneousDrags != null && _activeCount >= config.maxSimultaneousDrags)
+      return;
     assert(_activePointers.containsKey(pointer));
     _activePointers[pointer].resolve(GestureDisposition.accepted);
     Point dragStartPoint;
@@ -171,6 +197,9 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
         dragStartPoint = Point.origin;
       break;
     }
+    setState(() {
+      _activeCount += 1;
+    });
     new _DragAvatar<T>(
       pointer: pointer,
       router: router,
@@ -179,14 +208,20 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
       initialPosition: position,
       dragStartPoint: dragStartPoint,
       feedback: config.feedback,
-      feedbackOffset: config.feedbackOffset
+      feedbackOffset: config.feedbackOffset,
+      onDragEnd: () {
+        _activeCount -= 1;
+      }
     );
   }
 
   Widget build(BuildContext context) {
+    final bool canDrag = config.maxSimultaneousDrags == null ||
+                         _activeCount < config.maxSimultaneousDrags;
+    final bool showChild = _activeCount == 0 || config.childWhenDragging == null;
     return new Listener(
-      onPointerDown: _routePointer,
-      child: config.child
+      onPointerDown: canDrag ? _routePointer : null,
+      child: showChild ? config.child : config.childWhenDragging
     );
   }
 }
@@ -278,7 +313,8 @@ class _DragAvatar<T> {
     Point initialPosition,
     this.dragStartPoint: Point.origin,
     this.feedback,
-    this.feedbackOffset: Offset.zero
+    this.feedbackOffset: Offset.zero,
+    this.onDragEnd
   }) {
     assert(pointer != null);
     assert(router != null);
@@ -297,6 +333,7 @@ class _DragAvatar<T> {
   final Point dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
+  final VoidCallback onDragEnd;
 
   _DragTargetState _activeTarget;
   bool _activeTargetWillAcceptDrop = false;
@@ -353,6 +390,8 @@ class _DragAvatar<T> {
     _entry.remove();
     _entry = null;
     router.removeRoute(pointer, handleEvent);
+    if (onDragEnd != null)
+      onDragEnd();
   }
 
   Widget _build(BuildContext context) {
