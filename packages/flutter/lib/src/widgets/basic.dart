@@ -65,6 +65,7 @@ export 'package:flutter/rendering.dart' show
     TextStyle,
     TransferMode,
     ValueChanged,
+    ViewportAnchor,
     VoidCallback;
 
 
@@ -796,14 +797,20 @@ class Baseline extends OneChildRenderObjectWidget {
 class Viewport extends OneChildRenderObjectWidget {
   Viewport({
     Key key,
-    this.scrollDirection: Axis.vertical,
     this.paintOffset: Offset.zero,
+    this.scrollDirection: Axis.vertical,
+    this.scrollAnchor: ViewportAnchor.start,
     this.overlayPainter,
     Widget child
   }) : super(key: key, child: child) {
     assert(scrollDirection != null);
     assert(paintOffset != null);
   }
+
+  /// The offset at which to paint the child.
+  ///
+  /// The offset can be non-zero only in the [scrollDirection].
+  final Offset paintOffset;
 
   /// The direction in which the child is permitted to be larger than the viewport
   ///
@@ -812,26 +819,27 @@ class Viewport extends OneChildRenderObjectWidget {
   /// that direction (e.g., the child can be as tall as it wants).
   final Axis scrollDirection;
 
-  /// The offset at which to paint the child.
-  ///
-  /// The offset can be non-zero only in the [scrollDirection].
-  final Offset paintOffset;
+  final ViewportAnchor scrollAnchor;
 
   /// Paints an overlay over the viewport.
   ///
   /// Often used to paint scroll bars.
   final Painter overlayPainter;
 
-  RenderViewport createRenderObject() => new RenderViewport(
-    scrollDirection: scrollDirection,
-    paintOffset: paintOffset,
-    overlayPainter: overlayPainter
-  );
+  RenderViewport createRenderObject() {
+    return new RenderViewport(
+      paintOffset: paintOffset,
+      scrollDirection: scrollDirection,
+      scrollAnchor: scrollAnchor,
+      overlayPainter: overlayPainter
+    );
+  }
 
   void updateRenderObject(RenderViewport renderObject, Viewport oldWidget) {
     // Order dependency: RenderViewport validates scrollOffset based on scrollDirection.
     renderObject
       ..scrollDirection = scrollDirection
+      ..scrollAnchor = scrollAnchor
       ..paintOffset = paintOffset
       ..overlayPainter = overlayPainter;
   }

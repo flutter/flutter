@@ -14,6 +14,33 @@ enum ViewportAnchor {
   end,
 }
 
+class ViewportDimensions {
+  const ViewportDimensions({
+    this.contentSize: Size.zero,
+    this.containerSize: Size.zero
+  });
+
+  static const ViewportDimensions zero = const ViewportDimensions();
+
+  final Size contentSize;
+  final Size containerSize;
+
+  bool get _debugHasAtLeastOneCommonDimension {
+    return contentSize.width == containerSize.width
+        || contentSize.height == containerSize.height;
+  }
+
+  Offset getAbsolutePaintOffset({ Offset paintOffset, ViewportAnchor anchor }) {
+    assert(_debugHasAtLeastOneCommonDimension);
+    switch (anchor) {
+      case ViewportAnchor.start:
+        return paintOffset;
+      case ViewportAnchor.end:
+        return paintOffset + (containerSize - contentSize);
+    }
+  }
+}
+
 abstract class HasScrollDirection {
   Axis get scrollDirection;
 }
@@ -27,9 +54,11 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
   RenderViewportBase(
     Offset paintOffset,
     Axis scrollDirection,
+    ViewportAnchor scrollAnchor,
     Painter overlayPainter
   ) : _paintOffset = paintOffset,
       _scrollDirection = scrollDirection,
+      _scrollAnchor = scrollAnchor,
       _overlayPainter = overlayPainter {
     assert(paintOffset != null);
     assert(scrollDirection != null);
@@ -76,6 +105,17 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
     markNeedsLayout();
   }
 
+  ViewportAnchor get scrollAnchor => _scrollAnchor;
+  ViewportAnchor _scrollAnchor;
+  void set scrollAnchor(ViewportAnchor value) {
+    assert(value != null);
+    if (value == _scrollAnchor)
+      return;
+    _scrollAnchor = value;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
   Painter get overlayPainter => _overlayPainter;
   Painter _overlayPainter;
   void set overlayPainter(Painter value) {
@@ -99,16 +139,25 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
     _overlayPainter?.detach();
   }
 
-  Offset get _paintOffsetRoundedToIntegerDevicePixels {
+  ViewportDimensions get dimensions => _dimensions;
+  ViewportDimensions _dimensions = ViewportDimensions.zero;
+  void set dimensions(ViewportDimensions value) {
+    assert(debugDoingThisLayout);
+    _dimensions = value;
+  }
+
+  Offset get _effectivePaintOffset {
     final double devicePixelRatio = ui.window.devicePixelRatio;
     int dxInDevicePixels = (_paintOffset.dx * devicePixelRatio).round();
     int dyInDevicePixels = (_paintOffset.dy * devicePixelRatio).round();
-    return new Offset(dxInDevicePixels / devicePixelRatio,
-                      dyInDevicePixels / devicePixelRatio);
+    return _dimensions.getAbsolutePaintOffset(
+      paintOffset: new Offset(dxInDevicePixels / devicePixelRatio, dyInDevicePixels / devicePixelRatio),
+      anchor: _scrollAnchor
+    );
   }
 
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final Offset effectivePaintOffset = _paintOffsetRoundedToIntegerDevicePixels;
+    final Offset effectivePaintOffset = _effectivePaintOffset;
     super.applyPaintTransform(child, transform.translate(effectivePaintOffset.dx, effectivePaintOffset.dy));
   }
 
@@ -126,8 +175,9 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     RenderBox child,
     Offset paintOffset: Offset.zero,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     Painter overlayPainter
-  }) : super(paintOffset, scrollDirection, overlayPainter) {
+  }) : super(paintOffset, scrollDirection, scrollAnchor, overlayPainter) {
     this.child = child;
   }
 
@@ -183,8 +233,10 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
       size = constraints.constrain(child.size);
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = Offset.zero;
+      dimensions = new ViewportDimensions(containerSize: size, contentSize: child.size);
     } else {
       performResize();
+      dimensions = new ViewportDimensions(containerSize: size);
     }
   }
 
@@ -195,7 +247,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      final Offset effectivePaintOffset = _paintOffsetRoundedToIntegerDevicePixels;
+      final Offset effectivePaintOffset = _effectivePaintOffset;
 
       void paintContents(PaintingContext context, Offset offset) {
         context.paintChild(child, offset + effectivePaintOffset);
@@ -211,7 +263,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   }
 
   Rect describeApproximatePaintClip(RenderObject child) {
-    if (child != null && _shouldClipAtPaintOffset(_paintOffsetRoundedToIntegerDevicePixels))
+    if (child != null && _shouldClipAtPaintOffset(_effectivePaintOffset))
       return Point.origin & size;
     return null;
   }
@@ -219,7 +271,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
-      Point transformed = position + -_paintOffsetRoundedToIntegerDevicePixels;
+      Point transformed = position + -_effectivePaintOffset;
       return child.hitTest(result, position: transformed);
     }
     return false;
@@ -234,10 +286,11 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     LayoutCallback callback,
     Offset paintOffset: Offset.zero,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     Painter overlayPainter
   }) : _virtualChildCount = virtualChildCount,
        _callback = callback,
-       super(paintOffset, scrollDirection, overlayPainter);
+       super(paintOffset, scrollDirection, scrollAnchor, overlayPainter);
 
   int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;
@@ -262,11 +315,11 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   }
 
   bool hitTestChildren(HitTestResult result, { Point position }) {
-    return defaultHitTestChildren(result, position: position + -_paintOffsetRoundedToIntegerDevicePixels);
+    return defaultHitTestChildren(result, position: position + -_effectivePaintOffset);
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset + _paintOffsetRoundedToIntegerDevicePixels);
+    defaultPaint(context, offset + _effectivePaintOffset);
     _overlayPainter?.paint(context, offset);
   }
 
