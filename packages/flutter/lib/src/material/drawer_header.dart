@@ -18,8 +18,9 @@ class DrawerHeader extends StatelessComponent {
 
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeDims.zero).top;
     return new Container(
-      height: kStatusBarHeight + kMaterialDrawerHeight,
+      height: statusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(
         backgroundColor: Theme.of(context).cardColor,
         border: const Border(

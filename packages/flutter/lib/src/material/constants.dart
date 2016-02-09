@@ -4,9 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-// TODO(ianh): Figure out actual specced height for status bar
-const double kStatusBarHeight = 50.0;
-
 // TODO(eseidel) Toolbar needs to change size based on orientation:
 // http://www.google.com/design/spec/layout/structure.html#structure-app-bar
 // Mobile Landscape: 48dp
