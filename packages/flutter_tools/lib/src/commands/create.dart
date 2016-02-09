@@ -140,12 +140,13 @@ abstract class Template {
 
 class FlutterSimpleTemplate extends Template {
   FlutterSimpleTemplate() : super('flutter-simple', 'A minimal Flutter project.') {
+    files['.analysis_options'] = _analysis_options;
     files['.gitignore'] = _gitignore;
     files['flutter.yaml'] = _flutterYaml;
     files['pubspec.yaml'] = _pubspec;
     files['README.md'] = _readme;
-    files['lib/main.dart'] = _libMain;
     files['apk/AndroidManifest.xml'] = _apkManifest;
+    files['lib/main.dart'] = _libMain;
   }
 }
 
@@ -156,6 +157,12 @@ String _normalizeProjectName(String name) {
     name = name.substring(0, name.indexOf('.'));
   return name;
 }
+
+const String _analysis_options = r'''
+analyzer:
+  exclude:
+    - 'ios/build/**'
+''';
 
 const String _gitignore = r'''
 .DS_Store
