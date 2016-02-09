@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:xml/xml.dart' as xml;
 
 import 'artifacts.dart';
 import 'build_configuration.dart';
@@ -32,6 +34,8 @@ class AndroidApk extends ApplicationPackage {
   static const String _defaultName = 'SkyShell.apk';
   static const String _defaultId = 'org.domokit.sky.shell';
   static const String _defaultLaunchActivity = '$_defaultId/$_defaultId.SkyActivity';
+  static const String _defaultManifestPath = 'apk/AndroidManifest.xml';
+  static const String _defaultOutputPath = 'build/app.apk';
 
   /// The path to the activity that should be launched.
   /// Defaults to 'org.domokit.sky.shell/org.domokit.sky.shell.SkyActivity'
@@ -43,6 +47,36 @@ class AndroidApk extends ApplicationPackage {
     this.launchActivity: _defaultLaunchActivity
   }) : super(localPath: localPath, id: id) {
     assert(launchActivity != null);
+  }
+
+  /// Creates a new AndroidApk based on the information in the Android manifest.
+  static AndroidApk getCustomApk({
+    String localPath: _defaultOutputPath,
+    String manifest: _defaultManifestPath
+  }) {
+    if (!FileSystemEntity.isFileSync(manifest))
+      return null;
+    String manifestString = new File(manifest).readAsStringSync();
+    xml.XmlDocument document = xml.parse(manifestString);
+
+    Iterable<xml.XmlElement> manifests = document.findElements('manifest');
+    if (manifests.isEmpty)
+      return null;
+    String id = manifests.first.getAttribute('package');
+
+    String launchActivity;
+    for (xml.XmlElement category in document.findAllElements('category')) {
+      if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
+        xml.XmlElement activity = category.parent.parent as xml.XmlElement;
+        String activityName = activity.getAttribute('android:name');
+        launchActivity = "$id/$activityName";
+        break;
+      }
+    }
+    if (id == null || launchActivity == null)
+      return null;
+
+    return new AndroidApk(localPath: localPath, id: id, launchActivity: launchActivity);
   }
 }
 
@@ -86,7 +120,13 @@ class ApplicationPackageStore {
       switch (config.targetPlatform) {
         case TargetPlatform.android:
           assert(android == null);
-          if (config.type != BuildType.prebuilt) {
+          android = AndroidApk.getCustomApk();
+          // Fall back to the prebuilt or engine-provided apk if we can't build
+          // a custom one.
+          // TODO(mpcomplete): we should remove both these fallbacks.
+          if (android != null) {
+            break;
+          } else if (config.type != BuildType.prebuilt) {
             String localPath = path.join(config.buildDir, 'apks', AndroidApk._defaultName);
             android = new AndroidApk(localPath: localPath);
           } else {

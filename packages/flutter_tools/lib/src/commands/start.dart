@@ -142,7 +142,7 @@ Future<int> startApp(
 
   if (install) {
     printTrace('Running build command.');
-    applicationPackages = await buildAll(
+    await buildAll(
       devices, applicationPackages, toolchain, configs,
       enginePath: enginePath,
       target: target);
