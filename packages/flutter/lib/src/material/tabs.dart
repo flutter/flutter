@@ -777,7 +777,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
         onSizeChanged: _handleViewportSizeChanged,
         child: new Viewport(
           scrollDirection: Axis.horizontal,
-          scrollOffset: new Offset(scrollOffset, 0.0),
+          paintOffset: scrollOffsetToPixelDelta(scrollOffset),
           child: contents
         )
       );
@@ -929,12 +929,12 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
       controller.value = scrollOffset / 2.0;
   }
 
-  Future fling(Offset scrollVelocity) {
+  Future fling(double scrollVelocity) {
     if (_selection == null || _selection.valueIsChanging)
       return new Future.value();
 
-    if (scrollVelocity.dx.abs() > _kMinFlingVelocity) {
-      final int selectionDelta = scrollVelocity.dx > 0 ? -1 : 1;
+    if (scrollVelocity.abs() > _kMinFlingVelocity) {
+      final int selectionDelta = scrollVelocity.sign.truncate();
       final int targetIndex = (_selection.index + selectionDelta).clamp(0, _tabCount - 1);
       _selection.value = _selection.values[targetIndex];
       return new Future.value();

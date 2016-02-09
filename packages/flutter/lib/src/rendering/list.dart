@@ -11,7 +11,7 @@ import 'viewport.dart';
 /// Parent data for use with [RenderList].
 class ListParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
-class RenderList extends RenderVirtualViewport<ListParentData> implements HasScrollDirection {
+class RenderList extends RenderVirtualViewport<ListParentData> {
   RenderList({
     List<RenderBox> children,
     double itemExtent,
@@ -19,13 +19,15 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
     Axis scrollDirection: Axis.vertical,
+    Painter overlayPainter,
     LayoutCallback callback
   }) : _itemExtent = itemExtent,
        _padding = padding,
-       _scrollDirection = scrollDirection,
        super(
          virtualChildCount: virtualChildCount,
          paintOffset: paintOffset,
+         scrollDirection: scrollDirection,
+         overlayPainter: overlayPainter,
          callback: callback
        ) {
     addAll(children);
@@ -47,15 +49,6 @@ class RenderList extends RenderVirtualViewport<ListParentData> implements HasScr
     if (_padding == newValue)
       return;
     _padding = newValue;
-    markNeedsLayout();
-  }
-
-  Axis get scrollDirection => _scrollDirection;
-  Axis _scrollDirection;
-  void set scrollDirection (Axis newValue) {
-    if (_scrollDirection == newValue)
-      return;
-    _scrollDirection = newValue;
     markNeedsLayout();
   }
 
