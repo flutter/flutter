@@ -2,52 +2,188 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
-const List<String> _kKnownApps = const <String>[
-  'mojo:noodles_view',
-  'mojo:shapes_view',
+class LauncherData {
+  const LauncherData({ this.url, this.title });
+  final String url;
+  final String title;
+}
+
+const List<LauncherData> _kLauncherData = const <LauncherData>[
+  const LauncherData(
+    url: 'mojo:noodles_view',
+    title: 'Noodles'
+  ),
+  const LauncherData(
+    url: 'mojo:shapes_view',
+    title: 'Shapes'
+  ),
 ];
 
-const Size _kSmallWindowSize = const Size(400.0, 400.0);
-const Size _kBigWindowSize = const Size(600.0, 600.0);
+const Size _kInitialWindowSize = const Size(200.0, 200.0);
+const double _kWindowPadding = 10.0;
+
+enum WindowSide {
+  topCenter,
+  topRight,
+  bottomRight,
+}
+
+class WindowDecoration extends StatelessComponent {
+  WindowDecoration({
+    Key key,
+    this.side,
+    this.color,
+    this.onTap,
+    this.onPanUpdate
+  }) : super(key: key);
+
+  final WindowSide side;
+  final Color color;
+  final GestureTapCallback onTap;
+  final GesturePanUpdateCallback onPanUpdate;
+
+  Widget build(BuildContext context) {
+    double top, right, bottom, left, width, height;
+
+    height = _kWindowPadding * 2.0;
+
+    if (side == WindowSide.topCenter || side == WindowSide.topRight)
+      top = 0.0;
+
+    if (side == WindowSide.topRight || side == WindowSide.bottomRight) {
+      right = 0.0;
+      width = _kWindowPadding * 2.0;
+    }
+
+    if (side == WindowSide.topCenter) {
+      left = _kWindowPadding;
+      right = _kWindowPadding;
+    }
+
+    if (side == WindowSide.bottomRight)
+      bottom = 0.0;
+
+    return new Positioned(
+      top: top,
+      right: right,
+      bottom: bottom,
+      left: left,
+      width: width,
+      height: height,
+      child: new GestureDetector(
+        onTap: onTap,
+        onPanUpdate: onPanUpdate,
+        child: new Container(
+          decoration: new BoxDecoration(
+            backgroundColor: color
+          )
+        )
+      )
+    );
+  }
+}
 
 class Window extends StatefulComponent {
-  Window({ Key key, this.child }) : super(key: key);
+  Window({ Key key, this.child, this.onClose }) : super(key: key);
 
   final ChildViewConnection child;
+  final ValueChanged<ChildViewConnection> onClose;
 
   _WindowState createState() => new _WindowState();
 }
 
 class _WindowState extends State<Window> {
   Offset _offset = Offset.zero;
-  bool _isSmall = true;
+  Size _size = _kInitialWindowSize;
 
-  void _handlePanUpdate(Offset delta) {
+  void _handleResizerDrag(Offset delta) {
+    setState(() {
+      _size = new Size(
+        math.max(0.0, _size.width + delta.dx),
+        math.max(0.0, _size.height + delta.dy)
+      );
+    });
+  }
+
+  void _handleRepositionDrag(Offset delta) {
     setState(() {
       _offset += delta;
     });
   }
 
-  void _handleTap() {
-    setState(() {
-      _isSmall = !_isSmall;
-    });
+  void _handleClose() {
+    config.onClose(config.child);
   }
 
   Widget build(BuildContext context) {
-    Size size = _isSmall ? _kSmallWindowSize : _kBigWindowSize;
     return new Positioned(
       left: _offset.dx,
       top: _offset.dy,
-      width: size.width,
-      height: size.height,
-      child: new GestureDetector(
-        onPanUpdate: _handlePanUpdate,
-        onTap: _handleTap,
-        child: new ChildView(child: config.child)
+      width: _size.width + _kWindowPadding * 2.0,
+      height: _size.height + _kWindowPadding * 2.0,
+      child: new Stack(
+        children: <Widget>[
+          new WindowDecoration(
+            side: WindowSide.topCenter,
+            onPanUpdate: _handleRepositionDrag,
+            color: Colors.green[200]
+          ),
+          new WindowDecoration(
+            side: WindowSide.topRight,
+            onTap: _handleClose,
+            color: Colors.red[200]
+          ),
+          new WindowDecoration(
+            side: WindowSide.bottomRight,
+            onPanUpdate: _handleResizerDrag,
+            color: Colors.blue[200]
+          ),
+          new Container(
+            padding: const EdgeDims.all(_kWindowPadding),
+            child: new Material(
+              elevation: 8,
+              child: new ChildView(child: config.child)
+            )
+          )
+        ]
       )
+    );
+  }
+}
+
+class LauncherItem extends StatelessComponent {
+  LauncherItem({
+    Key key,
+    this.url,
+    this.child,
+    this.onLaunch
+  }) : super(key: key);
+
+  final String url;
+  final Widget child;
+  final ValueChanged<ChildViewConnection> onLaunch;
+
+  Widget build(BuildContext context) {
+    return new RaisedButton(
+      onPressed: () { onLaunch(new ChildViewConnection(url: url)); },
+      child: child
+    );
+  }
+}
+
+class Launcher extends StatelessComponent {
+  Launcher({ Key key, this.items }) : super(key: key);
+
+  final List<Widget> items;
+
+  Widget build(BuildContext context) {
+    return new Row(
+      justifyContent: FlexJustifyContent.center,
+      children: items
     );
   }
 }
@@ -59,27 +195,41 @@ class WindowManager extends StatefulComponent {
 class _WindowManagerState extends State<WindowManager> {
   List<ChildViewConnection> _windows = <ChildViewConnection>[];
 
-  void _handleTap() {
+  void _handleLaunch(ChildViewConnection child) {
     setState(() {
-      _windows.add(new ChildViewConnection(url: _kKnownApps[_windows.length % _kKnownApps.length]));
+      _windows.add(child);
+    });
+  }
+
+  void _handleClose(ChildViewConnection child) {
+    setState(() {
+      _windows.remove(child);
     });
   }
 
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTap: _handleTap,
-      child: new Container(
-        decoration: new BoxDecoration(
-          backgroundColor: Colors.blue[500]
-        ),
-        child: new Stack(
-          children: _windows.map((ChildViewConnection child) {
-            return new Window(
-              key: new ObjectKey(child),
-              child: child
-            );
-          }).toList()
-        )
+    return new Material(
+      child: new Stack(
+        children: <Widget>[
+          new Positioned(
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: new Launcher(items: _kLauncherData.map((LauncherData data) {
+              return new LauncherItem(
+                url: data.url,
+                onLaunch: _handleLaunch,
+                child: new Text(data.title)
+              );
+            }).toList())
+          )
+        ]..addAll(_windows.map((ChildViewConnection child) {
+          return new Window(
+            key: new ObjectKey(child),
+            onClose: _handleClose,
+            child: child
+          );
+        }))
       )
     );
   }
