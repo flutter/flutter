@@ -15,11 +15,6 @@ SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
 # TODO(abarth): We shouldn't require dart to be on the user's path.
 DART=dart
 
-if [ -n $FLUTTER_DEV ]; then
-  $DART --checked --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH" "$@"
-  exit 0
-fi
-
 REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
 if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
   echo Updating flutter tool...
