@@ -38,9 +38,10 @@ class CreateCommand extends Command {
       printError('variable was specified. Unable to find package:flutter.');
       return 2;
     }
-    String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
+    String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
     String flutterPackagePath = path.join(flutterRoot, 'packages', 'flutter');
+
     if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml'))) {
       printError('Unable to find package:flutter in $flutterPackagePath');
       return 2;
@@ -118,13 +119,18 @@ abstract class Template {
     printStatus('Creating ${path.basename(projectName)}...');
     dir.createSync(recursive: true);
 
-    String relativeFlutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
+    // If there's a good relative path use it; else fall back to an absolute path.
+    if (_hasRelativePath(flutterPackagePath, dirPath)) {
+      flutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
+    } else {
+      flutterPackagePath = path.absolute(flutterPackagePath);
+    }
 
     files.forEach((String filePath, String contents) {
       Map m = {
         'projectName': projectName,
         'description': description,
-        'flutterPackagePath': relativeFlutterPackagePath
+        'flutterPackagePath': flutterPackagePath
       };
       contents = mustache.render(contents, m);
       filePath = filePath.replaceAll('/', Platform.pathSeparator);
@@ -133,6 +139,16 @@ abstract class Template {
       file.writeAsStringSync(contents);
       printStatus('  ${file.path}');
     });
+  }
+
+  bool _hasRelativePath(String path1, String path2) {
+    List<String> parts1 = path.split(path1);
+    List<String> parts2 = path.split(path2);
+
+    if (parts1.length < 2 || parts2.length < 2)
+      return false;
+
+    return (path1[0] == path2[0]) && (path1[1] == path2[1]);
   }
 
   String toString() => name;
