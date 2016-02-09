@@ -22,8 +22,8 @@
     return false;                                               \
   }
 
-#define kLibrarySourceNamePrefix "/dart_service_isolate"
-static const char* kServiceIsolateScript = "main.dart";
+#define kLibrarySourceNamePrefix "/vmservice"
+static const char* kServiceIsolateScript = "vmservice_io.dart";
 
 struct ResourcesEntry {
   const char* path_;
@@ -130,9 +130,8 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     g_natives->Register({
-      {"ServiceIsolate_TriggerResourceLoad", TriggerResourceLoad, 0, true },
-      {"ServiceIsolate_NotifyServerState", NotifyServerState, 2, true },
-      {"ServiceIsolate_Shutdown", Shutdown, 0, true },
+      {"VMServiceIO_NotifyServerState", NotifyServerState, 2, true },
+      {"VMServiceIO_Shutdown", Shutdown, 0, true },
     });
   }
 
