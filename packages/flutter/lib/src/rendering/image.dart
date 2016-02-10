@@ -206,26 +206,26 @@ class RenderImage extends RenderBox {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     if (_width == null && _height == null)
       return constraints.constrainWidth(0.0);
     return _sizeForConstraints(constraints).width;
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return _sizeForConstraints(constraints).width;
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     if (_width == null && _height == null)
       return constraints.constrainHeight(0.0);
     return _sizeForConstraints(constraints).height;
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return _sizeForConstraints(constraints).height;
   }
 

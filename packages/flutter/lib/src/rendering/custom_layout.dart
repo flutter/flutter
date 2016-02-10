@@ -32,12 +32,32 @@ abstract class MultiChildLayoutDelegate {
   /// the constraints parameter. The child's size is returned.
   Size layoutChild(Object childId, BoxConstraints constraints) {
     final RenderBox child = _idToChild[childId];
-    assert(child != null);
     assert(() {
-      'A MultiChildLayoutDelegate cannot layout the same child more than once.';
-      return _debugChildrenNeedingLayout.remove(child);
+      if (child == null) {
+        throw new RenderingError(
+          'The $this custom multichild layout delegate tried to lay out a non-existent child:\n'
+          'There is no child with the id "$childId".'
+        );
+      }
+      if (!_debugChildrenNeedingLayout.remove(child)) {
+        throw new RenderingError(
+          'The $this custom multichild layout delegate tried to lay out the child with id "$childId" more than once.\n'
+          'Each child must be laid out exactly once.'
+        );
+      }
+      try {
+        assert(constraints.debugAssertIsNormalized);
+      } on AssertionError catch (exception) {
+        throw new RenderingError(
+          'The $this custom multichild layout delegate provided invalid box constraints for the child with id "$childId":\n'
+          '$exception\n'
+          'The minimum width and height must be greater than or equal to zero.\n'
+          'The maximum width must be greater than or equal to the minimum width.\n'
+          'The maximum height must be greater than or equal to the minimum height.'
+        );
+      }
+      return true;
     });
-    assert(constraints.isNormalized);
     child.layout(constraints, parentUsesSize: true);
     return child.size;
   }
@@ -45,9 +65,27 @@ abstract class MultiChildLayoutDelegate {
   /// Specify the child's origin relative to this origin.
   void positionChild(Object childId, Offset offset) {
     final RenderBox child = _idToChild[childId];
-    assert(child != null);
+    assert(() {
+      if (child == null) {
+        throw new RenderingError(
+          'The $this custom multichild layout delegate tried to position out a non-existent child:\n'
+          'There is no child with the id "$childId".'
+        );
+      }
+      if (offset == null) {
+        throw new RenderingError(
+          'The $this custom multichild layout delegate provided a null position for the child with id "$childId".'
+        );
+      }
+      return true;
+    });
     final MultiChildLayoutParentData childParentData = child.parentData;
     childParentData.offset = offset;
+  }
+
+  String _debugDescribeChild(RenderBox child) {
+    final MultiChildLayoutParentData childParentData = child.parentData;
+    return '${childParentData.id}: $child';
   }
 
   void _callPerformLayout(Size size, BoxConstraints constraints, RenderBox firstChild) {
@@ -65,7 +103,16 @@ abstract class MultiChildLayoutDelegate {
       RenderBox child = firstChild;
       while (child != null) {
         final MultiChildLayoutParentData childParentData = child.parentData;
-        assert(childParentData.id != null);
+        assert(() {
+          if (childParentData.id == null) {
+            throw new RenderingError(
+              'The following child has no ID:\n'
+              '  $child\n'
+              'Every child of a RenderCustomMultiChildLayoutBox must have an ID in its parent data.'
+            );
+          }
+          return true;
+        });
         _idToChild[childParentData.id] = child;
         assert(() {
           _debugChildrenNeedingLayout.add(child);
@@ -75,8 +122,22 @@ abstract class MultiChildLayoutDelegate {
       }
       performLayout(size, constraints);
       assert(() {
-        'A MultiChildLayoutDelegate needs to call layoutChild on every child.';
-        return _debugChildrenNeedingLayout.isEmpty;
+        if (_debugChildrenNeedingLayout.isNotEmpty) {
+          if (_debugChildrenNeedingLayout.length > 1) {
+            throw new RenderingError(
+              'The $this custom multichild layout delegate forgot to lay out the following children:\n'
+              '  ${_debugChildrenNeedingLayout.map(_debugDescribeChild).join("\n  ")}\n'
+              'Each child must be laid out exactly once.'
+            );
+          } else {
+            throw new RenderingError(
+              'The $this custom multichild layout delegate forgot to lay out the following child:\n'
+              '  ${_debugDescribeChild(_debugChildrenNeedingLayout.single)}\n'
+              'Each child must be laid out exactly once.'
+            );
+          }
+        }
+        return true;
       });
     } finally {
       _idToChild = previousIdToChild;
@@ -94,6 +155,8 @@ abstract class MultiChildLayoutDelegate {
   /// constraints. This method must apply layoutChild() to each child. It should
   /// specify the final position of each child with positionChild().
   void performLayout(Size size, BoxConstraints constraints);
+
+  String toString() => '$runtimeType';
 }
 
 /// Defers the layout of multiple children to a delegate.
@@ -131,7 +194,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   Size _getSize(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrain(_delegate.getSize(constraints));
   }
 

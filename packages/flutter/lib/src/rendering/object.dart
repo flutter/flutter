@@ -740,8 +740,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
           List<String> descendants = <String>[];
           const int maxDepth = 5;
           void visitor(RenderObject child) {
-            descendants.add('${"  " * depth}$child');
             depth += 1;
+            descendants.add('${"  " * depth}$child');
             if (depth < maxDepth)
               child.visitChildren(visitor);
             depth -= 1;

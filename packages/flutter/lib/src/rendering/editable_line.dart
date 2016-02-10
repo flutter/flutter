@@ -132,22 +132,22 @@ class RenderEditableLine extends RenderBox {
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(0.0);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(0.0);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_preferredHeight);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_preferredHeight);
   }
 
@@ -183,7 +183,7 @@ class RenderEditableLine extends RenderBox {
   // TODO(abarth): This logic should live in TextPainter and be shared with RenderParagraph.
   void _layoutText(BoxConstraints constraints) {
     assert(constraints != null);
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     if (_constraintsForCurrentLayout == constraints)
       return; // already cached this layout
     _textPainter.maxWidth = constraints.maxWidth;
