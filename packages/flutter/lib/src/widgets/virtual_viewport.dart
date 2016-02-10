@@ -13,7 +13,6 @@ typedef void ExtentsChangedCallback(double contentExtent, double containerExtent
 
 abstract class VirtualViewport extends RenderObjectWidget {
   double get startOffset;
-  Axis get scrollDirection;
 
   _WidgetProvider _createWidgetProvider();
 }
@@ -33,7 +32,27 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   double get startOffsetBase;
   double get startOffsetLimit;
 
-  double get paintOffset => -(widget.startOffset - startOffsetBase);
+  /// Returns the pixel offset for a scroll offset, accounting for the scroll
+  /// anchor.
+  double scrollOffsetToPixelOffset(double scrollOffset) {
+    switch (renderObject.scrollAnchor) {
+      case ViewportAnchor.start:
+        return -scrollOffset;
+      case ViewportAnchor.end:
+        return scrollOffset;
+    }
+  }
+
+  /// Returns a two-dimensional representation of the scroll offset, accounting
+  /// for the scroll direction and scroll anchor.
+  Offset scrollOffsetToPixelDelta(double scrollOffset) {
+    switch (renderObject.scrollDirection) {
+      case Axis.horizontal:
+        return new Offset(scrollOffsetToPixelOffset(scrollOffset), 0.0);
+      case Axis.vertical:
+        return new Offset(0.0, scrollOffsetToPixelOffset(scrollOffset));
+    }
+  }
 
   List<Element> _materializedChildren = const <Element>[];
 
@@ -71,14 +90,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   }
 
   void _updatePaintOffset() {
-    switch (widget.scrollDirection) {
-      case Axis.vertical:
-        renderObject.paintOffset = new Offset(0.0, paintOffset);
-        break;
-      case Axis.horizontal:
-        renderObject.paintOffset = new Offset(paintOffset, 0.0);
-        break;
-    }
+    renderObject.paintOffset = scrollOffsetToPixelDelta(widget.startOffset - startOffsetBase);
   }
 
   void updateRenderObject(T oldWidget) {

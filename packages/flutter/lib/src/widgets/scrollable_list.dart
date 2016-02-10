@@ -16,6 +16,7 @@ class ScrollableList extends Scrollable {
     Key key,
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
     double snapAlignmentOffset: 0.0,
@@ -28,6 +29,7 @@ class ScrollableList extends Scrollable {
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
+    scrollAnchor: scrollAnchor,
     onScroll: onScroll,
     snapOffsetCallback: snapOffsetCallback,
     snapAlignmentOffset: snapAlignmentOffset
@@ -79,6 +81,7 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
       onExtentsChanged: _handleExtentsChanged,
       startOffset: scrollOffset,
       scrollDirection: config.scrollDirection,
+      scrollAnchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
       itemsWrap: config.itemsWrap,
       padding: config.padding,
@@ -93,6 +96,7 @@ class _VirtualListViewport extends VirtualViewport {
     this.onExtentsChanged,
     this.startOffset,
     this.scrollDirection,
+    this.scrollAnchor,
     this.itemExtent,
     this.itemsWrap,
     this.padding,
@@ -105,6 +109,7 @@ class _VirtualListViewport extends VirtualViewport {
   final ExtentsChangedCallback onExtentsChanged;
   final double startOffset;
   final Axis scrollDirection;
+  final ViewportAnchor scrollAnchor;
   final double itemExtent;
   final bool itemsWrap;
   final EdgeDims padding;
@@ -135,6 +140,7 @@ class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListVie
   void updateRenderObject(_VirtualListViewport oldWidget) {
     renderObject
       ..scrollDirection = widget.scrollDirection
+      ..scrollAnchor = widget.scrollAnchor
       ..itemExtent = widget.itemExtent
       ..padding = widget.padding
       ..overlayPainter = widget.overlayPainter;
@@ -144,36 +150,76 @@ class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListVie
   double _contentExtent;
   double _containerExtent;
 
-  double _getContainerExtentFromRenderObject() {
-    switch (widget.scrollDirection) {
-      case Axis.vertical:
-        return renderObject.size.height;
-      case Axis.horizontal:
-        return renderObject.size.width;
-    }
-  }
-
   void layout(BoxConstraints constraints) {
     final int length = renderObject.virtualChildCount;
     final double itemExtent = widget.itemExtent;
     final EdgeDims padding = widget.padding ?? EdgeDims.zero;
+    final Size containerSize = renderObject.size;
 
-    double contentExtent = length == null ? double.INFINITY : widget.itemExtent * length + padding.top + padding.bottom;
-    double containerExtent = _getContainerExtentFromRenderObject();
+    double containerExtent;
+    double contentExtent;
+    double leadingPadding;
 
-    _materializedChildBase = math.max(0, (widget.startOffset - padding.top) ~/ itemExtent);
-    int materializedChildLimit = math.max(0, ((widget.startOffset + containerExtent) / itemExtent).ceil());
-
-    if (!widget.itemsWrap && length != null) {
-      _materializedChildBase = math.min(length, _materializedChildBase);
-      materializedChildLimit = math.min(length, materializedChildLimit);
-    } else if (length == 0) {
-      materializedChildLimit = _materializedChildBase;
+    switch (widget.scrollDirection) {
+      case Axis.vertical:
+        containerExtent = containerSize.height;
+        contentExtent = length == null ? double.INFINITY : widget.itemExtent * length + padding.vertical;
+        switch (widget.scrollAnchor) {
+          case ViewportAnchor.start:
+            leadingPadding = padding.top;
+            break;
+          case ViewportAnchor.end:
+            leadingPadding = padding.bottom;
+            break;
+        }
+        break;
+      case Axis.horizontal:
+        containerExtent = renderObject.size.width;
+        contentExtent = length == null ? double.INFINITY : widget.itemExtent * length + padding.horizontal;
+        switch (widget.scrollAnchor) {
+          case ViewportAnchor.start:
+            leadingPadding = padding.left;
+            break;
+          case ViewportAnchor.end:
+            leadingPadding = padding.right;
+            break;
+        }
+        break;
     }
 
-    _materializedChildCount = materializedChildLimit - _materializedChildBase;
-    _startOffsetBase = _materializedChildBase * itemExtent;
-    _startOffsetLimit = materializedChildLimit * itemExtent - containerExtent;
+    if (length == 0) {
+      _materializedChildBase = 0;
+      _materializedChildCount = 0;
+      _startOffsetBase = 0.0;
+      _startOffsetLimit = double.INFINITY;
+    } else {
+      int startItem = math.max(0, (widget.startOffset + leadingPadding) ~/ itemExtent);
+      int limitItem = math.max(0, ((widget.startOffset + leadingPadding + containerExtent) / itemExtent).ceil());
+
+      if (!widget.itemsWrap && length != null) {
+        startItem = math.min(length, startItem);
+        limitItem = math.min(length, limitItem);
+      }
+
+      _materializedChildBase = startItem;
+      _materializedChildCount = limitItem - startItem;
+      _startOffsetBase = startItem * itemExtent;
+      _startOffsetLimit = limitItem * itemExtent - containerExtent;
+
+      if (widget.scrollAnchor == ViewportAnchor.end)
+        _materializedChildBase = (length - _materializedChildBase - _materializedChildCount) % length;
+    }
+
+    Size materializedContentSize;
+    switch (widget.scrollDirection) {
+      case Axis.vertical:
+        materializedContentSize = new Size(containerSize.width, _materializedChildCount * itemExtent);
+        break;
+      case Axis.horizontal:
+        materializedContentSize = new Size(_materializedChildCount * itemExtent, containerSize.height);
+        break;
+    }
+    renderObject.dimensions = new ViewportDimensions(containerSize: containerSize, contentSize: materializedContentSize);
 
     super.layout(constraints);
 
@@ -190,6 +236,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportIterableMixi
     ExtentsChangedCallback onExtentsChanged,
     double startOffset: 0.0,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     double itemExtent,
     bool itemsWrap: false,
     EdgeDims padding,
@@ -199,6 +246,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportIterableMixi
     onExtentsChanged,
     startOffset,
     scrollDirection,
+    scrollAnchor,
     itemExtent,
     itemsWrap,
     padding,
@@ -218,6 +266,7 @@ class ScrollableLazyList extends Scrollable {
     Key key,
     double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
     double snapAlignmentOffset: 0.0,
@@ -230,12 +279,14 @@ class ScrollableLazyList extends Scrollable {
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
+    scrollAnchor: scrollAnchor,
     onScroll: onScroll,
     snapOffsetCallback: snapOffsetCallback,
     snapAlignmentOffset: snapAlignmentOffset
   ) {
     assert(itemExtent != null);
     assert(itemBuilder != null);
+    assert(itemCount != null || scrollAnchor == ViewportAnchor.start);
   }
 
   final double itemExtent;
@@ -282,6 +333,7 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
       onExtentsChanged: _handleExtentsChanged,
       startOffset: scrollOffset,
       scrollDirection: config.scrollDirection,
+      scrollAnchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
       itemCount: config.itemCount,
       itemBuilder: config.itemBuilder,
@@ -296,6 +348,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportLazyMixi
     ExtentsChangedCallback onExtentsChanged,
     double startOffset: 0.0,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     double itemExtent,
     EdgeDims padding,
     Painter overlayPainter,
@@ -305,6 +358,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportLazyMixi
     onExtentsChanged,
     startOffset,
     scrollDirection,
+    scrollAnchor,
     itemExtent,
     false, // Don't support wrapping yet.
     padding,

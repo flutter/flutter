@@ -230,15 +230,16 @@ class _PageViewportElement extends VirtualViewportElement<PageViewport> {
   double get startOffsetLimit =>_repaintOffsetLimit;
   double _repaintOffsetLimit;
 
-  double get paintOffset {
+  double scrollOffsetToPixelOffset(double scrollOffset) {
     if (_containerExtent == null)
       return 0.0;
-    return -(widget.startOffset - startOffsetBase) * _containerExtent;
+    return super.scrollOffsetToPixelOffset(scrollOffset) * _containerExtent;
   }
 
   void updateRenderObject(PageViewport oldWidget) {
-    renderObject.scrollDirection = widget.scrollDirection;
-    renderObject.overlayPainter = widget.overlayPainter;
+    renderObject
+      ..scrollDirection = widget.scrollDirection
+      ..overlayPainter = widget.overlayPainter;
     super.updateRenderObject(oldWidget);
   }
 
