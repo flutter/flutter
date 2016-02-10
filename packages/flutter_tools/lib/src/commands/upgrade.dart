@@ -15,6 +15,9 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
+  Validator projectRootValidator = () => true;
+
+  @override
   Future<int> runInProject() async {
     printStatus(getVersion(ArtifactStore.flutterRoot));
 
