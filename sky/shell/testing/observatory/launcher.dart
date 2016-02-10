@@ -19,6 +19,7 @@ class ShellProcess {
                    .transform(new LineSplitter()).listen((line) {
       const String observatoryUriPrefix = 'Observatory listening on ';
       if (line.startsWith(observatoryUriPrefix)) {
+        print(line);
         Uri uri = Uri.parse(line.substring(observatoryUriPrefix.length));
         _observatoryUriCompleter.complete(uri);
       }
@@ -43,9 +44,11 @@ class ShellLauncher {
   ];
   final String shellExecutablePath;
   final String mainDartPath;
+  final bool startPaused;
 
   ShellLauncher(this.shellExecutablePath,
                 this.mainDartPath,
+                this.startPaused,
                 List<String> extraArgs) {
     if (extraArgs is List) {
       args.addAll(extraArgs);
@@ -55,7 +58,13 @@ class ShellLauncher {
 
   Future<ShellProcess> launch() async {
     try {
-      var process = await Process.start(shellExecutablePath, args);
+      List<String> shellArguments = [];
+      if (startPaused) {
+        shellArguments.add('--start-paused');
+      }
+      shellArguments.addAll(args);
+      print('Launching $shellExecutablePath $shellArguments');
+      var process = await Process.start(shellExecutablePath, shellArguments);
       return new ShellProcess(process);
     } catch (e) {
       print('Error launching shell: $e');

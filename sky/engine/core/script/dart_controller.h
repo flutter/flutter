@@ -45,6 +45,7 @@ class DartController {
  private:
   void DidLoadMainLibrary(std::string url);
   void DidLoadSnapshot();
+  bool SendStartMessage(Dart_Handle root_library);
 
   std::unique_ptr<DOMDartState> dom_dart_state_;
   std::unique_ptr<DartSnapshotLoader> snapshot_loader_;

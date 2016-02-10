@@ -1,3 +1,4 @@
+dart:isolate,::,_startMainIsolate
 dart:mojo.internal,MojoHandleWatcher,mojoControlHandle
 dart:io,::,_setupHooks
 dart:ui,::,_beginFrame
