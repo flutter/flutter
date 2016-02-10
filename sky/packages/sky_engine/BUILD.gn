@@ -26,11 +26,11 @@ dart_pkg("sky_engine") {
     "//sky/engine/bindings",
   ]
 
-  service_isolate_dir = "//sky/engine/core/script/dart_service_isolate"
+  service_isolate_dir = "//dart/runtime/bin/vmservice"
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
   sdk_ext_files = [
     "//sky/engine/bindings/internals.dart",
-    "$service_isolate_dir/main.dart",
+    "$service_isolate_dir/vmservice_io.dart",
     "$service_isolate_dir/loader.dart",
     "$service_isolate_dir/server.dart",
   ]
