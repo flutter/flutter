@@ -377,8 +377,11 @@ class IOSSimulator extends Device {
 
   void clearLogs() {
     File logFile = new File(logFilePath);
-    if (logFile.existsSync())
-      logFile.delete();
+    if (logFile.existsSync()) {
+      RandomAccessFile randomFile = logFile.openSync(mode: FileMode.WRITE);
+      randomFile.truncateSync(0);
+      randomFile.closeSync();
+    }
   }
 }
 
@@ -419,7 +422,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   String get name => device.name;
 
-  Future<int> logs({bool clear: false}) async {
+  Future<int> logs({ bool clear: false }) async {
     if (!device.isConnected())
       return 2;
 
@@ -430,7 +433,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     //   'Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]: ...'
     RegExp mapRegex = new RegExp(r'\S+ +\S+ +\S+ \S+ (.+)\[\d+\]\)?: (.*)$');
     // Jan 31 19:23:28 --- last message repeated 1 time ---
-    RegExp lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ (--- .* ---)$');
+    RegExp lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ --- (.*) ---$');
 
     // This filter matches many Flutter lines in the log:
     // new RegExp(r'(FlutterRunner|flutter.runner.Runner|$id)'), but it misses
@@ -450,11 +453,13 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
           String content = match.group(2);
           if (category == 'Game Center' || category == 'itunesstored' || category == 'nanoregistrylaunchd')
             return null;
+          if (category == 'FlutterRunner')
+            return content;
           return '$category: $content';
         }
         match = lastMessageRegex.matchAsPrefix(string);
         if (match != null)
-          return match.group(1);
+          return '(${match.group(1)})';
         return string;
       }
     );

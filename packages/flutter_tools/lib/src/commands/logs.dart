@@ -50,7 +50,7 @@ class LogsCommand extends FlutterCommand {
       readers.add(device.createLogReader());
     }
 
-    printStatus('Logging for ${readers.join(', ')}...');
+    printStatus('Showing logs for ${readers.join(', ')}:');
 
     List<int> results = await Future.wait(readers.map((DeviceLogReader reader) async {
       int result = await reader.logs(clear: clear);
