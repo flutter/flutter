@@ -145,8 +145,6 @@ config("compiler") {
     # --------------------------------
     cflags += [ "-fno-strict-aliasing" ]  # See http://crbug.com/32204
     common_flags = [
-      "-fno-threadsafe-statics",
-
       # Not exporting C++ inline functions can generally be applied anywhere
       # so we do so here. Normal function visibility is controlled by
       # //build/config/gcc:symbol_visibility_hidden.
