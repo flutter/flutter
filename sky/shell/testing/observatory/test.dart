@@ -95,27 +95,61 @@ Future testHttpAssetRequest(Uri uri) async {
   client.close();
 }
 
+Future testStartPaused(Uri uri) async {
+  uri = uri.replace(scheme: 'ws', path: 'ws');
+  WebSocket webSocketClient = await WebSocket.connect(uri.toString());
+  ServiceClient serviceClient = new ServiceClient(webSocketClient);
+
+  // Wait until we have the isolateId.
+  String isolateId;
+  while (isolateId == null) {
+    Map response = await serviceClient.invokeRPC('getVM');
+    Expect.equals(response['type'], 'VM');
+    if (response['isolates'].length > 0) {
+      isolateId = response['isolates'][0]['id'];
+    }
+  }
+
+  // Grab the isolate.
+  Map isolate = await serviceClient.invokeRPC('getIsolate', {
+    'isolateId': isolateId,
+  });
+  Expect.equals(isolate['type'], 'Isolate');
+  // Verify that it is paused at start.
+  Expect.isNotNull(isolate['pauseEvent']);
+  Expect.equals(isolate['pauseEvent']['kind'], 'PauseStart');
+
+  // Resume the isolate.
+  await serviceClient.invokeRPC('resume', {
+    'isolateId': isolateId,
+  });
+
+  // Wait until the isolate has resumed.
+  while (true) {
+    Map response = await serviceClient.invokeRPC('getIsolate', {
+      'isolateId': isolateId,
+    });
+    Expect.equals(response['type'], 'Isolate');
+    Expect.isNotNull(response['pauseEvent']);
+    if (response['pauseEvent']['kind'] == 'Resume') {
+      break;
+    }
+  }
+}
+
 typedef Future TestFunction(Uri uri);
 
-final List<TestFunction> tests = [
+final List<TestFunction> basicTests = [
   testHttpProtocolRequest,
   testWebSocketProtocolRequest,
   testHttpAssetRequest
 ];
 
-main(List<String> args) async {
-  if (args.length < 2) {
-    print('Usage: dart ${Platform.script} '
-          '<sky_shell_executable> <main_dart> ...');
-    return;
-  }
-  final String shellExecutablePath = args[0];
-  final String mainDartPath = args[1];
-  final List<String> extraArgs = args.length <= 2 ? [] : args.sublist(2);
-  ShellLauncher launcher =
-      new ShellLauncher(shellExecutablePath,
-                        mainDartPath,
-                        extraArgs);
+final List<TestFunction> startPausedTests = [
+  testStartPaused,
+];
+
+bool runTests(ShellLauncher launcher, List<TestFunction> tests) async {
   ShellProcess process = await launcher.launch();
   Uri uri = await process.waitForObservatory();
   try {
@@ -128,4 +162,31 @@ main(List<String> args) async {
     exitCode = -1;
   }
   await process.kill();
+  return exitCode == 0;
+}
+
+main(List<String> args) async {
+  if (args.length < 2) {
+    print('Usage: dart ${Platform.script} '
+          '<sky_shell_executable> <main_dart> ...');
+    return;
+  }
+  final String shellExecutablePath = args[0];
+  final String mainDartPath = args[1];
+  final List<String> extraArgs = args.length <= 2 ? [] : args.sublist(2);
+
+  final ShellLauncher launcher =
+      new ShellLauncher(shellExecutablePath,
+                        mainDartPath,
+                        false,
+                        extraArgs);
+
+  final ShellLauncher startPausedlauncher =
+      new ShellLauncher(shellExecutablePath,
+                        mainDartPath,
+                        true,
+                        extraArgs);
+
+  await runTests(launcher, basicTests);
+  await runTests(startPausedlauncher, startPausedTests);
 }
