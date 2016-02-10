@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:yaml/yaml.dart';
 
 import '../android/device_android.dart';
 import '../application_package.dart';
@@ -19,6 +17,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
+import '../services.dart';
 import '../toolchain.dart';
 import 'start.dart';
 
@@ -27,7 +26,6 @@ const String _kDefaultOutputPath = 'build/app.apk';
 const String _kDefaultResourcesPath = 'apk/res';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
-const String _kPubspecYamlPath = 'pubspec.yaml';
 const String _kPackagesStatusPath = '.packages';
 
 // Alias of the key provided in the Chromium debug keystore
@@ -144,14 +142,6 @@ class ApkKeystoreInfo {
   ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, this.keyPassword });
 }
 
-// TODO(mpcomplete): find a better home for this.
-dynamic _loadYamlFile(String path) {
-  if (!FileSystemEntity.isFileSync(path))
-    return null;
-  String manifestString = new File(path).readAsStringSync();
-  return loadYaml(manifestString);
-}
-
 class ApkCommand extends FlutterCommand {
   final String name = 'apk';
   final String description = 'Build an Android APK package.';
@@ -214,37 +204,6 @@ class ApkCommand extends FlutterCommand {
   }
 }
 
-Future _findServices(_ApkComponents components) async {
-  if (!ArtifactStore.isPackageRootValid)
-    return;
-
-  dynamic manifest = _loadYamlFile(_kFlutterManifestPath);
-  if (manifest['services'] == null)
-    return;
-
-  for (String service in manifest['services']) {
-    String serviceRoot = '${ArtifactStore.packageRoot}/$service/apk';
-    dynamic serviceConfig = _loadYamlFile('$serviceRoot/config.yaml');
-    if (serviceConfig == null || serviceConfig['jars'] == null)
-      continue;
-    components.services.addAll(serviceConfig['services']);
-    for (String jar in serviceConfig['jars']) {
-      if (jar.startsWith("android-sdk:")) {
-        // Jar is something shipped in the standard android SDK.
-        jar = jar.replaceAll('android-sdk:', '${components.androidSdk.path}/');
-        components.jars.add(new File(jar));
-      } else if (jar.startsWith("http")) {
-        // Jar is a URL to download.
-        String cachePath = await ArtifactStore.getThirdPartyFile(jar, service);
-        components.jars.add(new File(cachePath));
-      } else {
-        // Assume jar is a path relative to the service's root dir.
-        components.jars.add(new File(path.join(serviceRoot, jar)));
-      }
-    }
-  }
-}
-
 Future<_ApkComponents> _findApkComponents(
   BuildConfiguration config, String enginePath, String manifest, String resources
 ) async {
@@ -283,7 +242,9 @@ Future<_ApkComponents> _findApkComponents(
   components.debugKeystore = new File(artifactPaths[3]);
   components.resources = new Directory(resources);
 
-  await _findServices(components);
+  await parseServiceConfigs(components.services,
+                            jars: components.jars,
+                            androidSdk: components.androidSdk.path);
 
   if (!components.resources.existsSync()) {
     // TODO(eseidel): This level should be higher when path is manually set.
@@ -313,24 +274,6 @@ Future<_ApkComponents> _findApkComponents(
   return components;
 }
 
-// Outputs a services.json file for the flutter engine to read. Format:
-// {
-//   services: [
-//     { name: string, class: string },
-//     ...
-//   ]
-// }
-void _generateServicesConfig(File servicesConfig, List<Map<String, String>> servicesIn) {
-  List<Map<String, String>> services =
-      servicesIn.map((Map<String, String> service) => {
-        'name': service['name'],
-        'class': service['registration-class']
-      }).toList();
-
-  Map<String, dynamic> json = { 'services': services };
-  servicesConfig.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
-}
-
 int _buildApk(
   _ApkComponents components, String flxPath, ApkKeystoreInfo keystore, String outputFile
 ) {
@@ -341,8 +284,8 @@ int _buildApk(
     File classesDex = new File('${tempDir.path}/classes.dex');
     builder.compileClassesDex(classesDex, components.jars);
 
-    File servicesConfig = new File('${tempDir.path}/services.json');
-    _generateServicesConfig(servicesConfig, components.services);
+    File servicesConfig =
+        generateServiceDefinitions(tempDir.path, components.services, ios: false);
 
     _AssetBuilder assetBuilder = new _AssetBuilder(tempDir, 'assets');
     assetBuilder.add(components.icuData, 'icudtl.dat');
@@ -438,7 +381,7 @@ Future<int> buildAndroid({
   String flxPath: '',
   ApkKeystoreInfo keystore
 }) async {
-  if (!_needsRebuild(outputFile, manifest)) {
+  if (!force && !_needsRebuild(outputFile, manifest)) {
     printTrace('APK up to date. Skipping build step.');
     return 0;
   }
