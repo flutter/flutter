@@ -16,7 +16,6 @@ import 'overlay.dart';
 typedef bool DragTargetWillAccept<T>(T data);
 typedef void DragTargetAccept<T>(T data);
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
-typedef void DragStartCallback(Point position, int pointer);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -81,11 +80,9 @@ abstract class DraggableBase<T> extends StatefulComponent {
   /// dragged at a time.
   final int maxSimultaneousDrags;
 
-  /// Should return a GestureRecognizer instance that is configured to call the starter
-  /// argument when the drag is to begin. The arena for the pointer must not yet have
-  /// resolved at the time that the callback is invoked, because the draggable itself
-  /// is going to attempt to win the pointer's arena in that case.
-  GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter);
+  /// Should return a new MultiDragGestureRecognizer instance
+  /// constructed with the given arguments.
+  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter);
 
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
@@ -112,11 +109,11 @@ class Draggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
-    return new MultiTapGestureRecognizer(
-      router: router,
-      gestureArena: Gesturer.instance.gestureArena,
-      onTapDown: starter
+  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
+    return new ImmediateMultiDragGestureRecognizer(
+      pointerRouter: router,
+      gestureArena: arena,
+      onStart: starter
     );
   }
 }
@@ -143,50 +140,44 @@ class LongPressDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  GestureRecognizer createRecognizer(PointerRouter router, DragStartCallback starter) {
-    return new MultiTapGestureRecognizer(
-      router: router,
-      gestureArena: Gesturer.instance.gestureArena,
-      longTapDelay: kLongPressTimeout,
-      onLongTapDown: (Point position, int pointer) {
-        userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
-        starter(position, pointer);
+  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
+    return new DelayedMultiDragGestureRecognizer(
+      pointerRouter: router,
+      gestureArena: arena,
+      delay: kLongPressTimeout,
+      onStart: (Point position) {
+        Drag result = starter(position);
+        if (result != null)
+          userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
+        return result;
       }
     );
   }
 }
 
-class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArenaMember {
-
-  PointerRouter get router => Gesturer.instance.pointerRouter;
+class _DraggableState<T> extends State<DraggableBase<T>> {
 
   void initState() {
     super.initState();
-    _recognizer = config.createRecognizer(router, _startDrag);
+    _recognizer = config.createRecognizer(
+      Gesturer.instance.pointerRouter,
+      Gesturer.instance.gestureArena,
+      _startDrag
+    );
   }
 
   GestureRecognizer _recognizer;
-  Map<int, GestureArenaEntry> _activePointers = <int, GestureArenaEntry>{};
   int _activeCount = 0;
 
   void _routePointer(PointerEvent event) {
-    _activePointers[event.pointer] = Gesturer.instance.gestureArena.add(event.pointer, this);
+    if (config.maxSimultaneousDrags != null && _activeCount >= config.maxSimultaneousDrags)
+      return;
     _recognizer.addPointer(event);
   }
 
-  void acceptGesture(int pointer) {
-    _activePointers.remove(pointer);
-  }
-
-  void rejectGesture(int pointer) {
-    _activePointers.remove(pointer);
-  }
-
-  void _startDrag(Point position, int pointer) {
+  _DragAvatar _startDrag(Point position) {
     if (config.maxSimultaneousDrags != null && _activeCount >= config.maxSimultaneousDrags)
-      return;
-    assert(_activePointers.containsKey(pointer));
-    _activePointers[pointer].resolve(GestureDisposition.accepted);
+      return null;
     Point dragStartPoint;
     switch (config.dragAnchor) {
       case DragAnchor.child:
@@ -200,9 +191,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> implements GestureArena
     setState(() {
       _activeCount += 1;
     });
-    new _DragAvatar<T>(
-      pointer: pointer,
-      router: router,
+    return new _DragAvatar<T>(
       overlay: Overlay.of(context),
       data: config.data,
       initialPosition: position,
@@ -305,10 +294,8 @@ enum _DragEndKind { dropped, canceled }
 // overlay goes away, or maybe even if the Draggable that created goes away.
 // This will probably need to be changed once we have more experience with using
 // this widget.
-class _DragAvatar<T> {
+class _DragAvatar<T> extends Drag {
   _DragAvatar({
-    this.pointer,
-    this.router,
     OverlayState overlay,
     this.data,
     Point initialPosition,
@@ -317,19 +304,15 @@ class _DragAvatar<T> {
     this.feedbackOffset: Offset.zero,
     this.onDragEnd
   }) {
-    assert(pointer != null);
-    assert(router != null);
     assert(overlay != null);
     assert(dragStartPoint != null);
     assert(feedbackOffset != null);
-    router.addRoute(pointer, handleEvent);
     _entry = new OverlayEntry(builder: _build);
     overlay.insert(_entry);
+    _position = initialPosition;
     update(initialPosition);
   }
 
-  final int pointer;
-  final PointerRouter router;
   final T data;
   final Point dragStartPoint;
   final Widget feedback;
@@ -338,18 +321,20 @@ class _DragAvatar<T> {
 
   _DragTargetState _activeTarget;
   bool _activeTargetWillAcceptDrop = false;
+  Point _position;
   Offset _lastOffset;
   OverlayEntry _entry;
 
-  void handleEvent(PointerEvent event) {
-    if (event is PointerUpEvent) {
-      update(event.position);
-      finish(_DragEndKind.dropped);
-    } else if (event is PointerCancelEvent) {
-      finish(_DragEndKind.canceled);
-    } else if (event is PointerMoveEvent) {
-      update(event.position);
-    }
+  // Drag API
+  void move(Offset offset) {
+    _position += offset;
+    update(_position);
+  }
+  void end(Offset velocity) {
+    finish(_DragEndKind.dropped);
+  }
+  void cancel() {
+    finish(_DragEndKind.canceled);
   }
 
   void update(Point globalPosition) {
@@ -390,7 +375,6 @@ class _DragAvatar<T> {
     _activeTargetWillAcceptDrop = false;
     _entry.remove();
     _entry = null;
-    router.removeRoute(pointer, handleEvent);
     if (onDragEnd != null)
       onDragEnd();
   }

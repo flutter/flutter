@@ -8,25 +8,27 @@ import 'lsq_solver.dart';
 
 export 'dart:ui' show Point, Offset;
 
-class _Estimator {
-  int degree;
-  Duration time;
-  List<double> xCoefficients;
-  List<double> yCoefficients;
-  double confidence;
+class _Estimate {
+  const _Estimate({ this.xCoefficients, this.yCoefficients, this.time, this.degree, this.confidence });
+
+  final List<double> xCoefficients;
+  final List<double> yCoefficients;
+  final Duration time;
+  final int degree;
+  final double confidence;
 
   String toString() {
-    return 'Estimator(degree: $degree, '
-                     'time: $time, '
-                     'confidence: $confidence, '
-                     'xCoefficients: $xCoefficients, '
-                     'yCoefficients: $yCoefficients)';
+    return 'Estimate(xCoefficients: $xCoefficients, '
+                    'yCoefficients: $yCoefficients, '
+                    'time: $time, '
+                    'degree: $degree, '
+                    'confidence: $confidence)';
   }
 }
 
 abstract class _VelocityTrackerStrategy {
   void addMovement(Duration timeStamp, Point position);
-  bool getEstimator(_Estimator estimator);
+  _Estimate getEstimate();
   void clear();
 }
 
@@ -80,7 +82,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
     movement.position = position;
   }
 
-  bool getEstimator(_Estimator estimator) {
+  _Estimate getEstimate() {
     // Iterate over movement samples in reverse time order and collect samples.
     List<double> x = new List<double>();
     List<double> y = new List<double>();
@@ -107,7 +109,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
     } while (m < kHistorySize);
 
     if (m == 0) // because we broke out of the loop above after age > kHorizonMilliseconds
-      return false; // no data
+      return null; // no data
 
     // Calculate a least squares polynomial fit.
     int n = degree;
@@ -121,24 +123,26 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
         LeastSquaresSolver ySolver = new LeastSquaresSolver(time, y, w);
         PolynomialFit yFit = ySolver.solve(n);
         if (yFit != null) {
-          estimator.xCoefficients = xFit.coefficients;
-          estimator.yCoefficients = yFit.coefficients;
-          estimator.time = newestMovement.eventTime;
-          estimator.degree = n;
-          estimator.confidence = xFit.confidence * yFit.confidence;
-          return true;
+          return new _Estimate(
+            xCoefficients: xFit.coefficients,
+            yCoefficients: yFit.coefficients,
+            time: newestMovement.eventTime,
+            degree: n,
+            confidence: xFit.confidence * yFit.confidence
+          );
         }
       }
     }
 
     // No velocity data available for this pointer, but we do have its current
     // position.
-    estimator.xCoefficients = <double>[ x[0] ];
-    estimator.yCoefficients = <double>[ y[0] ];
-    estimator.time = newestMovement.eventTime;
-    estimator.degree = 0;
-    estimator.confidence = 1.0;
-    return true;
+    return new _Estimate(
+      xCoefficients: <double>[ x[0] ],
+      yCoefficients: <double>[ y[0] ],
+      time: newestMovement.eventTime,
+      degree: 0,
+      confidence: 1.0
+    );
   }
 
   void clear() {
@@ -204,27 +208,52 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
 
 }
 
+/// Computes a pointer velocity based on data from PointerMove events.
+///
+/// The input data is provided by calling addPosition(). Adding data
+/// is cheap.
+///
+/// To obtain a velocity, call getVelocity(). This will compute the
+/// velocity based on the data added so far. Only call this when you
+/// need to use the velocity, as it is comparatively expensive.
+///
+/// The quality of the velocity estimation will be better if more data
+/// points have been received.
 class VelocityTracker {
-  static const int kAssumePointerMoveStoppedTimeMs = 40;
+
+  /// The maximum length of time between two move events to allow
+  /// before assuming the pointer stopped.
+  static const Duration kAssumePointerMoveStoppedTime = const Duration(milliseconds: 40);
 
   VelocityTracker() : _strategy = _createStrategy();
 
   Duration _lastTimeStamp = const Duration();
   _VelocityTrackerStrategy _strategy;
 
+  /// Add a given position corresponding to a specific time.
+  ///
+  /// If [kAssumePointerMoveStoppedTime] has elapsed since the last
+  /// call, then earlier data will be discarded.
   void addPosition(Duration timeStamp, Point position) {
-    if ((timeStamp - _lastTimeStamp).inMilliseconds >= kAssumePointerMoveStoppedTimeMs)
+    if (timeStamp - _lastTimeStamp >= kAssumePointerMoveStoppedTime)
       _strategy.clear();
     _lastTimeStamp = timeStamp;
     _strategy.addMovement(timeStamp, position);
   }
 
+  /// Computes the velocity of the pointer at the time of the last
+  /// provided data point.
+  ///
+  /// This can be expensive. Only call this when you need the velocity.
+  ///
+  /// getVelocity() will return null if no estimate is available or if
+  /// the velocity is zero.
   Offset getVelocity() {
-    _Estimator estimator = new _Estimator();
-    if (_strategy.getEstimator(estimator) && estimator.degree >= 1) {
+    _Estimate estimate = _strategy.getEstimate();
+    if (estimate != null && estimate.degree >= 1) {
       return new Offset( // convert from pixels/ms to pixels/s
-        estimator.xCoefficients[1] * 1000,
-        estimator.yCoefficients[1] * 1000
+        estimate.xCoefficients[1] * 1000,
+        estimate.yCoefficients[1] * 1000
       );
     }
     return null;
