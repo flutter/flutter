@@ -195,28 +195,28 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     if (child != null)
       return constraints.constrainWidth(child.getMinIntrinsicWidth(_getInnerConstraints(constraints)));
     return super.getMinIntrinsicWidth(constraints);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     if (child != null)
       return constraints.constrainWidth(child.getMaxIntrinsicWidth(_getInnerConstraints(constraints)));
     return super.getMaxIntrinsicWidth(constraints);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     if (child != null)
       return constraints.constrainHeight(child.getMinIntrinsicHeight(_getInnerConstraints(constraints)));
     return super.getMinIntrinsicHeight(constraints);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     if (child != null)
       return constraints.constrainHeight(child.getMaxIntrinsicHeight(_getInnerConstraints(constraints)));
     return super.getMaxIntrinsicHeight(constraints);

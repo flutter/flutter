@@ -29,22 +29,22 @@ class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<R
   }
 
   double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(_requestedSize.width);
   }
 
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(_requestedSize.width);
   }
 
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_requestedSize.height);
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.isNormalized);
+    assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_requestedSize.height);
   }
 

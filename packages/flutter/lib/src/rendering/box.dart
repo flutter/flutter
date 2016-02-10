@@ -95,6 +95,21 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : double.INFINITY,
       maxHeight = height != null ? height : double.INFINITY;
 
+  /// Returns new box constraints that remove the minimum width and height requirements.
+  BoxConstraints copyWith({
+    double minWidth,
+    double maxWidth,
+    double minHeight,
+    double maxHeight
+  }) {
+    return new BoxConstraints(
+      minWidth: minWidth ?? this.minWidth,
+      maxWidth: maxWidth ?? this.maxWidth,
+      minHeight: minHeight ?? this.minHeight,
+      maxHeight: maxHeight ?? this.maxHeight
+    );
+  }
+
   /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeDims edges) {
     assert(edges != null);
