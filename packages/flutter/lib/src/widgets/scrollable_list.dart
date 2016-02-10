@@ -193,8 +193,8 @@ class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListVie
       _startOffsetBase = 0.0;
       _startOffsetLimit = double.INFINITY;
     } else {
-      int startItem = math.max(0, (widget.startOffset + leadingPadding) ~/ itemExtent);
-      int limitItem = math.max(0, ((widget.startOffset + leadingPadding + containerExtent) / itemExtent).ceil());
+      int startItem = math.max(0, (widget.startOffset - leadingPadding) ~/ itemExtent);
+      int limitItem = math.max(0, ((widget.startOffset - leadingPadding + containerExtent) / itemExtent).ceil());
 
       if (!widget.itemsWrap && length != null) {
         startItem = math.min(length, startItem);
