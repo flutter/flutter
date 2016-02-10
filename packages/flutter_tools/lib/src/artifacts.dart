@@ -253,26 +253,34 @@ class ArtifactStore {
   }
 
   /// Download a file from the given url and write it to the cache.
-  static Future _downloadFileToCache(Uri url, File cachedFile) async {
+  /// If [unzip] is true, treat the url as a zip file, and unzip it to the
+  /// directory given.
+  static Future _downloadFileToCache(Uri url, FileSystemEntity cachedFile, bool unzip) async {
     if (!cachedFile.parent.existsSync())
       cachedFile.parent.createSync(recursive: true);
 
     List<int> fileBytes = await _downloadFile(url);
-    cachedFile.writeAsBytesSync(fileBytes, flush: true);
+    if (unzip) {
+      if (cachedFile is Directory && !cachedFile.existsSync())
+        cachedFile.createSync(recursive: true);
+
+      Archive archive = new ZipDecoder().decodeBytes(fileBytes);
+      for (ArchiveFile archiveFile in archive) {
+        File subFile = new File(path.join(cachedFile.path, archiveFile.name));
+        subFile.writeAsBytesSync(archiveFile.content, flush: true);
+      }
+    } else {
+      File asFile = new File(cachedFile.path);
+      asFile.writeAsBytesSync(fileBytes, flush: true);
+    }
   }
 
   /// Download the artifacts.zip archive for the given platform from GCS
   /// and extract it to the local cache.
   static Future _doDownloadArtifactsFromZip(String platform) async {
     String url = getCloudStorageBaseUrl(platform) + 'artifacts.zip';
-    List<int> zipBytes = await _downloadFile(Uri.parse(url));
-
-    Archive archive = new ZipDecoder().decodeBytes(zipBytes);
     Directory cacheDir = _getCacheDirForPlatform(platform);
-    for (ArchiveFile archiveFile in archive) {
-      File cacheFile = new File(path.join(cacheDir.path, archiveFile.name));
-      cacheFile.writeAsBytesSync(archiveFile.content, flush: true);
-    }
+    await _downloadFileToCache(Uri.parse(url), cacheDir, true);
 
     for (Artifact artifact in knownArtifacts) {
       if (artifact.platform == platform && artifact.executable) {
@@ -334,7 +342,7 @@ class ArtifactStore {
     return cachedFile.path;
   }
 
-  static Future<String> getThirdPartyFile(String urlStr, String cacheSubdir) async {
+  static Future<String> getThirdPartyFile(String urlStr, String cacheSubdir, bool unzip) async {
     Uri url = Uri.parse(urlStr);
     Directory baseDir = _getBaseCacheDir();
     Directory cacheDir = new Directory(path.join(
@@ -343,7 +351,7 @@ class ArtifactStore {
         path.join(cacheDir.path, url.pathSegments[url.pathSegments.length-1]));
     if (!cachedFile.existsSync()) {
       try {
-        await _downloadFileToCache(url, cachedFile);
+        await _downloadFileToCache(url, cachedFile, unzip);
       } catch (e) {
         printError('Failed to fetch third-party artifact: $url: $e');
         throw new ProcessExit(2);

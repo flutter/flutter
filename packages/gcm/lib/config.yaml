@@ -1,6 +1,6 @@
 services:
   - name: gcm::GcmService
-    registration-class: org.domokit.gcm.RegistrationIntentService$MojoService
+    android-class: org.domokit.gcm.RegistrationIntentService$MojoService
 jars:
   - android-sdk:extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar
   - android-sdk:extras/android/support/v13/android-support-v13.jar
@@ -8,6 +8,3 @@ jars:
   - android-sdk:extras/android/support/v7/mediarouter/libs/android-support-v7-mediarouter.jar
   - https://storage.googleapis.com/mojo_infra/flutter/7bce54b79ef9ee57999cc8e258d664a88723d56d/android-arm/gcm/gcm_lib.dex.jar
   - https://storage.googleapis.com/mojo_infra/flutter/7bce54b79ef9ee57999cc8e258d664a88723d56d/android-arm/gcm/interfaces_java.dex.jar
-todo: >
-  Maybe we should link to a URL to download the jars. Might need different
-  versions per platform, etc.

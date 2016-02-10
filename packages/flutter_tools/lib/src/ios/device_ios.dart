@@ -13,6 +13,7 @@ import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
+import '../services.dart';
 import '../toolchain.dart';
 import 'simulator.dart';
 
@@ -171,7 +172,6 @@ class IOSDevice extends Device {
 
     // Step 1: Install the precompiled application if necessary
     bool buildResult = await _buildIOSXcodeProject(app, true);
-
     if (!buildResult) {
       printError('Could not build the precompiled application for the device');
       return false;
@@ -179,12 +179,14 @@ class IOSDevice extends Device {
 
     // Step 2: Check that the application exists at the specified path
     Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
-
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       printError('Could not find the built application bundle at ${bundle.path}');
       return false;
     }
+
+    // Step 2.5: Copy any third-party sevices to the app bundle.
+    await _addServicesToBundle(bundle);
 
     // Step 3: Attempt to install the application on the device
     int installationResult = await runCommandAndStreamOutput([
@@ -323,6 +325,9 @@ class IOSSimulator extends Device {
       printError('Could not find the built application bundle at ${bundle.path}');
       return false;
     }
+
+    // Step 2.5: Copy any third-party sevices to the app bundle.
+    await _addServicesToBundle(bundle);
 
     // Step 3: Install the updated bundle to the simulator
     SimControl.install(id, path.absolute(bundle.path));
@@ -535,4 +540,54 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
   } catch (error) {
     return false;
   }
+}
+
+bool enabled = false;
+Future _addServicesToBundle(Directory bundle) async {
+  if (enabled) {
+    List<Map<String, String>> services = [];
+    await parseServiceConfigs(services);
+    await _fetchFrameworks(services);
+    _copyFrameworksToBundle(bundle.path, services);
+
+    generateServiceDefinitions(bundle.path, services, ios: true);
+  }
+}
+
+Future _fetchFrameworks(List<Map<String, String>> services) async {
+  for (Map<String, String> service in services) {
+    String frameworkUrl = service['framework'];
+    service['framework-path'] = await getServiceFromUrl(
+       frameworkUrl, service['root'], service['name'], unzip: true);
+  }
+}
+
+void _copyFrameworksToBundle(String destDir, List<Map<String, String>> services) {
+  // TODO(mpcomplete): check timestamps.
+  for (Map<String, String> service in services) {
+    String basename = path.basename(service['framework-path']);
+    String destPath = path.join(destDir, basename);
+    _copyDirRecursive(service['framework-path'], destPath);
+  }
+}
+
+void _copyDirRecursive(String fromPath, String toPath) {
+  Directory fromDir = new Directory(fromPath);
+  if (!fromDir.existsSync())
+    throw new Exception('Source directory "${fromDir.path}" does not exist');
+
+  Directory toDir = new Directory(toPath);
+  if (!toDir.existsSync())
+    toDir.createSync(recursive: true);
+
+  for (FileSystemEntity entity in fromDir.listSync()) {
+    String newPath = '${toDir.path}/${path.basename(entity.path)}';
+    if (entity is File) {
+      entity.copySync(newPath);
+    } else if (entity is Directory) {
+      _copyDirRecursive(entity.path, newPath);
+    } else {
+      throw new Exception('Unsupported file type for recursive copy.');
+    }
+  };
 }
