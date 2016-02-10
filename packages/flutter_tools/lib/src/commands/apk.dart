@@ -242,9 +242,11 @@ Future<_ApkComponents> _findApkComponents(
   components.debugKeystore = new File(artifactPaths[3]);
   components.resources = new Directory(resources);
 
-  await parseServiceConfigs(components.services,
-                            jars: components.jars,
-                            androidSdk: components.androidSdk.path);
+  await parseServiceConfigs(
+    components.services,
+    jars: components.jars,
+    androidSdk: components.androidSdk.path
+  );
 
   if (!components.resources.existsSync()) {
     // TODO(eseidel): This level should be higher when path is manually set.

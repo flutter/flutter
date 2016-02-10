@@ -29,7 +29,7 @@ Future parseServiceConfigs(
     return;
 
   dynamic manifest = _loadYamlFile(_kFlutterManifestPath);
-  if (manifest['services'] == null)
+  if (manifest == null || manifest['services'] == null)
     return;
 
   for (String service in manifest['services']) {
