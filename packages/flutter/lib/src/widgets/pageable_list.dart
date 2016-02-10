@@ -19,13 +19,12 @@ enum ItemsSnapAlignment {
   adjacentItem
 }
 
-typedef void PageChangedCallback(int newPage);
-
 class PageableList extends Scrollable {
   PageableList({
     Key key,
-    initialScrollOffset,
+    double initialScrollOffset,
     Axis scrollDirection: Axis.vertical,
+    ViewportAnchor scrollAnchor: ViewportAnchor.start,
     ScrollListener onScrollStart,
     ScrollListener onScroll,
     ScrollListener onScrollEnd,
@@ -42,6 +41,7 @@ class PageableList extends Scrollable {
     key: key,
     initialScrollOffset: initialScrollOffset,
     scrollDirection: scrollDirection,
+    scrollAnchor: scrollAnchor,
     onScrollStart: onScrollStart,
     onScroll: onScroll,
     onScrollEnd: onScrollEnd,
@@ -51,7 +51,7 @@ class PageableList extends Scrollable {
 
   final bool itemsWrap;
   final ItemsSnapAlignment itemsSnapAlignment;
-  final PageChangedCallback onPageChanged;
+  final ValueChanged<int> onPageChanged;
   final ScrollableListPainter scrollableListPainter;
   final Duration duration;
   final Curve curve;
@@ -61,7 +61,7 @@ class PageableList extends Scrollable {
 }
 
 class PageableListState<T extends PageableList> extends ScrollableState<T> {
-  int get itemCount => config.children?.length ?? 0;
+  int get _itemCount => config.children?.length ?? 0;
   int _previousItemCount;
 
   double get _pixelsPerScrollUnit {
@@ -85,6 +85,19 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     return super.scrollOffsetToPixelOffset(scrollOffset * _pixelsPerScrollUnit);
   }
 
+  int _scrollOffsetToPageIndex(double scrollOffset) {
+    int itemCount = _itemCount;
+    if (itemCount == 0)
+      return 0;
+    int scrollIndex = scrollOffset.floor();
+    switch (config.scrollAnchor) {
+      case ViewportAnchor.start:
+        return scrollIndex % itemCount;
+      case ViewportAnchor.end:
+        return (_itemCount - scrollIndex - 1) % itemCount;
+    }
+  }
+
   void initState() {
     super.initState();
     _updateScrollBehavior();
@@ -98,8 +111,8 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     if (config.itemsWrap != oldConfig.itemsWrap)
       scrollBehaviorUpdateNeeded = true;
 
-    if (itemCount != _previousItemCount) {
-      _previousItemCount = itemCount;
+    if (_itemCount != _previousItemCount) {
+      _previousItemCount = _itemCount;
       scrollBehaviorUpdateNeeded = true;
     }
 
@@ -108,9 +121,9 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   }
 
   void _updateScrollBehavior() {
-    config.scrollableListPainter?.contentExtent = itemCount.toDouble();
+    config.scrollableListPainter?.contentExtent = _itemCount.toDouble();
     scrollTo(scrollBehavior.updateExtents(
-      contentExtent: itemCount.toDouble(),
+      contentExtent: _itemCount.toDouble(),
       containerExtent: 1.0,
       scrollOffset: scrollOffset
     ));
@@ -135,6 +148,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     return new PageViewport(
       itemsWrap: config.itemsWrap,
       scrollDirection: config.scrollDirection,
+      scrollAnchor: config.scrollAnchor,
       startOffset: scrollOffset,
       overlayPainter: config.scrollableListPainter,
       children: config.children
@@ -187,7 +201,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 
   void _notifyPageChanged(_) {
     if (config.onPageChanged != null)
-      config.onPageChanged(itemCount == 0 ? 0 : scrollOffset.floor() % itemCount);
+      config.onPageChanged(_scrollOffsetToPageIndex(scrollOffset));
   }
 }
 
@@ -195,6 +209,7 @@ class PageViewport extends VirtualViewport with VirtualViewportIterableMixin {
   PageViewport({
     this.startOffset: 0.0,
     this.scrollDirection: Axis.vertical,
+    this.scrollAnchor: ViewportAnchor.start,
     this.itemsWrap: false,
     this.overlayPainter,
     this.children
@@ -204,6 +219,7 @@ class PageViewport extends VirtualViewport with VirtualViewportIterableMixin {
 
   final double startOffset;
   final Axis scrollDirection;
+  final ViewportAnchor scrollAnchor;
   final bool itemsWrap;
   final Painter overlayPainter;
   final Iterable<Widget> children;
@@ -224,11 +240,11 @@ class _PageViewportElement extends VirtualViewportElement<PageViewport> {
   int get materializedChildCount => _materializedChildCount;
   int _materializedChildCount;
 
-  double get startOffsetBase => _repaintOffsetBase;
-  double _repaintOffsetBase;
+  double get startOffsetBase => _startOffsetBase;
+  double _startOffsetBase;
 
-  double get startOffsetLimit =>_repaintOffsetLimit;
-  double _repaintOffsetLimit;
+  double get startOffsetLimit =>_startOffsetLimit;
+  double _startOffsetLimit;
 
   double scrollOffsetToPixelOffset(double scrollOffset) {
     if (_containerExtent == null)
@@ -245,34 +261,56 @@ class _PageViewportElement extends VirtualViewportElement<PageViewport> {
 
   double _containerExtent;
 
-  double _getContainerExtentFromRenderObject() {
+  void _updateViewportDimensions() {
+    final Size containerSize = renderObject.size;
+
+    Size materializedContentSize;
     switch (widget.scrollDirection) {
       case Axis.vertical:
-        return renderObject.size.height;
+        materializedContentSize = new Size(containerSize.width, _materializedChildCount * containerSize.height);
+        break;
       case Axis.horizontal:
-        return renderObject.size.width;
+        materializedContentSize = new Size(_materializedChildCount * containerSize.width, containerSize.height);
+        break;
     }
+    renderObject.dimensions = new ViewportDimensions(containerSize: containerSize, contentSize: materializedContentSize);
   }
 
   void layout(BoxConstraints constraints) {
-    int length = renderObject.virtualChildCount;
-    _containerExtent = _getContainerExtentFromRenderObject();
+    final int length = renderObject.virtualChildCount;
 
-    _materializedChildBase = widget.startOffset.floor();
-    int materializedChildLimit = (widget.startOffset + 1.0).ceil();
-
-    if (!widget.itemsWrap) {
-      _materializedChildBase = _materializedChildBase.clamp(0, length);
-      materializedChildLimit = materializedChildLimit.clamp(0, length);
-    } else if (length == 0) {
-      materializedChildLimit = _materializedChildBase;
+    switch (widget.scrollDirection) {
+      case Axis.vertical:
+        _containerExtent = renderObject.size.height;
+        break;
+      case Axis.horizontal:
+        _containerExtent =  renderObject.size.width;
+        break;
     }
 
-    _materializedChildCount = materializedChildLimit - _materializedChildBase;
+    if (length == 0) {
+      _materializedChildBase = 0;
+      _materializedChildCount = 0;
+      _startOffsetBase = 0.0;
+      _startOffsetLimit = double.INFINITY;
+    } else {
+      int startItem = widget.startOffset.floor();
+      int limitItem = (widget.startOffset + 1.0).ceil();
 
-    _repaintOffsetBase = _materializedChildBase.toDouble();
-    _repaintOffsetLimit = (materializedChildLimit - 1).toDouble();
+      if (!widget.itemsWrap) {
+        startItem = startItem.clamp(0, length);
+        limitItem = limitItem.clamp(0, length);
+      }
 
+      _materializedChildBase = startItem;
+      _materializedChildCount = limitItem - startItem;
+      _startOffsetBase = startItem.toDouble();
+      _startOffsetLimit = (limitItem - 1).toDouble();
+      if (widget.scrollAnchor == ViewportAnchor.end)
+        _materializedChildBase = (length - _materializedChildBase - _materializedChildCount) % length;
+    }
+
+    _updateViewportDimensions();
     super.layout(constraints);
   }
 }

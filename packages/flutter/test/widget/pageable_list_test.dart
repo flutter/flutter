@@ -11,7 +11,6 @@ Size pageSize = new Size(600.0, 300.0);
 const List<int> defaultPages = const <int>[0, 1, 2, 3, 4, 5];
 final List<GlobalKey> globalKeys = defaultPages.map((_) => new GlobalKey()).toList();
 int currentPage = null;
-bool itemsWrap = false;
 
 Widget buildPage(int page) {
   return new Container(
@@ -22,11 +21,16 @@ Widget buildPage(int page) {
   );
 }
 
-Widget buildFrame({ List<int> pages: defaultPages }) {
-  final list = new PageableList(
+Widget buildFrame({
+  bool itemsWrap: false,
+  ViewportAnchor scrollAnchor: ViewportAnchor.start,
+  List<int> pages: defaultPages
+}) {
+  final PageableList list = new PageableList(
     children: pages.map(buildPage),
     itemsWrap: itemsWrap,
     scrollDirection: Axis.horizontal,
+    scrollAnchor: scrollAnchor,
     onPageChanged: (int page) { currentPage = page; }
   );
 
@@ -58,7 +62,6 @@ void main() {
   test('PageableList with itemsWrap: false', () {
     testWidgets((WidgetTester tester) {
       currentPage = null;
-      itemsWrap = false;
       tester.pumpWidget(buildFrame());
       expect(currentPage, isNull);
       pageLeft(tester);
@@ -86,11 +89,46 @@ void main() {
     });
   });
 
+  test('PageableList with end scroll anchor', () {
+    testWidgets((WidgetTester tester) {
+      currentPage = 5;
+      tester.pumpWidget(buildFrame(scrollAnchor: ViewportAnchor.end));
+      pageRight(tester);
+      expect(currentPage, equals(4));
+
+      expect(tester.findText('0'), isNull);
+      expect(tester.findText('1'), isNull);
+      expect(tester.findText('2'), isNull);
+      expect(tester.findText('3'), isNull);
+      expect(tester.findText('4'), isNotNull);
+      expect(tester.findText('5'), isNull);
+
+      pageLeft(tester);
+      expect(currentPage, equals(5));
+
+      expect(tester.findText('0'), isNull);
+      expect(tester.findText('1'), isNull);
+      expect(tester.findText('2'), isNull);
+      expect(tester.findText('3'), isNull);
+      expect(tester.findText('4'), isNull);
+      expect(tester.findText('5'), isNotNull);
+
+      pageLeft(tester);
+      expect(currentPage, equals(5));
+
+      expect(tester.findText('0'), isNull);
+      expect(tester.findText('1'), isNull);
+      expect(tester.findText('2'), isNull);
+      expect(tester.findText('3'), isNull);
+      expect(tester.findText('4'), isNull);
+      expect(tester.findText('5'), isNotNull);
+    });
+  });
+
   test('PageableList with itemsWrap: true', () {
     testWidgets((WidgetTester tester) {
       currentPage = null;
-      itemsWrap = true;
-      tester.pumpWidget(buildFrame());
+      tester.pumpWidget(buildFrame(itemsWrap: true));
       expect(currentPage, isNull);
       pageLeft(tester);
       expect(currentPage, equals(1));
@@ -101,11 +139,56 @@ void main() {
     });
   });
 
+  test('PageableList with end and itemsWrap: true', () {
+    testWidgets((WidgetTester tester) {
+      currentPage = 5;
+      tester.pumpWidget(buildFrame(itemsWrap: true, scrollAnchor: ViewportAnchor.end));
+      pageRight(tester);
+      expect(currentPage, equals(4));
+
+      expect(tester.findText('0'), isNull);
+      expect(tester.findText('1'), isNull);
+      expect(tester.findText('2'), isNull);
+      expect(tester.findText('3'), isNull);
+      expect(tester.findText('4'), isNotNull);
+      expect(tester.findText('5'), isNull);
+
+      pageLeft(tester);
+      expect(currentPage, equals(5));
+
+      expect(tester.findText('0'), isNull);
+      expect(tester.findText('1'), isNull);
+      expect(tester.findText('2'), isNull);
+      expect(tester.findText('3'), isNull);
+      expect(tester.findText('4'), isNull);
+      expect(tester.findText('5'), isNotNull);
+
+      pageLeft(tester);
+      expect(currentPage, equals(0));
+
+      expect(tester.findText('0'), isNotNull);
+      expect(tester.findText('1'), isNull);
+      expect(tester.findText('2'), isNull);
+      expect(tester.findText('3'), isNull);
+      expect(tester.findText('4'), isNull);
+      expect(tester.findText('5'), isNull);
+
+      pageLeft(tester);
+      expect(currentPage, equals(1));
+
+      expect(tester.findText('0'), isNull);
+      expect(tester.findText('1'), isNotNull);
+      expect(tester.findText('2'), isNull);
+      expect(tester.findText('3'), isNull);
+      expect(tester.findText('4'), isNull);
+      expect(tester.findText('5'), isNull);
+    });
+  });
+
   test('PageableList with two items', () {
     testWidgets((WidgetTester tester) {
       currentPage = null;
-      itemsWrap = true;
-      tester.pumpWidget(buildFrame(pages: <int>[0, 1]));
+      tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[0, 1]));
       expect(currentPage, isNull);
       pageLeft(tester);
       expect(currentPage, equals(1));
@@ -119,8 +202,7 @@ void main() {
   test('PageableList with one item', () {
     testWidgets((WidgetTester tester) {
       currentPage = null;
-      itemsWrap = true;
-      tester.pumpWidget(buildFrame(pages: <int>[0]));
+      tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[0]));
       expect(currentPage, isNull);
       pageLeft(tester);
       expect(currentPage, equals(0));
@@ -134,8 +216,7 @@ void main() {
   test('PageableList with no items', () {
     testWidgets((WidgetTester tester) {
       currentPage = null;
-      itemsWrap = true;
-      tester.pumpWidget(buildFrame(pages: <int>[]));
+      tester.pumpWidget(buildFrame(itemsWrap: true, pages: <int>[]));
       expect(currentPage, isNull);
     });
   });
@@ -144,9 +225,8 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Container());
       currentPage = null;
-      itemsWrap = true;
 
-      tester.pumpWidget(buildFrame());
+      tester.pumpWidget(buildFrame(itemsWrap: true));
       expect(currentPage, isNull);
       pageRight(tester);
       expect(currentPage, equals(5));
@@ -156,7 +236,7 @@ void main() {
       expect(box.size.height, equals(pageSize.height));
 
       pageSize = new Size(pageSize.height, pageSize.width);
-      tester.pumpWidget(buildFrame());
+      tester.pumpWidget(buildFrame(itemsWrap: true));
 
       expect(tester.findText('0'), isNull);
       expect(tester.findText('1'), isNull);
