@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
@@ -24,21 +24,14 @@ class LogsCommand extends FlutterCommand {
 
   Future<int> runInProject() async {
     DeviceManager deviceManager = new DeviceManager();
-    List<Device> devices;
+    deviceManager.specifiedDeviceId = globalResults['device-id'];
 
-    String deviceId = globalResults['device-id'];
-    if (deviceId != null) {
-      Device device = await deviceManager.getDeviceById(deviceId);
-      if (device == null) {
-        printError("No device found with id '$deviceId'.");
-        return 1;
-      }
-      devices = <Device>[device];
-    } else {
-      devices = await deviceManager.getDevices();
-    }
+    List<Device> devices = await deviceManager.getDevices();
 
-    if (devices.isEmpty) {
+    if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
+      printError("No device found with id '${deviceManager.specifiedDeviceId}'.");
+      return 1;
+    } else if (devices.isEmpty) {
       printStatus('No connected devices.');
       return 0;
     }

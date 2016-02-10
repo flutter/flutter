@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../flx.dart' as flx;
@@ -118,7 +118,7 @@ class RunMojoCommand extends FlutterCommand {
     if (useDevtools) {
       final String buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
       args.add(buildFlag);
-      if (context.verbose)
+      if (logger.verbose)
         args.add('--verbose');
     }
 

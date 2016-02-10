@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../flx.dart';
 import '../runner/flutter_command.dart';
 

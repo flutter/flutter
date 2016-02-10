@@ -7,33 +7,48 @@ import 'dart:async';
 import 'android/device_android.dart';
 import 'application_package.dart';
 import 'base/common.dart';
-import 'base/context.dart';
+import 'base/globals.dart';
 import 'build_configuration.dart';
 import 'ios/device_ios.dart';
 import 'toolchain.dart';
 
 /// A class to get all available devices.
 class DeviceManager {
+  /// Constructing DeviceManagers is cheap; they only do expensive work if some
+  /// of their methods are invoked.
   DeviceManager() {
-    // Init the known discoverers.
+    // Register the known discoverers.
     _deviceDiscoverers.add(new AndroidDeviceDiscovery());
     _deviceDiscoverers.add(new IOSDeviceDiscovery());
     _deviceDiscoverers.add(new IOSSimulatorDiscovery());
+  }
 
-    Future.forEach(_deviceDiscoverers, (DeviceDiscovery discoverer) {
-      if (!discoverer.supportsPlatform)
-        return null;
-      return discoverer.init();
-    }).then((_) {
-      _initedCompleter.complete();
-    }).catchError((error, stackTrace) {
-      _initedCompleter.completeError(error, stackTrace);
-    });
+  Future _init() {
+    if (_initedCompleter == null) {
+      _initedCompleter = new Completer();
+
+      Future.forEach(_deviceDiscoverers, (DeviceDiscovery discoverer) {
+        if (!discoverer.supportsPlatform)
+          return null;
+        return discoverer.init();
+      }).then((_) {
+        _initedCompleter.complete();
+      }).catchError((error, stackTrace) {
+        _initedCompleter.completeError(error, stackTrace);
+      });
+    }
+
+    return _initedCompleter.future;
   }
 
   List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
 
-  Completer _initedCompleter = new Completer();
+  /// A user-specified device ID.
+  String specifiedDeviceId;
+
+  Completer _initedCompleter;
+
+  bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
   /// Return the device with the matching ID; else, complete the Future with
   /// `null`.
@@ -41,15 +56,26 @@ class DeviceManager {
   /// This does a case insentitive compare with `deviceId`.
   Future<Device> getDeviceById(String deviceId) async {
     deviceId = deviceId.toLowerCase();
-    List<Device> devices = await getDevices();
+    List<Device> devices = await getAllConnectedDevices();
     return devices.firstWhere(
       (Device device) => device.id.toLowerCase() == deviceId,
       orElse: () => null
     );
   }
 
+  /// Return the list of connected devices, filtered by any user-specified device id.
   Future<List<Device>> getDevices() async {
-    await _initedCompleter.future;
+    if (specifiedDeviceId == null) {
+      return getAllConnectedDevices();
+    } else {
+      Device device = await getDeviceById(specifiedDeviceId);
+      return device == null ? <Device>[] : <Device>[device];
+    }
+  }
+
+  /// Return the list of all connected devices.
+  Future<List<Device>> getAllConnectedDevices() async {
+    await _init();
 
     return _deviceDiscoverers
       .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform)

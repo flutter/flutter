@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show JSON;
 import 'dart:io';
 
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';

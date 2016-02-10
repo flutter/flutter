@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../flx.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';

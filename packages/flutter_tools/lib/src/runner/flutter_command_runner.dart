@@ -10,7 +10,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import 'version.dart';
@@ -158,10 +158,15 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   Future<int> runCommand(ArgResults globalResults) {
-    if (globalResults['verbose'])
-      context.verbose = true;
-
     _globalResults = globalResults;
+
+    // Check for verbose.
+    if (globalResults['verbose'])
+      logger.verbose = true;
+
+    // See if the user specified a specific device.
+    deviceManager.specifiedDeviceId = globalResults['device-id'];
+
     ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
     if (globalResults.wasParsed('package-root'))
       ArtifactStore.packageRoot = path.normalize(path.absolute(globalResults['package-root']));

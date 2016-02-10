@@ -8,12 +8,13 @@ import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';
+import 'src/test_context.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('trace', () {
-    test('returns 1 when no Android device is connected', () {
+    testUsingContext('returns 1 when no Android device is connected', () {
       TraceCommand command = new TraceCommand();
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
@@ -22,7 +23,7 @@ defineTests() {
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
-      runner.run(['trace']).then((int code) => expect(code, equals(1)));
+      return runner.run(['trace']).then((int code) => expect(code, equals(1)));
     });
   });
 }

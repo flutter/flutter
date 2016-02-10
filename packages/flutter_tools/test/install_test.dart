@@ -33,7 +33,7 @@ defineTests() {
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
-      runner.run(['install']).then((int code) => expect(code, equals(0)));
+      return runner.run(['install']).then((int code) => expect(code, equals(0)));
     });
 
     test('returns 0 when iOS is connected and ready for an install', () {
@@ -55,7 +55,7 @@ defineTests() {
 
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
-      runner.run(['install']).then((int code) => expect(code, equals(0)));
+      return runner.run(['install']).then((int code) => expect(code, equals(0)));
     });
   });
 }

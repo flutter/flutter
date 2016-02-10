@@ -11,6 +11,8 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+import 'src/test_context.dart';
+
 main() => defineTests();
 
 defineTests() {
@@ -31,7 +33,7 @@ defineTests() {
     // TODO(devoncarew): https://github.com/flutter/flutter/issues/1709
     if (Platform.isLinux) {
       // Verify that we create a project that is well-formed.
-      test('flutter-simple', () async {
+      testUsingContext('flutter-simple', () async {
         ArtifactStore.flutterRoot = '../..';
         CreateCommand command = new CreateCommand();
         CommandRunner runner = new CommandRunner('test_flutter', '')

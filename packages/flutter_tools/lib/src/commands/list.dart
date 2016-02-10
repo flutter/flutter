@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
@@ -15,9 +15,7 @@ class ListCommand extends FlutterCommand {
   bool get requiresProjectRoot => false;
 
   Future<int> runInProject() async {
-    DeviceManager deviceManager = new DeviceManager();
-
-    List<Device> devices = await deviceManager.getDevices();
+    List<Device> devices = await deviceManager.getAllConnectedDevices();
 
     if (devices.isEmpty) {
       printStatus('No connected devices.');

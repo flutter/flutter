@@ -10,12 +10,13 @@ import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/mocks.dart';
+import 'src/test_context.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('list', () {
-    test('returns 0 when called', () {
+    testUsingContext('returns 0 when called', () {
       final String mockCommand = Platform.isWindows ? 'cmd /c echo' : 'echo';
 
       ListCommand command = new ListCommand();
@@ -36,9 +37,8 @@ defineTests() {
       // Instead, cause the test to run the echo command.
       when(mockDevices.iOSSimulator.xcrunPath).thenReturn(mockCommand);
 
-      CommandRunner runner = new CommandRunner('test_flutter', '')
-        ..addCommand(command);
-      runner.run(['list']).then((int code) => expect(code, equals(0)));
+      CommandRunner runner = new CommandRunner('test_flutter', '')..addCommand(command);
+      return runner.run(['list']).then((int code) => expect(code, equals(0)));
     });
   });
 }

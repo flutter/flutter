@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 import 'start.dart';
 

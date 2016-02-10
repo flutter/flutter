@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';

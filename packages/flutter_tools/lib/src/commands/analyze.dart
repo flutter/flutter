@@ -11,7 +11,7 @@ import 'package:den_api/den_api.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../runner/flutter_command.dart';

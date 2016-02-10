@@ -5,11 +5,13 @@
 import 'package:flutter_tools/src/android/device_android.dart';
 import 'package:test/test.dart';
 
+import 'src/test_context.dart';
+
 main() => defineTests();
 
 defineTests() {
   group('android_device', () {
-    test('stores the requested id', () {
+    testUsingContext('stores the requested id', () {
       String deviceId = '1234';
       AndroidDevice device = new AndroidDevice(deviceId);
       expect(device.id, equals(deviceId));

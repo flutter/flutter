@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable;
 
 import '../artifacts.dart';
-import '../base/context.dart';
+import '../base/globals.dart';
 import '../build_configuration.dart';
 import '../runner/flutter_command.dart';
 import '../test/loader.dart' as loader;
