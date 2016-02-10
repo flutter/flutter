@@ -79,7 +79,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         child: new FloatingActionButton(
           child: new Icon(icon: 'content/add'),
           onPressed: () {
-            Navigator.push(context, new MaterialPageRoute(builder: (_) => new TabsFabDemo()));
+            Navigator.push(context, new MaterialPageRoute(
+              builder: (BuildContext context) => new TabsFabDemo()
+            ));
           }
         )
       )
@@ -94,7 +96,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new RaisedButton(
             child: new Text("Launch Demo"),
             onPressed: () {
-              Navigator.push(context, new MaterialPageRoute(builder: (_) => new SnackBarDemo()));
+              Navigator.push(context, new MaterialPageRoute(
+                builder: (BuildContext context) => new SnackBarDemo()
+              ));
             }
           ),
           new RaisedButton(
@@ -122,13 +126,9 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             new FlatButton(
               child: new Text("Launch Demo"),
               onPressed: () {
-                showDialog(context: context, child: new DialogDemo()).then((String value) {
-                  if (value != null) {
-                    Scaffold.of(context).showSnackBar(new SnackBar(
-                      content: new Text('You dismissed the dialog with "$value"')
-                    ));
-                  }
-                });
+                Navigator.push(context, new MaterialPageRoute(
+                  builder: (_) => new DialogDemo()
+                ));
               }
             ),
             new FlatButton(
