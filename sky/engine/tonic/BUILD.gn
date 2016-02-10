@@ -33,8 +33,6 @@ source_set("tonic") {
     "dart_library_natives.h",
     "dart_library_provider.cc",
     "dart_library_provider.h",
-    "dart_message_handler.cc",
-    "dart_message_handler.h",
     "dart_microtask_queue.cc",
     "dart_microtask_queue.h",
     "dart_persistent_value.cc",
