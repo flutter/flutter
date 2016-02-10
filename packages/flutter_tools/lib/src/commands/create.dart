@@ -38,9 +38,10 @@ class CreateCommand extends Command {
       printError('variable was specified. Unable to find package:flutter.');
       return 2;
     }
-    String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
+    String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
     String flutterPackagePath = path.join(flutterRoot, 'packages', 'flutter');
+
     if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml'))) {
       printError('Unable to find package:flutter in $flutterPackagePath');
       return 2;
@@ -118,13 +119,18 @@ abstract class Template {
     printStatus('Creating ${path.basename(projectName)}...');
     dir.createSync(recursive: true);
 
-    String relativeFlutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
+    String pubspecPath = path.relative(flutterPackagePath, from: dirPath);
+
+    // If we can't validate the relative path, use an absolute one.
+    String resolvedPath = path.join(dirPath, pubspecPath);
+    if (!FileSystemEntity.isDirectorySync(resolvedPath))
+      pubspecPath = path.absolute(flutterPackagePath);
 
     files.forEach((String filePath, String contents) {
       Map m = {
         'projectName': projectName,
         'description': description,
-        'flutterPackagePath': relativeFlutterPackagePath
+        'flutterPackagePath': pubspecPath
       };
       contents = mustache.render(contents, m);
       filePath = filePath.replaceAll('/', Platform.pathSeparator);
