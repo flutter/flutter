@@ -27,6 +27,7 @@
 #include "sky/engine/tonic/dart_io.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
 #include "sky/engine/tonic/dart_library_loader.h"
+#include "sky/engine/tonic/dart_message_handler.h"
 #include "sky/engine/tonic/dart_snapshot_loader.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrappable.h"
@@ -44,23 +45,6 @@ void CreateEmptyRootLibraryIfNeeded() {
     Dart_LoadScript(Dart_NewStringFromCString("dart:empty"), Dart_EmptyString(),
                     0, 0);
   }
-}
-
-void CallHandleMessage(base::WeakPtr<DartState> dart_state) {
-  TRACE_EVENT0("flutter", "CallHandleMessage");
-
-  if (!dart_state)
-    return;
-
-  DartIsolateScope scope(dart_state->isolate());
-  DartApiScope dart_api_scope;
-  LogIfError(Dart_HandleMessage());
-}
-
-void MessageNotifyCallback(Dart_Isolate dest_isolate) {
-  DCHECK(Platform::current());
-  Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
-      base::Bind(&CallHandleMessage, DartState::From(dest_isolate)->GetWeakPtr()));
 }
 
 } // namespace
@@ -149,8 +133,11 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
       dom_dart_state_->url().c_str(), "main",
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, static_cast<DartState*>(dom_dart_state_.get()), &error);
-  Dart_SetMessageNotifyCallback(MessageNotifyCallback);
   CHECK(isolate) << error;
+  auto message_handler = dom_dart_state_->message_handler();
+  message_handler.set_quit_message_loop_when_isolate_exits(false);
+  DCHECK(Platform::current());
+  message_handler.Initialize(Platform::current()->GetUITaskRunner());
   dom_dart_state_->SetIsolate(isolate);
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 

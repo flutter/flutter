@@ -13,6 +13,8 @@ namespace blink {
 
 void DartDebuggerIsolate::MessageLoop() {
   MonitorLocker ml(&monitor_);
+  Dart_MessageNotifyCallback saved_message_notify_callback =
+      Dart_GetMessageNotifyCallback();
   // Request notification on isolate messages.  This allows us to
   // respond to vm service messages while at breakpoint.
   Dart_SetMessageNotifyCallback(DartDebugger::NotifyIsolate);
@@ -30,7 +32,7 @@ void DartDebuggerIsolate::MessageLoop() {
     }
     ml.Wait();
   }
-  Dart_SetMessageNotifyCallback(nullptr);
+  Dart_SetMessageNotifyCallback(saved_message_notify_callback);
 }
 
 void DartDebugger::BptResolvedHandler(Dart_IsolateId isolate_id,
