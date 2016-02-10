@@ -21,7 +21,6 @@ abstract class ScrollBehavior {
   /// This function is called when a drag gesture ends and toSnapOffset is specified.
   Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) => null;
 
-
   /// Returns the scroll offset to use when the user attempts to scroll
   /// from the given offset by the given delta.
   double applyCurve(double scrollOffset, double scrollDelta);
@@ -70,10 +69,31 @@ abstract class ExtentScrollBehavior extends ScrollBehavior {
 
 /// A scroll behavior that prevents the user from exceeding scroll bounds.
 class BoundedBehavior extends ExtentScrollBehavior {
-  BoundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
-    : super(contentExtent: contentExtent, containerExtent: containerExtent);
+  BoundedBehavior({
+    double contentExtent: 0.0,
+    double containerExtent: 0.0,
+    double minScrollOffset: 0.0
+  }) : _minScrollOffset = minScrollOffset,
+       super(contentExtent: contentExtent, containerExtent: containerExtent);
 
-  double minScrollOffset = 0.0;
+  double _minScrollOffset;
+
+  double updateExtents({
+    double contentExtent,
+    double containerExtent,
+    double minScrollOffset,
+    double scrollOffset: 0.0
+  }) {
+    if (minScrollOffset != null)
+      _minScrollOffset = minScrollOffset;
+    return super.updateExtents(
+      contentExtent: contentExtent,
+      containerExtent: containerExtent,
+      scrollOffset: scrollOffset
+    );
+  }
+
+  double get minScrollOffset => _minScrollOffset;
   double get maxScrollOffset => math.max(minScrollOffset, minScrollOffset + _contentExtent - _containerExtent);
 
   double applyCurve(double scrollOffset, double scrollDelta) {
@@ -118,8 +138,8 @@ class UnboundedBehavior extends ExtentScrollBehavior {
 
 /// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance.
 class OverscrollBehavior extends BoundedBehavior {
-  OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
-    : super(contentExtent: contentExtent, containerExtent: containerExtent);
+  OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
+    : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
 
   Simulation createFlingScrollSimulation(double position, double velocity) {
     return _createFlingScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
@@ -148,6 +168,9 @@ class OverscrollBehavior extends BoundedBehavior {
 
 /// A scroll behavior that lets the user scroll beyond the scroll bounds only when the bounds are disjoint.
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
+  OverscrollWhenScrollableBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
+    : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
+
   bool get isScrollable => contentExtent > containerExtent;
 
   Simulation createFlingScrollSimulation(double position, double velocity) {
