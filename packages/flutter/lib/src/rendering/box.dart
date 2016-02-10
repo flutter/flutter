@@ -272,12 +272,21 @@ class BoxConstraints extends Constraints {
   /// normalized and have undefined behavior when they are not. In
   /// checked mode, many of these APIs will assert if the constraints
   /// are not normalized.
-  bool get isNormalized => minWidth <= maxWidth && minHeight <= maxHeight;
+  bool get isNormalized {
+    return minWidth >= 0.0 &&
+           minWidth <= maxWidth &&
+           minHeight >= 0.0 &&
+           minHeight <= maxHeight;
+  }
 
-  /// Same as [isNormalized] but, in checked mode, throws an exception
-  /// if isNormalized is false.
   bool get debugAssertIsNormalized {
     assert(() {
+      if (minWidth < 0.0 && minHeight < 0.0)
+        throw new RenderingError('BoxConstraints has both a negative minimum width and a negative minimum height.\n$this');
+      if (minWidth < 0.0)
+        throw new RenderingError('BoxConstraints has a negative minimum width.\n$this');
+      if (minHeight < 0.0)
+        throw new RenderingError('BoxConstraints has a negative minimum height.\n$this');
       if (maxWidth < minWidth && maxHeight < minHeight)
         throw new RenderingError('BoxConstraints has both width and height constraints non-normalized.\n$this');
       if (maxWidth < minWidth)
