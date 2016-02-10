@@ -140,7 +140,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
 
     switch (scrollDirection) {
       case Axis.vertical:
-        itemWidth = math.max(0, size.width - (padding == null ? 0.0 : padding.horizontal));
+        itemWidth = math.max(0.0, size.width - (padding == null ? 0.0 : padding.horizontal));
         itemHeight = itemExtent ?? size.height;
         y = padding != null ? padding.top : 0.0;
         dy = itemHeight;
