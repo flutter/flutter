@@ -4,7 +4,6 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
 import 'colors.dart';
 import 'debug.dart';
@@ -17,8 +16,7 @@ export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 class Input extends StatefulComponent {
   Input({
     GlobalKey key,
-    this.initialValue: '',
-    this.initialSelection,
+    this.value: InputValue.empty,
     this.keyboardType: KeyboardType.text,
     this.icon,
     this.labelText,
@@ -34,11 +32,8 @@ class Input extends StatefulComponent {
     assert(key != null);
   }
 
-  /// The initial editable text for the input field.
-  final String initialValue;
-
-  /// The initial selection for this input field.
-  final TextSelection initialSelection;
+  /// The text of the input field.
+  final InputValue value;
 
   /// The type of keyboard to use for editing the text.
   final KeyboardType keyboardType;
@@ -68,10 +63,10 @@ class Input extends StatefulComponent {
   final bool autofocus;
 
   /// Called when the text being edited changes.
-  final ValueChanged<String> onChanged;
+  final ValueChanged<InputValue> onChanged;
 
   /// Called when the user indicates that they are done editing the text in the field.
-  final ValueChanged<String> onSubmitted;
+  final ValueChanged<InputValue> onSubmitted;
 
   _InputState createState() => new _InputState();
 }
@@ -80,88 +75,12 @@ const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.ease;
 
 class _InputState extends State<Input> {
-  String _value;
-  EditableString _editableString;
-  KeyboardHandle _keyboardHandle;
-
-  // Used by tests.
-  EditableString get editableValue => _editableString;
-
-  void initState() {
-    super.initState();
-    _value = config.initialValue;
-    _editableString = new EditableString(
-      text: _value,
-      selection: config.initialSelection,
-      onUpdated: _handleTextUpdated,
-      onSubmitted: _handleTextSubmitted
-    );
-  }
-
-  void dispose() {
-    if (_isAttachedToKeyboard)
-      _keyboardHandle.release();
-    super.dispose();
-  }
-
-  bool get _isAttachedToKeyboard => _keyboardHandle != null && _keyboardHandle.attached;
-
-  void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_isAttachedToKeyboard) {
-      _keyboardHandle = keyboard.attach(_editableString.createStub(),
-                                        new mojom.KeyboardConfiguration()
-                                          ..type = config.keyboardType);
-      _keyboardHandle.setEditingState(_editableString.editingState);
-      _keyboardHandle.show();
-    } else if (!focused && _isAttachedToKeyboard) {
-      _keyboardHandle.release();
-      _keyboardHandle = null;
-      _editableString.didDetachKeyboard();
-    }
-  }
-
-  void _requestKeyboard() {
-    if (Focus.at(context)) {
-      assert(_isAttachedToKeyboard);
-      _keyboardHandle.show();
-    } else {
-      Focus.moveTo(config.key);
-      // we'll get told to rebuild and we'll take care of the keyboard then
-    }
-  }
-
-  void _handleTextUpdated() {
-    if (_value != _editableString.text) {
-      setState(() {
-        _value = _editableString.text;
-      });
-      if (config.onChanged != null)
-        config.onChanged(_value);
-    }
-  }
-
-  void _handleTextSubmitted() {
-    Focus.clear(context);
-    if (config.onSubmitted != null)
-      config.onSubmitted(_value);
-  }
-
-  void _handleSelectionChanged(TextSelection selection) {
-    if (_isAttachedToKeyboard) {
-      _editableString.setSelection(selection);
-      _keyboardHandle.setEditingState(_editableString.editingState);
-    } else {
-      _editableString.setSelection(selection);
-      _requestKeyboard();
-    }
-  }
+  GlobalKey<RawInputLineState> _rawInputLineKey = new GlobalKey<RawInputLineState>();
 
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     bool focused = Focus.at(context, autofocus: config.autofocus);
-
-    _attachOrDetachKeyboard(focused);
 
     TextStyle textStyle = config.style ?? themeData.text.subhead;
     Color focusHighlightColor = themeData.accentColor;
@@ -171,7 +90,7 @@ class _InputState extends State<Input> {
 
     List<Widget> stackChildren = <Widget>[];
 
-    bool hasInlineLabel = config.labelText != null && !focused && !_value.isNotEmpty;
+    bool hasInlineLabel = config.labelText != null && !focused && !config.value.text.isNotEmpty;
 
     if (config.labelText != null) {
       TextStyle labelStyle = hasInlineLabel ?
@@ -194,7 +113,7 @@ class _InputState extends State<Input> {
       topPadding += topPaddingIncrement;
     }
 
-    if (config.hintText != null && _value.isEmpty && !hasInlineLabel) {
+    if (config.hintText != null && config.value.text.isEmpty && !hasInlineLabel) {
       TextStyle hintStyle = themeData.text.subhead.copyWith(color: themeData.hintColor);
       stackChildren.add(new Positioned(
         left: 0.0,
@@ -234,14 +153,17 @@ class _InputState extends State<Input> {
           )
         )
       ),
-      child: new RawEditableLine(
-        value: _editableString,
-        focused: focused,
+      child: new RawInputLine(
+        key: _rawInputLineKey,
+        value: config.value,
+        focusKey: config.key,
         style: textStyle,
         hideText: config.hideText,
         cursorColor: cursorColor,
         selectionColor: cursorColor,
-        onSelectionChanged: _handleSelectionChanged
+        keyboardType: config.keyboardType,
+        onChanged: config.onChanged,
+        onSubmitted: config.onSubmitted
       )
     ));
 
@@ -278,7 +200,7 @@ class _InputState extends State<Input> {
 
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: _requestKeyboard,
+      onTap: () => _rawInputLineKey.currentState?.requestKeyboard(),
       child: new Padding(
         padding: const EdgeDims.symmetric(horizontal: 16.0),
         child: child

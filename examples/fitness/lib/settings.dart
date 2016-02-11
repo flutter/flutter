@@ -4,6 +4,64 @@
 
 part of fitness;
 
+class _SettingsDialog extends StatefulComponent {
+  _SettingsDialogState createState() => new _SettingsDialogState();
+}
+
+class _SettingsDialogState extends State<_SettingsDialog> {
+  final GlobalKey weightGoalKey = new GlobalKey();
+
+  InputValue _goalWeight = InputValue.empty;
+
+  void _handleGoalWeightChanged(InputValue goalWeight) {
+    setState(() {
+      _goalWeight = goalWeight;
+    });
+  }
+
+  void _handleGoalWeightSubmitted(InputValue goalWeight) {
+    _goalWeight = goalWeight;
+    _handleSavePressed();
+  }
+
+  void _handleSavePressed() {
+    double goalWeight;
+    try {
+      goalWeight = double.parse(_goalWeight.text);
+    } on FormatException {
+      goalWeight = 0.0;
+    }
+    Navigator.pop(context, goalWeight);
+  }
+
+  Widget build(BuildContext context) {
+    return new Dialog(
+      title: new Text("Goal Weight"),
+      content: new Input(
+        key: weightGoalKey,
+        value: _goalWeight,
+        autofocus: true,
+        hintText: 'Goal weight in lbs',
+        keyboardType: KeyboardType.number,
+        onChanged: _handleGoalWeightChanged,
+        onSubmitted: _handleGoalWeightSubmitted
+      ),
+      actions: <Widget>[
+        new FlatButton(
+          child: new Text('CANCEL'),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+        new FlatButton(
+          child: new Text('SAVE'),
+          onPressed: _handleSavePressed
+        ),
+      ]
+    );
+  }
+}
+
 typedef void SettingsUpdater({
   BackupMode backup,
   double goalWeight
@@ -36,52 +94,10 @@ class SettingsFragmentState extends State<SettingsFragment> {
     return "${config.userData.goalWeight}";
   }
 
-  static final GlobalKey weightGoalKey = new GlobalKey();
-
-  double _goalWeight;
-
-  void _handleGoalWeightChanged(String goalWeight) {
-    // TODO(jackson): Looking for null characters to detect enter key is a hack
-    if (goalWeight.endsWith("\u{0}")) {
-      Navigator.pop(context, double.parse(goalWeight.replaceAll("\u{0}", "")));
-    } else {
-      setState(() {
-        try {
-          _goalWeight = double.parse(goalWeight);
-        } on FormatException {
-          _goalWeight = 0.0;
-        }
-      });
-    }
-  }
-
   Future _handleGoalWeightPressed() async {
     double goalWeight = await showDialog(
       context: context,
-      child: new Dialog(
-        title: new Text("Goal Weight"),
-        content: new Input(
-          key: weightGoalKey,
-          autofocus: true,
-          hintText: 'Goal weight in lbs',
-          keyboardType: KeyboardType.number,
-          onChanged: _handleGoalWeightChanged
-        ),
-        actions: <Widget>[
-          new FlatButton(
-            child: new Text('CANCEL'),
-            onPressed: () {
-              Navigator.pop(context);
-            }
-          ),
-          new FlatButton(
-            child: new Text('SAVE'),
-            onPressed: () {
-              Navigator.pop(context, _goalWeight);
-            }
-          ),
-        ]
-      )
+      child: new _SettingsDialog()
     );
     config.updater(goalWeight: goalWeight);
   }

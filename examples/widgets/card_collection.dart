@@ -7,12 +7,12 @@ import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
 class CardModel {
   CardModel(this.value, this.height) {
-    label = "Item $value";
+    inputValue = new InputValue(text: "Item $value");
   }
   int value;
   double height;
   int get color => ((value % 9) + 1) * 100;
-  String label;
+  InputValue inputValue;
   Key get key => new ObjectKey(this);
 }
 
@@ -305,9 +305,11 @@ class CardCollectionState extends State<CardCollection> {
             new Center(
               child: new Input(
                 key: new GlobalObjectKey(cardModel),
-                initialValue: cardModel.label,
-                onChanged: (String value) {
-                  cardModel.label = value;
+                value: cardModel.inputValue,
+                onChanged: (InputValue value) {
+                  setState(() {
+                    cardModel.inputValue = value;
+                  });
                 }
               )
             )
@@ -317,7 +319,7 @@ class CardCollectionState extends State<CardCollection> {
               ),
               child: new Column(
                 children: <Widget>[
-                  new Text(cardModel.label)
+                  new Text(cardModel.inputValue.text)
                 ],
                 alignItems: FlexAlignItems.stretch,
                 justifyContent: FlexJustifyContent.center
