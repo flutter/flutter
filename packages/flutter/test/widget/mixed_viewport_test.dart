@@ -150,4 +150,50 @@ void main() {
       callbackTracker.clear();
     });
   });
+
+  test('MixedViewport reinvoke builders', () {
+    testWidgets((WidgetTester tester) {
+      List<int> callbackTracker = <int>[];
+      List<String> text = <String>[];
+
+      IndexedBuilder itemBuilder = (BuildContext context, int i) {
+        callbackTracker.add(i);
+        return new Container(
+          key: new ValueKey<int>(i),
+          width: 500.0, // this should be ignored
+          height: 220.0,
+          child: new Text("$i")
+        );
+      };
+
+      ElementVisitor collectText = (Element element) {
+        final Widget widget = element.widget;
+        if (widget is Text)
+          text.add(widget.data);
+      };
+
+      Widget builder() {
+        return new MixedViewport(
+          builder: itemBuilder,
+          startOffset: 0.0
+        );
+      }
+
+      tester.pumpWidget(builder());
+
+      expect(callbackTracker, equals([0, 1, 2]));
+      callbackTracker.clear();
+      tester.walkElements(collectText);
+      expect(text, equals(['0', '1', '2']));
+      text.clear();
+
+      tester.pumpWidget(builder());
+
+      expect(callbackTracker, equals([0, 1, 2]));
+      callbackTracker.clear();
+      tester.walkElements(collectText);
+      expect(text, equals(['0', '1', '2']));
+      text.clear();
+    });
+  });
 }
