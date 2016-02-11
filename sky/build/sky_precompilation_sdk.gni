@@ -72,6 +72,17 @@ template("sky_precompilation_sdk") {
     outputs = [  "$sdk_dir/{{source_file_part}}"  ]
   }
 
+  # All user editable files are copied to the out directory so that developers
+  # tinkering on the engine still have a fully functional project harness
+  copy("copy_user_editable_files") {
+    sources = [
+      "//sky/build/Info.plist",
+      "//sky/build/LaunchScreen.storyboard",
+      "//sky/build/Assets.xcassets",
+    ]
+    outputs = [  "$root_out_dir/{{source_file_part}}"  ]
+  }
+
   executable_gen_target_name = target_name + "_runner"
   executable(executable_gen_target_name) {
     libs = [
@@ -109,6 +120,7 @@ template("sky_precompilation_sdk") {
       ":$copy_data_gen_target_name",
       ":precompilation_xcode_scripts",
       ":copy_sdk_xcode_harness",
+      ":copy_user_editable_files",
     ]
   }
 }
