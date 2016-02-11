@@ -131,7 +131,12 @@ class IOSCommand extends FlutterCommand {
     // Step 3: Populate the Local.xcconfig with project specific paths
     _setupXcodeProjXcconfig(path.join(xcodeprojPath, "Local.xcconfig"));
 
-    // Step 4: Tell the user the location of the generated project.
+    // Step 4: Write the REVISION file
+    File revisionFile = new File(path.join(xcodeprojPath, "REVISION"));
+    revisionFile.createSync();
+    revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
+
+    // Step 5: Tell the user the location of the generated project.
     printStatus("An Xcode project has been placed in 'ios/'.");
     printStatus("You may edit it to modify iOS specific configuration.");
     return 0;
