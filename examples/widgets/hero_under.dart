@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';

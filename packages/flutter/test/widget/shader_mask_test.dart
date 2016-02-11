@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' show Shader;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-ui.Shader createShader(Rect bounds) {
+Shader createShader(Rect bounds) {
   return new LinearGradient(
       begin: bounds.topLeft,
       end: bounds.bottomLeft,

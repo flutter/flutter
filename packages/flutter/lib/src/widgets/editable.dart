@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/rendering.dart' show RenderEditableLine;
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show WindowPadding, window;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +11,8 @@ import 'package:flutter/widgets.dart';
 
 import 'page.dart';
 import 'theme.dart';
+
+export 'dart:ui' show Locale;
 
 const TextStyle _errorTextStyle = const TextStyle(
   color: const Color(0xD0FF0000),
@@ -38,7 +40,7 @@ class RouteArguments {
 }
 typedef Widget RouteBuilder(RouteArguments args);
 
-typedef Future<LocaleQueryData> LocaleChangedCallback(ui.Locale locale);
+typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
 class MaterialApp extends StatefulComponent {
   MaterialApp({
@@ -152,7 +154,7 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     });
   }
 
-  void didChangeLocale(ui.Locale locale) {
+  void didChangeLocale(Locale locale) {
     if (config.onLocaleChanged != null) {
       config.onLocaleChanged(locale).then((LocaleQueryData data) {
         if (mounted)
@@ -161,7 +163,7 @@ class _MaterialAppState extends State<MaterialApp> implements BindingObserver {
     }
   }
 
-  void didChangeAppLifecycleState(ui.AppLifecycleState state) { }
+  void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   final HeroController _heroController = new HeroController();
 

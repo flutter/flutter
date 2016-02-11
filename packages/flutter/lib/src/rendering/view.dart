@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-import 'dart:ui' show hashValues;
+import 'dart:ui' as ui show lerpDouble;
+
+import 'basic_types.dart';
 
 /// An immutable set of offsets in each of the four cardinal directions.
 ///
@@ -50,13 +51,13 @@ class EdgeDims {
   double get vertical => top + bottom;
 
   /// The size that this EdgeDims would occupy with an empty interior.
-  ui.Size get collapsedSize => new ui.Size(horizontal, vertical);
+  Size get collapsedSize => new Size(horizontal, vertical);
 
   /// An EdgeDims with top and bottom as well as left and right flipped.
   EdgeDims get flipped => new EdgeDims.TRBL(bottom, left, top, right);
 
-  ui.Rect inflateRect(ui.Rect rect) {
-    return new ui.Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
+  Rect inflateRect(Rect rect) {
+    return new Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
   }
 
   EdgeDims operator -(EdgeDims other) {

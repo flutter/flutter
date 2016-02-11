@@ -10,12 +10,10 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Image;
 
 import 'package:box2d/box2d.dart' as box2d;
-import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';

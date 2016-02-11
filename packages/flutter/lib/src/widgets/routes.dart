@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/animation.dart';
-
 import 'basic.dart';
 import 'focus.dart';
 import 'framework.dart';

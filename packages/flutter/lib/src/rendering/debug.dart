@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show JSON;
 import 'dart:developer' as developer;
-import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -18,35 +17,35 @@ export 'package:flutter/services.dart' show debugPrint;
 bool debugPaintSizeEnabled = false;
 
 /// The color to use when painting RenderObject bounds.
-ui.Color debugPaintSizeColor = const ui.Color(0xFF00FFFF);
+Color debugPaintSizeColor = const Color(0xFF00FFFF);
 
 /// The color to use when painting some boxes that just add space (e.g. an empty
 /// RenderConstrainedBox or RenderPadding).
-ui.Color debugPaintSpacingColor = const ui.Color(0x90909090);
+Color debugPaintSpacingColor = const Color(0x90909090);
 
 /// The color to use when painting RenderPadding edges.
-ui.Color debugPaintPaddingColor = const ui.Color(0x900090FF);
+Color debugPaintPaddingColor = const Color(0x900090FF);
 
 /// The color to use when painting RenderPadding edges.
-ui.Color debugPaintPaddingInnerEdgeColor = const ui.Color(0xFF0090FF);
+Color debugPaintPaddingInnerEdgeColor = const Color(0xFF0090FF);
 
 /// The color to use when painting the arrows used to show RenderPositionedBox alignment.
-ui.Color debugPaintArrowColor = const ui.Color(0xFFFFFF00);
+Color debugPaintArrowColor = const Color(0xFFFFFF00);
 
 /// Causes each RenderBox to paint a line at each of its baselines.
 bool debugPaintBaselinesEnabled = false;
 
 /// The color to use when painting alphabetic baselines.
-ui.Color debugPaintAlphabeticBaselineColor = const ui.Color(0xFF00FF00);
+Color debugPaintAlphabeticBaselineColor = const Color(0xFF00FF00);
 
 /// The color ot use when painting ideographic baselines.
-ui.Color debugPaintIdeographicBaselineColor = const ui.Color(0xFFFFD000);
+Color debugPaintIdeographicBaselineColor = const Color(0xFFFFD000);
 
 /// Causes each Layer to paint a box around its bounds.
 bool debugPaintLayerBordersEnabled = false;
 
 /// The color to use when painting Layer borders.
-ui.Color debugPaintLayerBordersColor = const ui.Color(0xFFFF9800);
+Color debugPaintLayerBordersColor = const Color(0xFFFF9800);
 
 /// Causes RenderBox objects to flash while they are being tapped.
 bool debugPaintPointersEnabled = false;
@@ -55,7 +54,7 @@ bool debugPaintPointersEnabled = false;
 int debugPaintPointersColorValue = 0x00BBBB;
 
 /// The color to use when painting RenderError boxes in checked mode.
-ui.Color debugErrorBoxColor = const ui.Color(0xFFFF0000);
+Color debugErrorBoxColor = const Color(0xFFFF0000);
 
 /// Overlay a rotating set of colors when repainting layers in checked mode.
 bool debugEnableRepaintRainbox = false;

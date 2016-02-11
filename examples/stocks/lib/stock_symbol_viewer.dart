@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of stocks;
+import 'package:flutter/material.dart';
+
+import 'stock_data.dart';
+import 'stock_arrow.dart';
+import 'stock_row.dart';
 
 class StockSymbolView extends StatelessComponent {
   StockSymbolView({ this.stock });

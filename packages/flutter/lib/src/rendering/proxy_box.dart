@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
-import 'package:flutter/painting.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'basic_types.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -19,7 +17,6 @@ export 'package:flutter/gestures.dart' show
   PointerMoveEvent,
   PointerUpEvent,
   PointerCancelEvent;
-export 'package:flutter/painting.dart' show Decoration, BoxDecoration;
 
 /// A base class for render objects that resemble their children.
 ///
@@ -642,7 +639,7 @@ class RenderOpacity extends RenderProxyBox {
   }
 }
 
-typedef ui.Shader ShaderCallback(Rect bounds);
+typedef Shader ShaderCallback(Rect bounds);
 
 class RenderShaderMask extends RenderProxyBox {
   RenderShaderMask({ RenderBox child, ShaderCallback shaderCallback, TransferMode transferMode })
@@ -805,7 +802,7 @@ class RenderClipRRect extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       Rect rect = Point.origin & size;
-      ui.RRect rrect = new ui.RRect.fromRectXY(rect, xRadius, yRadius);
+      RRect rrect = new RRect.fromRectXY(rect, xRadius, yRadius);
       context.pushClipRRect(needsCompositing, offset, rect, rrect, super.paint);
     }
   }

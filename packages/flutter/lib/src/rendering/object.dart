@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
@@ -18,8 +18,8 @@ import 'node.dart';
 import 'semantics.dart';
 import 'binding.dart';
 
-export 'layer.dart';
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
+export 'package:flutter/painting.dart';
 
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
@@ -163,7 +163,7 @@ class PaintingContext {
         canvas.drawRect(_paintBounds, new Paint()..color = debugCurrentRepaintColor.toColor());
       if (debugPaintLayerBordersEnabled) {
         Paint paint = new Paint()
-          ..style = ui.PaintingStyle.stroke
+          ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
           ..color = debugPaintLayerBordersColor;
         canvas.drawRect(_paintBounds, paint);
@@ -223,9 +223,9 @@ class PaintingContext {
   /// This function will call painter synchronously with a painting context that
   /// is clipped by the given clip. The given clip should not incorporate the
   /// painting offset.
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, ui.RRect clipRRect, PaintingContextCallback painter) {
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
     Rect offsetBounds = bounds.shift(offset);
-    ui.RRect offsetClipRRect = clipRRect.shift(offset);
+    RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
       ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: offsetClipRRect);
@@ -305,7 +305,7 @@ class PaintingContext {
   ///
   /// This function will call painter synchronously with a painting context that
   /// will be masked with the given shader.
-  void pushShaderMask(Offset offset, ui.Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
+  void pushShaderMask(Offset offset, Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
       shader: shader,

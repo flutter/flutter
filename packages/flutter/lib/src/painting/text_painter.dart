@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextBox;
 
 import 'basic_types.dart';
 import 'text_editing.dart';
@@ -212,7 +212,7 @@ class TextPainter {
   }
 
   /// Paints the text onto the given canvas at the given offset.
-  void paint(ui.Canvas canvas, ui.Offset offset) {
+  void paint(Canvas canvas, Offset offset) {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
     _paragraph.paint(canvas, offset);
   }
@@ -223,7 +223,7 @@ class TextPainter {
       return null;
     ui.TextBox box = boxes[0];
     double caretEnd = box.end;
-    double dx = box.direction == ui.TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
+    double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
     return new Offset(dx, 0.0);
   }
 
@@ -233,7 +233,7 @@ class TextPainter {
       return null;
     ui.TextBox box = boxes[0];
     double caretStart = box.start;
-    double dx = box.direction == ui.TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
+    double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
     return new Offset(dx, 0.0);
   }
 

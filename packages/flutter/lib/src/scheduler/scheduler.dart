@@ -5,10 +5,13 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show window;
+import 'dart:ui' show VoidCallback;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
+
+export 'dart:ui' show VoidCallback;
 
 /// Slows down animations by this factor to help in development.
 double timeDilation = 1.0;
@@ -32,7 +35,7 @@ SchedulerExceptionHandler debugSchedulerExceptionHandler;
 ///
 /// Combines the task and its priority.
 class _TaskEntry {
-  final ui.VoidCallback task;
+  final VoidCallback task;
   final int priority;
 
   const _TaskEntry(this.task, this.priority);
@@ -110,7 +113,7 @@ abstract class Scheduler extends BindingBase {
   bool _hasRequestedABeginFrameCallback = false;
 
   /// Schedules the given [task] with the given [priority].
-  void scheduleTask(ui.VoidCallback task, Priority priority) {
+  void scheduleTask(VoidCallback task, Priority priority) {
     bool isFirstTask = _taskQueue.isEmpty;
     _taskQueue.add(new _TaskEntry(task, priority._value));
     if (isFirstTask)

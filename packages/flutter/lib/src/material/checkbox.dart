@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Gradient;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -122,23 +122,24 @@ class _RenderCheckbox extends RenderToggleable {
     // Create an inner rectangle to cover inside of rectangle. This is needed to avoid
     // painting artefacts caused by overlayed paintings.
     Rect innerRect = rect.deflate(1.0);
-    ui.RRect rrect = new ui.RRect.fromRectXY(
-        rect, _kEdgeRadius, _kEdgeRadius);
+    RRect rrect = new RRect.fromRectXY(rect, _kEdgeRadius, _kEdgeRadius);
 
     // Outline of the empty rrect
-    paint.style = ui.PaintingStyle.stroke;
+    paint.style = PaintingStyle.stroke;
     canvas.drawRRect(rrect, paint);
 
     // Radial gradient that changes size
     if (!position.isDismissed) {
       paint
-        ..style = ui.PaintingStyle.fill
+        ..style = PaintingStyle.fill
         ..shader = new ui.Gradient.radial(
           new Point(_kEdgeSize / 2.0, _kEdgeSize / 2.0),
-          _kEdgeSize * (_kMidpoint - position.value) * 8.0, <Color>[
-        const Color(0x00000000),
-        inactiveColor
-      ]);
+          _kEdgeSize * (_kMidpoint - position.value) * 8.0,
+          <Color>[
+            const Color(0x00000000),
+            inactiveColor
+          ]
+        );
       canvas.drawRect(innerRect, paint);
     }
 
@@ -149,24 +150,22 @@ class _RenderCheckbox extends RenderToggleable {
         // First draw a rounded rect outline then fill inner rectangle with the active color
         paint
           ..color = activeColor.withAlpha((t * 255).floor())
-          ..style = ui.PaintingStyle.stroke;
+          ..style = PaintingStyle.stroke;
         canvas.drawRRect(rrect, paint);
-        paint.style = ui.PaintingStyle.fill;
+        paint.style = PaintingStyle.fill;
         canvas.drawRect(innerRect, paint);
       }
 
       // White inner check
       paint
         ..color = const Color(0xFFFFFFFF)
-        ..style = ui.PaintingStyle.stroke;
+        ..style = PaintingStyle.stroke;
       Path path = new Path();
       Point start = new Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
       Point mid = new Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
       Point end = new Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-      Point lerp(Point p1, Point p2, double t) =>
-          new Point(p1.x * (1.0 - t) + p2.x * t, p1.y * (1.0 - t) + p2.y * t);
-      Point drawStart = lerp(start, mid, 1.0 - t);
-      Point drawEnd = lerp(mid, end, t);
+      Point drawStart = Point.lerp(start, mid, 1.0 - t);
+      Point drawEnd = Point.lerp(mid, end, t);
       path.moveTo(offsetX + drawStart.x, offsetY + drawStart.y);
       path.lineTo(offsetX + mid.x, offsetY + mid.y);
       path.lineTo(offsetX + drawEnd.x, offsetY + drawEnd.y);

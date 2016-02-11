@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -86,7 +84,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = backgroundColor
-      ..style = ui.PaintingStyle.fill;
+      ..style = PaintingStyle.fill;
     canvas.drawRect(Point.origin & size, paint);
 
     paint.color = valueColor;
@@ -155,7 +153,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     Paint paint = new Paint()
       ..color = valueColor
       ..strokeWidth = _kCircularProgressIndicatorStrokeWidth
-      ..style = ui.PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;
 
     if (value != null) {
       double angle = value.clamp(0.0, 1.0) * _kSweep;

@@ -3,18 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
-import 'dart:ui' show hashValues;
+import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 import 'object.dart';
-
-export 'package:flutter/painting.dart' show EdgeDims, FractionalOffset, TextBaseline;
 
 // This class should only be used in debug builds
 class _DebugSize extends Size {
@@ -837,7 +833,7 @@ abstract class RenderBox extends RenderObject {
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
-       ..style = ui.PaintingStyle.stroke
+       ..style = PaintingStyle.stroke
        ..strokeWidth = 1.0
        ..color = debugPaintSizeColor;
       context.canvas.drawRect((offset & size).deflate(0.5), paint);
@@ -847,7 +843,7 @@ abstract class RenderBox extends RenderObject {
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
       Paint paint = new Paint()
-       ..style = ui.PaintingStyle.stroke
+       ..style = PaintingStyle.stroke
        ..strokeWidth = 0.25;
       Path path;
       // ideographic baseline

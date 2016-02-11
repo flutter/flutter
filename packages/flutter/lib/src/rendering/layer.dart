@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Picture, SceneBuilder;
+import 'dart:ui' show Offset;
 
+import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
 
-import 'basic_types.dart';
 import 'debug.dart';
-
-export 'basic_types.dart';
 
 /// A composited layer
 ///
@@ -317,7 +316,7 @@ class ClipRRectLayer extends ContainerLayer {
   ClipRRectLayer({ this.clipRRect });
 
   /// The rounded-rect to clip in the parent's coordinate system
-  ui.RRect clipRRect;
+  RRect clipRRect;
   // TODO(abarth): Why is the rounded-rect in the parent's coordinate system
   // instead of in the coordinate system of this layer?
 
@@ -403,7 +402,7 @@ class ShaderMaskLayer extends ContainerLayer {
   ShaderMaskLayer({ this.shader, this.maskRect, this.transferMode });
 
   /// The shader to apply to the children.
-  ui.Shader shader;
+  Shader shader;
 
   /// The size of the shader.
   Rect maskRect;

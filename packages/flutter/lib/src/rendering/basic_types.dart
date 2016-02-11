@@ -2,19 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'dart:ui' show
-  Canvas,
-  Color,
-  ColorFilter,
-  Offset,
-  Paint,
-  Path,
-  Point,
-  Rect,
-  Size,
-  TransferMode,
-  VoidCallback;
-
 typedef void ValueChanged<T>(T value);
 
 /// A BitField over an enum (or other class whose values implement "index").

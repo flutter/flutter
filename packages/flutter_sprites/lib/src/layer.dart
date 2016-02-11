@@ -22,7 +22,7 @@ class Layer extends Node with SpritePaint {
   Layer([this.layerRect = null]);
 
   Paint _cachedPaint = new Paint()
-    ..filterQuality = ui.FilterQuality.low
+    ..filterQuality = FilterQuality.low
     ..isAntiAlias = false;
 
   void _prePaint(Canvas canvas, Matrix4 matrix) {

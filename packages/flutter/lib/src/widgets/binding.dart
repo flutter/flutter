@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
 import 'dart:developer';
+import 'dart:ui' as ui show window;
+import 'dart:ui' show AppLifecycleState, Locale;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -12,11 +13,13 @@ import 'package:flutter/services.dart';
 
 import 'framework.dart';
 
+export 'dart:ui' show AppLifecycleState, Locale;
+
 class BindingObserver {
   bool didPopRoute() => false;
   void didChangeMetrics() { }
-  void didChangeLocale(ui.Locale locale) { }
-  void didChangeAppLifecycleState(ui.AppLifecycleState state) { }
+  void didChangeLocale(Locale locale) { }
+  void didChangeAppLifecycleState(AppLifecycleState state) { }
 }
 
 /// A concrete binding for applications based on the Widgets framework.
@@ -69,7 +72,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, MojoShe
     dispatchLocaleChanged(ui.window.locale);
   }
 
-  void dispatchLocaleChanged(ui.Locale locale) {
+  void dispatchLocaleChanged(Locale locale) {
     for (BindingObserver observer in _observers)
       observer.didChangeLocale(locale);
   }
@@ -82,7 +85,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, MojoShe
     activity.finishCurrentActivity();
   }
 
-  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) {
+  void handleAppLifecycleStateChanged(AppLifecycleState state) {
     for (BindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
   }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show window;
 
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
@@ -35,7 +35,7 @@ class WidgetTester extends Instrumentation {
   }
 
   void setLocale(String languageCode, String countryCode) {
-    ui.Locale locale = new ui.Locale(languageCode, countryCode);
+    Locale locale = new Locale(languageCode, countryCode);
     binding.dispatchLocaleChanged(locale);
     async.flushMicrotasks();
   }

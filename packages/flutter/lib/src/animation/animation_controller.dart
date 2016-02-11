@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show VoidCallback, lerpDouble;
+import 'dart:ui' as ui show lerpDouble;
 
+import 'package:flutter/scheduler.dart';
 import 'package:newton/newton.dart';
 
 import 'animation.dart';
 import 'curves.dart';
 import 'forces.dart';
 import 'listener_helpers.dart';
-import 'ticker.dart';
 
 /// A controller for an animation.
 ///
@@ -20,7 +20,7 @@ import 'ticker.dart';
 /// bounds of the animation and can drive an animation using a physics
 /// simulation.
 class AnimationController extends Animation<double>
-  with EagerListenerMixin, LocalListenersMixin, LocalAnimationStatusListenersMixin {
+  with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
 
   /// Creates an animation controller.
   ///
@@ -257,7 +257,7 @@ class _RepeatingSimulation extends Simulation {
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
     final double t = (timeInSeconds / _periodInSeconds) % 1.0;
-    return lerpDouble(min, max, t);
+    return ui.lerpDouble(min, max, t);
   }
 
   double dx(double timeInSeconds) => 1.0;

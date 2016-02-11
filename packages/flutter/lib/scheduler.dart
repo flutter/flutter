@@ -12,3 +12,4 @@
 library scheduler;
 
 export 'src/scheduler/scheduler.dart';
+export 'src/scheduler/ticker.dart';

@@ -63,7 +63,7 @@ class AlwaysStoppedAnimation extends Animation<double> {
 /// Implements most of the [Animation] interface, by deferring its behavior to a
 /// given [parent] Animation. To implement an [Animation] that proxies to a
 /// parent, this class plus implementing "T get value" is all that is necessary.
-abstract class ProxyAnimatedMixin<T> {
+abstract class AnimationWithParentMixin<T> {
   /// The animation whose value this animation will proxy.
   ///
   /// This animation must remain the same for the lifetime of this object. If
@@ -87,7 +87,7 @@ abstract class ProxyAnimatedMixin<T> {
 /// object, and then later change the animation from which the proxy receieves
 /// its value.
 class ProxyAnimation extends Animation<double>
-  with LazyListenerMixin, LocalListenersMixin, LocalAnimationStatusListenersMixin {
+  with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
   ProxyAnimation([Animation<double> animation]) {
     _parent = animation;
     if (_parent == null) {
@@ -158,7 +158,7 @@ class ProxyAnimation extends Animation<double>
 /// 0.0 because the tween does not change the status or direction of the
 /// animation.
 class ReverseAnimation extends Animation<double>
-  with LazyListenerMixin, LocalAnimationStatusListenersMixin {
+  with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
   ReverseAnimation(this.parent);
 
   /// The animation whose value and direction this animation is reversing.
@@ -211,7 +211,7 @@ class ReverseAnimation extends Animation<double>
 /// [CurvedAnimation] is useful when you wish to apply a [Curve] and you already
 /// have the underlying animation object. If you don't yet have an animation and
 /// want to apply a [Curve] to a [Tween], consider using [CurveTween].
-class CurvedAnimation extends Animation<double> with ProxyAnimatedMixin<double> {
+class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   CurvedAnimation({
     this.parent,
     this.curve: Curves.linear,
@@ -283,7 +283,7 @@ enum _TrainHoppingMode { minimize, maximize }
 /// removed, it exposes a [dispose()] method. Call this method to shut this
 /// object down.
 class TrainHoppingAnimation extends Animation<double>
-  with EagerListenerMixin, LocalListenersMixin, LocalAnimationStatusListenersMixin {
+  with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
     assert(_currentTrain != null);
     if (_nextTrain != null) {

@@ -5,29 +5,18 @@
 library stocks;
 
 import 'dart:async';
-import 'dart:collection';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/rendering.dart' show debugPaintSizeEnabled;
 import 'package:intl/intl.dart';
 
-import 'stock_data.dart';
 import 'i18n/stock_messages_all.dart';
-
-part 'stock_arrow.dart';
-part 'stock_home.dart';
-part 'stock_list.dart';
-part 'stock_menu.dart';
-part 'stock_row.dart';
-part 'stock_settings.dart';
-part 'stock_strings.dart';
-part 'stock_symbol_viewer.dart';
-part 'stock_types.dart';
+import 'stock_data.dart';
+import 'stock_home.dart';
+import 'stock_settings.dart';
+import 'stock_strings.dart';
+import 'stock_symbol_viewer.dart';
+import 'stock_types.dart';
 
 class StocksApp extends StatefulComponent {
   StocksAppState createState() => new StocksAppState();
@@ -94,7 +83,7 @@ class StocksAppState extends State<StocksApp> {
     return null;
   }
 
-  Future<LocaleQueryData> _onLocaleChanged(ui.Locale locale) async {
+  Future<LocaleQueryData> _onLocaleChanged(Locale locale) async {
     String localeString = locale.toString();
     await initializeMessages(localeString);
     Intl.defaultLocale = localeString;

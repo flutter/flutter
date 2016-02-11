@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of stocks;
+import 'dart:async';
+import 'dart:ui' as ui show window;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
 enum _MenuItems { autorefresh, autorefreshCheckbox, refresh, speedUp, speedDown }
 

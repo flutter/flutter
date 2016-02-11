@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 
 class ExampleDragTarget extends StatefulComponent {
   ExampleDragTargetState createState() => new ExampleDragTargetState();
@@ -144,7 +141,7 @@ class DashOutlineCirclePainter extends CustomPainter {
     final double radius = size.shortestSide / 2.0;
     final Paint paint = new Paint()
       ..color = const Color(0xFF000000)
-      ..style = ui.PaintingStyle.stroke
+      ..style = PaintingStyle.stroke
       ..strokeWidth = radius / 10.0;
     final Path path = new Path();
     final Rect box = Point.origin & size;

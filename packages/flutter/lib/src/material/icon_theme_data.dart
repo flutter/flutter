@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' show hashValues;
 
 enum IconThemeColor { white, black }
 
@@ -28,7 +29,7 @@ class IconThemeData {
     return color == typedOther.color && opacity == typedOther.opacity;
   }
 
-  int get hashCode => ui.hashValues(color, opacity);
+  int get hashCode => hashValues(color, opacity);
 
   String toString() => '$color';
 }

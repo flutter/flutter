@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Size, Rect, VoidCallback, lerpDouble;
+import 'dart:ui' show Color, Size, Rect, VoidCallback;
 
 import 'animation.dart';
 import 'animations.dart';
@@ -28,7 +28,7 @@ abstract class Animatable<T> {
   }
 }
 
-class _AnimatedEvaluation<T> extends Animation<T> with ProxyAnimatedMixin<double> {
+class _AnimatedEvaluation<T> extends Animation<T> with AnimationWithParentMixin<double> {
   _AnimatedEvaluation(this.parent, this._evaluatable);
 
   /// The animation from which this value is derived.

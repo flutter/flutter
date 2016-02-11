@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
@@ -193,17 +191,17 @@ class _SemanticsDebuggerEntry {
       if (innerRect.isEmpty) {
         Paint fill = new Paint()
          ..color = lineColor
-         ..style = ui.PaintingStyle.fill;
+         ..style = PaintingStyle.fill;
         canvas.drawRect(rect, fill);
       } else {
         Paint fill = new Paint()
          ..color = const Color(0xFFFFFFFF)
-         ..style = ui.PaintingStyle.fill;
+         ..style = PaintingStyle.fill;
         canvas.drawRect(rect, fill);
         Paint line = new Paint()
          ..strokeWidth = rank * 2.0
          ..color = lineColor
-         ..style = ui.PaintingStyle.stroke;
+         ..style = PaintingStyle.stroke;
         canvas.drawRect(innerRect, line);
       }
       if (textPainter != null) {

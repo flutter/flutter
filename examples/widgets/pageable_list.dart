@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 
 class CardModel {
   CardModel(this.value, this.size, this.color);

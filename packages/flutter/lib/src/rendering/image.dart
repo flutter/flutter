@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
-import 'package:flutter/painting.dart';
+import 'dart:ui' as ui show Image;
 
 import 'box.dart';
 import 'object.dart';

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of stocks;
+import 'package:flutter/material.dart';
+
+import 'stock_types.dart';
 
 class StockSettings extends StatefulComponent {
   const StockSettings(this.configuration, this.updater);

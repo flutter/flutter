@@ -15,7 +15,7 @@ class EffectLine extends Node {
 
   EffectLine({
     this.texture: null,
-    this.transferMode: ui.TransferMode.dstOver,
+    this.transferMode: TransferMode.dstOver,
     List<Point> points,
     this.widthMode : EffectLineWidthMode.linear,
     this.minWidth: 10.0,
@@ -38,8 +38,8 @@ class EffectLine extends Node {
     _colorSequence = colorSequence;
     if (_colorSequence == null) {
       _colorSequence = new ColorSequence.fromStartAndEndColor(
-        new Color(0xffffffff),
-        new Color(0xffffffff)
+        const Color(0xffffffff),
+        const Color(0xffffffff)
       );
     }
 
@@ -51,7 +51,7 @@ class EffectLine extends Node {
 
   final Texture texture;
 
-  final ui.TransferMode transferMode;
+  final TransferMode transferMode;
 
   final EffectLineWidthMode widthMode;
   final double minWidth;

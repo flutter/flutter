@@ -4,12 +4,11 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show window;
 
 import 'package:newton/newton.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/rendering.dart' show HasScrollDirection;
 
 import 'basic.dart';
 import 'framework.dart';

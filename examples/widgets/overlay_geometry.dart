@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -36,7 +34,7 @@ class _MarkerPainter extends CustomPainter {
 
     paint
       ..color = const Color(0xFFFFFFFF)
-      ..style = ui.PaintingStyle.stroke
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
     if (type == MarkerType.topLeft) {
       canvas.drawLine(new Point(r, r), new Point(r + r - 1.0, r), paint);

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Image, Gradient, lerpDouble;
 
 import 'package:flutter/services.dart';
 
@@ -238,7 +238,7 @@ class BoxShadow {
 /// A 2D gradient.
 abstract class Gradient {
   const Gradient();
-  ui.Shader createShader();
+  Shader createShader();
 }
 
 /// A 2D linear gradient.
@@ -248,7 +248,7 @@ class LinearGradient extends Gradient {
     this.end,
     this.colors,
     this.stops,
-    this.tileMode: ui.TileMode.clamp
+    this.tileMode: TileMode.clamp
   });
 
   /// The point at which stop 0.0 of the gradient is placed.
@@ -269,9 +269,9 @@ class LinearGradient extends Gradient {
   final List<double> stops;
 
   /// How this gradient should tile the plane.
-  final ui.TileMode tileMode;
+  final TileMode tileMode;
 
-  ui.Shader createShader() {
+  Shader createShader() {
     return new ui.Gradient.linear(<Point>[begin, end], this.colors, this.stops, this.tileMode);
   }
 
@@ -320,7 +320,7 @@ class RadialGradient extends Gradient {
     this.radius,
     this.colors,
     this.stops,
-    this.tileMode: ui.TileMode.clamp
+    this.tileMode: TileMode.clamp
   });
 
   /// The center of the gradient.
@@ -343,9 +343,9 @@ class RadialGradient extends Gradient {
   final List<double> stops;
 
   /// How this gradient should tile the plane.
-  final ui.TileMode tileMode;
+  final TileMode tileMode;
 
-  ui.Shader createShader() {
+  Shader createShader() {
     return new ui.Gradient.radial(center, radius, colors, stops, tileMode);
   }
 
@@ -869,7 +869,7 @@ class BoxDecoration extends Decoration {
     double shortestSide = rect.shortestSide;
     // In principle, we should use shortestSide / 2.0, but we don't want to
     // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let ui.Canvas do any remaining clamping.
+    // shortestSide and let Canvas do any remaining clamping.
     return borderRadius > shortestSide ? shortestSide : borderRadius;
   }
 
@@ -879,7 +879,7 @@ class BoxDecoration extends Decoration {
     switch (shape) {
       case BoxShape.rectangle:
         if (borderRadius != null) {
-          ui.RRect bounds = new ui.RRect.fromRectXY(Point.origin & size, borderRadius, borderRadius);
+          RRect bounds = new RRect.fromRectXY(Point.origin & size, borderRadius, borderRadius);
           return bounds.contains(position);
         }
         return true;
@@ -938,7 +938,7 @@ class _BoxDecorationPainter extends BoxPainter {
     return hasUniformWidth;
   }
 
-  void _paintBox(ui.Canvas canvas, Rect rect, Paint paint) {
+  void _paintBox(Canvas canvas, Rect rect, Paint paint) {
     switch (_decoration.shape) {
       case BoxShape.circle:
         assert(_decoration.borderRadius == null);
@@ -951,30 +951,30 @@ class _BoxDecorationPainter extends BoxPainter {
           canvas.drawRect(rect, paint);
         } else {
           double radius = _decoration.getEffectiveBorderRadius(rect);
-          canvas.drawRRect(new ui.RRect.fromRectXY(rect, radius, radius), paint);
+          canvas.drawRRect(new RRect.fromRectXY(rect, radius, radius), paint);
         }
         break;
     }
   }
 
-  void _paintShadows(ui.Canvas canvas, Rect rect) {
+  void _paintShadows(Canvas canvas, Rect rect) {
     if (_decoration.boxShadow == null)
       return;
     for (BoxShadow boxShadow in _decoration.boxShadow) {
       final Paint paint = new Paint()
         ..color = boxShadow.color
-        ..maskFilter = new ui.MaskFilter.blur(ui.BlurStyle.normal, boxShadow._blurSigma);
+        ..maskFilter = new MaskFilter.blur(BlurStyle.normal, boxShadow._blurSigma);
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       _paintBox(canvas, bounds, paint);
     }
   }
 
-  void _paintBackgroundColor(ui.Canvas canvas, Rect rect) {
+  void _paintBackgroundColor(Canvas canvas, Rect rect) {
     if (_decoration.backgroundColor != null || _decoration.gradient != null)
       _paintBox(canvas, rect, _backgroundPaint);
   }
 
-  void _paintBackgroundImage(ui.Canvas canvas, Rect rect) {
+  void _paintBackgroundImage(Canvas canvas, Rect rect) {
     final BackgroundImage backgroundImage = _decoration.backgroundImage;
     if (backgroundImage == null)
       return;
@@ -993,7 +993,7 @@ class _BoxDecorationPainter extends BoxPainter {
     );
   }
 
-  void _paintBorder(ui.Canvas canvas, Rect rect) {
+  void _paintBorder(Canvas canvas, Rect rect) {
     if (_decoration.border == null)
       return;
 
@@ -1056,19 +1056,19 @@ class _BoxDecorationPainter extends BoxPainter {
     canvas.drawPath(path, paint);
   }
 
-  void _paintBorderWithRadius(ui.Canvas canvas, Rect rect) {
+  void _paintBorderWithRadius(Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
     assert(_decoration.shape == BoxShape.rectangle);
     Color color = _decoration.border.top.color;
     double width = _decoration.border.top.width;
     double radius = _decoration.getEffectiveBorderRadius(rect);
 
-    ui.RRect outer = new ui.RRect.fromRectXY(rect, radius, radius);
-    ui.RRect inner = new ui.RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
+    RRect outer = new RRect.fromRectXY(rect, radius, radius);
+    RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
     canvas.drawDRRect(outer, inner, new Paint()..color = color);
   }
 
-  void _paintBorderWithCircle(ui.Canvas canvas, Rect rect) {
+  void _paintBorderWithCircle(Canvas canvas, Rect rect) {
     assert(_hasUniformBorder);
     assert(_decoration.shape == BoxShape.circle);
     assert(_decoration.borderRadius == null);
@@ -1078,14 +1078,14 @@ class _BoxDecorationPainter extends BoxPainter {
     Paint paint = new Paint()
       ..color = _decoration.border.top.color
       ..strokeWidth = width
-      ..style = ui.PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;
     Point center = rect.center;
     double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(center, radius, paint);
   }
 
   /// Paint the box decoration into the given location on the given canvas
-  void paint(ui.Canvas canvas, Rect rect) {
+  void paint(Canvas canvas, Rect rect) {
     _paintShadows(canvas, rect);
     _paintBackgroundColor(canvas, rect);
     _paintBackgroundImage(canvas, rect);
