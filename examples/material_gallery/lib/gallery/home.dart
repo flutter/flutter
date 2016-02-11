@@ -10,6 +10,7 @@ import 'drawer.dart';
 import 'section.dart';
 
 import '../demo/buttons_demo.dart';
+import '../demo/cards_demo.dart';
 import '../demo/chip_demo.dart';
 import '../demo/date_picker_demo.dart';
 import '../demo/dialog_demo.dart';
@@ -85,6 +86,7 @@ class GalleryHomeState extends State<GalleryHome> {
                   colors: Colors.amber,
                   demos: <GalleryDemo>[
                     new GalleryDemo(title: 'Buttons', builder: () => new ButtonsDemo()),
+                    new GalleryDemo(title: 'Cards', builder: () => new CardsDemo()),
                     new GalleryDemo(title: 'Chips', builder: () => new ChipDemo()),
                     new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
                     new GalleryDemo(title: 'Dialog', builder: () => new DialogDemo()),

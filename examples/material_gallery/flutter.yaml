@@ -18,6 +18,8 @@ assets:
   - packages/flutter_gallery_assets/icon-sun.png
   - packages/flutter_gallery_assets/icon-rain.png
   - packages/flutter_gallery_assets/icon-snow.png
+  - packages/flutter_gallery_assets/kangaroo_valley_safari.png
+  - packages/flutter_gallery_assets/top_10_australian_beaches.png
 material-design-icons:
   - name: action/account_circle
   - name: action/alarm
