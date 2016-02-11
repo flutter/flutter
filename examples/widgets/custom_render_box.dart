@@ -1,0 +1,42 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
+class _CustomRenderBox extends RenderConstrainedBox {
+  _CustomRenderBox() : super(additionalConstraints: const BoxConstraints.expand());
+
+  // Makes this render box hittable so that we'll get pointer events.
+  bool hitTestSelf(Point position) => true;
+
+  final Map<int, Point> _dots = <int, Point>{};
+
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent || event is PointerMoveEvent) {
+      _dots[event.pointer] = event.position;
+      markNeedsPaint();
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _dots.remove(event.pointer);
+      markNeedsPaint();
+    }
+  }
+
+  void paint(PaintingContext context, Offset offset) {
+    final Canvas canvas = context.canvas;
+    canvas.drawRect(offset & size, new Paint()..color = new Color(0xFF00FF00));
+
+    Paint paint = new Paint()..color = new Color(0xFF0000FF);
+    for (Point point in _dots.values)
+      canvas.drawCircle(point, 50.0, paint);
+  }
+}
+
+class _CustomRenderBoxWidget extends OneChildRenderObjectWidget {
+  _CustomRenderBox createRenderObject() => new _CustomRenderBox();
+}
+
+void main() {
+  runApp(new _CustomRenderBoxWidget());
+}
