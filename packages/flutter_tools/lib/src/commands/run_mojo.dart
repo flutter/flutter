@@ -103,7 +103,7 @@ class RunMojoCommand extends FlutterCommand {
       args.add('--android');
       final String appName = path.basename(appPath);
       final String appDir = path.dirname(appPath);
-      args.add('http://app/$appName');
+      args.add('mojo:launcher http://app/$appName');
       args.add('--map-origin=http://app/=$appDir');
 
       final String flutterName = path.basename(flutterPath);
@@ -111,7 +111,7 @@ class RunMojoCommand extends FlutterCommand {
       args.add('--map-origin=http://flutter/=$flutterDir');
       args.add('--url-mappings=mojo:flutter=http://flutter/$flutterName');
     } else {
-      args.add('file://$appPath');
+      args.add('mojo:launcher file://$appPath');
       args.add('--url-mappings=mojo:flutter=file://$flutterPath');
     }
 
