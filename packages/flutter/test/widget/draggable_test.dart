@@ -168,7 +168,68 @@ void main() {
       tester.pump();
       expect(events, equals(<String>['tap', 'tap', 'drop']));
       events.clear();
+    });
+
+    testWidgets((WidgetTester tester) {
+      TestPointer pointer = new TestPointer(7);
+
+      List<String> events = <String>[];
+      Point firstLocation, secondLocation;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) { return new Column(
+            children: <Widget>[
+              new Draggable(
+                data: 1,
+                child: new GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    events.add('tap');
+                  },
+                  child: new Container(
+                    child: new Text('Button')
+                  )
+                ),
+                feedback: new Text('Dragging')
+              ),
+              new DragTarget(
+                builder: (context, data, rejects) {
+                  return new Text('Target');
+                },
+                onAccept: (data) {
+                  events.add('drop');
+                }
+              ),
+            ]);
+          },
+        }
+      ));
+
+      expect(events, isEmpty);
+      expect(tester.findText('Button'), isNotNull);
+      expect(tester.findText('Target'), isNotNull);
+
+      expect(events, isEmpty);
+      tester.tap(tester.findText('Button'));
+      expect(events, equals(<String>['tap']));
+      events.clear();
+
+      firstLocation = tester.getCenter(tester.findText('Button'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+
+      expect(events, isEmpty);
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop']));
+      events.clear();
 
     });
+
   });
 }

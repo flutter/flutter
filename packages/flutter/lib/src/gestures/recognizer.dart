@@ -13,23 +13,45 @@ import 'pointer_router.dart';
 
 export 'pointer_router.dart' show PointerRouter;
 
+/// The base class that all GestureRecognizers should inherit from.
+///
+/// Provides a basic API that can be used by classes that work with
+/// gesture recognizers but don't care about the specific details of
+/// the gestures recognizers themselves.
 abstract class GestureRecognizer extends GestureArenaMember {
 
-  /// Calls this with the pointerdown event of each pointer that should be
-  /// considered for this gesture.
+  /// Registers a new pointer that might be relevant to this gesture
+  /// detector.
   ///
-  /// It's the GestureRecognizer's responsibility to then add itself to the
-  /// global pointer router to receive subsequent events for this pointer.
+  /// The owner of this gesture recognizer calls addPointer() with the
+  /// PointerDownEvent of each pointer that should be considered for
+  /// this gesture.
+  ///
+  /// It's the GestureRecognizer's responsibility to then add itself
+  /// to the global pointer router (see [PointerRouter]) to receive
+  /// subsequent events for this pointer, and to add the pointer to
+  /// the global gesture arena manager (see [GestureArena]) to track
+  /// that pointer.
   void addPointer(PointerDownEvent event);
 
   /// Releases any resources used by the object.
   ///
-  /// This method is called when the object is no longer needed (e.g. a gesture
-  /// recogniser is being unregistered from a [GestureDetector]).
+  /// This method is called by the owner of this gesture recognizer
+  /// when the object is no longer needed (e.g. when a gesture
+  /// recogniser is being unregistered from a [GestureDetector], the
+  /// GestureDetector widget calls this method).
   void dispose() { }
 
 }
 
+/// Base class for gesture recognizers that can only recognize one
+/// gesture at a time. For example, a single [TapGestureRecognizer]
+/// can never recognize two taps happening simultaneously, even if
+/// multiple pointers are placed on the same widget.
+///
+/// This is in contrast to, for instance, [MultiTapGestureRecognizer],
+/// which manages each pointer independently and can consider multiple
+/// simultaneous touches to each result in a separate tap.
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   OneSequenceGestureRecognizer({
     PointerRouter router,

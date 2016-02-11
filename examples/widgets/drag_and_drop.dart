@@ -39,20 +39,29 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
   }
 }
 
-class Dot extends StatelessComponent {
-  Dot({ Key key, this.color, this.size, this.child }) : super(key: key);
+class Dot extends StatefulComponent {
+  Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
   final Color color;
   final double size;
   final Widget child;
+  final bool tappable;
+  DotState createState() => new DotState();
+}
+class DotState extends State<Dot> {
+  int taps = 0;
   Widget build(BuildContext context) {
-    return new Container(
-      width: size,
-      height: size,
-      decoration: new BoxDecoration(
-        backgroundColor: color,
-        shape: BoxShape.circle
-      ),
-      child: child
+    return new GestureDetector(
+      onTap: config.tappable ? () { setState(() { taps += 1; }); } : null,
+      child: new Container(
+        width: config.size,
+        height: config.size,
+        decoration: new BoxDecoration(
+          backgroundColor: config.color,
+          border: new Border.all(color: const Color(0xFF000000), width: taps.toDouble()),
+          shape: BoxShape.circle
+        ),
+        child: config.child
+      )
     );
   }
 }
@@ -155,10 +164,14 @@ class DashOutlineCirclePainter extends CustomPainter {
 
 class MovableBall extends StatelessComponent {
   MovableBall(this.position, this.ballPosition, this.callback);
+
   final int position;
   final int ballPosition;
   final ValueChanged<int> callback;
+
+  static final GlobalKey kBallKey = new GlobalKey();
   static const double kBallSize = 50.0;
+
   Widget build(BuildContext context) {
     Widget ball = new DefaultTextStyle(
       style: Theme.of(context).text.body1.copyWith(
@@ -166,8 +179,10 @@ class MovableBall extends StatelessComponent {
         color: Colors.white
       ),
       child: new Dot(
+        key: kBallKey,
         color: Colors.blue[700],
         size: kBallSize,
+        tappable: true,
         child: new Center(child: new Text('BALL'))
       )
     );

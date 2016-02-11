@@ -1,0 +1,288 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'dart:ui' show Point, Offset;
+
+import 'arena.dart';
+import 'constants.dart';
+import 'events.dart';
+import 'pointer_router.dart';
+import 'recognizer.dart';
+import 'velocity_tracker.dart';
+
+typedef Drag GestureMultiDragStartCallback(Point position);
+
+class Drag {
+  void move(Offset offset) { }
+  void end(Offset velocity) { }
+  void cancel() { }
+}
+
+abstract class MultiDragPointerState {
+  MultiDragPointerState(this.initialPosition);
+
+  final Point initialPosition;
+
+  final VelocityTracker _velocityTracker = new VelocityTracker();
+  Drag _client;
+
+  Offset get pendingDelta => _pendingDelta;
+  Offset _pendingDelta = Offset.zero;
+
+  GestureArenaEntry _arenaEntry;
+  void _setArenaEntry(GestureArenaEntry entry) {
+    assert(_arenaEntry == null);
+    assert(pendingDelta != null);
+    assert(_client == null);
+    _arenaEntry = entry;
+  }
+
+  void resolve(GestureDisposition disposition) {
+    _arenaEntry.resolve(disposition);
+  }
+
+  void _move(PointerMoveEvent event) {
+    assert(_arenaEntry != null);
+    _velocityTracker.addPosition(event.timeStamp, event.position);
+    if (_client != null) {
+      assert(pendingDelta == null);
+      _client.move(event.delta);
+    } else {
+      assert(pendingDelta != null);
+      _pendingDelta += event.delta;
+      checkForResolutionAfterMove();
+    }
+    return null;
+  }
+
+  /// Override this to call resolve() if the drag should be accepted or rejected.
+  /// This is called when a pointer movement is received, but only if the gesture
+  /// has not yet been resolved.
+  void checkForResolutionAfterMove() { }
+
+  /// Called when the gesture was accepted.
+  void accepted(Drag client) {
+    assert(_arenaEntry != null);
+    assert(_client == null);
+    _client = client;
+    _client.move(pendingDelta);
+    _pendingDelta = null;
+  }
+
+  /// Called when the gesture was rejected.
+  void rejected() {
+    assert(_arenaEntry != null);
+    assert(_client == null);
+    assert(pendingDelta != null);
+    _pendingDelta = null;
+    _arenaEntry = null;
+  }
+
+  void _up() {
+    assert(_arenaEntry != null);
+    if (_client != null) {
+      assert(pendingDelta == null);
+      _client.end(_velocityTracker.getVelocity());
+      _client = null;
+    } else {
+      assert(pendingDelta != null);
+      _pendingDelta = null;
+    }
+    _arenaEntry = null;
+  }
+
+  void _cancel() {
+    assert(_arenaEntry != null);
+    if (_client != null) {
+      assert(pendingDelta == null);
+      _client.cancel();
+      _client = null;
+    } else {
+      assert(pendingDelta != null);
+      _pendingDelta = null;
+    }
+    _arenaEntry = null;
+  }
+
+  void dispose() { }
+}
+
+abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> extends GestureRecognizer {
+
+  MultiDragGestureRecognizer({
+    PointerRouter pointerRouter,
+    GestureArena gestureArena,
+    this.onStart
+  }) : _pointerRouter = pointerRouter, _gestureArena = gestureArena {
+    assert(pointerRouter != null);
+    assert(gestureArena != null);
+  }
+
+  final PointerRouter _pointerRouter;
+  final GestureArena _gestureArena;
+  GestureMultiDragStartCallback onStart;
+
+  Map<int, T> _pointers = <int, T>{};
+
+  void addPointer(PointerDownEvent event) {
+    assert(_pointers != null);
+    assert(event.pointer != null);
+    assert(event.position != null);
+    assert(!_pointers.containsKey(event.pointer));
+    T state = createNewPointerState(event);
+    _pointers[event.pointer] = state;
+    _pointerRouter.addRoute(event.pointer, handleEvent);
+    state._setArenaEntry(_gestureArena.add(event.pointer, this));
+  }
+
+  T createNewPointerState(PointerDownEvent event);
+
+  void handleEvent(PointerEvent event) {
+    assert(_pointers != null);
+    assert(event.pointer != null);
+    assert(event.timeStamp != null);
+    assert(event.position != null);
+    assert(_pointers.containsKey(event.pointer));
+    T state = _pointers[event.pointer];
+    if (event is PointerMoveEvent) {
+      state._move(event);
+    } else if (event is PointerUpEvent) {
+      assert(event.delta == Offset.zero);
+      state._up();
+      _removeState(event.pointer);
+    } else if (event is PointerCancelEvent) {
+      assert(event.delta == Offset.zero);
+      state._cancel();
+      _removeState(event.pointer);
+    } else if (event is! PointerDownEvent) {
+      // we get the PointerDownEvent that resulted in our addPointer gettig called since we
+      // add ourselves to the pointer router then (before the pointer router has heard of
+      // the event).
+      assert(false);
+    }
+  }
+
+  void acceptGesture(int pointer) {
+    assert(_pointers != null);
+    T state = _pointers[pointer];
+    assert(state != null);
+    Drag drag;
+    if (onStart != null)
+      drag = onStart(state.initialPosition);
+    if (drag != null) {
+      state.accepted(drag);
+    } else {
+      _removeState(pointer);
+    }
+  }
+
+  void rejectGesture(int pointer) {
+    assert(_pointers != null);
+    if (_pointers.containsKey(pointer)) {
+      T state = _pointers[pointer];
+      assert(state != null);
+      state.rejected();
+      _removeState(pointer);
+    } // else we already preemptively forgot about it (e.g. we got an up event)
+  }
+
+  void _removeState(int pointer) {
+    assert(_pointers != null);
+    assert(_pointers.containsKey(pointer));
+    _pointerRouter.removeRoute(pointer, handleEvent);
+    _pointers[pointer].dispose();
+    _pointers.remove(pointer);
+  }
+
+  void dispose() {
+    for (int pointer in _pointers.keys)
+      _removeState(pointer);
+    _pointers = null;
+    super.dispose();
+  }
+
+}
+
+
+class _ImmediatePointerState extends MultiDragPointerState {
+  _ImmediatePointerState(Point initialPosition) : super(initialPosition);
+
+  void checkForResolutionAfterMove() {
+    assert(pendingDelta != null);
+    if (pendingDelta.distance > kTouchSlop)
+      resolve(GestureDisposition.accepted);
+  }
+}
+
+class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_ImmediatePointerState> {
+  ImmediateMultiDragGestureRecognizer({
+    PointerRouter pointerRouter,
+    GestureArena gestureArena,
+    GestureMultiDragStartCallback onStart
+  }) : super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart);
+
+  _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
+    return new _ImmediatePointerState(event.position);
+  }
+}
+
+class _DelayedPointerState extends MultiDragPointerState {
+  _DelayedPointerState(Point initialPosition, Duration delay) : super(initialPosition) {
+    assert(delay != null);
+    _timer = new Timer(delay, _delayPassed);
+  }
+
+  Timer _timer;
+
+  void _delayPassed() {
+    assert(_timer != null);
+    assert(pendingDelta != null);
+    assert(pendingDelta.distance <= kTouchSlop);
+    resolve(GestureDisposition.accepted);
+    _timer = null;
+  }
+
+  void accepted(Drag client) {
+    _timer?.cancel();
+    _timer = null;
+    super.accepted(client);
+  }
+
+  void checkForResolutionAfterMove() {
+    assert(_timer != null);
+    assert(pendingDelta != null);
+    if (pendingDelta.distance > kTouchSlop)
+      resolve(GestureDisposition.rejected);
+  }
+
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+    super.dispose();
+  }
+}
+
+class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_DelayedPointerState> {
+  DelayedMultiDragGestureRecognizer({
+    PointerRouter pointerRouter,
+    GestureArena gestureArena,
+    GestureMultiDragStartCallback onStart,
+    Duration delay: kLongPressTimeout
+  }) : _delay = delay,
+       super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart) {
+    assert(delay != null);
+  }
+
+  Duration get delay => _delay;
+  Duration _delay;
+  void set delay(Duration value) {
+    assert(value != null);
+    _delay = value;
+  }
+
+  _DelayedPointerState createNewPointerState(PointerDownEvent event) {
+    return new _DelayedPointerState(event.position, _delay);
+  }
+}
