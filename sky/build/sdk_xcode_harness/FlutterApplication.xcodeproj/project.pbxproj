@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		9E07CF8A1BE7F4D200BCD8DE /* FlutterApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = 9E07CF891BE7F4D200BCD8DE /* FlutterApplication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */; };
-		9E07CFAC1BE8280A00BCD8DE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9E07CFAA1BE8280A00BCD8DE /* LaunchScreen.storyboard */; };
 		9E07CFB51BE82D2600BCD8DE /* FlutterApplication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; };
 		9E07CFB61BE82D2600BCD8DE /* FlutterApplication.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9E07CF861BE7F4D200BCD8DE /* FlutterApplication.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9E07CFBA1BE82DFF00BCD8DE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E07CF9D1BE8280A00BCD8DE /* main.m */; };
@@ -19,6 +18,7 @@
 		9E0FB06F1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 9E0FB06B1C1A3F5600DDAEFA /* kDartVmIsolateSnapshotBufferSource.c */; };
 		9E40465D1C1B6E9200A4B87C /* icudtl.dat in Resources */ = {isa = PBXBuildFile; fileRef = 9E4046541C1B6A3600A4B87C /* icudtl.dat */; };
 		9E627AD91C582ABB000D800D /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9E627AD81C582ABB000D800D /* app.flx */; };
+		9EA2FB801C6D2D6B00670B03 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,9 +51,8 @@
 		9E07CF8B1BE7F4D200BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9E07CF9A1BE8280A00BCD8DE /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E07CF9D1BE8280A00BCD8DE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		9E07CFAB1BE8280A00BCD8DE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9E07CFAD1BE8280A00BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		9E07CFAD1BE8280A00BCD8DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../Info.plist; sourceTree = SOURCE_ROOT; };
 		9E0FB0681C1A3F5600DDAEFA /* FlutterApplication.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FlutterApplication.c; sourceTree = "<group>"; };
 		9E0FB0691C1A3F5600DDAEFA /* InstructionsSnapshotSource.S */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = InstructionsSnapshotSource.S; sourceTree = "<group>"; };
 		9E0FB06A1C1A3F5600DDAEFA /* kDartIsolateSnapshotBufferSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kDartIsolateSnapshotBufferSource.c; sourceTree = "<group>"; };
@@ -70,6 +69,7 @@
 		9E40465A1C1B6A3600A4B87C /* Snapshotter */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = Snapshotter; sourceTree = "<group>"; };
 		9E40465E1C1B6F7900A4B87C /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 		9E627AD81C582ABB000D800D /* app.flx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = app.flx; path = Generated/app.flx; sourceTree = "<group>"; };
+		9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ../LaunchScreen.storyboard; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,7 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				9E07CFA81BE8280A00BCD8DE /* Assets.xcassets */,
-				9E07CFAA1BE8280A00BCD8DE /* LaunchScreen.storyboard */,
+				9EA2FB7F1C6D2D6B00670B03 /* LaunchScreen.storyboard */,
 				9E07CFAD1BE8280A00BCD8DE /* Info.plist */,
 				9E07CF9C1BE8280A00BCD8DE /* Supporting Files */,
 			);
@@ -298,7 +298,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E40465D1C1B6E9200A4B87C /* icudtl.dat in Resources */,
-				9E07CFAC1BE8280A00BCD8DE /* LaunchScreen.storyboard in Resources */,
+				9EA2FB801C6D2D6B00670B03 /* LaunchScreen.storyboard in Resources */,
 				9E07CFA91BE8280A00BCD8DE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -398,17 +398,6 @@
 			targetProxy = 9E07CFB71BE82D2600BCD8DE /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		9E07CFAA1BE8280A00BCD8DE /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				9E07CFAB1BE8280A00BCD8DE /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		9E07CF8C1BE7F4D200BCD8DE /* Debug */ = {
@@ -540,7 +529,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_FILE = ../Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -551,7 +540,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_FILE = ../Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
