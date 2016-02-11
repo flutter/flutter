@@ -10,12 +10,14 @@ import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.vsync.VSyncProvider;
 
+import java.util.ArrayList;
+
 /**
  * Android implementation of VSyncProvider.
  */
 public class VSyncProviderImpl implements VSyncProvider, Choreographer.FrameCallback {
     private Choreographer mChoreographer;
-    private AwaitVSyncResponse mCallback;
+    private ArrayList<AwaitVSyncResponse> mCallbacks = new ArrayList<AwaitVSyncResponse>();
     private MessagePipeHandle mPipe;
 
     public VSyncProviderImpl(MessagePipeHandle pipe) {
@@ -31,17 +33,18 @@ public class VSyncProviderImpl implements VSyncProvider, Choreographer.FrameCall
 
     @Override
     public void awaitVSync(final AwaitVSyncResponse callback) {
-        if (mCallback != null) {
-            mPipe.close();
-            return;
+        mCallbacks.add(callback);
+        if (mCallbacks.size() == 1) {
+            mChoreographer.postFrameCallback(this);
         }
-        mCallback = callback;
-        mChoreographer.postFrameCallback(this);
     }
 
     @Override
     public void doFrame(long frameTimeNanos) {
-        mCallback.call(frameTimeNanos / 1000);
-        mCallback = null;
+        long frameTimeMicros = frameTimeNanos / 1000;
+        for (AwaitVSyncResponse callback : mCallbacks) {
+            callback.call(frameTimeMicros);
+        }
+        mCallbacks.clear();
     }
 }
