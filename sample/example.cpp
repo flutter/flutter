@@ -99,6 +99,6 @@ int runMinikinTest() {
     return 0;
 }
 
-int main(int argc, const char** argv) {
+int main() {
     return runMinikinTest();
 }
