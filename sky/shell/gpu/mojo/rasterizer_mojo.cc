@@ -98,6 +98,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   update->nodes.insert(kBackgroundNodeId, background_node.Pass());
 
   auto root_node = mojo::gfx::composition::Node::New();
+  root_node->combinator = mojo::gfx::composition::Node::Combinator::PRUNE;
   root_node->child_node_ids.push_back(kBackgroundNodeId);
   layer_tree->UpdateScene(update.get(), root_node.get());
 

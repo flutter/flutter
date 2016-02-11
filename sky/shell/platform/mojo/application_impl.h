@@ -53,6 +53,7 @@ class ApplicationImpl : public mojo::Application,
 
   mojo::StrongBinding<mojo::Application> binding_;
   mojo::URLResponsePtr initial_response_;
+  mojo::ServiceRegistryPtr initial_service_registry_;
   mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
   mojo::BindingSet<mojo::ui::ViewProvider> view_provider_bindings_;
   std::string url_;
