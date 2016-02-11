@@ -3,14 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
 const double _kLinearProgressIndicatorHeight = 6.0;
-const double _kMinCircularProgressIndicatorSize = 15.0;
-const double _kCircularProgressIndicatorStrokeWidth = 3.0;
+const double _kMinCircularProgressIndicatorSize = 36.0;
+const double _kCircularProgressIndicatorStrokeWidth = 4.0;
 
 // TODO(hansmuller) implement the support for buffer indicator
 
@@ -25,46 +27,9 @@ abstract class ProgressIndicator extends StatefulComponent {
   Color _getBackgroundColor(BuildContext context) => Theme.of(context).primarySwatch[200];
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
 
-  Widget _buildIndicator(BuildContext context, double animationValue);
-
-  _ProgressIndicatorState createState() => new _ProgressIndicatorState();
-
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
-  }
-}
-
-class _ProgressIndicatorState extends State<ProgressIndicator> {
-  Animation<double> _animation;
-  AnimationController _controller;
-
-  void initState() {
-    super.initState();
-    _controller = new AnimationController(
-      duration: const Duration(milliseconds: 1500)
-    )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
-        _restartAnimation();
-    })..forward();
-    _animation = new CurvedAnimation(parent: _controller, curve: Curves.ease);
-  }
-
-  void _restartAnimation() {
-    _controller.value = 0.0;
-    _controller.forward();
-  }
-
-  Widget build(BuildContext context) {
-    if (config.value != null)
-      return config._buildIndicator(context, _animation.value);
-
-    return new AnimatedBuilder(
-      animation: _animation,
-      builder: (BuildContext context, Widget child) {
-        return config._buildIndicator(context, _animation.value);
-      }
-    );
   }
 }
 
@@ -84,7 +49,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = backgroundColor
-      ..style = PaintingStyle.fill;
+      ..style = ui.PaintingStyle.fill;
     canvas.drawRect(Point.origin & size, paint);
 
     paint.color = valueColor;
@@ -114,6 +79,8 @@ class LinearProgressIndicator extends ProgressIndicator {
     double value
   }) : super(key: key, value: value);
 
+  _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
+
   Widget _buildIndicator(BuildContext context, double animationValue) {
     return new Container(
       constraints: new BoxConstraints.tightFor(
@@ -132,9 +99,34 @@ class LinearProgressIndicator extends ProgressIndicator {
   }
 }
 
+class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
+  Animation<double> _animation;
+  AnimationController _controller;
+
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+      duration: const Duration(milliseconds: 1500)
+    )..repeat();
+    _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
+  }
+
+  Widget build(BuildContext context) {
+    if (config.value != null)
+      return config._buildIndicator(context, _animation.value);
+
+    return new AnimatedBuilder(
+      animation: _animation,
+      builder: (BuildContext context, Widget child) {
+        return config._buildIndicator(context, _animation.value);
+      }
+    );
+  }
+}
+
 class _CircularProgressIndicatorPainter extends CustomPainter {
   static const _kTwoPI = math.PI * 2.0;
-  static const _kEpsilon = .0000001;
+  static const _kEpsilon = .001;
   // Canavs.drawArc(r, 0, 2*PI) doesn't draw anything, so just get close.
   static const _kSweep = _kTwoPI - _kEpsilon;
   static const _kStartAngle = -math.PI / 2.0;
@@ -142,31 +134,42 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   const _CircularProgressIndicatorPainter({
     this.valueColor,
     this.value,
-    this.animationValue
+    this.headValue,
+    this.tailValue,
+    this.stepValue,
+    this.rotationValue
   });
 
   final Color valueColor;
   final double value;
-  final double animationValue;
+  final double headValue;
+  final double tailValue;
+  final int stepValue;
+  final double rotationValue;
 
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = valueColor
       ..strokeWidth = _kCircularProgressIndicatorStrokeWidth
-      ..style = PaintingStyle.stroke;
+      ..style = ui.PaintingStyle.stroke;
 
+    // Determinite
     if (value != null) {
       double angle = value.clamp(0.0, 1.0) * _kSweep;
       Path path = new Path()
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
+
+    // Non-determinite
     } else {
-      double startAngle = _kTwoPI * (1.75 * animationValue - 0.75);
-      double endAngle = startAngle + _kTwoPI * 0.75;
-      double arcAngle = startAngle.clamp(0.0, _kTwoPI);
-      double arcSweep = endAngle.clamp(0.0, _kTwoPI) - arcAngle;
+      paint.strokeCap = ui.StrokeCap.square;
+
+      double arcSweep = math.max(headValue * 3 / 2 * math.PI - tailValue * 3 / 2 * math.PI, _kEpsilon);
       Path path = new Path()
-        ..arcTo(Point.origin & size, _kStartAngle + arcAngle, arcSweep, false);
+        ..arcTo(Point.origin & size,
+                _kStartAngle + tailValue * 3 / 2 * math.PI + rotationValue * math.PI * 1.7 - stepValue * 0.8 * math.PI,
+                arcSweep,
+                false);
       canvas.drawPath(path, paint);
     }
   }
@@ -174,7 +177,10 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
     return oldPainter.valueColor != valueColor
         || oldPainter.value != value
-        || oldPainter.animationValue != animationValue;
+        || oldPainter.headValue != headValue
+        || oldPainter.tailValue != tailValue
+        || oldPainter.stepValue != stepValue
+        || oldPainter.rotationValue != rotationValue;
   }
 }
 
@@ -184,7 +190,9 @@ class CircularProgressIndicator extends ProgressIndicator {
     double value
   }) : super(key: key, value: value);
 
-  Widget _buildIndicator(BuildContext context, double animationValue) {
+  _CircularProgressIndicatorState createState() => new _CircularProgressIndicatorState();
+
+  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
     return new Container(
       constraints: new BoxConstraints(
         minWidth: _kMinCircularProgressIndicatorSize,
@@ -194,9 +202,86 @@ class CircularProgressIndicator extends ProgressIndicator {
         painter: new _CircularProgressIndicatorPainter(
           valueColor: _getValueColor(context),
           value: value,
-          animationValue: animationValue
+          headValue: headValue,
+          tailValue: tailValue,
+          stepValue: stepValue,
+          rotationValue: rotationValue
         )
       )
+    );
+  }
+}
+// TODO(jestelle) This should probably go somewhere else?  And maybe be more
+// general?
+class RepeatingCurveTween extends Animatable<double> {
+  RepeatingCurveTween({ this.curve, this.repeats });
+
+  Curve curve;
+  int repeats;
+
+  double evaluate(Animation<double> animation) {
+    double t = animation.value;
+    t *= repeats;
+    t -= t.truncateToDouble();
+    if (t == 0.0 || t == 1.0) {
+      assert(curve.transform(t).round() == t);
+      return t;
+    }
+    return curve.transform(t);
+  }
+}
+
+// TODO(jestelle) This should probably go somewhere else?  And maybe be more
+// general?  Or maybe the IntTween should actually work this way?
+class StepTween extends Tween<int> {
+  StepTween({ int begin, int end }) : super(begin: begin, end: end);
+
+  // The inherited lerp() function doesn't work with ints because it multiplies
+  // the begin and end types by a double, and int * double returns a double.
+  int lerp(double t) => (begin + (end - begin) * t).floor();
+}
+
+// Tweens used by circular progress indicator
+final RepeatingCurveTween _kStrokeHeadTween =
+    new RepeatingCurveTween(
+        curve:new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
+        repeats:5);
+
+final RepeatingCurveTween _kStrokeTailTween =
+    new RepeatingCurveTween(
+        curve:new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
+        repeats:5);
+
+final StepTween _kStepTween = new StepTween(begin:0, end:5);
+
+final RepeatingCurveTween _kRotationTween =
+    new RepeatingCurveTween(curve:Curves.linear, repeats:5);
+
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
+  Animation<double> _animation;
+  AnimationController _controller;
+
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+      duration: const Duration(milliseconds: 6666)
+    )..repeat();
+    _animation = new CurvedAnimation(parent: _controller, curve: Curves.linear);
+  }
+
+  Widget build(BuildContext context) {
+    if (config.value != null)
+      return config._buildIndicator(context, 0.0, 0.0, 0, 0.0);
+
+    return new AnimatedBuilder(
+      animation: _animation,
+      builder: (BuildContext context, Widget child) {
+        return config._buildIndicator(context,
+            _kStrokeHeadTween.evaluate(_animation),
+            _kStrokeTailTween.evaluate(_animation),
+            _kStepTween.evaluate(_animation),
+            _kRotationTween.evaluate(_animation));
+      }
     );
   }
 }
