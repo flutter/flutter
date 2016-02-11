@@ -357,11 +357,11 @@
 			files = (
 			);
 			inputPaths = (
-			  "${FLUTTER_APPLICATION_PATH}/pubspec.yaml"
+				"${FLUTTER_APPLICATION_PATH}/pubspec.yaml",
 			);
 			name = "Ensure `pub get`";
 			outputPaths = (
-			  "${FLUTTER_APPLICATION_PATH}/.packages"
+				"${FLUTTER_APPLICATION_PATH}/.packages",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -543,7 +543,6 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.runner.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -555,7 +554,6 @@
 				INFOPLIST_FILE = Runner/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.runner.Runner;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
