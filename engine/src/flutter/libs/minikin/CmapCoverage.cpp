@@ -67,6 +67,7 @@ static bool getCoverageFormat4(vector<uint32_t>& coverage, const uint8_t* data, 
         uint32_t start = readU16(data, kHeaderSize + 2 * (segCount + i));
         if (end < start) {
             // invalid segment range: size must be positive
+            android_errorWriteLog(0x534e4554, "26413177");
             return false;
         }
         uint32_t rangeOffset = readU16(data, kHeaderSize + 2 * (3 * segCount + i));
@@ -113,6 +114,7 @@ static bool getCoverageFormat12(vector<uint32_t>& coverage, const uint8_t* data,
     }
     uint32_t nGroups = readU32(data, kNGroupsOffset);
     if (nGroups >= kMaxNGroups || kFirstGroupOffset + nGroups * kGroupSize > size) {
+        android_errorWriteLog(0x534e4554, "25645298");
         return false;
     }
     for (uint32_t i = 0; i < nGroups; i++) {
@@ -121,6 +123,7 @@ static bool getCoverageFormat12(vector<uint32_t>& coverage, const uint8_t* data,
         uint32_t end = readU32(data, groupOffset + kEndCharCodeOffset);
         if (end < start) {
             // invalid group range: size must be positive
+            android_errorWriteLog(0x534e4554, "26413177");
             return false;
         }
         addRange(coverage, start, end + 1);  // file is inclusive, vector is exclusive
