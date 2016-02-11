@@ -8,12 +8,13 @@
 #include <Foundation/Foundation.h>
 #include <QuartzCore/CADisplayLink.h>
 #include <mach/mach_time.h>
+#include <vector>
 
 @interface VSyncClient : NSObject
 
 @end
 
-static inline uint64_t CurrentTimeMicrosSeconds() {
+static inline uint64_t CurrentTimeMicroseconds() {
   static mach_timebase_info_data_t timebase = {0};
 
   if (timebase.denom == 0) {
@@ -25,7 +26,7 @@ static inline uint64_t CurrentTimeMicrosSeconds() {
 
 @implementation VSyncClient {
   CADisplayLink* _displayLink;
-  ::vsync::VSyncProvider::AwaitVSyncCallback _pendingCallback;
+  std::vector<::vsync::VSyncProvider::AwaitVSyncCallback> _pendingCallbacks;
   BOOL _traceLevel;
 }
 
@@ -45,14 +46,18 @@ static inline uint64_t CurrentTimeMicrosSeconds() {
 }
 
 - (void)await:(::vsync::VSyncProvider::AwaitVSyncCallback)callback {
-  _pendingCallback = callback;
+  _pendingCallbacks.push_back(callback);
   _displayLink.paused = NO;
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
   TRACE_COUNTER1("vsync", "PlatformVSync", _traceLevel = !_traceLevel);
   _displayLink.paused = YES;
-  _pendingCallback.Run(CurrentTimeMicrosSeconds());
+  uint64_t micros = CurrentTimeMicroseconds();
+  for (const auto& callback : _pendingCallbacks) {
+    callback.Run(micros);
+  }
+  _pendingCallbacks.clear();
 }
 
 - (void)dealloc {
