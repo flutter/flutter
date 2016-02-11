@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Image;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sprites/flutter_sprites.dart';

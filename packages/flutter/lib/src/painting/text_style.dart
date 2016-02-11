@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble;
 
 import 'basic_types.dart';
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/rendering.dart';
 
 class _BaselinePainter extends CustomPainter {
@@ -29,7 +27,7 @@ class _BaselinePainter extends CustomPainter {
     path.lineTo(w, h);
     paint = new Paint()
      ..color = const Color(0xFFFF9000)
-     ..style = ui.PaintingStyle.stroke
+     ..style = PaintingStyle.stroke
      ..strokeWidth = 1.5;
     canvas.drawPath(path, paint);
 
@@ -39,7 +37,7 @@ class _BaselinePainter extends CustomPainter {
     path.lineTo(w, baseline);
     paint = new Paint()
      ..color = const Color(0xFF00FF90)
-     ..style = ui.PaintingStyle.stroke
+     ..style = PaintingStyle.stroke
      ..strokeWidth = 1.5;
     canvas.drawPath(path, paint);
   }

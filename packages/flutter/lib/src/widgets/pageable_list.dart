@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/animation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/rendering.dart' show RenderList, ViewportDimensions;
 
 import 'basic.dart';
 import 'framework.dart';

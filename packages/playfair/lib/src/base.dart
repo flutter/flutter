@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of playfair;
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class ChartData {
   const ChartData({
@@ -54,17 +57,17 @@ class _ChartWrapper extends LeafRenderObjectWidget {
   final TextTheme textTheme;
   final ChartData data;
 
-  RenderChart createRenderObject() => new RenderChart(textTheme: textTheme, data: data);
+  _RenderChart createRenderObject() => new _RenderChart(textTheme: textTheme, data: data);
 
-  void updateRenderObject(RenderChart renderObject, _ChartWrapper oldWidget) {
-    renderObject.textTheme = textTheme;
-    renderObject.data = data;
+  void updateRenderObject(_RenderChart renderObject, _ChartWrapper oldWidget) {
+    renderObject
+      ..textTheme = textTheme
+      ..data = data;
   }
 }
 
-class RenderChart extends RenderConstrainedBox {
-
-  RenderChart({
+class _RenderChart extends RenderConstrainedBox {
+  _RenderChart({
     TextTheme textTheme,
     ChartData data
   }) : _painter = new ChartPainter(textTheme: textTheme, data: data),
@@ -98,7 +101,7 @@ class RenderChart extends RenderConstrainedBox {
   }
 }
 
-class Gridline {
+class _Gridline {
   double value;
   TextPainter labelPainter;
   Point labelPosition;
@@ -106,7 +109,7 @@ class Gridline {
   Point end;
 }
 
-class Indicator {
+class _Indicator {
   Point start;
   Point end;
   TextPainter labelPainter;
@@ -148,18 +151,18 @@ class ChartPainter {
   Rect _rect;
 
   // These are updated by _layout()
-  List<Gridline> _horizontalGridlines;
+  List<_Gridline> _horizontalGridlines;
   List<Point> _markers;
-  Indicator _indicator;
+  _Indicator _indicator;
 
   void _layout() {
     // Create the scale labels
     double yScaleWidth = 0.0;
-    _horizontalGridlines = new List<Gridline>();
+    _horizontalGridlines = new List<_Gridline>();
     assert(data.numHorizontalGridlines > 1);
     double stepSize = (data.endY - data.startY) / (data.numHorizontalGridlines - 1);
     for(int i = 0; i < data.numHorizontalGridlines; i++) {
-      Gridline gridline = new Gridline()
+      _Gridline gridline = new _Gridline()
         ..value = _roundToPlaces(data.startY + stepSize * i, data.roundToPlaces);
       if (gridline.value < data.startY || gridline.value > data.endY)
         continue;  // TODO(jackson): Align things so this doesn't ever happen
@@ -185,7 +188,7 @@ class ChartPainter {
     );
 
     // Left align and vertically center the labels on the right side
-    for(Gridline gridline in _horizontalGridlines) {
+    for(_Gridline gridline in _horizontalGridlines) {
       gridline.start = _convertPointToRectSpace(new Point(data.startX, gridline.value), markerRect);
       gridline.end = _convertPointToRectSpace(new Point(data.endX, gridline.value), markerRect);
       gridline.labelPosition = new Point(
@@ -206,13 +209,13 @@ class ChartPainter {
     if (data.indicatorLine != null &&
         data.indicatorLine >= data.startY &&
         data.indicatorLine <= data.endY) {
-      _indicator = new Indicator()
+      _indicator = new _Indicator()
         ..start = _convertPointToRectSpace(new Point(data.startX, data.indicatorLine), markerRect)
         ..end = _convertPointToRectSpace(new Point(data.endX, data.indicatorLine), markerRect);
       if (data.indicatorText != null) {
         TextSpan text = new StyledTextSpan(
           _textTheme.body1,
-          [new PlainTextSpan("${data.indicatorText}")]
+          <TextSpan>[new PlainTextSpan("${data.indicatorText}")]
         );
         _indicator.labelPainter = new TextPainter(text)
           ..maxWidth = markerRect.width
@@ -236,17 +239,17 @@ class ChartPainter {
     return new Point(x, y);
   }
 
-  void _paintGrid(ui.Canvas canvas) {
+  void _paintGrid(Canvas canvas) {
     Paint paint = new Paint()
       ..strokeWidth = kGridStrokeWidth
       ..color = kGridColor;
-    for(Gridline gridline in _horizontalGridlines) {
+    for(_Gridline gridline in _horizontalGridlines) {
       gridline.labelPainter.paint(canvas, gridline.labelPosition.toOffset());
       canvas.drawLine(gridline.start, gridline.end, paint);
     }
   }
 
-  void _paintChart(ui.Canvas canvas) {
+  void _paintChart(Canvas canvas) {
     Paint paint = new Paint()
       ..strokeWidth = kMarkerStrokeWidth
       ..color = kMarkerColor;
@@ -256,11 +259,11 @@ class ChartPainter {
       canvas.drawCircle(marker, kMarkerRadius, paint);
       path.lineTo(marker.x, marker.y);
     }
-    paint.style = ui.PaintingStyle.stroke;
+    paint.style = PaintingStyle.stroke;
     canvas.drawPath(path, paint);
   }
 
-  void _paintIndicator(ui.Canvas canvas) {
+  void _paintIndicator(Canvas canvas) {
     if (_indicator == null)
       return;
     Paint paint = new Paint()
@@ -271,7 +274,7 @@ class ChartPainter {
       _indicator.labelPainter.paint(canvas, _indicator.labelPosition.toOffset());
   }
 
-  void paint(ui.Canvas canvas, Rect rect) {
+  void paint(Canvas canvas, Rect rect) {
     if (rect != _rect)
       _needsLayout = true;
     _rect = rect;

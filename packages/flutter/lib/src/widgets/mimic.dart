@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/animation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/rendering.dart' show RenderStack;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -110,7 +109,9 @@ class MimicOverlayEntry {
 
     RenderBox stack = context.ancestorRenderObjectOfType(const TypeMatcher<RenderStack>());
     // TODO(abarth): Handle the case where the transform here isn't just a translation.
-    Point localPosition = stack == null ? globalPosition: stack.globalToLocal(globalPosition);
+    // TODO(ianh): We should probably be getting the overlay's render object rather than looking for a RenderStack.
+    assert(stack != null);
+    Point localPosition = stack.globalToLocal(globalPosition);
     return new Positioned(
       left: localPosition.x,
       top: localPosition.y,

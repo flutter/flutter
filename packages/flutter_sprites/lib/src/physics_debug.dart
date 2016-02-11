@@ -43,7 +43,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
   void drawCircle(Vector2 center, num radius, box2d.Color3i color, [Vector2 axis]) {
     Paint paint = new Paint()
       ..color = _toColor(color)
-      ..style = ui.PaintingStyle.stroke
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
     canvas.drawCircle(_toPoint(center), _scale(radius), paint);

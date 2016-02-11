@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:newton/newton.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 

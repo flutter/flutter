@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of stocks;
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 
 class StockArrowPainter extends CustomPainter {
   StockArrowPainter({ this.color, this.percentChange });
@@ -34,11 +36,11 @@ class StockArrowPainter extends CustomPainter {
     path.lineTo(centerX + w, arrowY + h);
     path.lineTo(centerX - w, arrowY + h);
     path.close();
-    paint.style = ui.PaintingStyle.fill;
+    paint.style = PaintingStyle.fill;
     canvas.drawPath(path, paint);
 
     // Draw a circle that circumscribes the arrow.
-    paint.style = ui.PaintingStyle.stroke;
+    paint.style = PaintingStyle.stroke;
     canvas.drawCircle(new Point(centerX, centerY), r, paint);
   }
 

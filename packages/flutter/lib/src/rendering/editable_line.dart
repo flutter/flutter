@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextBox;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 
+import 'basic_types.dart';
 import 'box.dart';
 import 'object.dart';
-import 'paragraph.dart';
 
 const _kCaretGap = 1.0; // pixels
 const _kCaretHeightOffset = 2.0; // pixels

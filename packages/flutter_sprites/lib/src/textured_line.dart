@@ -38,8 +38,8 @@ class TexturedLinePainter {
       _cachedPaint = new Paint();
     } else {
       Matrix4 matrix = new Matrix4.identity();
-      ui.ImageShader shader = new ui.ImageShader(texture.image,
-        ui.TileMode.repeated, ui.TileMode.repeated, matrix.storage);
+      ImageShader shader = new ImageShader(texture.image,
+        TileMode.repeated, TileMode.repeated, matrix.storage);
 
       _cachedPaint = new Paint()
         ..shader = shader;
@@ -77,7 +77,7 @@ class TexturedLinePainter {
 
   bool removeArtifacts = true;
 
-  ui.TransferMode transferMode = ui.TransferMode.srcOver;
+  TransferMode transferMode = TransferMode.srcOver;
 
   Paint _cachedPaint = new Paint();
 
@@ -169,7 +169,7 @@ class TexturedLinePainter {
       lastMiter = currentMiter;
     }
 
-    canvas.drawVertices(ui.VertexMode.triangles, vertices, textureCoordinates, verticeColors, ui.TransferMode.modulate, indicies, _cachedPaint);
+    canvas.drawVertices(VertexMode.triangles, vertices, textureCoordinates, verticeColors, TransferMode.modulate, indicies, _cachedPaint);
   }
 
   double _xPosForStop(double stop) {

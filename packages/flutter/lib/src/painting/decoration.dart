@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
+import 'basic_types.dart';
 import 'edge_dims.dart';
 
 export 'edge_dims.dart' show EdgeDims;
@@ -16,14 +15,14 @@ abstract class Decoration {
   EdgeDims get padding => null;
   Decoration lerpFrom(Decoration a, double t) => this;
   Decoration lerpTo(Decoration b, double t) => b;
-  bool hitTest(ui.Size size, ui.Point position) => true;
+  bool hitTest(Size size, Point position) => true;
   bool get needsListeners => false;
-  void addChangeListener(ui.VoidCallback listener) { assert(false); }
-  void removeChangeListener(ui.VoidCallback listener) { assert(false); }
+  void addChangeListener(VoidCallback listener) { assert(false); }
+  void removeChangeListener(VoidCallback listener) { assert(false); }
   BoxPainter createBoxPainter();
   String toString([String prefix = '']) => '$prefix$runtimeType';
 }
 
 abstract class BoxPainter {
-  void paint(ui.Canvas canvas, ui.Rect rect);
+  void paint(Canvas canvas, Rect rect);
 }

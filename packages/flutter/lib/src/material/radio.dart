@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -116,13 +114,13 @@ class _RenderRadio extends RenderToggleable {
     // Outer circle
     Paint paint = new Paint()
       ..color = Color.lerp(inactiveColor, radioColor, position.value)
-      ..style = ui.PaintingStyle.stroke
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);
 
     // Inner circle
     if (!position.isDismissed) {
-      paint.style = ui.PaintingStyle.fill;
+      paint.style = PaintingStyle.fill;
       canvas.drawCircle(center, _kInnerRadius * position.value, paint);
     }
   }

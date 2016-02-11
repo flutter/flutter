@@ -5,11 +5,4 @@
 /// A simple charting library for Flutter.
 library playfair;
 
-import 'dart:ui' as ui;
-import 'dart:math' as math;
-
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/painting.dart';
-
-part 'src/base.dart';
+export 'src/base.dart';

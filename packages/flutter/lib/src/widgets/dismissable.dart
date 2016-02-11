@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
-import 'package:flutter/animation.dart';
-
 import 'basic.dart';
 import 'transitions.dart';
 import 'framework.dart';
@@ -186,7 +182,7 @@ class _DismissableState extends State<Dismissable> {
       _dismissController.value = _dragExtent.abs() / _size.width;
   }
 
-  bool _isFlingGesture(ui.Offset velocity) {
+  bool _isFlingGesture(Offset velocity) {
     double vx = velocity.dx;
     double vy = velocity.dy;
     if (_directionIsYAxis) {
@@ -215,7 +211,7 @@ class _DismissableState extends State<Dismissable> {
     return false;
   }
 
-  void _handleDragEnd(ui.Offset velocity) {
+  void _handleDragEnd(Offset velocity) {
     if (!_isActive || _dismissController.isAnimating)
       return;
     setState(() {

@@ -3,10 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
-
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -37,7 +33,7 @@ class _CheckedModeBannerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paintShadow = new Paint()
       ..color = const Color(0x7F000000)
-      ..maskFilter = new ui.MaskFilter.blur(ui.BlurStyle.normal, kShadowBlur);
+      ..maskFilter = new MaskFilter.blur(BlurStyle.normal, kShadowBlur);
     final Paint paintBanner = new Paint()
       ..color = kColor;
     canvas

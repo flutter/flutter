@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/animation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sky_services/editing/editing.mojom.dart' as mojom;
@@ -13,7 +11,6 @@ import 'debug.dart';
 import 'icon.dart';
 import 'theme.dart';
 
-export 'package:flutter/rendering.dart' show ValueChanged;
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 
 /// A material design text input field.

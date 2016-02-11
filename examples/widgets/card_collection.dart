@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
 class CardModel {
   CardModel(this.value, this.height) {
@@ -394,7 +391,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  ui.Shader _createShader(Rect bounds) {
+  Shader _createShader(Rect bounds) {
     return new LinearGradient(
         begin: bounds.topLeft,
         end: bounds.bottomLeft,

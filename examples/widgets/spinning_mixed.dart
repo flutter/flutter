@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:flutter_rendering_examples/solid_color_box.dart';
 
 // Solid colour, RenderObject version
-void addFlexChildSolidColor(RenderFlex parent, ui.Color backgroundColor, { int flex: 0 }) {
+void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex: 0 }) {
   RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
   parent.add(child);
   FlexParentData childParentData = child.parentData;
@@ -92,9 +90,9 @@ void main() {
   attachWidgetTreeToRenderTree(proxy);
 
   RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
-  addFlexChildSolidColor(flexRoot, const ui.Color(0xFFFF00FF), flex: 1);
+  addFlexChildSolidColor(flexRoot, const Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);
-  addFlexChildSolidColor(flexRoot, const ui.Color(0xFF0000FF), flex: 1);
+  addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
   RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);

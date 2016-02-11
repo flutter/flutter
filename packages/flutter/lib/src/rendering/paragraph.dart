@@ -2,23 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
-
 import 'box.dart';
 import 'object.dart';
 import 'semantics.dart';
-
-export 'package:flutter/painting.dart' show
-  FontStyle,
-  FontWeight,
-  PlainTextSpan,
-  StyledTextSpan,
-  TextAlign,
-  TextBaseline,
-  TextDecoration,
-  TextDecorationStyle,
-  TextSpan,
-  TextStyle;
 
 /// A render object that displays a paragraph of text
 class RenderParagraph extends RenderBox {

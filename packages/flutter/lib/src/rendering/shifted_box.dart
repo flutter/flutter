@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
-
-import 'package:flutter/painting.dart';
 
 import 'box.dart';
 import 'debug.dart';
@@ -300,7 +297,7 @@ class RenderPositionedBox extends RenderShiftedBox {
       if (child != null && !child.size.isEmpty) {
         Path path;
         paint = new Paint()
-          ..style = ui.PaintingStyle.stroke
+          ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
           ..color = debugPaintArrowColor;
         path = new Path();

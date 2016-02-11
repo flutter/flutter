@@ -2,72 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Image;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'framework.dart';
 
+export 'package:flutter/animation.dart';
+export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
-    BackgroundImage,
-    Border,
-    BorderSide,
+    Axis,
     BoxConstraints,
-    BoxDecoration,
-    BoxShadow,
-    BoxShape,
-    Canvas,
-    Color,
-    ColorFilter,
     CustomClipper,
     CustomPainter,
-    Decoration,
-    DecorationPosition,
-    EdgeDims,
+    FixedColumnCountGridDelegate,
     FlexAlignItems,
     FlexDirection,
     FlexJustifyContent,
-    FixedColumnCountGridDelegate,
-    FontStyle,
-    FontWeight,
-    FractionalOffset,
-    Gradient,
+    FractionalOffsetTween,
     GridDelegate,
     HitTestBehavior,
-    ImageFit,
-    ImageRepeat,
-    InputEvent,
-    LinearGradient,
-    Matrix4,
     MaxTileWidthGridDelegate,
-    Offset,
+    MultiChildLayoutDelegate,
     OneChildLayoutDelegate,
-    Paint,
-    Path,
+    Painter,
+    PaintingContext,
     PlainTextSpan,
-    Point,
     PointerCancelEvent,
+    PointerCancelEventListener,
     PointerDownEvent,
+    PointerDownEventListener,
     PointerEvent,
     PointerMoveEvent,
+    PointerMoveEventListener,
     PointerUpEvent,
-    RadialGradient,
-    Rect,
-    Axis,
-    Size,
-    StyledTextSpan,
-    TextAlign,
-    TextBaseline,
-    TextDecoration,
-    TextDecorationStyle,
-    TextSpan,
-    TextStyle,
-    TransferMode,
+    PointerUpEventListener,
+    RelativeRect,
+    ShaderCallback,
     ValueChanged,
-    ViewportAnchor,
-    VoidCallback;
-
+    ViewportAnchor;
 
 // PAINTING NODES
 

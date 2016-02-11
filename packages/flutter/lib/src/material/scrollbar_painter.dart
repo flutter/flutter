@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/animation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 const double _kMinScrollbarThumbLength = 18.0;

@@ -8,7 +8,7 @@ import 'dart:collection';
 import 'package:flutter/rendering.dart';
 
 export 'dart:ui' show hashValues, hashList;
-export 'package:flutter/rendering.dart' show debugPrint;
+export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint;
 
 // KEYS
 

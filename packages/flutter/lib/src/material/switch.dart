@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -194,13 +191,13 @@ class _RenderSwitch extends RenderToggleable {
       size.width - 2.0 * trackHorizontalPadding,
       _kTrackHeight
     );
-    ui.RRect trackRRect = new ui.RRect.fromRectXY(
-        trackRect, _kTrackRadius, _kTrackRadius);
+    RRect trackRRect = new RRect.fromRectXY(trackRect, _kTrackRadius, _kTrackRadius);
     canvas.drawRRect(trackRRect, paint);
 
     Offset thumbOffset = new Offset(
       offset.dx + kRadialReactionRadius + position.value * _trackInnerLength,
-      offset.dy + size.height / 2.0);
+      offset.dy + size.height / 2.0
+    );
 
     paintRadialReaction(canvas, thumbOffset);
 
