@@ -35,6 +35,13 @@ void ApplicationImpl::AcceptConnection(
     mojo::ServiceProviderPtr incoming_services,
     const mojo::String& resolved_url) {
   service_provider_bindings_.AddBinding(this, outgoing_services.Pass());
+
+  // It's unclear where we should get the service registry from. We currently
+  // get it from the first incomming application connection, which happens to
+  // work for our current use cases, but it's fragile and unsatifying. We'll
+  // probably need to re-think service registry once more of the system exists.
+  if (incoming_services && !initial_service_registry_)
+    mojo::ConnectToService(incoming_services.get(), &initial_service_registry_);
 }
 
 void ApplicationImpl::RequestQuit() {
@@ -57,12 +64,9 @@ void ApplicationImpl::CreateView(
     return;
   }
 
-  mojo::ServiceRegistryPtr service_registry;
-  if (incoming_services)
-    mojo::ConnectToService(incoming_services.get(), &service_registry);
   ServicesDataPtr services = ServicesData::New();
   services->shell = shell_.Pass();
-  services->service_registry = service_registry.Pass();
+  services->service_registry = initial_service_registry_.Pass();
   services->services_provided_by_embedder = incoming_services.Pass();
   services->services_provided_to_embedder = outgoing_services.Pass();
 
