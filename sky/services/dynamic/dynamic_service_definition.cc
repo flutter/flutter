@@ -4,6 +4,7 @@
 
 #include "sky/services/dynamic/dynamic_service_definition.h"
 
+#include "base/logging.h"
 #include <dlfcn.h>
 
 namespace sky {
@@ -35,6 +36,7 @@ void DynamicServiceDefinition::Setup(const mojo::String& dylib_path) {
   std::lock_guard<std::mutex> lock(lifecycle_mtx_);
 
   if (!OpenDylib(dylib_path)) {
+    LOG(ERROR) << "Could not open the service dylib.";
     return;
   }
 
@@ -43,22 +45,27 @@ void DynamicServiceDefinition::Setup(const mojo::String& dylib_path) {
   // performed *after* the version check is complete.
 
   if (!AcquireServiceVersionProc()) {
+    LOG(ERROR) << "Could not acquire proc for service version check.";
     return;
   }
 
   if (!CheckServiceVersion()) {
+    LOG(ERROR) << "Service and embedder versions mismatch.";
     return;
   }
 
   if (!AcquireServiceProcs()) {
+    LOG(ERROR) << "Could not acquire procs for loading the service.";
     return;
   }
 
   if (!InstallSystemThunks()) {
+    LOG(ERROR) << "Could not install system thunks to process the service.";
     return;
   }
 
   if (!InvokeLibraryOnLoad()) {
+    LOG(ERROR) << "Could not invoke library OnLoad.";
     return;
   }
 

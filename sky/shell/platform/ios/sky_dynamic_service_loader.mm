@@ -57,6 +57,11 @@
 
   _definition = sky::services::DynamicServiceDefinition::Initialize(dylib_path);
 
+  if (!_definition) {
+    LOG(ERROR) << "Could not load dynamic service for '"
+               << _serviceName.UTF8String << "'";
+  }
+
   // All known services are in the application bundle. If the service cannot
   // be initialized once, dont attempt any more loads.
   _initializationAttempted = YES;
