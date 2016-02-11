@@ -530,7 +530,9 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
     '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
   ];
 
-  if (!isDevice) {
+  if (isDevice) {
+    commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
+  } else {
     commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
