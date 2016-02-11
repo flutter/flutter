@@ -98,6 +98,8 @@ abstract class Device {
 
   String get name;
 
+  bool get supportsStartPaused => true;
+
   /// Install an app package on the current device
   bool installApp(ApplicationPackage app);
 
