@@ -16,36 +16,6 @@ const double _kCircularProgressIndicatorStrokeWidth = 4.0;
 
 // TODO(hansmuller) implement the support for buffer indicator
 
-// TODO(jestelle) This should probably go somewhere else?  And maybe be more
-// general?
-class RepeatingCurveTween extends Animatable<double> {
-  RepeatingCurveTween({ this.curve, this.repeats });
-
-  Curve curve;
-  int repeats;
-
-  double evaluate(Animation<double> animation) {
-    double t = animation.value;
-    t = t * repeats;
-    t -= t.truncateToDouble();
-    if (t == 0.0 || t == 1.0) {
-      assert(curve.transform(t).round() == t);
-      return t;
-    }
-    return curve.transform(t);
-  }
-}
-
-// TODO(jestelle) This should probably go somewhere else?  And maybe be more
-// general?  Or maybe the IntTween should actually work this way?
-class StepTween extends Tween<int> {
-  StepTween({ int begin, int end }) : super(begin: begin, end: end);
-
-  // The inherited lerp() function doesn't work with ints because it multiplies
-  // the begin and end types by a double, and int * double returns a double.
-  int lerp(double t) => (begin + (end - begin) * t).floor();
-}
-
 abstract class ProgressIndicator extends StatefulComponent {
   ProgressIndicator({
     Key key,
@@ -241,25 +211,55 @@ class CircularProgressIndicator extends ProgressIndicator {
     );
   }
 }
+// TODO(jestelle) This should probably go somewhere else?  And maybe be more
+// general?
+class RepeatingCurveTween extends Animatable<double> {
+  RepeatingCurveTween({ this.curve, this.repeats });
+
+  Curve curve;
+  int repeats;
+
+  double evaluate(Animation<double> animation) {
+    double t = animation.value;
+    t *= repeats;
+    t -= t.truncateToDouble();
+    if (t == 0.0 || t == 1.0) {
+      assert(curve.transform(t).round() == t);
+      return t;
+    }
+    return curve.transform(t);
+  }
+}
+
+// TODO(jestelle) This should probably go somewhere else?  And maybe be more
+// general?  Or maybe the IntTween should actually work this way?
+class StepTween extends Tween<int> {
+  StepTween({ int begin, int end }) : super(begin: begin, end: end);
+
+  // The inherited lerp() function doesn't work with ints because it multiplies
+  // the begin and end types by a double, and int * double returns a double.
+  int lerp(double t) => (begin + (end - begin) * t).floor();
+}
+
+// Tweens used by circular progress indicator
+final RepeatingCurveTween _kStrokeHeadTween =
+    new RepeatingCurveTween(
+        curve:new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
+        repeats:5);
+
+final RepeatingCurveTween _kStrokeTailTween =
+    new RepeatingCurveTween(
+        curve:new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
+        repeats:5);
+
+final StepTween _kStepTween = new StepTween(begin:0, end:5);
+
+final RepeatingCurveTween _kRotationTween =
+    new RepeatingCurveTween(curve:Curves.linear, repeats:5);
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   Animation<double> _animation;
   AnimationController _controller;
-
-  RepeatingCurveTween _strokeHeadTween =
-      new RepeatingCurveTween(
-          curve:new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
-          repeats:5);
-
-  RepeatingCurveTween _strokeTailTween =
-      new RepeatingCurveTween(
-          curve:new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-          repeats:5);
-
-  StepTween _stepTween = new StepTween(begin:0, end:5);
-
-  RepeatingCurveTween _rotationTween =
-      new RepeatingCurveTween(curve:Curves.linear, repeats:5);
 
   void initState() {
     super.initState();
@@ -277,10 +277,10 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
       animation: _animation,
       builder: (BuildContext context, Widget child) {
         return config._buildIndicator(context,
-            _strokeHeadTween.evaluate(_animation),
-            _strokeTailTween.evaluate(_animation),
-            _stepTween.evaluate(_animation),
-            _rotationTween.evaluate(_animation));
+            _kStrokeHeadTween.evaluate(_animation),
+            _kStrokeTailTween.evaluate(_animation),
+            _kStepTween.evaluate(_animation),
+            _kRotationTween.evaluate(_animation));
       }
     );
   }
