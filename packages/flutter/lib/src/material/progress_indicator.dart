@@ -141,11 +141,6 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
   }
 
-  void _restartAnimation() {
-    _controller.value = 0.0;
-    _controller.repeat();
-  }
-
   Widget build(BuildContext context) {
     if (config.value != null)
       return config._buildIndicator(context, _animation.value);
@@ -272,11 +267,6 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
       duration: const Duration(milliseconds: 6666)
     )..repeat();
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.linear);
-  }
-
-  void _restartAnimation() {
-    _controller.value = 0.0;
-    _controller.repeat();
   }
 
   Widget build(BuildContext context) {
