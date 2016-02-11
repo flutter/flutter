@@ -190,6 +190,13 @@ Future<int> startApp(
       printError('Error starting application on ${device.name}.');
     } else {
       startedSomething = true;
+
+      // If the user specified --start-paused (and the device supports it) then
+      // wait for the observatory port to become available before returning from
+      // `startApp()`.
+      if (startPaused && device.supportsStartPaused) {
+        await _delayUntilObservatoryAvailable('localhost', debugPort);
+      }
     }
   }
 
@@ -202,6 +209,34 @@ Future<int> startApp(
   }
 
   return startedSomething ? 0 : 2;
+}
+
+/// Delay until the Observatory / service protocol is available.
+///
+/// This does not fail if we're unable to connect, and times out after the given
+/// [timeout].
+Future _delayUntilObservatoryAvailable(String host, int port, {
+  Duration timeout: const Duration(seconds: 10)
+}) async {
+  Stopwatch stopwatch = new Stopwatch()..start();
+
+  final String url = 'ws://$host:$port/ws';
+  printTrace('Looking for the observatory at $url.');
+
+  while (stopwatch.elapsed <= timeout) {
+    try {
+      WebSocket ws = await WebSocket.connect(url);
+
+      printTrace('Connected to the observatory port (${stopwatch.elapsedMilliseconds}ms).');
+      ws.close().catchError((error) => null);
+
+      return;
+    } catch (error) {
+      await new Future.delayed(new Duration(milliseconds: 250));
+    }
+  }
+
+  printTrace('Unable to connect to the observatory.');
 }
 
 /// Return a relative path if [fullPath] is contained by the cwd, else return an

@@ -82,6 +82,8 @@ class IOSDevice extends Device {
 
   final String name;
 
+  bool get supportsStartPaused => false;
+
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
     List<IOSDevice> devices = [];
     for (String id in _getAttachedDeviceIDs(mockIOS)) {
