@@ -19,6 +19,7 @@ assets:
   - packages/flutter_gallery_assets/icon-rain.png
   - packages/flutter_gallery_assets/icon-snow.png
 material-design-icons:
+  - name: action/account_circle
   - name: action/alarm
   - name: action/android
   - name: action/event
@@ -31,6 +32,8 @@ material-design-icons:
   - name: communication/location_on
   - name: communication/message
   - name: content/add
+  - name: content/add_circle
+  - name: content/clear
   - name: content/create
   - name: image/brightness_5
   - name: image/brightness_7
