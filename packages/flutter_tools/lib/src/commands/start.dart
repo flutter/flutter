@@ -145,7 +145,8 @@ Future<int> startApp(
     await buildAll(
       devices, applicationPackages, toolchain, configs,
       enginePath: enginePath,
-      target: target);
+      target: target
+    );
   }
 
   if (stop) {

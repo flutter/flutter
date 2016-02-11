@@ -60,11 +60,6 @@ Future main(List<String> args) async {
     ..addCommand(new UpgradeCommand());
 
   return Chain.capture(() async {
-    // Convert `flutter init` invocations to `flutter create` ones.
-    // TODO(devoncarew): Remove this after a few releases.
-    if (args.isNotEmpty && args[0] == 'init')
-      args[0] = 'create';
-
     // Initialize globals.
     context[Logger] = new StdoutLogger();
     context[DeviceManager] = new DeviceManager();

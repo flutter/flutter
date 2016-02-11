@@ -21,9 +21,9 @@ import '../services.dart';
 import '../toolchain.dart';
 import 'start.dart';
 
-const String _kDefaultAndroidManifestPath = 'apk/AndroidManifest.xml';
+const String _kDefaultAndroidManifestPath = 'android/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
-const String _kDefaultResourcesPath = 'apk/res';
+const String _kDefaultResourcesPath = 'android/res';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
 const String _kPackagesStatusPath = '.packages';
@@ -264,9 +264,9 @@ Future<_ApkComponents> _findApkComponents(
     printError('and version $_kBuildToolsVersion of the build tools.');
     return null;
   }
-  for (File f in [components.manifest, components.icuData,
-                  components.libSkyShell, components.debugKeystore]
-                  ..addAll(components.jars)) {
+  for (File f in [
+    components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
+  ]..addAll(components.jars)) {
     if (!f.existsSync()) {
       printError('Can not locate file: ${f.path}');
       return null;
@@ -299,8 +299,10 @@ int _buildApk(
     artifactBuilder.add(components.libSkyShell, 'lib/armeabi-v7a/libsky_shell.so');
 
     File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
-    builder.package(unalignedApk, components.manifest, assetBuilder.directory,
-                    artifactBuilder.directory, components.resources);
+    builder.package(
+      unalignedApk, components.manifest, assetBuilder.directory,
+      artifactBuilder.directory, components.resources
+    );
 
     int signResult = _signApk(builder, components, unalignedApk, keystore);
     if (signResult != 0)
@@ -389,7 +391,7 @@ Future<int> buildAndroid({
   }
 
   BuildConfiguration config = configs.firstWhere(
-      (BuildConfiguration bc) => bc.targetPlatform == TargetPlatform.android
+    (BuildConfiguration bc) => bc.targetPlatform == TargetPlatform.android
   );
   _ApkComponents components = await _findApkComponents(config, enginePath, manifest, resources);
   if (components == null) {
@@ -422,6 +424,7 @@ Future<int> buildAndroid({
 }
 
 // TODO(mpcomplete): move this to Device?
+/// This is currently Android specific.
 Future buildAll(
   DeviceStore devices,
   ApplicationPackageStore applicationPackages,
@@ -437,6 +440,14 @@ Future buildAll(
 
     // TODO(mpcomplete): Temporary hack. We only support the apk builder atm.
     if (package == applicationPackages.android) {
+      // TODO(devoncarew): Remove this warning after a few releases.
+      if (FileSystemEntity.isDirectorySync('apk') && !FileSystemEntity.isDirectorySync('android')) {
+        // Tell people the android directory location changed.
+        printStatus(
+          "Warning: Flutter now looks for Android resources in the android/ directory; "
+          "consider renaming your 'apk/' directory to 'android/'.");
+      }
+
       if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
         printStatus('Using pre-built SkyShell.apk.');
         continue;

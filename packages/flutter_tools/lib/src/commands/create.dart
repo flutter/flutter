@@ -145,7 +145,7 @@ class FlutterSimpleTemplate extends Template {
     files['flutter.yaml'] = _flutterYaml;
     files['pubspec.yaml'] = _pubspec;
     files['README.md'] = _readme;
-    files['apk/AndroidManifest.xml'] = _apkManifest;
+    files['android/AndroidManifest.xml'] = _apkManifest;
     files['lib/main.dart'] = _libMain;
   }
 }
