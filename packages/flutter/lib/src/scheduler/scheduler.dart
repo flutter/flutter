@@ -215,11 +215,12 @@ abstract class Scheduler extends BindingBase {
     _postFrameCallbacks.add(callback);
   }
 
-  bool _isInFrame = false;
+  static bool get debugInFrame => _debugInFrame;
+  static bool _debugInFrame = false;
 
   void _invokeTransientFrameCallbacks(Duration timeStamp) {
     Timeline.startSync('Animate');
-    assert(_isInFrame);
+    assert(_debugInFrame);
     Map<int, FrameCallback> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, FrameCallback>();
     callbacks.forEach((int id, FrameCallback callback) {
@@ -239,8 +240,8 @@ abstract class Scheduler extends BindingBase {
   /// [addPostFrameCallback].
   void handleBeginFrame(Duration rawTimeStamp) {
     Timeline.startSync('Begin frame');
-    assert(!_isInFrame);
-    _isInFrame = true;
+    assert(!_debugInFrame);
+    assert(() { _debugInFrame = true; return true; });
     Duration timeStamp = new Duration(
         microseconds: (rawTimeStamp.inMicroseconds / timeDilation).round());
     _hasRequestedABeginFrameCallback = false;
@@ -255,7 +256,7 @@ abstract class Scheduler extends BindingBase {
     for (FrameCallback callback in localPostFrameCallbacks)
       invokeFrameCallback(callback, timeStamp);
 
-    _isInFrame = false;
+    assert(() { _debugInFrame = false; return true; });
     Timeline.finishSync();
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
