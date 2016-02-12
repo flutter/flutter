@@ -25,7 +25,7 @@ final Tolerance kPixelScrollTolerance = new Tolerance(
 );
 
 typedef void ScrollListener(double scrollOffset);
-typedef double SnapOffsetCallback(double scrollOffset);
+typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 
 /// A base class for scrollable widgets.
 ///
@@ -43,12 +43,10 @@ abstract class Scrollable extends StatefulComponent {
     this.onScrollStart,
     this.onScroll,
     this.onScrollEnd,
-    this.snapOffsetCallback,
-    this.snapAlignmentOffset: 0.0
+    this.snapOffsetCallback
   }) : super(key: key) {
     assert(scrollDirection == Axis.vertical || scrollDirection == Axis.horizontal);
     assert(scrollAnchor == ViewportAnchor.start || scrollAnchor == ViewportAnchor.end);
-    assert(snapAlignmentOffset != null);
   }
 
   /// The scroll offset this widget should use when first created.
@@ -68,10 +66,20 @@ abstract class Scrollable extends StatefulComponent {
   /// Called whenever this widget stops scrolling.
   final ScrollListener onScrollEnd;
 
-  /// Called to determine the offset to which scrolling should snap.
+  /// Called to determine the offset to which scrolling should snap,
+  /// when handling a fling.
+  ///
+  /// This callback, if set, will be called with the offset that the
+  /// Scrollable would have scrolled to in the absence of this
+  /// callback, and a Size describing the size of the Scrollable
+  /// itself.
+  ///
+  /// The callback's return value is used as the new scroll offset to
+  /// aim for.
+  ///
+  /// If the callback simply returns its first argument (the offset),
+  /// then it is as if the callback was null.
   final SnapOffsetCallback snapOffsetCallback;
-
-  final double snapAlignmentOffset; // What does this do?
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScrollableState of(BuildContext context) {
@@ -294,7 +302,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Returns the snapped offset closest to the given scroll offset.
   double snapScrollOffset(double scrollOffset) {
-    return config.snapOffsetCallback == null ? scrollOffset : config.snapOffsetCallback(scrollOffset);
+    RenderBox box = context.findRenderObject();
+    return config.snapOffsetCallback == null ? scrollOffset : config.snapOffsetCallback(scrollOffset, box.size);
   }
 
   /// Whether this scrollable should attempt to snap scroll offsets.
@@ -312,20 +321,20 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     if (endScrollOffset.isNaN)
       return null;
 
-    final double snappedScrollOffset = snapScrollOffset(endScrollOffset + config.snapAlignmentOffset);
-    final double alignedScrollOffset = snappedScrollOffset - config.snapAlignmentOffset;
-    if (!_scrollOffsetIsInBounds(alignedScrollOffset))
+    final double snappedScrollOffset = snapScrollOffset(endScrollOffset);
+    if (!_scrollOffsetIsInBounds(snappedScrollOffset))
       return null;
 
-    final double snapVelocity = scrollVelocity.abs() * (alignedScrollOffset - scrollOffset).sign;
+    final double snapVelocity = scrollVelocity.abs() * (snappedScrollOffset - scrollOffset).sign;
     final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs() * scrollVelocity.sign;
-    Simulation toSnapSimulation =
-      scrollBehavior.createSnapScrollSimulation(scrollOffset, alignedScrollOffset, snapVelocity, endVelocity);
+    Simulation toSnapSimulation = scrollBehavior.createSnapScrollSimulation(
+      scrollOffset, snappedScrollOffset, snapVelocity, endVelocity
+    );
     if (toSnapSimulation == null)
       return null;
 
-    final double scrollOffsetMin = math.min(scrollOffset, alignedScrollOffset);
-    final double scrollOffsetMax = math.max(scrollOffset, alignedScrollOffset);
+    final double scrollOffsetMin = math.min(scrollOffset, snappedScrollOffset);
+    final double scrollOffsetMax = math.max(scrollOffset, snappedScrollOffset);
     return new ClampedSimulation(toSnapSimulation, xMin: scrollOffsetMin, xMax: scrollOffsetMax);
   }
 
@@ -631,7 +640,6 @@ class ScrollableMixedWidgetList extends Scrollable {
     double initialScrollOffset,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
-    double snapAlignmentOffset: 0.0,
     this.builder,
     this.token,
     this.onInvalidatorAvailable
@@ -639,8 +647,7 @@ class ScrollableMixedWidgetList extends Scrollable {
     key: key,
     initialScrollOffset: initialScrollOffset,
     onScroll: onScroll,
-    snapOffsetCallback: snapOffsetCallback,
-    snapAlignmentOffset: snapAlignmentOffset
+    snapOffsetCallback: snapOffsetCallback
   );
 
   final IndexedBuilder builder;

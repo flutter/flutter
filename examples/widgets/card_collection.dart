@@ -28,6 +28,8 @@ class CardCollectionState extends State<CardCollection> {
   // TODO(hansmuller): need a local image asset
   static const _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
 
+  static const kCardMargins = 8.0;
+
   final TextStyle backgroundTextStyle =
     Typography.white.title.copyWith(textAlign: TextAlign.center);
 
@@ -41,7 +43,6 @@ class CardCollectionState extends State<CardCollection> {
   bool _sunshine = false;
   bool _varyFontSizes = false;
   InvalidatorCallback _invalidator;
-  Size _cardCollectionSize = new Size(200.0, 200.0);
 
   void _initVariableSizedCardModels() {
     List<double> cardHeights = <double>[
@@ -78,15 +79,14 @@ class CardCollectionState extends State<CardCollection> {
 
   double _variableSizeToSnapOffset(double scrollOffset) {
     double cumulativeHeight = 0.0;
-    double  margins = 8.0;
     List<double> cumulativeHeights = _cardModels.map((CardModel card) {
-      cumulativeHeight += card.height + margins;
+      cumulativeHeight += card.height + kCardMargins;
       return cumulativeHeight;
     })
     .toList();
 
     double offsetForIndex(int i) {
-      return 12.0 + (margins + _cardModels[i].height) / 2.0 + ((i == 0) ? 0.0 : cumulativeHeights[i - 1]);
+      return (kCardMargins + _cardModels[i].height) / 2.0 + ((i == 0) ? 0.0 : cumulativeHeights[i - 1]);
     }
 
     for (int i = 0; i <  cumulativeHeights.length; i++) {
@@ -99,11 +99,14 @@ class CardCollectionState extends State<CardCollection> {
   double _fixedSizeToSnapOffset(double scrollOffset) {
     double cardHeight = _cardModels[0].height;
     int cardIndex = (scrollOffset.clamp(0.0, cardHeight * (_cardModels.length - 1)) / cardHeight).floor();
-    return 12.0 + cardIndex * cardHeight + cardHeight * 0.5;
+    return cardIndex * cardHeight + cardHeight * 0.5;
   }
 
-  double _toSnapOffset(double scrollOffset) {
-    return _fixedSizeCards ? _fixedSizeToSnapOffset(scrollOffset) : _variableSizeToSnapOffset(scrollOffset);
+  double _toSnapOffset(double scrollOffset, Size containerSize) {
+    double halfHeight = containerSize.height / 2.0;
+    scrollOffset += halfHeight;
+    double result = _fixedSizeCards ? _fixedSizeToSnapOffset(scrollOffset) : _variableSizeToSnapOffset(scrollOffset);
+    return result - halfHeight;
   }
 
   void dismissCard(CardModel card) {
@@ -300,7 +303,7 @@ class CardCollectionState extends State<CardCollection> {
         color: Theme.of(context).primarySwatch[cardModel.color],
         child: new Container(
           height: cardModel.height,
-          padding: const EdgeDims.all(8.0),
+          padding: const EdgeDims.all(kCardMargins),
           child: _editable ?
             new Center(
               child: new Input(
@@ -387,12 +390,6 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  void _updateCardCollectionSize(Size newSize) {
-    setState(() {
-      _cardCollectionSize = newSize;
-    });
-  }
-
   Shader _createShader(Rect bounds) {
     return new LinearGradient(
         begin: bounds.topLeft,
@@ -408,7 +405,6 @@ class CardCollectionState extends State<CardCollection> {
     if (_fixedSizeCards) {
       cardCollection = new ScrollableList (
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
-        snapAlignmentOffset: _cardCollectionSize.height / 2.0,
         itemExtent: _cardModels[0].height,
         children: _cardModels.map((CardModel card) => _buildCard(context, card.value))
       );
@@ -417,7 +413,6 @@ class CardCollectionState extends State<CardCollection> {
         builder: _buildCard,
         token: _cardModels.length,
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
-        snapAlignmentOffset: _cardCollectionSize.height / 2.0,
         onInvalidatorAvailable: (InvalidatorCallback callback) { _invalidator = callback; }
       );
     }
@@ -431,13 +426,10 @@ class CardCollectionState extends State<CardCollection> {
       );
     }
 
-    Widget body = new SizeObserver(
-      onSizeChanged: _updateCardCollectionSize,
-      child: new Container(
-        padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-        decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
-        child: cardCollection
-      )
+    Widget body = new Container(
+      padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
+      decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
+      child: cardCollection
     );
 
     if (_snapToCenter) {

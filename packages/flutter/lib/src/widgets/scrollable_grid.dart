@@ -20,7 +20,6 @@ class ScrollableGrid extends Scrollable {
     double initialScrollOffset,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
-    double snapAlignmentOffset: 0.0,
     this.delegate,
     this.children
   }) : super(
@@ -31,8 +30,7 @@ class ScrollableGrid extends Scrollable {
     // delegate that places children in column-major order.
     scrollDirection: Axis.vertical,
     onScroll: onScroll,
-    snapOffsetCallback: snapOffsetCallback,
-    snapAlignmentOffset: snapAlignmentOffset
+    snapOffsetCallback: snapOffsetCallback
   );
 
   final GridDelegate delegate;

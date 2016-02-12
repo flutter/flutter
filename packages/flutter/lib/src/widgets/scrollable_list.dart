@@ -19,7 +19,6 @@ class ScrollableList extends Scrollable {
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
-    double snapAlignmentOffset: 0.0,
     this.itemExtent,
     this.itemsWrap: false,
     this.padding,
@@ -31,8 +30,7 @@ class ScrollableList extends Scrollable {
     scrollDirection: scrollDirection,
     scrollAnchor: scrollAnchor,
     onScroll: onScroll,
-    snapOffsetCallback: snapOffsetCallback,
-    snapAlignmentOffset: snapAlignmentOffset
+    snapOffsetCallback: snapOffsetCallback
   ) {
     assert(itemExtent != null);
   }
@@ -269,7 +267,6 @@ class ScrollableLazyList extends Scrollable {
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     ScrollListener onScroll,
     SnapOffsetCallback snapOffsetCallback,
-    double snapAlignmentOffset: 0.0,
     this.itemExtent,
     this.itemCount,
     this.itemBuilder,
@@ -281,8 +278,7 @@ class ScrollableLazyList extends Scrollable {
     scrollDirection: scrollDirection,
     scrollAnchor: scrollAnchor,
     onScroll: onScroll,
-    snapOffsetCallback: snapOffsetCallback,
-    snapAlignmentOffset: snapAlignmentOffset
+    snapOffsetCallback: snapOffsetCallback
   ) {
     assert(itemExtent != null);
     assert(itemBuilder != null);
