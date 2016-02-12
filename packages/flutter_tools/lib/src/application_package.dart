@@ -82,7 +82,7 @@ class AndroidApk extends ApplicationPackage {
 
 class IOSApp extends ApplicationPackage {
   static const String _defaultId = 'io.flutter.runner.Runner';
-  static const String _defaultPath = 'ios/Generated';
+  static const String _defaultPath = 'ios/.generated';
 
   IOSApp({
     String localPath: _defaultPath,

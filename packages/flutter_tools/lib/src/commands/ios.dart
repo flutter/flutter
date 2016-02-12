@@ -152,7 +152,7 @@ class IOSCommand extends FlutterCommand {
   Future<int> _runInitCommand() async {
     // Step 1: Fetch the archive from the cloud
     String iosFilesPath = path.join(Directory.current.path, "ios");
-    String xcodeprojPath = path.join(iosFilesPath, "Generated");
+    String xcodeprojPath = path.join(iosFilesPath, ".generated");
     List<int> archiveBytes = await _fetchXcodeArchive();
 
     if (archiveBytes.isEmpty) {
@@ -172,7 +172,7 @@ class IOSCommand extends FlutterCommand {
     //         one does not exist.
     File generatedGitignore = new File(path.join(iosFilesPath, ".gitignore"));
     if (!generatedGitignore.existsSync()) {
-      generatedGitignore.writeAsStringSync("Generated/\n");
+      generatedGitignore.writeAsStringSync(".generated/\n");
     }
 
     // Step 4: Setup default user editable files if this is the first run of
