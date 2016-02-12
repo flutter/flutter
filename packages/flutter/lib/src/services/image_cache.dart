@@ -45,8 +45,8 @@ class _UrlFetcher implements ImageProvider {
 
 const int _kDefaultSize = 1000;
 
-class _ImageCache {
-  _ImageCache._();
+class ImageCache {
+  ImageCache._();
 
   final LruMap<ImageProvider, ImageResource> _cache =
       new LruMap<ImageProvider, ImageResource>(maximumSize: _kDefaultSize);
@@ -65,4 +65,4 @@ class _ImageCache {
   }
 }
 
-final _ImageCache imageCache = new _ImageCache._();
+final ImageCache imageCache = new ImageCache._();
