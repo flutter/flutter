@@ -13,6 +13,13 @@ import "../base/process.dart";
 import "../runner/flutter_command.dart";
 import "../runner/flutter_command_runner.dart";
 
+/// A map from file path to file contents.
+final Map<String, String> iosTemplateFiles = <String, String>{
+  'ios/Info.plist': _infoPlistInitialContents,
+  'ios/LaunchScreen.storyboard': _launchScreenInitialContents,
+  'ios/Assets.xcassets/AppIcon.appiconset/Contents.json': _iconAssetInitialContents
+};
+
 class IOSCommand extends FlutterCommand {
   final String name = "ios";
   final String description = "Commands for creating and updating Flutter iOS projects.";
@@ -93,46 +100,23 @@ class IOSCommand extends FlutterCommand {
     return true;
   }
 
-
   void _writeUserEditableFilesIfNecessary(String directory) {
-    printStatus("Checking if user editable files need updates");
+    iosTemplateFiles.forEach((String filePath, String contents) {
+      File file = new File(filePath);
 
-    // Step 1: Check if the Info.plist exists and write one if not
-    File infoPlist = new File(path.join(directory, "Info.plist"));
-    if (!infoPlist.existsSync()) {
-      printStatus("Did not find an existing Info.plist. Creating one.");
-      infoPlist.writeAsStringSync(_infoPlistInitialContents);
-    } else {
-      printStatus("Info.plist present. Using existing.");
-    }
-
-    // Step 2: Check if the LaunchScreen.storyboard exists and write one if not
-    File launchScreen = new File(path.join(directory, "LaunchScreen.storyboard"));
-    if (!launchScreen.existsSync()) {
-      printStatus("Did not find an existing LaunchScreen.storyboard. Creating one.");
-      launchScreen.writeAsStringSync(_launchScreenInitialContents);
-    } else {
-      printStatus("LaunchScreen.storyboard present. Using existing.");
-    }
-
-    // Step 3: Check if the Assets.xcassets exists and write one if not
-    Directory xcassets = new Directory(path.join(directory, "Assets.xcassets"));
-    if (!xcassets.existsSync()) {
-      printStatus("Did not find an existing Assets.xcassets. Creating one.");
-      Directory iconsAssetsDir = new Directory(path.join(xcassets.path, "AppIcon.appiconset"));
-      iconsAssetsDir.createSync(recursive: true);
-      File iconContents = new File(path.join(iconsAssetsDir.path, "Contents.json"));
-      iconContents.writeAsStringSync(_iconAssetInitialContents);
-    } else {
-      printStatus("Assets.xcassets present. Using existing.");
-    }
+      if (!file.existsSync()) {
+        file.parent.createSync(recursive: true);
+        file.writeAsStringSync(contents);
+        printStatus('Created $filePath.');
+      }
+    });
   }
 
   void _setupXcodeProjXcconfig(String filePath) {
     StringBuffer localsBuffer = new StringBuffer();
 
     localsBuffer.writeln("// Generated. Do not edit or check into version control!");
-    localsBuffer.writeln("// Recreate using `flutter ios`.");
+    localsBuffer.writeln("// Recreate using `flutter ios --init`.");
 
     String flutterRoot = path.normalize(Platform.environment[kFlutterRootEnvironmentVariableName]);
     localsBuffer.writeln("FLUTTER_ROOT=$flutterRoot");
@@ -167,27 +151,19 @@ class IOSCommand extends FlutterCommand {
       return 1;
     }
 
-    // Step 3: The generated project should NOT be checked into the users
-    //         version control system. Be nice and write a gitignore for them if
-    //         one does not exist.
-    File generatedGitignore = new File(path.join(iosFilesPath, ".gitignore"));
-    if (!generatedGitignore.existsSync()) {
-      generatedGitignore.writeAsStringSync(".generated/\n");
-    }
-
-    // Step 4: Setup default user editable files if this is the first run of
+    // Step 3: Setup default user editable files if this is the first run of
     //         the init command.
     _writeUserEditableFilesIfNecessary(iosFilesPath);
 
-    // Step 5: Populate the Local.xcconfig with project specific paths
+    // Step 4: Populate the Local.xcconfig with project specific paths
     _setupXcodeProjXcconfig(path.join(xcodeprojPath, "Local.xcconfig"));
 
-    // Step 6: Write the REVISION file
+    // Step 5: Write the REVISION file
     File revisionFile = new File(path.join(xcodeprojPath, "REVISION"));
     revisionFile.createSync();
     revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
 
-    // Step 7: Tell the user the location of the generated project.
+    // Step 6: Tell the user the location of the generated project.
     printStatus("An Xcode project has been placed in 'ios/'.");
     printStatus("You may edit it to modify iOS specific configuration.");
     return 0;
