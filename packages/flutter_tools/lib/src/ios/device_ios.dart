@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:path/path.dart' as path;
 
@@ -173,25 +174,22 @@ class IOSDevice extends Device {
     // TODO(devoncarew): Handle startPaused, debugPort.
     printTrace('Building ${app.name} for $id');
 
-    // Step 1: Install the precompiled application if necessary
+    // Step 1: Install the precompiled application if necessary.
     bool buildResult = await _buildIOSXcodeProject(app, buildForDevice: true);
     if (!buildResult) {
-      printError('Could not build the precompiled application for the device');
+      printError('Could not build the precompiled application for the device.');
       return false;
     }
 
-    // Step 2: Check that the application exists at the specified path
+    // Step 2: Check that the application exists at the specified path.
     Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
-      printError('Could not find the built application bundle at ${bundle.path}');
+      printError('Could not find the built application bundle at ${bundle.path}.');
       return false;
     }
 
-    // Step 2.5: Copy any third-party sevices to the app bundle.
-    await _addServicesToBundle(bundle);
-
-    // Step 3: Attempt to install the application on the device
+    // Step 3: Attempt to install the application on the device.
     int installationResult = await runCommandAndStreamOutput([
       '/usr/bin/env',
       'ios-deploy',
@@ -202,11 +200,11 @@ class IOSDevice extends Device {
     ]);
 
     if (installationResult != 0) {
-      printError('Could not install ${bundle.path} on $id');
+      printError('Could not install ${bundle.path} on $id.');
       return false;
     }
 
-    printTrace('Installation successful');
+    printTrace('Installation successful.');
     return true;
   }
 
@@ -309,33 +307,30 @@ class IOSSimulator extends Device {
     Map<String, dynamic> platformArgs
   }) async {
     // TODO(chinmaygarde): Use mainPath, route.
-    printTrace('Building ${app.name} for $id');
+    printTrace('Building ${app.name} for $id.');
 
     if (clearLogs)
       this.clearLogs();
 
-    // Step 1: Build the Xcode project
+    // Step 1: Build the Xcode project.
     bool buildResult = await _buildIOSXcodeProject(app, buildForDevice: false);
     if (!buildResult) {
-      printError('Could not build the application for the simulator');
+      printError('Could not build the application for the simulator.');
       return false;
     }
 
-    // Step 2: Assert that the Xcode project was successfully built
+    // Step 2: Assert that the Xcode project was successfully built.
     Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphonesimulator', 'Runner.app'));
     bool bundleExists = await bundle.exists();
     if (!bundleExists) {
-      printError('Could not find the built application bundle at ${bundle.path}');
+      printError('Could not find the built application bundle at ${bundle.path}.');
       return false;
     }
 
-    // Step 2.5: Copy any third-party sevices to the app bundle.
-    await _addServicesToBundle(bundle);
-
-    // Step 3: Install the updated bundle to the simulator
+    // Step 3: Install the updated bundle to the simulator.
     SimControl.install(id, path.absolute(bundle.path));
 
-    // Step 4: Prepare launch arguments
+    // Step 4: Prepare launch arguments.
     List<String> args = <String>[];
 
     if (checked)
@@ -347,7 +342,7 @@ class IOSSimulator extends Device {
     if (debugPort != observatoryDefaultPort)
       args.add("--observatory-port=$debugPort");
 
-    // Step 5: Launch the updated application in the simulator
+    // Step 5: Launch the updated application in the simulator.
     try {
       SimControl.launch(id, app.id, args);
     } catch (error) {
@@ -355,7 +350,7 @@ class IOSSimulator extends Device {
       return false;
     }
 
-    printTrace('Successfully started ${app.name} on $id');
+    printTrace('Successfully started ${app.name} on $id.');
 
     return true;
   }
@@ -575,6 +570,11 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice
   if (!_checkXcodeVersion())
     return false;
 
+  // Before the build, all service definitions must be updated and the dylibs
+  // copied over to a location that is suitable for Xcodebuild to find them.
+
+  await _addServicesToBundle(new Directory(app.localPath));
+
   List<String> commands = <String>[
     '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
   ];
@@ -593,54 +593,49 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice
   }
 }
 
-bool _servicesEnabled = false;
-
 Future _addServicesToBundle(Directory bundle) async {
-  if (_servicesEnabled) {
-    List<Map<String, String>> services = [];
-    await parseServiceConfigs(services);
-    await _fetchFrameworks(services);
-    _copyFrameworksToBundle(bundle.path, services);
+  List<Map<String, String>> services = [];
+  printTrace("Trying to resolve native pub services.");
 
-    generateServiceDefinitions(bundle.path, services, ios: true);
-  }
+  // Step 1: Parse the service configuration yaml files present in the service
+  //         pub packages.
+  await parseServiceConfigs(services);
+  printTrace("Found ${services.length} service definition(s).");
+
+  // Step 2: Copy framework dylibs to the correct spot for xcodebuild to pick up.
+  Directory frameworksDirectory = new Directory(path.join(bundle.path, "Frameworks"));
+  await _copyServiceFrameworks(services, frameworksDirectory);
+
+  // Step 3: Copy the service definitions manifest at the correct spot for
+  //         xcodebuild to pick up.
+  File manifestFile = new File(path.join(bundle.path, "ServiceDefinitions.json"));
+  _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
-Future _fetchFrameworks(List<Map<String, String>> services) async {
+Future _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
+  printTrace("Copying service frameworks to '${path.absolute(frameworksDirectory.path)}'.");
+  frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {
-    String frameworkUrl = service['framework'];
-    service['framework-path'] = await getServiceFromUrl(
-      frameworkUrl, service['root'], service['name'], unzip: true
-    );
-  }
-}
-
-void _copyFrameworksToBundle(String destDir, List<Map<String, String>> services) {
-  // TODO(mpcomplete): check timestamps.
-  for (Map<String, String> service in services) {
-    String basename = path.basename(service['framework-path']);
-    String destPath = path.join(destDir, basename);
-    _copyDirRecursive(service['framework-path'], destPath);
-  }
-}
-
-void _copyDirRecursive(String fromPath, String toPath) {
-  Directory fromDir = new Directory(fromPath);
-  if (!fromDir.existsSync())
-    throw new Exception('Source directory "${fromDir.path}" does not exist');
-
-  Directory toDir = new Directory(toPath);
-  if (!toDir.existsSync())
-    toDir.createSync(recursive: true);
-
-  for (FileSystemEntity entity in fromDir.listSync()) {
-    String newPath = '${toDir.path}/${path.basename(entity.path)}';
-    if (entity is File) {
-      entity.copySync(newPath);
-    } else if (entity is Directory) {
-      _copyDirRecursive(entity.path, newPath);
-    } else {
-      throw new Exception('Unsupported file type for recursive copy.');
+    String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
+    File dylib = new File(dylibPath);
+    printTrace("Copying ${dylib.path} into bundle.");
+    if (!dylib.existsSync()) {
+      printError("The service dylib '${dylib.path}' does not exist.");
+      continue;
     }
-  };
+    // Shell out so permissions on the dylib are preserved.
+    runCheckedSync(['/bin/cp', dylib.path, frameworksDirectory.path]);
+  }
+}
+
+void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File manifest) {
+  printTrace("Creating service definitions manifest at '${manifest.path}'");
+  List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => {
+    'name': service['name'],
+    // Since we have already moved it to the Frameworks directory. Strip away
+    // the directory and basenames.
+    'framework': path.basenameWithoutExtension(service['ios-framework'])
+  }).toList();
+  Map<String, dynamic> json = { 'services' : jsonServices };
+  manifest.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
 }

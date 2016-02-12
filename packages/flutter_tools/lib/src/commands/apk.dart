@@ -271,7 +271,7 @@ int _buildApk(
     builder.compileClassesDex(classesDex, components.jars);
 
     File servicesConfig =
-        generateServiceDefinitions(tempDir.path, components.services, ios: false);
+        generateServiceDefinitions(tempDir.path, components.services);
 
     _AssetBuilder assetBuilder = new _AssetBuilder(tempDir, 'assets');
     assetBuilder.add(components.icuData, 'icudtl.dat');
