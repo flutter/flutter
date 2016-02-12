@@ -34,6 +34,9 @@ Future<String> _getCompilerPath(BuildConfiguration config) async {
     String compilerPath = path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
     if (FileSystemEntity.isFileSync(compilerPath))
       return compilerPath;
+    compilerPath = path.join(config.buildDir, 'sky_snapshot');
+    if (FileSystemEntity.isFileSync(compilerPath))
+      return compilerPath;
     return null;
   }
   Artifact artifact = ArtifactStore.getArtifact(
