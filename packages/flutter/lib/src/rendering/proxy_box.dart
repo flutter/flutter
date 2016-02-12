@@ -1264,9 +1264,43 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
+    int debugPreviousCanvasSaveCount;
+    canvas.save();
+    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; });
     canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
-    canvas.translate(-offset.dx, -offset.dy);
+    assert(() {
+      // This isn't perfect. For example, we can't catch the case of
+      // someone first restoring, then setting a transform or whatnot,
+      // then saving.
+      // If this becomes a real problem, we could add logic to the
+      // Canvas class to lock the canvas at a particular save count
+      // such that restore() fails if it would take the lock count
+      // below that number.
+      int debugNewCanvasSaveCount = canvas.getSaveCount();
+      if (debugNewCanvasSaveCount > debugPreviousCanvasSaveCount) {
+        throw new RenderingError(
+          'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
+          '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
+          'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
+          'than it called canvas.restore().\n'
+          'This leaves the canvas in an inconsistent state and will probably result in a broken display.\n'
+          'You must pair each call to save()/saveLayer() with a later matching call to restore().'
+        );
+      }
+      if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
+        throw new RenderingError(
+          'The $painter custom painter called canvas.restore() '
+          '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
+          'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
+          'than it called canvas.save() or canvas.saveLayer().\n'
+          'This leaves the canvas in an inconsistent state and will result in a broken display.\n'
+          'You should only call restore() if you first called save() or saveLayer().'
+        );
+      }
+      return debugNewCanvasSaveCount == debugPreviousCanvasSaveCount;
+    });
+    canvas.restore();
   }
 
   void paint(PaintingContext context, Offset offset) {
