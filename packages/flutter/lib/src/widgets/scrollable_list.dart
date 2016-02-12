@@ -77,7 +77,7 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
   Widget buildContent(BuildContext context) {
     return new ListViewport(
       onExtentsChanged: _handleExtentsChanged,
-      startOffset: scrollOffset,
+      scrollOffset: scrollOffset,
       scrollDirection: config.scrollDirection,
       scrollAnchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
@@ -92,7 +92,7 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
 class _VirtualListViewport extends VirtualViewport {
   _VirtualListViewport(
     this.onExtentsChanged,
-    this.startOffset,
+    this.scrollOffset,
     this.scrollDirection,
     this.scrollAnchor,
     this.itemExtent,
@@ -105,13 +105,40 @@ class _VirtualListViewport extends VirtualViewport {
   }
 
   final ExtentsChangedCallback onExtentsChanged;
-  final double startOffset;
+  final double scrollOffset;
   final Axis scrollDirection;
   final ViewportAnchor scrollAnchor;
   final double itemExtent;
   final bool itemsWrap;
   final EdgeDims padding;
   final Painter overlayPainter;
+
+  double get _leadingPadding {
+    switch (scrollDirection) {
+      case Axis.vertical:
+        switch (scrollAnchor) {
+          case ViewportAnchor.start:
+            return padding.top;
+          case ViewportAnchor.end:
+            return padding.bottom;
+        }
+        break;
+      case Axis.horizontal:
+        switch (scrollAnchor) {
+          case ViewportAnchor.start:
+            return padding.left;
+          case ViewportAnchor.end:
+            return padding.right;
+        }
+        break;
+    }
+  }
+
+  double get startOffset {
+    if (padding == null)
+      return scrollOffset;
+    return scrollOffset - _leadingPadding;
+  }
 
   RenderList createRenderObject() => new RenderList(itemExtent: itemExtent);
 
@@ -156,32 +183,15 @@ class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListVie
 
     double containerExtent;
     double contentExtent;
-    double leadingPadding;
 
     switch (widget.scrollDirection) {
       case Axis.vertical:
         containerExtent = containerSize.height;
         contentExtent = length == null ? double.INFINITY : widget.itemExtent * length + padding.vertical;
-        switch (widget.scrollAnchor) {
-          case ViewportAnchor.start:
-            leadingPadding = padding.top;
-            break;
-          case ViewportAnchor.end:
-            leadingPadding = padding.bottom;
-            break;
-        }
         break;
       case Axis.horizontal:
         containerExtent = renderObject.size.width;
         contentExtent = length == null ? double.INFINITY : widget.itemExtent * length + padding.horizontal;
-        switch (widget.scrollAnchor) {
-          case ViewportAnchor.start:
-            leadingPadding = padding.left;
-            break;
-          case ViewportAnchor.end:
-            leadingPadding = padding.right;
-            break;
-        }
         break;
     }
 
@@ -191,8 +201,9 @@ class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListVie
       _startOffsetBase = 0.0;
       _startOffsetLimit = double.INFINITY;
     } else {
-      int startItem = math.max(0, (widget.startOffset - leadingPadding) ~/ itemExtent);
-      int limitItem = math.max(0, ((widget.startOffset - leadingPadding + containerExtent) / itemExtent).ceil());
+      final double startOffset = widget.startOffset;
+      int startItem = math.max(0, startOffset ~/ itemExtent);
+      int limitItem = math.max(0, ((startOffset + containerExtent) / itemExtent).ceil());
 
       if (!widget.itemsWrap && length != null) {
         startItem = math.min(length, startItem);
@@ -232,7 +243,7 @@ class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListVie
 class ListViewport extends _VirtualListViewport with VirtualViewportIterableMixin {
   ListViewport({
     ExtentsChangedCallback onExtentsChanged,
-    double startOffset: 0.0,
+    double scrollOffset: 0.0,
     Axis scrollDirection: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     double itemExtent,
@@ -242,7 +253,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportIterableMixi
     this.children
   }) : super(
     onExtentsChanged,
-    startOffset,
+    scrollOffset,
     scrollDirection,
     scrollAnchor,
     itemExtent,
@@ -327,7 +338,7 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
   Widget buildContent(BuildContext context) {
     return new LazyListViewport(
       onExtentsChanged: _handleExtentsChanged,
-      startOffset: scrollOffset,
+      scrollOffset: scrollOffset,
       scrollDirection: config.scrollDirection,
       scrollAnchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
@@ -342,7 +353,7 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
 class LazyListViewport extends _VirtualListViewport with VirtualViewportLazyMixin {
   LazyListViewport({
     ExtentsChangedCallback onExtentsChanged,
-    double startOffset: 0.0,
+    double scrollOffset: 0.0,
     Axis scrollDirection: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     double itemExtent,
@@ -352,7 +363,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportLazyMixi
     this.itemBuilder
   }) : super(
     onExtentsChanged,
-    startOffset,
+    scrollOffset,
     scrollDirection,
     scrollAnchor,
     itemExtent,

@@ -102,18 +102,19 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
       // If we don't already need layout, we need to request a layout if the
       // viewport has shifted to expose new children.
       if (!renderObject.needsLayout) {
+        final double startOffset = widget.startOffset;
         bool shouldLayout = false;
         if (startOffsetBase != null) {
-          if (widget.startOffset < startOffsetBase)
+          if (startOffset < startOffsetBase)
             shouldLayout = true;
-          else if (widget.startOffset == startOffsetBase && oldWidget?.startOffset != startOffsetBase)
+          else if (startOffset == startOffsetBase && oldWidget?.startOffset != startOffsetBase)
             shouldLayout = true;
         }
 
         if (startOffsetLimit != null) {
-          if (widget.startOffset > startOffsetLimit)
+          if (startOffset > startOffsetLimit)
             shouldLayout = true;
-          else if (widget.startOffset == startOffsetLimit && oldWidget?.startOffset != startOffsetLimit)
+          else if (startOffset == startOffsetLimit && oldWidget?.startOffset != startOffsetLimit)
             shouldLayout = true;
         }
 
