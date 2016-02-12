@@ -199,7 +199,9 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
       feedback: config.feedback,
       feedbackOffset: config.feedbackOffset,
       onDragEnd: () {
-        _activeCount -= 1;
+        setState(() {
+          _activeCount -= 1;
+        });
       }
     );
   }
