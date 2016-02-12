@@ -48,6 +48,7 @@ minikin_shared_libraries := \
 LOCAL_MODULE := libminikin
 LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
 LOCAL_SRC_FILES := $(minikin_src_files)
+LOCAL_CFLAGS := -Wno-unused-parameter
 LOCAL_C_INCLUDES := $(minikin_c_includes)
 LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
 LOCAL_CLANG := true
@@ -60,8 +61,8 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libminikin
-LOCAL_MODULE_TAGS := optional
 LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
+LOCAL_CFLAGS := -Wno-unused-parameter
 LOCAL_SRC_FILES := $(minikin_src_files)
 LOCAL_C_INCLUDES := $(minikin_c_includes)
 LOCAL_SHARED_LIBRARIES := $(minikin_shared_libraries)
@@ -77,7 +78,6 @@ include $(CLEAR_VARS)
 # Reduced library (currently just hyphenation) for host
 
 LOCAL_MODULE := libminikin_host
-LOCAL_MODULE_TAGS := optional
 LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
 LOCAL_C_INCLUDES := $(minikin_c_includes)
 LOCAL_SHARED_LIBRARIES := liblog libicuuc-host
