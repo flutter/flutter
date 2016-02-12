@@ -75,6 +75,8 @@ class Tween<T extends dynamic> extends Animatable<T> {
       return end;
     return lerp(t);
   }
+
+  String toString() => '$runtimeType($begin \u2192 $end)';
 }
 
 /// An interpolation between two colors.

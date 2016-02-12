@@ -285,5 +285,5 @@ class ThemeData {
     );
   }
 
-  String toString() => '$primaryColor $brightness etc...';
+  String toString() => '$runtimeType($brightness $primaryColor etc...)';
 }
