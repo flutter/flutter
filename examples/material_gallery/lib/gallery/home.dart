@@ -28,6 +28,7 @@ import '../demo/tabs_demo.dart';
 import '../demo/tabs_fab_demo.dart';
 import '../demo/time_picker_demo.dart';
 import '../demo/two_level_list_demo.dart';
+import '../demo/typography_demo.dart';
 import '../demo/weathers_demo.dart';
 
 class GalleryHome extends StatefulComponent {
@@ -72,7 +73,8 @@ class GalleryHomeState extends State<GalleryHome> {
                   image: 'assets/section_style.png',
                   colors: Colors.green,
                   demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Colors', builder: () => new ColorsDemo())
+                    new GalleryDemo(title: 'Colors', builder: () => new ColorsDemo()),
+                    new GalleryDemo(title: 'Typography', builder: () => new TypographyDemo())
                   ]
                 )
               ]
