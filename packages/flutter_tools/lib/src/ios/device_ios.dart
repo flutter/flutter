@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/globals.dart';
 import '../base/process.dart';
@@ -173,7 +174,7 @@ class IOSDevice extends Device {
     printTrace('Building ${app.name} for $id');
 
     // Step 1: Install the precompiled application if necessary
-    bool buildResult = await _buildIOSXcodeProject(app, true);
+    bool buildResult = await _buildIOSXcodeProject(app, buildForDevice: true);
     if (!buildResult) {
       printError('Could not build the precompiled application for the device');
       return false;
@@ -314,7 +315,7 @@ class IOSSimulator extends Device {
       this.clearLogs();
 
     // Step 1: Build the Xcode project
-    bool buildResult = await _buildIOSXcodeProject(app, false);
+    bool buildResult = await _buildIOSXcodeProject(app, buildForDevice: false);
     if (!buildResult) {
       printError('Could not build the application for the simulator');
       return false;
@@ -335,19 +336,16 @@ class IOSSimulator extends Device {
     SimControl.install(id, path.absolute(bundle.path));
 
     // Step 4: Prepare launch arguments
-    List<String> args = [];
+    List<String> args = <String>[];
 
-    if (checked) {
+    if (checked)
       args.add("--enable-checked-mode");
-    }
 
-    if (startPaused) {
+    if (startPaused)
       args.add("--start-paused");
-    }
 
-    if (debugPort != observatoryDefaultPort) {
+    if (debugPort != observatoryDefaultPort)
       args.add("--observatory-port=$debugPort");
-    }
 
     // Step 5: Launch the updated application in the simulator
     SimControl.launch(id, app.id, args);
@@ -519,11 +517,37 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async {
+bool _validateEngineRevision(ApplicationPackage app) {
+  String skyRevision = ArtifactStore.engineRevision;
+  String iosRevision = _getIOSEngineRevision(app);
+
+  if (iosRevision != skyRevision) {
+    printError("Error: incompatible sky_engine revision; please run 'flutter ios --init' to update.");
+    printStatus('sky_engine revision: $skyRevision, iOS engine revision: $iosRevision');
+    return false;
+  } else {
+    printTrace('sky_engine revision: $skyRevision, iOS engine revision: $iosRevision');
+    return true;
+  }
+}
+
+String _getIOSEngineRevision(ApplicationPackage app) {
+  File revisionFile = new File(path.join(app.localPath, 'REVISION'));
+  if (revisionFile.existsSync()) {
+    return revisionFile.readAsStringSync().trim();
+  } else {
+    return null;
+  }
+}
+
+Future<bool> _buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice }) async {
   if (!FileSystemEntity.isDirectorySync(app.localPath)) {
     printError('Path "${path.absolute(app.localPath)}" does not exist.\nDid you run `flutter ios --init`?');
     return false;
   }
+
+  if (!_validateEngineRevision(app))
+    return false;
 
   if (!_checkXcodeVersion())
     return false;
@@ -532,7 +556,7 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
     '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
   ];
 
-  if (isDevice) {
+  if (buildForDevice) {
     commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
   } else {
     commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
@@ -546,9 +570,10 @@ Future<bool> _buildIOSXcodeProject(ApplicationPackage app, bool isDevice) async 
   }
 }
 
-bool enabled = false;
+bool _servicesEnabled = false;
+
 Future _addServicesToBundle(Directory bundle) async {
-  if (enabled) {
+  if (_servicesEnabled) {
     List<Map<String, String>> services = [];
     await parseServiceConfigs(services);
     await _fetchFrameworks(services);
@@ -562,7 +587,8 @@ Future _fetchFrameworks(List<Map<String, String>> services) async {
   for (Map<String, String> service in services) {
     String frameworkUrl = service['framework'];
     service['framework-path'] = await getServiceFromUrl(
-       frameworkUrl, service['root'], service['name'], unzip: true);
+      frameworkUrl, service['root'], service['name'], unzip: true
+    );
   }
 }
 
