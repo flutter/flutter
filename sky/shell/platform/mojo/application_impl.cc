@@ -4,6 +4,8 @@
 
 #include "sky/shell/platform/mojo/application_impl.h"
 
+#include "base/files/file_util.h"
+#include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "sky/shell/platform/mojo/view_impl.h"
 
@@ -14,10 +16,14 @@ ApplicationImpl::ApplicationImpl(
   mojo::InterfaceRequest<mojo::Application> application,
   mojo::URLResponsePtr response)
   : binding_(this, application.Pass()),
-    initial_response_(response.Pass()) {
+    initial_response_(response.Pass()),
+    view_created_(false) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
+  if (!flx_path_.empty()) {
+    base::DeleteFile(flx_path_, false);
+  }
 }
 
 void ApplicationImpl::Initialize(mojo::ShellPtr shell,
@@ -59,10 +65,12 @@ void ApplicationImpl::CreateView(
     mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
     mojo::ServiceProviderPtr incoming_services,
     const mojo::ui::ViewProvider::CreateViewCallback& callback) {
-  if (!bundle_) {
+  if (view_created_) {
     LOG(ERROR) << "We only support creating one view.";
     return;
   }
+
+  view_created_ = true;
 
   ServicesDataPtr services = ServicesData::New();
   services->shell = shell_.Pass();
@@ -71,16 +79,27 @@ void ApplicationImpl::CreateView(
   services->services_provided_to_embedder = outgoing_services.Pass();
 
   ViewImpl* view = new ViewImpl(services.Pass(), url_, callback);
-  view->Run(bundle_.Pass());
+  view->Run(flx_path_);
 }
 
 void ApplicationImpl::UnpackInitialResponse(mojo::Shell* shell) {
   DCHECK(initial_response_);
-  DCHECK(!bundle_);
-  mojo::asset_bundle::AssetUnpackerPtr unpacker;
-  mojo::ConnectToService(shell, "mojo:asset_bundle", &unpacker);
-  unpacker->UnpackZipStream(initial_response_->body.Pass(),
-                            mojo::GetProxy(&bundle_));
+  DCHECK(flx_path_.empty());
+
+  if (!base::CreateTemporaryFile(&flx_path_)) {
+    LOG(ERROR) << "Unable to create temporary file";
+    return;
+  }
+  FILE* temp_file = base::OpenFile(flx_path_, "w");
+  if (temp_file == nullptr) {
+    LOG(ERROR) << "Unable to open temporary file";
+    return;
+  }
+
+  mojo::common::BlockingCopyToFile(initial_response_->body.Pass(),
+                                   temp_file);
+  base::CloseFile(temp_file);
+
   initial_response_ = nullptr;
 }
 

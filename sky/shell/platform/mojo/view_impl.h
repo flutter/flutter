@@ -8,7 +8,6 @@
 #include "base/macros.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
-#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
 #include "mojo/services/ui/input/interfaces/input_connection.mojom.h"
 #include "mojo/services/ui/views/interfaces/view_manager.mojom.h"
@@ -29,7 +28,7 @@ class ViewImpl : public mojo::ui::View,
            const mojo::ui::ViewProvider::CreateViewCallback& callback);
   ~ViewImpl() override;
 
-  void Run(mojo::asset_bundle::AssetBundlePtr bundle);
+  void Run(base::FilePath flx_path);
 
  private:
   // mojo::ui::View

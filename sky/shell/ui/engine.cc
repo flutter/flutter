@@ -11,7 +11,6 @@
 #include "base/trace_event/trace_event.h"
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
-#include "services/asset_bundle/asset_unpacker_job.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
@@ -30,24 +29,10 @@ namespace {
 
 const char kSnapshotKey[] = "snapshot_blob.bin";
 
-void Ignored(bool) {
-  TRACE_EVENT_ASYNC_END0("flutter", "AssetUnpackerJobFetch", 1);
-}
-
-mojo::ScopedDataPipeConsumerHandle Fetch(const base::FilePath& path) {
-  TRACE_EVENT_ASYNC_BEGIN0("flutter", "AssetUnpackerJobFetch", 1);
-  mojo::DataPipe pipe;
-  auto runner = base::WorkerPool::GetTaskRunner(true);
-  mojo::common::CopyFromFile(base::FilePath(path), pipe.producer_handle.Pass(),
-                             0, runner.get(), base::Bind(&Ignored));
-  return pipe.consumer_handle.Pass();
-}
-
 PlatformImpl* g_platform_impl = nullptr;
 
 }  // namespace
 
-using mojo::asset_bundle::AssetUnpackerJob;
 using mojo::asset_bundle::ZipAssetBundle;
 
 Engine::Config::Config() {
@@ -199,10 +184,11 @@ void Engine::RunFromSnapshotStream(
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
-  AssetUnpackerJob* unpacker = new AssetUnpackerJob(
-      mojo::GetProxy(&root_bundle_), base::WorkerPool::GetTaskRunner(true));
+
   std::string path_str = bundle_path;
-  unpacker->Unpack(Fetch(base::FilePath(path_str)));
+  ZipAssetBundle::Create(mojo::GetProxy(&root_bundle_),
+                         base::FilePath(path_str),
+                         base::WorkerPool::GetTaskRunner(true));
 
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView("http://localhost");
@@ -232,16 +218,6 @@ void Engine::RunFromBundle(const mojo::String& path) {
   root_bundle_->GetAsStream(kSnapshotKey,
                             base::Bind(&Engine::RunFromSnapshotStream,
                                        weak_factory_.GetWeakPtr(), path_str));
-}
-
-void Engine::RunFromAssetBundle(const mojo::String& url,
-                                mojo::asset_bundle::AssetBundlePtr bundle) {
-  TRACE_EVENT0("flutter", "Engine::RunFromAssetBundle");
-  std::string url_str = url;
-  root_bundle_ = bundle.Pass();
-  root_bundle_->GetAsStream(kSnapshotKey,
-                            base::Bind(&Engine::RunFromSnapshotStream,
-                                       weak_factory_.GetWeakPtr(), url_str));
 }
 
 void Engine::RunFromBundleAndSnapshot(const mojo::String& bundle_path,

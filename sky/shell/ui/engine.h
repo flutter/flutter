@@ -65,8 +65,6 @@ class Engine : public UIDelegate,
                    const mojo::String& package_root) override;
   void RunFromPrecompiledSnapshot(const mojo::String& bundle_path) override;
   void RunFromBundle(const mojo::String& path) override;
-  void RunFromAssetBundle(const mojo::String& url,
-                          mojo::asset_bundle::AssetBundlePtr bundle) override;
   void RunFromBundleAndSnapshot(const mojo::String& bundle_path,
                                 const mojo::String& snapshot_path) override;
   void PushRoute(const mojo::String& route) override;

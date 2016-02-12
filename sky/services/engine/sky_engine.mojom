@@ -54,8 +54,6 @@ interface SkyEngine {
   RunFromPrecompiledSnapshot(string path);
   RunFromBundle(string path);
 
-  RunFromAssetBundle(string url, mojo.asset_bundle.AssetBundle bundle);
-
   // Run the app from a bundle, but obtain the snapshot from snapshot_path
   // instead of using the snapshot within the bundle.
   RunFromBundleAndSnapshot(string bundle_path, string snapshot_path);
