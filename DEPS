@@ -138,16 +138,6 @@ hooks = [
     'action': ['python', 'src/tools/dart/update.py'],
   },
   {
-    # This downloads SDK extras and puts them in the
-    # third_party/android_tools/sdk/extras directory on the bots. Developers
-    # need to manually install these packages and accept the ToS.
-    'name': 'sdkextras',
-    'pattern': '.',
-    # When adding a new sdk extras package to download, add the package
-    # directory and zip file to .gitignore in third_party/android_tools.
-    'action': ['python', 'src/build/download_sdk_extras.py'],
-  },
-  {
     # Update LASTCHANGE. This is also run by export_tarball.py in
     # src/tools/export_tarball - please keep them in sync.
     'name': 'lastchange',
