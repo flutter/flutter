@@ -169,7 +169,9 @@ void main() {
       expect(events, equals(<String>['tap', 'tap', 'drop']));
       events.clear();
     });
+  });
 
+  test('Drag and drop - tapping button', () {
     testWidgets((WidgetTester tester) {
       TestPointer pointer = new TestPointer(7);
 
@@ -230,6 +232,113 @@ void main() {
       events.clear();
 
     });
+  });
 
+  test('Drag and drop - long press draggable, short press', () {
+    testWidgets((WidgetTester tester) {
+      TestPointer pointer = new TestPointer(7);
+
+      List<String> events = <String>[];
+      Point firstLocation, secondLocation;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) { return new Column(
+            children: <Widget>[
+              new LongPressDraggable(
+                data: 1,
+                child: new Text('Source'),
+                feedback: new Text('Dragging')
+              ),
+              new DragTarget(
+                builder: (context, data, rejects) {
+                  return new Text('Target');
+                },
+                onAccept: (data) {
+                  events.add('drop');
+                }
+              ),
+            ]);
+          },
+        }
+      ));
+
+      expect(events, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Target'), isNotNull);
+
+      expect(events, isEmpty);
+      tester.tap(tester.findText('Source'));
+      expect(events, isEmpty);
+
+      firstLocation = tester.getCenter(tester.findText('Source'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+
+      expect(events, isEmpty);
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, isEmpty);
+
+    });
+  });
+
+  test('Drag and drop - long press draggable, long press', () {
+    testWidgets((WidgetTester tester) {
+      TestPointer pointer = new TestPointer(7);
+
+      List<String> events = <String>[];
+      Point firstLocation, secondLocation;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) { return new Column(
+            children: <Widget>[
+              new Draggable(
+                data: 1,
+                child: new Text('Source'),
+                feedback: new Text('Dragging')
+              ),
+              new DragTarget(
+                builder: (context, data, rejects) {
+                  return new Text('Target');
+                },
+                onAccept: (data) {
+                  events.add('drop');
+                }
+              ),
+            ]);
+          },
+        }
+      ));
+
+      expect(events, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Target'), isNotNull);
+
+      expect(events, isEmpty);
+      tester.tap(tester.findText('Source'));
+      expect(events, isEmpty);
+
+      firstLocation = tester.getCenter(tester.findText('Source'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+
+      tester.pump(const Duration(seconds: 20));
+
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+
+      expect(events, isEmpty);
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop']));
+
+    });
   });
 }
