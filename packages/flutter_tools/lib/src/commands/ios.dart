@@ -167,19 +167,27 @@ class IOSCommand extends FlutterCommand {
       return 1;
     }
 
-    // Step 3: Setup default user editable files if this is the first run of
+    // Step 3: The generated project should NOT be checked into the users
+    //         version control system. Be nice and write a gitignore for them if
+    //         one does not exist.
+    File generatedGitignore = new File(path.join(iosFilesPath, ".gitignore"));
+    if (!generatedGitignore.existsSync()) {
+      generatedGitignore.writeAsStringSync("Generated/\n");
+    }
+
+    // Step 4: Setup default user editable files if this is the first run of
     //         the init command.
     _writeUserEditableFilesIfNecessary(iosFilesPath);
 
-    // Step 3: Populate the Local.xcconfig with project specific paths
+    // Step 5: Populate the Local.xcconfig with project specific paths
     _setupXcodeProjXcconfig(path.join(xcodeprojPath, "Local.xcconfig"));
 
-    // Step 4: Write the REVISION file
+    // Step 6: Write the REVISION file
     File revisionFile = new File(path.join(xcodeprojPath, "REVISION"));
     revisionFile.createSync();
     revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
 
-    // Step 5: Tell the user the location of the generated project.
+    // Step 7: Tell the user the location of the generated project.
     printStatus("An Xcode project has been placed in 'ios/'.");
     printStatus("You may edit it to modify iOS specific configuration.");
     return 0;
