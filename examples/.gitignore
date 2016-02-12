@@ -5,6 +5,5 @@
 .packages
 .pub/
 build/
-ios/Generated/
 packages
 pubspec.lock
