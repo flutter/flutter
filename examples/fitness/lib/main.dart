@@ -6,7 +6,6 @@ library fitness;
 
 import 'package:playfair/playfair.dart' as playfair;
 import 'package:flutter/material.dart';
-import 'package:gcm/gcm.dart' as gcm;
 
 import 'user_data.dart';
 import 'date_utils.dart';
@@ -161,19 +160,6 @@ class FitnessAppState extends State<FitnessApp> {
   }
 }
 
-initGcm() async {
-  // Register for GCM messages using the senderId provided in the
-  // google-services.json we received when registering our app.
-  String token;
-  token = await gcm.registerGcmService(
-      "858790231562", (String from, String message) {
-    print("onMessageReceived: $from; $message");
-    gcm.unsubscribeTopics(token, ["global"]);
-  });
-  gcm.subscribeTopics(token, ["global"]);
-}
-
 main() {
-  initGcm();
   runApp(new FitnessApp());
 }
