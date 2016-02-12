@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -49,7 +47,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = backgroundColor
-      ..style = ui.PaintingStyle.fill;
+      ..style = PaintingStyle.fill;
     canvas.drawRect(Point.origin & size, paint);
 
     paint.color = valueColor;
@@ -151,18 +149,18 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     Paint paint = new Paint()
       ..color = valueColor
       ..strokeWidth = _kCircularProgressIndicatorStrokeWidth
-      ..style = ui.PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;
 
-    // Determinite
     if (value != null) {
+      // Determinite
       double angle = value.clamp(0.0, 1.0) * _kSweep;
       Path path = new Path()
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
 
-    // Non-determinite
     } else {
-      paint.strokeCap = ui.StrokeCap.square;
+      // Non-determinite
+      paint.strokeCap = StrokeCap.square;
 
       double arcSweep = math.max(headValue * 3 / 2 * math.PI - tailValue * 3 / 2 * math.PI, _kEpsilon);
       Path path = new Path()
@@ -213,8 +211,8 @@ class CircularProgressIndicator extends ProgressIndicator {
 }
 // TODO(jestelle) This should probably go somewhere else?  And maybe be more
 // general?
-class RepeatingCurveTween extends Animatable<double> {
-  RepeatingCurveTween({ this.curve, this.repeats });
+class _RepeatingCurveTween extends Animatable<double> {
+  _RepeatingCurveTween({ this.curve, this.repeats });
 
   Curve curve;
   int repeats;
@@ -233,8 +231,8 @@ class RepeatingCurveTween extends Animatable<double> {
 
 // TODO(jestelle) This should probably go somewhere else?  And maybe be more
 // general?  Or maybe the IntTween should actually work this way?
-class StepTween extends Tween<int> {
-  StepTween({ int begin, int end }) : super(begin: begin, end: end);
+class _StepTween extends Tween<int> {
+  _StepTween({ int begin, int end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
@@ -242,31 +240,29 @@ class StepTween extends Tween<int> {
 }
 
 // Tweens used by circular progress indicator
-final RepeatingCurveTween _kStrokeHeadTween =
-    new RepeatingCurveTween(
+final _RepeatingCurveTween _kStrokeHeadTween =
+    new _RepeatingCurveTween(
         curve:new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
         repeats:5);
 
-final RepeatingCurveTween _kStrokeTailTween =
-    new RepeatingCurveTween(
+final _RepeatingCurveTween _kStrokeTailTween =
+    new _RepeatingCurveTween(
         curve:new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
         repeats:5);
 
-final StepTween _kStepTween = new StepTween(begin:0, end:5);
+final _StepTween _kStepTween = new _StepTween(begin:0, end:5);
 
-final RepeatingCurveTween _kRotationTween =
-    new RepeatingCurveTween(curve:Curves.linear, repeats:5);
+final _RepeatingCurveTween _kRotationTween =
+    new _RepeatingCurveTween(curve:Curves.linear, repeats:5);
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
-  Animation<double> _animation;
-  AnimationController _controller;
+  AnimationController _animationController;
 
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _animationController = new AnimationController(
       duration: const Duration(milliseconds: 6666)
     )..repeat();
-    _animation = new CurvedAnimation(parent: _controller, curve: Curves.linear);
   }
 
   Widget build(BuildContext context) {
@@ -274,13 +270,13 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
       return config._buildIndicator(context, 0.0, 0.0, 0, 0.0);
 
     return new AnimatedBuilder(
-      animation: _animation,
+      animation: _animationController,
       builder: (BuildContext context, Widget child) {
         return config._buildIndicator(context,
-            _kStrokeHeadTween.evaluate(_animation),
-            _kStrokeTailTween.evaluate(_animation),
-            _kStepTween.evaluate(_animation),
-            _kRotationTween.evaluate(_animation));
+            _kStrokeHeadTween.evaluate(_animationController),
+            _kStrokeTailTween.evaluate(_animationController),
+            _kStepTween.evaluate(_animationController),
+            _kRotationTween.evaluate(_animationController));
       }
     );
   }
