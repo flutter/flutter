@@ -237,6 +237,7 @@
 				9E07CF981BE8280A00BCD8DE /* Resources */,
 				9E07CFB91BE82D2600BCD8DE /* Embed Frameworks */,
 				9E40465C1C1B6DEC00A4B87C /* Replace Fake Runner with Actual Flutter Runner */,
+				9EA2FB831C6E940F00670B03 /* Copy Native Service Assets */,
 			);
 			buildRules = (
 			);
@@ -349,6 +350,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "rm ${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Runner; cp ${FLUTTER_ARCH_TOOLS_PATH}/FlutterRunner ${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Runner";
+			showEnvVarsInLog = 0;
+		};
+		9EA2FB831C6E940F00670B03 /* Copy Native Service Assets */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Native Service Assets";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SERVICE_FRAMEWORKS_DIR=${SOURCE_ROOT}/Frameworks\nSERVICE_DEFINITIONS=${SOURCE_ROOT}/ServiceDefinitions.json\nAPPLICATION_BUNDLE=${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}\n\n# Copy Service Dylibs\nif [ -d \"${SERVICE_FRAMEWORKS_DIR}\" ]; then\nditto ${SERVICE_FRAMEWORKS_DIR} ${APPLICATION_BUNDLE}/Frameworks\nfi\n\n# Copy Service Definitions\nif [ -f \"${SERVICE_DEFINITIONS}\" ]; then\ncp ${SERVICE_DEFINITIONS} ${APPLICATION_BUNDLE}/\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		9EBB2F351BF675C200177634 /* Ensure `pub get` */ = {
