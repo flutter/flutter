@@ -59,6 +59,11 @@ class IOSCommand extends FlutterCommand {
     tempFile.writeAsBytesSync(archiveBytes);
 
     try {
+      // Remove the old generated project if one is present
+      runCheckedSync(['/bin/rm', '-rf', directory]);
+      // Create the directory so unzip can write to it
+      runCheckedSync(['/bin/mkdir', '-p', directory]);
+      // Unzip the Xcode project into the new empty directory
       runCheckedSync(['/usr/bin/unzip', tempFile.path, '-d', directory]);
     } catch (error) {
       return false;
@@ -111,7 +116,7 @@ class IOSCommand extends FlutterCommand {
 
   Future<int> _runInitCommand() async {
     // Step 1: Fetch the archive from the cloud
-    String xcodeprojPath = path.join(Directory.current.path, "ios");
+    String xcodeprojPath = path.join(Directory.current.path, "ios", "Generated");
     List<int> archiveBytes = await _fetchXcodeArchive();
 
     if (archiveBytes.isEmpty) {
@@ -122,9 +127,7 @@ class IOSCommand extends FlutterCommand {
     // Step 2: Inflate the archive into the user project directory
     bool result = await _inflateXcodeArchive(xcodeprojPath, archiveBytes);
     if (!result) {
-      printError("Error: Could not init the Xcode project: the 'ios' directory already exists.");
-      printError("To proceed, remove the 'ios' directory and try again.");
-      printError("Warning: You may have made manual changes to files in the 'ios' directory.");
+      printError("Could not inflate the Xcode project archive.");
       return 1;
     }
 
