@@ -362,7 +362,7 @@ class ScaffoldState extends State<Scaffold> {
 
   bool _shouldShowBackArrow;
 
-  Widget _getModifiedToolBar({ EdgeDims padding, double foregroundOpacity: 1.0, int elevation: 4 }) {
+  Widget _getModifiedToolBar({ EdgeDims padding, double foregroundOpacity: 1.0, int elevation }) {
     ToolBar toolBar = config.toolBar;
     if (toolBar == null)
       return null;
@@ -387,7 +387,7 @@ class ScaffoldState extends State<Scaffold> {
       }
     }
     return toolBar.copyWith(
-      elevation: elevation,
+      elevation: elevation ?? toolBar.elevation ?? 4,
       padding: toolBarPadding,
       foregroundOpacity: foregroundOpacity,
       left: left
