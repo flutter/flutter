@@ -28,7 +28,6 @@ class PageableList extends Scrollable {
     ScrollListener onScroll,
     ScrollListener onScrollEnd,
     SnapOffsetCallback snapOffsetCallback,
-    double snapAlignmentOffset: 0.0,
     this.itemsWrap: false,
     this.itemsSnapAlignment: ItemsSnapAlignment.adjacentItem,
     this.onPageChanged,
@@ -44,8 +43,7 @@ class PageableList extends Scrollable {
     onScrollStart: onScrollStart,
     onScroll: onScroll,
     onScrollEnd: onScrollEnd,
-    snapOffsetCallback: snapOffsetCallback,
-    snapAlignmentOffset: snapAlignmentOffset
+    snapOffsetCallback: snapOffsetCallback
   );
 
   final bool itemsWrap;

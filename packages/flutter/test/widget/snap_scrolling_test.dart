@@ -20,7 +20,7 @@ Widget buildItem(int item) {
   );
 }
 
-double snapOffsetCallback(double offset) {
+double snapOffsetCallback(double offset, Size size) {
   return (offset / itemExtent).floor() * itemExtent;
 }
 
