@@ -302,7 +302,7 @@ hb_blob_t* referenceTable(hb_face_t* face, hb_tag_t tag, void* userData)  {
         return 0;
     }
     ok = font->GetTable(tag, reinterpret_cast<uint8_t*>(buffer), &length);
-    printf("referenceTable %c%c%c%c length=%d %d\n",
+    printf("referenceTable %c%c%c%c length=%zu %d\n",
         (tag >>24) & 0xff, (tag>>16)&0xff, (tag>>8)&0xff, tag&0xff, length, ok);
     if (!ok) {
         free(buffer);
@@ -810,7 +810,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 if (info[i].cluster - start < count) {
                     mAdvances[info[i].cluster - start] += xAdvance;
                 } else {
-                    ALOGE("cluster %d (start %d) out of bounds of count %d",
+                    ALOGE("cluster %ul (start %zu) out of bounds of count %zu",
                         info[i].cluster - start, start, count);
                 }
                 x += xAdvance;
