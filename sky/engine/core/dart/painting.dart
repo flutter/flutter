@@ -211,7 +211,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   void saveLayer(Rect bounds, Paint paint) native "Canvas_saveLayer";
   void restore() native "Canvas_restore";
   
-  /// returns 1 for a clean canvas; each call to save() or saveLayer() increments it, and each call to 
+  /// Returns 1 for a clean canvas; each call to save() or saveLayer()
+  /// increments it, and each call to restore() decrements it.
   int getSaveCount() native "Canvas_getSaveCount";
   
   void translate(double dx, double dy) native "Canvas_translate";
@@ -248,7 +249,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   void drawPath(Path path, Paint paint) native "Canvas_drawPath";
   void drawImage(Image image, Point p, Paint paint) native "Canvas_drawImage";
 
-  /// Drawss the src rect from the image into the canvas as dst rect.
+  /// Draws the src rect from the image into the canvas as dst rect.
   ///
   /// Might sample from outside the src rect by half the width of an applied
   /// filter.
