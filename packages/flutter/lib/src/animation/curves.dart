@@ -28,6 +28,16 @@ class Linear implements Curve {
   double transform(double t) => t;
 }
 
+/// A sawtooth curve that repeats a given number of times over the unit interval.
+class SawTooth implements Curve {
+  const SawTooth(this.count);
+  final int count;
+  double transform(double t) {
+    t *= count;
+    return t - t.truncateToDouble();
+  }
+}
+
 /// A curve that is 0.0 until start, then curved from 0.0 to 1.0 at end, then 1.0.
 class Interval implements Curve {
   const Interval(this.start, this.end, { this.curve: Curves.linear });
