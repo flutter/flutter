@@ -34,7 +34,7 @@ class AndroidApk extends ApplicationPackage {
   static const String _defaultName = 'SkyShell.apk';
   static const String _defaultId = 'org.domokit.sky.shell';
   static const String _defaultLaunchActivity = '$_defaultId/$_defaultId.SkyActivity';
-  static const String _defaultManifestPath = 'apk/AndroidManifest.xml';
+  static const String _defaultManifestPath = 'android/AndroidManifest.xml';
   static const String _defaultOutputPath = 'build/app.apk';
 
   /// The path to the activity that should be launched.
