@@ -251,7 +251,9 @@ class FlutterDemoState extends State {
 
 final String _apkManifest = '''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.{{projectName}}">
+    package="com.example.{{projectName}}"
+    android:versionCode="1"
+    android:versionName="0.0.1">
 
     <uses-sdk android:minSdkVersion="${android.minApiLevel}" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
