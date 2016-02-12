@@ -12,7 +12,7 @@ const double _kLinearProgressIndicatorHeight = 6.0;
 const double _kMinCircularProgressIndicatorSize = 36.0;
 const double _kCircularProgressIndicatorStrokeWidth = 4.0;
 
-// TODO(hansmuller) implement the support for buffer indicator
+// TODO(hansmuller): implement the support for buffer indicator
 
 abstract class ProgressIndicator extends StatefulComponent {
   ProgressIndicator({
@@ -78,23 +78,6 @@ class LinearProgressIndicator extends ProgressIndicator {
   }) : super(key: key, value: value);
 
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
-
-  Widget _buildIndicator(BuildContext context, double animationValue) {
-    return new Container(
-      constraints: new BoxConstraints.tightFor(
-        width: double.INFINITY,
-        height: _kLinearProgressIndicatorHeight
-      ),
-      child: new CustomPaint(
-        painter: new _LinearProgressIndicatorPainter(
-          backgroundColor: _getBackgroundColor(context),
-          valueColor: _getValueColor(context),
-          value: value,
-          animationValue: animationValue
-        )
-      )
-    );
-  }
 }
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
@@ -109,14 +92,31 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
   }
 
+  Widget _buildIndicator(BuildContext context, double animationValue) {
+    return new Container(
+      constraints: new BoxConstraints.tightFor(
+        width: double.INFINITY,
+        height: _kLinearProgressIndicatorHeight
+      ),
+      child: new CustomPaint(
+        painter: new _LinearProgressIndicatorPainter(
+          backgroundColor: config._getBackgroundColor(context),
+          valueColor: config._getValueColor(context),
+          value: config.value, // may be null
+          animationValue: animationValue // ignored if config.value is not null
+        )
+      )
+    );
+  }
+
   Widget build(BuildContext context) {
     if (config.value != null)
-      return config._buildIndicator(context, _animation.value);
+      return _buildIndicator(context, _animation.value);
 
     return new AnimatedBuilder(
       animation: _animation,
       builder: (BuildContext context, Widget child) {
-        return config._buildIndicator(context, _animation.value);
+        return _buildIndicator(context, _animation.value);
       }
     );
   }
@@ -152,14 +152,14 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     if (value != null) {
-      // Determinite
+      // Determinate
       double angle = value.clamp(0.0, 1.0) * _kSweep;
       Path path = new Path()
         ..arcTo(Point.origin & size, _kStartAngle, angle, false);
       canvas.drawPath(path, paint);
 
     } else {
-      // Non-determinite
+      // Non-determinate
       paint.strokeCap = StrokeCap.square;
 
       double arcSweep = math.max(headValue * 3 / 2 * math.PI - tailValue * 3 / 2 * math.PI, _kEpsilon);
@@ -189,28 +189,9 @@ class CircularProgressIndicator extends ProgressIndicator {
   }) : super(key: key, value: value);
 
   _CircularProgressIndicatorState createState() => new _CircularProgressIndicatorState();
-
-  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
-    return new Container(
-      constraints: new BoxConstraints(
-        minWidth: _kMinCircularProgressIndicatorSize,
-        minHeight: _kMinCircularProgressIndicatorSize
-      ),
-      child: new CustomPaint(
-        painter: new _CircularProgressIndicatorPainter(
-          valueColor: _getValueColor(context),
-          value: value,
-          headValue: headValue,
-          tailValue: tailValue,
-          stepValue: stepValue,
-          rotationValue: rotationValue
-        )
-      )
-    );
-  }
 }
-// TODO(jestelle) This should probably go somewhere else?  And maybe be more
-// general?
+
+// This class assumes that the incoming animation is a linear 0.0..1.0.
 class _RepeatingCurveTween extends Animatable<double> {
   _RepeatingCurveTween({ this.curve, this.repeats });
 
@@ -229,31 +210,23 @@ class _RepeatingCurveTween extends Animatable<double> {
   }
 }
 
-// TODO(jestelle) This should probably go somewhere else?  And maybe be more
-// general?  Or maybe the IntTween should actually work this way?
-class _StepTween extends Tween<int> {
-  _StepTween({ int begin, int end }) : super(begin: begin, end: end);
-
-  // The inherited lerp() function doesn't work with ints because it multiplies
-  // the begin and end types by a double, and int * double returns a double.
-  int lerp(double t) => (begin + (end - begin) * t).floor();
-}
-
 // Tweens used by circular progress indicator
-final _RepeatingCurveTween _kStrokeHeadTween =
-    new _RepeatingCurveTween(
-        curve:new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
-        repeats:5);
+final _RepeatingCurveTween _kStrokeHeadTween = new _RepeatingCurveTween(
+  curve: new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
+  repeats: 5
+);
 
-final _RepeatingCurveTween _kStrokeTailTween =
-    new _RepeatingCurveTween(
-        curve:new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-        repeats:5);
+final _RepeatingCurveTween _kStrokeTailTween = new _RepeatingCurveTween(
+  curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
+  repeats: 5
+);
 
-final _StepTween _kStepTween = new _StepTween(begin:0, end:5);
+final StepTween _kStepTween = new StepTween(begin: 0, end: 5);
 
-final _RepeatingCurveTween _kRotationTween =
-    new _RepeatingCurveTween(curve:Curves.linear, repeats:5);
+final _RepeatingCurveTween _kRotationTween = new _RepeatingCurveTween(
+  curve: Curves.linear,
+  repeats: 5
+);
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   AnimationController _animationController;
@@ -265,18 +238,39 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
     )..repeat();
   }
 
+  Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
+    return new Container(
+      constraints: new BoxConstraints(
+        minWidth: _kMinCircularProgressIndicatorSize,
+        minHeight: _kMinCircularProgressIndicatorSize
+      ),
+      child: new CustomPaint(
+        painter: new _CircularProgressIndicatorPainter(
+          valueColor: config._getValueColor(context),
+          value: config.value, // may be null
+          headValue: headValue, // remaining arguments are ignored if config.value is not null
+          tailValue: tailValue,
+          stepValue: stepValue,
+          rotationValue: rotationValue
+        )
+      )
+    );
+  }
+
   Widget build(BuildContext context) {
     if (config.value != null)
-      return config._buildIndicator(context, 0.0, 0.0, 0, 0.0);
+      return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
 
     return new AnimatedBuilder(
       animation: _animationController,
       builder: (BuildContext context, Widget child) {
-        return config._buildIndicator(context,
-            _kStrokeHeadTween.evaluate(_animationController),
-            _kStrokeTailTween.evaluate(_animationController),
-            _kStepTween.evaluate(_animationController),
-            _kRotationTween.evaluate(_animationController));
+        return _buildIndicator(
+          context,
+          _kStrokeHeadTween.evaluate(_animationController),
+          _kStrokeTailTween.evaluate(_animationController),
+          _kStepTween.evaluate(_animationController),
+          _kRotationTween.evaluate(_animationController)
+        );
       }
     );
   }
