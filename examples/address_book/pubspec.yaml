@@ -1,4 +1,0 @@
-name: address_book
-dependencies:
-  flutter:
-    path: ../../packages/flutter
