@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'scheduler.dart';
 
-typedef TickerCallback(Duration elapsed);
+typedef void TickerCallback(Duration elapsed);
 
 /// Calls its callback once per animation frame.
 class Ticker {
