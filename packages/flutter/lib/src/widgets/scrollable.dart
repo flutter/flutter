@@ -237,6 +237,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return _scrollBehavior;
   }
 
+  GestureDragDownCallback _getDragDownHandler(Axis direction) {
+    if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
+      return null;
+    return _handleDragDown;
+  }
+
   GestureDragStartCallback _getDragStartHandler(Axis direction) {
     if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
       return null;
@@ -257,17 +263,16 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   Widget build(BuildContext context) {
     return new GestureDetector(
+      onVerticalDragDown: _getDragDownHandler(Axis.vertical),
       onVerticalDragStart: _getDragStartHandler(Axis.vertical),
       onVerticalDragUpdate: _getDragUpdateHandler(Axis.vertical),
       onVerticalDragEnd: _getDragEndHandler(Axis.vertical),
+      onHorizontalDragDown: _getDragDownHandler(Axis.horizontal),
       onHorizontalDragStart: _getDragStartHandler(Axis.horizontal),
       onHorizontalDragUpdate: _getDragUpdateHandler(Axis.horizontal),
       onHorizontalDragEnd: _getDragEndHandler(Axis.horizontal),
       behavior: HitTestBehavior.opaque,
-      child: new Listener(
-        child: buildContent(context),
-        onPointerDown: _handlePointerDown
-      )
+      child: buildContent(context)
     );
   }
 
@@ -438,7 +443,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       config.onScrollEnd(_scrollOffset);
   }
 
-  void _handlePointerDown(_) {
+  void _handleDragDown(_) {
     _controller.stop();
   }
 
