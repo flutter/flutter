@@ -13,6 +13,7 @@ import '../android/android.dart' as android;
 import '../artifacts.dart';
 import '../base/globals.dart';
 import '../base/process.dart';
+import 'ios.dart';
 
 class CreateCommand extends Command {
   final String name = 'create';
@@ -108,7 +109,7 @@ abstract class Template {
   final String name;
   final String description;
 
-  Map<String, String> files = {};
+  Map<String, String> files = <String, String>{};
 
   Template(this.name, this.description);
 
@@ -119,9 +120,11 @@ abstract class Template {
     dir.createSync(recursive: true);
 
     String relativeFlutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
+    Iterable<String> paths = files.keys.toList()..sort();
 
-    files.forEach((String filePath, String contents) {
-      Map m = {
+    for (String filePath in paths) {
+      String contents = files[filePath];
+      Map m = <String, String>{
         'projectName': projectName,
         'description': description,
         'flutterPackagePath': relativeFlutterPackagePath
@@ -129,10 +132,10 @@ abstract class Template {
       contents = mustache.render(contents, m);
       filePath = filePath.replaceAll('/', Platform.pathSeparator);
       File file = new File(path.join(dir.path, filePath));
-      file.parent.createSync();
+      file.parent.createSync(recursive: true);
       file.writeAsStringSync(contents);
       printStatus('  ${file.path}');
-    });
+    }
   }
 
   String toString() => name;
@@ -145,8 +148,15 @@ class FlutterSimpleTemplate extends Template {
     files['flutter.yaml'] = _flutterYaml;
     files['pubspec.yaml'] = _pubspec;
     files['README.md'] = _readme;
-    files['android/AndroidManifest.xml'] = _apkManifest;
     files['lib/main.dart'] = _libMain;
+
+    // Android files.
+    files['android/AndroidManifest.xml'] = _apkManifest;
+    // Create a file here, so we create the directory for the user and it gets committed with git.
+    files['android/res/README.md'] = _androidResReadme;
+
+    // iOS files.
+    files.addAll(iosTemplateFiles);
   }
 }
 
@@ -161,7 +171,7 @@ String _normalizeProjectName(String name) {
 const String _analysis_options = r'''
 analyzer:
   exclude:
-    - 'ios/build/**'
+    - 'ios/.generated/**'
 ''';
 
 const String _gitignore = r'''
@@ -171,6 +181,7 @@ const String _gitignore = r'''
 .packages
 .pub/
 build/
+ios/.generated/
 packages
 pubspec.lock
 ''';
@@ -272,4 +283,8 @@ final String _apkManifest = '''
         </activity>
     </application>
 </manifest>
+''';
+
+final String _androidResReadme = '''
+Place Android resources here (http://developer.android.com/guide/topics/resources/overview.html).
 ''';
