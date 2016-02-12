@@ -15,7 +15,7 @@ class _CheckedModeBannerPainter extends CustomPainter {
   static const kHeight = 12.0; // height of banner
   static const kTextAlign = const Offset(0.0, -3.0); // offset to move text up
   static const kFontSize = kHeight * 0.85;
-  static const kShadowBlur = 8.0; // shadow blur sigma
+  static const kShadowBlur = 4.0; // shadow blur sigma
   static final Rect kRect = new Rect.fromLTWH(-kOffset, kOffset-kHeight, kOffset * 2.0, kHeight);
   static const TextStyle kTextStyles = const TextStyle(
     color: const Color(0xFFFFFFFF),
