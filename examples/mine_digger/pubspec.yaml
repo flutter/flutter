@@ -1,4 +1,0 @@
-name: mine_digger
-dependencies:
-  flutter:
-    path: ../../packages/flutter
