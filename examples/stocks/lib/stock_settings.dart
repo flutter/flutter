@@ -33,6 +33,23 @@ class StockSettingsState extends State<StockSettings> {
     sendUpdates(config.configuration.copyWith(debugShowSizes: value));
   }
 
+  void _handleShowBaselinesChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(debugShowBaselines: value));
+  }
+
+  void _handleShowLayersChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(debugShowLayers: value));
+  }
+
+  void _handleShowPointersChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(debugShowPointers: value));
+  }
+
+  void _handleShowRainbowChanged(bool value) {
+    sendUpdates(config.configuration.copyWith(debugShowRainbow: value));
+  }
+
+
   void _handleShowPerformanceOverlayChanged(bool value) {
     sendUpdates(config.configuration.copyWith(showPerformanceOverlay: value));
   }
@@ -166,7 +183,59 @@ class StockSettingsState extends State<StockSettings> {
               ),
             ]
           )
-        )
+        ),
+        new DrawerItem(
+          icon: 'editor/format_color_text',
+          onPressed: () { _handleShowBaselinesChanged(!config.configuration.debugShowBaselines); },
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Show baselines (for debugging)')),
+              new Switch(
+                value: config.configuration.debugShowBaselines,
+                onChanged: _handleShowBaselinesChanged
+              ),
+            ]
+          )
+        ),
+        new DrawerItem(
+          icon: 'image/filter_none',
+          onPressed: () { _handleShowLayersChanged(!config.configuration.debugShowLayers); },
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Show layer boundaries (for debugging)')),
+              new Switch(
+                value: config.configuration.debugShowLayers,
+                onChanged: _handleShowLayersChanged
+              ),
+            ]
+          )
+        ),
+        new DrawerItem(
+          icon: 'hardware/mouse',
+          onPressed: () { _handleShowPointersChanged(!config.configuration.debugShowPointers); },
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Show pointer hit-testing (for debugging)')),
+              new Switch(
+                value: config.configuration.debugShowPointers,
+                onChanged: _handleShowPointersChanged
+              ),
+            ]
+          )
+        ),
+        new DrawerItem(
+          icon: 'image/gradient',
+          onPressed: () { _handleShowRainbowChanged(!config.configuration.debugShowRainbow); },
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Text('Show repaint rainbow (for debugging)')),
+              new Switch(
+                value: config.configuration.debugShowRainbow,
+                onChanged: _handleShowRainbowChanged
+              ),
+            ]
+          )
+        ),
       ]);
       return true;
     });

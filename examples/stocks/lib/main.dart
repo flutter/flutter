@@ -7,7 +7,12 @@ library stocks;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugPaintSizeEnabled;
+import 'package:flutter/rendering.dart' show
+  debugPaintSizeEnabled,
+  debugPaintBaselinesEnabled,
+  debugPaintLayerBordersEnabled,
+  debugPaintPointersEnabled,
+  debugRepaintRainbowEnabled;
 import 'package:intl/intl.dart';
 
 import 'i18n/stock_messages_all.dart';
@@ -32,6 +37,10 @@ class StocksAppState extends State<StocksApp> {
     backupMode: BackupMode.enabled,
     debugShowGrid: false,
     debugShowSizes: false,
+    debugShowBaselines: false,
+    debugShowLayers: false,
+    debugShowPointers: false,
+    debugShowRainbow: false,
     showPerformanceOverlay: false,
     showSemanticsDebugger: false
   );
@@ -93,6 +102,10 @@ class StocksAppState extends State<StocksApp> {
   Widget build(BuildContext context) {
     assert(() {
       debugPaintSizeEnabled = _configuration.debugShowSizes;
+      debugPaintBaselinesEnabled = _configuration.debugShowBaselines;
+      debugPaintLayerBordersEnabled = _configuration.debugShowLayers;
+      debugPaintPointersEnabled = _configuration.debugShowPointers;
+      debugRepaintRainbowEnabled = _configuration.debugShowRainbow;
       return true;
     });
     return new MaterialApp(
