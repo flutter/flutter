@@ -5,7 +5,7 @@
 import("//sky/engine/core/core.gni")
 import("//mojo/dart/embedder/embedder.gni")
 
-visibility = [ "//sky/engine/*" ]
+visibility = [ "//sky/engine/*", "//sky/shell/*" ]
 
 source_set("libraries") {
   public_deps = [

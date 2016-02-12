@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "dart/runtime/include/dart_api.h"
+#include "sky/engine/platform/fonts/FontSelector.h"
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -35,6 +36,9 @@ class DOMDartState : public DartState {
   Dart_Handle value_handle() { return value_handle_.value(); }
   Dart_Handle color_class() { return color_class_.value(); }
 
+  void set_font_selector(PassRefPtr<FontSelector> selector);
+  PassRefPtr<FontSelector> font_selector();
+
  private:
   std::unique_ptr<Window> window_;
   std::string url_;
@@ -45,6 +49,7 @@ class DOMDartState : public DartState {
   DartPersistentValue dy_handle_;
   DartPersistentValue value_handle_;
   DartPersistentValue color_class_;
+  RefPtr<FontSelector> font_selector_;
 };
 
 }  // namespace blink

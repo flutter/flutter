@@ -21,19 +21,47 @@ void Ignored(bool) {
 
 }  // namespace
 
-ZipAssetBundle* ZipAssetBundle::Create(
+unzFile ScopedUnzFileTraits::InvalidValue() {
+  return nullptr;
+}
+
+void ScopedUnzFileTraits::Free(unzFile file) {
+  unzClose(file);
+}
+
+scoped_refptr<ZipAssetBundle> ZipAssetService::Create(
     InterfaceRequest<AssetBundle> request,
     const base::FilePath& zip_path,
     scoped_refptr<base::TaskRunner> worker_runner) {
-  return new ZipAssetBundle(request.Pass(), zip_path, worker_runner.Pass());
+  scoped_refptr<ZipAssetBundle> zip_asset_bundle(
+      new ZipAssetBundle(zip_path, worker_runner.Pass()));
+
+  // Register as a Mojo service.
+  new ZipAssetService(request.Pass(), zip_asset_bundle);
+
+  return zip_asset_bundle;
+}
+
+ZipAssetService::ZipAssetService(
+    InterfaceRequest<AssetBundle> request,
+    const scoped_refptr<ZipAssetBundle>& zip_asset_bundle)
+    : binding_(this, request.Pass()),
+      zip_asset_bundle_(zip_asset_bundle) {
+}
+
+ZipAssetService::~ZipAssetService() {
+}
+
+void ZipAssetService::GetAsStream(
+    const String& asset_name,
+    const Callback<void(ScopedDataPipeConsumerHandle)>& callback) {
+  zip_asset_bundle_->GetAsStream(asset_name, callback);
 }
 
 ZipAssetBundle::ZipAssetBundle(
-    InterfaceRequest<AssetBundle> request,
     const base::FilePath& zip_path,
     scoped_refptr<base::TaskRunner> worker_runner)
-    : binding_(this, request.Pass()),
-      zip_path_(zip_path),
+    : zip_path_(zip_path),
       worker_runner_(worker_runner.Pass()) {
 }
 
@@ -72,6 +100,49 @@ void ZipAssetBundle::GetAsStream(
       base::Bind(&ZipAssetHandler::Start, base::Unretained(handler)));
 }
 
+bool ZipAssetBundle::GetAsBuffer(const std::string& asset_name,
+                                 std::vector<uint8_t>* data) {
+  ScopedUnzFile zip_file(unzOpen2(zip_path_.AsUTF8Unsafe().c_str(), NULL));
+  if (!zip_file.is_valid()) {
+    LOG(ERROR) << "Unable to open ZIP file: " << zip_path_.value();
+    return false;
+  }
+
+  int result = unzLocateFile(zip_file.get(), asset_name.c_str(), 0);
+  if (result != UNZ_OK) {
+    LOG(WARNING) << "Requested asset '" << asset_name << "' does not exist.";
+    return false;
+  }
+
+  unz_file_info file_info;
+  result = unzGetCurrentFileInfo(zip_file.get(), &file_info, nullptr, 0,
+                                 nullptr, 0, nullptr, 0);
+  if (result != UNZ_OK) {
+    LOG(WARNING) << "unzGetCurrentFileInfo failed, error=" << result;
+    return false;
+  }
+
+  result = unzOpenCurrentFile(zip_file.get());
+  if (result != UNZ_OK) {
+    LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
+    return false;
+  }
+
+  data->resize(file_info.uncompressed_size);
+  int total_read = 0;
+  while (total_read < static_cast<int>(data->size())) {
+    int bytes_read = unzReadCurrentFile(zip_file.get(),
+                                        data->data() + total_read,
+                                        data->size() - total_read);
+    if (bytes_read <= 0) {
+      return false;
+    }
+    total_read += bytes_read;
+  }
+
+  return true;
+}
+
 ZipAssetHandler::ZipAssetHandler(
     const base::FilePath& zip_path,
     const std::string& asset_name,
@@ -82,33 +153,30 @@ ZipAssetHandler::ZipAssetHandler(
     producer_(producer.Pass()),
     main_runner_(base::MessageLoop::current()->task_runner()),
     worker_runner_(worker_runner.Pass()),
-    zip_file_(nullptr),
     buffer_(nullptr),
     buffer_size_(0) {
 }
 
 ZipAssetHandler::~ZipAssetHandler() {
-  if (zip_file_) {
-    unzClose(zip_file_);
-  }
+
 }
 
 void ZipAssetHandler::Start() {
-  zip_file_ = unzOpen2(zip_path_.AsUTF8Unsafe().c_str(), NULL);
-  if (!zip_file_) {
+  zip_file_.reset(unzOpen2(zip_path_.AsUTF8Unsafe().c_str(), NULL));
+  if (!zip_file_.is_valid()) {
     LOG(ERROR) << "Unable to open ZIP file: " << zip_path_.value();
     delete this;
     return;
   }
 
-  int result = unzLocateFile(zip_file_, asset_name_.c_str(), 0);
+  int result = unzLocateFile(zip_file_.get(), asset_name_.c_str(), 0);
   if (result != UNZ_OK) {
     LOG(WARNING) << "Requested asset '" << asset_name_ << "' does not exist.";
     delete this;
     return;
   }
 
-  result = unzOpenCurrentFile(zip_file_);
+  result = unzOpenCurrentFile(zip_file_.get());
   if (result != UNZ_OK) {
     LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
     delete this;
@@ -134,7 +202,7 @@ void ZipAssetHandler::CopyData() {
       return;
     }
 
-    int bytes_read = unzReadCurrentFile(zip_file_, buffer_, buffer_size_);
+    int bytes_read = unzReadCurrentFile(zip_file_.get(), buffer_, buffer_size_);
     mojo_result = EndWriteDataRaw(producer_.get(), std::max(0, bytes_read));
 
     if (bytes_read == 0) {

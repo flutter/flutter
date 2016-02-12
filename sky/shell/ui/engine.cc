@@ -19,6 +19,7 @@
 #include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/animator.h"
+#include "sky/shell/ui/flutter_font_selector.h"
 #include "sky/shell/ui/platform_impl.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -34,6 +35,7 @@ PlatformImpl* g_platform_impl = nullptr;
 }  // namespace
 
 using mojo::asset_bundle::ZipAssetBundle;
+using mojo::asset_bundle::ZipAssetService;
 
 Engine::Config::Config() {
 }
@@ -186,9 +188,10 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
 
   std::string path_str = bundle_path;
-  ZipAssetBundle::Create(mojo::GetProxy(&root_bundle_),
-                         base::FilePath(path_str),
-                         base::WorkerPool::GetTaskRunner(true));
+  zip_asset_bundle_ = ZipAssetService::Create(
+      mojo::GetProxy(&root_bundle_),
+      base::FilePath(path_str),
+      base::WorkerPool::GetTaskRunner(true));
 
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView("http://localhost");
@@ -211,9 +214,10 @@ void Engine::RunFromFile(const mojo::String& main,
 void Engine::RunFromBundle(const mojo::String& path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
   std::string path_str = path;
-  ZipAssetBundle::Create(mojo::GetProxy(&root_bundle_),
-                         base::FilePath(path_str),
-                         base::WorkerPool::GetTaskRunner(true));
+  zip_asset_bundle_ = ZipAssetService::Create(
+      mojo::GetProxy(&root_bundle_),
+      base::FilePath(path_str),
+      base::WorkerPool::GetTaskRunner(true));
 
   root_bundle_->GetAsStream(kSnapshotKey,
                             base::Bind(&Engine::RunFromSnapshotStream,
@@ -224,14 +228,14 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& bundle_path,
                                       const mojo::String& snapshot_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundleAndSnapshot");
   std::string bundle_path_str = bundle_path;
-  ZipAssetBundle* asset_bundle = ZipAssetBundle::Create(
+  zip_asset_bundle_ = ZipAssetService::Create(
       mojo::GetProxy(&root_bundle_),
       base::FilePath(bundle_path_str),
       base::WorkerPool::GetTaskRunner(true));
 
   std::string snapshot_path_str = snapshot_path;
-  asset_bundle->AddOverlayFile(kSnapshotKey,
-                               base::FilePath(snapshot_path_str));
+  zip_asset_bundle_->AddOverlayFile(kSnapshotKey,
+                                    base::FilePath(snapshot_path_str));
 
   root_bundle_->GetAsStream(kSnapshotKey,
                             base::Bind(&Engine::RunFromSnapshotStream,
@@ -270,6 +274,9 @@ void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
 
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {
   blink::MojoServices::Create(isolate, services_.Pass(), root_bundle_.Pass());
+
+  if (zip_asset_bundle_)
+    FlutterFontSelector::install(zip_asset_bundle_);
 }
 
 void Engine::StopAnimator() {
