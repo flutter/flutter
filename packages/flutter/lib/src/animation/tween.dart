@@ -109,17 +109,38 @@ class RectTween extends Tween<Rect> {
   Rect lerp(double t) => Rect.lerp(begin, end, t);
 }
 
-/// An interpolation between two integers.
+/// An interpolation between two integers that rounds.
 ///
 /// This class specializes the interpolation of Tween<int> to be
-/// appropriate for integers by interpolating between the given begin and end
-/// values and then rounding the result to the nearest integer.
+/// appropriate for integers by interpolating between the given begin
+/// and end values and then rounding the result to the nearest
+/// integer.
+///
+/// This is the closest approximation to a linear tween that is
+/// possible with an integer. Compare to [StepTween].
 class IntTween extends Tween<int> {
   IntTween({ int begin, int end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
   int lerp(double t) => (begin + (end - begin) * t).round();
+}
+
+/// An interpolation between two integers that floors.
+///
+/// This class specializes the interpolation of Tween<int> to be
+/// appropriate for integers by interpolating between the given begin
+/// and end values and then using [int.floor()] to return the current
+/// integer component, dropping the fractional component.
+///
+/// This results in a value that is never greater than the equivalent
+/// value from a linear double interpolation. Compare to [IntTween].
+class StepTween extends Tween<int> {
+  StepTween({ int begin, int end }) : super(begin: begin, end: end);
+
+  // The inherited lerp() function doesn't work with ints because it multiplies
+  // the begin and end types by a double, and int * double returns a double.
+  int lerp(double t) => (begin + (end - begin) * t).floor();
 }
 
 /// Transforms the value of the given animation by the given curve.
