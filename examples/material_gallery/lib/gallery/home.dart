@@ -11,6 +11,7 @@ import 'section.dart';
 
 import '../demo/buttons_demo.dart';
 import '../demo/cards_demo.dart';
+import '../demo/colors_demo.dart';
 import '../demo/chip_demo.dart';
 import '../demo/date_picker_demo.dart';
 import '../demo/dialog_demo.dart';
@@ -69,7 +70,10 @@ class GalleryHomeState extends State<GalleryHome> {
                 new GallerySection(
                   title: 'Style',
                   image: 'assets/section_style.png',
-                  colors: Colors.green
+                  colors: Colors.green,
+                  demos: <GalleryDemo>[
+                    new GalleryDemo(title: 'Colors', builder: () => new ColorsDemo())
+                  ]
                 )
               ]
             ),
