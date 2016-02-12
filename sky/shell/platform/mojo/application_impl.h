@@ -8,7 +8,6 @@
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
-#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 #include "sky/shell/platform/mojo/platform_view_mojo.h"
 #include "sky/shell/shell_view.h"
@@ -58,7 +57,8 @@ class ApplicationImpl : public mojo::Application,
   mojo::BindingSet<mojo::ui::ViewProvider> view_provider_bindings_;
   std::string url_;
   mojo::ShellPtr shell_;
-  mojo::asset_bundle::AssetBundlePtr bundle_;
+  base::FilePath flx_path_;
+  bool view_created_;
 };
 
 }  // namespace shell

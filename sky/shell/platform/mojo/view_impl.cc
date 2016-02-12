@@ -52,8 +52,8 @@ ViewImpl::ViewImpl(ServicesDataPtr services,
 ViewImpl::~ViewImpl() {
 }
 
-void ViewImpl::Run(mojo::asset_bundle::AssetBundlePtr bundle) {
-  engine_->RunFromAssetBundle(url_, bundle.Pass());
+void ViewImpl::Run(base::FilePath flx_path) {
+  engine_->RunFromBundle(mojo::String(flx_path.value()));
 }
 
 void ViewImpl::OnLayout(mojo::ui::ViewLayoutParamsPtr layout_params,
