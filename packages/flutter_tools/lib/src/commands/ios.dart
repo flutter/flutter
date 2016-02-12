@@ -93,6 +93,41 @@ class IOSCommand extends FlutterCommand {
     return true;
   }
 
+
+  void _writeUserEditableFilesIfNecessary(String directory) {
+    printStatus("Checking if user editable files need updates");
+
+    // Step 1: Check if the Info.plist exists and write one if not
+    File infoPlist = new File(path.join(directory, "Info.plist"));
+    if (!infoPlist.existsSync()) {
+      printStatus("Did not find an existing Info.plist. Creating one.");
+      infoPlist.writeAsStringSync(_infoPlistInitialContents);
+    } else {
+      printStatus("Info.plist present. Using existing.");
+    }
+
+    // Step 2: Check if the LaunchScreen.storyboard exists and write one if not
+    File launchScreen = new File(path.join(directory, "LaunchScreen.storyboard"));
+    if (!launchScreen.existsSync()) {
+      printStatus("Did not find an existing LaunchScreen.storyboard. Creating one.");
+      launchScreen.writeAsStringSync(_launchScreenInitialContents);
+    } else {
+      printStatus("LaunchScreen.storyboard present. Using existing.");
+    }
+
+    // Step 3: Check if the Assets.xcassets exists and write one if not
+    Directory xcassets = new Directory(path.join(directory, "Assets.xcassets"));
+    if (!xcassets.existsSync()) {
+      printStatus("Did not find an existing Assets.xcassets. Creating one.");
+      Directory iconsAssetsDir = new Directory(path.join(xcassets.path, "AppIcon.appiconset"));
+      iconsAssetsDir.createSync(recursive: true);
+      File iconContents = new File(path.join(iconsAssetsDir.path, "Contents.json"));
+      iconContents.writeAsStringSync(_iconAssetInitialContents);
+    } else {
+      printStatus("Assets.xcassets present. Using existing.");
+    }
+  }
+
   void _setupXcodeProjXcconfig(String filePath) {
     StringBuffer localsBuffer = new StringBuffer();
 
@@ -116,7 +151,8 @@ class IOSCommand extends FlutterCommand {
 
   Future<int> _runInitCommand() async {
     // Step 1: Fetch the archive from the cloud
-    String xcodeprojPath = path.join(Directory.current.path, "ios", "Generated");
+    String iosFilesPath = path.join(Directory.current.path, "ios");
+    String xcodeprojPath = path.join(iosFilesPath, "Generated");
     List<int> archiveBytes = await _fetchXcodeArchive();
 
     if (archiveBytes.isEmpty) {
@@ -130,6 +166,10 @@ class IOSCommand extends FlutterCommand {
       printError("Could not inflate the Xcode project archive.");
       return 1;
     }
+
+    // Step 3: Setup default user editable files if this is the first run of
+    //         the init command.
+    _writeUserEditableFilesIfNecessary(iosFilesPath);
 
     // Step 3: Populate the Local.xcconfig with project specific paths
     _setupXcodeProjXcconfig(path.join(xcodeprojPath, "Local.xcconfig"));
@@ -159,3 +199,159 @@ class IOSCommand extends FlutterCommand {
     return 1;
   }
 }
+
+final String _infoPlistInitialContents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>Runner</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.flutter.runner.Runner</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Flutter</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+</dict>
+</plist>
+''';
+
+final String _launchScreenInitialContents = '''
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="EHf-IW-A2E">
+            <objects>
+                <viewController id="01J-lp-oVM" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Llm-lL-Icb"/>
+                        <viewControllerLayoutGuide type="bottom" id="xb3-aO-Qok"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="53" y="375"/>
+        </scene>
+    </scenes>
+</document>
+''';
+
+final String _iconAssetInitialContents = '''
+{
+  "images" : [
+    {
+      "idiom" : "iphone",
+      "size" : "29x29",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "iphone",
+      "size" : "29x29",
+      "scale" : "3x"
+    },
+    {
+      "idiom" : "iphone",
+      "size" : "40x40",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "iphone",
+      "size" : "40x40",
+      "scale" : "3x"
+    },
+    {
+      "idiom" : "iphone",
+      "size" : "60x60",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "iphone",
+      "size" : "60x60",
+      "scale" : "3x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "29x29",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "29x29",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "40x40",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "40x40",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "76x76",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "76x76",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "83.5x83.5",
+      "scale" : "2x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+''';
