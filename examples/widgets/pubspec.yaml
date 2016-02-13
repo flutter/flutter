@@ -2,5 +2,3 @@ name: sky_widgets_examples
 dependencies:
   flutter:
     path: ../../packages/flutter
-  flutter_rendering_examples:
-    path: ../rendering
