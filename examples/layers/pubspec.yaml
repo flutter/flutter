@@ -1,4 +1,4 @@
-name: flutter_rendering_examples
+name: flutter_examples_layers
 dependencies:
   flutter:
     path: ../../packages/flutter

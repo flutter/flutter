@@ -4,14 +4,14 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'lib/solid_color_box.dart';
+import 'src/solid_color_box.dart';
 
 void main() {
   RenderFlex table = new RenderFlex(direction: FlexDirection.vertical);
 
-  for (FlexAlignItems alignItems in FlexAlignItems.values) {
+  void addAlignmentRow(FlexAlignItems alignItems) {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
-    RenderParagraph paragraph = new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan("$alignItems")]));
+    RenderParagraph paragraph = new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan('$alignItems')]));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
     RenderFlex row = new RenderFlex(alignItems: alignItems, textBaseline: TextBaseline.alphabetic);
     style = new TextStyle(fontSize: 15.0, color: const Color(0xFF000000));
@@ -36,6 +36,32 @@ void main() {
     final FlexParentData rowParentData = row.parentData;
     rowParentData.flex = 1;
   }
+
+  addAlignmentRow(FlexAlignItems.start);
+  addAlignmentRow(FlexAlignItems.end);
+  addAlignmentRow(FlexAlignItems.center);
+  addAlignmentRow(FlexAlignItems.stretch);
+  addAlignmentRow(FlexAlignItems.baseline);
+
+  void addJustificationRow(FlexJustifyContent justify) {
+    const TextStyle style = const TextStyle(color: const Color(0xFF000000));
+    RenderParagraph paragraph = new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan('$justify')]));
+    table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
+    RenderFlex row = new RenderFlex(direction: FlexDirection.horizontal);
+    row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: new Size(80.0, 60.0)));
+    row.add(new RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: new Size(64.0, 60.0)));
+    row.add(new RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: new Size(160.0, 60.0)));
+    row.justifyContent = justify;
+    table.add(row);
+    final FlexParentData rowParentData = row.parentData;
+    rowParentData.flex = 1;
+  }
+
+  addJustificationRow(FlexJustifyContent.start);
+  addJustificationRow(FlexJustifyContent.end);
+  addJustificationRow(FlexJustifyContent.center);
+  addJustificationRow(FlexJustifyContent.spaceBetween);
+  addJustificationRow(FlexJustifyContent.spaceAround);
 
   RenderDecoratedBox root = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),

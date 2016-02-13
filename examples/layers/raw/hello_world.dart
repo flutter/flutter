@@ -17,8 +17,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   ui.Size size = paintBounds.size;
 
   double radius = size.shortestSide * 0.45;
-  ui.Paint paint = new ui.Paint()
-    ..color = color;
+  ui.Paint paint = new ui.Paint()..color = color;
   canvas.drawCircle(size.center(ui.Point.origin), radius, paint);
 
   return recorder.endRecording();
@@ -26,7 +25,12 @@ ui.Picture paint(ui.Rect paintBounds) {
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
-  ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.window.size.width * devicePixelRatio, ui.window.size.height * devicePixelRatio);
+  ui.Rect sceneBounds = new ui.Rect.fromLTWH(
+      0.0,
+      0.0,
+      ui.window.size.width * devicePixelRatio,
+      ui.window.size.height * devicePixelRatio
+  );
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
@@ -51,9 +55,7 @@ void handlePopRoute() {
 }
 
 void handlePointerPacket(ByteData serializedPacket) {
-  bindings.Message message = new bindings.Message(
-      serializedPacket, <core.MojoHandle>[],
-      serializedPacket.lengthInBytes, 0);
+  bindings.Message message = new bindings.Message(serializedPacket, <core.MojoHandle>[], serializedPacket.lengthInBytes, 0);
   PointerPacket packet = PointerPacket.deserialize(message);
 
   for (Pointer pointer in packet.pointers) {

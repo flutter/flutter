@@ -27,7 +27,12 @@ void beginFrame(Duration timeStamp) {
 
     // composite
     final double devicePixelRatio = ui.window.devicePixelRatio;
-    ui.Rect sceneBounds = new ui.Rect.fromLTWH(0.0, 0.0, ui.window.size.width * devicePixelRatio, ui.window.size.height * devicePixelRatio);
+    ui.Rect sceneBounds = new ui.Rect.fromLTWH(
+      0.0,
+      0.0,
+      ui.window.size.width * devicePixelRatio,
+      ui.window.size.height * devicePixelRatio
+    );
     Float64List deviceTransform = new Float64List(16)
       ..[0] = devicePixelRatio
       ..[5] = devicePixelRatio
