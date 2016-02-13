@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -81,7 +82,7 @@ class DrawerControllerState extends State<DrawerController> {
 
   LocalHistoryEntry _historyEntry;
   // TODO(abarth): This should be a GlobalValueKey when those exist.
-  GlobalKey get _focusKey => new GlobalObjectKey(config.key);
+  GlobalKey get _drawerKey => new GlobalObjectKey(config.key);
 
   void _ensureHistoryEntry() {
     if (_historyEntry == null) {
@@ -89,7 +90,7 @@ class DrawerControllerState extends State<DrawerController> {
       if (route != null) {
         _historyEntry = new LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
         route.addLocalHistoryEntry(_historyEntry);
-        Focus.moveScopeTo(_focusKey, context: context);
+        Focus.moveScopeTo(_drawerKey, context: context);
       }
     }
   }
@@ -116,17 +117,18 @@ class DrawerControllerState extends State<DrawerController> {
   }
 
   AnimationController _controller;
-  double _width = _kEdgeDragWidth;
-
-  void _handleSizeChanged(Size newSize) {
-    setState(() {
-      _width = newSize.width;
-    });
-  }
 
   void _handleTapDown(Point position) {
     _controller.stop();
     _ensureHistoryEntry();
+  }
+
+  double get _width {
+    assert(!Scheduler.debugInFrame); // we should never try to read the tree state while building or laying out
+    RenderBox drawerBox = _drawerKey.currentContext?.findRenderObject();
+    if (drawerBox != null)
+      return drawerBox.size.width;
+    return _kWidth; // drawer not being shown currently
   }
 
   void _move(double delta) {
@@ -193,13 +195,10 @@ class DrawerControllerState extends State<DrawerController> {
                   child: new Align(
                     alignment: const FractionalOffset(1.0, 0.5),
                     widthFactor: _controller.value,
-                    child: new SizeObserver(
-                      onSizeChanged: _handleSizeChanged,
-                      child: new RepaintBoundary(
-                        child: new Focus(
-                          key: _focusKey,
-                          child: config.child
-                        )
+                    child: new RepaintBoundary(
+                      child: new Focus(
+                        key: _drawerKey,
+                        child: config.child
                       )
                     )
                   )
