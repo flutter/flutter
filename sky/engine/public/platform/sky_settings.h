@@ -14,6 +14,7 @@ struct SkySettings {
   uint32_t observatory_port = 8181;
   bool start_paused = false;
   bool enable_dart_checked_mode = false;
+  bool enable_background_compilation = false;
 
   static const SkySettings& Get();
   static void Set(const SkySettings& settings);
