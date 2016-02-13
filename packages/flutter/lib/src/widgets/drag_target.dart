@@ -118,6 +118,70 @@ class Draggable<T> extends DraggableBase<T> {
   }
 }
 
+/// Makes its child draggable. When competing with other gestures,
+/// this will only start the drag horizontally.
+class HorizontalDraggable<T> extends DraggableBase<T> {
+  HorizontalDraggable({
+    Key key,
+    T data,
+    Widget child,
+    Widget childWhenDragging,
+    Widget feedback,
+    Offset feedbackOffset: Offset.zero,
+    DragAnchor dragAnchor: DragAnchor.child,
+    int maxSimultaneousDrags
+  }) : super(
+    key: key,
+    data: data,
+    child: child,
+    childWhenDragging: childWhenDragging,
+    feedback: feedback,
+    feedbackOffset: feedbackOffset,
+    dragAnchor: dragAnchor,
+    maxSimultaneousDrags: maxSimultaneousDrags
+  );
+
+  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
+    return new HorizontalMultiDragGestureRecognizer(
+      pointerRouter: router,
+      gestureArena: arena,
+      onStart: starter
+    );
+  }
+}
+
+/// Makes its child draggable. When competing with other gestures,
+/// this will only start the drag vertically.
+class VerticalDraggable<T> extends DraggableBase<T> {
+  VerticalDraggable({
+    Key key,
+    T data,
+    Widget child,
+    Widget childWhenDragging,
+    Widget feedback,
+    Offset feedbackOffset: Offset.zero,
+    DragAnchor dragAnchor: DragAnchor.child,
+    int maxSimultaneousDrags
+  }) : super(
+    key: key,
+    data: data,
+    child: child,
+    childWhenDragging: childWhenDragging,
+    feedback: feedback,
+    feedbackOffset: feedbackOffset,
+    dragAnchor: dragAnchor,
+    maxSimultaneousDrags: maxSimultaneousDrags
+  );
+
+  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
+    return new VerticalMultiDragGestureRecognizer(
+      pointerRouter: router,
+      gestureArena: arena,
+      onStart: starter
+    );
+  }
+}
+
 /// Makes its child draggable starting from long press.
 class LongPressDraggable<T> extends DraggableBase<T> {
   LongPressDraggable({

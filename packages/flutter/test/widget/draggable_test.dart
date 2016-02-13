@@ -338,6 +338,232 @@ void main() {
       tester.dispatchEvent(pointer.up(), firstLocation);
       tester.pump();
       expect(events, equals(<String>['drop']));
+    });
+  });
+
+  test('Drag and drop - horizontal and vertical draggables in vertical block', () {
+    testWidgets((WidgetTester tester) {
+      TestPointer pointer = new TestPointer(7);
+
+      List<String> events = <String>[];
+      Point firstLocation, secondLocation, thirdLocation;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) {
+            return new Block(
+              children: <Widget>[
+                new DragTarget(
+                  builder: (context, data, rejects) {
+                    return new Text('Target');
+                  },
+                  onAccept: (data) {
+                    events.add('drop $data');
+                  }
+                ),
+                new Container(height: 400.0),
+                new HorizontalDraggable(
+                  data: 1,
+                  child: new Text('H'),
+                  feedback: new Text('Dragging')
+                ),
+                new VerticalDraggable(
+                  data: 2,
+                  child: new Text('V'),
+                  feedback: new Text('Dragging')
+                ),
+                new Container(height: 500.0),
+                new Container(height: 500.0),
+                new Container(height: 500.0),
+                new Container(height: 500.0),
+              ]
+            );
+          },
+        }
+      ));
+
+      expect(events, isEmpty);
+      expect(tester.findText('Target'), isNotNull);
+      expect(tester.findText('H'), isNotNull);
+      expect(tester.findText('V'), isNotNull);
+
+      // vertical draggable drags vertically
+      expect(events, isEmpty);
+      firstLocation = tester.getCenter(tester.findText('V'));
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop 2']));
+      expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
+      events.clear();
+
+      // horizontal draggable drags horizontally
+      expect(events, isEmpty);
+      firstLocation = tester.getTopLeft(tester.findText('H'));
+      secondLocation = tester.getTopRight(tester.findText('H'));
+      thirdLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop 1']));
+      expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
+      events.clear();
+
+      // vertical draggable drags horizontally when there's no competition
+      // from other gesture detectors
+      expect(events, isEmpty);
+      firstLocation = tester.getTopLeft(tester.findText('V'));
+      secondLocation = tester.getTopRight(tester.findText('V'));
+      thirdLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop 2']));
+      expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
+      events.clear();
+
+      // horizontal draggable doesn't drag vertically when there is competition
+      // for vertical gestures
+      expect(events, isEmpty);
+      firstLocation = tester.getCenter(tester.findText('H'));
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump(); // scrolls off screen!
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>[]));
+      expect(tester.getCenter(tester.findText('Target')).y, lessThan(0.0));
+      events.clear();
+
+    });
+  });
+
+  test('Drag and drop - horizontal and vertical draggables in horizontal block', () {
+    testWidgets((WidgetTester tester) {
+      TestPointer pointer = new TestPointer(7);
+
+      List<String> events = <String>[];
+      Point firstLocation, secondLocation, thirdLocation;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, RouteBuilder>{
+          '/': (RouteArguments args) {
+            return new Block(
+              scrollDirection: Axis.horizontal,
+              children: <Widget>[
+                new DragTarget(
+                  builder: (context, data, rejects) {
+                    return new Text('Target');
+                  },
+                  onAccept: (data) {
+                    events.add('drop $data');
+                  }
+                ),
+                new Container(width: 400.0),
+                new HorizontalDraggable(
+                  data: 1,
+                  child: new Text('H'),
+                  feedback: new Text('Dragging')
+                ),
+                new VerticalDraggable(
+                  data: 2,
+                  child: new Text('V'),
+                  feedback: new Text('Dragging')
+                ),
+                new Container(width: 500.0),
+                new Container(width: 500.0),
+                new Container(width: 500.0),
+                new Container(width: 500.0),
+              ]
+            );
+          },
+        }
+      ));
+
+      expect(events, isEmpty);
+      expect(tester.findText('Target'), isNotNull);
+      expect(tester.findText('H'), isNotNull);
+      expect(tester.findText('V'), isNotNull);
+
+      // horizontal draggable drags horizontally
+      expect(events, isEmpty);
+      firstLocation = tester.getCenter(tester.findText('H'));
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop 1']));
+      expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
+      events.clear();
+
+      // vertical draggable drags vertically
+      expect(events, isEmpty);
+      firstLocation = tester.getTopLeft(tester.findText('V'));
+      secondLocation = tester.getBottomLeft(tester.findText('V'));
+      thirdLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop 2']));
+      expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
+      events.clear();
+
+      // horizontal draggable drags vertically when there's no competition
+      // from other gesture detectors
+      expect(events, isEmpty);
+      firstLocation = tester.getTopLeft(tester.findText('H'));
+      secondLocation = tester.getBottomLeft(tester.findText('H'));
+      thirdLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>['drop 1']));
+      expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
+      events.clear();
+
+      // vertical draggable doesn't drag horizontally when there is competition
+      // for horizontal gestures
+      expect(events, isEmpty);
+      firstLocation = tester.getCenter(tester.findText('V'));
+      secondLocation = tester.getCenter(tester.findText('Target'));
+      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      tester.pump(); // scrolls off screen!
+      tester.dispatchEvent(pointer.up(), firstLocation);
+      tester.pump();
+      expect(events, equals(<String>[]));
+      expect(tester.getCenter(tester.findText('Target')).x, lessThan(0.0));
+      events.clear();
 
     });
   });
