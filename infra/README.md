@@ -28,6 +28,7 @@ Recipes are just python.  They are
 by the [luci/recipes-py github project](https://github.com/luci/recipes-py).
 
 The typical cyle for editing a recipe is:
+
 1. Make your edits.
 2. Run `build/slave/recipes.py train simulation_test flutter` to update expected files  (remove the flutter if you need to do a global update).
 3. Run `build/slave/recipes.py run flutter/flutter` (or flutter/engine) if something was strange during training and you need to run it locally.
