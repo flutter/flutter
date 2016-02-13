@@ -251,7 +251,25 @@ class RenderImage extends RenderBox {
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
-    settings.add('width: $width');
-    settings.add('height: $height');
+    if (image != null)
+      settings.add('image: [${image.width}\u00D7${image.height}]');
+    else
+      settings.add('image: null');
+    if (width != null)
+      settings.add('width: $width');
+    if (height != null)
+      settings.add('height: $height');
+    if (scale != 1.0)
+      settings.add('scale: $scale');
+    if (color != null)
+      settings.add('color: $color');
+    if (fit != null)
+      settings.add('fit: $fit');
+    if (alignment != null)
+      settings.add('alignment: $alignment');
+    if (repeat != ImageRepeat.noRepeat)
+      settings.add('repeat: $repeat');
+    if (centerSlice != null)
+      settings.add('centerSlice: $centerSlice');
   }
 }

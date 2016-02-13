@@ -191,14 +191,20 @@ class AssetVendor extends StatefulComponent {
   final Widget child;
 
   _AssetVendorState createState() => new _AssetVendorState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('bundle: $bundle');
+    if (devicePixelRatio != null)
+      description.add('devicePixelRatio: $devicePixelRatio');
+  }
 }
 
 class _AssetVendorState extends State<AssetVendor> {
 
   _ResolvingAssetBundle _bundle;
 
-  void initState() {
-    super.initState();
+  void _initBundle() {
     _bundle = new _ResolutionAwareAssetBundle(
       bundle: config.bundle,
       resolver: new _ResolutionAwareAssetResolver(
@@ -208,20 +214,24 @@ class _AssetVendorState extends State<AssetVendor> {
     );
   }
 
+  void initState() {
+    super.initState();
+    _initBundle();
+  }
+
   void didUpdateConfig(AssetVendor oldConfig) {
     if (config.bundle != oldConfig.bundle ||
         config.devicePixelRatio != oldConfig.devicePixelRatio) {
-      _bundle = new _ResolutionAwareAssetBundle(
-        bundle: config.bundle,
-        resolver: new _ResolutionAwareAssetResolver(
-          bundle: config.bundle,
-          devicePixelRatio: config.devicePixelRatio
-        )
-      );
+      _initBundle();
     }
   }
 
   Widget build(BuildContext context) {
     return new DefaultAssetBundle(bundle: _bundle, child: config.child);
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('bundle: $_bundle');
   }
 }

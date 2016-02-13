@@ -1,0 +1,109 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui' as ui show window;
+
+import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:stocks/main.dart' as stocks;
+import 'package:stocks/stock_data.dart' as stock_data;
+
+Element findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
+  void walker(Element child) {
+    if (child.widget.runtimeType == targetType)
+      throw child;
+    child.visitChildElements(walker);
+  }
+  try {
+    walker(node);
+  } on Element catch (result) {
+    return result;
+  }
+  return null;
+}
+
+Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
+  Element result;
+  bool walker(Element ancestor) {
+    if (ancestor.widget.runtimeType == targetType)
+      result = ancestor;
+    return result == null;
+  }
+  node.visitAncestorElements(walker);
+  return result;
+}
+
+final RegExp materialIconAssetNameColorExtractor = new RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
+
+void checkIconColor(WidgetTester tester, String label, Color color) {
+  // The icon is going to be in the same merged semantics box as the text
+  // regardless of how the menu item is represented, so this is a good
+  // way to find the menu item. I hope.
+  Element semantics = findElementOfExactWidgetTypeGoingUp(tester.findText(label), MergeSemantics);
+  expect(semantics, isNotNull);
+  Element asset = findElementOfExactWidgetTypeGoingDown(semantics, AssetImage);
+  RenderImage imageBox = asset.findRenderObject();
+  Match match = materialIconAssetNameColorExtractor.firstMatch(asset.widget.name);
+  expect(match, isNotNull);
+  if (color == const Color(0xFFFFFFFF)) {
+    expect(match[1], equals('white'));
+    expect(imageBox.color, isNull);
+  } else if (color == const Color(0xFF000000)) {
+    expect(match[1], equals('black'));
+    expect(imageBox.color, isNull);
+  } else {
+    expect(imageBox.color, equals(color));
+  }
+}
+
+void main() {
+  stock_data.StockDataFetcher.actuallyFetchData = false;
+
+  test("Test icon colors", () {
+    testWidgets((WidgetTester tester) {
+      stocks.main(); // builds the app and schedules a frame but doesn't trigger one
+      tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+      tester.pump(); // triggers a frame
+
+      // sanity check
+      expect(tester.findText('MARKET'), isNotNull);
+      expect(tester.findText('Help & Feedback'), isNull);
+      tester.pump(new Duration(seconds: 2));
+      expect(tester.findText('MARKET'), isNotNull);
+      expect(tester.findText('Help & Feedback'), isNull);
+
+      // drag the drawer out
+      TestPointer pointer = new TestPointer(1);
+      Point left = new Point(0.0, ui.window.size.height / 2.0);
+      Point right = new Point(ui.window.size.width, left.y);
+      tester.dispatchEvent(pointer.down(left), left);
+      tester.pump();
+      tester.dispatchEvent(pointer.move(right), left);
+      tester.pump();
+      tester.dispatchEvent(pointer.up(), left);
+      tester.pump();
+      expect(tester.findText('MARKET'), isNotNull);
+      expect(tester.findText('Help & Feedback'), isNotNull);
+
+      // check the colour of the icon - light mode
+      checkIconColor(tester, 'Stock List', Colors.purple[500]); // theme primary color
+      checkIconColor(tester, 'Account Balance', Colors.black45); // enabled
+      checkIconColor(tester, 'Help & Feedback', Colors.black26); // disabled
+
+      // switch to dark mode
+      tester.tap(tester.findText('Pessimistic'));
+      tester.pump(); // get the tap and send the notification that the theme has changed
+      tester.pump(); // start the theme transition
+      tester.pump(const Duration(seconds: 5)); // end the transition
+
+      // check the colour of the icon - dark mode
+      checkIconColor(tester, 'Stock List', Colors.redAccent[200]); // theme accent color
+      checkIconColor(tester, 'Account Balance', Colors.white); // enabled
+      checkIconColor(tester, 'Help & Feedback', Colors.white30); // disabled
+
+    });
+  });
+}

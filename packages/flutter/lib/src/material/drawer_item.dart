@@ -24,21 +24,31 @@ class DrawerItem extends StatelessComponent {
   final bool selected;
 
   Color _getIconColor(ThemeData themeData) {
-    if (selected) {
-      if (themeData.brightness == ThemeBrightness.dark)
-        return themeData.accentColor;
-      return themeData.primaryColor;
+    switch (themeData.brightness) {
+      case ThemeBrightness.light:
+        if (selected)
+          return themeData.primaryColor;
+        if (onPressed == null)
+          return Colors.black26;
+        return Colors.black45;
+      case ThemeBrightness.dark:
+        if (selected)
+          return themeData.accentColor;
+        if (onPressed == null)
+          return Colors.white30;
+        return null; // use default icon theme colour unmodified
     }
-    return Colors.black45;
   }
 
   TextStyle _getTextStyle(ThemeData themeData) {
     TextStyle result = themeData.text.body2;
     if (selected) {
-      if (themeData.brightness == ThemeBrightness.dark)
-        result = result.copyWith(color: themeData.accentColor);
-      else
-        result = result.copyWith(color: themeData.primaryColor);
+      switch (themeData.brightness) {
+        case ThemeBrightness.light:
+          return result.copyWith(color: themeData.primaryColor);
+        case ThemeBrightness.dark:
+          return result.copyWith(color: themeData.accentColor);
+      }
     }
     return result;
   }

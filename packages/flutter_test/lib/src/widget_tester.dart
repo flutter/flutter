@@ -29,17 +29,26 @@ class WidgetTester extends Instrumentation {
   final FakeAsync async;
   final Clock clock;
 
+  /// Calls [runApp()] with the given widget, then triggers a frame sequent and
+  /// flushes microtasks, by calling [pump()] with the same duration (if any).
   void pumpWidget(Widget widget, [ Duration duration ]) {
     runApp(widget);
     pump(duration);
   }
 
+  /// Artificially calls dispatchLocaleChanged on the Widget binding,
+  /// then flushes microtasks.
   void setLocale(String languageCode, String countryCode) {
     Locale locale = new Locale(languageCode, countryCode);
     binding.dispatchLocaleChanged(locale);
     async.flushMicrotasks();
   }
 
+  /// Triggers a frame sequence (build/layout/paint/etc),
+  /// then flushes microtasks.
+  ///
+  /// If duration is set, then advances the clock by that much first.
+  /// Doing this flushes microtasks.
   void pump([ Duration duration ]) {
     if (duration != null)
       async.elapse(duration);

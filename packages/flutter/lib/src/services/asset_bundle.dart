@@ -21,6 +21,7 @@ abstract class AssetBundle {
   ImageResource loadImage(String key);
   Future<String> loadString(String key);
   Future<core.MojoDataPipeConsumer> load(String key);
+  String toString() => '$runtimeType@$hashCode()';
 }
 
 class NetworkAssetBundle extends AssetBundle {
@@ -39,6 +40,8 @@ class NetworkAssetBundle extends AssetBundle {
   Future<String> loadString(String key) async {
     return (await http.get(_urlFromKey(key))).body;
   }
+
+  String toString() => '$runtimeType@$hashCode($_baseUrl)';
 }
 
 abstract class CachingAssetBundle extends AssetBundle {

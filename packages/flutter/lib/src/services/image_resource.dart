@@ -11,6 +11,7 @@ class ImageInfo {
   ImageInfo({ this.image, this.scale: 1.0 });
   final ui.Image image;
   final double scale;
+  String toString() => '[${image.width}\u00D7${image.height}] @ ${scale}x';
 }
 
 /// A callback for when the image is available.
@@ -81,5 +82,17 @@ class ImageResource {
     debugPrint('Stack trace:');
     debugPrint('$stack');
     debugPrint('------------------------------------------------------------------------');
+  }
+
+  String toString() {
+    StringBuffer result = new StringBuffer();
+    result.write('$runtimeType(');
+    if (!_resolved)
+      result.write('unresolved');
+    else
+      result.write('$_image');
+    result.write('; ${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }');
+    result.write(')');
+    return result.toString();
   }
 }
