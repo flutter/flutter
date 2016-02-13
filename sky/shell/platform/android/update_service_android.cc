@@ -7,9 +7,9 @@
 #include "base/logging.h"
 #include "base/task_runner_util.h"
 #include "jni/UpdateService_jni.h"
+#include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/public/sky/sky_headless.h"
 #include "sky/shell/shell.h"
-#include "sky/shell/ui/internals.h"
 
 namespace sky {
 namespace shell {
@@ -39,7 +39,7 @@ void UpdateTaskAndroid::Start() {
 }
 
 void UpdateTaskAndroid::DidCreateIsolate(Dart_Isolate isolate) {
-  Internals::Create(isolate, nullptr, nullptr);
+  blink::MojoServices::Create(isolate, nullptr, nullptr);
 }
 
 void UpdateTaskAndroid::RunDartOnUIThread() {
