@@ -90,10 +90,6 @@ SnapshotProject() {
   local mojo_internal_path="$(readlink ${packages}/mojo)/../sdk_ext/internal.dart"
   AssertExists $mojo_internal_path
 
-  # For dart:ui_internals
-  local ui_internals_path="$(readlink ${packages}/sky_engine)/../sdk_ext/bindings/internals.dart"
-  AssertExists $ui_internals_path
-
   # For dart:ui
   local ui_path="$(readlink ${packages}/sky_engine)/../sdk_ext/dart_ui.dart"
   AssertExists $ui_path
@@ -132,7 +128,6 @@ SnapshotProject() {
       --package_root=${packages}                                               \
       --url_mapping=dart:mojo.internal,${mojo_internal_path}                   \
       --url_mapping=dart:ui,${ui_path}                                         \
-      --url_mapping=dart:ui_internals,${ui_internals_path}                     \
       --url_mapping=dart:vmservice_sky,$vm_service_path                        \
       $main_path
 

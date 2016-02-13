@@ -12,13 +12,13 @@
 #include "mojo/data_pipe_utils/data_pipe_utils.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
+#include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"
 #include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/animator.h"
-#include "sky/shell/ui/internals.h"
 #include "sky/shell/ui/platform_impl.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -269,7 +269,7 @@ void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
 }
 
 void Engine::DidCreateIsolate(Dart_Isolate isolate) {
-  Internals::Create(isolate, services_.Pass(), root_bundle_.Pass());
+  blink::MojoServices::Create(isolate, services_.Pass(), root_bundle_.Pass());
 }
 
 void Engine::StopAnimator() {
