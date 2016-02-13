@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This example shows how to draw some bi-directional text using the raw
+// interface to the engine.
+
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
+// A paragraph represents a rectangular region that contains some text.
 ui.Paragraph paragraph;
 
 ui.Picture paint(ui.Rect paintBounds) {
@@ -15,8 +19,9 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.drawRect(new ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
 
-  canvas.translate(paragraph.maxWidth / -2.0, (paragraph.maxWidth / 2.0) - 125);
-  paragraph.paint(canvas, ui.Offset.zero);
+  // The paint method of Pargraph draws the contents of the paragraph unto the
+  // given canvas.
+  paragraph.paint(canvas, new ui.Offset(paragraph.maxWidth / -2.0, (paragraph.maxWidth / 2.0) - 125));
 
   return recorder.endRecording();
 }
@@ -49,19 +54,37 @@ void beginFrame(Duration timeStamp) {
 }
 
 void main() {
+  // To create a paragraph of text, we use ParagraphBuilder.
   ui.ParagraphBuilder builder = new ui.ParagraphBuilder()
+    // We first push a style that turns the text blue.
     ..pushStyle(new ui.TextStyle(color: const ui.Color(0xFF0000FF)))
-    ..addText("Hello, ")
+    ..addText('Hello, ')
+    // The next run of text will be bold.
     ..pushStyle(new ui.TextStyle(fontWeight: ui.FontWeight.bold))
-    ..addText("world. ")
+    ..addText('world. ')
+    // The pop() command signals the end of the bold styling.
     ..pop()
-    ..addText("هذا هو قليلا طويلة من النص الذي يجب التفاف .")
+    // We add text to the paragraph in logical order. The paragraph object
+    // understands bi-directional text and will compute the visual ordering
+    // during layout.
+    ..addText('هذا هو قليلا طويلة من النص الذي يجب التفاف .')
+    // The second pop() removes the blue color.
     ..pop()
-    ..addText(" و أكثر قليلا لجعله أطول. ");
+    // We can add more text with the default styling.
+    ..addText(' و أكثر قليلا لجعله أطول. ')
+    ..addText('สวัสดี');
+  // When we're done adding styles and text, we build the Paragraph object, at
+  // which time we can apply styling that affects the entire paragraph, such as
+  // left, right, or center alignment. Once built, the contents of the paragraph
+  // cannot be altered, but sizing and positioning information can be updated.
   paragraph = builder.build(new ui.ParagraphStyle())
+    // Next, we supply a maximum width that the text is permitted to occupy.
     ..maxWidth = 180.0
+    // ... and we ask the paragraph to the visual position of each its glyphs as
+    // well as its overall size, subject to its sizing constraints.
     ..layout();
 
+  // Finally, we register our beginFrame callback and kick off the first frame.
   ui.window.onBeginFrame = beginFrame;
   ui.window.scheduleFrame();
 }

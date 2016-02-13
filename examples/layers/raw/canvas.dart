@@ -2,19 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This example shows how to use the ui.Canvas interface to draw various shapes
+// with gradients and transforms.
+
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 ui.Picture paint(ui.Rect paintBounds) {
+  // First we create a PictureRecorder to record the commands we're going to
+  // feed in the canvas. The PictureRecorder will eventually produce a Picture,
+  // which is an immutable record of those commands.
   ui.PictureRecorder recorder = new ui.PictureRecorder();
+
+  // Next, we create a canvas from the recorder. The canvas is an interface
+  // which can receive drawing commands. The canvas interface is modeled after
+  // the SkCanvas interface from Skia. The paintBounds establishes a "cull rect"
+  // for the canvas, which lets the implementation discard any commands that
+  // are entirely outside this rectangle.
   ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
-  ui.Size size = paintBounds.size;
 
   ui.Paint paint = new ui.Paint();
+  canvas.drawPaint(new ui.Paint()..color = const ui.Color(0xFFFFFFFF));
+
+  ui.Size size = paintBounds.size;
   ui.Point mid = size.center(ui.Point.origin);
   double radius = size.shortestSide / 2.0;
-  canvas.drawPaint(new ui.Paint()..color = const ui.Color(0xFFFFFFFF));
 
   canvas.save();
   canvas.translate(-mid.x/2.0, ui.window.size.height*2.0);
@@ -46,6 +59,11 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.restore();
 
   canvas.translate(0.0, 50.0);
+
+  // A DrawLooper is a powerful painting primitive that lets you apply several
+  // blending and filtering passes over a sequence of commands "in a loop". For
+  // example, the looper below draws the circle tree times, once with a blur,
+  // then with a gradient blend, and finally with just an offset.
   ui.LayerDrawLooperBuilder builder = new ui.LayerDrawLooperBuilder()
     ..addLayerOnTop(
         new ui.DrawLooperLayerInfo()
@@ -90,6 +108,10 @@ ui.Picture paint(ui.Rect paintBounds) {
   paint.drawLooper = builder.build();
   canvas.drawCircle(ui.Point.origin, radius, paint);
 
+  // When we're done issuing painting commands, we end the recording an receive
+  // a Picture, which is an immutable record of the commands we've issued. You
+  // can draw a Picture into another canvas or include it as part of a
+  // composited scene.
   return recorder.endRecording();
 }
 

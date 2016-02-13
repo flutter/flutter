@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This example shows how to use flex layout directly in the underlying render
+// tree.
+
 import 'package:flutter/rendering.dart';
 
 import 'src/solid_color_box.dart';
