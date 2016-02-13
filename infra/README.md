@@ -27,6 +27,12 @@ Recipes are just python.  They are
 [documented](https://github.com/luci/recipes-py/blob/master/doc/user_guide.md)
 by the [luci/recipes-py github project](https://github.com/luci/recipes-py).
 
+The typical cyle for editing a recipe is:
+1. Make your edits.
+2. Run `build/slave/recipes.py train simulation_test flutter` to update expected files  (remove the flutter if you need to do a global update).
+3. Run `build/slave/recipes.py run flutter/flutter` (or flutter/engine) if something was strange during training and you need to run it locally.
+4. Upload the patch (`git commit`, `git cl upload`) and send it to someone in the `recipes/flutter/OWNERS` file for review.
+
 Most of the functionality for recipes comes from recipe_modules, which are
 unfortunately spread to many separate repositories.  The easiest way to find
 documentation on how to use modules is to [get a full checkout of chromium's
