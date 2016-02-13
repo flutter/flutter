@@ -252,6 +252,61 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
   }
 }
 
+
+class _HorizontalPointerState extends MultiDragPointerState {
+  _HorizontalPointerState(Point initialPosition) : super(initialPosition);
+
+  void checkForResolutionAfterMove() {
+    assert(pendingDelta != null);
+    if (pendingDelta.dx.abs() > kTouchSlop)
+      resolve(GestureDisposition.accepted);
+  }
+
+  void accepted(GestureMultiDragStartCallback starter) {
+    starter(initialPosition);
+  }
+}
+
+class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_HorizontalPointerState> {
+  HorizontalMultiDragGestureRecognizer({
+    PointerRouter pointerRouter,
+    GestureArena gestureArena,
+    GestureMultiDragStartCallback onStart
+  }) : super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart);
+
+  _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
+    return new _HorizontalPointerState(event.position);
+  }
+}
+
+
+class _VerticalPointerState extends MultiDragPointerState {
+  _VerticalPointerState(Point initialPosition) : super(initialPosition);
+
+  void checkForResolutionAfterMove() {
+    assert(pendingDelta != null);
+    if (pendingDelta.dy.abs() > kTouchSlop)
+      resolve(GestureDisposition.accepted);
+  }
+
+  void accepted(GestureMultiDragStartCallback starter) {
+    starter(initialPosition);
+  }
+}
+
+class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_VerticalPointerState> {
+  VerticalMultiDragGestureRecognizer({
+    PointerRouter pointerRouter,
+    GestureArena gestureArena,
+    GestureMultiDragStartCallback onStart
+  }) : super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart);
+
+  _VerticalPointerState createNewPointerState(PointerDownEvent event) {
+    return new _VerticalPointerState(event.position);
+  }
+}
+
+
 class _DelayedPointerState extends MultiDragPointerState {
   _DelayedPointerState(Point initialPosition, Duration delay) : super(initialPosition) {
     assert(delay != null);
