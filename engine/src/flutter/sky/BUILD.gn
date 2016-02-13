@@ -46,6 +46,5 @@ group("sky") {
   }
 
   if (enable_gcm) {
-    deps += [ "//flutter_gcm:gcm" ]
   }
 }
