@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui_internals' as internals;
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:flutter/http.dart' as http;
@@ -95,7 +95,7 @@ class MojoAssetBundle extends CachingAssetBundle {
 AssetBundle _initRootBundle() {
   try {
     AssetBundleProxy bundle = new AssetBundleProxy.fromHandle(
-      new core.MojoHandle(internals.takeRootBundleHandle())
+      new core.MojoHandle(ui.takeRootBundleHandle())
     );
     return new MojoAssetBundle(bundle);
   } catch (e) {

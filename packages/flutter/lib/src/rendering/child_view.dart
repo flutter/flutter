@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui_internals' as internals;
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
@@ -18,7 +18,7 @@ import 'box.dart';
 import 'object.dart';
 
 mojom.ViewHostProxy _initViewHostProxy() {
-  int viewHost = internals.takeViewHostHandle();
+  int viewHost = ui.takeViewHostHandle();
   assert(() {
     if (viewHost == 0)
       debugPrint('Child view are supported only when running in Mojo shell.');

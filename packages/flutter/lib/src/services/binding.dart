@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui_internals' as internals;
+import 'dart:ui' as ui;
 
 import 'package:mojo/application.dart';
 import 'package:mojo/bindings.dart' as bindings;
@@ -55,7 +55,7 @@ abstract class MojoShell extends BindingBase {
   static MojoShell get instance => _instance;
 
   static mojom.ShellProxy _initShellProxy() {
-    core.MojoHandle shellHandle = new core.MojoHandle(internals.takeShellProxyHandle());
+    core.MojoHandle shellHandle = new core.MojoHandle(ui.takeShellProxyHandle());
     if (!shellHandle.isValid)
       return null;
     return new mojom.ShellProxy.fromHandle(shellHandle);
@@ -63,8 +63,8 @@ abstract class MojoShell extends BindingBase {
   final mojom.Shell _shell = _initShellProxy()?.ptr;
 
   static ApplicationConnection _initEmbedderConnection() {
-    core.MojoHandle servicesHandle = new core.MojoHandle(internals.takeServicesProvidedByEmbedder());
-    core.MojoHandle exposedServicesHandle = new core.MojoHandle(internals.takeServicesProvidedToEmbedder());
+    core.MojoHandle servicesHandle = new core.MojoHandle(ui.takeServicesProvidedByEmbedder());
+    core.MojoHandle exposedServicesHandle = new core.MojoHandle(ui.takeServicesProvidedToEmbedder());
     if (!servicesHandle.isValid || !exposedServicesHandle.isValid)
       return null;
     mojom.ServiceProviderProxy services = new mojom.ServiceProviderProxy.fromHandle(servicesHandle);
