@@ -1,9 +1,9 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_UI_INTERNALS_H_
-#define SKY_SHELL_UI_INTERNALS_H_
+#ifndef SKY_ENGINE_BINDINGS_MOJO_SERVICES_H_
+#define SKY_ENGINE_BINDINGS_MOJO_SERVICES_H_
 
 #include "base/supports_user_data.h"
 #include "dart/runtime/include/dart_api.h"
@@ -17,18 +17,20 @@ namespace mojo {
 class ApplicationConnection;
 }
 
-namespace sky {
-namespace shell {
+namespace blink {
+class DartLibraryNatives;
 
-class Internals
+class MojoServices
   : public base::SupportsUserData::Data,
     public mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker> {
  public:
-  ~Internals() override;
+  ~MojoServices() override;
 
   static void Create(Dart_Isolate isolate,
-                     ServicesDataPtr services,
+                     sky::ServicesDataPtr services,
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
+
+  static void RegisterNatives(DartLibraryNatives* natives);
 
   mojo::Handle TakeShellProxy();
   mojo::Handle TakeServiceRegistry();
@@ -38,15 +40,15 @@ class Internals
   mojo::Handle TakeViewHostHandle();
 
  private:
-  explicit Internals(ServicesDataPtr services,
-                     mojo::asset_bundle::AssetBundlePtr root_bundle);
+  explicit MojoServices(sky::ServicesDataPtr services,
+                        mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   // |mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker>| implementation:
   void Create(
       mojo::ApplicationConnection* connection,
       mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker>) override;
 
-  ServicesDataPtr services_;
+  sky::ServicesDataPtr services_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
 
   mojo::ServiceProviderPtr service_provider_;
@@ -61,10 +63,9 @@ class Internals
   mojo::InterfaceRequest<mojo::ServiceProvider>
       services_provided_to_embedder_;
 
-  MOJO_DISALLOW_COPY_AND_ASSIGN(Internals);
+  MOJO_DISALLOW_COPY_AND_ASSIGN(MojoServices);
 };
 
-}  // namespace shell
-}  // namespace sky
+}  // namespace blink
 
-#endif  // SKY_SHELL_UI_INTERNALS_H_
+#endif  // SKY_ENGINE_BINDINGS_MOJO_SERVICES_H_

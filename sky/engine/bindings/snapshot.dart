@@ -12,5 +12,4 @@ import 'dart:jni';
 import 'dart:math';
 import 'dart:mojo.internal';
 import 'dart:ui';
-import 'dart:ui_internals';
 import 'dart:typed_data';

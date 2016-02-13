@@ -25,6 +25,7 @@ part 'compositing.dart';
 part 'hash_codes.dart';
 part 'hooks.dart';
 part 'lerp.dart';
+part 'mojo_services.dart';
 part 'natives.dart';
 part 'painting.dart';
 part 'text.dart';

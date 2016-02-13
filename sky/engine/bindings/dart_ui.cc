@@ -5,6 +5,7 @@
 #include "sky/engine/bindings/dart_ui.h"
 
 #include "sky/engine/bindings/dart_runtime_hooks.h"
+#include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/compositing/SceneBuilder.h"
 #include "sky/engine/core/painting/Canvas.h"
@@ -55,6 +56,7 @@ void DartUI::InitForGlobal() {
     ImageShader::RegisterNatives(g_natives);
     LayerDrawLooperBuilder::RegisterNatives(g_natives);
     MaskFilter::RegisterNatives(g_natives);
+    MojoServices::RegisterNatives(g_natives);
     Painting::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);

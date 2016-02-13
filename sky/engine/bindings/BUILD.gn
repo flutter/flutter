@@ -16,25 +16,33 @@ source_set("bindings") {
     "dart_ui.h",
     "exception_messages.cc",
     "exception_messages.h",
-    "exception_state_placeholder.cc",
-    "exception_state_placeholder.h",
     "exception_state.cc",
     "exception_state.h",
+    "exception_state_placeholder.cc",
+    "exception_state_placeholder.h",
+    "mojo_services.cc",
+    "mojo_services.h",
   ]
 
   defines = [ "DART_IO_SECURE_SOCKET_DISABLED" ]
 
   deps = [
     "//base",
-    "//dart/runtime:libdart",
     "//dart/runtime/bin:embedded_dart_io",
+    "//dart/runtime:libdart",
     "//mojo/public/c/system",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
+    "//mojo/public/interfaces/application",
     "//mojo/public/platform/dart:mojo_internal_impl",
+    "//mojo/services/asset_bundle/interfaces",
+    "//services/asset_bundle:lib",
     "//sky/engine/core:prerequisites",
     "//sky/engine/platform:platform",
     "//sky/engine/tonic",
     "//sky/engine/wtf",
+    "//sky/services/engine:interfaces",
   ]
 
   # On iOS (device), precompiled snapshots contain the instruction buffer.
@@ -61,7 +69,6 @@ action("generate_snapshot_bin") {
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
-    "//sky/engine/bindings/internals.dart",
     "//sky/engine/bindings/jni/jni.dart",
     "//sky/engine/bindings/jni/jni_raw.dart",
     "//sky/engine/bindings/jni/jni_helper.dart",
@@ -78,8 +85,6 @@ action("generate_snapshot_bin") {
 
   dart_mojo_internal_path =
       rebase_path("//mojo/dart/packages/mojo/sdk_ext/internal.dart")
-  dart_ui_internals_path =
-      rebase_path("//sky/engine/bindings/internals.dart")
   dart_ui_path = rebase_path("$bindings_output_dir/dart_ui.dart")
   dart_jni_path = rebase_path("//sky/engine/bindings/jni/jni.dart")
 
@@ -103,7 +108,6 @@ action("generate_snapshot_bin") {
     target_os,
     "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
     "--url_mapping=dart:ui,$dart_ui_path",
-    "--url_mapping=dart:ui_internals,$dart_ui_internals_path",
     "--url_mapping=dart:jni,$dart_jni_path",
   ]
 }

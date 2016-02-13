@@ -1,6 +1,6 @@
+dart:io,::,_setupHooks
 dart:isolate,::,_startMainIsolate
 dart:mojo.internal,MojoHandleWatcher,mojoControlHandle
-dart:io,::,_setupHooks
 dart:ui,::,_beginFrame
 dart:ui,::,_dispatchPointerPacket
 dart:ui,::,_getCreateTimerClosure
@@ -13,6 +13,11 @@ dart:ui,::,_popRoute
 dart:ui,::,_pushRoute
 dart:ui,::,_updateLocale
 dart:ui,::,_updateWindowMetrics
+dart:ui,::,takeRootBundleHandle
+dart:ui,::,takeServiceRegistry
+dart:ui,::,takeServicesProvidedByEmbedder
+dart:ui,::,takeServicesProvidedToEmbedder
+dart:ui,::,takeShellProxyHandle
 dart:ui,Canvas,Canvas.
 dart:ui,DrawLooper,DrawLooper.
 dart:ui,DrawLooperLayerInfo,DrawLooperLayerInfo.
@@ -29,9 +34,4 @@ dart:ui,Scene,Scene.
 dart:ui,SceneBuilder,SceneBuilder.
 dart:ui,Shader,Shader.
 dart:ui,TextBox,TextBox._
-dart:ui_internals,::,takeRootBundleHandle
-dart:ui_internals,::,takeServiceRegistry
-dart:ui_internals,::,takeServicesProvidedByEmbedder
-dart:ui_internals,::,takeServicesProvidedToEmbedder
-dart:ui_internals,::,takeShellProxyHandle
 dart:vmservice_sky,::,main
