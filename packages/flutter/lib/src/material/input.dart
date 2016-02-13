@@ -15,7 +15,7 @@ export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 /// A material design text input field.
 class Input extends StatefulComponent {
   Input({
-    GlobalKey key,
+    Key key,
     this.value: InputValue.empty,
     this.keyboardType: KeyboardType.text,
     this.icon,
@@ -28,9 +28,7 @@ class Input extends StatefulComponent {
     this.autofocus: false,
     this.onChanged,
     this.onSubmitted
-  }) : super(key: key) {
-    assert(key != null);
-  }
+  }) : super(key: key);
 
   /// The text of the input field.
   final InputValue value;
@@ -77,10 +75,13 @@ const Curve _kTransitionCurve = Curves.ease;
 class _InputState extends State<Input> {
   GlobalKey<RawInputLineState> _rawInputLineKey = new GlobalKey<RawInputLineState>();
 
+  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputLineKey;
+
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
-    bool focused = Focus.at(context, autofocus: config.autofocus);
+    BuildContext focusContext = focusKey.currentContext;
+    bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
 
     TextStyle textStyle = config.style ?? themeData.text.subhead;
     Color focusHighlightColor = themeData.accentColor;
@@ -156,7 +157,7 @@ class _InputState extends State<Input> {
       child: new RawInputLine(
         key: _rawInputLineKey,
         value: config.value,
-        focusKey: config.key,
+        focusKey: focusKey,
         style: textStyle,
         hideText: config.hideText,
         cursorColor: cursorColor,
