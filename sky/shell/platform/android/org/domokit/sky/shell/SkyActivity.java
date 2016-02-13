@@ -42,6 +42,9 @@ public class SkyActivity extends Activity {
         if (intent.getBooleanExtra("enable-checked-mode", false)) {
             args.add("--enable-checked-mode");
         }
+        if (intent.getBooleanExtra("enable-background-compilation", false)) {
+            args.add("--enable-background-compilation");
+        }
         if (intent.getBooleanExtra("trace-startup", false)) {
             args.add("--trace-startup");
         }

@@ -22,7 +22,6 @@ namespace sky {
 namespace shell {
 namespace {
 
-// Instruct the DartVM to report type errors.
 const char kEnableCheckedMode[] = "--enable-checked-mode";
 
 }  // namespace
