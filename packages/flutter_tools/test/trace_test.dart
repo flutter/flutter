@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/commands/trace.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
+import 'src/common.dart';
+import 'src/context.dart';
 import 'src/mocks.dart';
-import 'src/test_context.dart';
 
 main() => defineTests();
 
@@ -21,9 +21,9 @@ defineTests() {
 
       when(mockDevices.android.isConnected()).thenReturn(false);
 
-      CommandRunner runner = new CommandRunner('test_flutter', '')
-        ..addCommand(command);
-      return runner.run(['trace']).then((int code) => expect(code, equals(1)));
+      return createTestCommandRunner(command).run(['trace']).then((int code) {
+        expect(code, equals(1));
+      });
     });
   });
 }

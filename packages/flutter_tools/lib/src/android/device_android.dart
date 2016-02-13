@@ -50,18 +50,6 @@ class AndroidDevice extends Device {
   }) : super(id) {
     if (connected != null)
       _connected = connected;
-
-    _adbPath = getAdbPath();
-    _hasAdb = _checkForAdb();
-
-    // Checking for [minApiName] only needs to be done if we are starting an
-    // app, but it has an important side effect, which is to discard any
-    // progress messages if the adb server is restarted.
-    _hasValidAndroid = _checkForSupportedAndroidVersion();
-
-    if (!_hasAdb || !_hasValidAndroid) {
-      printError('Unable to run on Android.');
-    }
   }
 
   final String productID;
@@ -69,32 +57,9 @@ class AndroidDevice extends Device {
   final String deviceCodeName;
 
   bool _connected;
-  String _adbPath;
-  String get adbPath => _adbPath;
-  bool _hasAdb = false;
-  bool _hasValidAndroid = false;
-
-  static String getAndroidSdkPath() {
-    if (Platform.environment.containsKey('ANDROID_HOME')) {
-      String androidHomeDir = Platform.environment['ANDROID_HOME'];
-      if (FileSystemEntity.isDirectorySync(
-          path.join(androidHomeDir, 'platform-tools'))) {
-        return androidHomeDir;
-      } else if (FileSystemEntity.isDirectorySync(
-          path.join(androidHomeDir, 'sdk', 'platform-tools'))) {
-        return path.join(androidHomeDir, 'sdk');
-      } else {
-        printError('Android SDK not found at $androidHomeDir');
-        return null;
-      }
-    } else {
-      printError('Android SDK not found. The ANDROID_HOME variable must be set.');
-      return null;
-    }
-  }
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[adbPath, '-s', id]..addAll(args);
+    return <String>[androidSdk.adbPath, '-s', id]..addAll(args);
   }
 
   bool _isValidAdbVersion(String adbVersion) {
@@ -121,24 +86,19 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  bool _checkForAdb() {
-    try {
-      String adbVersion = runCheckedSync(<String>[adbPath, 'version']);
-      if (_isValidAdbVersion(adbVersion)) {
-        return true;
-      }
+  bool _checkForSupportedAdbVersion() {
+    if (androidSdk == null)
+      return false;
 
-      String locatedAdbPath = runCheckedSync(<String>['which', 'adb']);
-      printError('"$locatedAdbPath" is too old. '
-          'Please install version 1.0.32 or later.\n'
-          'Try setting ANDROID_HOME to the path to your Android SDK install. '
-          'Android builds are unavailable.');
-    } catch (e) {
-      printError('"adb" not found in \$PATH. '
-          'Please install the Android SDK or set ANDROID_HOME '
-          'to the path of your Android SDK install.');
-      printTrace('$e');
+    try {
+      String adbVersion = runCheckedSync(<String>[androidSdk.adbPath, 'version']);
+      if (_isValidAdbVersion(adbVersion))
+        return true;
+      printError('The ADB at "${androidSdk.adbPath}" is too old; please install version 1.0.32 or later.');
+    } catch (error, trace) {
+      printError('Error running ADB: $error', trace);
     }
+
     return false;
   }
 
@@ -150,34 +110,29 @@ class AndroidDevice extends Device {
       //   * daemon started successfully *
       runCheckedSync(adbCommandForDevice(<String>['start-server']));
 
-      String ready = runSync(adbCommandForDevice(<String>['shell', 'echo', 'ready']));
-      if (ready.trim() != 'ready') {
-        printTrace('Android device not found.');
-        return false;
-      }
-
       // Sample output: '22'
       String sdkVersion = runCheckedSync(
         adbCommandForDevice(<String>['shell', 'getprop', 'ro.build.version.sdk'])
       ).trimRight();
 
-      int sdkVersionParsed =
-          int.parse(sdkVersion, onError: (String source) => null);
+      int sdkVersionParsed = int.parse(sdkVersion, onError: (String source) => null);
       if (sdkVersionParsed == null) {
         printError('Unexpected response from getprop: "$sdkVersion"');
         return false;
       }
+
       if (sdkVersionParsed < minApiLevel) {
         printError(
           'The Android version ($sdkVersion) on the target device is too old. Please '
           'use a $minVersionName (version $minApiLevel / $minVersionText) device or later.');
         return false;
       }
+
       return true;
     } catch (e) {
       printError('Unexpected failure from adb: $e');
+      return false;
     }
-    return false;
   }
 
   String _getDeviceSha1Path(ApplicationPackage app) {
@@ -220,10 +175,14 @@ class AndroidDevice extends Device {
       printTrace('Android device not connected. Not installing.');
       return false;
     }
+
     if (!FileSystemEntity.isFileSync(app.localPath)) {
       printError('"${app.localPath}" does not exist.');
       return false;
     }
+
+    if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
+      return false;
 
     printStatus('Installing ${app.name} on device.');
     runCheckedSync(adbCommandForDevice(<String>['install', '-r', app.localPath]));
@@ -306,6 +265,9 @@ class AndroidDevice extends Device {
     int debugPort: observatoryDefaultPort,
     Map<String, dynamic> platformArgs
   }) async {
+    if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
+      return false;
+
     flx.DirectoryResult buildResult = await flx.buildInTempDir(
       toolchain,
       mainPath: mainPath
@@ -420,7 +382,7 @@ class AndroidDevice extends Device {
     return null;
   }
 
-  bool isConnected() => _connected ?? _hasValidAndroid;
+  bool isConnected() => _connected ?? androidSdk != null;
 
   void setConnected(bool value) {
     _connected = value;
@@ -447,18 +409,12 @@ class AndroidDevice extends Device {
   }
 }
 
-/// The [mockAndroid] argument is only to facilitate testing with mocks, so that
-/// we don't have to rely on the test setup having adb available to it.
-List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
-  List<AndroidDevice> devices = [];
-  String adbPath = (mockAndroid != null) ? mockAndroid.adbPath : getAdbPath();
+List<AndroidDevice> getAdbDevices() {
+  if (androidSdk == null)
+    return <AndroidDevice>[];
 
-  try {
-    runCheckedSync(<String>[adbPath, 'version']);
-  } catch (e) {
-    printError('Unable to find adb. Is "adb" in your path?');
-    return devices;
-  }
+  String adbPath = androidSdk.adbPath;
+  List<AndroidDevice> devices = [];
 
   List<String> output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
 
@@ -523,25 +479,6 @@ List<AndroidDevice> getAdbDevices([AndroidDevice mockAndroid]) {
     }
   }
   return devices;
-}
-
-String getAdbPath() {
-  if (Platform.environment.containsKey('ANDROID_HOME')) {
-    String androidHomeDir = Platform.environment['ANDROID_HOME'];
-    String adbPath1 = path.join(androidHomeDir, 'sdk', 'platform-tools', 'adb');
-    String adbPath2 = path.join(androidHomeDir, 'platform-tools', 'adb');
-    if (FileSystemEntity.isFileSync(adbPath1)) {
-      return adbPath1;
-    } else if (FileSystemEntity.isFileSync(adbPath2)) {
-      return adbPath2;
-    } else {
-      printTrace('"adb" not found at\n  "$adbPath1" or\n  "$adbPath2"\n' +
-          'using default path "$_defaultAdbPath"');
-      return _defaultAdbPath;
-    }
-  } else {
-    return _defaultAdbPath;
-  }
 }
 
 /// A log reader that logs from `adb logcat`. This will have the same output as

@@ -7,11 +7,12 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../android/device_android.dart';
+import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/globals.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
@@ -33,9 +34,6 @@ const String _kDebugKeystoreKeyAlias = "chromiumdebugkey";
 
 // Password for the Chromium debug keystore
 const String _kDebugKeystorePassword = "chromium";
-
-const String _kAndroidPlatformVersion = '22';
-const String _kBuildToolsVersion = '22.0.1';
 
 /// Copies files into a new directory structure.
 class _AssetBuilder {
@@ -59,30 +57,24 @@ class _AssetBuilder {
 
 /// Builds an APK package using Android SDK tools.
 class _ApkBuilder {
-  final String androidSdk;
+  final AndroidSdkVersion sdk;
 
   File _androidJar;
   File _aapt;
   File _dx;
   File _zipalign;
-  String _jarsigner;
+  File _jarsigner;
 
-  _ApkBuilder(this.androidSdk) {
-    _androidJar = new File('$androidSdk/platforms/android-$_kAndroidPlatformVersion/android.jar');
-
-    String buildTools = '$androidSdk/build-tools/$_kBuildToolsVersion';
-    _aapt = new File('$buildTools/aapt');
-    _dx = new File('$buildTools/dx');
-    _zipalign = new File('$buildTools/zipalign');
-    _jarsigner = 'jarsigner';
-  }
-
-  bool checkSdkPath() {
-    return (_androidJar.existsSync() && _aapt.existsSync() && _dx.existsSync() && _zipalign.existsSync());
+  _ApkBuilder(this.sdk) {
+    _androidJar = new File(sdk.androidJarPath);
+    _aapt = new File(sdk.aaptPath);
+    _dx = new File(sdk.dxPath);
+    _zipalign = new File(sdk.zipalignPath);
+    _jarsigner = os.which('jarsigner');
   }
 
   void compileClassesDex(File classesDex, List<File> jars) {
-    List<String> packageArgs = [_dx.path,
+    List<String> packageArgs = <String>[_dx.path,
       '--dex',
       '--force-jumbo',
       '--output', classesDex.path
@@ -94,7 +86,7 @@ class _ApkBuilder {
   }
 
   void package(File outputApk, File androidManifest, Directory assets, Directory artifacts, Directory resources) {
-    List<String> packageArgs = [_aapt.path,
+    List<String> packageArgs = <String>[_aapt.path,
       'package',
       '-M', androidManifest.path,
       '-A', assets.path,
@@ -109,7 +101,7 @@ class _ApkBuilder {
   }
 
   void sign(File keystore, String keystorePassword, String keyAlias, String keyPassword, File outputApk) {
-    runCheckedSync([_jarsigner,
+    runCheckedSync(<String>[_jarsigner.path,
       '-keystore', keystore.path,
       '-storepass', keystorePassword,
       '-keypass', keyPassword,
@@ -119,12 +111,11 @@ class _ApkBuilder {
   }
 
   void align(File unalignedApk, File outputApk) {
-    runCheckedSync([_zipalign.path, '-f', '4', unalignedApk.path, outputApk.path]);
+    runCheckedSync(<String>[_zipalign.path, '-f', '4', unalignedApk.path, outputApk.path]);
   }
 }
 
 class _ApkComponents {
-  Directory androidSdk;
   File manifest;
   File icuData;
   List<File> jars;
@@ -135,11 +126,12 @@ class _ApkComponents {
 }
 
 class ApkKeystoreInfo {
+  ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, this.keyPassword });
+
   String keystore;
   String password;
   String keyAlias;
   String keyPassword;
-  ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, this.keyPassword });
 }
 
 class ApkCommand extends FlutterCommand {
@@ -183,7 +175,19 @@ class ApkCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
+    // Validate that we can find an android sdk.
+    if (androidSdk == null) {
+      printError('No Android SDK found.');
+      return 1;
+    }
+
+    if (!androidSdk.validateSdkWellFormed(complain: true)) {
+      printError('Try re-installing or updating your Android SDK.');
+      return 1;
+    }
+
     await downloadToolchain();
+
     return await buildAndroid(
       toolchain: toolchain,
       configs: buildConfigurations,
@@ -207,10 +211,8 @@ class ApkCommand extends FlutterCommand {
 Future<_ApkComponents> _findApkComponents(
   BuildConfiguration config, String enginePath, String manifest, String resources
 ) async {
-  String androidSdkPath;
   List<String> artifactPaths;
   if (enginePath != null) {
-    androidSdkPath = '$enginePath/third_party/android_tools/sdk';
     artifactPaths = [
       '$enginePath/third_party/icu/android/icudtl.dat',
       '${config.buildDir}/gen/sky/shell/shell/classes.dex.jar',
@@ -218,9 +220,6 @@ Future<_ApkComponents> _findApkComponents(
       '$enginePath/build/android/ant/chromium-debug.keystore',
     ];
   } else {
-    androidSdkPath = AndroidDevice.getAndroidSdkPath();
-    if (androidSdkPath == null)
-      return null;
     List<ArtifactType> artifactTypes = <ArtifactType>[
       ArtifactType.androidIcuData,
       ArtifactType.androidClassesJar,
@@ -234,7 +233,6 @@ Future<_ApkComponents> _findApkComponents(
   }
 
   _ApkComponents components = new _ApkComponents();
-  components.androidSdk = new Directory(androidSdkPath);
   components.manifest = new File(manifest);
   components.icuData = new File(artifactPaths[0]);
   components.jars = [new File(artifactPaths[1])];
@@ -242,11 +240,7 @@ Future<_ApkComponents> _findApkComponents(
   components.debugKeystore = new File(artifactPaths[3]);
   components.resources = new Directory(resources);
 
-  await parseServiceConfigs(
-    components.services,
-    jars: components.jars,
-    androidSdk: components.androidSdk.path
-  );
+  await parseServiceConfigs(components.services, jars: components.jars);
 
   if (!components.resources.existsSync()) {
     // TODO(eseidel): This level should be higher when path is manually set.
@@ -254,16 +248,6 @@ Future<_ApkComponents> _findApkComponents(
     components.resources = null;
   }
 
-  if (!components.androidSdk.existsSync()) {
-    printError('Can not locate Android SDK: $androidSdkPath');
-    return null;
-  }
-  if (!(new _ApkBuilder(components.androidSdk.path).checkSdkPath())) {
-    printError('Can not locate expected Android SDK tools at $androidSdkPath');
-    printError('You must install version $_kAndroidPlatformVersion of the SDK platform');
-    printError('and version $_kBuildToolsVersion of the build tools.');
-    return null;
-  }
   for (File f in [
     components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
   ]..addAll(components.jars)) {
@@ -281,7 +265,7 @@ int _buildApk(
 ) {
   Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
   try {
-    _ApkBuilder builder = new _ApkBuilder(components.androidSdk.path);
+    _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
 
     File classesDex = new File('${tempDir.path}/classes.dex');
     builder.compileClassesDex(classesDex, components.jars);

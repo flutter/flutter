@@ -5,7 +5,7 @@
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/test.dart';
 
-import 'src/test_context.dart';
+import 'src/context.dart';
 
 main() => defineTests();
 

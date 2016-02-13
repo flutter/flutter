@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../android/adb.dart';
+import '../android/android_sdk.dart';
 import '../android/device_android.dart';
 import '../base/context.dart';
 import '../base/globals.dart';

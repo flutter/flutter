@@ -16,11 +16,17 @@ import 'src/mocks.dart';
 main() => defineTests();
 
 defineTests() {
-  group('daemon', () {
-    Daemon daemon;
-    AppContext appContext;
-    NotifyingLogger notifyingLogger;
+  Daemon daemon;
+  AppContext appContext;
+  NotifyingLogger notifyingLogger;
 
+  void _testUsingContext(String description, dynamic testMethod()) {
+    test(description, () {
+      return appContext.runInZone(testMethod);
+    });
+  }
+
+  group('daemon', () {
     setUp(() {
       appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
@@ -32,7 +38,7 @@ defineTests() {
         return daemon.shutdown();
     });
 
-    test('daemon.version', () async {
+    _testUsingContext('daemon.version', () async {
       StreamController<Map<String, dynamic>> commands = new StreamController();
       StreamController<Map<String, dynamic>> responses = new StreamController();
       daemon = new Daemon(
@@ -47,7 +53,7 @@ defineTests() {
       expect(response['result'] is String, true);
     });
 
-    test('daemon.logMessage', () {
+    _testUsingContext('daemon.logMessage', () {
       return appContext.runInZone(() async {
         StreamController<Map<String, dynamic>> commands = new StreamController();
         StreamController<Map<String, dynamic>> responses = new StreamController();
@@ -68,7 +74,7 @@ defineTests() {
       });
     });
 
-    test('daemon.shutdown', () async {
+    _testUsingContext('daemon.shutdown', () async {
       StreamController<Map<String, dynamic>> commands = new StreamController();
       StreamController<Map<String, dynamic>> responses = new StreamController();
       daemon = new Daemon(
@@ -82,7 +88,7 @@ defineTests() {
       });
     });
 
-    test('daemon.stopAll', () async {
+    _testUsingContext('daemon.stopAll', () async {
       DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -112,7 +118,7 @@ defineTests() {
       expect(response['result'], true);
     });
 
-    test('device.getDevices', () async {
+    _testUsingContext('device.getDevices', () async {
       StreamController<Map<String, dynamic>> commands = new StreamController();
       StreamController<Map<String, dynamic>> responses = new StreamController();
       daemon = new Daemon(

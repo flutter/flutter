@@ -9,7 +9,9 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
@@ -166,6 +168,22 @@ class FlutterCommandRunner extends CommandRunner {
 
     // See if the user specified a specific device.
     deviceManager.specifiedDeviceId = globalResults['device-id'];
+
+    // The Android SDK could already have been set by tests.
+    if (!context.isSet(AndroidSdk)) {
+      if (enginePath != null) {
+        context[AndroidSdk] = new AndroidSdk('$enginePath/third_party/android_tools/sdk');
+      } else {
+        context[AndroidSdk] = AndroidSdk.locateAndroidSdk();
+      }
+    }
+
+    if (androidSdk != null) {
+      printTrace('Using Android SDK at ${androidSdk.directory}.');
+
+      if (androidSdk.latestVersion != null)
+        printTrace('${androidSdk.latestVersion}');
+    }
 
     ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
     if (globalResults.wasParsed('package-root'))

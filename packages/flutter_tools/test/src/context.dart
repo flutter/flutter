@@ -9,12 +9,25 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/test.dart';
 
-void testUsingContext(String description, dynamic testMethod(), { Timeout timeout }) {
+/// Return the test logger. This assumes that the current Logger is a BufferLogger.
+BufferLogger get testLogger => context[Logger];
+
+void testUsingContext(String description, dynamic testMethod(), {
+  Timeout timeout,
+  Map<Type, dynamic> overrides: const <Type, dynamic>{}
+}) {
   test(description, () {
     AppContext testContext = new AppContext();
 
-    testContext[Logger] = new BufferLogger();
-    testContext[DeviceManager] = new MockDeviceManager();
+    overrides.forEach((Type type, dynamic value) {
+      testContext[type] = value;
+    });
+
+    if (!overrides.containsKey(Logger))
+      testContext[Logger] = new BufferLogger();
+
+    if (!overrides.containsKey(DeviceManager))
+      testContext[DeviceManager] = new MockDeviceManager();
 
     return testContext.runInZone(testMethod);
   }, timeout: timeout);
