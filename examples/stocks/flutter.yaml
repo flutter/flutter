@@ -19,3 +19,7 @@ material-design-icons:
   - name: navigation/arrow_back
   - name: navigation/menu
   - name: navigation/more_vert
+  - name: editor/format_color_text
+  - name: image/filter_none
+  - name: hardware/mouse
+  - name: image/gradient

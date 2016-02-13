@@ -57,13 +57,13 @@ int debugPaintPointersColorValue = 0x00BBBB;
 Color debugErrorBoxColor = const Color(0xFFFF0000);
 
 /// Overlay a rotating set of colors when repainting layers in checked mode.
-bool debugEnableRepaintRainbox = false;
+bool debugRepaintRainbowEnabled = false;
 
 /// The current color to overlay when repainting a layer.
 HSVColor debugCurrentRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
 
 /// The amount to increment the hue of the current repaint color.
-double debugRepaintRainboxHueIncrement = 2.0;
+double debugRepaintRainbowHueIncrement = 2.0;
 
 /// Log the call stacks that mark render objects as needing paint.
 bool debugPrintMarkNeedsPaintStacks = false;
