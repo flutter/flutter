@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
+import 'src/common.dart';
+import 'src/context.dart';
 import 'src/mocks.dart';
 
 main() => defineTests();
 
 defineTests() {
   group('install', () {
-    test('returns 0 when Android is connected and ready for an install', () {
+    testUsingContext('returns 0 when Android is connected and ready for an install', () {
       InstallCommand command = new InstallCommand();
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
@@ -30,13 +31,12 @@ defineTests() {
       when(mockDevices.iOSSimulator.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
 
-
-      CommandRunner runner = new CommandRunner('test_flutter', '')
-        ..addCommand(command);
-      return runner.run(['install']).then((int code) => expect(code, equals(0)));
+      return createTestCommandRunner(command).run(['install']).then((int code) {
+        expect(code, equals(0));
+      });
     });
 
-    test('returns 0 when iOS is connected and ready for an install', () {
+    testUsingContext('returns 0 when iOS is connected and ready for an install', () {
       InstallCommand command = new InstallCommand();
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
@@ -53,9 +53,9 @@ defineTests() {
       when(mockDevices.iOSSimulator.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
 
-      CommandRunner runner = new CommandRunner('test_flutter', '')
-        ..addCommand(command);
-      return runner.run(['install']).then((int code) => expect(code, equals(0)));
+      return createTestCommandRunner(command).run(['install']).then((int code) {
+        expect(code, equals(0));
+      });
     });
   });
 }

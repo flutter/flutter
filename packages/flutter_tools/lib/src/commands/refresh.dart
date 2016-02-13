@@ -32,7 +32,7 @@ class RefreshCommand extends FlutterCommand {
       downloadApplicationPackagesAndConnectToDevices(),
     ], eagerError: true);
 
-    if (!devices.android.isConnected()) {
+    if (devices.android == null || !devices.android.isConnected()) {
       printError('No device connected.');
       return 1;
     }

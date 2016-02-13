@@ -18,11 +18,25 @@ abstract class OperatingSystemUtils {
 
   /// Make the given file executable. This may be a no-op on some platforms.
   ProcessResult makeExecutable(File file);
+
+  /// Return the path (with symlinks resolved) to the given executable, or `null`
+  /// if `which` was not able to locate the binary.
+  File which(String execName);
 }
 
 class _PosixUtils implements OperatingSystemUtils {
   ProcessResult makeExecutable(File file) {
     return Process.runSync('chmod', ['u+x', file.path]);
+  }
+
+  /// Return the path (with symlinks resolved) to the given executable, or `null`
+  /// if `which` was not able to locate the binary.
+  File which(String execName) {
+    ProcessResult result = Process.runSync('which', <String>[execName]);
+    if (result.exitCode != 0)
+      return null;
+    String path = result.stdout.trim().split('\n').first.trim();
+    return new File(new File(path).resolveSymbolicLinksSync());
   }
 }
 
@@ -30,6 +44,10 @@ class _WindowsUtils implements OperatingSystemUtils {
   // This is a no-op.
   ProcessResult makeExecutable(File file) {
     return new ProcessResult(0, 0, null, null);
+  }
+
+  File which(String execName) {
+    throw new UnimplementedError('_WindowsUtils.which');
   }
 }
 

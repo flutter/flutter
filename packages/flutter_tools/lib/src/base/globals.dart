@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../android/android_sdk.dart';
 import '../device.dart';
 import 'context.dart';
 import 'logger.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 Logger get logger => context[Logger];
+AndroidSdk get androidSdk => context[AndroidSdk];
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

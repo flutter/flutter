@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'artifacts.dart';
+import 'base/globals.dart';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
 
@@ -23,7 +24,7 @@ dynamic _loadYamlFile(String path) {
 /// Loads all services specified in `flutter.yaml`. Parses each service config file,
 /// storing metadata in [services] and the list of jar files in [jars].
 Future parseServiceConfigs(
-  List<Map<String, String>> services, { List<File> jars, String androidSdk }
+  List<Map<String, String>> services, { List<File> jars }
 ) async {
   if (!ArtifactStore.isPackageRootValid)
     return;
@@ -49,17 +50,17 @@ Future parseServiceConfigs(
 
     if (jars != null) {
       for (String jar in serviceConfig['jars'])
-        jars.add(new File(await getServiceFromUrl(jar, serviceRoot, service, androidSdk: androidSdk, unzip: false)));
+        jars.add(new File(await getServiceFromUrl(jar, serviceRoot, service, unzip: false)));
     }
   }
 }
 
 Future<String> getServiceFromUrl(
-  String url, String rootDir, String serviceName, { String androidSdk, bool unzip: false }
+  String url, String rootDir, String serviceName, { bool unzip: false }
 ) async {
-  if (url.startsWith("android-sdk:")) {
+  if (url.startsWith("android-sdk:") && androidSdk != null) {
     // It's something shipped in the standard android SDK.
-    return url.replaceAll('android-sdk:', '$androidSdk/');
+    return url.replaceAll('android-sdk:', '${androidSdk.directory}/');
   } else if (url.startsWith("http")) {
     // It's a regular file to download.
     return await ArtifactStore.getThirdPartyFile(url, serviceName, unzip);

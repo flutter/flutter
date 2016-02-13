@@ -16,6 +16,14 @@ AppContext get context {
 class AppContext {
   Map<Type, dynamic> _instances = <Type, dynamic>{};
 
+  bool isSet(Type type) {
+    if (_instances.containsKey(type))
+      return true;
+
+    AppContext parent = _calcParent(Zone.current);
+    return parent != null ? parent.isSet(type) : false;
+  }
+
   dynamic getVariable(Type type) {
     if (_instances.containsKey(type))
       return _instances[type];
