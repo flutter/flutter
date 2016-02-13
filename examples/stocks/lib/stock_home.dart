@@ -241,9 +241,6 @@ class StockHomeState extends State<StockHome> {
 
   static const List<String> portfolioSymbols = const <String>["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
 
-  static GlobalKey searchFieldKey = new GlobalKey();
-  static GlobalKey companyNameKey = new GlobalKey();
-
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
   Widget buildSearchBar() {
     return new ToolBar(
@@ -255,7 +252,6 @@ class StockHomeState extends State<StockHome> {
       ),
       center: new Input(
         value: _searchQuery,
-        key: searchFieldKey,
         autofocus: true,
         hintText: 'Search stocks',
         onChanged: _handleSearchQueryChanged
@@ -272,7 +268,6 @@ class StockHomeState extends State<StockHome> {
         return new Column(
           children: <Widget>[
             new Input(
-              key: companyNameKey,
               autofocus: true,
               hintText: 'Company Name'
             ),
