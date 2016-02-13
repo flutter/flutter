@@ -1,4 +1,0 @@
-name: sky_raw_examples
-dependencies:
-  flutter:
-    path: ../../packages/flutter

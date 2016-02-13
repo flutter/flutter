@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'lib/sector_layout.dart';
+import 'src/sector_layout.dart';
 
 RenderBox buildSectorExample() {
   RenderSectorRing rootCircle = new RenderSectorRing(padding: 20.0);

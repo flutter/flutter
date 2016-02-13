@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'package:flutter_rendering_examples/solid_color_box.dart';
+import '../rendering/src/solid_color_box.dart';
 
 // Solid colour, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex: 0 }) {

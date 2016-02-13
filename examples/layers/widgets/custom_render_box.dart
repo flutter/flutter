@@ -5,8 +5,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-class _CustomRenderBox extends RenderConstrainedBox {
-  _CustomRenderBox() : super(additionalConstraints: const BoxConstraints.expand());
+class RenderDots extends RenderConstrainedBox {
+  RenderDots() : super(additionalConstraints: const BoxConstraints.expand());
 
   // Makes this render box hittable so that we'll get pointer events.
   bool hitTestSelf(Point position) => true;
@@ -25,18 +25,21 @@ class _CustomRenderBox extends RenderConstrainedBox {
 
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
-    canvas.drawRect(offset & size, new Paint()..color = new Color(0xFF00FF00));
+    canvas.drawRect(offset & size, new Paint()..color = new Color(0xFF0000FF));
 
-    Paint paint = new Paint()..color = new Color(0xFF0000FF);
+    Paint paint = new Paint()..color = new Color(0xFF00FF00);
     for (Point point in _dots.values)
       canvas.drawCircle(point, 50.0, paint);
+
+    super.paint(context, offset);
   }
 }
 
-class _CustomRenderBoxWidget extends OneChildRenderObjectWidget {
-  _CustomRenderBox createRenderObject() => new _CustomRenderBox();
+class Dots extends OneChildRenderObjectWidget {
+  Dots({ Key key, Widget child }) : super(key: key, child: child);
+  RenderDots createRenderObject() => new RenderDots();
 }
 
 void main() {
-  runApp(new _CustomRenderBoxWidget());
+  runApp(new Dots(child: new Center(child: new Text('Touch me!'))));
 }

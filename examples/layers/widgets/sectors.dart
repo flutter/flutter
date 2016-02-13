@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'package:flutter_rendering_examples/sector_layout.dart';
+import '../rendering/src/sector_layout.dart';
 
 RenderBox initCircle() {
   return new RenderBoxToRenderSectorAdapter(
