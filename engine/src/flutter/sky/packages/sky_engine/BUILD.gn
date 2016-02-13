@@ -36,6 +36,5 @@ dart_pkg("sky_engine") {
   ]
   sdk_ext_mappings = [
     "dart:ui,dart_ui.dart",
-    "dart:ui_internals,bindings/internals.dart",
   ]
 }
