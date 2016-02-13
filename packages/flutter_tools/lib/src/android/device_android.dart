@@ -256,6 +256,7 @@ class AndroidDevice extends Device {
 
   Future<bool> startBundle(AndroidApk apk, String bundlePath, {
     bool checked: true,
+    bool backgroundCompilation: false,
     bool traceStartup: false,
     String route,
     bool clearLogs: false,
@@ -283,6 +284,8 @@ class AndroidDevice extends Device {
     ]);
     if (checked)
       cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
+    if (backgroundCompilation)
+      cmd.addAll(<String>['--ez', 'enable-background-compilation', 'true']);
     if (traceStartup)
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
     if (startPaused)
@@ -301,6 +304,7 @@ class AndroidDevice extends Device {
     String mainPath,
     String route,
     bool checked: true,
+    bool backgroundCompilation: false,
     bool clearLogs: false,
     bool startPaused: false,
     int debugPort: observatoryDefaultPort,
@@ -318,6 +322,7 @@ class AndroidDevice extends Device {
         package,
         buildResult.localBundlePath,
         checked: checked,
+        backgroundCompilation: backgroundCompilation,
         traceStartup: platformArgs['trace-startup'],
         route: route,
         clearLogs: clearLogs,

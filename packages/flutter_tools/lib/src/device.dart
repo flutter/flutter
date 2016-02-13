@@ -123,6 +123,7 @@ abstract class Device {
     String mainPath,
     String route,
     bool checked: true,
+    bool backgroundCompilation: false,
     bool clearLogs: false,
     bool startPaused: false,
     int debugPort: observatoryDefaultPort,
