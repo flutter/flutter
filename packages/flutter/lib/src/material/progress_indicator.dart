@@ -191,42 +191,22 @@ class CircularProgressIndicator extends ProgressIndicator {
   _CircularProgressIndicatorState createState() => new _CircularProgressIndicatorState();
 }
 
-// This class assumes that the incoming animation is a linear 0.0..1.0.
-class _RepeatingCurveTween extends Animatable<double> {
-  _RepeatingCurveTween({ this.curve, this.repeats });
-
-  Curve curve;
-  int repeats;
-
-  double evaluate(Animation<double> animation) {
-    double t = animation.value;
-    t *= repeats;
-    t -= t.truncateToDouble();
-    if (t == 0.0 || t == 1.0) {
-      assert(curve.transform(t).round() == t);
-      return t;
-    }
-    return curve.transform(t);
-  }
-}
-
 // Tweens used by circular progress indicator
-final _RepeatingCurveTween _kStrokeHeadTween = new _RepeatingCurveTween(
-  curve: new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
-  repeats: 5
-);
+final Animatable<double> _kStrokeHeadTween = new CurveTween(
+  curve: new Interval(0.0, 0.5, curve: Curves.fastOutSlowIn)
+).chain(new CurveTween(
+  curve: new SawTooth(5)
+));
 
-final _RepeatingCurveTween _kStrokeTailTween = new _RepeatingCurveTween(
-  curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-  repeats: 5
-);
+final Animatable<double> _kStrokeTailTween = new CurveTween(
+  curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)
+).chain(new CurveTween(
+  curve: new SawTooth(5)
+));
 
-final StepTween _kStepTween = new StepTween(begin: 0, end: 5);
+final Animatable<int> _kStepTween = new StepTween(begin: 0, end: 5);
 
-final _RepeatingCurveTween _kRotationTween = new _RepeatingCurveTween(
-  curve: Curves.linear,
-  repeats: 5
-);
+final Animatable<double> _kRotationTween = new CurveTween(curve: new SawTooth(5));
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   AnimationController _animationController;
