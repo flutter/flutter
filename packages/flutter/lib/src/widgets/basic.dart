@@ -1593,10 +1593,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (image != null)
-      description.add('image: [${image.width}\u00D7${image.height}]');
-    else
-      description.add('image: null');
+    description.add('image: $image');
     if (width != null)
       description.add('width: $width');
     if (height != null)

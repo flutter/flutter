@@ -11,7 +11,7 @@ class ImageInfo {
   ImageInfo({ this.image, this.scale: 1.0 });
   final ui.Image image;
   final double scale;
-  String toString() => '[${image.width}\u00D7${image.height}] @ ${scale}x';
+  String toString() => '$image @ ${scale}x';
 }
 
 /// A callback for when the image is available.
