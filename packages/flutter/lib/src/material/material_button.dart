@@ -35,7 +35,10 @@ class ButtonTheme extends InheritedWidget {
 }
 
 /// Base class for buttons in the Material theme.
-/// Rather than using this class directly, please use FlatButton or RaisedButton.
+/// Rather than using this class directly, please use [FlatButton] or [RaisedButton].
+///
+/// MaterialButtons whose [onPressed] handler is null will be disabled. To have
+/// an enabled button, make sure to pass a non-null value for onPressed.
 abstract class MaterialButton extends StatefulComponent {
   MaterialButton({
     Key key,
@@ -50,8 +53,14 @@ abstract class MaterialButton extends StatefulComponent {
   final ButtonColor textTheme;
   final Color textColor;
   final Color disabledTextColor;
+
+  /// The callback that is invoked when the button is tapped or otherwise activated.
+  ///
+  /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
+  /// Whether the button is enabled or disabled. Buttons are disabled by default. To
+  /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
 
   void debugFillDescription(List<String> description) {

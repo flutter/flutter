@@ -30,12 +30,23 @@ const Duration kSnackBarMediumDisplayDuration = const Duration(milliseconds: 275
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
+/// A button for a [SnackBar], known as an "action".
+///
+/// Snack bar actions are always enabled. If you want to disable a snack bar
+/// action, simply don't include it in the snack bar.
+///
+/// See also:
+///  * https://www.google.com/design/spec/components/snackbars-toasts.html
 class SnackBarAction extends StatelessComponent {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
+    assert(onPressed != null);
   }
 
+  /// The button label.
   final String label;
+
+  /// The callback to be invoked when the button is pressed. Must be non-null.
   final VoidCallback onPressed;
 
   Widget build(BuildContext context) {
@@ -50,6 +61,15 @@ class SnackBarAction extends StatelessComponent {
   }
 }
 
+/// A lightweight message with an optional action which briefly displays at the
+/// bottom of the screen.
+///
+/// Displayed with the Scaffold.of().showSnackBar() API.
+///
+/// See also:
+///  * [Scaffold.of] and [ScaffoldState.showSnackBar]
+///  * [SnackBarAction]
+///  * https://www.google.com/design/spec/components/snackbars-toasts.html
 class SnackBar extends StatelessComponent {
   SnackBar({
     Key key,

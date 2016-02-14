@@ -7,6 +7,28 @@ import 'package:flutter/widgets.dart';
 import 'material_button.dart';
 import 'theme.dart';
 
+/// A material design "flat button".
+///
+/// A flat button is a section printed on a [Material] widget that reacts to
+/// touches by filling with color.
+///
+/// Use flat buttons on toolbars, in dialogs, or inline with other content but
+/// offset from that content with padding so that the button's presence is
+/// obvious. Flat buttons intentionally do not have visible borders and must
+/// therefore rely on their position relative to other content for context. In
+/// dialogs and cards, they should be grouped together in one of the bottom
+/// corners. Avoid using flat buttons where they would blend in with other
+/// content, for example in the middle of lists.
+///
+/// If the [onPressed] callback is not specified or null, then the button will
+/// be disabled, will not react to touch, and will be colored as specified by
+/// the [disabledColor] property instead of the [color] property. If you are
+/// trying to change the button's [color] and it is not having any effect, check
+/// that you are passing a non-null [onPressed] handler.
+///
+/// See also:
+///  * [RaisedButton] class
+///  * https://www.google.com/design/spec/components/buttons.html
 class FlatButton extends MaterialButton {
   FlatButton({
     Key key,
@@ -25,8 +47,13 @@ class FlatButton extends MaterialButton {
              disabledTextColor: disabledTextColor,
              onPressed: onPressed);
 
-  // These default to null, meaning transparent.
+  /// The color of the button, as printed on the [Material]. Defaults to null,
+  /// meaning transparent.
   final Color color;
+
+  /// The color of the button when the button is disabled. Buttons are disabled
+  /// by default. To enable a button, set its [onPressed] property to a non-null
+  /// value.
   final Color disabledColor;
 
   /// Controls the default text color if the text color isn't explicit set.
