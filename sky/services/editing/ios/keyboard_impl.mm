@@ -4,9 +4,10 @@
 
 #include "sky/services/editing/ios/keyboard_impl.h"
 
+#include "base/strings/sys_string_conversions.h"
+#include "base/strings/utf_string_conversions.h"
 #include <UIKit/UIKit.h>
 #include <unicode/utf16.h>
-#include "base/strings/utf_string_conversions.h"
 
 static inline UIKeyboardType ToUIKeyboardType(::editing::KeyboardType type) {
   using Type = ::editing::KeyboardType;
@@ -81,10 +82,10 @@ static inline UIKeyboardType ToUIKeyboardType(::editing::KeyboardType type) {
 }
 
 - (void)insertText:(NSString*)text {
-  int start = std::min(_state->selection_base, _state->selection_extent);
-  int end = std::max(_state->selection_base, _state->selection_extent);
+  int start = std::max(0, std::min(_state->selection_base, _state->selection_extent));
+  int end = std::max(0, std::max(_state->selection_base, _state->selection_extent));
   int len = end - start;
-  _text.replace(start, len, base::UTF8ToUTF16(text.UTF8String));
+  _text.replace(start, len, base::SysNSStringToUTF16(text));
   int caret = start + text.length;
   _state->selection_base = caret;
   _state->selection_extent = caret;
@@ -97,8 +98,8 @@ static inline UIKeyboardType ToUIKeyboardType(::editing::KeyboardType type) {
 }
 
 - (void)deleteBackward {
-  int start = std::min(_state->selection_base, _state->selection_extent);
-  int end = std::max(_state->selection_base, _state->selection_extent);
+  int start = std::max(0, std::min(_state->selection_base, _state->selection_extent));
+  int end = std::max(0, std::max(_state->selection_base, _state->selection_extent));
   int len = end - start;
   if (len > 0) {
     _text.erase(start, len);
@@ -134,17 +135,18 @@ KeyboardImpl::KeyboardImpl(
     : binding_(this, request.Pass()), client_([[KeyboardClient alloc] init]) {}
 
 KeyboardImpl::~KeyboardImpl() {
+  [client_ hide];
   [client_ release];
 }
 
 void KeyboardImpl::SetClient(::editing::KeyboardClientPtr client,
-                                    ::editing::KeyboardConfigurationPtr configuration) {
-  client_.keyboardType = ToUIKeyboardType(configuration->type);
+                             ::editing::KeyboardConfigurationPtr config) {
+  client_.keyboardType = ToUIKeyboardType(config->type);
   [client_ setClient:client.Pass()];
 }
 
 void KeyboardImpl::SetEditingState(::editing::EditingStatePtr state) {
-  [client_ setEditingState: state.Pass()];
+  [client_ setEditingState:state.Pass()];
 }
 
 void KeyboardImpl::Show() {
