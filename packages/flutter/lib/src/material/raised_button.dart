@@ -8,6 +8,24 @@ import 'colors.dart';
 import 'material_button.dart';
 import 'theme.dart';
 
+/// A material design "raised button".
+///
+/// A raised button consists of a rectangular piece of material that hovers over
+/// the interface.
+///
+/// Use raised buttons to add dimension to otherwise mostly flat layouts, e.g.
+/// in long busy lists of content, or in wide spaces. Avoid using raised buttons
+/// on already-raised content such as dialogs or cards.
+///
+/// If the [onPressed] callback is not specified or null, then the button will
+/// be disabled and by default will appear like a flat button in the
+/// [disabledColor]. If you are trying to change the button's [color] and it is
+/// not having any effect, check that you are passing a non-null [onPressed]
+/// handler.
+///
+/// See also:
+///  * [FlatButton] class
+///  * https://www.google.com/design/spec/components/buttons.html
 class RaisedButton extends MaterialButton {
   RaisedButton({
     Key key,
@@ -23,7 +41,13 @@ class RaisedButton extends MaterialButton {
              child: child,
              onPressed: onPressed);
 
+  /// The color of the button, as printed on the [Material]. Defaults to null,
+  /// meaning that the color is automatically derived from the [Theme].
   final Color color;
+
+  /// The color of the button when the button is disabled. Buttons are disabled
+  /// by default. To enable a button, set its [onPressed] property to a non-null
+  /// value.
   final Color disabledColor;
 
   /// Controls the default text color if the text color isn't explicit set.

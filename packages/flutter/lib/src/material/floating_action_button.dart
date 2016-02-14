@@ -17,6 +17,20 @@ const double _kSizeMini = 40.0;
 const Duration _kChildSegue = const Duration(milliseconds: 400);
 const Interval _kChildSegueInterval = const Interval(0.65, 1.0);
 
+/// A material design "floating action button".
+///
+/// A floating action button is a circular icon button that hovers over content
+/// to promote a primary action in the application.
+///
+/// Use at most a single floating action button per screen. Floating action
+/// buttons should be used for positive actions such as "create", "share", or
+/// "navigate".
+///
+/// If the [onPressed] callback is not specified or null, then the button will
+/// be disabled, will not react to touch.
+///
+/// See also:
+///  * https://www.google.com/design/spec/components/buttons-floating-action-button.html
 class FloatingActionButton extends StatefulComponent {
   const FloatingActionButton({
     Key key,
@@ -30,6 +44,10 @@ class FloatingActionButton extends StatefulComponent {
 
   final Widget child;
   final Color backgroundColor;
+
+  /// The callback that is invoked when the button is tapped or otherwise activated.
+  ///
+  /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
   final int elevation;
   final int highlightElevation;
