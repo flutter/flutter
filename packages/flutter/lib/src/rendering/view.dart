@@ -142,10 +142,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   Rect get paintBounds => Point.origin & size;
   Rect get semanticBounds => Point.origin & size;
 
-  void debugDescribeSettings(List<String> settings) {
-    // call to ${super.debugDescribeSettings(prefix)} is omitted because the root superclasses don't include any interesting information for this class
-    settings.add('window size: ${ui.window.size} (in device pixels)');
-    settings.add('device pixel ratio: ${ui.window.devicePixelRatio} (device pixels per logical pixel)');
-    settings.add('configuration: $configuration (in logical pixels)');
+  void debugFillDescription(List<String> description) {
+    // call to ${super.debugFillDescription(prefix)} is omitted because the root superclasses don't include any interesting information for this class
+    description.add('window size: ${ui.window.size} (in device pixels)');
+    description.add('device pixel ratio: ${ui.window.devicePixelRatio} (device pixels per logical pixel)');
+    description.add('configuration: $configuration (in logical pixels)');
   }
 }

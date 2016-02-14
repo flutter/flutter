@@ -596,9 +596,9 @@ abstract class RenderBox extends RenderObject {
           node = node.parent;
         information.writeln('The nearest ancestor providing an unbounded width constraint is:');
         information.writeln('  $node');
-        List<String> settings = <String>[];
-        node.debugDescribeSettings(settings);
-        for (String line in settings)
+        List<String> description = <String>[];
+        node.debugFillDescription(description);
+        for (String line in description)
         information.writeln('  $line');
       }
       if (!constraints.hasBoundedHeight) {
@@ -607,9 +607,9 @@ abstract class RenderBox extends RenderObject {
           node = node.parent;
         information.writeln('The nearest ancestor providing an unbounded height constraint is:');
         information.writeln('  $node');
-        List<String> settings = <String>[];
-        node.debugDescribeSettings(settings);
-        for (String line in settings)
+        List<String> description = <String>[];
+        node.debugFillDescription(description);
+        for (String line in description)
         information.writeln('  $line');
       }
       throw new RenderingError(
@@ -878,9 +878,9 @@ abstract class RenderBox extends RenderObject {
     });
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('size: ${ hasSize ? size : "MISSING" }');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('size: ${ hasSize ? size : "MISSING" }');
   }
 }
 

@@ -249,24 +249,24 @@ class RenderImage extends RenderBox {
     );
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('image: $image');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('image: $image');
     if (width != null)
-      settings.add('width: $width');
+      description.add('width: $width');
     if (height != null)
-      settings.add('height: $height');
+      description.add('height: $height');
     if (scale != 1.0)
-      settings.add('scale: $scale');
+      description.add('scale: $scale');
     if (color != null)
-      settings.add('color: $color');
+      description.add('color: $color');
     if (fit != null)
-      settings.add('fit: $fit');
+      description.add('fit: $fit');
     if (alignment != null)
-      settings.add('alignment: $alignment');
+      description.add('alignment: $alignment');
     if (repeat != ImageRepeat.noRepeat)
-      settings.add('repeat: $repeat');
+      description.add('repeat: $repeat');
     if (centerSlice != null)
-      settings.add('centerSlice: $centerSlice');
+      description.add('centerSlice: $centerSlice');
   }
 }

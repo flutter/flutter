@@ -77,19 +77,19 @@ abstract class Layer {
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
-    final String settingsPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    List<String> settings = <String>[];
-    debugDescribeSettings(settings);
-    result += settings.map((String setting) => "$settingsPrefix$setting\n").join();
+    final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
+    List<String> description = <String>[];
+    debugFillDescription(description);
+    result += description.map((String description) => "$descriptionPrefix$description\n").join();
     if (childrenDescription == '')
       result += '$prefixOtherLines\n';
     result += childrenDescription;
     return result;
   }
 
-  void debugDescribeSettings(List<String> settings) {
+  void debugFillDescription(List<String> description) {
     if (debugOwner != null)
-      settings.add('owner: $debugOwner');
+      description.add('owner: $debugOwner');
   }
 
   String debugDescribeChildren(String prefix) => '';
@@ -122,12 +122,12 @@ class ChildSceneLayer extends Layer {
     );
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('offset: $offset');
-    settings.add('physicalWidth: ${layoutInfo.size.width}');
-    settings.add('physicalHeight: ${layoutInfo.size.height}');
-    settings.add('sceneToken.value: ${layoutInfo.sceneToken.value}');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('offset: $offset');
+    description.add('physicalWidth: ${layoutInfo.size.width}');
+    description.add('physicalHeight: ${layoutInfo.size.height}');
+    description.add('sceneToken.value: ${layoutInfo.sceneToken.value}');
   }
 }
 
@@ -283,9 +283,9 @@ class OffsetLayer extends ContainerLayer {
     addChildrenToScene(builder, offset + layerOffset);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('offset: $offset');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('offset: $offset');
   }
 }
 
@@ -305,9 +305,9 @@ class ClipRectLayer extends ContainerLayer {
     builder.pop();
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('clipRect: $clipRect');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('clipRect: $clipRect');
   }
 }
 
@@ -326,9 +326,9 @@ class ClipRRectLayer extends ContainerLayer {
     builder.pop();
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('clipRRect: $clipRRect');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('clipRRect: $clipRRect');
   }
 }
 
@@ -347,9 +347,9 @@ class ClipPathLayer extends ContainerLayer {
     builder.pop();
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('clipPath: $clipPath');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('clipPath: $clipPath');
   }
 }
 
@@ -368,10 +368,10 @@ class TransformLayer extends OffsetLayer {
     builder.pop();
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('transform:');
-    settings.addAll(debugDescribeTransform(transform));
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('transform:');
+    description.addAll(debugDescribeTransform(transform));
   }
 }
 
@@ -391,9 +391,9 @@ class OpacityLayer extends ContainerLayer {
     builder.pop();
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('alpha: $alpha');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('alpha: $alpha');
   }
 }
 
@@ -416,10 +416,10 @@ class ShaderMaskLayer extends ContainerLayer {
     builder.pop();
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('shader: $shader');
-    settings.add('maskRect: $maskRect');
-    settings.add('transferMode: $transferMode');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('shader: $shader');
+    description.add('maskRect: $maskRect');
+    description.add('transferMode: $transferMode');
   }
 }

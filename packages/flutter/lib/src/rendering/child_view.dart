@@ -232,9 +232,9 @@ class RenderChildView extends RenderBox {
       context.pushChildScene(offset, _layoutInfo);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('child: $child');
-    settings.add('scale: $scale');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('child: $child');
+    description.add('scale: $scale');
   }
 }

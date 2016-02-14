@@ -127,17 +127,17 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
 
   bool hitTestSelf(Point position) => behavior == HitTestBehavior.opaque;
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
     switch (behavior) {
       case HitTestBehavior.translucent:
-        settings.add('behavior: translucent');
+        description.add('behavior: translucent');
         break;
       case HitTestBehavior.opaque:
-        settings.add('behavior: opaque');
+        description.add('behavior: opaque');
         break;
       case HitTestBehavior.deferToChild:
-        settings.add('behavior: defer-to-child');
+        description.add('behavior: defer-to-child');
         break;
     }
   }
@@ -224,9 +224,9 @@ class RenderConstrainedBox extends RenderProxyBox {
     });
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('additionalConstraints: $additionalConstraints');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('additionalConstraints: $additionalConstraints');
   }
 }
 
@@ -339,10 +339,10 @@ class RenderFractionallySizedBox extends RenderProxyBox {
     }
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('widthFactor: ${_widthFactor ?? "pass-through"}');
-    settings.add('heightFactor: ${_heightFactor ?? "pass-through"}');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('widthFactor: ${_widthFactor ?? "pass-through"}');
+    description.add('heightFactor: ${_heightFactor ?? "pass-through"}');
   }
 }
 
@@ -410,9 +410,9 @@ class RenderAspectRatio extends RenderProxyBox {
       child.layout(new BoxConstraints.tight(size));
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('aspectRatio: $aspectRatio');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('aspectRatio: $aspectRatio');
   }
 }
 
@@ -512,10 +512,10 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     }
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('stepWidth: $stepWidth');
-    settings.add('stepHeight: $stepHeight');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('stepWidth: $stepWidth');
+    description.add('stepHeight: $stepHeight');
   }
 }
 
@@ -633,9 +633,9 @@ class RenderOpacity extends RenderProxyBox {
       visitor(child);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('opacity: ${opacity.toStringAsFixed(1)}');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('opacity: ${opacity.toStringAsFixed(1)}');
   }
 }
 
@@ -940,10 +940,10 @@ class RenderDecoratedBox extends RenderProxyBox {
       _painter.paint(context.canvas, offset & size);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('decoration:');
-    settings.addAll(_decoration.toString("  ").split('\n'));
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('decoration:');
+    description.addAll(_decoration.toString("  ").split('\n'));
   }
 }
 
@@ -1099,13 +1099,13 @@ class RenderTransform extends RenderProxyBox {
     super.applyPaintTransform(child, transform);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('transform matrix:');
-    settings.addAll(debugDescribeTransform(_transform));
-    settings.add('origin: $origin');
-    settings.add('alignment: $alignment');
-    settings.add('transformHitTests: $transformHitTests');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('transform matrix:');
+    description.addAll(debugDescribeTransform(_transform));
+    description.add('origin: $origin');
+    description.add('alignment: $alignment');
+    description.add('transformHitTests: $transformHitTests');
   }
 }
 
@@ -1160,10 +1160,10 @@ class RenderFractionalTranslation extends RenderProxyBox {
     super.applyPaintTransform(child, transform);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('translation: $translation');
-    settings.add('transformHitTests: $transformHitTests');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('translation: $translation');
+    description.add('transformHitTests: $transformHitTests');
   }
 }
 
@@ -1344,8 +1344,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerCancel(event);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
     List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
@@ -1357,7 +1357,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('cancel');
     if (listeners.isEmpty)
       listeners.add('<none>');
-    settings.add('listeners: ${listeners.join(", ")}');
+    description.add('listeners: ${listeners.join(", ")}');
   }
 }
 
@@ -1430,10 +1430,10 @@ class RenderIgnorePointer extends RenderProxyBox {
       visitor(child);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('ignoring: $ignoring');
-    settings.add('ignoringSemantics: ${ ignoringSemantics == null ? "implicitly " : "" }$_effectiveIgnoringSemantics');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('ignoring: $ignoring');
+    description.add('ignoringSemantics: ${ ignoringSemantics == null ? "implicitly " : "" }$_effectiveIgnoringSemantics');
   }
 }
 
@@ -1448,9 +1448,9 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   /// Opaque meta data ignored by the render tree
   dynamic metaData;
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('metaData: $metaData');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('metaData: $metaData');
   }
 }
 
