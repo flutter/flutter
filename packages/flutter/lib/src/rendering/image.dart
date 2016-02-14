@@ -251,10 +251,7 @@ class RenderImage extends RenderBox {
 
   void debugDescribeSettings(List<String> settings) {
     super.debugDescribeSettings(settings);
-    if (image != null)
-      settings.add('image: [${image.width}\u00D7${image.height}]');
-    else
-      settings.add('image: null');
+    settings.add('image: $image');
     if (width != null)
       settings.add('width: $width');
     if (height != null)
