@@ -1576,7 +1576,8 @@ class RawImage extends LeafRenderObjectWidget {
     fit: fit,
     alignment: alignment,
     repeat: repeat,
-    centerSlice: centerSlice);
+    centerSlice: centerSlice
+  );
 
   void updateRenderObject(RenderImage renderObject, RawImage oldWidget) {
     renderObject.image = image;
@@ -1588,6 +1589,30 @@ class RawImage extends LeafRenderObjectWidget {
     renderObject.fit = fit;
     renderObject.repeat = repeat;
     renderObject.centerSlice = centerSlice;
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (image != null)
+      description.add('image: [${image.width}\u00D7${image.height}]');
+    else
+      description.add('image: null');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+    if (scale != 1.0)
+      description.add('scale: $scale');
+    if (color != null)
+      description.add('color: $color');
+    if (fit != null)
+      description.add('fit: $fit');
+    if (alignment != null)
+      description.add('alignment: $alignment');
+    if (repeat != ImageRepeat.noRepeat)
+      description.add('repeat: $repeat');
+    if (centerSlice != null)
+      description.add('centerSlice: $centerSlice');
   }
 }
 
@@ -1655,10 +1680,29 @@ class RawImageResource extends StatefulComponent {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
-  _ImageListenerState createState() => new _ImageListenerState();
+  _RawImageResourceState createState() => new _RawImageResourceState();
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('image: $image');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+    if (color != null)
+      description.add('color: $color');
+    if (fit != null)
+      description.add('fit: $fit');
+    if (alignment != null)
+      description.add('alignment: $alignment');
+    if (repeat != ImageRepeat.noRepeat)
+      description.add('repeat: $repeat');
+    if (centerSlice != null)
+      description.add('centerSlice: $centerSlice');
+  }
 }
 
-class _ImageListenerState extends State<RawImageResource> {
+class _RawImageResourceState extends State<RawImageResource> {
   void initState() {
     super.initState();
     config.image.addListener(_handleImageChanged);
@@ -1771,6 +1815,27 @@ class NetworkImage extends StatelessComponent {
       centerSlice: centerSlice
     );
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('src: $src');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+    if (scale != 1.0)
+      description.add('scale: $scale');
+    if (color != null)
+      description.add('color: $color');
+    if (fit != null)
+      description.add('fit: $fit');
+    if (alignment != null)
+      description.add('alignment: $alignment');
+    if (repeat != ImageRepeat.noRepeat)
+      description.add('repeat: $repeat');
+    if (centerSlice != null)
+      description.add('centerSlice: $centerSlice');
+  }
 }
 
 /// Sets a default asset bundle for its descendants.
@@ -1869,6 +1934,25 @@ class AsyncImage extends StatelessComponent {
       centerSlice: centerSlice
     );
   }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('provider: $provider');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+    if (color != null)
+      description.add('color: $color');
+    if (fit != null)
+      description.add('fit: $fit');
+    if (alignment != null)
+      description.add('alignment: $alignment');
+    if (repeat != ImageRepeat.noRepeat)
+      description.add('repeat: $repeat');
+    if (centerSlice != null)
+      description.add('centerSlice: $centerSlice');
+  }
 }
 
 /// Displays an image from an [AssetBundle].
@@ -1948,6 +2032,27 @@ class AssetImage extends StatelessComponent {
       repeat: repeat,
       centerSlice: centerSlice
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('name: $name');
+    if (width != null)
+      description.add('width: $width');
+    if (height != null)
+      description.add('height: $height');
+    if (color != null)
+      description.add('color: $color');
+    if (fit != null)
+      description.add('fit: $fit');
+    if (alignment != null)
+      description.add('alignment: $alignment');
+    if (repeat != ImageRepeat.noRepeat)
+      description.add('repeat: $repeat');
+    if (centerSlice != null)
+      description.add('centerSlice: $centerSlice');
+    if (bundle != null)
+      description.add('bundle: $bundle');
   }
 }
 

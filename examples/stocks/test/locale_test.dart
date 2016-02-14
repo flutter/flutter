@@ -1,3 +1,6 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'package:test/test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +14,8 @@ void main() {
   test("Test changing locale", () {
     testWidgets((WidgetTester tester) {
       stocks.main();
-      tester.pump(const Duration(seconds: 1)); // Unclear why duration is required.
+      tester.async.flushMicrotasks(); // see https://github.com/flutter/flutter/issues/1865
+      tester.pump();
 
       Element<Text> tab = tester.findText('MARKET');
       expect(tab, isNotNull);

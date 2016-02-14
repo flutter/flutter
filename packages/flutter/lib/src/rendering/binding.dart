@@ -111,7 +111,7 @@ void debugDumpLayerTree() {
 /// This will only work if there is a semantics client attached.
 /// Otherwise, the tree is empty and this will print "null".
 void debugDumpSemanticsTree() {
-  debugPrint(Renderer.instance?.renderView?.debugSemantics?.toStringDeep());
+  debugPrint(Renderer.instance?.renderView?.debugSemantics?.toStringDeep() ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework

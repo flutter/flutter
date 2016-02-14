@@ -77,9 +77,9 @@ class Icon extends StatelessComponent {
     Color iconColor = color;
     final int iconAlpha = (255.0 * (IconTheme.of(context)?.clampedOpacity ?? 1.0)).round();
     if (iconAlpha != 255) {
-      if (color != null)
+      if (color != null) {
         iconColor = color.withAlpha(iconAlpha);
-      else {
+      } else {
         switch(iconThemeColor) {
           case IconThemeColor.black:
             iconColor = Colors.black.withAlpha(iconAlpha);
@@ -103,5 +103,9 @@ class Icon extends StatelessComponent {
     super.debugFillDescription(description);
     description.add('$icon');
     description.add('size: $size');
+    if (this.colorTheme != null)
+      description.add('colorTheme: $colorTheme');
+    if (this.color != null)
+      description.add('color: $color');
   }
 }
