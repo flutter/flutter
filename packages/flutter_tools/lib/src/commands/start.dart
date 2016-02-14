@@ -38,6 +38,9 @@ abstract class StartCommandBase extends FlutterCommand {
         negatable: true,
         defaultsTo: true,
         help: 'Toggle Dart\'s checked mode.');
+    argParser.addFlag('enable-background-compilation',
+        defaultsTo: false,
+        help: 'Enable background compilation the Dart VM.');
     argParser.addFlag('trace-startup',
         negatable: true,
         defaultsTo: false,
@@ -102,6 +105,7 @@ class StartCommand extends StartCommandBase {
       install: true,
       stop: argResults['full-restart'],
       checked: argResults['checked'],
+      backgroundCompilation: argResults['enable-background-compilation'],
       traceStartup: argResults['trace-startup'],
       route: argResults['route'],
       clearLogs: clearLogs,
@@ -124,6 +128,7 @@ Future<int> startApp(
   bool stop: true,
   bool install: true,
   bool checked: true,
+  bool backgroundCompilation: false,
   bool traceStartup: false,
   String route,
   bool clearLogs: false,
@@ -181,6 +186,7 @@ Future<int> startApp(
       mainPath: mainPath,
       route: route,
       checked: checked,
+      backgroundCompilation: backgroundCompilation,
       clearLogs: clearLogs,
       startPaused: startPaused,
       debugPort: debugPort,
