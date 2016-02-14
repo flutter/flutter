@@ -30,7 +30,7 @@ void main() {
     };
 
     bool didEndPan = false;
-    pan.onEnd = (Offset velocity) {
+    pan.onEnd = (Velocity velocity) {
       didEndPan = true;
     };
 

@@ -156,7 +156,7 @@ class _RenderSwitch extends RenderToggleable {
     }
   }
 
-  void _handleDragEnd(Offset velocity) {
+  void _handleDragEnd(Velocity velocity) {
     if (position.value >= 0.5)
       positionController.forward();
     else

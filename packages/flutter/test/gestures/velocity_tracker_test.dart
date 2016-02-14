@@ -12,10 +12,10 @@ bool _withinTolerance(double actual, double expected) {
   return diff.abs() < kTolerance;
 }
 
-bool _checkVelocity(Offset actual, Offset expected) {
+bool _checkVelocity(Velocity actual, Offset expected) {
   return (actual != null)
-      && _withinTolerance(actual.dx, expected.dx)
-      && _withinTolerance(actual.dy, expected.dy);
+      && _withinTolerance(actual.pixelsPerSecond.dx, expected.dx)
+      && _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
 }
 
 void main() {

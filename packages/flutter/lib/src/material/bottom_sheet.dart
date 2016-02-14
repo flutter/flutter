@@ -59,11 +59,11 @@ class _BottomSheetState extends State<BottomSheet> {
     config.animationController.value -= delta / (_childHeight ?? delta);
   }
 
-  void _handleDragEnd(Offset velocity) {
+  void _handleDragEnd(Velocity velocity) {
     if (_dismissUnderway)
       return;
-    if (velocity.dy > _kMinFlingVelocity) {
-      double flingVelocity = -velocity.dy / _childHeight;
+    if (velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
+      double flingVelocity = -velocity.pixelsPerSecond.dy / _childHeight;
       config.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
         config.onClosing();

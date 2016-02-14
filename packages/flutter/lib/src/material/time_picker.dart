@@ -425,7 +425,7 @@ class _DialState extends State<_Dial> {
     _notifyOnChangedIfNeeded();
   }
 
-  void _handlePanEnd(Offset velocity) {
+  void _handlePanEnd(Velocity velocity) {
     assert(_dragging);
     _dragging = false;
     _position = null;
