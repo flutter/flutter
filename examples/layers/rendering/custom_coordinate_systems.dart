@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This example shows how to build a render tree with a non-cartesian coordinate
+// system. Most of the guts of this examples are in src/sector_layout.dart.
+
 import 'package:flutter/rendering.dart';
 import 'src/sector_layout.dart';
 
