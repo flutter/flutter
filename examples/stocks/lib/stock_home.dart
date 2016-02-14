@@ -262,18 +262,8 @@ class StockHomeState extends State<StockHome> {
 
   void _handleCreateCompany() {
     showModalBottomSheet(
-      // TODO(ianh): Fill this out.
       context: context,
-      builder: (BuildContext context) {
-        return new Column(
-          children: <Widget>[
-            new Input(
-              autofocus: true,
-              hintText: 'Company Name'
-            ),
-          ]
-        );
-      }
+      builder: (BuildContext context) => new _CreateCompanySheet()
     );
   }
 
@@ -300,6 +290,34 @@ class StockHomeState extends State<StockHome> {
           ]
         )
       )
+    );
+  }
+}
+
+class _CreateCompanySheet extends StatefulComponent {
+  _CreateCompanySheetState createState() => new _CreateCompanySheetState();
+}
+
+class _CreateCompanySheetState extends State<_CreateCompanySheet> {
+  InputValue _companyName = InputValue.empty;
+
+  void _handleCompanyNameChanged(InputValue value) {
+    setState(() {
+      _companyName = value;
+    });
+  }
+
+  Widget build(BuildContext context) {
+    // TODO(ianh): Fill this out.
+    return new Column(
+      children: <Widget>[
+        new Input(
+          autofocus: true,
+          hintText: 'Company Name',
+          value: _companyName,
+          onChanged: _handleCompanyNameChanged
+        ),
+      ]
     );
   }
 }
