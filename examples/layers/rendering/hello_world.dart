@@ -14,7 +14,7 @@ void main() {
     // child both vertically and horizontally.
     root: new RenderPositionedBox(
       alignment: const FractionalOffset(0.5, 0.5),
-      // We use a RenderParagraph to display the text "Hello, world." without
+      // We use a RenderParagraph to display the text 'Hello, world.' without
       // any explicit styling.
       child: new RenderParagraph(new PlainTextSpan('Hello, world.'))
     )
