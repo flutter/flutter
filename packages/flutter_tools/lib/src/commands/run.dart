@@ -32,8 +32,8 @@ String findMainDartFile([String target]) {
   }
 }
 
-abstract class StartCommandBase extends FlutterCommand {
-  StartCommandBase() {
+abstract class RunCommandBase extends FlutterCommand {
+  RunCommandBase() {
     argParser.addFlag('checked',
         negatable: true,
         defaultsTo: true,
@@ -51,12 +51,13 @@ abstract class StartCommandBase extends FlutterCommand {
   }
 }
 
-class StartCommand extends StartCommandBase {
-  final String name = 'start';
-  final String description = 'Start your Flutter app on an attached device '
-                             '(defaults to checked/debug mode).';
+class RunCommand extends RunCommandBase {
+  final String name = 'run';
+  final String description =
+    'Run your Flutter app on an attached device (defaults to checked/debug mode).';
+  final List<String> aliases = <String>['start'];
 
-  StartCommand() {
+  RunCommand() {
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before starting the app.');

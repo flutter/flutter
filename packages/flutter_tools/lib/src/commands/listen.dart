@@ -7,9 +7,9 @@ import 'dart:io';
 
 import '../base/globals.dart';
 import '../base/process.dart';
-import 'start.dart';
+import 'run.dart';
 
-class ListenCommand extends StartCommandBase {
+class ListenCommand extends RunCommandBase {
   final String name = 'listen';
   final String description =
     'Listen for changes to files and reload the running app (Android only).';

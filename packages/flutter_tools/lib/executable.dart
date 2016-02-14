@@ -17,14 +17,14 @@ import 'src/commands/build.dart';
 import 'src/commands/cache.dart';
 import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
+import 'src/commands/devices.dart';
 import 'src/commands/install.dart';
 import 'src/commands/ios.dart';
-import 'src/commands/list.dart';
 import 'src/commands/listen.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/refresh.dart';
+import 'src/commands/run.dart';
 import 'src/commands/run_mojo.dart';
-import 'src/commands/start.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
@@ -38,22 +38,23 @@ import 'src/runner/flutter_command_runner.dart';
 Future main(List<String> args) async {
   bool help = args.contains('-h') || args.contains('--help');
   bool verbose = args.contains('-v') || args.contains('--verbose');
+  bool verboseHelp = help && verbose;
 
-  FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: help && verbose)
+  FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
     ..addCommand(new AnalyzeCommand())
     ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CacheCommand())
     ..addCommand(new CreateCommand())
-    ..addCommand(new DaemonCommand())
+    ..addCommand(new DaemonCommand(hideCommand: !verboseHelp))
+    ..addCommand(new DevicesCommand())
     ..addCommand(new InstallCommand())
     ..addCommand(new IOSCommand())
-    ..addCommand(new ListCommand())
     ..addCommand(new ListenCommand())
     ..addCommand(new LogsCommand())
     ..addCommand(new RefreshCommand())
+    ..addCommand(new RunCommand())
     ..addCommand(new RunMojoCommand())
-    ..addCommand(new StartCommand())
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())

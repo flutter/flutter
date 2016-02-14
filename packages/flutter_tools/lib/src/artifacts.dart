@@ -306,7 +306,7 @@ class ArtifactStore {
 
   static final Map<String, Future> _pendingZipDownloads = new Map<String, Future>();
 
-  static Directory _getBaseCacheDir() {
+  static Directory getBaseCacheDir() {
     if (flutterRoot == null) {
       printError('FLUTTER_ROOT not specified. Cannot find artifact cache.');
       throw new ProcessExit(2);
@@ -319,7 +319,7 @@ class ArtifactStore {
 
   static Directory _getCacheDirForPlatform(String platform) {
     validateSkyEnginePackage();
-    Directory baseDir = _getBaseCacheDir();
+    Directory baseDir = getBaseCacheDir();
     // TODO(jamesr): Add support for more configurations.
     String config = 'Release';
     Directory artifactSpecificDir = new Directory(path.join(
@@ -344,7 +344,7 @@ class ArtifactStore {
 
   static Future<String> getThirdPartyFile(String urlStr, String cacheSubdir, bool unzip) async {
     Uri url = Uri.parse(urlStr);
-    Directory baseDir = _getBaseCacheDir();
+    Directory baseDir = getBaseCacheDir();
     Directory cacheDir = new Directory(path.join(
         baseDir.path, 'third_party', cacheSubdir));
     File cachedFile = new File(
@@ -361,7 +361,7 @@ class ArtifactStore {
   }
 
   static void clear() {
-    Directory cacheDir = _getBaseCacheDir();
+    Directory cacheDir = getBaseCacheDir();
     printTrace('Clearing cache directory ${cacheDir.path}');
     cacheDir.deleteSync(recursive: true);
   }
