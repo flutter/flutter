@@ -396,7 +396,7 @@ class _DragAvatar<T> extends Drag {
     _position += offset;
     update(_position);
   }
-  void end(Offset velocity) {
+  void end(Velocity velocity) {
     finish(_DragEndKind.dropped);
   }
   void cancel() {

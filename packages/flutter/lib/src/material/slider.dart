@@ -145,7 +145,7 @@ class _RenderSlider extends RenderConstrainedBox {
     }
   }
 
-  void _handleDragEnd(Offset velocity) {
+  void _handleDragEnd(Velocity velocity) {
     if (_active) {
       _active = false;
       _currentDragValue = 0.0;

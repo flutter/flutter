@@ -16,7 +16,7 @@ typedef Drag GestureMultiDragStartCallback(Point position);
 
 class Drag {
   void move(Offset offset) { }
-  void end(Offset velocity) { }
+  void end(Velocity velocity) { }
   void cancel() { }
 }
 

@@ -58,7 +58,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
       _lastPointerDownLocation = null;
     });
   }
-  void _handlePanEnd(Offset velocity) {
+  void _handlePanEnd(Velocity velocity) {
     assert(_lastPointerDownLocation != null);
     _SemanticsDebuggerListener.instance.handlePanEnd(_lastPointerDownLocation, velocity);
     setState(() {
@@ -329,16 +329,18 @@ class _SemanticsDebuggerListener implements mojom.SemanticsListener {
   void handleLongPress(Point position) {
     _server.longPress(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeLongPressed)?.id ?? 0);
   }
-  void handlePanEnd(Point position, Offset velocity) {
-    if (velocity.dx.abs() == velocity.dy.abs())
+  void handlePanEnd(Point position, Velocity velocity) {
+    double vx = velocity.pixelsPerSecond.dx;
+    double vy = velocity.pixelsPerSecond.dy;
+    if (vx.abs() == vy.abs())
       return;
-    if (velocity.dx.abs() > velocity.dy.abs()) {
-      if (velocity.dx.sign < 0)
+    if (vx.abs() > vy.abs()) {
+      if (vx.sign < 0)
         _server.scrollLeft(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledHorizontally)?.id ?? 0);
       else
         _server.scrollRight(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledHorizontally)?.id ?? 0);
     } else {
-      if (velocity.dy.sign < 0)
+      if (vy.sign < 0)
         _server.scrollUp(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledVertically)?.id ?? 0);
       else
         _server.scrollDown(_hitTest(position, (_SemanticsDebuggerEntry entry) => entry.canBeScrolledVertically)?.id ?? 0);

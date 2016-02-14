@@ -182,9 +182,9 @@ class _DismissableState extends State<Dismissable> {
       _dismissController.value = _dragExtent.abs() / _size.width;
   }
 
-  bool _isFlingGesture(Offset velocity) {
-    double vx = velocity.dx;
-    double vy = velocity.dy;
+  bool _isFlingGesture(Velocity velocity) {
+    double vx = velocity.pixelsPerSecond.dx;
+    double vy = velocity.pixelsPerSecond.dy;
     if (_directionIsYAxis) {
       if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
         return false;
@@ -211,7 +211,7 @@ class _DismissableState extends State<Dismissable> {
     return false;
   }
 
-  void _handleDragEnd(Offset velocity) {
+  void _handleDragEnd(Velocity velocity) {
     if (!_isActive || _dismissController.isAnimating)
       return;
     setState(() {
@@ -219,7 +219,7 @@ class _DismissableState extends State<Dismissable> {
       if (_dismissController.isCompleted) {
         _startResizeAnimation();
       } else if (_isFlingGesture(velocity)) {
-        double flingVelocity = _directionIsYAxis ? velocity.dy : velocity.dx;
+        double flingVelocity = _directionIsYAxis ? velocity.pixelsPerSecond.dy : velocity.pixelsPerSecond.dx;
         _dragExtent = flingVelocity.sign;
         _dismissController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
       } else if (_dismissController.value > _kDismissCardThreshold) {

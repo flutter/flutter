@@ -16,19 +16,19 @@ enum DragState {
 
 typedef void GestureDragStartCallback(Point globalPosition);
 typedef void GestureDragUpdateCallback(double delta);
-typedef void GestureDragEndCallback(Offset velocity);
+typedef void GestureDragEndCallback(Velocity velocity);
 
 typedef void GesturePanStartCallback(Point globalPosition);
 typedef void GesturePanUpdateCallback(Offset delta);
-typedef void GesturePanEndCallback(Offset velocity);
+typedef void GesturePanEndCallback(Velocity velocity);
 
 typedef void _GesturePolymorphicUpdateCallback<T>(T delta);
 
-bool _isFlingGesture(Offset velocity) {
+bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);
-  double velocitySquared = velocity.dx * velocity.dx + velocity.dy * velocity.dy;
-  return velocitySquared > kMinFlingVelocity * kMinFlingVelocity
-      && velocitySquared < kMaxFlingVelocity * kMaxFlingVelocity;
+  final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
+  return speedSquared > kMinFlingVelocity * kMinFlingVelocity
+      && speedSquared < kMaxFlingVelocity * kMaxFlingVelocity;
 }
 
 abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
@@ -110,11 +110,11 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
       VelocityTracker tracker = _velocityTrackers[pointer];
       assert(tracker != null);
 
-      Offset velocity = tracker.getVelocity();
+      Velocity velocity = tracker.getVelocity();
       if (velocity != null && _isFlingGesture(velocity))
         onEnd(velocity);
       else
-        onEnd(Offset.zero);
+        onEnd(Velocity.zero);
     }
     _velocityTrackers.clear();
   }

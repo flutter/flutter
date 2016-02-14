@@ -135,11 +135,11 @@ class DrawerControllerState extends State<DrawerController> {
     _controller.value += delta / _width;
   }
 
-  void _settle(Offset velocity) {
+  void _settle(Velocity velocity) {
     if (_controller.isDismissed)
       return;
-    if (velocity.dx.abs() >= _kMinFlingVelocity) {
-      _controller.fling(velocity: velocity.dx / _width);
+    if (velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
+      _controller.fling(velocity: velocity.pixelsPerSecond.dx / _width);
     } else if (_controller.value < 0.5) {
       close();
     } else {

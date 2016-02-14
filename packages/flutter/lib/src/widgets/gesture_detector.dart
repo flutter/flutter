@@ -25,7 +25,8 @@ export 'package:flutter/gestures.dart' show
   GesturePanEndCallback,
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
-  GestureScaleEndCallback;
+  GestureScaleEndCallback,
+  Velocity;
 
 /// A widget that detects gestures.
 ///
@@ -414,7 +415,7 @@ class _GestureSemantics extends OneChildRenderObjectWidget {
       if (onHorizontalDragUpdate != null)
         onHorizontalDragUpdate(delta);
       if (onHorizontalDragEnd != null)
-        onHorizontalDragEnd(Offset.zero);
+        onHorizontalDragEnd(Velocity.zero);
     } else {
       assert(_watchingPans);
       if (onPanStart != null)
@@ -422,7 +423,7 @@ class _GestureSemantics extends OneChildRenderObjectWidget {
       if (onPanUpdate != null)
         onPanUpdate(new Offset(delta, 0.0));
       if (onPanEnd != null)
-        onPanEnd(Offset.zero);
+        onPanEnd(Velocity.zero);
     }
   }
 
@@ -433,7 +434,7 @@ class _GestureSemantics extends OneChildRenderObjectWidget {
       if (onVerticalDragUpdate != null)
         onVerticalDragUpdate(delta);
       if (onVerticalDragEnd != null)
-        onVerticalDragEnd(Offset.zero);
+        onVerticalDragEnd(Velocity.zero);
     } else {
       assert(_watchingPans);
       if (onPanStart != null)
@@ -441,7 +442,7 @@ class _GestureSemantics extends OneChildRenderObjectWidget {
       if (onPanUpdate != null)
         onPanUpdate(new Offset(0.0, delta));
       if (onPanEnd != null)
-        onPanEnd(Offset.zero);
+        onPanEnd(Velocity.zero);
     }
   }
 

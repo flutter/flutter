@@ -208,6 +208,28 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
 
 }
 
+/// A velocity in two dimensions.
+class Velocity {
+  const Velocity({ this.pixelsPerSecond });
+
+  /// A velocity that isn't moving at all.
+  static const Velocity zero = const Velocity(pixelsPerSecond: Offset.zero);
+
+  /// The number of pixels per second of velocity in the x and y directions.
+  final Offset pixelsPerSecond;
+
+  bool operator ==(dynamic other) {
+    if (other is! Velocity)
+      return false;
+    final Velocity typedOther = other;
+    return pixelsPerSecond == typedOther.pixelsPerSecond;
+  }
+
+  int get hashCode => pixelsPerSecond.hashCode;
+
+  String toString() => 'Velocity(${pixelsPerSecond.dx.toStringAsFixed(1)}, ${pixelsPerSecond.dy.toStringAsFixed(1)})';
+}
+
 /// Computes a pointer velocity based on data from PointerMove events.
 ///
 /// The input data is provided by calling addPosition(). Adding data
@@ -248,12 +270,14 @@ class VelocityTracker {
   ///
   /// getVelocity() will return null if no estimate is available or if
   /// the velocity is zero.
-  Offset getVelocity() {
+  Velocity getVelocity() {
     _Estimate estimate = _strategy.getEstimate();
     if (estimate != null && estimate.degree >= 1) {
-      return new Offset( // convert from pixels/ms to pixels/s
-        estimate.xCoefficients[1] * 1000,
-        estimate.yCoefficients[1] * 1000
+      return new Velocity(
+        pixelsPerSecond: new Offset( // convert from pixels/ms to pixels/s
+          estimate.xCoefficients[1] * 1000,
+          estimate.yCoefficients[1] * 1000
+        )
       );
     }
     return null;
