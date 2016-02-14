@@ -9,6 +9,8 @@ abstract class Image extends NativeFieldWrapperClass2 {
   int get height native "Image_height";
 
   void dispose() native "Image_dispose";
+
+  String toString() => '[$width\u00D7$height]';
 }
 
 typedef void _ImageDecoderCallback(Image result);
