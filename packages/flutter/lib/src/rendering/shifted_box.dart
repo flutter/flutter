@@ -198,9 +198,9 @@ class RenderPadding extends RenderShiftedBox {
     });
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('padding: $padding');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('padding: $padding');
   }
 }
 
@@ -347,9 +347,9 @@ class RenderPositionedBox extends RenderShiftedBox {
     });
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('alignment: $alignment');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('alignment: $alignment');
   }
 }
 
@@ -495,13 +495,13 @@ class RenderOverflowBox extends RenderShiftedBox {
     }
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('minWidth: ${minWidth ?? "use parent minWidth constraint"}');
-    settings.add('maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}');
-    settings.add('minHeight: ${minHeight ?? "use parent minHeight constraint"}');
-    settings.add('maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}');
-    settings.add('alignment: $alignment');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('minWidth: ${minWidth ?? "use parent minWidth constraint"}');
+    description.add('maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}');
+    description.add('minHeight: ${minHeight ?? "use parent minHeight constraint"}');
+    description.add('maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}');
+    description.add('alignment: $alignment');
   }
 }
 
@@ -636,9 +636,9 @@ class RenderBaseline extends RenderShiftedBox {
     }
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('baseline: $baseline');
-    settings.add('baselineType: $baselineType');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('baseline: $baseline');
+    description.add('baselineType: $baselineType');
   }
 }

@@ -115,9 +115,9 @@ abstract class RenderBlockBase extends RenderBox
     assert(!size.isInfinite);
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('direction: $direction');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('direction: $direction');
   }
 }
 
@@ -441,8 +441,8 @@ class RenderBlockViewport extends RenderBlockBase {
       return defaultHitTestChildren(result, position: position + new Offset(-startOffset, 0.0));
   }
 
-  void debugDescribeSettings(List<String> settings) {
-    super.debugDescribeSettings(settings);
-    settings.add('startOffset: $startOffset');
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('startOffset: $startOffset');
   }
 }

@@ -1701,10 +1701,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _debugActiveLayout = null;
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
-    final String settingsPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    List<String> settings = <String>[];
-    debugDescribeSettings(settings);
-    result += settings.map((String setting) => "$settingsPrefix$setting\n").join();
+    final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
+    List<String> description = <String>[];
+    debugFillDescription(description);
+    result += description.map((String description) => "$descriptionPrefix$description\n").join();
     if (childrenDescription == '')
       result += '$prefixOtherLines\n';
     result += childrenDescription;
@@ -1722,9 +1722,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _debugActiveLayout = null;
     StringBuffer result = new StringBuffer();
     result.write('$this; ');
-    List<String> settings = <String>[];
-    debugDescribeSettings(settings);
-    result.write(settings.join('; '));
+    List<String> description = <String>[];
+    debugFillDescription(description);
+    result.write(description.join('; '));
     _debugActiveLayout = debugPreviousActiveLayout;
     return result.toString();
   }
@@ -1732,11 +1732,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a list of strings describing the current node's fields, one field
   /// per string. Subclasses should override this to have their information
   /// included in toStringDeep().
-  void debugDescribeSettings(List<String> settings) {
+  void debugFillDescription(List<String> description) {
     if (debugOwner != null)
-      settings.add('owner: $debugOwner');
-    settings.add('parentData: $parentData');
-    settings.add('constraints: $constraints');
+      description.add('owner: $debugOwner');
+    description.add('parentData: $parentData');
+    description.add('constraints: $constraints');
   }
 
   /// Returns a string describing the current node's descendants. Each line of
