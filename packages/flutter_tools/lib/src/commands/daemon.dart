@@ -16,7 +16,7 @@ import '../device.dart';
 import '../ios/device_ios.dart';
 import '../ios/simulator.dart';
 import '../runner/flutter_command.dart';
-import 'start.dart';
+import 'run.dart';
 import 'stop.dart' as stop;
 
 const String protocolVersion = '0.1.0';
@@ -28,10 +28,15 @@ const String protocolVersion = '0.1.0';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
+  DaemonCommand({ this.hideCommand: false });
+
   final String name = 'daemon';
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
+  final bool hideCommand;
 
   bool get requiresProjectRoot => false;
+
+  bool get hidden => hideCommand;
 
   Future<int> runInProject() {
     printStatus('Starting device daemon...');
@@ -246,7 +251,6 @@ class AppDomain extends Domain {
     // command. This would have race conditions with other commands happening in
     // parallel and doesn't play well with the caching built into `FlutterCommand`.
     // TODO(devoncarew): Make flutter_tools work better with commands run from any directory.
-    // TODO(devoncarew): Use less (or more explicit) caching.
     Directory cwd = Directory.current;
     Directory.current = new Directory(projectDirectory);
 

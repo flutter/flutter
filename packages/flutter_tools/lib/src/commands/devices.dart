@@ -8,9 +8,10 @@ import '../base/globals.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
-class ListCommand extends FlutterCommand {
-  final String name = 'list';
+class DevicesCommand extends FlutterCommand {
+  final String name = 'devices';
   final String description = 'List all connected devices.';
+  final List<String> aliases = <String>['list'];
 
   bool get requiresProjectRoot => false;
 

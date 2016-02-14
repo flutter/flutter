@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/commands/list.dart';
+import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/test.dart';
 
@@ -13,16 +13,16 @@ import 'src/context.dart';
 main() => defineTests();
 
 defineTests() {
-  group('list', () {
+  group('devices', () {
     testUsingContext('returns 0 when called', () {
-      ListCommand command = new ListCommand();
+      DevicesCommand command = new DevicesCommand();
       return createTestCommandRunner(command).run(['list']).then((int code) {
         expect(code, equals(0));
       });
     });
 
     testUsingContext('no error when no connected devices', () {
-      ListCommand command = new ListCommand();
+      DevicesCommand command = new DevicesCommand();
       return createTestCommandRunner(command).run(['list']).then((int code) {
         expect(code, equals(0));
         expect(testLogger.statusText, contains('No connected devices'));

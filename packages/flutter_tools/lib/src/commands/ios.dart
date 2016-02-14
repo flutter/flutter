@@ -115,7 +115,7 @@ class IOSCommand extends FlutterCommand {
   void _setupXcodeProjXcconfig(String filePath) {
     StringBuffer localsBuffer = new StringBuffer();
 
-    localsBuffer.writeln("// Generated. Do not edit or check into version control!");
+    localsBuffer.writeln("// This is a generated file; do not edit or check into version control.");
     localsBuffer.writeln("// Recreate using `flutter ios --init`.");
 
     String flutterRoot = path.normalize(Platform.environment[kFlutterRootEnvironmentVariableName]);
@@ -164,8 +164,9 @@ class IOSCommand extends FlutterCommand {
     revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
 
     // Step 6: Tell the user the location of the generated project.
-    printStatus("An Xcode project has been placed in 'ios/'.");
-    printStatus("You may edit it to modify iOS specific configuration.");
+    printStatus("Xcode project created at $xcodeprojPath/.");
+    printStatus("User editable settings are in $iosFilesPath/.");
+
     return 0;
   }
 

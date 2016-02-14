@@ -7,10 +7,12 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 
 import '../artifacts.dart';
+import '../base/globals.dart';
 
 class CacheCommand extends Command {
   final String name = 'cache';
   final String description = 'Manages Flutter\'s cache of binary artifacts.';
+
   CacheCommand() {
     addSubcommand(new _ClearCommand());
     addSubcommand(new _PopulateCommand());
@@ -24,6 +26,7 @@ class _ClearCommand extends Command {
   @override
   Future<int> run() async {
     await ArtifactStore.clear();
+    printStatus('Cleared cache directory ${ArtifactStore.getBaseCacheDir().path}.');
     return 0;
   }
 }

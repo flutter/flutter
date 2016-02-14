@@ -16,7 +16,7 @@ import '../test/loader.dart' as loader;
 
 class TestCommand extends FlutterCommand {
   String get name => 'test';
-  String get description => 'Runs Flutter unit tests for the current project.';
+  String get description => 'Runs Flutter unit tests for the current project (Linux only).';
 
   bool get requiresProjectRoot => false;
 

@@ -20,7 +20,7 @@ import '../flx.dart' as flx;
 import '../runner/flutter_command.dart';
 import '../services.dart';
 import '../toolchain.dart';
-import 'start.dart';
+import 'run.dart';
 
 const String _kDefaultAndroidManifestPath = 'android/AndroidManifest.xml';
 const String _kDefaultOutputPath = 'build/app.apk';
