@@ -11,11 +11,6 @@ Things you will need
  * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
- * The Dart SDK (see [Issue #54](https://github.com/flutter/flutter/issues/54)
-   about downloading the Dart SDK automatically). _If you're also
-   working on the Flutter engine, you can use the copy of the Dart SDK
-   in `.../engine/src/third_party/dart-sdk/dart-sdk`._
-   - [https://www.dartlang.org/downloads/archive/](https://www.dartlang.org/downloads/archive/)
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
    about downloading the Android platform tools automatically).
    _If you're also working on the Flutter engine, you can use the
