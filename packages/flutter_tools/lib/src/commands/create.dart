@@ -57,7 +57,7 @@ class CreateCommand extends Command {
 All done! To run your application:
 
   \$ cd ${out.path}
-  \$ flutter start
+  \$ flutter run
 ''';
 
     if (argResults['pub']) {
