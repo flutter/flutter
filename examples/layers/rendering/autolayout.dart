@@ -9,12 +9,12 @@ import 'package:cassowary/cassowary.dart' as al;
 import 'package:flutter/rendering.dart';
 
 class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
-  AutoLayoutParams p1 = new AutoLayoutParams();
-  AutoLayoutParams p2 = new AutoLayoutParams();
-  AutoLayoutParams p3 = new AutoLayoutParams();
-  AutoLayoutParams p4 = new AutoLayoutParams();
+  AutoLayoutRect p1 = new AutoLayoutRect();
+  AutoLayoutRect p2 = new AutoLayoutRect();
+  AutoLayoutRect p3 = new AutoLayoutRect();
+  AutoLayoutRect p4 = new AutoLayoutRect();
 
-  List<al.Constraint> getConstraints(AutoLayoutParams parent) {
+  List<al.Constraint> getConstraints(AutoLayoutRect parent) {
     return <al.Constraint>[
       // Sum of widths of each box must be equal to that of the container
       parent.width.equals(p1.width + p2.width + p3.width),
@@ -76,10 +76,10 @@ void main() {
   AutoLayoutParentData parentData3 = c3.parentData;
   AutoLayoutParentData parentData4 = c4.parentData;
 
-  parentData1.params = delegate.p1;
-  parentData2.params = delegate.p2;
-  parentData3.params = delegate.p3;
-  parentData4.params = delegate.p4;
+  parentData1.rect = delegate.p1;
+  parentData2.rect = delegate.p2;
+  parentData3.rect = delegate.p3;
+  parentData4.rect = delegate.p4;
 
   new RenderingFlutterBinding(root: root);
 }

@@ -10,8 +10,8 @@ import 'object.dart';
 /// Hosts the edge parameters and vends useful methods to construct expressions
 /// for constraints. Also sets up and manages implicit constraints and edit
 /// variables.
-class AutoLayoutParams {
-  AutoLayoutParams() {
+class AutoLayoutRect {
+  AutoLayoutRect() {
     _left = new al.Param();
     _right = new al.Param();
     _top = new al.Param();
@@ -34,7 +34,7 @@ class AutoLayoutParams {
   al.Expression get horizontalCenter => (_left + _right) / al.cm(2.0);
   al.Expression get verticalCenter => (_top + _bottom) / al.cm(2.0);
 
-  List<al.Constraint> contains(AutoLayoutParams other) {
+  List<al.Constraint> contains(AutoLayoutRect other) {
     return <al.Constraint>[
       other.left >= left,
       other.right <= right,
@@ -49,34 +49,34 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
 
   final RenderBox _renderBox;
 
-  AutoLayoutParams get params => _params;
-  AutoLayoutParams _params;
-  void set params(AutoLayoutParams value) {
-    if (_params == value)
+  AutoLayoutRect get rect => _rect;
+  AutoLayoutRect _rect;
+  void set rect(AutoLayoutRect value) {
+    if (_rect == value)
       return;
-    if (_params != null)
+    if (_rect != null)
       _removeImplicitConstraints();
-    _params = value;
-    if (_params != null)
+    _rect = value;
+    if (_rect != null)
       _addImplicitConstraints();
   }
 
   BoxConstraints get _constraintsFromSolver {
     return new BoxConstraints.tightFor(
-      width: _params._right.value - _params._left.value,
-      height: _params._bottom.value - _params._top.value
+      width: _rect._right.value - _rect._left.value,
+      height: _rect._bottom.value - _rect._top.value
     );
   }
 
   Offset get _offsetFromSolver {
-    return new Offset(_params._left.value, _params._top.value);
+    return new Offset(_rect._left.value, _rect._top.value);
   }
 
   List<al.Constraint> _implicitConstraints;
 
   void _addImplicitConstraints() {
     assert(_renderBox != null);
-    if (_renderBox.parent == null || _params == null)
+    if (_renderBox.parent == null || _rect == null)
       return;
     final List<al.Constraint> implicit = _constructImplicitConstraints();
     assert(implicit != null && implicit.isNotEmpty);
@@ -106,8 +106,9 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// may return null.
   List<al.Constraint> _constructImplicitConstraints() {
     return <al.Constraint>[
-      _params._left >= al.cm(0.0), // The left edge must be positive.
-      _params._right >= _params._left, // Width must be positive.
+      _rect._left >= al.cm(0.0), // The left edge must be positive.
+      _rect._right >= _rect._left, // Width must be positive.
+      // Why don't we need something similar for the top and the bottom?
     ];
   }
 }
@@ -115,7 +116,7 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
 abstract class AutoLayoutDelegate {
   const AutoLayoutDelegate();
 
-  List<al.Constraint> getConstraints(AutoLayoutParams parent);
+  List<al.Constraint> getConstraints(AutoLayoutRect parent);
   bool shouldUpdateConstraints(AutoLayoutDelegate oldDelegate);
 }
 
@@ -128,10 +129,10 @@ class RenderAutoLayout extends RenderBox
     List<RenderBox> children
   }) : _delegate = delegate, _needToUpdateConstraints = (delegate != null) {
     _solver.addEditVariables(<al.Variable>[
-        _params._left.variable,
-        _params._right.variable,
-        _params._top.variable,
-        _params._bottom.variable
+        _rect._left.variable,
+        _rect._right.variable,
+        _rect._top.variable,
+        _rect._bottom.variable
       ], al.Priority.required - 1);
 
     addAll(children);
@@ -158,7 +159,7 @@ class RenderAutoLayout extends RenderBox
 
   bool _needToUpdateConstraints;
 
-  final AutoLayoutParams _params = new AutoLayoutParams();
+  final AutoLayoutRect _rect = new AutoLayoutRect();
 
   final al.Solver _solver = new al.Solver();
   final List<al.Constraint> _explicitConstraints = new List<al.Constraint>();
@@ -212,17 +213,17 @@ class RenderAutoLayout extends RenderBox
     if (_needToUpdateConstraints) {
       _clearExplicitConstraints();
       if (_delegate != null)
-        _setExplicitConstraints(_delegate.getConstraints(_params));
+        _setExplicitConstraints(_delegate.getConstraints(_rect));
       _needToUpdateConstraints = false;
       needToFlushUpdates = true;
     }
 
     if (size != _previousSize) {
       _solver
-        ..suggestValueForVariable(_params._left.variable, 0.0)
-        ..suggestValueForVariable(_params._top.variable, 0.0)
-        ..suggestValueForVariable(_params._bottom.variable, size.height)
-        ..suggestValueForVariable(_params._right.variable, size.width);
+        ..suggestValueForVariable(_rect._left.variable, 0.0)
+        ..suggestValueForVariable(_rect._top.variable, 0.0)
+        ..suggestValueForVariable(_rect._bottom.variable, size.height)
+        ..suggestValueForVariable(_rect._right.variable, size.width);
       _previousSize = size;
       needToFlushUpdates = true;
     }
