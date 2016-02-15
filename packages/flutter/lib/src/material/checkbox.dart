@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient;
+import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -109,63 +109,40 @@ class _RenderCheckbox extends RenderToggleable {
 
     paintRadialReaction(canvas, offset + const Offset(kRadialReactionRadius, kRadialReactionRadius));
 
-    // Choose a color between grey and the theme color
-    Paint paint = new Paint()
-      ..strokeWidth = _kStrokeWidth
-      ..color = inactiveColor;
+    double t = position.value;
 
-    // The rrect contracts slightly during the transition animation from checked states.
-    // Because we have a stroke size of 2, we should have a minimum 1.0 inset.
-    double inset = 2.0 - (position.value - _kMidpoint).abs() * 2.0;
+    Color borderColor = inactiveColor;
+    if (onChanged != null)
+      borderColor = t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0);
+
+    Paint paint = new Paint()
+      ..color = borderColor;
+
+    double inset = 1.0 - (t - 0.5).abs() * 2.0;
     double rectSize = _kEdgeSize - inset * _kStrokeWidth;
     Rect rect = new Rect.fromLTWH(offsetX + inset, offsetY + inset, rectSize, rectSize);
-    // Create an inner rectangle to cover inside of rectangle. This is needed to avoid
-    // painting artefacts caused by overlayed paintings.
-    Rect innerRect = rect.deflate(1.0);
-    RRect rrect = new RRect.fromRectXY(rect, _kEdgeRadius, _kEdgeRadius);
 
-    // Outline of the empty rrect
-    paint.style = PaintingStyle.stroke;
-    canvas.drawRRect(rrect, paint);
-
-    // Radial gradient that changes size
-    if (!position.isDismissed) {
-      paint
-        ..style = PaintingStyle.fill
-        ..shader = new ui.Gradient.radial(
-          new Point(_kEdgeSize / 2.0, _kEdgeSize / 2.0),
-          _kEdgeSize * (_kMidpoint - position.value) * 8.0,
-          <Color>[
-            const Color(0x00000000),
-            inactiveColor
-          ]
-        );
-      canvas.drawRect(innerRect, paint);
-    }
-
-    if (position.value > _kMidpoint) {
-      double t = (position.value - _kMidpoint) / (1.0 - _kMidpoint);
-
-      if (onChanged != null) {
-        // First draw a rounded rect outline then fill inner rectangle with the active color
-        paint
-          ..color = activeColor.withAlpha((t * 255).floor())
-          ..style = PaintingStyle.stroke;
-        canvas.drawRRect(rrect, paint);
-        paint.style = PaintingStyle.fill;
-        canvas.drawRect(innerRect, paint);
-      }
+    RRect outer = new RRect.fromRectXY(rect, _kEdgeRadius, _kEdgeRadius);
+    if (t <= 0.5) {
+      // Outline
+      RRect inner = outer.deflate(math.min(rectSize / 2.0, _kStrokeWidth + rectSize * t));
+      canvas.drawDRRect(outer, inner, paint);
+    } else {
+      // Background
+      canvas.drawRRect(outer, paint);
 
       // White inner check
+      double value = (t - 0.5) * 2.0;
       paint
         ..color = const Color(0xFFFFFFFF)
-        ..style = PaintingStyle.stroke;
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _kStrokeWidth;
       Path path = new Path();
       Point start = new Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
       Point mid = new Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
       Point end = new Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-      Point drawStart = Point.lerp(start, mid, 1.0 - t);
-      Point drawEnd = Point.lerp(mid, end, t);
+      Point drawStart = Point.lerp(start, mid, 1.0 - value);
+      Point drawEnd = Point.lerp(mid, end, value);
       path.moveTo(offsetX + drawStart.x, offsetY + drawStart.y);
       path.lineTo(offsetX + mid.x, offsetY + mid.y);
       path.lineTo(offsetX + drawEnd.x, offsetY + drawEnd.y);
