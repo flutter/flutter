@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
+import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/globals.dart';
@@ -17,6 +18,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../toolchain.dart';
+import 'adb.dart';
 import 'android.dart';
 
 const String _defaultAdbPath = 'adb';
@@ -249,7 +251,12 @@ class AndroidDevice extends Device {
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
     cmd.add(apk.launchActivity);
-    runCheckedSync(cmd);
+    String result = runCheckedSync(cmd);
+    // This invocation returns 0 even when it fails.
+    if (result.contains('Error: ')) {
+      printError(result.trim());
+      return false;
+    }
     return true;
   }
 
@@ -410,10 +417,10 @@ class AndroidDevice extends Device {
 }
 
 List<AndroidDevice> getAdbDevices() {
-  if (androidSdk == null)
+  String adbPath = getAdbPath(androidSdk);
+  if (adbPath == null)
     return <AndroidDevice>[];
 
-  String adbPath = androidSdk.adbPath;
   List<AndroidDevice> devices = [];
 
   List<String> output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
@@ -445,9 +452,8 @@ List<AndroidDevice> getAdbDevices() {
       String modelID = match[3];
       String deviceCodeName = match[4];
 
-      // Convert `Nexus_7` / `Nexus_5X` style names to `Nexus 7` ones.
       if (modelID != null)
-        modelID = modelID.replaceAll('_', ' ');
+        modelID = cleanAdbDeviceName(modelID);
 
       devices.add(new AndroidDevice(
         deviceID,

@@ -23,7 +23,10 @@ import '../base/os.dart';
 // Perhaps something like `flutter config --android-home=foo/bar`.
 
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
-String getAdbPath() {
+String getAdbPath([AndroidSdk existingSdk]) {
+  if (existingSdk?.adbPath != null)
+    return existingSdk.adbPath;
+
   AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
   if (sdk?.latestVersion == null) {

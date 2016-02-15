@@ -131,7 +131,6 @@ Future<int> startApp(
   bool startPaused: false,
   int debugPort: observatoryDefaultPort
 }) async {
-
   String mainPath = findMainDartFile(target);
   if (!FileSystemEntity.isFileSync(mainPath)) {
     String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -143,11 +142,13 @@ Future<int> startApp(
 
   if (install) {
     printTrace('Running build command.');
-    await buildAll(
+    int result = await buildAll(
       devices, applicationPackages, toolchain, configs,
       enginePath: enginePath,
       target: target
     );
+    if (result != 0)
+      return result;
   }
 
   if (stop) {
