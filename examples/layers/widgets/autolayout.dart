@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This example shows how to use the Cassowary autolayout system directly in the
-// underlying render tree.
+// This example shows how to use the Cassowary autolayout system with widgets.
 
 import 'package:cassowary/cassowary.dart' as al;
-import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
   AutoLayoutParams p1 = new AutoLayoutParams();
@@ -47,39 +46,42 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
   bool shouldUpdateConstraints(AutoLayoutDelegate oldDelegate) => true;
 }
 
+class ColoredBox extends StatelessComponent {
+  ColoredBox({ Key key, this.params, this.color }) : super(key: key);
+
+  final AutoLayoutParams params;
+  final Color color;
+
+  Widget build(BuildContext context) {
+    return new AutoLayoutChild(
+      params: params,
+      child: new DecoratedBox(
+        decoration: new BoxDecoration(backgroundColor: color)
+      )
+    );
+  }
+}
+
+class ColoredBoxes extends StatefulComponent {
+  _ColoredBoxesState createState() => new _ColoredBoxesState();
+}
+
+class _ColoredBoxesState extends State<ColoredBoxes> {
+  final _MyAutoLayoutDelegate delegate = new _MyAutoLayoutDelegate();
+
+  Widget build(BuildContext context) {
+    return new AutoLayout(
+      delegate: delegate,
+      children: <Widget>[
+        new ColoredBox(params: delegate.p1, color: const Color(0xFFFF0000)),
+        new ColoredBox(params: delegate.p2, color: const Color(0xFF00FF00)),
+        new ColoredBox(params: delegate.p3, color: const Color(0xFF0000FF)),
+        new ColoredBox(params: delegate.p4, color: const Color(0xFFFFFFFF)),
+      ]
+    );
+  }
+}
+
 void main() {
-  RenderDecoratedBox c1 = new RenderDecoratedBox(
-    decoration: new BoxDecoration(backgroundColor: const Color(0xFFFF0000))
-  );
-
-  RenderDecoratedBox c2 = new RenderDecoratedBox(
-    decoration: new BoxDecoration(backgroundColor: const Color(0xFF00FF00))
-  );
-
-  RenderDecoratedBox c3 = new RenderDecoratedBox(
-    decoration: new BoxDecoration(backgroundColor: const Color(0xFF0000FF))
-  );
-
-  RenderDecoratedBox c4 = new RenderDecoratedBox(
-    decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF))
-  );
-
-  _MyAutoLayoutDelegate delegate = new _MyAutoLayoutDelegate();
-
-  RenderAutoLayout root = new RenderAutoLayout(
-    delegate: delegate,
-    children: <RenderBox>[c1, c2, c3, c4]
-  );
-
-  AutoLayoutParentData parentData1 = c1.parentData;
-  AutoLayoutParentData parentData2 = c2.parentData;
-  AutoLayoutParentData parentData3 = c3.parentData;
-  AutoLayoutParentData parentData4 = c4.parentData;
-
-  parentData1.params = delegate.p1;
-  parentData2.params = delegate.p2;
-  parentData3.params = delegate.p3;
-  parentData4.params = delegate.p4;
-
-  new RenderingFlutterBinding(root: root);
+  runApp(new ColoredBoxes());
 }

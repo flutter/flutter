@@ -6,6 +6,7 @@
 library widgets;
 
 export 'src/widgets/asset_vendor.dart';
+export 'src/widgets/auto_layout.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
 export 'src/widgets/checked_mode_banner.dart';
