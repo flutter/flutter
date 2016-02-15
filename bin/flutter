@@ -7,26 +7,38 @@ set -e
 
 export FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
-FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
 STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
 SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
+DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
-# TODO(abarth): We shouldn't require dart to be on the user's path.
-DART=dart
+DART="$DART_SDK_PATH/bin/dart"
 
 REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
 if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
-  echo Updating flutter tool...
-  (cd "$FLUTTER_TOOLS_DIR"; pub get > /dev/null)
-  (cd "$FLUTTER_DIR"; pub get > /dev/null)  # Allows us to check if sky_engine's REVISION is correct
-  $DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
-  echo -n $REVISION > "$STAMP_PATH"
+  "$FLUTTER_ROOT/bin/cache/update_dart_sdk.sh"
+
+  echo Building flutter tool...
+  FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
+  PUB="$DART_SDK_PATH/bin/pub"
+
+  (cd "$FLUTTER_TOOLS_DIR"; "$PUB" get > /dev/null)
+  (cd "$FLUTTER_DIR"; "$PUB" get > /dev/null)  # Allows us to check if sky_engine's REVISION is correct
+  "$DART" --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+  echo $REVISION > "$STAMP_PATH"
 fi
+
+# Add our internalized version of the Dart SDK to the path ahead of any other
+# versions that might be installed on this machine.
+#
+# TODO(abarth): We should teach flutter_tools to our version of the Dart SDK
+#               explicitly instead of relying upon the PATH.
+#
+export PATH="$DART_SDK_PATH/bin:$PATH"
 
 set +e
 
-$DART "$SNAPSHOT_PATH" "$@"
+"$DART" "$SNAPSHOT_PATH" "$@"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
 # If it is, we need to snapshot it again.
@@ -37,5 +49,5 @@ fi
 
 set -e
 
-$DART --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
-$DART "$SNAPSHOT_PATH" "$@"
+"$DART" --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
+"$DART" "$SNAPSHOT_PATH" "$@"

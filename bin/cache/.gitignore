@@ -1,3 +1,4 @@
 *.snapshot
 *.stamp
 artifacts
+dart-sdk
