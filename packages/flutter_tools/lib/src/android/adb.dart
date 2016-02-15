@@ -181,9 +181,8 @@ class AdbDevice {
       }
     }
 
-    // Convert `Nexus_7` / `Nexus_5X` style names to `Nexus 7` ones.
     if (modelID != null)
-      modelID = modelID.replaceAll('_', ' ');
+      modelID = cleanAdbDeviceName(modelID);
   }
 
   static final RegExp deviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
@@ -233,6 +232,16 @@ class AdbDevice {
       return '$id ($status) - $modelID';
     }
   }
+}
+
+String cleanAdbDeviceName(String name) {
+  // Some emulators use `___` in the name as separators.
+  name = name.replaceAll('___', ', ');
+
+  // Convert `Nexus_7` / `Nexus_5X` style names to `Nexus 7` ones.
+  name = name.replaceAll('_', ' ');
+
+  return name;
 }
 
 List<int> _createAdbRequest(String payload) {

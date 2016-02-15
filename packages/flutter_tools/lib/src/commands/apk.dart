@@ -369,6 +369,17 @@ Future<int> buildAndroid({
   String flxPath: '',
   ApkKeystoreInfo keystore
 }) async {
+  // Validate that we can find an android sdk.
+  if (androidSdk == null) {
+    printError('No Android SDK found.');
+    return 1;
+  }
+
+  if (!androidSdk.validateSdkWellFormed(complain: true)) {
+    printError('Try re-installing or updating your Android SDK.');
+    return 1;
+  }
+
   if (!force && !_needsRebuild(outputFile, manifest)) {
     printTrace('APK up to date. Skipping build step.');
     return 0;
@@ -437,13 +448,17 @@ Future buildAll(
         continue;
       }
 
-      await buildAndroid(
+      int result = await buildAndroid(
         toolchain: toolchain,
         configs: configs,
         enginePath: enginePath,
         force: false,
         target: target
       );
+      if (result != 0)
+        return result;
     }
   }
+
+  return 0;
 }

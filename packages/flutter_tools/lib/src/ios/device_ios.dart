@@ -348,7 +348,12 @@ class IOSSimulator extends Device {
       args.add("--observatory-port=$debugPort");
 
     // Step 5: Launch the updated application in the simulator
-    SimControl.launch(id, app.id, args);
+    try {
+      SimControl.launch(id, app.id, args);
+    } catch (error) {
+      printError('$error');
+      return false;
+    }
 
     printTrace('Successfully started ${app.name} on $id');
 
@@ -387,6 +392,12 @@ class IOSSimulator extends Device {
       randomFile.truncateSync(0);
       randomFile.closeSync();
     }
+  }
+
+  void ensureLogsExists() {
+    File logFile = new File(logFilePath);
+    if (!logFile.existsSync())
+      logFile.writeAsBytesSync(<int>[]);
   }
 }
 
@@ -427,6 +438,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   final IOSSimulator device;
 
+  bool _lastWasFiltered = false;
+
   String get name => device.name;
 
   Future<int> logs({ bool clear: false }) async {
@@ -435,6 +448,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
     if (clear)
       device.clearLogs();
+
+    device.ensureLogsExists();
 
     // Match the log prefix (in order to shorten it):
     //   'Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]: ...'
@@ -453,19 +468,25 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       mapFunction: (String string) {
         Match match = mapRegex.matchAsPrefix(string);
         if (match != null) {
+          _lastWasFiltered = true;
+
           // Filter out some messages that clearly aren't related to Flutter.
           if (string.contains(': could not find icon for representation -> com.apple.'))
             return null;
           String category = match.group(1);
           String content = match.group(2);
-          if (category == 'Game Center' || category == 'itunesstored' || category == 'nanoregistrylaunchd')
+          if (category == 'Game Center' || category == 'itunesstored' || category == 'nanoregistrylaunchd' ||
+              category == 'mstreamd' || category == 'syncdefaultsd' || category == 'companionappd' || category == 'searchd')
             return null;
-          if (category == 'FlutterRunner')
+
+          _lastWasFiltered = false;
+
+          if (category == 'FlutterRunner' || category == 'Runner')
             return content;
           return '$category: $content';
         }
         match = lastMessageRegex.matchAsPrefix(string);
-        if (match != null)
+        if (match != null && !_lastWasFiltered)
           return '(${match.group(1)})';
         return string;
       }

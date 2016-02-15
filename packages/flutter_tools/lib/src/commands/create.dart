@@ -57,7 +57,7 @@ class CreateCommand extends Command {
 All done! To run your application:
 
   \$ cd ${out.path}
-  \$ flutter start
+  \$ flutter run
 ''';
 
     if (argResults['pub']) {
@@ -152,8 +152,8 @@ class FlutterSimpleTemplate extends Template {
 
     // Android files.
     files['android/AndroidManifest.xml'] = _apkManifest;
-    // Create a file here, so we create the directory for the user and it gets committed with git.
-    files['android/res/README.md'] = _androidResReadme;
+    // Create a file here in order to create the res/ directory and ensure it gets committed to git.
+    files['android/res/.empty'] = _androidEmptyFile;
 
     // iOS files.
     files.addAll(iosTemplateFiles);
@@ -285,6 +285,6 @@ final String _apkManifest = '''
 </manifest>
 ''';
 
-final String _androidResReadme = '''
+final String _androidEmptyFile = '''
 Place Android resources here (http://developer.android.com/guide/topics/resources/overview.html).
 ''';
