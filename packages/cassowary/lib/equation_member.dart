@@ -15,7 +15,7 @@ abstract class _EquationMember {
 
   Constraint operator <=(_EquationMember m) => asExpression() <= m;
 
-  operator ==(_EquationMember m) => asExpression() == m;
+  Constraint equals(_EquationMember m) => asExpression().equals(m);
 
   Expression operator +(_EquationMember m) => asExpression() + m;
 

@@ -27,8 +27,8 @@ class AutoLayout extends MultiChildRenderObjectWidget {
 }
 
 class AutoLayoutChild extends ParentDataWidget<AutoLayout> {
-  AutoLayoutChild({ Key key, this.params, Widget child })
-    : super(key: key, child: child);
+  AutoLayoutChild({ AutoLayoutParams params, Widget child })
+    : params = params, super(key: new ObjectKey(params), child: child);
 
   final AutoLayoutParams params;
 
