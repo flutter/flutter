@@ -121,6 +121,36 @@ class PointerEventConverter {
           assert(_pointers.containsKey(datum.pointer));
           _PointerState state = _pointers[datum.pointer];
           assert(state.down);
+          if (position != state.lastPosition) {
+            // Not all sources of pointer packets respect the invariant that
+            // they move the pointer to the up location before sending the up
+            // event. For example, in the iOS simulator, of you drag outside the
+            // window, you'll get a stream of pointers that violates that
+            // invariant. We restore the invariant here for our clients.
+            Offset offset = position - state.lastPosition;
+            state.lastPosition = position;
+            yield new PointerMoveEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              position: position,
+              delta: offset,
+              down: state.down,
+              obscured: datum.obscured,
+              pressure: datum.pressure,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMajor: datum.radiusMajor,
+              radiusMinor: datum.radiusMajor,
+              radiusMin: datum.radiusMin,
+              radiusMax: datum.radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt
+            );
+            state.lastPosition = position;
+          }
           assert(position == state.lastPosition);
           state.setUp();
           if (datum.type == mojom.PointerType.up) {
