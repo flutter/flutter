@@ -54,7 +54,7 @@ Future main(List<String> args) async {
     ..addCommand(new LogsCommand())
     ..addCommand(new RefreshCommand())
     ..addCommand(new RunCommand())
-    ..addCommand(new RunMojoCommand())
+    ..addCommand(new RunMojoCommand(hideCommand: !verboseHelp))
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
