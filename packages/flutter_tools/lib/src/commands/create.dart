@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 import '../android/android.dart' as android;
 import '../artifacts.dart';
 import '../base/globals.dart';
-import '../base/process.dart';
+import '../dart/pub.dart';
 import 'ios.dart';
 
 class CreateCommand extends Command {
@@ -69,39 +69,6 @@ All done! To run your application:
     printStatus('');
     printStatus(message);
     return 0;
-  }
-
-  Future<int> pubGet({
-    String directory: '',
-    bool skipIfAbsent: false
-  }) async {
-    File pubSpecYaml = new File(path.join(directory, 'pubspec.yaml'));
-    File pubSpecLock = new File(path.join(directory, 'pubspec.lock'));
-    File dotPackages = new File(path.join(directory, '.packages'));
-
-    if (!pubSpecYaml.existsSync()) {
-      if (skipIfAbsent)
-        return 0;
-      printError('$directory: no pubspec.yaml found');
-      return 1;
-    }
-
-    if (!pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
-      printStatus("Running 'pub get' in '$directory'...");
-      int code = await runCommandAndStreamOutput(
-        <String>[sdkBinaryName('pub'), '--verbosity=warning', 'get'],
-        workingDirectory: directory
-      );
-      if (code != 0)
-        return code;
-    }
-
-    if ((pubSpecLock.existsSync() && pubSpecLock.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())) &&
-        (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())))
-      return 0;
-
-    printError('$directory: pubspec.yaml, pubspec.lock, and .packages are in an inconsistent state');
-    return 1;
   }
 }
 
