@@ -2152,6 +2152,15 @@ class Listener extends OneChildRenderObjectWidget {
   }
 }
 
+/// Creates a separate display list for its child.
+///
+/// This widget creates a separate display list for its child, which
+/// can improve performance if the subtree repaints at different times than
+/// the surrounding parts of the tree. Specifically, when the child does not
+/// repaint but its parent does, we can re-use the display list we recorded
+/// previously. Similarly, when the child repaints but the surround tree does
+/// not, we can re-record its display list without re-recording the display list
+/// for the surround tree.
 class RepaintBoundary extends OneChildRenderObjectWidget {
   RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
   RenderRepaintBoundary createRenderObject() => new RenderRepaintBoundary();

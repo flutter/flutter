@@ -1361,7 +1361,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 }
 
-/// Force this subtree to have a layer
+/// Creates a separate display list for its child.
 ///
 /// This render object creates a separate display list for its child, which
 /// can improve performance if the subtree repaints at different times than
