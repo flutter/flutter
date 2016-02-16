@@ -11,6 +11,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/globals.dart';
 import '../build_configuration.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../flx.dart';
 import '../runner/flutter_command.dart';
@@ -68,9 +69,19 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
+    argParser.addFlag('pub',
+        defaultsTo: true,
+        help: 'Whether to run "pub get" before running the app.');
     argParser.addOption('debug-port',
         defaultsTo: observatoryDefaultPort.toString(),
         help: 'Listen to the given port for a debug connection.');
+  }
+
+  @override
+  Future<int> run() async {
+    if (argResults['pub'])
+      await pubGet();
+    return await super.run();
   }
 
   @override
