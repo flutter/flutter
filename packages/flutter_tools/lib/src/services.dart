@@ -13,8 +13,10 @@ import 'artifacts.dart';
 import 'base/globals.dart';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
+const String _kFlutterServicesManifestPath = 'flutter_services.yaml';
 
 dynamic _loadYamlFile(String path) {
+  printTrace("Looking for YAML at '$path'");
   if (!FileSystemEntity.isFileSync(path))
     return null;
   String manifestString = new File(path).readAsStringSync();
@@ -26,18 +28,24 @@ dynamic _loadYamlFile(String path) {
 Future parseServiceConfigs(
   List<Map<String, String>> services, { List<File> jars }
 ) async {
-  if (!ArtifactStore.isPackageRootValid)
+  if (!ArtifactStore.isPackageRootValid) {
+    printTrace("Artifact store invalid while parsing service configs");
     return;
+  }
 
   dynamic manifest = _loadYamlFile(_kFlutterManifestPath);
-  if (manifest == null || manifest['services'] == null)
+  if (manifest == null || manifest['services'] == null) {
+    printTrace("No services specified in the manifest");
     return;
+  }
 
   for (String service in manifest['services']) {
     String serviceRoot = '${ArtifactStore.packageRoot}/$service';
-    dynamic serviceConfig = _loadYamlFile('$serviceRoot/config.yaml');
-    if (serviceConfig == null)
+    dynamic serviceConfig = _loadYamlFile('$serviceRoot/$_kFlutterServicesManifestPath');
+    if (serviceConfig == null) {
+      printStatus("No $_kFlutterServicesManifestPath found for service '$serviceRoot'. Skipping.");
       continue;
+    }
 
     for (Map<String, String> service in serviceConfig['services']) {
       services.add({
@@ -78,22 +86,16 @@ Future<String> getServiceFromUrl(
 ///   ]
 /// }
 File generateServiceDefinitions(
-  String dir, List<Map<String, String>> servicesIn, { bool ios }
+  String dir, List<Map<String, String>> servicesIn
 ) {
-  assert(ios != null);
-
-  String keyOut = ios ? 'framework' : 'class';
-  String keyIn = ios ? 'framework-path' : 'android-class';
-  // TODO(mpcomplete): we should use the same filename for consistency.
-  String filename = ios ? 'ServiceDefinitions.json' : 'services.json';
   List<Map<String, String>> services =
       servicesIn.map((Map<String, String> service) => {
         'name': service['name'],
-        keyOut: service[keyIn]
+        'class': service['android-class']
       }).toList();
 
   Map<String, dynamic> json = { 'services': services };
-  File servicesFile = new File(path.join(dir, filename));
+  File servicesFile = new File(path.join(dir, 'services.json'));
   servicesFile.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
   return servicesFile;
 }
