@@ -17,6 +17,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../services.dart';
 import '../toolchain.dart';
+import '../ios/initialize_xcode.dart';
 import 'simulator.dart';
 
 const String _ideviceinstallerInstructions =
@@ -560,8 +561,11 @@ String _getIOSEngineRevision(ApplicationPackage app) {
 
 Future<bool> _buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice }) async {
   if (!FileSystemEntity.isDirectorySync(app.localPath)) {
-    printError('Path "${path.absolute(app.localPath)}" does not exist.\nDid you run `flutter ios --init`?');
-    return false;
+    printTrace('Path "${path.absolute(app.localPath)}" does not exist. Initializing the Xcode project.');
+    if ((await initializeXcodeProjectHarness()) != 0) {
+      printError('Could not initialize the Xcode project.');
+      return false;
+    }
   }
 
   if (!_validateEngineRevision(app))

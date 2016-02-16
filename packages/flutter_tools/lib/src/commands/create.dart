@@ -13,7 +13,7 @@ import '../android/android.dart' as android;
 import '../artifacts.dart';
 import '../base/globals.dart';
 import '../dart/pub.dart';
-import 'ios.dart';
+import '../ios/initialize_xcode.dart';
 
 class CreateCommand extends Command {
   final String name = 'create';
