@@ -7,7 +7,7 @@ import "dart:io";
 
 import "../base/globals.dart";
 import "../runner/flutter_command.dart";
-import "../ios/initialize_xcode.dart";
+import '../ios/setup_xcodeproj.dart';
 
 class IOSCommand extends FlutterCommand {
   final String name = "ios";
@@ -25,7 +25,7 @@ class IOSCommand extends FlutterCommand {
     }
 
     if (argResults['init'])
-      return await initializeXcodeProjectHarness();
+      return await setupXcodeProjectHarness();
 
     printError("No flags specified.");
     return 1;
