@@ -107,7 +107,6 @@ void _setupXcodeProjXcconfig(String filePath) {
   StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
-  localsBuffer.writeln('// Recreate using `flutter ios --init`.');
 
   String flutterRoot = path.normalize(Platform.environment[kFlutterRootEnvironmentVariableName]);
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');

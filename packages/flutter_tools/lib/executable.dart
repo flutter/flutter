@@ -19,7 +19,6 @@ import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/install.dart';
-import 'src/commands/ios.dart';
 import 'src/commands/listen.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/refresh.dart';
@@ -49,7 +48,6 @@ Future main(List<String> args) async {
     ..addCommand(new DaemonCommand(hideCommand: !verboseHelp))
     ..addCommand(new DevicesCommand())
     ..addCommand(new InstallCommand())
-    ..addCommand(new IOSCommand())
     ..addCommand(new ListenCommand())
     ..addCommand(new LogsCommand())
     ..addCommand(new RefreshCommand())

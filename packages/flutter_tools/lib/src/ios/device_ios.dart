@@ -541,7 +541,7 @@ bool _validateEngineRevision(ApplicationPackage app) {
   String iosRevision = _getIOSEngineRevision(app);
 
   if (iosRevision != skyRevision) {
-    printError("Error: incompatible sky_engine revision; please run 'flutter ios --init' to update.");
+    printError("Error: incompatible sky_engine revision.");
     printStatus('sky_engine revision: $skyRevision, iOS engine revision: $iosRevision');
     return false;
   } else {
