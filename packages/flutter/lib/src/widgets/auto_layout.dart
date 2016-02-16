@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
-    AutoLayoutParams,
+    AutoLayoutRect,
     AutoLayoutDelegate;
 
 class AutoLayout extends MultiChildRenderObjectWidget {
@@ -27,16 +27,16 @@ class AutoLayout extends MultiChildRenderObjectWidget {
 }
 
 class AutoLayoutChild extends ParentDataWidget<AutoLayout> {
-  AutoLayoutChild({ Key key, this.params, Widget child })
-    : super(key: key, child: child);
+  AutoLayoutChild({ AutoLayoutRect rect, Widget child })
+    : rect = rect, super(key: new ObjectKey(rect), child: child);
 
-  final AutoLayoutParams params;
+  final AutoLayoutRect rect;
 
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is AutoLayoutParentData);
     final AutoLayoutParentData parentData = renderObject.parentData;
     // AutoLayoutParentData filters out redundant writes and marks needs layout
     // as appropriate.
-    parentData.params = params;
+    parentData.rect = rect;
   }
 }

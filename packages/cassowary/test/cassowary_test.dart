@@ -243,7 +243,7 @@ void main() {
     expect(c1.expression.constant, -20.0);
     expect(c1.relation, Relation.greaterThanOrEqualTo);
 
-    var c2 = (right - left == cm(30.0)) as Constraint;
+    var c2 = (right - left).equals(cm(30.0));
     expect(c2 is Constraint, true);
     expect(c2.expression.constant, -30.0);
     expect(c2.relation, Relation.equalTo);
@@ -438,7 +438,7 @@ void main() {
 
     Solver s = new Solver();
 
-    expect(s.addConstraint((right + left == mid * cm(2.0)) as Constraint),
+    expect(s.addConstraint((right + left).equals(mid * cm(2.0))),
         Result.success);
     expect(s.addConstraint(right - left >= cm(100.0)), Result.success);
     expect(s.addConstraint(left >= cm(0.0)), Result.success);
@@ -460,7 +460,7 @@ void main() {
     var c = (left >= cm(0.0));
 
     expect(s.addConstraints([
-      (left + right == cm(2.0) * mid) as Constraint,
+      (left + right).equals(cm(2.0) * mid),
       (right - left >= cm(100.0)),
       c
     ]), Result.success);
@@ -476,7 +476,7 @@ void main() {
 
     Solver s = new Solver();
 
-    expect(s.addConstraint((right + left == mid * cm(2.0)) as Constraint),
+    expect(s.addConstraint((right + left).equals(mid * cm(2.0))),
         Result.success);
     expect(s.addConstraint(right - left >= cm(100.0)), Result.success);
     expect(s.addConstraint(left >= cm(0.0)), Result.success);
@@ -496,7 +496,7 @@ void main() {
     var right = new Param(100.0);
     var c1 = right >= left;
     var c2 = right <= left;
-    var c3 = (right == left) as Constraint;
+    var c3 = right.equals(left);
 
     Solver s = new Solver();
     expect(s.addConstraint(c1), Result.success);
@@ -519,9 +519,9 @@ void main() {
     solver.suggestValueForVariable(container.variable, 100.0);
 
     solver.addConstraint((p1 >= cm(30.0)) | Priority.strong);
-    solver.addConstraint(((p1 == p3) as Constraint) | Priority.medium);
-    solver.addConstraint((p2 == cm(2.0) * p1) as Constraint);
-    solver.addConstraint((container == (p1 + p2 + p3)) as Constraint);
+    solver.addConstraint(p1.equals(p3) | Priority.medium);
+    solver.addConstraint(p2.equals(cm(2.0) * p1));
+    solver.addConstraint(container.equals(p1 + p2 + p3));
 
     solver.flushUpdates();
 
@@ -541,7 +541,7 @@ void main() {
 
     expect(s.addEditVariable(mid.variable, Priority.strong), Result.success);
 
-    expect(s.addConstraint((mid * cm(2.0) == left + right) as Constraint),
+    expect(s.addConstraint((mid * cm(2.0)).equals(left + right)),
         Result.success);
     expect(s.addConstraint(left >= cm(0.0)), Result.success);
 
@@ -565,7 +565,7 @@ void main() {
 
     expect(s.addEditVariable(mid.variable, Priority.strong), Result.success);
 
-    expect(s.addConstraint((mid * cm(2.0) == left + right) as Constraint),
+    expect(s.addConstraint((mid * cm(2.0)).equals(left + right)),
         Result.success);
     expect(s.addConstraint(left >= cm(10.0)), Result.success);
 
@@ -590,7 +590,7 @@ void main() {
     Param left = new Param();
     Param right = new Param();
 
-    expect((left == right).runtimeType, Constraint);
+    expect(left.equals(right).runtimeType, Constraint);
   });
 
   test('bulk_add_edit_variables', () {

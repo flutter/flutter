@@ -57,8 +57,8 @@ class Expression extends _EquationMember {
   Constraint operator <=(_EquationMember value) =>
       _createConstraint(value, Relation.lessThanOrEqualTo);
 
-  operator ==(_EquationMember value) =>
-    _createConstraint(value, Relation.equalTo); // analyzer says "Type check failed" // analyzer says "The return type 'Constraint' is not a 'bool', as defined by the method '=='"
+  Constraint equals(_EquationMember value) =>
+    _createConstraint(value, Relation.equalTo);
 
   Expression operator +(_EquationMember m) {
     if (m is ConstantMember) {
