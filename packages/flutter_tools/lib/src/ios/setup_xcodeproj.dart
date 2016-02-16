@@ -124,7 +124,7 @@ void _setupXcodeProjXcconfig(String filePath) {
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-Future<int> initializeXcodeProjectHarness() async {
+Future<int> setupXcodeProjectHarness() async {
   // Step 1: Fetch the archive from the cloud
   String iosFilesPath = path.join(Directory.current.path, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
