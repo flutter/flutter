@@ -11,11 +11,6 @@ Things you will need
  * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
- * The Dart SDK (see [Issue #54](https://github.com/flutter/flutter/issues/54)
-   about downloading the Dart SDK automatically). _If you're also
-   working on the Flutter engine, you can use the copy of the Dart SDK
-   in `.../engine/src/third_party/dart-sdk/dart-sdk`._
-   - [https://www.dartlang.org/downloads/archive/](https://www.dartlang.org/downloads/archive/)
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
    about downloading the Android platform tools automatically).
    _If you're also working on the Flutter engine, you can use the
@@ -28,9 +23,9 @@ Getting the code and configuring your environment
 -------------------------------------------------
 
  * Ensure all the dependencies described in the previous section, in particular
-   git, ssh, and python are installed. Ensure that `dart`, `pub`, and `adb`
-   (from the Dart SDK and the Android platform tools) are in your path (e.g.,
-   that `which dart` and `which adb` print sensible output).
+   git, ssh, and python are installed. Ensure that `adb`
+   (from the Android platform tools) is in your path (e.g.,
+   that `which adb` prints sensible output).
  * Fork `https://github.com/flutter/flutter` into your own GitHub account. If
    you already have a fork, and are now installing a development environment on
    a new machine, make sure you've updated your fork so that you don't use stale
@@ -46,9 +41,7 @@ Getting the code and configuring your environment
    Flutter depends on. You can replicate what this script does by running
    `pub get` in each directory that contains a `pubspec.yaml` file.
  * Add this repository's `bin` directory to your path. That will let you use the
-   `flutter` command in this directory more easily. (If you have previously
-   activated the `flutter` package using `pub`, you should deactivate it and use
-   the script in `bin` instead: `pub global deactivate flutter`.)
+   `flutter` command in this directory more easily.
 
 Running the examples
 --------------------
