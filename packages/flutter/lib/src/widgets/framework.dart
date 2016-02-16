@@ -274,7 +274,7 @@ abstract class StatefulComponent extends Widget {
   /// override this to return a new instance of the State class associated with
   /// this StatefulComponent class, like this:
   ///
-  ///   MyState createState() => new MyState(this);
+  ///   _MyState createState() => new _MyState();
   State createState();
 }
 
