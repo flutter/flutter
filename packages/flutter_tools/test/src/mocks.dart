@@ -14,8 +14,8 @@ import 'package:mockito/mockito.dart';
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: new AndroidApk(localPath: '/mock/path/to/android/SkyShell.apk'),
-    iOS: new IOSApp(localPath: '/mock/path/to/iOS/SkyShell.app'),
-    iOSSimulator: new IOSApp(localPath: '/mock/path/to/iOSSimulator/SkyShell.app'));
+    iOS: new IOSApp(iosProjectDir: '/mock/path/to/iOS/SkyShell.app'),
+    iOSSimulator: new IOSApp(iosProjectDir: '/mock/path/to/iOSSimulator/SkyShell.app'));
 }
 
 class MockCompiler extends Mock implements Compiler {

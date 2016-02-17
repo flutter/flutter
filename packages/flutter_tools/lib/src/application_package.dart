@@ -10,6 +10,7 @@ import 'package:xml/xml.dart' as xml;
 
 import 'artifacts.dart';
 import 'build_configuration.dart';
+import 'ios/plist_utils.dart';
 
 abstract class ApplicationPackage {
   /// Path to the actual apk or bundle.
@@ -81,13 +82,25 @@ class AndroidApk extends ApplicationPackage {
 }
 
 class IOSApp extends ApplicationPackage {
-  static const String _defaultId = 'io.flutter.runner.Runner';
-  static const String _defaultPath = 'ios/.generated';
-
   IOSApp({
-    String localPath: _defaultPath,
-    String id: _defaultId
-  }) : super(localPath: localPath, id: id);
+    String iosProjectDir,
+    String iosProjectBundleId
+  }) : super(localPath: iosProjectDir, id: iosProjectBundleId);
+
+  factory IOSApp.fromBuildConfiguration(BuildConfiguration config) {
+    if (getCurrentHostPlatform() != HostPlatform.mac) {
+      return null;
+    }
+
+    String plistPath = path.join("ios", "Info.plist");
+    String id = plistValueForKey(plistPath, kCFBundleIdentifierKey);
+    if (id == "") {
+      return null;
+    }
+
+    String projectDir = path.join("ios", ".generated");
+    return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: id);
+  }
 }
 
 class ApplicationPackageStore {
@@ -138,12 +151,12 @@ class ApplicationPackageStore {
 
         case TargetPlatform.iOS:
           assert(iOS == null);
-          iOS = new IOSApp();
+          iOS = new IOSApp.fromBuildConfiguration(config);
           break;
 
         case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
-          iOSSimulator = new IOSApp();
+          iOSSimulator = new IOSApp.fromBuildConfiguration(config);
           break;
 
         case TargetPlatform.mac:
