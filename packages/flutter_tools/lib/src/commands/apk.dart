@@ -177,7 +177,7 @@ class ApkCommand extends FlutterCommand {
   Future<int> runInProject() async {
     // Validate that we can find an android sdk.
     if (androidSdk == null) {
-      printError('No Android SDK found.');
+      printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
       return 1;
     }
 
@@ -371,7 +371,7 @@ Future<int> buildAndroid({
 }) async {
   // Validate that we can find an android sdk.
   if (androidSdk == null) {
-    printError('No Android SDK found.');
+    printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
     return 1;
   }
 
