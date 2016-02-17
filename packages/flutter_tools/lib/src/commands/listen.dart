@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../base/globals.dart';
 import '../base/process.dart';
+import '../globals.dart';
 import 'run.dart';
 
 class ListenCommand extends RunCommandBase {

@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
-import '../base/globals.dart';
 import '../device.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
   final String name = 'logs';
-  final String description = 'Show logs for running Flutter apps.';
+  final String description = 'Show log output for running Flutter apps.';
 
   LogsCommand() {
     argParser.addFlag('clear',

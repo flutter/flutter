@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../android/android_sdk.dart';
-import '../device.dart';
-import '../doctor.dart';
-import '../ios/mac.dart';
-import 'context.dart';
-import 'logger.dart';
+import 'android/android_sdk.dart';
+import 'base/context.dart';
+import 'base/logger.dart';
+import 'device.dart';
+import 'doctor.dart';
+import 'ios/mac.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 Logger get logger => context[Logger];

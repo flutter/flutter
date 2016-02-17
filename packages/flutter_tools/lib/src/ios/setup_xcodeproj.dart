@@ -8,8 +8,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/globals.dart';
 import '../base/process.dart';
+import '../globals.dart';
 import '../runner/flutter_command_runner.dart';
 
 /// A map from file path to file contents.

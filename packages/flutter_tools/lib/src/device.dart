@@ -7,8 +7,8 @@ import 'dart:async';
 import 'android/device_android.dart';
 import 'application_package.dart';
 import 'base/common.dart';
-import 'base/globals.dart';
 import 'build_configuration.dart';
+import 'globals.dart';
 import 'ios/device_ios.dart';
 import 'toolchain.dart';
 

@@ -12,9 +12,9 @@ import 'package:path/path.dart' as path;
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/context.dart';
-import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
+import '../globals.dart';
 import 'version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
@@ -45,6 +45,7 @@ class FlutterCommandRunner extends CommandRunner {
     else
       packagesHelp = '\n(required, since the current directory does not contain a "packages" subdirectory)';
     argParser.addOption('package-root',
+        hide: !verboseHelp,
         help: 'Path to your packages directory.$packagesHelp');
     argParser.addOption('flutter-root',
         help: 'The root directory of the Flutter repository. Uses \$$kFlutterRootEnvironmentVariableName if set,\n'
@@ -122,7 +123,10 @@ class FlutterCommandRunner extends CommandRunner {
         defaultsTo: 'out/ios_sim_Release/');
   }
 
-  final String usageFooter = 'Run "flutter -h -v" for verbose help output, including less commonly used options.';
+  String get usageFooter =>
+    'Run "flutter -h -v" for verbose help output, including less commonly used options.\n'
+    '\n'
+    '${doctor.summaryText}';
 
   List<BuildConfiguration> get buildConfigurations {
     if (_buildConfigurations == null)
@@ -191,6 +195,8 @@ class FlutterCommandRunner extends CommandRunner {
 
     if (globalResults['version']) {
       printStatus(getVersion(ArtifactStore.flutterRoot));
+      printStatus('');
+      doctor.summary();
       return new Future<int>.value(0);
     }
 

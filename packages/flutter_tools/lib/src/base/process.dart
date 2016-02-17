@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'globals.dart';
+import '../globals.dart';
 
 typedef String StringConverter(String string);
 

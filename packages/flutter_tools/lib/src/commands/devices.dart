@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import '../base/globals.dart';
 import '../device.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {

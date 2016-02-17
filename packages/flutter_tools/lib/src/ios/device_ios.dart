@@ -3,21 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
+import '../globals.dart';
+import '../ios/setup_xcodeproj.dart';
 import '../services.dart';
 import '../toolchain.dart';
-import '../ios/setup_xcodeproj.dart';
 import 'simulator.dart';
 
 const String _ideviceinstallerInstructions =

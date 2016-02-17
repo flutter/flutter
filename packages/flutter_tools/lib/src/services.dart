@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'artifacts.dart';
-import 'base/globals.dart';
+import 'globals.dart';
 
 const String _kFlutterManifestPath = 'flutter.yaml';
 const String _kFlutterServicesManifestPath = 'flutter_services.yaml';

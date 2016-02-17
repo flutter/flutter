@@ -8,10 +8,10 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../flx.dart' as flx;
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'run.dart';
 

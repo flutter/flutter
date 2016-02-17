@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'base/globals.dart';
+import 'globals.dart';
 
 enum BuildType {
   prebuilt,

@@ -4,14 +4,14 @@
 
 import 'dart:async';
 
-import '../base/globals.dart';
 import '../flx.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 
 class BuildCommand extends FlutterCommand {
   final String name = 'build';
-  final String description = 'Packages your Flutter app into an FLX.';
+  final String description = 'Package your Flutter app into an FLX.';
 
   BuildCommand() {
     argParser.addFlag('precompiled', negatable: false);

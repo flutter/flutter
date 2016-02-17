@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import '../artifacts.dart';
-import '../base/globals.dart';
 import '../base/process.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../runner/version.dart';
 

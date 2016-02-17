@@ -7,8 +7,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../base/globals.dart';
 import '../base/process.dart';
+import '../globals.dart';
 
 Future<int> pubGet({
   String directory,

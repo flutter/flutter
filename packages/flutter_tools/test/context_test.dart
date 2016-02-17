@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/context.dart' hide context;
-import 'package:flutter_tools/src/base/globals.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();
