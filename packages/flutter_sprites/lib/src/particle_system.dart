@@ -252,7 +252,7 @@ class ParticleSystem extends Node {
         particle.dir += accel;
       } else if (gravity[0] != 0.0 || gravity[1] != 0) {
         // gravity
-        Vector2 accel = gravity.scale(dt);
+        Vector2 accel = new Vector2.copy(gravity).scale(dt);
         particle.dir += accel;
       }
 

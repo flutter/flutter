@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sprites/flutter_sprites.dart';
+import 'package:vector_math/vector_math_64.dart' as vec;
 
 ImageMap _images;
 SpriteSheet _sprites;
@@ -173,6 +174,25 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
   void endWorkout() {
     setState(() {
       workoutAnimation.stop();
+
+      if (count >= 3) {
+        showDialog(
+          context: context,
+          child: new Stack(children: <Widget>[
+            new _Fireworks(),
+            new Dialog(
+              title: new Text("Awesome workout"),
+              content: new Text("You have completed $count jumping jacks. Good going!"),
+              actions: <Widget>[
+                new FlatButton(
+                  child: new Text("SWEET"),
+                  onPressed: () { Navigator.pop(context); }
+                )
+              ]
+            )
+          ])
+        );
+      }
     });
   }
 }
@@ -487,5 +507,72 @@ class _JumpingJackPart extends Sprite {
         )
       );
     }
+  }
+}
+
+class _Fireworks extends StatefulComponent {
+  _Fireworks({ Key key }) : super(key: key);
+
+  _FireworksState createState() => new _FireworksState();
+}
+
+class _FireworksState extends State<_Fireworks> {
+  void initState() {
+    super.initState();
+    fireworks = new _FireworksNode();
+  }
+
+  _FireworksNode fireworks;
+
+  Widget build(BuildContext context) {
+    return new SpriteWidget(fireworks);
+  }
+}
+
+class _FireworksNode extends NodeWithSize {
+  _FireworksNode() : super(const Size(1024.0, 1024.0));
+  double _countDown = 0.0;
+
+  void update(double dt) {
+    if (_countDown <= 0.0) {
+      _addExplosion();
+      _countDown = randomDouble();
+    }
+
+    _countDown -= dt;
+  }
+
+  Color _randomExplosionColor() {
+    double rand = randomDouble();
+    if (rand < 0.25)
+      return Colors.pink[200];
+    else if (rand < 0.5)
+      return Colors.lightBlue[200];
+    else if (rand < 0.75)
+      return Colors.purple[200];
+    else
+      return Colors.cyan[200];
+  }
+
+  void _addExplosion() {
+    Color startColor = _randomExplosionColor();
+    Color endColor = startColor.withAlpha(0);
+
+    ParticleSystem system = new ParticleSystem(
+      _sprites['particle-0.png'],
+      numParticlesToEmit: 100,
+      emissionRate: 1000.0,
+      rotateToMovement: true,
+      startRotation: 90.0,
+      endRotation: 90.0,
+      speed: 100.0,
+      speedVar: 50.0,
+      startSize: 1.0,
+      startSizeVar: 0.5,
+      gravity: new vec.Vector2(0.0, 30.0),
+      colorSequence: new ColorSequence.fromStartAndEndColor(startColor, endColor)
+    );
+    system.position = new Point(randomDouble() * 1024.0, randomDouble() * 1024.0);
+    addChild(system);
   }
 }
