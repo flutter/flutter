@@ -4,8 +4,6 @@
 
 source_set("common") {
   sources = [
-    "gpu/ganesh_canvas.cc",
-    "gpu/ganesh_canvas.h",
     "gpu/picture_serializer.cc",
     "gpu/picture_serializer.h",
     "rasterizer.cc",
@@ -68,6 +66,8 @@ source_set("gpu_direct") {
     "gpu/direct/surface_notifications_direct.h",
     "gpu/direct/rasterizer_direct.cc",
     "gpu/direct/rasterizer_direct.h",
+    "gpu/direct/ganesh_canvas.cc",
+    "gpu/direct/ganesh_canvas.h",
   ]
 
   deps = [
