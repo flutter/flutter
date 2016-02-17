@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_GPU_GANESH_CANVAS_H_
-#define SKY_SHELL_GPU_GANESH_CANVAS_H_
+#ifndef SKY_SHELL_GPU_DIRECT_GANESH_CANVAS_H_
+#define SKY_SHELL_GPU_DIRECT_GANESH_CANVAS_H_
 
 #include "base/basictypes.h"
 #include "skia/ext/refptr.h"
@@ -38,4 +38,4 @@ class GaneshCanvas {
 }  // namespace shell
 }  // namespace sky
 
-#endif  // SKY_SHELL_GPU_GANESH_CANVAS_H_
+#endif  // SKY_SHELL_GPU_DIRECT_GANESH_CANVAS_H_

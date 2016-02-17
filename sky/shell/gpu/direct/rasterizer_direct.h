@@ -8,7 +8,7 @@
 #include "base/memory/weak_ptr.h"
 #include "flow/paint_context.h"
 #include "skia/ext/refptr.h"
-#include "sky/shell/gpu/ganesh_canvas.h"
+#include "sky/shell/gpu/direct/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
 #include "ui/gfx/native_widget_types.h"
 
