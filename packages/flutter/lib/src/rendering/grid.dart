@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'box.dart';
@@ -25,8 +26,8 @@ bool _debugIsMonotonic(List<double> offsets) {
 }
 
 List<double> _generateRegularOffsets(int count, double size) {
-  int length = count + 1;
-  List<double> result = new Float64List(length);
+  final int length = count + 1;
+  final List<double> result = new Float64List(length);
   for (int i = 0; i < length; ++i)
     result[i] = i * size;
   return result;
@@ -37,11 +38,15 @@ class GridSpecification {
   GridSpecification.fromOffsets({
     this.columnOffsets,
     this.rowOffsets,
+    this.columnSpacing: 0.0,
+    this.rowSpacing: 0.0,
     this.padding: EdgeDims.zero
   }) {
     assert(_debugIsMonotonic(columnOffsets));
     assert(_debugIsMonotonic(rowOffsets));
-    assert(padding != null);
+    assert(columnSpacing != null && columnSpacing >= 0.0);
+    assert(rowSpacing != null && rowSpacing >= 0.0);
+    assert(padding != null && padding.isNonNegative);
   }
 
   /// Creates a grid specification containing a certain number of equally sized tiles.
@@ -50,42 +55,50 @@ class GridSpecification {
     double tileHeight,
     int columnCount,
     int rowCount,
+    this.rowSpacing: 0.0,
+    this.columnSpacing: 0.0,
     this.padding: EdgeDims.zero
   }) : columnOffsets = _generateRegularOffsets(columnCount, tileWidth),
        rowOffsets = _generateRegularOffsets(rowCount, tileHeight) {
     assert(_debugIsMonotonic(columnOffsets));
     assert(_debugIsMonotonic(rowOffsets));
-    assert(padding != null);
+    assert(padding != null && padding.isNonNegative);
   }
 
   /// The offsets of the column boundaries in the grid.
   ///
   /// The first offset is the offset of the left edge of the left-most column
-  /// from the left edge of the interior of the grid's padding (usually 0.0).
-  /// The last offset is the offset of the right edge of the right-most column
-  /// from the left edge of the interior of the grid's padding.
+  /// from the left edge of the interior of the grid's padding (0.0 if the padding
+  /// is EdgeOffsets.zero). The last offset is the offset of the right edge of
+  /// the right-most column from the left edge of the interior of the grid's padding.
   ///
   /// If there are n columns in the grid, there should be n + 1 entries in this
-  /// list (because there's an entry before the first column and after the last
-  /// column).
+  /// list. The right edge of the last column is defined as columnOffsets(n), i.e.
+  /// the left edge of an extra column.
   final List<double> columnOffsets;
 
   /// The offsets of the row boundaries in the grid.
   ///
   /// The first offset is the offset of the top edge of the top-most row from
-  /// the top edge of the interior of the grid's padding (usually 0.0). The
-  /// last offset is the offset of the bottom edge of the bottom-most column
-  /// from the top edge of the interior of the grid's padding.
+  /// the top edge of the interior of the grid's padding (usually if the padding
+  /// is EdgeOffsets.zero). The last offset is the offset of the bottom edge of
+  /// the bottom-most column from the top edge of the interior of the grid's padding.
   ///
   /// If there are n rows in the grid, there should be n + 1 entries in this
-  /// list (because there's an entry before the first row and after the last
-  /// row).
+  /// list. The bottom edge of the last row is defined as rowOffsets(n), i.e.
+  /// the top edge of an extra row.
   final List<double> rowOffsets;
+
+  /// The vertical distance between rows.
+  final double rowSpacing;
+
+  /// The horizontal distance between columns.
+  final double columnSpacing;
 
   /// The interior padding of the grid.
   ///
-  /// The grid's size encloses the rows and columns and is then inflated by the
-  /// padding.
+  /// The grid's size encloses the spaced rows and columns and is then inflated
+  /// by the padding.
   final EdgeDims padding;
 
   /// The size of the grid.
@@ -104,14 +117,12 @@ class GridChildPlacement {
     this.column,
     this.row,
     this.columnSpan: 1,
-    this.rowSpan: 1,
-    this.padding: EdgeDims.zero
+    this.rowSpan: 1
   }) {
-    assert(column != null);
-    assert(row != null);
-    assert(columnSpan != null);
-    assert(rowSpan != null);
-    assert(padding != null);
+    assert(column != null && column >= 0);
+    assert(row != null && row >= 0);
+    assert(columnSpan != null && columnSpan > 0);
+    assert(rowSpan != null && rowSpan > 0);
   }
 
   /// The column in which to place the child.
@@ -125,9 +136,6 @@ class GridChildPlacement {
 
   /// How many rows the child should span.
   final int rowSpan;
-
-  /// How much the child should be inset from the column and row boundaries.
-  final EdgeDims padding;
 }
 
 /// An abstract interface to control the layout of a [RenderGrid].
@@ -172,32 +180,53 @@ abstract class GridDelegate {
 
 /// A [GridDelegate] the places its children in order throughout the grid.
 abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
-  GridDelegateWithInOrderChildPlacement({ this.padding: EdgeDims.zero });
+  GridDelegateWithInOrderChildPlacement({
+    this.columnSpacing: 0.0,
+    this.rowSpacing: 0.0,
+    this.padding: EdgeDims.zero
+  }) {
+    assert(columnSpacing != null && columnSpacing >= 0.0);
+    assert(rowSpacing != null && rowSpacing >= 0.0);
+    assert(padding != null && padding.isNonNegative);
+  }
 
-  /// The amount of padding to apply to each child.
+  /// The horizontal distance between columns.
+  final double columnSpacing;
+
+  /// The vertical distance between rows.
+  final double rowSpacing;
+
+  // Insets for the entire grid.
   final EdgeDims padding;
 
   GridChildPlacement getChildPlacement(GridSpecification specification, int index, Object placementData) {
-    int columnCount = specification.columnOffsets.length - 1;
+    final int columnCount = specification.columnOffsets.length - 1;
     return new GridChildPlacement(
       column: index % columnCount,
-      row: index ~/ columnCount,
-      padding: padding
+      row: index ~/ columnCount
     );
   }
 
   bool shouldRelayout(GridDelegateWithInOrderChildPlacement oldDelegate) {
-    return padding != oldDelegate.padding;
+    return columnSpacing != oldDelegate.columnSpacing
+      || rowSpacing != oldDelegate.rowSpacing
+      || padding != oldDelegate.padding;
   }
 }
+
 
 /// A [GridDelegate] that divides the grid's width evenly amount a fixed number of columns.
 class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement {
   FixedColumnCountGridDelegate({
     this.columnCount,
-    this.tileAspectRatio: 1.0,
-    EdgeDims padding: EdgeDims.zero
-  }) : super(padding: padding);
+    double columnSpacing: 0.0,
+    double rowSpacing: 0.0,
+    EdgeDims padding: EdgeDims.zero,
+    this.tileAspectRatio: 1.0
+  }) : super(columnSpacing: columnSpacing, rowSpacing: rowSpacing, padding: padding) {
+    assert(columnCount != null && columnCount >= 0);
+    assert(tileAspectRatio != null && tileAspectRatio > 0.0);
+  }
 
   /// The number of columns in the grid.
   final int columnCount;
@@ -208,14 +237,16 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
     assert(constraints.maxWidth < double.INFINITY);
     int rowCount = (childCount / columnCount).ceil();
-    double tileWidth = constraints.maxWidth / columnCount;
+    double tileWidth = math.max(0.0, constraints.maxWidth - padding.horizontal + columnSpacing) / columnCount;
     double tileHeight = tileWidth / tileAspectRatio;
     return new GridSpecification.fromRegularTiles(
       tileWidth: tileWidth,
       tileHeight: tileHeight,
       columnCount: columnCount,
       rowCount: rowCount,
-      padding: padding.flipped
+      columnSpacing: columnSpacing,
+      rowSpacing: rowSpacing,
+      padding: padding
     );
   }
 
@@ -246,8 +277,13 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
   MaxTileWidthGridDelegate({
     this.maxTileWidth,
     this.tileAspectRatio: 1.0,
+    double columnSpacing: 0.0,
+    double rowSpacing: 0.0,
     EdgeDims padding: EdgeDims.zero
-  }) : super(padding: padding);
+  }) : super(columnSpacing: columnSpacing, rowSpacing: rowSpacing, padding: padding) {
+    assert(maxTileWidth != null && maxTileWidth >= 0.0);
+    assert(tileAspectRatio != null && tileAspectRatio > 0.0);
+  }
 
   /// The maximum width of a tile in the grid.
   final double maxTileWidth;
@@ -257,7 +293,7 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
 
   GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
     assert(constraints.maxWidth < double.INFINITY);
-    double gridWidth = constraints.maxWidth;
+    final double gridWidth = math.max(0.0, constraints.maxWidth - padding.horizontal);
     int columnCount = (gridWidth / maxTileWidth).ceil();
     int rowCount = (childCount / columnCount).ceil();
     double tileWidth = gridWidth / columnCount;
@@ -267,7 +303,9 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
       tileHeight: tileHeight,
       columnCount: columnCount,
       rowCount: rowCount,
-      padding: padding.flipped
+      columnSpacing: columnSpacing,
+      rowSpacing: rowSpacing,
+      padding: padding
     );
   }
 
@@ -411,14 +449,14 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
 
   void performLayout() {
     _updateGridSpecification();
-    Size gridSize = _specification.gridSize;
+    final Size gridSize = _specification.gridSize;
     size = constraints.constrain(gridSize);
 
     if (callback != null)
       invokeLayoutCallback(callback);
 
-    double gridTopPadding = _specification.padding.top;
-    double gridLeftPadding = _specification.padding.left;
+    final double gridTopPadding = _specification.padding.top;
+    final double gridLeftPadding = _specification.padding.left;
     int childIndex = virtualChildBase;
     RenderBox child = firstChild;
     while (child != null) {
@@ -435,8 +473,8 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
       double tileTop = _specification.rowOffsets[placement.row] + gridTopPadding;
       double tileBottom = _specification.rowOffsets[placement.row + placement.rowSpan] + gridTopPadding;
 
-      double childWidth = tileRight - tileLeft - placement.padding.horizontal;
-      double childHeight = tileBottom - tileTop - placement.padding.vertical;
+      double childWidth = math.max(0.0, tileRight - tileLeft - _specification.columnSpacing);
+      double childHeight = math.max(0.0, tileBottom - tileTop - _specification.rowSpacing);
 
       child.layout(new BoxConstraints(
         minWidth: childWidth,
@@ -445,11 +483,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
         maxHeight: childHeight
       ));
 
-      childParentData.offset = new Offset(
-        tileLeft + placement.padding.left,
-        tileTop + placement.padding.top
-      );
-
+      childParentData.offset = new Offset(tileLeft, tileTop);
       childIndex += 1;
 
       assert(child.parentData == childParentData);

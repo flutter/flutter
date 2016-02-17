@@ -22,6 +22,7 @@ export 'package:flutter/rendering.dart' show
     FlexJustifyContent,
     FractionalOffsetTween,
     GridDelegate,
+    GridSpecification,
     HitTestBehavior,
     MaxTileWidthGridDelegate,
     MultiChildLayoutDelegate,
@@ -1192,6 +1193,8 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
     Key key,
     List<Widget> children: _emptyWidgetList,
     this.columnCount,
+    this.columnSpacing,
+    this.rowSpacing,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeDims.zero
   }) : super(key: key, children: children) {
@@ -1200,6 +1203,12 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
 
   /// The number of columns in the grid.
   final int columnCount;
+
+  /// The horizontal distance between columns.
+  final double columnSpacing;
+
+  /// The vertical distance between rows.
+  final double rowSpacing;
 
   /// The ratio of the width to the height of each tile in the grid.
   final double tileAspectRatio;
@@ -1210,6 +1219,8 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
   FixedColumnCountGridDelegate createDelegate() {
     return new FixedColumnCountGridDelegate(
       columnCount: columnCount,
+      columnSpacing: columnSpacing,
+      rowSpacing: rowSpacing,
       tileAspectRatio: tileAspectRatio,
       padding: padding
     );
@@ -1224,6 +1235,8 @@ class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
     Key key,
     List<Widget> children: _emptyWidgetList,
     this.maxTileWidth,
+    this.columnSpacing,
+    this.rowSpacing,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeDims.zero
   }) : super(key: key, children: children) {
@@ -1236,6 +1249,12 @@ class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
   /// The ratio of the width to the height of each tile in the grid.
   final double tileAspectRatio;
 
+  /// The horizontal distance between columns.
+  final double columnSpacing;
+
+  /// The vertical distance between rows.
+  final double rowSpacing;
+
   /// The amount of padding to apply to each child.
   final EdgeDims padding;
 
@@ -1243,6 +1262,8 @@ class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
     return new MaxTileWidthGridDelegate(
       maxTileWidth: maxTileWidth,
       tileAspectRatio: tileAspectRatio,
+      columnSpacing: columnSpacing,
+      rowSpacing: rowSpacing,
       padding: padding
     );
   }
