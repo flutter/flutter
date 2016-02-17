@@ -28,15 +28,15 @@ const String protocolVersion = '0.1.0';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hideCommand: false });
+  DaemonCommand({ bool hideCommand: false }) : _hideCommand = hideCommand;
 
   final String name = 'daemon';
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
-  final bool hideCommand;
+  final bool _hideCommand;
 
   bool get requiresProjectRoot => false;
 
-  bool get hidden => hideCommand;
+  bool get hidden => _hideCommand;
 
   Future<int> runInProject() {
     printStatus('Starting device daemon...');
