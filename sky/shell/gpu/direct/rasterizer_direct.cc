@@ -49,8 +49,9 @@ void RasterizerDirect::ConnectToRasterizer(
 }
 
 void RasterizerDirect::OnAcceleratedWidgetAvailable(gfx::AcceleratedWidget widget) {
-  surface_ =
-      gfx::GLSurface::CreateViewGLSurface(widget, gfx::SurfaceConfiguration());
+  gfx::SurfaceConfiguration config;
+  config.stencil_bits = 8;
+  surface_ = gfx::GLSurface::CreateViewGLSurface(widget, config);
   CHECK(surface_) << "GLSurface required.";
   // Eagerly create the GL context. For a while after the accelerated widget
   // is first available (after startup), the process is busy setting up dart
