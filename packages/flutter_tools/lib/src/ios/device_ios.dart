@@ -409,12 +409,10 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     if (!device.isConnected())
       return 2;
 
-    // TODO(devoncarew): This regex should use the CFBundleIdentifier value from
-    // the user's plist (instead of `flutter.runner.Runner`).
     return await runCommandAndStreamOutput(
       <String>[device.loggerPath],
       prefix: '[$name] ',
-      filter: new RegExp(r'(FlutterRunner|flutter.runner.Runner)')
+      filter: new RegExp(r'Runner')
     );
   }
 
@@ -477,7 +475,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
           _lastWasFiltered = false;
 
-          if (category == 'FlutterRunner' || category == 'Runner')
+          if (category == 'Runner')
             return content;
           return '$category: $content';
         }
