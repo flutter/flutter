@@ -50,6 +50,10 @@ class GridSpecification {
   }
 
   /// Creates a grid specification containing a certain number of equally sized tiles.
+  /// The tileWidth is the sum of the width of the child it will contain and
+  /// columnSpacing (even if columnCount is 1). Similarly tileHeight is child's height
+  /// plus rowSpacing. If the tiles are to completely fill the grid, then their size
+  /// should be based on the grid's padded interior.
   GridSpecification.fromRegularTiles({
     double tileWidth,
     double tileHeight,
@@ -62,6 +66,8 @@ class GridSpecification {
        rowOffsets = _generateRegularOffsets(rowCount, tileHeight) {
     assert(_debugIsMonotonic(columnOffsets));
     assert(_debugIsMonotonic(rowOffsets));
+    assert(columnSpacing != null && columnSpacing >= 0.0);
+    assert(rowSpacing != null && rowSpacing >= 0.0);
     assert(padding != null && padding.isNonNegative);
   }
 
@@ -209,8 +215,8 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
 
   bool shouldRelayout(GridDelegateWithInOrderChildPlacement oldDelegate) {
     return columnSpacing != oldDelegate.columnSpacing
-      || rowSpacing != oldDelegate.rowSpacing
-      || padding != oldDelegate.padding;
+        || rowSpacing != oldDelegate.rowSpacing
+        || padding != oldDelegate.padding;
   }
 }
 
@@ -468,10 +474,10 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
       assert(placement.column + placement.columnSpan < _specification.columnOffsets.length);
       assert(placement.row + placement.rowSpan < _specification.rowOffsets.length);
 
-      double tileLeft = _specification.columnOffsets[placement.column] + gridLeftPadding;
-      double tileRight = _specification.columnOffsets[placement.column + placement.columnSpan] + gridLeftPadding;
-      double tileTop = _specification.rowOffsets[placement.row] + gridTopPadding;
-      double tileBottom = _specification.rowOffsets[placement.row + placement.rowSpan] + gridTopPadding;
+      double tileLeft = gridLeftPadding + _specification.columnOffsets[placement.column];
+      double tileRight = gridLeftPadding + _specification.columnOffsets[placement.column + placement.columnSpan];
+      double tileTop = gridTopPadding + _specification.rowOffsets[placement.row];
+      double tileBottom =  gridTopPadding + _specification.rowOffsets[placement.row + placement.rowSpan];
 
       double childWidth = math.max(0.0, tileRight - tileLeft - _specification.columnSpacing);
       double childHeight = math.max(0.0, tileBottom - tileTop - _specification.rowSpacing);
