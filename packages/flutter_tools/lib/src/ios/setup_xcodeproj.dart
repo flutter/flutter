@@ -91,6 +91,18 @@ Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) asyn
   return true;
 }
 
+void _writeUserEditableFilesIfNecessary(String directory) {
+  iosTemplateFiles.forEach((String filePath, String contents) {
+    File file = new File(filePath);
+
+    if (!file.existsSync()) {
+      file.parent.createSync(recursive: true);
+      file.writeAsStringSync(contents);
+      printStatus('Created $filePath.');
+    }
+  });
+}
+
 void _setupXcodeProjXcconfig(String filePath) {
   StringBuffer localsBuffer = new StringBuffer();
 
@@ -148,15 +160,19 @@ Future<int> setupXcodeProjectHarness() async {
     return 1;
   }
 
-  // Step 3: Populate the Local.xcconfig with project specific paths
+  // Step 3: Setup default user editable files if this is the first run of
+  //         the init command.
+  _writeUserEditableFilesIfNecessary(iosFilesPath);
+
+  // Step 4: Populate the Local.xcconfig with project specific paths
   _setupXcodeProjXcconfig(path.join(xcodeprojPath, 'Local.xcconfig'));
 
-  // Step 4: Write the REVISION file
+  // Step 5: Write the REVISION file
   File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));
   revisionFile.createSync();
   revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
 
-  // Step 5: Tell the user the location of the generated project.
+  // Step 6: Tell the user the location of the generated project.
   printStatus('Xcode project created at $xcodeprojPath/.');
   printStatus('User editable settings are in $iosFilesPath/.');
 
@@ -173,11 +189,11 @@ final String _infoPlistInitialContents = '''
 	<key>CFBundleExecutable</key>
 	<string>Runner</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.example.{{projectName}}</string>
+	<string>io.flutter.runner.Runner</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>{{projectName}}</string>
+	<string>Flutter</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
