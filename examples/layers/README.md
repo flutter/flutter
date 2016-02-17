@@ -18,5 +18,5 @@ Flutter's layered architecture.
 To run each example, use the `-t` argument to the `flutter` tool:
 
 ```
-flutter start -t widgets/spinning_square.dart
+flutter run -t widgets/spinning_square.dart
 ```

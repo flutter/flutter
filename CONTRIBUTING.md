@@ -48,17 +48,17 @@ Running the examples
 
 To run an example with a prebuilt binary from the cloud, switch to that
 example's directory, run `pub get` to make sure its dependencies have been
-downloaded, and use `flutter start`. Make sure you have a device connected over
+downloaded, and use `flutter run`. Make sure you have a device connected over
 USB and debugging enabled on that device.
 
- * `cd examples/hello_world; flutter start`
+ * `cd examples/hello_world; flutter run`
 
 You can also specify a particular Dart file to run if you want to run an example
 that doesn't have a `lib/main.dart` file using the `-t` command-line option. For
 example, to run the `tabs.dart` example in the [examples/widgets](examples/widgets)
 directory on a connected Android device, from that directory you would run:
 
- * `flutter start -t tabs.dart`
+ * `flutter run -t tabs.dart`
 
 When running code from the examples directory, any changes you make to the
 example code, as well as any changes to Dart code in the
@@ -169,7 +169,7 @@ engine using the `flutter test --debug` command. To run one of the
 examples on your device using your locally built engine, use the
 `--debug` option to the `flutter` tool:
 
- * `flutter start --debug`
+ * `flutter run --debug`
 
 If you want to test the release version instead of the debug version,
 use `--release` instead of `--debug`.
