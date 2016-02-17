@@ -20,10 +20,9 @@ if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` 
 
   echo Building flutter tool...
   FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
-  PUB="$DART_SDK_PATH/bin/pub"
 
-  (cd "$FLUTTER_TOOLS_DIR"; "$PUB" get > /dev/null)
-  (cd "$FLUTTER_DIR"; "$PUB" get > /dev/null)  # Allows us to check if sky_engine's REVISION is correct
+  (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get > /dev/null)
+  (cd "$FLUTTER_DIR"; "../../bin/cache/dart-sdk/bin/pub" get > /dev/null)  # Allows us to check if sky_engine's REVISION is correct
   "$DART" --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
   echo $REVISION > "$STAMP_PATH"
 fi
