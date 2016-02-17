@@ -52,12 +52,8 @@ SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   desc.fWidth = size.width();
   desc.fHeight = size.height();
   desc.fConfig = kSkia8888_GrPixelConfig;
-#if defined(FNL_MUSL)
-  // TODO(kulakowski) This should be handled by MGL
-  desc.fOrigin = kTopLeft_GrSurfaceOrigin;
-#else
+  desc.fStencilBits = 8;
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
-#endif
   desc.fRenderTargetHandle = fbo;
 
   skia::RefPtr<GrRenderTarget> target = skia::AdoptRef(
