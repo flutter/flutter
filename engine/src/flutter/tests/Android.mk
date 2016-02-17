@@ -79,7 +79,8 @@ LOCAL_SRC_FILES += \
     MinikinFontForTest.cpp \
     GraphemeBreakTests.cpp \
     LayoutUtilsTest.cpp \
-    UnicodeUtils.cpp
+    UnicodeUtils.cpp \
+    WordBreakerTests.cpp
 
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../libs/minikin/ \
