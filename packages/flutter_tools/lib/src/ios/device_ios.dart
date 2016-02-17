@@ -560,8 +560,8 @@ String _getIOSEngineRevision(ApplicationPackage app) {
 }
 
 Future<bool> _buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice }) async {
-  if (!FileSystemEntity.isDirectorySync(app.localPath)) {
-    printTrace('Path "${path.absolute(app.localPath)}" does not exist. Initializing the Xcode project.');
+  if (xcodeProjectRequiresUpdate()) {
+    printTrace('Initializing the Xcode project.');
     if ((await setupXcodeProjectHarness()) != 0) {
       printError('Could not initialize the Xcode project.');
       return false;

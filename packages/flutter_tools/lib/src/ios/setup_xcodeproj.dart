@@ -111,6 +111,25 @@ void _setupXcodeProjXcconfig(String filePath) {
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
+bool xcodeProjectRequiresUpdate() {
+  File revisionFile = new File(path.join(Directory.current.path, 'ios', '.generated', 'REVISION'));
+
+  // If the revision stamp does not exist, the Xcode project definitely requires
+  // an update
+  if (!revisionFile.existsSync()) {
+    printTrace("A revision stamp does not exist. The Xcode project has never been initialized.");
+    return true;
+  }
+
+  if (revisionFile.readAsStringSync() != ArtifactStore.engineRevision) {
+    printTrace("The revision stamp and the Flutter engine revision differ. Project needs to be updated.");
+    return true;
+  }
+
+  printTrace("Xcode project is up to date.");
+  return false;
+}
+
 Future<int> setupXcodeProjectHarness() async {
   // Step 1: Fetch the archive from the cloud
   String iosFilesPath = path.join(Directory.current.path, 'ios');
