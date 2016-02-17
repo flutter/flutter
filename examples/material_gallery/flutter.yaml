@@ -31,6 +31,7 @@ material-design-icons:
   - name: action/face
   - name: action/home
   - name: action/hourglass_empty
+  - name: action/info
   - name: action/language
   - name: av/play_arrow
   - name: av/stop

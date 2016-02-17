@@ -22,6 +22,7 @@ export 'package:flutter/rendering.dart' show
     FlexJustifyContent,
     FractionalOffsetTween,
     GridDelegate,
+    GridDelegateWithInOrderChildPlacement,
     GridSpecification,
     HitTestBehavior,
     MaxTileWidthGridDelegate,
