@@ -16,6 +16,12 @@ class DevicesCommand extends FlutterCommand {
   bool get requiresProjectRoot => false;
 
   Future<int> runInProject() async {
+    if (!doctor.canListAnything) {
+      printError("Unable to locate a development device; please run 'flutter doctor' for "
+        "information about installing additional components.");
+      return 1;
+    }
+
     List<Device> devices = await deviceManager.getAllConnectedDevices();
 
     if (devices.isEmpty) {

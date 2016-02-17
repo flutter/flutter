@@ -86,6 +86,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
+    if (!doctor.iosWorkflow.hasIdeviceId)
+      return <IOSDevice>[];
+
     List<IOSDevice> devices = [];
     for (String id in _getAttachedDeviceIDs(mockIOS)) {
       String name = _getDeviceName(id, mockIOS);
@@ -176,7 +179,7 @@ class IOSDevice extends Device {
     // Step 1: Install the precompiled application if necessary
     bool buildResult = await _buildIOSXcodeProject(app, buildForDevice: true);
     if (!buildResult) {
-      printError('Could not build the precompiled application for the device');
+      printError('Could not build the precompiled application for the device.');
       return false;
     }
 
@@ -184,7 +187,7 @@ class IOSDevice extends Device {
     Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphoneos', 'Runner.app'));
     bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
-      printError('Could not find the built application bundle at ${bundle.path}');
+      printError('Could not find the built application bundle at ${bundle.path}.');
       return false;
     }
 
@@ -202,7 +205,7 @@ class IOSDevice extends Device {
     ]);
 
     if (installationResult != 0) {
-      printError('Could not install ${bundle.path} on $id');
+      printError('Could not install ${bundle.path} on $id.');
       return false;
     }
 
@@ -246,6 +249,9 @@ class IOSSimulator extends Device {
   IOSSimulator(String id, { this.name }) : super(id);
 
   static List<IOSSimulator> getAttachedDevices() {
+    if (!xcode.isInstalled)
+      return <IOSSimulator>[];
+
     return SimControl.getConnectedDevices().map((SimDevice device) {
       return new IOSSimulator(device.udid, name: device.name);
     }).toList();
@@ -317,7 +323,7 @@ class IOSSimulator extends Device {
     // Step 1: Build the Xcode project
     bool buildResult = await _buildIOSXcodeProject(app, buildForDevice: false);
     if (!buildResult) {
-      printError('Could not build the application for the simulator');
+      printError('Could not build the application for the simulator.');
       return false;
     }
 
@@ -325,7 +331,7 @@ class IOSSimulator extends Device {
     Directory bundle = new Directory(path.join(app.localPath, 'build', 'Release-iphonesimulator', 'Runner.app'));
     bool bundleExists = await bundle.exists();
     if (!bundleExists) {
-      printError('Could not find the built application bundle at ${bundle.path}');
+      printError('Could not find the built application bundle at ${bundle.path}.');
       return false;
     }
 
@@ -476,7 +482,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
           String category = match.group(1);
           String content = match.group(2);
           if (category == 'Game Center' || category == 'itunesstored' || category == 'nanoregistrylaunchd' ||
-              category == 'mstreamd' || category == 'syncdefaultsd' || category == 'companionappd' || category == 'searchd')
+              category == 'mstreamd' || category == 'syncdefaultsd' || category == 'companionappd' ||
+              category == 'searchd')
             return null;
 
           _lastWasFiltered = false;

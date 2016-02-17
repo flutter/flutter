@@ -80,6 +80,14 @@ String sdkBinaryName(String name) {
   return Platform.isWindows ? '$name.bat' : name;
 }
 
+bool exitsHappy(List<String> cli) {
+  try {
+    return Process.runSync(cli.first, cli.sublist(1)).exitCode == 0;
+  } catch (error) {
+    return false;
+  }
+}
+
 String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
   bool noisyErrors: false,

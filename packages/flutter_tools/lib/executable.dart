@@ -18,6 +18,7 @@ import 'src/commands/cache.dart';
 import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
+import 'src/commands/doctor.dart';
 import 'src/commands/install.dart';
 import 'src/commands/ios.dart';
 import 'src/commands/listen.dart';
@@ -30,6 +31,8 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/upgrade.dart';
 import 'src/device.dart';
+import 'src/doctor.dart';
+import 'src/ios/mac.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
@@ -48,6 +51,7 @@ Future main(List<String> args) async {
     ..addCommand(new CreateCommand())
     ..addCommand(new DaemonCommand(hideCommand: !verboseHelp))
     ..addCommand(new DevicesCommand())
+    ..addCommand(new DoctorCommand())
     ..addCommand(new InstallCommand())
     ..addCommand(new IOSCommand())
     ..addCommand(new ListenCommand())
@@ -64,6 +68,8 @@ Future main(List<String> args) async {
     // Initialize globals.
     context[Logger] = new StdoutLogger();
     context[DeviceManager] = new DeviceManager();
+    Doctor.initGlobal();
+    XCode.initGlobal();
 
     dynamic result = await runner.run(args);
 

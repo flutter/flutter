@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:test/test.dart';
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
@@ -28,6 +31,14 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     if (!overrides.containsKey(DeviceManager))
       testContext[DeviceManager] = new MockDeviceManager();
+
+    if (!overrides.containsKey(Doctor))
+      testContext[Doctor] = new Doctor();
+
+    if (Platform.isMacOS) {
+      if (!overrides.containsKey(XCode))
+        testContext[XCode] = new XCode();
+    }
 
     return testContext.runInZone(testMethod);
   }, timeout: timeout);
