@@ -7,8 +7,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../base/globals.dart';
 import '../flx.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class RefreshCommand extends FlutterCommand {

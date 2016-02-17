@@ -7,8 +7,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 
-import '../base/globals.dart';
 import '../base/os.dart';
+import '../globals.dart';
 
 // Android SDK layout:
 //

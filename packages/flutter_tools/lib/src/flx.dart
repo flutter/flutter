@@ -14,7 +14,7 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
-import 'base/globals.dart';
+import 'globals.dart';
 import 'toolchain.dart';
 
 const String defaultMainPath = 'lib/main.dart';

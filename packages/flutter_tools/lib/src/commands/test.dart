@@ -9,14 +9,14 @@ import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable;
 
 import '../artifacts.dart';
-import '../base/globals.dart';
 import '../build_configuration.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/loader.dart' as loader;
 
 class TestCommand extends FlutterCommand {
   String get name => 'test';
-  String get description => 'Runs Flutter unit tests for the current project (Linux only).';
+  String get description => 'Run Flutter unit tests for the current project (Linux only).';
 
   bool get requiresProjectRoot => false;
 

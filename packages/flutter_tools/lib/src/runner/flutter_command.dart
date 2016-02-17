@@ -9,9 +9,9 @@ import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
-import '../base/globals.dart';
 import '../build_configuration.dart';
 import '../device.dart';
+import '../globals.dart';
 import '../toolchain.dart';
 import 'flutter_command_runner.dart';
 

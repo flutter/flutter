@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 
 import '../artifacts.dart';
-import '../base/globals.dart';
+import '../globals.dart';
 
 class CacheCommand extends Command {
   final String name = 'cache';

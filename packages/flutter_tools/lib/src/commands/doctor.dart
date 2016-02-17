@@ -5,20 +5,20 @@
 import 'dart:async';
 
 import '../artifacts.dart';
-import '../base/globals.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../runner/version.dart';
 
 class DoctorCommand extends FlutterCommand {
   final String name = 'doctor';
-  final String description = 'Diagnose the flutter tool.';
+  final String description = 'Show information about the installed tooling.';
 
   bool get requiresProjectRoot => false;
 
   Future<int> runInProject() async {
     // general info
     String flutterRoot = ArtifactStore.flutterRoot;
-    printStatus('Flutter root is $flutterRoot.');
+    printStatus('Flutter root: $flutterRoot.');
     printStatus('');
 
     // doctor

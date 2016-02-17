@@ -5,9 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/globals.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

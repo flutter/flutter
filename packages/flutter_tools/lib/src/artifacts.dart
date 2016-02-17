@@ -8,10 +8,10 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
-import 'base/globals.dart';
 import 'base/os.dart';
 import 'base/process.dart';
 import 'build_configuration.dart';
+import 'globals.dart';
 
 String _getNameForHostPlatform(HostPlatform platform) {
   switch (platform) {

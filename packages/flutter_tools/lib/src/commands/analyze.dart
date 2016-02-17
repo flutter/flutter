@@ -11,14 +11,14 @@ import 'package:den_api/den_api.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
-import '../base/globals.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   String get name => 'analyze';
-  String get description => 'Runs a carefully configured dartanalyzer over the current project\'s Dart code.';
+  String get description => 'Analyze the project\'s Dart code.';
 
   AnalyzeCommand() {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);

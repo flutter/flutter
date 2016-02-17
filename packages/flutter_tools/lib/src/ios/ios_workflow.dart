@@ -4,9 +4,9 @@
 
 import 'dart:io';
 
-import '../base/globals.dart';
 import '../base/process.dart';
 import '../doctor.dart';
+import '../globals.dart';
 
 class IOSWorkflow extends Workflow {
   IOSWorkflow() : super('iOS');
@@ -20,8 +20,11 @@ class IOSWorkflow extends Workflow {
   // for real devices.
   bool get canLaunchDevices => xcode.isInstalled;
 
-  void diagnose() {
-    Validator iosValidator = new Validator('Develop for iOS devices');
+  ValidationResult validate() {
+    Validator iosValidator = new Validator(
+      '$name toolchain',
+      description: 'develop for iOS devices'
+    );
 
     Function _xcodeExists = () {
       return xcode.isInstalled ? ValidationType.installed : ValidationType.missing;
@@ -48,29 +51,33 @@ class IOSWorkflow extends Workflow {
       validatorFunction: _xcodeExists
     ));
 
-    iosValidator.addValidator(new Validator(
+    Validator brewValidator = new Validator(
       'brew',
       description: 'install additional development packages',
       resolution: 'Download at http://brew.sh/',
       validatorFunction: _brewExists
-    ));
+    );
 
-    iosValidator.addValidator(new Validator(
+    iosValidator.addValidator(brewValidator);
+
+    brewValidator.addValidator(new Validator(
       'ideviceinstaller',
       description: 'discover connected iOS devices',
       resolution: "Install via 'brew install ideviceinstaller'",
       validatorFunction: _ideviceinstallerExists
     ));
 
-    iosValidator.addValidator(new Validator(
+    brewValidator.addValidator(new Validator(
       'ios-deploy',
       description: 'deploy to connected iOS devices',
       resolution: "Install via 'brew install ios-deploy'",
       validatorFunction: _iosdeployExists
     ));
 
-    iosValidator.validate().print();
+    return iosValidator.validate();
   }
+
+  void diagnose() => validate().print();
 
   bool get hasIdeviceId => exitsHappy(<String>['idevice_id', '-h']);
 

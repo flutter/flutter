@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../android/device_android.dart';
 import '../application_package.dart';
-import '../base/globals.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class TraceCommand extends FlutterCommand {

@@ -4,7 +4,7 @@
 
 import 'android/android_workflow.dart';
 import 'base/context.dart';
-import 'base/globals.dart';
+import 'globals.dart';
 import 'ios/ios_workflow.dart';
 
 class Doctor {
@@ -33,6 +33,35 @@ class Doctor {
   List<Workflow> _workflows = <Workflow>[];
 
   List<Workflow> get workflows => _workflows;
+
+  /// Print a summary of the state of the tooling, as well as how to get more info.
+  void summary() => printStatus(summaryText);
+
+  String get summaryText {
+    StringBuffer buffer = new StringBuffer();
+
+    bool allGood = true;
+
+    for (Workflow workflow in workflows) {
+      ValidationResult result = workflow.validate();
+      buffer.write('${result.leadingBox} The ${workflow.name} toolchain is ');
+      if (result.type == ValidationType.missing)
+        buffer.writeln('not installed.');
+      else if (result.type == ValidationType.partial)
+        buffer.writeln('partially installed; more components are available.');
+      else
+        buffer.writeln('fully installed.');
+      if (result.type != ValidationType.installed)
+        allGood = false;
+    }
+
+    if (!allGood) {
+      buffer.writeln();
+      buffer.write('Run "flutter doctor" for information about installing additional components.');
+    }
+
+    return buffer.toString();
+  }
 
   /// Print verbose information about the state of installed tooling.
   void diagnose() {
@@ -63,6 +92,8 @@ abstract class Workflow {
   /// Could this thing launch *something*? It may still have minor issues.
   bool get canLaunchDevices;
 
+  ValidationResult validate();
+
   /// Print verbose information about the state of the workflow.
   void diagnose();
 
@@ -85,20 +116,28 @@ class Validator {
   final String resolution;
   final ValidationFunction validatorFunction;
 
-  List<Validator> _children = [];
+  List<Validator> _children = <Validator>[];
 
   ValidationResult validate() {
+    List<ValidationResult> childResults;
+    ValidationType type;
+
     if (validatorFunction != null)
-      return new ValidationResult(validatorFunction(), this);
+      type = validatorFunction();
 
-    List<ValidationResult> results = _children.map((Validator child) {
-      return child.validate();
-    }).toList();
+    childResults = _children.map((Validator child) => child.validate()).toList();
 
-    ValidationType type = _combine(results.map((ValidationResult result) {
-      return result.type;
-    }));
-    return new ValidationResult(type, this, results);
+    // If there's no immediate validator, the result we return is synthesized
+    // from the sub-tree of children. This is so we can show that the branch is
+    // not fully installed.
+    if (type == null) {
+      type = _combine(childResults
+        .expand((ValidationResult child) => child._allResults)
+        .map((ValidationResult result) => result.type)
+      );
+    }
+
+    return new ValidationResult(type, this, childResults);
   }
 
   ValidationType _combine(Iterable<ValidationType> types) {
@@ -119,6 +158,15 @@ class ValidationResult {
   final Validator validator;
   final List<ValidationResult> childResults;
 
+  String get leadingBox {
+    if (type == ValidationType.missing)
+      return '[ ]';
+    else if (type == ValidationType.installed)
+      return '[✓]';
+    else
+      return '[-]';
+  }
+
   void print([String indent = '']) {
     printSelf(indent);
 
@@ -126,15 +174,15 @@ class ValidationResult {
       child.print(indent + '  ');
   }
 
-  void printSelf(String indent) {
+  void printSelf([String indent = '']) {
     String result = indent;
 
     if (type == ValidationType.missing)
-      result += '[ ] ';
+      result += '$leadingBox ';
     else if (type == ValidationType.installed)
-      result += '[✓] ';
+      result += '$leadingBox ';
     else
-      result += '[-] ';
+      result += '$leadingBox ';
 
     result += '${validator.name} ';
 
@@ -150,5 +198,11 @@ class ValidationResult {
 
     if (type == ValidationType.missing && validator.resolution != null)
       printStatus('$indent    ${validator.resolution}');
+  }
+
+  List<ValidationResult> get _allResults {
+    List<ValidationResult> results = <ValidationResult>[this];
+    results.addAll(childResults);
+    return results;
   }
 }

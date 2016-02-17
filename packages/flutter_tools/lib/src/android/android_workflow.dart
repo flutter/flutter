@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/globals.dart';
 import '../doctor.dart';
+import '../globals.dart';
 import 'android_sdk.dart';
 
 class AndroidWorkflow extends Workflow {
@@ -15,8 +15,11 @@ class AndroidWorkflow extends Workflow {
 
   bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed(complain: false);
 
-  void diagnose() {
-    Validator androidValidator = new Validator('Develop for Android devices');
+  ValidationResult validate() {
+    Validator androidValidator = new Validator(
+      '$name toolchain',
+      description: 'develop for Android devices'
+    );
 
     Function _sdkExists = () {
       return androidSdk == null ? ValidationType.missing : ValidationType.installed;
@@ -29,6 +32,8 @@ class AndroidWorkflow extends Workflow {
       validatorFunction: _sdkExists
     ));
 
-    androidValidator.validate().print();
+    return androidValidator.validate();
   }
+
+  void diagnose() => validate().print();
 }
