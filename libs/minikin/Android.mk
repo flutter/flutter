@@ -33,7 +33,8 @@ minikin_src_files := \
     MinikinInternal.cpp \
     MinikinRefCounted.cpp \
     MinikinFontFreeType.cpp \
-    SparseBitSet.cpp
+    SparseBitSet.cpp \
+    WordBreaker.cpp
 
 minikin_c_includes := \
     external/harfbuzz_ng/src \
