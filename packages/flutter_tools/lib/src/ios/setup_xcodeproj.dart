@@ -91,7 +91,7 @@ Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) asyn
   return true;
 }
 
-void _setupXcodeProjXcconfig(String filePath) {
+void updateXcodeLocalProperties(String projectPath) {
   StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -106,7 +106,7 @@ void _setupXcodeProjXcconfig(String filePath) {
   String dartSDKPath = path.normalize(path.join(Platform.resolvedExecutable, '..', '..'));
   localsBuffer.writeln('DART_SDK_PATH=$dartSDKPath');
 
-  File localsFile = new File(filePath);
+  File localsFile = new File(path.join(projectPath, 'ios', '.generated', 'Local.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
@@ -130,9 +130,9 @@ bool xcodeProjectRequiresUpdate() {
   return false;
 }
 
-Future<int> setupXcodeProjectHarness() async {
+Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   // Step 1: Fetch the archive from the cloud
-  String iosFilesPath = path.join(Directory.current.path, 'ios');
+  String iosFilesPath = path.join(flutterProjectPath, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
   List<int> archiveBytes = await _fetchXcodeArchive();
 
@@ -149,7 +149,7 @@ Future<int> setupXcodeProjectHarness() async {
   }
 
   // Step 3: Populate the Local.xcconfig with project specific paths
-  _setupXcodeProjXcconfig(path.join(xcodeprojPath, 'Local.xcconfig'));
+  updateXcodeLocalProperties(flutterProjectPath);
 
   // Step 4: Write the REVISION file
   File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));
