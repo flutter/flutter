@@ -42,6 +42,8 @@ void WordBreaker::setText(const uint16_t* data, size_t size) {
     mIteratorWasReset = false;
     mLast = 0;
     mCurrent = 0;
+    mScanOffset = 0;
+    mSuppressHyphen = false;
     UErrorCode status = U_ZERO_ERROR;
     utext_openUChars(&mUText, data, size, &status);
     mBreakIterator->setText(&mUText, status);
@@ -52,9 +54,60 @@ ssize_t WordBreaker::current() const {
     return mCurrent;
 }
 
+enum ScanState {
+    START,
+    SAW_AT,
+    SAW_COLON,
+    SAW_COLON_SLASH,
+    SAW_COLON_SLASH_SLASH,
+};
+
 ssize_t WordBreaker::next() {
-    int32_t result;
     mLast = mCurrent;
+
+    // scan forward from current ICU position for email address or URL
+    if (mLast >= mScanOffset) {
+        ScanState state = START;
+        size_t i;
+        for (i = mLast; i < mTextSize; i++) {
+            uint16_t c = mText[i];
+            // scan only ASCII characters, stop at space
+            if (!(' ' < c && c <= 0x007E)) {
+                break;
+            }
+            if (state == START && c == '@') {
+                state = SAW_AT;
+            } else if (state == START && c == ':') {
+                state = SAW_COLON;
+            } else if (state == SAW_COLON || state == SAW_COLON_SLASH) {
+                if (c == '/') {
+                    state = static_cast<ScanState>((int)state + 1);  // next state adds a slash
+                } else {
+                    state = START;
+                }
+            }
+        }
+        if (state == SAW_AT || state == SAW_COLON_SLASH_SLASH) {
+            // no line breaks in entire email address or url
+            // TODO: refine this according to Chicago Manual of Style rules
+            while (i < mTextSize && mText[i] == ' ') {
+                i++;
+            }
+            mCurrent = i;
+            mSuppressHyphen = true;
+            // Setting mIteratorWasReset will cause next break to be computed following
+            // mCurrent, rather than following the current ICU iterator location.
+            mIteratorWasReset = true;
+            if (mBreakIterator->isBoundary(mCurrent)) {
+                return mCurrent;
+            }
+        } else {
+            mScanOffset = i;
+            mSuppressHyphen = false;
+        }
+    }
+
+    int32_t result;
     do {
         if (mIteratorWasReset) {
             result = mBreakIterator->following(mCurrent);
@@ -69,6 +122,9 @@ ssize_t WordBreaker::next() {
 }
 
 ssize_t WordBreaker::wordStart() const {
+    if (mSuppressHyphen) {
+        return mLast;
+    }
     ssize_t result = mLast;
     while (result < mCurrent) {
         UChar32 c;
@@ -86,6 +142,9 @@ ssize_t WordBreaker::wordStart() const {
 }
 
 ssize_t WordBreaker::wordEnd() const {
+    if (mSuppressHyphen) {
+        return mLast;
+    }
     ssize_t result = mCurrent;
     while (result > mLast) {
         UChar32 c;

@@ -60,6 +60,10 @@ private:
     ssize_t mLast;
     ssize_t mCurrent;
     bool mIteratorWasReset;
+
+    // state for the email address / url detector
+    ssize_t mScanOffset;
+    bool mSuppressHyphen;
 };
 
 }  // namespace
