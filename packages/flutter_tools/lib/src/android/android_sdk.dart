@@ -49,12 +49,24 @@ class AndroidSdk {
   static AndroidSdk locateAndroidSdk() {
     // TODO: Use explicit configuration information from a metadata file?
 
+    String androidHomeDir;
     if (Platform.environment.containsKey('ANDROID_HOME')) {
-      String homeDir = Platform.environment['ANDROID_HOME'];
-      if (validSdkDirectory(homeDir))
-        return new AndroidSdk(homeDir);
-      if (validSdkDirectory(path.join(homeDir, 'sdk')))
-        return new AndroidSdk(path.join(homeDir, 'sdk'));
+      androidHomeDir = Platform.environment['ANDROID_HOME'];
+    } else if (Platform.isLinux) {
+      String homeDir = Platform.environment['HOME'];
+      if (homeDir != null)
+        androidHomeDir = '$homeDir/Android/Sdk';
+    } else if (Platform.isMacOS) {
+      String homeDir = Platform.environment['HOME'];
+      if (homeDir != null)
+        androidHomeDir = '$homeDir/Library/Android/sdk';
+    }
+
+    if (androidHomeDir != null) {
+      if (validSdkDirectory(androidHomeDir))
+        return new AndroidSdk(androidHomeDir);
+      if (validSdkDirectory(path.join(androidHomeDir, 'sdk')))
+        return new AndroidSdk(path.join(androidHomeDir, 'sdk'));
     }
 
     File aaptBin = os.which('aapt'); // in build-tools/$version/aapt
