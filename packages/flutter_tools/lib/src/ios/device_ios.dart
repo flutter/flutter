@@ -88,6 +88,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
+    if (!doctor.iosWorkflow.hasIdeviceId)
+      return <IOSDevice>[];
+
     List<IOSDevice> devices = [];
     for (String id in _getAttachedDeviceIDs(mockIOS)) {
       String name = _getDeviceName(id, mockIOS);
@@ -245,6 +248,9 @@ class IOSSimulator extends Device {
   IOSSimulator(String id, { this.name }) : super(id);
 
   static List<IOSSimulator> getAttachedDevices() {
+    if (!xcode.isInstalled)
+      return <IOSSimulator>[];
+
     return SimControl.getConnectedDevices().map((SimDevice device) {
       return new IOSSimulator(device.udid, name: device.name);
     }).toList();
@@ -470,7 +476,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
           String category = match.group(1);
           String content = match.group(2);
           if (category == 'Game Center' || category == 'itunesstored' || category == 'nanoregistrylaunchd' ||
-              category == 'mstreamd' || category == 'syncdefaultsd' || category == 'companionappd' || category == 'searchd')
+              category == 'mstreamd' || category == 'syncdefaultsd' || category == 'companionappd' ||
+              category == 'searchd')
             return null;
 
           _lastWasFiltered = false;
