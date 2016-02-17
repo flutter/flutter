@@ -85,7 +85,9 @@ TEST_F(WordBreakerTest, email) {
     breaker.setLocale(icu::Locale::getEnglish());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
-    EXPECT_EQ(16, breaker.next());  // after "foo@example.com "
+    EXPECT_EQ(11, breaker.next());  // after "foo@example"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(16, breaker.next());  // after ".com "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(16, breaker.wordStart());  // "x"
@@ -99,13 +101,19 @@ TEST_F(WordBreakerTest, mailto) {
     breaker.setLocale(icu::Locale::getEnglish());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
-    EXPECT_EQ(23, breaker.next());  // after "mailto:foo@example.com "
+    EXPECT_EQ(7, breaker.next());  // after "mailto:"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(18, breaker.next());  // after "foo@example"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(23, breaker.next());  // after ".com "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(23, breaker.wordStart());  // "x"
     EXPECT_EQ(24, breaker.wordEnd());
 }
 
+// The current logic always places a line break after a detected email address or URL
+// and an immediately following non-ASCII character.
 TEST_F(WordBreakerTest, emailNonAscii) {
     uint16_t buf[] = {'f', 'o', 'o', '@', 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm',
         0x4E00};
@@ -113,7 +121,9 @@ TEST_F(WordBreakerTest, emailNonAscii) {
     breaker.setLocale(icu::Locale::getEnglish());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
-    EXPECT_EQ(15, breaker.next());  // after "foo@example.com"
+    EXPECT_EQ(11, breaker.next());  // after "foo@example"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(15, breaker.next());  // after ".com"
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(15, breaker.wordStart());  // "一"
@@ -127,11 +137,29 @@ TEST_F(WordBreakerTest, emailCombining) {
     breaker.setLocale(icu::Locale::getEnglish());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
-    EXPECT_EQ(17, breaker.next());  // after "foo@example.com̃"
+    EXPECT_EQ(11, breaker.next());  // after "foo@example"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(17, breaker.next());  // after ".com̃ "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(17, breaker.wordStart());  // "x"
     EXPECT_EQ(18, breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, lonelyAt) {
+    uint16_t buf[] = {'a', ' ', '@', ' ', 'b'};
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(2, breaker.next());  // after "a "
+    EXPECT_EQ(0, breaker.wordStart());  // "a"
+    EXPECT_EQ(1, breaker.wordEnd());
+    EXPECT_EQ(4, breaker.next());  // after "@ "
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_EQ(4, breaker.wordStart());  // "b"
+    EXPECT_EQ(5, breaker.wordEnd());
 }
 
 TEST_F(WordBreakerTest, url) {
@@ -141,9 +169,101 @@ TEST_F(WordBreakerTest, url) {
     breaker.setLocale(icu::Locale::getEnglish());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
-    EXPECT_EQ(19, breaker.next());  // after "http://example.com "
+    EXPECT_EQ(5, breaker.next());  // after "http:"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(7, breaker.next());  // after "//"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(14, breaker.next());  // after "example"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(19, breaker.next());  // after ".com "
     EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(19, breaker.wordStart());  // "x"
     EXPECT_EQ(20, breaker.wordEnd());
+}
+
+// Breaks according to section 14.12 of Chicago Manual of Style, *URLs or DOIs and line breaks*
+TEST_F(WordBreakerTest, urlBreakChars) {
+    uint16_t buf[] = {'h', 't', 't', 'p', ':', '/', '/', 'a', '.', 'b', '/', '~', 'c', ',', 'd',
+        '-', 'e', '?', 'f', '=', 'g', '&', 'h', '#', 'i', '%', 'j', '_', 'k', '/', 'l'};
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(5, breaker.next());  // after "http:"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(7, breaker.next());  // after "//"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(8, breaker.next());  // after "a"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(10, breaker.next());  // after ".b"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(11, breaker.next());  // after "/"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(13, breaker.next());  // after "~c"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(15, breaker.next());  // after ",d"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(17, breaker.next());  // after "-e"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(19, breaker.next());  // after "?f"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(20, breaker.next());  // after "="
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(21, breaker.next());  // after "g"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(22, breaker.next());  // after "&"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(23, breaker.next());  // after "h"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(25, breaker.next());  // after "#i"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(27, breaker.next());  // after "%j"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(29, breaker.next());  // after "_k"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, urlNoHyphenBreak) {
+    uint16_t buf[] = {'h', 't', 't', 'p', ':', '/', '/', 'a', '-', '/', 'b'};
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(5, breaker.next());  // after "http:"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(7, breaker.next());  // after "//"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(8, breaker.next());  // after "a"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, urlEndsWithSlash) {
+    uint16_t buf[] = {'h', 't', 't', 'p', ':', '/', '/', 'a', '/'};
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(5, breaker.next());  // after "http:"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(7, breaker.next());  // after "//"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ(8, breaker.next());  // after "a"
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, emailStartsWithSlash) {
+    uint16_t buf[] = {'/', 'a', '@', 'b'};
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_TRUE(breaker.wordStart() >= breaker.wordEnd());
 }

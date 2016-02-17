@@ -43,7 +43,7 @@ void WordBreaker::setText(const uint16_t* data, size_t size) {
     mLast = 0;
     mCurrent = 0;
     mScanOffset = 0;
-    mSuppressHyphen = false;
+    mInEmailOrUrl = false;
     UErrorCode status = U_ZERO_ERROR;
     utext_openUChars(&mUText, data, size, &status);
     mBreakIterator->setText(&mUText, status);
@@ -61,6 +61,17 @@ enum ScanState {
     SAW_COLON_SLASH,
     SAW_COLON_SLASH_SLASH,
 };
+
+// Chicago Manual of Style recommends breaking after these characters in URLs and email addresses
+static bool breakAfter(uint16_t c) {
+    return c == ':' || c == '=' || c == '&';
+}
+
+// Chicago Manual of Style recommends breaking before these characters in URLs and email addresses
+static bool breakBefore(uint16_t c) {
+    return c == '~' || c == '.' || c == ',' || c == '-' || c == '_' || c == '?' || c == '#'
+            || c == '%' || c == '=' || c == '&';
+}
 
 ssize_t WordBreaker::next() {
     mLast = mCurrent;
@@ -88,23 +99,45 @@ ssize_t WordBreaker::next() {
             }
         }
         if (state == SAW_AT || state == SAW_COLON_SLASH_SLASH) {
-            // no line breaks in entire email address or url
-            // TODO: refine this according to Chicago Manual of Style rules
-            while (i < mTextSize && mText[i] == ' ') {
-                i++;
+            if (!mBreakIterator->isBoundary(i)) {
+                i = mBreakIterator->following(i);
             }
-            mCurrent = i;
-            mSuppressHyphen = true;
-            // Setting mIteratorWasReset will cause next break to be computed following
-            // mCurrent, rather than following the current ICU iterator location.
+            mInEmailOrUrl = true;
             mIteratorWasReset = true;
-            if (mBreakIterator->isBoundary(mCurrent)) {
-                return mCurrent;
-            }
         } else {
-            mScanOffset = i;
-            mSuppressHyphen = false;
+            mInEmailOrUrl = false;
         }
+        mScanOffset = i;
+    }
+
+    if (mInEmailOrUrl) {
+        // special rules for email addresses and URL's as per Chicago Manual of Style (16th ed.)
+        uint16_t lastChar = mText[mLast];
+        ssize_t i;
+        for (i = mLast + 1; i < mScanOffset; i++) {
+            if (breakAfter(lastChar)) {
+                break;
+            }
+            // break after double slash
+            if (lastChar == '/' && i >= mLast + 2 && mText[i - 2] == '/') {
+                break;
+            }
+            uint16_t thisChar = mText[i];
+            // never break after hyphen
+            if (lastChar != '-') {
+                if (breakBefore(thisChar)) {
+                    break;
+                }
+                // break before single slash
+                if (thisChar == '/' && lastChar != '/' &&
+                            !(i + 1 < mScanOffset && mText[i + 1] == '/')) {
+                    break;
+                }
+            }
+            lastChar = thisChar;
+        }
+        mCurrent = i;
+        return mCurrent;
     }
 
     int32_t result;
@@ -122,7 +155,7 @@ ssize_t WordBreaker::next() {
 }
 
 ssize_t WordBreaker::wordStart() const {
-    if (mSuppressHyphen) {
+    if (mInEmailOrUrl) {
         return mLast;
     }
     ssize_t result = mLast;
@@ -142,7 +175,7 @@ ssize_t WordBreaker::wordStart() const {
 }
 
 ssize_t WordBreaker::wordEnd() const {
-    if (mSuppressHyphen) {
+    if (mInEmailOrUrl) {
         return mLast;
     }
     ssize_t result = mCurrent;
