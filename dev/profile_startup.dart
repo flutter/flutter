@@ -45,7 +45,7 @@ Future<double> test(String tracesDir, String projectPath, int runNumber) async {
   String tracePath = "${tracesDir}/trace_$runNumber.json";
   runWithLoggingSync([
     'flutter',
-    'start',
+    'run',
     '--no-checked',
     '--trace-startup'
   ], workingDirectory: projectPath);
@@ -84,7 +84,7 @@ main(List<String> args) async {
   String traces_dir = '/tmp';
 
   List<double> times = [];
-  print("Profiling startup using flutter start --trace-startup.");
+  print("Profiling startup using flutter run --trace-startup.");
   print("Measuring from first trace event to completion of first frame upload.");
   print("aka NativeViewGLSurfaceEGL:RealSwapBuffers.\n");
   print("NOTE: If device is not on/unlocked tracing may fail.\n");
