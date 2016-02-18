@@ -174,7 +174,8 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             if (paint != nullptr && mHyphenator != nullptr &&
                     mHyphenationFrequency != kHyphenationFrequency_None &&
                     !wordEndsInHyphen && !temporarilySkipHyphenation &&
-                    wordEnd > wordStart && wordEnd - wordStart <= LONGEST_HYPHENATED_WORD) {
+                    wordStart >= start && wordEnd > wordStart &&
+                    wordEnd - wordStart <= LONGEST_HYPHENATED_WORD) {
                 mHyphenator->hyphenate(&mHyphBuf, &mTextBuf[wordStart], wordEnd - wordStart);
 #if VERBOSE_DEBUG
                 std::string hyphenatedString;
