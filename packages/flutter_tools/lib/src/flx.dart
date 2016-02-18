@@ -167,6 +167,11 @@ ArchiveFile _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
   return new ArchiveFile.noCompress(key, content.length, content);
 }
 
+ArchiveFile _createFontManifest(Map manifestDescriptor) {
+  List<int> content = UTF8.encode(JSON.encode(manifestDescriptor['fonts']));
+  return new ArchiveFile.noCompress('FontManifest.json', content.length, content);
+}
+
 ArchiveFile _createSnapshotFile(String snapshotPath) {
   File file = new File(snapshotPath);
   List<int> content = file.readAsBytesSync();
@@ -273,6 +278,7 @@ Future<int> assemble({
   }
 
   archive.addFile(_createAssetManifest(assets));
+  archive.addFile(_createFontManifest(manifestDescriptor));
 
   await CipherParameters.get().seedRandom();
 
