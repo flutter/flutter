@@ -23,7 +23,8 @@ namespace android {
 
 class CmapCoverage {
 public:
-    static bool getCoverage(SparseBitSet &coverage, const uint8_t* cmap_data, size_t cmap_size);
+    static bool getCoverage(SparseBitSet &coverage, const uint8_t* cmap_data, size_t cmap_size,
+            bool* has_cmap_format14_subtable);
 };
 
 }  // namespace android

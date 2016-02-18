@@ -62,6 +62,9 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
             continue;
         }
         mFamilies.push_back(family);  // emplace_back would be better
+        if (family->hasVSTable()) {
+            mVSFamilyVec.push_back(family);
+        }
         mMaxChar = max(mMaxChar, coverage->length());
         lastChar.push_back(coverage->nextSetBit(0));
     }
@@ -233,15 +236,22 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
         return NULL;
     }
 
-    // Even if the font supports variation sequence, mRanges isn't aware of the base character of
-    // the sequence. Search all FontFamilies if variation sequence is specified.
-    // TODO: Always use mRanges for font search.
-    const std::vector<FontFamily*>& familyVec = (vs == 0) ? mFamilyVec : mFamilies;
-    Range range;
-    if (vs == 0) {
-        range = mRanges[ch >> kLogCharsPerPage];
-    } else {
-        range = { 0, mFamilies.size() };
+    const std::vector<FontFamily*>* familyVec = &mFamilyVec;
+    Range range = mRanges[ch >> kLogCharsPerPage];
+
+    std::vector<FontFamily*> familyVecForVS;
+    if (vs != 0) {
+        // If variation selector is specified, need to search for both the variation sequence and
+        // its base codepoint. Compute the union vector of them.
+        familyVecForVS = mVSFamilyVec;
+        familyVecForVS.insert(familyVecForVS.end(),
+                mFamilyVec.begin() + range.start, mFamilyVec.begin() + range.end);
+        std::sort(familyVecForVS.begin(), familyVecForVS.end());
+        auto last = std::unique(familyVecForVS.begin(), familyVecForVS.end());
+        familyVecForVS.erase(last, familyVecForVS.end());
+
+        familyVec = &familyVecForVS;
+        range = { 0, familyVecForVS.size() };
     }
 
 #ifdef VERBOSE_DEBUG
@@ -250,7 +260,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
     FontFamily* bestFamily = nullptr;
     uint32_t bestScore = kUnsupportedFontScore;
     for (size_t i = range.start; i < range.end; i++) {
-        FontFamily* family = familyVec[i];
+        FontFamily* family = (*familyVec)[i];
         const uint32_t score = calcFamilyScore(ch, vs, variant, langListId, family);
         if (score == kFirstFontScore) {
             // If the first font family supports the given character or variation sequence, always
@@ -310,12 +320,15 @@ bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
     if (baseCodepoint >= mMaxChar) {
         return false;
     }
+    if (variationSelector == 0) {
+        return false;
+    }
+
     // Currently mRanges can not be used here since it isn't aware of the variation sequence.
-    // TODO: Use mRanges for narrowing down the search range.
-    for (size_t i = 0; i < mFamilies.size(); i++) {
+    for (size_t i = 0; i < mVSFamilyVec.size(); i++) {
         AutoMutex _l(gMinikinLock);
-        if (mFamilies[i]->hasVariationSelector(baseCodepoint, variationSelector)) {
-          return true;
+        if (mVSFamilyVec[i]->hasVariationSelector(baseCodepoint, variationSelector)) {
+            return true;
         }
     }
     return false;
