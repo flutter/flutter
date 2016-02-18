@@ -1,0 +1,21 @@
+name: flutter_driver
+version: 0.0.1
+description: Integration and performance test API for Flutter applications
+homepage: http://flutter.io
+author: Flutter Authors <flutter-dev@googlegroups.com>
+
+environment:
+  sdk: '>=1.12.0 <2.0.0'
+
+dependencies:
+  vm_service_client: '>=0.1.2 <1.0.0'
+  json_rpc_2: any
+  logging: '>=0.11.0 <1.0.0'
+  flutter:
+    path: '../flutter'
+  flutter_test:
+    path: '../flutter_test'
+
+dev_dependencies:
+  test: '>=0.12.6 <1.0.0'
+  mockito: ^0.10.1

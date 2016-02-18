@@ -15,5 +15,6 @@ flutter analyze --flutter-repo --no-current-directory --no-current-package --con
 (cd packages/newton; pub run test -j1)
 # (cd packages/playfair; ) # No tests to run.
 # (cd packages/updater; ) # No tests to run.
+(cd packages/flutter_driver; pub run test -j1)
 
 (cd examples/stocks; flutter test)
