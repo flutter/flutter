@@ -28,26 +28,26 @@ namespace android {
 // These could be considered helper methods of layout, but need only be loosely coupled, so
 // are separate.
 
-static float getRunAdvance(Layout& layout, const uint16_t* buf, size_t layoutStart, size_t start,
-        size_t count, size_t offset) {
+static float getRunAdvance(const float* advances, const uint16_t* buf, size_t layoutStart,
+        size_t start, size_t count, size_t offset) {
     float advance = 0.0f;
     size_t lastCluster = start;
     float clusterWidth = 0.0f;
     for (size_t i = start; i < offset; i++) {
-        float charAdvance = layout.getCharAdvance(i - layoutStart);
+        float charAdvance = advances[i - layoutStart];
         if (charAdvance != 0.0f) {
             advance += charAdvance;
             lastCluster = i;
             clusterWidth = charAdvance;
         }
     }
-    if (offset < start + count && layout.getCharAdvance(offset - layoutStart) == 0.0f) {
+    if (offset < start + count && advances[offset - layoutStart] == 0.0f) {
         // In the middle of a cluster, distribute width of cluster so that each grapheme cluster
         // gets an equal share.
         // TODO: get caret information out of font when that's available
         size_t nextCluster;
         for (nextCluster = offset + 1; nextCluster < start + count; nextCluster++) {
-            if (layout.getCharAdvance(nextCluster - layoutStart) != 0.0f) break;
+            if (advances[nextCluster - layoutStart] != 0.0f) break;
         }
         int numGraphemeClusters = 0;
         int numGraphemeClustersAfter = 0;
@@ -67,9 +67,9 @@ static float getRunAdvance(Layout& layout, const uint16_t* buf, size_t layoutSta
     return advance;
 }
 
-float getRunAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t count,
+float getRunAdvance(const float* advances, const uint16_t* buf, size_t start, size_t count,
         size_t offset) {
-    return getRunAdvance(layout, buf, start, start, count, offset);
+    return getRunAdvance(advances, buf, start, start, count, offset);
 }
 
 /**
@@ -80,7 +80,7 @@ float getRunAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t co
  * The actual implementation fast-forwards through clusters to get "close", then does a finer-grain
  * search within the cluster and grapheme breaks.
  */
-size_t getOffsetForAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t count,
+size_t getOffsetForAdvance(const float* advances, const uint16_t* buf, size_t start, size_t count,
         float advance) {
     float x = 0.0f, xLastClusterStart = 0.0f, xSearchStart = 0.0f;
     size_t lastClusterStart = start, searchStart = start;
@@ -89,7 +89,7 @@ size_t getOffsetForAdvance(Layout& layout, const uint16_t* buf, size_t start, si
             searchStart = lastClusterStart;
             xSearchStart = xLastClusterStart;
         }
-        float width = layout.getCharAdvance(i - start);
+        float width = advances[i - start];
         if (width != 0.0f) {
             lastClusterStart = i;
             xLastClusterStart = x;
@@ -104,7 +104,7 @@ size_t getOffsetForAdvance(Layout& layout, const uint16_t* buf, size_t start, si
     for (size_t i = searchStart; i <= start + count; i++) {
         if (GraphemeBreak::isGraphemeBreak(buf, start, count, i)) {
             // "getRunAdvance(layout, buf, start, count, i) - advance" but more efficient
-            float delta = getRunAdvance(layout, buf, start, searchStart, count - searchStart, i)
+            float delta = getRunAdvance(advances, buf, start, searchStart, count - searchStart, i)
 
                     + xSearchStart - advance;
             if (std::abs(delta) < bestDist) {
