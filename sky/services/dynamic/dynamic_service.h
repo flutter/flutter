@@ -15,7 +15,7 @@
 FLUTTER_C_API_START
 
 /// ============================================================================
-/// The definitions in the file (and this file alone) form the stable Flutter
+/// The definitions in this file (and this file alone) form the stable Flutter
 /// dynamic services ABI.
 /// ============================================================================
 
