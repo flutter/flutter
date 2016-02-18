@@ -18,19 +18,27 @@ import '../ios/setup_xcodeproj.dart';
 class CreateCommand extends Command {
   final String name = 'create';
   final String description = 'Create a new Flutter project.';
+  final List<String> aliases = <String>['init'];
 
   CreateCommand() {
-    argParser.addOption('out', abbr: 'o', help: 'The output directory.');
+    argParser.addOption('out',
+      abbr: 'o',
+      hide: true,
+      help: 'The output directory.'
+    );
     argParser.addFlag('pub',
-        defaultsTo: true,
-        help: 'Whether to run "pub get" after the project has been created.');
+      defaultsTo: true,
+      help: 'Whether to run "pub get" after the project has been created.'
+    );
   }
+
+  String get invocation => "${runner.executableName} $name <output directory>";
 
   @override
   Future<int> run() async {
-    if (!argResults.wasParsed('out')) {
+    if (!argResults.wasParsed('out') && argResults.rest.isEmpty) {
       printStatus('No option specified for the output directory.');
-      printStatus(argParser.usage);
+      printStatus(usage);
       return 2;
     }
 
@@ -39,6 +47,7 @@ class CreateCommand extends Command {
       printError('variable was specified. Unable to find package:flutter.');
       return 2;
     }
+
     String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
     String flutterPackagePath = path.join(flutterRoot, 'packages', 'flutter');
@@ -47,7 +56,13 @@ class CreateCommand extends Command {
       return 2;
     }
 
-    Directory out = new Directory(argResults['out']);
+    Directory out;
+
+    if (argResults.wasParsed('out')) {
+      out = new Directory(argResults['out']);
+    } else {
+      out = new Directory(argResults.rest.first);
+    }
 
     new FlutterSimpleTemplate().generateInto(out, flutterPackagePath);
 
