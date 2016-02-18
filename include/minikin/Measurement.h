@@ -21,9 +21,10 @@
 
 namespace android {
 
-float getRunAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t count, size_t offset);
+float getRunAdvance(const float* advances, const uint16_t* buf, size_t start, size_t count,
+        size_t offset);
 
-size_t getOffsetForAdvance(Layout& layout, const uint16_t* buf, size_t start, size_t count,
+size_t getOffsetForAdvance(const float* advances, const uint16_t* buf, size_t start, size_t count,
         float advance);
 
 }

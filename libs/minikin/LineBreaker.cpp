@@ -122,17 +122,13 @@ static bool isLineBreakingHyphen(uint16_t c) {
 // to addCandidate.
 float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typeface,
         FontStyle style, size_t start, size_t end, bool isRtl) {
-    Layout layout;  // performance TODO: move layout to self object to reduce allocation cost?
     float width = 0.0f;
     int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
 
     float hyphenPenalty = 0.0;
     if (paint != nullptr) {
-        layout.setFontCollection(typeface);
-        layout.doLayout(mTextBuf.data(), start, end - start, mTextBuf.size(), bidiFlags, style,
-                *paint);
-        layout.getAdvances(mCharWidths.data() + start);
-        width = layout.getAdvance();
+        width = Layout::measureText(mTextBuf.data(), start, end - start, mTextBuf.size(), bidiFlags,
+                style, *paint, typeface, mCharWidths.data() + start);
 
         // a heuristic that seems to perform well
         hyphenPenalty = 0.5 * paint->size * paint->scaleX * mLineWidths.getLineWidth(0);
@@ -192,13 +188,17 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
                     uint8_t hyph = mHyphBuf[j - wordStart];
                     if (hyph) {
                         paint->hyphenEdit = hyph;
-                        layout.doLayout(mTextBuf.data(), lastBreak, j - lastBreak,
-                                mTextBuf.size(), bidiFlags, style, *paint);
-                        ParaWidth hyphPostBreak = lastBreakWidth + layout.getAdvance();
+
+                        const float firstPartWidth = Layout::measureText(mTextBuf.data(),
+                                lastBreak, j - lastBreak, mTextBuf.size(), bidiFlags, style,
+                                *paint, typeface, nullptr);
+                        ParaWidth hyphPostBreak = lastBreakWidth + firstPartWidth;
                         paint->hyphenEdit = 0;
-                        layout.doLayout(mTextBuf.data(), j, afterWord - j,
-                                mTextBuf.size(), bidiFlags, style, *paint);
-                        ParaWidth hyphPreBreak = postBreak - layout.getAdvance();
+
+                        const float secondPartWith = Layout::measureText(mTextBuf.data(), j,
+                                afterWord - j, mTextBuf.size(), bidiFlags, style, *paint,
+                                typeface, nullptr);
+                        ParaWidth hyphPreBreak = postBreak - secondPartWith;
                         addWordBreak(j, hyphPreBreak, hyphPostBreak, hyphenPenalty, hyph);
                     }
                 }
