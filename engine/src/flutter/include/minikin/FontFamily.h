@@ -104,7 +104,11 @@ public:
 
     FontFamily(int variant);
 
-    FontFamily(uint32_t langId, int variant) : mLangId(langId), mVariant(variant) {
+    FontFamily(uint32_t langId, int variant)
+        : mLangId(langId),
+        mVariant(variant),
+        mHasVSTable(false),
+        mCoverageValid(false) {
     }
 
     ~FontFamily();
@@ -131,6 +135,9 @@ public:
     // Caller should acquire a lock before calling the method.
     bool hasVariationSelector(uint32_t codepoint, uint32_t variationSelector);
 
+    // Returns true if this font family has a variaion sequence table (cmap format 14 subtable).
+    bool hasVSTable() const;
+
 private:
     void addFontLocked(MinikinFont* typeface, FontStyle style);
 
@@ -146,6 +153,7 @@ private:
     std::vector<Font> mFonts;
 
     SparseBitSet mCoverage;
+    bool mHasVSTable;
     bool mCoverageValid;
 };
 

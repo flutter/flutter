@@ -89,6 +89,9 @@ private:
     // This vector contains pointers into mInstances
     std::vector<FontFamily*> mFamilyVec;
 
+    // This vector has pointers to the font family instance which has cmap 14 subtable.
+    std::vector<FontFamily*> mVSFamilyVec;
+
     // These are offsets into mInstanceVec, one range per page
     std::vector<Range> mRanges;
 };
