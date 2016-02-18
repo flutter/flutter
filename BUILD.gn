@@ -7,6 +7,7 @@ group("default") {
   testonly = true
   deps = [
     "//sky",
+    "//sky/services/dynamic:sdk_lib",
   ]
 }
 

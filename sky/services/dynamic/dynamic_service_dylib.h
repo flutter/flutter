@@ -5,7 +5,6 @@
 #ifndef SKY_SERVICES_DYNAMIC_DYNAMIC_SERVICE_DYLIB_H_
 #define SKY_SERVICES_DYNAMIC_DYNAMIC_SERVICE_DYLIB_H_
 
-#include "sky/services/dynamic/dynamic_service_macros.h"
 #include "mojo/public/cpp/system/message_pipe.h"
 #include "mojo/public/cpp/bindings/string.h"
 
