@@ -378,4 +378,31 @@ TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     expectVSGlyphs(&family, kNotSupportedChar, std::set<uint32_t>());
 }
 
+TEST_F(FontFamilyTest, hasVSTableTest) {
+    struct TestCase {
+        const std::string fontPath;
+        bool hasVSTable;
+    } testCases[] = {
+        { kTestFontDir "Ja.ttf", true },
+        { kTestFontDir "ZhHant.ttf", true },
+        { kTestFontDir "ZhHans.ttf", true },
+        { kTestFontDir "Italic.ttf", false },
+        { kTestFontDir "Bold.ttf", false },
+        { kTestFontDir "BoldItalic.ttf", false },
+    };
+
+    for (auto testCase : testCases) {
+        SCOPED_TRACE(testCase.hasVSTable ?
+                "Font " + testCase.fontPath + " should have a variation sequence table." :
+                "Font " + testCase.fontPath + " shouldn't have a variation sequence table.");
+
+        MinikinFontForTest minikinFont(testCase.fontPath);
+        FontFamily family;
+        family.addFont(&minikinFont);
+        family.getCoverage();
+
+        EXPECT_EQ(testCase.hasVSTable, family.hasVSTable());
+    }
+}
+
 }  // namespace android
