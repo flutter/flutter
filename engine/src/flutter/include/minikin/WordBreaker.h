@@ -50,6 +50,8 @@ public:
 
     ssize_t wordEnd() const;
 
+    int breakBadness() const;
+
     void finish();
 
 private:
