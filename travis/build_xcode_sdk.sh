@@ -61,6 +61,35 @@ ninja -C out/ios_sim_Release ${GOMA_FLAGS}
 sky/tools/gn --ios --release
 ninja -C out/ios_Release ${GOMA_FLAGS}
 
+pushd out/
+
+# Package up the services SDK
+
+mkdir -p ${SERVICES_SDK_DIR}/include/mojo/public
+mkdir -p ${SERVICES_SDK_DIR}/lib
+
+# Create the fat services binary
+
+lipo -create                                                      \
+    ios_sim_Release/obj/sky/services/dynamic/libFlutterServices.a \
+    ios_Release/obj/sky/services/dynamic/libFlutterServices.a     \
+    -output ${SERVICES_SDK_DIR}/lib/libFlutterServicesIOS.a
+
+# Copy all relevant headers
+
+rsync -a --prune-empty-dirs --include '*/' --include '*.h' --exclude '*' \
+    ../mojo/public/c ${SERVICES_SDK_DIR}/include/mojo/public
+rsync -a --prune-empty-dirs --include '*/' --include '*.h' --exclude '*' \
+    ../mojo/public/cpp ${SERVICES_SDK_DIR}/include/mojo/public
+cp ../sky/services/dynamic/dynamic_service_dylib.h                       \
+    ${SERVICES_SDK_DIR}/include/FlutterService.h
+
+# Create the service archive
+
+zip -r ${SERVICES_ARCHIVE} ${SERVICES_SDK_DIR}/
+
+popd # Out of the out/ directory
+
 # Create the directory for the merged project
 mkdir -p out/FlutterXcode
 
@@ -73,31 +102,6 @@ pushd out/FlutterXcode
 
 zip -r FlutterXcode.zip Flutter
 
-# Package up the services SDK
-
-mkdir -p ${SERVICES_SDK_DIR}/include/mojo/public
-mkdir -p ${SERVICES_SDK_DIR}/lib
-
-# Create the fat services binary
-
-lipo -create                                                          \
-    out/ios_sim_Release/obj/sky/services/dynamic/libFlutterServices.a \
-    out/ios_Release/obj/sky/services/dynamic/libFlutterServices.a     \
-    -output ${SERVICES_SDK_DIR}/lib/libFlutterServicesIOS.a
-
-# Copy all relevant headers
-
-rsync -a --prune-empty-dirs --include '*/' --include '*.h' --exclude '*' \
-    mojo/public/c ${SERVICES_SDK_DIR}/include/mojo/public
-rsync -a --prune-empty-dirs --include '*/' --include '*.h' --exclude '*' \
-    mojo/public/cpp ${SERVICES_SDK_DIR}/include/mojo/public
-cp sky/services/dynamic/dynamic_service_dylib.h \
-    ${SERVICES_SDK_DIR}/include/FlutterService.h
-
-# Create the service archive
-
-zip -r ${SERVICES_ARCHIVE} ${SERVICES_SDK_DIR}/
-
 # Upload generated assets if the key to the service account is available
 if [[ ! -z ${BUCKET_KEY_FILE} ]]; then
   set +e
@@ -109,7 +113,7 @@ if [[ ! -z ${BUCKET_KEY_FILE} ]]; then
   fi
   gcloud auth activate-service-account --key-file ${BUCKET_KEY_FILE}
   gsutil cp FlutterXcode.zip gs://flutter_infra/flutter/${ENGINE_SHA}/ios/FlutterXcode.zip
-  gsutil cp ${SERVICES_ARCHIVE} gs://flutter_infra/flutter/${ENGINE_SHA}/ios/${SERVICES_ARCHIVE}
+  gsutil cp ../${SERVICES_ARCHIVE} gs://flutter_infra/flutter/${ENGINE_SHA}/ios/${SERVICES_ARCHIVE}
 fi
 
 popd # Out of the Xcode project
