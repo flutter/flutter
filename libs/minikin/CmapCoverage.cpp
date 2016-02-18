@@ -131,7 +131,8 @@ static bool getCoverageFormat12(vector<uint32_t>& coverage, const uint8_t* data,
     return true;
 }
 
-bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data, size_t cmap_size) {
+bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data, size_t cmap_size,
+        bool* has_cmap_format14_subtable) {
     vector<uint32_t> coverageVec;
     const size_t kHeaderSize = 4;
     const size_t kNumTablesOffset = 2;
@@ -139,8 +140,10 @@ bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data,
     const size_t kPlatformIdOffset = 0;
     const size_t kEncodingIdOffset = 2;
     const size_t kOffsetOffset = 4;
+    const uint16_t kUnicodePlatformId = 0;
     const uint16_t kMicrosoftPlatformId = 3;
     const uint16_t kUnicodeBmpEncodingId = 1;
+    const uint16_t kVariationSequencesEncodingId = 5;
     const uint16_t kUnicodeUcs4EncodingId = 10;
     const uint32_t kNoTable = UINT32_MAX;
     if (kHeaderSize > cmap_size) {
@@ -151,6 +154,7 @@ bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data,
         return false;
     }
     uint32_t bestTable = kNoTable;
+    bool hasCmapFormat14Subtable = false;
     for (uint32_t i = 0; i < numTables; i++) {
         uint16_t platformId = readU16(cmap_data, kHeaderSize + i * kTableSize + kPlatformIdOffset);
         uint16_t encodingId = readU16(cmap_data, kHeaderSize + i * kTableSize + kEncodingIdOffset);
@@ -159,8 +163,15 @@ bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data,
             break;
         } else if (platformId == kMicrosoftPlatformId && encodingId == kUnicodeBmpEncodingId) {
             bestTable = i;
+        } else if (platformId == kUnicodePlatformId &&
+                encodingId == kVariationSequencesEncodingId) {
+            uint32_t offset = readU32(cmap_data, kHeaderSize + i * kTableSize + kOffsetOffset);
+            if (offset <= cmap_size - 2 && readU16(cmap_data, offset) == 14) {
+                hasCmapFormat14Subtable = true;
+            }
         }
     }
+    *has_cmap_format14_subtable = hasCmapFormat14Subtable;
 #ifdef VERBOSE_DEBUG
     ALOGD("best table = %d\n", bestTable);
 #endif
