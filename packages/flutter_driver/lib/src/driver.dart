@@ -74,8 +74,8 @@ class FlutterDriver {
 
       // Waits for a signal from the VM service that the extension is registered
       Future waitForServiceExtension() {
-        return isolate.onServiceExtensionAdded.firstWhere((VMServiceExtension ext) {
-          return ext.method == _flutterExtensionMethod;
+        return isolate.onExtensionAdded.firstWhere((String extension) {
+          return extension == _flutterExtensionMethod;
         });
       }
 

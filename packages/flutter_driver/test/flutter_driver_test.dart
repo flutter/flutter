@@ -46,10 +46,8 @@ main() {
     test('connects to isolate paused at start', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseStartEvent());
       when(mockIsolate.resume()).thenReturn(new Future.value());
-      MockVMServiceExtension mockExtension = new MockVMServiceExtension();
-      when(mockExtension.method).thenReturn('ext.flutter_driver');
-      when(mockIsolate.onServiceExtensionAdded)
-          .thenReturn(new Stream.fromIterable([mockExtension]));
+      when(mockIsolate.onExtensionAdded)
+          .thenReturn(new Stream.fromIterable(['ext.flutter_driver']));
 
       FlutterDriver driver = await FlutterDriver.connect();
       expect(driver, isNotNull);
@@ -203,6 +201,3 @@ class MockVMPauseBreakpointEvent extends Mock implements VMPauseBreakpointEvent 
 
 @proxy
 class MockVMResumeEvent extends Mock implements VMResumeEvent { }
-
-@proxy
-class MockVMServiceExtension extends Mock implements VMServiceExtension { }

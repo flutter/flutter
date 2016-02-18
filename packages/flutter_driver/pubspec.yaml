@@ -8,10 +8,7 @@ environment:
   sdk: '>=1.12.0 <2.0.0'
 
 dependencies:
-  vm_service_client:
-    git:
-      url: git://github.com/yjbanov/vm_service_client.git
-      ref: 54085d1
+  vm_service_client: '>=0.1.2 <1.0.0'
   json_rpc_2: any
   logging: '>=0.11.0 <1.0.0'
   flutter:
