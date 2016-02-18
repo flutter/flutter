@@ -218,6 +218,16 @@ class Velocity {
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
 
+  Velocity operator -() => new Velocity(pixelsPerSecond: -pixelsPerSecond);
+  Velocity operator -(Velocity other) {
+    return new Velocity(
+        pixelsPerSecond: pixelsPerSecond - other.pixelsPerSecond);
+  }
+  Velocity operator +(Velocity other) {
+    return new Velocity(
+        pixelsPerSecond: pixelsPerSecond + other.pixelsPerSecond);
+  }
+
   bool operator ==(dynamic other) {
     if (other is! Velocity)
       return false;
