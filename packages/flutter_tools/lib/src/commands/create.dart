@@ -98,6 +98,7 @@ abstract class Template {
   void generateInto(Directory dir, String flutterPackagePath) {
     String dirPath = path.normalize(dir.absolute.path);
     String projectName = _normalizeProjectName(path.basename(dirPath));
+    String projectIdentifier = _createProjectIdentifier(path.basename(dirPath));
     printStatus('Creating ${path.basename(projectName)}...');
     dir.createSync(recursive: true);
 
@@ -108,6 +109,7 @@ abstract class Template {
       String contents = files[filePath];
       Map m = <String, String>{
         'projectName': projectName,
+        'projectIdentifier': projectIdentifier,
         'description': description,
         'flutterPackagePath': relativeFlutterPackagePath
       };
@@ -148,6 +150,14 @@ String _normalizeProjectName(String name) {
   if (name.contains('.'))
     name = name.substring(0, name.indexOf('.'));
   return name;
+}
+
+String _createProjectIdentifier(String name) {
+  // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
+  RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-.\u0080-\uffff]+");
+  name = name.replaceAll(disallowed, '');
+  name = name.length == 0 ? 'untitled' : name;
+  return 'com.yourcompany.${name}';
 }
 
 const String _analysis_options = r'''
@@ -244,7 +254,7 @@ class FlutterDemoState extends State {
 
 final String _apkManifest = '''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.{{projectName}}"
+    package="{{projectIdentifier}}"
     android:versionCode="1"
     android:versionName="0.0.1">
 
