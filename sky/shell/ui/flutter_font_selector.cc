@@ -48,6 +48,12 @@ FlutterFontSelector::FlutterFontSelector(
     : zip_asset_bundle_(zip_asset_bundle) {
 }
 
+FlutterFontSelector::~FlutterFontSelector() {
+}
+
+FlutterFontSelector::TypefaceAsset::TypefaceAsset() {
+}
+
 void FlutterFontSelector::parseFontManifest() {
   std::vector<uint8_t> font_manifest_data;
   if (!zip_asset_bundle_->GetAsBuffer(kFontManifestAssetPath,
