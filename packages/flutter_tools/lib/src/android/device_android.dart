@@ -392,6 +392,8 @@ class AndroidDevice extends Device {
 
   bool isConnected() => _connected ?? androidSdk != null;
 
+  bool isSupported() => true;
+
   void setConnected(bool value) {
     _connected = value;
   }

@@ -150,6 +150,9 @@ class IOSDevice extends Device {
   bool isConnected() => _getAttachedDeviceIDs().contains(id);
 
   @override
+  bool isSupported() => true;
+
+  @override
   bool isAppInstalled(ApplicationPackage app) {
     try {
       String apps = runCheckedSync([installerPath, '--list-apps']);
@@ -289,6 +292,61 @@ class IOSSimulator extends Device {
     if (!Platform.isMacOS)
       return false;
     return SimControl.getConnectedDevices().any((SimDevice device) => device.udid == id);
+  }
+
+  @override
+  bool isSupported() {
+    if (!Platform.isMacOS) {
+      _supportMessage = "Not supported on a non Mac host";
+      return false;
+    }
+
+    // Step 1: Check if the device is part of a blacklisted category.
+    //         We do not support WatchOS or tvOS devices.
+
+    RegExp blacklist = new RegExp(r'Apple (TV|Watch)', caseSensitive: false);
+
+    if (blacklist.hasMatch(name)) {
+      _supportMessage = "Flutter does not support either the Apple TV or Watch. Choose an iPhone 5s or above.";
+      return false;
+    }
+
+    // Step 2: Check if the device must be rejected because of its version.
+    //         There is an artitifical check on older simulators where arm64
+    //         targetted applications cannot be run (even though the
+    //         Flutter runner on the simulator is completely different).
+
+    RegExp versionExp = new RegExp(r'iPhone ([0-9])+');
+    Match match = versionExp.firstMatch(name);
+
+    if (match == null) {
+      // Not an iPhone. All available non-iPhone simulators are compatible.
+      return true;
+    }
+
+    if (int.parse(match.group(1)) > 5) {
+      // iPhones 6 and above are always fine.
+      return true;
+    }
+
+    // The 's' subtype of 5 is compatible.
+    if (name.contains('iPhone 5s')) {
+      return true;
+    }
+
+    _supportMessage = "The simulator version is too old. Choose an iPhone 5s or above.";
+    return false;
+  }
+
+  String _supportMessage;
+
+  @override
+  String supportMessage() {
+    if (isSupported()) {
+      return "Supported";
+    }
+
+    return _supportMessage != null ? _supportMessage : "Unknown";
   }
 
   @override
