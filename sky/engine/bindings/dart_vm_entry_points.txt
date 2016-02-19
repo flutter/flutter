@@ -14,7 +14,6 @@ dart:ui,::,_pushRoute
 dart:ui,::,_updateLocale
 dart:ui,::,_updateWindowMetrics
 dart:ui,::,takeRootBundleHandle
-dart:ui,::,takeServiceRegistry
 dart:ui,::,takeServicesProvidedByEmbedder
 dart:ui,::,takeServicesProvidedToEmbedder
 dart:ui,::,takeShellProxyHandle

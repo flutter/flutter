@@ -33,11 +33,6 @@ void DartTakeShellProxyHandle(Dart_NativeArguments args) {
       args, GetMojoServices()->TakeShellProxy().value());
 }
 
-void DartTakeServiceRegistry(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(
-      args, GetMojoServices()->TakeServiceRegistry().value());
-}
-
 void DartTakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(
       args, GetMojoServices()->TakeServicesProvidedByEmbedder().value());
@@ -58,7 +53,6 @@ void DartTakeViewHostHandle(Dart_NativeArguments args) {
 void MojoServices::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
     {"takeRootBundleHandle", DartTakeRootBundleHandle, 0, true},
-    {"takeServiceRegistry", DartTakeServiceRegistry, 0, true},
     {"takeServicesProvidedByEmbedder", DartTakeServicesProvidedByEmbedder, 0, true},
     {"takeServicesProvidedToEmbedder", DartTakeServicesProvidedToEmbedder, 0, true},
     {"takeShellProxyHandle", DartTakeShellProxyHandle, 0, true},
@@ -103,10 +97,6 @@ void MojoServices::Create(
 
 mojo::Handle MojoServices::TakeShellProxy() {
   return services_ ? services_->shell.PassInterface().PassHandle().release() : mojo::Handle();
-}
-
-mojo::Handle MojoServices::TakeServiceRegistry() {
-  return mojo::Handle();
 }
 
 mojo::Handle MojoServices::TakeServicesProvidedByEmbedder() {

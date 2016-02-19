@@ -33,7 +33,6 @@ class MojoServices
   static void RegisterNatives(DartLibraryNatives* natives);
 
   mojo::Handle TakeShellProxy();
-  mojo::Handle TakeServiceRegistry();
   mojo::Handle TakeServicesProvidedByEmbedder();
   mojo::Handle TakeServicesProvidedToEmbedder();
   mojo::Handle TakeRootBundleHandle();
