@@ -241,6 +241,7 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.RUN',
       '-d', _deviceBundlePath,
       '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+      '--ez', 'enable-background-compilation', 'true',
     ]);
     if (checked)
       cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
