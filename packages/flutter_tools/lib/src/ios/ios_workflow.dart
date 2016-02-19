@@ -39,7 +39,7 @@ class IOSWorkflow extends Workflow {
       return ValidationType.missing;
     };
 
-    Function _xcodeVersionSatisfacotry = () {
+    Function _xcodeVersionSatisfactory = () {
       if (xcode.isInstalledAndMeetsVersionCheck) {
         return ValidationType.installed;
       }
@@ -71,10 +71,10 @@ class IOSWorkflow extends Workflow {
     iosValidator.addValidator(xcodeValidator);
 
     xcodeValidator.addValidator(new Validator(
-      'XCode',
+      'Version Check',
       description: 'Xcode version is at least $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor',
       resolution: 'Download the latest version or update via the Mac App Store',
-      validatorFunction: _xcodeVersionSatisfacotry
+      validatorFunction: _xcodeVersionSatisfactory
     ));
 
     Validator brewValidator = new Validator(
