@@ -36,4 +36,13 @@ void DOMDartState::DidSetIsolate() {
   color_class_.Set(this, Dart_GetType(library, ToDart("Color"), 0, 0));
 }
 
+void DOMDartState::set_font_selector(PassRefPtr<FontSelector> selector) {
+  font_selector_ = selector;
+}
+
+PassRefPtr<FontSelector> DOMDartState::font_selector() {
+  return font_selector_;
+}
+
+
 }  // namespace blink

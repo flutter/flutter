@@ -23,6 +23,12 @@
 #include "sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
+namespace mojo {
+namespace asset_bundle {
+class ZipAssetBundle;
+}
+}
+
 namespace sky {
 class PlatformImpl;
 namespace shell {
@@ -81,6 +87,8 @@ class Engine : public UIDelegate,
   void RunFromSnapshotStream(const std::string& name,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
 
+  void SetupAssetBundle(const mojo::String& bundle_path);
+
   void StopAnimator();
   void StartAnimatorIfPossible();
 
@@ -97,6 +105,7 @@ class Engine : public UIDelegate,
   std::string language_code_;
   std::string country_code_;
   mojo::Binding<SkyEngine> binding_;
+  scoped_refptr<mojo::asset_bundle::ZipAssetBundle> zip_asset_bundle_;
 
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;
