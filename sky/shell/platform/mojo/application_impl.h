@@ -20,6 +20,7 @@ namespace shell {
 
 class ApplicationImpl : public mojo::Application,
                         public mojo::ServiceProvider,
+                        public mojo::Shell,
                         public mojo::ui::ViewProvider {
  public:
   ApplicationImpl(mojo::InterfaceRequest<mojo::Application> application,
@@ -42,6 +43,14 @@ class ApplicationImpl : public mojo::Application,
   void ConnectToService(const mojo::String& service_name,
                         mojo::ScopedMessagePipeHandle client_handle) override;
 
+  // mojo::Shell
+  void ConnectToApplication(
+      const mojo::String& application_url,
+      mojo::InterfaceRequest<mojo::ServiceProvider> services,
+      mojo::ServiceProviderPtr exposed_services) override;
+  void CreateApplicationConnector(
+      mojo::InterfaceRequest<mojo::ApplicationConnector> request) override;
+
   // mojo::ui::ViewProvider
   void CreateView(
       mojo::InterfaceRequest<mojo::ServiceProvider> services,
@@ -53,11 +62,11 @@ class ApplicationImpl : public mojo::Application,
   mojo::StrongBinding<mojo::Application> binding_;
   mojo::URLResponsePtr initial_response_;
   mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
+  mojo::BindingSet<mojo::Shell> shell_bindings_;
   mojo::BindingSet<mojo::ui::ViewProvider> view_provider_bindings_;
   std::string url_;
   mojo::ShellPtr shell_;
   base::FilePath flx_path_;
-  bool view_created_;
 };
 
 }  // namespace shell

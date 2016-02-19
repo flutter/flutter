@@ -16,8 +16,7 @@ ApplicationImpl::ApplicationImpl(
   mojo::InterfaceRequest<mojo::Application> application,
   mojo::URLResponsePtr response)
   : binding_(this, application.Pass()),
-    initial_response_(response.Pass()),
-    view_created_(false) {
+    initial_response_(response.Pass()) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -54,19 +53,32 @@ void ApplicationImpl::ConnectToService(const mojo::String& service_name,
   }
 }
 
+void ApplicationImpl::ConnectToApplication(
+    const mojo::String& application_url,
+    mojo::InterfaceRequest<mojo::ServiceProvider> services,
+    mojo::ServiceProviderPtr exposed_services) {
+  shell_->ConnectToApplication(application_url,
+                               services.Pass(),
+                               exposed_services.Pass());
+}
+
+void ApplicationImpl::CreateApplicationConnector(
+    mojo::InterfaceRequest<mojo::ApplicationConnector> request) {
+  shell_->CreateApplicationConnector(request.Pass());
+}
+
 void ApplicationImpl::CreateView(
     mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
     mojo::ServiceProviderPtr incoming_services,
     const mojo::ui::ViewProvider::CreateViewCallback& callback) {
-  if (view_created_) {
-    LOG(ERROR) << "We only support creating one view.";
-    return;
-  }
 
-  view_created_ = true;
+  // TODO(abarth): Rather than proxying the shell, we should give Dart an
+  //               ApplicationConnectorPtr instead of a ShellPtr.
+  mojo::ShellPtr shell;
+  shell_bindings_.AddBinding(this, mojo::GetProxy(&shell));
 
   ServicesDataPtr services = ServicesData::New();
-  services->shell = shell_.Pass();
+  services->shell = shell.Pass();
   services->services_provided_by_embedder = incoming_services.Pass();
   services->services_provided_to_embedder = outgoing_services.Pass();
 
