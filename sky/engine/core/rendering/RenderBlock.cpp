@@ -1280,24 +1280,6 @@ static bool shouldCheckLines(RenderObject* obj)
         && obj->isRenderBlock() && obj->style()->height().isAuto();
 }
 
-static int getHeightForLineCount(RenderBlock* block, int l, bool includeBottom, int& count)
-{
-    RenderBox* normalFlowChildWithoutLines = 0;
-    for (RenderBox* obj = block->firstChildBox(); obj; obj = obj->nextSiblingBox()) {
-        if (shouldCheckLines(obj)) {
-            int result = getHeightForLineCount(toRenderBlock(obj), l, false, count);
-            if (result != -1)
-                return result + obj->y() + (includeBottom ? (block->borderBottom() + block->paddingBottom()) : LayoutUnit());
-        } else if (!obj->isFloatingOrOutOfFlowPositioned()) {
-            normalFlowChildWithoutLines = obj;
-        }
-    }
-    if (normalFlowChildWithoutLines && l == 0)
-        return normalFlowChildWithoutLines->y() + normalFlowChildWithoutLines->height();
-
-    return -1;
-}
-
 RootInlineBox* RenderBlock::lineAtIndex(int i) const
 {
     ASSERT(i >= 0);

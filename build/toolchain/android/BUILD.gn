@@ -45,8 +45,18 @@ template("android_gcc_toolchain") {
       compiler_prefix = ""
     }
 
-    cc = compiler_prefix + tool_prefix + "gcc"
-    cxx = compiler_prefix + tool_prefix + "g++"
+    is_clang = invoker.is_clang
+    if (is_clang) {
+      prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
+                           root_build_dir)
+
+      cc = compiler_prefix + prefix + "/clang"
+      cxx = compiler_prefix + prefix + "/clang++"
+    } else {
+      cc = compiler_prefix + tool_prefix + "gcc"
+      cxx = compiler_prefix + tool_prefix + "g++"
+    }
+
     ar = tool_prefix + "ar"
     ld = cxx
     readelf = compiler_prefix + tool_prefix + "readelf"
@@ -80,7 +90,23 @@ template("android_gcc_toolchain") {
   }
 }
 
-android_gcc_toolchain("x86") {
+template("android_gcc_toolchains_helper") {
+  android_gcc_toolchain(target_name) {
+    android_ndk_sysroot = invoker.android_ndk_sysroot
+    android_ndk_lib_dir = invoker.android_ndk_lib_dir
+    tool_prefix = invoker.tool_prefix
+    toolchain_cpu = invoker.toolchain_cpu
+  }
+  android_gcc_toolchain("clang_$target_name") {
+    android_ndk_sysroot = invoker.android_ndk_sysroot
+    android_ndk_lib_dir = invoker.android_ndk_lib_dir
+    tool_prefix = invoker.tool_prefix
+    toolchain_cpu = invoker.toolchain_cpu
+    is_clang = true
+  }
+}
+
+android_gcc_toolchains_helper("x86") {
   android_ndk_sysroot = "$android_ndk_root/$x86_android_sysroot_subdir"
   android_ndk_lib_dir = "usr/lib"
 
@@ -88,7 +114,7 @@ android_gcc_toolchain("x86") {
   toolchain_cpu = "x86"
 }
 
-android_gcc_toolchain("arm") {
+android_gcc_toolchains_helper("arm") {
   android_ndk_sysroot = "$android_ndk_root/$arm_android_sysroot_subdir"
   android_ndk_lib_dir = "usr/lib"
 
@@ -96,7 +122,7 @@ android_gcc_toolchain("arm") {
   toolchain_cpu = "arm"
 }
 
-android_gcc_toolchain("mipsel") {
+android_gcc_toolchains_helper("mipsel") {
   android_ndk_sysroot = "$android_ndk_root/$mips_android_sysroot_subdir"
   android_ndk_lib_dir = "usr/lib"
 
@@ -104,7 +130,7 @@ android_gcc_toolchain("mipsel") {
   toolchain_cpu = "mipsel"
 }
 
-android_gcc_toolchain("x64") {
+android_gcc_toolchains_helper("x64") {
   android_ndk_sysroot = "$android_ndk_root/$x86_64_android_sysroot_subdir"
   android_ndk_lib_dir = "usr/lib64"
 
@@ -112,7 +138,7 @@ android_gcc_toolchain("x64") {
   toolchain_cpu = "x86_64"
 }
 
-android_gcc_toolchain("arm64") {
+android_gcc_toolchains_helper("arm64") {
   android_ndk_sysroot = "$android_ndk_root/$arm64_android_sysroot_subdir"
   android_ndk_lib_dir = "usr/lib"
 
@@ -120,7 +146,7 @@ android_gcc_toolchain("arm64") {
   toolchain_cpu = "aarch64"
 }
 
-android_gcc_toolchain("mips64el") {
+android_gcc_toolchains_helper("mips64el") {
   android_ndk_sysroot = "$android_ndk_root/$mips64_android_sysroot_subdir"
   android_ndk_lib_dir = "usr/lib64"
 
