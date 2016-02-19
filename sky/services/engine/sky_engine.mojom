@@ -8,7 +8,6 @@ import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/public/interfaces/application/shell.mojom";
 import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
 import "mojo/services/gfx/composition/interfaces/scheduling.mojom";
-import "mojo/services/service_registry/interfaces/service_registry.mojom";
 import "mojo/services/ui/views/interfaces/views.mojom";
 import "sky/services/engine/input_event.mojom";
 import "sky/services/pointer/pointer.mojom";
@@ -30,7 +29,6 @@ struct ViewportMetrics {
 
 struct ServicesData {
   mojo.Shell? shell;
-  mojo.ServiceRegistry? service_registry;
   mojo.ServiceProvider? services_provided_by_embedder;
   mojo.ServiceProvider&? services_provided_to_embedder;
   mojo.ui.ViewHost? view_host;
