@@ -91,19 +91,7 @@ Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) asyn
   return true;
 }
 
-void _writeUserEditableFilesIfNecessary(String directory) {
-  iosTemplateFiles.forEach((String filePath, String contents) {
-    File file = new File(filePath);
-
-    if (!file.existsSync()) {
-      file.parent.createSync(recursive: true);
-      file.writeAsStringSync(contents);
-      printStatus('Created $filePath.');
-    }
-  });
-}
-
-void _setupXcodeProjXcconfig(String filePath) {
+void updateXcodeLocalProperties(String projectPath) {
   StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -118,7 +106,7 @@ void _setupXcodeProjXcconfig(String filePath) {
   String dartSDKPath = path.normalize(path.join(Platform.resolvedExecutable, '..', '..'));
   localsBuffer.writeln('DART_SDK_PATH=$dartSDKPath');
 
-  File localsFile = new File(filePath);
+  File localsFile = new File(path.join(projectPath, 'ios', '.generated', 'Local.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
@@ -142,9 +130,9 @@ bool xcodeProjectRequiresUpdate() {
   return false;
 }
 
-Future<int> setupXcodeProjectHarness() async {
+Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   // Step 1: Fetch the archive from the cloud
-  String iosFilesPath = path.join(Directory.current.path, 'ios');
+  String iosFilesPath = path.join(flutterProjectPath, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
   List<int> archiveBytes = await _fetchXcodeArchive();
 
@@ -160,19 +148,15 @@ Future<int> setupXcodeProjectHarness() async {
     return 1;
   }
 
-  // Step 3: Setup default user editable files if this is the first run of
-  //         the init command.
-  _writeUserEditableFilesIfNecessary(iosFilesPath);
+  // Step 3: Populate the Local.xcconfig with project specific paths
+  updateXcodeLocalProperties(flutterProjectPath);
 
-  // Step 4: Populate the Local.xcconfig with project specific paths
-  _setupXcodeProjXcconfig(path.join(xcodeprojPath, 'Local.xcconfig'));
-
-  // Step 5: Write the REVISION file
+  // Step 4: Write the REVISION file
   File revisionFile = new File(path.join(xcodeprojPath, 'REVISION'));
   revisionFile.createSync();
   revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
 
-  // Step 6: Tell the user the location of the generated project.
+  // Step 5: Tell the user the location of the generated project.
   printStatus('Xcode project created at $xcodeprojPath/.');
   printStatus('User editable settings are in $iosFilesPath/.');
 
@@ -189,11 +173,11 @@ final String _infoPlistInitialContents = '''
 	<key>CFBundleExecutable</key>
 	<string>Runner</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.runner.Runner</string>
+	<string>com.example.{{projectName}}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Flutter</string>
+	<string>{{projectName}}</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

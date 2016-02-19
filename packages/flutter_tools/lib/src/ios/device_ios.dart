@@ -565,12 +565,16 @@ String _getIOSEngineRevision(ApplicationPackage app) {
 }
 
 Future<bool> _buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice }) async {
+  String flutterProjectPath = Directory.current.path;
+
   if (xcodeProjectRequiresUpdate()) {
     printTrace('Initializing the Xcode project.');
-    if ((await setupXcodeProjectHarness()) != 0) {
+    if ((await setupXcodeProjectHarness(flutterProjectPath)) != 0) {
       printError('Could not initialize the Xcode project.');
       return false;
     }
+  } else {
+    updateXcodeLocalProperties(flutterProjectPath);
   }
 
   if (!_validateEngineRevision(app))
