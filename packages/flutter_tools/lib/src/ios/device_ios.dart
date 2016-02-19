@@ -248,7 +248,7 @@ class IOSSimulator extends Device {
   IOSSimulator(String id, { this.name }) : super(id);
 
   static List<IOSSimulator> getAttachedDevices() {
-    if (!xcode.isInstalled)
+    if (!xcode.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
     return SimControl.getConnectedDevices().map((SimDevice device) {

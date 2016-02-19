@@ -7,6 +7,7 @@ import 'dart:io';
 import '../base/process.dart';
 import '../doctor.dart';
 import '../globals.dart';
+import 'mac.dart';
 
 class IOSWorkflow extends Workflow {
   IOSWorkflow() : super('iOS');
@@ -14,11 +15,11 @@ class IOSWorkflow extends Workflow {
   bool get appliesToHostPlatform => Platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
-  bool get canListDevices => xcode.isInstalled;
+  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
-  bool get canLaunchDevices => xcode.isInstalled;
+  bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
 
   ValidationResult validate() {
     Validator iosValidator = new Validator(
@@ -27,7 +28,23 @@ class IOSWorkflow extends Workflow {
     );
 
     Function _xcodeExists = () {
-      return xcode.isInstalled ? ValidationType.installed : ValidationType.missing;
+      if (xcode.isInstalledAndMeetsVersionCheck) {
+        return ValidationType.installed;
+      }
+
+      if (xcode.isInstalled) {
+        return ValidationType.partial;
+      }
+
+      return ValidationType.missing;
+    };
+
+    Function _xcodeVersionSatisfacotry = () {
+      if (xcode.isInstalledAndMeetsVersionCheck) {
+        return ValidationType.installed;
+      }
+
+      return ValidationType.missing;
     };
 
     Function _brewExists = () {
@@ -44,11 +61,20 @@ class IOSWorkflow extends Workflow {
       return hasIdeviceId ? ValidationType.installed : ValidationType.missing;
     };
 
-    iosValidator.addValidator(new Validator(
+    Validator xcodeValidator = new Validator(
       'XCode',
       description: 'enable development for iOS devices',
       resolution: 'Download at https://developer.apple.com/xcode/download/',
       validatorFunction: _xcodeExists
+    );
+
+    iosValidator.addValidator(xcodeValidator);
+
+    xcodeValidator.addValidator(new Validator(
+      'XCode',
+      description: 'Xcode version is at least $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor',
+      resolution: 'Download the latest version or update via the Mac App Store',
+      validatorFunction: _xcodeVersionSatisfacotry
     ));
 
     Validator brewValidator = new Validator(
