@@ -14,7 +14,6 @@ mojom("interfaces") {
     "//mojo/public/interfaces/application",
     "//mojo/services/asset_bundle/interfaces",
     "//mojo/services/gfx/composition/interfaces",
-    "//mojo/services/service_registry/interfaces",
     "//mojo/services/ui/views/interfaces",
     "//sky/services/pointer:interfaces",
   ]

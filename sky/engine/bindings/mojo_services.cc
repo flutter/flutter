@@ -106,7 +106,7 @@ mojo::Handle MojoServices::TakeShellProxy() {
 }
 
 mojo::Handle MojoServices::TakeServiceRegistry() {
-  return services_ ? services_->service_registry.PassInterface().PassHandle().release() : mojo::Handle();
+  return mojo::Handle();
 }
 
 mojo::Handle MojoServices::TakeServicesProvidedByEmbedder() {

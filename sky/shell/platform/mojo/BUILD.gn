@@ -36,7 +36,6 @@ mojo_native_application("mojo") {
     "//mojo/services/content_handler/interfaces",
     "//mojo/services/gfx/composition/interfaces",
     "//mojo/services/input_events/interfaces",
-    "//mojo/services/service_registry/interfaces",
     "//mojo/services/ui/input/interfaces",
     "//mojo/services/ui/views/interfaces",
     "//services/asset_bundle:lib",
