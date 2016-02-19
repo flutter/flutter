@@ -25,6 +25,7 @@
 namespace android {
 
 const uint32_t CHAR_SOFT_HYPHEN = 0x00AD;
+const uint16_t CHAR_ZWJ = 0x200D;
 
 void WordBreaker::setLocale(const icu::Locale& locale) {
     UErrorCode status = U_ZERO_ERROR;
@@ -61,6 +62,32 @@ enum ScanState {
     SAW_COLON_SLASH,
     SAW_COLON_SLASH_SLASH,
 };
+
+/**
+ * Determine whether a line break at position i within the buffer buf is valid. This
+ * represents customization beyond the ICU behavior, because plain ICU provides some
+ * line break opportunities that we don't want.
+ **/
+static bool isBreakValid(uint16_t codeUnit, const uint16_t* buf, size_t bufEnd, size_t i) {
+    if (codeUnit == CHAR_SOFT_HYPHEN) {
+        return false;
+    }
+    if (codeUnit == CHAR_ZWJ) {
+        // Possible emoji ZWJ sequence
+        uint32_t next_codepoint;
+        U16_NEXT(buf, i, bufEnd, next_codepoint);
+        if (next_codepoint == 0x2764 ||       // HEAVY BLACK HEART
+                next_codepoint == 0x1F466 ||  // BOY
+                next_codepoint == 0x1F467 ||  // GIRL
+                next_codepoint == 0x1F468 ||  // MAN
+                next_codepoint == 0x1F469 ||  // WOMAN
+                next_codepoint == 0x1F48B ||  // KISS MARK
+                next_codepoint == 0x1F5E8) {  // LEFT SPEECH BUBBLE
+            return false;
+        }
+    }
+    return true;
+}
 
 // Chicago Manual of Style recommends breaking after these characters in URLs and email addresses
 static bool breakAfter(uint16_t c) {
@@ -149,7 +176,7 @@ ssize_t WordBreaker::next() {
             result = mBreakIterator->next();
         }
     } while (result != icu::BreakIterator::DONE && (size_t)result != mTextSize
-             && mText[result - 1] == CHAR_SOFT_HYPHEN);
+            && !isBreakValid(mText[result - 1], mText, mTextSize, result));
     mCurrent = (ssize_t)result;
     return mCurrent;
 }
