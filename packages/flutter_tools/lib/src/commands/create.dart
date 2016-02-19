@@ -157,7 +157,7 @@ String _createProjectIdentifier(String name) {
   RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-.\u0080-\uffff]+");
   name = name.replaceAll(disallowed, '');
   name = name.length == 0 ? 'untitled' : name;
-  return 'com.yourcompany.${name}';
+  return 'com.yourcompany.$name';
 }
 
 const String _analysis_options = r'''
