@@ -21,6 +21,7 @@ import 'tooltip.dart';
 class IconButton extends StatelessComponent {
   const IconButton({
     Key key,
+    this.size: IconSize.s24,
     this.icon,
     this.colorTheme,
     this.color,
@@ -28,6 +29,7 @@ class IconButton extends StatelessComponent {
     this.tooltip
   }) : super(key: key);
 
+  final IconSize size;
   final String icon;
   final IconThemeColor colorTheme;
   final Color color;
@@ -42,6 +44,7 @@ class IconButton extends StatelessComponent {
     Widget result = new Padding(
       padding: const EdgeDims.all(8.0),
       child: new Icon(
+        size: size,
         icon: icon,
         colorTheme: colorTheme,
         color: color
