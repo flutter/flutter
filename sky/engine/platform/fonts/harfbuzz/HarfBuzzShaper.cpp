@@ -646,7 +646,7 @@ static inline bool collectCandidateRuns(const UChar* normalizedBuffer,
             lastCharacter = character;
         }
 
-        CandidateRun run = { character, startIndexOfCurrentRun, iterator.currentCharacter(), currentFontData, currentScript };
+        CandidateRun run = { character, startIndexOfCurrentRun, static_cast<unsigned>(iterator.currentCharacter()), currentFontData, currentScript };
         runs->append(run);
 
         startIndexOfCurrentRun = iterator.currentCharacter();
