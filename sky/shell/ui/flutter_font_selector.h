@@ -24,6 +24,8 @@ namespace shell {
 // loaded from the FLX.
 class FlutterFontSelector : public blink::FontSelector {
  public:
+  ~FlutterFontSelector() override;
+
   static void install(
       const scoped_refptr<mojo::asset_bundle::ZipAssetBundle>& zip_asset_bundle);
 
@@ -42,6 +44,7 @@ class FlutterFontSelector : public blink::FontSelector {
  private:
   // A Skia typeface along with a buffer holding the raw typeface asset data.
   struct TypefaceAsset {
+    TypefaceAsset();
     RefPtr<SkTypeface> typeface;
     std::vector<uint8_t> data;
   };
