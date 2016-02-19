@@ -581,7 +581,11 @@ if (is_win) {
   } else {
     assert(false, "Unknown host for android cross compile")
   }
-  set_default_toolchain("//build/toolchain/android:$current_cpu")
+  if (is_clang) {
+    set_default_toolchain("//build/toolchain/android:clang_$current_cpu")
+  } else {
+    set_default_toolchain("//build/toolchain/android:$current_cpu")
+  }
 } else if (is_linux) {
   if (is_clang) {
     host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
