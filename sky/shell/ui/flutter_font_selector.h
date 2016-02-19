@@ -45,6 +45,7 @@ class FlutterFontSelector : public blink::FontSelector {
   // A Skia typeface along with a buffer holding the raw typeface asset data.
   struct TypefaceAsset {
     TypefaceAsset();
+    ~TypefaceAsset();
     RefPtr<SkTypeface> typeface;
     std::vector<uint8_t> data;
   };
