@@ -16,6 +16,7 @@ import '../demo/chip_demo.dart';
 import '../demo/date_picker_demo.dart';
 import '../demo/dialog_demo.dart';
 import '../demo/drop_down_demo.dart';
+import '../demo/fitness_demo.dart';
 import '../demo/grid_list_demo.dart';
 import '../demo/modal_bottom_sheet_demo.dart';
 import '../demo/page_selector_demo.dart';
@@ -28,10 +29,10 @@ import '../demo/snack_bar_demo.dart';
 import '../demo/tabs_demo.dart';
 import '../demo/tabs_fab_demo.dart';
 import '../demo/time_picker_demo.dart';
+import '../demo/tooltip_demo.dart';
 import '../demo/two_level_list_demo.dart';
 import '../demo/typography_demo.dart';
 import '../demo/weathers_demo.dart';
-import '../demo/fitness_demo.dart';
 
 class GalleryHome extends StatefulComponent {
   GalleryHome({ Key key }) : super(key: key);
@@ -111,7 +112,8 @@ class GalleryHomeState extends State<GalleryHome> {
                     new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
                     new GalleryDemo(title: 'SnackBar', builder: () => new SnackBarDemo()),
                     new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
-                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo())
+                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
+                    new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
                   ]
                 )
               ]
@@ -129,7 +131,10 @@ class GalleryHomeState extends State<GalleryHome> {
                 new GallerySection(
                   title: 'Usability',
                   image: 'assets/section_usability.png',
-                  colors: Colors.lightGreen
+                  colors: Colors.lightGreen,
+                  demos: <GalleryDemo>[
+                    new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
+                  ]
                 )
               ]
             )
