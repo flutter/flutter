@@ -18,6 +18,7 @@ import '../demo/dialog_demo.dart';
 import '../demo/drop_down_demo.dart';
 import '../demo/fitness_demo.dart';
 import '../demo/grid_list_demo.dart';
+import '../demo/icons_demo.dart';
 import '../demo/modal_bottom_sheet_demo.dart';
 import '../demo/page_selector_demo.dart';
 import '../demo/persistent_bottom_sheet_demo.dart';
@@ -104,6 +105,7 @@ class GalleryHomeState extends State<GalleryHome> {
                     new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
                     new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo()),
                     new GalleryDemo(title: 'Grid', builder: () => new GridListDemo()),
+                    new GalleryDemo(title: 'Icons', builder: () => new IconsDemo()),
                     new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
                     new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
                     new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
