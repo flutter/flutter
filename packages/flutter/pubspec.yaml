@@ -14,7 +14,7 @@ dependencies:
   # See the comment in flutter_tools' pubspec.yaml. We have to pin it
   # here also because sky_services depends on mojo_sdk which depends
   # on test.
-  test: 0.12.6+1
+  test: 0.12.11+1
 
   # We have to pin analyzer to 0.27.1 because the flx package depends
   # on pointycastle which depends on reflectable which depends on
