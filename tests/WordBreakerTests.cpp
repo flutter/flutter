@@ -67,6 +67,30 @@ TEST_F(WordBreakerTest, softHyphen) {
     EXPECT_EQ(0, breaker.breakBadness());
 }
 
+TEST_F(WordBreakerTest, zwjEmojiSequences) {
+    uint16_t buf[] = {
+        // man + zwj + heart + zwj + man
+        0xD83D, 0xDC68, 0x200D, 0x2764, 0x200D, 0xD83D, 0xDC68,
+        // woman + zwj + heart + zwj + woman
+        0xD83D, 0xDC69, 0x200D, 0x2764, 0x200D, 0xD83D, 0xDC8B, 0x200D, 0xD83D, 0xDC69,
+        // eye + zwj + left speech bubble
+        0xD83D, 0xDC41, 0x200D, 0xD83D, 0xDDE8,
+    };
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(7, breaker.next());  // after man + zwj + heart + zwj + man
+    EXPECT_EQ(0, breaker.wordStart());
+    EXPECT_EQ(7, breaker.wordEnd());
+    EXPECT_EQ(17, breaker.next());  // after woman + zwj + heart + zwj + woman
+    EXPECT_EQ(7, breaker.wordStart());
+    EXPECT_EQ(17, breaker.wordEnd());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_EQ(17, breaker.wordStart());
+    EXPECT_EQ(22, breaker.wordEnd());
+}
+
 TEST_F(WordBreakerTest, punct) {
     uint16_t buf[] = {0x00A1, 0x00A1, 'h', 'e', 'l', 'l' ,'o', ',', ' ', 'w', 'o', 'r', 'l', 'd',
         '!', '!'};
