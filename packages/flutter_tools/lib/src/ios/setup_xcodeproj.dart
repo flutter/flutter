@@ -173,7 +173,7 @@ final String _infoPlistInitialContents = '''
 	<key>CFBundleExecutable</key>
 	<string>Runner</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.example.{{projectName}}</string>
+	<string>{{projectIdentifier}}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
