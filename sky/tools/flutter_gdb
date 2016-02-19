@@ -1,0 +1,163 @@
+#!/usr/bin/env python
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+
+"""Tool for starting a GDB client and server to debug a Flutter engine process on an Android device.
+
+Usage:
+  flutter_gdb server com.example.package_name
+  flutter_gdb client com.example.package_name
+
+The Android package must be marked as debuggable in its manifest.
+
+The "client" command will copy system libraries from the device to the host
+in order to provide debug symbols.  If this has already been done on a
+previous run for a given device, then you can skip this step by passing
+--no-pull-libs.
+"""
+
+ADB_LOCAL_PATH = 'third_party/android_tools/sdk/platform-tools/adb'
+
+def _get_flutter_root():
+    return os.path.abspath(os.path.join(
+        __file__, os.pardir, os.pardir, os.pardir))
+
+
+def _find_package_pid(adb_path, package):
+    """Find the pid of the Flutter application process."""
+    ps_output = subprocess.check_output([adb_path, 'shell', 'ps'])
+    ps_match = re.search('^\S+\s+(\d+).*\s%s' % package, ps_output, re.MULTILINE)
+    if not ps_match:
+        print 'Unable to find pid for package %s on device' % package
+        return None
+    return int(ps_match.group(1))
+
+
+class GdbClient(object):
+    GDB_LOCAL_PATH = ('third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.9/'
+                      'prebuilt/linux-x86_64/bin/arm-linux-androideabi-gdb')
+    SYSTEM_LIBS_PATH = '/tmp/flutter_gdb_device_libs'
+
+    def add_subparser(self, subparsers):
+        parser = subparsers.add_parser('client',
+            help='run a GDB client')
+        parser.add_argument('package', type=str)
+        parser.add_argument('--gdb-port', type=int, default=8888)
+        parser.add_argument('--no-pull-libs', action="store_false",
+            default=True, dest="pull_libs",
+            help="Do not copy system libraries from the device to the host")
+        parser.set_defaults(func=self.run)
+
+    def _copy_system_libs(self, adb_path, package):
+        """Copy libraries used by the Flutter process from the device to the host."""
+        package_pid = _find_package_pid(adb_path, package)
+        if package_pid is None:
+            return False
+
+        # Find library files that are mapped into the process.
+        proc_maps = subprocess.check_output(
+            [adb_path, 'shell', 'run-as', package, 'cat', '/proc/%d/maps' % package_pid])
+        proc_libs = re.findall('(/system/.*\.so)\s*$', proc_maps, re.MULTILINE)
+
+        device_libs = set(proc_libs)
+        device_libs.add('/system/bin/linker')
+
+        if not os.path.exists(GdbClient.SYSTEM_LIBS_PATH):
+            os.makedirs(GdbClient.SYSTEM_LIBS_PATH)
+
+        dev_null = open(os.devnull, 'w')
+        for lib in sorted(device_libs):
+            print 'Copying %s' % lib
+            local_path = os.path.join(GdbClient.SYSTEM_LIBS_PATH, os.path.basename(lib))
+            subprocess.check_call([adb_path, 'pull', lib, local_path], stderr=dev_null)
+
+        return True
+
+    def run(self, args):
+        flutter_root = _get_flutter_root()
+        adb_path = os.path.join(flutter_root, ADB_LOCAL_PATH)
+
+        if args.pull_libs:
+            if not self._copy_system_libs(adb_path, args.package):
+                return 1
+
+        subprocess.check_call(
+            [adb_path, 'forward', 'tcp:%d' % args.gdb_port, 'tcp:%d' % args.gdb_port])
+
+        eval_commands = ['target remote localhost:%d' % args.gdb_port]
+
+        debug_out_path = os.path.join(flutter_root, 'out/android_Debug')
+        if not os.path.exists(os.path.join(debug_out_path, 'libsky_shell.so')):
+            print 'Unable to find libsky_shell.so. Make sure you have completed an android_Debug build'
+            return 1
+        eval_commands.append('set solib-search-path %s:%s' %
+                             (debug_out_path, GdbClient.SYSTEM_LIBS_PATH))
+
+        exec_command = [os.path.join(flutter_root, GdbClient.GDB_LOCAL_PATH)]
+        for command in eval_commands:
+            exec_command += ['--eval-command', command]
+
+        os.execv(exec_command[0], exec_command)
+
+
+class GdbServer(object):
+    GDB_SERVER_LOCAL_PATH = 'third_party/android_tools/ndk/prebuilt/android-arm/gdbserver/gdbserver'
+    GDB_SERVER_DEVICE_TMP_PATH = '/data/local/tmp/gdbserver'
+
+    def add_subparser(self, subparsers):
+        parser = subparsers.add_parser('server',
+            help='run a GDB server on the device')
+        parser.add_argument('package', type=str)
+        parser.add_argument('--gdb-port', type=int, default=8888)
+        parser.set_defaults(func=self.run)
+
+    def run(self, args):
+        flutter_root = _get_flutter_root()
+        adb_path = os.path.join(flutter_root, ADB_LOCAL_PATH)
+
+        package_pid = _find_package_pid(adb_path, args.package)
+        if package_pid is None:
+            return 1
+
+        # Copy gdbserver to the package's data directory.
+        subprocess.check_call([adb_path, 'push',
+                               os.path.join(flutter_root, GdbServer.GDB_SERVER_LOCAL_PATH),
+                               GdbServer.GDB_SERVER_DEVICE_TMP_PATH])
+        gdb_server_device_path = '/data/data/%s/gdbserver' % args.package
+        subprocess.check_call([adb_path, 'shell', 'run-as', args.package, 'cp',
+                               GdbServer.GDB_SERVER_DEVICE_TMP_PATH,
+                               gdb_server_device_path])
+
+        # Run gdbserver.
+        try:
+            subprocess.call([adb_path, 'shell', 'run-as', args.package,
+                             gdb_server_device_path,
+                             '--attach', ':%d' % args.gdb_port, str(package_pid)])
+        except KeyboardInterrupt:
+            pass
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Flutter debugger tool')
+    subparsers = parser.add_subparsers(help='sub-command help')
+
+    commands = [
+        GdbClient(),
+        GdbServer(),
+    ]
+    for command in commands:
+        command.add_subparser(subparsers)
+
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
