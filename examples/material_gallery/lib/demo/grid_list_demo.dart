@@ -69,52 +69,26 @@ class GridDemoPhotoItem extends StatelessComponent {
         return image;
 
       case GridDemoTileStyle.oneLine:
-        return new Stack(
-          children: <Widget>[
-            new Positioned(
-              top: 0.0,
-              left: 0.0,
-              bottom: 0.0,
-              right: 0.0,
-              child: image
-            ),
-            new Positioned(
-              top: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: new GridTileBar(
-                backgroundColor: Colors.black.withAlpha(0x08),
-                title: new Text(photo.title),
-                left: new Icon(icon: 'action/info', color: Colors.white70)
-              )
-            )
-          ]
+        return new GridTile(
+          header: new GridTileBar(
+            backgroundColor: Colors.black.withAlpha(0x08),
+            left: new Icon(icon: 'action/info', color: Colors.white70),
+            title: new Text(photo.title)
+          ),
+          child: image
         );
 
       case GridDemoTileStyle.twoLine:
-        return new Stack(
-          children: <Widget>[
-            new Positioned(
-              top: 0.0,
-              left: 0.0,
-              bottom: 0.0,
-              right: 0.0,
-              child: image
-            ),
-            new Positioned(
-              left: 0.0,
-              bottom: 0.0,
-              right: 0.0,
-              child: new GridTileBar(
-                backgroundColor: Colors.black.withAlpha(0x08),
-                title: new Text(photo.title),
-                caption: new Text(photo.caption),
-                right: new Icon(icon: 'action/info', color: Colors.white70)
-              )
-            )
-          ]
+        return new GridTile(
+          footer: new GridTileBar(
+            backgroundColor: Colors.black.withAlpha(0x08),
+            title: new Text(photo.title),
+            caption: new Text(photo.caption),
+            right: new Icon(icon: 'action/info', color: Colors.white70)
+          ),
+          child: image
         );
-      }
+    }
   }
 }
 
