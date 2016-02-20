@@ -28,15 +28,19 @@ class DevicesCommand extends FlutterCommand {
       printStatus('No connected devices.');
     } else {
       printStatus('${devices.length} connected ${pluralize('device', devices.length)}:');
-      printStatus('');
 
       for (Device device in devices) {
-        printStatus('${device.name} (${device.id})');
+        printStatus('\t${_supportIndicator(device)}: ${device.name} (${device.id})');
+        if (!device.isSupported()) {
+          printStatus("\t\t${device.supportMessage()}");
+        }
       }
     }
 
     return 0;
   }
 }
+
+String _supportIndicator(Device device) => device.isSupported() ? "[✔] Supported" : "[✘] Unsupported";
 
 String pluralize(String word, int count) => count == 1 ? word : word + 's';

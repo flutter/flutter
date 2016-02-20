@@ -106,6 +106,13 @@ abstract class Device {
   /// Check if the device is currently connected
   bool isConnected();
 
+  /// Check if the device is supported by Flutter
+  bool isSupported();
+
+  // String meant to be displayed to the user indicating if the device is
+  // supported by Flutter, and, if not, why.
+  String supportMessage() => isSupported() ? "Supported" : "Unsupported";
+
   /// Check if the current version of the given app is already installed
   bool isAppInstalled(ApplicationPackage app);
 

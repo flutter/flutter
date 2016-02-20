@@ -179,6 +179,11 @@ Future<int> startApp(
     if (package == null || !device.isConnected())
       continue;
 
+    if (!device.isSupported()) {
+      printStatus("Skipping unsupported device: ${device.name}");
+      continue;
+    }
+
     printTrace('Running build command for $device.');
 
     Map<String, dynamic> platformArgs = <String, dynamic>{};
@@ -215,11 +220,7 @@ Future<int> startApp(
   }
 
   if (!startedSomething) {
-    if (!devices.all.any((device) => device.isConnected())) {
-      printError('Unable to run application - no connected devices.');
-    } else {
-      printError('Unable to run application.');
-    }
+    printError('Unable to run application. Please ensure that a supported device/simulator is connected.');
   }
 
   return startedSomething ? 0 : 2;
