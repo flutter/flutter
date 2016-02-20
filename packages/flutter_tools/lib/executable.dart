@@ -19,6 +19,7 @@ import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
+import 'src/commands/drive.dart';
 import 'src/commands/install.dart';
 import 'src/commands/listen.dart';
 import 'src/commands/logs.dart';
@@ -51,6 +52,7 @@ Future main(List<String> args) async {
     ..addCommand(new DaemonCommand(hideCommand: !verboseHelp))
     ..addCommand(new DevicesCommand())
     ..addCommand(new DoctorCommand())
+    ..addCommand(new DriveCommand())
     ..addCommand(new InstallCommand())
     ..addCommand(new ListenCommand())
     ..addCommand(new LogsCommand())

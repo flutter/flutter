@@ -12,25 +12,12 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 
-/// A function that connects to a Dart VM service given the [url].
-typedef Future<VMServiceClient> VMServiceConnectFunction(String url);
-
-/// Connects to a real Dart VM service using the [VMServiceClient].
-final VMServiceConnectFunction vmServiceClientConnectFunction =
-    VMServiceClient.connect;
-
-/// The connection function used by [FlutterDriver.connect].
-///
-/// Overwrite this function if you require a different method for connecting to
-/// the VM service.
-VMServiceConnectFunction vmServiceConnectFunction =
-    vmServiceClientConnectFunction;
+final Logger _log = new Logger('FlutterDriver');
 
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
 
   static const String _flutterExtensionMethod = 'ext.flutter_driver';
-  static final Logger _log = new Logger('FlutterDriver');
 
   /// Connects to a Flutter application.
   ///
@@ -173,4 +160,43 @@ class FlutterDriver {
     // Don't leak vm_service_client-specific objects, if any
     return null;
   });
+}
+
+/// A function that connects to a Dart VM service given the [url].
+typedef Future<VMServiceClient> VMServiceConnectFunction(String url);
+
+/// The connection function used by [FlutterDriver.connect].
+///
+/// Overwrite this function if you require a custom method for connecting to
+/// the VM service.
+VMServiceConnectFunction vmServiceConnectFunction = _waitAndConnect;
+
+/// Restores [vmServiceConnectFunction] to its default value.
+void restoreVmServiceConnectFunction() {
+  vmServiceConnectFunction = _waitAndConnect;
+}
+
+/// Waits for a real Dart VM service to become available, then connects using
+/// the [VMServiceClient].
+///
+/// Times out after 30 seconds.
+Future<VMServiceClient> _waitAndConnect(String url) async {
+  Stopwatch timer = new Stopwatch();
+  Future<VMServiceClient> attemptConnection() {
+    return VMServiceClient.connect(url)
+      .catchError((e) async {
+        if (timer.elapsed < const Duration(seconds: 30)) {
+          _log.info('Waiting for application to start');
+          await new Future.delayed(const Duration(seconds: 1));
+          return attemptConnection();
+        } else {
+          _log.critical(
+            'Application has not started in 30 seconds. '
+            'Giving up.'
+          );
+          throw e;
+        }
+      });
+  }
+  return attemptConnection();
 }
