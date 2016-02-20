@@ -218,6 +218,7 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
 const char* kDartVmIsolateSnapshotBufferName = "kDartVmIsolateSnapshotBuffer";
 const char* kDartIsolateSnapshotBufferName = "kDartIsolateSnapshotBuffer";
 const char* kInstructionsSnapshotName = "kInstructionsSnapshot";
+const char* kDataSnapshotName = "kDataSnapshot";
 
 const char* kDartApplicationLibraryPath =
     "FlutterApplication.framework/FlutterApplication";
@@ -261,6 +262,10 @@ static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
   return reinterpret_cast<uint8_t*>(DART_SYMBOL(kInstructionsSnapshot));
 }
 
+static const uint8_t* PrecompiledDataSnapshotSymbolIfPresent() {
+  return reinterpret_cast<uint8_t*>(DART_SYMBOL(kDataSnapshot));
+}
+
 bool IsRunningPrecompiledCode() {
   TRACE_EVENT0("flutter", __func__);
   return PrecompiledInstructionsSymbolIfPresent() != nullptr;
@@ -269,6 +274,10 @@ bool IsRunningPrecompiledCode() {
 #else  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
+  return nullptr;
+}
+
+static const uint8_t* PrecompiledDataSnapshotSymbolIfPresent() {
   return nullptr;
 }
 
@@ -327,6 +336,7 @@ void InitDartVM() {
     CHECK(Dart_Initialize(reinterpret_cast<uint8_t*>(
                               DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
                           PrecompiledInstructionsSymbolIfPresent(),
+                          PrecompiledDataSnapshotSymbolIfPresent(),
                           IsolateCreateCallback,
                           nullptr,  // Isolate interrupt callback.
                           nullptr,
