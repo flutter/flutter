@@ -126,7 +126,7 @@ abstract class Template {
 }
 
 class FlutterSimpleTemplate extends Template {
-  FlutterSimpleTemplate() : super('flutter-simple', 'A minimal Flutter project.') {
+  FlutterSimpleTemplate() : super('flutter-simple', 'A simple Flutter app.') {
     files['.analysis_options'] = _analysis_options;
     files['.gitignore'] = _gitignore;
     files['flutter.yaml'] = _flutterYaml;
@@ -201,6 +201,9 @@ const String _flutterYaml = r'''
 name: {{projectName}}
 material-design-icons:
   - name: content/add
+  - name: navigation/arrow_back
+  - name: navigation/menu
+  - name: navigation/more_vert
 ''';
 
 const String _libMain = r'''
@@ -209,7 +212,7 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(
     new MaterialApp(
-      title: "Flutter Demo",
+      title: 'Flutter Demo',
       routes: <String, RouteBuilder>{
         '/': (RouteArguments args) => new FlutterDemo()
       }
@@ -218,34 +221,33 @@ void main() {
 }
 
 class FlutterDemo extends StatefulComponent {
-  @override
-  State createState() => new FlutterDemoState();
+  State createState() => new _FlutterDemoState();
 }
 
-class FlutterDemoState extends State {
-  int counter = 0;
+class _FlutterDemoState extends State<FlutterDemo> {
+  int _counter = 0;
 
-  void incrementCounter() {
+  void _incrementCounter() {
     setState(() {
-      counter++;
+      _counter++;
     });
   }
 
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
-        center: new Text("Flutter Demo")
+        center: new Text('Flutter Demo')
       ),
       body: new Material(
         child: new Center(
-          child: new Text("Button tapped $counter times.")
+          child: new Text('Button tapped $_counter times.')
         )
       ),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(
           icon: 'content/add'
         ),
-        onPressed: incrementCounter
+        onPressed: _incrementCounter
       )
     );
   }
