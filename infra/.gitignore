@@ -1,4 +1,3 @@
 .recipe_deps
-dart-sdk
 android_tools
 *.pyc
