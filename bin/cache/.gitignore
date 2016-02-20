@@ -1,4 +1,5 @@
 *.snapshot
 *.stamp
-artifacts
-dart-sdk
+artifacts/
+dart-sdk/
+pkg/

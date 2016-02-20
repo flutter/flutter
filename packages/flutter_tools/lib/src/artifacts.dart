@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
-import 'base/os.dart';
 import 'base/process.dart';
 import 'build_configuration.dart';
 import 'globals.dart';
@@ -35,12 +34,6 @@ String _getNameForTargetPlatform(TargetPlatform platform) {
     case TargetPlatform.linux:
       return 'linux-x64';
   }
-}
-
-// Keep in sync with https://github.com/flutter/engine/blob/master/sky/tools/release_engine.py
-// and https://github.com/flutter/buildbot/blob/master/travis/build.sh
-String _getCloudStorageBaseUrl({String platform, String revision}) {
-  return 'https://storage.googleapis.com/mojo_infra/flutter/$revision/$platform/';
 }
 
 enum ArtifactType {
@@ -75,12 +68,6 @@ class Artifact {
       return _getNameForHostPlatform(hostPlatform);
     assert(false);
     return null;
-  }
-
-  // Whether the artifact needs to be marked as executable on disk.
-  bool get executable {
-    return type == ArtifactType.snapshot ||
-      (type == ArtifactType.shell && targetPlatform == TargetPlatform.linux);
   }
 }
 
@@ -192,45 +179,39 @@ class ArtifactStore {
     }
   }
 
-  static void validateSkyEnginePackage() {
-    if (engineRevision == null) {
-      printError("Cannot locate the sky_engine package; did you include 'flutter' in your pubspec.yaml file?");
-      throw new ProcessExit(2);
-    }
-    if (engineRevision != expectedEngineRevision) {
-      printError("Error: incompatible sky_engine package; please run 'pub get' to get the correct one.\n");
-      throw new ProcessExit(2);
-    }
-  }
-
   static String _engineRevision;
 
   static String get engineRevision {
     if (_engineRevision == null) {
-      File revisionFile = new File(path.join(packageRoot, 'sky_engine', 'REVISION'));
+      File revisionFile = new File(path.join(flutterRoot, 'bin', 'cache', 'engine.version'));
       if (revisionFile.existsSync())
-        _engineRevision = revisionFile.readAsStringSync();
+        _engineRevision = revisionFile.readAsStringSync().trim();
     }
     return _engineRevision;
   }
 
-  static String _expectedEngineRevision;
-
-  static String get expectedEngineRevision {
-    if (_expectedEngineRevision == null) {
-      // TODO(jackson): Parse the .packages file and use the path from there instead
-      File revisionFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'packages', 'sky_engine', 'REVISION'));
-      if (revisionFile.existsSync())
-        _expectedEngineRevision = revisionFile.readAsStringSync();
+  static Directory getBaseCacheDir() {
+    if (flutterRoot == null) {
+      printError('FLUTTER_ROOT not specified. Cannot find artifact cache.');
+      throw new ProcessExit(2);
     }
-    return _expectedEngineRevision;
+    Directory cacheDir = new Directory(path.join(flutterRoot, 'bin', 'cache', 'artifacts'));
+    if (!cacheDir.existsSync()) {
+      printError('${cacheDir.path} does not exist. Cannot find artifact cache.');
+      throw new ProcessExit(2);
+    }
+    return cacheDir;
   }
 
-  static String getCloudStorageBaseUrl(String platform) {
-    return _getCloudStorageBaseUrl(
-      platform: platform,
-      revision: engineRevision
-    );
+  static Future<String> getPath(Artifact artifact) async {
+    File cachedFile = new File(path.join(
+        getBaseCacheDir().path, 'engine', artifact.platform, artifact.fileName
+    ));
+    if (!cachedFile.existsSync()) {
+      printError('File not found in the platform artifacts: ${cachedFile.path}');
+      throw new ProcessExit(2);
+    }
+    return cachedFile.path;
   }
 
   /// Download a file from the given URL and return the bytes.
@@ -245,9 +226,8 @@ class ArtifactStore {
       throw new Exception(response.reasonPhrase);
 
     BytesBuilder responseBody = new BytesBuilder(copy: false);
-    await for (List<int> chunk in response) {
+    await for (List<int> chunk in response)
       responseBody.add(chunk);
-    }
 
     return responseBody.takeBytes();
   }
@@ -275,73 +255,6 @@ class ArtifactStore {
     }
   }
 
-  /// Download the artifacts.zip archive for the given platform from GCS
-  /// and extract it to the local cache.
-  static Future _doDownloadArtifactsFromZip(String platform) async {
-    String url = getCloudStorageBaseUrl(platform) + 'artifacts.zip';
-    Directory cacheDir = _getCacheDirForPlatform(platform);
-    await _downloadFileToCache(Uri.parse(url), cacheDir, true);
-
-    for (Artifact artifact in knownArtifacts) {
-      if (artifact.platform == platform && artifact.executable) {
-        ProcessResult result = os.makeExecutable(
-            new File(path.join(cacheDir.path, artifact.fileName)));
-        if (result.exitCode != 0)
-          throw new Exception(result.stderr);
-      }
-    }
-  }
-
-  /// A wrapper ensuring that a platform's ZIP is not downloaded multiple times
-  /// concurrently.
-  static Future _downloadArtifactsFromZip(String platform) {
-    if (_pendingZipDownloads.containsKey(platform)) {
-      return _pendingZipDownloads[platform];
-    }
-    printStatus('Downloading $platform artifacts from the cloud, one moment please...');
-    Future future = _doDownloadArtifactsFromZip(platform);
-    _pendingZipDownloads[platform] = future;
-    return future.then((_) => _pendingZipDownloads.remove(platform));
-  }
-
-  static final Map<String, Future> _pendingZipDownloads = new Map<String, Future>();
-
-  static Directory getBaseCacheDir() {
-    if (flutterRoot == null) {
-      printError('FLUTTER_ROOT not specified. Cannot find artifact cache.');
-      throw new ProcessExit(2);
-    }
-    Directory cacheDir = new Directory(path.join(flutterRoot, 'bin', 'cache', 'artifacts'));
-    if (!cacheDir.existsSync())
-      cacheDir.createSync(recursive: true);
-    return cacheDir;
-  }
-
-  static Directory _getCacheDirForPlatform(String platform) {
-    validateSkyEnginePackage();
-    Directory baseDir = getBaseCacheDir();
-    // TODO(jamesr): Add support for more configurations.
-    String config = 'Release';
-    Directory artifactSpecificDir = new Directory(path.join(
-        baseDir.path, 'sky_engine', engineRevision, config, platform));
-    if (!artifactSpecificDir.existsSync())
-      artifactSpecificDir.createSync(recursive: true);
-    return artifactSpecificDir;
-  }
-
-  static Future<String> getPath(Artifact artifact) async {
-    Directory cacheDir = _getCacheDirForPlatform(artifact.platform);
-    File cachedFile = new File(path.join(cacheDir.path, artifact.fileName));
-    if (!cachedFile.existsSync()) {
-      await _downloadArtifactsFromZip(artifact.platform);
-      if (!cachedFile.existsSync()) {
-        printError('File not found in the platform artifacts: ${cachedFile.path}');
-        throw new ProcessExit(2);
-      }
-    }
-    return cachedFile.path;
-  }
-
   static Future<String> getThirdPartyFile(String urlStr, String cacheSubdir, bool unzip) async {
     Uri url = Uri.parse(urlStr);
     Directory baseDir = getBaseCacheDir();
@@ -358,15 +271,5 @@ class ArtifactStore {
       }
     }
     return cachedFile.path;
-  }
-
-  static void clear() {
-    Directory cacheDir = getBaseCacheDir();
-    printTrace('Clearing cache directory ${cacheDir.path}');
-    cacheDir.deleteSync(recursive: true);
-  }
-
-  static Future populate() {
-    return Future.wait(knownArtifacts.map((artifact) => getPath(artifact)));
   }
 }

@@ -14,7 +14,6 @@ import 'src/base/process.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/apk.dart';
 import 'src/commands/build.dart';
-import 'src/commands/cache.dart';
 import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
@@ -47,7 +46,6 @@ Future main(List<String> args) async {
     ..addCommand(new AnalyzeCommand())
     ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())
-    ..addCommand(new CacheCommand())
     ..addCommand(new CreateCommand())
     ..addCommand(new DaemonCommand(hideCommand: !verboseHelp))
     ..addCommand(new DevicesCommand())

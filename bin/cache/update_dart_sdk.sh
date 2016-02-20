@@ -5,6 +5,8 @@
 
 set -e
 
+FLUTTER_ROOT=$(dirname $(dirname $(dirname "${BASH_SOURCE[0]}")))
+
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_STAMP_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk.stamp"
 DART_SDK_VERSION=`cat "$FLUTTER_ROOT/bin/cache/dart-sdk.version"`

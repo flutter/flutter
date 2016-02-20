@@ -7,8 +7,9 @@ fi
 
 set -x
 
-dart dev/update_packages.dart
-(cd packages/flutter; ../../bin/flutter cache populate)
+# Download dependencies flutter
+./bin/flutter --version
+./bin/cache/dart-sdk/bin/dart ./dev/update_packages.dart
 
 if [ $TRAVIS_PULL_REQUEST = "false" ]; then
   export CLOUDSDK_CORE_DISABLE_PROMPTS=1

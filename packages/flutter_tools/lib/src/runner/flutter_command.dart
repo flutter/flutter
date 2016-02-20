@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -59,7 +58,6 @@ abstract class FlutterCommand extends Command {
         'Do not run this command from the root of your git clone of Flutter.');
       return false;
     }
-    ArtifactStore.validateSkyEnginePackage();
     return true;
   };
 
