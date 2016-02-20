@@ -40,7 +40,7 @@ main() {
 
     tearDown(() async {
       await logSub.cancel();
-      vmServiceConnectFunction = vmServiceClientConnectFunction;
+      restoreVmServiceConnectFunction();
     });
 
     test('connects to isolate paused at start', () async {

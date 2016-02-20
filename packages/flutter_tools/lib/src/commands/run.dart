@@ -164,12 +164,12 @@ Future<int> startApp(
 
   if (stop) {
     printTrace('Running stop command.');
-    stopAll(devices, applicationPackages);
+    await stopAll(devices, applicationPackages);
   }
 
   if (install) {
     printTrace('Running install command.');
-    installApp(devices, applicationPackages);
+    await installApp(devices, applicationPackages);
   }
 
   bool startedSomething = false;

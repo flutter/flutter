@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
-import '../base/file_system.dart';
+import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/os.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
