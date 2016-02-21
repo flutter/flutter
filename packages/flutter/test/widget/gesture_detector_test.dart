@@ -9,8 +9,6 @@ import 'package:test/test.dart';
 void main() {
   test('Uncontested scrolls start immediately', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       bool didStartDrag = false;
       double updatedDragDelta;
       bool didEndDrag = false;
@@ -38,20 +36,20 @@ void main() {
       expect(didEndDrag, isFalse);
 
       Point firstLocation = new Point(10.0, 10.0);
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       expect(didStartDrag, isTrue);
       didStartDrag = false;
       expect(updatedDragDelta, isNull);
       expect(didEndDrag, isFalse);
 
       Point secondLocation = new Point(10.0, 9.0);
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       expect(didStartDrag, isFalse);
       expect(updatedDragDelta, -1.0);
       updatedDragDelta = null;
       expect(didEndDrag, isFalse);
 
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       expect(didStartDrag, isFalse);
       expect(updatedDragDelta, isNull);
       expect(didEndDrag, isTrue);
@@ -63,8 +61,6 @@ void main() {
 
   test('Match two scroll gestures in succession', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       int gestureCount = 0;
       double dragDistance = 0.0;
 
@@ -84,13 +80,13 @@ void main() {
       );
       tester.pumpWidget(widget);
 
-      tester.dispatchEvent(pointer.down(downLocation), downLocation);
-      tester.dispatchEvent(pointer.move(upLocation), downLocation);
-      tester.dispatchEvent(pointer.up(), downLocation);
+      TestGesture gesture = tester.startGesture(downLocation, pointer: 7);
+      gesture.moveTo(upLocation);
+      gesture.up();
 
-      tester.dispatchEvent(pointer.down(downLocation), downLocation);
-      tester.dispatchEvent(pointer.move(upLocation), downLocation);
-      tester.dispatchEvent(pointer.up(), downLocation);
+      gesture = tester.startGesture(downLocation, pointer: 7);
+      gesture.moveTo(upLocation);
+      gesture.up();
 
       expect(gestureCount, 2);
       expect(dragDistance, 20.0);

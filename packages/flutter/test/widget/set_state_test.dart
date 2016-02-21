@@ -58,11 +58,10 @@ void main() {
   test('setState() smoke test', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Outside());
-      TestPointer pointer = new TestPointer(1);
       Point location = tester.getCenter(tester.findText('INSIDE'));
-      tester.dispatchEvent(pointer.down(location), location);
+      TestGesture gesture = tester.startGesture(location);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), location);
+      gesture.up();
       tester.pump();
     });
   });
