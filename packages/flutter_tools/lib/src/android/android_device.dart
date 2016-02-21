@@ -29,17 +29,11 @@ const String _deviceBundlePath = '/data/local/tmp/dev.flx';
 // Path where the snapshot will be copied on the device.
 const String _deviceSnapshotPath = '/data/local/tmp/dev_snapshot.bin';
 
-class AndroidDeviceDiscovery extends DeviceDiscovery {
-  List<Device> _devices = <Device>[];
+class AndroidDevices extends PollingDeviceDiscovery {
+  AndroidDevices() : super('AndroidDevices');
 
   bool get supportsPlatform => true;
-
-  Future init() {
-    _devices = getAdbDevices();
-    return new Future.value();
-  }
-
-  List<Device> get devices => _devices;
+  List<Device> pollingGetDevices() => getAdbDevices();
 }
 
 class AndroidDevice extends Device {
