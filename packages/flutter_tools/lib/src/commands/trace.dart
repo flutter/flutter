@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../android/device_android.dart';
+import '../android/android_device.dart';
 import '../application_package.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
