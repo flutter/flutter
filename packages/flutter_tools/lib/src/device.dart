@@ -189,7 +189,7 @@ abstract class Device {
 abstract class DeviceLogReader {
   String get name;
 
-  Future<int> logs({ bool clear: false });
+  Future<int> logs({ bool clear: false, bool showPrefix: false });
 
   int get hashCode;
   bool operator ==(dynamic other);

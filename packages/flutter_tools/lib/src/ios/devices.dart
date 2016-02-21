@@ -232,13 +232,13 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   // TODO(devoncarew): Support [clear].
-  Future<int> logs({ bool clear: false }) async {
+  Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
     if (!device.isConnected())
       return 2;
 
     return await runCommandAndStreamOutput(
       <String>[device.loggerPath],
-      prefix: '[$name] ',
+      prefix: showPrefix ? '[$name] ' : '',
       filter: new RegExp(r'Runner')
     );
   }
