@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -31,6 +34,9 @@ defineTests() {
       appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
       appContext[Logger] = notifyingLogger;
+      appContext[Doctor] = new Doctor();
+      if (Platform.isMacOS)
+        appContext[XCode] = new XCode();
     });
 
     tearDown(() {

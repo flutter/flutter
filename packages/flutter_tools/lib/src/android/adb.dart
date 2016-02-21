@@ -74,7 +74,7 @@ class Adb {
     ).toList();
   }
 
-  /// Listen to device activations and deactivations via the asb server's
+  /// Listen to device activations and deactivations via the adb server's
   /// 'track-devices' command. Call cancel on the returned stream to stop
   /// listening.
   Stream<List<AdbDevice>> trackDevices() {
