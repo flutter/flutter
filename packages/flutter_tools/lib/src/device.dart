@@ -4,12 +4,14 @@
 
 import 'dart:async';
 
-import 'android/device_android.dart';
+import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/common.dart';
+import 'base/utils.dart';
 import 'build_configuration.dart';
 import 'globals.dart';
-import 'ios/device_ios.dart';
+import 'ios/devices.dart';
+import 'ios/simulators.dart';
 import 'toolchain.dart';
 
 /// A class to get all available devices.
@@ -18,35 +20,15 @@ class DeviceManager {
   /// of their methods are invoked.
   DeviceManager() {
     // Register the known discoverers.
-    _deviceDiscoverers.add(new AndroidDeviceDiscovery());
-    _deviceDiscoverers.add(new IOSDeviceDiscovery());
-    _deviceDiscoverers.add(new IOSSimulatorDiscovery());
-  }
-
-  Future _init() {
-    if (_initedCompleter == null) {
-      _initedCompleter = new Completer();
-
-      Future.forEach(_deviceDiscoverers, (DeviceDiscovery discoverer) {
-        if (!discoverer.supportsPlatform)
-          return null;
-        return discoverer.init();
-      }).then((_) {
-        _initedCompleter.complete();
-      }).catchError((error, stackTrace) {
-        _initedCompleter.completeError(error, stackTrace);
-      });
-    }
-
-    return _initedCompleter.future;
+    _deviceDiscoverers.add(new AndroidDevices());
+    _deviceDiscoverers.add(new IOSDevices());
+    _deviceDiscoverers.add(new IOSSimulators());
   }
 
   List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
 
   /// A user-specified device ID.
   String specifiedDeviceId;
-
-  Completer _initedCompleter;
 
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
@@ -75,8 +57,6 @@ class DeviceManager {
 
   /// Return the list of all connected devices.
   Future<List<Device>> getAllConnectedDevices() async {
-    await _init();
-
     return _deviceDiscoverers
       .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform)
       .expand((DeviceDiscovery discoverer) => discoverer.devices)
@@ -87,8 +67,58 @@ class DeviceManager {
 /// An abstract class to discover and enumerate a specific type of devices.
 abstract class DeviceDiscovery {
   bool get supportsPlatform;
-  Future init();
   List<Device> get devices;
+}
+
+/// A [DeviceDiscovery] implementation that uses polling to discover device adds
+/// and removals.
+abstract class PollingDeviceDiscovery extends DeviceDiscovery {
+  PollingDeviceDiscovery(this.name);
+
+  static const Duration _pollingDuration = const Duration(seconds: 4);
+
+  final String name;
+  ItemListNotifier<Device> _items;
+  Timer _timer;
+
+  List<Device> pollingGetDevices();
+
+  void startPolling() {
+    if (_timer == null) {
+      if (_items == null)
+        _items = new ItemListNotifier<Device>();
+      _timer = new Timer.periodic(_pollingDuration, (Timer timer) {
+        _items.updateWithNewList(pollingGetDevices());
+      });
+    }
+  }
+
+  void stopPolling() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  List<Device> get devices {
+    if (_items == null)
+      _items = new ItemListNotifier<Device>.from(pollingGetDevices());
+    return _items.items;
+  }
+
+  Stream<Device> get onAdded {
+    if (_items == null)
+      _items = new ItemListNotifier<Device>();
+    return _items.onAdded;
+  }
+
+  Stream<Device> get onRemoved {
+    if (_items == null)
+      _items = new ItemListNotifier<Device>();
+    return _items.onRemoved;
+  }
+
+  void dispose() => stopPolling();
+
+  String toString() => '$name device discovery';
 }
 
 abstract class Device {
@@ -138,6 +168,16 @@ abstract class Device {
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
+
+  int get hashCode => id.hashCode;
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! Device)
+      return false;
+    return id == other.id;
+  }
 
   String toString() => '$runtimeType $id';
 }

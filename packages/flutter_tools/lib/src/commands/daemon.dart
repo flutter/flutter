@@ -6,15 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '../android/adb.dart';
-import '../android/android_sdk.dart';
-import '../android/device_android.dart';
+import '../android/android_device.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../ios/device_ios.dart';
-import '../ios/simulator.dart';
+import '../ios/devices.dart';
+import '../ios/simulators.dart';
 import '../runner/flutter_command.dart';
 import 'run.dart';
 import 'stop.dart' as stop;
@@ -126,10 +124,8 @@ class Daemon {
         throw 'no domain for method: $method';
 
       _domainMap[prefix].handleCommand(name, id, request['params']);
-    } catch (error, trace) {
+    } catch (error) {
       _send({'id': id, 'error': _toJsonable(error)});
-      stderr.writeln('error handling $request: $error');
-      stderr.writeln(trace);
     }
   }
 
@@ -170,8 +166,6 @@ abstract class Domain {
       }
     }).catchError((error, trace) {
       _send({'id': id, 'error': _toJsonable(error)});
-      stderr.writeln("error handling '$name.$command': $error");
-      stderr.writeln(trace);
     });
   }
 
@@ -286,166 +280,65 @@ class AppDomain extends Domain {
 
 /// This domain lets callers list and monitor connected devices.
 ///
-/// It exports a `getDevices()` call, as well as firing `device.added`,
-/// `device.removed`, and `device.changed` events.
+/// It exports a `getDevices()` call, as well as firing `device.added` and
+/// `device.removed` events.
 class DeviceDomain extends Domain {
   DeviceDomain(Daemon daemon) : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
+    registerHandler('enable', enable);
+    registerHandler('disable', disable);
 
-    _androidDeviceDiscovery = new AndroidDeviceDiscovery();
-    _androidDeviceDiscovery.onAdded.listen((Device device) {
-      sendEvent('device.added', _deviceToMap(device));
-    });
-    _androidDeviceDiscovery.onRemoved.listen((Device device) {
-      sendEvent('device.removed', _deviceToMap(device));
-    });
-    _androidDeviceDiscovery.onChanged.listen((Device device) {
-      sendEvent('device.changed', _deviceToMap(device));
-    });
+    PollingDeviceDiscovery deviceDiscovery = new AndroidDevices();
+    if (deviceDiscovery.supportsPlatform)
+      _discoverers.add(deviceDiscovery);
 
-    if (Platform.isMacOS) {
-      _iosSimulatorDeviceDiscovery = new IOSSimulatorDeviceDiscovery();
-      _iosSimulatorDeviceDiscovery.onAdded.listen((Device device) {
+    deviceDiscovery = new IOSDevices();
+    if (deviceDiscovery.supportsPlatform)
+      _discoverers.add(deviceDiscovery);
+
+    deviceDiscovery = new IOSSimulators();
+    if (deviceDiscovery.supportsPlatform)
+      _discoverers.add(deviceDiscovery);
+
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
+      discoverer.onAdded.listen((Device device) {
         sendEvent('device.added', _deviceToMap(device));
       });
-      _iosSimulatorDeviceDiscovery.onRemoved.listen((Device device) {
+      discoverer.onRemoved.listen((Device device) {
         sendEvent('device.removed', _deviceToMap(device));
       });
     }
   }
 
-  AndroidDeviceDiscovery _androidDeviceDiscovery;
-  IOSSimulatorDeviceDiscovery _iosSimulatorDeviceDiscovery;
+  List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
   Future<List<Device>> getDevices(dynamic args) {
-    List<Device> devices = <Device>[];
-    devices.addAll(_androidDeviceDiscovery.getDevices());
-    if (_iosSimulatorDeviceDiscovery != null)
-      devices.addAll(_iosSimulatorDeviceDiscovery.getDevices());
+    List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
+      return discoverer.devices;
+    }).toList();
     return new Future.value(devices);
   }
 
-  void dispose() {
-    _androidDeviceDiscovery.dispose();
-    _iosSimulatorDeviceDiscovery?.dispose();
-  }
-}
-
-class AndroidDeviceDiscovery {
-  AndroidDeviceDiscovery() {
-    _initAdb();
-
-    if (_adb != null) {
-      _subscription = _adb.trackDevices().listen(_handleUpdatedDevices);
+  /// Enable device events.
+  Future enable(dynamic args) {
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
+      discoverer.startPolling();
     }
+    return new Future.value();
   }
 
-  Adb _adb;
-  StreamSubscription _subscription;
-  Map<String, AndroidDevice> _devices = new Map<String, AndroidDevice>();
-
-  StreamController<Device> addedController = new StreamController<Device>.broadcast();
-  StreamController<Device> removedController = new StreamController<Device>.broadcast();
-  StreamController<Device> changedController = new StreamController<Device>.broadcast();
-
-  List<Device> getDevices() => _devices.values.toList();
-
-  Stream<Device> get onAdded => addedController.stream;
-  Stream<Device> get onRemoved => removedController.stream;
-  Stream<Device> get onChanged => changedController.stream;
-
-  void _initAdb() {
-    if (_adb == null) {
-      _adb = new Adb(getAdbPath(androidSdk));
-      if (!_adb.exists())
-        _adb = null;
+  /// Disable device events.
+  Future disable(dynamic args) {
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
+      discoverer.stopPolling();
     }
-  }
-
-  void _handleUpdatedDevices(List<AdbDevice> newDevices) {
-    List<AndroidDevice> currentDevices = new List.from(getDevices());
-
-    for (AdbDevice device in newDevices) {
-      AndroidDevice androidDevice = _devices[device.id];
-
-      if (androidDevice == null) {
-        // device added
-        androidDevice = new AndroidDevice(
-          device.id,
-          productID: device.productID,
-          modelID: device.modelID,
-          deviceCodeName: device.deviceCodeName,
-          connected: device.isAvailable
-        );
-        _devices[androidDevice.id] = androidDevice;
-        addedController.add(androidDevice);
-      } else {
-        currentDevices.remove(androidDevice);
-
-        // check state
-        if (androidDevice.isConnected() != device.isAvailable) {
-          androidDevice.setConnected(device.isAvailable);
-          changedController.add(androidDevice);
-        }
-      }
-    }
-
-    // device removed
-    for (AndroidDevice device in currentDevices) {
-      _devices.remove(device.id);
-
-      removedController.add(device);
-    }
+    return new Future.value();
   }
 
   void dispose() {
-    _subscription?.cancel();
-  }
-}
-
-class IOSSimulatorDeviceDiscovery {
-  IOSSimulatorDeviceDiscovery() {
-    _subscription = SimControl.trackDevices().listen(_handleUpdatedDevices);
-  }
-
-  StreamSubscription<List<SimDevice>> _subscription;
-
-  Map<String, IOSSimulator> _devices = new Map<String, IOSSimulator>();
-
-  StreamController<Device> addedController = new StreamController<Device>.broadcast();
-  StreamController<Device> removedController = new StreamController<Device>.broadcast();
-
-  List<Device> getDevices() => _devices.values.toList();
-
-  Stream<Device> get onAdded => addedController.stream;
-  Stream<Device> get onRemoved => removedController.stream;
-
-  void _handleUpdatedDevices(List<SimDevice> newDevices) {
-    List<IOSSimulator> currentDevices = new List.from(getDevices());
-
-    for (SimDevice device in newDevices) {
-      IOSSimulator androidDevice = _devices[device.udid];
-
-      if (androidDevice == null) {
-        // device added
-        androidDevice = new IOSSimulator(device.udid, name: device.name);
-        _devices[androidDevice.id] = androidDevice;
-        addedController.add(androidDevice);
-      } else {
-        currentDevices.remove(androidDevice);
-      }
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
+      discoverer.dispose();
     }
-
-    // device removed
-    for (IOSSimulator device in currentDevices) {
-      _devices.remove(device.id);
-
-      removedController.add(device);
-    }
-  }
-
-  void dispose() {
-    _subscription?.cancel();
   }
 }
 
@@ -490,7 +383,7 @@ class NotifyingLogger extends Logger {
   }
 
   void printTrace(String message) {
-    _messageController.add(new LogMessage('trace', message));
+    // This is a lot of traffic to send over the wire.
   }
 }
 

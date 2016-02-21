@@ -7,7 +7,7 @@ import 'dart:io';
 
 import '../application_package.dart';
 import '../device.dart';
-import '../ios/simulator.dart';
+import '../ios/simulators.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
