@@ -40,6 +40,23 @@ class XCode {
     return _isInstalled;
   }
 
+  /// Has the EULA been signed?
+  bool get eulaSigned {
+    if (!isInstalled)
+      return false;
+
+    try {
+      ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
+      if (result.stdout != null && result.stdout.contains('license'))
+        return false;
+      if (result.stderr != null && result.stderr.contains('license'))
+        return false;
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   bool _xcodeVersionSatisfactory;
   bool get xcodeVersionSatisfactory {
     if (_xcodeVersionSatisfactory != null) {
