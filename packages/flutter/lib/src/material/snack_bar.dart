@@ -74,7 +74,7 @@ class SnackBar extends StatelessComponent {
   SnackBar({
     Key key,
     this.content,
-    this.actions,
+    this.action,
     this.duration: kSnackBarShortDisplayDuration,
     this.animation
   }) : super(key: key) {
@@ -82,7 +82,7 @@ class SnackBar extends StatelessComponent {
   }
 
   final Widget content;
-  final List<SnackBarAction> actions;
+  final SnackBarAction action;
   final Duration duration;
   final Animation<double> animation;
 
@@ -99,8 +99,8 @@ class SnackBar extends StatelessComponent {
         )
       )
     ];
-    if (actions != null)
-      children.addAll(actions);
+    if (action != null)
+      children.add(action);
     CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve);
     ThemeData theme = Theme.of(context);
@@ -156,7 +156,7 @@ class SnackBar extends StatelessComponent {
     return new SnackBar(
       key: key ?? fallbackKey,
       content: content,
-      actions: actions,
+      action: action,
       duration: duration,
       animation: newAnimation
     );

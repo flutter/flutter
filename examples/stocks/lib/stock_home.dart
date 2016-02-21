@@ -210,9 +210,12 @@ class StockHomeState extends State<StockHome> {
     });
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
       content: new Text("Purchased ${stock.symbol} for ${stock.lastSale}"),
-      actions: <SnackBarAction>[
-        new SnackBarAction(label: "BUY MORE", onPressed: () { _buyStock(stock, arrowKey); })
-      ]
+      action: new SnackBarAction(
+        label: "BUY MORE",
+        onPressed: () {
+          _buyStock(stock, arrowKey);
+        }
+      )
     ));
   }
 
