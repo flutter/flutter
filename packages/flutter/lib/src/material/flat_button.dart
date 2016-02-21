@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'material_button.dart';
+import 'button.dart';
 import 'theme.dart';
 
 /// A material design "flat button".

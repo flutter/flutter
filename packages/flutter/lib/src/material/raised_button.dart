@@ -4,8 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'colors.dart';
-import 'material_button.dart';
 import 'theme.dart';
 
 /// A material design "raised button".
