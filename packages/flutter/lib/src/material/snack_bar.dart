@@ -4,11 +4,11 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'flat_button.dart';
 import 'material.dart';
-import 'material_button.dart';
-import 'theme.dart';
 import 'theme_data.dart';
+import 'theme.dart';
 import 'typography.dart';
 
 // https://www.google.com/design/spec/components/snackbars-toasts.html#snackbars-toasts-specs
