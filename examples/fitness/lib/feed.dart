@@ -110,11 +110,12 @@ class FeedFragmentState extends State<FeedFragment> {
     config.onItemDeleted(item);
     Scaffold.of(context).showSnackBar(new SnackBar(
       content: new Text("Item deleted."),
-      actions: <SnackBarAction>[
-        new SnackBarAction(label: "UNDO", onPressed: () {
+      action: new SnackBarAction(
+        label: "UNDO",
+        onPressed: () {
           config.onItemCreated(item);
-        }),
-      ]
+        }
+      )
     ));
   }
 
