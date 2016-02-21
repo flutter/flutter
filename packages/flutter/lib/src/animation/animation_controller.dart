@@ -163,10 +163,11 @@ class AnimationController extends Animation<double>
 
   AnimationStatus _lastStatus = AnimationStatus.dismissed;
   void _checkStatusChanged() {
-    AnimationStatus currentStatus = status;
-    if (currentStatus != _lastStatus)
-      notifyStatusListeners(status);
-    _lastStatus = currentStatus;
+    AnimationStatus newStatus = status;
+    AnimationStatus oldStatus = _lastStatus;
+    _lastStatus = newStatus;
+    if (oldStatus != newStatus)
+      notifyStatusListeners(newStatus);
   }
 
   /// Drives the animation from its current value to target.
