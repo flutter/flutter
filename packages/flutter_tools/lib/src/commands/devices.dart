@@ -31,7 +31,7 @@ class DevicesCommand extends FlutterCommand {
 
       for (Device device in devices) {
         String supportIndicator = device.isSupported() ? '' : '- unsupported';
-        printStatus('${device.name} (${device.id}) ${supportIndicator}');
+        printStatus('${device.name} (${device.id}) $supportIndicator');
       }
     }
 
