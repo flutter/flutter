@@ -88,36 +88,32 @@ class IOSApp extends ApplicationPackage {
   }) : super(localPath: iosProjectDir, id: iosProjectBundleId);
 
   factory IOSApp.fromBuildConfiguration(BuildConfiguration config) {
-    if (getCurrentHostPlatform() != HostPlatform.mac) {
+    if (getCurrentHostPlatform() != HostPlatform.mac)
       return null;
-    }
 
     String plistPath = path.join("ios", "Info.plist");
-    String id = plistValueForKey(plistPath, kCFBundleIdentifierKey);
-    if (id == "") {
+    String value = getValueFromFile(plistPath, kCFBundleIdentifierKey);
+    if (value == null)
       return null;
-    }
 
     String projectDir = path.join("ios", ".generated");
-    return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: id);
+    return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: value);
   }
 }
 
 class ApplicationPackageStore {
   final AndroidApk android;
   final IOSApp iOS;
-  final IOSApp iOSSimulator;
 
-  ApplicationPackageStore({ this.android, this.iOS, this.iOSSimulator });
+  ApplicationPackageStore({ this.android, this.iOS });
 
   ApplicationPackage getPackageForPlatform(TargetPlatform platform) {
     switch (platform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return iOS;
       case TargetPlatform.iOSSimulator:
-        return iOSSimulator;
+        return iOS;
       case TargetPlatform.mac:
       case TargetPlatform.linux:
         return null;
@@ -127,7 +123,6 @@ class ApplicationPackageStore {
   static Future<ApplicationPackageStore> forConfigs(List<BuildConfiguration> configs) async {
     AndroidApk android;
     IOSApp iOS;
-    IOSApp iOSSimulator;
 
     for (BuildConfiguration config in configs) {
       switch (config.targetPlatform) {
@@ -150,13 +145,9 @@ class ApplicationPackageStore {
           break;
 
         case TargetPlatform.iOS:
+        case TargetPlatform.iOSSimulator:
           assert(iOS == null);
           iOS = new IOSApp.fromBuildConfiguration(config);
-          break;
-
-        case TargetPlatform.iOSSimulator:
-          assert(iOSSimulator == null);
-          iOSSimulator = new IOSApp.fromBuildConfiguration(config);
           break;
 
         case TargetPlatform.mac:
@@ -165,6 +156,6 @@ class ApplicationPackageStore {
       }
     }
 
-    return new ApplicationPackageStore(android: android, iOS: iOS, iOSSimulator: iOSSimulator);
+    return new ApplicationPackageStore(android: android, iOS: iOS);
   }
 }

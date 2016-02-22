@@ -27,11 +27,11 @@ class DevicesCommand extends FlutterCommand {
     if (devices.isEmpty) {
       printStatus('No connected devices.');
     } else {
-      printStatus('${devices.length} connected ${pluralize('device', devices.length)}:');
+      printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
 
       for (Device device in devices) {
-        String supportIndicator = device.isSupported() ? '' : '- unsupported';
-        printStatus('${device.name} (${device.id}) $supportIndicator');
+        String supportIndicator = device.isSupported() ? '' : ' - unsupported';
+        printStatus('${device.name} (${device.id})$supportIndicator');
       }
     }
 

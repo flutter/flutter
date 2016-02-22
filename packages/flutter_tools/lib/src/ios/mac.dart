@@ -59,9 +59,8 @@ class XCode {
 
   bool _xcodeVersionSatisfactory;
   bool get xcodeVersionSatisfactory {
-    if (_xcodeVersionSatisfactory != null) {
+    if (_xcodeVersionSatisfactory != null)
       return _xcodeVersionSatisfactory;
-    }
 
     try {
       String output = runSync(<String>['xcodebuild', '-version']);

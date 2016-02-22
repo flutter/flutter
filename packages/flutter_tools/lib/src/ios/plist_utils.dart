@@ -8,7 +8,7 @@ import '../base/process.dart';
 
 const String kCFBundleIdentifierKey = "CFBundleIdentifier";
 
-String plistValueForKey(String plistFilePath, String plistKey) {
+String getValueFromFile(String plistFilePath, String key) {
   // TODO(chinmaygarde): For now, we only need to read from plist files on a
   // mac host. If this changes, we will need our own Dart plist reader.
 
@@ -18,12 +18,14 @@ String plistValueForKey(String plistFilePath, String plistKey) {
   String normalizedPlistPath = path.withoutExtension(path.absolute(plistFilePath));
 
   try {
-    return runCheckedSync([
+    String value = runCheckedSync(<String>[
       '/usr/bin/defaults',
       'read',
       normalizedPlistPath,
-      plistKey]).trim();
+      key
+    ]).trim();
+    return value.isEmpty ? null : value;
   } catch (error) {
-    return "";
+    return null;
   }
 }
