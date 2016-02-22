@@ -82,10 +82,9 @@ void dismissElement(WidgetTester tester, Element itemElement, { DismissDirection
       fail("unsupported gestureDirection");
   }
 
-  TestPointer pointer = new TestPointer(5);
-  tester.dispatchEvent(pointer.down(downLocation), downLocation);
-  tester.dispatchEvent(pointer.move(upLocation), downLocation);
-  tester.dispatchEvent(pointer.up(), downLocation);
+  TestGesture gesture = tester.startGesture(downLocation, pointer: 5);
+  gesture.moveTo(upLocation);
+  gesture.up();
 }
 
 void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirection }) {
@@ -247,18 +246,18 @@ void main() {
       tester.pumpWidget(widgetBuilder());
       Element itemElement = tester.findText('0');
 
-      TestPointer pointer = new TestPointer(5);
       Point location = tester.getTopLeft(itemElement);
       Offset offset = new Offset(0.0, 5.0);
-      tester.dispatchEvent(pointer.down(location), location);
-      tester.dispatchEvent(pointer.move(location + offset), location);
+      TestGesture gesture = tester.startGesture(location, pointer: 5);
+      gesture.moveBy(offset);
       tester.pumpWidget(widgetBuilder());
-      tester.dispatchEvent(pointer.move(location + (offset * 2.0)), location);
+      gesture.moveBy(offset);
       tester.pumpWidget(widgetBuilder());
-      tester.dispatchEvent(pointer.move(location + (offset * 3.0)), location);
+      gesture.moveBy(offset);
       tester.pumpWidget(widgetBuilder());
-      tester.dispatchEvent(pointer.move(location + (offset * 4.0)), location);
+      gesture.moveBy(offset);
       tester.pumpWidget(widgetBuilder());
+      gesture.up();
     });
   });
 

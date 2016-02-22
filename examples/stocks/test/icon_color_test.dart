@@ -76,14 +76,13 @@ void main() {
       expect(tester.findText('Help & Feedback'), isNull);
 
       // drag the drawer out
-      TestPointer pointer = new TestPointer(1);
       Point left = new Point(0.0, ui.window.size.height / 2.0);
       Point right = new Point(ui.window.size.width, left.y);
-      tester.dispatchEvent(pointer.down(left), left);
+      TestGesture gesture = tester.startGesture(left);
       tester.pump();
-      tester.dispatchEvent(pointer.move(right), left);
+      gesture.moveTo(right);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), left);
+      gesture.up();
       tester.pump();
       expect(tester.findText('MARKET'), isNotNull);
       expect(tester.findText('Help & Feedback'), isNotNull);

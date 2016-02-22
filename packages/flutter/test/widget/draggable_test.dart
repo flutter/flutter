@@ -9,8 +9,6 @@ import 'package:test/test.dart';
 void main() {
   test('Drag and drop - control test', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       List<dynamic> accepted = <dynamic>[];
 
       tester.pumpWidget(new MaterialApp(
@@ -44,7 +42,7 @@ void main() {
       expect(tester.findText('Target'), isNotNull);
 
       Point firstLocation = tester.getCenter(tester.findText('Source'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       expect(accepted, isEmpty);
@@ -53,7 +51,7 @@ void main() {
       expect(tester.findText('Target'), isNotNull);
 
       Point secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(accepted, isEmpty);
@@ -61,7 +59,7 @@ void main() {
       expect(tester.findText('Dragging'), isNotNull);
       expect(tester.findText('Target'), isNotNull);
 
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
 
       expect(accepted, equals([1]));
@@ -73,8 +71,6 @@ void main() {
 
   test('Drag and drop - dragging over button', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -138,15 +134,15 @@ void main() {
       // drag and drop
 
       firstLocation = tester.getCenter(tester.findText('Source'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(events, isEmpty);
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop']));
       events.clear();
@@ -154,17 +150,17 @@ void main() {
       // drag and tap and drop
 
       firstLocation = tester.getCenter(tester.findText('Source'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(events, isEmpty);
       tester.tap(tester.findText('Button'));
       tester.tap(tester.findText('Target'));
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['tap', 'tap', 'drop']));
       events.clear();
@@ -173,8 +169,6 @@ void main() {
 
   test('Drag and drop - tapping button', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -218,15 +212,15 @@ void main() {
       events.clear();
 
       firstLocation = tester.getCenter(tester.findText('Button'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(events, isEmpty);
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop']));
       events.clear();
@@ -236,8 +230,6 @@ void main() {
 
   test('Drag and drop - long press draggable, short press', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -272,15 +264,15 @@ void main() {
       expect(events, isEmpty);
 
       firstLocation = tester.getCenter(tester.findText('Source'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(events, isEmpty);
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, isEmpty);
 
@@ -289,8 +281,6 @@ void main() {
 
   test('Drag and drop - long press draggable, long press', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       List<String> events = <String>[];
       Point firstLocation, secondLocation;
 
@@ -325,17 +315,17 @@ void main() {
       expect(events, isEmpty);
 
       firstLocation = tester.getCenter(tester.findText('Source'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
 
       tester.pump(const Duration(seconds: 20));
 
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
 
       expect(events, isEmpty);
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop']));
     });
@@ -343,8 +333,6 @@ void main() {
 
   test('Drag and drop - horizontal and vertical draggables in vertical block', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       List<String> events = <String>[];
       Point firstLocation, secondLocation, thirdLocation;
 
@@ -391,11 +379,11 @@ void main() {
       expect(events, isEmpty);
       firstLocation = tester.getCenter(tester.findText('V'));
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 2']));
       expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
@@ -406,13 +394,13 @@ void main() {
       firstLocation = tester.getTopLeft(tester.findText('H'));
       secondLocation = tester.getTopRight(tester.findText('H'));
       thirdLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      gesture.moveTo(thirdLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 1']));
       expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
@@ -424,13 +412,13 @@ void main() {
       firstLocation = tester.getTopLeft(tester.findText('V'));
       secondLocation = tester.getTopRight(tester.findText('V'));
       thirdLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      gesture.moveTo(thirdLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 2']));
       expect(tester.getCenter(tester.findText('Target')).y, greaterThan(0.0));
@@ -441,11 +429,11 @@ void main() {
       expect(events, isEmpty);
       firstLocation = tester.getCenter(tester.findText('H'));
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump(); // scrolls off screen!
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>[]));
       expect(tester.getCenter(tester.findText('Target')).y, lessThan(0.0));
@@ -456,8 +444,6 @@ void main() {
 
   test('Drag and drop - horizontal and vertical draggables in horizontal block', () {
     testWidgets((WidgetTester tester) {
-      TestPointer pointer = new TestPointer(7);
-
       List<String> events = <String>[];
       Point firstLocation, secondLocation, thirdLocation;
 
@@ -505,11 +491,11 @@ void main() {
       expect(events, isEmpty);
       firstLocation = tester.getCenter(tester.findText('H'));
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 1']));
       expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
@@ -520,13 +506,13 @@ void main() {
       firstLocation = tester.getTopLeft(tester.findText('V'));
       secondLocation = tester.getBottomLeft(tester.findText('V'));
       thirdLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      gesture.moveTo(thirdLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 2']));
       expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
@@ -538,13 +524,13 @@ void main() {
       firstLocation = tester.getTopLeft(tester.findText('H'));
       secondLocation = tester.getBottomLeft(tester.findText('H'));
       thirdLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.move(thirdLocation), firstLocation);
+      gesture.moveTo(thirdLocation);
       tester.pump();
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>['drop 1']));
       expect(tester.getCenter(tester.findText('Target')).x, greaterThan(0.0));
@@ -555,11 +541,11 @@ void main() {
       expect(events, isEmpty);
       firstLocation = tester.getCenter(tester.findText('V'));
       secondLocation = tester.getCenter(tester.findText('Target'));
-      tester.dispatchEvent(pointer.down(firstLocation), firstLocation);
+      gesture = tester.startGesture(firstLocation, pointer: 7);
       tester.pump();
-      tester.dispatchEvent(pointer.move(secondLocation), firstLocation);
+      gesture.moveTo(secondLocation);
       tester.pump(); // scrolls off screen!
-      tester.dispatchEvent(pointer.up(), firstLocation);
+      gesture.up();
       tester.pump();
       expect(events, equals(<String>[]));
       expect(tester.getCenter(tester.findText('Target')).x, lessThan(0.0));

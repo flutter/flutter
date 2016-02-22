@@ -26,15 +26,14 @@ void main() {
 
       Point middleOfContainer = tester.getCenter(tester.findText('Hello'));
       Point target = tester.getCenter(tester.findElementByKey(blockKey));
-      TestPointer pointer = new TestPointer();
-      tester.dispatchEvent(pointer.down(target), target);
-      tester.dispatchEvent(pointer.move(target + const Offset(0.0, -10.0)), target);
+      TestGesture gesture = tester.startGesture(target);
+      gesture.moveBy(const Offset(0.0, -10.0));
 
       tester.pump(const Duration(milliseconds: 1));
 
       expect(tester.getCenter(tester.findText('Hello')) == middleOfContainer, isTrue);
 
-      tester.dispatchEvent(pointer.up(), target);
+      gesture.up();
     });
   });
 
@@ -55,15 +54,14 @@ void main() {
 
       Point middleOfContainer = tester.getCenter(tester.findText('Hello'));
       Point target = tester.getCenter(tester.findElementByKey(blockKey));
-      TestPointer pointer = new TestPointer();
-      tester.dispatchEvent(pointer.down(target), target);
-      tester.dispatchEvent(pointer.move(target + const Offset(0.0, -10.0)), target);
+      TestGesture gesture = tester.startGesture(target);
+      gesture.moveBy(const Offset(0.0, -10.0));
 
       tester.pump(const Duration(milliseconds: 1));
 
       expect(tester.getCenter(tester.findText('Hello')) == middleOfContainer, isFalse);
 
-      tester.dispatchEvent(pointer.up(), target);
+      gesture.up();
     });
   });
 

@@ -161,6 +161,14 @@ class Instrumentation {
     _dispatchEvent(p.up(), result);
   }
 
+  TestGesture startGesture(Point downLocation, { int pointer: 1 }) {
+    TestPointer p = new TestPointer(pointer);
+    HitTestResult result = _hitTest(downLocation);
+    _dispatchEvent(p.down(downLocation), result);
+    return new TestGesture._(this, result, p);
+  }
+
+  @Deprecated('soon. Use startGesture instead.')
   void dispatchEvent(PointerEvent event, Point location) {
     _dispatchEvent(event, _hitTest(location));
   }
@@ -173,5 +181,36 @@ class Instrumentation {
 
   void _dispatchEvent(PointerEvent event, HitTestResult result) {
     binding.dispatchEvent(event, result);
+  }
+}
+
+class TestGesture {
+  TestGesture._(this._target, this._result, this.pointer);
+
+  final Instrumentation _target;
+  final HitTestResult _result;
+  final TestPointer pointer;
+  bool _isDown = true;
+
+  void moveTo(Point location) {
+    assert(_isDown);
+    _target._dispatchEvent(pointer.move(location), _result);
+  }
+
+  void moveBy(Offset offset) {
+    assert(_isDown);
+    moveTo(pointer.location + offset);
+  }
+
+  void up() {
+    assert(_isDown);
+    _isDown = false;
+    _target._dispatchEvent(pointer.up(), _result);
+  }
+
+  void cancel() {
+    assert(_isDown);
+    _isDown = false;
+    _target._dispatchEvent(pointer.cancel(), _result);
   }
 }
