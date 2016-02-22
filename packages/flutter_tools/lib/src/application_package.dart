@@ -146,8 +146,8 @@ class ApplicationPackageStore {
 
         case TargetPlatform.iOS:
         case TargetPlatform.iOSSimulator:
-          assert(iOS == null);
-          iOS = new IOSApp.fromBuildConfiguration(config);
+          if (iOS == null)
+            iOS = new IOSApp.fromBuildConfiguration(config);
           break;
 
         case TargetPlatform.mac:
