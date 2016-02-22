@@ -181,8 +181,8 @@ class DayPicker extends StatelessComponent {
   final DateTime displayedMonth;
 
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    TextStyle headerStyle = theme.text.caption.copyWith(fontWeight: FontWeight.w700);
+    ThemeData themeData = Theme.of(context);
+    TextStyle headerStyle = themeData.text.caption.copyWith(fontWeight: FontWeight.w700);
     TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, height: 24.0 / 14.0);
     TextStyle dayStyle = headerStyle.copyWith(fontWeight: FontWeight.w500);
     DateFormat dateFormat = new DateFormat();
@@ -230,7 +230,7 @@ class DayPicker extends StatelessComponent {
             selectedDate.month == month &&
             selectedDate.day == day)
           decoration = new BoxDecoration(
-            backgroundColor: theme.primarySwatch[100],
+            backgroundColor: themeData.backgroundColor,
             shape: BoxShape.circle
           );
 
@@ -239,7 +239,7 @@ class DayPicker extends StatelessComponent {
         if (currentDate.year == year &&
             currentDate.month == month &&
             currentDate.day == day)
-          itemStyle = itemStyle.copyWith(color: theme.primaryColor);
+          itemStyle = itemStyle.copyWith(color: themeData.primaryColor);
 
         item = new GestureDetector(
           onTap: () {
@@ -389,7 +389,7 @@ class _YearPickerState extends State<YearPicker> {
         child: new Container(
           height: _itemExtent,
           decoration: year == config.selectedDate.year ? new BoxDecoration(
-            backgroundColor: Theme.of(context).primarySwatch[100],
+            backgroundColor: Theme.of(context).backgroundColor,
             shape: BoxShape.circle
           ) : null,
           child: new Center(

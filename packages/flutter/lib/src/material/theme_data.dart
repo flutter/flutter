@@ -31,9 +31,10 @@ class ThemeData {
 
   ThemeData.raw({
     this.brightness,
-    this.primarySwatch,
     this.primaryColor,
     this.primaryColorBrightness,
+    this.accentColor,
+    this.accentColorBrightness,
     this.canvasColor,
     this.cardColor,
     this.dividerColor,
@@ -41,8 +42,9 @@ class ThemeData {
     this.splashColor,
     this.unselectedColor,
     this.disabledColor,
-    this.accentColor,
-    this.accentColorBrightness,
+    this.buttonColor,
+    this.selectionColor,
+    this.backgroundColor,
     this.indicatorColor,
     this.hintColor,
     this.hintOpacity,
@@ -52,9 +54,10 @@ class ThemeData {
     this.primaryIconTheme
   }) {
     assert(brightness != null);
-    // primarySwatch can be null; TODO(ianh): see https://github.com/flutter/flutter/issues/1277
     assert(primaryColor != null);
     assert(primaryColorBrightness != null);
+    assert(accentColor != null);
+    assert(accentColorBrightness != null);
     assert(canvasColor != null);
     assert(cardColor != null);
     assert(dividerColor != null);
@@ -62,8 +65,9 @@ class ThemeData {
     assert(splashColor != null);
     assert(unselectedColor != null);
     assert(disabledColor != null);
-    assert(accentColor != null);
-    assert(accentColorBrightness != null);
+    assert(buttonColor != null);
+    assert(selectionColor != null);
+    assert(disabledColor != null);
     assert(indicatorColor != null);
     assert(hintColor != null);
     assert(hintOpacity != null);
@@ -74,10 +78,12 @@ class ThemeData {
   }
 
   factory ThemeData({
-    ThemeBrightness brightness: ThemeBrightness.light,
+    ThemeBrightness brightness,
     Map<int, Color> primarySwatch,
     Color primaryColor,
     ThemeBrightness primaryColorBrightness,
+    Color accentColor,
+    ThemeBrightness accentColorBrightness,
     Color canvasColor,
     Color cardColor,
     Color dividerColor,
@@ -85,8 +91,9 @@ class ThemeData {
     Color splashColor,
     Color unselectedColor,
     Color disabledColor,
-    Color accentColor,
-    ThemeBrightness accentColorBrightness: ThemeBrightness.dark,
+    Color buttonColor,
+    Color selectionColor,
+    Color backgroundColor,
     Color indicatorColor,
     Color hintColor,
     double hintOpacity,
@@ -95,10 +102,13 @@ class ThemeData {
     TextTheme primaryTextTheme,
     IconThemeData primaryIconTheme
   }) {
-    // brightness default is in the arguments list
-    bool isDark = brightness == ThemeBrightness.dark;
-    primaryColor ??= primarySwatch == null ? isDark ? Colors.grey[900] : Colors.grey[100] : primarySwatch[500];
-    primaryColorBrightness ??= primarySwatch == null ? brightness : ThemeBrightness.dark /* swatch[500] is always dark */;
+    brightness ??= ThemeBrightness.light;
+    final bool isDark = brightness == ThemeBrightness.dark;
+    primarySwatch ??= Colors.blue;
+    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
+    primaryColorBrightness ??= ThemeBrightness.dark;
+    accentColor ??= primarySwatch[500];
+    accentColorBrightness ??= ThemeBrightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
@@ -106,8 +116,9 @@ class ThemeData {
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
     unselectedColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
-    accentColor ??= primarySwatch == null ? Colors.blue[500] : primarySwatch[500];
-    // accentColorBrightness default is in the arguments list
+    buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
+    selectionColor ??= isDark ? accentColor : primarySwatch[200];
+    backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     hintOpacity ??= hintColor != null ? hintColor.alpha / 0xFF : isDark ? 0.26 : 0.30;
@@ -117,9 +128,10 @@ class ThemeData {
     primaryIconTheme ??= primaryColorBrightness == ThemeBrightness.dark ? const IconThemeData(color: IconThemeColor.white) : const IconThemeData(color: IconThemeColor.black);
     return new ThemeData.raw(
       brightness: brightness,
-      primarySwatch: primarySwatch,
       primaryColor: primaryColor,
       primaryColorBrightness: primaryColorBrightness,
+      accentColor: accentColor,
+      accentColorBrightness: accentColorBrightness,
       canvasColor: canvasColor,
       cardColor: cardColor,
       dividerColor: dividerColor,
@@ -127,8 +139,9 @@ class ThemeData {
       splashColor: splashColor,
       unselectedColor: unselectedColor,
       disabledColor: disabledColor,
-      accentColor: accentColor,
-      accentColorBrightness: accentColorBrightness,
+      buttonColor: buttonColor,
+      selectionColor: selectionColor,
+      backgroundColor: backgroundColor,
       indicatorColor: indicatorColor,
       hintColor: hintColor,
       hintOpacity: hintOpacity,
@@ -139,7 +152,7 @@ class ThemeData {
     );
   }
 
-  factory ThemeData.light() => new ThemeData(primarySwatch: Colors.blue, brightness: ThemeBrightness.light);
+  factory ThemeData.light() => new ThemeData(brightness: ThemeBrightness.light);
   factory ThemeData.dark() => new ThemeData(brightness: ThemeBrightness.dark);
   factory ThemeData.fallback() => new ThemeData.light();
 
@@ -155,22 +168,12 @@ class ThemeData {
   /// dark, use Colors.white or the accentColor for a contrasting color.
   final ThemeBrightness brightness;
 
-  final Map<int, Color> primarySwatch;
-
   /// The background colour for major parts of the app (toolbars, tab bars, etc)
   final Color primaryColor;
 
   /// The brightness of the primaryColor. Used to determine the colour of text and
   /// icons placed on top of the primary color (e.g. toolbar text).
   final ThemeBrightness primaryColorBrightness;
-
-  final Color canvasColor;
-  final Color cardColor;
-  final Color dividerColor;
-  final Color highlightColor;
-  final Color splashColor;
-  final Color unselectedColor;
-  final Color disabledColor;
 
   /// The foreground color for widgets (knobs, text, etc)
   final Color accentColor;
@@ -179,6 +182,17 @@ class ThemeData {
   /// and icons placed on top of the accent color (e.g. the icons on a floating
   /// action button).
   final ThemeBrightness accentColorBrightness;
+
+  final Color canvasColor;
+  final Color cardColor;
+  final Color dividerColor;
+  final Color highlightColor;
+  final Color splashColor;
+  final Color unselectedColor;
+  final Color disabledColor;
+  final Color buttonColor;
+  final Color selectionColor;
+  final Color backgroundColor;
 
   /// The color of the selected tab indicator in a tab strip.
   final Color indicatorColor;
@@ -199,18 +213,8 @@ class ThemeData {
   final IconThemeData primaryIconTheme;
 
   static ThemeData lerp(ThemeData begin, ThemeData end, double t) {
-    Map<int, Color> primarySwatch;
-    if (begin.primarySwatch != null && end.primarySwatch != null) {
-      primarySwatch = <int, Color>{};
-      for (int index in begin.primarySwatch.keys) {
-        if (!end.primarySwatch.containsKey(index))
-          continue;
-        primarySwatch[index] = Color.lerp(begin.primarySwatch[index], end.primarySwatch[index], t);
-      }
-    }
     return new ThemeData.raw(
       brightness: t < 0.5 ? begin.brightness : end.brightness,
-      primarySwatch: primarySwatch,
       primaryColor: Color.lerp(begin.primaryColor, end.primaryColor, t),
       primaryColorBrightness: t < 0.5 ? begin.primaryColorBrightness : end.primaryColorBrightness,
       canvasColor: Color.lerp(begin.canvasColor, end.canvasColor, t),
@@ -220,6 +224,9 @@ class ThemeData {
       splashColor: Color.lerp(begin.splashColor, end.splashColor, t),
       unselectedColor: Color.lerp(begin.unselectedColor, end.unselectedColor, t),
       disabledColor: Color.lerp(begin.disabledColor, end.disabledColor, t),
+      buttonColor: Color.lerp(begin.buttonColor, end.buttonColor, t),
+      selectionColor: Color.lerp(begin.selectionColor, end.selectionColor, t),
+      backgroundColor: Color.lerp(begin.backgroundColor, end.backgroundColor, t),
       accentColor: Color.lerp(begin.accentColor, end.accentColor, t),
       accentColorBrightness: t < 0.5 ? begin.accentColorBrightness : end.accentColorBrightness,
       indicatorColor: Color.lerp(begin.indicatorColor, end.indicatorColor, t),
@@ -237,7 +244,6 @@ class ThemeData {
       return false;
     ThemeData otherData = other;
     return (otherData.brightness == brightness) &&
-           (otherData.primarySwatch == primarySwatch) &&
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&
            (otherData.canvasColor == canvasColor) &&
@@ -247,6 +253,9 @@ class ThemeData {
            (otherData.splashColor == splashColor) &&
            (otherData.unselectedColor == unselectedColor) &&
            (otherData.disabledColor == disabledColor) &&
+           (otherData.buttonColor == buttonColor) &&
+           (otherData.selectionColor == selectionColor) &&
+           (otherData.backgroundColor == backgroundColor) &&
            (otherData.accentColor == accentColor) &&
            (otherData.accentColorBrightness == accentColorBrightness) &&
            (otherData.indicatorColor == indicatorColor) &&
@@ -260,8 +269,6 @@ class ThemeData {
   int get hashCode {
     return hashValues(
       brightness,
-      hashList(primarySwatch.keys),
-      hashList(primarySwatch.values),
       primaryColor,
       primaryColorBrightness,
       canvasColor,
@@ -271,6 +278,9 @@ class ThemeData {
       splashColor,
       unselectedColor,
       disabledColor,
+      buttonColor,
+      selectionColor,
+      backgroundColor,
       accentColor,
       accentColorBrightness,
       hashValues( // Too many values.

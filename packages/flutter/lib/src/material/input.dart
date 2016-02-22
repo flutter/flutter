@@ -84,9 +84,17 @@ class _InputState extends State<Input> {
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
 
     TextStyle textStyle = config.style ?? themeData.text.subhead;
-    Color focusHighlightColor = themeData.accentColor;
-    if (themeData.primarySwatch != null)
-      focusHighlightColor = focused ? themeData.primarySwatch[400] : themeData.hintColor;
+    Color activeColor = themeData.hintColor;
+    if (focused) {
+      switch (themeData.brightness) {
+        case ThemeBrightness.dark:
+          activeColor = themeData.accentColor;
+          break;
+        case ThemeBrightness.light:
+          activeColor = themeData.primaryColor;
+          break;
+      }
+    }
     double topPadding = config.isDense ? 12.0 : 16.0;
 
     List<Widget> stackChildren = <Widget>[];
@@ -96,7 +104,7 @@ class _InputState extends State<Input> {
     if (config.labelText != null) {
       TextStyle labelStyle = hasInlineLabel ?
         themeData.text.subhead.copyWith(color: themeData.hintColor) :
-        themeData.text.caption.copyWith(color: focused ? focusHighlightColor : themeData.hintColor);
+        themeData.text.caption.copyWith(color: activeColor);
 
       double topPaddingIncrement = themeData.text.caption.fontSize + (config.isDense ? 4.0 : 8.0);
       double top = topPadding;
@@ -123,13 +131,9 @@ class _InputState extends State<Input> {
       ));
     }
 
-    Color cursorColor = themeData.primarySwatch == null ?
-      themeData.accentColor :
-      themeData.primarySwatch[200];
-
     EdgeDims margin = new EdgeDims.only(bottom: config.isDense ? 4.0 : 8.0);
     EdgeDims padding = new EdgeDims.only(top: topPadding, bottom: 8.0);
-    Color borderColor = focusHighlightColor;
+    Color borderColor = activeColor;
     double borderWidth = focused ? 2.0 : 1.0;
 
     if (config.errorText != null) {
@@ -160,8 +164,8 @@ class _InputState extends State<Input> {
         focusKey: focusKey,
         style: textStyle,
         hideText: config.hideText,
-        cursorColor: cursorColor,
-        selectionColor: cursorColor,
+        cursorColor: themeData.selectionColor,
+        selectionColor: themeData.selectionColor,
         keyboardType: config.keyboardType,
         onChanged: config.onChanged,
         onSubmitted: config.onSubmitted
@@ -190,7 +194,7 @@ class _InputState extends State<Input> {
             width: config.isDense ? 40.0 : 48.0,
             child: new Icon(
               icon: config.icon,
-              color: focused ? focusHighlightColor : Colors.black45,
+              color: focused ? activeColor : Colors.black45,
               size: config.isDense ? IconSize.s18 : IconSize.s24
             )
           ),
