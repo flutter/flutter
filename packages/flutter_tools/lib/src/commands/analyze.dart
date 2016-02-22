@@ -235,9 +235,30 @@ class AnalyzeCommand extends FlutterCommand {
     for (String package in packages.keys)
       packagesBody.writeln('$package:${path.toUri(packages[package])}');
 
+    /// specify analysis options
+    String optionsBody = '''
+linter:
+  rules:
+    - camel_case_types
+    # sometimes we have no choice (e.g. when matching other platforms)
+    # - constant_identifier_names
+    - empty_constructor_bodies
+    # disabled until regexp fix is pulled in (https://github.com/flutter/flutter/pull/1996)
+    # - library_names
+    - library_prefixes
+    - non_constant_identifier_names
+    # too many false-positives; code review should catch real instances
+    # - one_member_abstracts
+    - slash_for_doc_comments
+    - super_goes_last
+    - type_init_formals
+    - unnecessary_brace_in_string_interp
+''';
+
     // save the Dart file and the .packages file to disk
     Directory host = Directory.systemTemp.createTempSync('flutter-analyze-');
     File mainFile = new File(path.join(host.path, 'main.dart'))..writeAsStringSync(mainBody.toString());
+    File optionsFile = new File(path.join(host.path, '_analysis.options'))..writeAsStringSync(optionsBody.toString());
     File packagesFile = new File(path.join(host.path, '.packages'))..writeAsStringSync(packagesBody.toString());
 
     List<String> cmd = <String>[
@@ -252,7 +273,8 @@ class AnalyzeCommand extends FlutterCommand {
       '--fatal-warnings',
       '--strong-hints',
       '--fatal-hints',
-      '--lints',
+      // defines lints
+      '--options', optionsFile.path,
       '--packages', packagesFile.path,
       mainFile.path
     ];
@@ -295,8 +317,6 @@ class AnalyzeCommand extends FlutterCommand {
       new RegExp(r'^\[warning\] .+ will need runtime check to cast to type .+'), // https://github.com/dart-lang/sdk/issues/24542
       new RegExp(r'^\[error\] Type check failed: .*\(dynamic\) is not of type'), // allow unchecked casts from dynamic
       new RegExp('^\\[error\\] Target of URI does not exist: \'dart:ui_internals\''), // https://github.com/flutter/flutter/issues/83
-      new RegExp(r'\[lint\] Prefer using lowerCamelCase for constant names.'), // sometimes we have no choice (e.g. when matching other platforms)
-      new RegExp(r'\[lint\] Avoid defining a one-member abstract class when a simple function will do.'), // too many false-positives; code review should catch real instances
       new RegExp(r'\[info\] TODO.+'),
       new RegExp('\\[warning\\] Missing concrete implementation of \'RenderObject\\.applyPaintTransform\''), // https://github.com/dart-lang/sdk/issues/25232
       new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
