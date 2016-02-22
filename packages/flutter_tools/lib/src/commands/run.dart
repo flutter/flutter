@@ -17,6 +17,7 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 import 'apk.dart';
+import 'devices.dart';
 import 'install.dart';
 import 'stop.dart';
 
@@ -173,6 +174,7 @@ Future<int> startApp(
   }
 
   bool startedSomething = false;
+  int unsupportedCount = 0;
 
   for (Device device in devices.all) {
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
@@ -180,7 +182,8 @@ Future<int> startApp(
       continue;
 
     if (!device.isSupported()) {
-      printStatus("Skipping unsupported device: ${device.name}");
+      printStatus("Skipping unsupported device '${device.name}'. ${device.supportMessage()}");
+      unsupportedCount++;
       continue;
     }
 
@@ -220,7 +223,14 @@ Future<int> startApp(
   }
 
   if (!startedSomething) {
-    printError('Unable to run application. Please ensure that a supported device/simulator is connected.');
+    int connected = devices.all.where((device) => device.isConnected()).length;
+    String message = 'Unable to run application';
+    if (connected == 0) {
+      message += ' - no connected devices.';
+    } else if (unsupportedCount != 0) {
+      message += ' - $unsupportedCount unsupported ${pluralize('device', unsupportedCount)} connected';
+    }
+    printError(message);
   }
 
   return startedSomething ? 0 : 2;
