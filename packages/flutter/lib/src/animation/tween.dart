@@ -47,7 +47,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 
   T evaluate(Animation<double> animation) {
     double value = _parent.evaluate(animation);
-    return _evaluatable.evaluate(new AlwaysStoppedAnimation(value));
+    return _evaluatable.evaluate(new AlwaysStoppedAnimation<double>(value));
   }
 }
 
