@@ -170,6 +170,7 @@ Future<int> startApp(
 
   if (install) {
     printTrace('Running install command.');
+    // TODO(devoncarew): This fails for ios devices - we haven't built yet.
     await installApp(devices, applicationPackages);
   }
 
