@@ -307,7 +307,7 @@ class AndroidDevice extends Device {
   TargetPlatform get platform => TargetPlatform.android;
 
   void clearLogs() {
-    runSync(adbCommandForDevice(<String>['logcat', '-c']));
+    runSync(adbCommandForDevice(<String>['-s', id, 'logcat', '-c']));
   }
 
   DeviceLogReader createLogReader() => new _AdbLogReader(this);
@@ -322,10 +322,12 @@ class AndroidDevice extends Device {
     ]));
   }
 
-  // Return the most recent timestamp in the Android log.  The format can be
+  // Return the most recent timestamp in the Android log. The format can be
   // passed to logcat's -T option.
   String lastLogcatTimestamp() {
-    String output = runCheckedSync(adbCommandForDevice(<String>['logcat', '-v', 'time', '-t', '1']));
+    String output = runCheckedSync(adbCommandForDevice(<String>[
+      '-s', id, 'logcat', '-v', 'time', '-t', '1'
+    ]));
 
     RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
     Match timeMatch = timeRegExp.firstMatch(output);
@@ -350,7 +352,9 @@ class AndroidDevice extends Device {
     String tracePath = null;
     bool isComplete = false;
     while (!isComplete) {
-      String logs = runCheckedSync(adbCommandForDevice(<String>['logcat', '-d', '-T', beforeStop]));
+      String logs = runCheckedSync(adbCommandForDevice(<String>[
+        '-s', id, 'logcat', '-d', '-T', beforeStop
+      ]));
       Match fileMatch = traceRegExp.firstMatch(logs);
       if (fileMatch != null && fileMatch[1] != null) {
         tracePath = fileMatch[1];
@@ -484,16 +488,15 @@ List<AndroidDevice> getAdbDevices() {
   return devices;
 }
 
-/// A log reader that logs from `adb logcat`. This will have the same output as
-/// another copy of [_AdbLogReader], and the two instances will be equivalent.
+/// A log reader that logs from `adb logcat`.
 class _AdbLogReader extends DeviceLogReader {
   _AdbLogReader(this.device);
 
   final AndroidDevice device;
 
-  String get name => 'Android';
+  String get name => device.name;
 
-  Future<int> logs({bool clear: false}) async {
+  Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
     if (!device.isConnected())
       return 2;
 
@@ -501,6 +504,8 @@ class _AdbLogReader extends DeviceLogReader {
       device.clearLogs();
 
     return await runCommandAndStreamOutput(device.adbCommandForDevice(<String>[
+      '-s',
+      device.id,
       'logcat',
       '-v',
       'tag', // Only log the tag and the message
@@ -509,15 +514,16 @@ class _AdbLogReader extends DeviceLogReader {
       'ActivityManager:W',
       'System.err:W',
       '*:F',
-    ]), prefix: '[Android] ');
+    ]), prefix: showPrefix ? '[$name] ' : '');
   }
 
-  // Intentionally constant; overridden because we've overridden the `operator ==` method below.
   int get hashCode => name.hashCode;
 
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    return other is _AdbLogReader;
+    if (other is! _AdbLogReader)
+      return false;
+    return other.device.id == device.id;
   }
 }

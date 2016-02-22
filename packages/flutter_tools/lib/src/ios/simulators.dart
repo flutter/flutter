@@ -410,7 +410,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   String get name => device.name;
 
-  Future<int> logs({ bool clear: false }) async {
+  Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
     if (!device.isConnected())
       return 2;
 
@@ -432,7 +432,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
     Future<int> result = runCommandAndStreamOutput(
       <String>['tail', '-n', '+0', '-F', device.logFilePath],
-      prefix: '[$name] ',
+      prefix: showPrefix ? '[$name] ' : '',
       mapFunction: (String string) {
         Match match = mapRegex.matchAsPrefix(string);
         if (match != null) {
@@ -465,7 +465,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     runCommandAndStreamOutput(
       <String>['tail', '-F', '/private/var/log/system.log'],
-      prefix: '[$name] ',
+      prefix: showPrefix ? '[$name] ' : '',
       filter: new RegExp(r' FlutterRunner\[\d+\] '),
       mapFunction: (String string) {
         Match match = mapRegex.matchAsPrefix(string);
