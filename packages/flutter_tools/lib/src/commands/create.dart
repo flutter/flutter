@@ -30,6 +30,12 @@ class CreateCommand extends Command {
       defaultsTo: true,
       help: 'Whether to run "pub get" after the project has been created.'
     );
+    argParser.addFlag(
+      'with-driver-test',
+      negatable: true,
+      defaultsTo: false,
+      help: 'Also add Flutter Driver dependencies and generate a sample driver test.'
+    );
   }
 
   String get invocation => "${runner.executableName} $name <output directory>";
@@ -50,9 +56,16 @@ class CreateCommand extends Command {
 
     String flutterRoot = path.absolute(ArtifactStore.flutterRoot);
 
-    String flutterPackagePath = path.join(flutterRoot, 'packages', 'flutter');
+    String flutterPackagesDirectory = path.join(flutterRoot, 'packages');
+    String flutterPackagePath = path.join(flutterPackagesDirectory, 'flutter');
     if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml'))) {
       printError('Unable to find package:flutter in $flutterPackagePath');
+      return 2;
+    }
+
+    String flutterDriverPackagePath = path.join(flutterRoot, 'packages', 'flutter_driver');
+    if (!FileSystemEntity.isFileSync(path.join(flutterDriverPackagePath, 'pubspec.yaml'))) {
+      printError('Unable to find package:flutter_driver in $flutterDriverPackagePath');
       return 2;
     }
 
@@ -64,7 +77,15 @@ class CreateCommand extends Command {
       out = new Directory(argResults.rest.first);
     }
 
-    new FlutterSimpleTemplate().generateInto(out, flutterPackagePath);
+    FlutterSimpleTemplate template = new FlutterSimpleTemplate();
+
+    if (argResults['with-driver-test'])
+      template.withDriverTest();
+
+    template.generateInto(
+      dir: out,
+      flutterPackagesDirectory: flutterPackagesDirectory
+    );
 
     printStatus('');
 
@@ -90,19 +111,23 @@ All done! To run your application:
 abstract class Template {
   final String name;
   final String description;
-
-  Map<String, String> files = <String, String>{};
+  final Map<String, String> files = <String, String>{};
+  final Map<String, dynamic> additionalTemplateVariables = <String, dynamic>{};
 
   Template(this.name, this.description);
 
-  void generateInto(Directory dir, String flutterPackagePath) {
+  void generateInto({
+    Directory dir,
+    String flutterPackagesDirectory
+  }) {
     String dirPath = path.normalize(dir.absolute.path);
     String projectName = _normalizeProjectName(path.basename(dirPath));
     String projectIdentifier = _createProjectIdentifier(path.basename(dirPath));
     printStatus('Creating ${path.basename(projectName)}...');
     dir.createSync(recursive: true);
 
-    String relativeFlutterPackagePath = path.relative(flutterPackagePath, from: dirPath);
+    String relativeFlutterPackagesDirectory =
+        path.relative(flutterPackagesDirectory, from: dirPath);
     Iterable<String> paths = files.keys.toList()..sort();
 
     for (String filePath in paths) {
@@ -111,8 +136,9 @@ abstract class Template {
         'projectName': projectName,
         'projectIdentifier': projectIdentifier,
         'description': description,
-        'flutterPackagePath': relativeFlutterPackagePath
+        'flutterPackagesDirectory': relativeFlutterPackagesDirectory,
       };
+      m.addAll(additionalTemplateVariables);
       contents = mustache.render(contents, m);
       filePath = filePath.replaceAll('/', Platform.pathSeparator);
       File file = new File(path.join(dir.path, filePath));
@@ -141,6 +167,12 @@ class FlutterSimpleTemplate extends Template {
 
     // iOS files.
     files.addAll(iosTemplateFiles);
+  }
+
+  void withDriverTest() {
+    additionalTemplateVariables['withDriverTest?'] = {};
+    files['test_driver/e2e.dart'] = _e2eApp;
+    files['test_driver/e2e_test.dart'] = _e2eTest;
   }
 }
 
@@ -194,7 +226,12 @@ name: {{projectName}}
 description: {{description}}
 dependencies:
   flutter:
-    path: {{flutterPackagePath}}
+    path: {{flutterPackagesDirectory}}/flutter
+{{#withDriverTest?}}
+dev_dependencies:
+  flutter_driver:
+    path: {{flutterPackagesDirectory}}/flutter_driver
+{{/withDriverTest?}}
 ''';
 
 const String _flutterYaml = r'''
@@ -240,10 +277,14 @@ class _FlutterDemoState extends State<FlutterDemo> {
       ),
       body: new Material(
         child: new Center(
-          child: new Text('Button tapped $_counter times.')
+          child: new Text(
+            'Button tapped $_counter times.',
+            key: const ValueKey('counter')
+          )
         )
       ),
       floatingActionButton: new FloatingActionButton(
+        key: const ValueKey('fab'),
         child: new Icon(
           icon: 'content/add'
         ),
@@ -251,6 +292,65 @@ class _FlutterDemoState extends State<FlutterDemo> {
       )
     );
   }
+}
+''';
+
+const String _e2eApp = '''
+// Starts the app with Flutter Driver extension enabled to allow Flutter Driver
+// to test the app.
+import 'package:{{projectName}}/main.dart' as app;
+import 'package:flutter_driver/driver_extension.dart';
+
+main() {
+  enableFlutterDriverExtension();
+  app.main();
+}
+''';
+
+const String _e2eTest = '''
+// This is a basic Flutter Driver test for the application. A Flutter Driver
+// test is an end-to-end test that "drives" your application from another
+// process or even from another computer. If you are familiar with
+// Selenium/WebDriver for web, Espresso for Android or UI Automation for iOS,
+// this is simply Flutter's version of that.
+//
+// To start the test run the following command from the root of your application
+// package:
+//
+//     flutter drive --target=test_driver/e2e.dart
+//
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:test/test.dart';
+
+main() {
+  group('end-to-end test', () {
+    FlutterDriver driver;
+
+    setUpAll(() async {
+      // Connect to a running Flutter application instance.
+      driver = await FlutterDriver.connect();
+    });
+
+    tearDownAll(() async {
+      if (driver != null) driver.close();
+    });
+
+    test('find the floating action button by value key', () async {
+      ObjectRef elem = await driver.findByValueKey('fab');
+      expect(elem, isNotNull);
+      expect(elem.objectReferenceKey, isNotNull);
+    });
+
+    test('tap on the floating action button; verify counter', () async {
+      ObjectRef fab = await driver.findByValueKey('fab');
+      expect(fab, isNotNull);
+      await driver.tap(fab);
+      ObjectRef counter = await driver.findByValueKey('counter');
+      expect(counter, isNotNull);
+      String text = await driver.getText(counter);
+      expect(text, contains("Button tapped 1 times."));
+    });
+  });
 }
 ''';
 

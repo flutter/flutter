@@ -20,7 +20,7 @@ main() => defineTests();
 defineTests() {
   group('drive', () {
     setUp(() {
-      useInMemoryFileSystem();
+      useInMemoryFileSystem(cwd: '/some/app');
     });
 
     tearDown(() {
@@ -39,7 +39,7 @@ defineTests() {
         expect(code, equals(1));
         BufferLogger buffer = logger;
         expect(buffer.errorText,
-            contains('Test file not found: /some/app/test/e2e_test.dart'));
+            contains('Test file not found: /some/app/test_driver/e2e_test.dart'));
       });
     });
 
@@ -49,8 +49,8 @@ defineTests() {
       }));
       applyMocksToCommand(command);
 
-      String testApp = '/some/app/test/e2e.dart';
-      String testFile = '/some/app/test/e2e_test.dart';
+      String testApp = '/some/app/test_driver/e2e.dart';
+      String testFile = '/some/app/test_driver/e2e_test.dart';
 
       MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() {}');
@@ -69,9 +69,50 @@ defineTests() {
       });
     });
 
+    testUsingContext('returns 1 when app file is outside package', () async {
+      String packageDir = '/my/app';
+      useInMemoryFileSystem(cwd: packageDir);
+      DriveCommand command = new DriveCommand();
+      applyMocksToCommand(command);
+
+      String appFile = '/not/in/my/app.dart';
+      List<String> args = [
+        'drive',
+        '--target=$appFile',
+      ];
+      return createTestCommandRunner(command).run(args).then((int code) {
+        expect(code, equals(1));
+        BufferLogger buffer = logger;
+        expect(buffer.errorText, contains(
+          'Application file $appFile is outside the package directory $packageDir'
+        ));
+      });
+    });
+
+    testUsingContext('returns 1 when app file is in the root dir', () async {
+      String packageDir = '/my/app';
+      useInMemoryFileSystem(cwd: packageDir);
+      DriveCommand command = new DriveCommand();
+      applyMocksToCommand(command);
+
+      String appFile = '/my/app/main.dart';
+      List<String> args = [
+        'drive',
+        '--target=$appFile',
+      ];
+      return createTestCommandRunner(command).run(args).then((int code) {
+        expect(code, equals(1));
+        BufferLogger buffer = logger;
+        expect(buffer.errorText, contains(
+          'Application file main.dart must reside in one of the '
+          'sub-directories of the package structure, not in the root directory.'
+        ));
+      });
+    });
+
     testUsingContext('returns 0 when test ends successfully', () async {
       String testApp = '/some/app/test/e2e.dart';
-      String testFile = '/some/app/test/e2e_test.dart';
+      String testFile = '/some/app/test_driver/e2e_test.dart';
 
       DriveCommand command = new DriveCommand.custom(
         runAppFn: expectAsync(() {
