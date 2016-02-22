@@ -28,15 +28,7 @@ class IOSWorkflow extends Workflow {
     );
 
     Function _xcodeExists = () {
-      if (xcode.isInstalledAndMeetsVersionCheck) {
-        return ValidationType.installed;
-      }
-
-      if (xcode.isInstalled) {
-        return ValidationType.partial;
-      }
-
-      return ValidationType.missing;
+      return xcode.isInstalled ? ValidationType.installed : ValidationType.missing;
     };
 
     Function _xcodeVersionSatisfactory = () {
@@ -45,6 +37,10 @@ class IOSWorkflow extends Workflow {
       }
 
       return ValidationType.missing;
+    };
+
+    Function _xcodeEulaSigned = () {
+      return xcode.eulaSigned ? ValidationType.installed : ValidationType.missing;
     };
 
     Function _brewExists = () {
@@ -71,10 +67,17 @@ class IOSWorkflow extends Workflow {
     iosValidator.addValidator(xcodeValidator);
 
     xcodeValidator.addValidator(new Validator(
-      'Version Check',
-      description: 'Xcode version is at least $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor',
+      'version',
+      description: 'Xcode minimum version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0',
       resolution: 'Download the latest version or update via the Mac App Store',
       validatorFunction: _xcodeVersionSatisfactory
+    ));
+
+    xcodeValidator.addValidator(new Validator(
+      'EULA',
+      description: 'XCode end user license agreement',
+      resolution: "Open XCode or run the command 'sudo xcodebuild -license'",
+      validatorFunction: _xcodeEulaSigned
     ));
 
     Validator brewValidator = new Validator(
