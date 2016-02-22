@@ -73,15 +73,23 @@ class XCode {
       int major = int.parse(components[0]);
       int minor = components.length == 1 ? 0 : int.parse(components[1]);
 
-      _xcodeVersionSatisfactory = major >= kXcodeRequiredVersionMajor && minor >= kXcodeRequiredVersionMinor;
-      return _xcodeVersionSatisfactory;
+      _xcodeVersionSatisfactory = _xcodeVersionCheckValid(major, minor);
     } catch (error) {
       _xcodeVersionSatisfactory = false;
-      return false;
     }
 
-    return false;
+    return _xcodeVersionSatisfactory;
   }
+}
+
+bool _xcodeVersionCheckValid(int major, int minor) {
+  if (major > kXcodeRequiredVersionMajor)
+    return true;
+
+  if (major == kXcodeRequiredVersionMajor)
+    return minor >= kXcodeRequiredVersionMinor;
+
+  return false;
 }
 
 Future<bool> buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice }) async {

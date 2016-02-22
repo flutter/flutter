@@ -32,11 +32,7 @@ class IOSWorkflow extends Workflow {
     };
 
     Function _xcodeVersionSatisfactory = () {
-      if (xcode.isInstalledAndMeetsVersionCheck) {
-        return ValidationType.installed;
-      }
-
-      return ValidationType.missing;
+      return xcode.isInstalledAndMeetsVersionCheck ? ValidationType.installed : ValidationType.missing;
     };
 
     Function _xcodeEulaSigned = () {
