@@ -300,7 +300,7 @@ class CardCollectionState extends State<CardCollection> {
       onResized: () { _invalidator(<int>[index]); },
       onDismissed: () { dismissCard(cardModel); },
       child: new Card(
-        color: Theme.of(context).primarySwatch[cardModel.color],
+        color: _primaryColor[cardModel.color],
         child: new Container(
           height: cardModel.height,
           padding: const EdgeDims.all(kCardMargins),
@@ -428,7 +428,7 @@ class CardCollectionState extends State<CardCollection> {
 
     Widget body = new Container(
       padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: new BoxDecoration(backgroundColor: Theme.of(context).primarySwatch[50]),
+      decoration: new BoxDecoration(backgroundColor: _primaryColor[50]),
       child: cardCollection
     );
 

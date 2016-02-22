@@ -74,15 +74,7 @@ class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
 
   Color getColor(BuildContext context) {
     if (config.enabled) {
-      if (config.color != null)
-        return config.color;
-      switch (Theme.of(context).brightness) {
-        case ThemeBrightness.light:
-          return Colors.grey[300];
-        case ThemeBrightness.dark:
-          Map<int, Color> swatch = Theme.of(context).primarySwatch ?? Colors.blue;
-          return swatch[600];
-      }
+      return config.color ?? Theme.of(context).buttonColor;
     } else {
       if (config.disabledColor != null)
         return config.disabledColor;

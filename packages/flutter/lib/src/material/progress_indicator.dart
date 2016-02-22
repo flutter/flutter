@@ -22,7 +22,7 @@ abstract class ProgressIndicator extends StatefulComponent {
 
   final double value; // Null for non-determinate progress indicator.
 
-  Color _getBackgroundColor(BuildContext context) => Theme.of(context).primarySwatch[200];
+  Color _getBackgroundColor(BuildContext context) => Theme.of(context).backgroundColor;
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
 
   void debugFillDescription(List<String> description) {
