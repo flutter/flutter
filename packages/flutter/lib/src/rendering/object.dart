@@ -687,6 +687,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       child.parentData = new ParentData();
   }
 
+  bool _debugHasChild(RenderObject child) {
+    bool foundChild = false;
+    visitChildren((RenderObject otherChild) {
+      if (otherChild == child)
+        foundChild = true;
+    });
+    return foundChild;
+  }
+
   /// Called by subclasses when they decide a render object is a child.
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
@@ -694,6 +703,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void adoptChild(RenderObject child) {
     assert(debugCanPerformMutations);
     assert(child != null);
+    assert(_debugHasChild(child));
     setupParentData(child);
     super.adoptChild(child);
     markNeedsLayout();
@@ -708,6 +718,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(debugCanPerformMutations);
     assert(child != null);
     assert(child.parentData != null);
+    assert(!_debugHasChild(child));
     child._cleanRelayoutSubtreeRoot();
     child.parentData.detach();
     child.parentData = null;
