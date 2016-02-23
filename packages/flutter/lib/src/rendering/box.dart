@@ -533,19 +533,19 @@ abstract class RenderBox extends RenderObject {
   double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
     assert(!needsLayout);
     assert(!_debugDoingBaseline);
-    final RenderObject parent = this.parent;
     assert(() {
+      final RenderObject parent = this.parent;
       if (RenderObject.debugDoingLayout)
         return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
       if (RenderObject.debugDoingPaint)
         return ((RenderObject.debugActivePaint == parent) && parent.debugDoingThisPaint) ||
                ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
+      assert(parent == this.parent);
       return false;
     });
     assert(_debugSetDoingBaseline(true));
     double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
-    assert(parent == this.parent);
     if (result == null && !onlyReal)
       return size.height;
     return result;
