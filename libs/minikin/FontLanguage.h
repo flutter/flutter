@@ -68,14 +68,15 @@ private:
     // mLanguage = 0 means the FontLanguage is unsupported.
     uint32_t mLanguage;
 
-    // For faster comparing, use 7 bits for specific scripts.
-    static const uint8_t kEmojiFlag = 1u;
-    static const uint8_t kHanFlag = 1u << 1;
-    static const uint8_t kHangulFlag = 1u << 2;
-    static const uint8_t kHiraganaFlag = 1u << 3;
-    static const uint8_t kKatakanaFlag = 1u << 4;
-    static const uint8_t kSimplifiedChineseFlag = 1u << 5;
-    static const uint8_t kTraditionalChineseFlag = 1u << 6;
+    // For faster comparing, use 8 bits for specific scripts.
+    static const uint8_t kBopomofoFlag = 1u;
+    static const uint8_t kEmojiFlag = 1u << 1;
+    static const uint8_t kHanFlag = 1u << 2;
+    static const uint8_t kHangulFlag = 1u << 3;
+    static const uint8_t kHiraganaFlag = 1u << 4;
+    static const uint8_t kKatakanaFlag = 1u << 5;
+    static const uint8_t kSimplifiedChineseFlag = 1u << 6;
+    static const uint8_t kTraditionalChineseFlag = 1u << 7;
     uint8_t mSubScriptBits;
 
     static uint8_t scriptToSubScriptBits(uint32_t script);
