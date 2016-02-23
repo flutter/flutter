@@ -47,10 +47,10 @@ class _AlwaysDismissedAnimation extends Animation<double> {
 const Animation<double> kAlwaysDismissedAnimation = const _AlwaysDismissedAnimation();
 
 /// An animation that is always stopped at a given value.
-class AlwaysStoppedAnimation extends Animation<double> {
+class AlwaysStoppedAnimation<T> extends Animation<T> {
   const AlwaysStoppedAnimation(this.value);
 
-  final double value;
+  final T value;
 
   void addListener(VoidCallback listener) { }
   void removeListener(VoidCallback listener) { }

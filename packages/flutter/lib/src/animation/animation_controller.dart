@@ -48,7 +48,7 @@ class AnimationController extends Animation<double>
   /// * debugLabel is a string to help identify this animation during debugging (used by toString).
   ///
   /// This constructor is most useful for animations that will be driven using a
-  /// physics simulation, especially when the physics simulation as no
+  /// physics simulation, especially when the physics simulation has no
   /// pre-determined bounds.
   AnimationController.unbounded({
     double value: 0.0,
@@ -128,48 +128,6 @@ class AnimationController extends Animation<double>
     return animateTo(_direction == AnimationDirection.forward ? upperBound : lowerBound);
   }
 
-  /// Stops running this animation.
-  void stop() {
-    _simulation = null;
-    _ticker.stop();
-  }
-
-  /// Stops running this animation.
-  void dispose() {
-    stop();
-  }
-
-  /// Flings the timeline with an optional force (defaults to a critically
-  /// damped spring) and initial velocity. If velocity is positive, the
-  /// animation will complete, otherwise it will dismiss.
-  Future fling({ double velocity: 1.0, Force force }) {
-    force ??= kDefaultSpringForce;
-    _direction = velocity < 0.0 ? AnimationDirection.reverse : AnimationDirection.forward;
-    return animateWith(force.release(value, velocity));
-  }
-
-  /// Starts running this animation in the forward direction, and
-  /// restarts the animation when it completes.
-  Future repeat({ double min: 0.0, double max: 1.0, Duration period }) {
-    period ??= duration;
-    return animateWith(new _RepeatingSimulation(min, max, period));
-  }
-
-  /// Drives the animation according to the given simulation.
-  Future animateWith(Simulation simulation) {
-    stop();
-    return _startSimulation(simulation);
-  }
-
-  AnimationStatus _lastStatus = AnimationStatus.dismissed;
-  void _checkStatusChanged() {
-    AnimationStatus newStatus = status;
-    AnimationStatus oldStatus = _lastStatus;
-    _lastStatus = newStatus;
-    if (oldStatus != newStatus)
-      notifyStatusListeners(newStatus);
-  }
-
   /// Drives the animation from its current value to target.
   Future animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
@@ -190,12 +148,54 @@ class AnimationController extends Animation<double>
     return _startSimulation(new _TweenSimulation(_value, target, simulationDuration, curve));
   }
 
+  /// Starts running this animation in the forward direction, and
+  /// restarts the animation when it completes.
+  Future repeat({ double min: 0.0, double max: 1.0, Duration period }) {
+    period ??= duration;
+    return animateWith(new _RepeatingSimulation(min, max, period));
+  }
+
+  /// Flings the timeline with an optional force (defaults to a critically
+  /// damped spring) and initial velocity. If velocity is positive, the
+  /// animation will complete, otherwise it will dismiss.
+  Future fling({ double velocity: 1.0, Force force }) {
+    force ??= kDefaultSpringForce;
+    _direction = velocity < 0.0 ? AnimationDirection.reverse : AnimationDirection.forward;
+    return animateWith(force.release(value, velocity));
+  }
+
+  /// Drives the animation according to the given simulation.
+  Future animateWith(Simulation simulation) {
+    stop();
+    return _startSimulation(simulation);
+  }
+
   Future _startSimulation(Simulation simulation) {
     assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
     _value = simulation.x(0.0);
     return _ticker.start();
+  }
+
+  /// Stops running this animation.
+  void stop() {
+    _simulation = null;
+    _ticker.stop();
+  }
+
+  /// Stops running this animation.
+  void dispose() {
+    stop();
+  }
+
+  AnimationStatus _lastStatus = AnimationStatus.dismissed;
+  void _checkStatusChanged() {
+    AnimationStatus newStatus = status;
+    AnimationStatus oldStatus = _lastStatus;
+    _lastStatus = newStatus;
+    if (oldStatus != newStatus)
+      notifyStatusListeners(newStatus);
   }
 
   void _tick(Duration elapsed) {
