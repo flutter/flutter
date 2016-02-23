@@ -10,7 +10,7 @@ import '../globals.dart';
 import 'mac.dart';
 
 class IOSWorkflow extends Workflow {
-  IOSWorkflow() : super('iOS');
+  String get label => 'iOS toolchain';
 
   bool get appliesToHostPlatform => Platform.isMacOS;
 
@@ -23,33 +23,33 @@ class IOSWorkflow extends Workflow {
 
   ValidationResult validate() {
     Validator iosValidator = new Validator(
-      '$name toolchain',
+      label,
       description: 'develop for iOS devices'
     );
 
-    Function _xcodeExists = () {
+    ValidationType xcodeExists() {
       return xcode.isInstalled ? ValidationType.installed : ValidationType.missing;
     };
 
-    Function _xcodeVersionSatisfactory = () {
+    ValidationType xcodeVersionSatisfactory() {
       return xcode.isInstalledAndMeetsVersionCheck ? ValidationType.installed : ValidationType.missing;
     };
 
-    Function _xcodeEulaSigned = () {
+    ValidationType xcodeEulaSigned() {
       return xcode.eulaSigned ? ValidationType.installed : ValidationType.missing;
     };
 
-    Function _brewExists = () {
+    ValidationType brewExists() {
       return exitsHappy(<String>['brew', '-v'])
         ? ValidationType.installed : ValidationType.missing;
     };
 
-    Function _ideviceinstallerExists = () {
+    ValidationType ideviceinstallerExists() {
       return exitsHappy(<String>['ideviceinstaller', '-h'])
         ? ValidationType.installed : ValidationType.missing;
     };
 
-    Function _iosdeployExists = () {
+    ValidationType iosdeployExists() {
       return hasIdeviceId ? ValidationType.installed : ValidationType.missing;
     };
 
@@ -57,7 +57,7 @@ class IOSWorkflow extends Workflow {
       'XCode',
       description: 'enable development for iOS devices',
       resolution: 'Download at https://developer.apple.com/xcode/download/',
-      validatorFunction: _xcodeExists
+      validatorFunction: xcodeExists
     );
 
     iosValidator.addValidator(xcodeValidator);
@@ -66,21 +66,21 @@ class IOSWorkflow extends Workflow {
       'version',
       description: 'Xcode minimum version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0',
       resolution: 'Download the latest version or update via the Mac App Store',
-      validatorFunction: _xcodeVersionSatisfactory
+      validatorFunction: xcodeVersionSatisfactory
     ));
 
     xcodeValidator.addValidator(new Validator(
       'EULA',
       description: 'XCode end user license agreement',
       resolution: "Open XCode or run the command 'sudo xcodebuild -license'",
-      validatorFunction: _xcodeEulaSigned
+      validatorFunction: xcodeEulaSigned
     ));
 
     Validator brewValidator = new Validator(
       'brew',
       description: 'install additional development packages',
       resolution: 'Download at http://brew.sh/',
-      validatorFunction: _brewExists
+      validatorFunction: brewExists
     );
 
     iosValidator.addValidator(brewValidator);
@@ -89,14 +89,14 @@ class IOSWorkflow extends Workflow {
       'ideviceinstaller',
       description: 'discover connected iOS devices',
       resolution: "Install via 'brew install ideviceinstaller'",
-      validatorFunction: _ideviceinstallerExists
+      validatorFunction: ideviceinstallerExists
     ));
 
     brewValidator.addValidator(new Validator(
       'ios-deploy',
       description: 'deploy to connected iOS devices',
       resolution: "Install via 'brew install ios-deploy'",
-      validatorFunction: _iosdeployExists
+      validatorFunction: iosdeployExists
     ));
 
     return iosValidator.validate();
