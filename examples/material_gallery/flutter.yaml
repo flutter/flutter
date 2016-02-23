@@ -33,7 +33,9 @@ material-design-icons:
   - name: action/hourglass_empty
   - name: action/info
   - name: action/language
+  - name: action/list
   - name: av/play_arrow
+  - name: av/sort_by_alpha
   - name: av/stop
   - name: communication/call
   - name: communication/email

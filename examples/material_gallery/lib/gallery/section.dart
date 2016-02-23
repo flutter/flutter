@@ -49,7 +49,7 @@ class GallerySection extends StatelessComponent {
                 type: MaterialListType.oneLine,
                 children: (demos ?? const <GalleryDemo>[]).map((GalleryDemo demo) {
                   return new ListItem(
-                    center: new Text(demo.title, style: theme.text.subhead),
+                    primary: new Text(demo.title),
                     onTap: () { showDemo(demo, context, theme); }
                   );
                 })

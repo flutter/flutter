@@ -332,7 +332,7 @@ class ScaffoldState extends State<Scaffold> {
         bottomSheet,
         completer,
         () => entry.remove(),
-        setState
+        (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); }
       );
     });
     return _currentBottomSheet;

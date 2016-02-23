@@ -39,7 +39,7 @@ class TwoLevelListItem extends StatelessComponent {
       height: kListItemExtent[parentList.type],
       child: new ListItem(
         left: left,
-        center: center,
+        primary: center,
         right: right,
         onTap: onTap,
         onLongPress: onLongPress
