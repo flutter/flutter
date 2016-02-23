@@ -2,20 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'android/android_workflow.dart';
 import 'base/context.dart';
+import 'base/process.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
+
+// TODO(devoncarew): Make it easy to add version information to the `doctor` printout.
 
 class Doctor {
   Doctor() {
     _iosWorkflow = new IOSWorkflow();
     if (_iosWorkflow.appliesToHostPlatform)
-      _workflows.add(_iosWorkflow);
+      _validators.add(_iosWorkflow);
 
     _androidWorkflow = new AndroidWorkflow();
     if (_androidWorkflow.appliesToHostPlatform)
-      _workflows.add(_androidWorkflow);
+      _validators.add(_androidWorkflow);
+
+    _validators.add(new _AtomValidator());
   }
 
   static void initGlobal() {
@@ -30,9 +37,9 @@ class Doctor {
 
   AndroidWorkflow get androidWorkflow => _androidWorkflow;
 
-  List<Workflow> _workflows = <Workflow>[];
+  List<DoctorValidator> _validators = <DoctorValidator>[];
 
-  List<Workflow> get workflows => _workflows;
+  Iterable<Workflow> get workflows => _validators.where((DoctorValidator validator) => validator is Workflow);
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
   void summary() => printStatus(summaryText);
@@ -42,9 +49,9 @@ class Doctor {
 
     bool allGood = true;
 
-    for (Workflow workflow in workflows) {
-      ValidationResult result = workflow.validate();
-      buffer.write('${result.leadingBox} The ${workflow.name} toolchain is ');
+    for (DoctorValidator validator in _validators) {
+      ValidationResult result = validator.validate();
+      buffer.write('${result.leadingBox} The ${validator.label} is ');
       if (result.type == ValidationType.missing)
         buffer.writeln('not installed.');
       else if (result.type == ValidationType.partial)
@@ -65,10 +72,12 @@ class Doctor {
 
   /// Print verbose information about the state of installed tooling.
   void diagnose() {
-    for (int i = 0; i < workflows.length; i++) {
-      if (i > 0)
+    bool firstLine = true;
+    for (DoctorValidator validator in _validators) {
+      if (!firstLine)
         printStatus('');
-      workflows[i].diagnose();
+      firstLine = false;
+      validator.diagnose();
     }
   }
 
@@ -77,12 +86,17 @@ class Doctor {
   bool get canLaunchAnything => workflows.any((Workflow workflow) => workflow.canLaunchDevices);
 }
 
+abstract class DoctorValidator {
+  String get label;
+
+  ValidationResult validate();
+
+  /// Print verbose information about the state of the workflow.
+  void diagnose();
+}
+
 /// A series of tools and required install steps for a target platform (iOS or Android).
-abstract class Workflow {
-  Workflow(this.name);
-
-  final String name;
-
+abstract class Workflow extends DoctorValidator {
   /// Whether the workflow applies to this platform (as in, should we ever try and use it).
   bool get appliesToHostPlatform;
 
@@ -91,13 +105,6 @@ abstract class Workflow {
 
   /// Could this thing launch *something*? It may still have minor issues.
   bool get canLaunchDevices;
-
-  ValidationResult validate();
-
-  /// Print verbose information about the state of the workflow.
-  void diagnose();
-
-  String toString() => name;
 }
 
 enum ValidationType {
@@ -205,4 +212,51 @@ class ValidationResult {
     results.addAll(childResults);
     return results;
   }
+}
+
+class _AtomValidator extends DoctorValidator {
+  String get label => 'Atom development environment';
+
+  ValidationResult validate() {
+    Validator atomValidator = new Validator(
+      label,
+      description: 'a lightweight development environment for Flutter'
+    );
+
+    ValidationType atomExists() {
+      return exitsHappy(<String>['atom', '--version']) ? ValidationType.installed : ValidationType.missing;
+    };
+
+    ValidationType flutterPluginExists() {
+      try {
+        // apm list -b -p -i
+        ProcessResult result = Process.runSync('apm', <String>['list', '-b', '-p', '-i']);
+        if (result.exitCode != 0)
+          return ValidationType.missing;
+        bool available = (result.stdout as String).split('\n').any((String line) {
+          return line.startsWith('flutter@');
+        });
+        return available ? ValidationType.installed : ValidationType.missing;
+      } catch (error) {
+        return ValidationType.missing;
+      }
+    };
+
+    atomValidator.addValidator(new Validator(
+      'Atom editor',
+      resolution: 'Download at https://atom.io',
+      validatorFunction: atomExists
+    ));
+
+    atomValidator.addValidator(new Validator(
+      'Flutter plugin',
+      description: 'adds Flutter specific functionality to Atom',
+      resolution: "Install the 'flutter' plugin in Atom or run 'apm install flutter'",
+      validatorFunction: flutterPluginExists
+    ));
+
+    return atomValidator.validate();
+  }
+
+  void diagnose() => validate().print();
 }

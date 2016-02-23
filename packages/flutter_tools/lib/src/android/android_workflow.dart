@@ -7,7 +7,7 @@ import '../globals.dart';
 import 'android_sdk.dart';
 
 class AndroidWorkflow extends Workflow {
-  AndroidWorkflow() : super('Android');
+  String get label => 'Android toolchain';
 
   bool get appliesToHostPlatform => true;
 
@@ -17,11 +17,11 @@ class AndroidWorkflow extends Workflow {
 
   ValidationResult validate() {
     Validator androidValidator = new Validator(
-      '$name toolchain',
+      label,
       description: 'develop for Android devices'
     );
 
-    Function _sdkExists = () {
+    ValidationType sdkExists() {
       return androidSdk == null ? ValidationType.missing : ValidationType.installed;
     };
 
@@ -29,7 +29,7 @@ class AndroidWorkflow extends Workflow {
       'Android SDK',
       description: 'enable development for Android devices',
       resolution: 'Download at https://developer.android.com/sdk/',
-      validatorFunction: _sdkExists
+      validatorFunction: sdkExists
     ));
 
     return androidValidator.validate();
