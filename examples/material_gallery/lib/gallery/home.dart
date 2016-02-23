@@ -59,91 +59,89 @@ class GalleryHomeState extends State<GalleryHome> {
           );
         }
       ),
-      body: new Padding(
+      body: new Block(
         padding: const EdgeDims.all(4.0),
-        child: new Block(
-          children: <Widget>[
-            new Row(
-              children: <Widget>[
-                new GallerySection(
-                  title: 'Animation',
-                  image: 'assets/section_animation.png',
-                  colors: Colors.purple,
-                  demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Weathers', builder: () => new WeathersDemo()),
-                    new GalleryDemo(title: 'Fitness', builder: () => new FitnessDemo())
-                  ]
-                ),
-                new GallerySection(
-                  title: 'Style',
-                  image: 'assets/section_style.png',
-                  colors: Colors.green,
-                  demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Colors', builder: () => new ColorsDemo()),
-                    new GalleryDemo(title: 'Typography', builder: () => new TypographyDemo())
-                  ]
-                )
-              ]
-            ),
-            new Row(
-              children: <Widget>[
-                new GallerySection(
-                  title: 'Layout',
-                  image: 'assets/section_layout.png',
-                  colors: Colors.pink
-                ),
-                new GallerySection(
-                  title: 'Components',
-                  image: 'assets/section_components.png',
-                  colors: Colors.amber,
-                  demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Buttons', builder: () => new ButtonsDemo()),
-                    new GalleryDemo(title: 'Cards', builder: () => new CardsDemo()),
-                    new GalleryDemo(title: 'Chips', builder: () => new ChipDemo()),
-                    new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
-                    new GalleryDemo(title: 'Dialog', builder: () => new DialogDemo()),
-                    new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
-                    new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
-                    new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo()),
-                    new GalleryDemo(title: 'Grid', builder: () => new GridListDemo()),
-                    new GalleryDemo(title: 'Icons', builder: () => new IconsDemo()),
-                    new GalleryDemo(title: 'List', builder: () => new ListDemo()),
-                    new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
-                    new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
-                    new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
-                    new GalleryDemo(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
-                    new GalleryDemo(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
-                    new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
-                    new GalleryDemo(title: 'SnackBar', builder: () => new SnackBarDemo()),
-                    new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
-                    new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
-                    new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
-                  ]
-                )
-              ]
-            ),
-            new Row(
-              children: <Widget>[
-                new GallerySection(
-                  title: 'Patterns',
-                  image: 'assets/section_patterns.png',
-                  colors: Colors.cyan,
-                  demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Scrolling Techniques', builder: () => new ScrollingTechniquesDemo())
-                  ]
-                ),
-                new GallerySection(
-                  title: 'Usability',
-                  image: 'assets/section_usability.png',
-                  colors: Colors.lightGreen,
-                  demos: <GalleryDemo>[
-                    new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
-                  ]
-                )
-              ]
-            )
-          ]
-        )
+        children: <Widget>[
+          new Row(
+            children: <Widget>[
+              new GallerySection(
+                title: 'Animation',
+                image: 'assets/section_animation.png',
+                colors: Colors.purple,
+                demos: <GalleryDemo>[
+                  new GalleryDemo(title: 'Weathers', builder: () => new WeathersDemo()),
+                  new GalleryDemo(title: 'Fitness', builder: () => new FitnessDemo())
+                ]
+              ),
+              new GallerySection(
+                title: 'Style',
+                image: 'assets/section_style.png',
+                colors: Colors.green,
+                demos: <GalleryDemo>[
+                  new GalleryDemo(title: 'Colors', builder: () => new ColorsDemo()),
+                  new GalleryDemo(title: 'Typography', builder: () => new TypographyDemo())
+                ]
+              )
+            ]
+          ),
+          new Row(
+            children: <Widget>[
+              new GallerySection(
+                title: 'Layout',
+                image: 'assets/section_layout.png',
+                colors: Colors.pink
+              ),
+              new GallerySection(
+                title: 'Components',
+                image: 'assets/section_components.png',
+                colors: Colors.amber,
+                demos: <GalleryDemo>[
+                  new GalleryDemo(title: 'Buttons', builder: () => new ButtonsDemo()),
+                  new GalleryDemo(title: 'Cards', builder: () => new CardsDemo()),
+                  new GalleryDemo(title: 'Chips', builder: () => new ChipDemo()),
+                  new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
+                  new GalleryDemo(title: 'Dialog', builder: () => new DialogDemo()),
+                  new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
+                  new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
+                  new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo()),
+                  new GalleryDemo(title: 'Grid', builder: () => new GridListDemo()),
+                  new GalleryDemo(title: 'Icons', builder: () => new IconsDemo()),
+                  new GalleryDemo(title: 'List', builder: () => new ListDemo()),
+                  new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
+                  new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
+                  new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
+                  new GalleryDemo(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
+                  new GalleryDemo(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
+                  new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
+                  new GalleryDemo(title: 'SnackBar', builder: () => new SnackBarDemo()),
+                  new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
+                  new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
+                  new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
+                ]
+              )
+            ]
+          ),
+          new Row(
+            children: <Widget>[
+              new GallerySection(
+                title: 'Patterns',
+                image: 'assets/section_patterns.png',
+                colors: Colors.cyan,
+                demos: <GalleryDemo>[
+                  new GalleryDemo(title: 'Scrolling Techniques', builder: () => new ScrollingTechniquesDemo())
+                ]
+              ),
+              new GallerySection(
+                title: 'Usability',
+                image: 'assets/section_usability.png',
+                colors: Colors.lightGreen,
+                demos: <GalleryDemo>[
+                  new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
+                ]
+              )
+            ]
+          )
+        ]
       )
     );
   }
