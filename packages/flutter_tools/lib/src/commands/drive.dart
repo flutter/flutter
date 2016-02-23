@@ -25,9 +25,10 @@ typedef Future<int> StopAppFunction();
 ///
 /// This command takes a target Flutter application that you would like to test
 /// as the `--target` option (defaults to `lib/main.dart`). It then looks for a
-/// file with the same name but containing the `_test.dart` suffix. The
-/// `_test.dart` file is expected to be a program that uses
-/// `package:flutter_driver` that exercises your application. Most commonly it
+/// corresponding test file within the `test_driver` directory. The test file is
+/// expected to have the same name but contain the `_test.dart` suffix. The
+/// `_test.dart` file would generall be a Dart program that uses
+/// `package:flutter_driver` and exercises your application. Most commonly it
 /// is a test written using `package:test`, but you are free to use something
 /// else.
 ///
@@ -59,6 +60,25 @@ class DriveCommand extends RunCommand {
     _runApp = runAppFn ?? super.runInProject;
     _runTests = runTestsFn ?? executable.main;
     _stopApp = stopAppFn ?? this.stop;
+
+    argParser.addFlag(
+      'keep-app-running',
+      negatable: true,
+      defaultsTo: false,
+      help:
+        'Will keep the Flutter application running when done testing. By '
+        'default Flutter Driver stops the application after tests are finished.'
+    );
+
+    argParser.addFlag(
+      'use-existing-app',
+      negatable: true,
+      defaultsTo: false,
+      help:
+        'Will not start a new Flutter application but connect to an '
+        'already running instance. This will also cause the driver to keep '
+        'the application running after tests are done.'
+    );
   }
 
   DriveCommand() : this.custom();
@@ -66,27 +86,40 @@ class DriveCommand extends RunCommand {
   @override
   Future<int> runInProject() async {
     String testFile = _getTestFile();
+    if (testFile == null) {
+      return 1;
+    }
 
     if (await fs.type(testFile) != FileSystemEntityType.FILE) {
       printError('Test file not found: $testFile');
       return 1;
     }
 
-    int result = await _runApp();
-    if (result != 0) {
-      printError('Application failed to start. Will not run test. Quitting.');
-      return result;
+    if (!argResults['use-existing-app']) {
+      printStatus('Starting application: ${argResults["target"]}');
+      int result = await _runApp();
+      if (result != 0) {
+        printError('Application failed to start. Will not run test. Quitting.');
+        return result;
+      }
+    } else {
+      printStatus('Will connect to already running application instance');
     }
 
     try {
       return await _runTests([testFile])
         .then((_) => 0)
         .catchError((error, stackTrace) {
-          printError('ERROR: $error\n$stackTrace');
+          printError('CAUGHT EXCEPTION: $error\n$stackTrace');
           return 1;
         });
     } finally {
-      await _stopApp();
+      if (!argResults['keep-app-running'] && !argResults['use-existing-app']) {
+        printStatus('Stopping application instance');
+        await _stopApp();
+      } else {
+        printStatus('Leaving the application running');
+      }
     }
   }
 
@@ -95,9 +128,39 @@ class DriveCommand extends RunCommand {
   }
 
   String _getTestFile() {
-    String appFile = argResults['target'];
-    String extension = path.extension(appFile);
-    String name = path.withoutExtension(appFile);
-    return '${name}_test$extension';
+    String appFile = path.normalize(argResults['target']);
+
+    // This command extends `flutter start` and therefore CWD == package dir
+    String packageDir = getCurrentDirectory();
+
+    // Make appFile path relative to package directory because we are looking
+    // for the corresponding test file relative to it.
+    if (!path.isRelative(appFile)) {
+      if (!path.isWithin(packageDir, appFile)) {
+        printError(
+          'Application file $appFile is outside the package directory $packageDir'
+        );
+        return null;
+      }
+
+      appFile = path.relative(appFile, from: packageDir);
+    }
+
+    List<String> parts = path.split(appFile);
+
+    if (parts.length < 2) {
+      printError(
+        'Application file $appFile must reside in one of the sub-directories '
+        'of the package structure, not in the root directory.'
+      );
+      return null;
+    }
+
+    // Look for the test file inside `test_driver/` matching the sub-path, e.g.
+    // if the application is `lib/foo/bar.dart`, the test file is expected to
+    // be `test_driver/foo/bar_test.dart`.
+    String pathWithNoExtension = path.withoutExtension(path.joinAll(
+      [packageDir, 'test_driver']..addAll(parts.skip(1))));
+    return '${pathWithNoExtension}_test${path.extension(appFile)}';
   }
 }
