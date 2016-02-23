@@ -6,40 +6,36 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 class CircleAvatar extends StatelessComponent {
   CircleAvatar({
     Key key,
-    this.label,
+    this.child,
     this.backgroundColor,
-    this.textTheme
+    this.radius: 40.0
   }) : super(key: key);
 
-  final String label;
+  final Widget child;
   final Color backgroundColor;
-  final TextTheme textTheme;
+  final double radius;
 
   Widget build(BuildContext context) {
-    Color color = backgroundColor;
-    TextStyle style = textTheme?.title;
-
-    if (color == null || style == null) {
-      ThemeData themeData = Theme.of(context);
-      color ??= themeData.primaryColor;
-      style ??= themeData.primaryTextTheme.title;
-    }
+    final ThemeData theme = Theme.of(context);
+    final Color color = backgroundColor ?? theme.primaryColor;
 
     return new AnimatedContainer(
+      width: radius,
+      height: radius,
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
         backgroundColor: color,
         shape: BoxShape.circle
       ),
-      width: 40.0,
-      height: 40.0,
       child: new Center(
-        child: new Text(label, style: style)
+        child: new DefaultTextStyle(
+          style: theme.primaryTextTheme.title,
+          child: child
+        )
       )
     );
   }

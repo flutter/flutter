@@ -23,7 +23,7 @@ class _ChipDemoState extends State<ChipDemo> {
         label: new Text('Apple')
       ),
       new Chip(
-        avatar: new CircleAvatar(label: 'B'),
+        avatar: new CircleAvatar(child: new Text('B')),
         label: new Text('Blueberry')
       ),
     ];
