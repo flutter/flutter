@@ -61,8 +61,15 @@ FontLanguage::FontLanguage(const char* buf, size_t length) : FontLanguage() {
 uint8_t FontLanguage::scriptToSubScriptBits(uint32_t script) {
     uint8_t subScriptBits = 0u;
     switch (script) {
+        case SCRIPT_TAG('B', 'o', 'p', 'o'):
+            subScriptBits = kBopomofoFlag;
+            break;
         case SCRIPT_TAG('H', 'a', 'n', 'g'):
             subScriptBits = kHangulFlag;
+            break;
+        case SCRIPT_TAG('H', 'a', 'n', 'b'):
+            // Bopomofo is almost exclusively used in Taiwan.
+            subScriptBits = kHanFlag | kBopomofoFlag;
             break;
         case SCRIPT_TAG('H', 'a', 'n', 'i'):
             subScriptBits = kHanFlag;
