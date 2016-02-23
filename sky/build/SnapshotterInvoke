@@ -74,6 +74,8 @@ SnapshotProject() {
 
   local project_path="$1"
 
+  RunCommand cd ${project_path}
+
   # Check if 'pub get' has been run
   RunCommand ls ${project_path}/packages
   if [ $? -ne 0 ]; then
