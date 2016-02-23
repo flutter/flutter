@@ -109,10 +109,11 @@ To start working on a patch:
 
  * `git fetch upstream`
  * `git checkout upstream/master -b name_of_your_branch`
- * Hack away. Please peruse our [style guides](https://github.com/flutter/engine/blob/master/sky/specs/style-guide.md)
- and [design principles](https://github.com/flutter/engine/blob/master/sky/specs/design.md)
- before working on anything non-trivial. These guidelines are intended to keep
- the code consistent and avoid common pitfalls.
+ * Hack away. Please peruse our
+ [style guides](https://flutter.io/style-guide/) and
+ [design principles](https://flutter.io/design-principles/) before
+ working on anything non-trivial. These guidelines are intended to
+ keep the code consistent and avoid common pitfalls.
  * `git commit -a -m "<your informative commit message>"`
  * `git push origin name_of_your_branch`
 
