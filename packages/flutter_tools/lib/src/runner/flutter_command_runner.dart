@@ -123,10 +123,11 @@ class FlutterCommandRunner extends CommandRunner {
         defaultsTo: 'out/ios_sim_Release/');
   }
 
-  String get usageFooter =>
-    'Run "flutter -h -v" for verbose help output, including less commonly used options.\n'
-    '\n'
-    '${doctor.summaryText}';
+  String get usageFooter {
+    return 'Run "flutter -h -v" for verbose help output, including less commonly used options.\n'
+           '\n'
+           '${doctor.summaryText}';
+  }
 
   List<BuildConfiguration> get buildConfigurations {
     if (_buildConfigurations == null)
@@ -136,21 +137,17 @@ class FlutterCommandRunner extends CommandRunner {
   List<BuildConfiguration> _buildConfigurations;
 
   String get enginePath {
-    if (!_enginePathSet) {
-      _enginePath = _findEnginePath(_globalResults);
-      _enginePathSet = true;
-    }
+    assert(ArtifactStore.flutterRoot != null);
+    _enginePath ??= _findEnginePath(_globalResults);
     return _enginePath;
   }
   String _enginePath;
-  bool _enginePathSet = false;
 
   ArgResults _globalResults;
 
   String get _defaultFlutterRoot {
     if (Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
       return Platform.environment[kFlutterRootEnvironmentVariableName];
-
     try {
       String script = Platform.script.toFilePath();
       if (path.basename(script) == kSnapshotFileName)
@@ -170,6 +167,12 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['verbose'])
       logger.verbose = true;
 
+    // we must set ArtifactStore.flutterRoot early because other features use it
+    // (e.g. enginePath's initialiser uses it)
+    ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
+    if (globalResults.wasParsed('package-root'))
+      ArtifactStore.packageRoot = path.normalize(path.absolute(globalResults['package-root']));
+
     // See if the user specified a specific device.
     deviceManager.specifiedDeviceId = globalResults['device-id'];
 
@@ -184,14 +187,9 @@ class FlutterCommandRunner extends CommandRunner {
 
     if (androidSdk != null) {
       printTrace('Using Android SDK at ${androidSdk.directory}.');
-
       if (androidSdk.latestVersion != null)
         printTrace('${androidSdk.latestVersion}');
     }
-
-    ArtifactStore.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
-    if (globalResults.wasParsed('package-root'))
-      ArtifactStore.packageRoot = path.normalize(path.absolute(globalResults['package-root']));
 
     if (globalResults['version']) {
       printStatus(getVersion(ArtifactStore.flutterRoot));
