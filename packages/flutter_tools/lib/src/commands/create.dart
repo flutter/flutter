@@ -275,12 +275,10 @@ class _FlutterDemoState extends State<FlutterDemo> {
       toolBar: new ToolBar(
         center: new Text('Flutter Demo')
       ),
-      body: new Material(
-        child: new Center(
-          child: new Text(
-            'Button tapped $_counter times.',
-            key: const ValueKey('counter')
-          )
+      body: new Center(
+        child: new Text(
+          'Button tapped $_counter times.',
+          key: const ValueKey('counter')
         )
       ),
       floatingActionButton: new FloatingActionButton(
