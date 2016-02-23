@@ -10,27 +10,36 @@ const double _kSecondsPerMillisecond = 1000.0;
 const double _kScrollDrag = 0.025;
 
 /// An interface for controlling the behavior of scrollable widgets.
-abstract class ScrollBehavior {
+///
+/// The type argument T is the type that describes the scroll offset.
+/// The type argument U is the type that describes the scroll velocity.
+abstract class ScrollBehavior<T, U> {
   /// Returns a simulation that propels the scrollOffset.
   ///
   /// This function is called when a drag gesture ends.
-  Simulation createFlingScrollSimulation(double position, double velocity) => null;
+  ///
+  /// Returns null if the behavior is to do nothing.
+  Simulation createFlingScrollSimulation(T position, U velocity) => null;
 
   /// Returns an animation that ends at the snap offset.
   ///
-  /// This function is called when a drag gesture ends and toSnapOffset is specified.
-  Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) => null;
+  /// This function is called when a drag gesture ends and a
+  /// [SnapOffsetCallback] is specified for the scrollable.
+  ///
+  /// Returns null if the behavior is to do nothing.
+  Simulation createSnapScrollSimulation(T startOffset, T endOffset, U startVelocity, U endVelocity) => null;
 
   /// Returns the scroll offset to use when the user attempts to scroll
   /// from the given offset by the given delta.
-  double applyCurve(double scrollOffset, double scrollDelta);
+  T applyCurve(T scrollOffset, T scrollDelta) => scrollOffset;
 
   /// Whether this scroll behavior currently permits scrolling
   bool get isScrollable => true;
 }
 
-/// A scroll behavior for a scrollable widget with linear extent.
-abstract class ExtentScrollBehavior extends ScrollBehavior {
+/// A scroll behavior for a scrollable widget with linear extent (i.e.
+/// that only scrolls along one axis).
+abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
   ExtentScrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : _contentExtent = contentExtent, _containerExtent = containerExtent;
 
