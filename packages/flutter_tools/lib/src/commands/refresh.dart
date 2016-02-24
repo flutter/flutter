@@ -23,6 +23,10 @@ class RefreshCommand extends FlutterCommand {
     );
   }
 
+  bool get androidOnly => true;
+
+  bool get requiresDevice => true;
+
   @override
   Future<int> runInProject() async {
     printTrace('Downloading toolchain.');

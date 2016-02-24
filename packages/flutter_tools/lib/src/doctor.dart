@@ -39,7 +39,9 @@ class Doctor {
 
   List<DoctorValidator> _validators = <DoctorValidator>[];
 
-  Iterable<Workflow> get workflows => _validators.where((DoctorValidator validator) => validator is Workflow);
+  List<Workflow> get workflows {
+    return new List<Workflow>.from(_validators.where((DoctorValidator validator) => validator is Workflow));
+  }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
   void summary() => printStatus(summaryText);

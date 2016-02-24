@@ -31,6 +31,8 @@ defineTests() {
       when(mockDevices.iOSSimulator.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
 
+      testDeviceManager.addDevice(mockDevices.android);
+
       return createTestCommandRunner(command).run(['install']).then((int code) {
         expect(code, equals(0));
       });
@@ -52,6 +54,8 @@ defineTests() {
       when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
+
+      testDeviceManager.addDevice(mockDevices.iOS);
 
       return createTestCommandRunner(command).run(['install']).then((int code) {
         expect(code, equals(0));

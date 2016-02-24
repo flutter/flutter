@@ -8,12 +8,14 @@ import 'dart:io';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
+import 'src/context.dart';
 import 'src/mocks.dart';
 
 main() => defineTests();
@@ -37,6 +39,7 @@ defineTests() {
       appContext[Doctor] = new Doctor();
       if (Platform.isMacOS)
         appContext[XCode] = new XCode();
+      appContext[DeviceManager] = new MockDeviceManager();
     });
 
     tearDown(() {

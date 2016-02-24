@@ -51,12 +51,17 @@ class TestCommand extends FlutterCommand {
   }
 
   TestCommand() {
-    argParser.addFlag('flutter-repo', help: 'Run tests from the \'flutter\' package in the Flutter repository instead of the current directory.', defaultsTo: false);
+    argParser.addFlag(
+      'flutter-repo',
+      help: 'Run tests from the \'flutter\' package in the Flutter repository instead of the current directory.',
+      defaultsTo: false
+    );
   }
 
   Iterable<String> _findTests(Directory directory) {
     return directory.listSync(recursive: true, followLinks: false)
-                    .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') && FileSystemEntity.isFileSync(entity.path))
+                    .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
+                      FileSystemEntity.isFileSync(entity.path))
                     .map((FileSystemEntity entity) => path.absolute(entity.path));
   }
 
