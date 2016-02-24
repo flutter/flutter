@@ -136,6 +136,30 @@ TEST(GraphemeBreak, tailoring) {
     EXPECT_TRUE(IsBreak("U+0628 U+200D | U+2764"));
 }
 
+TEST(GraphemeBreak, emojiModifiers) {
+    EXPECT_FALSE(IsBreak("U+261D | U+1F3FB"));  // white up pointing index + modifier
+    EXPECT_FALSE(IsBreak("U+270C | U+1F3FB"));  // victory hand + modifier
+    EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FB"));  // boy + modifier
+    EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FC"));  // boy + modifier
+    EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FD"));  // boy + modifier
+    EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FE"));  // boy + modifier
+    EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FF"));  // boy + modifier
+    EXPECT_FALSE(IsBreak("U+1F918 | U+1F3FF"));  // sign of the horns + modifier
+    EXPECT_FALSE(IsBreak("U+1F933 | U+1F3FF"));  // selfie (Unicode 9) + modifier
+
+    // adding emoji style variation selector doesn't affect grapheme cluster
+    EXPECT_TRUE(IsBreak("U+270C U+FE0E | U+1F3FB"));  // victory hand + text style + modifier
+    EXPECT_FALSE(IsBreak("U+270C U+FE0F | U+1F3FB"));  // heart + emoji style + modifier
+
+    // heart is not an emoji base
+    EXPECT_TRUE(IsBreak("U+2764 | U+1F3FB"));  // heart + modifier
+    EXPECT_TRUE(IsBreak("U+2764 U+FE0E | U+1F3FB"));  // heart + emoji style + modifier
+    EXPECT_TRUE(IsBreak("U+2764 U+FE0F | U+1F3FB"));  // heart + emoji style + modifier
+
+    // rat is not an emoji modifer
+    EXPECT_TRUE(IsBreak("U+1F466 | U+1F400"));  // boy + rat
+}
+
 TEST(GraphemeBreak, offsets) {
     uint16_t string[] = { 0x0041, 0x06DD, 0x0045, 0x0301, 0x0049, 0x0301 };
     EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(string, 2, 3, 2));
