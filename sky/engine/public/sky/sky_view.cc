@@ -51,12 +51,12 @@ void SkyView::PopRoute() {
   GetWindow()->PopRoute();
 }
 
-void SkyView::CreateView(const std::string& name) {
+void SkyView::CreateView(const std::string& script_uri) {
   DCHECK(!dart_controller_);
 
   dart_controller_ = WTF::MakeUnique<DartController>();
   dart_controller_->CreateIsolateFor(WTF::MakeUnique<DOMDartState>(
-      WTF::MakeUnique<Window>(this), name));
+      WTF::MakeUnique<Window>(this), script_uri));
 
   DOMDartState* dart_state = dart_controller_->dart_state();
   DartState::Scope scope(dart_state);
@@ -76,8 +76,7 @@ void SkyView::RunFromPrecompiledSnapshot() {
   dart_controller_->RunFromPrecompiledSnapshot();
 }
 
-void SkyView::RunFromSnapshot(const std::string& name,
-                              mojo::ScopedDataPipeConsumerHandle snapshot) {
+void SkyView::RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot) {
   dart_controller_->RunFromSnapshot(snapshot.Pass());
 }
 

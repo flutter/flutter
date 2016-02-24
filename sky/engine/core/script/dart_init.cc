@@ -13,6 +13,7 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
+#include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/bindings/dart_mojo_internal.h"
 #include "sky/engine/bindings/dart_runtime_hooks.h"
 #include "sky/engine/bindings/dart_ui.h"
@@ -51,6 +52,10 @@ extern const uint8_t* observatory_assets_archive;
 
 namespace blink {
 
+using mojo::asset_bundle::ZipAssetBundle;
+
+const char kSnapshotAssetKey[] = "snapshot_blob.bin";
+
 Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
                                   Dart_Handle library,
                                   Dart_Handle url) {
@@ -58,13 +63,6 @@ Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
 }
 
 namespace {
-
-void CreateEmptyRootLibraryIfNeeded() {
-  if (Dart_IsNull(Dart_RootLibrary())) {
-    Dart_LoadScript(Dart_NewStringFromCString("dart:empty"), Dart_EmptyString(),
-                    0, 0);
-  }
-}
 
 static const char* kDartArgs[] = {
     "--enable_mirrors=false",
@@ -99,6 +97,8 @@ static const char* kDartCheckedModeArgs[] = {
 static const char* kDartStartPausedArgs[]{
     "--pause_isolates_on_start",
 };
+
+const char kFileUriPrefix[] = "file://";
 
 void IsolateShutdownCallback(void* callback_data) {
   // TODO(dart)
@@ -138,7 +138,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 #ifdef OS_ANDROID
       DartJni::InitForIsolate();
 #endif
-      DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate);
+      DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate, "");
       const SkySettings& settings = SkySettings::Get();
       if (settings.enable_observatory) {
         std::string ip = "127.0.0.1";
@@ -152,11 +152,19 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     return isolate;
   }
 
-  // Create & start the handle watcher isolate
-  // TODO(abarth): Who deletes this DartState instance?
+  std::vector<uint8_t> snapshot_data;
+  if (!IsRunningPrecompiledCode()) {
+    CHECK(base::StartsWith(script_uri, kFileUriPrefix,
+                           base::CompareCase::SENSITIVE));
+    base::FilePath flx_path(script_uri + strlen(kFileUriPrefix));
+    scoped_refptr<ZipAssetBundle> zip_asset_bundle(
+        new ZipAssetBundle(flx_path, nullptr));
+    CHECK(zip_asset_bundle->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
+  }
+
   DartState* dart_state = new DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
-      "sky:handle_watcher", "",
+      script_uri, main,
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, dart_state, error);
   CHECK(isolate) << error;
@@ -172,9 +180,12 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 #ifdef OS_ANDROID
     DartJni::InitForIsolate();
 #endif
+    DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate, script_uri);
 
-    if (!script_uri)
-      CreateEmptyRootLibraryIfNeeded();
+    if (!snapshot_data.empty()) {
+      CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(
+          snapshot_data.data(), snapshot_data.size())));
+    }
   }
 
   Dart_ExitIsolate();

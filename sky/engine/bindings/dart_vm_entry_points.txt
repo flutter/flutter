@@ -1,4 +1,5 @@
 dart:io,::,_setupHooks
+dart:io,_Platform,set:_nativeScript
 dart:isolate,::,_startMainIsolate
 dart:mojo.internal,MojoHandleWatcher,mojoControlHandle
 dart:ui,::,_beginFrame

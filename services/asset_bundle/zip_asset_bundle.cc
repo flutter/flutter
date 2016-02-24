@@ -21,25 +21,18 @@ void Ignored(bool) {
 
 }  // namespace
 
-unzFile ScopedUnzFileTraits::InvalidValue() {
+void* ScopedUnzFileTraits::InvalidValue() {
   return nullptr;
 }
 
-void ScopedUnzFileTraits::Free(unzFile file) {
+void ScopedUnzFileTraits::Free(void* file) {
   unzClose(file);
 }
 
-scoped_refptr<ZipAssetBundle> ZipAssetService::Create(
+void ZipAssetService::Create(
     InterfaceRequest<AssetBundle> request,
-    const base::FilePath& zip_path,
-    scoped_refptr<base::TaskRunner> worker_runner) {
-  scoped_refptr<ZipAssetBundle> zip_asset_bundle(
-      new ZipAssetBundle(zip_path, worker_runner.Pass()));
-
-  // Register as a Mojo service.
+    const scoped_refptr<ZipAssetBundle>& zip_asset_bundle) {
   new ZipAssetService(request.Pass(), zip_asset_bundle);
-
-  return zip_asset_bundle;
 }
 
 ZipAssetService::ZipAssetService(

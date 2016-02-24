@@ -193,7 +193,8 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
-    DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate);
+    DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate,
+                              dom_dart_state_->url().c_str());
 
     dart_state()->class_library().add_provider(
       "ui",

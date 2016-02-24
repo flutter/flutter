@@ -18,7 +18,7 @@ class DartRuntimeHooks {
     DartIOIsolate,
   };
 
-  static void Install(IsolateType isolate_type);
+  static void Install(IsolateType isolate_type, const std::string& script_uri);
   static void RegisterNatives(DartLibraryNatives* natives);
 
  private:

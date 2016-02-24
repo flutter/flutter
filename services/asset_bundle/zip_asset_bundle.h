@@ -13,7 +13,6 @@
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/cpp/environment/async_waiter.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
-#include "third_party/zlib/contrib/minizip/unzip.h"
 
 namespace mojo {
 namespace asset_bundle {
@@ -24,6 +23,9 @@ class ZipAssetBundle : public base::RefCountedThreadSafe<ZipAssetBundle> {
   friend class ZipAssetService;
 
  public:
+  ZipAssetBundle(const base::FilePath& zip_path,
+                 scoped_refptr<base::TaskRunner> worker_runner);
+
   // AssetBundle implementation
   void GetAsStream(
       const String& asset_name,
@@ -40,10 +42,6 @@ class ZipAssetBundle : public base::RefCountedThreadSafe<ZipAssetBundle> {
   friend class base::RefCountedThreadSafe<ZipAssetBundle>;
   virtual ~ZipAssetBundle();
 
- private:
-  ZipAssetBundle(const base::FilePath& zip_path,
-                 scoped_refptr<base::TaskRunner> worker_runner);
-
   const base::FilePath zip_path_;
   scoped_refptr<base::TaskRunner> worker_runner_;
   std::map<String, base::FilePath> overlay_files_;
@@ -54,11 +52,9 @@ class ZipAssetBundle : public base::RefCountedThreadSafe<ZipAssetBundle> {
 // Wrapper that exposes the ZipAssetBundle as a Mojo service.
 class ZipAssetService : public AssetBundle {
  public:
-  // Construct a ZipAssetBundle and register it as a Mojo service.
-  static scoped_refptr<ZipAssetBundle> Create(
+  static void Create(
       InterfaceRequest<AssetBundle> request,
-      const base::FilePath& zip_path,
-      scoped_refptr<base::TaskRunner> worker_runner);
+      const scoped_refptr<ZipAssetBundle>& zip_asset_bundle);
 
  public:
   void GetAsStream(
@@ -76,11 +72,11 @@ class ZipAssetService : public AssetBundle {
 };
 
 struct ScopedUnzFileTraits {
-  static unzFile InvalidValue();
-  static void Free(unzFile file);
+  static void* InvalidValue();
+  static void Free(void* unz_file);
 };
 
-typedef base::ScopedGeneric<unzFile, ScopedUnzFileTraits> ScopedUnzFile;
+typedef base::ScopedGeneric<void*, ScopedUnzFileTraits> ScopedUnzFile;
 
 // Reads an asset from a ZIP archive and writes it to a Mojo pipe.
 class ZipAssetHandler {
