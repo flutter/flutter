@@ -13,8 +13,11 @@ import 'find.dart';
 import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
+import 'retry.dart';
 
 const String _extensionMethod = 'ext.flutter_driver';
+const Duration _kDefaultTimeout = const Duration(seconds: 5);
+const Duration _kDefaultPauseBetweenRetries = const Duration(milliseconds: 160);
 
 bool _flutterDriverExtensionEnabled = false;
 
@@ -93,8 +96,11 @@ class FlutterDriverExtension {
 
   Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
 
-  Future<ObjectRef> findByValueKey(FindByValueKey command) {
-    Element elem = prober.findElementByKey(new ValueKey<dynamic>(command.keyValue));
+  Future<ObjectRef> findByValueKey(FindByValueKey command) async {
+    Element elem = await retry(() {
+      return prober.findElementByKey(new ValueKey<dynamic>(command.keyValue));
+    }, _kDefaultTimeout, _kDefaultPauseBetweenRetries);
+
     ObjectRef elemRef = elem != null
       ? new ObjectRef(_registerObject(elem))
       : new ObjectRef.notFound();
