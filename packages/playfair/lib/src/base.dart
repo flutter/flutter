@@ -166,9 +166,9 @@ class ChartPainter {
         ..value = _roundToPlaces(data.startY + stepSize * i, data.roundToPlaces);
       if (gridline.value < data.startY || gridline.value > data.endY)
         continue;  // TODO(jackson): Align things so this doesn't ever happen
-      TextSpan text = new StyledTextSpan(
-        _textTheme.body1,
-        [new PlainTextSpan("${gridline.value}")]
+      TextSpan text = new TextSpan(
+        style: _textTheme.body1,
+        text: '${gridline.value}'
       );
       gridline.labelPainter = new TextPainter(text)
         ..maxWidth = _rect.width
@@ -213,9 +213,9 @@ class ChartPainter {
         ..start = _convertPointToRectSpace(new Point(data.startX, data.indicatorLine), markerRect)
         ..end = _convertPointToRectSpace(new Point(data.endX, data.indicatorLine), markerRect);
       if (data.indicatorText != null) {
-        TextSpan text = new StyledTextSpan(
-          _textTheme.body1,
-          <TextSpan>[new PlainTextSpan("${data.indicatorText}")]
+        TextSpan text = new TextSpan(
+          style: _textTheme.body1,
+          text: '${data.indicatorText}'
         );
         _indicator.labelPainter = new TextPainter(text)
           ..maxWidth = markerRect.width

@@ -19,7 +19,7 @@ final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 /// A single line of editable text.
 class RenderEditableLine extends RenderBox {
   RenderEditableLine({
-    StyledTextSpan text,
+    TextSpan text,
     Color cursorColor,
     bool showCursor: false,
     Color selectionColor,
@@ -49,12 +49,12 @@ class RenderEditableLine extends RenderBox {
   ValueChanged<TextSelection> onSelectionChanged;
 
   /// The text to display
-  StyledTextSpan get text => _textPainter.text;
+  TextSpan get text => _textPainter.text;
   final TextPainter _textPainter;
-  void set text(StyledTextSpan value) {
+  void set text(TextSpan value) {
     if (_textPainter.text == value)
       return;
-    StyledTextSpan oldStyledText = _textPainter.text;
+    TextSpan oldStyledText = _textPainter.text;
     if (oldStyledText.style != value.style)
       _layoutTemplate = null;
     _textPainter.text = value;

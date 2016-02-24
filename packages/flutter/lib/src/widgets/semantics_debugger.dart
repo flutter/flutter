@@ -172,7 +172,7 @@ class _SemanticsDebuggerEntry {
     message = message.trim();
     if (message != '') {
       textPainter ??= new TextPainter();
-      textPainter.text = new StyledTextSpan(textStyles, <TextSpan>[new PlainTextSpan(message)]);
+      textPainter.text = new TextSpan(style: textStyles, text: message);
       textPainter.maxWidth = rect.width;
       textPainter.maxHeight = rect.height;
       textPainter.layout();

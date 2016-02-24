@@ -100,7 +100,9 @@ class RenderParagraph extends RenderBox {
 
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     yield (SemanticsNode node) {
-      node.label = text.toPlainText();
+      StringBuffer buffer = new StringBuffer();
+      text.writePlainText(buffer);
+      node.label = buffer.toString();
     };
   }
 

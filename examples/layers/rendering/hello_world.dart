@@ -16,7 +16,7 @@ void main() {
       alignment: const FractionalOffset(0.5, 0.5),
       // We use a RenderParagraph to display the text 'Hello, world.' without
       // any explicit styling.
-      child: new RenderParagraph(new PlainTextSpan('Hello, world.'))
+      child: new RenderParagraph(new TextSpan(text: 'Hello, world.'))
     )
   );
 }

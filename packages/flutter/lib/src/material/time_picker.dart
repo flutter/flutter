@@ -240,9 +240,7 @@ List<TextPainter> _initPainters(List<String> labels) {
   for (int i = 0; i < painters.length; ++i) {
     String label = labels[i];
     TextPainter painter = new TextPainter(
-      new StyledTextSpan(style, [
-        new PlainTextSpan(label)
-      ])
+      new TextSpan(style: style, text: label)
     );
     painter
       ..maxWidth = double.INFINITY

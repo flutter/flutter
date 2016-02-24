@@ -112,7 +112,7 @@ class InputValue {
     return typedOther.text == text
         && typedOther.selection == selection
         && typedOther.composing == composing;
-  }  
+  }
 
   int get hashCode => hashValues(
     text.hashCode,
@@ -126,7 +126,7 @@ class InputValue {
     TextRange composing
   }) {
     return new InputValue (
-      text: text ?? this.text, 
+      text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing
     );
@@ -394,24 +394,27 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       ..paintOffset = paintOffset;
   }
 
-  StyledTextSpan get _styledTextSpan {
+  TextSpan get _styledTextSpan {
     if (!hideText && value.composing.isValid) {
       TextStyle composingStyle = style.merge(
         const TextStyle(decoration: TextDecoration.underline)
       );
 
-      return new StyledTextSpan(style, <TextSpan>[
-        new PlainTextSpan(value.composing.textBefore(value.text)),
-        new StyledTextSpan(composingStyle, <TextSpan>[
-          new PlainTextSpan(value.composing.textInside(value.text))
-        ]),
-        new PlainTextSpan(value.composing.textAfter(value.text))
+      return new TextSpan(
+        style: style,
+        children: <TextSpan>[
+          new TextSpan(text: value.composing.textBefore(value.text)),
+          new TextSpan(
+            style: composingStyle,
+            text: value.composing.textInside(value.text)
+          ),
+          new TextSpan(text: value.composing.textAfter(value.text))
       ]);
     }
 
     String text = value.text;
     if (hideText)
       text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
-    return new StyledTextSpan(style, <TextSpan>[ new PlainTextSpan(text) ]);
+    return new TextSpan(style: style, text: text);
   }
 }
