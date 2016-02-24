@@ -88,7 +88,7 @@ class AnimationController extends Animation<double>
   /// The current value of the animation.
   ///
   /// Setting this value stops the current animation.
-  double get value => _value.clamp(lowerBound, upperBound);
+  double get value => _value;
   double _value;
   void set value(double newValue) {
     assert(newValue != null);
@@ -174,7 +174,7 @@ class AnimationController extends Animation<double>
     assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
-    _value = simulation.x(0.0);
+    _value = simulation.x(0.0).clamp(lowerBound, upperBound);
     return _ticker.start();
   }
 
@@ -200,7 +200,7 @@ class AnimationController extends Animation<double>
 
   void _tick(Duration elapsed) {
     double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
-    _value = _simulation.x(elapsedInSeconds);
+    _value = _simulation.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation.isDone(elapsedInSeconds))
       stop();
     notifyListeners();
