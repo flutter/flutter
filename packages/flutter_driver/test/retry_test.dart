@@ -59,6 +59,6 @@ main() {
       expect(lastError, 'error');
       expect(lastStackTrace, isNotNull);
       expect(retryCount, 4);
-    });
+    }, skip: "Flaky. See https://github.com/flutter/flutter/issues/2133");
   });
 }
