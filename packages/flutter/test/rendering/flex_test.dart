@@ -19,6 +19,65 @@ void main() {
     expect(flex.size.height, equals(200.0), reason: "flex height");
   });
 
+  test('Vertical Overflow', () {
+    RenderConstrainedBox flexible = new RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.expand()
+    );
+    RenderFlex flex = new RenderFlex(
+      direction: FlexDirection.vertical,
+      children: <RenderBox>[
+        new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(height: 200.0)),
+        flexible,
+      ]
+    );
+    FlexParentData flexParentData = flexible.parentData;
+    flexParentData.flex = 1;
+    BoxConstraints viewport = new BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    layout(flex, constraints: viewport);
+    expect(flexible.size.height, equals(0.0));
+    expect(flex.getMinIntrinsicHeight(viewport), equals(100.0));
+    expect(flex.getMaxIntrinsicHeight(viewport), equals(100.0));
+    expect(flex.getMinIntrinsicWidth(viewport), equals(100.0));
+    expect(flex.getMaxIntrinsicWidth(viewport), equals(100.0));
+  });
+
+  test('Horizontal Overflow', () {
+    RenderConstrainedBox flexible = new RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints.expand()
+    );
+    RenderFlex flex = new RenderFlex(
+      direction: FlexDirection.horizontal,
+      children: <RenderBox>[
+        new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 200.0)),
+        flexible,
+      ]
+    );
+    FlexParentData flexParentData = flexible.parentData;
+    flexParentData.flex = 1;
+    BoxConstraints viewport = new BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    layout(flex, constraints: viewport);
+    expect(flexible.size.width, equals(0.0));
+    expect(flex.getMinIntrinsicHeight(viewport), equals(100.0));
+    expect(flex.getMaxIntrinsicHeight(viewport), equals(100.0));
+    expect(flex.getMinIntrinsicWidth(viewport), equals(100.0));
+    expect(flex.getMaxIntrinsicWidth(viewport), equals(100.0));
+  });
+
+  test('Vertical Flipped Constraints', () {
+    RenderFlex flex = new RenderFlex(
+      direction: FlexDirection.vertical,
+      children: <RenderBox>[
+        new RenderAspectRatio(aspectRatio: 1.0),
+      ]
+    );
+    BoxConstraints viewport = new BoxConstraints(maxHeight: 200.0, maxWidth: 1000.0);
+    layout(flex, constraints: viewport);
+    expect(flex.getMaxIntrinsicWidth(viewport) , equals(1000.0));
+  });
+
+  // We can't right a horizontal version of the above test due to
+  // RenderAspectRatio being height-in, width-out.
+
   test('Defaults', () {
     RenderFlex flex = new RenderFlex();
     expect(flex.alignItems, equals(FlexAlignItems.center));
