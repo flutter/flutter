@@ -101,8 +101,6 @@ void Shell::InitStandalone() {
   settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
   settings.enable_dart_checked_mode =
       command_line.HasSwitch(switches::kEnableCheckedMode);
-  settings.enable_background_compilation =
-      command_line.HasSwitch(switches::kEnableBackgroundCompilation);
   blink::SkySettings::Set(settings);
 
   Init();
