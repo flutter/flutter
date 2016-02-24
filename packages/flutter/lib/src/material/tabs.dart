@@ -699,10 +699,10 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   void _updateScrollBehavior() {
-    scrollBehavior.updateExtents(
+    scrollTo(scrollBehavior.updateExtents(
       containerExtent: config.scrollDirection == Axis.vertical ? _viewportSize.height : _viewportSize.width,
       contentExtent: _tabWidths.reduce((double sum, double width) => sum + width)
-    );
+    ));
   }
 
   void _layoutChanged(Size tabBarSize, List<double> tabWidths) {
@@ -713,11 +713,16 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     });
   }
 
-  void _handleViewportSizeChanged(Size newSize) {
-    _viewportSize = newSize;
+  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
+    // We make various state changes here but don't have to do so in a
+    // setState() callback because we are called during layout and all
+    // we're updating is the new offset, which we are providing to the
+    // render object via our return value.
+    _viewportSize = dimensions.containerSize;
     _updateScrollBehavior();
     if (config.isScrollable)
       scrollTo(_centeredTabScrollOffset(_selection.index), duration: _kTabBarScroll);
+    return scrollOffsetToPixelDelta(scrollOffset);
   }
 
   Widget buildContent(BuildContext context) {
@@ -772,13 +777,11 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     );
 
     if (config.isScrollable) {
-      contents = new SizeObserver(
-        onSizeChanged: _handleViewportSizeChanged,
-        child: new Viewport(
-          scrollDirection: Axis.horizontal,
-          paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-          child: contents
-        )
+      child: new Viewport(
+        scrollDirection: Axis.horizontal,
+        paintOffset: scrollOffsetToPixelDelta(scrollOffset),
+        onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
+        child: contents
       );
     }
 

@@ -237,32 +237,42 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return _scrollBehavior;
   }
 
-  GestureDragStartCallback _getDragStartHandler(Axis direction) {
-    if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
-      return null;
-    return _handleDragStart;
+  Map<Type, GestureRecognizerFactory> buildGestureDetectors() {
+    if (scrollBehavior.isScrollable) {
+      switch (config.scrollDirection) {
+        case Axis.vertical:
+          return <Type, GestureRecognizerFactory>{
+            VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {
+              return (recognizer ??= new VerticalDragGestureRecognizer())
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd;
+            }
+          };
+        case Axis.horizontal:
+          return <Type, GestureRecognizerFactory>{
+            HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {
+              return (recognizer ??= new HorizontalDragGestureRecognizer())
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd;
+            }
+          };
+      }
+    }
+    return const <Type, GestureRecognizerFactory>{};
   }
 
-  GestureDragUpdateCallback _getDragUpdateHandler(Axis direction) {
-    if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
-      return null;
-    return _handleDragUpdate;
-  }
+  final GlobalKey _gestureDetectorKey = new GlobalKey();
 
-  GestureDragEndCallback _getDragEndHandler(Axis direction) {
-    if (config.scrollDirection != direction || !scrollBehavior.isScrollable)
-      return null;
-    return _handleDragEnd;
+  void updateGestureDetector() {
+    _gestureDetectorKey.currentState.replaceGestureRecognizers(buildGestureDetectors());
   }
 
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onVerticalDragStart: _getDragStartHandler(Axis.vertical),
-      onVerticalDragUpdate: _getDragUpdateHandler(Axis.vertical),
-      onVerticalDragEnd: _getDragEndHandler(Axis.vertical),
-      onHorizontalDragStart: _getDragStartHandler(Axis.horizontal),
-      onHorizontalDragUpdate: _getDragUpdateHandler(Axis.horizontal),
-      onHorizontalDragEnd: _getDragEndHandler(Axis.horizontal),
+    return new RawGestureDetector(
+      key: _gestureDetectorKey,
+      gestures: buildGestureDetectors(),
       behavior: HitTestBehavior.opaque,
       child: new Listener(
         child: buildContent(context),
@@ -321,7 +331,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     if (endScrollOffset.isNaN)
       return null;
 
-    final double snappedScrollOffset = snapScrollOffset(endScrollOffset);
+    final double snappedScrollOffset = snapScrollOffset(endScrollOffset); // invokes the config.snapOffsetCallback callback
     if (!_scrollOffsetIsInBounds(snappedScrollOffset))
       return null;
 
@@ -443,7 +453,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragStart(_) {
-    scheduleMicrotask(dispatchOnScrollStart);
+    dispatchOnScrollStart();
   }
 
   void _handleDragUpdate(double delta) {
@@ -503,18 +513,19 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 
   double _viewportSize = 0.0;
   double _childSize = 0.0;
-  void _handleViewportSizeChanged(Size newSize) {
-    _viewportSize = config.scrollDirection == Axis.vertical ? newSize.height : newSize.width;
-    setState(() {
-      _updateScrollBehavior();
-    });
+
+  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
+    // We make various state changes here but don't have to do so in a
+    // setState() callback because we are called during layout and all
+    // we're updating is the new offset, which we are providing to the
+    // render object via our return value.
+    _viewportSize = config.scrollDirection == Axis.vertical ? dimensions.containerSize.height : dimensions.containerSize.width;
+    _childSize = config.scrollDirection == Axis.vertical ? dimensions.contentSize.height : dimensions.contentSize.width;
+    _updateScrollBehavior();
+    updateGestureDetector();
+    return scrollOffsetToPixelDelta(scrollOffset);
   }
-  void _handleChildSizeChanged(Size newSize) {
-    _childSize = config.scrollDirection == Axis.vertical ? newSize.height : newSize.width;
-    setState(() {
-      _updateScrollBehavior();
-    });
-  }
+
   void _updateScrollBehavior() {
     // if you don't call this from build(), you must call it from setState().
     scrollTo(scrollBehavior.updateExtents(
@@ -525,17 +536,12 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
   }
 
   Widget buildContent(BuildContext context) {
-    return new SizeObserver(
-      onSizeChanged: _handleViewportSizeChanged,
-      child: new Viewport(
-        paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-        scrollDirection: config.scrollDirection,
-        scrollAnchor: config.scrollAnchor,
-        child: new SizeObserver(
-          onSizeChanged: _handleChildSizeChanged,
-          child: config.child
-        )
-      )
+    return new Viewport(
+      paintOffset: scrollOffsetToPixelDelta(scrollOffset),
+      scrollDirection: config.scrollDirection,
+      scrollAnchor: config.scrollAnchor,
+      onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
+      child: config.child
     );
   }
 }
@@ -690,11 +696,11 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
     }
   }
 
-  void _handleExtentsUpdate(double newExtents) {
+  void _handleExtentChanged(double newExtent) {
     double newScrollOffset;
     setState(() {
       newScrollOffset = scrollBehavior.updateExtents(
-        contentExtent: newExtents ?? double.INFINITY,
+        contentExtent: newExtent ?? double.INFINITY,
         scrollOffset: scrollOffset
       );
     });
@@ -712,7 +718,7 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
         builder: config.builder,
         token: config.token,
         onInvalidatorAvailable: config.onInvalidatorAvailable,
-        onExtentsUpdate: _handleExtentsUpdate
+        onExtentChanged: _handleExtentChanged
       )
     );
   }

@@ -37,6 +37,8 @@ abstract class BindingBase {
   void initInstances() {
     assert(() { _debugInitialized = true; return true; });
   }
+
+  String toString() => '<$runtimeType>';
 }
 
 // A replacement for shell.connectToService.  Implementations should return true

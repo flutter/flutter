@@ -19,6 +19,8 @@ class Instrumentation {
 
   final WidgetFlutterBinding binding;
 
+  /// Returns a list of all the [Layer] objects in the rendering.
+  List<Layer> get layers => _layers(binding.renderView.layer);
   // TODO(ianh): This should not be O(N) hidden behind a getter!
   List<Layer> _layers(Layer layer) {
     List<Layer> result = <Layer>[layer];
@@ -32,9 +34,9 @@ class Instrumentation {
     }
     return result;
   }
-  List<Layer> get layers => _layers(binding.renderView.layer);
 
-
+  /// Walks all the elements in the tree, in depth-first pre-order,
+  /// calling the given function for each one.
   void walkElements(ElementVisitor visitor) {
     void walk(Element element) {
       visitor(element);
@@ -43,6 +45,9 @@ class Instrumentation {
     binding.renderViewElement.visitChildren(walk);
   }
 
+  /// Returns the first element that for which the given predicate
+  /// function returns true, if any, or null if the predicate function
+  /// never returns true.
   Element findElement(bool predicate(Element element)) {
     try {
       walkElements((Element element) {
@@ -55,16 +60,24 @@ class Instrumentation {
     return null;
   }
 
+  /// Returns the first element that corresponds to a widget with the
+  /// given [Key], or null if there is no such element.
   Element findElementByKey(Key key) {
     return findElement((Element element) => element.widget.key == key);
   }
 
+  /// Returns the first element that corresponds to a [Text] widget
+  /// whose data is the given string, or null if there is no such
+  /// element.
   Element findText(String text) {
     return findElement((Element element) {
       return element.widget is Text && element.widget.data == text;
     });
   }
 
+  /// Returns the [State] object of the first element whose state has
+  /// the given [runtimeType], if any. Returns null if there is no
+  /// matching element.
   State findStateOfType(Type type) {
     StatefulComponentElement element = findElement((Element element) {
       return element is StatefulComponentElement && element.state.runtimeType == type;
@@ -72,6 +85,10 @@ class Instrumentation {
     return element?.state;
   }
 
+  /// Returns the [State] object of the first element whose
+  /// configuration is the given widget, if any. Returns null if the
+  /// given configuration is not that of a stateful widget or if there
+  /// is no matching element.
   State findStateByConfig(Widget config) {
     StatefulComponentElement element = findElement((Element element) {
       return element is StatefulComponentElement && element.state.config == config;
@@ -79,26 +96,36 @@ class Instrumentation {
     return element?.state;
   }
 
+  /// Returns the point at the center of the given element.
   Point getCenter(Element element) {
     return _getElementPoint(element, (Size size) => size.center(Point.origin));
   }
 
+  /// Returns the point at the top left of the given element.
   Point getTopLeft(Element element) {
     return _getElementPoint(element, (_) => Point.origin);
   }
 
+  /// Returns the point at the top right of the given element. This
+  /// point is not inside the object's hit test area.
   Point getTopRight(Element element) {
     return _getElementPoint(element, (Size size) => size.topRight(Point.origin));
   }
 
+  /// Returns the point at the bottom left of the given element. This
+  /// point is not inside the object's hit test area.
   Point getBottomLeft(Element element) {
     return _getElementPoint(element, (Size size) => size.bottomLeft(Point.origin));
   }
 
+  /// Returns the point at the bottom right of the given element. This
+  /// point is not inside the object's hit test area.
   Point getBottomRight(Element element) {
     return _getElementPoint(element, (Size size) => size.bottomRight(Point.origin));
   }
 
+  /// Returns the size of the given element. This is only valid once
+  /// the element's render object has been laid out at least once.
   Size getSize(Element element) {
     assert(element != null);
     RenderBox box = element.renderObject as RenderBox;
@@ -113,22 +140,34 @@ class Instrumentation {
     return box.localToGlobal(sizeToPoint(box.size));
   }
 
-
+  /// Dispatch a pointer down / pointer up sequence at the center of
+  /// the given element, assuming it is exposed. If the center of the
+  /// element is not exposed, this might send events to another
+  /// object.
   void tap(Element element, { int pointer: 1 }) {
     tapAt(getCenter(element), pointer: pointer);
   }
 
+  /// Dispatch a pointer down / pointer up sequence at the given
+  /// location.
   void tapAt(Point location, { int pointer: 1 }) {
     HitTestResult result = _hitTest(location);
     TestPointer p = new TestPointer(pointer);
-    _dispatchEvent(p.down(location), result);
-    _dispatchEvent(p.up(), result);
+    dispatchEvent(p.down(location), result);
+    dispatchEvent(p.up(), result);
   }
 
+  /// Attempts a fling gesture starting from the center of the given
+  /// element, moving the given distance, reaching the given velocity.
+  ///
+  /// If the middle of the element is not exposed, this might send
+  /// events to another object.
   void fling(Element element, Offset offset, double velocity, { int pointer: 1 }) {
     flingFrom(getCenter(element), offset, velocity, pointer: pointer);
   }
 
+  /// Attempts a fling gesture starting from the given location,
+  /// moving the given distance, reaching the given velocity.
   void flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1 }) {
     assert(offset.distance > 0.0);
     assert(velocity != 0.0);   // velocity is pixels/second
@@ -137,40 +176,44 @@ class Instrumentation {
     const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
     final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
     double timeStamp = 0.0;
-    _dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+    dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
     for(int i = 0; i < kMoveCount; i++) {
       final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-      _dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       timeStamp += timeStampDelta;
     }
-    _dispatchEvent(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+    dispatchEvent(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
   }
 
+  /// Attempts to drag the given element by the given offset, by
+  /// starting a drag in the middle of the element.
+  ///
+  /// If the middle of the element is not exposed, this might send
+  /// events to another object.
   void scroll(Element element, Offset offset, { int pointer: 1 }) {
     scrollAt(getCenter(element), offset, pointer: pointer);
   }
 
+  /// Attempts a drag gesture consisting of a pointer down, a move by
+  /// the given offset, and a pointer up.
   void scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
     Point endLocation = startLocation + offset;
     TestPointer p = new TestPointer(pointer);
     // Events for the entire press-drag-release gesture are dispatched
     // to the widgets "hit" by the pointer down event.
     HitTestResult result = _hitTest(startLocation);
-    _dispatchEvent(p.down(startLocation), result);
-    _dispatchEvent(p.move(endLocation), result);
-    _dispatchEvent(p.up(), result);
+    dispatchEvent(p.down(startLocation), result);
+    dispatchEvent(p.move(endLocation), result);
+    dispatchEvent(p.up(), result);
   }
 
+  /// Begins a gesture at a particular point, and returns the
+  /// [TestGesture] object which you can use to continue the gesture.
   TestGesture startGesture(Point downLocation, { int pointer: 1 }) {
     TestPointer p = new TestPointer(pointer);
     HitTestResult result = _hitTest(downLocation);
-    _dispatchEvent(p.down(downLocation), result);
+    dispatchEvent(p.down(downLocation), result);
     return new TestGesture._(this, result, p);
-  }
-
-  @Deprecated('soon. Use startGesture instead.')
-  void dispatchEvent(PointerEvent event, Point location) {
-    _dispatchEvent(event, _hitTest(location));
   }
 
   HitTestResult _hitTest(Point location) {
@@ -179,11 +222,19 @@ class Instrumentation {
     return result;
   }
 
-  void _dispatchEvent(PointerEvent event, HitTestResult result) {
+  /// Sends a [PointerEvent] at a particular [HitTestResult].
+  ///
+  /// Generally speaking, it is preferred to use one of the more
+  /// semantically meaningful ways to dispatch events in tests, in
+  /// particular: [tap], [tapAt], [fling], [flingFrom], [scroll],
+  /// [scrollAt], or [startGesture].
+  void dispatchEvent(PointerEvent event, HitTestResult result) {
     binding.dispatchEvent(event, result);
   }
 }
 
+/// A class for performing gestures in tests. To create a
+/// [TestGesture], call [WidgetTester.startGesture].
 class TestGesture {
   TestGesture._(this._target, this._result, this.pointer);
 
@@ -192,25 +243,31 @@ class TestGesture {
   final TestPointer pointer;
   bool _isDown = true;
 
+  /// Send a move event moving the pointer to the given location.
   void moveTo(Point location) {
     assert(_isDown);
-    _target._dispatchEvent(pointer.move(location), _result);
+    _target.dispatchEvent(pointer.move(location), _result);
   }
 
+  /// Send a move event moving the pointer by the given offset.
   void moveBy(Offset offset) {
     assert(_isDown);
     moveTo(pointer.location + offset);
   }
 
+  /// End the gesture by releasing the pointer.
   void up() {
     assert(_isDown);
     _isDown = false;
-    _target._dispatchEvent(pointer.up(), _result);
+    _target.dispatchEvent(pointer.up(), _result);
   }
 
+  /// End the gesture by canceling the pointer (as would happen if the
+  /// system showed a modal dialog on top of the Flutter application,
+  /// for instance).
   void cancel() {
     assert(_isDown);
     _isDown = false;
-    _target._dispatchEvent(pointer.cancel(), _result);
+    _target.dispatchEvent(pointer.cancel(), _result);
   }
 }

@@ -10,7 +10,6 @@ import 'framework.dart';
 import 'basic.dart';
 
 typedef Widget IndexedBuilder(BuildContext context, int index); // return null if index is greater than index of last entry
-typedef void ExtentsUpdateCallback(double newExtents);
 typedef void InvalidatorCallback(Iterable<int> indices);
 typedef void InvalidatorAvailableCallback(InvalidatorCallback invalidator);
 
@@ -23,7 +22,7 @@ class MixedViewport extends RenderObjectWidget {
     this.direction: Axis.vertical,
     this.builder,
     this.token,
-    this.onExtentsUpdate,
+    this.onExtentChanged,
     this.onInvalidatorAvailable
   }) : super(key: key);
 
@@ -31,7 +30,7 @@ class MixedViewport extends RenderObjectWidget {
   final Axis direction;
   final IndexedBuilder builder;
   final Object token; // change this if the list changed (i.e. there are added, removed, or resorted items)
-  final ExtentsUpdateCallback onExtentsUpdate;
+  final ValueChanged<double> onExtentChanged;
   final InvalidatorAvailableCallback onInvalidatorAvailable; // call the callback this gives to invalidate sizes
 
   _MixedViewportElement createElement() => new _MixedViewportElement(this);
@@ -108,8 +107,8 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
   /// The constraints for which the current offsets are valid.
   BoxConstraints _lastLayoutConstraints;
 
-  /// The last value that was sent to onExtentsUpdate.
-  double _lastReportedExtents;
+  /// The last value that was sent to onExtentChanged.
+  double _lastReportedExtent;
 
   RenderBlockViewport get renderObject => super.renderObject;
 
@@ -227,11 +226,11 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     BuildableElement.lockState(() {
       _doLayout(constraints);
     }, building: true);
-    if (widget.onExtentsUpdate != null) {
-      final double newExtents = _didReachLastChild ? _childOffsets.last : null;
-      if (newExtents != _lastReportedExtents) {
-        _lastReportedExtents = newExtents;
-        widget.onExtentsUpdate(_lastReportedExtents);
+    if (widget.onExtentChanged != null) {
+      final double newExtent = _didReachLastChild ? _childOffsets.last : null;
+      if (newExtent != _lastReportedExtent) {
+        _lastReportedExtent = newExtent;
+        widget.onExtentChanged(_lastReportedExtent);
       }
     }
   }
