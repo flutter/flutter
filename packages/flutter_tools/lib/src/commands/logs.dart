@@ -22,6 +22,8 @@ class LogsCommand extends FlutterCommand {
 
   bool get requiresProjectRoot => false;
 
+  bool get requiresDevice => true;
+
   Future<int> runInProject() async {
     List<Device> devices = await deviceManager.getDevices();
 

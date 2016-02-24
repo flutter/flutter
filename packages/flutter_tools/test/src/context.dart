@@ -15,6 +15,9 @@ import 'package:test/test.dart';
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context[Logger];
 
+MockDeviceManager get testDeviceManager => context[DeviceManager];
+MockDoctor get testDoctor => context[Doctor];
+
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, dynamic> overrides: const <Type, dynamic>{}
@@ -33,7 +36,7 @@ void testUsingContext(String description, dynamic testMethod(), {
       testContext[DeviceManager] = new MockDeviceManager();
 
     if (!overrides.containsKey(Doctor))
-      testContext[Doctor] = new Doctor();
+      testContext[Doctor] = new MockDoctor();
 
     if (Platform.isMacOS) {
       if (!overrides.containsKey(XCode))
@@ -45,10 +48,31 @@ void testUsingContext(String description, dynamic testMethod(), {
 }
 
 class MockDeviceManager implements DeviceManager {
+  List<Device> devices = <Device>[];
+
   String specifiedDeviceId;
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
-  Future<List<Device>> getAllConnectedDevices() => new Future.value(<Device>[]);
-  Future<Device> getDeviceById(String deviceId) => new Future.value(null);
-  Future<List<Device>> getDevices() => getAllConnectedDevices();
+  Future<List<Device>> getAllConnectedDevices() => new Future.value(devices);
+
+  Future<Device> getDeviceById(String deviceId) {
+    Device device = devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
+    return new Future.value(device);
+  }
+
+  Future<List<Device>> getDevices() async {
+    if (specifiedDeviceId == null) {
+      return getAllConnectedDevices();
+    } else {
+      Device device = await getDeviceById(specifiedDeviceId);
+      return device == null ? <Device>[] : <Device>[device];
+    }
+  }
+
+  void addDevice(Device device) => devices.add(device);
+}
+
+class MockDoctor extends Doctor {
+  // True for testing.
+  bool get canLaunchAnything => true;
 }

@@ -22,31 +22,68 @@ abstract class FlutterCommand extends Command {
   /// Whether this command needs to be run from the root of a project.
   bool get requiresProjectRoot => true;
 
+  /// Whether this command requires a (single) Flutter target device to be connected.
+  bool get requiresDevice => false;
+
+  /// Whether this command only applies to Android devices.
+  bool get androidOnly => false;
+
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
-  Future downloadApplicationPackages() async {
-    if (applicationPackages == null)
-      applicationPackages = await ApplicationPackageStore.forConfigs(buildConfigurations);
-  }
-
   Future downloadToolchain() async {
-    if (toolchain == null)
-      toolchain = await Toolchain.forConfigs(buildConfigurations);
-  }
-
-  void connectToDevices() {
-    if (devices == null)
-      devices = new DeviceStore.forConfigs(buildConfigurations);
+    toolchain ??= await Toolchain.forConfigs(buildConfigurations);
   }
 
   Future downloadApplicationPackagesAndConnectToDevices() async {
-    await downloadApplicationPackages();
-    connectToDevices();
+    await _downloadApplicationPackages();
+    _connectToDevices();
+  }
+
+  Future _downloadApplicationPackages() async {
+    applicationPackages ??= await ApplicationPackageStore.forConfigs(buildConfigurations);
+  }
+
+  void _connectToDevices() {
+    devices ??= new DeviceStore.forConfigs(buildConfigurations);
   }
 
   Future<int> run() async {
     if (requiresProjectRoot && !projectRootValidator())
       return 1;
+
+    // Ensure at least one toolchain is installed.
+    if (requiresDevice && !doctor.canLaunchAnything) {
+      printError("Unable to locate a development device; please run 'flutter doctor' "
+        "for information about installing additional components.");
+      return 1;
+    }
+
+    // Validate devices.
+    if (requiresDevice) {
+      List<Device> devices = await deviceManager.getDevices();
+
+      if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
+        printError("No device found with id '${deviceManager.specifiedDeviceId}'.");
+        return 1;
+      } else if (devices.isEmpty) {
+        printStatus('No connected devices.');
+        return 1;
+      }
+
+      devices = devices.where((Device device) => device.isSupported()).toList();
+
+      if (androidOnly)
+        devices = devices.where((Device device) => device.platform == TargetPlatform.android).toList();
+
+      // TODO(devoncarew): Switch this to just supporting one connected device?
+      if (devices.isEmpty) {
+        printStatus('No supported devices connected.');
+        return 1;
+      }
+
+      _devicesForCommand = await _getDevicesForCommand();
+    }
+
     return await runInProject();
   }
 
@@ -63,7 +100,36 @@ abstract class FlutterCommand extends Command {
 
   Future<int> runInProject();
 
+  List<Device> get devicesForCommand => _devicesForCommand;
+
+  Device get deviceForCommand {
+    // TODO(devoncarew): Switch this to just supporting one connected device?
+    return devicesForCommand.isNotEmpty ? devicesForCommand.first : null;
+  }
+
+  // This is caculated in run() if the command has [requiresDevice] specified.
+  List<Device> _devicesForCommand;
+
   ApplicationPackageStore applicationPackages;
   Toolchain toolchain;
   DeviceStore devices;
+
+  Future<List<Device>> _getDevicesForCommand() async {
+    List<Device> devices = await deviceManager.getDevices();
+
+    if (devices.isEmpty)
+      return null;
+
+    if (deviceManager.hasSpecifiedDeviceId) {
+      Device device = await deviceManager.getDeviceById(deviceManager.specifiedDeviceId);
+      return device == null ? <Device>[] : <Device>[device];
+    }
+
+    devices = devices.where((Device device) => device.isSupported()).toList();
+
+    if (androidOnly)
+      devices = devices.where((Device device) => device.platform == TargetPlatform.android).toList();
+
+    return devices;
+  }
 }

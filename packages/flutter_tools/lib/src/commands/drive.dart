@@ -83,6 +83,8 @@ class DriveCommand extends RunCommand {
 
   DriveCommand() : this.custom();
 
+  bool get requiresDevice => true;
+
   @override
   Future<int> runInProject() async {
     String testFile = _getTestFile();

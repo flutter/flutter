@@ -12,6 +12,8 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/toolchain.dart';
 import 'package:mockito/mockito.dart';
 
+import 'context.dart';
+
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: new AndroidApk(localPath: '/mock/path/to/android/SkyShell.apk'),
@@ -31,14 +33,17 @@ class MockToolchain extends Toolchain {
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
   TargetPlatform get platform => TargetPlatform.android;
+  bool isSupported() => true;
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
   TargetPlatform get platform => TargetPlatform.iOS;
+  bool isSupported() => true;
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
   TargetPlatform get platform => TargetPlatform.iOSSimulator;
+  bool isSupported() => true;
 }
 
 class MockDeviceStore extends DeviceStore {
@@ -48,10 +53,13 @@ class MockDeviceStore extends DeviceStore {
     iOSSimulator: new MockIOSSimulator());
 }
 
-void applyMocksToCommand(FlutterCommand command) {
+void applyMocksToCommand(FlutterCommand command, { bool noDevices: false }) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
     ..toolchain = new MockToolchain()
     ..devices = new MockDeviceStore()
     ..projectRootValidator = () => true;
+
+  if (!noDevices)
+    testDeviceManager.addDevice(command.devices.android);
 }

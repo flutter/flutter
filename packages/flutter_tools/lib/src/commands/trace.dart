@@ -25,6 +25,10 @@ class TraceCommand extends FlutterCommand {
         defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
   }
 
+  bool get androidOnly => true;
+
+  bool get requiresDevice => true;
+
   @override
   Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();

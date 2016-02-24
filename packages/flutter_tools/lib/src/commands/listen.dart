@@ -22,6 +22,10 @@ class ListenCommand extends RunCommandBase {
 
   ListenCommand({ this.singleRun: false });
 
+  bool get androidOnly => true;
+
+  bool get requiresDevice => true;
+
   @override
   Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();

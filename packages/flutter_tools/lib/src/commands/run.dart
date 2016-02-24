@@ -55,8 +55,7 @@ abstract class RunCommandBase extends FlutterCommand {
 
 class RunCommand extends RunCommandBase {
   final String name = 'run';
-  final String description =
-    'Run your Flutter app on an attached device (defaults to checked/debug mode).';
+  final String description = 'Run your Flutter app on an attached device.';
   final List<String> aliases = <String>['start'];
 
   RunCommand() {
@@ -77,6 +76,8 @@ class RunCommand extends RunCommandBase {
         defaultsTo: observatoryDefaultPort.toString(),
         help: 'Listen to the given port for a debug connection.');
   }
+
+  bool get requiresDevice => true;
 
   @override
   Future<int> run() async {

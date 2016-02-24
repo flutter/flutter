@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/commands/listen.dart';
-import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -14,17 +13,11 @@ main() => defineTests();
 
 defineTests() {
   group('listen', () {
-    testUsingContext('returns 0 when no device is connected', () {
+    testUsingContext('returns 1 when no device is connected', () {
       ListenCommand command = new ListenCommand(singleRun: true);
-      applyMocksToCommand(command);
-      MockDeviceStore mockDevices = command.devices;
-
-      when(mockDevices.android.isConnected()).thenReturn(false);
-      when(mockDevices.iOS.isConnected()).thenReturn(false);
-      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
-
+      applyMocksToCommand(command, noDevices: true);
       return createTestCommandRunner(command).run(['listen']).then((int code) {
-        expect(code, equals(0));
+        expect(code, equals(1));
       });
     });
   });

@@ -3,41 +3,29 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import '../application_package.dart';
 import '../device.dart';
-import '../ios/simulators.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
   final String name = 'install';
   final String description = 'Install Flutter apps on attached devices.';
 
-  InstallCommand() {
-    argParser.addFlag('boot', help: 'Boot the iOS Simulator if it isn\'t already running.');
-  }
+  bool get requiresDevice => true;
 
   @override
   Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
-    bool installedAny = await installApp(
-      devices,
-      applicationPackages,
-      boot: argResults['boot']
-    );
+    bool installedAny = await installApp(devices, applicationPackages);
     return installedAny ? 0 : 2;
   }
 }
 
 Future<bool> installApp(
   DeviceStore devices,
-  ApplicationPackageStore applicationPackages, {
-  bool boot: false
-}) async {
-  if (boot && Platform.isMacOS)
-    await SimControl.boot();
-
+  ApplicationPackageStore applicationPackages
+) async {
   bool installedSomewhere = false;
 
   for (Device device in devices.all) {

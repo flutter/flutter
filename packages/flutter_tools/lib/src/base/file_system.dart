@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' as dart_io;
+
 import 'package:file/io.dart';
 import 'package:file/sync_io.dart';
 import 'package:path/path.dart' as path;
