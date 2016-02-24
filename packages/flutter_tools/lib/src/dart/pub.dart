@@ -29,7 +29,7 @@ Future<int> pubGet({
   }
 
   if (!pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
-    printStatus("Running 'pub get' in '$directory'...");
+    printStatus("Running 'pub get' in $directory${Platform.pathSeparator}...");
     int code = await runCommandAndStreamOutput(
       <String>[sdkBinaryName('pub'), '--verbosity=warning', 'get'],
       workingDirectory: directory

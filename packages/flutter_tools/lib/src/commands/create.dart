@@ -80,13 +80,6 @@ class CreateCommand extends Command {
 
     printStatus('');
 
-    String message = '''
-All done! To run your application:
-
-  \$ cd ${projectDir.path}
-  \$ flutter run
-''';
-
     if (argResults['pub']) {
       int code = await pubGet(directory: projectDir.path);
       if (code != 0)
@@ -94,7 +87,32 @@ All done! To run your application:
     }
 
     printStatus('');
-    printStatus(message);
+
+    // Run doctor; tell the user the next steps.
+    if (doctor.canLaunchAnything) {
+      // Let them know a summary of the state of their tooling.
+      doctor.summary();
+
+      printStatus('''
+All done! In order to run your application, type:
+
+  \$ cd ${projectDir.path}
+  \$ flutter run
+''');
+    } else {
+      printStatus("You'll need to install additional components before you can run "
+        "your Flutter app:");
+      printStatus('');
+
+      // Give the user more detailed analysis.
+      doctor.diagnose();
+      printStatus('');
+      printStatus("After installing components, run 'flutter doctor' in order to "
+        "re-validate your setup.");
+      printStatus("When complete, type 'flutter run' from the '${projectDir.path}' "
+        "directory in order to launch your app.");
+    }
+
     return 0;
   }
 
@@ -105,7 +123,7 @@ All done! To run your application:
     String projectIdentifier = _createProjectIdentifier(path.basename(dirPath));
     String relativeFlutterPackagesDirectory = path.relative(flutterPackagesDirectory, from: dirPath);
 
-    printStatus('Creating ${path.basename(projectName)}...');
+    printStatus('Creating project ${path.basename(projectName)}:');
 
     projectDir.createSync(recursive: true);
 
@@ -117,7 +135,7 @@ All done! To run your application:
     };
 
     if (renderDriverTest)
-      templateContext['withDriverTest?'] = {};
+      templateContext['withDriverTest?'] = <String, dynamic>{};
 
     Template createTemplate = new Template.fromName('create');
     createTemplate.render(new Directory(dirPath), templateContext,
