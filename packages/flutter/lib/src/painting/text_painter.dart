@@ -9,92 +9,86 @@ import 'text_editing.dart';
 import 'text_style.dart';
 
 /// An immutable span of text.
-abstract class TextSpan {
-  // This class must be immutable, because we won't notice when it changes.
-  const TextSpan();
-  void build(ui.ParagraphBuilder builder);
-  ui.ParagraphStyle get paragraphStyle => null;
-  String toPlainText(); // for semantics
-  String toString([String prefix = '']); // for debugging
-}
+class TextSpan {
+  const TextSpan({
+    this.style,
+    this.text,
+    this.children
+  });
 
-/// An immutable span of unstyled text.
-class PlainTextSpan extends TextSpan {
-  const PlainTextSpan(this.text);
-
-  /// The text contained in the span.
-  final String text;
-
-  void build(ui.ParagraphBuilder builder) {
-    assert(text != null);
-    builder.addText(text);
-  }
-
-  bool operator ==(dynamic other) {
-    if (other is! PlainTextSpan)
-      return false;
-    final PlainTextSpan typedOther = other;
-    return text == typedOther.text;
-  }
-
-  int get hashCode => text.hashCode;
-
-  String toPlainText() => text;
-  String toString([String prefix = '']) => '$prefix$runtimeType: "$text"';
-}
-
-/// An immutable text span that applies a style to a list of children.
-class StyledTextSpan extends TextSpan {
-  const StyledTextSpan(this.style, this.children);
-
-  /// The style to apply to the children.
+  /// The style to apply to the text and the children.
   final TextStyle style;
 
-  /// The children to which the style is applied.
+  /// The text contained in the span.
+  ///
+  /// If both text and children are non-null, the text will preceed the
+  /// children.
+  final String text;
+
+  /// Additional spans to include as children.
+  ///
+  /// If both text and children are non-null, the text will preceed the
+  /// children.
   final List<TextSpan> children;
 
   void build(ui.ParagraphBuilder builder) {
-    assert(style != null);
-    assert(children != null);
-    builder.pushStyle(style.textStyle);
-    for (TextSpan child in children) {
-      assert(child != null);
-      child.build(builder);
+    final bool hasStyle = style != null;
+    if (hasStyle)
+      builder.pushStyle(style.textStyle);
+    if (text != null)
+      builder.addText(text);
+    if (children != null) {
+      for (TextSpan child in children) {
+        assert(child != null);
+        child.build(builder);
+      }
     }
-    builder.pop();
+    if (hasStyle)
+      builder.pop();
   }
 
-  ui.ParagraphStyle get paragraphStyle => style.paragraphStyle;
+  void writePlainText(StringBuffer result) {
+    if (text != null)
+      result.write(text);
+    if (children != null) {
+      for (TextSpan child in children)
+        child.writePlainText(result);
+    }
+  }
+
+  String toString([String prefix = '']) {
+    StringBuffer buffer = new StringBuffer();
+    buffer.writeln('$prefix$runtimeType:');
+    String indent = '$prefix  ';
+    buffer.writeln(style.toString(indent));
+    if (text != null)
+      buffer.writeln('$indent"$text"');
+    for (TextSpan child in children)
+      buffer.writeln(child.toString(indent));
+    return buffer.toString();
+  }
 
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! StyledTextSpan)
+    if (other is! TextSpan)
       return false;
-    final StyledTextSpan typedOther = other;
-    if (style != typedOther.style ||
-        children.length != typedOther.children.length)
+    final TextSpan typedOther = other;
+    if (typedOther.text != text)
       return false;
-    for (int i = 0; i < children.length; ++i) {
-      if (children[i] != typedOther.children[i])
-        return false;
+    if (typedOther.style != style)
+      return false;
+    if ((typedOther.children == null) != (children == null))
+      return false;
+    if (children != null) {
+      for (int i = 0; i < children.length; ++i) {
+        if (typedOther.children[i] != children[i])
+          return false;
+      }
     }
     return true;
   }
-
-  int get hashCode => hashValues(style, hashList(children));
-
-  String toPlainText() => children.map((TextSpan child) => child.toPlainText()).join();
-
-  String toString([String prefix = '']) {
-    List<String> result = <String>[];
-    result.add('$prefix$runtimeType:');
-    var indent = '$prefix  ';
-    result.add('${style.toString(indent)}');
-    for (TextSpan child in children)
-      result.add(child.toString(indent));
-    return result.join('\n');
-  }
+  int get hashCode => hashValues(style, text, hashList(children));
 }
 
 /// An object that paints a [TextSpan] into a canvas.
@@ -115,7 +109,7 @@ class TextPainter {
     _text = value;
     ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
     _text.build(builder);
-    _paragraph = builder.build(_text.paragraphStyle ?? new ui.ParagraphStyle());
+    _paragraph = builder.build(_text.style?.paragraphStyle ?? new ui.ParagraphStyle());
     _needsLayout = true;
   }
 

@@ -14,24 +14,24 @@ void main() {
 
   void addAlignmentRow(FlexAlignItems alignItems) {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
-    RenderParagraph paragraph = new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan('$alignItems')]));
+    RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$alignItems'));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
     RenderFlex row = new RenderFlex(alignItems: alignItems, textBaseline: TextBaseline.alphabetic);
     style = new TextStyle(fontSize: 15.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
       decoration: new BoxDecoration(backgroundColor: const Color(0x7FFFCCCC)),
-      child: new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan('foo foo foo')]))
+      child: new RenderParagraph(new TextSpan(style: style, text: 'foo foo foo'))
     ));
     style = new TextStyle(fontSize: 10.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
       decoration: new BoxDecoration(backgroundColor: const Color(0x7FCCFFCC)),
-      child: new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan('foo foo foo')]))
+      child: new RenderParagraph(new TextSpan(style: style, text: 'foo foo foo'))
     ));
     RenderFlex subrow = new RenderFlex(alignItems: alignItems, textBaseline: TextBaseline.alphabetic);
     style = new TextStyle(fontSize: 25.0, color: const Color(0xFF000000));
     subrow.add(new RenderDecoratedBox(
       decoration: new BoxDecoration(backgroundColor: const Color(0x7FCCCCFF)),
-      child: new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan('foo foo foo foo')]))
+      child: new RenderParagraph(new TextSpan(style: style, text: 'foo foo foo foo'))
     ));
     subrow.add(new RenderSolidColorBox(const Color(0x7FCCFFFF), desiredSize: new Size(30.0, 40.0)));
     row.add(subrow);
@@ -48,7 +48,7 @@ void main() {
 
   void addJustificationRow(FlexJustifyContent justify) {
     const TextStyle style = const TextStyle(color: const Color(0xFF000000));
-    RenderParagraph paragraph = new RenderParagraph(new StyledTextSpan(style, <TextSpan>[new PlainTextSpan('$justify')]));
+    RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$justify'));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
     RenderFlex row = new RenderFlex(direction: FlexDirection.horizontal);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: new Size(80.0, 60.0)));

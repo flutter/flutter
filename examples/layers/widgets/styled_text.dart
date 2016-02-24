@@ -34,9 +34,24 @@ final TextStyle _kUnderline = const TextStyle(
 
 Widget toStyledText(String name, String text) {
   TextStyle lineStyle = (name == "Dave") ? _kDaveStyle : _kHalStyle;
-  return new StyledText(
+  return new RichText(
     key: new Key(text),
-    elements: [lineStyle, [_kBold, [_kUnderline, name], ":"], text]
+    text: new TextSpan(
+      style: lineStyle,
+      children: <TextSpan>[
+        new TextSpan(
+          style: _kBold,
+          children: <TextSpan>[
+            new TextSpan(
+              style: _kUnderline,
+              text: name
+            ),
+            new TextSpan(text: ':')
+          ]
+        ),
+        new TextSpan(text: text)
+      ]
+    )
   );
 }
 

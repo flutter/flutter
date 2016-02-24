@@ -1405,12 +1405,12 @@ class Flexible extends ParentDataWidget<Flex> {
   }
 }
 
-/// A raw paragraph of text.
+/// A paragraph of rich text.
 ///
 /// This class is rarely used directly. Instead, consider using [Text], which
 /// integrates with [DefaultTextStyle].
-class RawText extends LeafRenderObjectWidget {
-  RawText({ Key key, this.text }) : super(key: key) {
+class RichText extends LeafRenderObjectWidget {
+  RichText({ Key key, this.text }) : super(key: key) {
     assert(text != null);
   }
 
@@ -1418,42 +1418,8 @@ class RawText extends LeafRenderObjectWidget {
 
   RenderParagraph createRenderObject() => new RenderParagraph(text);
 
-  void updateRenderObject(RenderParagraph renderObject, RawText oldWidget) {
+  void updateRenderObject(RenderParagraph renderObject, RichText oldWidget) {
     renderObject.text = text;
-  }
-}
-
-/// A convience widget for paragraphs of text with heterogeneous style.
-///
-/// The elements parameter is a recursive list of lists that matches the
-/// following grammar:
-///
-///   `elements ::= "string" | [<text-style> <elements>*]``
-///
-/// Where "string" is text to display and text-style is an instance of
-/// TextStyle. The text-style applies to all of the elements that follow.
-class StyledText extends StatelessComponent {
-  StyledText({ this.elements, Key key }) : super(key: key) {
-    assert(_toSpan(elements) != null);
-  }
-
-  /// The recursive list of lists that describes the text and style to paint.
-  final dynamic elements;
-
-  TextSpan _toSpan(dynamic element) {
-    if (element is String)
-      return new PlainTextSpan(element);
-    if (element is Iterable) {
-      dynamic first = element.first;
-      if (first is! TextStyle)
-        throw new ArgumentError("First element of Iterable is a ${first.runtimeType} not a TextStyle");
-      return new StyledTextSpan(first, element.skip(1).map(_toSpan).toList());
-    }
-    throw new ArgumentError("Element is ${element.runtimeType} not a String or an Iterable");
-  }
-
-  Widget build(BuildContext context) {
-    return new RawText(text: _toSpan(elements));
   }
 }
 
@@ -1504,17 +1470,20 @@ class Text extends StatelessComponent {
   /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
 
+  TextStyle _getEffectiveStyle(BuildContext context) {
+    if (style == null || style.inherit)
+      return DefaultTextStyle.of(context)?.merge(style) ?? style;
+    else
+      return style;
+  }
+
   Widget build(BuildContext context) {
-    TextSpan text = new PlainTextSpan(data);
-    TextStyle combinedStyle;
-    if (style == null || style.inherit) {
-      combinedStyle = DefaultTextStyle.of(context)?.merge(style) ?? style;
-    } else {
-      combinedStyle = style;
-    }
-    if (combinedStyle != null)
-      text = new StyledTextSpan(combinedStyle, <TextSpan>[text]);
-    return new RawText(text: text);
+    return new RichText(
+      text: new TextSpan(
+        style: _getEffectiveStyle(context),
+        text: data
+      )
+    );
   }
 
   void debugFillDescription(List<String> description) {

@@ -97,9 +97,9 @@ class RenderDots extends RenderBox {
 void main() {
   // Create some styled text to tell the user to interact with the app.
   RenderParagraph paragraph = new RenderParagraph(
-    new StyledTextSpan(
-      new TextStyle(color: Colors.black87),
-      <TextSpan>[ new PlainTextSpan("Touch me!") ]
+    new TextSpan(
+      style: new TextStyle(color: Colors.black87),
+      text: "Touch me!"
     )
   );
   // A stack is a render object that layers its children on top of each other.

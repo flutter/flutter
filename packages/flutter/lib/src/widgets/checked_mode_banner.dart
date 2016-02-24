@@ -25,7 +25,7 @@ class _CheckedModeBannerPainter extends CustomPainter {
   );
 
   static final TextPainter textPainter = new TextPainter()
-    ..text = new StyledTextSpan(kTextStyles, <TextSpan>[new PlainTextSpan('SLOW MODE')])
+    ..text = new TextSpan(style: kTextStyles, text: 'SLOW MODE')
     ..maxWidth = kOffset * 2.0
     ..maxHeight = kHeight
     ..layout();

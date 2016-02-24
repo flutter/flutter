@@ -15,11 +15,9 @@ class TestBlockPainter extends Painter {
 void main() {
   test('block intrinsics', () {
     RenderParagraph paragraph = new RenderParagraph(
-      new StyledTextSpan(
-        new TextStyle(
-          height: 1.0
-        ),
-        <TextSpan>[new PlainTextSpan('Hello World')]
+      new TextSpan(
+        style: new TextStyle(height: 1.0),
+        text: 'Hello World'
       )
     );
     const BoxConstraints unconstrained = const BoxConstraints();
