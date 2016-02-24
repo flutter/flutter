@@ -19,7 +19,7 @@ Future<dynamic> retry(Action action, Duration timeout,
   assert(timeout != null);
   assert(pauseBetweenRetries != null);
 
-  Stopwatch sw = new Stopwatch()..start();
+  Stopwatch sw = stopwatchFactory()..start();
   dynamic result = null;
   dynamic lastError = null;
   dynamic lastStackTrace = null;
@@ -43,3 +43,14 @@ Future<dynamic> retry(Action action, Duration timeout,
   else
     return new Future.error(lastError, lastStackTrace);
 }
+
+/// A function that produces a [Stopwatch].
+typedef Stopwatch StopwatchFactory();
+
+/// Restores [stopwatchFactory] to the default implementation.
+void restoreStopwatchFactory() {
+  stopwatchFactory = () => new Stopwatch();
+}
+
+/// Used by [retry] as a source of [Stopwatch] implementation.
+StopwatchFactory stopwatchFactory = () => new Stopwatch();
