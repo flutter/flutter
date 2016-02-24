@@ -197,11 +197,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       BoxConstraints childConstraints;
       switch(_direction) {
         case FlexDirection.horizontal:
-          childConstraints = new BoxConstraints(maxWidth: constraints.maxWidth);
+          childConstraints = new BoxConstraints(maxHeight: constraints.maxHeight);
           availableMainSpace = constraints.maxWidth;
           break;
         case FlexDirection.vertical:
-          childConstraints = new BoxConstraints(maxHeight: constraints.maxHeight);
+          childConstraints = new BoxConstraints(maxWidth: constraints.maxWidth);
           availableMainSpace = constraints.maxHeight;
           break;
       }
@@ -239,7 +239,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
 
       // Determine the spacePerFlex by allocating the remaining available space
-      double spacePerFlex = (availableMainSpace - inflexibleSpace) / totalFlex;
+      // When you're overconstrained spacePerFlex can be negative.
+      double spacePerFlex = math.max(0.0,
+          (availableMainSpace - inflexibleSpace) / totalFlex);
 
       // Size remaining items, find the maximum cross size
       child = firstChild;
