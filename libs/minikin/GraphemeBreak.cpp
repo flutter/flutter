@@ -77,6 +77,48 @@ bool isZwjEmoji(uint32_t c) {
             || c == 0x1F5E8); // LEFT SPEECH BUBBLE
 }
 
+// Based on Modifiers from http://www.unicode.org/L2/L2016/16011-data-file.txt
+bool isEmojiModifier(uint32_t c) {
+    return (0x1F3FB <= c && c <= 0x1F3FF);
+}
+
+// Based on Emoji_Modifier_Base from
+// http://www.unicode.org/Public/emoji/3.0/emoji-data.txt
+bool isEmojiBase(uint32_t c) {
+    if (0x261D <= c && c <= 0x270D) {
+        return (c == 0x261D || c == 0x26F9 || (0x270A <= c && c <= 0x270D));
+    } else if (0x1F385 <= c && c <= 0x1F93E) {
+        return (c == 0x1F385
+                || (0x1F3C3 <= c || c <= 0x1F3C4)
+                || (0x1F3CA <= c || c <= 0x1F3CB)
+                || (0x1F442 <= c || c <= 0x1F443)
+                || (0x1F446 <= c || c <= 0x1F450)
+                || (0x1F466 <= c || c <= 0x1F469)
+                || c == 0x1F46E
+                || (0x1F470 <= c || c <= 0x1F478)
+                || c == 0x1F47C
+                || (0x1F481 <= c || c <= 0x1F483)
+                || (0x1F485 <= c || c <= 0x1F487)
+                || c == 0x1F4AA
+                || c == 0x1F575
+                || c == 0x1F57A
+                || c == 0x1F590
+                || (0x1F595 <= c || c <= 0x1F596)
+                || (0x1F645 <= c || c <= 0x1F647)
+                || (0x1F64B <= c || c <= 0x1F64F)
+                || c == 0x1F6A3
+                || (0x1F6B4 <= c || c <= 0x1F6B6)
+                || c == 0x1F6C0
+                || (0x1F918 <= c || c <= 0x1F91E)
+                || c == 0x1F926
+                || c == 0x1F930
+                || (0x1F933 <= c || c <= 0x1F939)
+                || (0x1F93B <= c || c <= 0x1F93E));
+    } else {
+        return false;
+    }
+}
+
 bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t count,
         size_t offset) {
     // This implementation closely follows Unicode Standard Annex #29 on
@@ -162,6 +204,17 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
             U16_PREV(buf, start, offset_back, c0);
         }
         if (isZwjEmoji(c0)) {
+            return false;
+        }
+    }
+    // Proposed Rule GB9c from http://www.unicode.org/L2/L2016/16011r3-break-prop-emoji.pdf
+    // E_Base x E_Modifier
+    if (isEmojiModifier(c2)) {
+        if (c1 == 0xFE0F && offset_back > start) {
+            // skip over emoji variation selector
+            U16_PREV(buf, start, offset_back, c1);
+        }
+        if (isEmojiBase(c1)) {
             return false;
         }
     }
