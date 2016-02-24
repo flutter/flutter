@@ -3,14 +3,29 @@
 // found in the LICENSE file.
 
 import 'package:test/test.dart';
+import 'package:quiver/time.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:quiver/testing/time.dart';
 
 import 'package:flutter_driver/src/retry.dart';
 
 main() {
   group('retry', () {
+    FakeAsync fakeAsync;
+
+    setUp(() {
+      fakeAsync = new FakeAsync();
+      Clock fakeClock = fakeAsync.getClock(new DateTime.now());
+      stopwatchFactory = () {
+        return new FakeStopwatch(
+          () => fakeClock.now().millisecondsSinceEpoch,
+          1000
+        );
+      };
+    });
+
     test('retries until succeeds', () {
-      new FakeAsync().run((FakeAsync fakeAsync) {
+      fakeAsync.run((_) {
         int retryCount = 0;
 
         expect(
@@ -37,28 +52,34 @@ main() {
     });
 
     test('times out returning last error', () async {
-      bool timedOut = false;
-      int retryCount = 0;
-      dynamic lastError;
-      dynamic lastStackTrace;
+      fakeAsync.run((_) {
+        bool timedOut = false;
+        int retryCount = 0;
+        dynamic lastError;
+        dynamic lastStackTrace;
 
-      await retry(
-        () {
-          retryCount++;
-          throw 'error';
-        },
-        new Duration(milliseconds: 9),
-        new Duration(milliseconds: 2)
-      ).catchError((error, stackTrace) {
-        timedOut = true;
-        lastError = error;
-        lastStackTrace = stackTrace;
+        retry(
+          () {
+            retryCount++;
+            throw 'error';
+          },
+          new Duration(milliseconds: 7),
+          new Duration(milliseconds: 2)
+        ).catchError((error, stackTrace) {
+          timedOut = true;
+          lastError = error;
+          lastStackTrace = stackTrace;
+        });
+
+        print('before elapse');
+        fakeAsync.elapse(new Duration(milliseconds: 10));
+        print('after elapse');
+
+        expect(timedOut, isTrue);
+        expect(lastError, 'error');
+        expect(lastStackTrace, isNotNull);
+        expect(retryCount, 4);
       });
-
-      expect(timedOut, isTrue);
-      expect(lastError, 'error');
-      expect(lastStackTrace, isNotNull);
-      expect(retryCount, 4);
-    }, skip: "Flaky. See https://github.com/flutter/flutter/issues/2133");
+    });
   });
 }
