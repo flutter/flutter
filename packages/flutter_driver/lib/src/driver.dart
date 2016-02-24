@@ -4,20 +4,32 @@
 
 import 'dart:async';
 import 'package:vm_service_client/vm_service_client.dart';
+import 'package:matcher/matcher.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'error.dart';
 import 'find.dart';
 import 'gesture.dart';
 import 'health.dart';
+import 'matcher_util.dart';
 import 'message.dart';
+import 'retry.dart';
 
 final Logger _log = new Logger('FlutterDriver');
+
+/// Computes a value.
+///
+/// If computation is asynchronous, the function may return a [Future].
+///
+/// See also [FlutterDriver.waitFor].
+typedef dynamic EvaluatorFunction();
 
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
 
-  static const String _flutterExtensionMethod = 'ext.flutter_driver';
+  static const String _kFlutterExtensionMethod = 'ext.flutter_driver';
+  static const Duration _kDefaultTimeout = const Duration(seconds: 5);
+  static const Duration _kDefaultPauseBetweenRetries = const Duration(milliseconds: 160);
 
   /// Connects to a Flutter application.
   ///
@@ -62,7 +74,7 @@ class FlutterDriver {
       // Waits for a signal from the VM service that the extension is registered
       Future waitForServiceExtension() {
         return isolate.onExtensionAdded.firstWhere((String extension) {
-          return extension == _flutterExtensionMethod;
+          return extension == _kFlutterExtensionMethod;
         });
       }
 
@@ -124,7 +136,7 @@ class FlutterDriver {
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
     Map<String, dynamic> json = <String, dynamic>{'kind': command.kind}
       ..addAll(command.toJson());
-    return _appIsolate.invokeExtension(_flutterExtensionMethod, json)
+    return _appIsolate.invokeExtension(_kFlutterExtensionMethod, json)
       .then((Map<String, dynamic> result) => result, onError: (error, stackTrace) {
         throw new DriverError(
           'Failed to fulfill ${command.runtimeType} due to remote error',
@@ -150,6 +162,24 @@ class FlutterDriver {
   Future<String> getText(ObjectRef ref) async {
     GetTextResult result = GetTextResult.fromJson(await _sendCommand(new GetText(ref)));
     return result.text;
+  }
+
+  /// Calls the [evaluator] repeatedly until the result of the evaluation
+  /// satisfies the [matcher].
+  ///
+  /// Returns the result of the evaluation.
+  Future<String> waitFor(EvaluatorFunction evaluator, Matcher matcher, {
+    Duration timeout: _kDefaultTimeout,
+    Duration pauseBetweenRetries: _kDefaultPauseBetweenRetries
+  }) async {
+    return retry(() async {
+      dynamic value = await evaluator();
+      MatchResult matchResult = match(value, matcher);
+      if (!matchResult.hasMatched) {
+        return new Future.error(matchResult.mismatchDescription);
+      }
+      return value;
+    }, timeout, pauseBetweenRetries);
   }
 
   /// Closes the underlying connection to the VM service.
