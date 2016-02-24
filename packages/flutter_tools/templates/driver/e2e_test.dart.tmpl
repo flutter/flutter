@@ -32,13 +32,18 @@ main() {
     });
 
     test('tap on the floating action button; verify counter', () async {
+      // Find floating action button (fab) to tap on
       ObjectRef fab = await driver.findByValueKey('fab');
       expect(fab, isNotNull);
+
+      // Tap on the fab
       await driver.tap(fab);
-      ObjectRef counter = await driver.findByValueKey('counter');
-      expect(counter, isNotNull);
-      String text = await driver.getText(counter);
-      expect(text, contains("Button tapped 1 times."));
+
+      // Wait for text to change to the desired value
+      await driver.waitFor(() async {
+        ObjectRef counter = await driver.findByValueKey('counter');
+        return await driver.getText(counter);
+      }, contains("Button tapped 1 times."));
     });
   });
 }
