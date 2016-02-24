@@ -72,17 +72,12 @@ static const char* kDartArgs[] = {
     // default profile period to 100Hz. This number is suitable for older
     // Raspberry Pi devices but quite low for current smartphones.
     "--profile_period=1000",
+    "--background_compilation",
 #if (WTF_OS_IOS || WTF_OS_MACOSX)
     // On platforms where LLDB is the primary debugger, SIGPROF signals
     // overwhelm LLDB.
     "--no-profiler",
 #endif
-};
-
-// Background compilation isn't quite ready, but this flag turns it on if we
-// want to experiment with it.
-static const char* kDartBackgroundCompilationArgs[]{
-    "--background_compilation",
 };
 
 static const char* kDartPrecompilationArgs[]{
@@ -311,9 +306,6 @@ void InitDartVM() {
 
   if (enable_checked_mode)
     args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
-
-  if (SkySettings::Get().enable_background_compilation)
-    args.append(kDartBackgroundCompilationArgs, arraysize(kDartBackgroundCompilationArgs));
 
   if (SkySettings::Get().start_paused)
     args.append(kDartStartPausedArgs, arraysize(kDartStartPausedArgs));

@@ -12,7 +12,6 @@ namespace shell {
 namespace switches {
 
 extern const char kEnableCheckedMode[];
-extern const char kEnableBackgroundCompilation[];
 extern const char kFLX[];
 extern const char kHelp[];
 extern const char kNonInteractive[];

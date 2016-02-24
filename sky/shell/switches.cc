@@ -11,7 +11,6 @@ namespace shell {
 namespace switches {
 
 const char kEnableCheckedMode[] = "enable-checked-mode";
-const char kEnableBackgroundCompilation[] = "enable-background-compilation";
 const char kFLX[] = "flx";
 const char kHelp[] = "help";
 const char kNonInteractive[] = "non-interactive";
