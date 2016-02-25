@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
+import '../android/android.dart' as android;
 import '../artifacts.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
@@ -132,6 +133,7 @@ All done! In order to run your application, type:
       'projectIdentifier': projectIdentifier,
       'description': description,
       'flutterPackagesDirectory': relativeFlutterPackagesDirectory,
+      'androidMinApiLevel': android.minApiLevel
     };
 
     if (renderDriverTest)
