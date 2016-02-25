@@ -12,7 +12,9 @@ import '../globals.dart';
 
 Future<int> pubGet({
   String directory,
-  bool skipIfAbsent: false
+  bool skipIfAbsent: false,
+  bool upgrade: false,
+  bool checkLastModified: true
 }) async {
   if (directory == null)
     directory = Directory.current.path;
@@ -28,10 +30,11 @@ Future<int> pubGet({
     return 1;
   }
 
-  if (!pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
+  if (!checkLastModified || !pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
     printStatus("Running 'pub get' in $directory${Platform.pathSeparator}...");
+    String command = upgrade ? 'upgrade' : 'get';
     int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', 'get'],
+      <String>[sdkBinaryName('pub'), '--verbosity=warning', command],
       workingDirectory: directory
     );
     if (code != 0)
