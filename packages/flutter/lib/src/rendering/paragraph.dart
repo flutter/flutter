@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
+
 import 'box.dart';
 import 'object.dart';
 import 'semantics.dart';
@@ -81,6 +83,16 @@ class RenderParagraph extends RenderBox {
 
   bool hitTestSelf(Point position) => true;
 
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is! PointerDownEvent)
+      return;
+    _layoutText(constraints);
+    Offset offset = entry.localPosition.toOffset();
+    TextPosition position = _textPainter.getPositionForOffset(offset);
+    TextSpan span = _textPainter.text.getSpanForPosition(position);
+    span?.recognizer?.addPointer(event);
+  }
+
   void performLayout() {
     _layoutText(constraints);
     size = constraints.constrain(_textPainter.size);
@@ -100,9 +112,7 @@ class RenderParagraph extends RenderBox {
 
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     yield (SemanticsNode node) {
-      StringBuffer buffer = new StringBuffer();
-      text.writePlainText(buffer);
-      node.label = buffer.toString();
+      node.label = text.toPlainText();
     };
   }
 
