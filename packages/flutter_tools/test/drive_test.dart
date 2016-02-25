@@ -5,10 +5,15 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/commands/drive.dart';
+import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/commands/drive.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -19,18 +24,45 @@ main() => defineTests();
 
 defineTests() {
   group('drive', () {
+    DriveCommand command;
+    Device mockDevice;
+
+    void withMockDevice([Device mock]) {
+      mockDevice = mock ?? new MockDevice();
+      targetDeviceFinder = () async => mockDevice;
+      testDeviceManager.addDevice(mockDevice);
+    }
+
     setUp(() {
+      command = new DriveCommand();
+      applyMocksToCommand(command);
       useInMemoryFileSystem(cwd: '/some/app');
+      toolchainDownloader = (_) async { };
+      targetDeviceFinder = () {
+        throw 'Unexpected call to targetDeviceFinder';
+      };
+      appStarter = (_) {
+        throw 'Unexpected call to appStarter';
+      };
+      testRunner = (_) {
+        throw 'Unexpected call to testRunner';
+      };
+      appStopper = (_) {
+        throw 'Unexpected call to appStopper';
+      };
     });
 
     tearDown(() {
+      command = null;
       restoreFileSystem();
+      restoreAppStarter();
+      restoreAppStopper();
+      restoreTestRunner();
+      restoreTargetDeviceFinder();
     });
 
     testUsingContext('returns 1 when test file is not found', () {
-      DriveCommand command = new DriveCommand();
-      applyMocksToCommand(command);
-
+      withMockDevice();
       List<String> args = [
         'drive',
         '--target=/some/app/test/e2e.dart',
@@ -44,10 +76,8 @@ defineTests() {
     });
 
     testUsingContext('returns 1 when app fails to run', () async {
-      DriveCommand command = new DriveCommand.custom(runAppFn: expectAsync(() {
-        return new Future.value(1);
-      }));
-      applyMocksToCommand(command);
+      withMockDevice();
+      appStarter = expectAsync((_) async => 1);
 
       String testApp = '/some/app/test_driver/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
@@ -72,8 +102,6 @@ defineTests() {
     testUsingContext('returns 1 when app file is outside package', () async {
       String packageDir = '/my/app';
       useInMemoryFileSystem(cwd: packageDir);
-      DriveCommand command = new DriveCommand();
-      applyMocksToCommand(command);
 
       String appFile = '/not/in/my/app.dart';
       List<String> args = [
@@ -92,8 +120,6 @@ defineTests() {
     testUsingContext('returns 1 when app file is in the root dir', () async {
       String packageDir = '/my/app';
       useInMemoryFileSystem(cwd: packageDir);
-      DriveCommand command = new DriveCommand();
-      applyMocksToCommand(command);
 
       String appFile = '/my/app/main.dart';
       List<String> args = [
@@ -111,22 +137,21 @@ defineTests() {
     });
 
     testUsingContext('returns 0 when test ends successfully', () async {
+      withMockDevice();
+
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      DriveCommand command = new DriveCommand.custom(
-        runAppFn: expectAsync(() {
-          return new Future<int>.value(0);
-        }),
-        runTestsFn: expectAsync((List<String> testArgs) {
-          expect(testArgs, [testFile]);
-          return new Future<Null>.value();
-        }),
-        stopAppFn: expectAsync(() {
-          return new Future<int>.value(0);
-        })
-      );
-      applyMocksToCommand(command);
+      appStarter = expectAsync((_) {
+        return new Future<int>.value(0);
+      });
+      testRunner = expectAsync((List<String> testArgs) {
+        expect(testArgs, [testFile]);
+        return new Future<Null>.value();
+      });
+      appStopper = expectAsync((_) {
+        return new Future<int>.value(0);
+      });
 
       MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() {}');
@@ -142,5 +167,88 @@ defineTests() {
         expect(buffer.errorText, isEmpty);
       });
     });
+
+
+    group('findTargetDevice', () {
+      testUsingContext('uses specified device', () async {
+        testDeviceManager.specifiedDeviceId = '123';
+        withMockDevice();
+        when(mockDevice.name).thenReturn('specified-device');
+        when(mockDevice.id).thenReturn('123');
+
+        Device device = await findTargetDevice();
+        expect(device.name, 'specified-device');
+      });
+    });
+
+    group('findTargetDevice on iOS', () {
+      setOs() {
+        when(os.isMacOS).thenReturn(true);
+        when(os.isLinux).thenReturn(false);
+      }
+
+      testUsingContext('uses existing emulator', () async {
+        setOs();
+        withMockDevice();
+        when(mockDevice.name).thenReturn('mock-simulator');
+        when(mockDevice.isLocalEmulator).thenReturn(true);
+
+        Device device = await findTargetDevice();
+        expect(device.name, 'mock-simulator');
+      });
+
+      testUsingContext('uses existing Android device if and there are no simulators', () async {
+        setOs();
+        mockDevice = new MockAndroidDevice();
+        when(mockDevice.name).thenReturn('mock-android-device');
+        when(mockDevice.isLocalEmulator).thenReturn(false);
+        withMockDevice(mockDevice);
+
+        Device device = await findTargetDevice();
+        expect(device.name, 'mock-android-device');
+      });
+
+      testUsingContext('launches emulator', () async {
+        setOs();
+        when(SimControl.instance.boot()).thenReturn(true);
+        Device emulator = new MockDevice();
+        when(emulator.name).thenReturn('new-simulator');
+        when(IOSSimulatorUtils.instance.getAttachedDevices())
+            .thenReturn([emulator]);
+
+        Device device = await findTargetDevice();
+        expect(device.name, 'new-simulator');
+      });
+    });
+
+    group('findTargetDevice on Linux', () {
+      setOs() {
+        when(os.isMacOS).thenReturn(false);
+        when(os.isLinux).thenReturn(true);
+      }
+
+      testUsingContext('returns null if no devices found', () async {
+        setOs();
+        expect(await findTargetDevice(), isNull);
+      });
+
+      testUsingContext('uses existing Android device', () async {
+        setOs();
+        mockDevice = new MockAndroidDevice();
+        when(mockDevice.name).thenReturn('mock-android-device');
+        withMockDevice(mockDevice);
+
+        Device device = await findTargetDevice();
+        expect(device.name, 'mock-android-device');
+      });
+    });
   });
 }
+
+class MockDevice extends Mock implements Device {
+  MockDevice() {
+    when(this.isSupported()).thenReturn(true);
+  }
+}
+
+class MockAndroidDevice extends Mock implements AndroidDevice { }

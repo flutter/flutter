@@ -7,9 +7,13 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
+
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
@@ -37,6 +41,15 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     if (!overrides.containsKey(Doctor))
       testContext[Doctor] = new MockDoctor();
+
+    if (!overrides.containsKey(SimControl))
+      testContext[SimControl] = new MockSimControl();
+
+    if (!overrides.containsKey(OperatingSystemUtils))
+      testContext[OperatingSystemUtils] = new MockOperatingSystemUtils();
+
+    if (!overrides.containsKey(IOSSimulatorUtils))
+      testContext[IOSSimulatorUtils] = new MockIOSSimulatorUtils();
 
     if (Platform.isMacOS) {
       if (!overrides.containsKey(XCode))
@@ -76,3 +89,13 @@ class MockDoctor extends Doctor {
   // True for testing.
   bool get canLaunchAnything => true;
 }
+
+class MockSimControl extends Mock implements SimControl {
+  MockSimControl() {
+    when(this.getConnectedDevices()).thenReturn([]);
+  }
+}
+
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}

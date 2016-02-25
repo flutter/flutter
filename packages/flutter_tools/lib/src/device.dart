@@ -130,6 +130,9 @@ abstract class Device {
 
   bool get supportsStartPaused => true;
 
+  /// Whether it is an emulated device running on localhost.
+  bool get isLocalEmulator;
+
   /// Install an app package on the current device
   bool installApp(ApplicationPackage app);
 
@@ -259,7 +262,7 @@ class DeviceStore {
           break;
         case TargetPlatform.iOSSimulator:
           assert(iOSSimulator == null);
-          iOSSimulator = _deviceForConfig(config, IOSSimulator.getAttachedDevices());
+          iOSSimulator = _deviceForConfig(config, IOSSimulatorUtils.instance.getAttachedDevices());
           break;
         case TargetPlatform.mac:
         case TargetPlatform.linux:

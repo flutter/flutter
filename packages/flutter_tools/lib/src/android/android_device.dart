@@ -54,6 +54,8 @@ class AndroidDevice extends Device {
 
   bool _connected;
 
+  bool get isLocalEmulator => false;
+
   List<String> adbCommandForDevice(List<String> args) {
     return <String>[androidSdk.adbPath, '-s', id]..addAll(args);
   }
