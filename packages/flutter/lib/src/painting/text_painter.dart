@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextBox;
 
+import 'package:flutter/gestures.dart';
+
 import 'basic_types.dart';
 import 'text_editing.dart';
 import 'text_style.dart';
@@ -26,7 +28,8 @@ class TextSpan {
   const TextSpan({
     this.style,
     this.text,
-    this.children
+    this.children,
+    this.recognizer
   });
 
   /// The style to apply to the text and the children.
@@ -44,6 +47,9 @@ class TextSpan {
   /// children.
   final List<TextSpan> children;
 
+  /// If non-null, will receive events that hit this text span.
+  final GestureRecognizer recognizer;
+
   void build(ui.ParagraphBuilder builder) {
     final bool hasStyle = style != null;
     if (hasStyle)
@@ -60,13 +66,47 @@ class TextSpan {
       builder.pop();
   }
 
-  void writePlainText(StringBuffer result) {
-    if (text != null)
-      result.write(text);
-    if (children != null) {
-      for (TextSpan child in children)
-        child.writePlainText(result);
+  bool visitTextSpan(bool visitor(TextSpan span)) {
+    if (text != null) {
+      if (!visitor(this))
+        return false;
     }
+    if (children != null) {
+      for (TextSpan child in children) {
+        if (!child.visitTextSpan(visitor))
+          return false;
+      }
+    }
+    return true;
+  }
+
+  TextSpan getSpanForPosition(TextPosition position) {
+    TextAffinity affinity = position.affinity;
+    int targetOffset = position.offset;
+    int offset = 0;
+    TextSpan result;
+    visitTextSpan((TextSpan span) {
+      assert(result == null);
+      int endOffset = offset + span.text.length;
+      if (targetOffset == offset && affinity == TextAffinity.downstream ||
+          targetOffset > offset && targetOffset < endOffset ||
+          targetOffset == endOffset && affinity == TextAffinity.upstream) {
+        result = span;
+        return false;
+      }
+      offset = endOffset;
+      return true;
+    });
+    return result;
+  }
+
+  String toPlainText() {
+    StringBuffer buffer = new StringBuffer();
+    visitTextSpan((TextSpan span) {
+      buffer.write(span.text);
+      return true;
+    });
+    return buffer.toString();
   }
 
   String toString([String prefix = '']) {
@@ -89,9 +129,10 @@ class TextSpan {
     final TextSpan typedOther = other;
     return typedOther.text == text
         && typedOther.style == style
+        && typedOther.recognizer == recognizer
         && _deepEquals(typedOther.children, children);
   }
-  int get hashCode => hashValues(style, text, hashList(children));
+  int get hashCode => hashValues(style, text, recognizer, hashList(children));
 }
 
 /// An object that paints a [TextSpan] into a canvas.
