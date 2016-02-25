@@ -3,7 +3,7 @@ import 'dart:convert' hide BASE64;
 import 'dart:typed_data';
 
 import 'package:bignum/bignum.dart';
-import 'package:cipher/cipher.dart' hide CipherParameters;
+import 'package:pointycastle/pointycastle.dart' hide CipherParameters;
 import 'package:crypto/crypto.dart';
 import 'package:flx/signing.dart';
 import 'package:test/test.dart';

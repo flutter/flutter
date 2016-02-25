@@ -4,9 +4,9 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: Library for dealing with Flutter bundle (.flx) files
 homepage: https://github.com/flutter/flutter/tree/master/packages/flx
 dependencies:
-  bignum: ^0.0.7
+  bignum: ^0.1.0
   asn1lib: ^0.4.1
-  cipher: ^0.7.1
+  pointycastle: 0.10.0
   crypto: ^0.9.1
 
 environment:
