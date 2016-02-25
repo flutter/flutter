@@ -280,29 +280,29 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
       RenderObject renderObject = context.findRenderObject();
-      assert(renderObject is RenderPointerListener);
-      RenderPointerListener listener = renderObject;
-      RenderBox descendant = listener.child;
       if (!config.excludeFromSemantics) {
-        assert(descendant is RenderSemanticsGestureHandler);
-        RenderSemanticsGestureHandler semanticsGestureHandler = descendant;
-        descendant = semanticsGestureHandler.child;
+        assert(renderObject is RenderSemanticsGestureHandler);
+        RenderSemanticsGestureHandler semanticsGestureHandler = renderObject;
+        renderObject = semanticsGestureHandler.child;
       }
-      assert(descendant != null);
-      if (!descendant.debugDoingThisLayout) {
+      assert(renderObject is RenderPointerListener);
+      RenderPointerListener pointerListener = renderObject;
+      renderObject = pointerListener.child;
+      if (!renderObject.debugDoingThisLayout) {
         throw new WidgetError(
           'replaceGestureRecognizers() can only be called during the layout phase of the GestureDetector\'s nearest descendant RenderObjectWidget.\n'
           'In this particular case, that is:\n'
-          '  $descendant'
+          '  $renderObject'
         );
       }
       return true;
     });
     _syncAll(gestures);
     if (!config.excludeFromSemantics) {
-      RenderPointerListener listener = context.findRenderObject();
-      RenderSemanticsGestureHandler semanticsGestureHandler = listener.child;
-      context.visitChildElements((RenderObjectElement element) => element.widget.updateRenderObject(semanticsGestureHandler, null));
+      RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
+      context.visitChildElements((RenderObjectElement element) {
+        element.widget.updateRenderObject(semanticsGestureHandler, null);
+      });
     }
   }
 

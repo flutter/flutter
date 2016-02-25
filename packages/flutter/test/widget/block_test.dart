@@ -50,16 +50,18 @@ void main() {
           ]
         )
       );
-      tester.pump(); // for SizeObservers
 
       Point middleOfContainer = tester.getCenter(tester.findText('Hello'));
+      expect(middleOfContainer.x, equals(400.0));
+      expect(middleOfContainer.y, equals(1000.0));
+
       Point target = tester.getCenter(tester.findElementByKey(blockKey));
       TestGesture gesture = tester.startGesture(target);
       gesture.moveBy(const Offset(0.0, -10.0));
 
-      tester.pump(const Duration(milliseconds: 1));
+      tester.pump(); // redo layout
 
-      expect(tester.getCenter(tester.findText('Hello')) == middleOfContainer, isFalse);
+      expect(tester.getCenter(tester.findText('Hello')), isNot(equals(middleOfContainer)));
 
       gesture.up();
     });

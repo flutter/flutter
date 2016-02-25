@@ -43,7 +43,9 @@ export 'package:flutter/rendering.dart' show
     RelativeRect,
     ShaderCallback,
     ValueChanged,
-    ViewportAnchor;
+    ViewportAnchor,
+    ViewportDimensions,
+    ViewportDimensionsChangeCallback;
 
 // PAINTING NODES
 
@@ -777,6 +779,7 @@ class Viewport extends OneChildRenderObjectWidget {
     this.scrollDirection: Axis.vertical,
     this.scrollAnchor: ViewportAnchor.start,
     this.overlayPainter,
+    this.onPaintOffsetUpdateNeeded,
     Widget child
   }) : super(key: key, child: child) {
     assert(scrollDirection != null);
@@ -802,11 +805,14 @@ class Viewport extends OneChildRenderObjectWidget {
   /// Often used to paint scroll bars.
   final Painter overlayPainter;
 
+  final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
+
   RenderViewport createRenderObject() {
     return new RenderViewport(
       paintOffset: paintOffset,
       scrollDirection: scrollDirection,
       scrollAnchor: scrollAnchor,
+      onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded,
       overlayPainter: overlayPainter
     );
   }
@@ -817,6 +823,7 @@ class Viewport extends OneChildRenderObjectWidget {
       ..scrollDirection = scrollDirection
       ..scrollAnchor = scrollAnchor
       ..paintOffset = paintOffset
+      ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded
       ..overlayPainter = overlayPainter;
   }
 }

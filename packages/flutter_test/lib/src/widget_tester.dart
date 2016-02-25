@@ -6,6 +6,7 @@ import 'dart:ui' as ui show window;
 
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -55,6 +56,11 @@ class WidgetTester extends Instrumentation {
     binding.handleBeginFrame(new Duration(
       milliseconds: clock.now().millisecondsSinceEpoch)
     );
+    async.flushMicrotasks();
+  }
+
+  void dispatchEvent(PointerEvent event, HitTestResult result) {
+    super.dispatchEvent(event, result);
     async.flushMicrotasks();
   }
 }

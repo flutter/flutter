@@ -39,6 +39,20 @@ class ViewportDimensions {
         return paintOffset + (containerSize - contentSize);
     }
   }
+
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! ViewportDimensions)
+      return false;
+    final ViewportDimensions typedOther = other;
+    return contentSize == typedOther.contentSize &&
+           containerSize == typedOther.containerSize;
+  }
+
+  int get hashCode => hashValues(contentSize, containerSize);
+
+  String toString() => 'ViewportDimensions(container: $containerSize, content: $contentSize)';
 }
 
 abstract class HasScrollDirection {
@@ -163,6 +177,8 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
 
 }
 
+typedef Offset ViewportDimensionsChangeCallback(ViewportDimensions dimensions);
+
 /// A render object that's bigger on the inside.
 ///
 /// The child of a viewport can layout to a larger size than the viewport
@@ -176,10 +192,15 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     Offset paintOffset: Offset.zero,
     Axis scrollDirection: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
-    Painter overlayPainter
+    Painter overlayPainter,
+    this.onPaintOffsetUpdateNeeded
   }) : super(paintOffset, scrollDirection, scrollAnchor, overlayPainter) {
     this.child = child;
   }
+
+  /// Called during [layout] to report the dimensions of the viewport
+  /// and its child.
+  ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     BoxConstraints innerConstraints;
@@ -228,6 +249,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   // parent was baseline-aligned, which makes no sense.
 
   void performLayout() {
+    ViewportDimensions oldDimensions = dimensions;
     if (child != null) {
       child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child.size);
@@ -238,6 +260,9 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
       performResize();
       dimensions = new ViewportDimensions(containerSize: size);
     }
+    if (onPaintOffsetUpdateNeeded != null && dimensions != oldDimensions)
+      paintOffset = onPaintOffsetUpdateNeeded(dimensions);
+    assert(paintOffset != null);
   }
 
   bool _shouldClipAtPaintOffset(Offset paintOffset) {

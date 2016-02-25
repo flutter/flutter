@@ -35,6 +35,15 @@ abstract class ScrollBehavior<T, U> {
 
   /// Whether this scroll behavior currently permits scrolling
   bool get isScrollable => true;
+
+  String toString() {
+    List<String> description = <String>[];
+    debugFillDescription(description);
+    return '$runtimeType(${description.join("; ")})';
+  }
+  void debugFillDescription(List<String> description) {
+    description.add(isScrollable ? 'scrollable' : 'not scrollable');
+  }
 }
 
 /// A scroll behavior for a scrollable widget with linear extent (i.e.
@@ -74,6 +83,13 @@ abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
 
   /// The maximum value the scroll offset can obtain.
   double get maxScrollOffset;
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('content: ${contentExtent.toStringAsFixed(1)}');
+    description.add('container: ${contentExtent.toStringAsFixed(1)}');
+    description.add('range: ${minScrollOffset?.toStringAsFixed(1)} .. ${maxScrollOffset?.toStringAsFixed(1)}');
+  }
 }
 
 /// A scroll behavior that prevents the user from exceeding scroll bounds.
