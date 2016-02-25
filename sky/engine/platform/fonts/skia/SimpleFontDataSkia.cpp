@@ -40,7 +40,6 @@
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/core/SkTypes.h"
-#include "third_party/skia/include/core/SkUtils.h"
 
 namespace blink {
 
@@ -276,7 +275,7 @@ bool SimpleFontData::canRenderCombiningCharacterSequence(const UChar* characters
 
 bool SimpleFontData::fillGlyphPage(GlyphPage* pageToFill, unsigned offset, unsigned length, UChar* buffer, unsigned bufferLength) const
 {
-    if (SkUTF16_IsHighSurrogate(buffer[bufferLength-1])) {
+    if (U16_IS_LEAD(buffer[bufferLength-1])) {
         SkDebugf("%s last char is high-surrogate", __FUNCTION__);
         return false;
     }
