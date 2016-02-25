@@ -47,13 +47,12 @@ class SkyView : public WindowClient {
   std::unique_ptr<flow::LayerTree> BeginFrame(
       base::TimeTicks frame_time);
 
-  void CreateView(const std::string& name);
+  void CreateView(const std::string& script_uri);
 
   void RunFromLibrary(const std::string& name,
                       DartLibraryProvider* library_provider);
   void RunFromPrecompiledSnapshot();
-  void RunFromSnapshot(const std::string& name,
-                       mojo::ScopedDataPipeConsumerHandle snapshot);
+  void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
 
   void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
 

@@ -66,6 +66,7 @@ static_library("core") {
     ":generate_sky_embedder_service_isolate_resources_cc",
     ":libraries",
     ":prerequisites",
+    "//services/asset_bundle:lib",
     "//sky/engine/platform",
     "//sky/engine/bindings",
     "//sky/services/engine:interfaces",
