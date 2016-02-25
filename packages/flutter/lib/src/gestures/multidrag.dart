@@ -250,6 +250,8 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
     return new _ImmediatePointerState(event.position);
   }
+
+  String toStringShort() => 'multidrag';
 }
 
 
@@ -277,6 +279,8 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
     return new _HorizontalPointerState(event.position);
   }
+
+  String toStringShort() => 'horizontal multidrag';
 }
 
 
@@ -304,6 +308,8 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
     return new _VerticalPointerState(event.position);
   }
+
+  String toStringShort() => 'vertical multidrag';
 }
 
 
@@ -373,4 +379,6 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   _DelayedPointerState createNewPointerState(PointerDownEvent event) {
     return new _DelayedPointerState(event.position, _delay);
   }
+
+  String toStringShort() => 'long multidrag';
 }

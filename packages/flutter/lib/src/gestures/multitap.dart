@@ -212,6 +212,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     }
   }
 
+  String toStringShort() => 'double tap';
 }
 
 
@@ -385,4 +386,5 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     _gestureArena = null;
   }
 
+  String toStringShort() => 'multitap';
 }

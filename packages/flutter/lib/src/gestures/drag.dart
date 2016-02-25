@@ -143,6 +143,8 @@ class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   double get _initialPendingDragDelta => 0.0;
   double _getDragDelta(PointerEvent event) => event.delta.dy;
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
+
+  String toStringShort() => 'vertical drag';
 }
 
 class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
@@ -163,6 +165,8 @@ class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
   double get _initialPendingDragDelta => 0.0;
   double _getDragDelta(PointerEvent event) => event.delta.dx;
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
+
+  String toStringShort() => 'horizontal drag';
 }
 
 class PanGestureRecognizer extends _DragGestureRecognizer<Offset> {
@@ -185,4 +189,6 @@ class PanGestureRecognizer extends _DragGestureRecognizer<Offset> {
   bool get _hasSufficientPendingDragDeltaToAccept {
     return _pendingDragDelta.distance > kPanSlop;
   }
+
+  String toStringShort() => 'pan';
 }

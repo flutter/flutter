@@ -135,4 +135,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     _state = ScaleState.ready;
   }
+
+  String toStringShort() => 'scale';
 }
