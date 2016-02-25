@@ -82,7 +82,7 @@ abstract class DraggableBase<T> extends StatefulComponent {
 
   /// Should return a new MultiDragGestureRecognizer instance
   /// constructed with the given arguments.
-  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter);
+  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart);
 
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
@@ -109,12 +109,8 @@ class Draggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
-    return new ImmediateMultiDragGestureRecognizer(
-      pointerRouter: router,
-      gestureArena: arena,
-      onStart: starter
-    );
+  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+    return new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 }
 
@@ -141,12 +137,8 @@ class HorizontalDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
-    return new HorizontalMultiDragGestureRecognizer(
-      pointerRouter: router,
-      gestureArena: arena,
-      onStart: starter
-    );
+  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+    return new HorizontalMultiDragGestureRecognizer()..onStart = onStart;
   }
 }
 
@@ -173,12 +165,8 @@ class VerticalDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
-    return new VerticalMultiDragGestureRecognizer(
-      pointerRouter: router,
-      gestureArena: arena,
-      onStart: starter
-    );
+  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+    return new VerticalMultiDragGestureRecognizer()..onStart = onStart;
   }
 }
 
@@ -204,18 +192,14 @@ class LongPressDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(PointerRouter router, GestureArena arena, GestureMultiDragStartCallback starter) {
-    return new DelayedMultiDragGestureRecognizer(
-      pointerRouter: router,
-      gestureArena: arena,
-      delay: kLongPressTimeout,
-      onStart: (Point position) {
-        Drag result = starter(position);
+  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+    return new DelayedMultiDragGestureRecognizer()
+      ..onStart = (Point position) {
+        Drag result = onStart(position);
         if (result != null)
           userFeedback.performHapticFeedback(HapticFeedbackType.virtualKey);
         return result;
-      }
-    );
+      };
   }
 }
 
@@ -223,11 +207,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
 
   void initState() {
     super.initState();
-    _recognizer = config.createRecognizer(
-      Gesturer.instance.pointerRouter,
-      Gesturer.instance.gestureArena,
-      _startDrag
-    );
+    _recognizer = config.createRecognizer(_startDrag);
   }
 
   GestureRecognizer _recognizer;

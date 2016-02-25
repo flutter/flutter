@@ -19,17 +19,6 @@ typedef void GestureScaleUpdateCallback(double scale, Point focalPoint);
 typedef void GestureScaleEndCallback();
 
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
-  ScaleGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    this.onStart,
-    this.onUpdate,
-    this.onEnd
-  }) : super(
-    router: router,
-    gestureArena: gestureArena
-  );
-
   GestureScaleStartCallback onStart;
   GestureScaleUpdateCallback onUpdate;
   GestureScaleEndCallback onEnd;

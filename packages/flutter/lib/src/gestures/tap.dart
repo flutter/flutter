@@ -5,7 +5,6 @@
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
-import 'pointer_router.dart';
 import 'recognizer.dart';
 
 typedef void GestureTapDownCallback(Point globalPosition);
@@ -17,18 +16,7 @@ typedef void GestureTapCancelCallback();
 /// pointer per gesture. That is, during tap recognition, extra pointer events
 /// are ignored: down-1, down-2, up-1, up-2 produces only one tap on up-1.
 class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  TapGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    this.onTapDown,
-    this.onTapUp,
-    this.onTap,
-    this.onTapCancel
-  }) : super(
-    router: router,
-    gestureArena: gestureArena,
-    deadline: kPressTimeout
-  );
+  TapGestureRecognizer() : super(deadline: kPressTimeout);
 
   GestureTapDownCallback onTapDown;
   GestureTapUpCallback onTapUp;

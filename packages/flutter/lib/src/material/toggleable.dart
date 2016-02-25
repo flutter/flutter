@@ -30,7 +30,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     assert(value != null);
     assert(activeColor != null);
     assert(inactiveColor != null);
-    _tap = new TapGestureRecognizer(router: Gesturer.instance.pointerRouter, gestureArena: Gesturer.instance.gestureArena)
+    _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapUp = _handleTapUp

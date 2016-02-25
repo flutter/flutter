@@ -6,6 +6,8 @@ import 'package:quiver/testing/async.dart';
 import 'package:flutter/gestures.dart';
 import 'package:test/test.dart';
 
+import 'gesture_tester.dart';
+
 const PointerDownEvent down = const PointerDownEvent(
   pointer: 5,
   position: const Point(10.0, 10.0)
@@ -17,13 +19,10 @@ const PointerUpEvent up = const PointerUpEvent(
 );
 
 void main() {
+  setUp(ensureGesturer);
+
   test('Should recognize long press', () {
-    PointerRouter router = new PointerRouter();
-    GestureArena gestureArena = new GestureArena();
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(
-      router: router,
-      gestureArena: gestureArena
-    );
+    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -32,9 +31,9 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
-      gestureArena.close(5);
+      Gesturer.instance.gestureArena.close(5);
       expect(longPressRecognized, isFalse);
-      router.route(down);
+      Gesturer.instance.pointerRouter.route(down);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
@@ -46,12 +45,7 @@ void main() {
   });
 
   test('Up cancels long press', () {
-    PointerRouter router = new PointerRouter();
-    GestureArena gestureArena = new GestureArena();
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(
-      router: router,
-      gestureArena: gestureArena
-    );
+    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -60,13 +54,13 @@ void main() {
 
     new FakeAsync().run((FakeAsync async) {
       longPress.addPointer(down);
-      gestureArena.close(5);
+      Gesturer.instance.gestureArena.close(5);
       expect(longPressRecognized, isFalse);
-      router.route(down);
+      Gesturer.instance.pointerRouter.route(down);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(milliseconds: 300));
       expect(longPressRecognized, isFalse);
-      router.route(up);
+      Gesturer.instance.pointerRouter.route(up);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(seconds: 1));
       expect(longPressRecognized, isFalse);
@@ -76,16 +70,8 @@ void main() {
   });
 
   test('Should recognize both tap down and long press', () {
-    PointerRouter router = new PointerRouter();
-    GestureArena gestureArena = new GestureArena();
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer(
-      router: router,
-      gestureArena: gestureArena
-    );
-    TapGestureRecognizer tap = new TapGestureRecognizer(
-      router: router,
-      gestureArena: gestureArena
-    );
+    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapDownRecognized = false;
     tap.onTapDown = (_) {
@@ -100,10 +86,10 @@ void main() {
     new FakeAsync().run((FakeAsync async) {
       tap.addPointer(down);
       longPress.addPointer(down);
-      gestureArena.close(5);
+      Gesturer.instance.gestureArena.close(5);
       expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
-      router.route(down);
+      Gesturer.instance.pointerRouter.route(down);
       expect(tapDownRecognized, isFalse);
       expect(longPressRecognized, isFalse);
       async.elapse(const Duration(milliseconds: 300));

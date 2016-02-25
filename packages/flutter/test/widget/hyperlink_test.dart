@@ -11,22 +11,16 @@ void main() {
   test('Can tap a hyperlink', () {
     testWidgets((WidgetTester tester) {
       bool didTapLeft = false;
-      TapGestureRecognizer tapLeft = new TapGestureRecognizer(
-        router: Gesturer.instance.pointerRouter,
-        gestureArena: Gesturer.instance.gestureArena,
-        onTap: () {
+      TapGestureRecognizer tapLeft = new TapGestureRecognizer()
+        ..onTap = () {
           didTapLeft = true;
-        }
-      );
+        };
 
       bool didTapRight = false;
-      TapGestureRecognizer tapRight = new TapGestureRecognizer(
-        router: Gesturer.instance.pointerRouter,
-        gestureArena: Gesturer.instance.gestureArena,
-        onTap: () {
+      TapGestureRecognizer tapRight = new TapGestureRecognizer()
+        ..onTap = () {
           didTapRight = true;
-        }
-      );
+        };
 
       Key textKey = new Key('text');
 
