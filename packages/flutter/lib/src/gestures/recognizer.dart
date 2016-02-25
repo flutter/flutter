@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'dart:ui' show Point, Offset;
 
 import 'arena.dart';
+import 'binding.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'pointer_router.dart';
@@ -56,18 +57,6 @@ abstract class GestureRecognizer extends GestureArenaMember {
 /// which manages each pointer independently and can consider multiple
 /// simultaneous touches to each result in a separate tap.
 abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
-  OneSequenceGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena
-  }) : _router = router,
-       _gestureArena = gestureArena {
-    assert(_router != null);
-    assert(_gestureArena != null);
-  }
-
-  PointerRouter _router;
-  GestureArena _gestureArena;
-
   final List<GestureArenaEntry> _entries = <GestureArenaEntry>[];
   final Set<int> _trackedPointers = new HashSet<int>();
 
@@ -86,21 +75,19 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void dispose() {
     resolve(GestureDisposition.rejected);
     for (int pointer in _trackedPointers)
-      _router.removeRoute(pointer, handleEvent);
+      Gesturer.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);
-    _router = null;
-    _gestureArena = null;
   }
 
   void startTrackingPointer(int pointer) {
-    _router.addRoute(pointer, handleEvent);
+    Gesturer.instance.pointerRouter.addRoute(pointer, handleEvent);
     _trackedPointers.add(pointer);
-    _entries.add(_gestureArena.add(pointer, this));
+    _entries.add(Gesturer.instance.gestureArena.add(pointer, this));
   }
 
   void stopTrackingPointer(int pointer) {
-    _router.removeRoute(pointer, handleEvent);
+    Gesturer.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.remove(pointer);
     if (_trackedPointers.isEmpty)
       didStopTrackingLastPointer(pointer);
@@ -120,14 +107,7 @@ enum GestureRecognizerState {
 }
 
 abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecognizer {
-  PrimaryPointerGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    this.deadline
-  }) : super(
-    router: router,
-    gestureArena: gestureArena
-  );
+  PrimaryPointerGestureRecognizer({ this.deadline });
 
   final Duration deadline;
 

@@ -32,17 +32,6 @@ bool _isFlingGesture(Velocity velocity) {
 }
 
 abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
-  _DragGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    this.onStart,
-    this.onUpdate,
-    this.onEnd
-  }) : super(
-    router: router,
-    gestureArena: gestureArena
-  );
-
   GestureDragStartCallback onStart;
   _GesturePolymorphicUpdateCallback<T> onUpdate;
   GestureDragEndCallback onEnd;
@@ -126,20 +115,6 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
 }
 
 class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
-  VerticalDragGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    GestureDragStartCallback onStart,
-    GestureDragUpdateCallback onUpdate,
-    GestureDragEndCallback onEnd
-  }) : super(
-    router: router,
-    gestureArena: gestureArena,
-    onStart: onStart,
-    onUpdate: onUpdate,
-    onEnd: onEnd
-  );
-
   double get _initialPendingDragDelta => 0.0;
   double _getDragDelta(PointerEvent event) => event.delta.dy;
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
@@ -148,20 +123,6 @@ class VerticalDragGestureRecognizer extends _DragGestureRecognizer<double> {
 }
 
 class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
-  HorizontalDragGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    GestureDragStartCallback onStart,
-    GestureDragUpdateCallback onUpdate,
-    GestureDragEndCallback onEnd
-  }) : super(
-    router: router,
-    gestureArena: gestureArena,
-    onStart: onStart,
-    onUpdate: onUpdate,
-    onEnd: onEnd
-  );
-
   double get _initialPendingDragDelta => 0.0;
   double _getDragDelta(PointerEvent event) => event.delta.dx;
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragDelta.abs() > kTouchSlop;
@@ -170,20 +131,6 @@ class HorizontalDragGestureRecognizer extends _DragGestureRecognizer<double> {
 }
 
 class PanGestureRecognizer extends _DragGestureRecognizer<Offset> {
-  PanGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    GesturePanStartCallback onStart,
-    GesturePanUpdateCallback onUpdate,
-    GesturePanEndCallback onEnd
-  }) : super(
-    router: router,
-    gestureArena: gestureArena,
-    onStart: onStart,
-    onUpdate: onUpdate,
-    onEnd: onEnd
-  );
-
   Offset get _initialPendingDragDelta => Offset.zero;
   Offset _getDragDelta(PointerEvent event) => event.delta;
   bool get _hasSufficientPendingDragDeltaToAccept {

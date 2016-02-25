@@ -28,7 +28,7 @@ export 'package:flutter/gestures.dart' show
   GestureScaleEndCallback,
   Velocity;
 
-typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer, PointerRouter router, GestureArena arena);
+typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer);
 
 /// A widget that detects gestures.
 ///
@@ -152,8 +152,8 @@ class GestureDetector extends StatelessComponent {
     Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
     if (onTapDown != null || onTapUp != null || onTap != null || onTapCancel != null) {
-      gestures[TapGestureRecognizer] = (TapGestureRecognizer recognizer, PointerRouter router, GestureArena arena) {
-        return (recognizer ??= new TapGestureRecognizer(router: router, gestureArena: arena))
+      gestures[TapGestureRecognizer] = (TapGestureRecognizer recognizer) {
+        return (recognizer ??= new TapGestureRecognizer())
           ..onTapDown = onTapDown
           ..onTapUp = onTapUp
           ..onTap = onTap
@@ -162,22 +162,22 @@ class GestureDetector extends StatelessComponent {
     }
 
     if (onDoubleTap != null) {
-      gestures[DoubleTapGestureRecognizer] = (DoubleTapGestureRecognizer recognizer, PointerRouter router, GestureArena arena) {
-        return (recognizer ??= new DoubleTapGestureRecognizer(router: router, gestureArena: arena))
+      gestures[DoubleTapGestureRecognizer] = (DoubleTapGestureRecognizer recognizer) {
+        return (recognizer ??= new DoubleTapGestureRecognizer())
           ..onDoubleTap = onDoubleTap;
       };
     }
 
     if (onLongPress != null) {
-      gestures[LongPressGestureRecognizer] = (LongPressGestureRecognizer recognizer, PointerRouter router, GestureArena arena) {
-        return (recognizer ??= new LongPressGestureRecognizer(router: router, gestureArena: arena))
+      gestures[LongPressGestureRecognizer] = (LongPressGestureRecognizer recognizer) {
+        return (recognizer ??= new LongPressGestureRecognizer())
           ..onLongPress = onLongPress;
       };
     }
 
     if (onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null) {
-      gestures[VerticalDragGestureRecognizer] = (VerticalDragGestureRecognizer recognizer, PointerRouter router, GestureArena arena) {
-        return (recognizer ??= new VerticalDragGestureRecognizer(router: router, gestureArena: arena))
+      gestures[VerticalDragGestureRecognizer] = (VerticalDragGestureRecognizer recognizer) {
+        return (recognizer ??= new VerticalDragGestureRecognizer())
           ..onStart = onVerticalDragStart
           ..onUpdate = onVerticalDragUpdate
           ..onEnd = onVerticalDragEnd;
@@ -185,8 +185,8 @@ class GestureDetector extends StatelessComponent {
     }
 
     if (onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null) {
-      gestures[HorizontalDragGestureRecognizer] = (HorizontalDragGestureRecognizer recognizer, PointerRouter router, GestureArena arena) {
-        return (recognizer ??= new HorizontalDragGestureRecognizer(router: router, gestureArena: arena))
+      gestures[HorizontalDragGestureRecognizer] = (HorizontalDragGestureRecognizer recognizer) {
+        return (recognizer ??= new HorizontalDragGestureRecognizer())
           ..onStart = onHorizontalDragStart
           ..onUpdate = onHorizontalDragUpdate
           ..onEnd = onHorizontalDragEnd;
@@ -194,8 +194,8 @@ class GestureDetector extends StatelessComponent {
     }
 
     if (onPanStart != null || onPanUpdate != null || onPanEnd != null) {
-      gestures[PanGestureRecognizer] = (PanGestureRecognizer recognizer, PointerRouter router, GestureArena arena) {
-        return (recognizer ??= new PanGestureRecognizer(router: router, gestureArena: arena))
+      gestures[PanGestureRecognizer] = (PanGestureRecognizer recognizer) {
+        return (recognizer ??= new PanGestureRecognizer())
           ..onStart = onPanStart
           ..onUpdate = onPanUpdate
           ..onEnd = onPanEnd;
@@ -203,14 +203,14 @@ class GestureDetector extends StatelessComponent {
     }
 
     if (onScaleStart != null || onScaleUpdate != null || onScaleEnd != null) {
-      gestures[ScaleGestureRecognizer] = (ScaleGestureRecognizer recognizer, PointerRouter router, GestureArena arena) {
-        return (recognizer ??= new ScaleGestureRecognizer(router: router, gestureArena: arena))
+      gestures[ScaleGestureRecognizer] = (ScaleGestureRecognizer recognizer) {
+        return (recognizer ??= new ScaleGestureRecognizer())
           ..onStart = onScaleStart
           ..onUpdate = onScaleUpdate
           ..onEnd = onScaleEnd;
       };
     }
-    
+
     return new RawGestureDetector(
       gestures: gestures,
       behavior: behavior,
@@ -314,14 +314,12 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
-    final PointerRouter pointerRouter = Gesturer.instance.pointerRouter;
-    final GestureArena gestureArena = Gesturer.instance.gestureArena;
     assert(_recognizers != null);
     Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
     _recognizers = <Type, GestureRecognizer>{};
     for (Type type in gestures.keys) {
       assert(!_recognizers.containsKey(type));
-      _recognizers[type] = gestures[type](oldRecognizers[type], pointerRouter, gestureArena);
+      _recognizers[type] = gestures[type](oldRecognizers[type]);
       assert(_recognizers[type].runtimeType == type);
     }
     for (Type type in oldRecognizers.keys) {

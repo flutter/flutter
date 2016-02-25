@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:ui' show Point, Offset;
 
 import 'arena.dart';
+import 'binding.dart';
 import 'constants.dart';
 import 'events.dart';
-import 'pointer_router.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
@@ -121,18 +121,6 @@ abstract class MultiDragPointerState {
 }
 
 abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> extends GestureRecognizer {
-
-  MultiDragGestureRecognizer({
-    PointerRouter pointerRouter,
-    GestureArena gestureArena,
-    this.onStart
-  }) : _pointerRouter = pointerRouter, _gestureArena = gestureArena {
-    assert(pointerRouter != null);
-    assert(gestureArena != null);
-  }
-
-  final PointerRouter _pointerRouter;
-  final GestureArena _gestureArena;
   GestureMultiDragStartCallback onStart;
 
   Map<int, T> _pointers = <int, T>{};
@@ -144,8 +132,8 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(!_pointers.containsKey(event.pointer));
     T state = createNewPointerState(event);
     _pointers[event.pointer] = state;
-    _pointerRouter.addRoute(event.pointer, handleEvent);
-    state._setArenaEntry(_gestureArena.add(event.pointer, this));
+    Gesturer.instance.pointerRouter.addRoute(event.pointer, handleEvent);
+    state._setArenaEntry(Gesturer.instance.gestureArena.add(event.pointer, this));
   }
 
   T createNewPointerState(PointerDownEvent event);
@@ -211,7 +199,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   void _removeState(int pointer) {
     assert(_pointers != null);
     assert(_pointers.containsKey(pointer));
-    _pointerRouter.removeRoute(pointer, handleEvent);
+    Gesturer.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _pointers[pointer].dispose();
     _pointers.remove(pointer);
   }
@@ -241,12 +229,6 @@ class _ImmediatePointerState extends MultiDragPointerState {
 }
 
 class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_ImmediatePointerState> {
-  ImmediateMultiDragGestureRecognizer({
-    PointerRouter pointerRouter,
-    GestureArena gestureArena,
-    GestureMultiDragStartCallback onStart
-  }) : super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart);
-
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
     return new _ImmediatePointerState(event.position);
   }
@@ -270,12 +252,6 @@ class _HorizontalPointerState extends MultiDragPointerState {
 }
 
 class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_HorizontalPointerState> {
-  HorizontalMultiDragGestureRecognizer({
-    PointerRouter pointerRouter,
-    GestureArena gestureArena,
-    GestureMultiDragStartCallback onStart
-  }) : super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart);
-
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
     return new _HorizontalPointerState(event.position);
   }
@@ -299,12 +275,6 @@ class _VerticalPointerState extends MultiDragPointerState {
 }
 
 class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_VerticalPointerState> {
-  VerticalMultiDragGestureRecognizer({
-    PointerRouter pointerRouter,
-    GestureArena gestureArena,
-    GestureMultiDragStartCallback onStart
-  }) : super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart);
-
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
     return new _VerticalPointerState(event.position);
   }
@@ -360,12 +330,8 @@ class _DelayedPointerState extends MultiDragPointerState {
 
 class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_DelayedPointerState> {
   DelayedMultiDragGestureRecognizer({
-    PointerRouter pointerRouter,
-    GestureArena gestureArena,
-    GestureMultiDragStartCallback onStart,
     Duration delay: kLongPressTimeout
-  }) : _delay = delay,
-       super(pointerRouter: pointerRouter, gestureArena: gestureArena, onStart: onStart) {
+  }) : _delay = delay {
     assert(delay != null);
   }
 

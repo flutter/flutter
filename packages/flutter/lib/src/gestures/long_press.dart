@@ -5,22 +5,13 @@
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
-import 'pointer_router.dart';
 import 'recognizer.dart';
 
 typedef void GestureLongPressCallback();
 
 /// The user has pressed down at this location for a long period of time.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  LongPressGestureRecognizer({
-    PointerRouter router,
-    GestureArena gestureArena,
-    this.onLongPress
-  }) : super(
-    router: router,
-    gestureArena: gestureArena,
-    deadline: kLongPressTimeout
-  );
+  LongPressGestureRecognizer() : super(deadline: kLongPressTimeout);
 
   GestureLongPressCallback onLongPress;
 

@@ -84,7 +84,7 @@ class _RenderSlider extends RenderConstrainedBox {
        _activeColor = activeColor,
         super(additionalConstraints: const BoxConstraints.tightFor(width: _kTrackWidth + 2 * _kReactionRadius, height: 2 * _kReactionRadius)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
-    _drag = new HorizontalDragGestureRecognizer(router: Gesturer.instance.pointerRouter, gestureArena: Gesturer.instance.gestureArena)
+    _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;

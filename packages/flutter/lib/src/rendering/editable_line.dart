@@ -39,7 +39,7 @@ class RenderEditableLine extends RenderBox {
       ..maxWidth = double.INFINITY
       ..minHeight = 0.0
       ..maxHeight = double.INFINITY;
-    _tap = new TapGestureRecognizer(router: Gesturer.instance.pointerRouter, gestureArena: Gesturer.instance.gestureArena)
+    _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapCancel = _handleTapCancel;
