@@ -19,7 +19,8 @@ class SkyViewClient {
   virtual void FlushRealTimeEvents() = 0;
   virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
 
-  virtual void DidCreateIsolate(Dart_Isolate isolate) = 0;
+  virtual void DidCreateMainIsolate(Dart_Isolate isolate) = 0;
+  virtual void DidCreateSecondaryIsolate(Dart_Isolate isolate) = 0;
 
  protected:
   virtual ~SkyViewClient();

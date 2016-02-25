@@ -9,6 +9,9 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "base/single_thread_task_runner.h"
+#include "mojo/common/binding_set.h"
+#include "mojo/public/cpp/application/interface_factory.h"
+#include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/core.h"
 #include "mojo/public/cpp/system/data_pipe.h"
@@ -82,7 +85,11 @@ class Engine : public UIDelegate,
   void ScheduleFrame() override;
   void FlushRealTimeEvents() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
-  void DidCreateIsolate(Dart_Isolate isolate) override;
+  void DidCreateMainIsolate(Dart_Isolate isolate) override;
+  void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
+
+  void BindToServiceProvider(
+      mojo::InterfaceRequest<mojo::ServiceProvider> request);
 
   void RunFromLibrary(const std::string& name);
   void RunFromSnapshotStream(const std::string& name,
@@ -99,6 +106,10 @@ class Engine : public UIDelegate,
   std::unique_ptr<Animator> animator_;
 
   ServicesDataPtr services_;
+  mojo::ServiceProviderImpl service_provider_impl_;
+  mojo::ServiceProviderPtr services_provided_by_embedder_;
+  mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
+
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
   std::unique_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;

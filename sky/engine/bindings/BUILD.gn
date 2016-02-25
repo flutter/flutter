@@ -20,9 +20,28 @@ source_set("bindings") {
     "exception_state.h",
     "exception_state_placeholder.cc",
     "exception_state_placeholder.h",
+    "flutter_dart_state.cc",
+    "flutter_dart_state.h",
     "mojo_services.cc",
     "mojo_services.h",
   ]
+
+  if (is_android) {
+    sources += [
+      "jni/dart_jni.cc",
+      "jni/dart_jni.h",
+      "jni/jni_api.cc",
+      "jni/jni_api.h",
+      "jni/jni_array.cc",
+      "jni/jni_array.h",
+      "jni/jni_class.cc",
+      "jni/jni_class.h",
+      "jni/jni_object.cc",
+      "jni/jni_object.h",
+      "jni/jni_string.cc",
+      "jni/jni_string.h",
+    ]
+  }
 
   defines = [ "DART_IO_SECURE_SOCKET_DISABLED" ]
 

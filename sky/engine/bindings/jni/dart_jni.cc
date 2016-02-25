@@ -7,6 +7,7 @@
 #include "base/logging.h"
 #include "base/android/jni_android.h"
 #include "base/android/jni_string.h"
+#include "sky/engine/bindings/flutter_dart_state.h"
 #include "sky/engine/bindings/jni/jni_api.h"
 #include "sky/engine/bindings/jni/jni_array.h"
 #include "sky/engine/bindings/jni/jni_class.h"
@@ -15,6 +16,7 @@
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
 #include "sky/engine/tonic/dart_converter.h"
+#include "sky/engine/wtf/MakeUnique.h"
 
 namespace blink {
 
@@ -35,12 +37,6 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
   return g_natives->GetSymbol(native_function);
 }
 
-// Data cached for each Dart isolate.
-struct DartJniIsolateData : public base::SupportsUserData::Data {
-  Dart_PersistentHandle jni_object_type;
-  Dart_PersistentHandle jni_float_type;
-};
-
 // Data cached from the Java VM.
 struct DartJniJvmData {
   ScopedJavaGlobalRef<jobject> class_loader;
@@ -51,21 +47,13 @@ struct DartJniJvmData {
 
 DartJniJvmData* g_jvm_data = nullptr;
 
-void* UserDataKey() {
-  // Return a unique key for our per-isolate data.
-  static int data_key = 0;
-  return reinterpret_cast<void*>(&data_key);
-}
-
 void CreateIsolateData() {
-  DartState::Current()->SetUserData(UserDataKey(), new DartJniIsolateData());
+  static_cast<FlutterDartState*>(DartState::Current())->set_jni_data(
+      WTF::MakeUnique<DartJniIsolateData>());
 }
 
 DartJniIsolateData* IsolateData() {
-  base::SupportsUserData::Data* user_data =
-      DartState::Current()->GetUserData(UserDataKey());
-  DCHECK(user_data);
-  return static_cast<DartJniIsolateData*>(user_data);
+  return static_cast<FlutterDartState*>(DartState::Current())->jni_data();
 }
 
 } // anonymous namespace

@@ -5,9 +5,7 @@
 #ifndef SKY_ENGINE_BINDINGS_MOJO_SERVICES_H_
 #define SKY_ENGINE_BINDINGS_MOJO_SERVICES_H_
 
-#include "base/supports_user_data.h"
 #include "dart/runtime/include/dart_api.h"
-#include "mojo/public/cpp/application/interface_factory.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
@@ -20,14 +18,13 @@ class ApplicationConnection;
 namespace blink {
 class DartLibraryNatives;
 
-class MojoServices
-  : public base::SupportsUserData::Data,
-    public mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker> {
+class MojoServices {
  public:
-  ~MojoServices() override;
+  ~MojoServices();
 
   static void Create(Dart_Isolate isolate,
                      sky::ServicesDataPtr services,
+                     mojo::ServiceProviderPtr services_from_embedder,
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   static void RegisterNatives(DartLibraryNatives* natives);
@@ -40,18 +37,12 @@ class MojoServices
 
  private:
   explicit MojoServices(sky::ServicesDataPtr services,
+                        mojo::ServiceProviderPtr services_from_embedder,
                         mojo::asset_bundle::AssetBundlePtr root_bundle);
 
-  // |mojo::InterfaceFactory<mojo::asset_bundle::AssetUnpacker>| implementation:
-  void Create(
-      mojo::ApplicationConnection* connection,
-      mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker>) override;
-
   sky::ServicesDataPtr services_;
+  mojo::ServiceProviderPtr services_from_embedder_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
-
-  mojo::ServiceProviderPtr service_provider_;
-  mojo::ServiceProviderImpl service_provider_impl_;
 
   // We need to hold this object to work around
   // https://github.com/domokit/mojo/issues/536

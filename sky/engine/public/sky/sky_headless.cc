@@ -22,7 +22,7 @@ void SkyHeadless::Init(const std::string& name) {
 
   dart_controller_ = WTF::MakeUnique<DartController>();
   dart_controller_->CreateIsolateFor(WTF::MakeUnique<DOMDartState>(
-      WTF::MakeUnique<Window>(this), name));
+      this, name, WTF::MakeUnique<Window>(this)));
 
   DOMDartState* dart_state = dart_controller_->dart_state();
   DartState::Scope scope(dart_state);
@@ -41,6 +41,9 @@ void SkyHeadless::FlushRealTimeEvents() {
 }
 
 void SkyHeadless::Render(Scene* scene) {
+}
+
+void SkyHeadless::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
 }
 
 } // namespace blink

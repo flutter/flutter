@@ -7,7 +7,7 @@
 #include "base/threading/worker_pool.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
-#include "services/asset_bundle/asset_unpacker_impl.h"
+#include "sky/engine/bindings/flutter_dart_state.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "sky/engine/tonic/dart_library_natives.h"
@@ -16,11 +16,8 @@
 namespace blink {
 namespace {
 
-int kMojoServicesKey = 0;
-
 MojoServices* GetMojoServices() {
-  DartState* state = DartState::Current();
-  return static_cast<MojoServices*>(state->GetUserData(&kMojoServicesKey));
+  return static_cast<FlutterDartState*>(DartState::Current())->mojo_services();
 }
 
 void DartTakeRootBundleHandle(Dart_NativeArguments args) {
@@ -62,22 +59,20 @@ void MojoServices::RegisterNatives(DartLibraryNatives* natives) {
 
 void MojoServices::Create(Dart_Isolate isolate,
                           sky::ServicesDataPtr services,
+                          mojo::ServiceProviderPtr services_from_embedder,
                           mojo::asset_bundle::AssetBundlePtr root_bundle) {
-  DartState* state = DartState::From(isolate);
-  state->SetUserData(&kMojoServicesKey, new MojoServices(
-      services.Pass(), root_bundle.Pass()));
+  FlutterDartState* state = static_cast<FlutterDartState*>(
+      DartState::From(isolate));
+  state->set_mojo_services(std::unique_ptr<MojoServices>(new MojoServices(
+      services.Pass(), services_from_embedder.Pass(), root_bundle.Pass())));
 }
 
 MojoServices::MojoServices(sky::ServicesDataPtr services,
+                           mojo::ServiceProviderPtr services_from_embedder,
                            mojo::asset_bundle::AssetBundlePtr root_bundle)
   : services_(services.Pass()),
-    root_bundle_(root_bundle.Pass()),
-    service_provider_impl_(GetProxy(&service_provider_)) {
-  if (services_ && services_->services_provided_by_embedder) {
-    service_provider_impl_.set_fallback_service_provider(
-        services_->services_provided_by_embedder.get());
-  }
-  service_provider_impl_.AddService<mojo::asset_bundle::AssetUnpacker>(this);
+    services_from_embedder_(services_from_embedder.Pass()),
+    root_bundle_(root_bundle.Pass()) {
   if (services_ && services_->services_provided_to_embedder.is_pending()) {
     services_provided_to_embedder_ = services_->services_provided_to_embedder.Pass();
   } else {
@@ -88,19 +83,12 @@ MojoServices::MojoServices(sky::ServicesDataPtr services,
 MojoServices::~MojoServices() {
 }
 
-void MojoServices::Create(
-    mojo::ApplicationConnection* connection,
-    mojo::InterfaceRequest<mojo::asset_bundle::AssetUnpacker> request) {
-  new mojo::asset_bundle::AssetUnpackerImpl(
-      request.Pass(), base::WorkerPool::GetTaskRunner(true));
-}
-
 mojo::Handle MojoServices::TakeShellProxy() {
   return services_ ? services_->shell.PassInterface().PassHandle().release() : mojo::Handle();
 }
 
 mojo::Handle MojoServices::TakeServicesProvidedByEmbedder() {
-  return service_provider_.PassInterface().PassHandle().release();
+  return services_from_embedder_.PassInterface().PassHandle().release();
 }
 
 mojo::Handle MojoServices::TakeRootBundleHandle() {
