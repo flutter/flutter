@@ -38,8 +38,7 @@ class Template {
       return;
     }
 
-    List<FileSystemEntity> templateFiles =
-        templateSource.listSync(recursive: true);
+    List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
 
     for (FileSystemEntity entity in templateFiles) {
       if (entity is! File) {
@@ -67,8 +66,7 @@ class Template {
 
     String destinationDirPath = destination.absolute.path;
 
-    _templateFilePaths.forEach((String relativeDestPath,
-        String absoluteSrcPath) {
+    _templateFilePaths.forEach((String relativeDestPath, String absoluteSrcPath) {
       String finalDestinationPath = path
           .join(destinationDirPath, relativeDestPath)
           .replaceAll(_kCopyTemplateExtension, '')
@@ -83,14 +81,14 @@ class Template {
       if (finalDestinationFile.existsSync()) {
         if (overwriteExisting) {
           finalDestinationFile.delete(recursive: true);
-          printStatus('$relativePathForLogging exists. Overwriting.');
+          printStatus('  $relativePathForLogging (overwritten)');
         } else {
           // The file exists but we cannot overwrite it, move on.
-          printStatus('$relativePathForLogging exists. Skipping.');
+          printStatus('  $relativePathForLogging (existing - skipped)');
           return;
         }
       } else {
-        printStatus('$relativePathForLogging created.');
+        printStatus('  $relativePathForLogging');
       }
 
       finalDestinationFile.createSync(recursive: true);
