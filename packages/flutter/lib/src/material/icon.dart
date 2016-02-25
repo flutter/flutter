@@ -27,12 +27,11 @@ class Icon extends StatelessComponent {
   Icon({
     Key key,
     this.size: IconSize.s24,
-    this.icon: '',
+    this.icon,
     this.colorTheme,
     this.color
   }) : super(key: key) {
     assert(size != null);
-    assert(icon != null);
   }
 
   final IconSize size;
@@ -54,6 +53,14 @@ class Icon extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
+    final int iconSize = _kIconSize[size];
+    if (icon == null) {
+      return new SizedBox(
+        width: iconSize.toDouble(),
+        height: iconSize.toDouble()
+      );
+    }
+
     String category = '';
     String subtype = '';
     List<String> parts = icon.split('/');
@@ -62,7 +69,6 @@ class Icon extends StatelessComponent {
       subtype = parts[1];
     }
     final IconThemeColor iconThemeColor = _getIconThemeColor(context);
-    final int iconSize = _kIconSize[size];
 
     String colorSuffix;
     switch(iconThemeColor) {

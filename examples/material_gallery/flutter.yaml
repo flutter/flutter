@@ -27,6 +27,8 @@ material-design-icons:
   - name: action/account_circle
   - name: action/alarm
   - name: action/android
+  - name: action/delete
+  - name: action/done
   - name: action/event
   - name: action/face
   - name: action/home
@@ -58,3 +60,4 @@ material-design-icons:
   - name: navigation/menu
   - name: navigation/more_horiz
   - name: navigation/more_vert
+  - name: social/person_add
