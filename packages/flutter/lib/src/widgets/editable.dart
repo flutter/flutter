@@ -189,9 +189,6 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   Timer _cursorTimer;
   bool _showCursor = false;
 
-  double _contentWidth = 0.0;
-  double _containerWidth = 0.0;
-
   _KeyboardClientImpl _keyboardClient;
   KeyboardHandle _keyboardHandle;
 
@@ -218,24 +215,28 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
 
   bool get _isAttachedToKeyboard => _keyboardHandle != null && _keyboardHandle.attached;
 
-  void _handleContainerSizeChanged(Size newSize) {
-    _containerWidth = newSize.width;
-    _updateScrollBehavior();
-  }
+  double _contentWidth = 0.0;
+  double _containerWidth = 0.0;
 
-  void _handleContentSizeChanged(Size newSize) {
-    _contentWidth = newSize.width;
-    _updateScrollBehavior();
-  }
-
-  void _updateScrollBehavior() {
-    // Set the scroll offset to match the content width so that the cursor
-    // (which is always at the end of the text) will be visible.
+  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
+    // We make various state changes here but don't have to do so in a
+    // setState() callback because we are called during layout and all
+    // we're updating is the new offset, which we are providing to the
+    // render object via our return value.
+    _containerWidth = dimensions.containerSize.width;
+    _contentWidth = dimensions.contentSize.width;
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: _contentWidth,
       containerExtent: _containerWidth,
-      scrollOffset: _contentWidth
+      // Set the scroll offset to match the content width so that the
+      // cursor (which is always at the end of the text) will be
+      // visible.
+      // TODO(ianh): We should really only do this when text is added,
+      // not generally any time the size changes.
+      scrollOffset: pixelOffsetToScrollOffset(-_contentWidth)
     ));
+    updateGestureDetector();
+    return scrollOffsetToPixelDelta(scrollOffset);
   }
 
   void _attachOrDetachKeyboard(bool focused) {
@@ -327,19 +328,16 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     else if (_cursorTimer != null && (!focused || !config.value.selection.isCollapsed))
       _stopCursorTimer();
 
-    return new SizeObserver(
-      onSizeChanged: _handleContainerSizeChanged,
-      child: new _EditableLineWidget(
-        value: config.value,
-        style: config.style,
-        cursorColor: config.cursorColor,
-        showCursor: _showCursor,
-        selectionColor: config.selectionColor,
-        hideText: config.hideText,
-        onContentSizeChanged: _handleContentSizeChanged,
-        onSelectionChanged: _handleSelectionChanged,
-        paintOffset: new Offset(-scrollOffset, 0.0)
-      )
+    return new _EditableLineWidget(
+      value: config.value,
+      style: config.style,
+      cursorColor: config.cursorColor,
+      showCursor: _showCursor,
+      selectionColor: config.selectionColor,
+      hideText: config.hideText,
+      onSelectionChanged: _handleSelectionChanged,
+      paintOffset: scrollOffsetToPixelDelta(scrollOffset),
+      onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
     );
   }
 }
@@ -353,9 +351,9 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     this.showCursor,
     this.selectionColor,
     this.hideText,
-    this.onContentSizeChanged,
     this.onSelectionChanged,
-    this.paintOffset
+    this.paintOffset,
+    this.onPaintOffsetUpdateNeeded
   }) : super(key: key);
 
   final InputValue value;
@@ -364,9 +362,9 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final bool showCursor;
   final Color selectionColor;
   final bool hideText;
-  final ValueChanged<Size> onContentSizeChanged;
   final ValueChanged<TextSelection> onSelectionChanged;
   final Offset paintOffset;
+  final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
   RenderEditableLine createRenderObject() {
     return new RenderEditableLine(
@@ -375,9 +373,9 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       showCursor: showCursor,
       selectionColor: selectionColor,
       selection: value.selection,
-      onContentSizeChanged: onContentSizeChanged,
       onSelectionChanged: onSelectionChanged,
-      paintOffset: paintOffset
+      paintOffset: paintOffset,
+      onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded
     );
   }
 
@@ -389,9 +387,9 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       ..showCursor = showCursor
       ..selectionColor = selectionColor
       ..selection = value.selection
-      ..onContentSizeChanged = onContentSizeChanged
       ..onSelectionChanged = onSelectionChanged
-      ..paintOffset = paintOffset;
+      ..paintOffset = paintOffset
+      ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded;
   }
 
   TextSpan get _styledTextSpan {
