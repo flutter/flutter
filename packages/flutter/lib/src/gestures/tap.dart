@@ -102,4 +102,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     _wonArena = false;
     _finalPosition = null;
   }
+
+  String toStringShort() => 'tap';
 }

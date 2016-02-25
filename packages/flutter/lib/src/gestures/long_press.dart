@@ -34,4 +34,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (event is PointerUpEvent)
       resolve(GestureDisposition.rejected);
   }
+
+  String toStringShort() => 'long press';
 }

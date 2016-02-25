@@ -42,6 +42,9 @@ abstract class GestureRecognizer extends GestureArenaMember {
   /// GestureDetector widget calls this method).
   void dispose() { }
 
+  /// Returns a very short pretty description of the gesture that the
+  /// recognizer looks for, like 'tap' or 'horizontal drag'.
+  String toStringShort() => toString();
 }
 
 /// Base class for gesture recognizers that can only recognize one
