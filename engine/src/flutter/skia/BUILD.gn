@@ -95,6 +95,7 @@ config("skia_config") {
     "config",
     "ext",
     "//third_party/skia/include/c",
+    "//third_party/skia/include/client/android",
     "//third_party/skia/include/config",
     "//third_party/skia/include/core",
     "//third_party/skia/include/effects",
@@ -317,8 +318,6 @@ component("skia") {
 
   # Remove unused util files include in utils.gypi
   sources -= [
-    "//third_party/skia/src/utils/SkBitmapHasher.cpp",
-    "//third_party/skia/src/utils/SkBitmapHasher.h",
     "//third_party/skia/src/utils/SkBoundaryPatch.cpp",
     "//third_party/skia/src/utils/SkCamera.cpp",
     "//third_party/skia/src/utils/SkCanvasStack.h",
@@ -333,8 +332,6 @@ component("skia") {
     "//third_party/skia/src/utils/SkNinePatch.cpp",
     "//third_party/skia/src/utils/SkOSFile.cpp",
     "//third_party/skia/src/utils/SkParsePath.cpp",
-    "//third_party/skia/src/utils/SkSHA1.cpp",
-    "//third_party/skia/src/utils/SkSHA1.h",
     "//third_party/skia/src/utils/SkTFitsIn.h",
 
     #testing
