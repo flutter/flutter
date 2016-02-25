@@ -79,8 +79,6 @@ class CreateCommand extends Command {
     _renderTemplates(projectDir, flutterPackagesDirectory,
         renderDriverTest: argResults['with-driver-test']);
 
-    printStatus('');
-
     if (argResults['pub']) {
       int code = await pubGet(directory: projectDir.path);
       if (code != 0)
