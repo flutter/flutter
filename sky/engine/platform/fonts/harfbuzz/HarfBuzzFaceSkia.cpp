@@ -39,7 +39,6 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTypeface.h"
-#include "third_party/skia/include/core/SkUtils.h"
 
 #include "hb.h"
 #include "sky/engine/wtf/HashMap.h"

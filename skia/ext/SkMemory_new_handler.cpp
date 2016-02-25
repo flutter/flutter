@@ -23,8 +23,7 @@ static inline void* throw_on_failure(size_t size, void* p) {
     return p;
 }
 
-void sk_throw() {
-    SkASSERT(!"sk_throw");
+void sk_abort_no_print() {
     abort();
 }
 
