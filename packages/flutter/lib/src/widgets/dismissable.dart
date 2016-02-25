@@ -68,86 +68,59 @@ class Dismissable extends StatefulComponent {
 class _DismissableState extends State<Dismissable> {
   void initState() {
     super.initState();
-    _dismissController = new AnimationController(duration: _kCardDismissDuration);
-    _dismissController.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
-        _handleDismissCompleted();
-    });
+    _moveController = new AnimationController(duration: _kCardDismissDuration)
+      ..addStatusListener(_handleDismissStatusChanged);
+    _updateMoveAnimation();
   }
 
-  AnimationController _dismissController;
-  AnimationController _resizeController;
+  AnimationController _moveController;
+  Animation<FractionalOffset> _moveAnimation;
 
-  Size _size;
+  AnimationController _resizeController;
+  Animation<double> _resizeAnimation;
+
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
 
   void dispose() {
-    _dismissController?.stop();
+    _moveController?.stop();
     _resizeController?.stop();
     super.dispose();
   }
 
-  bool get _directionIsYAxis {
-    return
-      config.direction == DismissDirection.vertical ||
-      config.direction == DismissDirection.up ||
-      config.direction == DismissDirection.down;
-  }
-
-  void _handleDismissCompleted() {
-    if (!_dragUnderway)
-      _startResizeAnimation();
+  bool get _directionIsXAxis {
+    return config.direction == DismissDirection.horizontal
+        || config.direction == DismissDirection.left
+        || config.direction == DismissDirection.right;
   }
 
   bool get _isActive {
-    return _size != null && (_dragUnderway || _dismissController.isAnimating);
+    return _dragUnderway || _moveController.isAnimating;
   }
 
-  void _maybeCallOnResized() {
-    if (config.onResized != null)
-      config.onResized();
-  }
-
-  void _maybeCallOnDismissed() {
-    if (config.onDismissed != null)
-      config.onDismissed();
-  }
-
-  void _startResizeAnimation() {
-    assert(_size != null);
-    assert(_dismissController != null);
-    assert(_dismissController.isCompleted);
-    assert(_resizeController == null);
-    setState(() {
-      _resizeController = new AnimationController(duration: _kCardResizeDuration)
-        ..addListener(_handleResizeProgressChanged);
-      _resizeController.forward();
-    });
-  }
-
-  void _handleResizeProgressChanged() {
-    if (_resizeController.isCompleted)
-      _maybeCallOnDismissed();
-    else
-      _maybeCallOnResized();
+  Size _findSize() {
+    RenderBox box = context.findRenderObject();
+    assert(box != null);
+    assert(box.hasSize);
+    return box.size;
   }
 
   void _handleDragStart(_) {
+    _dragUnderway = true;
+    if (_moveController.isAnimating) {
+      _dragExtent = _moveController.value * _findSize().width * _dragExtent.sign;
+      _moveController.stop();
+    } else {
+      _dragExtent = 0.0;
+      _moveController.value = 0.0;
+    }
     setState(() {
-      _dragUnderway = true;
-      if (_dismissController.isAnimating) {
-        _dragExtent = _dismissController.value * _size.width * _dragExtent.sign;
-        _dismissController.stop();
-      } else {
-        _dragExtent = 0.0;
-        _dismissController.value = 0.0;
-      }
+      _updateMoveAnimation();
     });
   }
 
   void _handleDragUpdate(double delta) {
-    if (!_isActive || _dismissController.isAnimating)
+    if (!_isActive || _moveController.isAnimating)
       return;
 
     double oldDragExtent = _dragExtent;
@@ -169,34 +142,29 @@ class _DismissableState extends State<Dismissable> {
           _dragExtent += delta;
         break;
     }
-
     if (oldDragExtent.sign != _dragExtent.sign) {
       setState(() {
-        // Rebuild to update the new drag endpoint.
-        // The sign of _dragExtent is part of our build state;
-        // the actual value is not, it's just used to configure
-        // the animations.
+        _updateMoveAnimation();
       });
     }
-    if (!_dismissController.isAnimating)
-      _dismissController.value = _dragExtent.abs() / _size.width;
+    if (!_moveController.isAnimating) {
+      _moveController.value = _dragExtent.abs() / (_directionIsXAxis ? _findSize().width : _findSize().height);
+    }
+  }
+
+  void _updateMoveAnimation() {
+    _moveAnimation = new Tween<FractionalOffset>(
+      begin: FractionalOffset.zero,
+      end: _directionIsXAxis ?
+             new FractionalOffset(_dragExtent.sign, 0.0) :
+             new FractionalOffset(0.0, _dragExtent.sign)
+    ).animate(_moveController);
   }
 
   bool _isFlingGesture(Velocity velocity) {
     double vx = velocity.pixelsPerSecond.dx;
     double vy = velocity.pixelsPerSecond.dy;
-    if (_directionIsYAxis) {
-      if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
-        return false;
-      switch(config.direction) {
-        case DismissDirection.vertical:
-          return vy.abs() > _kMinFlingVelocity;
-        case DismissDirection.up:
-          return -vy > _kMinFlingVelocity;
-        default:
-          return vy > _kMinFlingVelocity;
-      }
-    } else {
+    if (_directionIsXAxis) {
       if (vx.abs() - vy.abs() < _kMinFlingVelocityDelta)
         return false;
       switch(config.direction) {
@@ -207,84 +175,108 @@ class _DismissableState extends State<Dismissable> {
         default:
           return vx > _kMinFlingVelocity;
       }
+    } else {
+      if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
+        return false;
+      switch(config.direction) {
+        case DismissDirection.vertical:
+          return vy.abs() > _kMinFlingVelocity;
+        case DismissDirection.up:
+          return -vy > _kMinFlingVelocity;
+        default:
+          return vy > _kMinFlingVelocity;
+      }
     }
     return false;
   }
 
   void _handleDragEnd(Velocity velocity) {
-    if (!_isActive || _dismissController.isAnimating)
+    if (!_isActive || _moveController.isAnimating)
       return;
+    _dragUnderway = false;
+    if (_moveController.isCompleted) {
+      _startResizeAnimation();
+    } else if (_isFlingGesture(velocity)) {
+      double flingVelocity = _directionIsXAxis ? velocity.pixelsPerSecond.dx : velocity.pixelsPerSecond.dy;
+      _dragExtent = flingVelocity.sign;
+      _moveController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
+    } else if (_moveController.value > _kDismissCardThreshold) {
+      _moveController.forward();
+    } else {
+      _moveController.reverse();
+    }
+  }
+
+  void _handleDismissStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed && !_dragUnderway)
+      _startResizeAnimation();
+  }
+
+  void _startResizeAnimation() {
+    assert(_moveController != null);
+    assert(_moveController.isCompleted);
+    assert(_resizeController == null);
+    _resizeController = new AnimationController(duration: _kCardResizeDuration)
+      ..addListener(_handleResizeProgressChanged);
+    _resizeController.forward();
     setState(() {
-      _dragUnderway = false;
-      if (_dismissController.isCompleted) {
-        _startResizeAnimation();
-      } else if (_isFlingGesture(velocity)) {
-        double flingVelocity = _directionIsYAxis ? velocity.pixelsPerSecond.dy : velocity.pixelsPerSecond.dx;
-        _dragExtent = flingVelocity.sign;
-        _dismissController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-      } else if (_dismissController.value > _kDismissCardThreshold) {
-        _dismissController.forward();
-      } else {
-        _dismissController.reverse();
-      }
-    });
-  }
-
-  void _handleSizeChanged(Size newSize) {
-    setState(() {
-      _size = new Size.copy(newSize);
-    });
-  }
-
-  FractionalOffset get _activeCardDragEndPoint {
-    if (!_isActive)
-      return FractionalOffset.zero;
-    if (_directionIsYAxis)
-      return new FractionalOffset(0.0, _dragExtent.sign);
-    return new FractionalOffset(_dragExtent.sign, 0.0);
-  }
-
-  Widget build(BuildContext context) {
-    if (_resizeController != null) {
-      // make sure you remove this widget once it's been dismissed!
-      assert(_resizeController.status == AnimationStatus.forward);
-
-      Animation<double> squashAxisExtent = new Tween<double>(
-        begin: _directionIsYAxis ? _size.width : _size.height,
+      _resizeAnimation = new Tween<double>(
+        begin: _directionIsXAxis ? _findSize().height : _findSize().width,
         end: 0.0
       ).animate(new CurvedAnimation(
         parent: _resizeController,
         curve: _kCardResizeTimeCurve
       ));
+    });
+  }
 
+  void _handleResizeProgressChanged() {
+    if (_resizeController.isCompleted) {
+      if (config.onDismissed != null)
+        config.onDismissed();
+    } else {
+      if (config.onResized != null)
+        config.onResized();
+    }
+  }
+
+  Widget build(BuildContext context) {
+    if (_resizeAnimation != null) {
+      // we've been dragged aside, and are now resizing.
+      assert(() {
+        if (_resizeAnimation.status != AnimationStatus.forward) {
+          assert(_resizeAnimation.status == AnimationStatus.completed);
+          throw new WidgetError(
+            'Dismissable widget completed its resize animation without being removed from the tree.\n'
+            'Make sure to implement the onDismissed handler and to immediately remove the Dismissable\n'
+            'widget from the application once that handler has fired.'
+          );
+        }
+        return true;
+      });
       return new AnimatedBuilder(
-        animation: squashAxisExtent,
+        animation: _resizeAnimation,
         builder: (BuildContext context, Widget child) {
           return new SizedBox(
-            width: _directionIsYAxis ? squashAxisExtent.value : null,
-            height: !_directionIsYAxis ? squashAxisExtent.value : null
+            width: !_directionIsXAxis ? _resizeAnimation.value : null,
+            height: _directionIsXAxis ? _resizeAnimation.value : null
           );
         }
       );
     }
 
+    // we are not resizing. (we may be being dragged aside.)
     return new GestureDetector(
-      onHorizontalDragStart: _directionIsYAxis ? null : _handleDragStart,
-      onHorizontalDragUpdate: _directionIsYAxis ? null : _handleDragUpdate,
-      onHorizontalDragEnd: _directionIsYAxis ? null : _handleDragEnd,
-      onVerticalDragStart: _directionIsYAxis ? _handleDragStart : null,
-      onVerticalDragUpdate: _directionIsYAxis ? _handleDragUpdate : null,
-      onVerticalDragEnd: _directionIsYAxis ? _handleDragEnd : null,
+      onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
+      onHorizontalDragUpdate: _directionIsXAxis ? _handleDragUpdate : null,
+      onHorizontalDragEnd: _directionIsXAxis ? _handleDragEnd : null,
+      onVerticalDragStart: _directionIsXAxis ? null : _handleDragStart,
+      onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
+      onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: HitTestBehavior.opaque,
-      child: new SizeObserver(
-        onSizeChanged: _handleSizeChanged,
-        child: new SlideTransition(
-          position: new Tween<FractionalOffset>(
-            begin: FractionalOffset.zero,
-            end: _activeCardDragEndPoint
-          ).animate(_dismissController),
-          child: config.child
-        )
+      child: new SlideTransition(
+        position: _moveAnimation,
+        child: config.child
       )
     );
   }
