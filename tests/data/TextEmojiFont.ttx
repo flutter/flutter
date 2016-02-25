@@ -27,6 +27,7 @@
     <GlyphID id="7" name="Emoji7"/>
     <GlyphID id="8" name="Emoji8"/>
     <GlyphID id="9" name="Emoji9"/>
+    <GlyphID id="10" name="WHITE_UP_POINTING_INDEX" />
   </GlyphOrder>
 
   <head>
@@ -153,6 +154,7 @@
     <mtx name="Emoji7" width="500" lsb="93"/>
     <mtx name="Emoji8" width="500" lsb="93"/>
     <mtx name="Emoji9" width="500" lsb="93"/>
+    <mtx name="WHITE_UP_POINTING_INDEX" width="500" lsb="93"/>
   </hmtx>
 
   <cmap>
@@ -163,6 +165,7 @@
       <map code="0x231A" name="Emoji5" /> <!-- Emoji Default -->
       <map code="0x23E9" name="Emoji7" /> <!-- Emoji Default -->
       <map code="0x26FA" name="Emoji9" /> <!-- U+26FA U+FE0E is in ColorTextMixedEmojiFont.ttf -->
+      <map code="0x261D" name="WHITE_UP_POINTING_INDEX" />
     </cmap_format_4>
   </cmap>
 
@@ -204,6 +207,9 @@
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
     <TTGlyph name="Emoji9" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="WHITE_UP_POINTING_INDEX" xMin="0" yMin="0" xMax="0" yMax="0">
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
   </glyf>
