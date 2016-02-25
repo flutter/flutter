@@ -87,7 +87,12 @@ class AnimationController extends Animation<double>
 
   /// The current value of the animation.
   ///
-  /// Setting this value stops the current animation.
+  /// Setting this value notifies all the listeners that the value
+  /// changed.
+  ///
+  /// Setting this value also stops the controller if it is currently
+  /// running; if this happens, it also notifies all the status
+  /// listeners.
   double get value => _value;
   double _value;
   void set value(double newValue) {

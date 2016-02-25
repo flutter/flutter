@@ -79,14 +79,15 @@ class SlideTransition extends AnimatedComponent {
     Animation<FractionalOffset> position,
     this.transformHitTests: true,
     this.child
-  }) : position = position, super(key: key, animation: position);
+  }) : position = position, super(key: key, animation: position) {
+    assert(position != null);
+  }
 
   /// The animation that controls the position of the child.
   ///
   /// If the current value of the position animation is (dx, dy), the child will
   /// be translated horizontally by width * dx and vertically by height * dy.
   final Animation<FractionalOffset> position;
-
 
   /// Whether hit testing should be affected by the slide animation.
   ///
