@@ -8,6 +8,19 @@ import 'basic_types.dart';
 import 'text_editing.dart';
 import 'text_style.dart';
 
+// TODO(abarth): Should this be somewhere more general?
+bool _deepEquals(List<Object> a, List<Object> b) {
+  if (a == null)
+    return b == null;
+  if (b == null || a.length != b.length)
+    return false;
+  for (int i = 0; i < a.length; ++i) {
+    if (a[i] != b[i])
+      return false;
+  }
+  return true;
+}
+
 /// An immutable span of text.
 class TextSpan {
   const TextSpan({
@@ -74,19 +87,9 @@ class TextSpan {
     if (other is! TextSpan)
       return false;
     final TextSpan typedOther = other;
-    if (typedOther.text != text)
-      return false;
-    if (typedOther.style != style)
-      return false;
-    if ((typedOther.children == null) != (children == null))
-      return false;
-    if (children != null) {
-      for (int i = 0; i < children.length; ++i) {
-        if (typedOther.children[i] != children[i])
-          return false;
-      }
-    }
-    return true;
+    return typedOther.text == text
+        && typedOther.style == style
+        && _deepEquals(typedOther.children, children);
   }
   int get hashCode => hashValues(style, text, hashList(children));
 }
