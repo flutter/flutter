@@ -7,16 +7,6 @@
 
 #include "sky/shell/platform/mac/platform_mac.h"
 
-extern "C" {
-// TODO(csg): HACK! boringssl accesses this on Android using a weak symbol
-// instead of a global. Till the patch for that lands and propagates to Sky, we
-// specify the same here to get workable builds on iOS. This is a hack! Will
-// go away.
-unsigned long getauxval(unsigned long type) {
-  return 0;
-}
-}
-
 int main(int argc, const char * argv[]) {
   return PlatformMacMain(argc, argv, ^(){
     return UIApplicationMain(argc, (char **)argv, nil,
