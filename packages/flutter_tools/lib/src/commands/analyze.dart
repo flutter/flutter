@@ -239,6 +239,13 @@ class AnalyzeCommand extends FlutterCommand {
     /// note that until there is a default "all-in" lint rule-set we need
     /// to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843)
     String optionsBody = '''
+analyzer:
+  errors:
+    # we allow overriding fields (if they use super, ideally...)
+    strong_mode_invalid_field_override: ignore
+    # we allow type narrowing
+    strong_mode_invalid_method_override: ignore
+    todo: ignore
 linter:
   rules:
     - camel_case_types
@@ -313,14 +320,9 @@ linter:
       'Analyzing [${mainFile.path}]...',
       new RegExp('^\\[(hint|error)\\] Unused import \\(${mainFile.path},'),
       new RegExp(r'^\[.+\] .+ \(.+/\.pub-cache/.+'),
-      new RegExp(r'^\[error\] Invalid override\. The type of [^ ]+ \(.+\) is not a subtype of [^ ]+ \(.+\)\.'), // we allow type narrowing
       new RegExp('^\\[error\\] The argument type \'List<T>\' cannot be assigned to the parameter type \'List<.+>\''), // until we have generic methods, there's not much choice if you want to use map()
-      new RegExp(r'^\[error\] Field declaration .+ cannot be overridden in .+\.'), // we allow overriding fields (if they use super, ideally...)
-      new RegExp(r'^\[warning\] .+ will need runtime check to cast to type .+'), // https://github.com/dart-lang/sdk/issues/24542
       new RegExp(r'^\[error\] Type check failed: .*\(dynamic\) is not of type'), // allow unchecked casts from dynamic
-      new RegExp('^\\[error\\] Target of URI does not exist: \'dart:ui_internals\''), // https://github.com/flutter/flutter/issues/83
-      new RegExp(r'\[info\] TODO.+'),
-      new RegExp('\\[warning\\] Missing concrete implementation of \'RenderObject\\.applyPaintTransform\''), // https://github.com/dart-lang/sdk/issues/25232
+      //new RegExp('\\[warning\\] Missing concrete implementation of \'RenderObject\\.applyPaintTransform\''), // https://github.com/dart-lang/sdk/issues/25232
       new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
       new RegExp(r'^$'),
     ];
