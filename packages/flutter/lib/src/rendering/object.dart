@@ -1968,6 +1968,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
       return;
     _removeFromChildList(child);
     _insertIntoChildList(child, after: after);
+    markNeedsLayout();
   }
 
   void attach() {
