@@ -26,9 +26,10 @@ class AndroidWorkflow extends Workflow {
     };
 
     androidValidator.addValidator(new Validator(
-      'Android SDK',
+      'Android Studio / Android SDK',
       description: 'enable development for Android devices',
-      resolution: 'Download at https://developer.android.com/sdk/',
+      resolution: 'Download from https://developer.android.com/sdk/ (or visit '
+        'https://flutter.io/setup/#android-setup for detailed instructions)',
       validatorFunction: sdkExists
     ));
 
