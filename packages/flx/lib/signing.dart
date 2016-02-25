@@ -9,11 +9,10 @@ import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
 import 'package:bignum/bignum.dart';
-import 'package:cipher/cipher.dart';
-import 'package:cipher/impl/client.dart';
+import 'package:pointycastle/pointycastle.dart';
 import 'package:crypto/crypto.dart';
 
-export 'package:cipher/cipher.dart' show AsymmetricKeyPair;
+export 'package:pointycastle/pointycastle.dart' show AsymmetricKeyPair;
 
 // The ECDSA algorithm parameters we're using. These match the parameters used
 // by the Flutter updater package.
@@ -29,7 +28,7 @@ class CipherParameters {
 
   // Seeds our secure random number generator using data from /dev/urandom.
   // Disclaimer: I don't really understand why we need 2 parameters for
-  // cipher's API.
+  // pointycastle's API.
   Future seedRandom() async {
     try {
       RandomAccessFile file = await new File("/dev/urandom").open();
@@ -53,7 +52,6 @@ class CipherParameters {
 
   static CipherParameters get() => _params;
   static CipherParameters _init() {
-    initCipher();
     return new CipherParameters();
   }
 }
