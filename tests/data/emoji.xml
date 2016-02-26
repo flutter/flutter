@@ -19,11 +19,11 @@
     <family>
         <font weight="400" style="normal">NoGlyphFont.ttf</font>
     </family>
-    <family lang="und-Zsye">
-        <font weight="400" style="normal">ColorEmojiFont.ttf</font>
-    </family>
     <family>
         <font weight="400" style="normal">TextEmojiFont.ttf</font>
+    </family>
+    <family lang="und-Zsye">
+        <font weight="400" style="normal">ColorEmojiFont.ttf</font>
     </family>
     <family>
         <font weight="400" style="normal">ColorTextMixedEmojiFont.ttf</font>

@@ -27,6 +27,8 @@
     <GlyphID id="7" name="Emoji7"/>
     <GlyphID id="8" name="Emoji8"/>
     <GlyphID id="9" name="Emoji9"/>
+    <GlyphID id="10" name="WHITE_UP_POINTING_INDEX" />
+    <GlyphID id="11" name="EMOJI_MODIFIER_FITZPATRICK_TYPE_4" />
   </GlyphOrder>
 
   <head>
@@ -153,17 +155,21 @@
     <mtx name="Emoji7" width="500" lsb="93"/>
     <mtx name="Emoji8" width="500" lsb="93"/>
     <mtx name="Emoji9" width="500" lsb="93"/>
+    <mtx name="WHITE_UP_POINTING_INDEX" width="500" lsb="93" />
+    <mtx name="EMOJI_MODIFIER_FITZPATRICK_TYPE_4" width="500" lsb="93" />
   </hmtx>
 
   <cmap>
     <tableVersion version="0"/>
-    <cmap_format_4 platformID="3" platEncID="10" language="0">
+    <cmap_format_12 format="12" reserved="0" length="7" nGroups="1" platformID="3" platEncID="10" language="0">
       <map code="0x00AE" name="Emoji2" /> <!-- Text Default -->
       <map code="0x203C" name="Emoji3" /> <!-- Text Default -->
       <map code="0x231B" name="Emoji6" /> <!-- Emoji Default -->
       <map code="0x23E9" name="Emoji7" /> <!-- Emoji Default -->
       <map code="0x26F9" name="Emoji9" /> <!-- U+26F9 U+FE0F is in ColorTextMixedEmojiFont.ttf -->
-    </cmap_format_4>
+      <map code="0x261D" name="WHITE_UP_POINTING_INDEX" />
+      <map code="0x1F3FD" name="EMOJI_MODIFIER_FITZPATRICK_TYPE_4" />
+    </cmap_format_12>
   </cmap>
 
   <loca>
@@ -204,6 +210,12 @@
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
     <TTGlyph name="Emoji9" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="WHITE_UP_POINTING_INDEX" xMin="0" yMin="0" xMax="0" yMax="0">
+      <contour></contour><instructions><assembly></assembly></instructions>
+    </TTGlyph>
+    <TTGlyph name="EMOJI_MODIFIER_FITZPATRICK_TYPE_4" xMin="0" yMin="0" xMax="0" yMax="0">
       <contour></contour><instructions><assembly></assembly></instructions>
     </TTGlyph>
   </glyf>
