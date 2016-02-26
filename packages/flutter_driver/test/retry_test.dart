@@ -71,9 +71,7 @@ main() {
           lastStackTrace = stackTrace;
         });
 
-        print('before elapse');
         fakeAsync.elapse(new Duration(milliseconds: 10));
-        print('after elapse');
 
         expect(timedOut, isTrue);
         expect(lastError, 'error');
