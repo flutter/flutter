@@ -34,7 +34,7 @@ main() async {
 
   // Set up a key generator.
   CipherParameters cipher = CipherParameters.get();
-  await cipher.seedRandom();
+  cipher.seedRandom();
   ECKeyGeneratorParameters ecParams = new ECKeyGeneratorParameters(cipher.domain);
   ParametersWithRandom<ECKeyGeneratorParameters> keyGeneratorParams =
     new ParametersWithRandom<ECKeyGeneratorParameters>(ecParams, cipher.random);

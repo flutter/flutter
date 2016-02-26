@@ -256,7 +256,7 @@ Future<int> build(
 
 Future<int> assemble({
   Map manifestDescriptor: const {},
-  ArchiveFile snapshotFile: null,
+  ArchiveFile snapshotFile,
   String assetBasePath: defaultAssetBasePath,
   String materialAssetBasePath: defaultMaterialAssetBasePath,
   String outputPath: defaultFlxOutputPath,
@@ -287,11 +287,15 @@ Future<int> assemble({
   if (fontManifest != null)
     archive.addFile(fontManifest);
 
-  await CipherParameters.get().seedRandom();
+  printTrace('Calling CipherParameters.seedRandom().');
+  CipherParameters.get().seedRandom();
 
   AsymmetricKeyPair keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
+  printTrace('KeyPair from $privateKeyPath: $keyPair.');
+  printTrace('Encoding zip file.');
   Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
   ensureDirectoryExists(outputPath);
+  printTrace('Creating flx at $outputPath.');
   Bundle bundle = new Bundle.fromContent(
     path: outputPath,
     manifest: manifestDescriptor,
