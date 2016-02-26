@@ -11,6 +11,8 @@ class Tolerance {
 
   const Tolerance({this.distance: epsilonDefault, this.time: epsilonDefault,
       this.velocity: epsilonDefault});
+
+  String toString() => 'Tolerance(distance: $distance, time=$time, velocity: $velocity)';
 }
 
 const double epsilonDefault = 1e-3;
