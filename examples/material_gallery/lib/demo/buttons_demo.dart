@@ -77,6 +77,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       height: 128.0,
       child: new Center(
         child: new FloatingActionButton(
+          tooltip: 'Open FAB demos',
           child: new Icon(icon: 'content/add'),
           onPressed: () {
             Navigator.push(context, new MaterialPageRoute(
