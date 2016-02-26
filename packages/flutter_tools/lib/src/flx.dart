@@ -148,9 +148,7 @@ bool _addAssetFile(Archive archive, _Asset asset) {
     return false;
   }
   List<int> content = file.readAsBytesSync();
-  archive.addFile(
-    new ArchiveFile.noCompress(asset.key, content.length, content)
-  );
+  archive.addFile(new ArchiveFile.noCompress(asset.key, content.length, content));
   return true;
 }
 
@@ -287,14 +285,19 @@ Future<int> assemble({
   if (fontManifest != null)
     archive.addFile(fontManifest);
 
-  printTrace('Calling CipherParameters.seedRandom().');
-  CipherParameters.get().seedRandom();
-
   AsymmetricKeyPair keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
   printTrace('KeyPair from $privateKeyPath: $keyPair.');
+
+  if (keyPair != null) {
+    printTrace('Calling CipherParameters.seedRandom().');
+    CipherParameters.get().seedRandom();
+  }
+
   printTrace('Encoding zip file.');
   Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
+
   ensureDirectoryExists(outputPath);
+
   printTrace('Creating flx at $outputPath.');
   Bundle bundle = new Bundle.fromContent(
     path: outputPath,
@@ -303,5 +306,8 @@ Future<int> assemble({
     keyPair: keyPair
   );
   bundle.writeSync();
+
+  printTrace('Built and signed flx at $outputPath.');
+
   return 0;
 }

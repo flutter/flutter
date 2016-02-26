@@ -65,7 +65,7 @@ class RunCommand extends RunCommandBase {
 
   RunCommand() {
     argParser.addFlag('full-restart',
-        defaultsTo: true,
+        defaultsTo: false,
         help: 'Stop any currently running application process before starting the app.');
     argParser.addFlag('clear-logs',
         defaultsTo: true,
@@ -116,13 +116,13 @@ class RunCommand extends RunCommandBase {
       applicationPackages,
       toolchain,
       buildConfigurations,
-      target: argResults['target'],
+      target: target,
       enginePath: runner.enginePath,
       install: true,
       stop: argResults['full-restart'],
-      checked: argResults['checked'],
-      traceStartup: argResults['trace-startup'],
-      route: argResults['route'],
+      checked: checked,
+      traceStartup: traceStartup,
+      route: route,
       clearLogs: clearLogs,
       startPaused: argResults['start-paused'],
       debugPort: debugPort
@@ -140,7 +140,7 @@ Future<int> startApp(
   List<BuildConfiguration> configs, {
   String target,
   String enginePath,
-  bool stop: true,
+  bool stop: false,
   bool install: true,
   bool checked: true,
   bool traceStartup: false,
