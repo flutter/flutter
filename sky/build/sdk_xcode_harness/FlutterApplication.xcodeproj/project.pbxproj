@@ -522,6 +522,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
+				OTHER_LDFLAGS = "-lSystem";
 				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.application.FlutterApplication;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -541,6 +542,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
+				OTHER_LDFLAGS = "-lSystem";
 				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.application.FlutterApplication;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
