@@ -46,12 +46,12 @@ class ListenCommand extends RunCommandBase {
         applicationPackages,
         toolchain,
         buildConfigurations,
-        target: argResults['target'],
+        target: target,
         install: firstTime,
         stop: true,
-        checked: argResults['checked'],
-        traceStartup: argResults['trace-startup'],
-        route: argResults['route']
+        checked: checked,
+        traceStartup: traceStartup,
+        route: route
       );
       firstTime = false;
     } while (!singleRun && result == 0 && _watchDirectory(watchCommand));

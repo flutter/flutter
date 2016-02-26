@@ -32,7 +32,9 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
-  static IOSSimulatorUtils get instance => context[IOSSimulatorUtils] ?? (context[IOSSimulatorUtils] = new IOSSimulatorUtils());
+  static IOSSimulatorUtils get instance {
+    return context[IOSSimulatorUtils] ?? (context[IOSSimulatorUtils] = new IOSSimulatorUtils());
+  }
 
   List<IOSSimulator> getAttachedDevices() {
     if (!xcode.isInstalledAndMeetsVersionCheck)
@@ -238,12 +240,7 @@ class IOSSimulator extends Device {
     }
   }
 
-  @override
-  bool isConnected() {
-    if (!Platform.isMacOS)
-      return false;
-    return SimControl.instance.getConnectedDevices().any((SimDevice device) => device.udid == id);
-  }
+  bool isConnected() => Platform.isMacOS;
 
   @override
   bool isSupported() {

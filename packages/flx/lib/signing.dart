@@ -9,8 +9,8 @@ import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
 import 'package:bignum/bignum.dart';
-import 'package:pointycastle/pointycastle.dart';
 import 'package:crypto/crypto.dart';
+import 'package:pointycastle/pointycastle.dart';
 
 export 'package:pointycastle/pointycastle.dart' show AsymmetricKeyPair;
 
@@ -82,8 +82,11 @@ Uint8List serializeManifest(Map manifestDescriptor, ECPublicKey publicKey, Uint8
   if (publicKey != null)
     outputManifest['key'] = BASE64.encode(publicKey.Q.getEncoded());
 
-  Uint8List zipHash = new Digest(_params.hashAlgorithm).process(zipBytes);
-  BigInteger zipHashInt = new BigInteger.fromBytes(1, zipHash);
+  SHA256 sha = new SHA256();
+  sha.add(zipBytes);
+  List<int> hash = sha.close();
+
+  BigInteger zipHashInt = new BigInteger.fromBytes(1, hash);
   outputManifest['content-hash'] = zipHashInt.intValue();
 
   return new Uint8List.fromList(UTF8.encode(JSON.encode(outputManifest)));
