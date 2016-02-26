@@ -94,7 +94,7 @@ class MenuDemoState extends State<MenuDemo> {
                   child: new Text('Context menu item one')
                 ),
                 new PopupMenuItem(
-                  isDisabled: true,
+                  enabled: false,
                   child: new Text('A disabled menu item')
                 ),
                 new PopupMenuItem(
@@ -178,22 +178,22 @@ class MenuDemoState extends State<MenuDemo> {
               items: <PopupMenuItem>[
                 new CheckedPopupMenuItem(
                   value: _checkedValue1,
-                  isChecked: isChecked(_checkedValue1),
+                  checked: isChecked(_checkedValue1),
                   child: new Text(_checkedValue1)
                 ),
                 new CheckedPopupMenuItem(
-                  isDisabled: true,
-                  isChecked: isChecked(_checkedValue2),
+                  enabled: false,
+                  checked: isChecked(_checkedValue2),
                   child: new Text(_checkedValue2)
                 ),
                 new CheckedPopupMenuItem(
                   value: _checkedValue3,
-                  isChecked: isChecked(_checkedValue3),
+                  checked: isChecked(_checkedValue3),
                   child: new Text(_checkedValue3)
                 ),
                 new CheckedPopupMenuItem(
                   value: _checkedValue4,
-                  isChecked: isChecked(_checkedValue4),
+                  checked: isChecked(_checkedValue4),
                   child: new Text(_checkedValue4)
                 )
               ]

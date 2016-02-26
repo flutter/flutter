@@ -21,7 +21,7 @@ class ListDemoState extends State<ListDemo> {
 
   ScaffoldFeatureController _bottomSheet;
   ListDemoItemSize _itemSize = ListDemoItemSize.threeLine;
-  bool _isDense = true;
+  bool _dense = true;
   bool _showAvatar = true;
   bool _showIcon = false;
   bool _reverseSort = false;
@@ -47,7 +47,7 @@ class ListDemoState extends State<ListDemo> {
           alignItems: FlexAlignItems.stretch,
           children: <Widget>[
             new ListItem(
-              isDense: true,
+              dense: true,
               primary: new Text('One-line'),
               right: new Radio<ListDemoItemSize>(
                 value: ListDemoItemSize.oneLine,
@@ -56,7 +56,7 @@ class ListDemoState extends State<ListDemo> {
               )
             ),
             new ListItem(
-              isDense: true,
+              dense: true,
               primary: new Text('Two-line'),
               right: new Radio<ListDemoItemSize>(
                 value: ListDemoItemSize.twoLine,
@@ -65,7 +65,7 @@ class ListDemoState extends State<ListDemo> {
               )
             ),
             new ListItem(
-              isDense: true,
+              dense: true,
               primary: new Text('Three-line'),
               right: new Radio<ListDemoItemSize>(
                 value: ListDemoItemSize.threeLine,
@@ -74,7 +74,7 @@ class ListDemoState extends State<ListDemo> {
               )
             ),
             new ListItem(
-              isDense: true,
+              dense: true,
               primary: new Text('Show Avatar'),
               right: new Checkbox(
                 value: _showAvatar,
@@ -87,7 +87,7 @@ class ListDemoState extends State<ListDemo> {
               )
             ),
             new ListItem(
-              isDense: true,
+              dense: true,
               primary: new Text('Show Icon'),
               right: new Checkbox(
                 value: _showIcon,
@@ -100,13 +100,13 @@ class ListDemoState extends State<ListDemo> {
               )
             ),
             new ListItem(
-              isDense: true,
+              dense: true,
               primary: new Text('Dense Layout'),
               right: new Checkbox(
-                value: _isDense,
+                value: _dense,
                 onChanged: (bool value) {
                   setState(() {
-                    _isDense = value;
+                    _dense = value;
                   });
                   _bottomSheet?.setState(() { });
                 }
@@ -131,7 +131,7 @@ class ListDemoState extends State<ListDemo> {
     }
     return new ListItem(
       isThreeLine: _itemSize == ListDemoItemSize.threeLine,
-      isDense: _isDense,
+      dense: _dense,
       left: _showAvatar ? new CircleAvatar(child: new Text(item)) : null,
       primary: new Text('This item represents $item'),
       secondary: secondary,
@@ -140,7 +140,7 @@ class ListDemoState extends State<ListDemo> {
   }
 
   Widget build(BuildContext context) {
-    final String layoutText = _isDense ? " \u2013 Dense" : "";
+    final String layoutText = _dense ? " \u2013 Dense" : "";
     String  itemSizeText;
     switch(_itemSize) {
       case ListDemoItemSize.oneLine:
@@ -176,7 +176,7 @@ class ListDemoState extends State<ListDemo> {
         ]
       ),
       body: new Block(
-        padding: new EdgeDims.all(_isDense ? 4.0 : 8.0),
+        padding: new EdgeDims.all(_dense ? 4.0 : 8.0),
         children: items.map((String item) => buildListItem(context, item)).toList()
       )
     );

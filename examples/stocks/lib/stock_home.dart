@@ -221,7 +221,7 @@ class StockHomeState extends State<StockHome> {
           items: <PopupMenuItem>[
             new CheckedPopupMenuItem(
               value: _StockMenuItem.autorefresh,
-              isChecked: _autorefresh,
+              checked: _autorefresh,
               child: new Text('Autorefresh')
             ),
             new PopupMenuItem(
