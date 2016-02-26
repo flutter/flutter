@@ -430,7 +430,7 @@ Future<int> buildAll(
 }) async {
   for (Device device in devices.all) {
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null || !device.isConnected())
+    if (package == null)
       continue;
 
     // TODO(mpcomplete): Temporary hack. We only support the apk builder atm.

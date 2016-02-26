@@ -347,7 +347,7 @@ Map<String, dynamic> _deviceToMap(Device device) {
     'id': device.id,
     'name': device.name,
     'platform': _enumToString(device.platform),
-    'available': device.isConnected()
+    'available': true
   };
 }
 

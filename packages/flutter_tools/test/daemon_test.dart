@@ -112,13 +112,8 @@ defineTests() {
 
       MockDeviceStore mockDevices = command.devices;
 
-      when(mockDevices.android.isConnected()).thenReturn(true);
       when(mockDevices.android.stopApp(any)).thenReturn(true);
-
-      when(mockDevices.iOS.isConnected()).thenReturn(false);
       when(mockDevices.iOS.stopApp(any)).thenReturn(false);
-
-      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
 
       commands.add({'id': 0, 'method': 'app.stopAll'});

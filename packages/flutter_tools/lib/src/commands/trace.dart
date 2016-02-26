@@ -33,7 +33,7 @@ class TraceCommand extends FlutterCommand {
   Future<int> runInProject() async {
     await downloadApplicationPackagesAndConnectToDevices();
 
-    if (devices.android == null || !devices.android.isConnected()) {
+    if (devices.android == null) {
       printError('No device connected, so no trace was completed.');
       return 1;
     }

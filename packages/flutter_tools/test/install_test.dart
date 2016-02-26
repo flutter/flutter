@@ -19,15 +19,12 @@ defineTests() {
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
 
-      when(mockDevices.android.isConnected()).thenReturn(true);
       when(mockDevices.android.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.android.installApp(any)).thenReturn(true);
 
-      when(mockDevices.iOS.isConnected()).thenReturn(false);
       when(mockDevices.iOS.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOS.installApp(any)).thenReturn(false);
 
-      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
 
@@ -43,15 +40,12 @@ defineTests() {
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
 
-      when(mockDevices.android.isConnected()).thenReturn(false);
       when(mockDevices.android.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.android.installApp(any)).thenReturn(false);
 
-      when(mockDevices.iOS.isConnected()).thenReturn(true);
       when(mockDevices.iOS.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOS.installApp(any)).thenReturn(true);
 
-      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.isAppInstalled(any)).thenReturn(false);
       when(mockDevices.iOSSimulator.installApp(any)).thenReturn(false);
 

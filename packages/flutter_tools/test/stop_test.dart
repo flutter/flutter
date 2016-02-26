@@ -19,13 +19,8 @@ defineTests() {
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
 
-      when(mockDevices.android.isConnected()).thenReturn(true);
       when(mockDevices.android.stopApp(any)).thenReturn(true);
-
-      when(mockDevices.iOS.isConnected()).thenReturn(false);
       when(mockDevices.iOS.stopApp(any)).thenReturn(false);
-
-      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
 
       return createTestCommandRunner(command).run(['stop']).then((int code) {
@@ -38,13 +33,8 @@ defineTests() {
       applyMocksToCommand(command);
       MockDeviceStore mockDevices = command.devices;
 
-      when(mockDevices.android.isConnected()).thenReturn(false);
       when(mockDevices.android.stopApp(any)).thenReturn(false);
-
-      when(mockDevices.iOS.isConnected()).thenReturn(true);
       when(mockDevices.iOS.stopApp(any)).thenReturn(true);
-
-      when(mockDevices.iOSSimulator.isConnected()).thenReturn(false);
       when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
 
       return createTestCommandRunner(command).run(['stop']).then((int code) {

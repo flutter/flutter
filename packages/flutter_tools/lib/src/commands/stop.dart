@@ -26,7 +26,7 @@ Future<bool> stopAll(DeviceStore devices, ApplicationPackageStore applicationPac
 
   for (Device device in devices.all) {
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null || !device.isConnected())
+    if (package == null)
       continue;
     if (await device.stopApp(package))
       stoppedSomething = true;

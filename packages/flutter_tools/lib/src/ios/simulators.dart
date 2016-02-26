@@ -229,9 +229,6 @@ class IOSSimulator extends Device {
 
   @override
   bool installApp(ApplicationPackage app) {
-    if (!isConnected())
-      return false;
-
     try {
       SimControl.instance.install(id, app.localPath);
       return true;
@@ -239,8 +236,6 @@ class IOSSimulator extends Device {
       return false;
     }
   }
-
-  bool isConnected() => Platform.isMacOS;
 
   @override
   bool isSupported() {
@@ -419,9 +414,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String get name => device.name;
 
   Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
-    if (!device.isConnected())
-      return 2;
-
     if (clear)
       device.clearLogs();
 
