@@ -123,7 +123,7 @@ class RunCommand extends RunCommandBase {
       debugPort: debugPort
     );
 
-    printTrace('Finished start command.');
+    printTrace('Finished $name command.');
     return result;
   }
 }

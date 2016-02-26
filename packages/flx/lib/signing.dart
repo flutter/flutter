@@ -20,6 +20,7 @@ class CipherParameters {
   final String signerAlgorithm = 'SHA-256/ECDSA';
   final String hashAlgorithm = 'SHA-256';
   final ECDomainParameters domain = new ECDomainParameters('prime256v1');
+
   SecureRandom get random {
     if (_random == null)
       _initRandom(new Uint8List(16), new Uint8List(16));
@@ -29,12 +30,16 @@ class CipherParameters {
   // Seeds our secure random number generator using data from /dev/urandom.
   // Disclaimer: I don't really understand why we need 2 parameters for
   // pointycastle's API.
-  Future seedRandom() async {
+  void seedRandom() {
+    if (_random != null)
+      return;
+
     try {
-      RandomAccessFile file = await new File("/dev/urandom").open();
-      Uint8List key = new Uint8List.fromList(await file.read(16));
-      Uint8List iv = new Uint8List.fromList(await file.read(16));
+      RandomAccessFile file = new File("/dev/urandom").openSync();
+      Uint8List key = new Uint8List.fromList(file.readSync(16));
+      Uint8List iv = new Uint8List.fromList(file.readSync(16));
       _initRandom(key, iv);
+      file.closeSync();
     } on FileSystemException {
       // TODO(mpcomplete): need an entropy source on Windows. We might get this
       // for free from Dart itself soon.

@@ -72,7 +72,7 @@ class Bundle {
     this.path,
     this.manifest,
     contentBytes,
-    AsymmetricKeyPair keyPair: null
+    AsymmetricKeyPair keyPair
   }) : _contentBytes = contentBytes {
     assert(path != null);
     assert(manifest != null);
