@@ -6,6 +6,7 @@ material-design-icons:
   - name: action/account_balance
   - name: action/assessment
   - name: action/backup
+  - name: action/done
   - name: action/help
   - name: action/picture_in_picture
   - name: action/search
