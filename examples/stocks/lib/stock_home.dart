@@ -6,17 +6,49 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree;
-
+import 'package:flutter/scheduler.dart' show timeDilation;
 import 'stock_data.dart';
 import 'stock_list.dart';
-import 'stock_menu.dart';
 import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
 typedef void ModeUpdater(StockMode mode);
 
+enum _StockMenuItem { autorefresh, refresh, speedUp, speedDown }
 enum StockHomeTab { market, portfolio }
+
+class _NotImplementedDialog extends StatelessComponent {
+  Widget build(BuildContext context) {
+    return new Dialog(
+      title: new Text('Not Implemented'),
+      content: new Text('This feature has not yet been implemented.'),
+      actions: <Widget>[
+        new FlatButton(
+          child: new Row(
+            children: <Widget>[
+              new Icon(
+                icon: 'device/dvr',
+                size: IconSize.s18
+              ),
+              new Container(
+                width: 8.0
+              ),
+              new Text('DUMP APP TO CONSOLE'),
+            ]
+          ),
+          onPressed: () { debugDumpApp(); }
+        ),
+        new FlatButton(
+          child: new Text('OH WELL'),
+          onPressed: () {
+            Navigator.pop(context, false);
+          }
+        )
+      ]
+    );
+  }
+}
 
 class StockHome extends StatefulComponent {
   const StockHome(this.stocks, this.symbols, this.configuration, this.updater);
@@ -34,6 +66,7 @@ class StockHomeState extends State<StockHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool _isSearching = false;
   InputValue _searchQuery = InputValue.empty;
+  bool _autorefresh = false;
 
   void _handleSearchBegin() {
     ModalRoute.of(context).addLocalHistoryEntry(new LocalHistoryEntry(
@@ -59,24 +92,31 @@ class StockHomeState extends State<StockHome> {
     });
   }
 
-  bool _autorefresh = false;
-  void _handleAutorefreshChanged(bool value) {
-    setState(() {
-      _autorefresh = value;
-    });
-  }
-
   void _handleStockModeChange(StockMode value) {
     if (config.updater != null)
       config.updater(config.configuration.copyWith(stockMode: value));
   }
 
-  void _handleMenuShow() {
-    showStockMenu(
-      context: context,
-      autorefresh: _autorefresh,
-      onAutorefreshChanged: _handleAutorefreshChanged
-    );
+  void _handleStockMenu(BuildContext context, _StockMenuItem value) {
+    switch(value) {
+      case _StockMenuItem.autorefresh:
+        setState(() {
+          _autorefresh = !_autorefresh;
+        });
+        break;
+      case _StockMenuItem.refresh:
+        showDialog(
+          context: context,
+          child: new _NotImplementedDialog()
+        );
+        break;
+      case _StockMenuItem.speedUp:
+        timeDilation /= 5.0;
+        break;
+      case _StockMenuItem.speedDown:
+        timeDilation *= 5.0;
+        break;
+    }
   }
 
   Widget _buildDrawer(BuildContext context) {
@@ -176,10 +216,27 @@ class StockHomeState extends State<StockHome> {
           onPressed: _handleSearchBegin,
           tooltip: 'Search'
         ),
-        new IconButton(
-          icon: "navigation/more_vert",
-          onPressed: _handleMenuShow,
-          tooltip: 'Show menu'
+        new PopupMenuButton<_StockMenuItem>(
+          onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
+          items: <PopupMenuItem>[
+            new CheckedPopupMenuItem(
+              value: _StockMenuItem.autorefresh,
+              isChecked: _autorefresh,
+              child: new Text('Autorefresh')
+            ),
+            new PopupMenuItem(
+              value: _StockMenuItem.refresh,
+              child: new Text('Refresh')
+            ),
+            new PopupMenuItem(
+              value: _StockMenuItem.speedUp,
+              child: new Text('Increase animation speed')
+            ),
+            new PopupMenuItem(
+              value: _StockMenuItem.speedDown,
+              child: new Text('Decrease animation speed')
+            )
+          ]
         )
       ],
       tabBar: new TabBar<StockHomeTab>(

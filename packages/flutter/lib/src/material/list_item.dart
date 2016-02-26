@@ -23,6 +23,7 @@ class ListItem extends StatelessComponent {
     this.right,
     this.isThreeLine: false,
     this.isDense: false,
+    this.isDisabled: false,
     this.onTap,
     this.onLongPress
   }) : super(key: key) {
@@ -36,11 +37,17 @@ class ListItem extends StatelessComponent {
   final Widget right;
   final bool isThreeLine;
   final bool isDense;
+  final bool isDisabled;
   final GestureTapCallback onTap;
   final GestureLongPressCallback onLongPress;
 
   TextStyle primaryTextStyle(BuildContext context) {
-    final TextStyle style = Theme.of(context).text.subhead;
+    final ThemeData theme = Theme.of(context);
+    final TextStyle style = theme.text.subhead;
+    if (isDisabled) {
+      final Color color = theme.disabledColor;
+      return isDense ? style.copyWith(fontSize: 13.0, color: color) : style.copyWith(color: color);
+    }
     return isDense ? style.copyWith(fontSize: 13.0) : style;
   }
 
@@ -113,8 +120,8 @@ class ListItem extends StatelessComponent {
     }
 
     return new InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
+      onTap: isDisabled ? null : onTap,
+      onLongPress: isDisabled ? null : onLongPress,
       child: new Container(
         height: itemHeight,
         padding: const EdgeDims.symmetric(horizontal: 16.0),

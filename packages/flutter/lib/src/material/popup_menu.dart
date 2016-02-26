@@ -6,8 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'icon.dart';
 import 'icon_button.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
+import 'list_item.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -21,26 +25,42 @@ const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
 const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
+const double _kDisabledIconOpacity = 0.38;
 
 class PopupMenuItem<T> extends StatelessComponent {
   PopupMenuItem({
     Key key,
     this.value,
-    this.disabled: false,
+    this.isDisabled: false,
     this.hasDivider: false,
     this.child
   }) : super(key: key);
 
   final T value;
-  final bool disabled;
+  final bool isDisabled;
   final bool hasDivider;
   final Widget child;
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     TextStyle style = theme.text.subhead;
-    if (disabled)
+    if (isDisabled)
       style = style.copyWith(color: theme.disabledColor);
+
+    Widget item = new DefaultTextStyle(
+      style: style,
+      child: new Baseline(
+        baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
+        child: child
+      )
+    );
+    if (isDisabled) {
+      final bool isDark = theme.brightness == ThemeBrightness.dark;
+      item = new IconTheme(
+        data: new IconThemeData(opacity: isDark ? 0.5 : 0.38),
+        child: item
+      );
+    }
 
     return new MergeSemantics(
       child: new Container(
@@ -49,16 +69,29 @@ class PopupMenuItem<T> extends StatelessComponent {
         decoration: !hasDivider ? null : new BoxDecoration(
           border: new Border(bottom: new BorderSide(color: theme.dividerColor))
         ),
-        child: new DefaultTextStyle(
-          style: style,
-          child: new Baseline(
-            baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
-            child: child
-          )
-        )
+        child: item
       )
     );
   }
+}
+
+class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
+  CheckedPopupMenuItem({
+    Key key,
+    T value,
+    isChecked: false,
+    bool isDisabled: false,
+    Widget child
+  }) : super(
+    key: key,
+    value: value,
+    isDisabled: isDisabled,
+    child: new ListItem(
+      isDisabled: isDisabled,
+      left: new Icon(icon: isChecked ? 'action/done' : null),
+      primary: child
+    )
+  );
 }
 
 class _PopupMenu<T> extends StatelessComponent {
@@ -80,7 +113,7 @@ class _PopupMenu<T> extends StatelessComponent {
         parent: route.animation,
         curve: new Interval(start, end)
       );
-      final bool disabled = route.items[i].disabled;
+      final bool isDisabled = route.items[i].isDisabled;
       Widget item = route.items[i];
       if (route.initialValue != null && route.initialValue == route.items[i].value) {
         item = new Container(
@@ -91,7 +124,7 @@ class _PopupMenu<T> extends StatelessComponent {
       children.add(new FadeTransition(
         opacity: opacity,
         child: new InkWell(
-          onTap: disabled ? null : () { Navigator.pop(context, route.items[i].value); },
+          onTap: isDisabled ? null : () { Navigator.pop(context, route.items[i].value); },
           child: item
         )
       ));
@@ -298,7 +331,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       )
     )
     .then((T value) {
-      if (config.onSelected != null)
+      if (value != null && config.onSelected != null)
         config.onSelected(value);
     });
   }

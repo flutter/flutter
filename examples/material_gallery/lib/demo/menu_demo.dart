@@ -94,7 +94,7 @@ class MenuDemoState extends State<MenuDemo> {
                   child: new Text('Context menu item one')
                 ),
                 new PopupMenuItem(
-                  disabled: true,
+                  isDisabled: true,
                   child: new Text('A disabled menu item')
                 ),
                 new PopupMenuItem(
@@ -176,34 +176,26 @@ class MenuDemoState extends State<MenuDemo> {
             right: new PopupMenuButton<String>(
               onSelected: showCheckedMenuSelections,
               items: <PopupMenuItem>[
-                new PopupMenuItem(
+                new CheckedPopupMenuItem(
                   value: _checkedValue1,
-                  child: new ListItem(
-                      left: new Icon(icon: isChecked(_checkedValue1) ? 'action/done' : null),
-                    primary: new Text(_checkedValue1)
-                  )
+                  isChecked: isChecked(_checkedValue1),
+                  child: new Text(_checkedValue1)
                 ),
-                new PopupMenuItem(
-                  value: _checkedValue2,
-                  child: new ListItem(
-                    left: new Icon(icon: isChecked(_checkedValue2) ? 'action/done' : null),
-                    primary: new Text(_checkedValue2)
-                  )
+                new CheckedPopupMenuItem(
+                  isDisabled: true,
+                  isChecked: isChecked(_checkedValue2),
+                  child: new Text(_checkedValue2)
                 ),
-                new PopupMenuItem(
+                new CheckedPopupMenuItem(
                   value: _checkedValue3,
-                  child: new ListItem(
-                    left: new Icon(icon: isChecked(_checkedValue3) ? 'action/done' : null),
-                    primary: new Text(_checkedValue3)
-                  )
+                  isChecked: isChecked(_checkedValue3),
+                  child: new Text(_checkedValue3)
                 ),
-                new PopupMenuItem(
+                new CheckedPopupMenuItem(
                   value: _checkedValue4,
-                  child: new ListItem(
-                    left: new Icon(icon: isChecked(_checkedValue4) ? 'action/done' : null),
-                    primary: new Text(_checkedValue4)
-                  )
-                ),
+                  isChecked: isChecked(_checkedValue4),
+                  child: new Text(_checkedValue4)
+                )
               ]
             )
           )
