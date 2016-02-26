@@ -295,7 +295,7 @@ Future<int> assemble({
   printTrace('Encoding zip file.');
   Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
   ensureDirectoryExists(outputPath);
-  printTrace('Creating flx at ${outputPath}.');
+  printTrace('Creating flx at $outputPath.');
   Bundle bundle = new Bundle.fromContent(
     path: outputPath,
     manifest: manifestDescriptor,
