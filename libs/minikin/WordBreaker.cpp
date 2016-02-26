@@ -17,7 +17,8 @@
 #define LOG_TAG "Minikin"
 #include <cutils/log.h>
 
-#include "minikin/WordBreaker.h"
+#include <minikin/WordBreaker.h>
+#include "MinikinInternal.h"
 
 #include <unicode/uchar.h>
 #include <unicode/utf16.h>
@@ -25,7 +26,7 @@
 namespace android {
 
 const uint32_t CHAR_SOFT_HYPHEN = 0x00AD;
-const uint16_t CHAR_ZWJ = 0x200D;
+const uint32_t CHAR_ZWJ = 0x200D;
 
 void WordBreaker::setLocale(const icu::Locale& locale) {
     UErrorCode status = U_ZERO_ERROR;
@@ -68,14 +69,18 @@ enum ScanState {
  * represents customization beyond the ICU behavior, because plain ICU provides some
  * line break opportunities that we don't want.
  **/
-static bool isBreakValid(uint16_t codeUnit, const uint16_t* buf, size_t bufEnd, size_t i) {
-    if (codeUnit == CHAR_SOFT_HYPHEN) {
+static bool isBreakValid(const uint16_t* buf, size_t bufEnd, size_t i) {
+    uint32_t codePoint;
+    size_t prev_offset = i;
+    U16_PREV(buf, 0, prev_offset, codePoint);
+    if (codePoint == CHAR_SOFT_HYPHEN) {
         return false;
     }
-    if (codeUnit == CHAR_ZWJ) {
+    uint32_t next_codepoint;
+    size_t next_offset = i;
+    U16_NEXT(buf, next_offset, bufEnd, next_codepoint);
+    if (codePoint == CHAR_ZWJ) {
         // Possible emoji ZWJ sequence
-        uint32_t next_codepoint;
-        U16_NEXT(buf, i, bufEnd, next_codepoint);
         if (next_codepoint == 0x2764 ||       // HEAVY BLACK HEART
                 next_codepoint == 0x1F466 ||  // BOY
                 next_codepoint == 0x1F467 ||  // GIRL
@@ -83,6 +88,17 @@ static bool isBreakValid(uint16_t codeUnit, const uint16_t* buf, size_t bufEnd, 
                 next_codepoint == 0x1F469 ||  // WOMAN
                 next_codepoint == 0x1F48B ||  // KISS MARK
                 next_codepoint == 0x1F5E8) {  // LEFT SPEECH BUBBLE
+            return false;
+        }
+    }
+    // Proposed Rule LB30b from http://www.unicode.org/L2/L2016/16011r3-break-prop-emoji.pdf
+    // EB x EM
+    if (isEmojiModifier(next_codepoint)) {
+        if (codePoint == 0xFE0F && prev_offset > 0) {
+            // skip over emoji variation selector
+            U16_PREV(buf, 0, prev_offset, codePoint);
+        }
+        if (isEmojiBase(codePoint)) {
             return false;
         }
     }
@@ -176,7 +192,7 @@ ssize_t WordBreaker::next() {
             result = mBreakIterator->next();
         }
     } while (result != icu::BreakIterator::DONE && (size_t)result != mTextSize
-            && !isBreakValid(mText[result - 1], mText, mTextSize, result));
+            && !isBreakValid(mText, mTextSize, result));
     mCurrent = (ssize_t)result;
     return mCurrent;
 }
