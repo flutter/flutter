@@ -29,6 +29,8 @@
 #define NELEM(x) ((sizeof(x) / sizeof((x)[0])))
 #endif
 
+#define UTF16(codepoint) U16_LEAD(codepoint), U16_TRAIL(codepoint)
+
 using namespace android;
 
 typedef ICUTestBase WordBreakerTest;
@@ -70,11 +72,11 @@ TEST_F(WordBreakerTest, softHyphen) {
 TEST_F(WordBreakerTest, zwjEmojiSequences) {
     uint16_t buf[] = {
         // man + zwj + heart + zwj + man
-        0xD83D, 0xDC68, 0x200D, 0x2764, 0x200D, 0xD83D, 0xDC68,
-        // woman + zwj + heart + zwj + woman
-        0xD83D, 0xDC69, 0x200D, 0x2764, 0x200D, 0xD83D, 0xDC8B, 0x200D, 0xD83D, 0xDC69,
+        UTF16(0x1F468), 0x200D, 0x2764, 0x200D, UTF16(0x1F468),
+        // woman + zwj + heart + zwj + kiss mark + zwj + woman
+        UTF16(0x1F469), 0x200D, 0x2764, 0x200D, UTF16(0x1F48B), 0x200D, UTF16(0x1F469),
         // eye + zwj + left speech bubble
-        0xD83D, 0xDC41, 0x200D, 0xD83D, 0xDDE8,
+        UTF16(0x1F441), 0x200D, UTF16(0x1F5E8),
     };
     WordBreaker breaker;
     breaker.setLocale(icu::Locale::getEnglish());
@@ -89,6 +91,23 @@ TEST_F(WordBreakerTest, zwjEmojiSequences) {
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(17, breaker.wordStart());
     EXPECT_EQ(22, breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, emojiWithModifier) {
+    uint16_t buf[] = {
+        UTF16(0x1F466), UTF16(0x1F3FB),  // boy + type 1-2 fitzpatrick modifier
+        0x270C, 0xFE0F, UTF16(0x1F3FF)  // victory hand + emoji style + type 6 fitzpatrick modifier
+    };
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(4, breaker.next());  // after man + type 6 fitzpatrick modifier
+    EXPECT_EQ(0, breaker.wordStart());
+    EXPECT_EQ(4, breaker.wordEnd());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
+    EXPECT_EQ(4, breaker.wordStart());
+    EXPECT_EQ(8, breaker.wordEnd());
 }
 
 TEST_F(WordBreakerTest, punct) {
