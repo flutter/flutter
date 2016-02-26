@@ -16,6 +16,66 @@ import '../build_configuration.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
+bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('.dart');
+bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
+bool isDartBenchmarkFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_bench.dart');
+
+bool _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSpecDirectories) {
+  final int originalDartFilesCount = dartFiles.length;
+
+  // .../directoryPath/*/bin/*.dart
+  // .../directoryPath/*/lib/main.dart
+  // .../directoryPath/*/test/*_test.dart
+  // .../directoryPath/*/test/*/*_test.dart
+  // .../directoryPath/*/benchmark/*/*_bench.dart
+
+  Directory binDirectory = new Directory(path.join(directoryPath, 'bin'));
+  if (binDirectory.existsSync()) {
+    for (FileSystemEntity subentry in binDirectory.listSync()) {
+      if (isDartFile(subentry))
+        dartFiles.add(subentry.path);
+    }
+  }
+
+  String mainPath = path.join(directoryPath, 'lib', 'main.dart');
+  if (FileSystemEntity.isFileSync(mainPath))
+    dartFiles.add(mainPath);
+
+  Directory testDirectory = new Directory(path.join(directoryPath, 'test'));
+  if (testDirectory.existsSync()) {
+    for (FileSystemEntity entry in testDirectory.listSync()) {
+      if (entry is Directory) {
+        for (FileSystemEntity subentry in entry.listSync()) {
+          if (isDartTestFile(subentry))
+            dartFiles.add(subentry.path);
+        }
+      } else if (isDartTestFile(entry)) {
+        dartFiles.add(entry.path);
+      }
+    }
+  }
+
+  Directory benchmarkDirectory = new Directory(path.join(directoryPath, 'benchmark'));
+  if (benchmarkDirectory.existsSync()) {
+    for (FileSystemEntity entry in benchmarkDirectory.listSync()) {
+      if (entry is Directory) {
+        for (FileSystemEntity subentry in entry.listSync()) {
+          if (isDartBenchmarkFile(subentry))
+            dartFiles.add(subentry.path);
+        }
+      } else if (isDartBenchmarkFile(entry)) {
+        dartFiles.add(entry.path);
+      }
+    }
+  }
+
+  if (originalDartFilesCount != dartFiles.length) {
+    pubSpecDirectories.add(directoryPath);
+    return true;
+  }
+  return false;
+}
+
 class AnalyzeCommand extends FlutterCommand {
   String get name => 'analyze';
   String get description => 'Analyze the project\'s Dart code.';
@@ -56,102 +116,12 @@ class AnalyzeCommand extends FlutterCommand {
       }
     }
 
-    if (argResults['flutter-repo']) {
-      // .../examples/*/*.dart
-      // .../examples/*/lib/main.dart
-      Directory examples = new Directory(path.join(ArtifactStore.flutterRoot, 'examples'));
-      for (FileSystemEntity entry in examples.listSync()) {
-        if (entry is Directory) {
-          bool foundOne = false;
-          for (FileSystemEntity subentry in entry.listSync()) {
-            if (subentry is File && subentry.path.endsWith('.dart')) {
-              dartFiles.add(subentry.path);
-              foundOne = true;
-            } else if (subentry is Directory && path.basename(subentry.path) == 'lib') {
-              String mainPath = path.join(subentry.path, 'main.dart');
-              if (FileSystemEntity.isFileSync(mainPath)) {
-                dartFiles.add(mainPath);
-                foundOne = true;
-              }
-            }
-          }
-          if (foundOne)
-            pubSpecDirectories.add(entry.path);
-        }
-      }
-
-      // .../packages/*/bin/*.dart
-      // .../packages/*/lib/main.dart
-      // .../packages/*/test/*_test.dart
-      // .../packages/*/test/*/*_test.dart
-      // .../packages/*/benchmark/*/*_bench.dart
-      Directory packages = new Directory(path.join(ArtifactStore.flutterRoot, 'packages'));
-      for (FileSystemEntity entry in packages.listSync()) {
-        if (entry is Directory) {
-          bool foundOne = false;
-
-          Directory binDirectory = new Directory(path.join(entry.path, 'bin'));
-          if (binDirectory.existsSync()) {
-            for (FileSystemEntity subentry in binDirectory.listSync()) {
-              if (subentry is File && subentry.path.endsWith('.dart')) {
-                dartFiles.add(subentry.path);
-                foundOne = true;
-              }
-            }
-          }
-
-          String mainPath = path.join(entry.path, 'lib', 'main.dart');
-          if (FileSystemEntity.isFileSync(mainPath)) {
-            dartFiles.add(mainPath);
-            foundOne = true;
-          }
-
-          Directory testDirectory = new Directory(path.join(entry.path, 'test'));
-          if (testDirectory.existsSync()) {
-            for (FileSystemEntity entry in testDirectory.listSync()) {
-              if (entry is Directory) {
-                for (FileSystemEntity subentry in entry.listSync()) {
-                  if (subentry is File && subentry.path.endsWith('_test.dart')) {
-                    dartFiles.add(subentry.path);
-                    foundOne = true;
-                  }
-                }
-              } else if (entry is File && entry.path.endsWith('_test.dart')) {
-                dartFiles.add(entry.path);
-                foundOne = true;
-              }
-            }
-          }
-
-          Directory benchmarkDirectory = new Directory(path.join(entry.path, 'benchmark'));
-          if (benchmarkDirectory.existsSync()) {
-            for (FileSystemEntity entry in benchmarkDirectory.listSync()) {
-              if (entry is Directory) {
-                for (FileSystemEntity subentry in entry.listSync()) {
-                  if (subentry is File && subentry.path.endsWith('_bench.dart')) {
-                    dartFiles.add(subentry.path);
-                    foundOne = true;
-                  }
-                }
-              } else if (entry is File && entry.path.endsWith('_bench.dart')) {
-                dartFiles.add(entry.path);
-                foundOne = true;
-              }
-            }
-          }
-
-          if (foundOne)
-            pubSpecDirectories.add(entry.path);
-        }
-      }
-    }
-
     if (argResults['current-directory']) {
       // ./*.dart
       Directory currentDirectory = new Directory('.');
       bool foundOne = false;
       for (FileSystemEntity entry in currentDirectory.listSync()) {
-        if (entry is File && entry.path.endsWith('.dart')) {
+        if (isDartFile(entry)) {
           dartFiles.add(entry.path);
           foundOne = true;
         }
@@ -163,19 +133,76 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     if (argResults['current-package']) {
-      // ./lib/main.dart
-      String mainPath = 'lib/main.dart';
-      if (FileSystemEntity.isFileSync(mainPath)) {
-        dartFiles.add(mainPath);
-        pubSpecDirectories.add('.');
+      if (_addPackage('.', dartFiles, pubSpecDirectories))
         foundAnyInCurrentDirectory = true;
-      }
     }
+
+    if (argResults['flutter-repo']) {
+
+      //examples/*/ as package
+      //examples/layers/*/ as files
+      //dev/manual_tests/*/ as package
+      //dev/manual_tests/*/ as files
+
+      Directory subdirectory;
+
+      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'packages'));
+      if (subdirectory.existsSync()) {
+        for (FileSystemEntity entry in subdirectory.listSync()) {
+          if (entry is Directory)
+            _addPackage(entry.path, dartFiles, pubSpecDirectories);
+        }
+      }
+
+      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'examples'));
+      if (subdirectory.existsSync()) {
+        for (FileSystemEntity entry in subdirectory.listSync()) {
+          if (entry is Directory)
+            _addPackage(entry.path, dartFiles, pubSpecDirectories);
+        }
+      }
+
+      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'examples', 'layers'));
+      if (subdirectory.existsSync()) {
+        bool foundOne = false;
+        for (FileSystemEntity entry in subdirectory.listSync()) {
+          if (entry is Directory) {
+            for (FileSystemEntity subentry in entry.listSync()) {
+              if (isDartFile(subentry)) {
+                dartFiles.add(subentry.path);
+                foundOne = true;
+              }
+            }
+          }
+        }
+        if (foundOne)
+          pubSpecDirectories.add(subdirectory.path);
+      }
+
+      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'dev', 'manual_tests'));
+      if (subdirectory.existsSync()) {
+        bool foundOne = false;
+        for (FileSystemEntity entry in subdirectory.listSync()) {
+          if (entry is Directory) {
+            _addPackage(entry.path, dartFiles, pubSpecDirectories);
+          } else if (isDartFile(entry)) {
+            dartFiles.add(entry.path);
+            foundOne = true;
+          }
+        }
+        if (foundOne)
+          pubSpecDirectories.add(subdirectory.path);
+      }
+
+    }
+
+    dartFiles = dartFiles.map((String directory) => path.normalize(path.absolute(directory))).toSet().toList();    
+    dartFiles.sort();
 
     // prepare a Dart file that references all the above Dart files
     StringBuffer mainBody = new StringBuffer();
     for (int index = 0; index < dartFiles.length; index += 1)
-      mainBody.writeln('import \'${path.normalize(path.absolute(dartFiles[index]))}\' as file$index;');
+      mainBody.writeln('import \'${dartFiles[index]}\' as file$index;');
     mainBody.writeln('void main() { }');
 
     // prepare a union of all the .packages files
@@ -220,7 +247,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
     if (hadInconsistentRequirements) {
       if (foundAnyInFlutterRepo)
-        printError('You may need to run "dart ${path.normalize(path.relative(path.join(ArtifactStore.flutterRoot, 'dev/update_packages.dart')))} --upgrade".');
+        printError('You may need to run "flutter update-packages --upgrade".');
       if (foundAnyInCurrentDirectory)
         printError('You may need to run "pub upgrade".');
     }
@@ -294,6 +321,8 @@ linter:
       } else {
         printStatus('Analyzing ${dartFiles.length} files...');
       }
+      for (String file in dartFiles)
+        printTrace(file);
     }
 
     Process process = await Process.start(
@@ -314,8 +343,6 @@ linter:
 
     int exitCode = await process.exitCode;
 
-    host.deleteSync(recursive: true);
-
     List<Pattern> patternsToSkip = <Pattern>[
       'Analyzing [${mainFile.path}]...',
       new RegExp('^\\[(hint|error)\\] Unused import \\(${mainFile.path},'),
@@ -331,6 +358,7 @@ linter:
     RegExp allowedIdentifiersPattern = new RegExp(r'_?([A-Z]|_+)\b');
     RegExp constructorTearOffsPattern = new RegExp('.+#.+// analyzer doesn\'t like constructor tear-offs');
     RegExp ignorePattern = new RegExp(r'// analyzer says "([^"]+)"');
+    RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
 
     List<String> errorLines = output.toString().split('\n');
     for (String errorLine in errorLines) {
@@ -346,7 +374,14 @@ linter:
           List<String> sourceLines = source.readAsLinesSync();
           String sourceLine = (lineNumber < sourceLines.length) ? sourceLines[lineNumber-1] : '';
           bool shouldIgnore = false;
-          if (filename.endsWith('.mojom.dart')) {
+          if (filename == mainFile.path) {
+            Match libs = conflictingNamesPattern.firstMatch(errorMessage);
+            if (libs != null) {
+              errorLine = '[$level] $errorMessage (${dartFiles[lineNumber-1]})'; // strip the reference to the generated main.dart
+            } else {
+              errorLine += ' (Please file a bug on the "flutter analyze" command saying that you saw this message.)';
+            }
+          } else if (filename.endsWith('.mojom.dart')) {
             // autogenerated code - TODO(ianh): Fix the Dart mojom compiler
             shouldIgnore = true;
           } else if ((sourceLines[0] == '/**') && (' * DO NOT EDIT. This is code generated'.matchAsPrefix(sourceLines[1]) != null)) {
@@ -375,6 +410,8 @@ linter:
     }
     stopwatch.stop();
     String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+
+    host.deleteSync(recursive: true);
 
     if (exitCode < 0 || exitCode > 3) // 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
