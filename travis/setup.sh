@@ -9,7 +9,7 @@ set -x
 
 # Download dependencies flutter
 ./bin/flutter --version
-./bin/cache/dart-sdk/bin/dart ./dev/update_packages.dart
+./bin/flutter update-packages
 
 if [ $TRAVIS_PULL_REQUEST = "false" ]; then
   export CLOUDSDK_CORE_DISABLE_PROMPTS=1

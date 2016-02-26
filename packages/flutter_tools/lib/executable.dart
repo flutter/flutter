@@ -28,6 +28,7 @@ import 'src/commands/run_mojo.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
+import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
@@ -60,6 +61,7 @@ Future main(List<String> args) async {
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
+    ..addCommand(new UpdatePackagesCommand(hideCommand: !verboseHelp))
     ..addCommand(new UpgradeCommand());
 
   return Chain.capture(() async {
