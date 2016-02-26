@@ -76,6 +76,8 @@ bool _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSp
   return false;
 }
 
+class FileChanged { }
+
 class AnalyzeCommand extends FlutterCommand {
   String get name => 'analyze';
   String get description => 'Analyze the project\'s Dart code.';
@@ -360,6 +362,8 @@ linter:
     RegExp ignorePattern = new RegExp(r'// analyzer says "([^"]+)"');
     RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
 
+    Set<String> changedFiles = new Set<String>(); // files about which we've complained that they changed
+
     List<String> errorLines = output.toString().split('\n');
     for (String errorLine in errorLines) {
       if (patternsToSkip.every((Pattern pattern) => pattern.allMatches(errorLine).isEmpty)) {
@@ -372,7 +376,20 @@ linter:
           int colNumber = int.parse(groups[5]);
           File source = new File(filename);
           List<String> sourceLines = source.readAsLinesSync();
-          String sourceLine = (lineNumber < sourceLines.length) ? sourceLines[lineNumber-1] : '';
+          String sourceLine;
+          try {
+            if (lineNumber > sourceLines.length)
+              throw new FileChanged();
+            sourceLine = sourceLines[lineNumber-1];
+            if (colNumber > sourceLine.length)
+              throw new FileChanged();
+          } on FileChanged {
+            if (changedFiles.add(filename))
+              printError('[warning] File shrank during analysis ($filename)');
+            sourceLine = '';
+            lineNumber = 1;
+            colNumber = 1;
+          }
           bool shouldIgnore = false;
           if (filename == mainFile.path) {
             Match libs = conflictingNamesPattern.firstMatch(errorMessage);
@@ -423,3 +440,4 @@ linter:
     return 0;
   }
 }
+
