@@ -146,6 +146,7 @@ class AnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.ZERO) {
       assert(value == target);
+      _checkStatusChanged();
       return new Future.value();
     }
     assert(simulationDuration > Duration.ZERO);
@@ -180,7 +181,9 @@ class AnimationController extends Animation<double>
     assert(!isAnimating);
     _simulation = simulation;
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
-    return _ticker.start();
+    Future result = _ticker.start();
+    _checkStatusChanged();
+    return result;
   }
 
   /// Stops running this animation.
@@ -194,13 +197,13 @@ class AnimationController extends Animation<double>
     stop();
   }
 
-  AnimationStatus _lastStatus = AnimationStatus.dismissed;
+  AnimationStatus _lastReportedStatus = AnimationStatus.dismissed;
   void _checkStatusChanged() {
     AnimationStatus newStatus = status;
-    AnimationStatus oldStatus = _lastStatus;
-    _lastStatus = newStatus;
-    if (oldStatus != newStatus)
+    if (_lastReportedStatus != newStatus) {
+      _lastReportedStatus = newStatus;
       notifyStatusListeners(newStatus);
+    }
   }
 
   void _tick(Duration elapsed) {
