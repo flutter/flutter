@@ -129,6 +129,8 @@ class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
 }
 
 class GridListDemo extends StatefulComponent {
+  GridListDemo({ Key key }) : super(key: key);
+
   GridListDemoState createState() => new GridListDemoState();
 }
 

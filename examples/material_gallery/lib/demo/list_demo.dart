@@ -175,11 +175,9 @@ class ListDemoState extends State<ListDemo> {
           )
         ]
       ),
-      body: new Padding(
-        padding: const EdgeDims.all(8.0),
-        child: new Block(
-          children: items.map((String item) => buildListItem(context, item)).toList()
-        )
+      body: new Block(
+        padding: new EdgeDims.all(_isDense ? 4.0 : 8.0),
+        children: items.map((String item) => buildListItem(context, item)).toList()
       )
     );
   }
