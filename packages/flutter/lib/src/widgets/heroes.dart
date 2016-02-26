@@ -111,14 +111,13 @@ class Hero extends StatefulComponent {
         final Map<Key, HeroState> tagHeroes = heroes.putIfAbsent(tag, () => <Key, HeroState>{});
         assert(() {
           if (tagHeroes.containsKey(key)) {
-            debugPrint('Tag: $tag   Key: $key');
-            assert(() {
-              'There are multiple heroes that share the same key within the same subtree.               '
-              'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
-              'either each Hero must have a unique tag, or, all the heroes with a particular tag must   '
-              'have different keys. The relevant tag and key were dumped above.                         ';
-              return false;
-            });
+            new WidgetError(
+              'There are multiple heroes that share the same key within the same subtree.\n'
+              'Within each subtree for which heroes are to be animated (typically a PageRoute subtree),\n'
+              'either each Hero must have a unique tag, or, all the heroes with a particular tag must\n'
+              'have different keys.\n'
+              'In this case, the tag "$tag" had multiple heroes with the key "$key".'
+            );
           }
           return true;
         });
@@ -149,86 +148,64 @@ class Hero extends StatefulComponent {
   HeroState createState() => new HeroState();
 }
 
-enum _HeroMode { constructing, initialized, measured, taken }
-
 class HeroState extends State<Hero> implements HeroHandle {
 
-  void initState() {
-    assert(_mode == _HeroMode.constructing);
-    super.initState();
-    _key = new GlobalKey();
-    _mode = _HeroMode.initialized;
-  }
-
-  GlobalKey _key;
-
-  _HeroMode _mode = _HeroMode.constructing;
-  Size _size;
+  GlobalKey _key = new GlobalKey();
+  Size _placeholderSize;
 
   bool get alwaysAnimate => config.alwaysAnimate;
 
   _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation) {
-    assert(_mode == _HeroMode.measured || _mode == _HeroMode.taken);
+    assert(mounted);
     final RenderBox renderObject = context.findRenderObject();
+    assert(renderObject != null);
+    assert(!renderObject.needsLayout);
+    assert(renderObject.hasSize);
+    if (_placeholderSize == null) {
+      // We are a "from" hero, about to depart on a quest.
+      // Remember our size so that we can leave a placeholder.
+      _placeholderSize = renderObject.size;
+    }
     final Point heroTopLeft = renderObject.localToGlobal(Point.origin);
     final Point heroBottomRight = renderObject.localToGlobal(renderObject.size.bottomRight(Point.origin));
     final Rect heroArea = new Rect.fromLTRB(heroTopLeft.x, heroTopLeft.y, heroBottomRight.x, heroBottomRight.y);
     final RelativeRect startRect = new RelativeRect.fromRect(heroArea, animationArea);
     _HeroManifest result = new _HeroManifest(
-      key: _key,
+      key: _key, // might be null, e.g. if the hero is returning to us
       config: config,
       sourceStates: new HashSet<HeroState>.from(<HeroState>[this]),
       currentRect: startRect,
       currentTurns: config.turns.toDouble()
     );
-    setState(() {
-      _key = null;
-      _mode = _HeroMode.taken;
-    });
+    if (_key != null)
+      setState(() { _key = null; });
     return result;
   }
 
   void _setChild(GlobalKey value) {
-    assert(_mode == _HeroMode.taken);
     assert(_key == null);
-    assert(_size != null);
-    if (mounted)
-      setState(() { _key = value; });
-    _size = null;
-    _mode = _HeroMode.initialized;
+    assert(_placeholderSize != null);
+    assert(mounted);
+    setState(() {
+      _key = value;
+      _placeholderSize = null;
+    });
   }
 
   void _resetChild() {
-    assert(_mode == _HeroMode.taken);
-    assert(_key == null);
-    assert(_size != null);
     if (mounted)
-      setState(() { _key = new GlobalKey(); });
-    _size = null;
-    _mode = _HeroMode.initialized;
+      _setChild(null);
   }
 
   Widget build(BuildContext context) {
-    switch (_mode) {
-      case _HeroMode.constructing:
-        assert(false);
-        return null;
-      case _HeroMode.initialized:
-      case _HeroMode.measured:
-        return new SizeObserver(
-          onSizeChanged: (Size size) {
-            assert(_mode == _HeroMode.initialized || _mode == _HeroMode.measured);
-            _size = size;
-            _mode = _HeroMode.measured;
-          },
-          child: new KeyedSubtree(
-            key: _key,
-            child: config.child
-          )
-        );
-      case _HeroMode.taken:
-        return new SizedBox(width: _size.width, height: _size.height);
+    if (_placeholderSize != null) {
+      assert(_key == null);
+      return new SizedBox(width: _placeholderSize.width, height: _placeholderSize.height);
     }
+    return new KeyedSubtree(
+      key: _key,
+      child: config.child
+    );
   }
 
 }
