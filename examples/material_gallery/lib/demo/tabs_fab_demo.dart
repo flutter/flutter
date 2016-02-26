@@ -102,6 +102,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
         ),
         floatingActionButton: !selectedPage.fabDefined ? null : new FloatingActionButton(
           key: selectedPage.fabKey,
+          tooltip: 'Show explanation',
           backgroundColor: selectedPage.fabColor,
           child: selectedPage.fabIcon,
           onPressed: _showExplanatoryText
