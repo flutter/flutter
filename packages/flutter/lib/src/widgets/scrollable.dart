@@ -380,6 +380,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   ///
   /// If a non-null [duration] is provided, the widget will animate to the new
   /// scroll offset over the given duration with the given curve.
+  ///
+  /// This function does not accept a zero duration. To jump-scroll to
+  /// the new offset, do not provide a duration, rather than providing
+  /// a zero duration.
   Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
     if (newScrollOffset == _scrollOffset)
       return new Future.value();
@@ -390,6 +394,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       return new Future.value();
     }
 
+    assert(duration > Duration.ZERO);
     return _animateTo(newScrollOffset, duration, curve);
   }
 

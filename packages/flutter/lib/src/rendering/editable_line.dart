@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'basic_types.dart';
 import 'box.dart';
 import 'object.dart';
+import 'viewport.dart';
 
 const _kCaretGap = 1.0; // pixels
 const _kCaretHeightOffset = 2.0; // pixels
@@ -24,9 +25,9 @@ class RenderEditableLine extends RenderBox {
     bool showCursor: false,
     Color selectionColor,
     TextSelection selection,
-    Offset paintOffset: Offset.zero,
     this.onSelectionChanged,
-    this.onContentSizeChanged
+    Offset paintOffset: Offset.zero,
+    this.onPaintOffsetUpdateNeeded
   }) : _textPainter = new TextPainter(text),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
@@ -45,8 +46,8 @@ class RenderEditableLine extends RenderBox {
       ..onTapCancel = _handleTapCancel;
   }
 
-  ValueChanged<Size> onContentSizeChanged;
   ValueChanged<TextSelection> onSelectionChanged;
+  ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
   /// The text to display
   TextSpan get text => _textPainter.text;
@@ -201,16 +202,15 @@ class RenderEditableLine extends RenderBox {
   Rect _caretPrototype;
 
   void performLayout() {
+    Size oldSize = hasSize ? size : null;
     size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight));
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, size.height - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     _layoutText(new BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight));
     Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
-    if (_contentSize != contentSize) {
-      _contentSize = contentSize;
-      if (onContentSizeChanged != null)
-        onContentSizeChanged(_contentSize);
-    }
+    if (onPaintOffsetUpdateNeeded != null && (size != oldSize || contentSize != _contentSize))
+      onPaintOffsetUpdateNeeded(new ViewportDimensions(containerSize: size, contentSize: contentSize));
+    _contentSize = contentSize;
   }
 
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
