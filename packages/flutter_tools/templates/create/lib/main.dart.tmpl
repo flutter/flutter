@@ -12,7 +12,7 @@ void main() {
 }
 
 class FlutterDemo extends StatefulComponent {
-  State createState() => new _FlutterDemoState();
+  _FlutterDemoState createState() => new _FlutterDemoState();
 }
 
 class _FlutterDemoState extends State<FlutterDemo> {
@@ -30,17 +30,14 @@ class _FlutterDemoState extends State<FlutterDemo> {
         center: new Text('Flutter Demo')
       ),
       body: new Center(
-        child: new Text(
-          'Button tapped $_counter times.',
-          key: const ValueKey('counter')
-        )
+        child: new Text('Button tapped $_counter time${ _counter == 1 ? '' : 's' }.')
       ),
       floatingActionButton: new FloatingActionButton(
-        key: const ValueKey('fab'),
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
         child: new Icon(
           icon: 'content/add'
-        ),
-        onPressed: _incrementCounter
+        )
       )
     );
   }

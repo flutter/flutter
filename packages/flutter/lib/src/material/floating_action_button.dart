@@ -9,6 +9,7 @@ import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 // TODO(eseidel): This needs to change based on device size?
 // http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
@@ -35,6 +36,7 @@ class FloatingActionButton extends StatefulComponent {
   const FloatingActionButton({
     Key key,
     this.child,
+    this.tooltip,
     this.backgroundColor,
     this.elevation: 6,
     this.highlightElevation: 12,
@@ -43,6 +45,7 @@ class FloatingActionButton extends StatefulComponent {
   }) : super(key: key);
 
   final Widget child;
+  final String tooltip;
   final Color backgroundColor;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
@@ -99,6 +102,23 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       iconThemeColor = themeData.accentColorBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
     }
 
+    Widget result = new Center(
+      child: new IconTheme(
+        data: new IconThemeData(color: iconThemeColor),
+        child: new RotationTransition(
+          turns: _childSegue,
+          child: config.child
+        )
+      )
+    );
+
+    if (config.tooltip != null) {
+      result = new Tooltip(
+        message: config.tooltip,
+        child: result
+      );
+    }
+
     return new Material(
       color: materialColor,
       type: MaterialType.circle,
@@ -109,15 +129,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
         child: new InkWell(
           onTap: config.onPressed,
           onHighlightChanged: _handleHighlightChanged,
-          child: new Center(
-            child: new IconTheme(
-              data: new IconThemeData(color: iconThemeColor),
-              child: new RotationTransition(
-                turns: _childSegue,
-                child: config.child
-              )
-            )
-          )
+          child: result
         )
       )
     );
