@@ -379,11 +379,13 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                     langListId, variant);
             if (utf16Pos == 0 || family != lastFamily) {
                 size_t start = utf16Pos;
-                // Workaround for Emoji keycap until we implement per-cluster font
-                // selection: if keycap is found in a different font that also
-                // supports previous char, attach previous char to the new run.
+                // Workaround for Emoji keycap and emoji modifier until we implement per-cluster
+                // font selection: if a keycap or an emoji modifier is found in a different font
+                // that also supports previous char, attach previous char to the new run.
                 // Bug 7557244.
-                if (ch == KEYCAP && utf16Pos != 0 && family && family->getCoverage()->get(prevCh)) {
+                if (utf16Pos != 0 &&
+                        (ch == KEYCAP || (isEmojiModifier(ch) && isEmojiBase(prevCh))) &&
+                        family && family->getCoverage()->get(prevCh)) {
                     const size_t prevChLength = U16_LENGTH(prevCh);
                     run->end -= prevChLength;
                     if (run->start == run->end) {
