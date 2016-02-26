@@ -1119,78 +1119,6 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageAndCoverage) {
     }
 }
 
-TEST_F(FontCollectionItemizeTest, itemize_emojiSelection) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
-    std::vector<FontCollection::Run> runs;
-
-    const FontStyle kDefaultFontStyle;
-
-    // U+00A9 is a text default emoji which is only available in TextEmojiFont.ttf.
-    // TextEmojiFont.ttf should be selected.
-    itemize(collection.get(), "U+00A9", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    EXPECT_EQ(kTextEmojiFont, getFontPath(runs[0]));
-
-    // U+00AE is a text default emoji which is only available in ColorEmojiFont.ttf.
-    // ColorEmojiFont.ttf should be selected.
-    itemize(collection.get(), "U+00AE", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
-
-    // U+203C is a text default emoji which is available in both TextEmojiFont.ttf and
-    // ColorEmojiFont.ttf. TextEmojiFont.ttf should be selected.
-    itemize(collection.get(), "U+203C", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    // TODO: use text font for text default emoji.
-    // EXPECT_EQ(kTextEmojiFont, getFontPath(runs[0]));
-
-    // U+2049 is a text default emoji which is not available in either TextEmojiFont.ttf or
-    // ColorEmojiFont.ttf. No font should be selected.
-    itemize(collection.get(), "U+2049", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    EXPECT_TRUE(runs[0].fakedFont.font == NULL || kNoGlyphFont == getFontPath(runs[0]));
-
-    // U+231A is a emoji default emoji which is available only in TextEmojiFont.ttf.
-    // TextEmojiFont.ttf should be selected.
-    itemize(collection.get(), "U+231A", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    EXPECT_EQ(kTextEmojiFont, getFontPath(runs[0]));
-
-    // U+231B is a emoji default emoji which is available only in ColorEmojiFont.ttf.
-    // ColorEmojiFont.ttf should be selected.
-    itemize(collection.get(), "U+231B", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
-
-    // U+23E9 is a emoji default emoji which is available in both TextEmojiFont.ttf and
-    // ColorEmojiFont.ttf. ColorEmojiFont should be selected.
-    itemize(collection.get(), "U+23E9", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
-
-    // U+23EA is a emoji default emoji which is not avaialble in either TextEmojiFont.ttf and
-    // ColorEmojiFont.ttf. No font should b e selected.
-    itemize(collection.get(), "U+23EA", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(1, runs[0].end);
-    EXPECT_TRUE(runs[0].fakedFont.font == NULL || kNoGlyphFont == getFontPath(runs[0]));
-}
-
 TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0E) {
     std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
     std::vector<FontCollection::Run> runs;
@@ -1355,3 +1283,41 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0F) {
     EXPECT_EQ(kMixedEmojiFont, getFontPath(runs[0]));
 }
 
+TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_with_skinTone) {
+    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
+    std::vector<FontCollection::Run> runs;
+
+    const FontStyle kDefaultFontStyle;
+
+    // TextEmoji font is selected since it is listed before ColorEmoji font.
+    itemize(collection.get(), "U+261D", kDefaultFontStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(1, runs[0].end);
+    EXPECT_EQ(kTextEmojiFont, getFontPath(runs[0]));
+
+    // If skin tone is specified, it should be colored.
+    itemize(collection.get(), "U+261D U+1F3FD", kDefaultFontStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(3, runs[0].end);
+    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
+
+    // Still color font is selected if an emoji variation selector is specified.
+    itemize(collection.get(), "U+261D U+FE0F U+1F3FD", kDefaultFontStyle, &runs);
+    ASSERT_EQ(1U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(4, runs[0].end);
+    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
+
+    // Text font should be selected if a text variation selector is specified and skin tone is
+    // rendered by itself.
+    itemize(collection.get(), "U+261D U+FE0E U+1F3FD", kDefaultFontStyle, &runs);
+    ASSERT_EQ(2U, runs.size());
+    EXPECT_EQ(0, runs[0].start);
+    EXPECT_EQ(2, runs[0].end);
+    EXPECT_EQ(kTextEmojiFont, getFontPath(runs[0]));
+    EXPECT_EQ(2, runs[1].start);
+    EXPECT_EQ(4, runs[1].end);
+    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[1]));
+}
