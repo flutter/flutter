@@ -30,7 +30,7 @@ Future<bool> installApp(
 
   for (Device device in devices.all) {
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null || !device.isConnected() || device.isAppInstalled(package))
+    if (package == null || device.isAppInstalled(package))
       continue;
     if (device.installApp(package))
       installedSomewhere = true;

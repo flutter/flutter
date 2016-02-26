@@ -136,9 +136,6 @@ abstract class Device {
   /// Install an app package on the current device
   bool installApp(ApplicationPackage app);
 
-  /// Check if the device is currently connected
-  bool isConnected();
-
   /// Check if the device is supported by Flutter
   bool isSupported();
 

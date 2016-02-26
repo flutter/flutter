@@ -185,7 +185,7 @@ Future<int> startApp(
 
   for (Device device in devices.all) {
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null || !device.isConnected())
+    if (package == null)
       continue;
 
     if (!device.isSupported()) {
@@ -230,13 +230,14 @@ Future<int> startApp(
   }
 
   if (!startedSomething) {
-    int connected = devices.all.where((device) => device.isConnected()).length;
     String message = 'Unable to run application';
-    if (connected == 0) {
+
+    if (devices.all.isEmpty) {
       message += ' - no connected devices.';
     } else if (unsupportedCount != 0) {
       message += ' - $unsupportedCount unsupported ${pluralize('device', unsupportedCount)} connected';
     }
+
     printError(message);
   }
 

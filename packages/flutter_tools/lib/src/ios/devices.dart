@@ -126,9 +126,6 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool isConnected() => _getAttachedDeviceIDs().contains(id);
-
-  @override
   bool isSupported() => true;
 
   @override
@@ -235,9 +232,6 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 
   // TODO(devoncarew): Support [clear].
   Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
-    if (!device.isConnected())
-      return 2;
-
     return await runCommandAndStreamOutput(
       <String>[device.loggerPath],
       prefix: showPrefix ? '[$name] ' : '',

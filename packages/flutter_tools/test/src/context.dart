@@ -48,8 +48,11 @@ void testUsingContext(String description, dynamic testMethod(), {
     if (!overrides.containsKey(OperatingSystemUtils))
       testContext[OperatingSystemUtils] = new MockOperatingSystemUtils();
 
-    if (!overrides.containsKey(IOSSimulatorUtils))
-      testContext[IOSSimulatorUtils] = new MockIOSSimulatorUtils();
+    if (!overrides.containsKey(IOSSimulatorUtils)) {
+      MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
+      when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
+      testContext[IOSSimulatorUtils] = mock;
+    }
 
     if (Platform.isMacOS) {
       if (!overrides.containsKey(XCode))

@@ -41,18 +41,12 @@ class AndroidDevice extends Device {
     String id, {
     this.productID,
     this.modelID,
-    this.deviceCodeName,
-    bool connected
-  }) : super(id) {
-    if (connected != null)
-      _connected = connected;
-  }
+    this.deviceCodeName
+  }) : super(id);
 
   final String productID;
   final String modelID;
   final String deviceCodeName;
-
-  bool _connected;
 
   bool get isLocalEmulator => false;
 
@@ -152,9 +146,6 @@ class AndroidDevice extends Device {
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
-    if (!isConnected())
-      return false;
-
     if (runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'path', app.id])) == '') {
       printTrace('TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
       return false;
@@ -169,11 +160,6 @@ class AndroidDevice extends Device {
 
   @override
   bool installApp(ApplicationPackage app) {
-    if (!isConnected()) {
-      printTrace('Android device not connected. Not installing.');
-      return false;
-    }
-
     if (!FileSystemEntity.isFileSync(app.localPath)) {
       printError('"${app.localPath}" does not exist.');
       return false;
@@ -390,13 +376,7 @@ class AndroidDevice extends Device {
     return null;
   }
 
-  bool isConnected() => _connected ?? androidSdk != null;
-
   bool isSupported() => true;
-
-  void setConnected(bool value) {
-    _connected = value;
-  }
 
   Future<bool> refreshSnapshot(AndroidApk apk, String snapshotPath) async {
     if (!FileSystemEntity.isFileSync(snapshotPath)) {
@@ -462,13 +442,12 @@ List<AndroidDevice> getAdbDevices() {
         deviceID,
         productID: productID,
         modelID: modelID,
-        deviceCodeName: deviceCodeName,
-        connected: true
+        deviceCodeName: deviceCodeName
       ));
     } else if (deviceRegex2.hasMatch(line)) {
       Match match = deviceRegex2.firstMatch(line);
       String deviceID = match[1];
-      devices.add(new AndroidDevice(deviceID, connected: true));
+      devices.add(new AndroidDevice(deviceID));
     } else if (unauthorizedRegex.hasMatch(line)) {
       Match match = unauthorizedRegex.firstMatch(line);
       String deviceID = match[1];
@@ -499,9 +478,6 @@ class _AdbLogReader extends DeviceLogReader {
   String get name => device.name;
 
   Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
-    if (!device.isConnected())
-      return 2;
-
     if (clear)
       device.clearLogs();
 
