@@ -62,6 +62,8 @@ class IOSDevice extends Device {
 
   final String name;
 
+  bool get isLocalEmulator => false;
+
   bool get supportsStartPaused => false;
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {

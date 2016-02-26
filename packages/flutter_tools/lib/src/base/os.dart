@@ -5,7 +5,10 @@
 import 'dart:async';
 import 'dart:io';
 
-final OperatingSystemUtils os = new OperatingSystemUtils._();
+import 'context.dart';
+
+/// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
+OperatingSystemUtils get os => context[OperatingSystemUtils] ?? (context[OperatingSystemUtils] = new OperatingSystemUtils._());
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils._() {
@@ -16,6 +19,14 @@ abstract class OperatingSystemUtils {
     }
   }
 
+  OperatingSystemUtils._private();
+
+  String get operatingSystem => Platform.operatingSystem;
+
+  bool get isMacOS => operatingSystem == 'macos';
+  bool get isWindows => operatingSystem == 'windows';
+  bool get isLinux => operatingSystem == 'linux';
+
   /// Make the given file executable. This may be a no-op on some platforms.
   ProcessResult makeExecutable(File file);
 
@@ -24,7 +35,9 @@ abstract class OperatingSystemUtils {
   File which(String execName);
 }
 
-class _PosixUtils implements OperatingSystemUtils {
+class _PosixUtils extends OperatingSystemUtils {
+  _PosixUtils() : super._private();
+
   ProcessResult makeExecutable(File file) {
     return Process.runSync('chmod', ['u+x', file.path]);
   }
@@ -40,7 +53,9 @@ class _PosixUtils implements OperatingSystemUtils {
   }
 }
 
-class _WindowsUtils implements OperatingSystemUtils {
+class _WindowsUtils extends OperatingSystemUtils {
+  _WindowsUtils() : super._private();
+
   // This is a no-op.
   ProcessResult makeExecutable(File file) {
     return new ProcessResult(0, 0, null, null);

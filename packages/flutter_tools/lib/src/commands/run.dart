@@ -51,6 +51,11 @@ abstract class RunCommandBase extends FlutterCommand {
     argParser.addOption('route',
         help: 'Which route to load when starting the app.');
   }
+
+  bool get checked => argResults['checked'];
+  bool get traceStartup => argResults['trace-startup'];
+  String get target => argResults['target'];
+  String get route => argResults['route'];
 }
 
 class RunCommand extends RunCommandBase {
@@ -219,7 +224,7 @@ Future<int> startApp(
       // wait for the observatory port to become available before returning from
       // `startApp()`.
       if (startPaused && device.supportsStartPaused) {
-        await _delayUntilObservatoryAvailable('localhost', debugPort);
+        await delayUntilObservatoryAvailable('localhost', debugPort);
       }
     }
   }
@@ -242,7 +247,7 @@ Future<int> startApp(
 ///
 /// This does not fail if we're unable to connect, and times out after the given
 /// [timeout].
-Future _delayUntilObservatoryAvailable(String host, int port, {
+Future delayUntilObservatoryAvailable(String host, int port, {
   Duration timeout: const Duration(seconds: 10)
 }) async {
   Stopwatch stopwatch = new Stopwatch()..start();

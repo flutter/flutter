@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
@@ -26,12 +27,29 @@ class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
   bool get supportsPlatform => Platform.isMacOS;
-  List<Device> pollingGetDevices() => IOSSimulator.getAttachedDevices();
+  List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
+}
+
+class IOSSimulatorUtils {
+  /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
+  static IOSSimulatorUtils get instance => context[IOSSimulatorUtils] ?? (context[IOSSimulatorUtils] = new IOSSimulatorUtils());
+
+  List<IOSSimulator> getAttachedDevices() {
+    if (!xcode.isInstalledAndMeetsVersionCheck)
+      return <IOSSimulator>[];
+
+    return SimControl.instance.getConnectedDevices().map((SimDevice device) {
+      return new IOSSimulator(device.udid, name: device.name);
+    }).toList();
+  }
 }
 
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
-  static Future<bool> boot({String deviceId}) async {
+  /// Returns [SimControl] active in the current app context (i.e. zone).
+  static SimControl get instance => context[SimControl] ?? (context[SimControl] = new SimControl());
+
+  Future<bool> boot({String deviceId}) async {
     if (_isAnyConnected())
       return true;
 
@@ -65,7 +83,7 @@ class SimControl {
   }
 
   /// Returns a list of all available devices, both potential and connected.
-  static List<SimDevice> getDevices() {
+  List<SimDevice> getDevices() {
     // {
     //   "devices" : {
     //     "com.apple.CoreSimulator.SimRuntime.iOS-8-2" : [
@@ -102,18 +120,18 @@ class SimControl {
   }
 
   /// Returns all the connected simulator devices.
-  static List<SimDevice> getConnectedDevices() {
+  List<SimDevice> getConnectedDevices() {
     return getDevices().where((SimDevice device) => device.isBooted).toList();
   }
 
-  static StreamController<List<SimDevice>> _trackDevicesControler;
+  StreamController<List<SimDevice>> _trackDevicesControler;
 
   /// Listens to changes in the set of connected devices. The implementation
   /// currently uses polling. Callers should be careful to call cancel() on any
   /// stream subscription when finished.
   ///
   /// TODO(devoncarew): We could investigate using the usbmuxd protocol directly.
-  static Stream<List<SimDevice>> trackDevices() {
+  Stream<List<SimDevice>> trackDevices() {
     if (_trackDevicesControler == null) {
       Timer timer;
       Set<String> deviceIds = new Set<String>();
@@ -138,7 +156,7 @@ class SimControl {
   }
 
   /// Update the cached set of device IDs and return whether there were any changes.
-  static bool _updateDeviceIds(List<SimDevice> devices, Set<String> deviceIds) {
+  bool _updateDeviceIds(List<SimDevice> devices, Set<String> deviceIds) {
     Set<String> newIds = new Set<String>.from(devices.map((SimDevice device) => device.udid));
 
     bool changed = false;
@@ -159,13 +177,13 @@ class SimControl {
     return changed;
   }
 
-  static bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
+  bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
 
-  static void install(String deviceId, String appPath) {
+  void install(String deviceId, String appPath) {
     runCheckedSync([_xcrunPath, 'simctl', 'install', deviceId, appPath]);
   }
 
-  static void launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
+  void launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
     List<String> args = [_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
       args.addAll(launchArgs);
@@ -190,16 +208,9 @@ class SimDevice {
 class IOSSimulator extends Device {
   IOSSimulator(String id, { this.name }) : super(id);
 
-  static List<IOSSimulator> getAttachedDevices() {
-    if (!xcode.isInstalledAndMeetsVersionCheck)
-      return <IOSSimulator>[];
-
-    return SimControl.getConnectedDevices().map((SimDevice device) {
-      return new IOSSimulator(device.udid, name: device.name);
-    }).toList();
-  }
-
   final String name;
+
+  bool get isLocalEmulator => true;
 
   String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
 
@@ -220,7 +231,7 @@ class IOSSimulator extends Device {
       return false;
 
     try {
-      SimControl.install(id, app.localPath);
+      SimControl.instance.install(id, app.localPath);
       return true;
     } catch (e) {
       return false;
@@ -231,7 +242,7 @@ class IOSSimulator extends Device {
   bool isConnected() {
     if (!Platform.isMacOS)
       return false;
-    return SimControl.getConnectedDevices().any((SimDevice device) => device.udid == id);
+    return SimControl.instance.getConnectedDevices().any((SimDevice device) => device.udid == id);
   }
 
   @override
@@ -333,7 +344,7 @@ class IOSSimulator extends Device {
     }
 
     // Step 3: Install the updated bundle to the simulator.
-    SimControl.install(id, path.absolute(bundle.path));
+    SimControl.instance.install(id, path.absolute(bundle.path));
 
     // Step 4: Prepare launch arguments.
     List<String> args = <String>[];
@@ -349,7 +360,7 @@ class IOSSimulator extends Device {
 
     // Step 5: Launch the updated application in the simulator.
     try {
-      SimControl.launch(id, app.id, args);
+      SimControl.instance.launch(id, app.id, args);
     } catch (error) {
       printError('$error');
       return false;

@@ -15,7 +15,7 @@ defineTests() {
   group('listen', () {
     testUsingContext('returns 1 when no device is connected', () {
       ListenCommand command = new ListenCommand(singleRun: true);
-      applyMocksToCommand(command, noDevices: true);
+      applyMocksToCommand(command);
       return createTestCommandRunner(command).run(['listen']).then((int code) {
         expect(code, equals(1));
       });

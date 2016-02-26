@@ -420,7 +420,7 @@ Future<int> buildAndroid({
 
 // TODO(mpcomplete): move this to Device?
 /// This is currently Android specific.
-Future buildAll(
+Future<int> buildAll(
   DeviceStore devices,
   ApplicationPackageStore applicationPackages,
   Toolchain toolchain,
@@ -434,31 +434,44 @@ Future buildAll(
       continue;
 
     // TODO(mpcomplete): Temporary hack. We only support the apk builder atm.
-    if (package == applicationPackages.android) {
-      // TODO(devoncarew): Remove this warning after a few releases.
-      if (FileSystemEntity.isDirectorySync('apk') && !FileSystemEntity.isDirectorySync('android')) {
-        // Tell people the android directory location changed.
-        printStatus(
-          "Warning: Flutter now looks for Android resources in the android/ directory; "
-          "consider renaming your 'apk/' directory to 'android/'.");
-      }
+    if (package != applicationPackages.android)
+      continue;
 
-      if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
-        printStatus('Using pre-built SkyShell.apk.');
-        continue;
-      }
-
-      int result = await buildAndroid(
-        toolchain: toolchain,
-        configs: configs,
-        enginePath: enginePath,
-        force: false,
-        target: target
-      );
-      if (result != 0)
-        return result;
+    // TODO(devoncarew): Remove this warning after a few releases.
+    if (FileSystemEntity.isDirectorySync('apk') && !FileSystemEntity.isDirectorySync('android')) {
+      // Tell people the android directory location changed.
+      printStatus(
+        "Warning: Flutter now looks for Android resources in the android/ directory; "
+        "consider renaming your 'apk/' directory to 'android/'.");
     }
+
+    int result = await build(toolchain, configs, enginePath: enginePath,
+        target: target);
+    if (result != 0)
+      return result;
   }
 
   return 0;
+}
+
+Future<int> build(
+  Toolchain toolchain,
+  List<BuildConfiguration> configs, {
+  String enginePath,
+  String target: ''
+}) async {
+  if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
+    printStatus('Using pre-built SkyShell.apk.');
+    return 0;
+  }
+
+  int result = await buildAndroid(
+    toolchain: toolchain,
+    configs: configs,
+    enginePath: enginePath,
+    force: false,
+    target: target
+  );
+
+  return result;
 }
