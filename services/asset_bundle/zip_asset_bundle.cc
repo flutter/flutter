@@ -103,7 +103,6 @@ bool ZipAssetBundle::GetAsBuffer(const std::string& asset_name,
 
   int result = unzLocateFile(zip_file.get(), asset_name.c_str(), 0);
   if (result != UNZ_OK) {
-    LOG(WARNING) << "Requested asset '" << asset_name << "' does not exist.";
     return false;
   }
 
