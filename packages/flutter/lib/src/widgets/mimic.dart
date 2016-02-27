@@ -27,14 +27,14 @@ class MimicableHandle {
 
 /// An overlay entry that is mimicking another widget.
 class MimicOverlayEntry {
-  MimicOverlayEntry._(this._key) {
+  MimicOverlayEntry._(this._handle) {
     _overlayEntry = new OverlayEntry(builder: _build);
-    _initialGlobalBounds = _key.globalBounds;
+    _initialGlobalBounds = _handle.globalBounds;
   }
 
   Rect _initialGlobalBounds;
 
-  MimicableHandle _key;
+  MimicableHandle _handle;
   OverlayEntry _overlayEntry;
 
   // Animation state
@@ -53,7 +53,7 @@ class MimicOverlayEntry {
     Duration duration,
     Curve curve: Curves.linear
   }) {
-    assert(_key != null);
+    assert(_handle != null);
     assert(_overlayEntry != null);
     assert(targetKey != null);
     assert(duration != null);
@@ -84,14 +84,14 @@ class MimicOverlayEntry {
     _curve = null;
     _controller?.stop();
     _controller = null;
-    _key.stopMimic();
-    _key = null;
+    _handle.stopMimic();
+    _handle = null;
     _overlayEntry.remove();
     _overlayEntry = null;
   }
 
   Widget _build(BuildContext context) {
-    assert(_key != null);
+    assert(_handle != null);
     assert(_overlayEntry != null);
     Rect globalBounds = _initialGlobalBounds;
     Point globalPosition = globalBounds.topLeft;
@@ -117,7 +117,7 @@ class MimicOverlayEntry {
       top: localPosition.y,
       width: globalBounds.width,
       height: globalBounds.height,
-      child: new Mimic(original: _key)
+      child: new Mimic(original: _handle)
     );
   }
 }
@@ -130,7 +130,7 @@ class Mimic extends StatelessComponent {
   final MimicableHandle original;
 
   Widget build(BuildContext context) {
-    if (original != null && original._state._beingMimicked)
+    if (original != null && original._state.mounted && original._state._placeholderSize != null)
       return original._state.config.child;
     return new Container();
   }
@@ -149,29 +149,49 @@ class Mimicable extends StatefulComponent {
 ///
 /// Exposes an API for starting and stopping mimicking.
 class MimicableState extends State<Mimicable> {
-  Size _size;
-  bool _beingMimicked = false;
+  Size _placeholderSize;
+
+  Rect get _globalBounds {
+    assert(mounted);
+    RenderBox box = context.findRenderObject();
+    assert(box != null);
+    assert(box.hasSize);
+    assert(!box.needsLayout);
+    // TODO(abarth): The bounds will be wrong if there's a scale or rotation transform involved
+    return box.localToGlobal(Point.origin) & box.size;
+  }
 
   /// Start the mimicking process.
   ///
-  /// The child of this object will no longer be built at this location in the
-  /// tree.  Instead, this widget will build a transparent placeholder with the
-  /// same dimensions as the widget had when the mimicking process started.
+  /// The child of this object will no longer be built at this
+  /// location in the tree. Instead, this widget will build a
+  /// transparent placeholder with the same dimensions as the widget
+  /// had when the mimicking process started.
+  ///
+  /// If you use startMimic(), it is your responsibility to do
+  /// something with the returned [MimicableHandle]; typically,
+  /// passing it to a [Mimic] widget. To mimic the child in the
+  /// [Overlay], consider using [liftToOverlay()] instead.
   MimicableHandle startMimic() {
-    assert(!_beingMimicked);
-    assert(_size != null);
+    assert(_placeholderSize == null);
+    RenderBox box = context.findRenderObject();
+    assert(box != null);
+    assert(box.hasSize);
+    assert(!box.needsLayout);
     setState(() {
-      _beingMimicked = true;
+      _placeholderSize = box.size;
     });
     return new MimicableHandle._(this);
   }
 
-  /// Mimic this object in the enclosing overlay.
+  /// Start the mimicking process and mimic this object in the
+  /// enclosing [Overlay].
   ///
-  /// The child of this object will no longer be built at this location in the
-  /// tree.  Instead, (1) this widget will build a transparent placeholder with
-  /// the same dimensions as the widget had when the mimicking process started
-  /// and (2) the child will be placed in the enclosing overlay.
+  /// The child of this object will no longer be built at this
+  /// location in the tree. Instead, (1) this widget will build a
+  /// transparent placeholder with the same dimensions as the widget
+  /// had when the mimicking process started and (2) the child will be
+  /// placed in the enclosing overlay.
   MimicOverlayEntry liftToOverlay() {
     OverlayState overlay = Overlay.of(context);
     assert(overlay != null); // You need an overlay to lift into.
@@ -181,36 +201,20 @@ class MimicableState extends State<Mimicable> {
   }
 
   void _stopMimic() {
-    assert(_beingMimicked);
-    if (!mounted) {
-      _beingMimicked = false;
-      return;
+    assert(_placeholderSize != null);
+    if (mounted) {
+      setState(() {
+        _placeholderSize = null;
+      });
     }
-    setState(() {
-      _beingMimicked = false;
-    });
-  }
-
-  Rect get _globalBounds {
-    RenderBox box = context.findRenderObject();
-    return box.localToGlobal(Point.origin) & box.size;
-  }
-
-  void _handleSizeChanged(Size size) {
-    setState(() {
-      _size = size;
-    });
   }
 
   Widget build(BuildContext context) {
-    if (_beingMimicked) {
+    if (_placeholderSize != null) {
       return new ConstrainedBox(
-        constraints: new BoxConstraints.tight(_size)
+        constraints: new BoxConstraints.tight(_placeholderSize)
       );
     }
-    return new SizeObserver(
-      onSizeChanged: _handleSizeChanged,
-      child: config.child
-    );
+    return config.child;
   }
 }
