@@ -66,5 +66,5 @@ class Size extends OffsetBase {
   /// Compares two Sizes for equality.
   bool operator ==(dynamic other) => other is Size && super == other;
 
-  String toString() => "Size(${width.toStringAsFixed(1)}, ${height.toStringAsFixed(1)})";
+  String toString() => "Size(${width?.toStringAsFixed(1)}, ${height?.toStringAsFixed(1)})";
 }
