@@ -242,6 +242,7 @@ class RenderBlockViewport extends RenderBlockBase {
 
   RenderBlockViewport({
     LayoutCallback callback,
+    VoidCallback postLayoutCallback,
     ExtentCallback totalExtentCallback,
     ExtentCallback maxCrossAxisDimensionCallback,
     ExtentCallback minCrossAxisDimensionCallback,
@@ -275,6 +276,12 @@ class RenderBlockViewport extends RenderBlockBase {
     _callback = value;
     markNeedsLayout();
   }
+
+  /// Called during after [layout].
+  ///
+  /// This callback cannot mutate the tree. To mutate the tree during
+  /// layout, use [callback].
+  VoidCallback postLayoutCallback;
 
   /// Returns the total main-axis extent of all the children that could be included by [callback] in one go.
   ExtentCallback get totalExtentCallback => _totalExtentCallback;
@@ -409,6 +416,8 @@ class RenderBlockViewport extends RenderBlockBase {
       }
     }
     super.performLayout();
+    if (postLayoutCallback != null)
+      postLayoutCallback();
   }
 
   void _paintContents(PaintingContext context, Offset offset) {

@@ -22,7 +22,7 @@ class MixedViewport extends RenderObjectWidget {
     this.direction: Axis.vertical,
     this.builder,
     this.token,
-    this.onExtentChanged,
+    this.onPaintOffsetUpdateNeeded,
     this.onInvalidatorAvailable
   }) : super(key: key);
 
@@ -30,7 +30,7 @@ class MixedViewport extends RenderObjectWidget {
   final Axis direction;
   final IndexedBuilder builder;
   final Object token; // change this if the list changed (i.e. there are added, removed, or resorted items)
-  final ValueChanged<double> onExtentChanged;
+  final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
   final InvalidatorAvailableCallback onInvalidatorAvailable; // call the callback this gives to invalidate sizes
 
   _MixedViewportElement createElement() => new _MixedViewportElement(this);
@@ -107,8 +107,11 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
   /// The constraints for which the current offsets are valid.
   BoxConstraints _lastLayoutConstraints;
 
-  /// The last value that was sent to onExtentChanged.
-  double _lastReportedExtent;
+  /// The last value that was sent to onPaintOffsetUpdateNeeded.
+  ViewportDimensions _lastReportedDimensions;
+
+  double _overrideStartOffset;
+  double get startOffset => _overrideStartOffset ?? widget.startOffset;
 
   RenderBlockViewport get renderObject => super.renderObject;
 
@@ -141,6 +144,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     renderObject
       ..direction = widget.direction
       ..callback = layout
+      ..postLayoutCallback = postLayout
       ..totalExtentCallback = _noIntrinsicExtent
       ..maxCrossAxisExtentCallback = _noIntrinsicExtent
       ..minCrossAxisExtentCallback = _noIntrinsicExtent;
@@ -149,6 +153,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
   void unmount() {
     renderObject
       ..callback = null
+      ..postLayoutCallback = null
       ..totalExtentCallback = null
       ..minCrossAxisExtentCallback = null
       ..maxCrossAxisExtentCallback = null;
@@ -175,9 +180,11 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     _ChangeDescription changes = newWidget.evaluateChangesFrom(widget);
     super.update(newWidget);
     renderObject.direction = widget.direction;
+    _overrideStartOffset = null;
     if (changes == _ChangeDescription.resized)
       _resetCache();
     if (changes != _ChangeDescription.none || !_isValid) {
+      // we scrolled or changed in some other potentially layout-affecting way
       renderObject.markNeedsLayout();
     } else {
       // We have to reinvoke our builders because they might return new data.
@@ -226,12 +233,45 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     BuildableElement.lockState(() {
       _doLayout(constraints);
     }, building: true);
-    if (widget.onExtentChanged != null) {
-      final double newExtent = _didReachLastChild ? _childOffsets.last : null;
-      if (newExtent != _lastReportedExtent) {
-        _lastReportedExtent = newExtent;
-        widget.onExtentChanged(_lastReportedExtent);
+  }
+
+  void postLayout() {
+    assert(renderObject.hasSize);
+    if (widget.onPaintOffsetUpdateNeeded != null) {
+      final Size containerSize = renderObject.size;
+      final double newExtent = _didReachLastChild ? _childOffsets.last : double.INFINITY;
+      Size contentSize;
+      switch (widget.direction) {
+        case Axis.vertical: 
+          contentSize = new Size(containerSize.width, newExtent);
+          break;
+        case Axis.horizontal:
+          contentSize = new Size(newExtent, containerSize.height);
+          break;
       }
+      ViewportDimensions dimensions = new ViewportDimensions(
+        containerSize: containerSize,
+        contentSize: contentSize
+      );
+      if (dimensions != _lastReportedDimensions) {
+        _lastReportedDimensions = dimensions;
+        Offset overrideOffset = widget.onPaintOffsetUpdateNeeded(dimensions);
+        switch (widget.direction) {
+          case Axis.vertical: 
+            assert(overrideOffset.dx == 0.0);
+            _overrideStartOffset = overrideOffset.dy;
+            break;
+          case Axis.horizontal:
+            assert(overrideOffset.dy == 0.0);
+            _overrideStartOffset = overrideOffset.dx;
+            break;
+        }
+      }
+    }
+    if (_childOffsets.length > 0) {
+      renderObject.startOffset = _childOffsets[_firstVisibleChildIndex] - startOffset;
+    } else {
+      renderObject.startOffset = 0.0;
     }
   }
 
@@ -375,7 +415,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     final Map<int, Element> builtChildren = new Map<int, Element>();
 
     // Establish the start and end offsets based on our current constraints.
-    final double endOffset = widget.startOffset + _getMaxExtent(constraints);
+    final double endOffset = startOffset + _getMaxExtent(constraints);
 
     // Create the constraints that we will use to measure the children.
     final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
@@ -417,7 +457,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
 
         // Decide if it's visible.
         final _ChildKey key = new _ChildKey.fromWidget(newElement.widget);
-        final bool isVisible = _childOffsets[widgetIndex] < endOffset && _childOffsets[widgetIndex + 1] >= widget.startOffset;
+        final bool isVisible = _childOffsets[widgetIndex] < endOffset && _childOffsets[widgetIndex + 1] >= startOffset;
         if (isVisible) {
           // Keep it.
           newChildren[key] = newElement;
@@ -438,7 +478,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     if (endOffset < 0.0) {
       // We're so far scrolled up that nothing is visible.
       haveChildren = false;
-    } else if (widget.startOffset <= 0.0) {
+    } else if (startOffset <= 0.0) {
       startIndex = 0;
       // If we're scrolled up past the top, then our first visible widget, if
       // any, is the first widget.
@@ -458,13 +498,13 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     } else {
       // We're at some sane (not higher than the top) scroll offset.
       // See if we can already find the offset in our cache.
-      startIndex = _findIndexForOffsetBeforeOrAt(widget.startOffset);
+      startIndex = _findIndexForOffsetBeforeOrAt(startOffset);
       if (startIndex < _childExtents.length) {
         // We already know of a child that would be visible at this offset.
         haveChildren = true;
       } else {
         // We don't have an offset on the list that is beyond the start offset.
-        assert(_childOffsets.last <= widget.startOffset);
+        assert(_childOffsets.last <= startOffset);
         // Fill the list until this isn't true or until we know that the
         // list is complete (and thus we are overscrolled).
         while (true) {
@@ -477,7 +517,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
             break;
           }
           final _ChildKey key = new _ChildKey.fromWidget(element.widget);
-          if (_childOffsets.last > widget.startOffset) {
+          if (_childOffsets.last > startOffset) {
             // This element is visible! It must thus be our first visible child.
             newChildren[key] = element;
             builtChildren[startIndex] = element;
@@ -491,7 +531,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
           startIndex += 1;
           assert(startIndex == _childExtents.length);
         }
-        assert(haveChildren == _childOffsets.last > widget.startOffset);
+        assert(haveChildren == _childOffsets.last > startOffset);
         assert(() {
           if (haveChildren) {
             // We found a child to render. It's the last one for which we have an
@@ -515,8 +555,6 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
     // Build the other widgets that are visible.
     int index;
     if (haveChildren) {
-      // Update the renderObject configuration
-      renderObject.startOffset = _childOffsets[startIndex] - widget.startOffset;
       // Build all the widgets we still need.
       for (index = startIndex; _childOffsets[index] < endOffset; index += 1) {
         if (!builtChildren.containsKey(index)) {
