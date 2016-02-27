@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'icon.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
+import 'theme.dart';
 import 'tooltip.dart';
 
 /// A material design "icon button".
@@ -47,7 +48,7 @@ class IconButton extends StatelessComponent {
         size: size,
         icon: icon,
         colorTheme: colorTheme,
-        color: color
+        color: onPressed != null ? color : Theme.of(context).disabledColor
       )
     );
     if (tooltip != null) {
