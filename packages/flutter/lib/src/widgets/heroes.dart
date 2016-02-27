@@ -479,7 +479,8 @@ class HeroController extends NavigatorObserver {
 
   void _addHeroToOverlay(Widget hero, Object tag, OverlayState overlay) {
     OverlayEntry entry = new OverlayEntry(builder: (_) => hero);
-    if (_animation.direction == AnimationDirection.forward)
+    assert(_animation.status != AnimationStatus.dismissed && _animation.status != AnimationStatus.completed);
+    if (_animation.status == AnimationStatus.forward)
       _to.insertHeroOverlayEntry(entry, tag, overlay);
     else
       _from.insertHeroOverlayEntry(entry, tag, overlay);

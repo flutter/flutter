@@ -66,7 +66,10 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
-    _positionController.play(value ? AnimationDirection.forward : AnimationDirection.reverse);
+    if (value)
+      _positionController.forward();
+    else
+      _positionController.reverse();
   }
 
   Color get activeColor => _activeColor;

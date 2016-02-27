@@ -51,7 +51,7 @@ class _BottomSheetState extends State<BottomSheet> {
     return renderBox.size.height;
   }
 
-  bool get _dismissUnderway => config.animationController.direction == AnimationDirection.reverse;
+  bool get _dismissUnderway => config.animationController.status == AnimationStatus.reverse;
 
   void _handleDragUpdate(double delta) {
     if (_dismissUnderway)

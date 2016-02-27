@@ -16,7 +16,6 @@ class _AlwaysCompleteAnimation extends Animation<double> {
   void addStatusListener(AnimationStatusListener listener) { }
   void removeStatusListener(AnimationStatusListener listener) { }
   AnimationStatus get status => AnimationStatus.completed;
-  AnimationDirection get direction => AnimationDirection.forward;
   double get value => 1.0;
 }
 
@@ -35,7 +34,6 @@ class _AlwaysDismissedAnimation extends Animation<double> {
   void addStatusListener(AnimationStatusListener listener) { }
   void removeStatusListener(AnimationStatusListener listener) { }
   AnimationStatus get status => AnimationStatus.dismissed;
-  AnimationDirection get direction => AnimationDirection.forward;
   double get value => 0.0;
 }
 
@@ -57,7 +55,6 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
   void addStatusListener(AnimationStatusListener listener) { }
   void removeStatusListener(AnimationStatusListener listener) { }
   AnimationStatus get status => AnimationStatus.forward;
-  AnimationDirection get direction => AnimationDirection.forward;
 }
 
 /// Implements most of the [Animation] interface, by deferring its behavior to a
@@ -77,7 +74,6 @@ abstract class AnimationWithParentMixin<T> {
   void removeStatusListener(AnimationStatusListener listener) => parent.removeStatusListener(listener);
 
   AnimationStatus get status => parent.status;
-  AnimationDirection get direction => parent.direction;
 }
 
 /// An animation that is a proxy for another animation.
@@ -92,13 +88,11 @@ class ProxyAnimation extends Animation<double>
     _parent = animation;
     if (_parent == null) {
       _status = AnimationStatus.dismissed;
-      _direction = AnimationDirection.forward;
       _value = 0.0;
     }
   }
 
   AnimationStatus _status;
-  AnimationDirection _direction;
   double _value;
 
   /// The animation whose value this animation will proxy.
@@ -112,7 +106,6 @@ class ProxyAnimation extends Animation<double>
       return;
     if (_parent != null) {
       _status = _parent.status;
-      _direction = _parent.direction;
       _value = _parent.value;
       if (isListening)
         didStopListening();
@@ -126,7 +119,6 @@ class ProxyAnimation extends Animation<double>
       if (_status != _parent.status)
         notifyStatusListeners(_parent.status);
       _status = null;
-      _direction = null;
       _value = null;
     }
   }
@@ -146,7 +138,6 @@ class ProxyAnimation extends Animation<double>
   }
 
   AnimationStatus get status => _parent != null ? _parent.status : _status;
-  AnimationDirection get direction => _parent != null ? _parent.direction : _direction;
   double get value => _parent != null ? _parent.value : _value;
 }
 
@@ -186,7 +177,6 @@ class ReverseAnimation extends Animation<double>
   }
 
   AnimationStatus get status => _reverseStatus(parent.status);
-  AnimationDirection get direction => _reverseDirection(parent.direction);
   double get value => 1.0 - parent.value;
 
   AnimationStatus _reverseStatus(AnimationStatus status) {
@@ -195,13 +185,6 @@ class ReverseAnimation extends Animation<double>
       case AnimationStatus.reverse: return AnimationStatus.forward;
       case AnimationStatus.completed: return AnimationStatus.dismissed;
       case AnimationStatus.dismissed: return AnimationStatus.completed;
-    }
-  }
-
-  AnimationDirection _reverseDirection(AnimationDirection direction) {
-    switch (direction) {
-      case AnimationDirection.forward: return AnimationDirection.reverse;
-      case AnimationDirection.reverse: return AnimationDirection.forward;
     }
   }
 }
@@ -238,7 +221,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// The curve direction is only reset when we hit the beginning or the end of
   /// the timeline to avoid discontinuities in the value of any variables this
   /// a animation is used to animate.
-  AnimationDirection _curveDirection;
+  AnimationStatus _curveDirection;
 
   void _handleStatusChanged(AnimationStatus status) {
     switch (status) {
@@ -247,16 +230,16 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
         _curveDirection = null;
         break;
       case AnimationStatus.forward:
-        _curveDirection ??= AnimationDirection.forward;
+        _curveDirection ??= AnimationStatus.forward;
         break;
       case AnimationStatus.reverse:
-        _curveDirection ??= AnimationDirection.reverse;
+        _curveDirection ??= AnimationStatus.reverse;
         break;
     }
   }
 
   double get value {
-    final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.direction) == AnimationDirection.forward;
+    final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
     Curve activeCurve = useForwardCurve ? curve : reverseCurve;
 
     double t = parent.value;
@@ -324,7 +307,6 @@ class TrainHoppingAnimation extends Animation<double>
   }
 
   AnimationStatus get status => _currentTrain.status;
-  AnimationDirection get direction => _currentTrain.direction;
 
   double _lastValue;
   void _valueChangeHandler() {

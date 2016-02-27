@@ -13,6 +13,15 @@ import 'curves.dart';
 import 'forces.dart';
 import 'listener_helpers.dart';
 
+/// The direction in which an animation is running.
+enum _AnimationDirection {
+  /// The animation is running from beginning to end.
+  forward,
+
+  /// The animation is running backwards, from end to beginning.
+  reverse
+}
+
 /// A controller for an animation.
 ///
 /// An animation controller can drive an animation forward or backward and can
@@ -79,9 +88,6 @@ class AnimationController extends Animation<double>
   /// The length of time this animation should last.
   Duration duration;
 
-  AnimationDirection get direction => _direction;
-  AnimationDirection _direction = AnimationDirection.forward;
-
   Ticker _ticker;
   Simulation _simulation;
 
@@ -106,31 +112,28 @@ class AnimationController extends Animation<double>
   /// Whether this animation is currently animating in either the forward or reverse direction.
   bool get isAnimating => _ticker.isTicking;
 
+  _AnimationDirection _direction;
+
   AnimationStatus get status {
     if (!isAnimating && value == upperBound)
       return AnimationStatus.completed;
     if (!isAnimating && value == lowerBound)
       return AnimationStatus.dismissed;
-    return _direction == AnimationDirection.forward ?
+    return _direction == _AnimationDirection.forward ?
         AnimationStatus.forward :
         AnimationStatus.reverse;
   }
 
   /// Starts running this animation forwards (towards the end).
-  Future forward() => play(AnimationDirection.forward);
-
-  /// Starts running this animation in reverse (towards the beginning).
-  Future reverse() => play(AnimationDirection.reverse);
-
-  /// Starts running this animation in the given direction.
-  Future play(AnimationDirection direction) {
-    _direction = direction;
-    return resume();
+  Future forward() {
+    _direction = _AnimationDirection.forward;
+    return animateTo(upperBound);
   }
 
-  /// Resumes this animation in the most recent direction.
-  Future resume() {
-    return animateTo(_direction == AnimationDirection.forward ? upperBound : lowerBound);
+  /// Starts running this animation in reverse (towards the beginning).
+  Future reverse() {
+    _direction = _AnimationDirection.reverse;
+    return animateTo(lowerBound);
   }
 
   /// Drives the animation from its current value to target.
@@ -165,7 +168,7 @@ class AnimationController extends Animation<double>
   /// animation will complete, otherwise it will dismiss.
   Future fling({ double velocity: 1.0, Force force }) {
     force ??= kDefaultSpringForce;
-    _direction = velocity < 0.0 ? AnimationDirection.reverse : AnimationDirection.forward;
+    _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     return animateWith(force.release(value, velocity));
   }
 
