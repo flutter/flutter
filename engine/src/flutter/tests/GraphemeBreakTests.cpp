@@ -155,6 +155,7 @@ TEST(GraphemeBreak, emojiModifiers) {
     EXPECT_TRUE(IsBreak("U+2764 | U+1F3FB"));  // heart + modifier
     EXPECT_TRUE(IsBreak("U+2764 U+FE0E | U+1F3FB"));  // heart + emoji style + modifier
     EXPECT_TRUE(IsBreak("U+2764 U+FE0F | U+1F3FB"));  // heart + emoji style + modifier
+    EXPECT_TRUE(IsBreak("U+1F3FB | U+1F3FB"));  // modifier + modifier
 
     // rat is not an emoji modifer
     EXPECT_TRUE(IsBreak("U+1F466 | U+1F400"));  // boy + rat
