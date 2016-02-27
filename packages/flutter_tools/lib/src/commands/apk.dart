@@ -13,6 +13,7 @@ import '../artifacts.dart';
 import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
@@ -296,6 +297,9 @@ int _buildApk(
     ensureDirectoryExists(finalApk.path);
     builder.align(unalignedApk, finalApk);
 
+    File apkShaFile = new File('$outputFile.sha1');
+    apkShaFile.writeAsStringSync(calculateSha(finalApk));
+
     printStatus('Generated APK to ${finalApk.path}.');
 
     return 0;
@@ -313,7 +317,7 @@ int _signApk(
   String keyPassword;
 
   if (keystoreInfo == null) {
-    printError('Signing the APK using the debug keystore.');
+    printStatus('Warning: signing the APK using the debug keystore.');
     keystore = components.debugKeystore;
     keystorePassword = _kDebugKeystorePassword;
     keyAlias = _kDebugKeystoreKeyAlias;
@@ -345,13 +349,14 @@ bool _needsRebuild(String apkPath, String manifest) {
   Iterable<FileStat> dependenciesStat = [
     manifest,
     _kFlutterManifestPath,
-    _kPackagesStatusPath
+    _kPackagesStatusPath,
+    '$apkPath.sha1'
   ].map((String path) => FileStat.statSync(path));
 
   if (apkStat.type == FileSystemEntityType.NOT_FOUND)
     return true;
   for (FileStat dep in dependenciesStat) {
-    if (dep.modified.isAfter(apkStat.modified))
+    if (dep.modified == null || dep.modified.isAfter(apkStat.modified))
       return true;
   }
   return false;
@@ -381,7 +386,7 @@ Future<int> buildAndroid({
   }
 
   if (!force && !_needsRebuild(outputFile, manifest)) {
-    printTrace('APK up to date. Skipping build step.');
+    printTrace('APK up to date; skipping build step.');
     return 0;
   }
 
@@ -408,13 +413,8 @@ Future<int> buildAndroid({
     String mainPath = findMainDartFile(target);
 
     // Build the FLX.
-    flx.DirectoryResult buildResult = await flx.buildInTempDir(toolchain, mainPath: mainPath);
-
-    try {
-      return _buildApk(components, buildResult.localBundlePath, keystore, outputFile);
-    } finally {
-      buildResult.dispose();
-    }
+    String localBundlePath = await flx.buildFlx(toolchain, mainPath: mainPath);
+    return _buildApk(components, localBundlePath, keystore, outputFile);
   }
 }
 
