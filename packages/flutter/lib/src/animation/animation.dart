@@ -4,15 +4,6 @@
 
 import 'dart:ui' show Color, Size, Rect, VoidCallback;
 
-/// The direction in which an animation is running.
-enum AnimationDirection {
-  /// The animation is running from beginning to end.
-  forward,
-
-  /// The animation is running backwards, from end to beginning.
-  reverse
-}
-
 /// The status of an animation
 enum AnimationStatus {
   /// The animation is stopped at the beginning
@@ -62,9 +53,6 @@ abstract class Animation<T> {
   /// The current status of this animation.
   AnimationStatus get status;
 
-  /// The current direction of the animation.
-  AnimationDirection get direction;
-
   /// The current value of the animation.
   T get value;
 
@@ -79,7 +67,6 @@ abstract class Animation<T> {
   }
   String toStringDetails() {
     assert(status != null);
-    assert(direction != null);
     String icon;
     switch (status) {
       case AnimationStatus.forward:
@@ -89,24 +76,10 @@ abstract class Animation<T> {
         icon = '\u25C0'; // <
         break;
       case AnimationStatus.completed:
-        switch (direction) {
-          case AnimationDirection.forward:
-            icon = '\u23ED'; // >>|
-            break;
-          case AnimationDirection.reverse:
-            icon = '\u29CF'; // <|
-            break;
-        }
+        icon = '\u23ED'; // >>|
         break;
       case AnimationStatus.dismissed:
-        switch (direction) {
-          case AnimationDirection.forward:
-            icon = '\u29D0'; // |>
-            break;
-          case AnimationDirection.reverse:
-            icon = '\u23EE'; // |<<
-            break;
-        }
+        icon = '\u23EE'; // |<<
         break;
     }
     assert(icon != null);

@@ -14,39 +14,44 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     super.initState();
     controller = new AnimationController(
       duration: const Duration(milliseconds: 1500)
-    )..play(AnimationDirection.forward);
+    )..forward();
 
     animation = new CurvedAnimation(
       parent: controller,
       curve: new Interval(0.0, 0.9, curve: Curves.ease),
       reverseCurve: Curves.ease
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed || status == AnimationStatus.completed)
-        reverseValueAnimationDirection();
+      if (status == AnimationStatus.dismissed)
+        controller.forward();
+      else if (status == AnimationStatus.completed)
+        controller.reverse();
     });
   }
 
   Animation<double> animation;
   AnimationController controller;
 
-  void handleTap() {
+  void _handleTap() {
     setState(() {
       // valueAnimation.isAnimating is part of our build state
-      if (controller.isAnimating)
+      if (controller.isAnimating) {
         controller.stop();
-      else
-        controller.resume();
+      } else {
+        switch (controller.status) {
+          case AnimationStatus.dismissed:
+          case AnimationStatus.forward:
+            controller.forward();
+            break;
+          case AnimationStatus.reverse:
+          case AnimationStatus.completed:
+            controller.reverse();
+            break;
+        }
+      }
     });
   }
 
-  void reverseValueAnimationDirection() {
-    AnimationDirection direction = (controller.direction == AnimationDirection.forward)
-      ? AnimationDirection.reverse
-      : AnimationDirection.forward;
-    controller.play(direction);
-  }
-
-  Widget buildIndicators(BuildContext context, Widget child) {
+  Widget _buildIndicators(BuildContext context, Widget child) {
     List<Widget> indicators = <Widget>[
         new SizedBox(
           width: 200.0,
@@ -82,13 +87,13 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
       body: new DefaultTextStyle(
         style: Theme.of(context).text.title,
         child: new GestureDetector(
-          onTap: handleTap,
+          onTap: _handleTap,
           behavior: HitTestBehavior.opaque,
           child: new Container(
             padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
             child: new AnimatedBuilder(
               animation: animation,
-              builder: buildIndicators
+              builder: _buildIndicators
             )
           )
         )

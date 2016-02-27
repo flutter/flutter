@@ -810,7 +810,6 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
 
   TabBarSelectionState _selection;
   List<Widget> _items;
-  AnimationDirection _scrollDirection = AnimationDirection.forward;
 
   int get _tabCount => config.children.length;
 
@@ -907,16 +906,11 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
 
     if (selectedIndex < previousSelectedIndex) {
       _updateItemsFromChildren(selectedIndex, previousSelectedIndex);
-      _scrollDirection = AnimationDirection.reverse;
+      scrollTo(1.0 - animation.value);
     } else {
       _updateItemsFromChildren(previousSelectedIndex, selectedIndex);
-      _scrollDirection = AnimationDirection.forward;
-    }
-
-    if (_scrollDirection == AnimationDirection.forward)
       scrollTo(animation.value);
-    else
-      scrollTo(1.0 - animation.value);
+    }
   }
 
   void dispatchOnScroll() {
