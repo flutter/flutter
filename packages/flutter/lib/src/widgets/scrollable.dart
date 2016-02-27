@@ -549,18 +549,13 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     // render object via our return value.
     _viewportSize = config.scrollDirection == Axis.vertical ? dimensions.containerSize.height : dimensions.containerSize.width;
     _childSize = config.scrollDirection == Axis.vertical ? dimensions.contentSize.height : dimensions.contentSize.width;
-    _updateScrollBehavior();
-    updateGestureDetector();
-    return scrollOffsetToPixelDelta(scrollOffset);
-  }
-
-  void _updateScrollBehavior() {
-    // if you don't call this from build(), you must call it from setState().
     scrollTo(scrollBehavior.updateExtents(
       contentExtent: _childSize,
       containerExtent: _viewportSize,
       scrollOffset: scrollOffset
     ));
+    updateGestureDetector();
+    return scrollOffsetToPixelDelta(scrollOffset);
   }
 
   Widget buildContent(BuildContext context) {
@@ -668,6 +663,8 @@ abstract class ScrollableListPainter extends Painter {
 /// have the same height. Prefer [ScrollableWidgetList] when all the children
 /// have the same height because it can use that property to be more efficient.
 /// Prefer [ScrollableViewport] with a single child.
+///
+/// ScrollableMixedWidgetList only supports vertical scrolling.
 class ScrollableMixedWidgetList extends Scrollable {
   ScrollableMixedWidgetList({
     Key key,
@@ -683,6 +680,8 @@ class ScrollableMixedWidgetList extends Scrollable {
     onScroll: onScroll,
     snapOffsetCallback: snapOffsetCallback
   );
+
+  // TODO(ianh): Support horizontal scrolling.
 
   final IndexedBuilder builder;
   final Object token;
@@ -702,52 +701,27 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
   ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
-  void _handleSizeChanged(Size newSize) {
-    setState(() {
-      scrollBy(scrollBehavior.updateExtents(
-        containerExtent: newSize.height,
-        scrollOffset: scrollOffset
-      ));
-    });
-  }
-
-  bool _contentChanged = false;
-
-  void didUpdateConfig(ScrollableMixedWidgetList oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (config.token != oldConfig.token) {
-      // When the token changes the scrollable's contents may have changed.
-      // Remember as much so that after the new contents have been laid out we
-      // can adjust the scrollOffset so that the last page of content is still
-      // visible.
-      _contentChanged = true;
-    }
-  }
-
-  void _handleExtentChanged(double newExtent) {
-    double newScrollOffset;
-    setState(() {
-      newScrollOffset = scrollBehavior.updateExtents(
-        contentExtent: newExtent ?? double.INFINITY,
-        scrollOffset: scrollOffset
-      );
-    });
-    if (_contentChanged) {
-      _contentChanged = false;
-      scrollTo(newScrollOffset);
-    }
+  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
+    // We make various state changes here but don't have to do so in a
+    // setState() callback because we are called during layout and all
+    // we're updating is the new offset, which we are providing to the
+    // render object via our return value.
+    scrollTo(scrollBehavior.updateExtents(
+      contentExtent: dimensions.contentSize.height,
+      containerExtent: dimensions.containerSize.height,
+      scrollOffset: scrollOffset
+    ));
+    updateGestureDetector();
+    return scrollOffsetToPixelDelta(scrollOffset);
   }
 
   Widget buildContent(BuildContext context) {
-    return new SizeObserver(
-      onSizeChanged: _handleSizeChanged,
-      child: new MixedViewport(
-        startOffset: scrollOffset,
-        builder: config.builder,
-        token: config.token,
-        onInvalidatorAvailable: config.onInvalidatorAvailable,
-        onExtentChanged: _handleExtentChanged
-      )
+    return new MixedViewport(
+      startOffset: scrollOffset,
+      builder: config.builder,
+      token: config.token,
+      onInvalidatorAvailable: config.onInvalidatorAvailable,
+      onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
     );
   }
 }
