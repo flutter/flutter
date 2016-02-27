@@ -22,7 +22,6 @@ void main() {
           ]
         )
       );
-      tester.pump(); // for SizeObservers
 
       Point middleOfContainer = tester.getCenter(tester.findText('Hello'));
       Point target = tester.getCenter(tester.findElementByKey(blockKey));
@@ -100,7 +99,6 @@ void main() {
       }
 
       tester.pumpWidget(buildBlock(ViewportAnchor.end));
-      tester.pump(); // for SizeObservers
 
       Point target = const Point(200.0, 200.0);
       tester.tapAt(target);
@@ -108,7 +106,6 @@ void main() {
       expect(second, equals(1));
 
       tester.pumpWidget(buildBlock(ViewportAnchor.start));
-      tester.pump(); // for SizeObservers
 
       tester.tapAt(target);
       expect(first, equals(1));

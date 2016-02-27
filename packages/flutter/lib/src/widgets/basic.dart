@@ -828,30 +828,6 @@ class Viewport extends OneChildRenderObjectWidget {
   }
 }
 
-/// Calls [onSizeChanged] whenever the child's layout size changes
-///
-/// Because size observer calls its callback during layout, you cannot modify
-/// layout information during the callback.
-class SizeObserver extends OneChildRenderObjectWidget {
-  SizeObserver({ Key key, this.onSizeChanged, Widget child })
-    : super(key: key, child: child) {
-    assert(onSizeChanged != null);
-  }
-
-  /// The callback to call whenever the child's layout size changes
-  final ValueChanged<Size> onSizeChanged;
-
-  RenderSizeObserver createRenderObject() => new RenderSizeObserver(onSizeChanged: onSizeChanged);
-
-  void updateRenderObject(RenderSizeObserver renderObject, SizeObserver oldWidget) {
-    renderObject.onSizeChanged = onSizeChanged;
-  }
-
-  void didUnmountRenderObject(RenderSizeObserver renderObject) {
-    renderObject.onSizeChanged = null;
-  }
-}
-
 
 // CONTAINER
 
