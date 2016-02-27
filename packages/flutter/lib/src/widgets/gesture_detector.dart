@@ -279,22 +279,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// the gesture detector should be enabled.
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
-      RenderObject renderObject = context.findRenderObject();
-      if (!config.excludeFromSemantics) {
-        assert(renderObject is RenderSemanticsGestureHandler);
-        RenderSemanticsGestureHandler semanticsGestureHandler = renderObject;
-        renderObject = semanticsGestureHandler.child;
-      }
-      assert(renderObject is RenderPointerListener);
-      RenderPointerListener pointerListener = renderObject;
-      renderObject = pointerListener.child;
-      if (!renderObject.debugDoingThisLayout) {
-        throw new WidgetError(
-          'replaceGestureRecognizers() can only be called during the layout phase of the GestureDetector\'s nearest descendant RenderObjectWidget.\n'
-          'In this particular case, that is:\n'
-          '  $renderObject'
-        );
-      }
+      if (!RenderObject.debugDoingLayout)
+        throw new WidgetError('replaceGestureRecognizers() can only be called during the layout phase.');
       return true;
     });
     _syncAll(gestures);
