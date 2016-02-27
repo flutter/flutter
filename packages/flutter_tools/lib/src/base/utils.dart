@@ -3,6 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
+
+import 'package:crypto/crypto.dart';
+
+String calculateSha(File file) {
+  SHA1 sha1 = new SHA1();
+  sha1.add(file.readAsBytesSync());
+  return CryptoUtils.bytesToHex(sha1.close());
+}
 
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is

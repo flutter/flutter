@@ -71,7 +71,7 @@ class Bundle {
   Bundle.fromContent({
     this.path,
     this.manifest,
-    contentBytes,
+    List<int> contentBytes,
     AsymmetricKeyPair keyPair
   }) : _contentBytes = contentBytes {
     assert(path != null);

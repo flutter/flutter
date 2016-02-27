@@ -65,8 +65,12 @@ Future<Process> runDetached(List<String> cmd) {
 
 /// Run cmd and return stdout.
 /// Throws an error if cmd exits with a non-zero value.
-String runCheckedSync(List<String> cmd, { String workingDirectory }) {
-  return _runWithLoggingSync(cmd, workingDirectory: workingDirectory, checked: true, noisyErrors: true);
+String runCheckedSync(List<String> cmd, {
+  String workingDirectory, bool truncateCommand: false
+}) {
+  return _runWithLoggingSync(
+    cmd, workingDirectory: workingDirectory, checked: true, noisyErrors: true, truncateCommand: truncateCommand
+  );
 }
 
 /// Run cmd and return stdout.
@@ -91,9 +95,13 @@ bool exitsHappy(List<String> cli) {
 String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
   bool noisyErrors: false,
-  String workingDirectory
+  String workingDirectory,
+  bool truncateCommand: false
 }) {
-  printTrace(cmd.join(' '));
+  String cmdText = cmd.join(' ');
+  if (truncateCommand && cmdText.length > 160)
+    cmdText = cmdText.substring(0, 160) + '…';
+  printTrace(cmdText);
   ProcessResult results =
       Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList(), workingDirectory: workingDirectory);
   if (results.exitCode != 0) {

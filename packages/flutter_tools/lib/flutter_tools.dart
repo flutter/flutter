@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
-import 'package:archive/archive.dart';
+import 'dart:io';
 
 import 'src/flx.dart' as flx;
 
@@ -12,7 +11,7 @@ import 'src/flx.dart' as flx;
 /// pre-compiled snapshot.
 Future<int> assembleFlx({
   Map manifestDescriptor: const {},
-  ArchiveFile snapshotFile: null,
+  File snapshotFile: null,
   String assetBasePath: flx.defaultAssetBasePath,
   String materialAssetBasePath: flx.defaultMaterialAssetBasePath,
   String outputPath: flx.defaultFlxOutputPath,

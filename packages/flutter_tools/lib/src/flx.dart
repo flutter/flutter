@@ -5,9 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
 import 'package:path/path.dart' as path;
@@ -16,6 +14,7 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
 import 'globals.dart';
 import 'toolchain.dart';
+import 'zip.dart';
 
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
@@ -140,20 +139,17 @@ dynamic _loadManifest(String manifestPath) {
   return loadYaml(manifestDescriptor);
 }
 
-bool _addAssetFile(Archive archive, _Asset asset) {
+ZipEntry _createAssetEntry(_Asset asset) {
   String source = asset.source ?? asset.key;
   File file = new File('${asset.base}/$source');
   if (!file.existsSync()) {
     printError('Cannot find asset "$source" in directory "${path.absolute(asset.base)}".');
-    return false;
+    return null;
   }
-  List<int> content = file.readAsBytesSync();
-  archive.addFile(new ArchiveFile.noCompress(asset.key, content.length, content));
-  return true;
+  return new ZipEntry.fromFile(asset.key, file);
 }
 
-ArchiveFile _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
-  String key = 'AssetManifest.json';
+ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
   Map<String, List<String>> json = <String, List<String>>{};
   for (_Asset main in assets.keys) {
     List<String> variants = <String>[];
@@ -161,34 +157,25 @@ ArchiveFile _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
       variants.add(variant.key);
     json[main.key] = variants;
   }
-  List<int> content = UTF8.encode(JSON.encode(json));
-  return new ArchiveFile.noCompress(key, content.length, content);
+  return new ZipEntry.fromString('AssetManifest.json', JSON.encode(json));
 }
 
-ArchiveFile _createFontManifest(Map manifestDescriptor) {
+ZipEntry _createFontManifest(Map manifestDescriptor) {
   if (manifestDescriptor != null && manifestDescriptor.containsKey('fonts')) {
-    List<int> content = UTF8.encode(JSON.encode(manifestDescriptor['fonts']));
-    return new ArchiveFile.noCompress('FontManifest.json', content.length, content);
+    return new ZipEntry.fromString('FontManifest.json', JSON.encode(manifestDescriptor['fonts']));
   } else {
     return null;
   }
 }
 
-ArchiveFile _createSnapshotFile(String snapshotPath) {
-  File file = new File(snapshotPath);
-  List<int> content = file.readAsBytesSync();
-  return new ArchiveFile(_kSnapshotKey, content.length, content);
-}
-
-/// Build the flx in a temp dir and return `localBundlePath` on success.
-Future<DirectoryResult> buildInTempDir(
+/// Build the flx in the build/ directory and return `localBundlePath` on success.
+Future<String> buildFlx(
   Toolchain toolchain, {
   String mainPath: defaultMainPath
 }) async {
   int result;
-  Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
-  String localBundlePath = path.join(tempDir.path, 'app.flx');
-  String localSnapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
+  String localBundlePath = path.join('build', 'app.flx');
+  String localSnapshotPath = path.join('build', 'snapshot_blob.bin');
   result = await build(
     toolchain,
     snapshotPath: localSnapshotPath,
@@ -196,7 +183,7 @@ Future<DirectoryResult> buildInTempDir(
     mainPath: mainPath
   );
   if (result == 0)
-    return new DirectoryResult(tempDir, localBundlePath);
+    return localBundlePath;
   else
     throw result;
 }
@@ -227,7 +214,8 @@ Future<int> build(
   Map manifestDescriptor = _loadManifest(manifestPath);
   String assetBasePath = path.dirname(path.absolute(manifestPath));
 
-  ArchiveFile snapshotFile = null;
+  File snapshotFile;
+
   if (!precompiledSnapshot) {
     ensureDirectoryExists(snapshotPath);
 
@@ -239,7 +227,7 @@ Future<int> build(
       return result;
     }
 
-    snapshotFile = _createSnapshotFile(snapshotPath);
+    snapshotFile = new File(snapshotPath);
   }
 
   return assemble(
@@ -254,7 +242,7 @@ Future<int> build(
 
 Future<int> assemble({
   Map manifestDescriptor: const {},
-  ArchiveFile snapshotFile,
+  File snapshotFile,
   String assetBasePath: defaultAssetBasePath,
   String materialAssetBasePath: defaultMaterialAssetBasePath,
   String outputPath: defaultFlxOutputPath,
@@ -265,25 +253,32 @@ Future<int> assemble({
   Map<_Asset, List<_Asset>> assets = _parseAssets(manifestDescriptor, assetBasePath);
   assets.addAll(_parseMaterialAssets(manifestDescriptor, materialAssetBasePath));
 
-  Archive archive = new Archive();
+  ZipBuilder zipBuilder = new ZipBuilder();
 
   if (snapshotFile != null)
-    archive.addFile(snapshotFile);
+    zipBuilder.addEntry(new ZipEntry.fromFile(_kSnapshotKey, snapshotFile));
 
   for (_Asset asset in assets.keys) {
-    if (!_addAssetFile(archive, asset))
+    ZipEntry assetEntry = _createAssetEntry(asset);
+    if (assetEntry == null)
       return 1;
+    else
+      zipBuilder.addEntry(assetEntry);
+
     for (_Asset variant in assets[asset]) {
-      if (!_addAssetFile(archive, variant))
+      ZipEntry variantEntry = _createAssetEntry(variant);
+      if (variantEntry == null)
         return 1;
+      else
+        zipBuilder.addEntry(variantEntry);
     }
   }
 
-  archive.addFile(_createAssetManifest(assets));
+  zipBuilder.addEntry(_createAssetManifest(assets));
 
-  ArchiveFile fontManifest = _createFontManifest(manifestDescriptor);
+  ZipEntry fontManifest = _createFontManifest(manifestDescriptor);
   if (fontManifest != null)
-    archive.addFile(fontManifest);
+    zipBuilder.addEntry(fontManifest);
 
   AsymmetricKeyPair keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
   printTrace('KeyPair from $privateKeyPath: $keyPair.');
@@ -293,8 +288,10 @@ Future<int> assemble({
     CipherParameters.get().seedRandom();
   }
 
-  printTrace('Encoding zip file.');
-  Uint8List zipBytes = new Uint8List.fromList(new ZipEncoder().encode(archive));
+  File zipFile = new File(outputPath.substring(0, outputPath.length - 4) + '.zip');
+  printTrace('Encoding zip file to ${zipFile.path}');
+  zipBuilder.createZip(zipFile, new Directory('build/flx'));
+  List<int> zipBytes = zipFile.readAsBytesSync();
 
   ensureDirectoryExists(outputPath);
 
@@ -307,7 +304,7 @@ Future<int> assemble({
   );
   bundle.writeSync();
 
-  printTrace('Built and signed flx at $outputPath.');
+  printTrace('Built $outputPath.');
 
   return 0;
 }

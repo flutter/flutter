@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
@@ -136,26 +135,16 @@ class AndroidDevice extends Device {
   }
 
   String _getSourceSha1(ApplicationPackage app) {
-    var sha1 = new SHA1();
-    var file = new File(app.localPath);
-    sha1.add(file.readAsBytesSync());
-    return CryptoUtils.bytesToHex(sha1.close());
+    File shaFile = new File('${app.localPath}.sha1');
+    return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
   String get name => modelID;
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
-    if (runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'path', app.id])) == '') {
-      printTrace('TODO(iansf): move this log to the caller. ${app.name} is not on the device. Installing now...');
-      return false;
-    }
-    if (_getDeviceApkSha1(app) != _getSourceSha1(app)) {
-      printTrace(
-          'TODO(iansf): move this log to the caller. ${app.name} is out of date. Installing now...');
-      return false;
-    }
-    return true;
+    // Just check for the existence of the application SHA.
+    return _getDeviceApkSha1(app) == _getSourceSha1(app);
   }
 
   @override
@@ -179,7 +168,7 @@ class AndroidDevice extends Device {
 
     if (port == 0) {
       // Auto-bind to a port. Set up forwarding for that port. Emit a stdout
-      // message similar to the command-line VM, so that tools can parse the output.
+      // message similar to the command-line VM so that tools can parse the output.
       // "Observatory listening on http://127.0.0.1:52111"
       port = await findAvailablePort();
     }
@@ -258,30 +247,26 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
-    flx.DirectoryResult buildResult = await flx.buildInTempDir(
+    String localBundlePath = await flx.buildFlx(
       toolchain,
       mainPath: mainPath
     );
 
     printTrace('Starting bundle for $this.');
 
-    try {
-      if (await startBundle(
-        package,
-        buildResult.localBundlePath,
-        checked: checked,
-        traceStartup: platformArgs['trace-startup'],
-        route: route,
-        clearLogs: clearLogs,
-        startPaused: startPaused,
-        debugPort: debugPort
-      )) {
-        return true;
-      } else {
-        return false;
-      }
-    } finally {
-      buildResult.dispose();
+    if (await startBundle(
+      package,
+      localBundlePath,
+      checked: checked,
+      traceStartup: platformArgs['trace-startup'],
+      route: route,
+      clearLogs: clearLogs,
+      startPaused: startPaused,
+      debugPort: debugPort
+    )) {
+      return true;
+    } else {
+      return false;
     }
   }
 
