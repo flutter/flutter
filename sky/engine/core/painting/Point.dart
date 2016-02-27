@@ -49,5 +49,5 @@ class Point {
 
   int get hashCode => hashValues(x, y);
 
-  String toString() => "Point(${x.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})";
+  String toString() => "Point(${x?.toStringAsFixed(1)}, ${y?.toStringAsFixed(1)})";
 }
