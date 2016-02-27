@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//mojo/public/dart/rules.gni")
-import("//dart/sdk/lib/rules.gni")
 
 copy("copy_sky_engine_license") {
   sources = [
@@ -16,77 +15,14 @@ copy("copy_sky_engine_license") {
   ]
 }
 
-dart_sdk_lib_copy("async") {
-  sdk_lib_name = "async"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("collection") {
-  sdk_lib_name = "collection"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("convert") {
-  sdk_lib_name = "convert"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("core") {
-  sdk_lib_name = "core"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("developer") {
-  sdk_lib_name = "developer"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("io") {
-  sdk_lib_name = "io"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("isolate") {
-  sdk_lib_name = "isolate"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("math") {
-  sdk_lib_name = "math"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-dart_sdk_lib_copy("typed_data") {
-  sdk_lib_name = "typed_data"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
-}
-
-
-group("copy_dart_sdk") {
-  deps = [
-    ":async",
-    ":collection",
-    ":convert",
-    ":core",
-    ":developer",
-    ":io",
-    ":isolate",
-    ":math",
-    ":typed_data",
-  ]
-}
-
 dart_pkg("sky_engine") {
   sources = [
-    "dart_sdk/_empty.dart",
-    "lib/_embedder.yaml",
     "README.md",
     "pubspec.yaml",
   ]
 
   deps = [
     ":copy_sky_engine_license",
-    ":copy_dart_sdk",
     "//sky/engine/bindings",
   ]
 
@@ -97,5 +33,8 @@ dart_pkg("sky_engine") {
     "$service_isolate_dir/vmservice_io.dart",
     "$service_isolate_dir/loader.dart",
     "$service_isolate_dir/server.dart",
+  ]
+  sdk_ext_mappings = [
+    "dart:ui,dart_ui.dart",
   ]
 }
