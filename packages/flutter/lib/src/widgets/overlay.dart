@@ -22,9 +22,9 @@ class OverlayEntry {
   bool get opaque => _opaque;
   bool _opaque;
   void set opaque (bool value) {
-    assert(_overlay != null);
     if (_opaque == value)
       return;
+    assert(_overlay != null);
     _overlay.setState(() {
       _opaque = value;
     });
