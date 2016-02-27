@@ -120,7 +120,7 @@ class RunMojoCommand extends FlutterCommand {
     if (useDevtools) {
       final String buildFlag = argResults['mojo-debug'] ? '--debug' : '--release';
       args.add(buildFlag);
-      if (logger.verbose)
+      if (logger.isVerbose)
         args.add('--verbose');
     }
 

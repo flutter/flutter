@@ -85,6 +85,8 @@ String sdkBinaryName(String name) {
 }
 
 bool exitsHappy(List<String> cli) {
+  printTrace(cli.join(' '));
+
   try {
     return Process.runSync(cli.first, cli.sublist(1)).exitCode == 0;
   } catch (error) {

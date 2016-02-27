@@ -232,7 +232,9 @@ class _AtomValidator extends DoctorValidator {
     ValidationType flutterPluginExists() {
       try {
         // apm list -b -p -i
-        ProcessResult result = Process.runSync('apm', <String>['list', '-b', '-p', '-i']);
+        List<String> args = <String>['list', '-b', '-p', '-i'];
+        printTrace('apm ${args.join(' ')}');
+        ProcessResult result = Process.runSync('apm', args);
         if (result.exitCode != 0)
           return ValidationType.missing;
         bool available = (result.stdout as String).split('\n').any((String line) {

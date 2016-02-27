@@ -47,7 +47,17 @@ abstract class FlutterCommand extends Command {
     devices ??= new DeviceStore.forConfigs(buildConfigurations);
   }
 
-  Future<int> run() async {
+  Future<int> run() {
+    Stopwatch stopwatch = new Stopwatch()..start();
+
+    return _run().then((int exitCode) {
+      printTrace("'flutter $name' exiting with code $exitCode; "
+        "elasped time ${stopwatch.elapsedMilliseconds}ms.");
+      return exitCode;
+    });
+  }
+
+  Future<int> _run() async {
     if (requiresProjectRoot && !projectRootValidator())
       return 1;
 

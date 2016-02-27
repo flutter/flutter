@@ -128,7 +128,6 @@ class RunCommand extends RunCommandBase {
       debugPort: debugPort
     );
 
-    printTrace('Finished $name command.');
     return result;
   }
 }
@@ -272,10 +271,8 @@ Future delayUntilObservatoryAvailable(String host, int port, {
   while (stopwatch.elapsed <= timeout) {
     try {
       WebSocket ws = await WebSocket.connect(url);
-
-      printTrace('Connected to the observatory port (${stopwatch.elapsedMilliseconds}ms).');
+      printTrace('Connected to the observatory port.');
       ws.close().catchError((error) => null);
-
       return;
     } catch (error) {
       await new Future.delayed(new Duration(milliseconds: 250));
