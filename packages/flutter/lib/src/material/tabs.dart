@@ -451,10 +451,8 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
       _initValueToIndex();
   }
 
-  void dispose() {
-    _controller.stop();
+  void _writeValue() {
     PageStorage.of(context)?.writeState(context, _value);
-    super.dispose();
   }
 
   List<T> get values => config.values;
@@ -477,6 +475,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     if (!_valueIsChanging)
       _previousValue = _value;
     _value = newValue;
+    _writeValue();
     _valueIsChanging = true;
 
     // If the selected value change was triggered by a drag gesture, the current
@@ -530,11 +529,13 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
   }
 
   void deactivate() {
+    _controller.stop();
     for (TabBarSelectionAnimationListener listener in _animationListeners.toList()) {
       listener.handleSelectionDeactivate();
       unregisterAnimationListener(listener);
     }
     assert(_animationListeners.isEmpty);
+    _writeValue();
   }
 
   Widget build(BuildContext context) {
