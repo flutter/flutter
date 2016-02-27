@@ -84,7 +84,7 @@ class Icon extends StatelessComponent {
     final int iconAlpha = (255.0 * (IconTheme.of(context)?.clampedOpacity ?? 1.0)).round();
     if (iconAlpha != 255) {
       if (color != null) {
-        iconColor = color.withAlpha(iconAlpha);
+        iconColor = color.withAlpha((iconAlpha * color.opacity).round());
       } else {
         switch(iconThemeColor) {
           case IconThemeColor.black:
