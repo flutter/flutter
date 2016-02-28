@@ -349,16 +349,20 @@ bool _needsRebuild(String apkPath, String manifest) {
   Iterable<FileStat> dependenciesStat = [
     manifest,
     _kFlutterManifestPath,
-    _kPackagesStatusPath,
-    '$apkPath.sha1'
+    _kPackagesStatusPath
   ].map((String path) => FileStat.statSync(path));
 
   if (apkStat.type == FileSystemEntityType.NOT_FOUND)
     return true;
+
   for (FileStat dep in dependenciesStat) {
     if (dep.modified == null || dep.modified.isAfter(apkStat.modified))
       return true;
   }
+
+  if (!FileSystemEntity.isFileSync('$apkPath.sha1'))
+    return true;
+
   return false;
 }
 

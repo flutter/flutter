@@ -234,12 +234,16 @@ class AdbDevice {
   }
 }
 
+final RegExp _whitespaceRegex = new RegExp(r'\s+');
+
 String cleanAdbDeviceName(String name) {
   // Some emulators use `___` in the name as separators.
   name = name.replaceAll('___', ', ');
 
   // Convert `Nexus_7` / `Nexus_5X` style names to `Nexus 7` ones.
   name = name.replaceAll('_', ' ');
+
+  name = name.replaceAll(_whitespaceRegex, ' ').trim();
 
   return name;
 }
