@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/context.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../globals.dart';
@@ -160,12 +161,19 @@ class FlutterCommandRunner extends CommandRunner {
     return '.';
   }
 
+  Future<dynamic> run(Iterable<String> args) {
+    return super.run(args).then((dynamic result) {
+      logger.flush();
+      return result;
+    });
+  }
+
   Future<int> runCommand(ArgResults globalResults) {
     _globalResults = globalResults;
 
     // Check for verbose.
     if (globalResults['verbose'])
-      logger.verbose = true;
+      context[Logger] = new VerboseLogger();
 
     // we must set ArtifactStore.flutterRoot early because other features use it
     // (e.g. enginePath's initialiser uses it)
