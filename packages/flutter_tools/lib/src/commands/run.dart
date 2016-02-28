@@ -169,9 +169,10 @@ Future<int> startApp(
       return result;
   }
 
-  // TODO: Move this into the startApp() device impl. They should wait on the
-  // stop command to complete before (re-)starting the app. We could plumb a
-  // Future through the start command from here, but that seems a little messy.
+  // TODO(devoncarew): Move this into the device.startApp() impls. They should
+  // wait on the stop command to complete before (re-)starting the app. We could
+  // plumb a Future through the start command from here, but that seems a little
+  // messy.
   if (stop) {
     for (Device device in devices.all) {
       if (!device.isSupported())
