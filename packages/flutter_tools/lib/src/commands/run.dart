@@ -19,7 +19,6 @@ import '../toolchain.dart';
 import 'apk.dart';
 import 'devices.dart';
 import 'install.dart';
-import 'stop.dart';
 
 /// Given the value of the --target option, return the path of the Dart file
 /// where the app's main function should be.
@@ -65,7 +64,7 @@ class RunCommand extends RunCommandBase {
 
   RunCommand() {
     argParser.addFlag('full-restart',
-        defaultsTo: false,
+        defaultsTo: true,
         help: 'Stop any currently running application process before starting the app.');
     argParser.addFlag('clear-logs',
         defaultsTo: true,
@@ -111,6 +110,7 @@ class RunCommand extends RunCommandBase {
       return 1;
     }
 
+    // TODO(devoncarew): Switch this to using [devicesForCommand].
     int result = await startApp(
       devices,
       applicationPackages,
@@ -140,7 +140,7 @@ Future<int> startApp(
   List<BuildConfiguration> configs, {
   String target,
   String enginePath,
-  bool stop: false,
+  bool stop: true,
   bool install: true,
   bool checked: true,
   bool traceStartup: false,
@@ -169,10 +169,26 @@ Future<int> startApp(
       return result;
   }
 
+  // TODO(devoncarew): Move this into the device.startApp() impls. They should
+  // wait on the stop command to complete before (re-)starting the app. We could
+  // plumb a Future through the start command from here, but that seems a little
+  // messy.
   if (stop) {
-    printTrace('Running stop command.');
-    await stopAll(devices, applicationPackages);
+    for (Device device in devices.all) {
+      if (!device.isSupported())
+        continue;
+
+      ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+      if (package != null) {
+        printTrace("Stopping app '${package.name}' on ${device.name}.");
+        // We don't wait for the stop command to complete.
+        device.stopApp(package);
+      }
+    }
   }
+
+  // Allow any stop commands from above to start work.
+  await new Future.delayed(Duration.ZERO);
 
   if (install) {
     printTrace('Running install command.');
@@ -193,8 +209,6 @@ Future<int> startApp(
       unsupportedCount++;
       continue;
     }
-
-    printTrace('Running build command for $device.');
 
     Map<String, dynamic> platformArgs = <String, dynamic>{};
 
@@ -223,9 +237,8 @@ Future<int> startApp(
       // If the user specified --start-paused (and the device supports it) then
       // wait for the observatory port to become available before returning from
       // `startApp()`.
-      if (startPaused && device.supportsStartPaused) {
+      if (startPaused && device.supportsStartPaused)
         await delayUntilObservatoryAvailable('localhost', debugPort);
-      }
     }
   }
 

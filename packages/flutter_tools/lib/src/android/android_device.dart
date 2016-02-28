@@ -207,6 +207,7 @@ class AndroidDevice extends Device {
       this.clearLogs();
 
     runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
+
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
@@ -270,10 +271,9 @@ class AndroidDevice extends Device {
     }
   }
 
-  Future<bool> stopApp(ApplicationPackage app) async {
-    final AndroidApk apk = app;
-    runSync(adbCommandForDevice(<String>['shell', 'am', 'force-stop', apk.id]));
-    return true;
+  Future<bool> stopApp(ApplicationPackage app) {
+    List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
+    return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
   }
 
   @override
