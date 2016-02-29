@@ -297,7 +297,7 @@ class AndroidDevice extends Device {
 
   // Return the most recent timestamp in the Android log. The format can be
   // passed to logcat's -T option.
-  String lastLogcatTimestamp() {
+  String get lastLogcatTimestamp {
     String output = runCheckedSync(adbCommandForDevice(<String>[
       '-s', id, 'logcat', '-v', 'time', '-t', '1'
     ]));
@@ -310,7 +310,7 @@ class AndroidDevice extends Device {
   Future<String> stopTracing(AndroidApk apk, { String outPath }) async {
     // Workaround for logcat -c not always working:
     // http://stackoverflow.com/questions/25645012/logcat-on-android-l-not-clearing-after-unplugging-and-reconnecting
-    String beforeStop = lastLogcatTimestamp();
+    String beforeStop = lastLogcatTimestamp;
     runCheckedSync(adbCommandForDevice(<String>[
       'shell',
       'am',
@@ -472,6 +472,8 @@ class _AdbLogReader extends DeviceLogReader {
       'logcat',
       '-v',
       'tag', // Only log the tag and the message
+      '-T',
+      device.lastLogcatTimestamp,
       '-s',
       'flutter:V',
       'ActivityManager:W',
