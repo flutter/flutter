@@ -88,6 +88,9 @@ deps = {
   # TODO(jackson): Remove this once we're able to build Firebase on its own Travis instance
   'src/third_party/firebase':
    'https://github.com/collinjackson/firebase-sdk.git@master',
+
+  'src/third_party/gcm':
+   'https://github.com/flutter/flutter_gcm.git@master',
 }
 
 deps_os = {
