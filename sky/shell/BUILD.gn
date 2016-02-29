@@ -121,7 +121,6 @@ if (is_android) {
       "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
       "platform/android/org/domokit/sky/shell/SkyMain.java",
       "platform/android/org/domokit/sky/shell/TracingController.java",
-      "platform/android/org/domokit/sky/shell/UpdateService.java",
     ]
     jni_package = "sky/shell"
   }
@@ -135,7 +134,6 @@ if (is_android) {
       "platform/android/sky_main.h",
       "platform/android/tracing_controller.cc",
       "platform/android/tracing_controller.h",
-      "platform/android/update_service_android.cc",
     ]
 
     deps = [
@@ -168,7 +166,6 @@ if (is_android) {
       "platform/android/org/domokit/sky/shell/SkyApplication.java",
       "platform/android/org/domokit/sky/shell/SkyMain.java",
       "platform/android/org/domokit/sky/shell/TracingController.java",
-      "platform/android/org/domokit/sky/shell/UpdateService.java",
     ]
 
     deps = [
@@ -196,7 +193,6 @@ if (is_android) {
       "//sky/services/raw_keyboard:interfaces_java",
       "//sky/services/raw_keyboard:raw_keyboard_lib",
       "//sky/services/semantics:interfaces_java",
-      "//sky/services/updater:interfaces_java",
       "//sky/services/vsync:vsync_lib",
     ]
   }

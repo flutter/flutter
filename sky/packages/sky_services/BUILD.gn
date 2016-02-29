@@ -29,6 +29,5 @@ dart_pkg("sky_services") {
     "//sky/services/pointer:interfaces",
     "//sky/services/raw_keyboard:interfaces",
     "//sky/services/semantics:interfaces",
-    "//sky/services/updater:interfaces",
   ]
 }
