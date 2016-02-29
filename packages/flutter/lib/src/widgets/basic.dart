@@ -998,8 +998,19 @@ abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget 
 
 /// Uses the stack layout algorithm for its children.
 ///
-/// For details about the stack layout algorithm, see [RenderStack]. To control
-/// the position of child widgets, see the [Positioned] widget.
+/// This class is useful if you want to overlap several children in a
+/// simple way, for example having some text and an image, overlaid
+/// with a gradient and a button attached to the bottom.
+///
+/// If you want to lay a number of children out in a particular
+/// pattern, or if you want to make a custom layout manager, you
+/// probably want to use [CustomMultiChildLayout] instead. In
+/// particular, when using a Stack you can't position children
+/// relative to their size or the stack's own size.
+///
+/// For more details about the stack layout algorithm, see
+/// [RenderStack]. To control the position of child widgets, see the
+/// [Positioned] widget.
 class Stack extends StackRenderObjectWidgetBase {
   Stack({
     Key key,
