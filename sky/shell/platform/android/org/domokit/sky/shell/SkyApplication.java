@@ -68,7 +68,6 @@ public class SkyApplication extends BaseChromiumApplication {
         initJavaUtils();
         initResources();
         initNative();
-        UpdateService.init(getApplicationContext());
         onServiceRegistryAvailable(ServiceRegistry.SHARED);
     }
 
@@ -89,15 +88,6 @@ public class SkyApplication extends BaseChromiumApplication {
             @Override
             public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
                 Activity.MANAGER.bind(new ActivityImpl(), pipe);
-            }
-        });
-
-        registry.register(org.chromium.mojom.updater.UpdateService.MANAGER.getName(),
-                          new ServiceFactory() {
-            @Override
-            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
-                org.chromium.mojom.updater.UpdateService.MANAGER.bind(
-                    new UpdateService.MojoService(), pipe);
             }
         });
 
