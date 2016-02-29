@@ -118,7 +118,7 @@ class DriveCommand extends RunCommandBase {
           await appStopper(this);
         } catch(error, stackTrace) {
           // TODO(yjbanov): remove this guard when this bug is fixed: https://github.com/dart-lang/sdk/issues/25862
-          printStatus('Could not stop application: $error\n$stackTrace');
+          printTrace('Could not stop application: $error\n$stackTrace');
         }
       } else {
         printStatus('Leaving the application running.');

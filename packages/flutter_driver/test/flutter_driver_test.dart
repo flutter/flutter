@@ -122,9 +122,10 @@ main() {
       test('finds by ValueKey', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], {
-            'kind': 'find_by_value_key',
+            'kind': 'find',
+            'searchSpecType': 'ByValueKey',
             'keyValueString': 'foo',
-            'keyValueType': 'String',
+            'keyValueType': 'String'
           });
           return new Future.value({
             'objectReferenceKey': '123',

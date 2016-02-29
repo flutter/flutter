@@ -55,6 +55,20 @@ bool _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSp
     }
   }
 
+  Directory testDriverDirectory = new Directory(path.join(directoryPath, 'test_driver'));
+  if (testDriverDirectory.existsSync()) {
+    for (FileSystemEntity entry in testDriverDirectory.listSync()) {
+      if (entry is Directory) {
+        for (FileSystemEntity subentry in entry.listSync()) {
+          if (isDartTestFile(subentry))
+            dartFiles.add(subentry.path);
+        }
+      } else if (isDartTestFile(entry)) {
+        dartFiles.add(entry.path);
+      }
+    }
+  }
+
   Directory benchmarkDirectory = new Directory(path.join(directoryPath, 'benchmark'));
   if (benchmarkDirectory.existsSync()) {
     for (FileSystemEntity entry in benchmarkDirectory.listSync()) {
@@ -74,6 +88,18 @@ bool _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSp
     return true;
   }
   return false;
+}
+
+/// Adds all packages in [subPath], assuming a flat directory structure, i.e.
+/// each direct child of [subPath] is a plain Dart package.
+void _addFlatPackageList(String subPath, List<String> dartFiles, Set<String> pubSpecDirectories) {
+  Directory subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, subPath));
+  if (subdirectory.existsSync()) {
+    for (FileSystemEntity entry in subdirectory.listSync()) {
+      if (entry is Directory)
+        _addPackage(entry.path, dartFiles, pubSpecDirectories);
+    }
+  }
 }
 
 class FileChanged { }
@@ -146,23 +172,10 @@ class AnalyzeCommand extends FlutterCommand {
       //dev/manual_tests/*/ as package
       //dev/manual_tests/*/ as files
 
+      _addFlatPackageList('packages', dartFiles, pubSpecDirectories);
+      _addFlatPackageList('examples', dartFiles, pubSpecDirectories);
+
       Directory subdirectory;
-
-      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'packages'));
-      if (subdirectory.existsSync()) {
-        for (FileSystemEntity entry in subdirectory.listSync()) {
-          if (entry is Directory)
-            _addPackage(entry.path, dartFiles, pubSpecDirectories);
-        }
-      }
-
-      subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'examples'));
-      if (subdirectory.existsSync()) {
-        for (FileSystemEntity entry in subdirectory.listSync()) {
-          if (entry is Directory)
-            _addPackage(entry.path, dartFiles, pubSpecDirectories);
-        }
-      }
 
       subdirectory = new Directory(path.join(ArtifactStore.flutterRoot, 'examples', 'layers'));
       if (subdirectory.existsSync()) {
@@ -198,7 +211,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     }
 
-    dartFiles = dartFiles.map((String directory) => path.normalize(path.absolute(directory))).toSet().toList();    
+    dartFiles = dartFiles.map((String directory) => path.normalize(path.absolute(directory))).toSet().toList();
     dartFiles.sort();
 
     // prepare a Dart file that references all the above Dart files
@@ -444,4 +457,3 @@ linter:
     return 0;
   }
 }
-

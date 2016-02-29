@@ -51,6 +51,26 @@ main() {
       });
     });
 
+    test('obeys predicates', () {
+      fakeAsync.run((_) {
+        int retryCount = 0;
+
+        expect(
+          // The predicate requires that the returned value is 2, so we expect
+          // that `retry` keeps trying until the counter reaches 2.
+          retry(
+            () async => retryCount++,
+            new Duration(milliseconds: 30),
+            new Duration(milliseconds: 10),
+            predicate: (value) => value == 2
+          ),
+          completion(2)
+        );
+
+        fakeAsync.elapse(new Duration(milliseconds: 50));
+      });
+    });
+
     test('times out returning last error', () async {
       fakeAsync.run((_) {
         bool timedOut = false;

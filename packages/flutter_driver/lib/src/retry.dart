@@ -8,13 +8,17 @@ import 'dart:async';
 /// that evaluates to the result.
 typedef dynamic Action();
 
+/// Determines if [value] is acceptable. For good style an implementation should
+/// be idempotent.
+typedef bool Predicate(dynamic value);
+
 /// Performs [action] repeatedly until it either succeeds or [timeout] limit is
 /// reached.
 ///
 /// When the retry time out, the last seen error and stack trace are returned in
 /// an error [Future].
 Future<dynamic> retry(Action action, Duration timeout,
-    Duration pauseBetweenRetries) async {
+    Duration pauseBetweenRetries, { Predicate predicate }) async {
   assert(action != null);
   assert(timeout != null);
   assert(pauseBetweenRetries != null);
@@ -28,20 +32,25 @@ Future<dynamic> retry(Action action, Duration timeout,
   while(!success && sw.elapsed < timeout) {
     try {
       result = await action();
-      success = true;
+      if (predicate == null || predicate(result))
+        success = true;
+      lastError = null;
+      lastStackTrace = null;
     } catch(error, stackTrace) {
       lastError = error;
       lastStackTrace = stackTrace;
-      if (sw.elapsed < timeout) {
-        await new Future<Null>.delayed(pauseBetweenRetries);
-      }
     }
+
+    if (!success && sw.elapsed < timeout)
+      await new Future<Null>.delayed(pauseBetweenRetries);
   }
 
   if (success)
     return result;
-  else
+  else if (lastError != null)
     return new Future.error(lastError, lastStackTrace);
+  else
+    return new Future.error('Retry timed out');
 }
 
 /// A function that produces a [Stopwatch].

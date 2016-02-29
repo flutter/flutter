@@ -6,7 +6,8 @@
 ///
 /// In Dart enum names are prefixed with enum class name. For example, for
 /// `enum Vote { yea, nay }`, `Vote.yea.toString()` produces `"Vote.yea"`
-/// rather than just `"yea"` - the simple name.
+/// rather than just `"yea"` - the simple name. This class provides methods for
+/// getting and looking up by simple names.
 ///
 /// Example:
 ///
