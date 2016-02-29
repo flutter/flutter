@@ -103,7 +103,7 @@ class GalleryHomeState extends State<GalleryHome> {
                   new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
                   new GalleryDemo(title: 'Dialog', builder: () => new DialogDemo()),
                   new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
-                  new GalleryDemo(title: 'Expland/Collapse List Control', builder: () => new TwoLevelListDemo()),
+                  new GalleryDemo(title: 'Expand/Collapse List Control', builder: () => new TwoLevelListDemo()),
                   new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo()),
                   new GalleryDemo(title: 'Grid', builder: () => new GridListDemo()),
                   new GalleryDemo(title: 'Icons', builder: () => new IconsDemo()),
