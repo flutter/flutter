@@ -85,6 +85,7 @@ action("generate_snapshot_bin") {
   deps = [
     "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
     ":generate_dart_ui",
+    ":generate_dart_jni",
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
@@ -177,5 +178,17 @@ copy("generate_dart_ui") {
 
   outputs = [
     "$bindings_output_dir/{{source_file_part}}",
+  ]
+}
+
+copy("generate_dart_jni") {
+  sources = [
+    "jni/jni.dart",
+    "jni/jni_helper.dart",
+    "jni/jni_raw.dart",
+  ]
+
+  outputs = [
+    "$bindings_output_dir/dart_jni/{{source_file_part}}",
   ]
 }
