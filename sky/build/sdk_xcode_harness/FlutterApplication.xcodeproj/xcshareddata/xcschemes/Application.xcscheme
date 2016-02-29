@@ -61,6 +61,20 @@
             ReferencedContainer = "container:FlutterApplication.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "--dart-main=$(FLUTTER_APPLICATION_PATH)/lib/main.dart"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--flx=$(FLUTTER_APPLICATION_PATH)/build/app.flx"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--package-root=$(FLUTTER_APPLICATION_PATH)/packages"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
