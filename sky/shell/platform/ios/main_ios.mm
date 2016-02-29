@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 #import <UIKit/UIKit.h>
-#import "sky/shell/platform/ios/sky_app_delegate.h"
 
+#include "sky/shell/platform/ios/sky_app_delegate.h"
 #include "sky/shell/platform/mac/platform_mac.h"
 
-int main(int argc, const char * argv[]) {
-  return PlatformMacMain(argc, argv, ^(){
-    return UIApplicationMain(argc, (char **)argv, nil,
+int main(int argc, const char* argv[]) {
+  return sky::shell::PlatformMacMain(argc, argv, ^() {
+    return UIApplicationMain(argc, (char**)argv, nil,
                              NSStringFromClass([SkyAppDelegate class]));
   });
 }

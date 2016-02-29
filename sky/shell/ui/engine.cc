@@ -37,11 +37,9 @@ PlatformImpl* g_platform_impl = nullptr;
 using mojo::asset_bundle::ZipAssetBundle;
 using mojo::asset_bundle::ZipAssetService;
 
-Engine::Config::Config() {
-}
+Engine::Config::Config() {}
 
-Engine::Config::~Config() {
-}
+Engine::Config::~Config() {}
 
 Engine::Engine(const Config& config, rasterizer::RasterizerPtr rasterizer)
     : config_(config),
@@ -49,11 +47,9 @@ Engine::Engine(const Config& config, rasterizer::RasterizerPtr rasterizer)
       binding_(this),
       activity_running_(false),
       have_surface_(false),
-      weak_factory_(this) {
-}
+      weak_factory_(this) {}
 
-Engine::~Engine() {
-}
+Engine::~Engine() {}
 
 base::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
@@ -140,7 +136,7 @@ void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
 }
 
 void Engine::OnLocaleChanged(const mojo::String& language_code,
-			     const mojo::String& country_code) {
+                             const mojo::String& country_code) {
   language_code_ = language_code;
   country_code_ = country_code;
   if (sky_view_)
@@ -185,13 +181,16 @@ void Engine::RunFromSnapshotStream(
     sky_view_->PushRoute(initial_route_);
 }
 
+void Engine::ConfigureZipAssetBundle(const mojo::String& path) {
+  zip_asset_bundle_ = new ZipAssetBundle(base::FilePath(std::string{path}),
+                                         base::WorkerPool::GetTaskRunner(true));
+  ZipAssetService::Create(mojo::GetProxy(&root_bundle_), zip_asset_bundle_);
+}
+
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
 
-  std::string path_str = bundle_path;
-  zip_asset_bundle_ = new ZipAssetBundle(
-      base::FilePath(path_str), base::WorkerPool::GetTaskRunner(true));
-  ZipAssetService::Create(mojo::GetProxy(&root_bundle_), zip_asset_bundle_);
+  ConfigureZipAssetBundle(bundle_path);
 
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView("http://localhost");
@@ -203,8 +202,13 @@ void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
 }
 
 void Engine::RunFromFile(const mojo::String& main,
-                         const mojo::String& package_root) {
+                         const mojo::String& package_root,
+                         const mojo::String& bundle) {
   TRACE_EVENT0("flutter", "Engine::RunFromFile");
+  if (bundle.size() != 0) {
+    // The specification of an FLX bundle is optional.
+    ConfigureZipAssetBundle(bundle);
+  }
   std::string package_root_str = package_root;
   dart_library_provider_.reset(
       new DartLibraryProviderFiles(base::FilePath(package_root_str)));
@@ -213,32 +217,29 @@ void Engine::RunFromFile(const mojo::String& main,
 
 void Engine::RunFromBundle(const mojo::String& path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
-  std::string path_str = path;
-  zip_asset_bundle_ = new ZipAssetBundle(
-      base::FilePath(path_str), base::WorkerPool::GetTaskRunner(true));
-  ZipAssetService::Create(mojo::GetProxy(&root_bundle_), zip_asset_bundle_);
 
-  root_bundle_->GetAsStream(blink::kSnapshotAssetKey,
-                            base::Bind(&Engine::RunFromSnapshotStream,
-                                       weak_factory_.GetWeakPtr(), path_str));
+  ConfigureZipAssetBundle(path);
+
+  root_bundle_->GetAsStream(
+      blink::kSnapshotAssetKey,
+      base::Bind(&Engine::RunFromSnapshotStream, weak_factory_.GetWeakPtr(),
+                 std::string{path}));
 }
 
 void Engine::RunFromBundleAndSnapshot(const mojo::String& bundle_path,
                                       const mojo::String& snapshot_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundleAndSnapshot");
-  std::string bundle_path_str = bundle_path;
-  zip_asset_bundle_ = new ZipAssetBundle(
-      base::FilePath(bundle_path_str), base::WorkerPool::GetTaskRunner(true));
-  ZipAssetService::Create(mojo::GetProxy(&root_bundle_), zip_asset_bundle_);
+
+  ConfigureZipAssetBundle(bundle_path);
 
   std::string snapshot_path_str = snapshot_path;
   zip_asset_bundle_->AddOverlayFile(blink::kSnapshotAssetKey,
                                     base::FilePath(snapshot_path_str));
 
-  root_bundle_->GetAsStream(blink::kSnapshotAssetKey,
-                            base::Bind(&Engine::RunFromSnapshotStream,
-                                       weak_factory_.GetWeakPtr(),
-                                       bundle_path_str));
+  root_bundle_->GetAsStream(
+      blink::kSnapshotAssetKey,
+      base::Bind(&Engine::RunFromSnapshotStream, weak_factory_.GetWeakPtr(),
+                 std::string{bundle_path}));
 }
 
 void Engine::PushRoute(const mojo::String& route) {
@@ -295,8 +296,7 @@ void Engine::FlushRealTimeEvents() {
   animator_->FlushRealTimeEvents();
 }
 
-void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
-}
+void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {}
 
 }  // namespace shell
 }  // namespace sky

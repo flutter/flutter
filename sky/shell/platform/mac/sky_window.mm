@@ -8,6 +8,7 @@
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
+#include "sky/shell/platform/mac/platform_mac.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
 #include "sky/shell/shell_view.h"
@@ -16,8 +17,7 @@
 #include "sky/shell/ui_delegate.h"
 
 static void DynamicServiceResolve(const mojo::String& service_name,
-                                  mojo::ScopedMessagePipeHandle handle) {
-}
+                                  mojo::ScopedMessagePipeHandle handle) {}
 
 @interface SkyWindow ()<NSWindowDelegate>
 
@@ -26,7 +26,8 @@ static void DynamicServiceResolve(const mojo::String& service_name,
 
 @end
 
-static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase) {
+static inline pointer::PointerType EventTypeFromNSEventPhase(
+    NSEventPhase phase) {
   switch (phase) {
     case NSEventPhaseNone:
       return pointer::PointerType::CANCEL;
@@ -72,14 +73,8 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
   self.platformView->SurfaceCreated(widget);
 }
 
-- (NSString*)skyInitialBundleURL {
-  return [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"];
-}
-
 // TODO(eseidel): This does not belong in sky_window!
 // Probably belongs in NSApplicationDelegate didFinishLaunching.
-// We also want a separate setup for normal apps vs SkyShell
-// normal apps only use a flx vs. SkyShell which always pulls from network.
 - (void)setupAndLoadDart {
   self.platformView->ConnectToEngine(mojo::GetProxy(&_sky_engine));
 
@@ -90,9 +85,16 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
   services->services_provided_by_embedder = service_provider.Pass();
   _sky_engine->SetServices(services.Pass());
 
+  if (sky::shell::AttemptLaunchFromCommandLineSwitches(_sky_engine)) {
+    // This attempts launching from an FLX bundle that does not contain a
+    // dart snapshot.
+    return;
+  }
+
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  std::string flx = command_line.GetSwitchValueASCII(sky::shell::switches::kFLX);
+  std::string flx =
+      command_line.GetSwitchValueASCII(sky::shell::switches::kFLX);
   if (!flx.empty()) {
     _sky_engine->RunFromBundle(flx);
     return;
@@ -100,15 +102,9 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(NSEventPhase phase)
 
   auto args = command_line.GetArgs();
   if (args.size() > 0) {
-    _sky_engine->RunFromFile(args[0],
-        command_line.GetSwitchValueASCII(sky::shell::switches::kPackageRoot));
-    return;
-  }
-
-  NSString *endpoint = self.skyInitialBundleURL;
-  if (endpoint.length > 0) {
-    mojo::String string(endpoint.UTF8String);
-    _sky_engine->RunFromBundle(string);
+    auto package_root =
+        command_line.GetSwitchValueASCII(sky::shell::switches::kPackageRoot);
+    _sky_engine->RunFromFile(args[0], package_root, "");
     return;
   }
 }
