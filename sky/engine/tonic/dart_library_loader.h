@@ -37,6 +37,7 @@ class DartLibraryLoader {
                                       Dart_Handle url);
 
   void LoadLibrary(const std::string& name);
+  void LoadScript(const std::string& name);
 
   void WaitForDependencies(
       const std::unordered_set<DartDependency*>& dependencies,

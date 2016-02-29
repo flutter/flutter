@@ -39,16 +39,6 @@
 #endif
 
 namespace blink {
-namespace {
-
-void CreateEmptyRootLibraryIfNeeded() {
-  if (Dart_IsNull(Dart_RootLibrary())) {
-    Dart_LoadScript(Dart_NewStringFromCString("dart:empty"), Dart_EmptyString(),
-                    0, 0);
-  }
-}
-
-} // namespace
 
 DartController::DartController() : weak_factory_(this) {
 }
@@ -159,13 +149,12 @@ void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
 void DartController::RunFromLibrary(const std::string& name,
                                     DartLibraryProvider* library_provider) {
   DartState::Scope scope(dart_state());
-  CreateEmptyRootLibraryIfNeeded();
 
   DartLibraryLoader& loader = dart_state()->library_loader();
   loader.set_library_provider(library_provider);
 
   DartDependencyCatcher dependency_catcher(loader);
-  loader.LoadLibrary(name);
+  loader.LoadScript(name);
   loader.WaitForDependencies(dependency_catcher.dependencies(),
                              base::Bind(&DartController::DidLoadMainLibrary,
                                         weak_factory_.GetWeakPtr(), name));
