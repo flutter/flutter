@@ -22,8 +22,7 @@ static TestRunner* g_test_runner = nullptr;
 }  // namespace
 
 TestRunner::TestRunner()
-  : shell_view_(new ShellView(Shell::Shared())),
-    weak_ptr_factory_(this) {
+    : shell_view_(new ShellView(Shell::Shared())), weak_ptr_factory_(this) {
   CHECK(!g_test_runner) << "Only create one TestRunner.";
 
   shell_view_->view()->ConnectToEngine(GetProxy(&sky_engine_));
@@ -33,8 +32,7 @@ TestRunner::TestRunner()
   sky_engine_->OnViewportMetricsChanged(metrics.Pass());
 }
 
-TestRunner::~TestRunner() {
-}
+TestRunner::~TestRunner() {}
 
 TestRunner& TestRunner::Shared() {
   if (!g_test_runner)
@@ -43,7 +41,7 @@ TestRunner& TestRunner::Shared() {
 }
 
 void TestRunner::Run(const TestDescriptor& test) {
-  sky_engine_->RunFromFile(test.path, test.package_root);
+  sky_engine_->RunFromFile(test.path, test.package_root, "");
 }
 
 }  // namespace shell

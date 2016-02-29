@@ -14,6 +14,7 @@ const char kEnableCheckedMode[] = "enable-checked-mode";
 const char kFLX[] = "flx";
 const char kHelp[] = "help";
 const char kNonInteractive[] = "non-interactive";
+const char kMainDartFile[] = "dart-main";
 const char kPackageRoot[] = "package-root";
 const char kStartPaused[] = "start-paused";
 const char kTraceStartup[] = "trace-startup";

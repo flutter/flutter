@@ -48,7 +48,7 @@ interface SkyEngine {
   PushRoute(string route);
   PopRoute();
 
-  RunFromFile(string main, string package_root);
+  RunFromFile(string main, string package_root, string bundle);
   RunFromPrecompiledSnapshot(string path);
   RunFromBundle(string path);
 

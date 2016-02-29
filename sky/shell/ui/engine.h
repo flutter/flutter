@@ -64,11 +64,12 @@ class Engine : public UIDelegate,
   void SetServices(ServicesDataPtr services) override;
   void OnViewportMetricsChanged(ViewportMetricsPtr metrics) override;
   void OnLocaleChanged(const mojo::String& language_code,
-		       const mojo::String& country_code) override;
+                       const mojo::String& country_code) override;
   void OnPointerPacket(pointer::PointerPacketPtr packet) override;
 
   void RunFromFile(const mojo::String& main,
-                   const mojo::String& package_root) override;
+                   const mojo::String& package_root,
+                   const mojo::String& bundle) override;
   void RunFromPrecompiledSnapshot(const mojo::String& bundle_path) override;
   void RunFromBundle(const mojo::String& path) override;
   void RunFromBundleAndSnapshot(const mojo::String& bundle_path,
@@ -91,6 +92,8 @@ class Engine : public UIDelegate,
 
   void StopAnimator();
   void StartAnimatorIfPossible();
+
+  void ConfigureZipAssetBundle(const mojo::String& path);
 
   Config config_;
   std::unique_ptr<Animator> animator_;

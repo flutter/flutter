@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_MAC_PLATFORM_MAC_H_
-#define SKY_SHELL_MAC_PLATFORM_MAC_H_
+#ifndef SKY_SHELL_PLATFORM_MAC_PLATFORM_MAC_H_
+#define SKY_SHELL_PLATFORM_MAC_PLATFORM_MAC_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "sky/services/engine/sky_engine.mojom.h"
+
+namespace sky {
+namespace shell {
 
 typedef int (^PlatformMacMainCallback)(void);
 
@@ -15,8 +16,9 @@ int PlatformMacMain(int argc,
                     const char* argv[],
                     PlatformMacMainCallback callback);
 
-#ifdef __cplusplus
-}
-#endif
+bool AttemptLaunchFromCommandLineSwitches(sky::SkyEnginePtr& engine);
 
-#endif  // SKY_SHELL_MAC_PLATFORM_MAC_H_
+}  // namespace shell
+}  // namespace sky
+
+#endif  // SKY_SHELL_PLATFORM_MAC_PLATFORM_MAC_H_

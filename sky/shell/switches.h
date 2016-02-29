@@ -15,6 +15,7 @@ extern const char kEnableCheckedMode[];
 extern const char kFLX[];
 extern const char kHelp[];
 extern const char kNonInteractive[];
+extern const char kMainDartFile[];
 extern const char kPackageRoot[];
 extern const char kStartPaused[];
 extern const char kTraceStartup[];

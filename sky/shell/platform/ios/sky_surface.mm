@@ -8,6 +8,7 @@
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/EAGLDrawable.h>
 
+#include "base/command_line.h"
 #include "base/logging.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
@@ -15,10 +16,12 @@
 #include "sky/services/engine/input_event.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
 #include "sky/shell/platform/ios/sky_dynamic_service_loader.h"
+#include "sky/shell/platform/mac/platform_mac.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
+#include "sky/shell/switches.h"
 #include "sky/shell/ui_delegate.h"
 #include <strings.h>
 
@@ -226,7 +229,6 @@ static std::string TracesBasePath() {
   // In case this runner is part of the precompilation SDK, the FLX bundle is
   // present in the application bundle instead of the runner bundle. Attempt
   // to resolve the path there first.
-  // TODO: Allow specification of the application bundle identifier
   NSBundle* applicationBundle = [NSBundle
       bundleWithIdentifier:@"io.flutter.application.FlutterApplication"];
   NSString* path = [applicationBundle pathForResource:@"app" ofType:@"flx"];
@@ -251,17 +253,43 @@ static std::string TracesBasePath() {
   services->services_provided_by_embedder = service_provider.Pass();
   _engine->SetServices(services.Pass());
 
-  mojo::String bundle_path([self flxBundlePath]);
-
-  CHECK(bundle_path.size() != 0)
-      << "There must be a valid FLX bundle to run the application";
-
 #if TARGET_IPHONE_SIMULATOR
-  _engine->RunFromBundle(bundle_path);
+  [self runFromDartSource];
 #else
-  _engine->RunFromPrecompiledSnapshot(bundle_path);
+  [self runFromPrecompiledSource];
 #endif
 }
+
+#if TARGET_IPHONE_SIMULATOR
+
+- (void)runFromDartSource {
+  if (sky::shell::AttemptLaunchFromCommandLineSwitches(_engine)) {
+    return;
+  }
+
+  UIAlertView* alert = [[UIAlertView alloc]
+          initWithTitle:@"Error"
+                message:@"Could not resolve one or all of either the main dart "
+                        @"file path, the FLX bundle path or the package root "
+                        @"on the host. Use the tooling to relaunch the "
+                        @"application."
+               delegate:self
+      cancelButtonTitle:@"OK"
+      otherButtonTitles:nil];
+  [alert show];
+  [alert release];
+}
+
+#else
+
+- (void)runFromPrecompiledSource {
+  mojo::String bundle_path([self flxBundlePath]);
+  CHECK(bundle_path.size() != 0)
+      << "There must be a valid FLX bundle to run the application";
+  _engine->RunFromPrecompiledSnapshot(bundle_path);
+}
+
+#endif  // TARGET_IPHONE_SIMULATOR
 
 #pragma mark - UIResponder overrides for raw touches
 
