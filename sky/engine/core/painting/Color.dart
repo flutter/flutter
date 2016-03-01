@@ -49,22 +49,33 @@ class Color {
   /// The blue channel of this color in an 8 bit value.
   int get blue => (0x000000ff & _value) >> 0;
 
-  /// Returns a new color that matches this color with the alpha channel replaced with a.
+  /// Returns a new color that matches this color with the alpha channel
+  /// replaced with a (which ranges from 0 to 255).
   Color withAlpha(int a) {
     return new Color.fromARGB(a, red, green, blue);
   }
 
-  /// Returns a new color that matches this color with the red channel replaced with r.
+  /// Returns a new color that matches this color with the alpha channel
+  /// replaced with the given opacity (which ranges from 0.0 to 1.0).
+  Color withOpacity(double opacity) {
+    assert(opacity >= 0.0 && opacity <= 1.0);
+    return withAlpha((255.0 * opacity).round());
+  }
+
+  /// Returns a new color that matches this color with the red channel replaced
+  /// with r.
   Color withRed(int r) {
     return new Color.fromARGB(alpha, r, green, blue);
   }
 
-  /// Returns a new color that matches this color with the green channel replaced with g.
+  /// Returns a new color that matches this color with the green channel
+  /// replaced with g.
   Color withGreen(int g) {
     return new Color.fromARGB(alpha, red, g, blue);
   }
 
-  /// Returns a new color that matches this color with the blue channel replaced with b.
+  /// Returns a new color that matches this color with the blue channel replaced
+  /// with b.
   Color withBlue(int b) {
     return new Color.fromARGB(alpha, red, green, b);
   }
