@@ -76,7 +76,15 @@ class CreateCommand extends Command {
       projectDir = new Directory(argResults.rest.first);
     }
 
-    _renderTemplates(projectDir, flutterPackagesDirectory,
+    String dirPath = path.normalize(projectDir.absolute.path);
+    String projectName = _normalizeProjectName(path.basename(dirPath));
+
+    if (_validateProjectName(projectName) != null) {
+      printError(_validateProjectName(projectName));
+      return 1;
+    }
+
+    _renderTemplates(projectName, dirPath, flutterPackagesDirectory,
         renderDriverTest: argResults['with-driver-test']);
 
     if (argResults['pub']) {
@@ -115,16 +123,14 @@ All done! In order to run your application, type:
     return 0;
   }
 
-  void _renderTemplates(Directory projectDir, String flutterPackagesDirectory,
-      { bool renderDriverTest: false }) {
-    String dirPath = path.normalize(projectDir.absolute.path);
-    String projectName = _normalizeProjectName(path.basename(dirPath));
+  void _renderTemplates(String projectName, String dirPath,
+      String flutterPackagesDirectory, { bool renderDriverTest: false }) {
     String projectIdentifier = _createProjectIdentifier(path.basename(dirPath));
     String relativeFlutterPackagesDirectory = path.relative(flutterPackagesDirectory, from: dirPath);
 
     printStatus('Creating project ${path.basename(projectName)}:');
 
-    projectDir.createSync(recursive: true);
+    new Directory(dirPath).createSync(recursive: true);
 
     Map templateContext = <String, dynamic>{
       'projectName': projectName,
@@ -163,4 +169,35 @@ String _createProjectIdentifier(String name) {
   name = name.replaceAll(disallowed, '');
   name = name.length == 0 ? 'untitled' : name;
   return 'com.yourcompany.$name';
+}
+
+final Set<String> _packageDependencies = new Set<String>.from(<String>[
+  'args',
+  'async',
+  'collection',
+  'convert',
+  'flutter',
+  'html',
+  'intl',
+  'logging',
+  'matcher',
+  'mime',
+  'path',
+  'plugin',
+  'pool',
+  'test',
+  'utf',
+  'watcher',
+  'yaml'
+]);
+
+/// Return `null` if the project name is legal. Return a validation message if
+/// we should disallow the project name.
+String _validateProjectName(String projectName) {
+  if (_packageDependencies.contains(projectName)) {
+    return "Invalid project name: '$projectName' - this will conflict with Flutter "
+    "package dependencies.";
+  }
+
+  return null;
 }
