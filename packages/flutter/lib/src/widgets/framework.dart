@@ -1107,7 +1107,18 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
         if (foundTarget)
           return true;
       }
-      return !_debugStateLocked || (_debugAllowIgnoredCallsToMarkNeedsBuild && dirty);
+      if (_debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
+        throw new WidgetError(
+          'Cannot mark this component as needing to build because the framework is '
+          'already in the process of building widgets. A widget can be marked as '
+          'needing to be built during the build phase only if one if its ancestor '
+          'is currently building. This exception is allowed because the framework '
+          'builds parent widgets before children, which means a dirty descendant '
+          'will always be built. Otherwise, the framework might not visit this '
+          'widget during this build phase.'
+        );
+      }
+      return true;
     });
     if (dirty)
       return;
