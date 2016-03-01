@@ -11,6 +11,7 @@ class Size extends OffsetBase {
   Size.copy(Size source) : super(source.width, source.height);
   const Size.fromWidth(double width) : super(width, double.INFINITY);
   const Size.fromHeight(double height) : super(double.INFINITY, height);
+  const Size.fromRadius(double radius) : super(radius * 2.0, radius * 2.0);
 
   double get width => _dx;
   double get height => _dy;
