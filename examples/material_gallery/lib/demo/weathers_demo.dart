@@ -276,14 +276,15 @@ class GradientNode extends NodeWithSize {
   void paint(Canvas canvas) {
     applyTransformForPivot(canvas);
 
+    Rect rect = Point.origin & size;
     Paint gradientPaint = new Paint()..shader = new LinearGradient(
-      begin: Point.origin,
-      end: new Point(0.0, size.height),
+      begin: const Offset(0.0, 0.0),
+      end: const Offset(0.0, 1.0),
       colors: <Color>[colorTop, colorBottom],
       stops: <double>[0.0, 1.0]
-    ).createShader();
+    ).createShader(rect);
 
-    canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, size.width, size.height), gradientPaint);
+    canvas.drawRect(rect, gradientPaint);
   }
 }
 

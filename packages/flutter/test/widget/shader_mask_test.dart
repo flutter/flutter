@@ -10,12 +10,12 @@ import 'package:test/test.dart';
 
 Shader createShader(Rect bounds) {
   return new LinearGradient(
-      begin: bounds.topLeft,
-      end: bounds.bottomLeft,
+      begin: const Offset(0.0, 0.0),
+      end: const Offset(0.0, 1.0),
       colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
       stops: <double>[0.1, 0.35]
   )
-  .createShader();
+  .createShader(bounds);
 }
 
 

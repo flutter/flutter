@@ -235,27 +235,43 @@ class BoxShadow {
   String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
 }
 
+// TODO(ianh): We should probably expose something that does this on Rect.
+// https://github.com/flutter/flutter/issues/2318
+Point _offsetToPoint(Offset offset, Rect rect) {
+  return new Point(rect.left + offset.dx * rect.width, rect.top + offset.dy * rect.height);
+}
+
 /// A 2D gradient.
 abstract class Gradient {
   const Gradient();
-  Shader createShader();
+  Shader createShader(Rect rect);
 }
 
 /// A 2D linear gradient.
 class LinearGradient extends Gradient {
   const LinearGradient({
-    this.begin,
-    this.end,
+    this.begin: const Offset(0.0, 0.5),
+    this.end: const Offset(1.0, 0.5),
     this.colors,
     this.stops,
     this.tileMode: TileMode.clamp
   });
 
-  /// The point at which stop 0.0 of the gradient is placed.
-  final Point begin;
+  /// The offset from coordinate (0.0,0.0) at which stop 0.0 of the
+  /// gradient is placed, in a coordinate space that maps the top left
+  /// of the paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
+  ///
+  /// For example, a begin offset of (0.0,0.5) is half way down the
+  /// left side of the box.
+  final Offset begin;
 
-  /// The point at which stop 1.0 of the gradient is placed.
-  final Point end;
+  /// The offset from coordinate (0.0,0.0) at which stop 1.0 of the
+  /// gradient is placed, in a coordinate space that maps the top left
+  /// of the paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
+  ///
+  /// For example, an end offset of (1.0,0.5) is half way down the
+  /// right side of the box.
+  final Offset end;
 
   /// The colors the gradient should obtain at each of the stops.
   ///
@@ -271,8 +287,11 @@ class LinearGradient extends Gradient {
   /// How this gradient should tile the plane.
   final TileMode tileMode;
 
-  Shader createShader() {
-    return new ui.Gradient.linear(<Point>[begin, end], this.colors, this.stops, this.tileMode);
+  Shader createShader(Rect rect) {
+    return new ui.Gradient.linear(
+      <Point>[_offsetToPoint(begin, rect), _offsetToPoint(end, rect)],
+      colors, stops, tileMode
+    );
   }
 
   bool operator ==(dynamic other) {
@@ -316,17 +335,26 @@ class LinearGradient extends Gradient {
 /// A 2D radial gradient.
 class RadialGradient extends Gradient {
   const RadialGradient({
-    this.center,
-    this.radius,
+    this.center: const Offset(0.5, 0.5),
+    this.radius: 0.5,
     this.colors,
     this.stops,
     this.tileMode: TileMode.clamp
   });
 
-  /// The center of the gradient.
-  final Point center;
+  /// The center of the gradient, as an offset into the unit square
+  /// describing the gradient which will be mapped onto the paint box.
+  ///
+  /// For example, an offset of (0.5,0.5) will place the radial
+  /// gradient in the center of the box.
+  final Offset center;
 
-  /// The radius at which stop 1.0 is placed.
+  /// The radius of the gradient, as a fraction of the shortest side
+  /// of the paint box.
+  ///
+  /// For example, if a radial gradient is painted on a box that is
+  /// 100.0 pixels wide and 200.0 pixels tall, then a radius of 1.0
+  /// will place the 1.0 stop at 100.0 pixels from the [center].
   final double radius;
 
   /// The colors the gradient should obtain at each of the stops.
@@ -345,8 +373,12 @@ class RadialGradient extends Gradient {
   /// How this gradient should tile the plane.
   final TileMode tileMode;
 
-  Shader createShader() {
-    return new ui.Gradient.radial(center, radius, colors, stops, tileMode);
+  Shader createShader(Rect rect) {
+    return new ui.Gradient.radial(
+      _offsetToPoint(center, rect),
+      radius * rect.shortestSide,
+      colors, stops, tileMode
+    );
   }
 
   bool operator ==(dynamic other) {
@@ -903,15 +935,23 @@ class _BoxDecorationPainter extends BoxPainter {
   final BoxDecoration _decoration;
 
   Paint _cachedBackgroundPaint;
-  Paint get _backgroundPaint {
-    if (_cachedBackgroundPaint == null) {
+  Rect _rectForCachedBackgroundPaint;
+  Paint _getBackgroundPaint(Rect rect) {
+    assert(rect != null);
+    if (_cachedBackgroundPaint == null ||
+        (_decoration.gradient == null && _rectForCachedBackgroundPaint != null) ||
+        (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       Paint paint = new Paint();
 
       if (_decoration.backgroundColor != null)
         paint.color = _decoration.backgroundColor;
 
-      if (_decoration.gradient != null)
-        paint.shader = _decoration.gradient.createShader();
+      if (_decoration.gradient != null) {
+        paint.shader = _decoration.gradient.createShader(rect);
+        _rectForCachedBackgroundPaint = rect;
+      } else {
+        _rectForCachedBackgroundPaint = null;
+      }
 
       _cachedBackgroundPaint = paint;
     }
@@ -971,7 +1011,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
   void _paintBackgroundColor(Canvas canvas, Rect rect) {
     if (_decoration.backgroundColor != null || _decoration.gradient != null)
-      _paintBox(canvas, rect, _backgroundPaint);
+      _paintBox(canvas, rect, _getBackgroundPaint(rect));
   }
 
   void _paintBackgroundImage(Canvas canvas, Rect rect) {
