@@ -15,7 +15,13 @@ class DriverError extends Error {
   final dynamic originalError;
   final dynamic originalStackTrace;
 
-  String toString() => 'DriverError: $message';
+  String toString() {
+    return '''DriverError: $message
+Original error: $originalError
+Original stack trace:
+$originalStackTrace
+    ''';
+  }
 }
 
 // Whether someone redirected the log messages somewhere.

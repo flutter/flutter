@@ -151,8 +151,19 @@ class FlutterDriver {
     return Health.fromJson(await _sendCommand(new GetHealth()));
   }
 
+  /// Finds the UI element with the given [key].
   Future<ObjectRef> findByValueKey(dynamic key) async {
-    return ObjectRef.fromJson(await _sendCommand(new FindByValueKey(key)));
+    return ObjectRef.fromJson(await _sendCommand(new Find(new ByValueKey(key))));
+  }
+
+  /// Finds the UI element for the tooltip with the given [message].
+  Future<ObjectRef> findByTooltipMessage(String message) async {
+    return ObjectRef.fromJson(await _sendCommand(new Find(new ByTooltipMessage(message))));
+  }
+
+  /// Finds the text element with the given [text].
+  Future<ObjectRef> findByText(String text) async {
+    return ObjectRef.fromJson(await _sendCommand(new Find(new ByText(text))));
   }
 
   Future<Null> tap(ObjectRef ref) async {

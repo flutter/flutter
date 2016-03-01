@@ -7,11 +7,84 @@ import 'message.dart';
 
 const List<Type> _supportedKeyValueTypes = const <Type>[String, int];
 
-/// Command to find an element by a value key.
-class FindByValueKey extends Command {
-  final String kind = 'find_by_value_key';
+/// Command to find an element.
+class Find extends Command {
+  final String kind = 'find';
 
-  FindByValueKey(dynamic keyValue)
+  Find(this.searchSpec);
+
+  final SearchSpecification searchSpec;
+
+  Map<String, dynamic> toJson() => searchSpec.toJson();
+
+  static Find fromJson(Map<String, dynamic> json) {
+    return new Find(SearchSpecification.fromJson(json));
+  }
+
+  static _throwInvalidKeyValueType(String invalidType) {
+    throw new DriverError('Unsupported key value type $invalidType. Flutter Driver only supports ${_supportedKeyValueTypes.join(", ")}');
+  }
+}
+
+/// Describes how to the driver should search for elements.
+abstract class SearchSpecification extends Message {
+  String get searchSpecType;
+
+  static SearchSpecification fromJson(Map<String, dynamic> json) {
+    String searchSpecType = json['searchSpecType'];
+    switch(searchSpecType) {
+      case 'ByValueKey': return ByValueKey.fromJson(json);
+      case 'ByTooltipMessage': return ByTooltipMessage.fromJson(json);
+      case 'ByText': return ByText.fromJson(json);
+    }
+    throw new DriverError('Unsupported search specification type $searchSpecType');
+  }
+
+  Map<String, dynamic> toJson() => {
+    'searchSpecType': searchSpecType,
+  };
+}
+
+/// Tells [Find] to search by tooltip text.
+class ByTooltipMessage extends SearchSpecification {
+  final String searchSpecType = 'ByTooltipMessage';
+
+  ByTooltipMessage(this.text);
+
+  /// Tooltip message text.
+  final String text;
+
+  Map<String, dynamic> toJson() => super.toJson()..addAll({
+    'text': text,
+  });
+
+  static ByTooltipMessage fromJson(Map<String, dynamic> json) {
+    return new ByTooltipMessage(json['text']);
+  }
+}
+
+/// Tells [Find] to search for `Text` widget by text.
+class ByText extends SearchSpecification {
+  final String searchSpecType = 'ByText';
+
+  ByText(this.text);
+
+  final String text;
+
+  Map<String, dynamic> toJson() => super.toJson()..addAll({
+    'text': text,
+  });
+
+  static ByText fromJson(Map<String, dynamic> json) {
+    return new ByText(json['text']);
+  }
+}
+
+/// Tells [Find] to search by `ValueKey`.
+class ByValueKey extends SearchSpecification {
+  final String searchSpecType = 'ByValueKey';
+
+  ByValueKey(dynamic keyValue)
     : this.keyValue = keyValue,
       this.keyValueString = '$keyValue',
       this.keyValueType = '${keyValue.runtimeType}' {
@@ -30,19 +103,19 @@ class FindByValueKey extends Command {
   /// May be one of "String", "int". The list of supported types may change.
   final String keyValueType;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => super.toJson()..addAll({
     'keyValueString': keyValueString,
     'keyValueType': keyValueType,
-  };
+  });
 
-  static FindByValueKey fromJson(Map<String, dynamic> json) {
+  static ByValueKey fromJson(Map<String, dynamic> json) {
     String keyValueString = json['keyValueString'];
     String keyValueType = json['keyValueType'];
     switch(keyValueType) {
       case 'int':
-        return new FindByValueKey(int.parse(keyValueString));
+        return new ByValueKey(int.parse(keyValueString));
       case 'String':
-        return new FindByValueKey(keyValueString);
+        return new ByValueKey(keyValueString);
       default:
         return _throwInvalidKeyValueType(keyValueType);
     }

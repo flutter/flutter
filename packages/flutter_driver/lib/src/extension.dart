@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/src/instrumentation.dart';
 
@@ -50,14 +51,14 @@ class FlutterDriverExtension {
   FlutterDriverExtension() {
     _commandHandlers = {
       'get_health': getHealth,
-      'find_by_value_key': findByValueKey,
+      'find': find,
       'tap': tap,
       'get_text': getText,
     };
 
     _commandDeserializers = {
       'get_health': GetHealth.fromJson,
-      'find_by_value_key': FindByValueKey.fromJson,
+      'find': Find.fromJson,
       'tap': Tap.fromJson,
       'get_text': GetText.fromJson,
     };
@@ -72,39 +73,93 @@ class FlutterDriverExtension {
       <String, CommandDeserializerCallback>{};
 
   Future<ServiceExtensionResponse> call(Map<String, String> params) async {
-    String commandKind = params['kind'];
-    CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
-    CommandDeserializerCallback commandDeserializer =
-        _commandDeserializers[commandKind];
+    try {
+      String commandKind = params['kind'];
+      CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
+      CommandDeserializerCallback commandDeserializer =
+          _commandDeserializers[commandKind];
 
-    if (commandHandler == null || commandDeserializer == null) {
-      return new ServiceExtensionResponse.error(
-        ServiceExtensionResponse.kInvalidParams,
-        'Extension $_extensionMethod does not support command $commandKind'
-      );
+      if (commandHandler == null || commandDeserializer == null) {
+        return new ServiceExtensionResponse.error(
+          ServiceExtensionResponse.kInvalidParams,
+          'Extension $_extensionMethod does not support command $commandKind'
+        );
+      }
+
+      Command command = commandDeserializer(params);
+      return commandHandler(command).then((Result result) {
+        return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
+      }, onError: (e, s) {
+        _log.warning('$e:\n$s');
+        return new ServiceExtensionResponse.error(
+          ServiceExtensionResponse.kExtensionError, '$e');
+      });
+    } catch(error, stackTrace) {
+      _log.warning('Uncaught extension error: $error\n$stackTrace');
     }
-
-    Command command = commandDeserializer(params);
-    return commandHandler(command).then((Result result) {
-      return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
-    }, onError: (e, s) {
-      _log.warning('$e:\n$s');
-      return new ServiceExtensionResponse.error(
-        ServiceExtensionResponse.kExtensionError, '$e');
-    });
   }
 
   Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
 
-  Future<ObjectRef> findByValueKey(FindByValueKey command) async {
-    Element elem = await retry(() {
-      return prober.findElementByKey(new ValueKey<dynamic>(command.keyValue));
-    }, _kDefaultTimeout, _kDefaultPauseBetweenRetries);
+  Future<ObjectRef> find(Find command) async {
+    SearchSpecification searchSpec = command.searchSpec;
+    switch(searchSpec.runtimeType) {
+      case ByValueKey: return findByValueKey(searchSpec);
+      case ByTooltipMessage: return findByTooltipMessage(searchSpec);
+      case ByText: return findByText(searchSpec);
+    }
+    throw new DriverError('Unsupported search specification type ${searchSpec.runtimeType}');
+  }
 
-    ObjectRef elemRef = elem != null
-      ? new ObjectRef(_registerObject(elem))
+  /// Runs object [locator] repeatedly until it returns a non-`null` value.
+  ///
+  /// [descriptionGetter] describes the object to be waited for. It is used in
+  /// the warning printed should timeout happen.
+  Future<ObjectRef> _waitForObject(String descriptionGetter(), Object locator()) async {
+    Object object = await retry(locator, _kDefaultTimeout, _kDefaultPauseBetweenRetries, predicate: (object) {
+      return object != null;
+    }).catchError((dynamic error, stackTrace) {
+      _log.warning('Timed out waiting for ${descriptionGetter()}');
+      return null;
+    });
+
+    ObjectRef elemRef = object != null
+      ? new ObjectRef(_registerObject(object))
       : new ObjectRef.notFound();
     return new Future.value(elemRef);
+  }
+
+  Future<ObjectRef> findByValueKey(ByValueKey byKey) async {
+    return _waitForObject(
+      () => 'element with key "${byKey.keyValue}" of type ${byKey.keyValueType}',
+      () {
+        return prober.findElementByKey(new ValueKey<dynamic>(byKey.keyValue));
+      }
+    );
+  }
+
+  Future<ObjectRef> findByTooltipMessage(ByTooltipMessage byTooltipMessage) async {
+    return _waitForObject(
+      () => 'tooltip with message "${byTooltipMessage.text}" on it',
+      () {
+        return prober.findElement((Element element) {
+          Widget widget = element.widget;
+
+          if (widget is Tooltip)
+            return widget.message == byTooltipMessage.text;
+
+          return false;
+        });
+      }
+    );
+  }
+
+  Future<ObjectRef> findByText(ByText byText) async {
+    return await _waitForObject(
+      () => 'text "${byText.text}"',
+      () {
+        return prober.findText(byText.text);
+      });
   }
 
   Future<TapResult> tap(Tap command) async {

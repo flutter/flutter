@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'enum_util.dart';
 import 'message.dart';
 
 /// Requests an application health check.
@@ -22,6 +23,9 @@ enum HealthStatus {
   bad,
 }
 
+final EnumIndex<HealthStatus> _healthStatusIndex =
+    new EnumIndex<HealthStatus>(HealthStatus.values);
+
 /// Application health status.
 class Health extends Result {
   Health(this.status) {
@@ -29,26 +33,13 @@ class Health extends Result {
   }
 
   static Health fromJson(Map<String, dynamic> json) {
-    return new Health(_statusFromId(json['status']));
+    return new Health(_healthStatusIndex.lookupBySimpleName(json['status']));
   }
 
   /// Health status
   final HealthStatus status;
 
   Map<String, dynamic> toJson() => {
-    'status': _getStatusId(status)
+    'status': _healthStatusIndex.toSimpleName(status)
   };
-}
-
-String _getStatusId(HealthStatus status) => status.toString().split('.').last;
-
-final Map<String, HealthStatus> _idToStatus = new Map<String, HealthStatus>.fromIterable(
-  HealthStatus.values,
-  key: _getStatusId
-);
-
-HealthStatus _statusFromId(String id) {
-  return _idToStatus.containsKey(id)
-    ? _idToStatus[id]
-    : throw new ArgumentError.value(id, 'id', 'unknown');
 }
