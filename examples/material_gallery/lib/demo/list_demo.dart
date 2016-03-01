@@ -21,9 +21,10 @@ class ListDemoState extends State<ListDemo> {
 
   ScaffoldFeatureController _bottomSheet;
   ListDemoItemSize _itemSize = ListDemoItemSize.threeLine;
-  bool _dense = true;
-  bool _showAvatar = true;
-  bool _showIcon = false;
+  bool _dense = false;
+  bool _showAvatars = true;
+  bool _showIcons = false;
+  bool _showDividers = false;
   bool _reverseSort = false;
   List<String> items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
@@ -77,10 +78,10 @@ class ListDemoState extends State<ListDemo> {
               dense: true,
               primary: new Text('Show Avatar'),
               right: new Checkbox(
-                value: _showAvatar,
+                value: _showAvatars,
                 onChanged: (bool value) {
                   setState(() {
-                    _showAvatar = value;
+                    _showAvatars = value;
                   });
                   _bottomSheet?.setState(() { });
                 }
@@ -90,10 +91,23 @@ class ListDemoState extends State<ListDemo> {
               dense: true,
               primary: new Text('Show Icon'),
               right: new Checkbox(
-                value: _showIcon,
+                value: _showIcons,
                 onChanged: (bool value) {
                   setState(() {
-                    _showIcon = value;
+                    _showIcons = value;
+                  });
+                  _bottomSheet?.setState(() { });
+                }
+              )
+            ),
+            new ListItem(
+              dense: true,
+              primary: new Text('Show Dividers'),
+              right: new Checkbox(
+                value: _showDividers,
+                onChanged: (bool value) {
+                  setState(() {
+                    _showDividers = value;
                   });
                   _bottomSheet?.setState(() { });
                 }
@@ -132,10 +146,10 @@ class ListDemoState extends State<ListDemo> {
     return new ListItem(
       isThreeLine: _itemSize == ListDemoItemSize.threeLine,
       dense: _dense,
-      left: _showAvatar ? new CircleAvatar(child: new Text(item)) : null,
+      left: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
       primary: new Text('This item represents $item'),
       secondary: secondary,
-      right: _showIcon ? new Icon(icon: 'action/info', color: Theme.of(context).disabledColor) : null
+      right: _showIcons ? new Icon(icon: 'action/info', color: Theme.of(context).disabledColor) : null
     );
   }
 
@@ -153,6 +167,11 @@ class ListDemoState extends State<ListDemo> {
         itemSizeText = 'Three-Line';
         break;
     }
+
+    Iterable<Widget> listItems = items.map((String item) => buildListItem(context, item));
+    if (_showDividers)
+      listItems = ListItem.divideItems(context: context, items: listItems);
+
     return new Scaffold(
       key: scaffoldKey,
       toolBar: new ToolBar(
@@ -177,7 +196,7 @@ class ListDemoState extends State<ListDemo> {
       ),
       body: new Block(
         padding: new EdgeDims.all(_dense ? 4.0 : 8.0),
-        children: items.map((String item) => buildListItem(context, item)).toList()
+        children: listItems.toList()
       )
     );
   }

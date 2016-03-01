@@ -41,6 +41,32 @@ class ListItem extends StatelessComponent {
   final GestureTapCallback onTap;
   final GestureLongPressCallback onLongPress;
 
+  /// Add a one pixel border in between each item. If color isn't specified the
+  /// dividerColor of the context's theme is used.
+  static Iterable<Widget> divideItems({ BuildContext context, Iterable<Widget> items, Color color }) sync* {
+    assert(items != null);
+    assert(color != null || context != null);
+
+    final Color dividerColor = color ?? Theme.of(context).dividerColor;
+    final Iterator<Widget> iterator = items.iterator;
+    final bool isNotEmpty = iterator.moveNext();
+
+    Widget item = iterator.current;
+    while(iterator.moveNext()) {
+      yield new DecoratedBox(
+        decoration: new BoxDecoration(
+          border: new Border(
+            bottom: new BorderSide(color: dividerColor)
+          )
+        ),
+        child: item
+      );
+      item = iterator.current;
+    }
+    if (isNotEmpty)
+      yield item;
+  }
+
   TextStyle primaryTextStyle(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle style = theme.text.subhead;
