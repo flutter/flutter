@@ -74,10 +74,17 @@ class DartLibraryLoader::Job : public DartDependency,
 
 class DartLibraryLoader::ImportJob : public Job {
  public:
-  ImportJob(DartLibraryLoader* loader, const std::string& name) : Job(loader, name) {
-    TRACE_EVENT_ASYNC_BEGIN1("flutter", "DartLibraryLoader::ImportJob", this, "url",
+  ImportJob(DartLibraryLoader* loader,
+            const std::string& name,
+            bool should_load_as_script)
+      : Job(loader, name),
+        should_load_as_script_(should_load_as_script) {
+    TRACE_EVENT_ASYNC_BEGIN1("flutter", "DartLibraryLoader::ImportJob", this,
+                             "url",
                              name);
   }
+
+  bool should_load_as_script() const { return should_load_as_script_; }
 
  private:
   // DataPipeDrainer::Client
@@ -85,6 +92,8 @@ class DartLibraryLoader::ImportJob : public Job {
     TRACE_EVENT_ASYNC_END0("flutter", "DartLibraryLoader::ImportJob", this);
     loader_->DidCompleteImportJob(this, buffer_);
   }
+
+  bool should_load_as_script_;
 };
 
 class DartLibraryLoader::SourceJob : public Job {
@@ -222,7 +231,21 @@ void DartLibraryLoader::LoadLibrary(const std::string& name) {
   const auto& result = pending_libraries_.insert(std::make_pair(name, nullptr));
   if (result.second) {
     // New entry.
-    std::unique_ptr<Job> job = std::unique_ptr<Job>(new ImportJob(this, name));
+    std::unique_ptr<Job> job =
+        std::unique_ptr<Job>(new ImportJob(this, name, false));
+    result.first->second = job.get();
+    jobs_.insert(std::move(job));
+  }
+  if (dependency_catcher_)
+    dependency_catcher_->AddDependency(result.first->second);
+}
+
+void DartLibraryLoader::LoadScript(const std::string& name) {
+  const auto& result = pending_libraries_.insert(std::make_pair(name, nullptr));
+  if (result.second) {
+    // New entry.
+    std::unique_ptr<Job> job =
+        std::unique_ptr<Job>(new ImportJob(this, name, true));
     result.first->second = job.get();
     jobs_.insert(std::move(job));
   }
@@ -257,9 +280,19 @@ void DartLibraryLoader::DidCompleteImportJob(
 
   WatcherSignaler watcher_signaler(*this, job);
 
-  Dart_Handle result = Dart_LoadLibrary(
-      StdStringToDart(job->name()),
-      Dart_NewStringFromUTF8(buffer.data(), buffer.size()), 0, 0);
+  Dart_Handle result;
+
+  if (job->should_load_as_script()) {
+    result = Dart_LoadScript(
+        StdStringToDart(job->name()),
+        Dart_NewStringFromUTF8(buffer.data(), buffer.size()),
+        0, 0);
+  } else {
+    result = Dart_LoadLibrary(
+        StdStringToDart(job->name()),
+        Dart_NewStringFromUTF8(buffer.data(), buffer.size()),
+        0, 0);
+  }
   if (Dart_IsError(result)) {
     LOG(ERROR) << "Error Loading " << job->name() << " "
         << Dart_GetError(result);

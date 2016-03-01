@@ -7,6 +7,7 @@
 #include <dlfcn.h>
 
 #include "base/bind.h"
+#include "base/command_line.h"
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
@@ -94,6 +95,8 @@ static const char* kDartStartPausedArgs[]{
 };
 
 const char kFileUriPrefix[] = "file://";
+
+const char kDartFlags[] = "dart-flags";
 
 void IsolateShutdownCallback(void* callback_data) {
   // TODO(dart)
@@ -321,6 +324,24 @@ void InitDartVM() {
   if (SkySettings::Get().start_paused)
     args.append(kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
 
+  Vector<std::string> dart_flags;
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(kDartFlags)) {
+    // Instruct the VM to ignore unrecognized flags.
+    args.append("--ignore-unrecognized-flags");
+    // Split up dart flags by spaces.
+    base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+    std::stringstream ss(
+        command_line.GetSwitchValueNative(kDartFlags));
+    std::istream_iterator<std::string> it(ss);
+    std::istream_iterator<std::string> end;
+    while (it != end) {
+      dart_flags.append(*it);
+      it++;
+    }
+  }
+  for (size_t i = 0; i < dart_flags.size(); i++) {
+    args.append(dart_flags[i].data());
+  }
   CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
   {
