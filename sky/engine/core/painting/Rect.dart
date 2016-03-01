@@ -27,6 +27,15 @@ class Rect {
       ..[3] = top + height;
   }
 
+  /// Construct a rectangle that bounds the given circle.
+  Rect.fromCircle({ Point center, double radius }) {
+    _value
+      ..[0] = center.x - radius
+      ..[1] = center.y - radius
+      ..[2] = center.x + radius
+      ..[3] = center.y + radius;
+  }
+
   static const int _kDataSize = 4;
   final Float32List _value = new Float32List(_kDataSize);
 
