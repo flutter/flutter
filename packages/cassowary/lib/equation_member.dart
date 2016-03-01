@@ -25,6 +25,7 @@ abstract class _EquationMember {
 
   Expression operator /(_EquationMember m) => asExpression() / m;
 
+  @override
   int get hashCode =>
       throw "An equation member is not comparable and cannot be added to collections";
 }

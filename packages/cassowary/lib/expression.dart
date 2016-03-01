@@ -9,8 +9,10 @@ class Expression extends _EquationMember {
 
   final double constant;
 
+  @override
   bool get isConstant => terms.length == 0;
 
+  @override
   double get value => terms.fold(constant, (value, term) => value + term.value);
 
   Expression(this.terms, this.constant);
@@ -18,6 +20,7 @@ class Expression extends _EquationMember {
       : this.terms = new List<Term>.from(expr.terms),
         this.constant = expr.constant;
 
+  @override
   Expression asExpression() => this;
 
   Constraint _createConstraint(
@@ -51,15 +54,19 @@ class Expression extends _EquationMember {
     return null;
   }
 
+  @override
   Constraint operator >=(_EquationMember value) =>
       _createConstraint(value, Relation.greaterThanOrEqualTo);
 
+  @override
   Constraint operator <=(_EquationMember value) =>
       _createConstraint(value, Relation.lessThanOrEqualTo);
 
+  @override
   Constraint equals(_EquationMember value) =>
     _createConstraint(value, Relation.equalTo);
 
+  @override
   Expression operator +(_EquationMember m) {
     if (m is ConstantMember) {
       return new Expression(new List.from(terms), constant + m.value);
@@ -83,6 +90,7 @@ class Expression extends _EquationMember {
     return null;
   }
 
+  @override
   Expression operator -(_EquationMember m) {
     if (m is ConstantMember) {
       return new Expression(new List.from(terms), constant - m.value);
