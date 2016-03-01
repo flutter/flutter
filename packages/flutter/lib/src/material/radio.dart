@@ -80,10 +80,11 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   );
 
   void updateRenderObject(_RenderRadio renderObject, _RadioRenderObjectWidget oldWidget) {
-    renderObject.value = selected;
-    renderObject.activeColor = activeColor;
-    renderObject.inactiveColor = inactiveColor;
-    renderObject.onChanged = onChanged;
+    renderObject
+      ..value = selected
+      ..activeColor = activeColor
+      ..inactiveColor = inactiveColor
+      ..onChanged = onChanged;
   }
 }
 

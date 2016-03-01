@@ -270,12 +270,13 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   }
 
   void updateRenderObject(_RenderTabBar renderObject, _TabBarWrapper oldWidget) {
-    renderObject.selectedIndex = selectedIndex;
-    renderObject.indicatorColor = indicatorColor;
-    renderObject.indicatorRect = indicatorRect;
-    renderObject.textAndIcons = textAndIcons;
-    renderObject.isScrollable = isScrollable;
-    renderObject.onLayoutChanged = onLayoutChanged;
+    renderObject
+      ..selectedIndex = selectedIndex
+      ..indicatorColor = indicatorColor
+      ..indicatorRect = indicatorRect
+      ..textAndIcons = textAndIcons
+      ..isScrollable = isScrollable
+      ..onLayoutChanged = onLayoutChanged;
   }
 }
 

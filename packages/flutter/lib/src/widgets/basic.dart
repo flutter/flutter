@@ -102,8 +102,9 @@ class ShaderMask extends OneChildRenderObjectWidget {
   }
 
   void updateRenderObject(RenderShaderMask renderObject, ShaderMask oldWidget) {
-    renderObject.shaderCallback = shaderCallback;
-    renderObject.transferMode = transferMode;
+    renderObject
+      ..shaderCallback = shaderCallback
+      ..transferMode = transferMode;
   }
 }
 
@@ -132,8 +133,9 @@ class DecoratedBox extends OneChildRenderObjectWidget {
   RenderDecoratedBox createRenderObject() => new RenderDecoratedBox(decoration: decoration, position: position);
 
   void updateRenderObject(RenderDecoratedBox renderObject, DecoratedBox oldWidget) {
-    renderObject.decoration = decoration;
-    renderObject.position = position;
+    renderObject
+      ..decoration = decoration
+      ..position = position;
   }
 }
 
@@ -166,13 +168,15 @@ class CustomPaint extends OneChildRenderObjectWidget {
   );
 
   void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
-    renderObject.painter = painter;
-    renderObject.foregroundPainter = foregroundPainter;
+    renderObject
+      ..painter = painter
+      ..foregroundPainter = foregroundPainter;
   }
 
   void didUnmountRenderObject(RenderCustomPaint renderObject) {
-    renderObject.painter = null;
-    renderObject.foregroundPainter = null;
+    renderObject
+      ..painter = null
+      ..foregroundPainter = null;
   }
 }
 
@@ -220,8 +224,9 @@ class ClipRRect extends OneChildRenderObjectWidget {
   RenderClipRRect createRenderObject() => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
 
   void updateRenderObject(RenderClipRRect renderObject, ClipRRect oldWidget) {
-    renderObject.xRadius = xRadius;
-    renderObject.yRadius = yRadius;
+    renderObject
+      ..xRadius = xRadius
+      ..yRadius = yRadius;
   }
 }
 
@@ -283,10 +288,11 @@ class Transform extends OneChildRenderObjectWidget {
   );
 
   void updateRenderObject(RenderTransform renderObject, Transform oldWidget) {
-    renderObject.transform = transform;
-    renderObject.origin = origin;
-    renderObject.alignment = alignment;
-    renderObject.transformHitTests = transformHitTests;
+    renderObject
+      ..transform = transform
+      ..origin = origin
+      ..alignment = alignment
+      ..transformHitTests = transformHitTests;
   }
 }
 
@@ -307,8 +313,9 @@ class FractionalTranslation extends OneChildRenderObjectWidget {
   RenderFractionalTranslation createRenderObject() => new RenderFractionalTranslation(translation: translation, transformHitTests: transformHitTests);
 
   void updateRenderObject(RenderFractionalTranslation renderObject, FractionalTranslation oldWidget) {
-    renderObject.translation = translation;
-    renderObject.transformHitTests = transformHitTests;
+    renderObject
+      ..translation = translation
+      ..transformHitTests = transformHitTests;
   }
 }
 
@@ -381,9 +388,10 @@ class Align extends OneChildRenderObjectWidget {
   RenderPositionedBox createRenderObject() => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
 
   void updateRenderObject(RenderPositionedBox renderObject, Align oldWidget) {
-    renderObject.alignment = alignment;
-    renderObject.widthFactor = widthFactor;
-    renderObject.heightFactor = heightFactor;
+    renderObject
+      ..alignment = alignment
+      ..widthFactor = widthFactor
+      ..heightFactor = heightFactor;
   }
 }
 
@@ -563,8 +571,9 @@ class FractionallySizedBox extends OneChildRenderObjectWidget {
   );
 
   void updateRenderObject(RenderFractionallySizedBox renderObject, FractionallySizedBox oldWidget) {
-    renderObject.widthFactor = width;
-    renderObject.heightFactor = height;
+    renderObject
+      ..widthFactor = width
+      ..heightFactor = height;
   }
 
   void debugFillDescription(List<String> description) {

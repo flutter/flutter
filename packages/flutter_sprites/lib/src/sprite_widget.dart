@@ -27,7 +27,8 @@ class SpriteWidget extends OneChildRenderObjectWidget {
   SpriteBox createRenderObject() => new SpriteBox(rootNode, transformMode);
 
   void updateRenderObject(SpriteBox renderObject, SpriteWidget oldWidget) {
-    renderObject.rootNode = rootNode;
-    renderObject.transformMode = transformMode;
+    renderObject
+      ..rootNode = rootNode
+      ..transformMode = transformMode;
   }
 }
