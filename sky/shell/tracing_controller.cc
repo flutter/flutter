@@ -21,8 +21,8 @@ namespace shell {
 const char kBaseTraceStart[] = "{\"traceEvents\":[";
 const char kBaseTraceEnd[] = "]}";
 
-const char kObservatoryMethodStartTracing[] = "flutter_startTracing";
-const char kObservatoryMethodStopTracing[] = "flutter_stopTracing";
+const char kObservatoryMethodStartTracing[] = "ext.flutter_startTracing";
+const char kObservatoryMethodStopTracing[] = "ext.flutter_stopTracing";
 const char kObservatoryResultOk[] = "{\"success\" : true}";
 const char kObservatoryResultFail[] = "{\"success\" : false}";
 
