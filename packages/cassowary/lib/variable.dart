@@ -23,5 +23,6 @@ class Variable {
 
   String get debugName => _elvis(name, 'variable$_tick');
 
+  @override
   String toString() => debugName;
 }

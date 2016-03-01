@@ -15,6 +15,7 @@ class Constraint {
 
   Constraint operator |(double p) => this..priority = p;
 
+  @override
   String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.write(expression.toString());
