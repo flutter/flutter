@@ -9,7 +9,7 @@ String getVersion(String flutterRoot) {
   String upstream = runSync([
     'git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{u}'
   ], workingDirectory: flutterRoot).trim();
-  String repository = '<unknown>';
+  String repository;
   int slash = upstream.indexOf('/');
   if (slash != -1) {
     String remote = upstream.substring(0, slash);
@@ -22,11 +22,9 @@ String getVersion(String flutterRoot) {
     'git', 'log', '-n', '1', '--pretty=format:%H (%ar)'
   ], workingDirectory: flutterRoot).trim();
 
-  String version = 'Flutter from $repository (on $upstream)\nflutter revision: $revision';
+  String from = repository == null ? 'Flutter from unknown source' : 'Flutter from $repository (on $upstream)';
+  String flutterVersion = 'Framework: $revision';
+  String engineRevision = 'Engine:    ${ArtifactStore.engineRevision}';
 
-  String engineRevision = ArtifactStore.engineRevision;
-  if (engineRevision != null)
-    version += '\nengine revision : $engineRevision';
-
-  return version;
+  return '$from\n$flutterVersion\n$engineRevision';
 }
