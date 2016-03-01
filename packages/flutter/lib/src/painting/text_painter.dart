@@ -116,8 +116,9 @@ class TextSpan {
     buffer.writeln(style.toString(indent));
     if (text != null)
       buffer.writeln('$indent"$text"');
-    for (TextSpan child in children)
-      buffer.writeln(child.toString(indent));
+    if (children != null)
+      for (TextSpan child in children)
+        buffer.writeln(child.toString(indent));
     return buffer.toString();
   }
 
