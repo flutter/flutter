@@ -450,11 +450,12 @@ class _GestureSemantics extends OneChildRenderObjectWidget {
 
   void updateRenderObject(RenderSemanticsGestureHandler renderObject, _GestureSemantics oldWidget) {
     Map<Type, GestureRecognizer> recognizers = owner._recognizers;
-    renderObject.onTap = recognizers.containsKey(TapGestureRecognizer) ? _handleTap : null;
-    renderObject.onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? _handleLongPress : null;
-    renderObject.onHorizontalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
-                                          recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null;
-    renderObject.onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
-                                        recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
+    renderObject
+      ..onTap = recognizers.containsKey(TapGestureRecognizer) ? _handleTap : null
+      ..onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? _handleLongPress : null
+      ..onHorizontalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
+          recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null
+      ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
+          recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
   }
 }

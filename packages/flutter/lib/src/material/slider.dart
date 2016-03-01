@@ -62,9 +62,10 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   );
 
   void updateRenderObject(_RenderSlider renderObject, _SliderRenderObjectWidget oldWidget) {
-    renderObject.value = value;
-    renderObject.activeColor = activeColor;
-    renderObject.onChanged = onChanged;
+    renderObject
+      ..value = value
+      ..activeColor = activeColor
+      ..onChanged = onChanged;
   }
 }
 

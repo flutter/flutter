@@ -78,12 +78,13 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   );
 
   void updateRenderObject(_RenderSwitch renderObject, _SwitchRenderObjectWidget oldWidget) {
-    renderObject.value = value;
-    renderObject.activeColor = activeColor;
-    renderObject.inactiveColor = inactiveColor;
-    renderObject.activeTrackColor = activeTrackColor;
-    renderObject.inactiveTrackColor = inactiveTrackColor;
-    renderObject.onChanged = onChanged;
+    renderObject
+      ..value = value
+      ..activeColor = activeColor
+      ..inactiveColor = inactiveColor
+      ..activeTrackColor = activeTrackColor
+      ..inactiveTrackColor = inactiveTrackColor
+      ..onChanged = onChanged;
   }
 }
 

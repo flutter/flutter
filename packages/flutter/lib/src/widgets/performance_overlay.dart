@@ -62,7 +62,8 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   );
 
   void updateRenderObject(RenderPerformanceOverlay renderObject, RenderObjectWidget oldWidget) {
-    renderObject.optionsMask = optionsMask;
-    renderObject.rasterizerThreshold = rasterizerThreshold;
+    renderObject
+      ..optionsMask = optionsMask
+      ..rasterizerThreshold = rasterizerThreshold;
   }
 }

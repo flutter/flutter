@@ -75,10 +75,11 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   );
 
   void updateRenderObject(_RenderCheckbox renderObject, _CheckboxRenderObjectWidget oldWidget) {
-    renderObject.value = value;
-    renderObject.activeColor = activeColor;
-    renderObject.inactiveColor = inactiveColor;
-    renderObject.onChanged = onChanged;
+    renderObject
+      ..value = value
+      ..activeColor = activeColor
+      ..inactiveColor = inactiveColor
+      ..onChanged = onChanged;
   }
 }
 
