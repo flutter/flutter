@@ -27,7 +27,7 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
       ;;
   esac
 
-  DART_SDK_URL="http://gsdview.appspot.com/dart-archive/channels/stable/raw/$DART_SDK_VERSION/sdk/$DART_ZIP_NAME"
+  DART_SDK_URL="http://storage.googleapis.com/dart-archive/channels/stable/raw/$DART_SDK_VERSION/sdk/$DART_ZIP_NAME"
 
   rm -rf -- "$DART_SDK_PATH"
   mkdir -p -- "$DART_SDK_PATH"
