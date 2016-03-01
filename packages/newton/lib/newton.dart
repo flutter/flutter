@@ -5,16 +5,12 @@
 /// Simple Physics Simulations for Dart. Springs, friction, gravity, etc.
 library newton;
 
-import 'dart:math' as math;
-
-part 'src/simulation.dart';
-part 'src/simulation_group.dart';
-part 'src/tolerance.dart';
-part 'src/utils.dart';
-
-part 'src/clamped_simulation.dart';
-part 'src/friction_simulation.dart';
-part 'src/gravity_simulation.dart';
-part 'src/scroll_simulation.dart';
-part 'src/spring_simulation.dart';
-part 'src/spring_solution.dart';
+export 'src/clamped_simulation.dart';
+export 'src/friction_simulation.dart';
+export 'src/gravity_simulation.dart';
+export 'src/scroll_simulation.dart';
+export 'src/simulation_group.dart';
+export 'src/simulation.dart';
+export 'src/spring_simulation.dart';
+export 'src/tolerance.dart';
+export 'src/utils.dart';
