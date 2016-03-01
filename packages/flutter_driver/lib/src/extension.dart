@@ -7,7 +7,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/src/instrumentation.dart';
+import 'package:flutter_test/src/test_pointer.dart';
 
 import 'error.dart';
 import 'find.dart';
@@ -54,6 +56,7 @@ class FlutterDriverExtension {
       'find': find,
       'tap': tap,
       'get_text': getText,
+      'scroll': scroll,
     };
 
     _commandDeserializers = {
@@ -61,6 +64,7 @@ class FlutterDriverExtension {
       'find': Find.fromJson,
       'tap': Tap.fromJson,
       'get_text': GetText.fromJson,
+      'scroll': Scroll.fromJson,
     };
   }
 
@@ -74,7 +78,7 @@ class FlutterDriverExtension {
 
   Future<ServiceExtensionResponse> call(Map<String, String> params) async {
     try {
-      String commandKind = params['kind'];
+      String commandKind = params['command'];
       CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
       CommandDeserializerCallback commandDeserializer =
           _commandDeserializers[commandKind];
@@ -91,11 +95,13 @@ class FlutterDriverExtension {
         return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
       }, onError: (e, s) {
         _log.warning('$e:\n$s');
-        return new ServiceExtensionResponse.error(
-          ServiceExtensionResponse.kExtensionError, '$e');
+        return new ServiceExtensionResponse.error(ServiceExtensionResponse.kExtensionError, '$e');
       });
     } catch(error, stackTrace) {
-      _log.warning('Uncaught extension error: $error\n$stackTrace');
+      String message = 'Uncaught extension error: $error\n$stackTrace';
+      _log.error(message);
+      return new ServiceExtensionResponse.error(
+        ServiceExtensionResponse.kExtensionError, message);
     }
   }
 
@@ -166,6 +172,29 @@ class FlutterDriverExtension {
     Element target = await _dereferenceOrDie(command.targetRef);
     prober.tap(target);
     return new TapResult();
+  }
+
+  Future<ScrollResult> scroll(Scroll command) async {
+    Element target = await _dereferenceOrDie(command.targetRef);
+    final int totalMoves = command.duration.inMicroseconds * command.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
+    Offset delta = new Offset(command.dx, command.dy) / totalMoves.toDouble();
+    Duration pause = command.duration ~/ totalMoves;
+    Point startLocation = prober.getCenter(target);
+    Point currentLocation = startLocation;
+    TestPointer pointer = new TestPointer(1);
+    HitTestResult hitTest = new HitTestResult();
+
+    prober.binding.hitTest(hitTest, startLocation);
+    prober.dispatchEvent(pointer.down(startLocation), hitTest);
+    await new Future<Null>.value();  // so that down and move don't happen in the same microtask
+    for (int moves = 0; moves < totalMoves; moves++) {
+      currentLocation = currentLocation + delta;
+      prober.dispatchEvent(pointer.move(currentLocation), hitTest);
+      await new Future<Null>.delayed(pause);
+    }
+    prober.dispatchEvent(pointer.up(), hitTest);
+
+    return new ScrollResult();
   }
 
   Future<GetTextResult> getText(GetText command) async {
