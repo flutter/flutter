@@ -141,10 +141,8 @@ class AnimationController extends Animation<double>
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
       double range = upperBound - lowerBound;
-      if (range.isFinite) {
-        double remainingFraction = (target - _value).abs() / range;
-        simulationDuration = this.duration * remainingFraction;
-      }
+      double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
+      simulationDuration = this.duration * remainingFraction;
     }
     stop();
     if (simulationDuration == Duration.ZERO) {
@@ -154,12 +152,16 @@ class AnimationController extends Animation<double>
     }
     assert(simulationDuration > Duration.ZERO);
     assert(!isAnimating);
-    return _startSimulation(new _TweenSimulation(_value, target, simulationDuration, curve));
+    return _startSimulation(new _InterpolationSimulation(_value, target, simulationDuration, curve));
   }
 
   /// Starts running this animation in the forward direction, and
   /// restarts the animation when it completes.
-  Future repeat({ double min: 0.0, double max: 1.0, Duration period }) {
+  ///
+  /// Defaults to repeating between the lower and upper bounds.
+  Future repeat({ double min, double max, Duration period }) {
+    min ??= lowerBound;
+    max ??= upperBound;
     period ??= duration;
     return animateWith(new _RepeatingSimulation(min, max, period));
   }
@@ -226,8 +228,8 @@ class AnimationController extends Animation<double>
   }
 }
 
-class _TweenSimulation extends Simulation {
-  _TweenSimulation(this._begin, this._end, Duration duration, this._curve)
+class _InterpolationSimulation extends Simulation {
+  _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve)
     : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
     assert(_durationInSeconds > 0.0);
     assert(_begin != null);
