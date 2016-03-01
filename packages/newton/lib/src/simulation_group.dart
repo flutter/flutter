@@ -1,8 +1,10 @@
-// Copyright (c) 2015 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of newton;
+import 'simulation.dart';
+import 'tolerance.dart';
+import 'utils.dart';
 
 /// The abstract base class for all composite simulations. Concrete subclasses
 /// must implement the appropriate methods to select the appropriate simulation
@@ -46,7 +48,7 @@ abstract class SimulationGroup extends Simulation {
 
   double _lastStep = -1.0;
   void _stepIfNecessary(double time) {
-    if (_nearEqual(_lastStep, time, toleranceDefault.time)) {
+    if (nearEqual(_lastStep, time, toleranceDefault.time)) {
       return;
     }
 

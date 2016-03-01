@@ -1,8 +1,11 @@
-// Copyright (c) 2015 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of newton;
+import 'friction_simulation.dart';
+import 'simulation_group.dart';
+import 'simulation.dart';
+import 'spring_simulation.dart';
 
 /// Simulates kinetic scrolling behavior between a leading and trailing
 /// boundary. Friction is applied within the extends and a spring action applied
