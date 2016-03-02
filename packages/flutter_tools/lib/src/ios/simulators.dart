@@ -14,6 +14,7 @@ import '../base/context.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
+import '../flx.dart' as flx;
 import '../globals.dart';
 import '../toolchain.dart';
 import 'mac.dart';
@@ -314,12 +315,69 @@ class IOSSimulator extends Device {
     int debugPort: observatoryDefaultPort,
     Map<String, dynamic> platformArgs
   }) async {
-    // TODO(chinmaygarde): Use mainPath, route.
     printTrace('Building ${app.name} for $id.');
 
     if (clearLogs)
       this.clearLogs();
 
+    if(!(await _setupUpdatedApplicationBundle(app, toolchain)))
+      return false;
+
+    // Prepare launch arguments.
+    List<String> args = <String>[
+      "--flx=${path.absolute(path.join('build', 'app.flx'))}",
+      "--dart-main=${path.absolute(mainPath)}",
+      "--package-root=${path.absolute('packages')}",
+    ];
+
+    if (checked)
+      args.add("--enable-checked-mode");
+
+    if (startPaused)
+      args.add("--start-paused");
+
+    if (debugPort != observatoryDefaultPort)
+      args.add("--observatory-port=$debugPort");
+
+    // Launch the updated application in the simulator.
+    try {
+      SimControl.instance.launch(id, app.id, args);
+    } catch (error) {
+      printError('$error');
+      return false;
+    }
+
+    printTrace('Successfully started ${app.name} on $id.');
+
+    return true;
+  }
+
+  bool _applicationIsInstalledAndRunning(ApplicationPackage app) {
+    bool isInstalled = exitsHappy([
+      'xcrun',
+      'simctl',
+      'get_app_container',
+      'booted',
+      app.id,
+    ]);
+
+    bool isRunning = exitsHappy([
+      '/usr/bin/killall',
+      'Runner',
+    ]);
+
+    return isInstalled && isRunning;
+  }
+
+  Future<bool> _setupUpdatedApplicationBundle(ApplicationPackage app, Toolchain toolchain) async {
+    if (_applicationIsInstalledAndRunning(app)) {
+      return _sideloadUpdatedAssetsForInstalledApplicationBundle(app, toolchain);
+    } else {
+      return _buildAndInstallApplicationBundle(app);
+    }
+  }
+
+  Future<bool> _buildAndInstallApplicationBundle(ApplicationPackage app) async {
     // Step 1: Build the Xcode project.
     bool buildResult = await buildIOSXcodeProject(app, buildForDevice: false);
     if (!buildResult) {
@@ -337,30 +395,12 @@ class IOSSimulator extends Device {
 
     // Step 3: Install the updated bundle to the simulator.
     SimControl.instance.install(id, path.absolute(bundle.path));
-
-    // Step 4: Prepare launch arguments.
-    List<String> args = <String>[];
-
-    if (checked)
-      args.add("--enable-checked-mode");
-
-    if (startPaused)
-      args.add("--start-paused");
-
-    if (debugPort != observatoryDefaultPort)
-      args.add("--observatory-port=$debugPort");
-
-    // Step 5: Launch the updated application in the simulator.
-    try {
-      SimControl.instance.launch(id, app.id, args);
-    } catch (error) {
-      printError('$error');
-      return false;
-    }
-
-    printTrace('Successfully started ${app.name} on $id.');
-
     return true;
+  }
+
+  Future<bool> _sideloadUpdatedAssetsForInstalledApplicationBundle(
+      ApplicationPackage app, Toolchain toolchain) async {
+    return (await flx.build(toolchain, precompiledSnapshot: true)) == 0;
   }
 
   @override
