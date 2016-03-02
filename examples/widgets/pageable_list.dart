@@ -124,7 +124,7 @@ class PageableListAppState extends State<PageableListApp> {
 
   Widget build(BuildContext context) {
     return new IconTheme(
-      data: const IconThemeData(color: IconThemeColor.white),
+      data: const IconThemeData(color: Colors.white),
       child: new Scaffold(
         toolBar: _buildToolBar(),
         drawer: _buildDrawer(),

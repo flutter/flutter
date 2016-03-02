@@ -4,8 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'icon_theme.dart';
+import 'colors.dart';
 import 'icon_theme_data.dart';
+import 'icon_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -94,17 +95,17 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   }
 
   Widget build(BuildContext context) {
-    IconThemeColor iconThemeColor = IconThemeColor.white;
+    Color iconColor = Colors.white;
     Color materialColor = config.backgroundColor;
     if (materialColor == null) {
       ThemeData themeData = Theme.of(context);
       materialColor = themeData.accentColor;
-      iconThemeColor = themeData.accentColorBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
+      iconColor = themeData.accentColorBrightness == ThemeBrightness.dark ? Colors.white : Colors.black;
     }
 
     Widget result = new Center(
       child: new IconTheme(
-        data: new IconThemeData(color: iconThemeColor),
+        data: new IconThemeData(color: iconColor),
         child: new RotationTransition(
           turns: _childSegue,
           child: config.child

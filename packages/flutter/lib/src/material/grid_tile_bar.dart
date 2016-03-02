@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'typography.dart';
@@ -77,7 +78,7 @@ class GridTileBar extends StatelessComponent {
       padding: padding,
       decoration: decoration,
       child: new IconTheme(
-        data: new IconThemeData(color: IconThemeColor.white),
+        data: new IconThemeData(color: Colors.white),
         child: new Row(
           alignItems: FlexAlignItems.center,
           children: children

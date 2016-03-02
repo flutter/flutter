@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 
 import 'icon.dart';
 import 'icons.dart';
-import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 import 'tooltip.dart';
@@ -25,21 +24,32 @@ class IconButton extends StatelessComponent {
     Key key,
     this.size: 24.0,
     this.icon,
-    this.colorTheme,
     this.color,
     this.onPressed,
     this.tooltip
   }) : super(key: key);
 
+  /// The size of the icon inside the button.
+  ///
+  /// The button itself will be larger than the icon by 8.0 logical pixels in
+  /// each direction.
   final double size;
+
+  /// The icon to display inside the button.
   final IconData icon;
-  final IconThemeColor colorTheme;
+
+  /// The color to use for the icon inside the button.
   final Color color;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
+  /// Text that describes the action that will occur when the button is pressed.
+  ///
+  /// This text is displayed when the user long-presses on the button and is
+  /// used for accessibility.
   final String tooltip;
 
   Widget build(BuildContext context) {
@@ -48,7 +58,6 @@ class IconButton extends StatelessComponent {
       child: new Icon(
         size: size,
         icon: icon,
-        colorTheme: colorTheme,
         color: onPressed != null ? color : Theme.of(context).disabledColor
       )
     );
@@ -69,8 +78,6 @@ class IconButton extends StatelessComponent {
     description.add('$icon');
     if (onPressed == null)
       description.add('disabled');
-    if (colorTheme != null)
-      description.add('$colorTheme');
     if (tooltip != null)
       description.add('tooltip: "$tooltip"');
   }

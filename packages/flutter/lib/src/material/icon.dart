@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'theme.dart';
 
 class Icon extends StatelessComponent {
@@ -15,53 +14,43 @@ class Icon extends StatelessComponent {
     Key key,
     this.size: 24.0,
     this.icon,
-    this.colorTheme,
     this.color
   }) : super(key: key) {
     assert(size != null);
   }
 
+  /// The size of the icon in logical pixels.
+  ///
+  /// Icons occupy a square with width and height equal to size.
   final double size;
+
+  /// The icon to display.
   final IconData icon;
-  final IconThemeColor colorTheme;
+
+  /// The color to use when drawing the icon.
   final Color color;
 
-  IconThemeColor _getIconThemeColor(BuildContext context) {
-    IconThemeColor iconThemeColor = colorTheme;
-    if (iconThemeColor == null) {
-      IconThemeData iconThemeData = IconTheme.of(context);
-      iconThemeColor = iconThemeData == null ? null : iconThemeData.color;
+  Color _getDefaultColorForThemeBrightness(ThemeBrightness brightness) {
+    switch (brightness) {
+      case ThemeBrightness.dark:
+        return Colors.white;
+      case ThemeBrightness.light:
+        return Colors.black;
     }
-    if (iconThemeColor == null) {
-      ThemeBrightness themeBrightness = Theme.of(context).brightness;
-      iconThemeColor = themeBrightness == ThemeBrightness.dark ? IconThemeColor.white : IconThemeColor.black;
-    }
-    return iconThemeColor;
+  }
+
+  Color _getDefaultColor(BuildContext context) {
+    return IconTheme.of(context)?.color ?? _getDefaultColorForThemeBrightness(Theme.of(context).brightness);
   }
 
   Widget build(BuildContext context) {
-    if (icon == null) {
-      return new SizedBox(
-        width: size,
-        height: size
-      );
-    }
+    if (icon == null)
+      return new SizedBox(width: size, height: size);
 
-    Color iconColor = color;
+    Color iconColor = color ?? _getDefaultColor(context);
     final int iconAlpha = (255.0 * (IconTheme.of(context)?.clampedOpacity ?? 1.0)).round();
-    if (color != null) {
-        if (iconAlpha != 255)
-          iconColor = color.withAlpha((iconAlpha * color.opacity).round());
-    } else {
-      switch(_getIconThemeColor(context)) {
-        case IconThemeColor.black:
-          iconColor = Colors.black.withAlpha(iconAlpha);
-          break;
-        case IconThemeColor.white:
-          iconColor = Colors.white.withAlpha(iconAlpha);
-          break;
-      }
-    }
+    if (iconAlpha != 255)
+        iconColor = color.withAlpha((iconAlpha * color.opacity).round());
 
     return new SizedBox(
       width: size,
@@ -83,8 +72,6 @@ class Icon extends StatelessComponent {
     super.debugFillDescription(description);
     description.add('$icon');
     description.add('size: $size');
-    if (this.colorTheme != null)
-      description.add('colorTheme: $colorTheme');
     if (this.color != null)
       description.add('color: $color');
   }

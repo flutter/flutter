@@ -3,21 +3,22 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show lerpDouble;
-import 'dart:ui' show hashValues;
-
-enum IconThemeColor { white, black }
+import 'dart:ui' show Color, hashValues;
 
 class IconThemeData {
   const IconThemeData({ this.color, this.opacity });
 
-  final IconThemeColor color;
+  /// The default color for icons.
+  final Color color;
+
+  /// An opacity to apply to both explicit and default icon colors.
   final double opacity;
 
   double get clampedOpacity => (opacity ?? 1.0).clamp(0.0, 1.0);
 
   static IconThemeData lerp(IconThemeData begin, IconThemeData end, double t) {
     return new IconThemeData(
-      color: t < 0.5 ? begin.color : end.color,
+      color: Color.lerp(begin.color, end.color, t),
       opacity: ui.lerpDouble(begin.clampedOpacity, end.clampedOpacity, t)
     );
   }

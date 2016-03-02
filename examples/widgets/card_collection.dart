@@ -120,7 +120,7 @@ class CardCollectionState extends State<CardCollection> {
   Widget _buildDrawer() {
     return new Drawer(
       child: new IconTheme(
-        data: const IconThemeData(color: IconThemeColor.black),
+        data: const IconThemeData(color: Colors.black),
         child: new Block(children: <Widget>[
           new DrawerHeader(child: new Text('Options')),
           buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
@@ -385,7 +385,7 @@ class CardCollectionState extends State<CardCollection> {
 
     return new IconTheme(
       key: cardModel.key,
-      data: const IconThemeData(color: IconThemeColor.white),
+      data: const IconThemeData(color: Colors.white),
       child: new Stack(children: <Widget>[background, card])
     );
   }
