@@ -125,13 +125,17 @@ class AnimationController extends Animation<double>
   }
 
   /// Starts running this animation forwards (towards the end).
-  Future forward() {
+  Future forward({ double from }) {
+    if (from != null)
+      value = from;
     _direction = _AnimationDirection.forward;
     return animateTo(upperBound);
   }
 
   /// Starts running this animation in reverse (towards the beginning).
-  Future reverse() {
+  Future reverse({ double from }) {
+    if (from != null)
+      value = from;
     _direction = _AnimationDirection.reverse;
     return animateTo(lowerBound);
   }
