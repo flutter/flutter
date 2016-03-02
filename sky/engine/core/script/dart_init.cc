@@ -20,7 +20,7 @@
 #include "sky/engine/bindings/dart_ui.h"
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/public/platform/sky_settings.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_class_library.h"

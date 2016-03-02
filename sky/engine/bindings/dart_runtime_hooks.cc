@@ -15,7 +15,7 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_error.h"
@@ -183,7 +183,7 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
 }
 
 void GetBaseURLString(Dart_NativeArguments args) {
-  Dart_SetReturnValue(args, ToDart(DOMDartState::Current()->url()));
+  Dart_SetReturnValue(args, ToDart(UIDartState::Current()->url()));
 }
 
 void Timer_create(Dart_NativeArguments args) {

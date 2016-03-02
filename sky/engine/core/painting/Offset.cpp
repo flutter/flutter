@@ -4,7 +4,7 @@
 
 #include "sky/engine/core/painting/Offset.h"
 
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "base/logging.h"
 
@@ -14,9 +14,9 @@ namespace blink {
 Offset DartConverter<Offset>::FromDart(Dart_Handle handle) {
   DCHECK(!LogIfError(handle));
   Dart_Handle dx_value =
-      Dart_GetField(handle, DOMDartState::Current()->dx_handle());
+      Dart_GetField(handle, UIDartState::Current()->dx_handle());
   Dart_Handle dy_value =
-      Dart_GetField(handle, DOMDartState::Current()->dy_handle());
+      Dart_GetField(handle, UIDartState::Current()->dy_handle());
   double dx = 0.0, dy = 0.0;
   Dart_Handle err = Dart_DoubleValue(dx_value, &dx);
   DCHECK(!LogIfError(err));

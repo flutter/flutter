@@ -5,7 +5,7 @@
 #include "sky/engine/core/painting/Rect.h"
 
 #include "base/logging.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_error.h"
 
@@ -36,7 +36,7 @@ Rect DartConverter<Rect>::FromDart(Dart_Handle dart_rect) {
     return result;
 
   Dart_Handle value =
-      Dart_GetField(dart_rect, DOMDartState::Current()->value_handle());
+      Dart_GetField(dart_rect, UIDartState::Current()->value_handle());
   if (Dart_IsNull(value))
     return result;
 

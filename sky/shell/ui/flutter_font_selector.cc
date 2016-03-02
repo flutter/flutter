@@ -6,7 +6,7 @@
 #include "base/values.h"
 #include "base/json/json_reader.h"
 #include "services/asset_bundle/zip_asset_bundle.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/platform/fonts/FontData.h"
 #include "sky/engine/platform/fonts/FontFaceCreationParams.h"
 #include "sky/engine/platform/fonts/SimpleFontData.h"
@@ -40,7 +40,7 @@ void FlutterFontSelector::install(
   RefPtr<FlutterFontSelector> font_selector = adoptRef(
       new FlutterFontSelector(zip_asset_bundle));
   font_selector->parseFontManifest();
-  blink::DOMDartState::Current()->set_font_selector(font_selector);
+  blink::UIDartState::Current()->set_font_selector(font_selector);
 }
 
 FlutterFontSelector::FlutterFontSelector(

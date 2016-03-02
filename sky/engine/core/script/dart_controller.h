@@ -19,7 +19,7 @@
 namespace blink {
 class AbstractModule;
 class DartUI;
-class DOMDartState;
+class UIDartState;
 class DartLibraryProvider;
 class DartSnapshotLoader;
 class View;
@@ -37,17 +37,17 @@ class DartController {
   void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
   void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
 
-  void CreateIsolateFor(std::unique_ptr<DOMDartState> dom_dart_state);
+  void CreateIsolateFor(std::unique_ptr<UIDartState> ui_dart_state);
   void Shutdown();
 
-  DOMDartState* dart_state() const { return dom_dart_state_.get(); }
+  UIDartState* dart_state() const { return ui_dart_state_.get(); }
 
  private:
   void DidLoadMainLibrary(std::string url);
   void DidLoadSnapshot();
   bool SendStartMessage(Dart_Handle root_library);
 
-  std::unique_ptr<DOMDartState> dom_dart_state_;
+  std::unique_ptr<UIDartState> ui_dart_state_;
   std::unique_ptr<DartSnapshotLoader> snapshot_loader_;
 
   base::WeakPtrFactory<DartController> weak_factory_;

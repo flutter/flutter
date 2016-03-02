@@ -8,7 +8,7 @@
 #include "base/trace_event/trace_event.h"
 #include "sky/engine/core/compositing/Scene.h"
 #include "sky/engine/core/script/dart_controller.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/sky/sky_view_client.h"
@@ -55,10 +55,10 @@ void SkyView::CreateView(const std::string& script_uri) {
   DCHECK(!dart_controller_);
 
   dart_controller_ = WTF::MakeUnique<DartController>();
-  dart_controller_->CreateIsolateFor(WTF::MakeUnique<DOMDartState>(
+  dart_controller_->CreateIsolateFor(WTF::MakeUnique<UIDartState>(
       this, script_uri, WTF::MakeUnique<Window>(this)));
 
-  DOMDartState* dart_state = dart_controller_->dart_state();
+  UIDartState* dart_state = dart_controller_->dart_state();
   DartState::Scope scope(dart_state);
   dart_state->window()->DidCreateIsolate();
   client_->DidCreateMainIsolate(dart_state->isolate());

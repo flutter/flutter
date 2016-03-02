@@ -12,7 +12,7 @@
 #include "sky/engine/core/painting/PaintingStyle.h"
 #include "sky/engine/core/painting/Shader.h"
 #include "sky/engine/core/painting/TransferMode.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
@@ -48,7 +48,7 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
   if (Dart_IsNull(dart_paint))
     return result;
 
-  Dart_Handle value_handle = DOMDartState::Current()->value_handle();
+  Dart_Handle value_handle = UIDartState::Current()->value_handle();
   Dart_Handle data = Dart_GetField(dart_paint, value_handle);
 
   if (Dart_IsInteger(data)) {

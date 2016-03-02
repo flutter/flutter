@@ -5,7 +5,7 @@
 #include "sky/engine/core/window/window.h"
 
 #include "sky/engine/core/compositing/Scene.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/tonic/dart_converter.h"
 #include "sky/engine/tonic/dart_invoke.h"
@@ -15,7 +15,7 @@ namespace blink {
 namespace {
 
 void ScheduleFrame(Dart_NativeArguments args) {
-  DOMDartState::Current()->window()->client()->ScheduleFrame();
+  UIDartState::Current()->window()->client()->ScheduleFrame();
 }
 
 void Render(Dart_NativeArguments args) {
@@ -25,12 +25,12 @@ void Render(Dart_NativeArguments args) {
     Dart_ThrowException(exception);
     return;
   }
-  DOMDartState::Current()->window()->client()->Render(scene);
+  UIDartState::Current()->window()->client()->Render(scene);
 }
 
 
 void FlushRealTimeEvents(Dart_NativeArguments args) {
-  DOMDartState::Current()->window()->client()->FlushRealTimeEvents();
+  UIDartState::Current()->window()->client()->FlushRealTimeEvents();
 }
 
 }  // namespace
