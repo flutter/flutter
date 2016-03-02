@@ -102,4 +102,32 @@ void main() {
 
     controller.stop();
   });
+
+  test("Forward and reverse from values", () {
+    WidgetFlutterBinding.ensureInitialized();
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100)
+    );
+    List<double> valueLog = <double>[];
+    List<AnimationStatus> statusLog = <AnimationStatus>[];
+    controller
+      ..addStatusListener((AnimationStatus status) {
+        statusLog.add(status);
+      })
+      ..addListener(() {
+        valueLog.add(controller.value);
+      });
+
+    controller.reverse(from: 0.2);
+    expect(statusLog, equals([ AnimationStatus.reverse ]));
+    expect(valueLog, equals([ 0.2 ]));
+    expect(controller.value, equals(0.2));
+    statusLog.clear();
+    valueLog.clear();
+
+    controller.forward(from: 0.0);
+    expect(statusLog, equals([ AnimationStatus.dismissed, AnimationStatus.forward ]));
+    expect(valueLog, equals([ 0.0 ]));
+    expect(controller.value, equals(0.0));
+  });
 }
