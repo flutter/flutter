@@ -8,4 +8,4 @@ int takeRootBundleHandle() native "takeRootBundleHandle";
 int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
 int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
 int takeShellProxyHandle() native "takeShellProxyHandle";
-int takeViewHostHandle() native "takeViewHostHandle";
+int takeViewHandle() native "takeViewHandle";

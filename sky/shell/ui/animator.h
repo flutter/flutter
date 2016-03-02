@@ -29,8 +29,8 @@ class Animator {
   void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider);
 
   void set_scene_scheduler(
-      mojo::gfx::composition::SceneSchedulerPtr scene_scheduler) {
-    scene_scheduler_ = scene_scheduler.Pass();
+      mojo::InterfaceHandle<mojo::gfx::composition::SceneScheduler> scene_scheduler) {
+    scene_scheduler_ = mojo::gfx::composition::SceneSchedulerPtr::Create(scene_scheduler.Pass());
   }
 
 

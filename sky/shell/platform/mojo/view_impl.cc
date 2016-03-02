@@ -11,22 +11,25 @@
 namespace sky {
 namespace shell {
 
-ViewImpl::ViewImpl(ServicesDataPtr services,
-                   const std::string& url,
-                   const mojo::ui::ViewProvider::CreateViewCallback& callback)
+ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
+                   ServicesDataPtr services,
+                   const std::string& url)
     : binding_(this), url_(url), listener_binding_(this) {
   DCHECK(services);
 
-  mojo::ui::ViewHostPtr view_host;
+  // Once we're done invoking |Shell|, we put it back inside |services| and pass
+  // it off.
+  mojo::ShellPtr shell = mojo::ShellPtr::Create(services->shell.Pass());
 
   // Views
   mojo::ConnectToService(
-      services->shell.get(), "mojo:view_manager_service", &view_manager_);
+      shell.get(), "mojo:view_manager_service", &view_manager_);
   mojo::ui::ViewPtr view;
-  binding_.Bind(mojo::GetProxy(&view));
-  view_manager_->RegisterView(
-      view.Pass(), mojo::GetProxy(&view_host), url_, callback);
-  view_host->GetServiceProvider(mojo::GetProxy(&view_service_provider_));
+  mojo::ui::ViewListenerPtr view_listener;
+  binding_.Bind(mojo::GetProxy(&view_listener));
+  view_manager_->CreateView(
+      mojo::GetProxy(&view), view_owner.Pass(), view_listener.Pass(), url_);
+  view->GetServiceProvider(mojo::GetProxy(&view_service_provider_));
 
   // Input
   mojo::ConnectToService(view_service_provider_.get(), &input_connection_);
@@ -36,16 +39,18 @@ ViewImpl::ViewImpl(ServicesDataPtr services,
 
   // Compositing
   mojo::gfx::composition::ScenePtr scene;
-  view_host->CreateScene(mojo::GetProxy(&scene));
+  view->CreateScene(mojo::GetProxy(&scene));
   scene->GetScheduler(mojo::GetProxy(&services->scene_scheduler));
-  services->view_host = view_host.Pass();
+  services->view = view.Pass();
 
   // Engine
   shell_view_.reset(new ShellView(Shell::Shared()));
   shell_view_->view()->ConnectToEngine(GetProxy(&engine_));
   mojo::ApplicationConnectorPtr connector;
-  services->shell->CreateApplicationConnector(mojo::GetProxy(&connector));
+  shell->CreateApplicationConnector(mojo::GetProxy(&connector));
   platform_view()->InitRasterizer(connector.Pass(), scene.Pass());
+
+  services->shell = shell.Pass();
   engine_->SetServices(services.Pass());
 }
 

@@ -235,7 +235,7 @@ hooks = [
   },
   # Pull the mojom parser binaries using checked-in hashes.
   {
-    'name': 'mojom_parser',
+    'name': 'mojom_tool',
     'pattern': '',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
@@ -243,11 +243,11 @@ hooks = [
                 '--platform=linux*',
                 '--no_auth',
                 '--bucket', 'mojo/mojom_parser/linux64',
-                '-s', 'src/mojo/public/tools/bindings/mojom_parser/bin/linux64/mojom_parser.sha1',
+                '-s', 'src/mojo/public/tools/bindings/mojom_tool/bin/linux64/mojom.sha1',
     ],
   },
   {
-    'name': 'mojom_parser',
+    'name': 'mojom_tool',
     'pattern': '',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
@@ -255,7 +255,7 @@ hooks = [
                 '--platform=darwin',
                 '--no_auth',
                 '--bucket', 'mojo/mojom_parser/mac64',
-                '-s', 'src/mojo/public/tools/bindings/mojom_parser/bin/mac64/mojom_parser.sha1',
+                '-s', 'src/mojo/public/tools/bindings/mojom_tool/bin/mac64/mojom.sha1',
     ],
   },
   {

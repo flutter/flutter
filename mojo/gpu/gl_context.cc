@@ -12,12 +12,12 @@ namespace mojo {
 
 GLContext::Observer::~Observer() {}
 
-GLContext::GLContext(CommandBufferPtr command_buffer) : weak_factory_(this) {
-  context_ = MGLCreateContext(
-      MGL_API_VERSION_GLES2,
-      command_buffer.PassInterface().PassHandle().release().value(),
-      MGL_NO_CONTEXT, &ContextLostThunk, this,
-      Environment::GetDefaultAsyncWaiter());
+GLContext::GLContext(InterfaceHandle<CommandBuffer> command_buffer)
+    : weak_factory_(this) {
+  context_ = MGLCreateContext(MGL_API_VERSION_GLES2,
+                              command_buffer.PassHandle().release().value(),
+                              MGL_NO_CONTEXT, &ContextLostThunk, this,
+                              Environment::GetDefaultAsyncWaiter());
   DCHECK(context_ != MGL_NO_CONTEXT);
 }
 
@@ -32,13 +32,13 @@ base::WeakPtr<GLContext> GLContext::CreateOffscreen(
                                   GetProxy(&native_viewport), nullptr);
   GpuPtr gpu_service;
   ConnectToService(native_viewport.get(), &gpu_service);
-  CommandBufferPtr command_buffer;
+  InterfaceHandle<CommandBuffer> command_buffer;
   gpu_service->CreateOffscreenGLES2Context(GetProxy(&command_buffer));
   return CreateFromCommandBuffer(command_buffer.Pass());
 }
 
 base::WeakPtr<GLContext> GLContext::CreateFromCommandBuffer(
-    CommandBufferPtr command_buffer) {
+    InterfaceHandle<CommandBuffer> command_buffer) {
   return (new GLContext(command_buffer.Pass()))->weak_factory_.GetWeakPtr();
 }
 

@@ -27,8 +27,7 @@ int main(int argc, const char* argv[]) {
 
   base::MessageLoop message_loop;
 
-  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
-      new mojo::embedder::SimplePlatformSupport()));
+  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
   sky::shell::Shell::InitStandalone();
 

@@ -76,8 +76,7 @@ static void Init(JNIEnv* env,
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
   base::MessageLoopForUI::current()->Start();
 
-  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
-      new mojo::embedder::SimplePlatformSupport()));
+  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
   CHECK(gfx::GLSurface::InitializeOneOff());
   Shell::InitStandalone();

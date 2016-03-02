@@ -33,7 +33,7 @@ class GLContext {
 
   // Creates a GL context from a command buffer.
   static base::WeakPtr<GLContext> CreateFromCommandBuffer(
-      CommandBufferPtr command_buffer);
+      InterfaceHandle<CommandBuffer> command_buffer);
 
   void MakeCurrent();
   bool IsCurrent();
@@ -43,7 +43,7 @@ class GLContext {
   void RemoveObserver(Observer* observer);
 
  private:
-  explicit GLContext(CommandBufferPtr command_buffer);
+  explicit GLContext(InterfaceHandle<CommandBuffer> command_buffer);
   ~GLContext();
 
   static void ContextLostThunk(void* self);

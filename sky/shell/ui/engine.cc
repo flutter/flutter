@@ -104,8 +104,8 @@ void Engine::SetServices(ServicesDataPtr services) {
   services_ = services.Pass();
 
   if (services_->services_provided_by_embedder) {
-    services_provided_by_embedder_ =
-        services_->services_provided_by_embedder.Pass();
+    services_provided_by_embedder_ = mojo::ServiceProviderPtr::Create(
+        services_->services_provided_by_embedder.Pass());
     service_provider_impl_.set_fallback_service_provider(
         services_provided_by_embedder_.get());
   }
@@ -117,11 +117,16 @@ void Engine::SetServices(ServicesDataPtr services) {
 #if defined(OS_ANDROID) || defined(OS_IOS)
     vsync::VSyncProviderPtr vsync_provider;
     if (services_->shell) {
-      mojo::ConnectToService(services_->shell.get(), "mojo:vsync",
-                             &vsync_provider);
+      // We bind and unbind our Shell here, since this is the only place we use
+      // it in this class.
+      auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
+      mojo::ConnectToService(shell.get(), "mojo:vsync", &vsync_provider);
+      services_->shell = shell.Pass();
     } else {
-      mojo::ConnectToService(services_provided_by_embedder_.get(),
-                             &vsync_provider);
+      auto embedder_services = mojo::ServiceProviderPtr::Create(
+          services_->services_provided_by_embedder.Pass());
+      mojo::ConnectToService(embedder_services.get(), &vsync_provider);
+      services_->services_provided_by_embedder = embedder_services.Pass();
     }
     animator_->Reset();
     animator_->set_vsync_provider(vsync_provider.Pass());

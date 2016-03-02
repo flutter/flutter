@@ -31,7 +31,7 @@ struct ServicesData {
   mojo.Shell? shell;
   mojo.ServiceProvider? services_provided_by_embedder;
   mojo.ServiceProvider&? services_provided_to_embedder;
-  mojo.ui.ViewHost? view_host;
+  mojo.ui.View? view;
   mojo.gfx.composition.SceneScheduler? scene_scheduler;
 };
 
