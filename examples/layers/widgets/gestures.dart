@@ -29,12 +29,16 @@ class _GesturePainter extends CustomPainter {
     Point center = (size.center(Point.origin).toOffset() * zoom + offset).toPoint();
     double radius = size.width / 2.0 * zoom;
     Gradient gradient = new RadialGradient(
-      center: center, radius: radius,
       colors: forward ? <Color>[swatch[50], swatch[900]]
                       : <Color>[swatch[900], swatch[50]]
     );
     Paint paint = new Paint()
-      ..shader = gradient.createShader();
+      ..shader = gradient.createShader(new Rect.fromLTWH(
+        center.x - radius,
+        center.y - radius,
+        radius * 2.0,
+        radius * 2.0
+      ));
     canvas.drawCircle(center, radius, paint);
   }
 
