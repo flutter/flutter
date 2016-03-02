@@ -33,7 +33,7 @@ main() {
       mockIsolate = new MockIsolate();
       when(mockClient.getVM()).thenReturn(mockVM);
       when(mockVM.isolates).thenReturn([mockIsolate]);
-      when(mockIsolate.load()).thenReturn(mockIsolate);
+      when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
       when(mockIsolate.invokeExtension(any, any))
           .thenReturn(new Future.value({'status': 'ok'}));
       vmServiceConnectFunction = (_) => new Future.value(mockClient);

@@ -43,7 +43,21 @@ class FlutterDriver {
     VMServiceClient client = await vmServiceConnectFunction(dartVmServiceUrl);
     VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
-    VMIsolate isolate = await vm.isolates.first.load();
+    VMIsolate isolate = await vm.isolates.first.loadRunnable();
+
+    // TODO(yjbanov): for a very brief moment the isolate could report that it
+    // is resumed, right before it goes into "paused on start" state. There's no
+    // robust way to deal with it other than waiting and querying for the
+    // isolate data again. 300 millis should be sufficient as the isolate is in
+    // the runnable state (i.e. it loaded and parsed all the Dart code) and
+    // going from here to the `main()` method should be trivial.
+    //
+    // See: https://github.com/dart-lang/sdk/issues/25902
+    if (isolate.pauseEvent is VMResumeEvent) {
+      await new Future.delayed(new Duration(milliseconds: 300));
+      isolate = await vm.isolates.first.loadRunnable();
+    }
+
     FlutterDriver driver = new FlutterDriver.connectedTo(client, isolate);
 
     // Attempts to resume the isolate, but does not crash if it fails because
