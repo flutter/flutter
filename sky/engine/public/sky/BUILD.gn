@@ -9,6 +9,7 @@ source_set("sky") {
     "//mojo/public/cpp/system",
     "//mojo/services/network/interfaces",
     "//skia",
+    "//sky/engine/bindings",
     "//sky/engine/core",
     "//sky/engine/platform",
     "//sky/engine/wtf",

@@ -34,6 +34,7 @@
 #include "sky/engine/tonic/dart_state.h"
 #include "sky/engine/tonic/dart_wrappable.h"
 #include "sky/engine/tonic/uint8_list.h"
+#include "sky/engine/wtf/MakeUnique.h"
 
 #ifdef OS_ANDROID
 #include "sky/engine/bindings/jni/dart_jni.h"
@@ -133,10 +134,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       DartIO::InitForIsolate();
       DartUI::InitForIsolate();
       DartMojoInternal::InitForIsolate();
-#ifdef OS_ANDROID
-      DartJni::InitForIsolate();
-#endif
-      DartRuntimeHooks::Install(DartRuntimeHooks::DartIOIsolate, "");
+      DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, "");
       const SkySettings& settings = SkySettings::Get();
       if (settings.enable_observatory) {
         std::string ip = "127.0.0.1";
@@ -160,7 +158,10 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     CHECK(zip_asset_bundle->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
   }
 
-  DartState* dart_state = new DartState();
+  FlutterDartState* parent_dart_state =
+      static_cast<FlutterDartState*>(callback_data);
+  FlutterDartState* dart_state = parent_dart_state->CreateForChildIsolate();
+
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, main,
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
@@ -175,15 +176,18 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
-#ifdef OS_ANDROID
-    DartJni::InitForIsolate();
-#endif
-    DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate, script_uri);
+    DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, script_uri);
+
+    dart_state->class_library().add_provider(
+      "ui",
+      WTF::MakeUnique<DartClassProvider>(dart_state, "dart:ui"));
 
     if (!snapshot_data.empty()) {
       CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(
           snapshot_data.data(), snapshot_data.size())));
     }
+
+    dart_state->isolate_client()->DidCreateSecondaryIsolate(isolate);
   }
 
   Dart_ExitIsolate();

@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/basictypes.h"
+#include "sky/engine/bindings/flutter_dart_state.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/text/WTFString.h"
@@ -19,7 +20,7 @@ class DartController;
 class Scene;
 
 // This class provides a way to run Dart script without a View.
-class SkyHeadless : public WindowClient {
+class SkyHeadless : public WindowClient, public IsolateClient {
  public:
   class Client {
    public:
@@ -39,6 +40,8 @@ class SkyHeadless : public WindowClient {
   void ScheduleFrame() override;
   void FlushRealTimeEvents() override;
   void Render(Scene* scene) override;
+
+  void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
   std::unique_ptr<DartController> dart_controller_;
   Client* client_;

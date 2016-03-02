@@ -43,6 +43,12 @@ class DartJni {
   static Dart_Handle jni_float_type();
 };
 
+// Data cached for each Dart isolate.
+struct DartJniIsolateData {
+  Dart_PersistentHandle jni_object_type;
+  Dart_PersistentHandle jni_float_type;
+};
+
 class JniMethodArgs {
  public:
   void Convert(JNIEnv* env,

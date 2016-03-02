@@ -86,7 +86,7 @@ static void InitDartInternal(Dart_Handle builtin_library,
     Dart_Handle timer_name = ToDart("timerFactory");
     DART_CHECK_VALID(Dart_SetField(vm_hooks, timer_name, timer));
   } else {
-    CHECK(isolate_type == DartRuntimeHooks::DartIOIsolate);
+    CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
     Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
     DART_CHECK_VALID(io_lib);
     Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
@@ -111,7 +111,7 @@ static void InitDartAsync(Dart_Handle builtin_library,
     schedule_microtask =
         GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
   } else {
-    CHECK(isolate_type == DartRuntimeHooks::DartIOIsolate);
+    CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
     Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
     Dart_Handle method_name =
         Dart_NewStringFromCString("_getIsolateScheduleImmediateClosure");

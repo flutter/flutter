@@ -12,6 +12,7 @@
 #include "flow/layers/layer_tree.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/services/network/interfaces/url_loader.mojom.h"
+#include "sky/engine/bindings/flutter_dart_state.h"
 #include "sky/engine/core/window/window.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/WebCommon.h"
@@ -32,7 +33,7 @@ class View;
 class WebInputEvent;
 class Window;
 
-class SkyView : public WindowClient {
+class SkyView : public WindowClient, public IsolateClient {
  public:
   static std::unique_ptr<SkyView> Create(SkyViewClient* client);
   ~SkyView();
@@ -66,6 +67,8 @@ class SkyView : public WindowClient {
   void ScheduleFrame() override;
   void FlushRealTimeEvents() override;
   void Render(Scene* scene) override;
+
+  void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
   SkyViewClient* client_;
   SkyDisplayMetrics display_metrics_;

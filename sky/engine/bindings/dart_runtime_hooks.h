@@ -15,7 +15,7 @@ class DartRuntimeHooks {
  public:
   enum IsolateType {
     MainIsolate,
-    DartIOIsolate,
+    SecondaryIsolate,
   };
 
   static void Install(IsolateType isolate_type, const std::string& script_uri);

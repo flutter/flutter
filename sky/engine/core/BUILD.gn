@@ -78,10 +78,6 @@ static_library("core") {
     "//mojo/services/navigation/interfaces",
   ]
 
-  if (is_android) {
-    deps += [ "//sky/engine/bindings/jni" ]
-  }
-
   sources = sky_core_files
 
   sources += [ "$target_gen_dir/sky_embedder_service_isolate_resources.cc" ]

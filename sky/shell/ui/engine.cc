@@ -103,6 +103,13 @@ void Engine::OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) {
 void Engine::SetServices(ServicesDataPtr services) {
   services_ = services.Pass();
 
+  if (services_->services_provided_by_embedder) {
+    services_provided_by_embedder_ =
+        services_->services_provided_by_embedder.Pass();
+    service_provider_impl_.set_fallback_service_provider(
+        services_provided_by_embedder_.get());
+  }
+
   if (services_->scene_scheduler) {
     animator_->Reset();
     animator_->set_scene_scheduler(services_->scene_scheduler.Pass());
@@ -113,7 +120,7 @@ void Engine::SetServices(ServicesDataPtr services) {
       mojo::ConnectToService(services_->shell.get(), "mojo:vsync",
                              &vsync_provider);
     } else {
-      mojo::ConnectToService(services_->services_provided_by_embedder.get(),
+      mojo::ConnectToService(services_provided_by_embedder_.get(),
                              &vsync_provider);
     }
     animator_->Reset();
@@ -271,12 +278,37 @@ void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
     sky_view_->OnAppLifecycleStateChanged(state);
 }
 
-void Engine::DidCreateIsolate(Dart_Isolate isolate) {
-  blink::MojoServices::Create(isolate, services_.Pass(), root_bundle_.Pass());
+void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
+  mojo::ServiceProviderPtr services_from_embedder;
+  service_provider_bindings_.AddBinding(
+      &service_provider_impl_, mojo::GetProxy(&services_from_embedder));
+
+  blink::MojoServices::Create(
+      isolate, services_.Pass(), services_from_embedder.Pass(),
+      root_bundle_.Pass());
 
   if (zip_asset_bundle_) {
     FlutterFontSelector::install(zip_asset_bundle_);
   }
+}
+
+void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
+  mojo::ServiceProviderPtr services_from_embedder;
+  mojo::InterfaceRequest<mojo::ServiceProvider> request =
+      mojo::GetProxy(&services_from_embedder);
+  blink::Platform::current()->GetUITaskRunner()->PostTask(FROM_HERE,
+      base::Bind(&Engine::BindToServiceProvider,
+                 weak_factory_.GetWeakPtr(),
+                 base::Passed(&request)));
+
+  blink::MojoServices::Create(
+      isolate, nullptr, services_from_embedder.Pass(), nullptr);
+}
+
+void Engine::BindToServiceProvider(
+    mojo::InterfaceRequest<mojo::ServiceProvider> request) {
+  service_provider_bindings_.AddBinding(&service_provider_impl_,
+                                        request.Pass());
 }
 
 void Engine::StopAnimator() {

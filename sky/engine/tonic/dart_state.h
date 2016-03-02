@@ -7,7 +7,6 @@
 
 #include "base/logging.h"
 #include "base/memory/weak_ptr.h"
-#include "base/supports_user_data.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/tonic/dart_api_scope.h"
 #include "sky/engine/tonic/dart_isolate_scope.h"
@@ -25,7 +24,7 @@ class DartMessageHandler;
 // reference to a DartState instance, please hold a base::WeakPtr<DartState>.
 //
 // DartState is analogous to gin::PerIsolateData and JSC::ExecState.
-class DartState : public base::SupportsUserData {
+class DartState {
  public:
   class Scope {
    public:

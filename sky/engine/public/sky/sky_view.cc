@@ -56,12 +56,12 @@ void SkyView::CreateView(const std::string& script_uri) {
 
   dart_controller_ = WTF::MakeUnique<DartController>();
   dart_controller_->CreateIsolateFor(WTF::MakeUnique<DOMDartState>(
-      WTF::MakeUnique<Window>(this), script_uri));
+      this, script_uri, WTF::MakeUnique<Window>(this)));
 
   DOMDartState* dart_state = dart_controller_->dart_state();
   DartState::Scope scope(dart_state);
   dart_state->window()->DidCreateIsolate();
-  client_->DidCreateIsolate(dart_state->isolate());
+  client_->DidCreateMainIsolate(dart_state->isolate());
 
   GetWindow()->UpdateWindowMetrics(display_metrics_);
   GetWindow()->UpdateLocale(language_code_, country_code_);
@@ -105,6 +105,10 @@ void SkyView::FlushRealTimeEvents() {
 
 void SkyView::Render(Scene* scene) {
   layer_tree_ = scene->takeLayerTree();
+}
+
+void SkyView::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
+  client_->DidCreateSecondaryIsolate(isolate);
 }
 
 void SkyView::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
