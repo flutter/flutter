@@ -1,26 +1,4 @@
 name: stocks
 version: 0.0.2
 update-url: http://localhost:9888/
-material-design-icons:
-  - name: action/accessibility
-  - name: action/account_balance
-  - name: action/assessment
-  - name: action/backup
-  - name: action/done
-  - name: action/help
-  - name: action/picture_in_picture
-  - name: action/search
-  - name: action/settings
-  - name: action/thumb_down
-  - name: action/thumb_up
-  - name: content/add
-  - name: device/dvr
-  - name: editor/border_all
-  - name: editor/border_clear
-  - name: navigation/arrow_back
-  - name: navigation/menu
-  - name: navigation/more_vert
-  - name: editor/format_color_text
-  - name: image/filter_none
-  - name: hardware/mouse
-  - name: image/gradient
+uses-material-design: true

@@ -64,7 +64,7 @@ class PostDemoState extends State<PostDemo> {
       floatingActionButton: new FloatingActionButton(
         tooltip: 'Refresh',
         child: new Icon(
-          icon: 'navigation/refresh'
+          icon: Icons.refresh
         ),
         onPressed: _refresh
       )

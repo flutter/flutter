@@ -28,7 +28,7 @@ const String _alertWithTitleText =
 class DialogDemoItem extends StatelessComponent {
   DialogDemoItem({ Key key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
 
-  final String icon;
+  final IconData icon;
   final Color color;
   final String text;
   final VoidCallback onPressed;
@@ -43,7 +43,7 @@ class DialogDemoItem extends StatelessComponent {
           alignItems: FlexAlignItems.center,
           children: <Widget>[
             new Icon(
-              size: IconSize.s36,
+              size: 36.0,
               icon: icon,
               color: color
             ),
@@ -166,19 +166,19 @@ class DialogDemoState extends State<DialogDemo> {
                         content: new Column(
                           children: <Widget>[
                             new DialogDemoItem(
-                              icon: 'action/account_circle',
+                              icon: Icons.account_circle,
                               color: theme.primaryColor,
                               text: 'username@gmail.com',
                               onPressed: () { Navigator.pop(context, 'username@gmail.com'); }
                             ),
                             new DialogDemoItem(
-                              icon: 'action/account_circle',
+                              icon: Icons.account_circle,
                               color: theme.primaryColor,
                               text: 'user02@gmail.com',
                               onPressed: () { Navigator.pop(context, 'user02@gmail.com'); }
                             ),
                             new DialogDemoItem(
-                              icon: 'content/add_circle',
+                              icon: Icons.add_circle,
                               text: 'add account',
                               color: theme.disabledColor
                             )

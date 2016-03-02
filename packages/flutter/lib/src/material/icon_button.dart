@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'icon.dart';
+import 'icons.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'theme.dart';
@@ -22,7 +23,7 @@ import 'tooltip.dart';
 class IconButton extends StatelessComponent {
   const IconButton({
     Key key,
-    this.size: IconSize.s24,
+    this.size: 24.0,
     this.icon,
     this.colorTheme,
     this.color,
@@ -30,8 +31,8 @@ class IconButton extends StatelessComponent {
     this.tooltip
   }) : super(key: key);
 
-  final IconSize size;
-  final String icon;
+  final double size;
+  final IconData icon;
   final IconThemeColor colorTheme;
   final Color color;
 

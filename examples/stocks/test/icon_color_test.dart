@@ -44,19 +44,9 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
   // way to find the menu item. I hope.
   Element semantics = findElementOfExactWidgetTypeGoingUp(tester.findText(label), MergeSemantics);
   expect(semantics, isNotNull);
-  Element asset = findElementOfExactWidgetTypeGoingDown(semantics, AssetImage);
-  RenderImage imageBox = asset.findRenderObject();
-  Match match = materialIconAssetNameColorExtractor.firstMatch(asset.widget.name);
-  expect(match, isNotNull);
-  if (color == const Color(0xFFFFFFFF)) {
-    expect(match[1], equals('white'));
-    expect(imageBox.color, isNull);
-  } else if (color == const Color(0xFF000000)) {
-    expect(match[1], equals('black'));
-    expect(imageBox.color, isNull);
-  } else {
-    expect(imageBox.color, equals(color));
-  }
+  Element asset = findElementOfExactWidgetTypeGoingDown(semantics, Text);
+  Text text = asset.widget;
+  expect(text.style.color, equals(color));
 }
 
 void main() {

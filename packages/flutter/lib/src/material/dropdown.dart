@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'icon.dart';
+import 'icons.dart';
 import 'ink_well.dart';
 import 'shadows.dart';
 import 'theme.dart';
@@ -298,7 +299,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
               alignment: const FractionalOffset(0.5, 0.0)
             ),
             new Container(
-              child: new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s36),
+              child: new Icon(icon: Icons.arrow_drop_down, size: 36.0),
               padding: const EdgeDims.only(top: 6.0)
             )
           ],

@@ -42,12 +42,12 @@ class IconsDemoState extends State<IconsDemo> {
     });
   }
 
-  Widget buildIconButton(IconSize size, String name, bool enabled) {
+  Widget buildIconButton(double size, IconData icon, bool enabled) {
     return new IconButton(
       size: size,
-      icon: name,
+      icon: icon,
       color: iconColor,
-      tooltip: "${enabled ? 'enabled' : 'disabled'} $name icon button",
+      tooltip: "${enabled ? 'enabled' : 'disabled'} icon button",
       onPressed: enabled ? handleIconButtonPress : null
     );
   }
@@ -97,10 +97,10 @@ class IconsDemoState extends State<IconsDemo> {
                       alignItems: FlexAlignItems.center,
                       children: <Widget>[
                         new Text('Enabled', style: textStyle),
-                        buildIconButton(IconSize.s18, 'action/face', true),
-                        buildIconButton(IconSize.s24, 'action/alarm', true),
-                        buildIconButton(IconSize.s36, 'action/home', true),
-                        buildIconButton(IconSize.s48, 'action/android', true)
+                        buildIconButton(18.0, Icons.face, true),
+                        buildIconButton(24.0, Icons.alarm, true),
+                        buildIconButton(36.0, Icons.home, true),
+                        buildIconButton(48.0, Icons.android, true)
                       ]
                     )
                   ),
@@ -109,10 +109,10 @@ class IconsDemoState extends State<IconsDemo> {
                       alignItems: FlexAlignItems.center,
                       children: <Widget>[
                         new Text('Disabled', style: textStyle),
-                        buildIconButton(IconSize.s18, 'action/face', false),
-                        buildIconButton(IconSize.s24, 'action/alarm', false),
-                        buildIconButton(IconSize.s36, 'action/home', false),
-                        buildIconButton(IconSize.s48, 'action/android', false)
+                        buildIconButton(18.0, Icons.face, false),
+                        buildIconButton(24.0, Icons.alarm, false),
+                        buildIconButton(36.0, Icons.home, false),
+                        buildIconButton(48.0, Icons.android, false)
                       ]
                     )
                   )
@@ -126,7 +126,7 @@ class IconsDemoState extends State<IconsDemo> {
                       justifyContent: FlexJustifyContent.center,
                       children: <Widget>[
                         new Icon(
-                          icon: 'image/brightness_7',
+                          icon: Icons.brightness_7,
                           color: iconColor.withAlpha(0x33) // 0.2 * 255 = 0x33
                         ),
                         new Slider(
@@ -141,7 +141,7 @@ class IconsDemoState extends State<IconsDemo> {
                           }
                         ),
                         new Icon(
-                          icon: 'image/brightness_7',
+                          icon: Icons.brightness_7,
                           color: iconColor.withAlpha(0xFF)
                         ),
                       ]

@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
+import 'icons.dart';
 import 'theme.dart';
 
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
@@ -37,7 +38,7 @@ class Input extends StatefulComponent {
   final KeyboardType keyboardType;
 
   /// An icon to show adjacent to the input field.
-  final String icon;
+  final IconData icon;
 
   /// Text to show above the input field.
   final String labelText;
@@ -195,7 +196,7 @@ class _InputState extends State<Input> {
             child: new Icon(
               icon: config.icon,
               color: focused ? activeColor : Colors.black45,
-              size: config.isDense ? IconSize.s18 : IconSize.s24
+              size: config.isDense ? 18.0 : 24.0
             )
           ),
           new Flexible(child: child)

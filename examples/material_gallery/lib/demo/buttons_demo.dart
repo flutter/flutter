@@ -78,7 +78,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: new Center(
         child: new FloatingActionButton(
           tooltip: 'Open FAB demos',
-          child: new Icon(icon: 'content/add'),
+          child: new Icon(icon: Icons.add),
           onPressed: () {
             Navigator.push(context, new MaterialPageRoute(
               builder: (BuildContext context) => new TabsFabDemo()

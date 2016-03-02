@@ -134,16 +134,16 @@ class CardCollectionState extends State<CardCollection> {
           buildDrawerColorRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
           buildDrawerColorRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
           new Divider(),
-          buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: 'action/code'),
-          buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.left, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_back'),
-          buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.right, _dismissDirection, _changeDismissDirection, icon: 'navigation/arrow_forward'),
+          buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
+          buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.left, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
+          buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.right, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
           new Divider(),
-          buildFontRadioItem("Left-align text", new TextStyle(textAlign: TextAlign.left), _textStyle, _changeTextStyle, icon: 'editor/format_align_left', enabled: !_editable),
-          buildFontRadioItem("Center-align text", new TextStyle(textAlign: TextAlign.center), _textStyle, _changeTextStyle, icon: 'editor/format_align_center', enabled: !_editable),
-          buildFontRadioItem("Right-align text", new TextStyle(textAlign: TextAlign.right), _textStyle, _changeTextStyle, icon: 'editor/format_align_right', enabled: !_editable),
+          buildFontRadioItem("Left-align text", new TextStyle(textAlign: TextAlign.left), _textStyle, _changeTextStyle, icon: Icons.format_align_left, enabled: !_editable),
+          buildFontRadioItem("Center-align text", new TextStyle(textAlign: TextAlign.center), _textStyle, _changeTextStyle, icon: Icons.format_align_center, enabled: !_editable),
+          buildFontRadioItem("Right-align text", new TextStyle(textAlign: TextAlign.right), _textStyle, _changeTextStyle, icon: Icons.format_align_right, enabled: !_editable),
           new Divider(),
           new DrawerItem(
-            icon: 'device/dvr',
+            icon: Icons.dvr,
             onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
             child: new Text('Dump App to Console')
           ),
@@ -221,7 +221,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { String icon, bool enabled: true }) {
+  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
       icon: icon,
       onPressed: enabled ? () { onChanged(itemValue); } : null,
@@ -238,7 +238,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { String icon, bool enabled: true }) {
+  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
       icon: icon,
       onPressed: enabled ? () { onChanged(itemValue); } : null,
@@ -255,7 +255,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildFontRadioItem(String label, TextStyle itemValue, TextStyle currentValue, ValueChanged<TextStyle> onChanged, { String icon, bool enabled: true }) {
+  Widget buildFontRadioItem(String label, TextStyle itemValue, TextStyle currentValue, ValueChanged<TextStyle> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
       icon: icon,
       onPressed: enabled ? () { onChanged(itemValue); } : null,
@@ -347,11 +347,11 @@ class CardCollectionState extends State<CardCollection> {
         backgroundMessage = "Unsupported dismissDirection";
     }
 
-    Widget leftArrowIcon =  new Icon(icon: 'navigation/arrow_back', size: IconSize.s36);
+    Widget leftArrowIcon =  new Icon(icon: Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.right)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
-    Widget rightArrowIcon =  new Icon(icon: 'navigation/arrow_forward', size: IconSize.s36);
+    Widget rightArrowIcon =  new Icon(icon: Icons.arrow_forward, size: 36.0);
     if (_dismissDirection == DismissDirection.left)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 

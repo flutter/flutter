@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icon.dart';
+import 'icons.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
@@ -18,7 +19,7 @@ class DrawerItem extends StatelessComponent {
     this.selected: false
   }) : super(key: key);
 
-  final String icon;
+  final IconData icon;
   final Widget child;
   final VoidCallback onPressed;
   final bool selected;

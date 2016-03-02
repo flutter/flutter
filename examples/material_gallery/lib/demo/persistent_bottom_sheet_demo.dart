@@ -30,7 +30,7 @@ class PersistentBottomSheetDemo extends StatelessComponent {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text("Persistent Bottom Sheet")),
       floatingActionButton: new FloatingActionButton(
-        child: new Icon(icon: 'content/add'),
+        child: new Icon(icon: Icons.add),
         backgroundColor: Colors.redAccent[200]
       ),
       body: new Builder(

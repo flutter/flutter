@@ -27,7 +27,7 @@ class GalleryDrawer extends StatelessComponent {
         children: <Widget>[
           new DrawerHeader(child: new Text('Flutter Gallery')),
           new DrawerItem(
-            icon: 'image/brightness_5',
+            icon: Icons.brightness_5,
             onPressed: () { _changeTheme(context, true); },
             selected: GalleryApp.of(context).lightTheme,
             child: new Row(
@@ -42,7 +42,7 @@ class GalleryDrawer extends StatelessComponent {
             )
           ),
           new DrawerItem(
-            icon: 'image/brightness_7',
+            icon: Icons.brightness_7,
             onPressed: () { _changeTheme(context, false); },
             selected: !GalleryApp.of(context).lightTheme,
             child: new Row(
@@ -58,7 +58,7 @@ class GalleryDrawer extends StatelessComponent {
           ),
           new Divider(),
           new DrawerItem(
-            icon: 'action/hourglass_empty',
+            icon: Icons.hourglass_empty,
             selected: timeDilation != 1.0,
             onPressed: () { _toggleAnimationSpeed(context); },
             child: new Row(

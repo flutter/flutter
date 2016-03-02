@@ -115,21 +115,21 @@ class MenuDemoState extends State<MenuDemo> {
                 new PopupMenuItem(
                   value: 'Preview',
                   child: new ListItem(
-                    left: new Icon(icon: 'action/visibility'),
+                    left: new Icon(icon: Icons.visibility),
                     primary: new Text('Preview')
                   )
                 ),
                 new PopupMenuItem(
                   value: 'Share',
                   child: new ListItem(
-                    left: new Icon(icon: 'social/person_add'),
+                    left: new Icon(icon: Icons.person_add),
                     primary: new Text('Share')
                   )
                 ),
                 new PopupMenuItem(
                   value: 'Get Link',
                   child: new ListItem(
-                    left: new Icon(icon: 'content/link'),
+                    left: new Icon(icon: Icons.link),
                     primary: new Text('Get Link')
                   )
                 ),
@@ -137,7 +137,7 @@ class MenuDemoState extends State<MenuDemo> {
                 new PopupMenuItem(
                   value: 'Remove',
                   child: new ListItem(
-                    left: new Icon(icon: 'action/delete'),
+                    left: new Icon(icon: Icons.delete),
                     primary: new Text('Remove')
                   )
                 )

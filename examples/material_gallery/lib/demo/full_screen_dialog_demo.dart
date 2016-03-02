@@ -56,7 +56,7 @@ class DateTimeItem extends StatelessComponent {
                   justifyContent: FlexJustifyContent.spaceBetween,
                   children: <Widget>[
                     new Text(new DateFormat('EEE, MMM d yyyy').format(date)),
-                    new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s24, color: Colors.black54),
+                    new Icon(icon: Icons.arrow_drop_down, color: Colors.black54),
                   ]
                 )
               )
@@ -81,7 +81,7 @@ class DateTimeItem extends StatelessComponent {
               child: new Row(
                 children: <Widget>[
                   new Text('$time'),
-                  new Icon(icon: 'navigation/arrow_drop_down', size: IconSize.s24, color: Colors.black54),
+                  new Icon(icon: Icons.arrow_drop_down, color: Colors.black54),
                 ]
               )
             )
@@ -143,7 +143,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     return new Scaffold(
       toolBar: new ToolBar(
         left: new IconButton(
-          icon: 'content/clear',
+          icon: Icons.clear,
           onPressed: () { handleDismissButton(context); }
         ),
         center: new Text('New Event'),

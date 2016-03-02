@@ -28,8 +28,8 @@ class TooltipDemo extends StatelessComponent {
                   new Tooltip(
                     message: 'call icon',
                     child: new Icon(
-                      size: IconSize.s18,
-                      icon: 'communication/call',
+                      size: 18.0,
+                      icon: Icons.call,
                       color: theme.primaryColor
                     )
                   ),
@@ -38,8 +38,8 @@ class TooltipDemo extends StatelessComponent {
               ),
               new Center(
                 child: new IconButton(
-                  size: IconSize.s48,
-                  icon: 'communication/call',
+                  size: 48.0,
+                  icon: Icons.call,
                   color: theme.primaryColor,
                   tooltip: 'place a phone call',
                   onPressed: () {

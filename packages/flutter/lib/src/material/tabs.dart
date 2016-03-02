@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icon.dart';
+import 'icons.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
@@ -291,7 +292,7 @@ class TabLabel {
   const TabLabel({ this.text, this.icon, this.iconBuilder });
 
   final String text;
-  final String icon;
+  final IconData icon;
   final TabLabelIconBuilder iconBuilder;
 }
 

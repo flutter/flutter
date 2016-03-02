@@ -1,4 +1,5 @@
 name: material_gallery
+uses-material-design: true
 assets:
   - assets/flutter_logo.png
   - assets/section_animation.png
@@ -22,42 +23,3 @@ assets:
   - packages/flutter_gallery_assets/top_10_australian_beaches.png
   - packages/flutter_gallery_assets/jumpingjack.json
   - packages/flutter_gallery_assets/jumpingjack.png
-material-design-icons:
-  - name: action/accessibility
-  - name: action/account_circle
-  - name: action/alarm
-  - name: action/android
-  - name: action/delete
-  - name: action/done
-  - name: action/event
-  - name: action/face
-  - name: action/home
-  - name: action/hourglass_empty
-  - name: action/info
-  - name: action/language
-  - name: action/list
-  - name: av/play_arrow
-  - name: av/sort_by_alpha
-  - name: av/stop
-  - name: communication/call
-  - name: communication/email
-  - name: communication/location_on
-  - name: communication/message
-  - name: content/add
-  - name: content/add_circle
-  - name: content/clear
-  - name: content/create
-  - name: image/brightness_5
-  - name: image/brightness_7
-  - name: image/flash_on
-  - name: image/timer
-  - name: navigation/arrow_back
-  - name: navigation/arrow_drop_down
-  - name: navigation/arrow_forward
-  - name: navigation/cancel
-  - name: navigation/expand_less
-  - name: navigation/expand_more
-  - name: navigation/menu
-  - name: navigation/more_horiz
-  - name: navigation/more_vert
-  - name: social/person_add

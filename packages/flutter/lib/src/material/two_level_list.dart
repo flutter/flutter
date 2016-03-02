@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icon.dart';
+import 'icons.dart';
 import 'list.dart';
 import 'list_item.dart';
 import 'theme.dart';
@@ -115,7 +116,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
             right: new RotationTransition(
               turns: _iconTurns,
               child: new Icon(
-                icon: 'navigation/expand_more',
+                icon: Icons.expand_more,
                 color: _iconColor.evaluate(_easeInAnimation)
               )
             )
