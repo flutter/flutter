@@ -4,7 +4,7 @@
 
 #include "sky/engine/core/painting/RSTransform.h"
 
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "base/logging.h"
 
@@ -18,7 +18,7 @@ RSTransform DartConverter<RSTransform>::FromDart(Dart_Handle dart_xform) {
     return result;
 
   Dart_Handle value =
-      Dart_GetField(dart_xform, DOMDartState::Current()->value_handle());
+      Dart_GetField(dart_xform, UIDartState::Current()->value_handle());
   if (Dart_IsNull(value))
     return result;
 

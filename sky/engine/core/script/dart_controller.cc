@@ -17,7 +17,7 @@
 #include "sky/engine/core/script/dart_debugger.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/core/script/dart_service_isolate.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/platform/sky_settings.h"
 #include "sky/engine/tonic/dart_api_scope.h"
@@ -44,12 +44,12 @@ DartController::DartController() : weak_factory_(this) {
 }
 
 DartController::~DartController() {
-  if (dom_dart_state_) {
+  if (ui_dart_state_) {
     // Don't use a DartIsolateScope here since we never exit the isolate.
-    Dart_EnterIsolate(dom_dart_state_->isolate());
+    Dart_EnterIsolate(ui_dart_state_->isolate());
     Dart_ShutdownIsolate();
-    dom_dart_state_->SetIsolate(nullptr);
-    dom_dart_state_ = nullptr;
+    ui_dart_state_->SetIsolate(nullptr);
+    ui_dart_state_ = nullptr;
   }
 }
 
@@ -160,13 +160,13 @@ void DartController::RunFromLibrary(const std::string& name,
                                         weak_factory_.GetWeakPtr(), name));
 }
 
-void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
+void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
   char* error = nullptr;
-  dom_dart_state_ = std::move(state);
+  ui_dart_state_ = std::move(state);
   Dart_Isolate isolate = Dart_CreateIsolate(
-      dom_dart_state_->url().c_str(), "main",
+      ui_dart_state_->url().c_str(), "main",
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
-      nullptr, static_cast<DartState*>(dom_dart_state_.get()), &error);
+      nullptr, static_cast<DartState*>(ui_dart_state_.get()), &error);
   CHECK(isolate) << error;
   auto& message_handler = dart_state()->message_handler();
   message_handler.set_quit_message_loop_when_isolate_exits(false);
@@ -174,7 +174,7 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
   message_handler.Initialize(Platform::current()->GetUITaskRunner());
 
   Dart_SetShouldPauseOnStart(SkySettings::Get().start_paused);
-  dom_dart_state_->SetIsolate(isolate);
+  ui_dart_state_->SetIsolate(isolate);
   CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
 
   {
@@ -183,7 +183,7 @@ void DartController::CreateIsolateFor(std::unique_ptr<DOMDartState> state) {
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
     DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate,
-                              dom_dart_state_->url().c_str());
+                              ui_dart_state_->url().c_str());
 
     dart_state()->class_library().add_provider(
       "ui",

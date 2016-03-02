@@ -14,7 +14,7 @@
 #include "services/asset_bundle/zip_asset_bundle.h"
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/script/dart_init.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/public/platform/sky_display_metrics.h"
 #include "sky/engine/public/platform/WebInputEvent.h"
 #include "sky/engine/public/web/Sky.h"

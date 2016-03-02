@@ -4,7 +4,7 @@
 
 #include "sky/engine/core/painting/RRect.h"
 
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
 
 namespace blink {
@@ -19,7 +19,7 @@ RRect DartConverter<RRect>::FromDart(Dart_Handle dart_rrect) {
     return result;
 
   Dart_Handle value =
-    Dart_GetField(dart_rrect, DOMDartState::Current()->value_handle());
+    Dart_GetField(dart_rrect, UIDartState::Current()->value_handle());
   if (Dart_IsNull(value))
     return result;
 

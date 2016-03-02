@@ -4,7 +4,7 @@
 
 #include "sky/engine/core/painting/Point.h"
 
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/tonic/dart_error.h"
 #include "base/logging.h"
 
@@ -14,9 +14,9 @@ namespace blink {
 Point DartConverter<Point>::FromDart(Dart_Handle handle) {
   DCHECK(!LogIfError(handle));
   Dart_Handle x_value =
-      Dart_GetField(handle, DOMDartState::Current()->x_handle());
+      Dart_GetField(handle, UIDartState::Current()->x_handle());
   Dart_Handle y_value =
-      Dart_GetField(handle, DOMDartState::Current()->y_handle());
+      Dart_GetField(handle, UIDartState::Current()->y_handle());
   double x = 0.0, y = 0.0;
   Dart_Handle err = Dart_DoubleValue(x_value, &x);
   DCHECK(!LogIfError(err));

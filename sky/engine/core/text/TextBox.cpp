@@ -5,7 +5,7 @@
 #include "sky/engine/core/text/TextBox.h"
 
 #include "base/logging.h"
-#include "sky/engine/core/script/dom_dart_state.h"
+#include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/tonic/dart_class_library.h"
 #include "sky/engine/tonic/dart_error.h"
 
