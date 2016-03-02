@@ -6,12 +6,6 @@ import("//mojo/public/mojo_application.gni")
 
 source_set("lib") {
   sources = [
-    "asset_bundle_impl.cc",
-    "asset_bundle_impl.h",
-    "asset_unpacker_impl.cc",
-    "asset_unpacker_impl.h",
-    "asset_unpacker_job.cc",
-    "asset_unpacker_job.h",
     "zip_asset_bundle.cc",
     "zip_asset_bundle.h",
   ]
@@ -24,42 +18,4 @@ source_set("lib") {
     "//mojo/services/asset_bundle/interfaces",
     "//third_party/zlib:zip",
   ]
-}
-
-mojo_native_application("asset_bundle") {
-  sources = [
-    "main.cc",
-  ]
-
-  deps = [
-    "//base",
-    "//mojo/application",
-    "//mojo/public/cpp/application",
-    "//mojo/public/cpp/bindings:callback",
-    "//mojo/public/cpp/system",
-    "//mojo/services/asset_bundle/interfaces",
-    ":lib",
-  ]
-}
-
-mojo_native_application("apptests") {
-  output_name = "asset_bundle_apptests"
-
-  testonly = true
-
-  sources = [
-    "asset_bundle_apptest.cc",
-  ]
-
-  deps = [
-    "//base",
-    "//mojo/application",
-    "//mojo/application:test_support",
-    "//mojo/data_pipe_utils",
-    "//mojo/public/cpp/bindings",
-    "//mojo/services/asset_bundle/interfaces",
-    "//third_party/zlib:zip",
-  ]
-
-  data_deps = [ ":asset_bundle($default_toolchain)" ]
 }
