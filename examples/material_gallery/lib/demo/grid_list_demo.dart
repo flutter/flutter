@@ -72,7 +72,7 @@ class GridDemoPhotoItem extends StatelessComponent {
         return new GridTile(
           header: new GridTileBar(
             backgroundColor: Colors.black.withAlpha(0x08),
-            left: new Icon(icon: 'action/info', color: Colors.white70),
+            left: new Icon(icon: Icons.info, color: Colors.white70),
             title: new Text(photo.title)
           ),
           child: image
@@ -84,7 +84,7 @@ class GridDemoPhotoItem extends StatelessComponent {
             backgroundColor: Colors.black.withAlpha(0x08),
             title: new Text(photo.title),
             caption: new Text(photo.caption),
-            right: new Icon(icon: 'action/info', color: Colors.white70)
+            right: new Icon(icon: Icons.info, color: Colors.white70)
           ),
           child: image
         );
@@ -176,7 +176,7 @@ class GridListDemoState extends State<GridListDemo> {
         center: new Text('Grid List'),
         right: <Widget>[
           new IconButton(
-            icon: "navigation/more_vert",
+            icon: Icons.more_vert,
             onPressed: () { showTileStyleMenu(context); },
             tooltip: 'Show menu'
           )

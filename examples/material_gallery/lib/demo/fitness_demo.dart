@@ -110,9 +110,9 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
             child: new Row(
               justifyContent: FlexJustifyContent.center,
               children: <Widget>[
-                _createInfoPanelCell("action/accessibility", "$count", "COUNT"),
-                _createInfoPanelCell("image/timer", _formatSeconds(time), "TIME"),
-                _createInfoPanelCell("image/flash_on", "$kcal", "KCAL")
+                _createInfoPanelCell(Icons.accessibility, '$count', 'COUNT'),
+                _createInfoPanelCell(Icons.timer, _formatSeconds(time), 'TIME'),
+                _createInfoPanelCell(Icons.flash_on, '$kcal', 'KCAL')
               ]
             )
           ),
@@ -136,7 +136,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
     );
   }
 
-  Widget _createInfoPanelCell(String icon, String value, String description) {
+  Widget _createInfoPanelCell(IconData icon, String value, String description) {
     Color color;
     if (workoutAnimation.workingOut)
       color = Colors.black87;
@@ -148,7 +148,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
       child: new Center(
         child: new Column(
           children: <Widget>[
-            new Icon(icon: icon, size: IconSize.s48, color: color),
+            new Icon(icon: icon, size: 48.0, color: color),
             new Text(value, style: new TextStyle(fontSize: 24.0, color: color)),
             new Text(description, style: new TextStyle(color: color))
           ]

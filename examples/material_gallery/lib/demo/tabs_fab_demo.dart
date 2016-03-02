@@ -9,7 +9,7 @@ class _Page {
 
   final String label;
   final Map<int, Color> colors;
-  final String icon;
+  final IconData icon;
 
   TabLabel get tabLabel => new TabLabel(text: label.toUpperCase());
   Color get labelColor => colors != null ? colors[300] : Colors.grey[300];
@@ -32,12 +32,12 @@ class TabsFabDemo extends StatefulComponent {
 class _TabsFabDemoState extends State<TabsFabDemo> {
   final GlobalKey scaffoldKey = new GlobalKey();
   final List<_Page> pages = <_Page>[
-    new _Page(label: 'Blue', colors: Colors.indigo, icon: 'content/add'),
-    new _Page(label: 'Too', colors: Colors.indigo, icon: 'content/add'),
-    new _Page(label: 'Eco', colors: Colors.green, icon: 'content/create'),
+    new _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
+    new _Page(label: 'Too', colors: Colors.indigo, icon: Icons.add),
+    new _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
     new _Page(label: 'No'),
-    new _Page(label: 'Teal', colors: Colors.teal, icon: 'content/add'),
-    new _Page(label: 'Red', colors: Colors.red, icon: 'content/create')
+    new _Page(label: 'Teal', colors: Colors.teal, icon: Icons.add),
+    new _Page(label: 'Red', colors: Colors.red, icon: Icons.create),
   ];
   _Page selectedPage;
 

@@ -81,13 +81,13 @@ class PageableListAppState extends State<PageableListApp> {
       child: new Block(children: <Widget>[
         new DrawerHeader(child: new Text('Options')),
         new DrawerItem(
-          icon: 'navigation/more_horiz',
+          icon: Icons.more_horiz,
           selected: scrollDirection == Axis.horizontal,
           child: new Text('Horizontal Layout'),
           onPressed: switchScrollDirection
         ),
         new DrawerItem(
-          icon: 'navigation/more_vert',
+          icon: Icons.more_vert,
           selected: scrollDirection == Axis.vertical,
           child: new Text('Vertical Layout'),
           onPressed: switchScrollDirection

@@ -11,6 +11,7 @@ import 'package:flx/signing.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'artifacts.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
 import 'globals.dart';
 import 'toolchain.dart';
@@ -18,22 +19,12 @@ import 'zip.dart';
 
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
-const String defaultMaterialAssetBasePath = 'packages/material_design_icons/icons';
 const String defaultManifestPath = 'flutter.yaml';
 const String defaultFlxOutputPath = 'build/app.flx';
 const String defaultSnapshotPath = 'build/snapshot_blob.bin';
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
-Map<String, double> _kIconDensities = {
-  'mdpi': 1.0,
-  'hdpi' : 1.5,
-  'xhdpi' : 2.0,
-  'xxhdpi' : 3.0,
-  'xxxhdpi' : 4.0
-};
-const List<String> _kThemes = const <String>['white', 'black'];
-const List<int> _kSizes = const <int>[18, 24, 36, 48];
 
 class _Asset {
   final String source;
@@ -41,6 +32,27 @@ class _Asset {
   final String key;
 
   _Asset({ this.source, this.base, this.key });
+}
+
+const String _kMaterialIconsKey = 'fonts/MaterialIcons-Regular.ttf';
+
+List _getMaterialFonts() {
+  return [{
+    'family': 'MaterialIcons',
+    'fonts': [{
+      'asset': _kMaterialIconsKey
+    }]
+  }];
+}
+
+List<_Asset> _getMaterialAssets() {
+  return <_Asset>[
+    new _Asset(
+      base: '${ArtifactStore.flutterRoot}/bin/cache/artifacts/material_fonts',
+      source: 'MaterialIcons-Regular.ttf',
+      key: _kMaterialIconsKey
+    )
+  ];
 }
 
 Map<_Asset, List<_Asset>> _parseAssets(Map manifestDescriptor, String assetBase) {
@@ -66,68 +78,6 @@ Map<_Asset, List<_Asset>> _parseAssets(Map manifestDescriptor, String assetBase)
         }
       }
     }
-  }
-  return result;
-}
-
-class _MaterialAsset extends _Asset {
-  final String name;
-  final String density;
-  final String theme;
-  final int size;
-
-  _MaterialAsset(this.name, this.density, this.theme, this.size, String assetBase)
-    : super(base: assetBase);
-
-  String get source {
-    List<String> parts = name.split('/');
-    String category = parts[0];
-    String subtype = parts[1];
-    return '$category/drawable-$density/ic_${subtype}_${theme}_${size}dp.png';
-  }
-
-  String get key {
-    List<String> parts = name.split('/');
-    String category = parts[0];
-    String subtype = parts[1];
-    double devicePixelRatio = _kIconDensities[density];
-    if (devicePixelRatio == 1.0)
-      return '$category/ic_${subtype}_${theme}_${size}dp.png';
-    else
-      return '$category/${devicePixelRatio}x/ic_${subtype}_${theme}_${size}dp.png';
-  }
-}
-
-Iterable/*<T>*/ _generateValues/*<T>*/(
-  Map/*<String, T>*/ assetDescriptor,
-  String key,
-  Iterable/*<T>*/ defaults
-) {
-  return assetDescriptor.containsKey(key) ? /*<T>*/[assetDescriptor[key]] : defaults;
-}
-
-void _accumulateMaterialAssets(Map<_Asset, List<_Asset>> result, Map assetDescriptor, String assetBase) {
-  String name = assetDescriptor['name'];
-  for (String theme in _generateValues(assetDescriptor, 'theme', _kThemes)) {
-    for (int size in _generateValues(assetDescriptor, 'size', _kSizes)) {
-      _MaterialAsset main = new _MaterialAsset(name, 'mdpi', theme, size, assetBase);
-      List<_Asset> variants = <_Asset>[];
-      result[main] = variants;
-      for (String density in _generateValues(assetDescriptor, 'density', _kIconDensities.keys)) {
-        if (density == 'mdpi')
-          continue;
-        variants.add(new _MaterialAsset(name, density, theme, size, assetBase));
-      }
-    }
-  }
-}
-
-Map<_Asset, List<_Asset>> _parseMaterialAssets(Map manifestDescriptor, String assetBase) {
-  Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
-  if (manifestDescriptor == null || !manifestDescriptor.containsKey('material-design-icons'))
-    return result;
-  for (Map assetDescriptor in manifestDescriptor['material-design-icons']) {
-    _accumulateMaterialAssets(result, assetDescriptor, assetBase);
   }
   return result;
 }
@@ -160,12 +110,15 @@ ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
   return new ZipEntry.fromString('AssetManifest.json', JSON.encode(json));
 }
 
-ZipEntry _createFontManifest(Map manifestDescriptor) {
-  if (manifestDescriptor != null && manifestDescriptor.containsKey('fonts')) {
-    return new ZipEntry.fromString('FontManifest.json', JSON.encode(manifestDescriptor['fonts']));
-  } else {
+ZipEntry _createFontManifest(Map manifestDescriptor, List additionalFonts) {
+  List fonts = [];
+  if (additionalFonts != null)
+    fonts.addAll(additionalFonts);
+  if (manifestDescriptor != null && manifestDescriptor.containsKey('fonts'))
+    fonts.addAll(manifestDescriptor['fonts']);
+  if (fonts.isEmpty)
     return null;
-  }
+  return new ZipEntry.fromString('FontManifest.json', JSON.encode(fonts));
 }
 
 /// Build the flx in the build/ directory and return `localBundlePath` on success.
@@ -203,7 +156,6 @@ class DirectoryResult {
 
 Future<int> build(
   Toolchain toolchain, {
-  String materialAssetBasePath: defaultMaterialAssetBasePath,
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
   String outputPath: defaultFlxOutputPath,
@@ -234,7 +186,6 @@ Future<int> build(
       manifestDescriptor: manifestDescriptor,
       snapshotFile: snapshotFile,
       assetBasePath: assetBasePath,
-      materialAssetBasePath: materialAssetBasePath,
       outputPath: outputPath,
       privateKeyPath: privateKeyPath
   );
@@ -244,14 +195,14 @@ Future<int> assemble({
   Map manifestDescriptor: const {},
   File snapshotFile,
   String assetBasePath: defaultAssetBasePath,
-  String materialAssetBasePath: defaultMaterialAssetBasePath,
   String outputPath: defaultFlxOutputPath,
   String privateKeyPath: defaultPrivateKeyPath
 }) async {
   printTrace('Building $outputPath');
 
   Map<_Asset, List<_Asset>> assets = _parseAssets(manifestDescriptor, assetBasePath);
-  assets.addAll(_parseMaterialAssets(manifestDescriptor, materialAssetBasePath));
+
+  final bool usesMaterialDesign = manifestDescriptor != null && manifestDescriptor['uses-material-design'] == true;
 
   ZipBuilder zipBuilder = new ZipBuilder();
 
@@ -262,21 +213,28 @@ Future<int> assemble({
     ZipEntry assetEntry = _createAssetEntry(asset);
     if (assetEntry == null)
       return 1;
-    else
-      zipBuilder.addEntry(assetEntry);
+    zipBuilder.addEntry(assetEntry);
 
     for (_Asset variant in assets[asset]) {
       ZipEntry variantEntry = _createAssetEntry(variant);
       if (variantEntry == null)
         return 1;
-      else
-        zipBuilder.addEntry(variantEntry);
+      zipBuilder.addEntry(variantEntry);
+    }
+  }
+
+  if (usesMaterialDesign) {
+    for (_Asset asset in _getMaterialAssets()) {
+      ZipEntry assetEntry = _createAssetEntry(asset);
+      if (assetEntry == null)
+        return 1;
+      zipBuilder.addEntry(assetEntry);
     }
   }
 
   zipBuilder.addEntry(_createAssetManifest(assets));
 
-  ZipEntry fontManifest = _createFontManifest(manifestDescriptor);
+  ZipEntry fontManifest = _createFontManifest(manifestDescriptor, usesMaterialDesign ? _getMaterialFonts() : null);
   if (fontManifest != null)
     zipBuilder.addEntry(fontManifest);
 

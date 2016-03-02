@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 class _ContactCategory extends StatelessComponent {
   _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
 
-  final String icon;
+  final IconData icon;
   final List<Widget> children;
 
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class _ContactItem extends StatelessComponent {
     assert(lines.length > 1);
   }
 
-  final String icon;
+  final IconData icon;
   final List<String> lines;
 
   Widget build(BuildContext context) {
@@ -88,11 +88,11 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         toolBar: new ToolBar(
           right: <Widget>[
             new IconButton(
-              icon: 'content/create',
+              icon: Icons.create,
               tooltip: 'Search'
             ),
             new IconButton(
-              icon: 'navigation/more_vert',
+              icon: Icons.more_vert,
               tooltip: 'Show menu'
             )
           ],
@@ -112,17 +112,17 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
           padding: new EdgeDims.only(top: appBarHeight),
           children: <Widget>[
             new _ContactCategory(
-              icon: 'communication/call',
+              icon: Icons.call,
               children: <Widget>[
                 new _ContactItem(
-                  icon: 'communication/message',
+                  icon: Icons.message,
                   lines: <String>[
                     '(650) 555-1234',
                     'Mobile'
                   ]
                 ),
                 new _ContactItem(
-                  icon: 'communication/message',
+                  icon: Icons.message,
                   lines: <String>[
                     '(323) 555-6789',
                     'Work'
@@ -131,7 +131,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
               ]
             ),
             new _ContactCategory(
-              icon: 'communication/email',
+              icon: Icons.email,
               children: <Widget>[
                 new _ContactItem(
                   lines: <String>[
@@ -148,7 +148,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
               ]
             ),
             new _ContactCategory(
-              icon: 'communication/location_on',
+              icon: Icons.location_on,
               children: <Widget>[
                 new _ContactItem(
                   lines: <String>[

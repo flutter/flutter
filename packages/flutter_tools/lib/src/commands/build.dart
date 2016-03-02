@@ -15,7 +15,9 @@ class BuildCommand extends FlutterCommand {
 
   BuildCommand() {
     argParser.addFlag('precompiled', negatable: false);
-    argParser.addOption('asset-base', defaultsTo: defaultMaterialAssetBasePath);
+    // This option is still referenced by the iOS build scripts. We should
+    // remove it once we've updated those build scripts.
+    argParser.addOption('asset-base', help: 'Ignored. Will be removed.', hide: true);
     argParser.addOption('compiler');
     argParser.addOption('target',
       abbr: 't',
@@ -42,7 +44,6 @@ class BuildCommand extends FlutterCommand {
 
     return await build(
       toolchain,
-      materialAssetBasePath: argResults['asset-base'],
       mainPath: argResults.wasParsed('main') ? argResults['main'] : argResults['target'],
       manifestPath: argResults['manifest'],
       outputPath: outputPath,

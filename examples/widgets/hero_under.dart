@@ -52,8 +52,8 @@ class HeroDemo extends StatelessComponent {
   Widget build(BuildContext context)  {
     return new Scaffold(
       toolBar: new ToolBar(
-        left: new IconButton(icon: "navigation/menu"),
-        center: new Text("Diets")
+        left: new IconButton(icon: Icons.menu),
+        center: new Text('Diets')
       ),
       body: new Center(
         child: new GestureDetector(
@@ -105,11 +105,11 @@ class CrabPage extends StatelessComponent {
                 padding: new EdgeDims.only(top: ui.window.padding.top),
                 backgroundColor: const Color(0x00000000),
                 left: new IconButton(
-                  icon: "navigation/arrow_back",
+                  icon: Icons.arrow_back,
                   onPressed: () => Navigator.pop(context)
                 ),
                 right: <Widget>[
-                    new IconButton(icon: "navigation/more_vert")
+                    new IconButton(icon: Icons.more_vert)
                 ]
               ),
               new Positioned(

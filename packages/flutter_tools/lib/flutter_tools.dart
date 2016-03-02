@@ -13,7 +13,6 @@ Future<int> assembleFlx({
   Map manifestDescriptor: const {},
   File snapshotFile: null,
   String assetBasePath: flx.defaultAssetBasePath,
-  String materialAssetBasePath: flx.defaultMaterialAssetBasePath,
   String outputPath: flx.defaultFlxOutputPath,
   String privateKeyPath: flx.defaultPrivateKeyPath
 }) async {
@@ -21,7 +20,6 @@ Future<int> assembleFlx({
       manifestDescriptor: manifestDescriptor,
       snapshotFile: snapshotFile,
       assetBasePath: assetBasePath,
-      materialAssetBasePath: materialAssetBasePath,
       outputPath: outputPath,
       privateKeyPath: privateKeyPath
   );

@@ -50,7 +50,7 @@ class AdaptedGridItem extends StatelessComponent {
                   child: new Text(name)
                 ),
                 new IconButton(
-                  icon: 'navigation/more_vert'
+                  icon: Icons.more_vert
                 )
               ]
             )

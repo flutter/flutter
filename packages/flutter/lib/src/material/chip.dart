@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
+import 'icons.dart';
 import 'tooltip.dart';
 
 const double _kChipHeight = 32.0;
@@ -66,8 +67,8 @@ class Chip extends StatelessComponent {
           child: new Container(
             padding: const EdgeDims.symmetric(horizontal: 4.0),
             child: new Icon(
-              icon: 'navigation/cancel',
-              size: IconSize.s18,
+              icon: Icons.cancel,
+              size: 18.0,
               color: Colors.black54
             )
           )

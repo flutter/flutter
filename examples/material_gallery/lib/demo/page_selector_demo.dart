@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 
 class PageSelectorDemo extends StatelessComponent {
-  Widget _buildTabView(String iconName) {
+  Widget _buildTabView(IconData icon) {
     return new Container(
-      key: new ValueKey<String>(iconName),
+      key: new ObjectKey(icon),
       padding: const EdgeDims.all(12.0),
       child: new Card(
         child: new Center(
-          child: new Icon(icon: 'action/$iconName', size:IconSize.s48)
+          child: new Icon(icon: icon, size: 48.0)
         )
       )
     );
@@ -24,12 +24,19 @@ class PageSelectorDemo extends StatelessComponent {
   }
 
   Widget build(BuildContext notUsed) { // Can't find the TabBarSelection from this context.
-    final List<String> iconNames = <String>['event', 'home', 'android', 'alarm', 'face', 'language'];
+    final List<IconData> icons = <IconData>[
+      Icons.event,
+      Icons.home,
+      Icons.android,
+      Icons.alarm,
+      Icons.face,
+      Icons.language,
+    ];
 
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Page Selector')),
       body: new TabBarSelection(
-        values: iconNames,
+        values: icons,
         child: new Builder(
           builder: (BuildContext context) {
             return new Column(
@@ -39,13 +46,13 @@ class PageSelectorDemo extends StatelessComponent {
                   child: new Row(
                     children: <Widget>[
                       new IconButton(
-                        icon: 'navigation/arrow_back',
+                        icon: Icons.arrow_back,
                         onPressed: () { _handleArrowButtonPress(context, -1); },
                         tooltip: 'Back'
                       ),
                       new TabPageSelector<String>(),
                       new IconButton(
-                        icon: 'navigation/arrow_forward',
+                        icon: Icons.arrow_forward,
                         onPressed: () { _handleArrowButtonPress(context, 1); },
                         tooltip: 'Forward'
                       )
@@ -55,7 +62,7 @@ class PageSelectorDemo extends StatelessComponent {
                 ),
                 new Flexible(
                   child: new TabBarView(
-                    children: iconNames.map(_buildTabView).toList()
+                    children: icons.map(_buildTabView).toList()
                   )
                 )
               ]

@@ -30,6 +30,7 @@ export 'src/material/floating_action_button.dart';
 export 'src/material/grid_tile.dart';
 export 'src/material/grid_tile_bar.dart';
 export 'src/material/icon.dart';
+export 'src/material/icons.dart';
 export 'src/material/icon_button.dart';
 export 'src/material/icon_theme.dart';
 export 'src/material/icon_theme_data.dart';

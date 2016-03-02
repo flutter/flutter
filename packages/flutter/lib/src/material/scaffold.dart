@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'bottom_sheet.dart';
 import 'constants.dart';
 import 'drawer.dart';
+import 'icons.dart';
 import 'icon_button.dart';
 import 'material.dart';
 import 'snack_bar.dart';
@@ -371,7 +372,7 @@ class ScaffoldState extends State<Scaffold> {
     if (left == null) {
       if (config.drawer != null) {
         left = new IconButton(
-          icon: 'navigation/menu',
+          icon: Icons.menu,
           onPressed: openDrawer,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
@@ -379,7 +380,7 @@ class ScaffoldState extends State<Scaffold> {
         _shouldShowBackArrow ??= Navigator.canPop(context);
         if (_shouldShowBackArrow) {
           left = new IconButton(
-            icon: 'navigation/arrow_back',
+            icon: Icons.arrow_back,
             onPressed: () => Navigator.pop(context),
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
           );

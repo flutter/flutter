@@ -5,28 +5,15 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'icons.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'theme.dart';
 
-enum IconSize {
-  s18,
-  s24,
-  s36,
-  s48,
-}
-
-const Map<IconSize, int> _kIconSize = const <IconSize, int>{
-  IconSize.s18: 18,
-  IconSize.s24: 24,
-  IconSize.s36: 36,
-  IconSize.s48: 48,
-};
-
 class Icon extends StatelessComponent {
   Icon({
     Key key,
-    this.size: IconSize.s24,
+    this.size: 24.0,
     this.icon,
     this.colorTheme,
     this.color
@@ -34,8 +21,8 @@ class Icon extends StatelessComponent {
     assert(size != null);
   }
 
-  final IconSize size;
-  final String icon;
+  final double size;
+  final IconData icon;
   final IconThemeColor colorTheme;
   final Color color;
 
@@ -53,55 +40,42 @@ class Icon extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    final int iconSize = _kIconSize[size];
     if (icon == null) {
       return new SizedBox(
-        width: iconSize.toDouble(),
-        height: iconSize.toDouble()
+        width: size,
+        height: size
       );
-    }
-
-    String category = '';
-    String subtype = '';
-    List<String> parts = icon.split('/');
-    if (parts.length == 2) {
-      category = parts[0];
-      subtype = parts[1];
-    }
-    final IconThemeColor iconThemeColor = _getIconThemeColor(context);
-
-    String colorSuffix;
-    switch(iconThemeColor) {
-      case IconThemeColor.black:
-        colorSuffix = "black";
-        break;
-      case IconThemeColor.white:
-        colorSuffix = "white";
-        break;
     }
 
     Color iconColor = color;
     final int iconAlpha = (255.0 * (IconTheme.of(context)?.clampedOpacity ?? 1.0)).round();
-    if (iconAlpha != 255) {
-      if (color != null) {
-        iconColor = color.withAlpha((iconAlpha * color.opacity).round());
-      } else {
-        switch(iconThemeColor) {
-          case IconThemeColor.black:
-            iconColor = Colors.black.withAlpha(iconAlpha);
-            break;
-          case IconThemeColor.white:
-            iconColor = Colors.white.withAlpha(iconAlpha);
-            break;
-        }
+    if (color != null) {
+        if (iconAlpha != 255)
+          iconColor = color.withAlpha((iconAlpha * color.opacity).round());
+    } else {
+      switch(_getIconThemeColor(context)) {
+        case IconThemeColor.black:
+          iconColor = Colors.black.withAlpha(iconAlpha);
+          break;
+        case IconThemeColor.white:
+          iconColor = Colors.white.withAlpha(iconAlpha);
+          break;
       }
     }
 
-    return new AssetImage(
-      name: '$category/ic_${subtype}_${colorSuffix}_${iconSize}dp.png',
-      width: iconSize.toDouble(),
-      height: iconSize.toDouble(),
-      color: iconColor
+    return new SizedBox(
+      width: size,
+      height: size,
+      child: new Center(
+        child: new Text(new String.fromCharCode(icon.codePoint),
+          style: new TextStyle(
+            inherit: false,
+            color: iconColor,
+            fontSize: size,
+            fontFamily: 'MaterialIcons'
+          )
+        )
+      )
     );
   }
 

@@ -5,29 +5,45 @@
 import 'package:flutter/material.dart';
 
 class TabsDemo extends StatelessComponent {
-  final List<String> iconNames = <String>["event", "home", "android", "alarm", "face", "language"];
+  final List<IconData> icons = <IconData>[
+    Icons.event,
+    Icons.home,
+    Icons.android,
+    Icons.alarm,
+    Icons.face,
+    Icons.language,
+  ];
+
+  final Map<IconData, String> labels = <IconData, String>{
+    Icons.event: 'EVENT',
+    Icons.home: 'HOME',
+    Icons.android: 'ANDROID',
+    Icons.alarm: 'ALARM',
+    Icons.face: 'FACE',
+    Icons.language: 'LANGUAGE',
+  };
 
   Widget build(_) {
     return new TabBarSelection(
-      values: iconNames,
+      values: icons,
       child: new Scaffold(
         toolBar: new ToolBar(
           center: new Text("Scrollable Tabs"),
           tabBar: new TabBar<String>(
             isScrollable: true,
             labels: new Map.fromIterable(
-              iconNames,
-              value: (String iconName) => new TabLabel(text: iconName.toUpperCase(), icon: "action/$iconName")
+              icons,
+              value: (IconData icon) => new TabLabel(text: labels[icon], icon: icon)
             )
           )
         ),
         body: new TabBarView(
-          children: iconNames.map((String iconName) {
+          children: icons.map((IconData icon) {
             return new Container(
-              key: new ValueKey<String>(iconName),
+              key: new ObjectKey(icon),
               padding: const EdgeDims.all(12.0),
               child: new Card(
-                child: new Center(child: new Icon(icon: "action/$iconName", size:IconSize.s48))
+                child: new Center(child: new Icon(icon: icon, size: 48.0))
               )
             );
           }).toList()
