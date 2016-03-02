@@ -13,6 +13,21 @@ String calculateSha(File file) {
   return CryptoUtils.bytesToHex(sha1.close());
 }
 
+/// Convert `foo_bar` to `fooBar`.
+String camelCase(String str) {
+  int index = str.indexOf('_');
+  while (index != -1 && index < str.length - 2) {
+    str = str.substring(0, index) +
+      str.substring(index + 1, index + 2).toUpperCase() +
+      str.substring(index + 2);
+    index = str.indexOf('_');
+  }
+  return str;
+}
+
+/// Return the plural of the given word (`cat(s)`).
+String pluralize(String word, int count) => count == 1 ? word : word + 's';
+
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.

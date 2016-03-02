@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
 import '../artifacts.dart';
+import '../base/utils.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../template.dart';
@@ -87,8 +88,10 @@ class CreateCommand extends Command {
     _renderTemplates(projectName, dirPath, flutterPackagesDirectory,
         renderDriverTest: argResults['with-driver-test']);
 
+    printStatus('');
+
     if (argResults['pub']) {
-      int code = await pubGet(directory: projectDir.path);
+      int code = await pubGet(directory: dirPath);
       if (code != 0)
         return code;
     }
@@ -103,7 +106,7 @@ class CreateCommand extends Command {
       printStatus('''
 All done! In order to run your application, type:
 
-  \$ cd ${projectDir.path}
+  \$ cd $dirPath
   \$ flutter run
 ''');
     } else {
@@ -116,7 +119,7 @@ All done! In order to run your application, type:
       printStatus('');
       printStatus("After installing components, run 'flutter doctor' in order to "
         "re-validate your setup.");
-      printStatus("When complete, type 'flutter run' from the '${projectDir.path}' "
+      printStatus("When complete, type 'flutter run' from the '$dirPath' "
         "directory in order to launch your app.");
     }
 
@@ -125,7 +128,6 @@ All done! In order to run your application, type:
 
   void _renderTemplates(String projectName, String dirPath,
       String flutterPackagesDirectory, { bool renderDriverTest: false }) {
-    String projectIdentifier = _createProjectIdentifier(path.basename(dirPath));
     String relativeFlutterPackagesDirectory = path.relative(flutterPackagesDirectory, from: dirPath);
 
     printStatus('Creating project ${path.basename(projectName)}:');
@@ -134,7 +136,8 @@ All done! In order to run your application, type:
 
     Map templateContext = <String, dynamic>{
       'projectName': projectName,
-      'projectIdentifier': projectIdentifier,
+      'androidIdentifier': _createAndroidIdentifier(projectName),
+      'iosIdentifier': _createUTIIdentifier(projectName),
       'description': description,
       'flutterPackagesDirectory': relativeFlutterPackagesDirectory,
       'androidMinApiLevel': android.minApiLevel
@@ -163,11 +166,15 @@ String _normalizeProjectName(String name) {
   return name;
 }
 
-String _createProjectIdentifier(String name) {
+String _createAndroidIdentifier(String name) {
+  return 'com.yourcompany.${camelCase(name)}';
+}
+
+String _createUTIIdentifier(String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
   RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-.\u0080-\uffff]+");
-  name = name.replaceAll(disallowed, '');
-  name = name.length == 0 ? 'untitled' : name;
+  name = camelCase(name).replaceAll(disallowed, '');
+  name = name.isEmpty ? 'untitled' : name;
   return 'com.yourcompany.$name';
 }
 
