@@ -5,7 +5,8 @@
 #ifndef MOJO_EDK_SYSTEM_CORE_TEST_BASE_H_
 #define MOJO_EDK_SYSTEM_CORE_TEST_BASE_H_
 
-#include "mojo/edk/embedder/simple_platform_support.h"
+#include <memory>
+
 #include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/types.h"
@@ -13,6 +14,11 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
+
+namespace embedder {
+class PlatformSupport;
+}
+
 namespace system {
 
 class Core;
@@ -36,11 +42,11 @@ class CoreTestBase : public testing::Test {
   // |info| must remain alive until the returned handle is closed.
   MojoHandle CreateMockHandle(MockHandleInfo* info);
 
-  Core* core() { return core_; }
+  Core* core() { return core_.get(); }
 
  private:
-  embedder::SimplePlatformSupport platform_support_;
-  Core* core_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
+  std::unique_ptr<Core> core_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(CoreTestBase);
 };

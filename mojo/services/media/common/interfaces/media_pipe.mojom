@@ -61,25 +61,6 @@ struct MediaPacket {
   // packet?
 };
 
-// MediaPipeState
-//
-// A small structure used by the user of a media pipe to fetch the shared buffer
-// used by the media pipe to move bulk data.
-//
-// TODO(johngro): Right now, the only real purpose for this struture is to
-// bundle the size of the buffer with the buffer handle itself.  When buffer
-// handles can have their properties queried directly, it can go away.  See
-// domokit/mojo issue #501
-struct MediaPipeState {
-  const uint64 kMaxPayloadLen = 0x3FFFFFFFFFFFFFFF;
-
-  handle<shared_buffer> payload_buffer;
-
-  // TODO(johngro) : Why do I have to send this?  Why can't I just query the
-  // shared_buffer handle for its length?
-  uint64 payload_buffer_len;
-};
-
 // MediaPipe
 //
 // An interface exposed by consumers of media which provides the means for
@@ -90,41 +71,28 @@ struct MediaPipeState {
 // the media has been consumed via the SendPacket callback they provide.
 // Finally, the pipeline may be flushed using the Flush method.
 interface MediaPipe {
-  // Request that a reference to the pipe's state be sent to the caller via
-  // callback.
-  GetState() => (MediaPipeState state);
+  const uint64 kMaxBufferLen = 0x3FFFFFFFFFFFFFFF;
+
+  // An enumeration used to indicate the ultimate fate of packets sent across
+  // the pipe using the SendPacket method.
+  enum SendResult {
+    CONSUMED,  // Media was completely consumed.
+    FLUSHED,   // Some or all of the media was flushed before being consumed.
+  };
+
+  // Sets the shared buffer in which sent Packet payloads will be located.
+  SetBuffer(handle<shared_buffer> buffer, uint64 size);
 
   // Place a media packet into the pipeline to be consumed.  When the consumer
   // is finished with the packet, it will invoke the supplied callback to
   // indicate that the region of the shared buffer indicated by the MediaPacket
-  // object is now available for new data.  MediaResults in the operation may
-  // include...
-  //
-  // OK:
-  //   Media packet has been consumed without error.
-  // BAD_STATE:
-  //   The media pipe is in a bad state (perhaps uninitialized) and payloads
-  //   cannot be pushed to it.
-  // INVALID_ARGUMENT:
-  //   One or more of the payload regions does not appears to go outside the
-  //   shared buffer bounds.
-  // FLUSHED:
-  //   The packet was flushed at the request of the producer.  It was not
-  //   completely consumed (but may have been partially consumed)
-  SendPacket(MediaPacket packet) => (MediaResult result);
+  // object is now available for new data.  In addition, a SendResult will be
+  // providid indicating whether or not the packet was consumed or flushed.
+  SendPacket(MediaPacket packet) => (SendResult result);
 
   // Flush the pipe, discarding all queued packets in order (from front to back)
   // as we go.  When the flush operation is complete, the provided callback will
   // be invoked to indicate that the consumer end of the pipe has finished
-  // flushing and that the pipeline is now empty.  Possible values for the
-  // MediaResult parameter of the callback include...
-  //
-  // OK:
-  //    Pipeline has been successfully flushed.
-  // BUSY:
-  //    A flush was already in progress, this flush request was ignored.
-  // BAD_STATE:
-  //   The media pipe is in a bad state (perhaps uninitialized) and cannot be
-  //   flushed
-  Flush() => (MediaResult result);
+  // flushing and that the pipeline is now empty.
+  Flush() => ();
 };

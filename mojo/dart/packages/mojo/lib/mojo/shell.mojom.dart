@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 library shell_mojom;
-
 import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
+import 'package:mojo/mojo/bindings/types/service_describer.mojom.dart' as service_describer;
 import 'package:mojo/mojo/application_connector.mojom.dart' as application_connector_mojom;
 import 'package:mojo/mojo/service_provider.mojom.dart' as service_provider_mojom;
 
@@ -73,12 +72,27 @@ class _ShellConnectToApplicationParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeString(applicationUrl, 8, false);
-    
-    encoder0.encodeInterfaceRequest(services, 16, true);
-    
-    encoder0.encodeInterface(exposedServices, 20, true);
+    try {
+      encoder0.encodeString(applicationUrl, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "applicationUrl of struct _ShellConnectToApplicationParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInterfaceRequest(services, 16, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "services of struct _ShellConnectToApplicationParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInterface(exposedServices, 20, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "exposedServices of struct _ShellConnectToApplicationParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -93,6 +107,8 @@ class _ShellConnectToApplicationParams extends bindings.Struct {
         'Object containing handles cannot be encoded to JSON.');
   }
 }
+
+
 
 
 class _ShellCreateApplicationConnectorParams extends bindings.Struct {
@@ -145,8 +161,13 @@ class _ShellCreateApplicationConnectorParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeInterfaceRequest(applicationConnectorRequest, 8, false);
+    try {
+      encoder0.encodeInterfaceRequest(applicationConnectorRequest, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "applicationConnectorRequest of struct _ShellCreateApplicationConnectorParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -160,8 +181,24 @@ class _ShellCreateApplicationConnectorParams extends bindings.Struct {
   }
 }
 
+
+
+
 const int _Shell_connectToApplicationName = 0;
 const int _Shell_createApplicationConnectorName = 1;
+
+
+
+class _ShellServiceDescription implements service_describer.ServiceDescription {
+  dynamic getTopLevelInterface([Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getTypeDefinition(String typeKey, [Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getAllTypeDefinitions([Function responseFactory]) =>
+      responseFactory(null);
+}
 
 abstract class Shell {
   static const String serviceName = null;
@@ -184,6 +221,9 @@ class _ShellProxyImpl extends bindings.Proxy {
     assert(endpoint.setDescription("For _ShellProxyImpl"));
     return new _ShellProxyImpl.fromEndpoint(endpoint);
   }
+
+  service_describer.ServiceDescription get serviceDescription =>
+    new _ShellServiceDescription();
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -344,6 +384,15 @@ class ShellStub extends bindings.Stub {
   }
 
   int get version => 0;
+
+  static service_describer.ServiceDescription _cachedServiceDescription;
+  static service_describer.ServiceDescription get serviceDescription {
+    if (_cachedServiceDescription == null) {
+      _cachedServiceDescription = new _ShellServiceDescription();
+    }
+    return _cachedServiceDescription;
+  }
 }
+
 
 

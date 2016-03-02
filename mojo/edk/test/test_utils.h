@@ -8,8 +8,6 @@
 #include <stddef.h>
 
 #include "mojo/edk/platform/platform_handle.h"
-#include "mojo/edk/platform/scoped_platform_handle.h"
-#include "mojo/edk/util/scoped_file.h"
 
 namespace mojo {
 namespace test {
@@ -36,13 +34,6 @@ bool NonBlockingRead(const platform::PlatformHandle& handle,
                      void* buffer,
                      size_t buffer_size,
                      size_t* bytes_read);
-
-// Gets a (scoped) |PlatformHandle| from the given (scoped) |FILE|.
-platform::ScopedPlatformHandle PlatformHandleFromFILE(util::ScopedFILE fp);
-
-// Gets a (scoped) |FILE| from a (scoped) |PlatformHandle|.
-util::ScopedFILE FILEFromPlatformHandle(platform::ScopedPlatformHandle h,
-                                        const char* mode);
 
 }  // namespace test
 }  // namespace mojo

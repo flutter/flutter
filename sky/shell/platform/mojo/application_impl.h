@@ -29,13 +29,13 @@ class ApplicationImpl : public mojo::Application,
 
  private:
   // mojo::Application
-  void Initialize(mojo::ShellPtr shell,
+  void Initialize(mojo::InterfaceHandle<mojo::Shell> shell,
                   mojo::Array<mojo::String> args,
                   const mojo::String& url) override;
   void AcceptConnection(
       const mojo::String& requestor_url,
       mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
-      mojo::ServiceProviderPtr incoming_services,
+      mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services,
       const mojo::String& resolved_url) override;
   void RequestQuit() override;
 
@@ -47,15 +47,15 @@ class ApplicationImpl : public mojo::Application,
   void ConnectToApplication(
       const mojo::String& application_url,
       mojo::InterfaceRequest<mojo::ServiceProvider> services,
-      mojo::ServiceProviderPtr exposed_services) override;
+      mojo::InterfaceHandle<mojo::ServiceProvider> exposed_services) override;
   void CreateApplicationConnector(
       mojo::InterfaceRequest<mojo::ApplicationConnector> request) override;
 
   // mojo::ui::ViewProvider
   void CreateView(
-      mojo::InterfaceRequest<mojo::ServiceProvider> services,
-      mojo::ServiceProviderPtr exposed_services,
-      const mojo::ui::ViewProvider::CreateViewCallback& callback) override;
+      mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
+      mojo::InterfaceRequest<mojo::ServiceProvider> incoming_services,
+      mojo::InterfaceHandle<mojo::ServiceProvider> outgoing_services) override;
 
   void UnpackInitialResponse(mojo::Shell* shell);
 

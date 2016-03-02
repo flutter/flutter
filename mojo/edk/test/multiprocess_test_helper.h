@@ -16,8 +16,8 @@
 
 namespace mojo {
 
-namespace embedder {
-class PlatformChannelPair;
+namespace platform {
+class PlatformPipe;
 }
 
 namespace test {
@@ -61,7 +61,7 @@ class MultiprocessTestHelper final {
   static platform::ScopedPlatformHandle client_platform_handle;
 
  private:
-  std::unique_ptr<embedder::PlatformChannelPair> platform_channel_pair_;
+  std::unique_ptr<platform::PlatformPipe> platform_pipe_;
 
   // Valid after |StartChild()| and before |WaitForChildShutdown()|.
   base::Process test_child_;

@@ -67,9 +67,10 @@ class MojoHandle {
     return "MojoHandle(h: $h, status: $mwr)";
   }
 
-  bool operator ==(MojoHandle other) {
-    return _h == other._h;
-  }
+  bool operator ==(other) =>
+      (other is MojoHandle) && (_h == other._h);
+
+  int get hashCode => _h.hashCode;
 
   static MojoWaitManyResult waitMany(
       List<int> handles, List<int> signals, int deadline) {

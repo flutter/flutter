@@ -9,12 +9,15 @@
 
 #include "base/logging.h"
 #include "mojo/edk/embedder/platform_support.h"
+#include "mojo/edk/platform/platform_shared_buffer.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/options_validation.h"
 #include "mojo/public/c/system/macros.h"
 
+using mojo::platform::PlatformSharedBuffer;
+using mojo::platform::PlatformSharedBufferMapping;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
@@ -161,7 +164,7 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Deserialize(
 }
 
 SharedBufferDispatcher::SharedBufferDispatcher(
-    RefPtr<embedder::PlatformSharedBuffer>&& shared_buffer)
+    RefPtr<PlatformSharedBuffer>&& shared_buffer)
     : shared_buffer_(std::move(shared_buffer)) {
   DCHECK(shared_buffer_);
 }
@@ -233,7 +236,7 @@ MojoResult SharedBufferDispatcher::MapBufferImplNoLock(
     uint64_t offset,
     uint64_t num_bytes,
     MojoMapBufferFlags flags,
-    std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping) {
+    std::unique_ptr<PlatformSharedBufferMapping>* mapping) {
   mutex().AssertHeld();
   DCHECK(shared_buffer_);
 

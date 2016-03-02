@@ -5,7 +5,7 @@
 [DartPackage="mojo_services"]
 module keyboard;
 
-import "native_viewport/interfaces/native_viewport.mojom";
+import "native_viewport/interfaces/native_viewport_event_dispatcher.mojom";
 
 struct CompletionData {
   int64 id;

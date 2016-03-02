@@ -4,15 +4,13 @@
 
 #include "mojo/edk/test/test_utils.h"
 
+#include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <unistd.h>
 
-#include "base/logging.h"
 #include "base/posix/eintr_wrapper.h"
 
 using mojo::platform::PlatformHandle;
-using mojo::platform::ScopedPlatformHandle;
 
 namespace mojo {
 namespace test {
@@ -75,21 +73,6 @@ bool NonBlockingRead(const PlatformHandle& handle,
   }
 
   return true;
-}
-
-ScopedPlatformHandle PlatformHandleFromFILE(util::ScopedFILE fp) {
-  CHECK(fp);
-  int rv = dup(fileno(fp.get()));
-  PCHECK(rv != -1) << "dup";
-  return ScopedPlatformHandle(PlatformHandle(rv));
-}
-
-util::ScopedFILE FILEFromPlatformHandle(ScopedPlatformHandle h,
-                                        const char* mode) {
-  CHECK(h.is_valid());
-  util::ScopedFILE rv(fdopen(h.release().fd, mode));
-  PCHECK(rv) << "fdopen";
-  return rv;
 }
 
 }  // namespace test

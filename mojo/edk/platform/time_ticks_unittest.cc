@@ -18,6 +18,7 @@ TEST(TimeTicks, GetTimeTicks) {
   // It's hard to test this without assuming that other things work correctly.
   // So, first just check that it's weakly monotonic.
   MojoTimeTicks first = GetTimeTicks();
+  EXPECT_GT(first, 0);
   MojoTimeTicks second = GetTimeTicks();
   EXPECT_LE(first, second);  // They're likely equal!
 

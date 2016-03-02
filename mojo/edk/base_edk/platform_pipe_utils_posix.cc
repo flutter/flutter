@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/edk/embedder/platform_channel_utils.h"
+// This file implements the functions declared in
+// //mojo/edk/platform/platform_pipe_utils_posix.h.
+// TODO(vtl): With only a little clean-up, this could probably be made to not
+// depend on //base, and moved to //mojo/edk/platform.
+
+#include "mojo/edk/platform/platform_pipe_utils_posix.h"
 
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -12,11 +17,8 @@
 #include "base/posix/eintr_wrapper.h"
 #include "build/build_config.h"
 
-using mojo::platform::PlatformHandle;
-using mojo::platform::ScopedPlatformHandle;
-
 namespace mojo {
-namespace embedder {
+namespace platform {
 
 // On Linux, |SIGPIPE| is suppressed by passing |MSG_NOSIGNAL| to
 // |send()|/|sendmsg()|. (There is no way of suppressing |SIGPIPE| on
@@ -47,9 +49,9 @@ const int kSendFlags = 0;
 const int kSendFlags = MSG_NOSIGNAL;
 #endif
 
-ssize_t PlatformChannelWrite(PlatformHandle h,
-                             const void* bytes,
-                             size_t num_bytes) {
+ssize_t PlatformPipeWrite(PlatformHandle h,
+                          const void* bytes,
+                          size_t num_bytes) {
   DCHECK(h.is_valid());
   DCHECK(bytes);
   DCHECK_GT(num_bytes, 0u);
@@ -61,9 +63,9 @@ ssize_t PlatformChannelWrite(PlatformHandle h,
 #endif
 }
 
-ssize_t PlatformChannelWritev(PlatformHandle h,
-                              struct iovec* iov,
-                              size_t num_iov) {
+ssize_t PlatformPipeWritev(PlatformHandle h,
+                           struct iovec* iov,
+                           size_t num_iov) {
   DCHECK(h.is_valid());
   DCHECK(iov);
   DCHECK_GT(num_iov, 0u);
@@ -78,18 +80,18 @@ ssize_t PlatformChannelWritev(PlatformHandle h,
 #endif
 }
 
-ssize_t PlatformChannelSendmsgWithHandles(PlatformHandle h,
-                                          struct iovec* iov,
-                                          size_t num_iov,
-                                          PlatformHandle* platform_handles,
-                                          size_t num_platform_handles) {
+ssize_t PlatformPipeSendmsgWithHandles(PlatformHandle h,
+                                       struct iovec* iov,
+                                       size_t num_iov,
+                                       PlatformHandle* platform_handles,
+                                       size_t num_platform_handles) {
   DCHECK(iov);
   DCHECK_GT(num_iov, 0u);
   DCHECK(platform_handles);
   DCHECK_GT(num_platform_handles, 0u);
-  DCHECK_LE(num_platform_handles, kPlatformChannelMaxNumHandles);
+  DCHECK_LE(num_platform_handles, kPlatformPipeMaxNumHandles);
 
-  char cmsg_buf[CMSG_SPACE(kPlatformChannelMaxNumHandles * sizeof(int))];
+  char cmsg_buf[CMSG_SPACE(kPlatformPipeMaxNumHandles * sizeof(int))];
   struct msghdr msg = {};
   msg.msg_iov = iov;
   msg.msg_iovlen = num_iov;
@@ -107,7 +109,7 @@ ssize_t PlatformChannelSendmsgWithHandles(PlatformHandle h,
   return HANDLE_EINTR(sendmsg(h.fd, &msg, kSendFlags));
 }
 
-ssize_t PlatformChannelRecvmsg(
+ssize_t PlatformPipeRecvmsg(
     PlatformHandle h,
     void* buf,
     size_t num_bytes,
@@ -117,7 +119,7 @@ ssize_t PlatformChannelRecvmsg(
   DCHECK(platform_handles);
 
   struct iovec iov = {buf, num_bytes};
-  char cmsg_buf[CMSG_SPACE(kPlatformChannelMaxNumHandles * sizeof(int))];
+  char cmsg_buf[CMSG_SPACE(kPlatformPipeMaxNumHandles * sizeof(int))];
   struct msghdr msg = {};
   msg.msg_iov = &iov;
   msg.msg_iovlen = 1;
@@ -152,5 +154,5 @@ ssize_t PlatformChannelRecvmsg(
   return result;
 }
 
-}  // namespace embedder
+}  // namespace platform
 }  // namespace mojo

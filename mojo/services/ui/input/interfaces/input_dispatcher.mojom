@@ -11,7 +11,7 @@ import "mojo/services/input_events/interfaces/input_events.mojom";
 // The input dispatcher service allows the component which owns and controls
 // a view tree to dispatch input events to the views that it contains.
 //
-// This service can be retrieved from the |ViewTreeHost| service provider.
+// This service can be retrieved from the |ViewTree| service provider.
 //
 // TODO(jeffbrown): Elaborate how input devices are registered with the
 // dispatcher so that applications can query their capabilities and distinguish

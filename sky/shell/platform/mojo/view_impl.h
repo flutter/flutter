@@ -20,18 +20,18 @@
 namespace sky {
 namespace shell {
 
-class ViewImpl : public mojo::ui::View,
+class ViewImpl : public mojo::ui::ViewListener,
                  public mojo::ui::InputListener {
  public:
-  ViewImpl(ServicesDataPtr services,
-           const std::string& url,
-           const mojo::ui::ViewProvider::CreateViewCallback& callback);
+  ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
+           ServicesDataPtr services,
+           const std::string& url);
   ~ViewImpl() override;
 
   void Run(base::FilePath flx_path);
 
  private:
-  // mojo::ui::View
+  // mojo::ui::ViewListener
   void OnLayout(mojo::ui::ViewLayoutParamsPtr layout_params,
                 mojo::Array<uint32_t> children_needing_layout,
                 const OnLayoutCallback& callback) override;
@@ -45,7 +45,7 @@ class ViewImpl : public mojo::ui::View,
     return static_cast<PlatformViewMojo*>(shell_view_->view());
   }
 
-  mojo::StrongBinding<mojo::ui::View> binding_;
+  mojo::StrongBinding<mojo::ui::ViewListener> binding_;
   std::string url_;
   mojo::ui::ViewManagerPtr view_manager_;
   mojo::ServiceProviderPtr view_service_provider_;

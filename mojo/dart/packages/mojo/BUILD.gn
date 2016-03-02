@@ -20,7 +20,7 @@ dart_pkg("mojo") {
   sdk_ext_files = dart_mojo_internal_sdk_sources
 
   deps = [
-    "//mojo/public/dart/third_party",
     "//mojo/public/interfaces",
+    "//third_party/dart-pkg",
   ]
 }

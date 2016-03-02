@@ -11,6 +11,8 @@ import 'dart:typed_data';
 
 import 'package:mojo/core.dart' as core;
 import 'package:mojo/mojo/interface_control_messages.mojom.dart' as icm;
+import 'package:mojo/mojo/bindings/types/service_describer.mojom.dart'
+    as service_describer;
 
 part 'src/control_message.dart';
 part 'src/codec.dart';

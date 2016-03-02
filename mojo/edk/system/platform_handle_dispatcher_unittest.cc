@@ -8,11 +8,13 @@
 
 #include <utility>
 
+#include "mojo/edk/platform/platform_handle_utils_posix.h"
 #include "mojo/edk/system/test/scoped_test_dir.h"
-#include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/scoped_file.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::FILEFromPlatformHandle;
+using mojo::platform::PlatformHandleFromFILE;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::util::RefPtr;
 
@@ -30,7 +32,7 @@ TEST(PlatformHandleDispatcherTest, Basic) {
   EXPECT_EQ(sizeof(kHelloWorld),
             fwrite(kHelloWorld, 1, sizeof(kHelloWorld), fp.get()));
 
-  ScopedPlatformHandle h(mojo::test::PlatformHandleFromFILE(std::move(fp)));
+  ScopedPlatformHandle h(PlatformHandleFromFILE(std::move(fp)));
   EXPECT_FALSE(fp);
   ASSERT_TRUE(h.is_valid());
 
@@ -41,7 +43,7 @@ TEST(PlatformHandleDispatcherTest, Basic) {
   h = dispatcher->PassPlatformHandle();
   EXPECT_TRUE(h.is_valid());
 
-  fp = mojo::test::FILEFromPlatformHandle(h.Pass(), "rb");
+  fp = FILEFromPlatformHandle(h.Pass(), "rb");
   EXPECT_FALSE(h.is_valid());
   EXPECT_TRUE(fp);
 
@@ -66,8 +68,8 @@ TEST(PlatformHandleDispatcherTest, CreateEquivalentDispatcherAndClose) {
   util::ScopedFILE fp(test_dir.CreateFile());
   EXPECT_EQ(sizeof(kFooBar), fwrite(kFooBar, 1, sizeof(kFooBar), fp.get()));
 
-  auto dispatcher = PlatformHandleDispatcher::Create(
-      mojo::test::PlatformHandleFromFILE(std::move(fp)));
+  auto dispatcher =
+      PlatformHandleDispatcher::Create(PlatformHandleFromFILE(std::move(fp)));
 
   DispatcherTransport transport(
       test::DispatcherTryStartTransport(dispatcher.get()));
@@ -86,8 +88,7 @@ TEST(PlatformHandleDispatcherTest, CreateEquivalentDispatcherAndClose) {
   dispatcher = RefPtr<PlatformHandleDispatcher>(
       static_cast<PlatformHandleDispatcher*>(generic_dispatcher.get()));
 
-  fp = mojo::test::FILEFromPlatformHandle(dispatcher->PassPlatformHandle(),
-                                          "rb");
+  fp = FILEFromPlatformHandle(dispatcher->PassPlatformHandle(), "rb");
   EXPECT_TRUE(fp);
 
   rewind(fp.get());

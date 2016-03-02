@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 library application_mojom;
-
 import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
+import 'package:mojo/mojo/bindings/types/service_describer.mojom.dart' as service_describer;
 import 'package:mojo/mojo/service_provider.mojom.dart' as service_provider_mojom;
 import 'package:mojo/mojo/shell.mojom.dart' as shell_mojom;
 
@@ -83,20 +82,34 @@ class _ApplicationInitializeParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeInterface(shell, 8, false);
-    
-    if (args == null) {
-      encoder0.encodeNullPointer(16, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(args.length, 16, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < args.length; ++i0) {
-        
-        encoder1.encodeString(args[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
-      }
+    try {
+      encoder0.encodeInterface(shell, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "shell of struct _ApplicationInitializeParams: $e";
+      rethrow;
     }
-    
-    encoder0.encodeString(url, 24, false);
+    try {
+      if (args == null) {
+        encoder0.encodeNullPointer(16, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(args.length, 16, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < args.length; ++i0) {
+          encoder1.encodeString(args[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
+      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "args of struct _ApplicationInitializeParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(url, 24, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "url of struct _ApplicationInitializeParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -111,6 +124,8 @@ class _ApplicationInitializeParams extends bindings.Struct {
         'Object containing handles cannot be encoded to JSON.');
   }
 }
+
+
 
 
 class _ApplicationAcceptConnectionParams extends bindings.Struct {
@@ -178,14 +193,34 @@ class _ApplicationAcceptConnectionParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeString(requestorUrl, 8, false);
-    
-    encoder0.encodeInterfaceRequest(services, 16, true);
-    
-    encoder0.encodeInterface(exposedServices, 20, true);
-    
-    encoder0.encodeString(resolvedUrl, 32, false);
+    try {
+      encoder0.encodeString(requestorUrl, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "requestorUrl of struct _ApplicationAcceptConnectionParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInterfaceRequest(services, 16, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "services of struct _ApplicationAcceptConnectionParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInterface(exposedServices, 20, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "exposedServices of struct _ApplicationAcceptConnectionParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(resolvedUrl, 32, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "resolvedUrl of struct _ApplicationAcceptConnectionParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -201,6 +236,8 @@ class _ApplicationAcceptConnectionParams extends bindings.Struct {
         'Object containing handles cannot be encoded to JSON.');
   }
 }
+
+
 
 
 class _ApplicationRequestQuitParams extends bindings.Struct {
@@ -260,9 +297,25 @@ class _ApplicationRequestQuitParams extends bindings.Struct {
   }
 }
 
+
+
+
 const int _Application_initializeName = 0;
 const int _Application_acceptConnectionName = 1;
 const int _Application_requestQuitName = 2;
+
+
+
+class _ApplicationServiceDescription implements service_describer.ServiceDescription {
+  dynamic getTopLevelInterface([Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getTypeDefinition(String typeKey, [Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getAllTypeDefinitions([Function responseFactory]) =>
+      responseFactory(null);
+}
 
 abstract class Application {
   static const String serviceName = null;
@@ -286,6 +339,9 @@ class _ApplicationProxyImpl extends bindings.Proxy {
     assert(endpoint.setDescription("For _ApplicationProxyImpl"));
     return new _ApplicationProxyImpl.fromEndpoint(endpoint);
   }
+
+  service_describer.ServiceDescription get serviceDescription =>
+    new _ApplicationServiceDescription();
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -439,8 +495,6 @@ class ApplicationStub extends bindings.Stub {
         _impl.acceptConnection(params.requestorUrl, params.services, params.exposedServices, params.resolvedUrl);
         break;
       case _Application_requestQuitName:
-        var params = _ApplicationRequestQuitParams.deserialize(
-            message.payload);
         _impl.requestQuit();
         break;
       default:
@@ -462,6 +516,15 @@ class ApplicationStub extends bindings.Stub {
   }
 
   int get version => 0;
+
+  static service_describer.ServiceDescription _cachedServiceDescription;
+  static service_describer.ServiceDescription get serviceDescription {
+    if (_cachedServiceDescription == null) {
+      _cachedServiceDescription = new _ApplicationServiceDescription();
+    }
+    return _cachedServiceDescription;
+  }
 }
+
 
 

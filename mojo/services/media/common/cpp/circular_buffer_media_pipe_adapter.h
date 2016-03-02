@@ -9,7 +9,6 @@
 #include <deque>
 #include <functional>
 #include <limits>
-#include <mutex>  // NOLINT(build/c++11)
 
 #include "mojo/public/cpp/bindings/callback.h"
 #include "mojo/public/cpp/environment/logging.h"
@@ -68,17 +67,35 @@ class CircularBufferMediaPipeAdapter {
    *
    * @param state The current state of the adapter.  If the state is anything
    * but MediaResult::OK, the pipe is in a fatal, unrecoverable error state.
-   * The owner should take appropriate action to either tear down and re-build
-   * the connection to the other end, or it should take steps to abort and shut
-   * down.
-   *
-   * @return True to continue receiving callbacks when in the signalled state.
-   *         False to automatically set the callback handler to nullptr.
    */
-  using SignalCbk = std::function<bool(MediaResult state)>;
+  using SignalCbk = std::function<void(MediaResult state)>;
 
+  /**
+   * Constructor
+   *
+   * Create an adapter which will take ownership of the provided MediaPipe
+   * interface and assist in the process of generating MediaPackets and
+   * marshalling them to the other side of the MediaPipe.
+   *
+   * @param pipe A pointer to the MediaPipe interface which will be used as the
+   * target for MediaPackets.
+   */
   explicit CircularBufferMediaPipeAdapter(MediaPipePtr pipe);
+
+  /**
+   * Destructor
+   */
   ~CircularBufferMediaPipeAdapter();
+
+  /**
+   * Init
+   *
+   * Allocate a shared memory buffer of the specified size and begin the process
+   * of marshalling it to the other side of the MediaPipe.
+   *
+   * @param size The size in bytes of the shared memory buffer to allocate.
+   */
+  void Init(uint64_t size);
 
   /**
    * Set the signal callback for this media pipe adapter.  This callback will be
@@ -93,14 +110,16 @@ class CircularBufferMediaPipeAdapter {
    * callback and the adapter, and ensure that the callback is valid as long as
    * it is assigned to a adapter instance.
    *
-   * Never call SetCallback from within the context of a callback.  To cancel
-   * all future callbacks from within the context of a callback itself, return
-   * false instead of true.
-   *
    * @param cbk A reference to the callback to execute when the adapter becomes
    * signalled.  Pass nullptr to cancel any pending callbacks.
    */
   void SetSignalCallback(SignalCbk cbk);
+
+  /**
+   * Clear any existing signal callback.  Callbacks will no longer be made, even
+   * if the adapter is in the signalled state.
+   */
+  void ResetSignalCallback() { SetSignalCallback(nullptr); }
 
   /**
    * Set the water marks (in bytes) for determining the signalled/un-signalled
@@ -192,16 +211,8 @@ class CircularBufferMediaPipeAdapter {
    */
   MediaResult Flush();
 
-  uint64_t GetPending() const {
-    std::lock_guard<std::mutex> lock(signal_lock_);
-    return GetPendingLocked();
-  }
-
-  uint64_t GetBufferSize() const {
-    std::lock_guard<std::mutex> lock(signal_lock_);
-    return GetBufferSizeLocked();
-  }
-
+  uint64_t GetPending() const;
+  uint64_t GetBufferSize() const;
   uint64_t AboveHiWater() const { return GetPending() >= hi_water_mark_; }
   uint64_t BelowLoWater() const { return GetPending() <  lo_water_mark_; }
 
@@ -216,57 +227,47 @@ class CircularBufferMediaPipeAdapter {
     uint32_t seq_num_;
     MediaPipe::SendPacketCallback cbk_;
   };
-
   using PacketStateQueue = std::deque<PacketState>;
 
-  void HandleGetState(MediaPipeStatePtr state);
-  void HandleSendPacket(uint32_t seq_num, MediaResult result);
-  void HandleFlush(MediaResult result);
+  void HandleSendPacket(uint32_t seq_num, MediaPipe::SendResult result);
+  void HandleFlush();
   void HandleSignalCallback();
 
-  void UpdateSignalledLocked();
-  void FaultLocked(MediaResult reason);
-  void CleanupLocked();
-  uint64_t GetPendingLocked() const;
-  uint64_t GetBufferSizeLocked() const;
+  void UpdateSignalled();
+  void Fault(MediaResult reason);
+  void Cleanup();
 
-  bool FaultedLocked() const {
-    // TODO(johngro): Assert that we are holding the signal lock.
+  bool Faulted() const {
     return (MediaResult::OK != internal_state_);
   }
 
-  bool BusyLocked() const {
-    // TODO(johngro): Assert that we are holding the signal lock.
-    return (get_state_in_progress_ || flush_in_progress_);
+  bool Busy() const {
+    return flush_in_progress_;
   }
 
-  // Pipe interface and static callback state.
+  // Pipe interface callbacks
   MediaPipePtr pipe_;
-  MediaPipe::GetStateCallback   pipe_get_state_cbk_;
-  MediaPipe::FlushCallback      pipe_flush_cbk_;
-  Closure                       handle_signal_cbk_;
+  MediaPipe::FlushCallback    pipe_flush_cbk_;
+  Closure                     signalled_callback_;
 
-  // State for the user's signal callback pointer.  Note, the signal_cbk_lock_
-  // is held for the duration of a callback dispatch, and during SetCallback.
-  mutable std::mutex  signal_cbk_lock_;
-  SignalCbk           signal_cbk_;
+  // A small helper which lets us nerf callbacks we may have directly scheduled
+  // on the main run loop which may be in flight as we get destroyed.
+  std::shared_ptr<CircularBufferMediaPipeAdapter*> thiz_;
 
-  // State for managing signalled/un-signalled status.
-  mutable std::mutex  signal_lock_;
-  bool                get_state_in_progress_ = true;
-  bool                flush_in_progress_ = false;
-
-  bool                fault_cbk_made_ = false;
-  bool                cbk_scheduled_ = false;
-  uint64_t            hi_water_mark_ = 0u;
-  uint64_t            lo_water_mark_ = 0u;
-  bool                signalled_ = false;
+  // State for managing signalled/un-signalled status and signal callbacks.
+  SignalCbk signal_cbk_;
+  bool      flush_in_progress_ = false;
+  bool      fault_cbk_made_ = false;
+  bool      cbk_scheduled_ = false;
+  uint64_t  hi_water_mark_ = 0u;
+  uint64_t  lo_water_mark_ = 0u;
+  bool      signalled_ = false;
 
   MediaResult internal_state_ = MediaResult::OK;
 
   ScopedSharedBufferHandle buffer_handle_;
   void*    buffer_ = nullptr;
-  uint64_t buffer_size_;
+  uint64_t buffer_size_ = 0;
   uint64_t rd_, wr_;
 
   // Packet queue state

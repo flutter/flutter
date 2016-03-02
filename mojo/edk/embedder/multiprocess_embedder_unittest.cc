@@ -9,8 +9,8 @@
 #include <memory>
 
 #include "base/logging.h"
-#include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/test_embedder.h"
+#include "mojo/edk/platform/platform_pipe.h"
 #include "mojo/edk/system/test/test_command_line.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/test/timeouts.h"
@@ -27,6 +27,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 using mojo::platform::PlatformHandleWatcher;
+using mojo::platform::PlatformPipe;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
 using mojo::system::test::TestIOThread;
@@ -147,11 +148,11 @@ TEST_F(MultiprocessEmbedderTest, ChannelsBasic) {
   mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner().Clone(),
                                            test_io_watcher());
 
-  PlatformChannelPair channel_pair;
-  ScopedTestChannel server_channel(channel_pair.PassServerHandle());
+  PlatformPipe channel_pair;
+  ScopedTestChannel server_channel(channel_pair.handle0.Pass());
   MojoHandle server_mp = server_channel.bootstrap_message_pipe();
   EXPECT_NE(server_mp, MOJO_HANDLE_INVALID);
-  ScopedTestChannel client_channel(channel_pair.PassClientHandle());
+  ScopedTestChannel client_channel(channel_pair.handle1.Pass());
   MojoHandle client_mp = client_channel.bootstrap_message_pipe();
   EXPECT_NE(client_mp, MOJO_HANDLE_INVALID);
 
@@ -193,11 +194,11 @@ TEST_F(MultiprocessEmbedderTest, ChannelsHandlePassing) {
   mojo::test::ScopedIPCSupport ipc_support(test_io_task_runner().Clone(),
                                            test_io_watcher());
 
-  PlatformChannelPair channel_pair;
-  ScopedTestChannel server_channel(channel_pair.PassServerHandle());
+  PlatformPipe channel_pair;
+  ScopedTestChannel server_channel(channel_pair.handle0.Pass());
   MojoHandle server_mp = server_channel.bootstrap_message_pipe();
   EXPECT_NE(server_mp, MOJO_HANDLE_INVALID);
-  ScopedTestChannel client_channel(channel_pair.PassClientHandle());
+  ScopedTestChannel client_channel(channel_pair.handle1.Pass());
   MojoHandle client_mp = client_channel.bootstrap_message_pipe();
   EXPECT_NE(client_mp, MOJO_HANDLE_INVALID);
 
@@ -368,9 +369,9 @@ TEST_F(MultiprocessEmbedderTest, ChannelShutdownRace_MessagePipeClose) {
                                            test_io_watcher());
 
   for (size_t i = 0; i < kIterations; i++) {
-    PlatformChannelPair channel_pair;
+    PlatformPipe channel_pair;
     std::unique_ptr<ScopedTestChannel> server_channel(
-        new ScopedTestChannel(channel_pair.PassServerHandle()));
+        new ScopedTestChannel(channel_pair.handle0.Pass()));
     server_channel->WaitForChannelCreationCompletion();
     server_channel->NoWaitOnShutdown();
 

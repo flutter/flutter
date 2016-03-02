@@ -8,7 +8,6 @@
 #include <functional>
 #include <memory>
 
-#include "base/gtest_prod_util.h"
 #include "mojo/edk/embedder/process_type.h"
 #include "mojo/edk/embedder/slave_info.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
@@ -16,6 +15,7 @@
 #include "mojo/edk/system/channel_id.h"
 #include "mojo/edk/system/connection_identifier.h"
 #include "mojo/edk/system/process_identifier.h"
+#include "mojo/edk/util/gtest_prod_utils.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 

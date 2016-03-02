@@ -28,7 +28,7 @@ dart_pkg("foo") {
   ]
   deps = [
     ":foo_mojom",
-    "//mojo/public/dart",
+    "//third_party/dart-pkg",
   ]
 }
 

@@ -33,7 +33,7 @@ class MojoServices {
   mojo::Handle TakeServicesProvidedByEmbedder();
   mojo::Handle TakeServicesProvidedToEmbedder();
   mojo::Handle TakeRootBundleHandle();
-  mojo::Handle TakeViewHostHandle();
+  mojo::Handle TakeViewHandle();
 
  private:
   explicit MojoServices(sky::ServicesDataPtr services,

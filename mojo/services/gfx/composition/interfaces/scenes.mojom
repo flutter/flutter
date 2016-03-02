@@ -30,9 +30,13 @@ const uint32 kSceneVersionNone = 0;
 // an application would like to render.  This description consists of
 // resources and nodes.
 //
-// Use |Compositor.RegisterScene()| to register a scene.  The application
+// LIFECYCLE
+//
+// Use |Compositor.CreateScene()| to create a scene.  The application
 // uses the |Scene| interface to manage the scene's content and implements
 // the |SceneListener| interface to handle events.
+//
+// To destroy a scene, simply close the |Scene| message pipe.
 //
 // CONTENT
 //
@@ -110,6 +114,13 @@ const uint32 kSceneVersionNone = 0;
 //   can more finely control the recovery policy.
 //
 // To maximize concurrency, we adopt the latter approach.
+//
+// SCHEDULING
+//
+// The scene provides support for scheduling update via its associated
+// |SceneScheduler| interface.  Use the scheduler to obtain frame timing
+// information and to throttle updates to match the display refresh rate
+// (ie. with vsync).
 interface Scene {
   // Sets the listener for receiving events from the scene.
   //
@@ -140,8 +151,8 @@ interface Scene {
   //
   // Publishing a scene graph applies all pending updates.  It is an error
   // to publish updates which cause the scene state to become inconsistent,
-  // such as by having nodes which refer to non-existent resources; the
-  // connection will be closed.
+  // such as by having nodes which refer to non-existent resources or
+  // introducing cycles in the scene's nodes; the connection will be closed.
   Publish(SceneMetadata? metadata);
 
   // Gets a scheduler for scheduling upcoming scene operations.

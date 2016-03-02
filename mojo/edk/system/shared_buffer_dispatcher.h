@@ -7,7 +7,6 @@
 
 #include <utility>
 
-#include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/simple_dispatcher.h"
 #include "mojo/edk/util/ref_ptr.h"
@@ -18,6 +17,11 @@ namespace mojo {
 
 namespace embedder {
 class PlatformSupport;
+}
+
+namespace platform {
+class PlatformSharedBuffer;
+class PlatformSharedBufferMapping;
 }
 
 namespace system {
@@ -63,12 +67,12 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
 
  private:
   static util::RefPtr<SharedBufferDispatcher> CreateInternal(
-      util::RefPtr<embedder::PlatformSharedBuffer>&& shared_buffer) {
+      util::RefPtr<platform::PlatformSharedBuffer>&& shared_buffer) {
     return AdoptRef(new SharedBufferDispatcher(std::move(shared_buffer)));
   }
 
   explicit SharedBufferDispatcher(
-      util::RefPtr<embedder::PlatformSharedBuffer>&& shared_buffer);
+      util::RefPtr<platform::PlatformSharedBuffer>&& shared_buffer);
   ~SharedBufferDispatcher() override;
 
   // Validates and/or sets default options for
@@ -91,7 +95,7 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
       uint64_t offset,
       uint64_t num_bytes,
       MojoMapBufferFlags flags,
-      std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping) override;
+      std::unique_ptr<platform::PlatformSharedBufferMapping>* mapping) override;
   void StartSerializeImplNoLock(Channel* channel,
                                 size_t* max_size,
                                 size_t* max_platform_handles) override
@@ -103,7 +107,7 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
       std::vector<platform::ScopedPlatformHandle>* platform_handles) override
       MOJO_NOT_THREAD_SAFE;
 
-  util::RefPtr<embedder::PlatformSharedBuffer> shared_buffer_
+  util::RefPtr<platform::PlatformSharedBuffer> shared_buffer_
       MOJO_GUARDED_BY(mutex());
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(SharedBufferDispatcher);

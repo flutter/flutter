@@ -8,18 +8,19 @@
 #include <stdio.h>
 
 #include <memory>
+#include <thread>
 #include <utility>
 #include <vector>
 
 #include "base/logging.h"
-#include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/platform_handle_utils_posix.h"
+#include "mojo/edk/platform/platform_pipe.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/message_in_transit.h"
 #include "mojo/edk/system/test/random.h"
 #include "mojo/edk/system/test/scoped_test_dir.h"
-#include "mojo/edk/system/test/simple_test_thread.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/transport_data.h"
@@ -31,7 +32,10 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::FILEFromPlatformHandle;
 using mojo::platform::PlatformHandle;
+using mojo::platform::PlatformHandleFromFILE;
+using mojo::platform::PlatformPipe;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::ThreadSleep;
 using mojo::util::AutoResetWaitableEvent;
@@ -80,9 +84,9 @@ class RawChannelTest : public testing::Test {
   ~RawChannelTest() override {}
 
   void SetUp() override {
-    embedder::PlatformChannelPair channel_pair;
-    handles[0] = channel_pair.PassServerHandle();
-    handles[1] = channel_pair.PassClientHandle();
+    PlatformPipe channel_pair;
+    handles[0] = channel_pair.handle0.Pass();
+    handles[1] = channel_pair.handle1.Pass();
     io_thread_.Start();
   }
 
@@ -311,29 +315,6 @@ TEST_F(RawChannelTest, OnReadMessage) {
 
 // RawChannelTest.WriteMessageAndOnReadMessage ---------------------------------
 
-class RawChannelWriterThread : public test::SimpleTestThread {
- public:
-  RawChannelWriterThread(RawChannel* raw_channel, size_t write_count)
-      : raw_channel_(raw_channel), left_to_write_(write_count) {}
-
-  ~RawChannelWriterThread() override { Join(); }
-
- private:
-  void Run() override {
-    static const int kMaxRandomMessageSize = 25000;
-
-    while (left_to_write_-- > 0) {
-      EXPECT_TRUE(raw_channel_->WriteMessage(MakeTestMessage(
-          static_cast<uint32_t>(test::RandomInt(1, kMaxRandomMessageSize)))));
-    }
-  }
-
-  RawChannel* const raw_channel_;
-  size_t left_to_write_;
-
-  MOJO_DISALLOW_COPY_AND_ASSIGN(RawChannelWriterThread);
-};
-
 class ReadCountdownRawChannelDelegate : public RawChannel::Delegate {
  public:
   explicit ReadCountdownRawChannelDelegate(size_t expected_count)
@@ -371,6 +352,15 @@ class ReadCountdownRawChannelDelegate : public RawChannel::Delegate {
   MOJO_DISALLOW_COPY_AND_ASSIGN(ReadCountdownRawChannelDelegate);
 };
 
+void WriteMessageAndOnReadMessageHelper(RawChannel* raw_channel,
+                                        size_t write_count) {
+  static const int kMaxRandomMessageSize = 25000;
+  while (write_count-- > 0) {
+    EXPECT_TRUE(raw_channel->WriteMessage(MakeTestMessage(
+        static_cast<uint32_t>(test::RandomInt(1, kMaxRandomMessageSize)))));
+  }
+}
+
 TEST_F(RawChannelTest, WriteMessageAndOnReadMessage) {
   static const size_t kNumWriterThreads = 10;
   static const size_t kNumWriteMessagesPerThread = 4000;
@@ -390,15 +380,15 @@ TEST_F(RawChannelTest, WriteMessageAndOnReadMessage) {
                     io_thread()->platform_handle_watcher(), &reader_delegate);
   });
 
-  {
-    std::vector<std::unique_ptr<RawChannelWriterThread>> writer_threads;
-    for (size_t i = 0; i < kNumWriterThreads; i++) {
-      writer_threads.push_back(MakeUnique<RawChannelWriterThread>(
-          writer_rc.get(), kNumWriteMessagesPerThread));
-    }
-    for (size_t i = 0; i < writer_threads.size(); i++)
-      writer_threads[i]->Start();
-  }  // Joins all the writer threads.
+  std::vector<std::thread> writer_threads;
+  // Create/start the the writer threads.
+  for (size_t i = 0; i < kNumWriterThreads; i++) {
+    writer_threads.push_back(std::thread(&WriteMessageAndOnReadMessageHelper,
+                                         writer_rc.get(),
+                                         kNumWriteMessagesPerThread));
+  }
+  for (auto& writer_thread : writer_threads)
+    writer_thread.join();
 
   // Sleep a bit, to let any extraneous reads be processed. (There shouldn't be
   // any, but we want to know about them.)
@@ -767,7 +757,7 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
     {
       char buffer[100] = {};
 
-      util::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h1.Pass(), "rb"));
+      util::ScopedFILE fp(FILEFromPlatformHandle(h1.Pass(), "rb"));
       EXPECT_TRUE(fp);
       rewind(fp.get());
       EXPECT_EQ(1u, fread(buffer, 1, sizeof(buffer), fp.get()));
@@ -776,7 +766,7 @@ class ReadPlatformHandlesCheckerRawChannelDelegate
 
     {
       char buffer[100] = {};
-      util::ScopedFILE fp(mojo::test::FILEFromPlatformHandle(h2.Pass(), "rb"));
+      util::ScopedFILE fp(FILEFromPlatformHandle(h2.Pass(), "rb"));
       EXPECT_TRUE(fp);
       rewind(fp.get());
       EXPECT_EQ(1u, fread(buffer, 1, sizeof(buffer), fp.get()));
@@ -823,10 +813,8 @@ TEST_F(RawChannelTest, ReadWritePlatformHandles) {
   {
     const char kHello[] = "hello";
     auto platform_handles = MakeUnique<std::vector<ScopedPlatformHandle>>();
-    platform_handles->push_back(
-        mojo::test::PlatformHandleFromFILE(std::move(fp1)));
-    platform_handles->push_back(
-        mojo::test::PlatformHandleFromFILE(std::move(fp2)));
+    platform_handles->push_back(PlatformHandleFromFILE(std::move(fp1)));
+    platform_handles->push_back(PlatformHandleFromFILE(std::move(fp2)));
 
     std::unique_ptr<MessageInTransit> message(
         new MessageInTransit(MessageInTransit::Type::ENDPOINT_CLIENT,

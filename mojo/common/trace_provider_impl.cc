@@ -4,6 +4,8 @@
 
 #include "mojo/common/trace_provider_impl.h"
 
+#include <utility>
+
 #include "base/callback.h"
 #include "base/logging.h"
 #include "base/memory/weak_ptr.h"
@@ -28,10 +30,11 @@ void TraceProviderImpl::Bind(InterfaceRequest<tracing::TraceProvider> request) {
   }
 }
 
-void TraceProviderImpl::StartTracing(const String& categories,
-                                     tracing::TraceRecorderPtr recorder) {
+void TraceProviderImpl::StartTracing(
+    const String& categories,
+    mojo::InterfaceHandle<tracing::TraceRecorder> recorder) {
   DCHECK(!recorder_.get());
-  recorder_ = recorder.Pass();
+  recorder_ = tracing::TraceRecorderPtr::Create(std::move(recorder));
   tracing_forced_ = false;
   if (!base::trace_event::TraceLog::GetInstance()->IsEnabled()) {
     std::string categories_str = categories.To<std::string>();

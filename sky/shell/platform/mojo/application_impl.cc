@@ -25,11 +25,11 @@ ApplicationImpl::~ApplicationImpl() {
   }
 }
 
-void ApplicationImpl::Initialize(mojo::ShellPtr shell,
+void ApplicationImpl::Initialize(mojo::InterfaceHandle<mojo::Shell> shell,
                                  mojo::Array<mojo::String> args,
                                  const mojo::String& url) {
   DCHECK(initial_response_);
-  shell_ = shell.Pass();
+  shell_ = mojo::ShellPtr::Create(shell.Pass());
   url_ = url;
   UnpackInitialResponse(shell_.get());
 }
@@ -37,7 +37,7 @@ void ApplicationImpl::Initialize(mojo::ShellPtr shell,
 void ApplicationImpl::AcceptConnection(
     const mojo::String& requestor_url,
     mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
-    mojo::ServiceProviderPtr incoming_services,
+    mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services,
     const mojo::String& resolved_url) {
   service_provider_bindings_.AddBinding(this, outgoing_services.Pass());
 }
@@ -56,7 +56,7 @@ void ApplicationImpl::ConnectToService(const mojo::String& service_name,
 void ApplicationImpl::ConnectToApplication(
     const mojo::String& application_url,
     mojo::InterfaceRequest<mojo::ServiceProvider> services,
-    mojo::ServiceProviderPtr exposed_services) {
+    mojo::InterfaceHandle<mojo::ServiceProvider> exposed_services) {
   shell_->ConnectToApplication(application_url,
                                services.Pass(),
                                exposed_services.Pass());
@@ -68,10 +68,9 @@ void ApplicationImpl::CreateApplicationConnector(
 }
 
 void ApplicationImpl::CreateView(
-    mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
-    mojo::ServiceProviderPtr incoming_services,
-    const mojo::ui::ViewProvider::CreateViewCallback& callback) {
-
+    mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
+      mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
+      mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services) {
   // TODO(abarth): Rather than proxying the shell, we should give Dart an
   //               ApplicationConnectorPtr instead of a ShellPtr.
   mojo::ShellPtr shell;
@@ -82,7 +81,7 @@ void ApplicationImpl::CreateView(
   services->services_provided_by_embedder = incoming_services.Pass();
   services->services_provided_to_embedder = outgoing_services.Pass();
 
-  ViewImpl* view = new ViewImpl(services.Pass(), url_, callback);
+  ViewImpl* view = new ViewImpl(view_owner.Pass(), services.Pass(), url_);
   view->Run(flx_path_);
 }
 

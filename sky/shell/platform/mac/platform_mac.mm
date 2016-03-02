@@ -86,8 +86,7 @@ int PlatformMacMain(int argc,
   message_loop->Attach();
 #endif
 
-  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
-      new mojo::embedder::SimplePlatformSupport()));
+  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
   CHECK(gfx::GLSurface::InitializeOneOff());
   sky::shell::Shell::InitStandalone();

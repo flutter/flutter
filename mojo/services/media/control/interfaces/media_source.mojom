@@ -38,8 +38,10 @@ interface MediaSource {
       (uint64 version, MediaSourceStatus status);
 
   // Prepares the source.
-  // TODO(dalesat): Revisit.
   Prepare() => ();
+
+  // Flushes the source.
+  Flush() => ();
 };
 
 // Describes a media stream produced by a source.

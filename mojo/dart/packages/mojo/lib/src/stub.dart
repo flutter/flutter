@@ -132,4 +132,9 @@ abstract class Stub extends core.MojoEventHandler {
   }
 
   int get version;
+
+  /// Returns a service description, which exposes the mojom type information
+  /// of the service being stubbed.
+  /// Note: The description is null or incomplete if type info is unavailable.
+  service_describer.ServiceDescription get description => null;
 }

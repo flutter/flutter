@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/dispatcher.h"
@@ -171,19 +172,19 @@ class MockDispatcher : public Dispatcher {
 
 // CoreTestBase ----------------------------------------------------------------
 
-CoreTestBase::CoreTestBase() {
-}
+CoreTestBase::CoreTestBase()
+    : platform_support_(embedder::CreateSimplePlatformSupport()) {}
 
-CoreTestBase::~CoreTestBase() {
-}
+CoreTestBase::~CoreTestBase() {}
 
 void CoreTestBase::SetUp() {
-  core_ = new Core(&platform_support_);
+  CHECK(!core_);
+  core_.reset(new Core(platform_support_.get()));
 }
 
 void CoreTestBase::TearDown() {
-  delete core_;
-  core_ = nullptr;
+  CHECK(core_);
+  core_.reset();
 }
 
 MojoHandle CoreTestBase::CreateMockHandle(CoreTestBase::MockHandleInfo* info) {

@@ -3,18 +3,15 @@
 // found in the LICENSE file.
 
 library mojom_files_mojom;
-
-import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
-import 'package:mojo/core.dart' as core;
+
 import 'package:mojo/mojo/bindings/types/mojom_types.mojom.dart' as mojom_types_mojom;
 
 
 
 class MojomFile extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(56, 0)
+    const bindings.StructDataHeader(64, 0)
   ];
   String fileName = null;
   String specifiedFileName = null;
@@ -22,6 +19,7 @@ class MojomFile extends bindings.Struct {
   List<mojom_types_mojom.Attribute> attributes = null;
   List<String> imports = null;
   KeysByType declaredMojomObjects = null;
+  List<int> serializedRuntimeTypeInfo = null;
 
   MojomFile() : super(kVersions.last.size);
 
@@ -104,39 +102,78 @@ class MojomFile extends bindings.Struct {
       var decoder1 = decoder0.decodePointer(48, false);
       result.declaredMojomObjects = KeysByType.decode(decoder1);
     }
+    if (mainDataHeader.version >= 0) {
+      
+      result.serializedRuntimeTypeInfo = decoder0.decodeUint8Array(56, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
+    }
     return result;
   }
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeString(fileName, 8, false);
-    
-    encoder0.encodeString(specifiedFileName, 16, true);
-    
-    encoder0.encodeString(moduleNamespace, 24, true);
-    
-    if (attributes == null) {
-      encoder0.encodeNullPointer(32, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(attributes.length, 32, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < attributes.length; ++i0) {
-        
-        encoder1.encodeStruct(attributes[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
-      }
+    try {
+      encoder0.encodeString(fileName, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "fileName of struct MojomFile: $e";
+      rethrow;
     }
-    
-    if (imports == null) {
-      encoder0.encodeNullPointer(40, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(imports.length, 40, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < imports.length; ++i0) {
-        
-        encoder1.encodeString(imports[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
-      }
+    try {
+      encoder0.encodeString(specifiedFileName, 16, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "specifiedFileName of struct MojomFile: $e";
+      rethrow;
     }
-    
-    encoder0.encodeStruct(declaredMojomObjects, 48, false);
+    try {
+      encoder0.encodeString(moduleNamespace, 24, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "moduleNamespace of struct MojomFile: $e";
+      rethrow;
+    }
+    try {
+      if (attributes == null) {
+        encoder0.encodeNullPointer(32, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(attributes.length, 32, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < attributes.length; ++i0) {
+          encoder1.encodeStruct(attributes[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
+      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "attributes of struct MojomFile: $e";
+      rethrow;
+    }
+    try {
+      if (imports == null) {
+        encoder0.encodeNullPointer(40, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(imports.length, 40, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < imports.length; ++i0) {
+          encoder1.encodeString(imports[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
+      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "imports of struct MojomFile: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeStruct(declaredMojomObjects, 48, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "declaredMojomObjects of struct MojomFile: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeUint8Array(serializedRuntimeTypeInfo, 56, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "serializedRuntimeTypeInfo of struct MojomFile: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -146,7 +183,8 @@ class MojomFile extends bindings.Struct {
            "moduleNamespace: $moduleNamespace" ", "
            "attributes: $attributes" ", "
            "imports: $imports" ", "
-           "declaredMojomObjects: $declaredMojomObjects" ")";
+           "declaredMojomObjects: $declaredMojomObjects" ", "
+           "serializedRuntimeTypeInfo: $serializedRuntimeTypeInfo" ")";
   }
 
   Map toJson() {
@@ -157,9 +195,12 @@ class MojomFile extends bindings.Struct {
     map["attributes"] = attributes;
     map["imports"] = imports;
     map["declaredMojomObjects"] = declaredMojomObjects;
+    map["serializedRuntimeTypeInfo"] = serializedRuntimeTypeInfo;
     return map;
   }
 }
+
+
 
 
 class MojomFileGraph extends bindings.Struct {
@@ -324,80 +365,86 @@ class MojomFileGraph extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    if (files == null) {
-      encoder0.encodeNullPointer(8, false);
-    } else {
-      var encoder1 = encoder0.encoderForMap(8);
-      int size0 = files.length;
-      var keys0 = files.keys.toList();
-      var values0 = files.values.toList();
-      
-      {
-        var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < keys0.length; ++i1) {
-          
-          encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+    try {
+      if (files == null) {
+        encoder0.encodeNullPointer(8, false);
+      } else {
+        var encoder1 = encoder0.encoderForMap(8);
+        var keys0 = files.keys.toList();
+        var values0 = files.values.toList();
+        
+        {
+          var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < keys0.length; ++i1) {
+            encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+          }
+        }
+        
+        {
+          var encoder2 = encoder1.encodePointerArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < values0.length; ++i1) {
+            encoder2.encodeStruct(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+          }
         }
       }
-      
-      {
-        var encoder2 = encoder1.encodePointerArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < values0.length; ++i1) {
-          
-          encoder2.encodeStruct(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
-        }
-      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "files of struct MojomFileGraph: $e";
+      rethrow;
     }
-    
-    if (resolvedTypes == null) {
-      encoder0.encodeNullPointer(16, false);
-    } else {
-      var encoder1 = encoder0.encoderForMap(16);
-      int size0 = resolvedTypes.length;
-      var keys0 = resolvedTypes.keys.toList();
-      var values0 = resolvedTypes.values.toList();
-      
-      {
-        var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < keys0.length; ++i1) {
-          
-          encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+    try {
+      if (resolvedTypes == null) {
+        encoder0.encodeNullPointer(16, false);
+      } else {
+        var encoder1 = encoder0.encoderForMap(16);
+        var keys0 = resolvedTypes.keys.toList();
+        var values0 = resolvedTypes.values.toList();
+        
+        {
+          var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < keys0.length; ++i1) {
+            encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+          }
+        }
+        
+        {
+          var encoder2 = encoder1.encodeUnionArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < values0.length; ++i1) {
+            encoder2.encodeUnion(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i1, false);
+          }
         }
       }
-      
-      {
-        var encoder2 = encoder1.encodeUnionArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < values0.length; ++i1) {
-          
-          encoder2.encodeUnion(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i1, false);
-        }
-      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "resolvedTypes of struct MojomFileGraph: $e";
+      rethrow;
     }
-    
-    if (resolvedValues == null) {
-      encoder0.encodeNullPointer(24, false);
-    } else {
-      var encoder1 = encoder0.encoderForMap(24);
-      int size0 = resolvedValues.length;
-      var keys0 = resolvedValues.keys.toList();
-      var values0 = resolvedValues.values.toList();
-      
-      {
-        var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < keys0.length; ++i1) {
-          
-          encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+    try {
+      if (resolvedValues == null) {
+        encoder0.encodeNullPointer(24, false);
+      } else {
+        var encoder1 = encoder0.encoderForMap(24);
+        var keys0 = resolvedValues.keys.toList();
+        var values0 = resolvedValues.values.toList();
+        
+        {
+          var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < keys0.length; ++i1) {
+            encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+          }
+        }
+        
+        {
+          var encoder2 = encoder1.encodeUnionArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < values0.length; ++i1) {
+            encoder2.encodeUnion(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i1, false);
+          }
         }
       }
-      
-      {
-        var encoder2 = encoder1.encodeUnionArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < values0.length; ++i1) {
-          
-          encoder2.encodeUnion(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i1, false);
-        }
-      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "resolvedValues of struct MojomFileGraph: $e";
+      rethrow;
     }
   }
 
@@ -416,6 +463,8 @@ class MojomFileGraph extends bindings.Struct {
     return map;
   }
 }
+
+
 
 
 class KeysByType extends bindings.Struct {
@@ -568,75 +617,103 @@ class KeysByType extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    if (interfaces == null) {
-      encoder0.encodeNullPointer(8, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(interfaces.length, 8, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < interfaces.length; ++i0) {
-        
-        encoder1.encodeString(interfaces[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+    try {
+      if (interfaces == null) {
+        encoder0.encodeNullPointer(8, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(interfaces.length, 8, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < interfaces.length; ++i0) {
+          encoder1.encodeString(interfaces[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
       }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "interfaces of struct KeysByType: $e";
+      rethrow;
     }
-    
-    if (structs == null) {
-      encoder0.encodeNullPointer(16, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(structs.length, 16, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < structs.length; ++i0) {
-        
-        encoder1.encodeString(structs[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+    try {
+      if (structs == null) {
+        encoder0.encodeNullPointer(16, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(structs.length, 16, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < structs.length; ++i0) {
+          encoder1.encodeString(structs[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
       }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "structs of struct KeysByType: $e";
+      rethrow;
     }
-    
-    if (unions == null) {
-      encoder0.encodeNullPointer(24, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(unions.length, 24, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < unions.length; ++i0) {
-        
-        encoder1.encodeString(unions[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+    try {
+      if (unions == null) {
+        encoder0.encodeNullPointer(24, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(unions.length, 24, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < unions.length; ++i0) {
+          encoder1.encodeString(unions[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
       }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "unions of struct KeysByType: $e";
+      rethrow;
     }
-    
-    if (topLevelEnums == null) {
-      encoder0.encodeNullPointer(32, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(topLevelEnums.length, 32, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < topLevelEnums.length; ++i0) {
-        
-        encoder1.encodeString(topLevelEnums[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+    try {
+      if (topLevelEnums == null) {
+        encoder0.encodeNullPointer(32, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(topLevelEnums.length, 32, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < topLevelEnums.length; ++i0) {
+          encoder1.encodeString(topLevelEnums[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
       }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "topLevelEnums of struct KeysByType: $e";
+      rethrow;
     }
-    
-    if (embeddedEnums == null) {
-      encoder0.encodeNullPointer(40, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(embeddedEnums.length, 40, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < embeddedEnums.length; ++i0) {
-        
-        encoder1.encodeString(embeddedEnums[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+    try {
+      if (embeddedEnums == null) {
+        encoder0.encodeNullPointer(40, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(embeddedEnums.length, 40, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < embeddedEnums.length; ++i0) {
+          encoder1.encodeString(embeddedEnums[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
       }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "embeddedEnums of struct KeysByType: $e";
+      rethrow;
     }
-    
-    if (topLevelConstants == null) {
-      encoder0.encodeNullPointer(48, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(topLevelConstants.length, 48, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < topLevelConstants.length; ++i0) {
-        
-        encoder1.encodeString(topLevelConstants[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+    try {
+      if (topLevelConstants == null) {
+        encoder0.encodeNullPointer(48, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(topLevelConstants.length, 48, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < topLevelConstants.length; ++i0) {
+          encoder1.encodeString(topLevelConstants[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
       }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "topLevelConstants of struct KeysByType: $e";
+      rethrow;
     }
-    
-    if (embeddedConstants == null) {
-      encoder0.encodeNullPointer(56, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(embeddedConstants.length, 56, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < embeddedConstants.length; ++i0) {
-        
-        encoder1.encodeString(embeddedConstants[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+    try {
+      if (embeddedConstants == null) {
+        encoder0.encodeNullPointer(56, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(embeddedConstants.length, 56, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < embeddedConstants.length; ++i0) {
+          encoder1.encodeString(embeddedConstants[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
       }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "embeddedConstants of struct KeysByType: $e";
+      rethrow;
     }
   }
 
@@ -663,5 +740,9 @@ class KeysByType extends bindings.Struct {
     return map;
   }
 }
+
+
+
+
 
 

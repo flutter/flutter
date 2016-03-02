@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mojo/edk/embedder/simple_platform_shared_buffer.h"
+#include "mojo/edk/platform/simple_platform_shared_buffer.h"
 
 #include <limits>
 
@@ -10,7 +10,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
-namespace embedder {
+namespace platform {
 namespace {
 
 TEST(SimplePlatformSharedBufferTest, Basic) {
@@ -20,7 +20,7 @@ TEST(SimplePlatformSharedBufferTest, Basic) {
   const int kFudge = 1234567890;
 
   // Make some memory.
-  auto buffer = SimplePlatformSharedBuffer::Create(kNumBytes);
+  auto buffer = CreateSimplePlatformSharedBuffer(kNumBytes);
   ASSERT_TRUE(buffer);
 
   // Map it all, scribble some stuff, and then unmap it.
@@ -96,7 +96,7 @@ TEST(SimplePlatformSharedBufferTest, Basic) {
 // TODO(vtl): Bigger buffers.
 
 TEST(SimplePlatformSharedBufferTest, InvalidMappings) {
-  auto buffer = SimplePlatformSharedBuffer::Create(100);
+  auto buffer = CreateSimplePlatformSharedBuffer(100);
   ASSERT_TRUE(buffer);
 
   // Zero length not allowed.
@@ -126,7 +126,7 @@ TEST(SimplePlatformSharedBufferTest, TooBig) {
   // If |size_t| is 32-bit, it's quite possible/likely that |Create()| succeeds
   // (since it only involves creating a 4 GB file).
   const size_t kMaxSizeT = std::numeric_limits<size_t>::max();
-  auto buffer = SimplePlatformSharedBuffer::Create(kMaxSizeT);
+  auto buffer = CreateSimplePlatformSharedBuffer(kMaxSizeT);
   // But, assuming |sizeof(size_t) == sizeof(void*)|, mapping all of it should
   // always fail.
   if (buffer)
@@ -138,7 +138,7 @@ TEST(SimplePlatformSharedBufferTest, TooBig) {
 // and reuse the same address, in which case we'd have to be more careful about
 // using the address as the key for unmapping.
 TEST(SimplePlatformSharedBufferTest, MappingsDistinct) {
-  auto buffer = SimplePlatformSharedBuffer::Create(100);
+  auto buffer = CreateSimplePlatformSharedBuffer(100);
   std::unique_ptr<PlatformSharedBufferMapping> mapping1(buffer->Map(0, 100));
   std::unique_ptr<PlatformSharedBufferMapping> mapping2(buffer->Map(0, 100));
   EXPECT_NE(mapping1->GetBase(), mapping2->GetBase());
@@ -147,7 +147,7 @@ TEST(SimplePlatformSharedBufferTest, MappingsDistinct) {
 TEST(SimplePlatformSharedBufferTest, BufferZeroInitialized) {
   static const size_t kSizes[] = {10, 100, 1000, 10000, 100000};
   for (size_t i = 0; i < MOJO_ARRAYSIZE(kSizes); i++) {
-    auto buffer = SimplePlatformSharedBuffer::Create(kSizes[i]);
+    auto buffer = CreateSimplePlatformSharedBuffer(kSizes[i]);
     std::unique_ptr<PlatformSharedBufferMapping> mapping(
         buffer->Map(0, kSizes[i]));
     for (size_t j = 0; j < kSizes[i]; j++) {
@@ -164,7 +164,7 @@ TEST(SimplePlatformSharedBufferTest, MappingsOutliveBuffer) {
   std::unique_ptr<PlatformSharedBufferMapping> mapping2;
 
   {
-    auto buffer = SimplePlatformSharedBuffer::Create(100);
+    auto buffer = CreateSimplePlatformSharedBuffer(100);
     mapping1 = buffer->Map(0, 100);
     mapping2 = buffer->Map(50, 50);
     static_cast<char*>(mapping1->GetBase())[50] = 'x';
@@ -177,5 +177,5 @@ TEST(SimplePlatformSharedBufferTest, MappingsOutliveBuffer) {
 }
 
 }  // namespace
-}  // namespace embedder
+}  // namespace platform
 }  // namespace mojo

@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
@@ -100,8 +101,8 @@ void ChannelThread::InitChannelOnIOThread(
 
 #if !defined(OS_IOS)
 MultiprocessMessagePipeTestBase::MultiprocessMessagePipeTestBase()
-    : channel_thread_(&platform_support_) {
-}
+    : platform_support_(embedder::CreateSimplePlatformSupport()),
+      channel_thread_(platform_support_.get()) {}
 
 MultiprocessMessagePipeTestBase::~MultiprocessMessagePipeTestBase() {
 }

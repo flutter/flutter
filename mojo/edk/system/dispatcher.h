@@ -27,7 +27,7 @@
 
 namespace mojo {
 
-namespace embedder {
+namespace platform {
 class PlatformSharedBufferMapping;
 }
 
@@ -120,7 +120,7 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
       uint64_t offset,
       uint64_t num_bytes,
       MojoMapBufferFlags flags,
-      std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping);
+      std::unique_ptr<platform::PlatformSharedBufferMapping>* mapping);
 
   // Gets the current handle signals state. (The default implementation simply
   // returns a default-constructed |HandleSignalsState|, i.e., no signals
@@ -269,7 +269,7 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
       uint64_t offset,
       uint64_t num_bytes,
       MojoMapBufferFlags flags,
-      std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping)
+      std::unique_ptr<platform::PlatformSharedBufferMapping>* mapping)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual HandleSignalsState GetHandleSignalsStateImplNoLock() const
       MOJO_SHARED_LOCKS_REQUIRED(mutex_);

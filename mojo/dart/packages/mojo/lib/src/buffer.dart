@@ -17,7 +17,7 @@ class MojoSharedBuffer {
 
   MojoSharedBuffer(this._handle, [this._status = MojoResult.kOk]);
 
-  factory MojoSharedBuffer.create(int numBytes, [int flags = 0]) {
+  factory MojoSharedBuffer.create(int numBytes, [int flags = createFlagNone]) {
     List result = MojoSharedBufferNatives.Create(numBytes, flags);
     if (result == null) {
       return null;
@@ -31,7 +31,8 @@ class MojoSharedBuffer {
     return buf;
   }
 
-  factory MojoSharedBuffer.duplicate(MojoSharedBuffer msb, [int flags = 0]) {
+  factory MojoSharedBuffer.duplicate(MojoSharedBuffer msb,
+      [int flags = duplicateFlagNone]) {
     List result = MojoSharedBufferNatives.Duplicate(msb.handle.h, flags);
     if (result == null) {
       return null;
@@ -55,7 +56,7 @@ class MojoSharedBuffer {
     return _status;
   }
 
-  ByteData map(int offset, int numBytes, [int flags = 0]) {
+  ByteData map(int offset, int numBytes, [int flags = mapFlagNone]) {
     if (handle == null) {
       _status = MojoResult.kInvalidArgument;
       return null;

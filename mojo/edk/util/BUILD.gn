@@ -14,6 +14,7 @@ mojo_edk_source_set("util") {
     "command_line.h",
     "cond_var.cc",
     "cond_var.h",
+    "gtest_prod_utils.h",
     "logging_internal.cc",
     "logging_internal.h",
     "make_unique.h",
@@ -32,6 +33,9 @@ mojo_edk_source_set("util") {
     "thread_checker.h",
     "waitable_event.cc",
     "waitable_event.h",
+    "weak_ptr.h",
+    "weak_ptr_internal.cc",
+    "weak_ptr_internal.h",
   ]
 
   mojo_sdk_public_deps = [ "mojo/public/cpp/system" ]
@@ -54,6 +58,7 @@ mojo_edk_source_set("unittests") {
     "thread_annotations_unittest.cc",
     "thread_checker_unittest.cc",
     "waitable_event_unittest.cc",
+    "weak_ptr_unittest.cc",
   ]
 
   deps = [

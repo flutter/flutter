@@ -23,12 +23,17 @@ template("dart_embedder_package") {
             "//mojo/dart/embedder/tools/dart_list_generated_bindings.py")
     root_prefix = rebase_path("//")
     source_directory = rebase_path(package_path)
-    generated_bindings = exec_script(list_generated_bindings_script,
-                                     [
-                                       source_directory,
-                                       root_prefix,
-                                     ],
-                                     "list lines")
+
+    arguments = [
+      source_directory,
+      root_prefix,
+    ]
+    if (defined(invoker.is_bindings_types) && invoker.is_bindings_types) {
+      arguments += [ "--bindings-types" ]
+    }
+
+    generated_bindings =
+        exec_script(list_generated_bindings_script, arguments, "list lines")
     sources = rebase_path(generated_bindings, ".", root_gen_dir)
     outputs = [
       "$root_gen_dir/dart_embedder_packages/$destination/{{source_file_part}}",

@@ -15,7 +15,7 @@ class MojoDataPipeProducer {
   MojoDataPipeProducer(this.handle,
       [this.status = MojoResult.kOk, this.elementBytes = 1]);
 
-  int write(ByteData data, [int numBytes = -1, int flags = 0]) {
+  int write(ByteData data, [int numBytes = -1, int flags = FLAG_NONE]) {
     if (handle == null) {
       status = MojoResult.kInvalidArgument;
       return 0;
@@ -34,14 +34,14 @@ class MojoDataPipeProducer {
     return result[1];
   }
 
-  ByteData beginWrite(int bufferBytes, [int flags = 0]) {
+  // TODO(floitsch): remove bufferBytes.
+  ByteData beginWrite(int bufferBytes, [int flags = FLAG_NONE]) {
     if (handle == null) {
       status = MojoResult.kInvalidArgument;
       return null;
     }
 
-    List result =
-        MojoDataPipeNatives.MojoBeginWriteData(handle.h, bufferBytes, flags);
+    List result = MojoDataPipeNatives.MojoBeginWriteData(handle.h, flags);
     if (result == null) {
       status = MojoResult.kInvalidArgument;
       return null;
@@ -80,7 +80,7 @@ class MojoDataPipeConsumer {
   MojoDataPipeConsumer(this.handle,
       [this.status = MojoResult.kOk, this.elementBytes = 1]);
 
-  int read(ByteData data, [int numBytes = -1, int flags = 0]) {
+  int read(ByteData data, [int numBytes = -1, int flags = FLAG_NONE]) {
     if (handle == null) {
       status = MojoResult.kInvalidArgument;
       return 0;
@@ -98,14 +98,14 @@ class MojoDataPipeConsumer {
     return result[1];
   }
 
-  ByteData beginRead([int bufferBytes = 0, int flags = 0]) {
+  // TODO(floitsch): remove bufferBytes.
+  ByteData beginRead([int bufferBytes = 0, int flags = FLAG_NONE]) {
     if (handle == null) {
       status = MojoResult.kInvalidArgument;
       return null;
     }
 
-    List result =
-        MojoDataPipeNatives.MojoBeginReadData(handle.h, bufferBytes, flags);
+    List result = MojoDataPipeNatives.MojoBeginReadData(handle.h, flags);
     if (result == null) {
       status = MojoResult.kInvalidArgument;
       return null;

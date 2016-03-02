@@ -4,9 +4,9 @@
 
 #include "mojo/edk/embedder/multiprocess_embedder.h"
 
+#include <atomic>
 #include <utility>
 
-#include "base/atomicops.h"
 #include "base/logging.h"
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
@@ -37,25 +37,23 @@ system::IPCSupport* g_ipc_support = nullptr;
 
 namespace {
 
+std::atomic<unsigned>* g_make_channel_id_counter = nullptr;
+
 // TODO(vtl): For now, we need this to be thread-safe (since theoretically we
 // currently support multiple channel creation threads -- possibly one per
 // channel). Eventually, we won't need it to be thread-safe (we'll require a
 // single I/O thread), and eventually we won't need it at all. Remember to
 // remove the base/atomicops.h include.
 system::ChannelId MakeChannelId() {
-  // Note that |AtomicWord| is signed.
-  static base::subtle::AtomicWord counter = 0;
-
-  base::subtle::AtomicWord new_counter_value =
-      base::subtle::NoBarrier_AtomicIncrement(&counter, 1);
-  // Don't allow the counter to wrap. Note that any (strictly) positive value is
-  // a valid |ChannelId| (and |NoBarrier_AtomicIncrement()| returns the value
-  // post-increment).
-  CHECK_GT(new_counter_value, 0);
+  DCHECK(g_make_channel_id_counter);
+  unsigned new_counter_value = g_make_channel_id_counter->fetch_add(1u) + 1u;
+  // Don't allow the counter to wrap.
+  CHECK_GT(new_counter_value, 0u);
   // Use "negative" values for these IDs, so that we'll also be able to use
   // "positive" "process identifiers" (see connection_manager.h) as IDs (and
-  // they won't conflict).
-  return static_cast<system::ChannelId>(-new_counter_value);
+  // they won't conflict). (|system::ChannelId| is a |uint64_t|, so assuming
+  // that |unsigned| is 32-bit, we won't run into the process identifiers.)
+  return -static_cast<system::ChannelId>(new_counter_value);
 }
 
 }  // namespace
@@ -70,19 +68,25 @@ void InitIPCSupport(ProcessType process_type,
   DCHECK(internal::g_core);
   // And not |InitIPCSupport()| (without |ShutdownIPCSupport()|).
   DCHECK(!internal::g_ipc_support);
+  DCHECK(!g_make_channel_id_counter);
 
   internal::g_ipc_support = new system::IPCSupport(
       internal::g_platform_support, process_type,
       std::move(delegate_thread_task_runner), process_delegate,
       std::move(io_task_runner), io_watcher, platform_handle.Pass());
+
+  g_make_channel_id_counter = new std::atomic<unsigned>();
 }
 
 void ShutdownIPCSupportOnIOThread() {
   DCHECK(internal::g_ipc_support);
+  DCHECK(g_make_channel_id_counter);
 
   internal::g_ipc_support->ShutdownOnIOThread();
   delete internal::g_ipc_support;
   internal::g_ipc_support = nullptr;
+  delete g_make_channel_id_counter;
+  g_make_channel_id_counter = nullptr;
 }
 
 void ShutdownIPCSupport() {

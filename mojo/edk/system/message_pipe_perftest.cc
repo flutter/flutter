@@ -4,10 +4,12 @@
 
 #include <stdint.h>
 
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "base/logging.h"
+#include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/platform/test_stopwatch.h"
 #include "mojo/edk/system/local_message_pipe_endpoint.h"
@@ -93,8 +95,9 @@ class MultiprocessMessagePipePerfTest
 // (which it doesn't reply to). It'll return the number of messages received,
 // not including any "quitquitquit" message, modulo 100.
 MOJO_MULTIPROCESS_TEST_CHILD_MAIN(PingPongClient) {
-  embedder::SimplePlatformSupport platform_support;
-  test::ChannelThread channel_thread(&platform_support);
+  std::unique_ptr<embedder::PlatformSupport> platform_support(
+      embedder::CreateSimplePlatformSupport());
+  test::ChannelThread channel_thread(platform_support.get());
   ScopedPlatformHandle client_platform_handle =
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   CHECK(client_platform_handle.is_valid());

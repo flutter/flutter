@@ -14,11 +14,11 @@
 
 #include "mojo/edk/base_edk/platform_task_runner_impl.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
-#include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/embedder/slave_process_delegate.h"
 #include "mojo/edk/platform/message_loop.h"
 #include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/platform_pipe.h"
 #include "mojo/edk/platform/test_message_loops.h"
 #include "mojo/edk/system/master_connection_manager.h"
 #include "mojo/edk/system/slave_connection_manager.h"
@@ -30,6 +30,7 @@
 
 using mojo::platform::MessageLoop;
 using mojo::platform::PlatformHandle;
+using mojo::platform::PlatformPipe;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
 using mojo::platform::test::CreateTestMessageLoop;
@@ -177,10 +178,14 @@ class MockSlaveProcessDelegate : public embedder::SlaveProcessDelegate {
 
 class ConnectionManagerTest : public testing::Test {
  protected:
-  ConnectionManagerTest() : message_loop_(CreateTestMessageLoop()) {}
+  ConnectionManagerTest()
+      : platform_support_(embedder::CreateSimplePlatformSupport()),
+        message_loop_(CreateTestMessageLoop()) {}
   ~ConnectionManagerTest() override {}
 
-  embedder::PlatformSupport* platform_support() { return &platform_support_; }
+  embedder::PlatformSupport* platform_support() {
+    return platform_support_.get();
+  }
   MessageLoop* message_loop() { return message_loop_.get(); }
   const RefPtr<TaskRunner>& task_runner() {
     return message_loop_->GetTaskRunner();
@@ -197,17 +202,16 @@ class ConnectionManagerTest : public testing::Test {
       embedder::SlaveProcessDelegate* slave_process_delegate,
       SlaveConnectionManager* slave,
       const std::string& slave_name) {
-    embedder::PlatformChannelPair platform_channel_pair;
-    ProcessIdentifier slave_process_identifier =
-        master->AddSlave(new TestSlaveInfo(slave_name),
-                         platform_channel_pair.PassServerHandle());
+    PlatformPipe platform_pipe;
+    ProcessIdentifier slave_process_identifier = master->AddSlave(
+        new TestSlaveInfo(slave_name), platform_pipe.handle0.Pass());
     slave->Init(task_runner().Clone(), slave_process_delegate,
-                platform_channel_pair.PassClientHandle());
+                platform_pipe.handle1.Pass());
     return slave_process_identifier;
   }
 
  private:
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
   std::unique_ptr<MessageLoop> message_loop_;
   MockMasterProcessDelegate master_process_delegate_;
 
@@ -650,9 +654,9 @@ TEST_F(ConnectionManagerTest, AddSlaveThenImmediateShutdown) {
 
   MockSlaveProcessDelegate slave_process_delegate;
   SlaveConnectionManager slave(platform_support());
-  embedder::PlatformChannelPair platform_channel_pair;
-  ProcessIdentifier slave_id = master.AddSlave(
-      new TestSlaveInfo("slave"), platform_channel_pair.PassServerHandle());
+  PlatformPipe platform_pipe;
+  ProcessIdentifier slave_id =
+      master.AddSlave(new TestSlaveInfo("slave"), platform_pipe.handle0.Pass());
   master.Shutdown();
   EXPECT_TRUE(IsValidSlaveProcessIdentifier(slave_id));
   // Since we never initialized |slave|, we don't have to shut it down.
@@ -662,11 +666,10 @@ TEST_F(ConnectionManagerTest, AddSlaveAndBootstrap) {
   MasterConnectionManager master(platform_support());
   master.Init(task_runner().Clone(), &master_process_delegate());
 
-  embedder::PlatformChannelPair platform_channel_pair;
+  PlatformPipe platform_pipe;
   ConnectionIdentifier connection_id = master.GenerateConnectionIdentifier();
   ProcessIdentifier slave_id = master.AddSlaveAndBootstrap(
-      new TestSlaveInfo("slave"), platform_channel_pair.PassServerHandle(),
-      connection_id);
+      new TestSlaveInfo("slave"), platform_pipe.handle0.Pass(), connection_id);
   EXPECT_TRUE(IsValidSlaveProcessIdentifier(slave_id));
 
   ScopedPlatformHandle h1;
@@ -682,7 +685,7 @@ TEST_F(ConnectionManagerTest, AddSlaveAndBootstrap) {
   MockSlaveProcessDelegate slave_process_delegate;
   SlaveConnectionManager slave(platform_support());
   slave.Init(task_runner().Clone(), &slave_process_delegate,
-             platform_channel_pair.PassClientHandle());
+             platform_pipe.handle1.Pass());
 
   ProcessIdentifier slave_peer = kInvalidProcessIdentifier;
   ScopedPlatformHandle h2;

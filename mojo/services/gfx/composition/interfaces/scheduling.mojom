@@ -47,10 +47,13 @@ struct FrameInfo {
   // to begin which may be used to coordinate animations that require a
   // monotonic timing reference for synchronization, even across scenes.
   //
+  // It essentially represents the time when the work of producing a new
+  // frame began.
+  //
   // This value monotonically increases with each frame, never repeats, and
-  // is guaranteed to represent a time in the past.  It will always be less
-  // than or equal to the value returned by |MojoGetTimeTicksNow()| when the
-  // frame info is received as part of a |ScheduleFrame()| callback.
+  // is guaranteed to represent a time in the recent past.  It will always be
+  // less than or equal to the value returned by |MojoGetTimeTicksNow()| when
+  // the frame info is received as part of a |ScheduleFrame()| callback.
   //
   // Expressed in microseconds in the |MojoTimeTicks| timebase.
   // TODO(jeffbrown): Time ticks may need finer resolution guarantees.
@@ -61,7 +64,7 @@ struct FrameInfo {
   //
   // The interval is approximate and may change at any time.  There is no
   // guarantee that the next frame will occur precisely on the specified
-  // interval.
+  // interval although that is what is expected to happen in steady state.
   //
   // Expressed in microseconds.
   uint64 frame_interval;
@@ -80,9 +83,8 @@ struct FrameInfo {
   // will be shown on the display output assuming everything is fully rendered
   // and submitted by the indicated |frame_deadline|.
   //
-  // This value is guaranteed to be no less than |frame_deadline| but it is
-  // not necessarily monotonic; it may briefly go backwards if the frame
-  // interval or pipeline depth changes between frames.
+  // This value monotonically increases with each frame, never repeats, and
+  // is guaranteed to be no less than |frame_deadline|.
   //
   // Expressed in microseconds in the |MojoTimeTicks| timebase.
   int64 presentation_time;

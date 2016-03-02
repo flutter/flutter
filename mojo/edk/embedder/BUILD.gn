@@ -55,14 +55,7 @@ mojo_edk_source_set("platform") {
   mojo_edk_visibility = [ "mojo/edk/system/*" ]
 
   sources = [
-    "platform_channel_pair.cc",
-    "platform_channel_pair.h",
-    "platform_channel_utils.cc",
-    "platform_channel_utils.h",
-    "platform_shared_buffer.h",
     "platform_support.h",
-    "simple_platform_shared_buffer.cc",
-    "simple_platform_shared_buffer.h",
     "simple_platform_support.cc",
     "simple_platform_support.h",
   ]
@@ -74,10 +67,6 @@ mojo_edk_source_set("platform") {
   deps = [
     "//base",
   ]
-
-  if (is_android) {
-    deps += [ "//third_party/ashmem" ]
-  }
 
   mojo_edk_deps = [ "mojo/edk/util" ]
 }
@@ -105,8 +94,6 @@ mojo_edk_unittests("mojo_edk_embedder_unittests") {
   sources = [
     "embedder_unittest.cc",
     "multiprocess_embedder_unittest.cc",
-    "platform_channel_pair_unittest.cc",
-    "simple_platform_shared_buffer_unittest.cc",
   ]
 
   deps = [

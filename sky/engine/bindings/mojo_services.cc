@@ -40,9 +40,9 @@ void DartTakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
       args, GetMojoServices()->TakeServicesProvidedToEmbedder().value());
 }
 
-void DartTakeViewHostHandle(Dart_NativeArguments args) {
+void DartTakeViewHandle(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(
-      args, GetMojoServices()->TakeViewHostHandle().value());
+      args, GetMojoServices()->TakeViewHandle().value());
 }
 
 }  // namespace
@@ -53,7 +53,7 @@ void MojoServices::RegisterNatives(DartLibraryNatives* natives) {
     {"takeServicesProvidedByEmbedder", DartTakeServicesProvidedByEmbedder, 0, true},
     {"takeServicesProvidedToEmbedder", DartTakeServicesProvidedToEmbedder, 0, true},
     {"takeShellProxyHandle", DartTakeShellProxyHandle, 0, true},
-    {"takeViewHostHandle", DartTakeViewHostHandle, 0, true},
+    {"takeViewHandle", DartTakeViewHandle, 0, true},
   });
 }
 
@@ -84,23 +84,23 @@ MojoServices::~MojoServices() {
 }
 
 mojo::Handle MojoServices::TakeShellProxy() {
-  return services_ ? services_->shell.PassInterface().PassHandle().release() : mojo::Handle();
+  return services_ ? services_->shell.PassHandle().release() : mojo::Handle();
 }
 
 mojo::Handle MojoServices::TakeServicesProvidedByEmbedder() {
-  return services_from_embedder_.PassInterface().PassHandle().release();
+  return services_from_embedder_.PassInterfaceHandle().PassHandle().release();
 }
 
 mojo::Handle MojoServices::TakeRootBundleHandle() {
-  return root_bundle_.PassInterface().PassHandle().release();
+  return root_bundle_.PassInterfaceHandle().PassHandle().release();
 }
 
 mojo::Handle MojoServices::TakeServicesProvidedToEmbedder() {
   return services_provided_to_embedder_.PassMessagePipe().release();
 }
 
-mojo::Handle MojoServices::TakeViewHostHandle() {
-  return services_ ? services_->view_host.PassInterface().PassHandle().release() : mojo::Handle();
+mojo::Handle MojoServices::TakeViewHandle() {
+  return services_ ? services_->view.PassHandle().release() : mojo::Handle();
 }
 
 }  // namespace blink

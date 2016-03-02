@@ -25,8 +25,9 @@ public class MojoTestCase extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER).ensureInitialized();
-        nativeInitApplicationContext(getInstrumentation().getTargetContext());
+        Context context = getInstrumentation().getTargetContext();
+        LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER).ensureInitialized(context);
+        nativeInitApplicationContext(context);
         mTestEnvironmentPointer = nativeSetupTestEnvironment();
     }
 

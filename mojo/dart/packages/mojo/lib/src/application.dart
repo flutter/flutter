@@ -104,8 +104,8 @@ abstract class Application implements bindings.ServiceConnector {
     return connection;
   }
 
-  void connectToService(
-      String url, bindings.ProxyBase proxy, [String serviceName]) {
+  void connectToService(String url, bindings.ProxyBase proxy,
+      [String serviceName]) {
     connectToApplication(url).requestService(proxy, serviceName);
   }
 
@@ -124,9 +124,8 @@ abstract class Application implements bindings.ServiceConnector {
 
   Future close({bool immediate: false}) async {
     assert(_applicationImpl != null);
-    for (var ac in _applicationConnections) {
-      await ac.close(immediate: immediate);
-    }
+    await Future.wait(
+        _applicationConnections.map((ac) => ac.close(immediate: immediate)));
     _applicationConnections.clear();
     return _applicationImpl.close(immediate: immediate);
   }
@@ -134,9 +133,7 @@ abstract class Application implements bindings.ServiceConnector {
   // This method closes all the application connections. Used during apptesting.
   Future resetConnections() async {
     assert(_applicationImpl != null);
-    for (var ac in _applicationConnections) {
-      await ac.close();
-    }
+    await Future.wait(_applicationConnections.map((ac) => ac.close()));
     _applicationConnections.clear();
   }
 

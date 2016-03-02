@@ -5,33 +5,20 @@
 #ifndef MOJO_EDK_EMBEDDER_SIMPLE_PLATFORM_SUPPORT_H_
 #define MOJO_EDK_EMBEDDER_SIMPLE_PLATFORM_SUPPORT_H_
 
+#include <memory>
+
 #include "mojo/edk/embedder/platform_support.h"
-#include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
 namespace embedder {
 
-// A simple implementation of |PlatformSupport|, when sandboxing and
-// multiprocess support are not issues (e.g., in most tests). Note: This class
-// has no state, and different instances of |SimplePlatformSupport| are mutually
-// compatible (i.e., you don't need to use a single instance of it everywhere --
-// you may simply create one whenever/wherever you need it).
-class SimplePlatformSupport final : public PlatformSupport {
- public:
-  SimplePlatformSupport() {}
-  ~SimplePlatformSupport() override {}
-
-  MojoTimeTicks GetTimeTicksNow() override;
-  void GetCryptoRandomBytes(void* bytes, size_t num_bytes) override;
-  util::RefPtr<PlatformSharedBuffer> CreateSharedBuffer(
-      size_t num_bytes) override;
-  util::RefPtr<PlatformSharedBuffer> CreateSharedBufferFromHandle(
-      size_t num_bytes,
-      platform::ScopedPlatformHandle platform_handle) override;
-
- private:
-  MOJO_DISALLOW_COPY_AND_ASSIGN(SimplePlatformSupport);
-};
+// Creates a simple implementation of |PlatformSupport| that works when
+// sandboxing and multiprocess support are not issues (e.g., in most tests).
+// Note: Instances of |PlatformSupport| created by this function have no state,
+// and different instances are mutually compatible (i.e., you don't need to use
+// a single instance of it everywhere -- you may simply create one
+// whenever/wherever you need it).
+std::unique_ptr<PlatformSupport> CreateSimplePlatformSupport();
 
 }  // namespace embedder
 }  // namespace mojo

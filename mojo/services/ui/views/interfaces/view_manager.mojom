@@ -12,55 +12,59 @@ import "mojo/services/ui/views/interfaces/view_trees.mojom";
 // Maximum length for a view or view tree label.
 const uint32 kLabelMaxLength = 32;
 
-// The view manager is a service which manages trees of views.
+// The view manager manages trees of views which represent user interface
+// components.
 //
-// Before a view can be added to the view tree, it must first be registered
-// with the view manager.  Once registered, the view receives a token as a
-// transferable reference to be provided to the view's intended container.
+// Applications create views to describe user interface components
+// to present content to the user and support user interaction.
+//
+// The system creates a view tree to hold the root of a view hierarchy
+// containing views from various applications.
+//
+// Refer to |View| and |ViewTree| for more information about these objects.
 [ServiceName="mojo::ui::ViewManager"]
 interface ViewManager {
-  // Registers a view with the view manager.
+  // Creates a view.
   //
-  // When a view is registered, it receives its own host and a token
-  // to identify it.
-  //
-  // The |view_host| is used to configure the view and interact with its
-  // local environment.  The view host is private to the view and should
+  // The |view| is used to configure the view and interact with its
+  // local environment.  The view pipe is private to the view and should
   // not be shared with anyone else.
   //
-  // The |view_token| is used as a transferable reference which can
+  // The |view_owner| is used as a transferable reference which can
   // be passed to the view's intended container as part of a request to
   // add the view as a child.  The view manager itself does not describe
-  // how this interaction should take place, only that the token should
-  // eventually be passed back through the container's view host interface
-  // as an argument to AddChild().
+  // how this interaction should take place, only that ownership should
+  // eventually be passed back through the container's view interface
+  // as an argument to |View.AddChild()|.
+  //
+  // The |view_listener| is used to receive events from the view.
   //
   // The |label| is an optional name to associate with the view for
   // diagnostic purposes.  The label will be truncated if it is longer
   // than |kLabelMaxLength|.
   //
-  // To unregister the view and cause it to be removed from the view tree,
-  // simply close the |view| and/or |view_host| message pipes.
-  RegisterView(mojo.ui.View view,
-               mojo.ui.ViewHost& view_host,
-               string? label) => (mojo.ui.ViewToken view_token);
+  // To destroy the view and cause it to be removed from the view tree,
+  // simply close the |view|, |view_listener|, or |view_owner| message pipes.
+  CreateView(mojo.ui.View& view,
+             mojo.ui.ViewOwner& view_owner,
+             mojo.ui.ViewListener view_listener,
+             string? label);
 
-  // Registers a view tree with the view manager.
+  // Creates a view tree.
   //
-  // The |view_tree_host| is used to configure the view tree and interact
-  // with the views it contains.  The view tree host is private to the view
+  // The |view_tree| is used to configure the view tree and interact
+  // with the views it contains.  The view tree is private to the view
   // and should not be shared with anyone else.
+  //
+  // The |view_tree_listener| is used to receive events from the view tree.
   //
   // The |label| is an optional name to associate with the view tree for
   // diagnostic purposes.  The label will be truncated if it is longer
   // than |kLabelMaxLength|.
   //
-  // The |view_tree_token| is used as a transferable reference which can
-  // be passed to trusted services to reference the view tree.
-  //
-  // To unregister the view tree simply close the |view_tree| and/or
-  // |view_tree_host| message pipes.
-  RegisterViewTree(mojo.ui.ViewTree view_tree,
-                   mojo.ui.ViewTreeHost& view_tree_host,
-                   string? label) => (mojo.ui.ViewTreeToken view_tree_token);
+  // To destroy the view tree simply close the |view_tree| or
+  // |view_tree_listener| message pipes.
+  CreateViewTree(mojo.ui.ViewTree& view_tree,
+                 mojo.ui.ViewTreeListener view_tree_listener,
+                 string? label);
 };

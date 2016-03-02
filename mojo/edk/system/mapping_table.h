@@ -16,7 +16,7 @@
 
 namespace mojo {
 
-namespace embedder {
+namespace platform {
 class PlatformSharedBufferMapping;
 }
 
@@ -42,7 +42,7 @@ class MappingTable {
   // Tries to add a mapping. (Takes ownership of the mapping in all cases; on
   // failure, it will be destroyed.)
   MojoResult AddMapping(
-      std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping);
+      std::unique_ptr<platform::PlatformSharedBufferMapping> mapping);
   MojoResult RemoveMapping(uintptr_t address);
 
  private:
@@ -50,7 +50,7 @@ class MappingTable {
 
   // TODO(vtl): Should the value type be |std::unique_ptr|?
   using AddressToMappingMap =
-      std::unordered_map<uintptr_t, embedder::PlatformSharedBufferMapping*>;
+      std::unordered_map<uintptr_t, platform::PlatformSharedBufferMapping*>;
   AddressToMappingMap address_to_mapping_map_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MappingTable);

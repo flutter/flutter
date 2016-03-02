@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 library http_header_mojom;
-
-import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
-import 'package:mojo/core.dart' as core;
+
 
 
 
@@ -66,10 +63,20 @@ class HttpHeader extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeString(name, 8, false);
-    
-    encoder0.encodeString(value, 16, false);
+    try {
+      encoder0.encodeString(name, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "name of struct HttpHeader: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(value, 16, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "value of struct HttpHeader: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -85,5 +92,9 @@ class HttpHeader extends bindings.Struct {
     return map;
   }
 }
+
+
+
+
 
 

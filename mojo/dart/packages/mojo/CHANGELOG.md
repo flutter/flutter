@@ -1,3 +1,27 @@
+## 0.4.16
+
+  - 80 changes: https://github.com/domokit/mojo/compare/9ec7563...1308cd1
+
+  MOJO_SDK: 1308cd12434c9536a28592ff09399a57ef7f4f77
+
+## 0.4.15
+
+  - 17 changes: https://github.com/domokit/mojo/compare/f64c6d6...c9e1513
+
+  MOJO_SDK: c9e15130499cc859050668ea6f78485001c96251
+
+## 0.4.14
+
+  - 41 changes: https://github.com/domokit/mojo/compare/ecb64e7...b3aaccc
+
+  MOJO_SDK: b3aaccc8d9408bc645ee633e7030c605f333be95
+
+## 0.4.13
+
+  - 63 changes: https://github.com/domokit/mojo/compare/56bf5b4...2ae2bcc
+
+  MOJO_SDK: 2ae2bccb82f37947c69ab5d6e06c2d109690a394
+
 ## 0.4.12
 
   - 25 changes: https://github.com/domokit/mojo/compare/1d94b2f...ebf4352

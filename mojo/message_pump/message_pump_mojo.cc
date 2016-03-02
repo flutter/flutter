@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "base/debug/alias.h"
-#include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/threading/thread_local.h"
 #include "base/time/time.h"
@@ -19,8 +18,10 @@ namespace mojo {
 namespace common {
 namespace {
 
-base::LazyInstance<base::ThreadLocalPointer<MessagePumpMojo> >::Leaky
-    g_tls_current_pump = LAZY_INSTANCE_INITIALIZER;
+base::ThreadLocalPointer<MessagePumpMojo>* CurrentPump() {
+  static auto* tls = new base::ThreadLocalPointer<MessagePumpMojo>;
+  return tls;
+}
 
 MojoDeadline TimeTicksToMojoDeadline(base::TimeTicks time_ticks,
                                      base::TimeTicks now) {
@@ -44,7 +45,7 @@ struct MessagePumpMojo::WaitState {
 
 struct MessagePumpMojo::RunState {
   RunState() : should_quit(false) {
-    CreateMessagePipe(NULL, &read_handle, &write_handle);
+    CreateMessagePipe(nullptr, &read_handle, &write_handle);
   }
 
   base::TimeTicks delayed_work_time;
@@ -60,15 +61,15 @@ struct MessagePumpMojo::RunState {
   bool should_quit;
 };
 
-MessagePumpMojo::MessagePumpMojo() : run_state_(NULL), next_handler_id_(0) {
+MessagePumpMojo::MessagePumpMojo() : run_state_(nullptr), next_handler_id_(0) {
   DCHECK(!current())
       << "There is already a MessagePumpMojo instance on this thread.";
-  g_tls_current_pump.Pointer()->Set(this);
+  CurrentPump()->Set(this);
 }
 
 MessagePumpMojo::~MessagePumpMojo() {
   DCHECK_EQ(this, current());
-  g_tls_current_pump.Pointer()->Set(NULL);
+  CurrentPump()->Set(nullptr);
 }
 
 // static
@@ -78,7 +79,7 @@ scoped_ptr<base::MessagePump> MessagePumpMojo::Create() {
 
 // static
 MessagePumpMojo* MessagePumpMojo::current() {
-  return g_tls_current_pump.Pointer()->Get();
+  return CurrentPump()->Get();
 }
 
 void MessagePumpMojo::AddHandler(MessagePumpMojoHandler* handler,
@@ -114,7 +115,7 @@ void MessagePumpMojo::Run(Delegate* delegate) {
   // TODO: better deal with error handling.
   CHECK(run_state.read_handle.is_valid());
   CHECK(run_state.write_handle.is_valid());
-  RunState* old_state = NULL;
+  RunState* old_state = nullptr;
   {
     base::AutoLock auto_lock(run_state_lock_);
     old_state = run_state_;
@@ -188,8 +189,8 @@ bool MessagePumpMojo::DoInternalWork(const RunState& run_state, bool block) {
   if (result == MOJO_RESULT_OK) {
     if (wait_many_result.index == 0) {
       // Control pipe was written to.
-      ReadMessageRaw(run_state.read_handle.get(), NULL, NULL, NULL, NULL,
-                     MOJO_READ_MESSAGE_FLAG_MAY_DISCARD);
+      ReadMessageRaw(run_state.read_handle.get(), nullptr, nullptr, nullptr,
+                     nullptr, MOJO_READ_MESSAGE_FLAG_MAY_DISCARD);
     } else {
       DCHECK(handlers_.find(
                  run_state_->wait_state->handles[wait_many_result.index]) !=
@@ -281,7 +282,7 @@ void MessagePumpMojo::RemoveInvalidHandle(const WaitState& wait_state,
 
 void MessagePumpMojo::SignalControlPipe(const RunState& run_state) {
   const MojoResult result =
-      WriteMessageRaw(run_state.write_handle.get(), NULL, 0, NULL, 0,
+      WriteMessageRaw(run_state.write_handle.get(), nullptr, 0, nullptr, 0,
                       MOJO_WRITE_MESSAGE_FLAG_NONE);
   // If we can't write we likely won't wake up the thread and there is a strong
   // chance we'll deadlock.

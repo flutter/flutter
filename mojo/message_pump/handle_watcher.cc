@@ -8,7 +8,6 @@
 
 #include "base/atomic_sequence_num.h"
 #include "base/bind.h"
-#include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/singleton.h"

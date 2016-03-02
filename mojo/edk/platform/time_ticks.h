@@ -12,8 +12,13 @@ namespace platform {
 
 // Gets the number of microseconds elapsed since an undefined epoch. (This is
 // from a monotonic clock of undefined resolution.)
-// TODO(vtl): Add different types of clocks. (E.g., what does "monotonic" mean
-// exactly?)
+//
+// Implementations of this function should be thread-safe. The returned value
+// should be non-negative, and nondecreasing with respect to time/causality
+// including across threads (as observable).
+//
+// TODO(vtl): Add different types of clocks. (What does "monotonic" mean exactly
+// -- does it continue to "run" in various "sleep" states?)
 MojoTimeTicks GetTimeTicks();
 
 }  // namespace platform

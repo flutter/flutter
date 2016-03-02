@@ -4,6 +4,7 @@
 
 #include "mojo/edk/system/unique_identifier.h"
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -18,13 +19,16 @@ namespace {
 
 class UniqueIdentifierTest : public testing::Test {
  public:
-  UniqueIdentifierTest() {}
+  UniqueIdentifierTest()
+      : platform_support_(embedder::CreateSimplePlatformSupport()) {}
   ~UniqueIdentifierTest() override {}
 
-  embedder::PlatformSupport* platform_support() { return &platform_support_; }
+  embedder::PlatformSupport* platform_support() {
+    return platform_support_.get();
+  }
 
  private:
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(UniqueIdentifierTest);
 };

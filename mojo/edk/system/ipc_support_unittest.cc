@@ -10,9 +10,9 @@
 
 #include "base/logging.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
-#include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/embedder/slave_process_delegate.h"
+#include "mojo/edk/platform/platform_pipe.h"
 #include "mojo/edk/system/channel_manager.h"
 #include "mojo/edk/system/connection_identifier.h"
 #include "mojo/edk/system/dispatcher.h"
@@ -30,6 +30,7 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::PlatformPipe;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::util::AutoResetWaitableEvent;
 using mojo::util::ManualResetWaitableEvent;
@@ -172,15 +173,15 @@ class TestSlaveConnection {
   // After this is called, |ShutdownChannelToSlave()| must be called (possibly
   // after |WaitForChannelToSlave()|) before destruction.
   RefPtr<MessagePipeDispatcher> ConnectToSlave() {
-    embedder::PlatformChannelPair channel_pair;
+    PlatformPipe channel_pair;
     // Note: |ChannelId|s and |ProcessIdentifier|s are interchangeable.
     RefPtr<MessagePipeDispatcher> mp = master_ipc_support_->ConnectToSlave(
-        connection_id_, nullptr, channel_pair.PassServerHandle(),
+        connection_id_, nullptr, channel_pair.handle0.Pass(),
         [this]() { event_.Signal(); }, nullptr, &slave_id_);
     EXPECT_TRUE(mp);
     EXPECT_NE(slave_id_, kInvalidProcessIdentifier);
     EXPECT_NE(slave_id_, kMasterProcessIdentifier);
-    slave_platform_handle_ = channel_pair.PassClientHandle();
+    slave_platform_handle_ = channel_pair.handle1.Pass();
     return mp;
   }
 
@@ -279,7 +280,7 @@ class TestSlave {
 // Encapsulates both the master and slave sides for each slave.
 class TestSlaveSetup {
  public:
-  TestSlaveSetup(embedder::SimplePlatformSupport* platform_support,
+  TestSlaveSetup(embedder::PlatformSupport* platform_support,
                  test::TestIOThread* test_io_thread,
                  TestMasterProcessDelegate* master_process_delegate,
                  IPCSupport* master_ipc_support)
@@ -345,7 +346,7 @@ class TestSlaveSetup {
   MessagePipeDispatcher* slave_mp() { return slave_mp_.get(); }
 
  private:
-  embedder::SimplePlatformSupport* const platform_support_;
+  embedder::PlatformSupport* const platform_support_;
   test::TestIOThread* const test_io_thread_;
   TestMasterProcessDelegate* const master_process_delegate_;
   IPCSupport* const master_ipc_support_;
@@ -363,8 +364,9 @@ class IPCSupportTest : public testing::Test {
  public:
   // Note: Run master process delegate methods on the I/O thread.
   IPCSupportTest()
-      : test_io_thread_(test::TestIOThread::StartMode::AUTO),
-        master_ipc_support_(&platform_support_,
+      : platform_support_(embedder::CreateSimplePlatformSupport()),
+        test_io_thread_(test::TestIOThread::StartMode::AUTO),
+        master_ipc_support_(platform_support_.get(),
                             embedder::ProcessType::MASTER,
                             test_io_thread_.task_runner().Clone(),
                             &master_process_delegate_,
@@ -375,7 +377,7 @@ class IPCSupportTest : public testing::Test {
 
   std::unique_ptr<TestSlaveSetup> SetupSlave() {
     std::unique_ptr<TestSlaveSetup> s(
-        new TestSlaveSetup(&platform_support_, &test_io_thread_,
+        new TestSlaveSetup(platform_support_.get(), &test_io_thread_,
                            &master_process_delegate_, &master_ipc_support_));
     s->Init();
     return s;
@@ -386,8 +388,8 @@ class IPCSupportTest : public testing::Test {
         [this]() { master_ipc_support_.ShutdownOnIOThread(); });
   }
 
-  embedder::SimplePlatformSupport& platform_support() {
-    return platform_support_;
+  embedder::PlatformSupport* platform_support() {
+    return platform_support_.get();
   }
   test::TestIOThread& test_io_thread() { return test_io_thread_; }
   TestMasterProcessDelegate& master_process_delegate() {
@@ -396,7 +398,7 @@ class IPCSupportTest : public testing::Test {
   IPCSupport& master_ipc_support() { return master_ipc_support_; }
 
  private:
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
   test::TestIOThread test_io_thread_;
 
   // All tests require a master.
@@ -575,11 +577,11 @@ TEST_F(IPCSupportTest, MasterSlaveInternal) {
   ConnectionIdentifier connection_id =
       master_ipc_support().GenerateConnectionIdentifier();
 
-  embedder::PlatformChannelPair channel_pair;
+  PlatformPipe channel_pair;
   ProcessIdentifier slave_id = kInvalidProcessIdentifier;
   ScopedPlatformHandle master_second_platform_handle =
       master_ipc_support().ConnectToSlaveInternal(
-          connection_id, nullptr, channel_pair.PassServerHandle(), &slave_id);
+          connection_id, nullptr, channel_pair.handle0.Pass(), &slave_id);
   ASSERT_TRUE(master_second_platform_handle.is_valid());
   EXPECT_NE(slave_id, kInvalidProcessIdentifier);
   EXPECT_NE(slave_id, kMasterProcessIdentifier);
@@ -587,11 +589,10 @@ TEST_F(IPCSupportTest, MasterSlaveInternal) {
   TestSlaveProcessDelegate slave_process_delegate;
   // Note: Run process delegate methods on the I/O thread.
   IPCSupport slave_ipc_support(
-      &platform_support(), embedder::ProcessType::SLAVE,
+      platform_support(), embedder::ProcessType::SLAVE,
       test_io_thread().task_runner().Clone(), &slave_process_delegate,
       test_io_thread().task_runner().Clone(),
-      test_io_thread().platform_handle_watcher(),
-      channel_pair.PassClientHandle());
+      test_io_thread().platform_handle_watcher(), channel_pair.handle1.Pass());
 
   ScopedPlatformHandle slave_second_platform_handle =
       slave_ipc_support.ConnectToMasterInternal(connection_id);
@@ -671,12 +672,13 @@ MOJO_MULTIPROCESS_TEST_CHILD_TEST(MultiprocessMasterSlaveInternal) {
       mojo::test::MultiprocessTestHelper::client_platform_handle.Pass();
   ASSERT_TRUE(client_platform_handle.is_valid());
 
-  embedder::SimplePlatformSupport platform_support;
+  std::unique_ptr<embedder::PlatformSupport> platform_support(
+      embedder::CreateSimplePlatformSupport());
   test::TestIOThread test_io_thread(test::TestIOThread::StartMode::AUTO);
   TestSlaveProcessDelegate slave_process_delegate;
   // Note: Run process delegate methods on the I/O thread.
   IPCSupport ipc_support(
-      &platform_support, embedder::ProcessType::SLAVE,
+      platform_support.get(), embedder::ProcessType::SLAVE,
       test_io_thread.task_runner().Clone(), &slave_process_delegate,
       test_io_thread.task_runner().Clone(),
       test_io_thread.platform_handle_watcher(), client_platform_handle.Pass());
