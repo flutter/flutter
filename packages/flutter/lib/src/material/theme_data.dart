@@ -125,7 +125,7 @@ class ThemeData {
     errorColor ??= Colors.red[700];
     text ??= isDark ? Typography.white : Typography.black;
     primaryTextTheme ??= primaryColorBrightness == ThemeBrightness.dark ? Typography.white : Typography.black;
-    primaryIconTheme ??= primaryColorBrightness == ThemeBrightness.dark ? const IconThemeData(color: IconThemeColor.white) : const IconThemeData(color: IconThemeColor.black);
+    primaryIconTheme ??= primaryColorBrightness == ThemeBrightness.dark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
