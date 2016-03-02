@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/utils.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -38,5 +39,3 @@ class DevicesCommand extends FlutterCommand {
     return 0;
   }
 }
-
-String pluralize(String word, int count) => count == 1 ? word : word + 's';

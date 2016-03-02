@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/utils.dart';
 import '../build_configuration.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -17,7 +18,6 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 import 'apk.dart';
-import 'devices.dart';
 import 'install.dart';
 
 /// Given the value of the --target option, return the path of the Dart file
