@@ -65,4 +65,8 @@ interface MediaConsumer {
   // Pushes a packet to the consumer. The callback signals that the consumer
   // is done with the packet buffer region.
   PushPacket(MediaPacket packet) => ();
+
+  // Flushes the stream. The callback signals that the flush operation is
+  // complete.
+  Flush() => ();
 };

@@ -15,17 +15,19 @@ import "mojo/services/ui/views/interfaces/views.mojom";
 [ServiceName="mojo::ui::ViewProvider"]
 interface ViewProvider {
   // Creates and registers a view with the view manager and returns its
-  // view token (as provided by |ViewManager.RegisterView()|).
+  // view owner which may subsequently be passed to |View.AddChild()|
+  // to attach the view to a view hierarchy.
   //
-  // Having received the view token, the caller should attach the view to
-  // a view tree and lay it out.
+  // Implementors of this interface are responsible for creating the view
+  // and forwarding the |view_owner| interface request to
+  // |ViewManager.CreateView()|.
   //
   // The caller may provide services to the view via the |services|
   // service provider.
   //
   // The caller may receive services from the view via the |exposed_services|
   // service provider.
-  CreateView(mojo.ServiceProvider&? services,
-             mojo.ServiceProvider? exposed_services) =>
-                 (ViewToken view_token);
+  CreateView(ViewOwner& view_owner,
+             mojo.ServiceProvider&? services,
+             mojo.ServiceProvider? exposed_services);
 };

@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 library network_error_mojom;
-
-import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
-import 'package:mojo/core.dart' as core;
+
 
 
 
@@ -66,10 +63,20 @@ class NetworkError extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeInt32(code, 8);
-    
-    encoder0.encodeString(description, 16, true);
+    try {
+      encoder0.encodeInt32(code, 8);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "code of struct NetworkError: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(description, 16, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "description of struct NetworkError: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -85,5 +92,9 @@ class NetworkError extends bindings.Struct {
     return map;
   }
 }
+
+
+
+
 
 

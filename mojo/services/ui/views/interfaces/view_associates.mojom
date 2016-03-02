@@ -43,8 +43,8 @@ interface ViewAssociate {
 
   // Asks the associate to provide the view service identified by
   // |interface_name| through the message |pipe| endpoint supplied by
-  // the caller.  If the host is not willing or able to provide the requested
-  // service, it should close the |pipe|.
+  // the caller.  If the associate is not willing or able to provide the
+  // requested service, it should close the |pipe|.
   //
   // The |view_token| is the token of the view which requested the service.
   ConnectToViewService(ViewToken view_token, string service_name,
@@ -52,8 +52,8 @@ interface ViewAssociate {
 
   // Asks the associate to provide the view tree service identified by
   // |interface_name| through the message |pipe| endpoint supplied by
-  // the caller.  If the host is not willing or able to provide the requested
-  // service, it should close the |pipe|.
+  // the caller.  If the associate is not willing or able to provide the
+  // requested service, it should close the |pipe|.
   //
   // The |view_tree_token| is the token of the view tree which requested
   // the service.

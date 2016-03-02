@@ -4,7 +4,7 @@
 
 part of application;
 
-typedef Object ServiceFactory(core.MojoMessagePipeEndpoint endpoint);
+typedef void ServiceFactory(core.MojoMessagePipeEndpoint endpoint);
 typedef void FallbackServiceFactory(
     String interfaceName, core.MojoMessagePipeEndpoint endpoint);
 
@@ -39,31 +39,33 @@ class LocalServiceProvider implements ServiceProvider {
   }
 }
 
-// Encapsulates a pair of ServiceProviders that enable services (interface
-// implementations) to be provided to a remote application as well as exposing
-// services provided by a remote application. ApplicationConnection
-// objects are returned by the Application ConnectToApplication() method
-// and they're passed to the Application AcceptConnection() method.
-//
-// To request a service from the remote application:
-//   var proxy = applicationConnection.requestService(ViewManagerClientName);
-//
-// To provide a service to the remote application, specify a function that
-// returns a service. For example:
-//   applicationConnection.provideService(ViewManagerClientName, (pipe) =>
-//       new ViewManagerClientImpl(pipe));
-//
-// To handle requests for any interface, set fallbackServiceFactory to a
-// function that takes ownership of the incoming message pipe endpoint. If the
-// fallbackServiceFactory function doesn't bind the pipe, it should close it.
-//
-// The fallbackServiceFactory is only used if a service wasn't specified
-// with provideService().
-
+/// [ApplicationConnection] encapsulates a pair of ServiceProviders that enable
+/// services (interface implementations) to be provided to a remote application
+/// as well as exposing services provided by a remote application.
+/// [ApplicationConnection] objects are returned by
+/// [Application.connectToApplication], and are passed to
+/// [Application.acceptConnection].
+///
+/// To request a service (e.g. `Foo`) from the remote application:
+///   var fooProxy =
+///       applicationConnection.requestService(new FooProxy.unbound());
+///
+/// To provide a service to the remote application, specify a function that
+/// instantiantes a service. For example:
+///   applicationConnection.provideService(
+///       Foo.serviceName, (pipe) => new FooImpl(pipe));
+/// or more succinctly:
+///   applicationConnection.provideService(Foo.serviceName, new FooImpl#);
+///
+/// To handle requests for services beyond those set up with [provideService],
+/// set [fallbackServiceFactory] to a function that instantiates a service as in
+/// the [provideService] case, or closes the pipe.
 class ApplicationConnection {
   ServiceProviderProxy remoteServiceProvider;
   LocalServiceProvider _localServiceProvider;
   final _nameToServiceFactory = new HashMap<String, ServiceFactory>();
+  final _serviceDescriptions =
+      new HashMap<String, service_describer.ServiceDescription>();
   FallbackServiceFactory _fallbackServiceFactory;
   core.ErrorHandler onError;
 
@@ -80,8 +82,8 @@ class ApplicationConnection {
     _fallbackServiceFactory = f;
   }
 
-  bindings.ProxyBase requestService(
-      bindings.ProxyBase proxy, [String serviceName]) {
+  bindings.ProxyBase requestService(bindings.ProxyBase proxy,
+      [String serviceName]) {
     assert(!proxy.impl.isBound &&
         (remoteServiceProvider != null) &&
         remoteServiceProvider.impl.isBound);
@@ -95,15 +97,34 @@ class ApplicationConnection {
     return proxy;
   }
 
-  void provideService(String interfaceName, ServiceFactory factory) {
+  /// Prepares this connection to provide the specified service when a call for
+  /// the given [interfaceName] is received. The provided service can also
+  /// choose to expose a service description.
+  void provideService(String interfaceName, ServiceFactory factory,
+      {service_describer.ServiceDescription description}) {
     assert(_localServiceProvider != null);
     assert(interfaceName != null);
     _nameToServiceFactory[interfaceName] = factory;
+    if (description != null) {
+      _serviceDescriptions[interfaceName] = description;
+      _provideServiceDescriber();
+    }
+  }
+
+  /// Provides the ServiceDescriber interface for the set of services whose
+  /// service descriptions have been provided (see provideService).
+  void _provideServiceDescriber() {
+    String describerName = service_describer.ServiceDescriber.serviceName;
+    if (_nameToServiceFactory[describerName] == null) {
+      _nameToServiceFactory[describerName] = (endpoint) =>
+          new _ServiceDescriberImpl(_serviceDescriptions, endpoint);
+    }
   }
 
   void _errorHandler(Object e) {
-    close().then((_) {
+    _localServiceProvider.close().then((_) {
       if (onError != null) onError(e);
+      _localServiceProvider = null;
     });
   }
 

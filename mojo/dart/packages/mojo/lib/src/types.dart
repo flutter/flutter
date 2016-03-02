@@ -103,9 +103,9 @@ class MojoHandleSignals {
       return "(INVALID)";
     }
     List<String> signals = [];
-    if (value == kReadable) signals.add("Readable");
-    if (value == kWritable) signals.add("Writable");
-    if (value == kPeerClosed) signals.add("PeerClosed");
+    if (isReadable(value)) signals.add("Readable");
+    if (isWritable(value)) signals.add("Writable");
+    if (isPeerClosed(value)) signals.add("PeerClosed");
     return "(" + signals.join(", ") + ")";
   }
 }

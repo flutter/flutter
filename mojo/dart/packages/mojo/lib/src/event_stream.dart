@@ -36,7 +36,7 @@ class MojoEventSubscription {
 
   void subscribe(void handler(int event)) {
     if (_isSubscribed) {
-      throw new MojoApiError("subscribe() has already been called: $this.");
+      throw new MojoApiError("Already subscribed: $this.");
     }
     _receivePort = new RawReceivePort(handler);
     _sendPort = _receivePort.sendPort;
@@ -47,7 +47,6 @@ class MojoEventSubscription {
         throw new MojoInternalError("MojoHandleWatcher add failed: $res");
       }
     }
-
     _isSubscribed = true;
   }
 
@@ -66,6 +65,21 @@ class MojoEventSubscription {
       enableSignals(MojoHandleSignals.kPeerClosedReadable);
   bool enableWriteEvents() => enableSignals(MojoHandleSignals.kWritable);
   bool enableAllEvents() => enableSignals(MojoHandleSignals.kReadWrite);
+
+  /// End the subscription by removing the handle from the handle watcher and
+  /// closing the Dart port, but do not close the underlying handle. The handle
+  /// can then be reused, or closed at a later time.
+  void unsubscribe({bool immediate: false}) {
+    if ((_handle == null) || !_isSubscribed || (_receivePort == null)) {
+      throw new MojoApiError("Cannont unsubscribe from a MojoEventSubscription "
+                             "that has not been subscribed to");
+    }
+    MojoHandleWatcher.remove(_handle.h);
+    _receivePort.close();
+    _receivePort = null;
+    _sendPort = null;
+    _isSubscribed = false;
+  }
 
   Future _close({bool immediate: false, bool local: false}) {
     if (_handle != null) {
@@ -96,8 +110,10 @@ class MojoEventSubscription {
   }
 
   void _localClose() {
-    _handle.close();
-    _handle = null;
+    if (_handle != null) {
+      _handle.close();
+      _handle = null;
+    }
     if (_receivePort != null) {
       _receivePort.close();
       _receivePort = null;
@@ -149,7 +165,7 @@ class MojoEventHandler {
 
   void bind(MojoMessagePipeEndpoint endpoint) {
     if (isBound) {
-      throw new MojoApiError("MojoEventStreamListener is already bound.");
+      throw new MojoApiError("MojoEventHandler is already bound.");
     }
     _endpoint = endpoint;
     _eventSubscription = new MojoEventSubscription(endpoint.handle);
@@ -160,7 +176,7 @@ class MojoEventHandler {
 
   void bindFromHandle(MojoHandle handle) {
     if (isBound) {
-      throw new MojoApiError("MojoEventStreamListener is already bound.");
+      throw new MojoApiError("MojoEventHandler is already bound.");
     }
     _endpoint = new MojoMessagePipeEndpoint(handle);
     _eventSubscription = new MojoEventSubscription(handle);
@@ -173,8 +189,48 @@ class MojoEventHandler {
     if (!isBound) {
       throw new MojoApiError("MojoEventHandler is unbound.");
     }
+    if (_isOpen) {
+      throw new MojoApiError("MojoEventHandler is already handling events");
+    }
     _isOpen = true;
     _eventSubscription.subscribe(_tryHandleEvent);
+  }
+
+  /// [endHandlineEvents] unsubscribes from the underlying
+  /// [MojoEventSubscription].
+  void endHandlingEvents() {
+    if (!isBound || !_isOpen || _isInHandler) {
+      throw new MojoApiError(
+          "MojoEventHandler was not handling events when instructed to end");
+    }
+    if (_isInHandler) {
+      throw new MojoApiError(
+          "Cannot end handling events from inside a callback");
+    }
+    _isOpen = false;
+    _eventSubscription.unsubscribe();
+  }
+
+  /// [unbind] stops handling events, and returns the underlying
+  /// [MojoMessagePipe]. The pipe can then be rebound to the same or different
+  /// [MojoEventHandler], or closed. [unbind] cannot be called from within
+  /// [handleRead] or [handleWrite].
+  MojoMessagePipeEndpoint unbind() {
+    if (!isBound) {
+      throw new MojoApiError(
+          "MojoEventHandler was not bound in call in unbind()");
+    }
+    if (_isOpen) {
+      endHandlingEvents();
+    }
+    if (_isInHandler) {
+      throw new MojoApiError(
+          "Cannot unbind a MojoEventHandler from inside a callback.");
+    }
+    var boundEndpoint = _endpoint;
+    _endpoint = null;
+    _eventSubscription = null;
+    return boundEndpoint;
   }
 
   Future close({bool immediate: false}) {
@@ -264,5 +320,5 @@ class MojoEventHandler {
   bool get isPeerClosed => _isPeerClosed;
 
   String toString() => "MojoEventHandler("
-      "isOpen: $isOpen, isBound: $isBound, endpoint: $_endpoint)";
+      "isOpen: $_isOpen, isBound: $isBound, endpoint: $_endpoint)";
 }

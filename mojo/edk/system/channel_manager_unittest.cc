@@ -6,23 +6,23 @@
 
 #include <functional>
 #include <memory>
-#include <utility>
+#include <thread>
 
-#include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/platform/message_loop.h"
+#include "mojo/edk/platform/platform_pipe.h"
 #include "mojo/edk/platform/task_runner.h"
 #include "mojo/edk/platform/test_message_loops.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/message_pipe_dispatcher.h"
-#include "mojo/edk/system/test/simple_test_thread.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 using mojo::platform::MessageLoop;
 using mojo::platform::PlatformHandleWatcher;
+using mojo::platform::PlatformPipe;
 using mojo::platform::TaskRunner;
 using mojo::platform::test::CreateTestMessageLoop;
 using mojo::platform::test::CreateTestMessageLoopForIO;
@@ -35,9 +35,10 @@ namespace {
 class ChannelManagerTest : public testing::Test {
  public:
   ChannelManagerTest()
-      : platform_handle_watcher_(nullptr),
+      : platform_support_(embedder::CreateSimplePlatformSupport()),
+        platform_handle_watcher_(nullptr),
         message_loop_(CreateTestMessageLoopForIO(&platform_handle_watcher_)),
-        channel_manager_(&platform_support_,
+        channel_manager_(platform_support_.get(),
                          message_loop_->GetTaskRunner().Clone(),
                          platform_handle_watcher_,
                          nullptr) {}
@@ -51,7 +52,7 @@ class ChannelManagerTest : public testing::Test {
   ChannelManager& channel_manager() { return channel_manager_; }
 
  private:
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
   // TODO(vtl): The |PlatformHandleWatcher| and |MessageLoop| should be injected
   // into the |ChannelManager|.
   // Valid while |message_loop_| is valid.
@@ -65,11 +66,11 @@ class ChannelManagerTest : public testing::Test {
 };
 
 TEST_F(ChannelManagerTest, Basic) {
-  embedder::PlatformChannelPair channel_pair;
+  PlatformPipe channel_pair;
 
   const ChannelId id = 1;
   RefPtr<MessagePipeDispatcher> d = channel_manager().CreateChannelOnIOThread(
-      id, channel_pair.PassServerHandle());
+      id, channel_pair.handle0.Pass());
 
   RefPtr<Channel> ch = channel_manager().GetChannel(id);
   EXPECT_TRUE(ch);
@@ -88,15 +89,15 @@ TEST_F(ChannelManagerTest, Basic) {
 }
 
 TEST_F(ChannelManagerTest, TwoChannels) {
-  embedder::PlatformChannelPair channel_pair;
+  PlatformPipe channel_pair;
 
   const ChannelId id1 = 1;
   RefPtr<MessagePipeDispatcher> d1 = channel_manager().CreateChannelOnIOThread(
-      id1, channel_pair.PassServerHandle());
+      id1, channel_pair.handle0.Pass());
 
   const ChannelId id2 = 2;
   RefPtr<MessagePipeDispatcher> d2 = channel_manager().CreateChannelOnIOThread(
-      id2, channel_pair.PassClientHandle());
+      id2, channel_pair.handle1.Pass());
 
   RefPtr<Channel> ch1 = channel_manager().GetChannel(id1);
   EXPECT_TRUE(ch1);
@@ -119,65 +120,38 @@ TEST_F(ChannelManagerTest, TwoChannels) {
   EXPECT_EQ(MOJO_RESULT_OK, d2->Close());
 }
 
-class OtherThread : public test::SimpleTestThread {
- public:
-  // Note: There should be no other refs to the channel identified by
-  // |channel_id| outside the channel manager.
-  OtherThread(RefPtr<TaskRunner>&& task_runner,
-              ChannelManager* channel_manager,
-              ChannelId channel_id,
-              std::function<void()>&& quit_closure)
-      : task_runner_(std::move(task_runner)),
-        channel_manager_(channel_manager),
-        channel_id_(channel_id),
-        quit_closure_(std::move(quit_closure)) {}
-  ~OtherThread() override {}
+TEST_F(ChannelManagerTest, CallsFromOtherThread) {
+  PlatformPipe channel_pair;
 
- private:
-  void Run() override {
+  const ChannelId id = 1;
+  RefPtr<MessagePipeDispatcher> d = channel_manager().CreateChannelOnIOThread(
+      id, channel_pair.handle0.Pass());
+
+  std::thread other_thread([this, id]() {
     // TODO(vtl): Once we have a way of creating a channel from off the I/O
     // thread, do that here instead.
 
     // You can use any unique, nonzero value as the ID.
-    RefPtr<Channel> ch = channel_manager_->GetChannel(channel_id_);
+    RefPtr<Channel> ch = channel_manager().GetChannel(id);
     // |ChannelManager| should have a ref.
     EXPECT_FALSE(ch->HasOneRef());
 
-    channel_manager_->WillShutdownChannel(channel_id_);
+    channel_manager().WillShutdownChannel(id);
     // |ChannelManager| should still have a ref.
     EXPECT_FALSE(ch->HasOneRef());
 
     {
       std::unique_ptr<MessageLoop> message_loop(CreateTestMessageLoop());
-      channel_manager_->ShutdownChannel(channel_id_, [&message_loop]() {
-        message_loop->QuitNow();
-      }, message_loop->GetTaskRunner().Clone());
+      channel_manager().ShutdownChannel(
+          id, [&message_loop]() { message_loop->QuitNow(); },
+          message_loop->GetTaskRunner().Clone());
       message_loop->Run();
     }
 
-    task_runner_->PostTask(std::move(quit_closure_));
-  }
-
-  const RefPtr<TaskRunner> task_runner_;
-  ChannelManager* const channel_manager_;
-  const ChannelId channel_id_;
-  std::function<void()> quit_closure_;
-
-  MOJO_DISALLOW_COPY_AND_ASSIGN(OtherThread);
-};
-
-TEST_F(ChannelManagerTest, CallsFromOtherThread) {
-  embedder::PlatformChannelPair channel_pair;
-
-  const ChannelId id = 1;
-  RefPtr<MessagePipeDispatcher> d = channel_manager().CreateChannelOnIOThread(
-      id, channel_pair.PassServerHandle());
-
-  OtherThread thread(task_runner().Clone(), &channel_manager(), id,
-                     [this]() { message_loop()->QuitNow(); });
-  thread.Start();
+    task_runner()->PostTask([this]() { message_loop()->QuitNow(); });
+  });
   message_loop()->Run();
-  thread.Join();
+  other_thread.join();
 
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }

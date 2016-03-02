@@ -91,8 +91,8 @@ std::ostream& operator<<(std::ostream& os,
     d.Append() << "content_transform=" << value.content_transform;
   if (value.content_clip)
     d.Append() << "content_clip=" << value.content_clip;
-  if (value.hit_id != mojo::gfx::composition::kHitIdNone)
-    d.Append() << "hit_id=" << value.hit_id;
+  if (value.hit_test_behavior)
+    d.Append() << "hit_test_behavior=" << value.hit_test_behavior;
   if (value.op)
     d.Append() << "op=" << value.op;
   d.Append() << "combinator=" << &value.combinator;
@@ -177,6 +177,58 @@ std::ostream& operator<<(std::ostream& os,
   return os << "{frame_time=" << value.frame_time
             << ", frame_interval=" << value.frame_interval
             << ", frame_deadline=" << value.frame_deadline << "}";
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::HitTestBehavior& value) {
+  return os << "{visibility=" << &value.visibility << ", prune" << value.prune
+            << ", hit_rect=" << value.hit_rect << "}";
+}
+
+std::ostream& operator<<(
+    std::ostream& os,
+    const mojo::gfx::composition::HitTestBehavior::Visibility* value) {
+  switch (*value) {
+    case mojo::gfx::composition::HitTestBehavior::Visibility::OPAQUE:
+      return os << "OPAQUE";
+    case mojo::gfx::composition::HitTestBehavior::Visibility::TRANSLUCENT:
+      return os << "TRANSLUCENT";
+    case mojo::gfx::composition::HitTestBehavior::Visibility::INVISIBLE:
+      return os << "INVISIBLE";
+    default:
+      return os << "???";
+  }
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::HitTestResult& value) {
+  return os << "{root=" << value.root << "}";
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::Hit& value) {
+  os << "{";
+  if (value.is_scene()) {
+    os << "scene=" << value.get_scene();
+  } else if (value.is_node()) {
+    os << "node=" << value.get_node();
+  } else {
+    os << "???";
+  }
+  return os << "}";
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::SceneHit& value) {
+  return os << "{scene_token=" << value.scene_token
+            << ", scene_version=" << value.scene_version
+            << ", hits=" << value.hits << "}";
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::NodeHit& value) {
+  return os << "{node_id=" << value.node_id
+            << ", intersection=" << value.intersection << "}";
 }
 
 }  // namespace composition

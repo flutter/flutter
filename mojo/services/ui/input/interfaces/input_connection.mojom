@@ -11,7 +11,7 @@ import "mojo/services/input_events/interfaces/input_events.mojom";
 // The input connection service allows a view to receive input events
 // such as key presses and pointer movements.
 
-// This service can be retrieved from the |ViewHost| service provider.
+// This service can be retrieved from the |View| service provider.
 //
 // TODO(jeffbrown): Elaborate this.  Particularly need to think about
 // how to handle focus and gestures.

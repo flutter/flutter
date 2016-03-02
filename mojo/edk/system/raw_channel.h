@@ -8,7 +8,6 @@
 #include <memory>
 #include <vector>
 
-#include "base/memory/weak_ptr.h"
 #include "mojo/edk/platform/platform_handle.h"
 #include "mojo/edk/platform/platform_handle_watcher.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
@@ -18,6 +17,7 @@
 #include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
+#include "mojo/edk/util/weak_ptr.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -334,7 +334,7 @@ class RawChannel {
 
   // This is used for posting tasks from write threads to the I/O thread. The
   // weak pointers it produces are only used/invalidated on the I/O thread.
-  base::WeakPtrFactory<RawChannel> weak_ptr_factory_
+  util::WeakPtrFactory<RawChannel> weak_ptr_factory_
       MOJO_GUARDED_BY(write_mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(RawChannel);

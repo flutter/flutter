@@ -5,13 +5,15 @@
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 
 #include <limits>
+#include <memory>
 
-#include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "mojo/edk/platform/platform_shared_buffer.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::PlatformSharedBufferMapping;
 using mojo::util::RefPtr;
 
 namespace mojo {
@@ -43,13 +45,16 @@ void RevalidateCreateOptions(
 
 class SharedBufferDispatcherTest : public testing::Test {
  public:
-  SharedBufferDispatcherTest() {}
+  SharedBufferDispatcherTest()
+      : platform_support_(embedder::CreateSimplePlatformSupport()) {}
   ~SharedBufferDispatcherTest() override {}
 
-  embedder::PlatformSupport* platform_support() { return &platform_support_; }
+  embedder::PlatformSupport* platform_support() {
+    return platform_support_.get();
+  }
 
  private:
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(SharedBufferDispatcherTest);
 };
@@ -124,7 +129,7 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
   EXPECT_EQ(Dispatcher::Type::SHARED_BUFFER, dispatcher->GetType());
 
   // Make a couple of mappings.
-  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping1;
+  std::unique_ptr<PlatformSharedBufferMapping> mapping1;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping1));
   ASSERT_TRUE(mapping1);
@@ -133,7 +138,7 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
   // Write something.
   static_cast<char*>(mapping1->GetBase())[50] = 'x';
 
-  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping2;
+  std::unique_ptr<PlatformSharedBufferMapping> mapping2;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 50, 50, MOJO_MAP_BUFFER_FLAG_NONE, &mapping2));
   ASSERT_TRUE(mapping2);
@@ -157,7 +162,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
   EXPECT_EQ(MOJO_RESULT_OK, result);
 
   // Map and write something.
-  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
+  std::unique_ptr<PlatformSharedBufferMapping> mapping;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher1->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   static_cast<char*>(mapping->GetBase())[0] = 'x';
@@ -260,7 +265,7 @@ TEST_F(SharedBufferDispatcherTest, MapBufferInvalidArguments) {
       &result);
   EXPECT_EQ(MOJO_RESULT_OK, result);
 
-  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping;
+  std::unique_ptr<PlatformSharedBufferMapping> mapping;
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             dispatcher->MapBuffer(0, 101, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   EXPECT_FALSE(mapping);

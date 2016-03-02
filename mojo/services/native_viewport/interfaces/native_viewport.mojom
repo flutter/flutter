@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[DartPackage="mojo_services"]
 module mojo;
 
 import "geometry/interfaces/geometry.mojom";
 import "gpu/interfaces/context_provider.mojom";
-import "input_events/interfaces/input_events.mojom";
+import "native_viewport/interfaces/native_viewport_event_dispatcher.mojom";
 
 struct ViewportMetrics {
   Size size;
@@ -46,9 +45,4 @@ interface NativeViewport {
   // the values last sent, so to receive continuous updates call this method
   // again after receiving the callback.
   RequestMetrics() => (ViewportMetrics metrics);
-};
-
-[ServiceName="mojo::NativeViewportEventDispatcher"]
-interface NativeViewportEventDispatcher {
-  OnEvent(Event event) => ();
 };

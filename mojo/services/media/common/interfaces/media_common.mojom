@@ -32,4 +32,5 @@ enum MediaResult {
   ALREADY_EXISTS         = -13, // bucket -> ALREADY_EXISTS
   NOT_FOUND              = -14, // bucket -> NOT_FOUND
   SHUTTING_DOWN          = -15, // bucket -> FAILED_PRECON
+  CONNECTION_LOST        = -16, // bucket -> INTERNAL?
 };

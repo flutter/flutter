@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 library service_describer_mojom;
-
 import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
+
 import 'package:mojo/mojo/bindings/types/mojom_types.mojom.dart' as mojom_types_mojom;
-const String serviceDescriberInterfaceName = "_ServiceDescriber";
 
 
 
@@ -68,10 +66,20 @@ class _ServiceDescriberDescribeServiceParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeString(interfaceName, 8, false);
-    
-    encoder0.encodeInterfaceRequest(descriptionRequest, 16, false);
+    try {
+      encoder0.encodeString(interfaceName, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "interfaceName of struct _ServiceDescriberDescribeServiceParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInterfaceRequest(descriptionRequest, 16, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "descriptionRequest of struct _ServiceDescriberDescribeServiceParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -85,6 +93,8 @@ class _ServiceDescriberDescribeServiceParams extends bindings.Struct {
         'Object containing handles cannot be encoded to JSON.');
   }
 }
+
+
 
 
 class _ServiceDescriptionGetTopLevelInterfaceParams extends bindings.Struct {
@@ -145,6 +155,8 @@ class _ServiceDescriptionGetTopLevelInterfaceParams extends bindings.Struct {
 }
 
 
+
+
 class ServiceDescriptionGetTopLevelInterfaceResponseParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
@@ -196,8 +208,13 @@ class ServiceDescriptionGetTopLevelInterfaceResponseParams extends bindings.Stru
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeStruct(mojomInterface, 8, false);
+    try {
+      encoder0.encodeStruct(mojomInterface, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "mojomInterface of struct ServiceDescriptionGetTopLevelInterfaceResponseParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -211,6 +228,8 @@ class ServiceDescriptionGetTopLevelInterfaceResponseParams extends bindings.Stru
     return map;
   }
 }
+
+
 
 
 class _ServiceDescriptionGetTypeDefinitionParams extends bindings.Struct {
@@ -263,8 +282,13 @@ class _ServiceDescriptionGetTypeDefinitionParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeString(typeKey, 8, false);
+    try {
+      encoder0.encodeString(typeKey, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "typeKey of struct _ServiceDescriptionGetTypeDefinitionParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -278,6 +302,8 @@ class _ServiceDescriptionGetTypeDefinitionParams extends bindings.Struct {
     return map;
   }
 }
+
+
 
 
 class ServiceDescriptionGetTypeDefinitionResponseParams extends bindings.Struct {
@@ -330,8 +356,13 @@ class ServiceDescriptionGetTypeDefinitionResponseParams extends bindings.Struct 
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeUnion(type, 8, true);
+    try {
+      encoder0.encodeUnion(type, 8, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "type of struct ServiceDescriptionGetTypeDefinitionResponseParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -345,6 +376,8 @@ class ServiceDescriptionGetTypeDefinitionResponseParams extends bindings.Struct 
     return map;
   }
 }
+
+
 
 
 class _ServiceDescriptionGetAllTypeDefinitionsParams extends bindings.Struct {
@@ -403,6 +436,8 @@ class _ServiceDescriptionGetAllTypeDefinitionsParams extends bindings.Struct {
     return map;
   }
 }
+
+
 
 
 class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Struct {
@@ -492,30 +527,32 @@ class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Str
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    if (definitions == null) {
-      encoder0.encodeNullPointer(8, true);
-    } else {
-      var encoder1 = encoder0.encoderForMap(8);
-      int size0 = definitions.length;
-      var keys0 = definitions.keys.toList();
-      var values0 = definitions.values.toList();
-      
-      {
-        var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < keys0.length; ++i1) {
-          
-          encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+    try {
+      if (definitions == null) {
+        encoder0.encodeNullPointer(8, true);
+      } else {
+        var encoder1 = encoder0.encoderForMap(8);
+        var keys0 = definitions.keys.toList();
+        var values0 = definitions.values.toList();
+        
+        {
+          var encoder2 = encoder1.encodePointerArray(keys0.length, bindings.ArrayDataHeader.kHeaderSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < keys0.length; ++i1) {
+            encoder2.encodeString(keys0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i1, false);
+          }
+        }
+        
+        {
+          var encoder2 = encoder1.encodeUnionArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
+          for (int i1 = 0; i1 < values0.length; ++i1) {
+            encoder2.encodeUnion(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i1, false);
+          }
         }
       }
-      
-      {
-        var encoder2 = encoder1.encodeUnionArray(values0.length, bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize, bindings.kUnspecifiedArrayLength);
-        for (int i1 = 0; i1 < values0.length; ++i1) {
-          
-          encoder2.encodeUnion(values0[i1], bindings.ArrayDataHeader.kHeaderSize + bindings.kUnionSize * i1, false);
-        }
-      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "definitions of struct ServiceDescriptionGetAllTypeDefinitionsResponseParams: $e";
+      rethrow;
     }
   }
 
@@ -531,7 +568,23 @@ class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Str
   }
 }
 
+
+
+
 const int _ServiceDescriber_describeServiceName = 0;
+
+
+
+class _ServiceDescriberServiceDescription implements ServiceDescription {
+  dynamic getTopLevelInterface([Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getTypeDefinition(String typeKey, [Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getAllTypeDefinitions([Function responseFactory]) =>
+      responseFactory(null);
+}
 
 abstract class ServiceDescriber {
   static const String serviceName = "mojo::bindings::types::ServiceDescriber";
@@ -553,6 +606,9 @@ class _ServiceDescriberProxyImpl extends bindings.Proxy {
     assert(endpoint.setDescription("For _ServiceDescriberProxyImpl"));
     return new _ServiceDescriberProxyImpl.fromEndpoint(endpoint);
   }
+
+  ServiceDescription get serviceDescription =>
+    new _ServiceDescriberServiceDescription();
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -698,11 +754,32 @@ class ServiceDescriberStub extends bindings.Stub {
   }
 
   int get version => 0;
+
+  static ServiceDescription _cachedServiceDescription;
+  static ServiceDescription get serviceDescription {
+    if (_cachedServiceDescription == null) {
+      _cachedServiceDescription = new _ServiceDescriberServiceDescription();
+    }
+    return _cachedServiceDescription;
+  }
 }
 
 const int _ServiceDescription_getTopLevelInterfaceName = 0;
 const int _ServiceDescription_getTypeDefinitionName = 1;
 const int _ServiceDescription_getAllTypeDefinitionsName = 2;
+
+
+
+class _ServiceDescriptionServiceDescription implements ServiceDescription {
+  dynamic getTopLevelInterface([Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getTypeDefinition(String typeKey, [Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getAllTypeDefinitions([Function responseFactory]) =>
+      responseFactory(null);
+}
 
 abstract class ServiceDescription {
   static const String serviceName = null;
@@ -726,6 +803,9 @@ class _ServiceDescriptionProxyImpl extends bindings.Proxy {
     assert(endpoint.setDescription("For _ServiceDescriptionProxyImpl"));
     return new _ServiceDescriptionProxyImpl.fromEndpoint(endpoint);
   }
+
+  ServiceDescription get serviceDescription =>
+    new _ServiceDescriptionServiceDescription();
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -938,8 +1018,6 @@ class ServiceDescriptionStub extends bindings.Stub {
     assert(_impl != null);
     switch (message.header.type) {
       case _ServiceDescription_getTopLevelInterfaceName:
-        var params = _ServiceDescriptionGetTopLevelInterfaceParams.deserialize(
-            message.payload);
         var response = _impl.getTopLevelInterface(_ServiceDescriptionGetTopLevelInterfaceResponseParamsFactory);
         if (response is Future) {
           return response.then((response) {
@@ -982,8 +1060,6 @@ class ServiceDescriptionStub extends bindings.Stub {
         }
         break;
       case _ServiceDescription_getAllTypeDefinitionsName:
-        var params = _ServiceDescriptionGetAllTypeDefinitionsParams.deserialize(
-            message.payload);
         var response = _impl.getAllTypeDefinitions(_ServiceDescriptionGetAllTypeDefinitionsResponseParamsFactory);
         if (response is Future) {
           return response.then((response) {
@@ -1022,6 +1098,15 @@ class ServiceDescriptionStub extends bindings.Stub {
   }
 
   int get version => 0;
+
+  static ServiceDescription _cachedServiceDescription;
+  static ServiceDescription get serviceDescription {
+    if (_cachedServiceDescription == null) {
+      _cachedServiceDescription = new _ServiceDescriptionServiceDescription();
+    }
+    return _cachedServiceDescription;
+  }
 }
+
 
 

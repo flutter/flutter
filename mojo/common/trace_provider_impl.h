@@ -26,8 +26,9 @@ class TraceProviderImpl : public tracing::TraceProvider {
 
  private:
   // tracing::TraceProvider implementation:
-  void StartTracing(const String& categories,
-                    tracing::TraceRecorderPtr recorder) override;
+  void StartTracing(
+      const String& categories,
+      mojo::InterfaceHandle<tracing::TraceRecorder> recorder) override;
   void StopTracing() override;
 
   void SendChunk(const scoped_refptr<base::RefCountedString>& events_str,

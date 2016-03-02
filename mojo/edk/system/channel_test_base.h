@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "mojo/edk/embedder/simple_platform_support.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/util/ref_ptr.h"
@@ -15,6 +14,11 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
+
+namespace embedder {
+class PlatformSupport;
+}
+
 namespace system {
 
 class RawChannel;
@@ -43,7 +47,7 @@ class ChannelTestBase : public testing::Test {
  private:
   void SetUpOnIOThread();
 
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
   TestIOThread io_thread_;
   std::unique_ptr<RawChannel> raw_channels_[2];
   util::RefPtr<Channel> channels_[2];

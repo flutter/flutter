@@ -5,7 +5,8 @@
 #ifndef MOJO_EDK_SYSTEM_MESSAGE_PIPE_TEST_UTILS_H_
 #define MOJO_EDK_SYSTEM_MESSAGE_PIPE_TEST_UTILS_H_
 
-#include "mojo/edk/embedder/simple_platform_support.h"
+#include <memory>
+
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/test/test_io_thread.h"
@@ -14,6 +15,11 @@
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
+
+namespace embedder {
+class PlatformSupport;
+}
+
 namespace system {
 
 class Channel;
@@ -55,11 +61,13 @@ class MultiprocessMessagePipeTestBase : public testing::Test {
  protected:
   void Init(util::RefPtr<ChannelEndpoint>&& ep);
 
-  embedder::PlatformSupport* platform_support() { return &platform_support_; }
+  embedder::PlatformSupport* platform_support() {
+    return platform_support_.get();
+  }
   mojo::test::MultiprocessTestHelper* helper() { return &helper_; }
 
  private:
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
   ChannelThread channel_thread_;
   mojo::test::MultiprocessTestHelper helper_;
 

@@ -8,42 +8,100 @@ module mojo.gfx.composition;
 import "mojo/services/geometry/interfaces/geometry.mojom";
 import "mojo/services/gfx/composition/interfaces/scene_token.mojom";
 
-// Indicates that hit testing is not needed for a given node.
-const uint32 kHitIdNone = 0;
+// Determines how a node behaves during hit testing.
+//
+// See |Node| for more details of the hit testing traversal process.
+struct HitTestBehavior {
+  // The visibility specifies how a node itself is hit and its effect on
+  // the hit testing traversal.
+  enum Visibility {
+    // The node can be hit and prevents other targets visually behind the
+    // node from being hit.  This is the default.
+    //
+    // Opaque targets are useful for UI elements like buttons which cover and
+    // block interaction with content visually behind them.
+    OPAQUE,
 
-// Provides information about the point of intersection of a hit test with
-// a node in a scene graph.
-struct Hit {
-  // The scene token of the scene which was hit.
-  SceneToken scene_token;
+    // The node can be hit and allows other targets visually behind the node
+    // to also be hit.
+    //
+    // Translucent targets are useful for UI elements like dimissed drawers
+    // which may not obscure content visually behind them but which do need
+    // to intercept gestures in that area (perhaps to reveal themselves).
+    TRANSLUCENT,
 
-  // The version of the scene which was consulted as part of evaluating the
-  // hit test.
-  uint32 scene_version;
+    // The node cannot be hit.
+    //
+    // Invisible targets are useful for explicitly suppressing hit testing
+    // for a node and its children when combined with the |prune| flag.
+    INVISIBLE,
+  };
 
-  // The node id of the node which was hit.
-  uint32 node_id;
+  // Specifies the visibility of the node for hit testing purposes.
+  // The default is opaque.
+  Visibility visibility = Visibility.OPAQUE;
 
-  // The hit test id of the node which was hit.
-  uint32 hit_id;
+  // When set to true, prevents a node's children from being hit tested.
+  bool prune = false;
 
-  // The coordinates of the hit within the node's content space.
-  mojo.Point intersection;
-};
-
-// The result of a hit test operation.
-struct HitTestResult {
-  // A sorted list of hits in dispatch order from the top-most hit node
-  // to the nodes underneath it and containing it, or an empty array if none.
-  // Omits nodes for which the hit_id was |kHitIdNone|.
-  array<Hit> hits;
+  // The rectangle within the node's content space to test for hits.
+  // If null, the node's entire clip region is tested for hits.
+  //
+  // TODO(jeffbrown): Support more complex hit test regions and masks.
+  mojo.Rect? hit_rect;
 };
 
 // A hit testing service for scene graphs.
 interface HitTester {
   // Performs a hit test on the specified point.
   //
-  // TODO(jeffbrown): Specify a timestamp to allow for hit-tests of geometry
-  // as it appeared in the recent past.
+  // TODO(jeffbrown): Specify a presentation timestamp to allow for
+  // hit-tests of geometry as it appeared to the user in the recent past.
   HitTest(mojo.Point point) => (HitTestResult result);
+};
+
+// The result of a hit test operation.
+//
+// Hit test results form a hit tree with information about the nodes which
+// were hit and the scenes which contain them.  The structure of the hit
+// tree reflects the path that the scene graph was traversed during the
+// hit test.
+//
+// To walk the hit nodes in dispatch order, perform a post-order traversal
+// of the hit tree starting at |root| and processing children before their
+// parents.
+struct HitTestResult {
+  // A tree of hits beginning at the root scene, or null if nothing was hit.
+  SceneHit? root;
+};
+
+// An element in a hit tree.
+// This either contains a reference to another scene which contains hits or
+// to a specific node within the containing scene which was hit.
+union Hit {
+  SceneHit scene;
+  NodeHit node;
+};
+
+// Describes a collection of hits within a scene.
+struct SceneHit {
+  // The scene token of the scene which contains hits.
+  SceneToken scene_token;
+
+  // The version of the scene which was consulted at the time the hit test
+  // was performed.
+  uint32 scene_version;
+
+  // The array of hits within this scene, in dispatch order.
+  // This list always contains at least one entry.
+  array<Hit> hits;
+};
+
+// Describes the point of intersection of a hit test with a node.
+struct NodeHit {
+  // The node id of the node which was hit.
+  uint32 node_id;
+
+  // The coordinates of the hit within the node's content space.
+  mojo.Point intersection;
 };

@@ -12,6 +12,7 @@
 #include "mojo/edk/system/platform_handle_dispatcher.h"
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 
+using mojo::platform::PlatformSharedBufferMapping;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::util::MutexLocker;
 using mojo::util::RefPtr;
@@ -209,7 +210,7 @@ MojoResult Dispatcher::MapBuffer(
     uint64_t offset,
     uint64_t num_bytes,
     MojoMapBufferFlags flags,
-    std::unique_ptr<embedder::PlatformSharedBufferMapping>* mapping) {
+    std::unique_ptr<PlatformSharedBufferMapping>* mapping) {
   MutexLocker locker(&mutex_);
   if (is_closed_)
     return MOJO_RESULT_INVALID_ARGUMENT;
@@ -361,7 +362,7 @@ MojoResult Dispatcher::MapBufferImplNoLock(
     uint64_t /*offset*/,
     uint64_t /*num_bytes*/,
     MojoMapBufferFlags /*flags*/,
-    std::unique_ptr<embedder::PlatformSharedBufferMapping>* /*mapping*/) {
+    std::unique_ptr<PlatformSharedBufferMapping>* /*mapping*/) {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
   // By default, not supported. Only needed for buffer dispatchers.

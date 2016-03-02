@@ -11,9 +11,9 @@
 
 #include "base/logging.h"
 #include "mojo/edk/embedder/master_process_delegate.h"
-#include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/platform/io_thread.h"
 #include "mojo/edk/platform/platform_handle.h"
+#include "mojo/edk/platform/platform_pipe.h"
 #include "mojo/edk/platform/thread.h"
 #include "mojo/edk/system/connection_manager_messages.h"
 #include "mojo/edk/system/message_in_transit.h"
@@ -25,6 +25,7 @@
 
 using mojo::platform::PlatformHandle;
 using mojo::platform::PlatformHandleWatcher;
+using mojo::platform::PlatformPipe;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::TaskRunner;
 using mojo::platform::Thread;
@@ -631,12 +632,12 @@ ConnectionManager::Result MasterConnectionManager::ConnectImplHelperNoLock(
           peer_process_identifier,
           ProcessConnections::ConnectionStatus::RUNNING,
           ScopedPlatformHandle());
-      embedder::PlatformChannelPair platform_channel_pair;
-      *platform_handle = platform_channel_pair.PassServerHandle();
+      PlatformPipe platform_pipe;
+      *platform_handle = platform_pipe.handle0.Pass();
 
       connections_[peer_process_identifier]->AddConnection(
           process_identifier, ProcessConnections::ConnectionStatus::PENDING,
-          platform_channel_pair.PassClientHandle());
+          platform_pipe.handle1.Pass());
       break;
     }
     case ProcessConnections::ConnectionStatus::PENDING:

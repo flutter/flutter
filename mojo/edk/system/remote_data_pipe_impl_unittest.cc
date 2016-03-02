@@ -7,11 +7,12 @@
 
 #include <stdint.h>
 
+#include <memory>
 #include <utility>
 
 #include "base/logging.h"
-#include "mojo/edk/embedder/platform_channel_pair.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "mojo/edk/platform/platform_pipe.h"
 #include "mojo/edk/system/channel.h"
 #include "mojo/edk/system/channel_endpoint.h"
 #include "mojo/edk/system/data_pipe.h"
@@ -27,6 +28,7 @@
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::PlatformPipe;
 using mojo::util::MakeRefCounted;
 using mojo::util::RefPtr;
 
@@ -40,7 +42,9 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteDataPipeImplTest : public testing::Test {
  public:
-  RemoteDataPipeImplTest() : io_thread_(test::TestIOThread::StartMode::AUTO) {}
+  RemoteDataPipeImplTest()
+      : platform_support_(embedder::CreateSimplePlatformSupport()),
+        io_thread_(test::TestIOThread::StartMode::AUTO) {}
   ~RemoteDataPipeImplTest() override {}
 
   void SetUp() override {
@@ -87,16 +91,16 @@ class RemoteDataPipeImplTest : public testing::Test {
                        RefPtr<ChannelEndpoint>&& ep1) {
     CHECK(io_thread_.IsCurrentAndRunning());
 
-    embedder::PlatformChannelPair channel_pair;
-    channels_[0] = MakeRefCounted<Channel>(&platform_support_);
+    PlatformPipe channel_pair;
+    channels_[0] = MakeRefCounted<Channel>(platform_support_.get());
     channels_[0]->Init(io_thread_.task_runner().Clone(),
                        io_thread_.platform_handle_watcher(),
-                       RawChannel::Create(channel_pair.PassServerHandle()));
+                       RawChannel::Create(channel_pair.handle0.Pass()));
     channels_[0]->SetBootstrapEndpoint(std::move(ep0));
-    channels_[1] = MakeRefCounted<Channel>(&platform_support_);
+    channels_[1] = MakeRefCounted<Channel>(platform_support_.get());
     channels_[1]->Init(io_thread_.task_runner().Clone(),
                        io_thread_.platform_handle_watcher(),
-                       RawChannel::Create(channel_pair.PassClientHandle()));
+                       RawChannel::Create(channel_pair.handle1.Pass()));
     channels_[1]->SetBootstrapEndpoint(std::move(ep1));
   }
 
@@ -113,7 +117,7 @@ class RemoteDataPipeImplTest : public testing::Test {
     }
   }
 
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
   test::TestIOThread io_thread_;
   RefPtr<Channel> channels_[2];
   RefPtr<MessagePipe> message_pipes_[2];

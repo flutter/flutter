@@ -11,7 +11,7 @@
 #include <functional>
 #include <ostream>
 
-#include "base/gtest_prod_util.h"
+#include "mojo/edk/util/gtest_prod_utils.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

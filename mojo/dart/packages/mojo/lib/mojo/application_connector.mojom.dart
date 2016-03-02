@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 library application_connector_mojom;
-
 import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
+import 'package:mojo/mojo/bindings/types/service_describer.mojom.dart' as service_describer;
 import 'package:mojo/mojo/service_provider.mojom.dart' as service_provider_mojom;
 
 
@@ -72,12 +71,27 @@ class _ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeString(applicationUrl, 8, false);
-    
-    encoder0.encodeInterfaceRequest(services, 16, true);
-    
-    encoder0.encodeInterface(exposedServices, 20, true);
+    try {
+      encoder0.encodeString(applicationUrl, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "applicationUrl of struct _ApplicationConnectorConnectToApplicationParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInterfaceRequest(services, 16, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "services of struct _ApplicationConnectorConnectToApplicationParams: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeInterface(exposedServices, 20, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "exposedServices of struct _ApplicationConnectorConnectToApplicationParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -92,6 +106,8 @@ class _ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
         'Object containing handles cannot be encoded to JSON.');
   }
 }
+
+
 
 
 class _ApplicationConnectorDuplicateParams extends bindings.Struct {
@@ -144,8 +160,13 @@ class _ApplicationConnectorDuplicateParams extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeInterfaceRequest(applicationConnectorRequest, 8, false);
+    try {
+      encoder0.encodeInterfaceRequest(applicationConnectorRequest, 8, false);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "applicationConnectorRequest of struct _ApplicationConnectorDuplicateParams: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -159,8 +180,24 @@ class _ApplicationConnectorDuplicateParams extends bindings.Struct {
   }
 }
 
+
+
+
 const int _ApplicationConnector_connectToApplicationName = 0;
 const int _ApplicationConnector_duplicateName = 1;
+
+
+
+class _ApplicationConnectorServiceDescription implements service_describer.ServiceDescription {
+  dynamic getTopLevelInterface([Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getTypeDefinition(String typeKey, [Function responseFactory]) =>
+      responseFactory(null);
+
+  dynamic getAllTypeDefinitions([Function responseFactory]) =>
+      responseFactory(null);
+}
 
 abstract class ApplicationConnector {
   static const String serviceName = null;
@@ -183,6 +220,9 @@ class _ApplicationConnectorProxyImpl extends bindings.Proxy {
     assert(endpoint.setDescription("For _ApplicationConnectorProxyImpl"));
     return new _ApplicationConnectorProxyImpl.fromEndpoint(endpoint);
   }
+
+  service_describer.ServiceDescription get serviceDescription =>
+    new _ApplicationConnectorServiceDescription();
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
@@ -343,6 +383,15 @@ class ApplicationConnectorStub extends bindings.Stub {
   }
 
   int get version => 0;
+
+  static service_describer.ServiceDescription _cachedServiceDescription;
+  static service_describer.ServiceDescription get serviceDescription {
+    if (_cachedServiceDescription == null) {
+      _cachedServiceDescription = new _ApplicationConnectorServiceDescription();
+    }
+    return _cachedServiceDescription;
+  }
 }
+
 
 

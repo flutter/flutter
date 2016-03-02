@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MOJO_EDK_EMBEDDER_PLATFORM_SHARED_BUFFER_H_
-#define MOJO_EDK_EMBEDDER_PLATFORM_SHARED_BUFFER_H_
+#ifndef MOJO_EDK_PLATFORM_PLATFORM_SHARED_BUFFER_H_
+#define MOJO_EDK_PLATFORM_PLATFORM_SHARED_BUFFER_H_
 
 #include <stddef.h>
 
@@ -14,7 +14,7 @@
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
-namespace embedder {
+namespace platform {
 
 class PlatformSharedBufferMapping;
 
@@ -56,13 +56,13 @@ class PlatformSharedBuffer
 
   // Duplicates the underlying platform handle and passes it to the caller.
   // TODO(vtl): On POSIX, we'll need two FDs to support sharing read-only.
-  virtual platform::ScopedPlatformHandle DuplicatePlatformHandle() = 0;
+  virtual ScopedPlatformHandle DuplicatePlatformHandle() = 0;
 
   // Passes the underlying platform handle to the caller. This should only be
   // called if there's a unique reference to this object (owned by the caller).
   // After calling this, this object should no longer be used, but should only
   // be disposed of.
-  virtual platform::ScopedPlatformHandle PassPlatformHandle() = 0;
+  virtual ScopedPlatformHandle PassPlatformHandle() = 0;
 
  protected:
   friend class util::RefCountedThreadSafe<PlatformSharedBuffer>;
@@ -97,7 +97,7 @@ class PlatformSharedBufferMapping {
   MOJO_DISALLOW_COPY_AND_ASSIGN(PlatformSharedBufferMapping);
 };
 
-}  // namespace embedder
+}  // namespace platform
 }  // namespace mojo
 
-#endif  // MOJO_EDK_EMBEDDER_PLATFORM_SHARED_BUFFER_H_
+#endif  // MOJO_EDK_PLATFORM_PLATFORM_SHARED_BUFFER_H_

@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 library url_response_mojom;
-
-import 'dart:async';
-
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
+
 import 'package:mojo/mojo/http_header.mojom.dart' as http_header_mojom;
 import 'package:mojo/mojo/network_error.mojom.dart' as network_error_mojom;
 
@@ -125,36 +123,90 @@ class UrlResponse extends bindings.Struct {
 
   void encode(bindings.Encoder encoder) {
     var encoder0 = encoder.getStructEncoderAtOffset(kVersions.last);
-    
-    encoder0.encodeStruct(error, 8, true);
-    
-    encoder0.encodeConsumerHandle(body, 16, true);
-    
-    encoder0.encodeUint32(statusCode, 20);
-    
-    encoder0.encodeString(url, 24, true);
-    
-    encoder0.encodeString(statusLine, 32, true);
-    
-    if (headers == null) {
-      encoder0.encodeNullPointer(40, true);
-    } else {
-      var encoder1 = encoder0.encodePointerArray(headers.length, 40, bindings.kUnspecifiedArrayLength);
-      for (int i0 = 0; i0 < headers.length; ++i0) {
-        
-        encoder1.encodeStruct(headers[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
-      }
+    try {
+      encoder0.encodeStruct(error, 8, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "error of struct UrlResponse: $e";
+      rethrow;
     }
-    
-    encoder0.encodeString(mimeType, 48, true);
-    
-    encoder0.encodeString(charset, 56, true);
-    
-    encoder0.encodeString(redirectMethod, 64, true);
-    
-    encoder0.encodeString(redirectUrl, 72, true);
-    
-    encoder0.encodeString(redirectReferrer, 80, true);
+    try {
+      encoder0.encodeConsumerHandle(body, 16, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "body of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeUint32(statusCode, 20);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "statusCode of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(url, 24, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "url of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(statusLine, 32, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "statusLine of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      if (headers == null) {
+        encoder0.encodeNullPointer(40, true);
+      } else {
+        var encoder1 = encoder0.encodePointerArray(headers.length, 40, bindings.kUnspecifiedArrayLength);
+        for (int i0 = 0; i0 < headers.length; ++i0) {
+          encoder1.encodeStruct(headers[i0], bindings.ArrayDataHeader.kHeaderSize + bindings.kPointerSize * i0, false);
+        }
+      }
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "headers of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(mimeType, 48, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "mimeType of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(charset, 56, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "charset of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(redirectMethod, 64, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "redirectMethod of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(redirectUrl, 72, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "redirectUrl of struct UrlResponse: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeString(redirectReferrer, 80, true);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "redirectReferrer of struct UrlResponse: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -177,5 +229,9 @@ class UrlResponse extends bindings.Struct {
         'Object containing handles cannot be encoded to JSON.');
   }
 }
+
+
+
+
 
 

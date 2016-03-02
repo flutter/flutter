@@ -5,8 +5,10 @@
 #include "mojo/edk/system/mapping_table.h"
 
 #include "base/logging.h"
-#include "mojo/edk/embedder/platform_shared_buffer.h"
+#include "mojo/edk/platform/platform_shared_buffer.h"
 #include "mojo/edk/system/configuration.h"
+
+using mojo::platform::PlatformSharedBufferMapping;
 
 namespace mojo {
 namespace system {
@@ -20,7 +22,7 @@ MappingTable::~MappingTable() {
 }
 
 MojoResult MappingTable::AddMapping(
-    std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping) {
+    std::unique_ptr<PlatformSharedBufferMapping> mapping) {
   DCHECK(mapping);
 
   if (address_to_mapping_map_.size() >=
@@ -38,7 +40,7 @@ MojoResult MappingTable::RemoveMapping(uintptr_t address) {
   AddressToMappingMap::iterator it = address_to_mapping_map_.find(address);
   if (it == address_to_mapping_map_.end())
     return MOJO_RESULT_INVALID_ARGUMENT;
-  embedder::PlatformSharedBufferMapping* mapping_to_delete = it->second;
+  PlatformSharedBufferMapping* mapping_to_delete = it->second;
   address_to_mapping_map_.erase(it);
   delete mapping_to_delete;
   return MOJO_RESULT_OK;

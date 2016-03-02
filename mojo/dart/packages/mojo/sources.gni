@@ -40,6 +40,7 @@ package_mojo_sources = [
                          "lib/src/message.dart",
                          "lib/src/message_pipe.dart",
                          "lib/src/proxy.dart",
+                         "lib/src/service_describer.dart",
                          "lib/src/struct.dart",
                          "lib/src/stub.dart",
                          "lib/src/types.dart",

@@ -49,7 +49,7 @@ class ArrayDataHeader {
 }
 
 class MojoCodecError {
-  final String message;
+  String message;
   MojoCodecError(this.message);
   String toString() => message;
 }

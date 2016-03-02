@@ -11,9 +11,6 @@
 #include "mojo/edk/system/channel_manager.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/handle_table.h"
-#include "mojo/edk/util/make_unique.h"
-
-using mojo::util::MakeUnique;
 
 namespace mojo {
 
@@ -43,7 +40,7 @@ namespace embedder {
 namespace test {
 
 void InitWithSimplePlatformSupport() {
-  Init(MakeUnique<SimplePlatformSupport>());
+  Init(CreateSimplePlatformSupport());
 }
 
 bool Shutdown() {

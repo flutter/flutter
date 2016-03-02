@@ -19,9 +19,6 @@ struct AudioTrackConfiguration {
   // The media type to use.
   MediaType media_type;
 
-  // Desired maximum buffer size, in frames of audio.
-  uint64 max_frames;
-
   // Ratio of audio frames to media time ticks.
   //
   // Presentation time stamps on audio packets are expressed in units of media
@@ -41,44 +38,24 @@ struct AudioTrackConfiguration {
 };
 
 interface AudioTrack {
+  // A special value which will always cause a track to become explicitly muted.
+  const float kMutedGain = -160.0;
+
+  // The maximum permitted above-unity gain.
+  const float kMaxGain = 20.0;
+
   // Get the descriptor.
   Describe() => (AudioTrackDescriptor descriptor);
 
   // Set the configuration, receive a pipe to send data to in return.
-  // Possible results include...
-  //
-  // OK:
-  //   Configuration successful, the bound pipe interface is ready to be used.
-  //
-  // INVALID_ARGUMENT:
-  //   One or more of the configuration arguments are illegal.  For example, a
-  //   value of 0 for either numerator or denominator of the audio frame to
-  //   media time ratio.
-  //
-  // kUnsupportedConfig:
-  //   The requested configuration is not supported by this track.
-  //
-  // INSUFFICIENT_RESOURCES:
-  //   Resource limitations prevent configuring the audio track is the desired
-  //   way.  Perhaps there is not enough RAM to support the 2.7 days of audio
-  //   buffer you requested, or perhaps there is not enough CPU power given the
-  //   existing active tracks in the system to support rendering 128 channels
-  //   at 1.5 MHz frame rate.
-  //
-  // BAD_STATE:
-  //  The track is already configured and has pending data in its pipe.  Data
-  //  needs to be flushed and the media clock must be stopped before the track
-  //  may be re-configured.
-  Configure(AudioTrackConfiguration configuration,
-            MediaPipe& pipe) => (MediaResult result);
+  Configure(AudioTrackConfiguration configuration, MediaPipe& pipe);
 
   // Request the rate control interface for this AudioTrack
-  // Possbile results include...
-  //
-  // OK:
-  //  Everything went well.
-  //
-  // BAD_STATE:
-  //  Rate control interface is already bound to a different client.
-  GetRateControl(RateControl& rate_control) => (MediaResult result);
+  GetRateControl(RateControl& rate_control);
+
+  // Sets the current gain/attenuation of the track, expressed in dB.  Legal
+  // values are in the range [-inf, 20.0].  Any value less than or equal to the
+  // constant kMutedGain will result in the track becoming explicitly muted
+  // (regardless of its underlying resolution or intensity).
+  SetGain(float db_gain);
 };

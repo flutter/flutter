@@ -16,10 +16,12 @@ import "mojo/services/gfx/composition/interfaces/hit_tests.mojom";
 // references to embedded scenes.  Nodes are arranged to form a directed
 // acyclic graph of drawing commands.
 //
-// The node graph is processed in pre-order traversal.  Starting from the
-// root, the compositor applies the transformation, clip, recursively
-// processes the node's children according to the node's combinator rule,
-// then applies the node's own operation.
+// RENDERING
+//
+// The node graph is renderer in pre-order traversal.  Starting from the
+// root, the compositor applies the transformation, clip, applies the
+// node's operation (if any), then recursively processes the node's children
+// according to the node's combinator rule.
 //
 // BLOCKED NODES
 //
@@ -53,15 +55,91 @@ import "mojo/services/gfx/composition/interfaces/hit_tests.mojom";
 // missing content for an earlier version of that content or for a placeholder
 // if not available.
 //
+// HIT TESTING
+//
+// Hit testing is the process of determining which nodes within a scene graph
+// should be responsible for handling events which occur within their visual
+// space on the screen.
+//
+// For example, when the user touches objects on a touch screen, the input
+// system asks the compositor to performs a hit test at the contact point to
+// find the nodes which represent the objects the user wants to interact with.
+// The result of the hit test is a list of nodes, in dispatch order, which
+// have asked to participate in handling events related to the contact point.
+//
+// Nodes may be opaque, translucent, or invisible to the hit testing
+// process depending on whether they prevent or allow targets visually
+// behind them from being hit and whether they can actually be hit,
+// as specified by |HitTestBehavior.visibility|.
+//
+// Nodes are added to the hit test result whenever one of their opaque children
+// is hit.  This is useful for scrolling containers which may need to intercept
+// certain gestures within the space of their children and therefore need to
+// be added to the hit test result themselves.
+//
+// Nodes can also request to prune hit testing for their children, which
+// prevents their children from being hit.
+//
+// Hit testing proceeds recursively in post-order traversal (the reverse of
+// the drawing order).  Intuitively, this means that the most specific
+// (deepest) nodes of the tree are tested before their ancestors.
+//
+// Starting from the root, the compositor transforms the point of interest
+// into the node's coordinate system, rejects the node if the point is
+// outside of the node's clip region, otherwise recursively tests the
+// node's children (those which were selected by the combinator rule)
+// until the first opaque target hit is found, then evaluates the node's
+// |HitTestBehavior| to determine whether the node was hit.  Nodes are
+// accumulated into a hit test result in the order in which they were
+// determined to have been hit.
+//
+// See |HitTestBehavior| for more details.
+//
+// INSTANCING
+//
+// The compositor allows nodes to be referenced and reused multiple times
+// within a scene (this is known as instancing).  Instancing makes it easier
+// to take advantage of combinators for interleaving placeholder content
+// when certain nodes are blocked from rendering (see above).  It also allows
+// common elements to be reused if desired.
+//
+// Likewise, the compositor allows scenes to be multiply referenced so that
+// the same content can be presented simultaneously in several places.
+//
+// CYCLES
+//
+// The compositor forbids cycles among nodes within scenes and will
+// reject scene updates which introduce node cycles by closing the client's
+// connection.
+//
+// Likewise, the compositor forbids cycles across scenes and will respond
+// to them by considering any scene within a cycle to be blocked from
+// rendering.
+//
+// For example, if there are scenes A, B, and C linked such that rendering
+// would traverse a path A -> B -> C -> B, the compositor will consider both
+// scenes B and C to be blocked and will apply A's combinator rules as required
+// to resolve the problem at the point where it would have entered the cycle.
+// This may cause A itself to be blocked if there are no applicable |PRUNE|
+// or |FALLBACK| predicated alternatives.
+//
+// This policy protects clients from cross-scene cycles which may have been
+// introduced downstream in the graph without their knowledge or which may
+// occur transiently, so long as they are not within the cycle themselves.
+// It also ensures that cycles are resolved deterministically regardless of
+// where they are encountered during traversal; all scenes within the cycle
+// are suppressed.
+//
 // TIPS
 //
 // 1. Reuse nodes when possible to reduce the size of the graph.  Consider
 //    using LayerNodeOps to flatten common elements to a texture which can
 //    be redrawn efficiently in many places.
 //
-// 2. Insert PRUNE or FALLBACK nodes in places where blocking is likely to
+// 2. Insert |PRUNE| or |FALLBACK| nodes in places where blocking is likely to
 //    occur, such as when embedding scenes produced by other applications.
-//    Provide alternate content where possible.
+//    Provide alternate content where possible to avoid stalling the
+//    rendering pipeline at these points.
 //
 struct Node {
   // The combinator specifies how child nodes are processed.
@@ -90,22 +168,17 @@ struct Node {
   // If null, the node does not apply any clipping of its own.
   mojo.Rect? content_clip;
 
-  // The hit test id to report if anything within the node is hit.
-  // Use |kHitIdNone| if the node should not be hit tested.
-  //
-  // TODO(jeffbrown): This scheme is probably too naive.
-  uint32 hit_id = kHitIdNone;
-
   // The Combinator to apply when processing the children of this node.
   Combinator combinator = Combinator.MERGE;
 
+  // The hit testing behavior of the node.
+  // If null, the node is considered invisible for hit testing.
+  HitTestBehavior? hit_test_behavior;
+
   // The ids of the children of this node.
   // It is an error to specify a node id that does not refer to a valid
-  // node; the compositor will close the connection when the scene
-  // is published.
-  // If a cycle is introduced then the node will be considered to be blocked
-  // at the point where recursion occurs.  A subsequent rearrangement of
-  // scenes which removes the cycle will unblock the node.
+  // node or which creates a cycle in the graph; the compositor will close
+  // the connection when the scene is published.
   array<uint32>? child_node_ids;
 
   // The drawing operation to apply when processing this node.
@@ -171,9 +244,8 @@ struct SceneNodeOp {
   // It is an error to specify a resource id that does not refer to a scene
   // resource; the compositor will close the connection when the scene
   // is published.
-  // If a cycle is introduced then the node will be considered to be blocked
-  // at the point where recursion occurs.  A subsequent rearrangement of
-  // scenes which removes the cycle will unblock the node.
+  // If a cycle is introduced then the scene will be substituted with
+  // placeholder content by the compositor.
   uint32 scene_resource_id;
 
   // The version of the scene that we would like to reference.

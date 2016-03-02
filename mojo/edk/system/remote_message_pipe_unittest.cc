@@ -11,9 +11,10 @@
 #include <vector>
 
 #include "base/logging.h"
-#include "mojo/edk/embedder/platform_channel_pair.h"
-#include "mojo/edk/embedder/platform_shared_buffer.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "mojo/edk/platform/platform_handle_utils_posix.h"
+#include "mojo/edk/platform/platform_pipe.h"
+#include "mojo/edk/platform/platform_shared_buffer.h"
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/platform/thread_utils.h"
 #include "mojo/edk/system/channel.h"
@@ -29,12 +30,15 @@
 #include "mojo/edk/system/test/test_io_thread.h"
 #include "mojo/edk/system/test/timeouts.h"
 #include "mojo/edk/system/waiter.h"
-#include "mojo/edk/test/test_utils.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/scoped_file.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
+using mojo::platform::FILEFromPlatformHandle;
+using mojo::platform::PlatformHandleFromFILE;
+using mojo::platform::PlatformPipe;
+using mojo::platform::PlatformSharedBufferMapping;
 using mojo::platform::ScopedPlatformHandle;
 using mojo::platform::ThreadSleep;
 using mojo::util::MakeRefCounted;
@@ -50,7 +54,9 @@ const MojoHandleSignals kAllSignals = MOJO_HANDLE_SIGNAL_READABLE |
 
 class RemoteMessagePipeTest : public testing::Test {
  public:
-  RemoteMessagePipeTest() : io_thread_(test::TestIOThread::StartMode::AUTO) {}
+  RemoteMessagePipeTest()
+      : platform_support_(embedder::CreateSimplePlatformSupport()),
+        io_thread_(test::TestIOThread::StartMode::AUTO) {}
   ~RemoteMessagePipeTest() override {}
 
   void SetUp() override {
@@ -88,7 +94,9 @@ class RemoteMessagePipeTest : public testing::Test {
     io_thread_.PostTaskAndWait([this]() { RestoreInitialStateOnIOThread(); });
   }
 
-  embedder::PlatformSupport* platform_support() { return &platform_support_; }
+  embedder::PlatformSupport* platform_support() {
+    return platform_support_.get();
+  }
   test::TestIOThread* io_thread() { return &io_thread_; }
   // Warning: It's up to the caller to ensure that the returned channel
   // is/remains valid.
@@ -98,9 +106,9 @@ class RemoteMessagePipeTest : public testing::Test {
   void SetUpOnIOThread() {
     CHECK(io_thread()->IsCurrentAndRunning());
 
-    embedder::PlatformChannelPair channel_pair;
-    platform_handles_[0] = channel_pair.PassServerHandle();
-    platform_handles_[1] = channel_pair.PassClientHandle();
+    PlatformPipe channel_pair;
+    platform_handles_[0] = channel_pair.handle0.Pass();
+    platform_handles_[1] = channel_pair.handle1.Pass();
   }
 
   void TearDownOnIOThread() {
@@ -121,7 +129,7 @@ class RemoteMessagePipeTest : public testing::Test {
     CHECK(channel_index == 0 || channel_index == 1);
     CHECK(!channels_[channel_index]);
 
-    channels_[channel_index] = MakeRefCounted<Channel>(&platform_support_);
+    channels_[channel_index] = MakeRefCounted<Channel>(platform_support_.get());
     channels_[channel_index]->Init(
         io_thread()->task_runner().Clone(),
         io_thread()->platform_handle_watcher(),
@@ -157,7 +165,7 @@ class RemoteMessagePipeTest : public testing::Test {
     SetUpOnIOThread();
   }
 
-  embedder::SimplePlatformSupport platform_support_;
+  std::unique_ptr<embedder::PlatformSupport> platform_support_;
   test::TestIOThread io_thread_;
   ScopedPlatformHandle platform_handles_[2];
   RefPtr<Channel> channels_[2];
@@ -912,7 +920,7 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
   ASSERT_TRUE(dispatcher);
 
   // Make a mapping.
-  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping0;
+  std::unique_ptr<PlatformSharedBufferMapping> mapping0;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping0));
   ASSERT_TRUE(mapping0);
@@ -980,7 +988,7 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
       static_cast<SharedBufferDispatcher*>(read_dispatchers[0].get()));
 
   // Make another mapping.
-  std::unique_ptr<embedder::PlatformSharedBufferMapping> mapping1;
+  std::unique_ptr<PlatformSharedBufferMapping> mapping1;
   EXPECT_EQ(MOJO_RESULT_OK, dispatcher->MapBuffer(
                                 0, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping1));
   ASSERT_TRUE(mapping1);
@@ -1029,8 +1037,8 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
   EXPECT_EQ(sizeof(kHello), fwrite(kHello, 1, sizeof(kHello), fp.get()));
   // We'll try to pass this dispatcher, which will cause a |PlatformHandle| to
   // be passed.
-  auto dispatcher = PlatformHandleDispatcher::Create(
-      mojo::test::PlatformHandleFromFILE(std::move(fp)));
+  auto dispatcher =
+      PlatformHandleDispatcher::Create(PlatformHandleFromFILE(std::move(fp)));
 
   // Prepare to wait on MP 1, port 1. (Add the waiter now. Otherwise, if we do
   // it later, it might already be readable.)
@@ -1092,7 +1100,7 @@ TEST_F(RemoteMessagePipeTest, PlatformHandlePassing) {
   ScopedPlatformHandle h = dispatcher->PassPlatformHandle();
   EXPECT_TRUE(h.is_valid());
 
-  fp = mojo::test::FILEFromPlatformHandle(h.Pass(), "rb");
+  fp = FILEFromPlatformHandle(h.Pass(), "rb");
   EXPECT_FALSE(h.is_valid());
   EXPECT_TRUE(fp);
 

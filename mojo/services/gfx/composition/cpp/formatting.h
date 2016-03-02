@@ -57,6 +57,20 @@ std::ostream& operator<<(std::ostream& os,
 std::ostream& operator<<(std::ostream& os,
                          const mojo::gfx::composition::FrameInfo& value);
 
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::HitTestBehavior& value);
+std::ostream& operator<<(
+    std::ostream& os,
+    const mojo::gfx::composition::HitTestBehavior::Visibility* value);
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::HitTestResult& value);
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::Hit& value);
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::SceneHit& value);
+std::ostream& operator<<(std::ostream& os,
+                         const mojo::gfx::composition::NodeHit& value);
+
 }  // namespace composition
 }  // namespace gfx
 }  // namespace mojo

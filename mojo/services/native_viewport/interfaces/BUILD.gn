@@ -8,6 +8,7 @@ import("$mojo_sdk_root/mojo/public/tools/bindings/mojom.gni")
 mojom("interfaces") {
   sources = [
     "native_viewport.mojom",
+    "native_viewport_event_dispatcher.mojom",
   ]
 
   import_dirs = [ get_path_info("../../", "abspath") ]
