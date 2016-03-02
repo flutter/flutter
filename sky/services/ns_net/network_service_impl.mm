@@ -48,13 +48,13 @@ void NetworkServiceImpl::CreateUDPSocket(InterfaceRequest<UDPSocket> socket) {
 
 void NetworkServiceImpl::CreateHttpServer(
     NetAddressPtr local_address,
-    HttpServerDelegatePtr delegate,
+    InterfaceHandle<HttpServerDelegate> delegate,
     const CreateHttpServerCallback& callback) {
   DCHECK(false);
 }
 
 void NetworkServiceImpl::RegisterURLLoaderInterceptor(
-    URLLoaderInterceptorFactoryPtr factory) {
+    InterfaceHandle<URLLoaderInterceptorFactory> factory) {
   DCHECK(false);
 }
 

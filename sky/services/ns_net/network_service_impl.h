@@ -32,10 +32,10 @@ class NetworkServiceImpl : public NetworkService {
       const CreateTCPConnectedSocketCallback& callback) override;
   void CreateUDPSocket(InterfaceRequest<UDPSocket> socket) override;
   void CreateHttpServer(NetAddressPtr local_address,
-                        HttpServerDelegatePtr delegate,
+                        InterfaceHandle<HttpServerDelegate> delegate,
                         const CreateHttpServerCallback& callback) override;
   void RegisterURLLoaderInterceptor(
-      URLLoaderInterceptorFactoryPtr factory) override;
+      InterfaceHandle<URLLoaderInterceptorFactory> factory) override;
   void CreateHostResolver(
       InterfaceRequest<HostResolver> host_resolver) override;
 

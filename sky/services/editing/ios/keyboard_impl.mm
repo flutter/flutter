@@ -139,10 +139,10 @@ KeyboardImpl::~KeyboardImpl() {
   [client_ release];
 }
 
-void KeyboardImpl::SetClient(::editing::KeyboardClientPtr client,
+void KeyboardImpl::SetClient(mojo::InterfaceHandle<::editing::KeyboardClient> client,
                              ::editing::KeyboardConfigurationPtr config) {
   client_.keyboardType = ToUIKeyboardType(config->type);
-  [client_ setClient:client.Pass()];
+  [client_ setClient: ::editing::KeyboardClientPtr::Create(client.Pass())];
 }
 
 void KeyboardImpl::SetEditingState(::editing::EditingStatePtr state) {
