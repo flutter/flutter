@@ -169,7 +169,7 @@ class StockHomeState extends State<StockHome> {
           },
           child: new Text('Dump App to Console')
         ),
-        new DrawerDivider(),
+        new Divider(),
         new DrawerItem(
           icon: 'action/thumb_up',
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
@@ -190,7 +190,7 @@ class StockHomeState extends State<StockHome> {
             ]
           )
         ),
-        new DrawerDivider(),
+        new Divider(),
         new DrawerItem(
           icon: 'action/settings',
           onPressed: _handleShowSettings,

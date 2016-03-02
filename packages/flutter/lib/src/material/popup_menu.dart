@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'divider.dart';
 import 'icon.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
@@ -26,19 +27,35 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
-class PopupMenuItem<T> extends StatelessComponent {
+abstract class PopupMenuEntry<T> extends StatelessComponent {
+  PopupMenuEntry({ Key key }) : super(key: key);
+
+  double get height;
+  T get value => null;
+  bool get enabled => true;
+}
+
+class PopupMenuDivider extends PopupMenuEntry<dynamic> {
+  PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
+
+  final double height;
+
+  Widget build(BuildContext context) => new Divider(height: height);
+}
+
+class PopupMenuItem<T> extends PopupMenuEntry<T> {
   PopupMenuItem({
     Key key,
     this.value,
     this.enabled: true,
-    this.hasDivider: false,
     this.child
   }) : super(key: key);
 
   final T value;
   final bool enabled;
-  final bool hasDivider;
   final Widget child;
+
+  double get height => _kMenuItemHeight;
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -49,7 +66,7 @@ class PopupMenuItem<T> extends StatelessComponent {
     Widget item = new DefaultTextStyle(
       style: style,
       child: new Baseline(
-        baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
+        baseline: height - _kBaselineOffsetFromBottom,
         child: child
       )
     );
@@ -63,11 +80,8 @@ class PopupMenuItem<T> extends StatelessComponent {
 
     return new MergeSemantics(
       child: new Container(
-        height: _kMenuItemHeight,
+        height: height,
         padding: const EdgeDims.symmetric(horizontal: _kMenuHorizontalPadding),
-        decoration: !hasDivider ? null : new BoxDecoration(
-          border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-        ),
         child: item
       )
     );
@@ -172,10 +186,10 @@ class _PopupMenu<T> extends StatelessComponent {
 }
 
 class _PopupMenuRouteLayout extends OneChildLayoutDelegate {
-  _PopupMenuRouteLayout(this.position, this.selectedIndex);
+  _PopupMenuRouteLayout(this.position, this.selectedItemOffset);
 
   final ModalPosition position;
-  final int selectedIndex;
+  final double selectedItemOffset;
 
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return new BoxConstraints(
@@ -195,8 +209,8 @@ class _PopupMenuRouteLayout extends OneChildLayoutDelegate {
     double y = position?.top
       ?? (position?.bottom != null ? size.height - (position.bottom - childSize.height) : _kMenuScreenPadding);
 
-    if (selectedIndex != -1)
-      y -= (_kMenuItemHeight * selectedIndex) + _kMenuVerticalPadding + _kMenuItemHeight / 2.0;
+    if (selectedItemOffset != null)
+      y -= selectedItemOffset + _kMenuVerticalPadding + _kMenuItemHeight / 2.0;
 
     if (x < _kMenuScreenPadding)
       x = _kMenuScreenPadding;
@@ -224,7 +238,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }) : super(completer: completer);
 
   final ModalPosition position;
-  final List<PopupMenuItem<T>> items;
+  final List<PopupMenuEntry<T>> items;
   final dynamic initialValue;
   final int elevation;
 
@@ -242,19 +256,20 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   Color get barrierColor => null;
 
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    int selectedIndex = -1;
+    double selectedItemOffset = null;
     if (initialValue != null) {
-      for (int i = 0; i < items.length; i++)
-        if (initialValue == items[i].value) {
-          selectedIndex = i;
+      selectedItemOffset = 0.0;
+      for (int i = 0; i < items.length; i++) {
+        if (initialValue == items[i].value)
           break;
-        }
+        selectedItemOffset += items[i].height;
+      }
     }
     final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
       constraints: new BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
       child: new CustomOneChildLayout(
-        delegate: new _PopupMenuRouteLayout(position, selectedIndex),
+        delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
         child: new _PopupMenu(route: this)
       )
     );
@@ -269,7 +284,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 Future/*<T>*/ showMenu/*<T>*/({
   BuildContext context,
   ModalPosition position,
-  List<PopupMenuItem/*<T>*/> items,
+  List<PopupMenuEntry/*<T>*/> items,
   dynamic/*=T*/ initialValue,
   int elevation: 8
 }) {
@@ -305,7 +320,7 @@ class PopupMenuButton<T> extends StatefulComponent {
     this.child
   }) : super(key: key);
 
-  final List<PopupMenuItem<T>> items;
+  final List<PopupMenuEntry<T>> items;
   final T initialValue;
   final PopupMenuItemSelected<T> onSelected;
   final String tooltip;

@@ -111,7 +111,7 @@ class MenuDemoState extends State<MenuDemo> {
             primary: new Text('An item with a sectioned menu'),
             right: new PopupMenuButton<String>(
               onSelected: showMenuSelection,
-              items: <PopupMenuItem>[
+              items: <PopupMenuEntry<String>>[
                 new PopupMenuItem(
                   value: 'Preview',
                   child: new ListItem(
@@ -128,12 +128,12 @@ class MenuDemoState extends State<MenuDemo> {
                 ),
                 new PopupMenuItem(
                   value: 'Get Link',
-                  hasDivider: true,
                   child: new ListItem(
                     left: new Icon(icon: 'content/link'),
                     primary: new Text('Get Link')
                   )
                 ),
+                new PopupMenuDivider(),
                 new PopupMenuItem(
                   value: 'Remove',
                   child: new ListItem(

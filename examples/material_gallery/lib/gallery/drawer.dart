@@ -56,7 +56,7 @@ class GalleryDrawer extends StatelessComponent {
               ]
             )
           ),
-          new DrawerDivider(),
+          new Divider(),
           new DrawerItem(
             icon: 'action/hourglass_empty',
             selected: timeDilation != 1.0,
