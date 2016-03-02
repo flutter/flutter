@@ -9,11 +9,24 @@ import 'icons.dart';
 import 'icon_theme.dart';
 import 'theme.dart';
 
+/// A material design icon.
+///
+/// Available icons are shown on this page:
+/// <https://design.google.com/icons/>
+///
+/// Icons are identified by their name (as given on that page), with
+/// spaces converted to underscores, from the [Icons] class. For
+/// example, the "alarm add" icon is [Icons.alarm_add].
+///
+/// To use this class, make sure you set `uses-material-design: true`
+/// in your project's `flutter.yaml` file. This ensures that the
+/// MaterialIcons font is included in your application. This font is
+/// used to display the icons.
 class Icon extends StatelessComponent {
   Icon({
     Key key,
-    this.size: 24.0,
     this.icon,
+    this.size: 24.0,
     this.color
   }) : super(key: key) {
     assert(size != null);
@@ -52,16 +65,19 @@ class Icon extends StatelessComponent {
     if (iconAlpha != 255)
         iconColor = color.withAlpha((iconAlpha * color.opacity).round());
 
-    return new SizedBox(
-      width: size,
-      height: size,
-      child: new Center(
-        child: new Text(new String.fromCharCode(icon.codePoint),
-          style: new TextStyle(
-            inherit: false,
-            color: iconColor,
-            fontSize: size,
-            fontFamily: 'MaterialIcons'
+    return new ExcludeSemantics(
+      child: new SizedBox(
+        width: size,
+        height: size,
+        child: new Center(
+          child: new Text(
+            new String.fromCharCode(icon.codePoint),
+            style: new TextStyle(
+              inherit: false,
+              color: iconColor,
+              fontSize: size,
+              fontFamily: 'MaterialIcons'
+            )
           )
         )
       )
