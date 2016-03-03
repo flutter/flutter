@@ -18,15 +18,12 @@ import 'setup_xcodeproj.dart';
 
 String get homeDirectory => path.absolute(Platform.environment['HOME']);
 
-// TODO(devoncarew): Refactor functionality into XCode.
-
 const int kXcodeRequiredVersionMajor = 7;
 const int kXcodeRequiredVersionMinor = 2;
 
 class XCode {
-  static void initGlobal() {
-    context[XCode] = new XCode();
-  }
+  /// Returns [XCode] active in the current app context.
+  static XCode get instance => context[XCode] ?? (context[XCode] = new XCode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 

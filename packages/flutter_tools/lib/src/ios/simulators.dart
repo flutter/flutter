@@ -38,7 +38,7 @@ class IOSSimulatorUtils {
   }
 
   List<IOSSimulator> getAttachedDevices() {
-    if (!xcode.isInstalledAndMeetsVersionCheck)
+    if (!XCode.instance.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
     return SimControl.instance.getConnectedDevices().map((SimDevice device) {
@@ -320,7 +320,7 @@ class IOSSimulator extends Device {
     if (clearLogs)
       this.clearLogs();
 
-    if(!(await _setupUpdatedApplicationBundle(app, toolchain)))
+    if (!(await _setupUpdatedApplicationBundle(app, toolchain)))
       return false;
 
     // Prepare launch arguments.
