@@ -9,11 +9,11 @@ class Tap extends CommandWithTarget {
 
   Tap(ObjectRef targetRef) : super(targetRef);
 
-  static Tap fromJson(Map<String, dynamic> json) {
+  static Tap deserialize(Map<String, String> json) {
     return new Tap(new ObjectRef(json['targetRef']));
   }
 
-  Map<String, dynamic> toJson() => super.toJson();
+  Map<String, String> serialize() => super.serialize();
 }
 
 class TapResult extends Result {
@@ -37,7 +37,7 @@ class Scroll extends CommandWithTarget {
     this.frequency
   ) : super(targetRef);
 
-  static Scroll fromJson(Map<String, dynamic> json) {
+  static Scroll deserialize(Map<String, dynamic> json) {
     return new Scroll(
       new ObjectRef(json['targetRef']),
       double.parse(json['dx']),
@@ -59,11 +59,11 @@ class Scroll extends CommandWithTarget {
   /// The frequency in Hz of the generated move events.
   final int frequency;
 
-  Map<String, dynamic> toJson() => super.toJson()..addAll({
-    'dx': dx,
-    'dy': dy,
-    'duration': duration.inMicroseconds,
-    'frequency': frequency,
+  Map<String, String> serialize() => super.serialize()..addAll({
+    'dx': '$dx',
+    'dy': '$dy',
+    'duration': '${duration.inMicroseconds}',
+    'frequency': '$frequency',
   });
 }
 

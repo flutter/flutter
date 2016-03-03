@@ -60,11 +60,11 @@ class FlutterDriverExtension {
     };
 
     _commandDeserializers = {
-      'get_health': GetHealth.fromJson,
-      'find': Find.fromJson,
-      'tap': Tap.fromJson,
-      'get_text': GetText.fromJson,
-      'scroll': Scroll.fromJson,
+      'get_health': GetHealth.deserialize,
+      'find': Find.deserialize,
+      'tap': Tap.deserialize,
+      'get_text': GetText.deserialize,
+      'scroll': Scroll.deserialize,
     };
   }
 
