@@ -4,9 +4,11 @@
 
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import 'android/android_workflow.dart';
 import 'base/context.dart';
-import 'base/process.dart';
+import 'base/os.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 
@@ -217,6 +219,15 @@ class ValidationResult {
 }
 
 class _AtomValidator extends DoctorValidator {
+  static String getAtomHomePath() {
+    final Map<String, String> env = Platform.environment;
+    if (env['ATOM_HOME'] != null)
+      return env['ATOM_HOME'];
+    return os.isWindows
+      ? path.join(env['USERPROFILE'], '.atom')
+      : path.join(env['HOME'], '.atom');
+  }
+
   String get label => 'Atom development environment';
 
   ValidationResult validate() {
@@ -226,24 +237,14 @@ class _AtomValidator extends DoctorValidator {
     );
 
     ValidationType atomExists() {
-      return exitsHappy(<String>['atom', '--version']) ? ValidationType.installed : ValidationType.missing;
+      bool atomDirExists = FileSystemEntity.isDirectorySync(getAtomHomePath());
+      return atomDirExists ? ValidationType.installed : ValidationType.missing;
     };
 
     ValidationType flutterPluginExists() {
-      try {
-        // apm list -b -p -i
-        List<String> args = <String>['list', '-b', '-p', '-i'];
-        printTrace('apm ${args.join(' ')}');
-        ProcessResult result = Process.runSync('apm', args);
-        if (result.exitCode != 0)
-          return ValidationType.missing;
-        bool available = (result.stdout as String).split('\n').any((String line) {
-          return line.startsWith('flutter@');
-        });
-        return available ? ValidationType.installed : ValidationType.missing;
-      } catch (error) {
-        return ValidationType.missing;
-      }
+      String flutterPluginPath = path.join(getAtomHomePath(), 'packages', 'flutter');
+      bool flutterPluginExists = FileSystemEntity.isDirectorySync(flutterPluginPath);
+      return flutterPluginExists ? ValidationType.installed : ValidationType.missing;
     };
 
     atomValidator.addValidator(new Validator(
