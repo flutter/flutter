@@ -75,6 +75,15 @@ class Instrumentation {
     });
   }
 
+  /// Returns the first [Widget] of the given [runtimeType], if any. Returns
+  /// null if there is no matching widget.
+  Widget findWidgetOfType(Type type) {
+    Element element = findElement((Element element) {
+      return element.widget.runtimeType == type;
+    });
+    return element?.widget;
+  }
+
   /// Returns the [State] object of the first element whose state has
   /// the given [runtimeType], if any. Returns null if there is no
   /// matching element.
