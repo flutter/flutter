@@ -60,10 +60,10 @@ class Icon extends StatelessComponent {
     if (icon == null)
       return new SizedBox(width: size, height: size);
 
+    final double iconOpacity = IconTheme.of(context)?.clampedOpacity ?? 1.0;
     Color iconColor = color ?? _getDefaultColor(context);
-    final int iconAlpha = (255.0 * (IconTheme.of(context)?.clampedOpacity ?? 1.0)).round();
-    if (iconAlpha != 255)
-        iconColor = color.withAlpha((iconAlpha * color.opacity).round());
+    if (iconOpacity != 1.0)
+      iconColor = iconColor.withAlpha((255.0 * iconColor.opacity * iconOpacity).round());
 
     return new ExcludeSemantics(
       child: new SizedBox(
