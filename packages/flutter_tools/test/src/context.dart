@@ -45,8 +45,11 @@ void testUsingContext(String description, dynamic testMethod(), {
     if (!overrides.containsKey(SimControl))
       testContext[SimControl] = new MockSimControl();
 
-    if (!overrides.containsKey(OperatingSystemUtils))
-      testContext[OperatingSystemUtils] = new MockOperatingSystemUtils();
+    if (!overrides.containsKey(OperatingSystemUtils)) {
+      MockOperatingSystemUtils os = new MockOperatingSystemUtils();
+      when(os.isWindows).thenReturn(false);
+      testContext[OperatingSystemUtils] = os;
+    }
 
     if (!overrides.containsKey(IOSSimulatorUtils)) {
       MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();

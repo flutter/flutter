@@ -236,17 +236,17 @@ class AppDomain extends Domain {
   }
 
   Future<dynamic> start(Map<String, dynamic> args) async {
-    if (args['deviceId'] is! String)
-      throw "A 'deviceId' is required";
+    if (args == null || args['deviceId'] is! String)
+      throw "deviceId is required";
     Device device = await _getDevice(args['deviceId']);
     if (device == null)
-      throw "A 'projectDirectory' is required";
+      throw "device '${args['deviceId']}' not found";
 
     if (args['projectDirectory'] is! String)
-      throw "A 'projectDirectory' is required";
+      throw "projectDirectory is required";
     String projectDirectory = args['projectDirectory'];
     if (!FileSystemEntity.isDirectorySync(projectDirectory))
-      throw "The '$projectDirectory' does not exist";
+      throw "'$projectDirectory' does not exist";
 
     // We change the current working directory for the duration of the `start` command.
     // TODO(devoncarew): Make flutter_tools work better with commands run from any directory.
@@ -280,17 +280,17 @@ class AppDomain extends Domain {
   }
 
   Future<bool> stop(dynamic args) async {
-    if (args['deviceId'] is! String)
-      throw "A 'deviceId' is required";
+    if (args == null || args['deviceId'] is! String)
+      throw "deviceId is required";
     Device device = await _getDevice(args['deviceId']);
     if (device == null)
-      throw "A 'projectDirectory' is required";
+      throw "device '${args['deviceId']}' not found";
 
     if (args['projectDirectory'] is! String)
-      throw "A 'projectDirectory' is required";
+      throw "projectDirectory is required";
     String projectDirectory = args['projectDirectory'];
     if (!FileSystemEntity.isDirectorySync(projectDirectory))
-      throw "The '$projectDirectory' does not exist";
+      throw "'$projectDirectory' does not exist";
 
     Directory cwd = Directory.current;
     Directory.current = new Directory(projectDirectory);
