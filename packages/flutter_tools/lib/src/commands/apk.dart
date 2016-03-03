@@ -449,8 +449,7 @@ Future<int> buildAll(
         "consider renaming your 'apk/' directory to 'android/'.");
     }
 
-    int result = await build(toolchain, configs, enginePath: enginePath,
-        target: target);
+    int result = await build(toolchain, configs, enginePath: enginePath, target: target);
     if (result != 0)
       return result;
   }

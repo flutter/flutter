@@ -6,31 +6,21 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../device.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class StopCommand extends FlutterCommand {
   final String name = 'stop';
-  final String description = 'Stop your Flutter app on all attached devices.';
+  final String description = 'Stop your Flutter app on an attached device.';
+
+  bool get requiresDevice => true;
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackagesAndConnectToDevices();
-    return await stop() ? 0 : 2;
+    await downloadApplicationPackages();
+    Device device = deviceForCommand;
+    ApplicationPackage app = applicationPackages.getPackageForPlatform(device.platform);
+    printStatus('Stopping apps on ${device.name}.');
+    return await device.stopApp(app) ? 0 : 1;
   }
-
-  Future<bool> stop() => stopAll(devices, applicationPackages);
-}
-
-Future<bool> stopAll(DeviceStore devices, ApplicationPackageStore applicationPackages) async {
-  bool stoppedSomething = false;
-
-  for (Device device in devices.all) {
-    ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null)
-      continue;
-    if (await device.stopApp(package))
-      stoppedSomething = true;
-  }
-
-  return stoppedSomething;
 }

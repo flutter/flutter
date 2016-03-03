@@ -340,6 +340,7 @@ linter:
         printTrace(file);
     }
 
+    printTrace(cmd.join(' '));
     Process process = await Process.start(
       cmd[0],
       cmd.sublist(1),
