@@ -44,9 +44,6 @@ PackageProject() {
   local package_root=${project_path}/packages
   AssertExists $package_root
 
-  local icons_path=${project_path}/packages/material_design_icons/icons
-  AssertExists $icons_path
-
   # Remove old build artifacts
   RunCommand rm -f ${derived_dir}/app.flx
 
@@ -63,7 +60,6 @@ PackageProject() {
   RunCommand pushd ${project_path}
 
   RunCommand ${FLUTTER_ROOT}/bin/flutter build                                 \
-      --asset-base ${icons_path}                                               \
       --target ${dart_main}                                                    \
       --output-file ${derived_dir}/app.flx                                     \
       --package-root ${package_root}                                           \
