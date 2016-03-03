@@ -560,6 +560,12 @@ void paintImage({
   Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
+  if (sourceSize != destinationSize) {
+    // Use the "low" quality setting to scale the image, which corresponds to
+    // bilinear interpolation, rather than the default "none" which corresponds
+    // to nearest-neighbor.
+    paint.filterQuality = FilterQuality.low;
+  }
   double dx = (outputSize.width - destinationSize.width) * (alignX ?? 0.5);
   double dy = (outputSize.height - destinationSize.height) * (alignY ?? 0.5);
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
