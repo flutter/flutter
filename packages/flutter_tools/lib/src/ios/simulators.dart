@@ -370,11 +370,15 @@ class IOSSimulator extends Device {
   }
 
   Future<bool> _setupUpdatedApplicationBundle(ApplicationPackage app, Toolchain toolchain) async {
-    if (_applicationIsInstalledAndRunning(app)) {
-      return _sideloadUpdatedAssetsForInstalledApplicationBundle(app, toolchain);
-    } else {
+    bool sideloadResult = await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, toolchain);
+
+    if (!sideloadResult)
+      return false;
+
+    if (!_applicationIsInstalledAndRunning(app))
       return _buildAndInstallApplicationBundle(app);
-    }
+
+    return true;
   }
 
   Future<bool> _buildAndInstallApplicationBundle(ApplicationPackage app) async {
