@@ -123,10 +123,7 @@ void Engine::SetServices(ServicesDataPtr services) {
       mojo::ConnectToService(shell.get(), "mojo:vsync", &vsync_provider);
       services_->shell = shell.Pass();
     } else {
-      auto embedder_services = mojo::ServiceProviderPtr::Create(
-          services_->services_provided_by_embedder.Pass());
-      mojo::ConnectToService(embedder_services.get(), &vsync_provider);
-      services_->services_provided_by_embedder = embedder_services.Pass();
+      mojo::ConnectToService(services_provided_by_embedder_.get(), &vsync_provider);
     }
     animator_->Reset();
     animator_->set_vsync_provider(vsync_provider.Pass());
