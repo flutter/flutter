@@ -21,9 +21,6 @@ import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
-const String _simulatorPath =
-  '/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app/Contents/MacOS/Simulator';
-
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
@@ -56,33 +53,34 @@ class SimControl {
     if (_isAnyConnected())
       return true;
 
-    if (deviceId == null) {
-      runDetached([_simulatorPath]);
-      Future<bool> checkConnection([int attempts = 20]) async {
-        if (attempts == 0) {
-          printStatus('Timed out waiting for iOS Simulator to boot.');
-          return false;
-        }
-        if (!_isAnyConnected()) {
-          printStatus('Waiting for iOS Simulator to boot...');
-          return await new Future.delayed(new Duration(milliseconds: 500),
-            () => checkConnection(attempts - 1)
-          );
-        }
-        return true;
+    if (deviceId == null)
+      deviceId = 'iPhone 6 (9.2)';
+
+    // `xcrun instruments` requires a template (-t). @yjbanov has no idea what
+    // "template" is but the built-in 'Blank' seems to work.
+    List<String> args = [_xcrunPath, 'instruments', '-w', deviceId, '-t', 'Blank'];
+    printTrace(args.join(' '));
+    runDetached(args);
+    printStatus('Waiting for iOS Simulator to boot...');
+
+    bool connected = false;
+    int attempted = 0;
+    while (!connected && attempted < 20) {
+      connected = await _isAnyConnected();
+      if (!connected) {
+        printStatus('Still waiting for iOS Simulator to boot...');
+        await new Future.delayed(new Duration(seconds: 1));
       }
-      return await checkConnection();
-    } else {
-      try {
-        runCheckedSync([_xcrunPath, 'simctl', 'boot', deviceId]);
-        return true;
-      } catch (e) {
-        printError('Unable to boot iOS Simulator $deviceId: ', e);
-        return false;
-      }
+      attempted++;
     }
 
-    return false;
+    if (connected) {
+      printStatus('Connected to iOS Simulator.');
+      return true;
+    } else {
+      printStatus('Timed out waiting for iOS Simulator to boot.');
+      return false;
+    }
   }
 
   /// Returns a list of all available devices, both potential and connected.
