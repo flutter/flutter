@@ -12,7 +12,7 @@ import '../artifacts.dart';
 import '../build_configuration.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../test/loader.dart' as loader;
+import '../test/flutter_platform.dart' as loader;
 
 class TestCommand extends FlutterCommand {
   String get name => 'test';
