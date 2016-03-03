@@ -15,6 +15,8 @@ const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissCardThreshold = 0.4;
 
+typedef void DismissDirectionCallback(DismissDirection direction);
+
 /// The direction in which a [Dismissable] can be dismissed.
 enum DismissDirection {
   /// The [Dismissable] can be dismissed by dragging either up or down.
@@ -57,7 +59,7 @@ class Dismissable extends StatefulComponent {
   final VoidCallback onResized;
 
   /// Called when the widget has been dismissed, after finishing resizing.
-  final VoidCallback onDismissed;
+  final DismissDirectionCallback onDismissed;
 
   /// The direction in which the widget can be dismissed.
   final DismissDirection direction;
@@ -232,8 +234,14 @@ class _DismissableState extends State<Dismissable> {
 
   void _handleResizeProgressChanged() {
     if (_resizeController.isCompleted) {
-      if (config.onDismissed != null)
-        config.onDismissed();
+      if (config.onDismissed != null) {
+        DismissDirection direction;
+        if (_directionIsXAxis)
+           direction = _dragExtent > 0 ? DismissDirection.right : DismissDirection.left;
+        else
+           direction = _dragExtent > 0 ? DismissDirection.down : DismissDirection.up;
+        config.onDismissed(direction);
+      }
     } else {
       if (config.onResized != null)
         config.onResized();
