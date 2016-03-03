@@ -161,7 +161,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
 #if defined(OS_ANDROID)
     // In addition to writing to the stdout, write to the logcat so that the
     // message is discoverable when running on an unrooted device.
-    __android_log_print(ANDROID_LOG_INFO, "flutter", "%.*s", length, chars);
+    __android_log_print(ANDROID_LOG_INFO, "flutter", "%.*s", (int)length, chars);
 #elif __APPLE__
     syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);
 #endif
