@@ -84,6 +84,22 @@ TEST(GraphemeBreak, rules) {
 
     // Rule GB8a, Regional_Indicator x Regional_Indicator
     EXPECT_FALSE(IsBreak("U+1F1FA | U+1F1F8"));
+    EXPECT_TRUE(IsBreak("U+1F1FA U+1F1F8 | U+1F1FA U+1F1F8")); // Regional indicator pair (flag)
+    EXPECT_FALSE(IsBreak("U+1F1FA | U+1F1F8 U+1F1FA U+1F1F8")); // Regional indicator pair (flag)
+    EXPECT_FALSE(IsBreak("U+1F1FA U+1F1F8 U+1F1FA | U+1F1F8")); // Regional indicator pair (flag)
+
+    EXPECT_TRUE(IsBreak("U+1F1FA U+1F1F8 | U+1F1FA"));  // Regional indicator pair (flag)
+    EXPECT_FALSE(IsBreak("U+1F1FA | U+1F1F8 U+1F1FA"));  // Regional indicator pair (flag)
+
+    EXPECT_TRUE(IsBreak("'a' U+1F1FA U+1F1F8 | U+1F1FA"));  // Regional indicator pair (flag)
+    EXPECT_FALSE(IsBreak("'a' U+1F1FA | U+1F1F8 U+1F1FA"));  // Regional indicator pair (flag)
+
+    EXPECT_TRUE(
+            IsBreak("'a' U+1F1FA U+1F1F8 | U+1F1FA U+1F1F8"));  // Regional indicator pair (flag)
+    EXPECT_FALSE(
+            IsBreak("'a' U+1F1FA | U+1F1F8 U+1F1FA U+1F1F8"));  // Regional indicator pair (flag)
+    EXPECT_FALSE(
+            IsBreak("'a' U+1F1FA U+1F1F8 U+1F1FA | U+1F1F8"));  // Regional indicator pair (flag)
 
     // Rule GB9, x Extend
     EXPECT_FALSE(IsBreak("'a' | U+0301"));  // combining accent
