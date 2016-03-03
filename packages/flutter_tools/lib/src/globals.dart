@@ -7,15 +7,11 @@ import 'base/context.dart';
 import 'base/logger.dart';
 import 'device.dart';
 import 'doctor.dart';
-import 'ios/mac.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 Logger get logger => context[Logger];
 AndroidSdk get androidSdk => context[AndroidSdk];
 Doctor get doctor => context[Doctor];
-
-// Mac specific globals - will be null on other platforms.
-XCode get xcode => context[XCode];
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

@@ -32,7 +32,6 @@ import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
-import 'src/ios/mac.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
@@ -69,7 +68,6 @@ Future main(List<String> args) async {
     context[Logger] = new StdoutLogger();
     context[DeviceManager] = new DeviceManager();
     Doctor.initGlobal();
-    XCode.initGlobal();
 
     dynamic result = await runner.run(args);
 

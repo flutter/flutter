@@ -6,7 +6,6 @@ import 'dart:io';
 
 import '../base/process.dart';
 import '../doctor.dart';
-import '../globals.dart';
 import 'mac.dart';
 
 class IOSWorkflow extends Workflow {
@@ -15,11 +14,11 @@ class IOSWorkflow extends Workflow {
   bool get appliesToHostPlatform => Platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
-  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
+  bool get canListDevices => XCode.instance.isInstalledAndMeetsVersionCheck;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
-  bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
+  bool get canLaunchDevices => XCode.instance.isInstalledAndMeetsVersionCheck;
 
   ValidationResult validate() {
     Validator iosValidator = new Validator(
@@ -28,15 +27,15 @@ class IOSWorkflow extends Workflow {
     );
 
     ValidationType xcodeExists() {
-      return xcode.isInstalled ? ValidationType.installed : ValidationType.missing;
+      return XCode.instance.isInstalled ? ValidationType.installed : ValidationType.missing;
     };
 
     ValidationType xcodeVersionSatisfactory() {
-      return xcode.isInstalledAndMeetsVersionCheck ? ValidationType.installed : ValidationType.missing;
+      return XCode.instance.isInstalledAndMeetsVersionCheck ? ValidationType.installed : ValidationType.missing;
     };
 
     ValidationType xcodeEulaSigned() {
-      return xcode.eulaSigned ? ValidationType.installed : ValidationType.missing;
+      return XCode.instance.eulaSigned ? ValidationType.installed : ValidationType.missing;
     };
 
     ValidationType brewExists() {
