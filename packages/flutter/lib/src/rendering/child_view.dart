@@ -17,14 +17,14 @@ import 'package:mojo/mojo/service_provider.mojom.dart' as mojom;
 import 'box.dart';
 import 'object.dart';
 
-mojom.ViewHostProxy _initViewHostProxy() {
-  int viewHost = ui.takeViewHostHandle();
+mojom.ViewProxy _initViewProxy() {
+  int viewHandle = ui.takeViewHandle();
   assert(() {
-    if (viewHost == 0)
+    if (viewHandle == 0)
       debugPrint('Child view are supported only when running in Mojo shell.');
     return true;
   });
-  return new mojom.ViewHostProxy.fromHandle(new core.MojoHandle(viewHost));
+  return new mojom.ViewProxy.fromHandle(new core.MojoHandle(viewHandle));
 }
 
 // TODO(abarth): The view host is a unique resource. We should structure how we
@@ -32,17 +32,18 @@ mojom.ViewHostProxy _initViewHostProxy() {
 // the view host safely. Unfortunately, the view host has a global namespace of
 // view keys, which means any scheme for sharing the view host also needs to
 // provide a mechanism for coordinating about view keys.
-final mojom.ViewHostProxy _viewHostProxy = _initViewHostProxy();
-final mojom.ViewHost _viewHost = _viewHostProxy?.ptr;
+final mojom.ViewProxy _viewProxy = _initViewProxy();
+final mojom.View _view = _viewProxy?.ptr;
 
 class ChildViewConnection {
   ChildViewConnection({ this.url }) {
-    mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.unbound();
-    mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.unbound();
-    assert(_viewToken == null);
     mojom.ViewProviderProxy viewProvider = new mojom.ViewProviderProxy.unbound();
     shell.connectToService(url, viewProvider);
-    _unresolvedViewToken = _awaitResponse(viewProvider.ptr.createView(incomingServices, outgoingServices), viewProvider);
+    mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.unbound();
+    mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.unbound();
+    _viewOwner = new mojom.ViewOwnerProxy.unbound();
+    viewProvider.ptr.createView(_viewOwner, incomingServices, outgoingServices);
+    viewProvider.close();
     _connection = new ApplicationConnection(outgoingServices, incomingServices);
   }
 
@@ -51,39 +52,26 @@ class ChildViewConnection {
   ApplicationConnection get connection => _connection;
   ApplicationConnection _connection;
 
-  Future<mojom.ViewToken> _unresolvedViewToken;
-  mojom.ViewToken _viewToken;
-
-  Future<mojom.ViewToken> _awaitResponse(
-    Future<mojom.ViewProviderCreateViewResponseParams> response,
-    mojom.ViewProviderProxy viewProvider
-  ) async {
-    mojom.ViewToken viewToken = (await response).viewToken;
-    viewProvider.close();
-    assert(_viewToken == null);
-    _viewToken = viewToken;
-    assert(_viewKey == null);
-    if (_attached)
-      _addChildToViewHost();
-    return viewToken;
-  }
+  mojom.ViewOwnerProxy _viewOwner;
 
   static int _nextViewKey = 1;
   int _viewKey;
 
   void _addChildToViewHost() {
     assert(_attached);
-    assert(_viewToken != null);
+    assert(_viewOwner != null);
     assert(_viewKey == null);
     _viewKey = _nextViewKey++;
-    _viewHost.addChild(_viewKey, _viewToken);
+    _view.addChild(_viewKey, _viewOwner.impl);
+    _viewOwner = null;
   }
 
   void _removeChildFromViewHost() {
     assert(!_attached);
-    assert(_viewToken != null);
+    assert(_viewOwner == null);
     assert(_viewKey != null);
-    _viewHost.removeChild(_viewKey);
+    _viewOwner = new mojom.ViewOwnerProxy.unbound();
+    _view.removeChild(_viewKey, _viewOwner);
     _viewKey = null;
   }
 
@@ -97,7 +85,7 @@ class ChildViewConnection {
   void _attach() {
     assert(_attachments >= 0);
     ++_attachments;
-    if (_viewToken != null && _viewKey == null)
+    if (_viewKey == null)
       _addChildToViewHost();
   }
 
@@ -130,7 +118,7 @@ class ChildViewConnection {
     mojom.ViewLayoutParams layoutParams = new mojom.ViewLayoutParams()
       ..constraints = childConstraints
       ..devicePixelRatio = scale;
-    return (await _viewHost.layoutChild(_viewKey, layoutParams)).info;
+    return (await _view.layoutChild(_viewKey, layoutParams)).info;
   }
 
   String toString() {
@@ -142,10 +130,7 @@ class RenderChildView extends RenderBox {
   RenderChildView({
     ChildViewConnection child,
     double scale
-  }) : _child = child, _scale = scale {
-    if (_child != null)
-      _awaitViewToken();
-  }
+  }) : _child = child, _scale = scale;
 
   ChildViewConnection get child => _child;
   ChildViewConnection _child;
@@ -158,24 +143,11 @@ class RenderChildView extends RenderBox {
     _layoutInfo = null;
     if (attached)
       _child?._attach();
-
     if (_child == null) {
       markNeedsPaint();
-    } else if (_child._viewToken != null) {
-      // We've already connected to the view, so we're ready to invalidate our
-      // layout immediately.
-      markNeedsLayout();
     } else {
-      // Otherwise, we're still in the process of connecting, so we need to
-      // repaint now (to remove any old child view), and we need to watch for
-      // the view token resolving before attempting layout.
-      markNeedsPaint();
-      _awaitViewToken();
+      markNeedsLayout();
     }
-  }
-
-  void _awaitViewToken() {
-    _child._unresolvedViewToken.then(_handleViewTokenResolved);
   }
 
   double get scale => _scale;
@@ -206,7 +178,7 @@ class RenderChildView extends RenderBox {
   }
 
   void performLayout() {
-    if (_child != null && _child._viewToken != null)
+    if (_child != null)
       _child._layout(size: size, scale: scale).then(_handleLayoutInfoChanged);
   }
 
@@ -215,13 +187,6 @@ class RenderChildView extends RenderBox {
   void _handleLayoutInfoChanged(mojom.ViewLayoutInfo layoutInfo) {
     _layoutInfo = layoutInfo;
     markNeedsPaint();
-  }
-
-  void _handleViewTokenResolved(mojom.ViewToken viewToken) {
-    // The _viewToken might not match viewToken if _child changed between the
-    // time we started waiting for the future and the time it resolved.
-    if (attached && _child?._viewToken == viewToken)
-      markNeedsLayout();
   }
 
   bool hitTestSelf(Point position) => true;
