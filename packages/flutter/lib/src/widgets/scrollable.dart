@@ -55,6 +55,31 @@ abstract class Scrollable extends StatefulComponent {
   /// The axis along which this widget should scroll.
   final Axis scrollDirection;
 
+  /// Whether to place first child at the start of the container or
+  /// the last child at the end of the container, when the scrollable
+  /// has not been scrolled and has no initial scroll offset.
+  ///
+  /// For example, if the [scrollDirection] is [Axis.vertical] and
+  /// there are enough items to overflow the container, then
+  /// [ViewportAnchor.start] means that the top of the first item
+  /// should be aligned with the top of the scrollable with the last
+  /// item below the bottom, and [ViewportAnchor.end] means the bottom
+  /// of the last item should be aligned with the bottom of the
+  /// scrollable, with the first item above the top.
+  ///
+  /// This also affects whether, when an item is added or removed, the
+  /// displacement will be towards the first item or the last item.
+  /// Continuing the earlier example, if a new item is inserted in the
+  /// middle of the list, in the [ViewportAnchor.start] case the items
+  /// after it (with greater indices, down to the item with the
+  /// highest index) will be pushed down, while in the
+  /// [ViewportAnchor.end] case the items before it (with lower
+  /// indices, up to the item with the index 0) will be pushed up.
+  ///
+  /// Subclasses may ignore this value if, for instance, they do not
+  /// have a concept of an anchor, or have more complicated behavior
+  /// (e.g. they would by default put the middle item in the middle of
+  /// the container).
   final ViewportAnchor scrollAnchor;
 
   /// Called whenever this widget starts to scroll.
@@ -153,10 +178,44 @@ abstract class Scrollable extends StatefulComponent {
   ScrollableState createState();
 }
 
-/// Contains the state for common scrolling behaviors.
+/// Contains the state for common scrolling widgets.
 ///
-/// Widgets that subclass [Scrollable] typically use state objects that subclass
-/// [ScrollableState].
+/// Widgets that subclass [Scrollable] typically use state objects
+/// that subclass [ScrollableState].
+///
+/// The main state of a ScrollableState is the "scroll offset", which
+/// is the the logical description of the current scroll position and
+/// is stored in [scrollOffset] as a double. The units of the scroll
+/// offset are defined by the specific subclass. By default, the units
+/// are logical pixels.
+///
+/// A "pixel offset" is a distance in logical pixels (or a velocity in
+/// logical pixels per second). The pixel offset corresponding to the
+/// current scroll position is typically used as the paint offset
+/// argument to the underlying [Viewport] class (or equivalent); see
+/// the [buildContent] method.
+///
+/// A "pixel delta" is an [Offset] that describes a two-dimensional
+/// distance as reported by input events. If the scrolling convention
+/// is axis-aligned (as in a vertical scrolling list or a horizontal
+/// scrolling list), then the pixel delta will consist of a pixel
+/// offset in the scroll axis, and a value in the other axis that is
+/// either ignored (when converting to a scroll offset) or set to zero
+/// (when converting a scroll offset to a pixel delta).
+///
+/// If the units of the scroll offset are not logical pixels, then a
+/// mapping must be made from logical pixels (as used by incoming
+/// input events) and the scroll offset (as stored internally). To
+/// provide this mapping, override the [pixelOffsetToScrollOffset] and
+/// [scrollOffsetToPixelOffset] methods.
+///
+/// If the scrollable is not providing axis-aligned scrolling, then,
+/// to convert pixel deltas to scroll offsets and vice versa, override
+/// the [pixelDeltaToScrollOffset] and [scrollOffsetToPixelOffset]
+/// methods. By default, these assume an axis-aligned scroll behavior
+/// along the [config.scrollDirection] axis and are implemented in
+/// terms of the [pixelOffsetToScrollOffset] and
+/// [scrollOffsetToPixelOffset] methods.
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
   void initState() {
     super.initState();
@@ -165,6 +224,11 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   AnimationController _controller;
+
+  void dispose() {
+    _controller.stop();
+    super.dispose();
+  }
 
   /// The current scroll offset.
   ///
@@ -178,6 +242,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// Scrollable gesture handlers convert their incoming values with this method.
   /// Subclasses that define scrollOffset in units other than pixels must
   /// override this method.
+  ///
+  /// This function should be the inverse of [scrollOffsetToPixelOffset].
   double pixelOffsetToScrollOffset(double pixelOffset) {
     switch (config.scrollAnchor) {
       case ViewportAnchor.start:
@@ -189,6 +255,9 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     }
   }
 
+  /// Convert a scrollOffset value to the number of pixels to which it corresponds.
+  ///
+  /// This function should be the inverse of [pixelOffsetToScrollOffset].
   double scrollOffsetToPixelOffset(double scrollOffset) {
     switch (config.scrollAnchor) {
       case ViewportAnchor.start:
@@ -200,6 +269,9 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Returns the scroll offset component of the given pixel delta, accounting
   /// for the scroll direction and scroll anchor.
+  ///
+  /// A pixel delta is an [Offset] in pixels. Typically this function
+  /// is implemented in terms of [pixelOffsetToScrollOffset].
   double pixelDeltaToScrollOffset(Offset pixelDelta) {
     switch (config.scrollDirection) {
       case Axis.horizontal:
@@ -211,6 +283,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Returns a two-dimensional representation of the scroll offset, accounting
   /// for the scroll direction and scroll anchor.
+  ///
+  /// See the definition of [ScrollableState] for more details.
   Offset scrollOffsetToPixelDelta(double scrollOffset) {
     switch (config.scrollDirection) {
       case Axis.horizontal:
@@ -220,79 +294,19 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     }
   }
 
-  ScrollBehavior _scrollBehavior;
-
-  /// Subclasses should override this function to create the [ScrollBehavior]
-  /// they desire.
-  ScrollBehavior createScrollBehavior();
-
   /// The current scroll behavior of this widget.
   ///
   /// Scroll behaviors control where the boundaries of the scrollable are placed
   /// and how the scrolling physics should behave near those boundaries and
   /// after the user stops directly manipulating the scrollable.
   ScrollBehavior get scrollBehavior {
-    if (_scrollBehavior == null)
-      _scrollBehavior = createScrollBehavior();
-    return _scrollBehavior;
+    return _scrollBehavior ??= createScrollBehavior();
   }
+  ScrollBehavior _scrollBehavior;
 
-  Map<Type, GestureRecognizerFactory> buildGestureDetectors() {
-    if (scrollBehavior.isScrollable) {
-      switch (config.scrollDirection) {
-        case Axis.vertical:
-          return <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {
-              return (recognizer ??= new VerticalDragGestureRecognizer())
-                ..onStart = _handleDragStart
-                ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd;
-            }
-          };
-        case Axis.horizontal:
-          return <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {
-              return (recognizer ??= new HorizontalDragGestureRecognizer())
-                ..onStart = _handleDragStart
-                ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd;
-            }
-          };
-      }
-    }
-    return const <Type, GestureRecognizerFactory>{};
-  }
-
-  final GlobalKey _gestureDetectorKey = new GlobalKey();
-
-  void updateGestureDetector() {
-    _gestureDetectorKey.currentState.replaceGestureRecognizers(buildGestureDetectors());
-  }
-
-  Widget build(BuildContext context) {
-    return new RawGestureDetector(
-      key: _gestureDetectorKey,
-      gestures: buildGestureDetectors(),
-      behavior: HitTestBehavior.opaque,
-      child: new Listener(
-        child: buildContent(context),
-        onPointerDown: _handlePointerDown
-      )
-    );
-  }
-
-  /// Subclasses should override this function to build the interior of their
-  /// scrollable widget. Scrollable wraps the returned widget in a
-  /// [GestureDetector] to observe the user's interaction with this widget and
-  /// to adjust the scroll offset accordingly.
-  Widget buildContent(BuildContext context);
-
-  Future _animateTo(double newScrollOffset, Duration duration, Curve curve) {
-    _controller.stop();
-    _controller.value = scrollOffset;
-    _dispatchOnScrollStartIfNeeded();
-    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_dispatchOnScrollEndIfNeeded);
-  }
+  /// Subclasses should override this function to create the [ScrollBehavior]
+  /// they desire.
+  ScrollBehavior createScrollBehavior();
 
   bool _scrollOffsetIsInBounds(double scrollOffset) {
     if (scrollBehavior is! ExtentScrollBehavior)
@@ -301,24 +315,104 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return scrollOffset >= behavior.minScrollOffset && scrollOffset < behavior.maxScrollOffset;
   }
 
-  Simulation _createFlingSimulation(double scrollVelocity) {
-    final Simulation simulation =  scrollBehavior.createFlingScrollSimulation(scrollOffset, scrollVelocity);
-    if (simulation != null) {
-      final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs() * (scrollVelocity < 0.0 ? -1.0 : 1.0);
-      final double endDistance = pixelOffsetToScrollOffset(kPixelScrollTolerance.distance).abs();
-      simulation.tolerance = new Tolerance(velocity: endVelocity, distance: endDistance);
-    }
-    return simulation;
+  void _handleAnimationChanged() {
+    _setScrollOffset(_controller.value);
   }
+
+  void _setScrollOffset(double newScrollOffset) {
+    if (_scrollOffset == newScrollOffset)
+      return;
+    setState(() {
+      _scrollOffset = newScrollOffset;
+    });
+    PageStorage.of(context)?.writeState(context, _scrollOffset);
+    new ScrollNotification(this, _scrollOffset).dispatch(context);
+    final needsScrollStart = !_isBetweenOnScrollStartAndOnScrollEnd;
+    if (needsScrollStart) {
+      dispatchOnScrollStart();
+      assert(_isBetweenOnScrollStartAndOnScrollEnd);
+    }
+    dispatchOnScroll();
+    assert(_isBetweenOnScrollStartAndOnScrollEnd);
+    if (needsScrollStart)
+      dispatchOnScrollEnd();
+  }
+
+  /// Scroll this widget by the given scroll delta.
+  ///
+  /// If a non-null [duration] is provided, the widget will animate to the new
+  /// scroll offset over the given duration with the given curve.
+  Future scrollBy(double scrollDelta, { Duration duration, Curve curve: Curves.ease }) {
+    double newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
+    return scrollTo(newScrollOffset, duration: duration, curve: curve);
+  }
+
+  /// Scroll this widget to the given scroll offset.
+  ///
+  /// If a non-null [duration] is provided, the widget will animate to the new
+  /// scroll offset over the given duration with the given curve.
+  ///
+  /// This function does not accept a zero duration. To jump-scroll to
+  /// the new offset, do not provide a duration, rather than providing
+  /// a zero duration.
+  Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
+    if (newScrollOffset == _scrollOffset)
+      return new Future.value();
+
+    if (duration == null) {
+      _controller.stop();
+      _setScrollOffset(newScrollOffset);
+      return new Future.value();
+    }
+
+    assert(duration > Duration.ZERO);
+    return _animateTo(newScrollOffset, duration, curve);
+  }
+
+  Future _animateTo(double newScrollOffset, Duration duration, Curve curve) {
+    _controller.stop();
+    _controller.value = scrollOffset;
+    _dispatchOnScrollStartIfNeeded();
+    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_dispatchOnScrollEndIfNeeded);
+  }
+
+  /// Fling the scroll offset with the given velocity.
+  ///
+  /// Calling this function starts a physics-based animation of the scroll
+  /// offset with the given value as the initial velocity. The physics
+  /// simulation used is determined by the scroll behavior.
+  Future fling(double scrollVelocity) {
+    if (scrollVelocity != 0.0 || !_controller.isAnimating)
+      return _startToEndAnimation(scrollVelocity);
+    return new Future.value();
+  }
+
+  /// Animate the scroll offset to a value with a local minima of energy.
+  ///
+  /// Calling this function starts a physics-based animation of the scroll
+  /// offset either to a snap point or to within the scrolling bounds. The
+  /// physics simulation used is determined by the scroll behavior.
+  Future settleScrollOffset() {
+    return _startToEndAnimation(0.0);
+  }
+
+  Future _startToEndAnimation(double scrollVelocity) {
+    _controller.stop();
+    Simulation simulation = _createSnapSimulation(scrollVelocity) ?? _createFlingSimulation(scrollVelocity);
+    if (simulation == null)
+      return new Future.value();
+    _dispatchOnScrollStartIfNeeded();
+    return _controller.animateWith(simulation).then(_dispatchOnScrollEndIfNeeded);
+  }
+
+  /// Whether this scrollable should attempt to snap scroll offsets.
+  bool get shouldSnapScrollOffset => config.snapOffsetCallback != null;
 
   /// Returns the snapped offset closest to the given scroll offset.
   double snapScrollOffset(double scrollOffset) {
     RenderBox box = context.findRenderObject();
     return config.snapOffsetCallback == null ? scrollOffset : config.snapOffsetCallback(scrollOffset, box.size);
   }
-
-  /// Whether this scrollable should attempt to snap scroll offsets.
-  bool get shouldSnapScrollOffset => config.snapOffsetCallback != null;
 
   Simulation _createSnapSimulation(double scrollVelocity) {
     if (!shouldSnapScrollOffset || scrollVelocity == 0.0 || !_scrollOffsetIsInBounds(scrollOffset))
@@ -349,104 +443,39 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return new ClampedSimulation(toSnapSimulation, xMin: scrollOffsetMin, xMax: scrollOffsetMax);
   }
 
-  Future _startToEndAnimation(double scrollVelocity) {
-    _controller.stop();
-    Simulation simulation = _createSnapSimulation(scrollVelocity) ?? _createFlingSimulation(scrollVelocity);
-    if (simulation == null)
-      return new Future.value();
-    _dispatchOnScrollStartIfNeeded();
-    return _controller.animateWith(simulation).then(_dispatchOnScrollEndIfNeeded);
-  }
-
-  void dispose() {
-    _controller.stop();
-    super.dispose();
-  }
-
-  void _handleAnimationChanged() {
-    _setScrollOffset(_controller.value);
-  }
-
-  void _setScrollOffset(double newScrollOffset) {
-    if (_scrollOffset == newScrollOffset)
-      return;
-    setState(() {
-      _scrollOffset = newScrollOffset;
-    });
-    PageStorage.of(context)?.writeState(context, _scrollOffset);
-    new ScrollNotification(this, _scrollOffset).dispatch(context);
-    final needsScrollStart = !_isBetweenOnScrollStartAndOnScrollEnd;
-    if (needsScrollStart) {
-      dispatchOnScrollStart();
-      assert(_isBetweenOnScrollStartAndOnScrollEnd);
+  Simulation _createFlingSimulation(double scrollVelocity) {
+    final Simulation simulation =  scrollBehavior.createFlingScrollSimulation(scrollOffset, scrollVelocity);
+    if (simulation != null) {
+      final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs() * (scrollVelocity < 0.0 ? -1.0 : 1.0);
+      final double endDistance = pixelOffsetToScrollOffset(kPixelScrollTolerance.distance).abs();
+      simulation.tolerance = new Tolerance(velocity: endVelocity, distance: endDistance);
     }
-    dispatchOnScroll();
-    assert(_isBetweenOnScrollStartAndOnScrollEnd);
-    if (needsScrollStart)
-      dispatchOnScrollEnd();
+    return simulation;
   }
 
-  /// Scroll this widget to the given scroll offset.
-  ///
-  /// If a non-null [duration] is provided, the widget will animate to the new
-  /// scroll offset over the given duration with the given curve.
-  ///
-  /// This function does not accept a zero duration. To jump-scroll to
-  /// the new offset, do not provide a duration, rather than providing
-  /// a zero duration.
-  Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
-    if (newScrollOffset == _scrollOffset)
-      return new Future.value();
-
-    if (duration == null) {
-      _controller.stop();
-      _setScrollOffset(newScrollOffset);
-      return new Future.value();
-    }
-
-    assert(duration > Duration.ZERO);
-    return _animateTo(newScrollOffset, duration, curve);
-  }
-
-  /// Scroll this widget by the given scroll delta.
-  ///
-  /// If a non-null [duration] is provided, the widget will animate to the new
-  /// scroll offset over the given duration with the given curve.
-  Future scrollBy(double scrollDelta, { Duration duration, Curve curve: Curves.ease }) {
-    double newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
-    return scrollTo(newScrollOffset, duration: duration, curve: curve);
-  }
-
-  /// Fling the scroll offset with the given velocity.
-  ///
-  /// Calling this function starts a physics-based animation of the scroll
-  /// offset with the given value as the initial velocity. The physics
-  /// simulation used is determined by the scroll behavior.
-  Future fling(double scrollVelocity) {
-    if (scrollVelocity != 0.0 || !_controller.isAnimating)
-      return _startToEndAnimation(scrollVelocity);
-    return new Future.value();
-  }
-
-  /// Animate the scroll offset to a value with a local minima of energy.
-  ///
-  /// Calling this function starts a physics-based animation of the scroll
-  /// offset either to a snap point or to within the scrolling bounds. The
-  /// physics simulation used is determined by the scroll behavior.
-  Future settleScrollOffset() {
-    return _startToEndAnimation(0.0);
-  }
 
   bool _isBetweenOnScrollStartAndOnScrollEnd = false;
+
+  /// Calls the onScroll callback.
+  ///
+  /// Subclasses can override this function to hook the scroll callback.
+  void dispatchOnScroll() {
+    assert(_isBetweenOnScrollStartAndOnScrollEnd);
+    if (config.onScroll != null)
+      config.onScroll(_scrollOffset);
+  }
+
+  void _handlePointerDown(_) {
+    _controller.stop();
+  }
+
+  void _handleDragStart(_) {
+    _dispatchOnScrollStartIfNeeded();
+  }
 
   void _dispatchOnScrollStartIfNeeded() {
     if (!_isBetweenOnScrollStartAndOnScrollEnd)
       dispatchOnScrollStart();
-  }
-
-  void _dispatchOnScrollEndIfNeeded(_) {
-    if (_isBetweenOnScrollStartAndOnScrollEnd)
-      dispatchOnScrollEnd();
   }
 
   /// Calls the onScrollStart callback.
@@ -459,13 +488,19 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       config.onScrollStart(_scrollOffset);
   }
 
-  /// Calls the onScroll callback.
-  ///
-  /// Subclasses can override this function to hook the scroll callback.
-  void dispatchOnScroll() {
-    assert(_isBetweenOnScrollStartAndOnScrollEnd);
-    if (config.onScroll != null)
-      config.onScroll(_scrollOffset);
+  void _handleDragUpdate(double delta) {
+    scrollBy(pixelOffsetToScrollOffset(delta));
+  }
+
+  Future _handleDragEnd(Velocity velocity) {
+    double scrollVelocity = pixelDeltaToScrollOffset(velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
+    // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
+    return fling(scrollVelocity.clamp(-kMaxFlingVelocity, kMaxFlingVelocity)).then(_dispatchOnScrollEndIfNeeded);
+  }
+
+  void _dispatchOnScrollEndIfNeeded(_) {
+    if (_isBetweenOnScrollStartAndOnScrollEnd)
+      dispatchOnScrollEnd();
   }
 
   /// Calls the dispatchOnScrollEnd callback.
@@ -478,23 +513,82 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       config.onScrollEnd(_scrollOffset);
   }
 
-  void _handlePointerDown(_) {
-    _controller.stop();
+  final GlobalKey _gestureDetectorKey = new GlobalKey();
+
+  Widget build(BuildContext context) {
+    return new RawGestureDetector(
+      key: _gestureDetectorKey,
+      gestures: buildGestureDetectors(),
+      behavior: HitTestBehavior.opaque,
+      child: new Listener(
+        child: buildContent(context),
+        onPointerDown: _handlePointerDown
+      )
+    );
   }
 
-  void _handleDragStart(_) {
-    _dispatchOnScrollStartIfNeeded();
+  /// Fixes up the gesture detector to listen to the appropriate
+  /// gestures based on the current information about the layout.
+  ///
+  /// This method should be called from the
+  /// [onPaintOffsetUpdateNeeded] or [onExtentsChanged] handler given
+  /// to the [Viewport] or equivalent used by the subclass's
+  /// [buildContent] method. See the [buildContent] method's
+  /// description for details.
+  void updateGestureDetector() {
+    _gestureDetectorKey.currentState.replaceGestureRecognizers(buildGestureDetectors());
   }
 
-  void _handleDragUpdate(double delta) {
-    scrollBy(pixelOffsetToScrollOffset(delta));
+  /// Return the gesture detectors, in the form expected by
+  /// [RawGestureDetector.gestures] and
+  /// [RawGestureDetectorState.replaceGestureRecognizers], that are
+  /// applicable to this [Scrollable] in its current state.
+  ///
+  /// This is called by [build] and [updateGestureDetector].
+  Map<Type, GestureRecognizerFactory> buildGestureDetectors() {
+    if (scrollBehavior.isScrollable) {
+      switch (config.scrollDirection) {
+        case Axis.vertical:
+          return <Type, GestureRecognizerFactory>{
+            VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {
+              return (recognizer ??= new VerticalDragGestureRecognizer())
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd;
+            }
+          };
+        case Axis.horizontal:
+          return <Type, GestureRecognizerFactory>{
+            HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {
+              return (recognizer ??= new HorizontalDragGestureRecognizer())
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd;
+            }
+          };
+      }
+    }
+    return const <Type, GestureRecognizerFactory>{};
   }
 
-  Future _handleDragEnd(Velocity velocity) {
-    double scrollVelocity = pixelDeltaToScrollOffset(velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
-    // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
-    return fling(scrollVelocity.clamp(-kMaxFlingVelocity, kMaxFlingVelocity)).then(_dispatchOnScrollEndIfNeeded);
-  }
+  /// Subclasses should override this function to build the interior of their
+  /// scrollable widget. Scrollable wraps the returned widget in a
+  /// [GestureDetector] to observe the user's interaction with this widget and
+  /// to adjust the scroll offset accordingly.
+  ///
+  /// The widgets used by this method should be widgets that provide a
+  /// layout-time callback that reports the sizes that are relevant to
+  /// the scroll offset (typically the size of the scrollable
+  /// container and the scrolled contents). [Viewport] and
+  /// [MixedViewport] provide an [onPaintOffsetUpdateNeeded] callback
+  /// for this purpose; [GridViewport], [ListViewport], and
+  /// [LazyListViewport] provide an [onExtentsChanged] callback for
+  /// this purpose.
+  ///
+  /// This callback should be used to update the scroll behavior, if
+  /// necessary, and then to call [updateGestureDetector] to update
+  /// the gesture detectors accordingly.
+  Widget buildContent(BuildContext context);
 }
 
 /// Indicates that a descendant scrollable has scrolled.
