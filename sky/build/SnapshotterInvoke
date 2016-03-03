@@ -122,6 +122,11 @@ SnapshotProject() {
   # snapshot buffer and isolate snapshot buffer, we name the file to match
   # the name of the symbol the VM expects at runtime. On these binary files,
   # we invoke xxd.
+  #
+  # Note about "checked mode": Precompilation snapshots are never in checked
+  # mode. The flag is also ignored by the standalone VM. So there is no sense
+  # in generating the larger snapshot. For development purposes, a
+  # non-precompilation enabled VM is used.
   RunCommand ${FLUTTER_ARCH_TOOLS_PATH}/Snapshotter                            \
       --vm_isolate_snapshot=${derived_dir}/kDartVmIsolateSnapshotBuffer        \
       --isolate_snapshot=${derived_dir}/kDartIsolateSnapshotBuffer             \
@@ -131,6 +136,7 @@ SnapshotProject() {
       --url_mapping=dart:mojo.internal,${mojo_internal_path}                   \
       --url_mapping=dart:ui,${ui_path}                                         \
       --url_mapping=dart:vmservice_sky,$vm_service_path                        \
+      --no-checked                                                             \
       $main_path
 
   if [[ $? -ne 0 ]]; then
