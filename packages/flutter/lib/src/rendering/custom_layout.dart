@@ -7,6 +7,7 @@ import 'object.dart';
 
 // For OneChildLayoutDelegate and RenderCustomOneChildLayoutBox, see shifted_box.dart
 
+/// [ParentData] used by [RenderCustomMultiChildLayoutBox].
 class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// An object representing the identity of this child.
   Object id;
@@ -15,21 +16,30 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
 }
 
 /// A delegate that controls the layout of multiple children.
+///
+/// Used with [MultiChildCustomLayout], the widget for the
+/// [RenderCustomMultiChildLayoutBox] render object.
+///
+/// Subclasses must override some or all of the methods
+/// marked "Override this method to..." to provide the constraints and
+/// positions of the children.
 abstract class MultiChildLayoutDelegate {
   Map<Object, RenderBox> _idToChild;
   Set<RenderBox> _debugChildrenNeedingLayout;
 
-  /// Returns the size of this object given the incoming constraints.
-  /// The size cannot reflect the instrinsic sizes of the children.
-  /// If this layout has a fixed width or height the returned size
-  /// can reflect that.
-  Size getSize(BoxConstraints constraints) => constraints.biggest;
-
   /// True if a non-null LayoutChild was provided for the specified id.
+  ///
+  /// Call this from the [performLayout] or [getSize] methods to
+  /// determine which children are available, if the child list might
+  /// vary.
   bool isChild(Object childId) => _idToChild[childId] != null;
 
   /// Ask the child to update its layout within the limits specified by
   /// the constraints parameter. The child's size is returned.
+  ///
+  /// Call this from your [performLayout] function to lay out each
+  /// child. Every child must be laid out using this function exactly
+  /// once each time the [performLayout] function is invoked.
   Size layoutChild(Object childId, BoxConstraints constraints) {
     final RenderBox child = _idToChild[childId];
     assert(() {
@@ -63,6 +73,11 @@ abstract class MultiChildLayoutDelegate {
   }
 
   /// Specify the child's origin relative to this origin.
+  ///
+  /// Call this from your [performLayout] function to position each
+  /// child. If you do not call this for a child, its position will
+  /// remain unchanged. Children initially have their position set to
+  /// (0,0), i.e. the top left of the [RenderCustomMultiChildLayoutBox].
   void positionChild(Object childId, Offset offset) {
     final RenderBox child = _idToChild[childId];
     assert(() {
@@ -89,6 +104,9 @@ abstract class MultiChildLayoutDelegate {
   }
 
   void _callPerformLayout(Size size, BoxConstraints constraints, RenderBox firstChild) {
+    // A particular layout delegate could be called reentrantly, e.g. if it used
+    // by both a parent and a child. So, we must restore the _idToChild map when
+    // we return.
     final Map<Object, RenderBox> previousIdToChild = _idToChild;
 
     Set<RenderBox> debugPreviousChildrenNeedingLayout;
@@ -148,14 +166,32 @@ abstract class MultiChildLayoutDelegate {
     }
   }
 
-  /// Override this method to return true when the children need to be laid out.
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate);
+  /// Override this method to return the size of this object given the
+  /// incoming constraints. The size cannot reflect the instrinsic
+  /// sizes of the children. If this layout has a fixed width or
+  /// height the returned size can reflect that; the size will be
+  /// constrained to the given constraints.
+  ///
+  /// By default, attempts to size the box to the biggest size
+  /// possible given the constraints.
+  Size getSize(BoxConstraints constraints) => constraints.biggest;
 
-  /// Layout and position all children given this widget's size and the specified
-  /// constraints. This method must apply layoutChild() to each child. It should
-  /// specify the final position of each child with positionChild().
+  /// Override this method to lay out and position all children given
+  /// this widget's size and the specified constraints. This method
+  /// must call [layoutChild] for each child. It should also specify
+  /// the final position of each child with [positionChild].
   void performLayout(Size size, BoxConstraints constraints);
 
+  /// Override this method to return true when the children need to be
+  /// laid out. This should compare the fields of the current delegate
+  /// and the given oldDelegate and return true if the fields are such
+  /// that the layout would be different.
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate);
+
+  /// Override this method to include additional information in the
+  /// debugging data printed by [debugDumpRenderTree] and friends.
+  ///
+  /// By default, returns the [runtimeType] of the class.
   String toString() => '$runtimeType';
 }
 
