@@ -704,7 +704,8 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   void _updateScrollBehavior() {
     scrollTo(scrollBehavior.updateExtents(
       containerExtent: config.scrollDirection == Axis.vertical ? _viewportSize.height : _viewportSize.width,
-      contentExtent: _tabWidths.reduce((double sum, double width) => sum + width)
+      contentExtent: _tabWidths.reduce((double sum, double width) => sum + width),
+      scrollOffset: scrollOffset
     ));
   }
 
@@ -780,7 +781,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     );
 
     if (config.isScrollable) {
-      child: new Viewport(
+      return new Viewport(
         scrollDirection: Axis.horizontal,
         paintOffset: scrollOffsetToPixelDelta(scrollOffset),
         onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
