@@ -17,12 +17,12 @@ enum WeatherType {
   snow
 }
 
-class WeathersDemo extends StatefulComponent {
-  WeathersDemo({ Key key }) : super(key: key);
-  _WeathersDemoState createState() => new _WeathersDemoState();
+class WeatherDemo extends StatefulComponent {
+  WeatherDemo({ Key key }) : super(key: key);
+  _WeatherDemoState createState() => new _WeatherDemoState();
 }
 
-class _WeathersDemoState extends State<WeathersDemo> {
+class _WeatherDemoState extends State<WeatherDemo> {
 
   Future _loadAssets(AssetBundle bundle) async {
     _images = new ImageMap(bundle);
@@ -62,7 +62,7 @@ class _WeathersDemoState extends State<WeathersDemo> {
     if (!assetsLoaded) {
       return new Scaffold(
         toolBar: new ToolBar(
-          center: new Text("Weathers")
+          center: new Text("Weather")
         ),
         body: new Container(
           decoration: new BoxDecoration(
@@ -74,7 +74,7 @@ class _WeathersDemoState extends State<WeathersDemo> {
 
     return new Scaffold(
       toolBar: new ToolBar(
-        center: new Text("Weathers")
+        center: new Text("Weather")
       ),
       body: new Material(
         child: new Stack(
