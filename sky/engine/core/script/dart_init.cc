@@ -66,10 +66,11 @@ Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
 
 namespace {
 
-static const char* kDartArgs[] = {
-    "--enable_mirrors=false",
+static const char* kDartProfilingArgs[] = {
+    // Dart assumes ARM devices are insufficiently powerful and sets the
+    // default profile period to 100Hz. This number is suitable for older
+    // Raspberry Pi devices but quite low for current smartphones.
     "--profile_period=1000",
-    "--background_compilation",
 #if (WTF_OS_IOS || WTF_OS_MACOSX)
     // On platforms where LLDB is the primary debugger, SIGPROF signals
     // overwhelm LLDB.
@@ -77,8 +78,12 @@ static const char* kDartArgs[] = {
 #endif
 };
 
-static const char* kDartPrecompilationArgs[]{
-    "--precompilation",
+static const char *kDartMirrorsArgs[] = {
+  "--enable_mirrors=false",
+};
+
+static const char* kDartBackgroundCompilationArgs[] = {
+  "--background_compilation",
 };
 
 static const char* kDartCheckedModeArgs[] = {
@@ -318,10 +323,16 @@ void InitDartVM() {
   }
 
   Vector<const char*> args;
-  args.append(kDartArgs, arraysize(kDartArgs));
+  args.append(kDartProfilingArgs, arraysize(kDartProfilingArgs));
 
-  if (IsRunningPrecompiledCode())
-    args.append(kDartPrecompilationArgs, arraysize(kDartPrecompilationArgs));
+  if (!IsRunningPrecompiledCode()) {
+    // The version of the VM setup to run precompiled code does not recognize
+    // the mirrors or the background compilation flags. They are never enabled.
+    // Make sure we dont pass in unrecognized flags.
+    args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
+    args.append(kDartBackgroundCompilationArgs,
+                arraysize(kDartBackgroundCompilationArgs));
+  }
 
   if (enable_checked_mode)
     args.append(kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));

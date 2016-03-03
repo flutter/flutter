@@ -30,11 +30,16 @@ source_set("common") {
     "ui_delegate.h",
   ]
 
-  public_deps = [
+  if (is_ios && !use_ios_simulator) {
+    dart_deps = [ "//dart/runtime:libdart_precompiled_runtime" ]
+  } else {
+    dart_deps = [ "//dart/runtime:libdart" ]
+  }
+
+  public_deps = dart_deps + [
     "//base",
     "//base:i18n",
     "//build/config/sanitizers:deps",
-    "//dart/runtime:libdart",
     "//flow",
     "//mojo/common",
     "//mojo/data_pipe_utils",
