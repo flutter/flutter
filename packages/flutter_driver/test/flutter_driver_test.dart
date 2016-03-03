@@ -122,7 +122,7 @@ main() {
       test('finds by ValueKey', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], {
-            'kind': 'find',
+            'command': 'find',
             'searchSpecType': 'ByValueKey',
             'keyValueString': 'foo',
             'keyValueType': 'String'
@@ -150,7 +150,7 @@ main() {
       test('sends the tap command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], {
-            'kind': 'tap',
+            'command': 'tap',
             'targetRef': '123'
           });
           return new Future.value();
@@ -172,7 +172,7 @@ main() {
       test('sends the getText command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], {
-            'kind': 'get_text',
+            'command': 'get_text',
             'targetRef': '123'
           });
           return new Future.value({

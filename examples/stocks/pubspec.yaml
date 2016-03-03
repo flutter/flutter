@@ -7,3 +7,5 @@ dependencies:
 dev_dependencies:
   flutter_test:
     path: ../../packages/flutter_test
+  flutter_driver:
+    path: ../../packages/flutter_driver
