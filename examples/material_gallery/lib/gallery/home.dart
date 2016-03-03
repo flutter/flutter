@@ -35,7 +35,7 @@ import '../demo/time_picker_demo.dart';
 import '../demo/tooltip_demo.dart';
 import '../demo/two_level_list_demo.dart';
 import '../demo/typography_demo.dart';
-import '../demo/weathers_demo.dart';
+import '../demo/weather_demo.dart';
 
 class GalleryHome extends StatefulComponent {
   GalleryHome({ Key key }) : super(key: key);
@@ -70,7 +70,7 @@ class GalleryHomeState extends State<GalleryHome> {
                 image: 'assets/section_animation.png',
                 colors: Colors.purple,
                 demos: <GalleryDemo>[
-                  new GalleryDemo(title: 'Weathers', builder: () => new WeathersDemo()),
+                  new GalleryDemo(title: 'Weather', builder: () => new WeatherDemo()),
                   new GalleryDemo(title: 'Fitness', builder: () => new FitnessDemo())
                 ]
               ),
