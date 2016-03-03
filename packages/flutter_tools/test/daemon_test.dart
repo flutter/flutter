@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -97,7 +96,7 @@ defineTests() {
       });
     });
 
-    _testUsingContext('daemon.stopAll', () async {
+    _testUsingContext('daemon.stop', () async {
       DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -110,16 +109,10 @@ defineTests() {
         notifyingLogger: notifyingLogger
       );
 
-      MockDeviceStore mockDevices = command.devices;
-
-      when(mockDevices.android.stopApp(any)).thenReturn(true);
-      when(mockDevices.iOS.stopApp(any)).thenReturn(false);
-      when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
-
-      commands.add({'id': 0, 'method': 'app.stopAll'});
+      commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });
       Map response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
-      expect(response['result'], true);
+      expect(response['error'], contains('deviceId is required'));
     });
 
     _testUsingContext('device.getDevices', () async {

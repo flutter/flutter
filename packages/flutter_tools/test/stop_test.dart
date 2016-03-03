@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/commands/stop.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -17,12 +19,9 @@ defineTests() {
     testUsingContext('returns 0 when Android is connected and ready to be stopped', () {
       StopCommand command = new StopCommand();
       applyMocksToCommand(command);
-      MockDeviceStore mockDevices = command.devices;
-
-      when(mockDevices.android.stopApp(any)).thenReturn(true);
-      when(mockDevices.iOS.stopApp(any)).thenReturn(false);
-      when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
-
+      MockAndroidDevice device = new MockAndroidDevice();
+      when(device.stopApp(any)).thenReturn(new Future.value(true));
+      testDeviceManager.addDevice(device);
       return createTestCommandRunner(command).run(['stop']).then((int code) {
         expect(code, equals(0));
       });
@@ -31,11 +30,9 @@ defineTests() {
     testUsingContext('returns 0 when iOS is connected and ready to be stopped', () {
       StopCommand command = new StopCommand();
       applyMocksToCommand(command);
-      MockDeviceStore mockDevices = command.devices;
-
-      when(mockDevices.android.stopApp(any)).thenReturn(false);
-      when(mockDevices.iOS.stopApp(any)).thenReturn(true);
-      when(mockDevices.iOSSimulator.stopApp(any)).thenReturn(false);
+      MockIOSDevice device = new MockIOSDevice();
+      when(device.stopApp(any)).thenReturn(new Future.value(true));
+      testDeviceManager.addDevice(device);
 
       return createTestCommandRunner(command).run(['stop']).then((int code) {
         expect(code, equals(0));
