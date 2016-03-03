@@ -122,12 +122,20 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice 
     commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
-  try {
-    runCheckedSync(commands, workingDirectory: app.localPath);
-    return true;
-  } catch (error) {
-    return false;
+  printTrace(commands.join(' '));
+
+  ProcessResult result = Process.runSync(
+    commands.first, commands.sublist(1), workingDirectory: app.localPath
+  );
+
+  if (result.exitCode != 0) {
+    if (result.stderr.isNotEmpty)
+      printStatus(result.stderr);
+    if (result.stdout.isNotEmpty)
+      printStatus(result.stdout);
   }
+
+  return result.exitCode == 0;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
