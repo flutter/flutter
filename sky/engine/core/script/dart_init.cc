@@ -68,9 +68,6 @@ namespace {
 
 static const char* kDartArgs[] = {
     "--enable_mirrors=false",
-    // Dart assumes ARM devices are insufficiently powerful and sets the
-    // default profile period to 100Hz. This number is suitable for older
-    // Raspberry Pi devices but quite low for current smartphones.
     "--profile_period=1000",
     "--background_compilation",
 #if (WTF_OS_IOS || WTF_OS_MACOSX)
@@ -315,6 +312,10 @@ void InitDartVM() {
 #if ENABLE(DART_STRICT)
   enable_checked_mode = true;
 #endif
+
+  if (IsRunningPrecompiledCode()) {
+    enable_checked_mode = false;
+  }
 
   Vector<const char*> args;
   args.append(kDartArgs, arraysize(kDartArgs));
