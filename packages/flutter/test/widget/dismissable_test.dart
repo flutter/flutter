@@ -10,13 +10,15 @@ import 'package:test/test.dart';
 const double itemExtent = 100.0;
 Axis scrollDirection = Axis.vertical;
 DismissDirection dismissDirection = DismissDirection.horizontal;
+DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
 
 void handleOnResized(int item) {
   expect(dismissedItems.contains(item), isFalse);
 }
 
-void handleOnDismissed(int item) {
+void handleOnDismissed(DismissDirection direction, int item) {
+  reportedDismissDirection = direction;
   expect(dismissedItems.contains(item), isFalse);
   dismissedItems.add(item);
 }
@@ -25,7 +27,7 @@ Widget buildDismissableItem(int item) {
   return new Dismissable(
     key: new ValueKey<int>(item),
     direction: dismissDirection,
-    onDismissed: () { handleOnDismissed(item); },
+    onDismissed: (DismissDirection direction) { handleOnDismissed(direction, item); },
     onResized: () { handleOnResized(item); },
     child: new Container(
       width: itemExtent,
@@ -129,10 +131,12 @@ void main() {
       dismissItem(tester, 0, gestureDirection: DismissDirection.right);
       expect(tester.findText('0'), isNull);
       expect(dismissedItems, equals([0]));
+      expect(reportedDismissDirection, DismissDirection.right);
 
       dismissItem(tester, 1, gestureDirection: DismissDirection.left);
       expect(tester.findText('1'), isNull);
       expect(dismissedItems, equals([0, 1]));
+      expect(reportedDismissDirection, DismissDirection.left);
     });
   });
 
@@ -148,10 +152,12 @@ void main() {
       dismissItem(tester, 0, gestureDirection: DismissDirection.up);
       expect(tester.findText('0'), isNull);
       expect(dismissedItems, equals([0]));
+      expect(reportedDismissDirection, DismissDirection.up);
 
       dismissItem(tester, 1, gestureDirection: DismissDirection.down);
       expect(tester.findText('1'), isNull);
       expect(dismissedItems, equals([0, 1]));
+      expect(reportedDismissDirection, DismissDirection.down);
     });
   });
 
@@ -167,10 +173,12 @@ void main() {
       dismissItem(tester, 0, gestureDirection: DismissDirection.right);
       expect(tester.findText('0'), isNotNull);
       expect(dismissedItems, isEmpty);
+      dismissItem(tester, 1, gestureDirection: DismissDirection.right);
 
       dismissItem(tester, 0, gestureDirection: DismissDirection.left);
       expect(tester.findText('0'), isNull);
       expect(dismissedItems, equals([0]));
+      dismissItem(tester, 1, gestureDirection: DismissDirection.left);
     });
   });
 
