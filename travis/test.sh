@@ -6,6 +6,12 @@ export PATH="$PWD/bin:$PATH"
 # analyze all the Dart code in the repo
 #flutter analyze --flutter-repo --no-current-directory --no-current-package --congratulate
 
+which dart
+which pub
+
+dart --version
+pub --version
+
 (cd packages/cassowary; pub run test -j1)
 (cd packages/flutter; flutter test)
 (cd packages/flutter_sprites; flutter test)
