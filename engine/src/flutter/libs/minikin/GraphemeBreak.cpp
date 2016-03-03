@@ -15,6 +15,7 @@
  */
 
 #include <stdint.h>
+#include <algorithm>
 #include <unicode/uchar.h>
 #include <unicode/utf16.h>
 
@@ -124,17 +125,25 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     if ((p1 == U_GCB_LVT || p1 == U_GCB_T) && p2 == U_GCB_T) {
         return false;
     }
-    // Rule GB8a, Regional_Indicator x Regional_Indicator
+    // Rule GB8a that looks at even-off cases.
     //
-    // Known limitation: This is overly conservative, and returns no grapheme breaks between two
-    // flags, such as in the character sequence "U+1F1FA U+1F1F8 [potential break] U+1F1FA U+1F1F8".
-    // Also, it assumes that all combinations of Regional Indicators produce a flag, where they
-    // don't.
-    //
-    // There is no easy solution for doing this correctly, except for querying the font and doing
-    // some lookback.
+    // sot   (RI RI)*  RI x RI
+    // [^RI] (RI RI)*  RI x RI
+    //                 RI ÷ RI
     if (p1 == U_GCB_REGIONAL_INDICATOR && p2 == U_GCB_REGIONAL_INDICATOR) {
-        return false;
+        // Look at up to 1000 code units.
+        start = std::max((ssize_t)start, (ssize_t)offset_back - 1000);
+        while (offset_back > start) {
+            U16_PREV(buf, start, offset_back, c1);
+            if (tailoredGraphemeClusterBreak(c1) != U_GCB_REGIONAL_INDICATOR) {
+                offset_back += U16_LENGTH(c1);
+                break;
+            }
+        }
+
+        // Note that the offset has moved forwared 2 code units by U16_NEXT.
+        // The number 4 comes from the number of code units in a whole flag.
+        return (offset - 2 - offset_back) % 4 == 0;
     }
     // Rule GB9, x Extend; Rule GB9a, x SpacingMark; Rule GB9b, Prepend x
     if (p2 == U_GCB_EXTEND || p2 == U_GCB_SPACING_MARK || p1 == U_GCB_PREPEND) {
