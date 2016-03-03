@@ -35,11 +35,11 @@ abstract class FlutterCommand extends Command {
   }
 
   Future downloadApplicationPackagesAndConnectToDevices() async {
-    await _downloadApplicationPackages();
+    await downloadApplicationPackages();
     _connectToDevices();
   }
 
-  Future _downloadApplicationPackages() async {
+  Future downloadApplicationPackages() async {
     applicationPackages ??= await ApplicationPackageStore.forConfigs(buildConfigurations);
   }
 

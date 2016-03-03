@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../android/android_device.dart';
+import '../application_package.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../device.dart';
@@ -15,7 +16,6 @@ import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../runner/flutter_command.dart';
 import 'run.dart';
-import 'stop.dart' as stop;
 
 const String protocolVersion = '0.1.0';
 
@@ -78,9 +78,9 @@ class Daemon {
     this.notifyingLogger
   }) {
     // Set up domains.
-    _registerDomain(new DaemonDomain(this));
-    _registerDomain(new AppDomain(this));
-    _registerDomain(new DeviceDomain(this));
+    _registerDomain(daemonDomain = new DaemonDomain(this));
+    _registerDomain(appDomain = new AppDomain(this));
+    _registerDomain(deviceDomain = new DeviceDomain(this));
 
     // Start listening.
     commandStream.listen(
@@ -88,6 +88,10 @@ class Daemon {
       onDone: () => _onExitCompleter.complete(0)
     );
   }
+
+  DaemonDomain daemonDomain;
+  AppDomain appDomain;
+  DeviceDomain deviceDomain;
 
   final DispatchComand sendCommand;
   final DaemonCommand daemonCommand;
@@ -221,29 +225,30 @@ class DaemonDomain extends Domain {
   }
 }
 
-/// This domain responds to methods like [start] and [stopAll].
+/// This domain responds to methods like [start] and [stop].
 ///
 /// It'll be extended to fire events for when applications start, stop, and
 /// log data.
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('start', start);
-    registerHandler('stopAll', stopAll);
+    registerHandler('stop', stop);
   }
 
   Future<dynamic> start(Map<String, dynamic> args) async {
-    // TODO(devoncarew): We need to be able to specify the target device.
+    if (args['deviceId'] is! String)
+      throw "A 'deviceId' is required";
+    Device device = await _getDevice(args['deviceId']);
+    if (device == null)
+      throw "A 'projectDirectory' is required";
 
     if (args['projectDirectory'] is! String)
       throw "A 'projectDirectory' is required";
-
     String projectDirectory = args['projectDirectory'];
     if (!FileSystemEntity.isDirectorySync(projectDirectory))
       throw "The '$projectDirectory' does not exist";
 
-    // We change the current working directory for the duration of the `start`
-    // command. This would have race conditions with other commands happening in
-    // parallel and doesn't play well with the caching built into `FlutterCommand`.
+    // We change the current working directory for the duration of the `start` command.
     // TODO(devoncarew): Make flutter_tools work better with commands run from any directory.
     Directory cwd = Directory.current;
     Directory.current = new Directory(projectDirectory);
@@ -259,6 +264,7 @@ class AppDomain extends Domain {
         command.applicationPackages,
         command.toolchain,
         command.buildConfigurations,
+        stop: true,
         target: args['target'],
         route: args['route'],
         checked: args['checked'] ?? true
@@ -273,8 +279,38 @@ class AppDomain extends Domain {
     return null;
   }
 
-  Future<bool> stopAll(dynamic args) {
-    return stop.stopAll(command.devices, command.applicationPackages);
+  Future<bool> stop(dynamic args) async {
+    if (args['deviceId'] is! String)
+      throw "A 'deviceId' is required";
+    Device device = await _getDevice(args['deviceId']);
+    if (device == null)
+      throw "A 'projectDirectory' is required";
+
+    if (args['projectDirectory'] is! String)
+      throw "A 'projectDirectory' is required";
+    String projectDirectory = args['projectDirectory'];
+    if (!FileSystemEntity.isDirectorySync(projectDirectory))
+      throw "The '$projectDirectory' does not exist";
+
+    Directory cwd = Directory.current;
+    Directory.current = new Directory(projectDirectory);
+
+    try {
+      await Future.wait([
+        command.downloadToolchain(),
+        command.downloadApplicationPackages(),
+      ], eagerError: true);
+
+      ApplicationPackage app = command.applicationPackages.getPackageForPlatform(device.platform);
+      return device.stopApp(app);
+    } finally {
+      Directory.current = cwd;
+    }
+  }
+
+  Future<Device> _getDevice(String deviceId) async {
+    List<Device> devices = await daemon.deviceDomain.getDevices();
+    return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
   }
 }
 
@@ -312,7 +348,7 @@ class DeviceDomain extends Domain {
 
   List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  Future<List<Device>> getDevices(dynamic args) {
+  Future<List<Device>> getDevices([dynamic args]) {
     List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
       return discoverer.devices;
     }).toList();

@@ -7,17 +7,16 @@ import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable;
 
+import '../android/android_device.dart' show AndroidDevice;
+import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
-import '../android/android_device.dart' show AndroidDevice;
-import '../application_package.dart';
 import 'apk.dart' as apk;
 import 'run.dart';
-import 'stop.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
 ///
@@ -124,10 +123,6 @@ class DriveCommand extends RunCommandBase {
         printStatus('Leaving the application running.');
       }
     }
-  }
-
-  Future<int> stop() async {
-    return await stopAll(devices, applicationPackages) ? 0 : 2;
   }
 
   String _getTestFile() {
