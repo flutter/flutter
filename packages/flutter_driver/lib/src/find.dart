@@ -15,10 +15,10 @@ class Find extends Command {
 
   final SearchSpecification searchSpec;
 
-  Map<String, dynamic> toJson() => searchSpec.toJson();
+  Map<String, String> serialize() => searchSpec.serialize();
 
-  static Find fromJson(Map<String, dynamic> json) {
-    return new Find(SearchSpecification.fromJson(json));
+  static Find deserialize(Map<String, String> json) {
+    return new Find(SearchSpecification.deserialize(json));
   }
 
   static _throwInvalidKeyValueType(String invalidType) {
@@ -27,20 +27,20 @@ class Find extends Command {
 }
 
 /// Describes how to the driver should search for elements.
-abstract class SearchSpecification extends Message {
+abstract class SearchSpecification {
   String get searchSpecType;
 
-  static SearchSpecification fromJson(Map<String, dynamic> json) {
+  static SearchSpecification deserialize(Map<String, String> json) {
     String searchSpecType = json['searchSpecType'];
     switch(searchSpecType) {
-      case 'ByValueKey': return ByValueKey.fromJson(json);
-      case 'ByTooltipMessage': return ByTooltipMessage.fromJson(json);
-      case 'ByText': return ByText.fromJson(json);
+      case 'ByValueKey': return ByValueKey.deserialize(json);
+      case 'ByTooltipMessage': return ByTooltipMessage.deserialize(json);
+      case 'ByText': return ByText.deserialize(json);
     }
     throw new DriverError('Unsupported search specification type $searchSpecType');
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, String> serialize() => {
     'searchSpecType': searchSpecType,
   };
 }
@@ -54,11 +54,11 @@ class ByTooltipMessage extends SearchSpecification {
   /// Tooltip message text.
   final String text;
 
-  Map<String, dynamic> toJson() => super.toJson()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll({
     'text': text,
   });
 
-  static ByTooltipMessage fromJson(Map<String, dynamic> json) {
+  static ByTooltipMessage deserialize(Map<String, String> json) {
     return new ByTooltipMessage(json['text']);
   }
 }
@@ -71,11 +71,11 @@ class ByText extends SearchSpecification {
 
   final String text;
 
-  Map<String, dynamic> toJson() => super.toJson()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll({
     'text': text,
   });
 
-  static ByText fromJson(Map<String, dynamic> json) {
+  static ByText deserialize(Map<String, String> json) {
     return new ByText(json['text']);
   }
 }
@@ -103,12 +103,12 @@ class ByValueKey extends SearchSpecification {
   /// May be one of "String", "int". The list of supported types may change.
   final String keyValueType;
 
-  Map<String, dynamic> toJson() => super.toJson()..addAll({
+  Map<String, String> serialize() => super.serialize()..addAll({
     'keyValueString': keyValueString,
     'keyValueType': keyValueType,
   });
 
-  static ByValueKey fromJson(Map<String, dynamic> json) {
+  static ByValueKey deserialize(Map<String, String> json) {
     String keyValueString = json['keyValueString'];
     String keyValueType = json['keyValueType'];
     switch(keyValueType) {
@@ -130,14 +130,14 @@ class ByValueKey extends SearchSpecification {
 class GetText extends CommandWithTarget {
   final String kind = 'get_text';
 
-  static GetText fromJson(Map<String, dynamic> json) {
+  static GetText deserialize(Map<String, String> json) {
     return new GetText(new ObjectRef(json['targetRef']));
   }
 
   /// [targetRef] identifies an element that contains a piece of text.
   GetText(ObjectRef targetRef) : super(targetRef);
 
-  Map<String, dynamic> toJson() => super.toJson();
+  Map<String, String> serialize() => super.serialize();
 }
 
 class GetTextResult extends Result {

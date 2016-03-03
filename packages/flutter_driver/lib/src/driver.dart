@@ -148,9 +148,9 @@ class FlutterDriver {
   final VMIsolateRef _appIsolate;
 
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
-    Map<String, dynamic> json = <String, dynamic>{'command': command.kind}
-      ..addAll(command.toJson());
-    return _appIsolate.invokeExtension(_kFlutterExtensionMethod, json)
+    Map<String, String> parameters = <String, String>{'command': command.kind}
+      ..addAll(command.serialize());
+    return _appIsolate.invokeExtension(_kFlutterExtensionMethod, parameters)
       .then((Map<String, dynamic> result) => result, onError: (error, stackTrace) {
         throw new DriverError(
           'Failed to fulfill ${command.runtimeType} due to remote error',

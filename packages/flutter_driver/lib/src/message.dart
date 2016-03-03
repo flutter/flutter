@@ -4,22 +4,22 @@
 
 import 'error.dart';
 
-/// A piece of data travelling between Flutter Driver and a Flutter application.
-abstract class Message {
+/// An object sent from the Flutter Driver to a Flutter application to instruct
+/// the application to perform a task.
+abstract class Command {
+  /// Identifies the type of the command object and of the handler.
+  String get kind;
+
+  /// Serializes this command to parameter name/value pairs.
+  Map<String, String> serialize();
+}
+
+/// An object sent from a Flutter application back to the Flutter Driver in
+/// response to a command.
+abstract class Result {
   /// Serializes this message to a JSON map.
   Map<String, dynamic> toJson();
 }
-
-/// A message that travels from the Flutter Driver to a Flutter application to
-/// instruct the application to perform a task.
-abstract class Command extends Message {
-  /// Identifies the type of the command object and of the handler.
-  String get kind;
-}
-
-/// A message sent from a Flutter application back to the Flutter Driver in
-/// response to a command.
-abstract class Result extends Message { }
 
 /// A serializable reference to an object that lives in the application isolate.
 class ObjectRef extends Result {
@@ -47,7 +47,7 @@ class ObjectRef extends Result {
 /// A command aimed at an object represented by [targetRef].
 ///
 /// Implementations must provide a concrete [kind]. If additional data is
-/// required beyond the [targetRef] the implementation may override [toJson]
+/// required beyond the [targetRef] the implementation may override [serialize]
 /// and add more keys to the returned map.
 abstract class CommandWithTarget extends Command {
   CommandWithTarget(ObjectRef ref) : this.targetRef = ref?.objectReferenceKey {
@@ -66,10 +66,10 @@ abstract class CommandWithTarget extends Command {
   ///
   /// Example:
   ///
-  ///     Map<String, dynamic> toJson() => super.toJson()..addAll({
+  ///     Map<String, String> toJson() => super.toJson()..addAll({
   ///       'foo': this.foo,
   ///     });
-  Map<String, dynamic> toJson() => {
+  Map<String, String> serialize() => <String, String>{
     'targetRef': targetRef,
   };
 }

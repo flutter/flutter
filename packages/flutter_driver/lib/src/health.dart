@@ -9,9 +9,9 @@ import 'message.dart';
 class GetHealth implements Command {
   final String kind = 'get_health';
 
-  static fromJson(Map<String, dynamic> json) => new GetHealth();
+  static deserialize(Map<String, String> json) => new GetHealth();
 
-  Map<String, dynamic> toJson() => const {};
+  Map<String, String> serialize() => const {};
 }
 
 /// Application health status.
