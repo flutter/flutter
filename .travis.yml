@@ -1,5 +1,9 @@
 language: dart
 sudo: false
+os:
+  - linux
+  - osx
+osx_image: xcode7.2
 dart:
   - stable
 addons:
