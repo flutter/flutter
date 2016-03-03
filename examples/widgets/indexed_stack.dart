@@ -19,18 +19,22 @@ class IndexedStackDemoState extends State<IndexedStackDemo> {
     });
   }
 
-  List<PopupMenuItem> _buildMenu() {
+  List<PopupMenuItem<int>> _buildMenu() {
     TextStyle style = const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold);
     String pad = '';
     return new List<PopupMenuItem>.generate(_itemCount, (int i) {
       pad += '-';
-      return new PopupMenuItem(value: i, child: new Text('$pad Hello World $i $pad', style: style));
+      return new PopupMenuItem<int>(value: i, child: new Text('$pad Hello World $i $pad', style: style));
     });
   }
 
   Widget build(BuildContext context) {
-    List<PopupMenuItem> items = _buildMenu();
-    IndexedStack indexedStack = new IndexedStack(children: items, index: _itemIndex, alignment: const FractionalOffset(0.5, 0.0));
+    List<PopupMenuItem<int>> items = _buildMenu();
+    IndexedStack indexedStack = new IndexedStack(
+      children: items,
+      index: _itemIndex,
+      alignment: const FractionalOffset(0.5, 0.0)
+    );
 
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('IndexedStackDemo Demo')),
