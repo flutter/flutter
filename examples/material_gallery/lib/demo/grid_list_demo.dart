@@ -138,16 +138,16 @@ class GridListDemoState extends State<GridListDemo> {
   GridDemoTileStyle tileStyle = GridDemoTileStyle.twoLine;
 
   void showTileStyleMenu(BuildContext context) {
-    final List<PopupMenuItem> items = <PopupMenuItem>[
-      new PopupMenuItem(
+    final List<PopupMenuItem> items = <PopupMenuItem<GridDemoTileStyle>>[
+      new PopupMenuItem<GridDemoTileStyle>(
         value: GridDemoTileStyle.imageOnly,
         child: new Text('Image only')
       ),
-      new PopupMenuItem(
+      new PopupMenuItem<GridDemoTileStyle>(
         value: GridDemoTileStyle.oneLine,
         child: new Text('One line')
       ),
-      new PopupMenuItem(
+      new PopupMenuItem<GridDemoTileStyle>(
         value: GridDemoTileStyle.twoLine,
         child: new Text('Two line')
       )

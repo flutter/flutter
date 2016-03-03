@@ -218,21 +218,21 @@ class StockHomeState extends State<StockHome> {
         ),
         new PopupMenuButton<_StockMenuItem>(
           onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
-          items: <PopupMenuItem>[
-            new CheckedPopupMenuItem(
+          items: <PopupMenuItem<_StockMenuItem>>[
+            new CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
               checked: _autorefresh,
               child: new Text('Autorefresh')
             ),
-            new PopupMenuItem(
+            new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.refresh,
               child: new Text('Refresh')
             ),
-            new PopupMenuItem(
+            new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedUp,
               child: new Text('Increase animation speed')
             ),
-            new PopupMenuItem(
+            new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedDown,
               child: new Text('Decrease animation speed')
             )

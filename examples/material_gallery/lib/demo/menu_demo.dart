@@ -61,16 +61,16 @@ class MenuDemoState extends State<MenuDemo> {
         right: <Widget>[
           new PopupMenuButton<String>(
             onSelected: showMenuSelection,
-            items: <PopupMenuItem>[
-              new PopupMenuItem(
+            items: <PopupMenuItem<String>>[
+              new PopupMenuItem<String>(
                 value: 'ToolBar Menu',
                 child: new Text('ToolBar Menu')
               ),
-              new PopupMenuItem(
+              new PopupMenuItem<String>(
                 value: 'Right Here',
                 child: new Text('Right Here')
               ),
-              new PopupMenuItem(
+              new PopupMenuItem<String>(
                 value: 'Hooray!',
                 child: new Text('Hooray!')
               ),
@@ -88,16 +88,16 @@ class MenuDemoState extends State<MenuDemo> {
             primary: new Text('An item with a context menu button'),
             right: new PopupMenuButton<String>(
               onSelected: showMenuSelection,
-              items: <PopupMenuItem>[
-                new PopupMenuItem(
+              items: <PopupMenuItem<String>>[
+                new PopupMenuItem<String>(
                   value: _simpleValue1,
                   child: new Text('Context menu item one')
                 ),
-                new PopupMenuItem(
+                new PopupMenuItem<String>(
                   enabled: false,
                   child: new Text('A disabled menu item')
                 ),
-                new PopupMenuItem(
+                new PopupMenuItem<String>(
                   value: _simpleValue3,
                   child: new Text('Context menu item three')
                 ),
@@ -112,21 +112,21 @@ class MenuDemoState extends State<MenuDemo> {
             right: new PopupMenuButton<String>(
               onSelected: showMenuSelection,
               items: <PopupMenuEntry<String>>[
-                new PopupMenuItem(
+                new PopupMenuItem<String>(
                   value: 'Preview',
                   child: new ListItem(
                     left: new Icon(icon: Icons.visibility),
                     primary: new Text('Preview')
                   )
                 ),
-                new PopupMenuItem(
+                new PopupMenuItem<String>(
                   value: 'Share',
                   child: new ListItem(
                     left: new Icon(icon: Icons.person_add),
                     primary: new Text('Share')
                   )
                 ),
-                new PopupMenuItem(
+                new PopupMenuItem<String>(
                   value: 'Get Link',
                   child: new ListItem(
                     left: new Icon(icon: Icons.link),
@@ -134,7 +134,7 @@ class MenuDemoState extends State<MenuDemo> {
                   )
                 ),
                 new PopupMenuDivider(),
-                new PopupMenuItem(
+                new PopupMenuItem<String>(
                   value: 'Remove',
                   child: new ListItem(
                     left: new Icon(icon: Icons.delete),
@@ -154,16 +154,16 @@ class MenuDemoState extends State<MenuDemo> {
               primary: new Text('An item with a simple menu'),
               secondary: new Text(_simpleValue)
             ),
-            items: <PopupMenuItem>[
-              new PopupMenuItem(
+            items: <PopupMenuItem<String>>[
+              new PopupMenuItem<String>(
                 value: _simpleValue1,
                 child: new Text(_simpleValue1)
               ),
-              new PopupMenuItem(
+              new PopupMenuItem<String>(
                 value: _simpleValue2,
                 child: new Text(_simpleValue2)
               ),
-              new PopupMenuItem(
+              new PopupMenuItem<String>(
                 value: _simpleValue3,
                 child: new Text(_simpleValue3)
               )
@@ -175,23 +175,24 @@ class MenuDemoState extends State<MenuDemo> {
             primary: new Text('An item with a checklist menu'),
             right: new PopupMenuButton<String>(
               onSelected: showCheckedMenuSelections,
-              items: <PopupMenuItem>[
+              items: <PopupMenuItem<String>>[
                 new CheckedPopupMenuItem(
                   value: _checkedValue1,
                   checked: isChecked(_checkedValue1),
                   child: new Text(_checkedValue1)
                 ),
-                new CheckedPopupMenuItem(
+                new CheckedPopupMenuItem<String>(
+                  value: _checkedValue2,
                   enabled: false,
                   checked: isChecked(_checkedValue2),
                   child: new Text(_checkedValue2)
                 ),
-                new CheckedPopupMenuItem(
+                new CheckedPopupMenuItem<String>(
                   value: _checkedValue3,
                   checked: isChecked(_checkedValue3),
                   child: new Text(_checkedValue3)
                 ),
-                new CheckedPopupMenuItem(
+                new CheckedPopupMenuItem<String>(
                   value: _checkedValue4,
                   checked: isChecked(_checkedValue4),
                   child: new Text(_checkedValue4)
