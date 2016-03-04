@@ -128,7 +128,10 @@ All done! In order to run your application, type:
 
   void _renderTemplates(String projectName, String dirPath,
       String flutterPackagesDirectory, { bool renderDriverTest: false }) {
-    String relativeFlutterPackagesDirectory = path.relative(flutterPackagesDirectory, from: dirPath);
+    String relativePackagesDirectory = path.relative(
+      flutterPackagesDirectory,
+      from: path.join(dirPath, 'pubspec.yaml')
+    );
 
     printStatus('Creating project ${path.basename(projectName)}:');
 
@@ -139,7 +142,7 @@ All done! In order to run your application, type:
       'androidIdentifier': _createAndroidIdentifier(projectName),
       'iosIdentifier': _createUTIIdentifier(projectName),
       'description': description,
-      'flutterPackagesDirectory': relativeFlutterPackagesDirectory,
+      'flutterPackagesDirectory': relativePackagesDirectory,
       'androidMinApiLevel': android.minApiLevel
     };
 

@@ -11,7 +11,9 @@ import 'package:flutter/rendering.dart';
 
 typedef void ExtentsChangedCallback(double contentExtent, double containerExtent);
 
+/// An abstract widget whose children are not all materialized.
 abstract class VirtualViewport extends RenderObjectWidget {
+  /// The offset from the [ViewportAnchor] at which the viewport should start painting children.
   double get startOffset;
 
   _WidgetProvider _createWidgetProvider();
@@ -24,12 +26,24 @@ abstract class _WidgetProvider {
   Widget getChild(int i);
 }
 
+/// Materializes a contiguous subset of its children.
+///
+/// This class is a building block for building a widget that has more children
+/// than it wishes to display at any given time. For example, [ScrollableList]
+/// uses this element to materialize only those children that are visible.
 abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderObjectElement<T> {
   VirtualViewportElement(T widget) : super(widget);
 
+  /// The index of the first child to materialize.
   int get materializedChildBase;
+
+  /// The number of children to materializes.
   int get materializedChildCount;
+
+  /// The least offset for which [materializedChildBase] and [materializedChildCount] are valid.
   double get startOffsetBase;
+
+  /// The greatest offset for which [materializedChildBase] and [materializedChildCount] are valid.
   double get startOffsetLimit;
 
   /// Returns the pixel offset for a scroll offset, accounting for the scroll
@@ -124,6 +138,12 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     }
   }
 
+  /// Called by [RenderVirtualViewport] during layout.
+  ///
+  /// Subclasses should override this function to compute [materializedChildBase]
+  /// and [materializedChildCount]. Overrides should call this function to
+  /// update the [RenderVirtualViewport]'s paint offset and to materialize the
+  /// children.
   void layout(BoxConstraints constraints) {
     assert(startOffsetBase != null);
     assert(startOffsetLimit != null);
@@ -162,7 +182,12 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
   }
 }
 
-abstract class VirtualViewportIterableMixin extends VirtualViewport {
+/// A VirtualViewport that represents its children using [Iterable<Widget>].
+///
+/// The iterator is advanced just far enough to obtain widgets for the children
+/// that need to be materialized.
+abstract class VirtualViewportFromIterable extends VirtualViewport {
+  /// The children, some of which might be materialized.
   Iterable<Widget> get children;
 
   _IterableWidgetProvider _createWidgetProvider() => new _IterableWidgetProvider();
@@ -173,7 +198,7 @@ class _IterableWidgetProvider extends _WidgetProvider {
   Iterator<Widget> _iterator;
   List<Widget> _widgets;
 
-  void didUpdateWidget(VirtualViewportIterableMixin oldWidget, VirtualViewportIterableMixin newWidget) {
+  void didUpdateWidget(VirtualViewportFromIterable oldWidget, VirtualViewportFromIterable newWidget) {
     if (oldWidget == null || newWidget.children != oldWidget.children) {
       _iterator = null;
       _widgets = <Widget>[];
@@ -187,7 +212,7 @@ class _IterableWidgetProvider extends _WidgetProvider {
     int limit = base < 0 ? _length : math.min(_length, base + count);
     if (limit <= _widgets.length)
       return;
-    VirtualViewportIterableMixin widget = context.widget;
+    VirtualViewportFromIterable widget = context.widget;
     if (widget.children is List<Widget>) {
       _widgets = widget.children;
       return;
@@ -205,10 +230,21 @@ class _IterableWidgetProvider extends _WidgetProvider {
   Widget getChild(int i) => _widgets[(i % _length).abs()];
 }
 
+/// Signature of a callback that returns the sublist of widgets in the given range.
 typedef List<Widget> ItemListBuilder(BuildContext context, int start, int count);
 
-abstract class VirtualViewportLazyMixin extends VirtualViewport {
+/// A VirtualViewport that represents its children using [ItemListBuilder].
+///
+/// This widget is less ergonomic than [VirtualViewportFromIterable] but scales to
+/// unlimited numbers of children.
+abstract class VirtualViewportFromBuilder extends VirtualViewport {
+  /// The total number of children that can be built.
   int get itemCount;
+
+  /// A callback to build the subset of widgets that are needed to populate the
+  /// viewport. Not all of the returned widgets will actually be included in the
+  /// viewport (e.g., if we need to measure the size of non-visible children to
+  /// determine which children are visible).
   ItemListBuilder get itemBuilder;
 
   _LazyWidgetProvider _createWidgetProvider() => new _LazyWidgetProvider();
@@ -219,7 +255,7 @@ class _LazyWidgetProvider extends _WidgetProvider {
   int _base;
   List<Widget> _widgets;
 
-  void didUpdateWidget(VirtualViewportLazyMixin oldWidget, VirtualViewportLazyMixin newWidget) {
+  void didUpdateWidget(VirtualViewportFromBuilder oldWidget, VirtualViewportFromBuilder newWidget) {
     if (_length != newWidget.itemCount || oldWidget?.itemBuilder != newWidget.itemBuilder) {
       _length = newWidget.itemCount;
       _base = null;
@@ -232,7 +268,7 @@ class _LazyWidgetProvider extends _WidgetProvider {
   void prepareChildren(VirtualViewportElement context, int base, int count) {
     if (_widgets != null && _widgets.length == count && _base == base)
       return;
-    VirtualViewportLazyMixin widget = context.widget;
+    VirtualViewportFromBuilder widget = context.widget;
     _base = base;
     _widgets = widget.itemBuilder(context, base, count);
   }

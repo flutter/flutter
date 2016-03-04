@@ -334,7 +334,7 @@ linter:
       if (dartFiles.length == 1) {
         printStatus('Analyzing ${dartFiles.first}...');
       } else {
-        printStatus('Analyzing ${dartFiles.length} files...');
+        printStatus('Analyzing ${dartFiles.length} entry points...');
       }
       for (String file in dartFiles)
         printTrace(file);

@@ -240,7 +240,7 @@ class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListVie
   }
 }
 
-class ListViewport extends _VirtualListViewport with VirtualViewportIterableMixin {
+class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable {
   ListViewport({
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,
@@ -350,7 +350,7 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
   }
 }
 
-class LazyListViewport extends _VirtualListViewport with VirtualViewportLazyMixin {
+class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuilder {
   LazyListViewport({
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,

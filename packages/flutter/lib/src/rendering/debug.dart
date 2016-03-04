@@ -53,7 +53,7 @@ bool debugPaintPointersEnabled = false;
 /// The color to use when reporting pointers.
 int debugPaintPointersColorValue = 0x00BBBB;
 
-/// The color to use when painting RenderError boxes in checked mode.
+/// The color to use when painting [RenderErrorBox] objects in checked mode.
 Color debugErrorBoxColor = const Color(0xFFFF0000);
 
 /// Overlay a rotating set of colors when repainting layers in checked mode.
