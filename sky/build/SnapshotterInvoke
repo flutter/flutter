@@ -94,10 +94,16 @@ SnapshotProject() {
 
   # For dart:ui
   local ui_path="$(readlink ${packages}/sky_engine)/../sdk_ext/dart_ui.dart"
+  if [[ "${ui_path:0:1}" != "/" ]]; then
+      ui_path="${packages}/${ui_path}"
+  fi
   AssertExists $ui_path
 
   # For dart:vmservice_sky
   local vm_service_path="$(readlink ${packages}/sky_engine)/../sdk_ext/dart/runtime/bin/vmservice/vmservice_io.dart"
+  if [[ "${vm_service_path:0:1}" != "/" ]]; then
+      vm_service_path="${packages}/${vm_service_path}"
+  fi
   AssertExists $vm_service_path
 
   local main_path="${project_path}/lib/main.dart"
