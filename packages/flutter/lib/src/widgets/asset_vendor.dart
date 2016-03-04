@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:ui' as ui show Image;
 
 import 'package:flutter/services.dart';
 import 'package:mojo/core.dart' as core;
@@ -39,17 +40,26 @@ class _ResolvingAssetBundle extends CachingAssetBundle {
   }
 }
 
+/// Abstraction for reading images out of a Mojo data pipe.
+///
+/// Useful for mocking purposes in unit tests.
+typedef Future<ui.Image> ImageDecoder(core.MojoDataPipeConsumer pipe);
+
 // Asset bundle that understands how specific asset keys represent image scale.
 class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
   _ResolutionAwareAssetBundle({
     AssetBundle bundle,
-    _ResolutionAwareAssetResolver resolver
-  }) : super(
+    _ResolutionAwareAssetResolver resolver,
+    ImageDecoder imageDecoder
+  }) : _imageDecoder = imageDecoder,
+  super(
     bundle: bundle,
     resolver: resolver
   );
 
   _ResolutionAwareAssetResolver get resolver => super.resolver;
+
+  final ImageDecoder _imageDecoder;
 
   Future<ImageInfo> fetchImage(String key) async {
     core.MojoDataPipeConsumer pipe = await load(key);
@@ -57,7 +67,7 @@ class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
     // resource should be in our image cache
     double scale = resolver.getScale(keyCache[key]);
     return new ImageInfo(
-      image: await decodeImageFromDataPipe(pipe),
+      image: await _imageDecoder(pipe),
       scale: scale
     );
   }
@@ -183,12 +193,14 @@ class AssetVendor extends StatefulComponent {
     Key key,
     this.bundle,
     this.devicePixelRatio,
-    this.child
+    this.child,
+    this.imageDecoder: decodeImageFromDataPipe
   }) : super(key: key);
 
   final AssetBundle bundle;
   final double devicePixelRatio;
   final Widget child;
+  final ImageDecoder imageDecoder;
 
   _AssetVendorState createState() => new _AssetVendorState();
 
@@ -207,6 +219,7 @@ class _AssetVendorState extends State<AssetVendor> {
   void _initBundle() {
     _bundle = new _ResolutionAwareAssetBundle(
       bundle: config.bundle,
+      imageDecoder: config.imageDecoder,
       resolver: new _ResolutionAwareAssetResolver(
         bundle: config.bundle,
         devicePixelRatio: config.devicePixelRatio

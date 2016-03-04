@@ -12,8 +12,61 @@ import 'package:flutter/widgets.dart';
 
 import 'instrumentation.dart';
 
+/// Enumeration of possible phases to reach in pumpWidget.
+enum EnginePhase {
+  layout,
+  compositingBits,
+  paint,
+  composite,
+  flushSemantics,
+  sendSemanticsTree
+}
 
-/// Helper class for fluter tests providing fake async.
+class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
+
+  /// Creates and initializes the binding. This constructor is
+  /// idempotent; calling it a second time will just return the
+  /// previously-created instance.
+  static WidgetFlutterBinding ensureInitialized() {
+    if (WidgetFlutterBinding.instance == null)
+      new _SteppedWidgetFlutterBinding();
+    return WidgetFlutterBinding.instance;
+  }
+
+  EnginePhase phase = EnginePhase.sendSemanticsTree;
+
+  // Pump the rendering pipeline up to the given phase.
+  void beginFrame() {
+    buildDirtyElements();
+    _beginFrame();
+    Element.finalizeTree();
+  }
+
+  // Cloned from Renderer.beginFrame() but with early-exit semantics.
+  void _beginFrame() {
+    assert(renderView != null);
+    RenderObject.flushLayout();
+    if (phase == EnginePhase.layout)
+      return;
+    RenderObject.flushCompositingBits();
+    if (phase == EnginePhase.compositingBits)
+      return;
+    RenderObject.flushPaint();
+    if (phase == EnginePhase.paint)
+      return;
+    renderView.compositeFrame(); // this sends the bits to the GPU
+    if (phase == EnginePhase.composite)
+      return;
+    if (SemanticsNode.hasListeners) {
+      RenderObject.flushSemantics();
+      if (phase == EnginePhase.flushSemantics)
+        return;
+      SemanticsNode.sendSemanticsTree();
+    }
+  }
+}
+
+/// Helper class for flutter tests providing fake async.
 ///
 /// This class extends Instrumentation to also abstract away the beginFrame
 /// and async/clock access to allow writing tests which depend on the passage
@@ -21,7 +74,8 @@ import 'instrumentation.dart';
 class WidgetTester extends Instrumentation {
   WidgetTester._(FakeAsync async)
     : async = async,
-      clock = async.getClock(new DateTime.utc(2015, 1, 1)) {
+      clock = async.getClock(new DateTime.utc(2015, 1, 1)),
+      super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
     runApp(new ErrorWidget()); // flush out the last build entirely
@@ -32,7 +86,18 @@ class WidgetTester extends Instrumentation {
 
   /// Calls [runApp()] with the given widget, then triggers a frame sequent and
   /// flushes microtasks, by calling [pump()] with the same duration (if any).
-  void pumpWidget(Widget widget, [ Duration duration ]) {
+  /// The supplied EnginePhase is the final phase reached during the pump pass;
+  /// if not supplied, the whole pass is executed.
+  void pumpWidget(Widget widget, [ Duration duration, EnginePhase phase ]) {
+    if (binding is _SteppedWidgetFlutterBinding) {
+      // Some tests call WidgetFlutterBinding.ensureInitialized() manually, so
+      // we can't actually be sure we have a stepped binding.
+      _SteppedWidgetFlutterBinding steppedBinding = binding;
+      steppedBinding.phase = phase ?? EnginePhase.sendSemanticsTree;
+    } else {
+      // Can't step to a given phase in that case
+      assert(phase == null);
+    }
     runApp(widget);
     pump(duration);
   }

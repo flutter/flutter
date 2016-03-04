@@ -15,7 +15,8 @@ typedef Point SizeToPointFunction(Size size);
 /// This class provides hooks for accessing the rendering tree and dispatching
 /// fake tap/drag/etc. events.
 class Instrumentation {
-  Instrumentation() : binding = WidgetFlutterBinding.ensureInitialized();
+  Instrumentation({ WidgetFlutterBinding binding })
+    : this.binding = binding ?? WidgetFlutterBinding.ensureInitialized();
 
   final WidgetFlutterBinding binding;
 
