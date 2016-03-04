@@ -19,11 +19,8 @@ dart:ui,::,takeServicesProvidedByEmbedder
 dart:ui,::,takeServicesProvidedToEmbedder
 dart:ui,::,takeShellProxyHandle
 dart:ui,Canvas,Canvas.
-dart:ui,DrawLooper,DrawLooper.
-dart:ui,DrawLooperLayerInfo,DrawLooperLayerInfo.
 dart:ui,Image,Image.
 dart:ui,ImageShader,ImageShader.
-dart:ui,LayerDrawLooperBuilder,LayerDrawLooperBuilder.
 dart:ui,Paragraph,Paragraph.
 dart:ui,ParagraphBuilder,ParagraphBuilder.
 dart:ui,Path,Path.

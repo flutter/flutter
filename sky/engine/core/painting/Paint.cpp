@@ -6,7 +6,6 @@
 
 #include "sky/engine/core/painting/CanvasColor.h"
 #include "sky/engine/core/painting/ColorFilter.h"
-#include "sky/engine/core/painting/DrawLooper.h"
 #include "sky/engine/core/painting/FilterQuality.h"
 #include "sky/engine/core/painting/MaskFilter.h"
 #include "sky/engine/core/painting/PaintingStyle.h"
@@ -28,7 +27,6 @@ enum PaintFields {
   kIsAntiAlias,
   kColor,
   kColorFilter,
-  kDrawLooper,
   kFilterQuality,
   kMaskFilter,
   kShader,
@@ -83,8 +81,6 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
     paint.setColor(DartConverter<CanvasColor>::FromDart(values[kColor]));
   if (!Dart_IsNull(values[kColorFilter]))
     paint.setColorFilter(DartConverter<ColorFilter*>::FromDart(values[kColorFilter])->filter());
-  if (!Dart_IsNull(values[kDrawLooper]))
-    paint.setLooper(DartConverter<DrawLooper*>::FromDart(values[kDrawLooper])->looper());
   if (!Dart_IsNull(values[kFilterQuality]))
     paint.setFilterQuality(DartConverter<FilterQuality>::FromDart(values[kFilterQuality]));
   if (!Dart_IsNull(values[kMaskFilter]))
