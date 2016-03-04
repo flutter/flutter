@@ -4,21 +4,36 @@
 
 part of dart_ui;
 
+/// Opaque handle to raw decoded image data (pixels).
+///
+/// To obtain an Image object, use the [decodeImageFromDataPipe] or
+/// [decodeImageFromList] functions.
+///
+/// To draw an Image, use one of the methods on the [Canvas] class, such as
+/// [drawImage].
 abstract class Image extends NativeFieldWrapperClass2 {
+  /// The number of image pixels along the image's horizontal axis.
   int get width native "Image_width";
+
+  /// The number of image pixels along the image's vertical axis.
   int get height native "Image_height";
 
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
   void dispose() native "Image_dispose";
 
   String toString() => '[$width\u00D7$height]';
 }
 
-typedef void _ImageDecoderCallback(Image result);
+/// Callback signature for [decodeImageFromDataPipe] and [decodeImageFromList].
+typedef void ImageDecoderCallback(Image result);
 
-void decodeImageFromDataPipe(int handle, _ImageDecoderCallback callback)
+/// Convert an image file from a mojo pipe into an [Image] object.
+void decodeImageFromDataPipe(int handle, ImageDecoderCallback callback)
     native "decodeImageFromDataPipe";
 
-void decodeImageFromList(Uint8List list, _ImageDecoderCallback callback)
+/// Convert an image file from a byte array into an [Image] object.
+void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
     native "decodeImageFromList";
 
 class Path extends NativeFieldWrapperClass2 {
@@ -335,6 +350,8 @@ abstract class Picture extends NativeFieldWrapperClass2 {
   /// canvas the option of just taking a ref.
   void playback(Canvas canvas) native "Picture_playback";
 
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
   void dispose() native "Picture_dispose";
 }
 
