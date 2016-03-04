@@ -101,6 +101,10 @@ DartWrappable* DartConverterWrappable::FromArguments(Dart_NativeArguments args,
     exception = Dart_NewStringFromCString(DartError::kInvalidArgument);
     return nullptr;
   }
+  if (!native_fields[DartWrappable::kPeerIndex]) {
+    exception = Dart_NewStringFromCString(DartError::kInvalidDartWrappable);
+    return nullptr;
+  }
   return reinterpret_cast<DartWrappable*>(
       native_fields[DartWrappable::kPeerIndex]);
 }

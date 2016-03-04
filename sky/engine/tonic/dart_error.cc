@@ -9,6 +9,7 @@
 namespace blink {
 namespace DartError {
 const char kInvalidArgument[] = "Invalid argument.";
+const char kInvalidDartWrappable[] = "Invalid Dart wrappable object.";
 }  // namespace DartError
 
 bool LogIfError(Dart_Handle handle) {

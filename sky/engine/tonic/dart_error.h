@@ -11,6 +11,7 @@ namespace blink {
 
 namespace DartError {
 extern const char kInvalidArgument[];
+extern const char kInvalidDartWrappable[];
 }  // namespace DartError
 
 bool LogIfError(Dart_Handle handle);
