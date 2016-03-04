@@ -11,10 +11,10 @@
 /// pointer input system, and functions for image decoding.
 library dart_ui;
 
-import 'dart:async';
+import 'dart:math' as math;
+import 'dart:mojo.internal';
 import 'dart:nativewrappers';
 import 'dart:typed_data';
-import 'dart:math' as math;
 
 part 'Color.dart';
 part 'FilterQuality.dart';

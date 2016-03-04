@@ -50,7 +50,6 @@ class DartState {
   DartClassLibrary& class_library() { return *class_library_; }
   DartExceptionFactory& exception_factory() { return *exception_factory_; }
   DartLibraryLoader& library_loader() { return *library_loader_; }
-  DartTimerHeap& timer_heap() { return *timer_heap_; }
   DartMessageHandler& message_handler() { return *message_handler_; }
 
   Dart_Handle index_handle() { return index_handle_.value(); }
@@ -62,7 +61,6 @@ class DartState {
   std::unique_ptr<DartClassLibrary> class_library_;
   std::unique_ptr<DartExceptionFactory> exception_factory_;
   std::unique_ptr<DartLibraryLoader> library_loader_;
-  std::unique_ptr<DartTimerHeap> timer_heap_;
   std::unique_ptr<DartMessageHandler> message_handler_;
 
   DartPersistentValue index_handle_;
