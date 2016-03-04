@@ -14,7 +14,6 @@ namespace shell {
 
 const uint32_t kContentImageResourceId = 1;
 const uint32_t kRootNodeId = mojo::gfx::composition::kSceneRootNodeId;
-const uint32_t kBackgroundNodeId = 1;
 
 std::unique_ptr<Rasterizer> Rasterizer::Create() {
   return std::unique_ptr<Rasterizer>(new RasterizerMojo());
@@ -88,18 +87,16 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   update->clear_resources = true;
   update->clear_nodes = true;
   update->resources.insert(kContentImageResourceId, resource.Pass());
-  auto background_node = mojo::gfx::composition::Node::New();
-  background_node->op = mojo::gfx::composition::NodeOp::New();
-  background_node->op->set_image(mojo::gfx::composition::ImageNodeOp::New());
-  background_node->op->get_image()->content_rect = mojo::Rect::New();
-  background_node->op->get_image()->content_rect->width = size.width;
-  background_node->op->get_image()->content_rect->height = size.height;
-  background_node->op->get_image()->image_resource_id = kContentImageResourceId;
-  update->nodes.insert(kBackgroundNodeId, background_node.Pass());
 
   auto root_node = mojo::gfx::composition::Node::New();
+  root_node->op = mojo::gfx::composition::NodeOp::New();
+  root_node->op->set_image(mojo::gfx::composition::ImageNodeOp::New());
+  root_node->op->get_image()->content_rect = mojo::Rect::New();
+  root_node->op->get_image()->content_rect->width = size.width;
+  root_node->op->get_image()->content_rect->height = size.height;
+  root_node->op->get_image()->image_resource_id = kContentImageResourceId;
+  root_node->hit_test_behavior = mojo::gfx::composition::HitTestBehavior::New();
   root_node->combinator = mojo::gfx::composition::Node::Combinator::PRUNE;
-  root_node->child_node_ids.push_back(kBackgroundNodeId);
   layer_tree->UpdateScene(update.get(), root_node.get());
 
   update->nodes.insert(kRootNodeId, root_node.Pass());
