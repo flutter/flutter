@@ -9,20 +9,33 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'object.dart';
 
+/// The end of the viewport from which the paint offset is computed.
 enum ViewportAnchor {
+  /// The start (e.g., top or left, depending on the axis) of the first item
+  /// should be aligned with the start (e.g., top or left, depending on the
+  /// axis) of the viewport.
   start,
+
+  /// The end (e.g., bottom or right, depending on the axis) of the last item
+  /// should be aligned with the end (e.g., bottom or right, depending on the
+  /// axis) of the viewport.
   end,
 }
 
+/// The interior and exterior dimensions of a viewport.
 class ViewportDimensions {
   const ViewportDimensions({
     this.contentSize: Size.zero,
     this.containerSize: Size.zero
   });
 
+  /// A viewport that has zero size, both inside and outside.
   static const ViewportDimensions zero = const ViewportDimensions();
 
+  /// The size of the content inside the viewport.
   final Size contentSize;
+
+  /// The size of the outside of the viewport.
   final Size containerSize;
 
   bool get _debugHasAtLeastOneCommonDimension {
@@ -30,6 +43,8 @@ class ViewportDimensions {
         || contentSize.height == containerSize.height;
   }
 
+  /// Returns the offset at which to paint the content, accounting for the given
+  /// anchor and the dimensions of the viewport.
   Offset getAbsolutePaintOffset({ Offset paintOffset, ViewportAnchor anchor }) {
     assert(_debugHasAtLeastOneCommonDimension);
     switch (anchor) {
@@ -55,7 +70,9 @@ class ViewportDimensions {
   String toString() => 'ViewportDimensions(container: $containerSize, content: $contentSize)';
 }
 
+/// An interface that indicates that an object has a scroll direction.
 abstract class HasScrollDirection {
+  /// Whether this object scrolls horizontally or vertically.
   Axis get scrollDirection;
 }
 
@@ -119,6 +136,9 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
     markNeedsLayout();
   }
 
+  /// The end of the viewport from which the paint offset is computed.
+  ///
+  /// See [ViewportAnchor] for more detail.
   ViewportAnchor get scrollAnchor => _scrollAnchor;
   ViewportAnchor _scrollAnchor;
   void set scrollAnchor(ViewportAnchor value) {
