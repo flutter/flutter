@@ -18,10 +18,6 @@ dependencies:
   # analyzer, by the way!) complaining about the inconsistency.
   analyzer: 0.27.1
 
-  # TODO(abarth): Remove once we've updated the iOS build to not assert that
-  # this package exists.
-  material_design_icons: '>=0.0.3 <0.1.0'
-
   sky_engine:
     path: ../../bin/cache/pkg/sky_engine
   sky_services:
