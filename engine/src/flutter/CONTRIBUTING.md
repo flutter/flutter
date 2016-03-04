@@ -128,6 +128,11 @@ Once you've gotten an LGTM from a project maintainer, submit your changes to the
   request (requires commit access)
 * `git push upstream name_of_your_branch:master` (requires commit access)
 
+Then, make sure it doesn't make our tree catch fire by watching [the waterfall](https://build.chromium.org/p/client.flutter/waterfall). The waterfall runs
+slightly different tests than Travis, so it's possible for the tree to go red even if
+Travis did not. If that happens, please immediately revert your change. Do not check
+anything in while the tree is red unless you are trying to resolve the problem.
+
 Please make sure all your checkins have detailed commit messages explaining the patch.
 If you made multiple commits for a single pull request, either make sure each one has a detailed
 message explaining that specific commit, or squash your commits into one single checkin with a
