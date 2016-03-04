@@ -109,6 +109,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
 }
 
 /// Paints a [Decoration] either before or after its child paints.
+/// Container insets its child by the widths of the borders, this Widget does not.
 ///
 /// Commonly used with [BoxDecoration].
 class DecoratedBox extends OneChildRenderObjectWidget {

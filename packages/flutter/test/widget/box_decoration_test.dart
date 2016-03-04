@@ -22,4 +22,23 @@ void main() {
       );
     });
   });
+
+  test('Bordered Container insets its child', () {
+    testWidgets((WidgetTester tester) {
+      Key key = new Key('outerContainer');
+      tester.pumpWidget(
+        new Center(
+          child: new Container(
+            key: key,
+            decoration: new BoxDecoration(border: new Border.all(width: 10.0)),
+            child: new Container(
+              width: 25.0,
+              height: 25.0
+            )
+          )
+        )
+      );
+      expect(tester.getSize(tester.findElementByKey(key)), equals(const Size(45.0, 45.0)));
+    });
+  });
 }

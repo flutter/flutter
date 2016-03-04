@@ -49,8 +49,9 @@ void main() {
       expect(getY(topKey), lessThan(getY(sublistKey)));
       expect(getY(sublistKey), lessThan(getY(bottomKey)));
 
-      expect(getHeight(topKey), equals(getHeight(sublistKey)));
-      expect(getHeight(sublistKey), equals(getHeight(bottomKey)));
+      // The sublist has a one pixel border above and below.
+      expect(getHeight(topKey), equals(getHeight(sublistKey) - 2.0));
+      expect(getHeight(bottomKey), equals(getHeight(sublistKey) - 2.0));
 
       tester.tap(tester.findText('Sublist'));
       tester.pump(const Duration(seconds: 1));

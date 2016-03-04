@@ -793,6 +793,9 @@ class BoxDecoration extends Decoration {
   /// The shape to fill the background color into and to cast as a shadow.
   final BoxShape shape;
 
+  /// The inset space occupied by the border.
+  EdgeDims get padding => border?.dimensions;
+
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
     // TODO(abarth): Scale ALL the things.
