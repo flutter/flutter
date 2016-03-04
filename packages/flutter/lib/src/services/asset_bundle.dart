@@ -96,14 +96,11 @@ class MojoAssetBundle extends CachingAssetBundle {
 }
 
 AssetBundle _initRootBundle() {
-  try {
-    AssetBundleProxy bundle = new AssetBundleProxy.fromHandle(
-      new core.MojoHandle(ui.takeRootBundleHandle())
-    );
-    return new MojoAssetBundle(bundle);
-  } catch (e) {
+  int h = ui.takeRootBundleHandle();
+  if (h == core.MojoHandle.INVALID)
     return null;
-  }
+  core.MojoHandle handle = new core.MojoHandle(h);
+  return new MojoAssetBundle(new AssetBundleProxy.fromHandle(handle));
 }
 
 final AssetBundle rootBundle = _initRootBundle();

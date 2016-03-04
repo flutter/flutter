@@ -46,9 +46,5 @@ void _debugPrintTask() {
 }
 
 void debugPrintStack() {
-  try {
-    throw new Exception();
-  } catch (e, stack) {
-    debugPrint(stack.toString());
-  }
+  debugPrint(StackTrace.current.toString());
 }
