@@ -59,7 +59,7 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
     Dart_Isolate isolate = dart_state()->isolate();
     DCHECK(Dart_CurrentIsolate() == isolate);
     Dart_ExitIsolate();
-    CHECK(Dart_IsolateMakeRunnable(isolate));
+    Dart_IsolateMakeRunnable(isolate);
     Dart_EnterIsolate(isolate);
   }
 
