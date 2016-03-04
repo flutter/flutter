@@ -202,7 +202,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   }
 }
 
-class PageViewport extends VirtualViewport with VirtualViewportIterableMixin {
+class PageViewport extends VirtualViewportFromIterable {
   PageViewport({
     this.startOffset: 0.0,
     this.scrollDirection: Axis.vertical,
