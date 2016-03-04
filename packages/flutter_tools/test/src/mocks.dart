@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_configuration.dart';
@@ -49,6 +50,39 @@ class MockDeviceStore extends DeviceStore {
     android: new MockAndroidDevice(),
     iOS: new MockIOSDevice(),
     iOSSimulator: new MockIOSSimulator());
+}
+
+class MockDeviceLogReader extends DeviceLogReader {
+  String get name => 'MockLogReader';
+
+  final StreamController<String> _linesStreamController =
+      new StreamController<String>.broadcast();
+
+  final Completer _finishedCompleter = new Completer();
+
+  Stream<String> get lines => _linesStreamController.stream;
+
+  void addLine(String line) {
+    _linesStreamController.add(line);
+  }
+
+  bool _started = false;
+
+  Future start() {
+    assert(!_started);
+    _started = true;
+    return new Future.value(this);
+  }
+
+  bool get isReading => _started;
+
+  Future stop() {
+    assert(_started);
+    _started = false;
+    return new Future.value(this);
+  }
+
+  Future get finished => _finishedCompleter.future;
 }
 
 void applyMocksToCommand(FlutterCommand command) {
