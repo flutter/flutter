@@ -334,7 +334,6 @@ if (is_android) {
     resource_copy_mac("sky_resources") {
       resources = [
         "//third_party/icu/android/icudtl.dat",
-        "platform/ios/LaunchScreen.storyboardc"
       ]
       bundle_directory = "."
     }
