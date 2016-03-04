@@ -26,14 +26,12 @@ class BindingObserver {
 /// This is the glue that binds the framework to the Flutter engine.
 class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, MojoShell, Renderer {
 
-  WidgetFlutterBinding._();
-
   /// Creates and initializes the WidgetFlutterBinding. This constructor is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
   static WidgetFlutterBinding ensureInitialized() {
     if (_instance == null)
-      new WidgetFlutterBinding._();
+      new WidgetFlutterBinding();
     return _instance;
   }
 
