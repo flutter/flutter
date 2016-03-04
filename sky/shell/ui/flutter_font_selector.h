@@ -5,6 +5,7 @@
 #ifndef SKY_SHELL_UI_FLUTTER_FONT_SELECTOR_H_
 #define SKY_SHELL_UI_FLUTTER_FONT_SELECTOR_H_
 
+#include <unordered_map>
 #include <vector>
 
 #include "sky/engine/platform/fonts/FontCacheKey.h"
@@ -24,6 +25,8 @@ namespace shell {
 // loaded from the FLX.
 class FlutterFontSelector : public blink::FontSelector {
  public:
+  struct FlutterFontAttributes;
+
   ~FlutterFontSelector() override;
 
   static void install(
@@ -42,24 +45,22 @@ class FlutterFontSelector : public blink::FontSelector {
   void fontCacheInvalidated() override;
 
  private:
-  // A Skia typeface along with a buffer holding the raw typeface asset data.
-  struct TypefaceAsset {
-    TypefaceAsset();
-    ~TypefaceAsset();
-    RefPtr<SkTypeface> typeface;
-    std::vector<uint8_t> data;
-  };
+  struct TypefaceAsset;
 
   FlutterFontSelector(
       const scoped_refptr<mojo::asset_bundle::ZipAssetBundle>& zip_asset_bundle);
 
   void parseFontManifest();
-  SkTypeface* getTypefaceAsset(const AtomicString& family_name);
+
+  SkTypeface* getTypefaceAsset(const blink::FontDescription& font_description,
+                               const AtomicString& family_name);
 
   scoped_refptr<mojo::asset_bundle::ZipAssetBundle> zip_asset_bundle_;
 
-  HashMap<AtomicString, String> font_asset_path_map_;
-  HashMap<AtomicString, OwnPtr<TypefaceAsset>> typeface_cache_;
+  HashMap<AtomicString, std::vector<FlutterFontAttributes>> font_family_map_;
+
+  std::unordered_map<std::string, std::unique_ptr<TypefaceAsset>>
+      typeface_cache_;
 
   typedef HashMap<blink::FontCacheKey, RefPtr<blink::SimpleFontData>,
                   blink::FontCacheKeyHash, blink::FontCacheKeyTraits>
