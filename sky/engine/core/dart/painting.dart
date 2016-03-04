@@ -86,10 +86,17 @@ class LayerDrawLooperBuilder extends NativeFieldWrapperClass2 {
 
 /// Blur styles. These mirror SkBlurStyle and must be kept in sync.
 enum BlurStyle {
-  normal,  /// Fuzzy inside and outside.
-  solid,  /// Solid inside, fuzzy outside.
-  outer,  /// Nothing inside, fuzzy outside.
-  inner,  /// Fuzzy inside, nothing outside.
+  /// Fuzzy inside and outside.
+  normal,
+
+  /// Solid inside, fuzzy outside.
+  solid,
+
+  /// Nothing inside, fuzzy outside.
+  outer,
+
+  /// Fuzzy inside, nothing outside.
+  inner,
 }
 
 // Convert constructor parameters to the SkBlurMaskFilter::BlurFlags type.
