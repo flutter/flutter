@@ -51,10 +51,11 @@ class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
     AssetBundle bundle,
     _ResolutionAwareAssetResolver resolver,
     ImageDecoder imageDecoder
-  }) : super(
+  }) : _imageDecoder = imageDecoder,
+  super(
     bundle: bundle,
     resolver: resolver
-  ), _imageDecoder = imageDecoder;
+  );
 
   _ResolutionAwareAssetResolver get resolver => super.resolver;
 

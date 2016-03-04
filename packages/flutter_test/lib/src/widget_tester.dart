@@ -73,9 +73,9 @@ class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
 /// of time without actually moving the clock forward.
 class WidgetTester extends Instrumentation {
   WidgetTester._(FakeAsync async)
-    : super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()),
-      async = async,
-      clock = async.getClock(new DateTime.utc(2015, 1, 1)) {
+    : async = async,
+      clock = async.getClock(new DateTime.utc(2015, 1, 1)),
+      super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
     runApp(new ErrorWidget()); // flush out the last build entirely
