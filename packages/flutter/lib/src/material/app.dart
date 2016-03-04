@@ -28,8 +28,7 @@ const TextStyle _errorTextStyle = const TextStyle(
 AssetBundle _initDefaultBundle() {
   if (rootBundle != null)
     return rootBundle;
-  const String _kAssetBase = '/packages/material_design_icons/icons/';
-  return new NetworkAssetBundle(Uri.base.resolve(_kAssetBase));
+  return new NetworkAssetBundle(Uri.base);
 }
 
 final AssetBundle _defaultBundle = _initDefaultBundle();
