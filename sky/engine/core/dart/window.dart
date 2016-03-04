@@ -4,10 +4,17 @@
 
 part of dart_ui;
 
+/// Signature of callbacks that have no arguments and return no data.
 typedef void VoidCallback();
-typedef void _FrameCallback(Duration duration);
-typedef void _PointerPacketCallback(ByteData serializedPacket);
-typedef void _AppLifecycleStateCallback(AppLifecycleState state);
+
+/// Signature for [Window.onBeginFrame].
+typedef void FrameCallback(Duration duration);
+
+/// Signature for [Window.onPointerPacket].
+typedef void PointerPacketCallback(ByteData serializedPacket);
+
+/// Signature for [Window.onAppLifecycleStateChanged].
+typedef void AppLifecycleStateCallback(AppLifecycleState state);
 
 /// States that an application can be in.
 ///
@@ -103,19 +110,19 @@ class Window {
 
   /// A callback that is invoked when there is a transition in the application's
   /// lifecycle (such as pausing or resuming).
-  _AppLifecycleStateCallback onAppLifecycleStateChanged;
+  AppLifecycleStateCallback onAppLifecycleStateChanged;
 
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
   /// [render()] method. When possible, this is driven by the hardware VSync
   /// signal. This is only called if [scheduleFrame()] has been called since the
   /// last time this callback was invoked.
-  _FrameCallback onBeginFrame;
+  FrameCallback onBeginFrame;
 
   /// A callback that is invoked when pointer data is available. The data is
   /// provided in the form of a raw byte stream containing an encoded mojo
   /// PointerPacket.
-  _PointerPacketCallback onPointerPacket;
+  PointerPacketCallback onPointerPacket;
 
   /// The route or path that the operating system requested when the application
   /// was launched.
@@ -140,5 +147,7 @@ class Window {
   void flushRealTimeEvents() native "Scheduler_FlushRealTimeEvents";
 }
 
-/// The [Window] singleton.
+/// The [Window] singleton. This object exposes the size of the display, the
+/// core scheduler API, the input event callback, the graphics drawing API, and
+/// other such core services.
 final Window window = new Window._();
