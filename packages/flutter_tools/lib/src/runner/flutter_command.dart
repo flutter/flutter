@@ -12,6 +12,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../toolchain.dart';
+import '../flx.dart' as flx;
 import 'flutter_command_runner.dart';
 
 typedef bool Validator();
@@ -20,7 +21,7 @@ abstract class FlutterCommand extends Command {
   FlutterCommandRunner get runner => super.runner;
 
   /// Whether this command needs to be run from the root of a project.
-  bool get requiresProjectRoot => true;
+  bool get requiresProjectRoot => !_targetSpecified;
 
   /// Whether this command requires a (single) Flutter target device to be connected.
   bool get requiresDevice => false;
@@ -141,5 +142,15 @@ abstract class FlutterCommand extends Command {
       devices = devices.where((Device device) => device.platform == TargetPlatform.android).toList();
 
     return devices;
+  }
+
+  bool _targetSpecified = false;
+
+  void addTargetOption() {
+    argParser.addOption('target',
+      abbr: 't',
+      callback: (val) => _targetSpecified = true,
+      defaultsTo: flx.defaultMainPath,
+      help: 'Target app path / main entry-point file.');
   }
 }

@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../flx.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -16,11 +15,7 @@ class RefreshCommand extends FlutterCommand {
   final String description = 'Build and deploy the Dart code in a Flutter app (Android only).';
 
   RefreshCommand() {
-    argParser.addOption('target',
-      abbr: 't',
-      defaultsTo: defaultMainPath,
-      help: 'Target app path / main entry-point file.'
-    );
+    addTargetOption();
   }
 
   bool get androidOnly => true;

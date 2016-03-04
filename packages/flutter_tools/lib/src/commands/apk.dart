@@ -152,10 +152,6 @@ class ApkCommand extends FlutterCommand {
         abbr: 'o',
         defaultsTo: _kDefaultOutputPath,
         help: 'Output APK file.');
-    argParser.addOption('target',
-        abbr: 't',
-        defaultsTo: flx.defaultMainPath,
-        help: 'Target app path / main entry-point file.');
     argParser.addOption('flx',
         abbr: 'f',
         defaultsTo: '',
@@ -172,6 +168,7 @@ class ApkCommand extends FlutterCommand {
     argParser.addOption('keystore-key-password',
         defaultsTo: '',
         help: 'Password for the entry within the keystore.');
+    addTargetOption();
   }
 
   @override
