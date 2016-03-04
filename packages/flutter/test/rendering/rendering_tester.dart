@@ -26,7 +26,7 @@ enum EnginePhase {
   composite
 }
 
-class TestRenderingFlutterBinding extends BindingBase with Scheduler, MojoShell, Renderer, Gesturer {
+class TestRenderingFlutterBinding extends BindingBase with Scheduler, Services, Renderer, Gesturer {
   void initRenderView() {
     if (renderView == null) {
       renderView = new TestRenderView();
@@ -58,7 +58,7 @@ void layout(RenderBox box, { BoxConstraints constraints, EnginePhase phase: Engi
 
   _renderer ??= new TestRenderingFlutterBinding();
 
-  renderer.renderView.child = null; 
+  renderer.renderView.child = null;
   if (constraints != null) {
     box = new RenderPositionedBox(
       child: new RenderConstrainedBox(
