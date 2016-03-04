@@ -17,7 +17,6 @@
 
 namespace blink {
 
-class DrawLooper;
 class ColorFilter;
 class MaskFilter;
 class Shader;

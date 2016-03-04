@@ -20,7 +20,6 @@ class Paint {
   bool isAntiAlias = true;
   Color color = const Color(0xFF000000);
   ColorFilter colorFilter;
-  DrawLooper drawLooper;
   FilterQuality filterQuality;
   MaskFilter maskFilter;
   Shader shader;
@@ -37,7 +36,6 @@ class Paint {
         strokeWidth == null &&
         isAntiAlias &&
         colorFilter == null &&
-        drawLooper == null &&
         filterQuality == null &&
         maskFilter == null &&
         shader == null &&
@@ -52,7 +50,6 @@ class Paint {
       isAntiAlias,
       color,
       colorFilter,
-      drawLooper,
       filterQuality,
       maskFilter,
       shader,
@@ -70,9 +67,6 @@ class Paint {
       result += ', colorFilter: $colorFilter';
     if (maskFilter != null)
       result += ', maskFilter: $maskFilter';
-    // TODO(mpcomplete): Figure out how to show a drawLooper.
-    if (drawLooper != null)
-      result += ', drawLooper:true';
     result += ')';
     return result;
   }
