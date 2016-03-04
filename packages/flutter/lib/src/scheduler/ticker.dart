@@ -6,11 +6,12 @@ import 'dart:async';
 
 import 'scheduler.dart';
 
+/// Signature for the [onTick] constructor argument of the [Ticker] class.
 typedef void TickerCallback(Duration elapsed);
 
 /// Calls its callback once per animation frame.
 class Ticker {
-  /// Constructs a ticker that will call onTick once per frame while running
+  /// Constructs a ticker that will call [onTick] once per frame while running.
   Ticker(TickerCallback onTick) : _onTick = onTick;
 
   final TickerCallback _onTick;
