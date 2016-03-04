@@ -11,7 +11,6 @@ export 'dart:ui' show
   FontStyle,
   FontWeight,
   ImageShader,
-  LayerDrawLooperBuilder,
   MaskFilter,
   Offset,
   Paint,

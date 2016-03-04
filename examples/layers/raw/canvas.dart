@@ -55,58 +55,10 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.transform(scaleMatrix);
   paint.color = const ui.Color.fromARGB(128, 0, 255, 0);
   canvas.drawCircle(ui.Point.origin, radius, paint);
-
   canvas.restore();
 
-  canvas.translate(0.0, 50.0);
-
-  // A DrawLooper is a powerful painting primitive that lets you apply several
-  // blending and filtering passes over a sequence of commands "in a loop". For
-  // example, the looper below draws the circle tree times, once with a blur,
-  // then with a gradient blend, and finally with just an offset.
-  ui.LayerDrawLooperBuilder builder = new ui.LayerDrawLooperBuilder()
-    ..addLayerOnTop(
-        new ui.DrawLooperLayerInfo()
-          ..setOffset(const ui.Offset(150.0, 0.0))
-          ..setColorMode(ui.TransferMode.src)
-          ..setPaintBits(ui.PaintBits.all),
-        new ui.Paint()
-          ..color = const ui.Color.fromARGB(128, 255, 255, 0)
-          ..colorFilter = new ui.ColorFilter.mode(
-              const ui.Color.fromARGB(128, 0, 0, 255),
-              ui.TransferMode.srcIn
-            )
-          ..maskFilter = new ui.MaskFilter.blur(
-              ui.BlurStyle.normal, 3.0, highQuality: true
-            )
-      )
-    ..addLayerOnTop(
-        new ui.DrawLooperLayerInfo()
-          ..setOffset(const ui.Offset(75.0, 75.0))
-          ..setColorMode(ui.TransferMode.src)
-          ..setPaintBits(ui.PaintBits.shader),
-        new ui.Paint()
-          ..shader = new ui.Gradient.radial(
-              new ui.Point(0.0, 0.0), radius/3.0,
-              <ui.Color>[
-                const ui.Color(0xFFFFFF00),
-                const ui.Color(0xFFFF0000)
-              ],
-              null,
-              ui.TileMode.mirror
-            )
-          // Since we're don't set ui.PaintBits.maskFilter, this has no effect.
-          ..maskFilter = new ui.MaskFilter.blur(
-              ui.BlurStyle.normal, 50.0, highQuality: true
-            )
-      )
-    ..addLayerOnTop(
-        new ui.DrawLooperLayerInfo()..setOffset(const ui.Offset(225.0, 75.0)),
-        // Since this layer uses a DST color mode, this has no effect.
-        new ui.Paint()..color = const ui.Color.fromARGB(128, 255, 0, 0)
-      );
-  paint.drawLooper = builder.build();
-  canvas.drawCircle(ui.Point.origin, radius, paint);
+  paint.color = const ui.Color.fromARGB(128, 255, 0, 0);
+  canvas.drawCircle(new ui.Point(150.0, 300.0), radius, paint);
 
   // When we're done issuing painting commands, we end the recording an receive
   // a Picture, which is an immutable record of the commands we've issued. You
