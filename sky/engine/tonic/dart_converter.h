@@ -89,6 +89,9 @@ template <>
 struct DartConverter<int> : public DartConverterInteger<int> {};
 
 template <>
+struct DartConverter<long int> : public DartConverterInteger<long int> {};
+
+template <>
 struct DartConverter<unsigned> : public DartConverterInteger<unsigned> {};
 
 template <>

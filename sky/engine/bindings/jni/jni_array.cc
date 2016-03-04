@@ -425,7 +425,7 @@ int64_t JniLongArray::GetArrayElement(jsize index) {
     env->GetLongArrayRegion(java_array<jlongArray>(), index, 1, &result);
     if (CheckJniException(env, &exception)) goto fail;
 
-    return result;
+    return static_cast<int64_t>(result);
   }
 fail:
   Dart_ThrowException(exception);
@@ -438,8 +438,9 @@ void JniLongArray::SetArrayElement(jsize index, int64_t value) {
   {
     ENTER_JNI();
 
+    jlong jni_value = static_cast<jlong>(value);
     env->SetLongArrayRegion(java_array<jlongArray>(), index, 1,
-                            &value);
+                            &jni_value);
     if (CheckJniException(env, &exception)) goto fail;
 
     return;
