@@ -182,6 +182,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
 
   ModalPosition getPosition(BuildContext context) {
     RenderBox overlayBox = Overlay.of(context).context.findRenderObject();
+    assert(overlayBox != null); // can't be null; routes get inserted by Navigator which has its own Overlay
     Size overlaySize = overlayBox.size;
     RelativeRect menuRect = new RelativeRect.fromSize(rect, overlaySize);
     return new ModalPosition(

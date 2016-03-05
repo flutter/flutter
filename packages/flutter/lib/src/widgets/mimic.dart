@@ -137,6 +137,9 @@ class Mimic extends StatelessComponent {
 }
 
 /// A widget that can be copied by a [Mimic].
+///
+/// This widget's State, [MimicableState], contains an API for initiating the
+/// mimic operation.
 class Mimicable extends StatefulComponent {
   Mimicable({ Key key, this.child }) : super(key: key);
 
@@ -193,8 +196,7 @@ class MimicableState extends State<Mimicable> {
   /// had when the mimicking process started and (2) the child will be
   /// placed in the enclosing overlay.
   MimicOverlayEntry liftToOverlay() {
-    OverlayState overlay = Overlay.of(context);
-    assert(overlay != null); // You need an overlay to lift into.
+    OverlayState overlay = Overlay.of(context, debugRequiredFor: config);
     MimicOverlayEntry entry = new MimicOverlayEntry._(startMimic());
     overlay.insert(entry._overlayEntry);
     return entry;
