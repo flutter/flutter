@@ -12,6 +12,18 @@ import 'debug.dart';
 import 'material.dart';
 import 'theme.dart';
 
+/// An area of a Material that responds to touch. Has a configurable shape and
+/// can be configured to clip splashes that extend outside its bounds or not.
+///
+/// For a variant of this widget that is specialised for rectangular areas that
+/// always clip splashes, see [InkWell].
+///
+/// Must have an ancestor [Material] widget in which to cause ink reactions.
+///
+/// If a Widget uses this class directly, it should include the following line
+/// at the top of its [build] function to call [debugCheckHasMaterial]:
+///
+///     assert(debugCheckHasMaterial(context));
 class InkResponse extends StatefulComponent {
   InkResponse({
     Key key,
@@ -156,9 +168,14 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 
 }
 
-/// An area of a Material that responds to touch.
+/// A rectangular area of a Material that responds to touch.
 ///
-/// Must have an ancestor Material widget in which to cause ink reactions.
+/// Must have an ancestor [Material] widget in which to cause ink reactions.
+///
+/// If a Widget uses this class directly, it should include the following line
+/// at the top of its [build] function to call [debugCheckHasMaterial]:
+///
+///     assert(debugCheckHasMaterial(context));
 class InkWell extends InkResponse {
   InkWell({
     Key key,

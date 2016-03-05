@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
@@ -85,6 +86,7 @@ class ListItem extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     final bool isTwoLine = !isThreeLine && secondary != null;
     final bool isOneLine = !isThreeLine && !isTwoLine;
     double itemHeight;

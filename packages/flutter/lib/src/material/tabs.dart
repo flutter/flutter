@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
 import 'icon_theme.dart';
@@ -330,6 +331,7 @@ class _Tab extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     Widget labelContent;
     if (label.icon == null && label.iconBuilder == null) {
       labelContent = _buildLabelText();
