@@ -18,6 +18,10 @@ enum ItemsSnapAlignment {
   adjacentItem
 }
 
+/// Scrollable widget that scrolls one "page" at a time.
+///
+/// In a pageable list, one child is visible at a time. Scrolling the list
+/// reveals either the next or previous child.
 class PageableList extends Scrollable {
   PageableList({
     Key key,
@@ -46,17 +50,34 @@ class PageableList extends Scrollable {
     snapOffsetCallback: snapOffsetCallback
   );
 
+  /// Whether the first item should be revealed after scrolling past the last item.
   final bool itemsWrap;
+
+  /// Controls whether a fling always reveals the adjacent item or whether flings can traverse many items.
   final ItemsSnapAlignment itemsSnapAlignment;
+
+  /// Called when the currently visible page changes.
   final ValueChanged<int> onPageChanged;
+
+  /// Used to paint the scrollbar for this list.
   final ScrollableListPainter scrollableListPainter;
+
+  /// The duration used when animating to a given page.
   final Duration duration;
+
+  /// The animation curve to use when animating to a given page.
   final Curve curve;
+
+  /// The list of pages themselves.
   final Iterable<Widget> children;
 
   PageableListState createState() => new PageableListState();
 }
 
+/// State for a [PageableList] widget.
+///
+/// Widgets that subclass [PageableList] can subclass this class to have
+/// sensible default behaviors for pageable lists.
 class PageableListState<T extends PageableList> extends ScrollableState<T> {
   int get _itemCount => config.children?.length ?? 0;
   int _previousItemCount;
