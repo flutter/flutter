@@ -128,21 +128,19 @@ All done! In order to run your application, type:
 
   void _renderTemplates(String projectName, String dirPath,
       String flutterPackagesDirectory, { bool renderDriverTest: false }) {
-    String relativePackagesDirectory = path.relative(
-      flutterPackagesDirectory,
-      from: path.join(dirPath, 'pubspec.yaml')
-    );
+    new Directory(dirPath).createSync(recursive: true);
+
+    flutterPackagesDirectory = path.normalize(flutterPackagesDirectory);
+    flutterPackagesDirectory = _relativePath(from: dirPath, to: flutterPackagesDirectory);
 
     printStatus('Creating project ${path.basename(projectName)}:');
-
-    new Directory(dirPath).createSync(recursive: true);
 
     Map templateContext = <String, dynamic>{
       'projectName': projectName,
       'androidIdentifier': _createAndroidIdentifier(projectName),
       'iosIdentifier': _createUTIIdentifier(projectName),
       'description': description,
-      'flutterPackagesDirectory': relativePackagesDirectory,
+      'flutterPackagesDirectory': flutterPackagesDirectory,
       'androidMinApiLevel': android.minApiLevel
     };
 
@@ -210,4 +208,12 @@ String _validateProjectName(String projectName) {
   }
 
   return null;
+}
+
+String _relativePath({ String from, String to }) {
+  String result = path.relative(to, from: from);
+  // `path.relative()` doesn't always return a correct result: dart-lang/path#12.
+  if (FileSystemEntity.isDirectorySync(path.join(from, result)))
+    return result;
+  return to;
 }
