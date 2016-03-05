@@ -46,6 +46,7 @@ class Tooltip extends StatefulComponent {
     assert(preferBelow != null);
     assert(fadeDuration != null);
     assert(showDuration != null);
+    assert(child != null);
   }
 
   final String message;
@@ -150,7 +151,7 @@ class _TooltipState extends State<Tooltip> {
           preferBelow: config.preferBelow
         );
       });
-      Overlay.of(context).insert(_entry);
+      Overlay.of(context, debugRequiredFor: config).insert(_entry);
     }
     _timer?.cancel();
     if (_controller.status != AnimationStatus.completed) {
@@ -175,7 +176,7 @@ class _TooltipState extends State<Tooltip> {
   }
 
   Widget build(BuildContext context) {
-    assert(Overlay.of(context) != null);
+    assert(Overlay.of(context, debugRequiredFor: config) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: showTooltip,
