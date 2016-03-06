@@ -149,8 +149,12 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
       message += 'The following GlobalKey was found multiple times among mounted elements: $key (${_debugDuplicates[key]} instances)\n';
       message += 'The most recently registered instance is: ${_registry[key]}\n';
     }
-    if (!_debugDuplicates.isEmpty)
-      throw new WidgetError('Incorrect GlobalKey usage.', message);
+    if (!_debugDuplicates.isEmpty) {
+      throw new WidgetError(
+        'Incorrect GlobalKey usage.\n'
+        '$message'
+      );
+    }
     return true;
   }
 
@@ -1109,9 +1113,10 @@ abstract class BuildableElement<T extends Widget> extends Element<T> {
       }
       if (_debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
         throw new WidgetError(
-          'Cannot mark this component as needing to build because the framework is '
-          'already in the process of building widgets. A widget can be marked as '
-          'needing to be built during the build phase only if one if its ancestor '
+          'setState() or markNeedsBuild() called during build.\n'
+          'This component cannot be marked as needing to build because the framework '
+          'is already in the process of building widgets. A widget can be marked as '
+          'needing to be built during the build phase only if one if its ancestors '
           'is currently building. This exception is allowed because the framework '
           'builds parent widgets before children, which means a dirty descendant '
           'will always be built. Otherwise, the framework might not visit this '
@@ -1208,8 +1213,11 @@ abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
       assert(() {
         if (built == null) {
           throw new WidgetError(
-            'A build function returned null. Build functions must never return null.',
-            'The offending widget is: $widget'
+            'A build function returned null.\n'
+            'The offending widget is: $widget\n'
+            'Build functions must never return null. '
+            'To return an empty space that causes the building widget to fill available room, return "new Container()". '
+            'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
           );
         }
         return true;
@@ -1289,7 +1297,11 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
     assert(() {
       if (_state._debugLifecycleState == _StateLifecycle.initialized)
         return true;
-      throw new WidgetError('${_state.runtimeType}.initState failed to call super.initState.');
+      throw new WidgetError(
+        '${_state.runtimeType}.initState failed to call super.initState.\n'
+        'initState() implementations must always call their superclass initState() method, to ensure '
+        'that the entire widget is initialized correctly.'
+      );
     });
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
     super._firstBuild();
@@ -1324,7 +1336,11 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
     assert(() {
       if (_state._debugLifecycleState == _StateLifecycle.defunct)
         return true;
-      throw new WidgetError('${_state.runtimeType}.dispose failed to call super.dispose.');
+      throw new WidgetError(
+        '${_state.runtimeType}.dispose failed to call super.dispose.\n'
+        'dispose() implementations must always call their superclass dispose() method, to ensure '
+        'that all the resources used by the widget are fully released.'
+      );
     });
     assert(!dirty); // See BuildableElement.unmount for why this is important.
     _state._element = null;
@@ -1381,12 +1397,15 @@ class ParentDataElement extends _ProxyElement<ParentDataWidget> {
       }
       if (ancestor != null && badAncestors.isEmpty)
         return true;
-      throw new WidgetError('Incorrect use of ParentDataWidget.', widget.debugDescribeInvalidAncestorChain(
-        description: "$this",
-        ownershipChain: parent.debugGetOwnershipChain(10),
-        foundValidAncestor: ancestor != null,
-        badAncestors: badAncestors
-      ));
+      throw new WidgetError(
+        'Incorrect use of ParentDataWidget.\n' +
+        widget.debugDescribeInvalidAncestorChain(
+          description: "$this",
+          ownershipChain: parent.debugGetOwnershipChain(10),
+          foundValidAncestor: ancestor != null,
+          badAncestors: badAncestors
+        )
+      );
     });
     super.mount(parent, slot);
   }
@@ -1507,7 +1526,14 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     // 'BuildContext' argument which you can pass to Theme.of() and other
     // InheritedWidget APIs which eventually trigger a rebuild.)
     assert(() {
-      throw new WidgetError('$runtimeType failed to implement reinvokeBuilders(), but got marked dirty.');
+      throw new WidgetError(
+        '$runtimeType failed to implement reinvokeBuilders(), but got marked dirty.\n'
+        'If a RenderObjectElement subclass supports being marked dirty, then the '
+        'reinvokeBuilders() method must be implemented.\n'
+        'If a RenderObjectElement uses a builder callback, it must support being '
+        'marked dirty, because builder callbacks can register the object as having '
+        'an Inherited dependency.'
+      );
     });
   }
 
@@ -1812,7 +1838,11 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
         continue; // when these nodes are reordered, we just reassign the data
 
       if (!idSet.add(child.key)) {
-        throw new WidgetError('If multiple keyed nodes exist as children of another node, they must have unique keys. $widget has multiple children with key "${child.key}".');
+        throw new WidgetError(
+          'Duplicate keys found.\n'
+          'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+          '$widget has multiple children with key "${child.key}".'
+        );
       }
     }
     return false;
@@ -1841,16 +1871,10 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
   }
 }
 
-class WidgetError extends Error {
-  WidgetError(String message, [ String rawDetails = '' ]) {
-    rawDetails = rawDetails.trimRight(); // remove trailing newlines
-    if (rawDetails != '')
-      _message = '$message\n$rawDetails';
-    else
-      _message = message;
-  }
-  String _message;
-  String toString() => _message;
+class WidgetError extends AssertionError {
+  WidgetError(this.message);
+  final String message;
+  String toString() => message;
 }
 
 typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);

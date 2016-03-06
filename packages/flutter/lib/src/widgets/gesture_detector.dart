@@ -71,11 +71,20 @@ class GestureDetector extends StatelessComponent {
       bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
       bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
       if (havePan || haveScale) {
-        if (havePan && haveScale)
-          throw new WidgetError('Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.');
+        if (havePan && haveScale) {
+          throw new WidgetError(
+            'Incorrect GestureDetector arguments.\n'
+            'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
+          );
+        }
         String recognizer = havePan ? 'pan' : 'scale';
-        if (haveVerticalDrag && haveHorizontalDrag)
-          throw new WidgetError('Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.');
+        if (haveVerticalDrag && haveHorizontalDrag) {
+          throw new WidgetError(
+            'Incorrect GestureDetector arguments.\n'
+            'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
+            'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
+          );
+        }
       }
       return true;
     });
@@ -279,8 +288,15 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// the gesture detector should be enabled.
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
-      if (!RenderObject.debugDoingLayout)
-        throw new WidgetError('replaceGestureRecognizers() can only be called during the layout phase.');
+      if (!RenderObject.debugDoingLayout) {
+        throw new WidgetError(
+          'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
+          'The replaceGestureRecognizers() method can only be called during the layout phase. '
+          'To set the gesture recognisers at other times, trigger a new build using setState() '
+          'and provide the new gesture recognisers as constructor arguments to the corresponding '
+          'RawGestureDetector or GestureDetector object.'
+        );
+      }
       return true;
     });
     _syncAll(gestures);
