@@ -4,19 +4,17 @@
 
 import 'tolerance.dart';
 
-abstract class Simulatable {
+/// The base class for all simulations. The user is meant to instantiate an
+/// instance of a simulation and query the same for the position and velocity
+/// of the body at a given interval.
+abstract class Simulation {
+  Tolerance tolerance = toleranceDefault;
+
   /// The current position of the object in the simulation
   double x(double time);
 
   /// The current velocity of the object in the simulation
-  double dx(double time);
-}
-
-/// The base class for all simulations. The user is meant to instantiate an
-/// instance of a simulation and query the same for the position and velocity
-/// of the body at a given interval.
-abstract class Simulation implements Simulatable {
-  Tolerance tolerance = toleranceDefault;
+  double dx(double time); // TODO(ianh): remove this; see https://github.com/flutter/flutter/issues/2092
 
   /// Returns if the simulation is done at a given time
   bool isDone(double time);
