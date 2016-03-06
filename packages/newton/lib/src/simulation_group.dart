@@ -10,7 +10,8 @@ import 'utils.dart';
 /// must implement the appropriate methods to select the appropriate simulation
 /// at a given time interval. The simulation group takes care to call the `step`
 /// method at appropriate intervals. If more fine grained control over the the
-/// step is necessary, subclasses may override `Simulatable` methods.
+/// step is necessary, subclasses may override the [x], [dx], and [isDone]
+/// methods.
 abstract class SimulationGroup extends Simulation {
 
   /// The currently active simulation
