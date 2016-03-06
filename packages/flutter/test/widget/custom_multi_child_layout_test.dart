@@ -17,16 +17,15 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   }
 
   Size performLayoutSize;
-  BoxConstraints performLayoutConstraints;
   Size performLayoutSize0;
   Size performLayoutSize1;
   bool performLayoutIsChild;
 
-  void performLayout(Size size, BoxConstraints constraints) {
+  void performLayout(Size size) {
     assert(!RenderObject.debugCheckingIntrinsics);
     expect(() {
       performLayoutSize = size;
-      performLayoutConstraints = constraints;
+      BoxConstraints constraints = new BoxConstraints.loose(size);
       performLayoutSize0 = layoutChild(0, constraints);
       performLayoutSize1 = layoutChild(1, constraints);
       performLayoutIsChild = isChild('fred');
@@ -68,10 +67,6 @@ void main() {
 
       expect(delegate.performLayoutSize.width, 200.0);
       expect(delegate.performLayoutSize.height, 300.0);
-      expect(delegate.performLayoutConstraints.minWidth, 0.0);
-      expect(delegate.performLayoutConstraints.maxWidth, 800.0);
-      expect(delegate.performLayoutConstraints.minHeight, 0.0);
-      expect(delegate.performLayoutConstraints.maxHeight, 600.0);
       expect(delegate.performLayoutSize0.width, 150.0);
       expect(delegate.performLayoutSize0.height, 100.0);
       expect(delegate.performLayoutSize1.width, 100.0);

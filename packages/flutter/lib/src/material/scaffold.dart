@@ -39,9 +39,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final EdgeDims padding;
 
-  void performLayout(Size size, BoxConstraints constraints) {
-
-    BoxConstraints looseConstraints = constraints.loosen();
+  void performLayout(Size size) {
+    BoxConstraints looseConstraints = new BoxConstraints.loose(size);
 
     // This part of the layout has the same effect as putting the toolbar and
     // body in a column and making the body flexible. What's different is that
