@@ -103,7 +103,7 @@ abstract class MultiChildLayoutDelegate {
     return '${childParentData.id}: $child';
   }
 
-  void _callPerformLayout(Size size, BoxConstraints constraints, RenderBox firstChild) {
+  void _callPerformLayout(Size size, RenderBox firstChild) {
     // A particular layout delegate could be called reentrantly, e.g. if it used
     // by both a parent and a child. So, we must restore the _idToChild map when
     // we return.
@@ -138,7 +138,7 @@ abstract class MultiChildLayoutDelegate {
         });
         child = childParentData.nextSibling;
       }
-      performLayout(size, constraints);
+      performLayout(size);
       assert(() {
         if (_debugChildrenNeedingLayout.isNotEmpty) {
           if (_debugChildrenNeedingLayout.length > 1) {
@@ -176,11 +176,10 @@ abstract class MultiChildLayoutDelegate {
   /// possible given the constraints.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
-  /// Override this method to lay out and position all children given
-  /// this widget's size and the specified constraints. This method
-  /// must call [layoutChild] for each child. It should also specify
-  /// the final position of each child with [positionChild].
-  void performLayout(Size size, BoxConstraints constraints);
+  /// Override this method to lay out and position all children given this
+  /// widget's size. This method must call [layoutChild] for each child. It
+  /// should also specify the final position of each child with [positionChild].
+  void performLayout(Size size);
 
   /// Override this method to return true when the children need to be
   /// laid out. This should compare the fields of the current delegate
@@ -257,7 +256,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   void performLayout() {
-    delegate._callPerformLayout(size, constraints, firstChild);
+    delegate._callPerformLayout(size, firstChild);
   }
 
   void paint(PaintingContext context, Offset offset) {
