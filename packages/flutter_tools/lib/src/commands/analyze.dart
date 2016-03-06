@@ -12,9 +12,16 @@ import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_configuration.dart';
+import '../dart/sdk.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+
+// TODO(devoncarew): Possible improvements to flutter analyze --watch:
+// - Auto-detect new issues introduced by changes and highlight then in the output.
+// - Use ANSI codes to improve the display when the terminal supports it (screen
+//   clearing, cursor position manipulation, bold and faint codes, ...)
 
 bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('.dart');
 bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
@@ -114,12 +121,23 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
+    argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
   }
 
   bool get requiresProjectRoot => false;
 
+  bool get isFlutterRepo {
+    return FileSystemEntity.isDirectorySync('examples') &&
+      FileSystemEntity.isDirectorySync('packages') &&
+      FileSystemEntity.isFileSync('bin/flutter');
+  }
+
   @override
   Future<int> runInProject() async {
+    return argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
+  }
+
+  Future<int> _analyzeOnce() async {
     Stopwatch stopwatch = new Stopwatch()..start();
     Set<String> pubSpecDirectories = new HashSet<String>();
     List<String> dartFiles = argResults.rest.toList();
@@ -166,7 +184,6 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     if (argResults['flutter-repo']) {
-
       //examples/*/ as package
       //examples/layers/*/ as files
       //dev/manual_tests/*/ as package
@@ -456,5 +473,273 @@ linter:
     if (argResults['congratulate'])
       printStatus('No analyzer warnings! (ran in ${elapsed}s)');
     return 0;
+  }
+
+  Future<int> _analyzeWatch() async {
+    List<String> directories;
+
+    if (isFlutterRepo) {
+      directories = <String>[];
+      directories.addAll(_gatherProjectPaths(path.absolute('examples')));
+      directories.addAll(_gatherProjectPaths(path.absolute('packages')));
+      printStatus('Analyzing Flutter repository (${directories.length} projects).');
+      for (String projectPath in directories)
+        printTrace('  ${path.relative(projectPath)}');
+      printStatus('');
+    } else {
+      directories = <String>[Directory.current.path];
+    }
+
+    AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
+    server.onAnalyzing.listen(_handleAnalysisStatus);
+    server.onErrors.listen(_handleAnalysisErrors);
+
+    await server.start();
+
+    int exitCode = await server.onExit;
+    printStatus('Analysis server exited with code $exitCode.');
+    return 0;
+  }
+
+  bool firstAnalysis = true;
+  Set<String> analyzedPaths = new Set<String>();
+  Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
+  Stopwatch analysisTimer;
+  int lastErrorCount = 0;
+
+  void _handleAnalysisStatus(bool isAnalyzing) {
+    if (isAnalyzing) {
+      if (firstAnalysis) {
+        printStatus('Analyzing ${path.basename(Directory.current.path)}...');
+      } else {
+        printStatus('');
+      }
+
+      analyzedPaths.clear();
+      analysisTimer = new Stopwatch()..start();
+    } else {
+      analysisTimer.stop();
+
+      // Sort and print errors.
+      List<AnalysisError> errors = <AnalysisError>[];
+      for (List<AnalysisError> fileErrors in analysisErrors.values)
+        errors.addAll(fileErrors);
+
+      errors.sort();
+
+      for (AnalysisError error in errors)
+        printStatus(error.toString());
+
+      // Print an analysis summary.
+      String errorsMessage;
+
+      int issueCount = errors.length;
+      int issueDiff = issueCount - lastErrorCount;
+      lastErrorCount = issueCount;
+
+      // TODO(devoncarew): If there were no issues found, and no change in the
+      // issue count, do we want to print anything?
+      if (firstAnalysis)
+        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
+      else if (issueDiff > 0)
+        errorsMessage = '$issueDiff new ${pluralize('issue', issueDiff)}, $issueCount total';
+      else if (issueDiff < 0)
+        errorsMessage = '${-issueDiff} ${pluralize('issue', -issueDiff)} fixed, $issueCount remaining';
+      else if (issueCount != 0)
+        errorsMessage = 'no new issues, $issueCount total';
+      else
+        errorsMessage = 'no issues found';
+
+      String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
+      String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
+      printStatus('$errorsMessage • analyzed $files, $seconds seconds');
+
+      firstAnalysis = false;
+    }
+  }
+
+  void _handleAnalysisErrors(FileAnalysisErrors fileErrors) {
+    fileErrors.errors.removeWhere(_filterError);
+
+    analyzedPaths.add(fileErrors.file);
+    analysisErrors[fileErrors.file] = fileErrors.errors;
+  }
+
+  bool _filterError(AnalysisError error) {
+    // TODO(devoncarew): Also filter the regex items from `analyzeOnce()`.
+
+    if (error.type == 'TODO')
+      return true;
+
+    return false;
+  }
+
+  List<String> _gatherProjectPaths(String rootPath) {
+    if (FileSystemEntity.isFileSync(path.join(rootPath, 'pubspec.yaml')))
+      return <String>[rootPath];
+
+    return new Directory(rootPath)
+      .listSync(followLinks: false)
+      .expand((FileSystemEntity entity) {
+        return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
+      });
+  }
+}
+
+class AnalysisServer {
+  AnalysisServer(this.sdk, this.directories);
+
+  final String sdk;
+  final List<String> directories;
+
+  Process _process;
+  StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
+  StreamController<FileAnalysisErrors> _errorsController = new StreamController<FileAnalysisErrors>.broadcast();
+
+  int _id = 0;
+
+  Future start() async {
+    String snapshot = path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
+    List<String> args = <String>[snapshot, '--sdk', sdk];
+
+    printTrace('dart ${args.join(' ')}');
+    _process = await Process.start('dart', args);
+    _process.exitCode.whenComplete(() => _process = null);
+
+    Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());
+    errorStream.listen((String error) => printError(error));
+
+    Stream<String> inStream = _process.stdout.transform(UTF8.decoder).transform(const LineSplitter());
+    inStream.listen(_handleServerResponse);
+
+    // Available options (many of these are obsolete):
+    //   enableAsync, enableDeferredLoading, enableEnums, enableNullAwareOperators,
+    //   enableSuperMixins, generateDart2jsHints, generateHints, generateLints
+    _sendCommand('analysis.updateOptions', <String, dynamic>{
+      'options': <String, dynamic>{
+        'enableSuperMixins': true
+      }
+    });
+
+    _sendCommand('server.setSubscriptions', <String, dynamic>{
+      'subscriptions': <String>['STATUS']
+    });
+
+    _sendCommand('analysis.setAnalysisRoots', <String, dynamic>{
+      'included': directories,
+      'excluded': <String>[]
+    });
+  }
+
+  Stream<bool> get onAnalyzing => _analyzingController.stream;
+  Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
+
+  Future<int> get onExit => _process.exitCode;
+
+  void _sendCommand(String method, Map<String, dynamic> params) {
+    String message = JSON.encode(<String, dynamic> {
+      'id': (++_id).toString(),
+      'method': method,
+      'params': params
+    });
+    _process.stdin.writeln(message);
+    printTrace('==> $message');
+  }
+
+  void _handleServerResponse(String line) {
+    printTrace('<== $line');
+
+    dynamic response = JSON.decode(line);
+
+    if (response is Map) {
+      if (response['event'] != null) {
+        String event = response['event'];
+        dynamic params = response['params'];
+
+        if (params is Map) {
+          if (event == 'server.status')
+            _handleStatus(response['params']);
+          else if (event == 'analysis.errors')
+            _handleAnalysisIssues(response['params']);
+          else if (event == 'server.error')
+            _handleServerError(response['params']);
+        }
+      } else if (response['error'] != null) {
+        printError('Error from the analysis server: ${response['error']['message']}');
+      }
+    }
+  }
+
+  void _handleStatus(Map<String, dynamic> statusInfo) {
+    // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
+    if (statusInfo['analysis'] != null) {
+      bool isAnalyzing = statusInfo['analysis']['isAnalyzing'];
+      _analyzingController.add(isAnalyzing);
+    }
+  }
+
+  void _handleServerError(Map<String, dynamic> errorInfo) {
+    printError('Error from the analysis server: ${errorInfo['message']}');
+  }
+
+  void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
+    // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
+    String file = issueInfo['file'];
+    List<AnalysisError> errors = issueInfo['errors'].map((Map<String, dynamic> json) => new AnalysisError(json)).toList();
+    _errorsController.add(new FileAnalysisErrors(file, errors));
+  }
+
+  Future dispose() async => _process?.kill();
+}
+
+class FileAnalysisErrors {
+  FileAnalysisErrors(this.file, this.errors);
+
+  final String file;
+  final List<AnalysisError> errors;
+}
+
+class AnalysisError implements Comparable<AnalysisError> {
+  AnalysisError(this.json);
+
+  static final Map<String, int> _severityMap = <String, int> {
+    'ERROR': 3,
+    'WARNING': 2,
+    'INFO': 1
+  };
+
+  // "severity":"INFO","type":"TODO","location":{
+  //   "file":"/Users/.../lib/test.dart","offset":362,"length":72,"startLine":15,"startColumn":4
+  // },"message":"...","hasFix":false}
+  Map<String, dynamic> json;
+
+  String get severity => json['severity'];
+  int get severityLevel => _severityMap[severity] ?? 0;
+  String get type => json['type'];
+  String get message => json['message'];
+
+  String get file => json['location']['file'];
+  int get startLine => json['location']['startLine'];
+  int get startColumn => json['location']['startColumn'];
+  int get offset => json['location']['offset'];
+
+  int compareTo(AnalysisError other) {
+    // Sort in order of file path, error location, severity, and message.
+    if (file != other.file)
+      return file.compareTo(other.file);
+
+    if (offset != other.offset)
+      return offset - other.offset;
+
+    int diff = other.severityLevel - severityLevel;
+    if (diff != 0)
+      return diff;
+
+    return message.compareTo(other.message);
+  }
+
+  String toString() {
+    String relativePath = path.relative(file);
+    return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';
   }
 }
