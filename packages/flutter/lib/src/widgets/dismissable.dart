@@ -256,7 +256,7 @@ class _DismissableState extends State<Dismissable> {
           assert(_resizeAnimation.status == AnimationStatus.completed);
           throw new WidgetError(
             'Dismissable widget completed its resize animation without being removed from the tree.\n'
-            'Make sure to implement the onDismissed handler and to immediately remove the Dismissable\n'
+            'Make sure to implement the onDismissed handler and to immediately remove the Dismissable '
             'widget from the application once that handler has fired.'
           );
         }

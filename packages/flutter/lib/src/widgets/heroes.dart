@@ -113,8 +113,8 @@ class Hero extends StatefulComponent {
           if (tagHeroes.containsKey(key)) {
             new WidgetError(
               'There are multiple heroes that share the same key within the same subtree.\n'
-              'Within each subtree for which heroes are to be animated (typically a PageRoute subtree),\n'
-              'either each Hero must have a unique tag, or, all the heroes with a particular tag must\n'
+              'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
+              'either each Hero must have a unique tag, or, all the heroes with a particular tag must '
               'have different keys.\n'
               'In this case, the tag "$tag" had multiple heroes with the key "$key".'
             );
