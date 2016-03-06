@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -53,6 +54,7 @@ class IconButton extends StatelessComponent {
   final String tooltip;
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     Widget result = new Padding(
       padding: const EdgeDims.all(8.0),
       child: new Icon(
