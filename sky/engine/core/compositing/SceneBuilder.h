@@ -28,8 +28,8 @@ namespace blink {
 class SceneBuilder : public RefCounted<SceneBuilder>, public DartWrappable {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtr<SceneBuilder> create(const Rect& bounds) {
-      return adoptRef(new SceneBuilder(bounds));
+    static PassRefPtr<SceneBuilder> create() {
+      return adoptRef(new SceneBuilder());
     }
 
     ~SceneBuilder() override;
@@ -57,7 +57,7 @@ public:
     static void RegisterNatives(DartLibraryNatives* natives);
 
 private:
-    explicit SceneBuilder(const Rect& bounds);
+    explicit SceneBuilder();
 
     void addLayer(std::unique_ptr<flow::ContainerLayer> layer);
 

@@ -66,7 +66,7 @@ FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
 }
 
-SceneBuilder::SceneBuilder(const Rect& bounds)
+SceneBuilder::SceneBuilder()
     : m_currentLayer(nullptr)
     , m_currentRasterizerTracingThreshold(0)
 {
