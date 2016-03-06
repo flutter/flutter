@@ -12,6 +12,9 @@ class Placeholder extends StatefulComponent {
   PlaceholderState createState() => new PlaceholderState();
 }
 
+/// State for a [Placeholder] widget.
+///
+/// Useful for setting the child currently displayed by this placeholder widget.
 class PlaceholderState extends State<Placeholder> {
   /// The child that this widget builds.
   ///

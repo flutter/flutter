@@ -999,6 +999,7 @@ class BlockBody extends MultiChildRenderObjectWidget {
   }
 }
 
+/// A base class for widgets that accept [Positioned] children.
 abstract class StackRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
   StackRenderObjectWidgetBase({
     List<Widget> children: _emptyWidgetList,
