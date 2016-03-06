@@ -327,15 +327,9 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     });
     PageStorage.of(context)?.writeState(context, _scrollOffset);
     new ScrollNotification(this, _scrollOffset).dispatch(context);
-    final needsScrollStart = !_isBetweenOnScrollStartAndOnScrollEnd;
-    if (needsScrollStart) {
-      dispatchOnScrollStart();
-      assert(_isBetweenOnScrollStartAndOnScrollEnd);
-    }
+    _startScroll();
     dispatchOnScroll();
-    assert(_isBetweenOnScrollStartAndOnScrollEnd);
-    if (needsScrollStart)
-      dispatchOnScrollEnd();
+    _endScroll();
   }
 
   /// Scroll this widget by the given scroll delta.
@@ -372,8 +366,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Future _animateTo(double newScrollOffset, Duration duration, Curve curve) {
     _controller.stop();
     _controller.value = scrollOffset;
-    _dispatchOnScrollStartIfNeeded();
-    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_dispatchOnScrollEndIfNeeded);
+    _startScroll();
+    return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_endScroll);
   }
 
   /// Fling the scroll offset with the given velocity.
@@ -401,8 +395,8 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     Simulation simulation = _createSnapSimulation(scrollVelocity) ?? _createFlingSimulation(scrollVelocity);
     if (simulation == null)
       return new Future.value();
-    _dispatchOnScrollStartIfNeeded();
-    return _controller.animateWith(simulation).then(_dispatchOnScrollEndIfNeeded);
+    _startScroll();
+    return _controller.animateWith(simulation).then(_endScroll);
   }
 
   /// Whether this scrollable should attempt to snap scroll offsets.
@@ -453,14 +447,21 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return simulation;
   }
 
-
-  bool _isBetweenOnScrollStartAndOnScrollEnd = false;
+  // When we start an scroll animation, we stop any previous scroll animation.
+  // However, the code that would deliver the onScrollEnd callback is watching
+  // for animations to end using a Future that resolves at the end of the
+  // microtask. That causes animations to "overlap" between the time we start a
+  // new animation and the end of the microtask. By the time the microtask is
+  // over and we check whether to deliver an onScrollEnd callback, we will have
+  // started the new animation (having skipped the onScrollStart) and therefore
+  // we won't deliver the onScrollEnd until the second animation is finished.
+  int _numberOfInProgressScrolls = 0;
 
   /// Calls the onScroll callback.
   ///
   /// Subclasses can override this function to hook the scroll callback.
   void dispatchOnScroll() {
-    assert(_isBetweenOnScrollStartAndOnScrollEnd);
+    assert(_numberOfInProgressScrolls > 0);
     if (config.onScroll != null)
       config.onScroll(_scrollOffset);
   }
@@ -470,11 +471,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragStart(_) {
-    _dispatchOnScrollStartIfNeeded();
+    _startScroll();
   }
 
-  void _dispatchOnScrollStartIfNeeded() {
-    if (!_isBetweenOnScrollStartAndOnScrollEnd)
+  void _startScroll() {
+    _numberOfInProgressScrolls += 1;
+    if (_numberOfInProgressScrolls == 1)
       dispatchOnScrollStart();
   }
 
@@ -482,8 +484,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   ///
   /// Subclasses can override this function to hook the scroll start callback.
   void dispatchOnScrollStart() {
-    assert(!_isBetweenOnScrollStartAndOnScrollEnd);
-    _isBetweenOnScrollStartAndOnScrollEnd = true;
+    assert(_numberOfInProgressScrolls == 1);
     if (config.onScrollStart != null)
       config.onScrollStart(_scrollOffset);
   }
@@ -495,11 +496,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Future _handleDragEnd(Velocity velocity) {
     double scrollVelocity = pixelDeltaToScrollOffset(velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
     // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
-    return fling(scrollVelocity.clamp(-kMaxFlingVelocity, kMaxFlingVelocity)).then(_dispatchOnScrollEndIfNeeded);
+    return fling(scrollVelocity.clamp(-kMaxFlingVelocity, kMaxFlingVelocity)).then(_endScroll);
   }
 
-  void _dispatchOnScrollEndIfNeeded(_) {
-    if (_isBetweenOnScrollStartAndOnScrollEnd)
+  void _endScroll([_]) {
+    _numberOfInProgressScrolls -= 1;
+    if (_numberOfInProgressScrolls == 0)
       dispatchOnScrollEnd();
   }
 
@@ -507,8 +509,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   ///
   /// Subclasses can override this function to hook the scroll end callback.
   void dispatchOnScrollEnd() {
-    assert(_isBetweenOnScrollStartAndOnScrollEnd);
-    _isBetweenOnScrollStartAndOnScrollEnd = false;
+    assert(_numberOfInProgressScrolls == 0);
     if (config.onScrollEnd != null)
       config.onScrollEnd(_scrollOffset);
   }
