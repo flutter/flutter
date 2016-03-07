@@ -1016,8 +1016,24 @@ abstract class Element<T extends Widget> implements BuildContext {
   }
 }
 
+/// A widget that renders an exception's message. This widget is used when a
+/// build function fails, to help with determining where the problem lies.
+/// Exceptions are also logged to the console, which you can read using `flutter
+/// logs`. The console will also include additional information such as the
+/// stack trace for the exception.
 class ErrorWidget extends LeafRenderObjectWidget {
-  RenderBox createRenderObject() => new RenderErrorBox();
+  ErrorWidget(
+    Object exception
+  ) : message = _stringify(exception),
+      super(key: new UniqueKey());
+  final String message;
+  static String _stringify(Object exception) {
+    try {
+      return exception.toString();
+    } catch (e) { }
+    return 'Error';
+  }
+  RenderBox createRenderObject() => new RenderErrorBox(message);
 }
 
 typedef void BuildScheduler(BuildableElement element);
@@ -1224,7 +1240,7 @@ abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
       });
     } catch (e, stack) {
       _debugReportException('building $_widget', e, stack);
-      built = new ErrorWidget();
+      built = new ErrorWidget(e);
     } finally {
       // We delay marking the element as clean until after calling _builder so
       // that attempts to markNeedsBuild() during build() will be ignored.
@@ -1236,7 +1252,7 @@ abstract class ComponentElement<T extends Widget> extends BuildableElement<T> {
       assert(_child != null);
     } catch (e, stack) {
       _debugReportException('building $_widget', e, stack);
-      built = new ErrorWidget();
+      built = new ErrorWidget(e);
       _child = updateChild(null, built, slot);
     }
   }
