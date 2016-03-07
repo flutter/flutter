@@ -195,6 +195,14 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
     super.applyPaintTransform(child, transform.translate(effectivePaintOffset.dx, effectivePaintOffset.dy));
   }
 
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('paintOffset: $paintOffset');
+    description.add('scrollDirection: $scrollDirection');
+    description.add('scrollAnchor: $scrollAnchor');
+    if (overlayPainter != null)
+      description.add('overlay painter: $overlayPainter');
+  }
 }
 
 typedef Offset ViewportDimensionsChangeCallback(ViewportDimensions dimensions);
@@ -373,4 +381,9 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   }
 
   Rect describeApproximatePaintClip(RenderObject child) => Point.origin & size;
+
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('virtual child count: $virtualChildCount');
+  }
 }

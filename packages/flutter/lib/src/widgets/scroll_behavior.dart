@@ -71,6 +71,7 @@ abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
     double containerExtent,
     double scrollOffset: 0.0
   }) {
+    assert(minScrollOffset <= maxScrollOffset);
     if (contentExtent != null)
       _contentExtent = contentExtent;
     if (containerExtent != null)
@@ -109,8 +110,10 @@ class BoundedBehavior extends ExtentScrollBehavior {
     double minScrollOffset,
     double scrollOffset: 0.0
   }) {
-    if (minScrollOffset != null)
+    if (minScrollOffset != null) {
       _minScrollOffset = minScrollOffset;
+      assert(minScrollOffset <= maxScrollOffset);
+    }
     return super.updateExtents(
       contentExtent: contentExtent,
       containerExtent: containerExtent,
