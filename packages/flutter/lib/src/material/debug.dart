@@ -13,12 +13,14 @@ bool debugCheckHasMaterial(BuildContext context) {
       Element element = context;
       throw new WidgetError(
         'No Material widget found.\n'
-        '${context.widget} widgets require a Material widget ancestor.\n'
+        '${context.widget.runtimeType} widgets require a Material widget ancestor.\n'
         'In material design, most widgets are conceptually "printed" on a sheet of material. In Flutter\'s material library, '
         'that material is represented by the Material widget. It is the Material widget that renders ink splashes, for instance. '
         'Because of this, many material library widgets require that there be a Material widget in the tree above them.\n'
         'To introduce a Material widget, you can either directly include one, or use a widget that contains Material itself, '
         'such as a Card, Dialog, Drawer, or Scaffold.\n'
+        'The specific widget that could not find a Material ancestor was:\n'
+        '  ${context.widget}'
         'The ownership chain for the affected widget is:\n'
         '  ${element.debugGetOwnershipChain(10)}'
       );
@@ -35,7 +37,9 @@ bool debugCheckHasScaffold(BuildContext context) {
       Element element = context;
       throw new WidgetError(
         'No Scaffold widget found.\n'
-        '${context.widget} widgets require a Scaffold widget ancestor.\n'
+        '${context.widget.runtimeType} widgets require a Scaffold widget ancestor.\n'
+        'The specific widget that could not find a Scaffold ancestor was:\n'
+        '  ${context.widget}'
         'The ownership chain for the affected widget is:\n'
         '  ${element.debugGetOwnershipChain(10)}'
       );
