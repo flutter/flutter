@@ -42,7 +42,7 @@ void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
 /// arcs, or beziers. Paths can be open or closed and can self-intersect. A path
 /// also encloses a (possibly discontiguous) region of the plane based on
 /// whether a line from a given point on the plane to a point at infinity
-/// intersects the path an even (non-enclosed) or and odd (enclosed) number of
+/// intersects the path an even (non-enclosed) or an odd (enclosed) number of
 /// times.
 class Path extends NativeFieldWrapperClass2 {
   void _constructor() native "Path_constructor";
