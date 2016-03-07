@@ -86,6 +86,10 @@ static const char* kDartBackgroundCompilationArgs[] = {
   "--background_compilation",
 };
 
+static const char *kDartConditionalDirectivesArgs[] = {
+    "--conditional_directives",
+};
+
 static const char* kDartCheckedModeArgs[] = {
     "--enable_asserts",
     "--enable_type_checks",
@@ -324,6 +328,7 @@ void InitDartVM() {
 
   Vector<const char*> args;
   args.append(kDartProfilingArgs, arraysize(kDartProfilingArgs));
+  args.append(kDartConditionalDirectivesArgs, arraysize(kDartConditionalDirectivesArgs));
 
   if (!IsRunningPrecompiledCode()) {
     // The version of the VM setup to run precompiled code does not recognize

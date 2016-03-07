@@ -16,6 +16,7 @@ extern void* kDartIsolateSnapshotBuffer;
 static const char* kDartArgs[] = {
     "--enable_mirrors=false",
     "--load_deferred_eagerly=true",
+    "--conditional_directives",
 };
 
 void InitDartVM() {
