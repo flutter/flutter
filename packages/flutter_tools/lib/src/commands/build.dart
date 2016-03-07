@@ -19,8 +19,6 @@ class BuildCommand extends FlutterCommand {
     // remove it once we've updated those build scripts.
     argParser.addOption('asset-base', help: 'Ignored. Will be removed.', hide: true);
     argParser.addOption('compiler');
-    // TODO(devoncarew): Remove this once the xcode project is switched over.
-    argParser.addOption('main', hide: true);
     argParser.addOption('manifest', defaultsTo: defaultManifestPath);
     argParser.addOption('private-key', defaultsTo: defaultPrivateKeyPath);
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
@@ -40,7 +38,7 @@ class BuildCommand extends FlutterCommand {
 
     return await build(
       toolchain,
-      mainPath: argResults.wasParsed('main') ? argResults['main'] : argResults['target'],
+      mainPath: argResults['target'],
       manifestPath: argResults['manifest'],
       outputPath: outputPath,
       snapshotPath: argResults['snapshot'],
