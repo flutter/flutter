@@ -17,6 +17,7 @@ enum FontStyle {
 class FontWeight {
   const FontWeight._(this.index);
 
+  /// The encoded integer value of this font weight.
   final int index;
 
   /// Thin, the least thick
@@ -46,13 +47,21 @@ class FontWeight {
   /// Black, the most thick
   static const FontWeight w900 = const FontWeight._(8);
 
+  /// The default font weight.
   static const FontWeight normal = w400;
+
+  /// A commonly used font weight that is heavier than normal.
   static const FontWeight bold = w700;
 
+  /// A list of all the font weights.
   static const List<FontWeight> values = const [
     w100, w200, w300, w400, w500, w600, w700, w800, w900
   ];
 
+  /// Linearly interpolates between two font weights.
+  ///
+  /// Rather than using fractional weights, the interpolation rounds to the
+  /// nearest weight.
   static FontWeight lerp(FontWeight begin, FontWeight end, double t) {
     return values[lerpDouble(begin?.index ?? normal.index, end?.index ?? normal.index, t.clamp(0.0, 1.0)).round()];
   }
@@ -251,7 +260,21 @@ Int32List _encodeTextStyle(Color color,
   return result;
 }
 
+/// An opaque object that determines the size, position, and rendering of text.
 class TextStyle {
+  /// Constructs a new TextStyle object.
+  ///
+  /// * [color] The color to use when painting the text.
+  /// * [decoration] The decorations to paint near the text (e.g., an underline).
+  /// * [decorationColor] The color in which to paint the text decorations.
+  /// * [decorationStyle] The style in which to paint the text decorations (e.g., dashed).
+  /// * [fontWeight] The typeface thickness to use when painting the text (e.g., bold).
+  /// * [fontStyle] The typeface variant to use when drawing the letters (e.g., italics).
+  /// * [fontFamily] The name of the font to use when painting the text (e.g., Roboto).
+  /// * [fontSize] The size of gyphs (in logical pixels) to use when painting the text.
+  /// * [letterSpacing] The amount of space (in logical pixels) to add between each letter.
+  /// * [wordSpacing] The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
+  /// * [lineHeight] The distance between the text baselines, as a multiple of the font size.
   TextStyle({
     Color color,
     TextDecoration decoration,
@@ -357,7 +380,13 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
   return result;
 }
 
+/// An opaque object that determines the position of lines within a paragraph of text.
 class ParagraphStyle {
+  /// Constructs a new ParagraphStyle object.
+  ///
+  /// * [textAlign] .
+  /// * [textBaseline] .
+  /// * [lineHeight] .
   ParagraphStyle({
     TextAlign textAlign,
     TextBaseline textBaseline,
@@ -514,23 +543,65 @@ class TextPosition {
   }
 }
 
+/// A paragraph of text.
+///
+/// A paragraph retains the size and position of each glyph in the text and can
+/// be efficiently resized and painted.
 abstract class Paragraph extends NativeFieldWrapperClass2 {
+  /// The minimum amount of horizontal space this paragraph of text is permitted to occupy.
   double get minWidth native "Paragraph_minWidth";
   void set minWidth(double value) native "Paragraph_setMinWidth";
+
+  /// The maximum amount of horizontal space this paragraph of text is permitted to occupy.
   double get maxWidth native "Paragraph_maxWidth";
   void set maxWidth(double value) native "Paragraph_setMaxWidth";
+
+  /// The minimum amount of vertical space this paragraph of text is permitted to occupy.
   double get minHeight native "Paragraph_minHeight";
   void set minHeight(double value) native "Paragraph_setMinHeight";
+
+  /// The maximum amount of vertical space this paragraph of text is permitted to occupy.
   double get maxHeight native "Paragraph_maxHeight";
   void set maxHeight(double value) native "Paragraph_setMaxHeight";
+
+  /// The amount of horizontal space this paragraph occupies.
+  ///
+  /// Valid only after [layout] has been called.
   double get width native "Paragraph_width";
+
+  /// The amount of vertical space this paragraph occupies.
+  ///
+  /// Valid only after [layout] has been called.
   double get height native "Paragraph_height";
+
+  /// The minimum width that this paragraph could be without failing to paint
+  /// its contents within itself.
+  ///
+  /// Valid only after [layout] has been called.
   double get minIntrinsicWidth native "Paragraph_minIntrinsicWidth";
+
+  /// Returns the smallest width beyond which increasing the width never
+  /// decreases the height.
+  ///
+  /// Valid only after [layout] has been called.
   double get maxIntrinsicWidth native "Paragraph_maxIntrinsicWidth";
+
+  /// The distance from the top of the paragraph to the alphabetic baseline of the first line, in logical pixels.
   double get alphabeticBaseline native "Paragraph_alphabeticBaseline";
+
+  /// The distance from the top of the paragraph to the ideographic baseline of the first line, in logical pixels.
   double get ideographicBaseline native "Paragraph_ideographicBaseline";
 
+  /// Computes the size and position of each glyph in the paragraph.
+  ///
+  /// Setting the [minWidth], [maxWidth], [minHeight], or [maxHeight]
+  /// invalidates the layout of this paragraph, requiring a call to this
+  /// function before painting or reading geometry from this paragraph.
   void layout() native "Paragraph_layout";
+
+  /// Draws the text in this paragraph into the given canvas at the given offset.
+  ///
+  /// Valid only after [layout] has been called.
   void paint(Canvas canvas, Offset offset) native "Paragraph_paint";
 
   /// Returns a list of text boxes that enclose the given text range.
@@ -545,18 +616,35 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   }
 }
 
+/// Builds a [Paragraph] containing text with the given styling information.
 class ParagraphBuilder extends NativeFieldWrapperClass2 {
   void _constructor() native "ParagraphBuilder_constructor";
   ParagraphBuilder() { _constructor(); }
 
-  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight) native "ParagraphBuilder_pushStyle";
+  /// Applies the given style to the added text until [pop] is called.
+  ///
+  /// See [pop] for details.
   void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._lineHeight);
+  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double lineHeight) native "ParagraphBuilder_pushStyle";
 
+  /// Ends the effect of the most recent call to [pushStyle].
+  ///
+  /// Internally, the paragraph builder maintains a stack of text styles. Text
+  /// added to the paragraph is affected by all the styles in the stack. Calling
+  /// [pop] removes the topmost style in the stack, leaving the remaining styles
+  /// in effect.
   void pop() native "ParagraphBuilder_pop";
 
+  /// Adds the given text to the paragraph.
+  ///
+  /// The text will be styled according to the current stack of text styles.
   void addText(String text) native "ParagraphBuilder_addText";
 
-  Paragraph _build(Int32List encoded, double lineHeight) native "ParagraphBuilder_build";
+  /// Applies the given paragraph style and returns a Paragraph containing the added text and associated styling.
+  ///
+  /// After calling this function, the paragraph builder object is invalid and
+  /// cannot be used further.
   Paragraph build(ParagraphStyle style) => _build(style._encoded, style._lineHeight);
+  Paragraph _build(Int32List encoded, double lineHeight) native "ParagraphBuilder_build";
 }
 

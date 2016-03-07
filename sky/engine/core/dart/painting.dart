@@ -36,6 +36,14 @@ void decodeImageFromDataPipe(int handle, ImageDecoderCallback callback)
 void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
     native "decodeImageFromList";
 
+/// A complex, one-dimensional subset of a plane.
+///
+/// A path consists of a number of segments of various types, such as lines,
+/// arcs, or beziers. Paths can be open or closed and can self-intersect. A path
+/// also encloses a (possibly discontiguous) region of the plane based on
+/// whether a line from a given point on the plane to a point at infinity
+/// intersects the path an even (non-enclosed) or and odd (enclosed) number of
+/// times.
 class Path extends NativeFieldWrapperClass2 {
   void _constructor() native "Path_constructor";
   Path() { _constructor(); }
@@ -179,14 +187,30 @@ enum VertexMode {
   triangleFan,
 }
 
+/// An interface for recording graphical operations.
+///
+/// To record graphical operations, first create a [PictureRecorder], then
+/// construct a Canvas using the picture recorder. After issuing all the
+/// graphical operations, call the [endRecording] function on the picture
+/// recorder to obtain the final [Picture]. The [Picture] can then be included
+/// in a composited [Scene] via a [SceneBuilder]. Finally, the [Scene] can be
+/// displayed to the user via the [render] function on [Window].
 class Canvas extends NativeFieldWrapperClass2 {
-  void _constructor(PictureRecorder recorder, Rect bounds) native "Canvas_constructor";
-  Canvas(PictureRecorder recorder, Rect bounds) {
+  void _constructor(PictureRecorder recorder, Rect cullRect) native "Canvas_constructor";
+
+  /// Constructs a canvas for recording graphical operations into the given picture recorder.
+  ///
+  /// Graphical operations that affect pixels entirely outside the given
+  /// cullRect might be discarded by the implementation. However, the
+  /// implementation might draw outside these bounds if, for example, a command
+  /// draws partially inside and outside the cullRect. To ensure that pixels
+  /// outside a given region are discarded, consider using a [clipRect].
+  Canvas(PictureRecorder recorder, Rect cullRect) {
     if (recorder == null)
       throw new ArgumentError("[recorder] argument cannot be null.");
     if (recorder.isRecording)
       throw new ArgumentError("You must call endRecording() before reusing a PictureRecorder to create a new Canvas object.");
-    _constructor(recorder, bounds);
+    _constructor(recorder, cullRect);
   }
 
   void save() native "Canvas_save";
@@ -304,8 +328,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
 }
 
+/// An object representing a sequence of recorded graphical operations.
 abstract class Picture extends NativeFieldWrapperClass2 {
-  /// Replays the drawing commands on the specified canvas. Note that
+  /// Replays the graphical operations on the specified canvas. Note that
   /// this has the effect of unfurling this picture into the destination
   /// canvas. Using the Canvas drawPicture entry point gives the destination
   /// canvas the option of just taking a ref.
@@ -316,10 +341,23 @@ abstract class Picture extends NativeFieldWrapperClass2 {
   void dispose() native "Picture_dispose";
 }
 
+/// Records a [Picture] containing a sequence of graphical operations.
+///
+/// To begin recording, construct a [Canvas] to record the commands.
 class PictureRecorder extends NativeFieldWrapperClass2 {
   void _constructor() native "PictureRecorder_constructor";
   PictureRecorder() { _constructor(); }
 
+  /// Whether this object is currently recording commands.
+  ///
+  /// Specifically, whether a [Canvas] object has been created to record
+  /// commands and recording has not yet ended.
   bool get isRecording native "PictureRecorder_isRecording";
+
+  /// Finishes recording graphical operations.
+  ///
+  /// Returns a picture containing the graphical operations that have been
+  /// recorded thus far. After calling this function, both the picture recorder
+  /// and the canvas objects are invalid and cannot be used further.
   Picture endRecording() native "PictureRecorder_endRecording";
 }
