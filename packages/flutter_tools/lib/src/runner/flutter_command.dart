@@ -12,6 +12,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../toolchain.dart';
+import '../flx.dart' as flx;
 import 'flutter_command_runner.dart';
 
 typedef bool Validator();
@@ -27,6 +28,10 @@ abstract class FlutterCommand extends Command {
 
   /// Whether this command only applies to Android devices.
   bool get androidOnly => false;
+
+  /// Whether this command allows usage of the 'target' option.
+  bool get allowsTarget => _targetOptionSpecified;
+  bool _targetOptionSpecified = false;
 
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
@@ -58,7 +63,8 @@ abstract class FlutterCommand extends Command {
   }
 
   Future<int> _run() async {
-    if (requiresProjectRoot && !projectRootValidator())
+    bool _checkRoot = requiresProjectRoot && allowsTarget && !_targetSpecified;
+    if (_checkRoot && !projectRootValidator())
       return 1;
 
     // Ensure at least one toolchain is installed.
@@ -141,5 +147,16 @@ abstract class FlutterCommand extends Command {
       devices = devices.where((Device device) => device.platform == TargetPlatform.android).toList();
 
     return devices;
+  }
+
+  bool _targetSpecified = false;
+
+  void addTargetOption() {
+    argParser.addOption('target',
+      abbr: 't',
+      callback: (val) => _targetSpecified = true,
+      defaultsTo: flx.defaultMainPath,
+      help: 'Target app path / main entry-point file.');
+    _targetOptionSpecified = true;
   }
 }

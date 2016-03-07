@@ -13,7 +13,6 @@ import '../base/utils.dart';
 import '../build_configuration.dart';
 import '../dart/pub.dart';
 import '../device.dart';
-import '../flx.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
@@ -43,12 +42,9 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: true,
         defaultsTo: false,
         help: 'Start tracing during startup.');
-    argParser.addOption('target',
-        abbr: 't',
-        defaultsTo: defaultMainPath,
-        help: 'Target app path / main entry-point file.');
     argParser.addOption('route',
         help: 'Which route to load when starting the app.');
+    addTargetOption();
   }
 
   bool get checked => argResults['checked'];
