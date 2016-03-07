@@ -19,6 +19,7 @@ import '../demo/drop_down_demo.dart';
 import '../demo/fitness_demo.dart';
 import '../demo/grid_list_demo.dart';
 import '../demo/icons_demo.dart';
+import '../demo/leave_behind_demo.dart';
 import '../demo/list_demo.dart';
 import '../demo/modal_bottom_sheet_demo.dart';
 import '../demo/menu_demo.dart';
@@ -107,6 +108,7 @@ class GalleryHomeState extends State<GalleryHome> {
                   new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo()),
                   new GalleryDemo(title: 'Grid', builder: () => new GridListDemo()),
                   new GalleryDemo(title: 'Icons', builder: () => new IconsDemo()),
+                  new GalleryDemo(title: 'Leave-behind List Items', builder: () => new LeaveBehindDemo()),
                   new GalleryDemo(title: 'List', builder: () => new ListDemo()),
                   new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
                   new GalleryDemo(title: 'Menus', builder: () => new MenuDemo()),

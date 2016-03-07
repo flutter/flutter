@@ -38,24 +38,47 @@ enum DismissDirection {
   down
 }
 
-/// Can be dismissed by dragging in one or more directions.
+/// Can be dismissed by dragging in the indicated [direction].
 ///
-/// The child is draggable in the indicated direction(s). When released (or
-/// flung), the child disappears off the edge and the dismissable widget
+/// Dragging or flinging this widget in the [DismissDirection] causes the child
+/// to slide out of view. Following the slide animation, the Dismissable widget
 /// animates its height (or width, whichever is perpendicular to the dismiss
 /// direction) to zero.
+///
+/// Backgrounds can be used to implement the "leave-behind" idiom. If a background
+/// is specified it is stacked behind the Dismissable's child and is exposed when
+/// the child moves.
+///
+/// The [onDimissed] callback runs after Dismissable's size has collapsed to zero.
+/// If the Dismissable is a list item, it must have a key that distinguishes it from
+/// the other items and its onDismissed callback must remove the item from the list.
 class Dismissable extends StatefulComponent {
   Dismissable({
     Key key,
     this.child,
+    this.background,
+    this.secondaryBackground,
     this.onResized,
     this.onDismissed,
     this.direction: DismissDirection.horizontal
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(key != null);
+    assert(secondaryBackground != null ? background != null : true);
+  }
 
   final Widget child;
 
-  /// Called when the widget changes size (i.e., when contracting after being dismissed).
+  /// A widget that is stacked behind the child. If secondaryBackground is also
+  /// specified then this widget only appears when the child has been dragged
+  /// down or to the right.
+  final  Widget background;
+
+  /// A widget that is stacked behind the child and is exposed when the child
+  /// has been dragged up or to the left. It may only be specified when background
+  /// has also been specified.
+  final Widget secondaryBackground;
+
+  /// Called when the widget changes size (i.e., when contracting before being dismissed).
   final VoidCallback onResized;
 
   /// Called when the widget has been dismissed, after finishing resizing.
@@ -94,6 +117,12 @@ class _DismissableState extends State<Dismissable> {
     return config.direction == DismissDirection.horizontal
         || config.direction == DismissDirection.left
         || config.direction == DismissDirection.right;
+  }
+
+  DismissDirection get _dismissDirection {
+    if (_directionIsXAxis)
+      return  _dragExtent > 0 ? DismissDirection.right : DismissDirection.left;
+    return _dragExtent > 0 ? DismissDirection.down : DismissDirection.up;
   }
 
   bool get _isActive {
@@ -235,12 +264,7 @@ class _DismissableState extends State<Dismissable> {
   void _handleResizeProgressChanged() {
     if (_resizeController.isCompleted) {
       if (config.onDismissed != null) {
-        DismissDirection direction;
-        if (_directionIsXAxis)
-           direction = _dragExtent > 0 ? DismissDirection.right : DismissDirection.left;
-        else
-           direction = _dragExtent > 0 ? DismissDirection.down : DismissDirection.up;
-        config.onDismissed(direction);
+        config.onDismissed(_dismissDirection);
       }
     } else {
       if (config.onResized != null)
@@ -249,31 +273,53 @@ class _DismissableState extends State<Dismissable> {
   }
 
   Widget build(BuildContext context) {
+    Widget background = config.background;
+    if (config.secondaryBackground != null) {
+      final DismissDirection direction = _dismissDirection;
+      if (direction == DismissDirection.left || direction == DismissDirection.up)
+        background = config.secondaryBackground;
+    }
+
     if (_resizeAnimation != null) {
       // we've been dragged aside, and are now resizing.
       assert(() {
         if (_resizeAnimation.status != AnimationStatus.forward) {
           assert(_resizeAnimation.status == AnimationStatus.completed);
           throw new WidgetError(
-            'Dismissable widget completed its resize animation without being removed from the tree.\n'
-            'Make sure to implement the onDismissed handler and to immediately remove the Dismissable '
+            'A dismissed Dismissable widget is still part of the tree.\n' +
+            'Make sure to implement the onDismissed handler and to immediately remove the Dismissable\n' +
             'widget from the application once that handler has fired.'
           );
         }
         return true;
       });
+
       return new AnimatedBuilder(
         animation: _resizeAnimation,
         builder: (BuildContext context, Widget child) {
           return new SizedBox(
             width: !_directionIsXAxis ? _resizeAnimation.value : null,
-            height: _directionIsXAxis ? _resizeAnimation.value : null
+            height: _directionIsXAxis ? _resizeAnimation.value : null,
+            child: background
           );
         }
       );
     }
 
-    // we are not resizing. (we may be being dragged aside.)
+    Widget backgroundAndChild = new SlideTransition(
+      position: _moveAnimation,
+      child: config.child
+    );
+    if (background != null) {
+      backgroundAndChild = new Stack(
+        children: <Widget>[
+          new Positioned(left: 0.0, top: 0.0, bottom: 0.0, right: 0.0, child: background),
+          new Viewport(child: backgroundAndChild)
+        ]
+      );
+    }
+
+    // We are not resizing but we may be being dragging in config.direction.
     return new GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
       onHorizontalDragUpdate: _directionIsXAxis ? _handleDragUpdate : null,
@@ -282,10 +328,7 @@ class _DismissableState extends State<Dismissable> {
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: HitTestBehavior.opaque,
-      child: new SlideTransition(
-        position: _moveAnimation,
-        child: config.child
-      )
+      child: backgroundAndChild
     );
   }
 }

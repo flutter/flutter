@@ -67,7 +67,7 @@ class GallerySection extends StatelessComponent {
       primarySwatch: colors
     );
     final TextStyle titleTextStyle = theme.text.title.copyWith(
-      color: theme.brightness == ThemeBrightness.dark ?  Colors.black : Colors.white
+      color: Colors.white
     );
     return new Flexible(
       child: new GestureDetector(
