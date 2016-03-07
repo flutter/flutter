@@ -21,13 +21,17 @@ abstract class FlutterCommand extends Command {
   FlutterCommandRunner get runner => super.runner;
 
   /// Whether this command needs to be run from the root of a project.
-  bool get requiresProjectRoot => !_targetSpecified;
+  bool get requiresProjectRoot => true;
 
   /// Whether this command requires a (single) Flutter target device to be connected.
   bool get requiresDevice => false;
 
   /// Whether this command only applies to Android devices.
   bool get androidOnly => false;
+
+  /// Whether this command allows usage of the 'target' option.
+  bool get allowsTarget => _targetOptionSpecified;
+  bool _targetOptionSpecified = false;
 
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
@@ -59,7 +63,8 @@ abstract class FlutterCommand extends Command {
   }
 
   Future<int> _run() async {
-    if (requiresProjectRoot && !projectRootValidator())
+    bool _checkRoot = requiresProjectRoot && allowsTarget && !_targetSpecified;
+    if (_checkRoot && !projectRootValidator())
       return 1;
 
     // Ensure at least one toolchain is installed.
@@ -152,5 +157,6 @@ abstract class FlutterCommand extends Command {
       callback: (val) => _targetSpecified = true,
       defaultsTo: flx.defaultMainPath,
       help: 'Target app path / main entry-point file.');
+    _targetOptionSpecified = true;
   }
 }

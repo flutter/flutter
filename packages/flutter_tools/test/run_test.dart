@@ -13,7 +13,7 @@ main() => defineTests();
 
 defineTests() {
   group('run', () {
-    testUsingContext('fail when target not found', () {
+    testUsingContext('fails when target not found', () {
       RunCommand command = new RunCommand();
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(<String>['run', '-t', 'abc123']).then((int code) {
