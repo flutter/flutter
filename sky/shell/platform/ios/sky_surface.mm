@@ -157,6 +157,12 @@ static std::string TracesBasePath() {
            selector:@selector(keyboardWillBeHidden:)
                name:UIKeyboardWillHideNotification
              object:nil];
+
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+           selector:@selector(onLocaleUpdated:)
+               name:NSCurrentLocaleDidChangeNotification
+             object:nil];
   }
   return self;
 }
@@ -177,6 +183,13 @@ static std::string TracesBasePath() {
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
   _viewportMetrics->physical_padding_bottom = 0.0;
   _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
+}
+
+- (void)onLocaleUpdated:(NSNotification*)notification {
+    NSLocale *currentLocale = [NSLocale currentLocale];
+    NSString *languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
+    NSString *countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
+    _engine->OnLocaleChanged(languageCode.UTF8String, countryCode.UTF8String);
 }
 
 - (void)layoutSubviews {
@@ -252,6 +265,9 @@ static std::string TracesBasePath() {
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->services_provided_by_embedder = service_provider.Pass();
   _engine->SetServices(services.Pass());
+
+  // Initialize to current locale
+  [self onLocaleUpdated:nil];
 
 #if TARGET_IPHONE_SIMULATOR
   [self runFromDartSource];
