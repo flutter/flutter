@@ -60,7 +60,7 @@ FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void SceneBuilder::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
-    { "SceneBuilder_constructor", SceneBuilder_constructor, 2, true },
+    { "SceneBuilder_constructor", SceneBuilder_constructor, 1, true },
     { "SceneBuilder_pushTransform", SceneBuilder_pushTransform, 2, true },
 FOR_EACH_BINDING(DART_REGISTER_NATIVE)
   });
