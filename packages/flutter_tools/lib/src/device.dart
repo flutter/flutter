@@ -148,7 +148,11 @@ abstract class Device {
 
   TargetPlatform get platform;
 
-  DeviceLogReader createLogReader();
+  /// Get the log reader for this device.
+  DeviceLogReader get logReader;
+
+  /// Clear the device's logs.
+  void clearLogs();
 
   /// Start an app package on the current device.
   ///
@@ -189,7 +193,21 @@ abstract class Device {
 abstract class DeviceLogReader {
   String get name;
 
-  Future<int> logs({ bool clear: false, bool showPrefix: false });
+  /// A broadcast stream where each element in the string is a line of log
+  /// output.
+  Stream<String> get lines;
+
+  /// Start reading logs from the device.
+  Future start();
+
+  /// Actively reading lines from the log?
+  bool get isReading;
+
+  /// Actively stop reading logs from the device.
+  Future stop();
+
+  /// Completes when the log is finished.
+  Future get finished;
 
   int get hashCode;
   bool operator ==(dynamic other);

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -48,6 +49,8 @@ class AndroidDevice extends Device {
   final String deviceCodeName;
 
   bool get isLocalEmulator => false;
+
+  _AdbLogReader _logReader;
 
   List<String> adbCommandForDevice(List<String> args) {
     return <String>[androidSdk.adbPath, '-s', id]..addAll(args);
@@ -283,7 +286,12 @@ class AndroidDevice extends Device {
     runSync(adbCommandForDevice(<String>['-s', id, 'logcat', '-c']));
   }
 
-  DeviceLogReader createLogReader() => new _AdbLogReader(this);
+  DeviceLogReader get logReader {
+    if (_logReader == null)
+      _logReader = new _AdbLogReader(this);
+
+    return _logReader;
+  }
 
   void startTracing(AndroidApk apk) {
     runCheckedSync(adbCommandForDevice(<String>[
@@ -460,26 +468,76 @@ class _AdbLogReader extends DeviceLogReader {
 
   final AndroidDevice device;
 
+  final StreamController<String> _linesStreamController =
+      new StreamController<String>.broadcast();
+
+  Process _process;
+  StreamSubscription _stdoutSubscription;
+  StreamSubscription _stderrSubscription;
+
+  Stream<String> get lines => _linesStreamController.stream;
+
   String get name => device.name;
 
-  Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
-    if (clear)
-      device.clearLogs();
+  bool get isReading => _process != null;
 
-    return await runCommandAndStreamOutput(device.adbCommandForDevice(<String>[
-      '-s',
-      device.id,
-      'logcat',
-      '-v',
-      'tag', // Only log the tag and the message
-      '-T',
-      device.lastLogcatTimestamp,
-      '-s',
-      'flutter:V',
-      'ActivityManager:W',
-      'System.err:W',
-      '*:F',
-    ]), prefix: showPrefix ? '[$name] ' : '');
+  Future get finished =>
+      _process != null ? _process.exitCode : new Future.value(0);
+
+  Future start() async {
+    if (_process != null) {
+      throw new StateError(
+          '_AdbLogReader must be stopped before it can be started.');
+    }
+
+    // Start the adb logcat process.
+    _process = await runCommand(device.adbCommandForDevice(
+      <String>[
+        '-s',
+        device.id,
+        'logcat',
+        '-v',
+        'tag', // Only log the tag and the message
+        '-T',
+        device.lastLogcatTimestamp,
+        '-s',
+        'flutter:V',
+        'ActivityManager:W',
+        'System.err:W',
+        '*:F',
+      ]));
+    _stdoutSubscription =
+        _process.stdout.transform(UTF8.decoder)
+                       .transform(const LineSplitter()).listen(_onLine);
+    _stderrSubscription =
+        _process.stderr.transform(UTF8.decoder)
+                       .transform(const LineSplitter()).listen(_onLine);
+    _process.exitCode.then(_onExit);
+  }
+
+  Future stop() async {
+    if (_process == null) {
+      throw new StateError(
+          '_AdbLogReader must be started before it can be stopped.');
+    }
+    _stdoutSubscription?.cancel();
+    _stdoutSubscription = null;
+    _stderrSubscription?.cancel();
+    _stderrSubscription = null;
+    await _process.kill();
+    _process = null;
+  }
+
+  void _onExit(int exitCode) {
+    _stdoutSubscription?.cancel();
+    _stdoutSubscription = null;
+    _stderrSubscription?.cancel();
+    _stderrSubscription = null;
+    _process = null;
+  }
+
+  void _onLine(String line) {
+    _linesStreamController.add(line);
   }
 
   int get hashCode => name.hashCode;
