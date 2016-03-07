@@ -12,3 +12,30 @@ embedded_libs:
   "dart:ui": "../sdk_ext/dart_ui.dart"
   "dart:_internal": "../dart_sdk/_empty.dart"
   "dart:nativewrappers": "../dart_sdk/_empty.dart"
+
+analyzer:
+  language:
+    enableSuperMixins: true
+  errors:
+    # We allow overriding fields (if they use super, ideally...).
+    strong_mode_invalid_field_override: ignore
+    # We allow type narrowing.
+    strong_mode_invalid_method_override: ignore
+    todo: ignore
+
+linter:
+  rules:
+    - camel_case_types
+    # Sometimes we have no choice (e.g. when matching other platforms).
+    # - constant_identifier_names
+    - empty_constructor_bodies
+    # Disabled until regexp fix is pulled in (https://github.com/flutter/flutter/pull/1996).
+    # - library_names
+    - library_prefixes
+    - non_constant_identifier_names
+    # Too many false-positives; code review should catch real instances.
+    # - one_member_abstracts
+    - slash_for_doc_comments
+    - super_goes_last
+    - type_init_formals
+    - unnecessary_brace_in_string_interp
