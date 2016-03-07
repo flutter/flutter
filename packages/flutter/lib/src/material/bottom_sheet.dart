@@ -80,7 +80,7 @@ class _BottomSheetState extends State<BottomSheet> {
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
       child: new Material(
-          key: _childKey,
+        key: _childKey,
         child: config.builder(context)
       )
     );

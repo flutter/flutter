@@ -78,7 +78,7 @@ class WidgetTester extends Instrumentation {
       super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
-    runApp(new ErrorWidget()); // flush out the last build entirely
+    runApp(new Container(key: new UniqueKey())); // flush out the last build entirely
   }
 
   final FakeAsync async;

@@ -95,4 +95,45 @@ void main() {
       expect(log, equals(['scrollstart', 'scroll', 'scroll', 'scrollend']));
     });
   });
+
+  test('Scroll during animation', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey<ScrollableState> scrollKey = new GlobalKey<ScrollableState>();
+      List<String> log = <String>[];
+      tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
+
+      expect(log, equals([]));
+      scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
+      expect(log, equals(['scrollstart']));
+      tester.pump(const Duration(milliseconds: 100));
+      expect(log, equals(['scrollstart']));
+      tester.pump(const Duration(milliseconds: 100));
+      expect(log, equals(['scrollstart', 'scroll']));
+      scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
+      expect(log, equals(['scrollstart', 'scroll']));
+      tester.pump(const Duration(milliseconds: 100));
+      expect(log, equals(['scrollstart', 'scroll']));
+      tester.pump(const Duration(milliseconds: 1500));
+      expect(log, equals(['scrollstart', 'scroll', 'scroll', 'scrollend']));
+    });
+  });
+
+  test('fling, fling generates one start/end pair', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey<ScrollableState> scrollKey = new GlobalKey<ScrollableState>();
+      List<String> log = <String>[];
+      tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
+
+      expect(log, equals([]));
+      tester.flingFrom(new Point(100.0, 100.0), new Offset(-50.0, -50.0), 500.0);
+      tester.pump(new Duration(seconds: 1));
+      log.removeWhere((String value) => value == 'scroll');
+      expect(log, equals(['scrollstart']));
+      tester.flingFrom(new Point(100.0, 100.0), new Offset(-50.0, -50.0), 500.0);
+      tester.pump(new Duration(seconds: 1));
+      tester.pump(new Duration(seconds: 1));
+      log.removeWhere((String value) => value == 'scroll');
+      expect(log, equals(['scrollstart', 'scrollend']));
+    });
+  });
 }

@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -55,6 +56,7 @@ class DrawerItem extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
 
     List<Widget> children = <Widget>[];

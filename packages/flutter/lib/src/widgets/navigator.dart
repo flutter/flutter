@@ -260,8 +260,12 @@ class Navigator extends StatefulComponent {
   static void openTransaction(BuildContext context, NavigatorTransactionCallback callback) {
     NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
-      if (navigator == null)
-        throw new WidgetError('openTransaction called with a context that does not include a Navigator. The context passed to the Navigator.openTransaction() method must be that of a widget that is a descendant of a Navigator widget.');
+      if (navigator == null) {
+        throw new WidgetError(
+          'openTransaction called with a context that does not include a Navigator.\n'
+          'The context passed to the Navigator.openTransaction() method must be that of a widget that is a descendant of a Navigator widget.'
+        );
+      }
       return true;
     });
     navigator.openTransaction(callback);

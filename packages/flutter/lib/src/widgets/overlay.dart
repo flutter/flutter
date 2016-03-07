@@ -71,7 +71,32 @@ class Overlay extends StatefulComponent {
   final List<OverlayEntry> initialEntries;
 
   /// The state from the closest instance of this class that encloses the given context.
-  static OverlayState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<OverlayState>());
+  ///
+  /// In checked mode, if the [debugRequiredFor] argument is provided then this
+  /// function will assert that an overlay was found and will throw an exception
+  /// if not. The exception attempts to explain that the calling [Widget] (the
+  /// one given by the [debugRequiredFor] argument) needs an [Overlay] to be
+  /// present to function.
+  static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
+    OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
+    assert(() {
+      if (debugRequiredFor != null && result == null) {
+        String additional = context.widget != debugRequiredFor
+          ? '\nThe context from which that widget was searching for an overlay was:\n  $context'
+          : '';
+        throw new WidgetError(
+          'No Overlay widget found.\n'
+          '${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.\n'
+          'The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.\n'
+          'The specific widget that failed to find an overlay was:\n'
+          '  $debugRequiredFor'
+          '$additional'
+        );
+      }
+      return true;
+    });
+    return result;
+  }
 
   OverlayState createState() => new OverlayState();
 }

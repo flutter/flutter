@@ -10,6 +10,7 @@ import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 import 'typography.dart';
@@ -403,6 +404,7 @@ class _YearPickerState extends State<YearPicker> {
   }
 
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
     return new ScrollableLazyList(
       itemExtent: _itemExtent,
       itemCount: config.lastDate.year - config.firstDate.year + 1,

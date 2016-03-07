@@ -234,7 +234,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
       _activeCount += 1;
     });
     return new _DragAvatar<T>(
-      overlay: Overlay.of(context),
+      overlay: Overlay.of(context, debugRequiredFor: config),
       data: config.data,
       initialPosition: position,
       dragStartPoint: dragStartPoint,
@@ -249,6 +249,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
   }
 
   Widget build(BuildContext context) {
+    assert(Overlay.of(context, debugRequiredFor: config) != null);
     final bool canDrag = config.maxSimultaneousDrags == null ||
                          _activeCount < config.maxSimultaneousDrags;
     final bool showChild = _activeCount == 0 || config.childWhenDragging == null;

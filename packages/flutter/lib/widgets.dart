@@ -5,6 +5,7 @@
 /// The Flutter widget framework.
 library widgets;
 
+export 'src/widgets/app.dart';
 export 'src/widgets/asset_vendor.dart';
 export 'src/widgets/auto_layout.dart';
 export 'src/widgets/basic.dart';

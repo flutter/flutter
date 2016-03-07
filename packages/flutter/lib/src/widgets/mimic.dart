@@ -137,6 +137,9 @@ class Mimic extends StatelessComponent {
 }
 
 /// A widget that can be copied by a [Mimic].
+///
+/// This widget's State, [MimicableState], contains an API for initiating the
+/// mimic operation.
 class Mimicable extends StatefulComponent {
   Mimicable({ Key key, this.child }) : super(key: key);
 
@@ -173,7 +176,18 @@ class MimicableState extends State<Mimicable> {
   /// passing it to a [Mimic] widget. To mimic the child in the
   /// [Overlay], consider using [liftToOverlay()] instead.
   MimicableHandle startMimic() {
-    assert(_placeholderSize == null);
+    assert(() {
+      if (_placeholderSize != null) {
+        throw new WidgetError(
+          'Mimicable started while already active.\n'
+          'When startMimic() or liftToOverlay() is called on a MimicableState, the mimic becomes active. '
+          'While active, it cannot be reactivated until it is stopped. '
+          'To stop a Mimicable started with startMimic(), call the MimicableHandle object\'s stopMimic() method. '
+          'To stop a Mimicable started with liftToOverlay(), call dispose() on the MimicOverlayEntry.'
+        );
+      }
+      return true;
+    });
     RenderBox box = context.findRenderObject();
     assert(box != null);
     assert(box.hasSize);
@@ -193,8 +207,7 @@ class MimicableState extends State<Mimicable> {
   /// had when the mimicking process started and (2) the child will be
   /// placed in the enclosing overlay.
   MimicOverlayEntry liftToOverlay() {
-    OverlayState overlay = Overlay.of(context);
-    assert(overlay != null); // You need an overlay to lift into.
+    OverlayState overlay = Overlay.of(context, debugRequiredFor: config);
     MimicOverlayEntry entry = new MimicOverlayEntry._(startMimic());
     overlay.insert(entry._overlayEntry);
     return entry;

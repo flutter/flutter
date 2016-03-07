@@ -31,22 +31,22 @@ class TextStyle {
   /// The color to use when painting the text.
   final Color color;
 
-  /// The name of the font to use when painting the text.
+  /// The name of the font to use when painting the text (e.g., Roboto).
   final String fontFamily;
 
   /// The size of gyphs (in logical pixels) to use when painting the text.
   final double fontSize;
 
-  /// The font weight to use when painting the text.
+  /// The typeface thickness to use when painting the text (e.g., bold).
   final FontWeight fontWeight;
 
-  /// The font style to use when painting the text.
+  /// The typeface variant to use when drawing the letters (e.g., italics).
   final FontStyle fontStyle;
 
-  /// The amount of space to add between each letter.
+  /// The amount of space (in logical pixels) to add between each letter.
   final double letterSpacing;
 
-  /// The amount of space to add at each sequence of white-space (i.e. between each word).
+  /// The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
   final double wordSpacing;
 
   /// How the text should be aligned (applies only to the outermost
@@ -59,13 +59,13 @@ class TextStyle {
   /// The distance between the text baselines, as a multiple of the font size.
   final double height;
 
-  /// The decorations to paint near the text.
+  /// The decorations to paint near the text (e.g., an underline).
   final TextDecoration decoration;
 
   /// The color in which to paint the text decorations.
   final Color decorationColor;
 
-  /// The style in which to paint the text decorations.
+  /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
   /// Returns a new text style that matches this text style but with the given

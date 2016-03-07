@@ -20,7 +20,7 @@ import 'object.dart';
 mojom.ViewProxy _initViewProxy() {
   int viewHandle = ui.takeViewHandle();
   assert(() {
-    if (viewHandle == 0)
+    if (viewHandle == core.MojoHandle.INVALID)
       debugPrint('Child view are supported only when running in Mojo shell.');
     return true;
   });
@@ -35,8 +35,12 @@ mojom.ViewProxy _initViewProxy() {
 final mojom.ViewProxy _viewProxy = _initViewProxy();
 final mojom.View _view = _viewProxy?.ptr;
 
+/// (mojo-only) A connection with a child view.
+///
+/// Used with the [ChildView] widget to display a child view.
 class ChildViewConnection {
-  ChildViewConnection({ this.url }) {
+  /// Establishes a connection to the app at the given URL.
+  ChildViewConnection({ String url }) {
     mojom.ViewProviderProxy viewProvider = new mojom.ViewProviderProxy.unbound();
     shell.connectToService(url, viewProvider);
     mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.unbound();
@@ -47,8 +51,16 @@ class ChildViewConnection {
     _connection = new ApplicationConnection(outgoingServices, incomingServices);
   }
 
-  final String url;
+  /// Wraps an already-established connection ot a child app.
+  ChildViewConnection.fromViewOwner({
+    mojom.ViewOwnerProxy viewOwner,
+    ApplicationConnection connection
+  }) : _connection = connection, _viewOwner = viewOwner;
 
+  /// The underlying application connection to the child app.
+  ///
+  /// Useful for requesting services from the child app and for providing
+  /// services to the child app.
   ApplicationConnection get connection => _connection;
   ApplicationConnection _connection;
 
@@ -120,18 +132,16 @@ class ChildViewConnection {
       ..devicePixelRatio = scale;
     return (await _view.layoutChild(_viewKey, layoutParams)).info;
   }
-
-  String toString() {
-    return '$runtimeType(url: $url)';
-  }
 }
 
+/// (mojo-only) A view of a child application.
 class RenderChildView extends RenderBox {
   RenderChildView({
     ChildViewConnection child,
     double scale
   }) : _child = child, _scale = scale;
 
+  /// The child to display.
   ChildViewConnection get child => _child;
   ChildViewConnection _child;
   void set child (ChildViewConnection value) {
@@ -150,6 +160,7 @@ class RenderChildView extends RenderBox {
     }
   }
 
+  /// The device pixel ratio to provide the child.
   double get scale => _scale;
   double _scale;
   void set scale (double value) {
