@@ -5,7 +5,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'basic_types.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -1164,33 +1163,6 @@ class RenderFractionalTranslation extends RenderProxyBox {
     super.debugFillDescription(description);
     description.add('translation: $translation');
     description.add('transformHitTests: $transformHitTests');
-  }
-}
-
-/// Calls [onSizeChanged] whenever the child's layout size changes
-///
-/// Because size observer calls its callback during layout, you cannot modify
-/// layout information during the callback.
-class RenderSizeObserver extends RenderProxyBox {
-  RenderSizeObserver({
-    this.onSizeChanged,
-    RenderBox child
-  }) : super(child) {
-    assert(onSizeChanged != null);
-  }
-
-  /// The callback to call whenever the child's layout size changes
-  ValueChanged<Size> onSizeChanged;
-
-  void performLayout() {
-    Size oldSize = hasSize ? size : null;
-    super.performLayout();
-    if (oldSize != size) {
-      // We make a copy of the Size object here because if we leak a _DebugSize
-      // object out of the render tree, we can get confused later if it comes
-      // back and gets set as the size property of a RenderBox.
-      onSizeChanged(new Size(size.width, size.height));
-    }
   }
 }
 
