@@ -28,7 +28,6 @@ class ListItem extends StatelessComponent {
     this.onTap,
     this.onLongPress
   }) : super(key: key) {
-    assert(primary != null);
     assert(isThreeLine ? secondary != null : true);
   }
 
@@ -117,7 +116,7 @@ class ListItem extends StatelessComponent {
 
     final Widget primaryLine = new DefaultTextStyle(
       style: primaryTextStyle(context),
-      child: primary
+      child: primary ?? new Container()
     );
     Widget center = primaryLine;
     if (isTwoLine || isThreeLine) {
