@@ -230,10 +230,11 @@ uint32_t FontCollection::calcVariantMatchingScore(int variant, const FontFamily&
 // 1. If first font in the collection has the character, it wins.
 // 2. Calculate a score for the font family. See comments in calcFamilyScore for the detail.
 // 3. Highest score wins, with ties resolved to the first font.
+// This method never returns nullptr.
 FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             uint32_t langListId, int variant) const {
     if (ch >= mMaxChar) {
-        return NULL;
+        return mFamilies[0];
     }
 
     const std::vector<FontFamily*>* familyVec = &mFamilyVec;
@@ -272,7 +273,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
             bestFamily = family;
         }
     }
-    if (bestFamily == nullptr && !mFamilyVec.empty()) {
+    if (bestFamily == nullptr) {
         UErrorCode errorCode = U_ZERO_ERROR;
         const UNormalizer2* normalizer = unorm2_getNFDInstance(&errorCode);
         if (U_SUCCESS(errorCode)) {
@@ -396,11 +397,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 Run dummy;
                 result->push_back(dummy);
                 run = &result->back();
-                if (family == NULL) {
-                    run->fakedFont.font = NULL;
-                } else {
-                    run->fakedFont = family->getClosestMatch(style);
-                }
+                run->fakedFont = family->getClosestMatch(style);
                 lastFamily = family;
                 run->start = start;
             }
@@ -415,9 +412,6 @@ MinikinFont* FontCollection::baseFont(FontStyle style) {
 }
 
 FakedFont FontCollection::baseFontFaked(FontStyle style) {
-    if (mFamilies.empty()) {
-        return FakedFont();
-    }
     return mFamilies[0]->getClosestMatch(style);
 }
 

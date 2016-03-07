@@ -84,9 +84,11 @@ private:
     uint32_t mMaxChar;
 
     // This vector has ownership of the bitsets and typeface objects.
+    // This vector can't be empty.
     std::vector<FontFamily*> mFamilies;
 
     // This vector contains pointers into mInstances
+    // This vector can't be empty.
     std::vector<FontFamily*> mFamilyVec;
 
     // This vector has pointers to the font family instance which has cmap 14 subtable.
