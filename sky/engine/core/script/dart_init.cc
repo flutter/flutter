@@ -328,8 +328,7 @@ void InitDartVM() {
 
   Vector<const char*> args;
   args.append(kDartProfilingArgs, arraysize(kDartProfilingArgs));
-  args.append(kDartConditionalDirectivesArgs, arraysize(kDartConditionalDirectivesArgs));
-
+  
   if (!IsRunningPrecompiledCode()) {
     // The version of the VM setup to run precompiled code does not recognize
     // the mirrors or the background compilation flags. They are never enabled.
@@ -337,6 +336,8 @@ void InitDartVM() {
     args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
     args.append(kDartBackgroundCompilationArgs,
                 arraysize(kDartBackgroundCompilationArgs));
+    args.append(kDartConditionalDirectivesArgs,
+                arraysize(kDartConditionalDirectivesArgs));
   }
 
   if (enable_checked_mode)
