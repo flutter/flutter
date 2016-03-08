@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -212,6 +212,8 @@ class IOSSimulator extends Device {
   final String name;
 
   bool get isLocalEmulator => true;
+
+  _IOSSimulatorLogReader _logReader;
 
   String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
 
@@ -428,7 +430,12 @@ class IOSSimulator extends Device {
   @override
   TargetPlatform get platform => TargetPlatform.iOSSimulator;
 
-  DeviceLogReader createLogReader() => new _IOSSimulatorLogReader(this);
+  DeviceLogReader get logReader {
+    if (_logReader == null)
+      _logReader = new _IOSSimulatorLogReader(this);
+
+    return _logReader;
+  }
 
   void clearLogs() {
     File logFile = new File(logFilePath);
@@ -451,71 +458,157 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   final IOSSimulator device;
 
+  final StreamController<String> _linesStreamController =
+      new StreamController<String>.broadcast();
+
   bool _lastWasFiltered = false;
+
+  // We log from two logs: the device and the system log.
+  Process _deviceProcess;
+  StreamSubscription _deviceStdoutSubscription;
+  StreamSubscription _deviceStderrSubscription;
+
+  Process _systemProcess;
+  StreamSubscription _systemStdoutSubscription;
+  StreamSubscription _systemStderrSubscription;
+
+  Stream<String> get lines => _linesStreamController.stream;
 
   String get name => device.name;
 
-  Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
-    if (clear)
-      device.clearLogs();
+  bool get isReading => (_deviceProcess != null) && (_systemProcess != null);
 
+  Future get finished =>
+      (_deviceProcess != null) ? _deviceProcess.exitCode : new Future.value(0);
+
+  Future start() async {
+    if (isReading) {
+      throw new StateError(
+          '_IOSSimulatorLogReader must be stopped before it can be started.');
+    }
+
+    // TODO(johnmccutchan): Add a ProcessSet abstraction that handles running
+    // N processes and merging their output.
+
+    // Device log.
     device.ensureLogsExists();
-
-    // Match the log prefix (in order to shorten it):
-    //   'Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]: ...'
-    RegExp mapRegex = new RegExp(r'\S+ +\S+ +\S+ \S+ (.+)\[\d+\]\)?: (.*)$');
-    // Jan 31 19:23:28 --- last message repeated 1 time ---
-    RegExp lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ --- (.*) ---$');
-
-    // This filter matches many Flutter lines in the log:
-    // new RegExp(r'(FlutterRunner|flutter.runner.Runner|$id)'), but it misses
-    // a fair number, including ones that would be useful in diagnosing crashes.
-    // For now, we're not filtering the log file (but do clear it with each run).
-
-    Future<int> result = runCommandAndStreamOutput(
-      <String>['tail', '-n', '+0', '-F', device.logFilePath],
-      prefix: showPrefix ? '[$name] ' : '',
-      mapFunction: (String string) {
-        Match match = mapRegex.matchAsPrefix(string);
-        if (match != null) {
-          _lastWasFiltered = true;
-
-          // Filter out some messages that clearly aren't related to Flutter.
-          if (string.contains(': could not find icon for representation -> com.apple.'))
-            return null;
-          String category = match.group(1);
-          String content = match.group(2);
-          if (category == 'Game Center' || category == 'itunesstored' || category == 'nanoregistrylaunchd' ||
-              category == 'mstreamd' || category == 'syncdefaultsd' || category == 'companionappd' ||
-              category == 'searchd')
-            return null;
-
-          _lastWasFiltered = false;
-
-          if (category == 'Runner')
-            return content;
-          return '$category: $content';
-        }
-        match = lastMessageRegex.matchAsPrefix(string);
-        if (match != null && !_lastWasFiltered)
-          return '(${match.group(1)})';
-        return string;
-      }
-    );
+    _deviceProcess = await runCommand(
+        <String>['tail', '-n', '+0', '-F', device.logFilePath]);
+    _deviceStdoutSubscription =
+        _deviceProcess.stdout.transform(UTF8.decoder)
+                             .transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceStderrSubscription =
+        _deviceProcess.stderr.transform(UTF8.decoder)
+                             .transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.exitCode.then(_onDeviceExit);
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
-    runCommandAndStreamOutput(
-      <String>['tail', '-F', '/private/var/log/system.log'],
-      prefix: showPrefix ? '[$name] ' : '',
-      filter: new RegExp(r' FlutterRunner\[\d+\] '),
-      mapFunction: (String string) {
-        Match match = mapRegex.matchAsPrefix(string);
-        return match == null ? string : '${match.group(1)}: ${match.group(2)}';
-      }
-    );
+    _systemProcess = await runCommand(
+        <String>['tail', '-F', '/private/var/log/system.log']);
+    _systemStdoutSubscription =
+        _systemProcess.stdout.transform(UTF8.decoder)
+                             .transform(const LineSplitter()).listen(_onSystemLine);
+    _systemStderrSubscription =
+        _systemProcess.stderr.transform(UTF8.decoder)
+                             .transform(const LineSplitter()).listen(_onSystemLine);
+    _systemProcess.exitCode.then(_onSystemExit);
+  }
 
-    return await result;
+  Future stop() async {
+    if (!isReading) {
+      throw new StateError(
+          '_IOSSimulatorLogReader must be started before it can be stopped.');
+    }
+    if (_deviceProcess != null) {
+      await _deviceProcess.kill();
+      _deviceProcess = null;
+    }
+    _onDeviceExit(0);
+    if (_systemProcess != null) {
+      await _systemProcess.kill();
+      _systemProcess = null;
+    }
+    _onSystemExit(0);
+  }
+
+  void _onDeviceExit(int exitCode) {
+    _deviceStdoutSubscription?.cancel();
+    _deviceStdoutSubscription = null;
+    _deviceStderrSubscription?.cancel();
+    _deviceStderrSubscription = null;
+    _deviceProcess = null;
+  }
+
+  void _onSystemExit(int exitCode) {
+    _systemStdoutSubscription?.cancel();
+    _systemStdoutSubscription = null;
+    _systemStderrSubscription?.cancel();
+    _systemStderrSubscription = null;
+    _systemProcess = null;
+  }
+
+  // Match the log prefix (in order to shorten it):
+  //   'Jan 29 01:31:44 devoncarew-macbookpro3 SpringBoard[96648]: ...'
+  final RegExp _mapRegex =
+      new RegExp(r'\S+ +\S+ +\S+ \S+ (.+)\[\d+\]\)?: (.*)$');
+
+  // Jan 31 19:23:28 --- last message repeated 1 time ---
+  final RegExp _lastMessageRegex = new RegExp(r'\S+ +\S+ +\S+ --- (.*) ---$');
+
+  final RegExp _flutterRunnerRegex = new RegExp(r' FlutterRunner\[\d+\] ');
+
+  String _filterDeviceLine(String string) {
+    Match match = _mapRegex.matchAsPrefix(string);
+    if (match != null) {
+      _lastWasFiltered = true;
+
+      // Filter out some messages that clearly aren't related to Flutter.
+      if (string.contains(': could not find icon for representation -> com.apple.'))
+        return null;
+
+      String category = match.group(1);
+      String content = match.group(2);
+      if (category == 'Game Center' || category == 'itunesstored' ||
+          category == 'nanoregistrylaunchd' || category == 'mstreamd' ||
+          category == 'syncdefaultsd' || category == 'companionappd' ||
+          category == 'searchd')
+        return null;
+
+      _lastWasFiltered = false;
+
+      if (category == 'Runner')
+        return content;
+      return '$category: $content';
+    }
+    match = _lastMessageRegex.matchAsPrefix(string);
+    if (match != null && !_lastWasFiltered)
+      return '(${match.group(1)})';
+    return string;
+  }
+
+  void _onDeviceLine(String line) {
+    String filteredLine = _filterDeviceLine(line);
+    if (filteredLine == null)
+      return;
+
+    _linesStreamController.add(filteredLine);
+  }
+
+  String _filterSystemLog(String string) {
+    Match match = _mapRegex.matchAsPrefix(string);
+    return match == null ? string : '${match.group(1)}: ${match.group(2)}';
+  }
+
+  void _onSystemLine(String line) {
+    if (!_flutterRunnerRegex.hasMatch(line))
+      return;
+
+    String filteredLine = _filterSystemLog(line);
+    if (filteredLine == null)
+      return;
+
+    _linesStreamController.add(filteredLine);
   }
 
   int get hashCode => device.logFilePath.hashCode;

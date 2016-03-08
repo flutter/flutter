@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -61,6 +62,8 @@ class IOSDevice extends Device {
   String get pusherPath => _pusherPath;
 
   final String name;
+
+  _IOSDeviceLogReader _logReader;
 
   bool get isLocalEmulator => false;
 
@@ -220,7 +223,15 @@ class IOSDevice extends Device {
   @override
   TargetPlatform get platform => TargetPlatform.iOS;
 
-  DeviceLogReader createLogReader() => new _IOSDeviceLogReader(this);
+  DeviceLogReader get logReader {
+    if (_logReader == null)
+      _logReader = new _IOSDeviceLogReader(this);
+
+    return _logReader;
+  }
+
+  void clearLogs() {
+  }
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
@@ -228,15 +239,65 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 
   final IOSDevice device;
 
+  final StreamController<String> _linesStreamController =
+      new StreamController<String>.broadcast();
+
+  Process _process;
+  StreamSubscription _stdoutSubscription;
+  StreamSubscription _stderrSubscription;
+
+  Stream<String> get lines => _linesStreamController.stream;
+
   String get name => device.name;
 
-  // TODO(devoncarew): Support [clear].
-  Future<int> logs({ bool clear: false, bool showPrefix: false }) async {
-    return await runCommandAndStreamOutput(
-      <String>[device.loggerPath],
-      prefix: showPrefix ? '[$name] ' : '',
-      filter: new RegExp(r'Runner')
-    );
+  bool get isReading => _process != null;
+
+  Future get finished =>
+      _process != null ? _process.exitCode : new Future.value(0);
+
+  Future start() async {
+    if (_process != null) {
+      throw new StateError(
+          '_IOSDeviceLogReader must be stopped before it can be started.');
+    }
+    _process = await runCommand(<String>[device.loggerPath]);
+    _stdoutSubscription =
+        _process.stdout.transform(UTF8.decoder)
+                       .transform(const LineSplitter()).listen(_onLine);
+    _stderrSubscription =
+        _process.stderr.transform(UTF8.decoder)
+                       .transform(const LineSplitter()).listen(_onLine);
+    _process.exitCode.then(_onExit);
+  }
+
+  Future stop() async {
+    if (_process == null) {
+      throw new StateError(
+          '_IOSDeviceLogReader must be started before it can be stopped.');
+    }
+    _stdoutSubscription?.cancel();
+    _stdoutSubscription = null;
+    _stderrSubscription?.cancel();
+    _stderrSubscription = null;
+    await _process.kill();
+    _process = null;
+  }
+
+  void _onExit(int exitCode) {
+    _stdoutSubscription?.cancel();
+    _stdoutSubscription = null;
+    _stderrSubscription?.cancel();
+    _stderrSubscription = null;
+    _process = null;
+  }
+
+  RegExp _runnerRegex = new RegExp(r'Runner');
+
+  void _onLine(String line) {
+    if (!_runnerRegex.hasMatch(line))
+      return;
+
+    _linesStreamController.add(line);
   }
 
   int get hashCode => name.hashCode;
