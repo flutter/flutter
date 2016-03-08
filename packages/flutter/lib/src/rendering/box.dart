@@ -419,7 +419,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Returns the smallest width beyond which increasing the width never
-  /// decreases the height.
+  /// decreases the preferred height.
   ///
   /// Override in subclasses that implement [performLayout].
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
@@ -437,7 +437,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Returns the smallest height beyond which increasing the height never
-  /// decreases the width.
+  /// decreases the preferred width.
   ///
   /// If the layout algorithm used is width-in-height-out, i.e. the height
   /// depends on the width and not vice versa, then this will return the same
