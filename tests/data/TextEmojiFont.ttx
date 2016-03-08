@@ -160,13 +160,26 @@
   <cmap>
     <tableVersion version="0"/>
     <cmap_format_4 platformID="3" platEncID="10" language="0">
+      <!-- TODO: Clean up and write the target test name. -->
       <map code="0x00A9" name="Emoji1" /> <!-- Text Default -->
       <map code="0x203C" name="Emoji3" /> <!-- Text Default -->
       <map code="0x231A" name="Emoji5" /> <!-- Emoji Default -->
       <map code="0x23E9" name="Emoji7" /> <!-- Emoji Default -->
       <map code="0x26FA" name="Emoji9" /> <!-- U+26FA U+FE0E is in ColorTextMixedEmojiFont.ttf -->
       <map code="0x261D" name="WHITE_UP_POINTING_INDEX" />
+
+      <!-- For FontCollectionTest.hasVariationSelectorTest_emoji -->
+      <map code="0x2623" name="Emoji1" />
+      <map code="0x2626" name="Emoji1" />
+      <map code="0x262A" name="Emoji1" />
+      <map code="0x262E" name="Emoji1" />
+      <!-- U+262F is reserved for this test. -->
     </cmap_format_4>
+    <cmap_format_14 format="14" platformID="0" platEncID="5" length="40" numVarSelectorRecords="2">
+      <!-- For FontCollectionTest.hasVariationSelectorTest_emoji -->
+      <map uvs="0xFE0E" uv="0x2623" name="None" />
+      <map uvs="0xFE0E" uv="0x2626" name="None" />
+    </cmap_format_14>
   </cmap>
 
   <loca>

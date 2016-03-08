@@ -32,6 +32,7 @@ using android::FontLanguage;
 using android::FontLanguages;
 using android::FontLanguageListCache;
 using android::FontStyle;
+using android::MinikinAutoUnref;
 using android::MinikinFont;
 using android::gMinikinLock;
 
@@ -80,7 +81,7 @@ const FontLanguages& registerAndGetFontLanguages(const std::string& lang_string)
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_latin) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     const FontStyle kRegularStyle = FontStyle();
@@ -150,7 +151,7 @@ TEST_F(FontCollectionItemizeTest, itemize_latin) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_emoji) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     itemize(collection.get(), "U+1F469 U+1F467", FontStyle(), &runs);
@@ -211,7 +212,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emoji) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_non_latin) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     FontStyle kJAStyle = FontStyle(FontStyle::registerLanguageList("ja_JP"));
@@ -300,7 +301,7 @@ TEST_F(FontCollectionItemizeTest, itemize_non_latin) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_mixed) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     FontStyle kUSStyle = FontStyle(FontStyle::registerLanguageList("en_US"));
@@ -339,7 +340,7 @@ TEST_F(FontCollectionItemizeTest, itemize_mixed) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_variationSelector) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     // A glyph for U+4FAE is provided by both Japanese font and Simplified
@@ -478,7 +479,7 @@ TEST_F(FontCollectionItemizeTest, itemize_variationSelector) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     // A glyph for U+845B is provided by both Japanese font and Simplified
@@ -603,7 +604,7 @@ TEST_F(FontCollectionItemizeTest, itemize_variationSelectorSupplement) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_no_crash) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     // Broken Surrogate pairs. Check only not crashing.
@@ -627,7 +628,7 @@ TEST_F(FontCollectionItemizeTest, itemize_no_crash) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_fakery) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
     std::vector<FontCollection::Run> runs;
 
     FontStyle kJABoldStyle = FontStyle(FontStyle::registerLanguageList("ja_JP"), 0, 7, false);
@@ -1134,7 +1135,7 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageAndCoverage) {
         { "U+1F469", "zh-Hant,ja-Jpan,zh-Hans", kEmojiFont },
     };
 
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kItemizeFontXml);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kItemizeFontXml));
 
     for (auto testCase : testCases) {
         SCOPED_TRACE("Test for \"" + testCase.testString + "\" with languages " +
@@ -1150,7 +1151,7 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageAndCoverage) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0E) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
     std::vector<FontCollection::Run> runs;
 
     const FontStyle kDefaultFontStyle;
@@ -1232,7 +1233,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0E) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0F) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
     std::vector<FontCollection::Run> runs;
 
     const FontStyle kDefaultFontStyle;
@@ -1314,7 +1315,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0F) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_with_skinTone) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
     std::vector<FontCollection::Run> runs;
 
     const FontStyle kDefaultFontStyle;
@@ -1353,7 +1354,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_with_skinTone) {
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_PrivateUseArea) {
-    std::unique_ptr<FontCollection> collection = getFontCollection(kTestFontDir, kEmojiXmlFile);
+    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
     std::vector<FontCollection::Run> runs;
 
     const FontStyle kDefaultFontStyle;

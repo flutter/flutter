@@ -100,7 +100,7 @@ struct FakedFont {
 
 class FontFamily : public MinikinRefCounted {
 public:
-    FontFamily() {}
+    FontFamily();
 
     FontFamily(int variant);
 
@@ -126,6 +126,7 @@ public:
     size_t getNumFonts() const;
     MinikinFont* getFont(size_t index) const;
     FontStyle getStyle(size_t index) const;
+    bool isColorEmojiFamily() const;
 
     // Get Unicode coverage. Lifetime of returned bitset is same as receiver. May return nullptr on
     // error.
@@ -133,7 +134,7 @@ public:
 
     // Returns true if the font has a glyph for the code point and variation selector pair.
     // Caller should acquire a lock before calling the method.
-    bool hasVariationSelector(uint32_t codepoint, uint32_t variationSelector);
+    bool hasGlyph(uint32_t codepoint, uint32_t variationSelector);
 
     // Returns true if this font family has a variaion sequence table (cmap format 14 subtable).
     bool hasVSTable() const;
