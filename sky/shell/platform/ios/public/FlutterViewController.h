@@ -5,8 +5,11 @@
 #ifndef FLUTTER_FLUTTERVIEWCONTROLLER_H_
 #define FLUTTER_FLUTTERVIEWCONTROLLER_H_
 
+#include "FlutterMacros.h"
+
 #import <UIKit/UIKit.h>
 
+FLUTTER_EXPORT
 @interface FlutterViewController : UIViewController
 
 /**
