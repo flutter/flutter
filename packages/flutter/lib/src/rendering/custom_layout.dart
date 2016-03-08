@@ -249,13 +249,8 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
     return _getSize(constraints).height;
   }
 
-  bool get sizedByParent => true;
-
-  void performResize() {
-    size = _getSize(constraints);
-  }
-
   void performLayout() {
+    size = _getSize(constraints);
     delegate._callPerformLayout(size, firstChild);
   }
 

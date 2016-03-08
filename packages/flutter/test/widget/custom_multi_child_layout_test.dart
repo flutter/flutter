@@ -53,6 +53,19 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
   );
 }
 
+class PreferredSizeDelegate extends MultiChildLayoutDelegate {
+  PreferredSizeDelegate({ this.preferredSize });
+
+  final Size preferredSize;
+
+  Size getSize(BoxConstraints constraints) => preferredSize;
+
+  void performLayout(Size size) { }
+
+  bool shouldRelayout(PreferredSizeDelegate oldDelegate) {
+    return preferredSize != oldDelegate.preferredSize;
+  }
+}
 
 void main() {
   test('Control test for CustomMultiChildLayout', () {
@@ -122,6 +135,32 @@ void main() {
         )
       ));
 
+    });
+  });
+
+  test('Loose constraints', () {
+    testWidgets((WidgetTester tester) {
+      Key key = new UniqueKey();
+      tester.pumpWidget(new Center(
+        child: new CustomMultiChildLayout(
+          key: key,
+          delegate: new PreferredSizeDelegate(preferredSize: new Size(300.0, 200.0))
+        )
+      ));
+
+      RenderBox box = tester.findElementByKey(key).renderObject;
+      expect(box.size.width, equals(300.0));
+      expect(box.size.height, equals(200.0));
+
+      tester.pumpWidget(new Center(
+        child: new CustomMultiChildLayout(
+          key: key,
+          delegate: new PreferredSizeDelegate(preferredSize: new Size(350.0, 250.0))
+        )
+      ));
+
+      expect(box.size.width, equals(350.0));
+      expect(box.size.height, equals(250.0));
     });
   });
 }
