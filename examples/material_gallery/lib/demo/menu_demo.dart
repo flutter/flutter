@@ -172,7 +172,7 @@ class MenuDemoState extends State<MenuDemo> {
           // Pressing the PopupMenuButton on the right of this item shows a menu
           // whose items have checked icons that reflect this app's state.
           new ListItem(
-            primary: new Text('An item with a checklist menu'),
+            primary: new Text('${isChecked(_checkedValue1)} An item with a checklist menu'),
             right: new PopupMenuButton<String>(
               onSelected: showCheckedMenuSelections,
               items: <PopupMenuEntry<String>>[

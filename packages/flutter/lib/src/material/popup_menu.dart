@@ -37,11 +37,11 @@ class StatefulPopupWidget extends StatefulComponent {
 }
 
 abstract class PopupMenuEntry<T> {
-  // PopupMenuEntry({ Key key }) : super(key: key);
-
   double get height;
   T get value => null;
   bool get enabled => true;
+
+  void onTap() {}
 }
 
 class PopupMenuDivider extends PopupWidget with PopupMenuEntry<dynamic> {
@@ -96,26 +96,7 @@ class PopupMenuItem<T> extends PopupWidget with PopupMenuEntry<T> {
     );
   }
 }
-/*
-class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
-  CheckedPopupMenuItem({
-    Key key,
-    T value,
-    checked: false,
-    bool enabled: true,
-    Widget child
-  }) : super(
-    key: key,
-    value: value,
-    enabled: enabled,
-    child: new ListItem(
-      enabled: enabled,
-      left: new Icon(icon: checked ? Icons.done : null),
-      primary: child
-    )
-  );
-}
-*/
+
 class CheckedPopupMenuItem<T> extends StatefulPopupWidget with PopupMenuEntry<T> {
    CheckedPopupMenuItem({
      Key key,
@@ -131,6 +112,11 @@ class CheckedPopupMenuItem<T> extends StatefulPopupWidget with PopupMenuEntry<T>
   final Widget child;
 
   _CheckedPopupMenuItemState<T> createState() => new _CheckedPopupMenuItemState<T>();
+
+  void onTap() {
+    // inform the State object that it needs to update somehow??
+    print('tapped');
+  }
 }
 
 class _CheckedPopupMenuItemState<T> extends State<CheckedPopupMenuItem<T>> {
@@ -142,7 +128,7 @@ class _CheckedPopupMenuItemState<T> extends State<CheckedPopupMenuItem<T>> {
     super.initState();
     _controller = new AnimationController(duration: _kAnimateDuration)
       ..value = config.checked ? 1.0 : 0.0
-      ..addListener(() => setState(() {}));
+      ..addListener(() { setState(() {}); });
   }
 
   void didUpdateConfig(CheckedPopupMenuItem<T> oldConfig) {
@@ -205,7 +191,7 @@ class _PopupMenu<T> extends StatelessComponent {
       children.add(new FadeTransition(
         opacity: opacity,
         child: new InkWell(
-          onTap: enabled ? () { Navigator.pop(context, route.items[i].value); } : null,
+          onTap: enabled ? () { route.items[i].onTap(); Navigator.pop(context, route.items[i].value); } : null,
           child: item
         )
       ));
