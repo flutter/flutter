@@ -143,6 +143,7 @@ SnapshotProject() {
       --url_mapping=dart:ui,${ui_path}                                         \
       --url_mapping=dart:vmservice_sky,$vm_service_path                        \
       --no-checked                                                             \
+      --conditional_directives                                                 \
       $main_path
 
   if [[ $? -ne 0 ]]; then
