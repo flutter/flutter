@@ -63,6 +63,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   }
 }
 
+/// A route with entrance and exit transitions.
 abstract class TransitionRoute<T> extends OverlayRoute<T> {
   TransitionRoute({
     Completer<T> popCompleter,
@@ -70,6 +71,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }) : _popCompleter = popCompleter,
        _transitionCompleter = transitionCompleter;
 
+  /// The same as the default constructor but callable with mixins.
   TransitionRoute.explicit(
     Completer<T> popCompleter,
     Completer<T> transitionCompleter
@@ -87,9 +89,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Future<T> get completed => _transitionCompleter?.future;
   final Completer<T> _transitionCompleter;
 
+  /// The duration the transition lasts.
   Duration get transitionDuration;
+
+  /// Whether the route obscures previous routes when the transition is complete.
+  ///
+  /// When an opaque route's entrance transition is complete, the routes behind
+  /// the opaque route will not be built to save resources.
   bool get opaque;
 
+  /// The animation that drives the route's transition and the previous route's
+  /// forward transition.
   Animation<double> get animation => _animation;
   Animation<double> _animation;
   AnimationController _controller;
@@ -113,7 +123,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   T _result;
 
-  void handleStatusChanged(AnimationStatus status) {
+  void _handleStatusChanged(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.completed:
         if (overlayEntries.isNotEmpty)
@@ -144,7 +154,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   void didPush() {
-    _animation.addStatusListener(handleStatusChanged);
+    _animation.addStatusListener(_handleStatusChanged);
     _controller.forward();
     super.didPush();
   }
@@ -152,7 +162,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   void didReplace(Route oldRoute) {
     if (oldRoute is TransitionRoute)
       _controller.value = oldRoute._controller.value;
-    _animation.addStatusListener(handleStatusChanged);
+    _animation.addStatusListener(_handleStatusChanged);
     super.didReplace(oldRoute);
   }
 
@@ -202,7 +212,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     }
   }
 
+  /// Whether this route can perform a transition to the given route.
+  ///
+  /// Subclasses can override this function to restrict the set of routes they
+  /// need to coordinate transitions with.
   bool canTransitionTo(TransitionRoute nextRoute) => true;
+
+  /// Whether this route can perform a transition from the given route.
+  ///
+  /// Subclasses can override this function to restrict the set of routes they
+  /// need to coordinate transitions with.
   bool canTransitionFrom(TransitionRoute nextRoute) => true;
 
   void finished() {
@@ -219,28 +238,55 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   String toString() => '$runtimeType(animation: $_controller)';
 }
 
+/// An entry in the history of a [LocalHistoryRoute].
 class LocalHistoryEntry {
   LocalHistoryEntry({ this.onRemove });
+
+  /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
   final VoidCallback onRemove;
+
   LocalHistoryRoute _owner;
+
+  /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
     _owner.removeLocalHistoryEntry(this);
     assert(_owner == null);
   }
+
   void _notifyRemoved() {
     if (onRemove != null)
       onRemove();
   }
 }
 
+/// A route that can handle back navigations internally by popping a list.
+///
+/// When a [Navigator] is instructed to pop, the current route is given an
+/// opportunity to handle the pop internally. A LocalHistoryRoute handles the
+/// pop internally if its list of local history entries is non-empty. Rather
+/// than being removed as the current route, the most recent [LocalHistoryEntry]
+/// is removed from the list and its [onRemove] is called.
 abstract class LocalHistoryRoute<T> extends Route<T> {
   List<LocalHistoryEntry> _localHistory;
+
+  /// Adds a local history entry to this route.
+  ///
+  /// When asked to pop, if this route has any local history entires, this route
+  /// will handle the pop internally by removing the most recently added local
+  /// history entry.
+  ///
+  /// The given local history entry must not already be part of another local
+  /// history route.
   void addLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry._owner == null);
     entry._owner = this;
     _localHistory ??= <LocalHistoryEntry>[];
     _localHistory.add(entry);
   }
+
+  /// Remove a local history entry from this route.
+  ///
+  /// The entry's [onRemove] callback, if any, will be called synchronously.
   void removeLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry != null);
     assert(entry._owner == this);
@@ -364,14 +410,24 @@ class _ModalScopeState extends State<_ModalScope> {
   }
 }
 
+/// Where a [ModalRoute] should be positioned within the [Navigator]'s [Overlay].
 class ModalPosition {
   const ModalPosition({ this.top, this.right, this.bottom, this.left });
+
+  /// The offset of the route's top edge from the top of the overlay.
   final double top;
+
+  /// The offset of the route's right edge from the right of the overlay.
   final double right;
+
+  /// The offset of the route's bottom edge from the bottom of the overlay.
   final double bottom;
+
+  /// The offset of the route's left edge from the left of the overlay.
   final double left;
 }
 
+/// A route that blocks interaction with previous routes.
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   ModalRoute({
     Completer<T> completer,
@@ -380,6 +436,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // The API for general users of this class
 
+  /// The settings for this route.
+  ///
+  /// See [RouteSettings] for details.
   final RouteSettings settings;
 
   /// Returns the modal route most closely associated with the given context.
@@ -393,8 +452,36 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // The API for subclasses to override - used by _ModalScope
 
+  /// Override to provide a position for this route within the [Navigator]'s [Overlay].
+  ///
+  /// By default, the route expands to fill the entire overlay.
   ModalPosition getPosition(BuildContext context) => null;
+
+  /// Override this function to build the primary content of this route.
+  ///
+  /// * [context] The context in which the route is being built.
+  /// * [animation] The animation for this route's transition. When entering,
+  ///   the animation runs forward from 0.0 to 1.0. When exiting, this animation
+  ///   runs backwards from 1.0 to 0.0.
+  /// * [forwardAnimation] The animation for the route being pushed on top of
+  ///   this route. This animation lets this route coordinate with the entrance
+  ///   and exit transition of routes pushed on top of this route.
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation);
+
+  /// Override this function to wrap the route in a number of transition widgets.
+  ///
+  /// For example, to create a fade entrance transition, wrap the given child
+  /// widget in a [FadeTransition] using the given animation as the opacity.
+  ///
+  /// By default, the child is not wrapped in any transition widgets.
+  ///
+  /// * [context] The context in which the route is being built.
+  /// * [animation] The animation for this route's transition. When entering,
+  ///   the animation runs forward from 0.0 to 1.0. When exiting, this animation
+  ///   runs backwards from 1.0 to 0.0.
+  /// * [forwardAnimation] The animation for the route being pushed on top of
+  ///   this route. This animation lets this route coordinate with the entrance
+  ///   and exit transition of routes pushed on top of this route.
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     return child;
   }
@@ -408,6 +495,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Whether you can dismiss this route by tapping the modal barrier.
   bool get barrierDismissable;
+
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
   Color get barrierColor;
@@ -415,6 +503,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // The API for _ModalScope and HeroController
 
+  /// Whether this route is currently offstage.
+  ///
+  /// On the first frame of a route's entrance transition, the route is built
+  /// [Offstage] using an animation progress of 1.0. The route is invisible and
+  /// non-interactive, but each widget has its final size and position. This
+  /// mechanism lets the [HeroController] determine the final local of any hero
+  /// widgets being animated as part of the transition.
   bool get offstage => _offstage;
   bool _offstage = false;
   void set offstage (bool value) {
@@ -431,6 +526,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     });
   }
 
+  /// The build context for the subtree containing the primary content of this route.
   BuildContext get subtreeContext => _subtreeKey.currentContext;
 
 
