@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart' show lowerBound;
+
 import 'package:flutter/material.dart';
 
 enum LeaveBehindDemoAction {
@@ -67,6 +69,15 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     }
   }
 
+  void handleUndo(LeaveBehindItem item) {
+    int insertionIndex = lowerBound(leaveBehindItems, item,
+      compare: (LeaveBehindItem a, LeaveBehindItem b) => a.index.compareTo(b.index)
+    );
+    setState(() {
+      leaveBehindItems.insert(insertionIndex, item);
+    });
+  }
+
   Widget buildItem(LeaveBehindItem item) {
     final ThemeData theme = Theme.of(context);
     return new Dismissable(
@@ -78,7 +89,11 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         });
         final String action = (direction == DismissDirection.left) ? 'archived' : 'deleted';
         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          content: new Text('You $action item ${item.index}')
+          content: new Text('You $action item ${item.index}'),
+          action: new SnackBarAction(
+            label: 'UNDO',
+            onPressed: () { handleUndo(item); }
+          )
         ));
       },
       background: new Container(

@@ -58,7 +58,7 @@ class Dismissable extends StatefulComponent {
     this.child,
     this.background,
     this.secondaryBackground,
-    this.onResized,
+    this.onResize,
     this.onDismissed,
     this.direction: DismissDirection.horizontal
   }) : super(key: key) {
@@ -79,7 +79,7 @@ class Dismissable extends StatefulComponent {
   final Widget secondaryBackground;
 
   /// Called when the widget changes size (i.e., when contracting before being dismissed).
-  final VoidCallback onResized;
+  final VoidCallback onResize;
 
   /// Called when the widget has been dismissed, after finishing resizing.
   final DismissDirectionCallback onDismissed;
@@ -263,12 +263,11 @@ class _DismissableState extends State<Dismissable> {
 
   void _handleResizeProgressChanged() {
     if (_resizeController.isCompleted) {
-      if (config.onDismissed != null) {
+      if (config.onDismissed != null)
         config.onDismissed(_dismissDirection);
-      }
     } else {
-      if (config.onResized != null)
-        config.onResized();
+      if (config.onResize != null)
+        config.onResize();
     }
   }
 

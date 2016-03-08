@@ -33,7 +33,7 @@ class SnackBarDemo extends StatelessComponent {
               Scaffold.of(context).showSnackBar(new SnackBar(
                 content: new Text('This is a SnackBar'),
                 action: new SnackBarAction(
-                  label: 'Action',
+                  label: 'ACTION',
                   onPressed: () {
                     Scaffold.of(context).showSnackBar(new SnackBar(
                       content: new Text("You pressed the SnackBar's Action")

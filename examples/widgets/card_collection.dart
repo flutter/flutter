@@ -298,7 +298,7 @@ class CardCollectionState extends State<CardCollection> {
     Widget card = new Dismissable(
       key: new ObjectKey(cardModel),
       direction: _dismissDirection,
-      onResized: () { _invalidator(<int>[index]); },
+      onResize: () { _invalidator(<int>[index]); },
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
       child: new Card(
         color: _primaryColor[cardModel.color],

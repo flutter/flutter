@@ -13,7 +13,7 @@ DismissDirection dismissDirection = DismissDirection.horizontal;
 DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
 
-void handleOnResized(int item) {
+void handleOnResize(int item) {
   expect(dismissedItems.contains(item), isFalse);
 }
 
@@ -28,7 +28,7 @@ Widget buildDismissableItem(int item) {
     key: new ValueKey<int>(item),
     direction: dismissDirection,
     onDismissed: (DismissDirection direction) { handleOnDismissed(direction, item); },
-    onResized: () { handleOnResized(item); },
+    onResize: () { handleOnResize(item); },
     child: new Container(
       width: itemExtent,
       height: itemExtent,
