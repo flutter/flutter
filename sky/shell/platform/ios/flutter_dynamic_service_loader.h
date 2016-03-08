@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #include "sky/shell/platform/mac/platform_service_provider.h"
 
-@interface SkyDynamicServiceLoader : NSObject
+@interface FlutterDynamicServiceLoader : NSObject
 
 - (void)resolveService:(NSString*)name
                 handle:(mojo::ScopedMessagePipeHandle)handle;

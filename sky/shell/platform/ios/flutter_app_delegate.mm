@@ -2,19 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "sky_app_delegate.h"
-#import "sky_view_controller.h"
-#import "base/trace_event/trace_event.h"
+#include "sky/shell/platform/ios/flutter_app_delegate.h"
+#include "sky/shell/platform/ios/public/FlutterViewController.h"
+#include "base/trace_event/trace_event.h"
 
-@implementation SkyAppDelegate
+@implementation FlutterAppDelegate
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   TRACE_EVENT0("flutter", "applicationDidFinishLaunchingWithOptions");
 
+  NSBundle* dartBundle = [NSBundle
+      bundleWithIdentifier:@"io.flutter.application.FlutterApplication"];
+
   CGRect frame = [UIScreen mainScreen].bounds;
   UIWindow* window = [[UIWindow alloc] initWithFrame:frame];
-  SkyViewController* viewController = [[SkyViewController alloc] init];
+  FlutterViewController* viewController =
+      [[FlutterViewController alloc] initWithDartBundle:dartBundle];
   window.rootViewController = viewController;
   [viewController release];
   self.window = window;
