@@ -86,10 +86,6 @@ static const char* kDartBackgroundCompilationArgs[] = {
   "--background_compilation",
 };
 
-static const char *kDartConditionalDirectivesArgs[] = {
-    "--conditional_directives",
-};
-
 static const char* kDartCheckedModeArgs[] = {
     "--enable_asserts",
     "--enable_type_checks",
@@ -336,8 +332,6 @@ void InitDartVM() {
     args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
     args.append(kDartBackgroundCompilationArgs,
                 arraysize(kDartBackgroundCompilationArgs));
-    args.append(kDartConditionalDirectivesArgs,
-                arraysize(kDartConditionalDirectivesArgs));
   }
 
   if (enable_checked_mode)
