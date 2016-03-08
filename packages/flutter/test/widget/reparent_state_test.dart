@@ -95,6 +95,68 @@ void main() {
     });
   });
 
+  test('can reparent state with multichild widgets', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey left = new GlobalKey();
+      GlobalKey right = new GlobalKey();
+
+      StateMarker grandchild = new StateMarker();
+      tester.pumpWidget(
+        new Stack(
+          children: <Widget>[
+            new StateMarker(key: left),
+            new StateMarker(
+              key: right,
+              child: grandchild
+            )
+          ]
+        )
+      );
+
+      (left.currentState as StateMarkerState).marker = "left";
+      (right.currentState as StateMarkerState).marker = "right";
+
+      StateMarkerState grandchildState = tester.findStateByConfig(grandchild);
+      expect(grandchildState, isNotNull);
+      grandchildState.marker = "grandchild";
+
+      StateMarker newGrandchild = new StateMarker();
+      tester.pumpWidget(
+        new Stack(
+          children: <Widget>[
+            new StateMarker(
+              key: right,
+              child: newGrandchild
+            ),
+            new StateMarker(key: left)
+          ]
+        )
+      );
+
+      expect((left.currentState as StateMarkerState).marker, equals("left"));
+      expect((right.currentState as StateMarkerState).marker, equals("right"));
+
+      StateMarkerState newGrandchildState = tester.findStateByConfig(newGrandchild);
+      expect(newGrandchildState, isNotNull);
+      expect(newGrandchildState, equals(grandchildState));
+      expect(newGrandchildState.marker, equals("grandchild"));
+
+      tester.pumpWidget(
+        new Center(
+          child: new Container(
+            child: new StateMarker(
+              key: left,
+              child: new Container()
+            )
+          )
+        )
+      );
+
+      expect((left.currentState as StateMarkerState).marker, equals("left"));
+      expect(right.currentState, isNull);
+    });
+  });
+
   test('can with scrollable list', () {
     testWidgets((WidgetTester tester) {
       GlobalKey key = new GlobalKey();
