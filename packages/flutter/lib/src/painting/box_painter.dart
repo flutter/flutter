@@ -492,8 +492,7 @@ void paintImage({
   ImageFit fit,
   ImageRepeat repeat: ImageRepeat.noRepeat,
   Rect centerSlice,
-  double alignX,
-  double alignY
+  FractionalOffset alignment
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -508,6 +507,7 @@ void paintImage({
     outputSize -= sliceBorder;
     inputSize -= sliceBorder;
   }
+  Point sourcePosition = Point.origin;
   Size sourceSize;
   Size destinationSize;
   fit ??= centerSlice == null ? ImageFit.scaleDown : ImageFit.fill;
@@ -525,10 +525,13 @@ void paintImage({
         destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       break;
     case ImageFit.cover:
-      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height)
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
         sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
-      else
+        sourcePosition = new Point(0.0, (inputSize.height - sourceSize.height) * (alignment?.dy ?? 0.5));
+      } else {
         sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+        sourcePosition = new Point((inputSize.width - sourceSize.width) * (alignment?.dx ?? 0.5), 0.0);
+      }
       destinationSize = outputSize;
       break;
     case ImageFit.none:
@@ -566,8 +569,8 @@ void paintImage({
     // to nearest-neighbor.
     paint.filterQuality = FilterQuality.low;
   }
-  double dx = (outputSize.width - destinationSize.width) * (alignX ?? 0.5);
-  double dy = (outputSize.height - destinationSize.height) * (alignY ?? 0.5);
+  double dx = (outputSize.width - destinationSize.width) * (alignment?.dx ?? 0.5);
+  double dy = (outputSize.height - destinationSize.height) * (alignment?.dy ?? 0.5);
   Point destinationPosition = rect.topLeft + new Offset(dx, dy);
   Rect destinationRect = destinationPosition & destinationSize;
   if (repeat != ImageRepeat.noRepeat) {
@@ -575,7 +578,7 @@ void paintImage({
     canvas.clipRect(rect);
   }
   if (centerSlice == null) {
-    Rect sourceRect = Point.origin & sourceSize;
+    Rect sourceRect = sourcePosition & sourceSize;
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
       canvas.drawImageRect(image, sourceRect, tileRect, paint);
   } else {
@@ -1035,8 +1038,7 @@ class _BoxDecorationPainter extends BoxPainter {
       rect: rect,
       image: image,
       colorFilter: backgroundImage.colorFilter,
-      alignX: backgroundImage.alignment?.dx,
-      alignY: backgroundImage.alignment?.dy,
+      alignment: backgroundImage.alignment,
       fit:  backgroundImage.fit,
       repeat: backgroundImage.repeat
     );

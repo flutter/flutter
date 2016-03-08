@@ -1,0 +1,49 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui' as ui;
+
+import 'package:flutter/painting.dart';
+
+import 'package:test/test.dart';
+
+class TestImage implements ui.Image {
+  TestImage({ this.width, this.height });
+
+  final int width;
+  final int height;
+
+  void dispose() { }
+}
+
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
+}
+
+void main() {
+  test("Cover and align", () {
+    TestImage image = new TestImage(width: 300, height: 300);
+    TestCanvas canvas = new TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
+      image: image,
+      fit: ImageFit.cover,
+      alignment: new FractionalOffset(0.0, 0.5)
+    );
+
+    Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+      return invocation.memberName == #drawImageRect;
+    });
+
+    expect(command, isNotNull);
+    expect(command.positionalArguments[0], equals(image));
+    expect(command.positionalArguments[1], equals(new Rect.fromLTWH(0.0, 75.0, 300.0, 150.0)));
+    expect(command.positionalArguments[2], equals(new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0)));
+  });
+}
