@@ -28,29 +28,37 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
-abstract class PopupMenuEntry<T> extends StatelessComponent {
-  PopupMenuEntry({ Key key }) : super(key: key);
+class PopupWidget extends StatelessComponent {
+  PopupWidget(Key key) : super(key: key);
+}
+
+class StatefulPopupWidget extends StatefulComponent {
+  StatefulPopupWidget(Key key) : super(key: key);
+}
+
+abstract class PopupMenuEntry<T> {
+  // PopupMenuEntry({ Key key }) : super(key: key);
 
   double get height;
   T get value => null;
   bool get enabled => true;
 }
 
-class PopupMenuDivider extends PopupMenuEntry<dynamic> {
-  PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
+class PopupMenuDivider extends PopupWidget with PopupMenuEntry<dynamic> {
+  PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key);
 
   final double height;
 
   Widget build(BuildContext context) => new Divider(height: height);
 }
 
-class PopupMenuItem<T> extends PopupMenuEntry<T> {
+class PopupMenuItem<T> extends PopupWidget with PopupMenuEntry<T> {
   PopupMenuItem({
     Key key,
     this.value,
     this.enabled: true,
     this.child
-  }) : super(key: key);
+  }) : super(key);
 
   final T value;
   final bool enabled;
@@ -88,7 +96,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     );
   }
 }
-
+/*
 class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   CheckedPopupMenuItem({
     Key key,
@@ -106,6 +114,65 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
       primary: child
     )
   );
+}
+*/
+class CheckedPopupMenuItem<T> extends StatefulPopupWidget with PopupMenuEntry<T> {
+   CheckedPopupMenuItem({
+     Key key,
+     this.value,
+     this.enabled: true,
+     this.checked: false,
+     this.child
+   }) : super(key);
+
+  final T value;
+  final bool enabled;
+  final bool checked;
+  final Widget child;
+
+  _CheckedPopupMenuItemState<T> createState() => new _CheckedPopupMenuItemState<T>();
+}
+
+class _CheckedPopupMenuItemState<T> extends State<CheckedPopupMenuItem<T>> {
+  static const Duration _kAnimateDuration = const Duration(milliseconds: 100);
+  AnimationController _controller;
+  Animation<double> get _opacity => _controller.view;
+
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(duration: _kAnimateDuration)
+      ..value = config.checked ? 1.0 : 0.0
+      ..addListener(() => setState(() {}));
+  }
+
+  void didUpdateConfig(CheckedPopupMenuItem<T> oldConfig) {
+    if (config.checked != oldConfig.checked) {
+      if (config.checked)
+        _controller.forward();
+      else
+        _controller.reverse();
+    }
+  }
+
+  Widget buildChild() {
+    return new ListItem(
+      enabled: config.enabled,
+      left: new FadeTransition(
+        opacity: _opacity,
+        child: new Icon(icon: _controller.isDismissed ? null : Icons.done)
+      ),
+      primary: config.child
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return new PopupMenuItem<T>(
+      key: config.key,
+      value: config.value,
+      enabled: config.enabled,
+      child: buildChild()
+    );
+  }
 }
 
 class _PopupMenu<T> extends StatelessComponent {

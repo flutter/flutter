@@ -175,11 +175,11 @@ class MenuDemoState extends State<MenuDemo> {
             primary: new Text('An item with a checklist menu'),
             right: new PopupMenuButton<String>(
               onSelected: showCheckedMenuSelections,
-              items: <PopupMenuItem<String>>[
+              items: <PopupMenuEntry<String>>[
                 new CheckedPopupMenuItem(
                   value: _checkedValue1,
                   checked: isChecked(_checkedValue1),
-                  child: new Text(_checkedValue1)
+                  child: new Text('${isChecked(_checkedValue1)}')
                 ),
                 new CheckedPopupMenuItem<String>(
                   value: _checkedValue2,
