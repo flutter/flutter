@@ -69,18 +69,12 @@ ui.Picture paint(ui.Rect paintBounds) {
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
-  ui.Rect sceneBounds = new ui.Rect.fromLTWH(
-    0.0,
-    0.0,
-    ui.window.size.width * devicePixelRatio,
-    ui.window.size.height * devicePixelRatio
-  );
   Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();

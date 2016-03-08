@@ -122,8 +122,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     try {
       final TransformLayer transformLayer = layer;
       transformLayer.transform = _logicalToDeviceTransform;
-      Rect bounds = Point.origin & (size * ui.window.devicePixelRatio);
-      ui.SceneBuilder builder = new ui.SceneBuilder(bounds);
+      ui.SceneBuilder builder = new ui.SceneBuilder();
       transformLayer.addToScene(builder, Offset.zero);
       assert(layer == transformLayer);
       ui.Scene scene = builder.build();

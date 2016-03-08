@@ -28,7 +28,7 @@ void beginFrame(Duration timeStamp) {
   ));
   final ui.Picture picture = recorder.endRecording();
 
-  final ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(physicalBounds)
+  final ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
     // TODO(abarth): We should be able to add a picture without pushing a
     // container layer first.
     ..pushClipRect(physicalBounds)
