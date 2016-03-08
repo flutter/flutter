@@ -11,7 +11,6 @@ ENGINE_STAMP_PATH="$FLUTTER_ROOT/bin/cache/engine.stamp"
 ENGINE_VERSION=`cat "$FLUTTER_ROOT/bin/cache/engine.version"`
 
 if [ ! -f "$ENGINE_STAMP_PATH" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP_PATH"` ]; then
-  echo "Downloading Flutter engine $ENGINE_VERSION..."
 
   BASE_URL="https://storage.googleapis.com/flutter_infra/flutter/$ENGINE_VERSION"
   PKG_PATH="$FLUTTER_ROOT/bin/cache/pkg"
@@ -19,9 +18,9 @@ if [ ! -f "$ENGINE_STAMP_PATH" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP_P
 
   # sky_engine Package
 
+  echo "Downloading Flutter engine $ENGINE_VERSION..."
   ENGINE_PKG_URL="$BASE_URL/sky_engine.zip"
   ENGINE_PKG_ZIP="$FLUTTER_ROOT/bin/cache/sky_engine.zip"
-
   curl --progress-bar -continue-at=- --location --output "$ENGINE_PKG_ZIP" "$ENGINE_PKG_URL"
   rm -rf -- "$PKG_PATH/sky_engine"
   unzip -o -q "$ENGINE_PKG_ZIP" -d "$PKG_PATH"
@@ -29,9 +28,9 @@ if [ ! -f "$ENGINE_STAMP_PATH" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP_P
 
   # sky_services Package
 
+  echo "  And corresponding services package..."
   SERVICES_PKG_URL="$BASE_URL/sky_services.zip"
   SERVICES_PKG_ZIP="$FLUTTER_ROOT/bin/cache/sky_services.zip"
-
   curl --progress-bar -continue-at=- --location --output "$SERVICES_PKG_ZIP" "$SERVICES_PKG_URL"
   rm -rf -- "$PKG_PATH/sky_services"
   unzip -o -q "$SERVICES_PKG_ZIP" -d "$PKG_PATH"
@@ -44,13 +43,13 @@ if [ ! -f "$ENGINE_STAMP_PATH" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP_P
 
   download_artifacts() {
     PLATFORM="$1"
-    PLATFORM_PATH="$ENGINE_ARTIFACT_PATH/$PLATFORM"
 
+    PLATFORM_PATH="$ENGINE_ARTIFACT_PATH/$PLATFORM"
     mkdir -p -- "$PLATFORM_PATH"
 
+    echo "  And corresponding toolchain for $PLATFORM..."
     ARTIFACTS_URL="$BASE_URL/$PLATFORM/artifacts.zip"
     ARTIFACTS_ZIP="$PLATFORM_PATH/artifacts.zip"
-
     curl --progress-bar -continue-at=- --location --output "$ARTIFACTS_ZIP" "$ARTIFACTS_URL"
     unzip -o -q "$ARTIFACTS_ZIP" -d "$PLATFORM_PATH"
     rm -f -- "$ARTIFACTS_ZIP"
