@@ -349,8 +349,10 @@ class SemanticsNode extends AbstractNode {
   static bool get hasListeners => _listeners != null && _listeners.length > 0;
   static VoidCallback onSemanticsEnabled; // set by the binding
   static void addListener(mojom.SemanticsListener listener) {
-    if (!hasListeners)
+    if (!hasListeners) {
+      assert(onSemanticsEnabled != null); // initialise the binding _before_ adding listeners
       onSemanticsEnabled();
+    }
     _listeners ??= <mojom.SemanticsListener>[];
     _listeners.add(listener);
   }
