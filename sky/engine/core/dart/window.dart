@@ -44,6 +44,13 @@ class WindowPadding {
 /// consisting of a language and a country. This is a subset of locale
 /// identifiers as defined by BCP 47.
 class Locale {
+  /// Creates a new Locale object. The first argument is the
+  /// primary language subtag, the second is the region subtag.
+  ///
+  /// For example:
+  ///
+  ///     const Locale swissFrench = const Locale('fr', 'CH');
+  ///     const Locale canadianFrench = const Locale('fr', 'CA');
   const Locale(this.languageCode, this.countryCode);
 
   /// The primary language subtag for the locale.
@@ -73,6 +80,9 @@ class Locale {
 }
 
 /// The most basic interface to the host operating system's user interface.
+///
+/// There is a single Window instance in the system, which you can
+/// obtain from the [window] property.
 class Window {
   Window._();
 
@@ -141,6 +151,18 @@ class Window {
   /// Updates the application's rendering on the GPU with the newly provided
   /// [Scene]. For optimal performance, this should only be called in response
   /// to the [onBeginFrame] callback being invoked.
+  ///
+  /// To record graphical operations, first create a
+  /// [PictureRecorder], then construct a [Canvas], passing that
+  /// [PictureRecorder] to its constructor. After issuing all the
+  /// graphical operations, call the [endRecording] function on the
+  /// [PictureRecorder] to obtain the final [Picture] that represents
+  /// the issued graphical operations.
+  /// 
+  /// Next, create a [SceneBuilder], and add the [Picture] to it using
+  /// [SceneBuilder.addPicture]. With the [SceneBuilder.build] method
+  /// you can then obtain a [Scene] object, which you can display to
+  /// the user via this [render] function.
   void render(Scene scene) native "Window_render";
 
   /// Flushes pending real-time events, executing their callbacks.

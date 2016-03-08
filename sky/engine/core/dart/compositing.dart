@@ -5,7 +5,18 @@
 part of dart_ui;
 
 /// An opaque object representing a composited scene.
-abstract class Scene extends NativeFieldWrapperClass2 {
+///
+/// To create a Scene object, use a [SceneBuilder].
+///
+/// Scene objects can be displayed on the screen using the
+/// [Window.render] method.
+class Scene extends NativeFieldWrapperClass2 {
+  /// Creates an uninitialized Scene object.
+  ///
+  /// Calling the Scene constructor directly will not create a useable
+  /// object. To create a Scene object, use a [SceneBuilder].
+  Scene(); // (this constructor is here just so we can document it)
+
   /// Releases the resources used by this scene.
   ///
   /// After calling this function, the scene is cannot be used further.
@@ -13,9 +24,15 @@ abstract class Scene extends NativeFieldWrapperClass2 {
 }
 
 /// Builds a [Scene] containing the given visuals.
+///
+/// A [Scene] can then be rendered using [Window.render].
+///
+/// To draw graphical operations onto a [Scene], first create a
+/// [Picture] using a [PictureRecorder] and a [Canvas], and then add
+/// it to the scene using [addPicture].
 class SceneBuilder extends NativeFieldWrapperClass2 {
-  // TODO(abarth): Remove this ignored "bounds" argument.
-  SceneBuilder([Rect bounds]) { _constructor(); }
+  /// Creates an empty [SceneBuilder] object.
+  SceneBuilder() { _constructor(); }
   void _constructor() native "SceneBuilder_constructor";
 
   /// Pushes a transform operation onto the operation stack.
@@ -87,7 +104,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// controls where the statistics are displayed.
   void addPerformanceOverlay(int enabledOptions, Rect bounds) native "SceneBuilder_addPerformanceOverlay";
 
-  /// Adds a picture to the scene.
+  /// Adds a [Picture] to the scene.
   ///
   /// The picture is rasterized at the given offset.
   void addPicture(Offset offset, Picture picture) native "SceneBuilder_addPicture";
@@ -113,8 +130,9 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
 
   /// Finishes building the scene.
   ///
-  /// Returns a [Scene] containing the objects that have been added to this
-  /// scene builder.
+  /// Returns a [Scene] containing the objects that have been added to
+  /// this scene builder. The [Scene] can then be displayed on the
+  /// screen with [Window.render].
   ///
   /// After calling this function, the scene builder object is invalid and
   /// cannot be used further.

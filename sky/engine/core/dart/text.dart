@@ -106,7 +106,7 @@ enum TextBaseline {
 class TextDecoration {
   const TextDecoration._(this._mask);
 
-  /// Constructs a decoration that paints the union of all the given decorations.
+  /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     int mask = 0;
     for (TextDecoration decoration in decorations)
@@ -262,7 +262,7 @@ Int32List _encodeTextStyle(Color color,
 
 /// An opaque object that determines the size, position, and rendering of text.
 class TextStyle {
-  /// Constructs a new TextStyle object.
+  /// Creates a new TextStyle object.
   ///
   /// * [color] The color to use when painting the text.
   /// * [decoration] The decorations to paint near the text (e.g., an underline).
@@ -382,7 +382,7 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
 
 /// An opaque object that determines the position of lines within a paragraph of text.
 class ParagraphStyle {
-  /// Constructs a new ParagraphStyle object.
+  /// Creates a new ParagraphStyle object.
   ///
   /// * [textAlign] .
   /// * [textBaseline] .
