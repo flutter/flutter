@@ -28,7 +28,7 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
-abstract class PopupMenuEntry<T> extends StatelessComponent {
+abstract class PopupMenuEntry<T> extends StatefulComponent {
   PopupMenuEntry({ Key key }) : super(key: key);
 
   double get height;
@@ -41,7 +41,11 @@ class PopupMenuDivider extends PopupMenuEntry<dynamic> {
 
   final double height;
 
-  Widget build(BuildContext context) => new Divider(height: height);
+  _PopupMenuDividerState createState() => new _PopupMenuDividerState();
+}
+
+class _PopupMenuDividerState extends State<PopupMenuDivider> {
+  Widget build(BuildContext context) => new Divider(height: config.height);
 }
 
 class PopupMenuItem<T> extends PopupMenuEntry<T> {
@@ -58,20 +62,31 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   double get height => _kMenuItemHeight;
 
+  _PopupMenuItemState<PopupMenuItem<T>> createState() => new _PopupMenuItemState<PopupMenuItem<T>>();
+}
+
+class _PopupMenuItemState<T extends PopupMenuItem> extends State<T> {
+  // Override this to put something else in the menu entry.
+  Widget buildChild() => config.child;
+
+  void onTap(BuildContext context) {
+    Navigator.pop(context, config.value);
+  }
+
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     TextStyle style = theme.text.subhead;
-    if (!enabled)
+    if (!config.enabled)
       style = style.copyWith(color: theme.disabledColor);
 
     Widget item = new DefaultTextStyle(
       style: style,
       child: new Baseline(
-        baseline: height - _kBaselineOffsetFromBottom,
-        child: child
+        baseline: config.height - _kBaselineOffsetFromBottom,
+        child: buildChild()
       )
     );
-    if (!enabled) {
+    if (!config.enabled) {
       final bool isDark = theme.brightness == ThemeBrightness.dark;
       item = new IconTheme(
         data: new IconThemeData(opacity: isDark ? 0.5 : 0.38),
@@ -79,11 +94,14 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
       );
     }
 
-    return new MergeSemantics(
-      child: new Container(
-        height: height,
-        padding: const EdgeDims.symmetric(horizontal: _kMenuHorizontalPadding),
-        child: item
+    return new InkWell(
+      onTap: config.enabled ? () { onTap(context); } : null,
+      child: new MergeSemantics(
+        child: new Container(
+          height: config.height,
+          padding: const EdgeDims.symmetric(horizontal: _kMenuHorizontalPadding),
+          child: item
+        )
       )
     );
   }
@@ -93,19 +111,52 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   CheckedPopupMenuItem({
     Key key,
     T value,
-    checked: false,
+    this.checked: false,
     bool enabled: true,
     Widget child
   }) : super(
     key: key,
     value: value,
     enabled: enabled,
-    child: new ListItem(
-      enabled: enabled,
-      left: new Icon(icon: checked ? Icons.done : null),
-      primary: child
-    )
+    child: child
   );
+
+  final bool checked;
+
+  _CheckedPopupMenuItemState<T> createState() => new _CheckedPopupMenuItemState<T>();
+}
+
+class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenuItem<T>> {
+  static const Duration _kFadeDuration = const Duration(milliseconds: 150);
+  AnimationController _controller;
+  Animation<double> get _opacity => _controller.view;
+
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(duration: _kFadeDuration)
+      ..value = config.checked ? 1.0 : 0.0
+      ..addListener(() => setState(() {}));
+  }
+
+  void onTap(BuildContext context) {
+    // This fades the checkmark in or out when tapped.
+    if (config.checked)
+      _controller.reverse();
+    else
+      _controller.forward();
+    super.onTap(context);
+  }
+
+  Widget buildChild() {
+    return new ListItem(
+      enabled: config.enabled,
+      left: new FadeTransition(
+        opacity: _opacity,
+        child: new Icon(icon: _controller.isDismissed ? null : Icons.done)
+      ),
+      primary: config.child
+    );
+  }
 }
 
 class _PopupMenu<T> extends StatelessComponent {
@@ -137,10 +188,7 @@ class _PopupMenu<T> extends StatelessComponent {
       }
       children.add(new FadeTransition(
         opacity: opacity,
-        child: new InkWell(
-          onTap: enabled ? () { Navigator.pop(context, route.items[i].value); } : null,
-          child: item
-        )
+        child: item
       ));
     }
 
