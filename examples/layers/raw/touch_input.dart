@@ -48,12 +48,6 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   // pixels, which are then scalled by the device pixel ratio before being drawn
   // on the screen.
   final double devicePixelRatio = ui.window.devicePixelRatio;
-  ui.Rect sceneBounds = new ui.Rect.fromLTWH(
-      0.0,
-      0.0,
-      ui.window.size.width * devicePixelRatio,
-      ui.window.size.height * devicePixelRatio
-  );
 
   // This transform scales the x and y coordinates by the devicePixelRatio.
   Float64List deviceTransform = new Float64List(16)
@@ -66,7 +60,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   // transform that scale its children by the device pixel ratio. This transform
   // lets us paint in "logical" pixels which are converted to device pixels by
   // this scaling operation.
-  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder(sceneBounds)
+  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
