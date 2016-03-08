@@ -110,6 +110,7 @@ class Test1215DismissableComponent extends StatelessComponent {
   final String text;
   Widget build(BuildContext context) {
     return new Dismissable(
+      key: new ObjectKey(text),
       child: new AspectRatio(
         aspectRatio: 1.0,
         child: new Text(this.text)

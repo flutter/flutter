@@ -10,20 +10,30 @@ import '../globals.dart';
 
 typedef String StringConverter(String string);
 
+/// This runs the command in the background from the specified working
+/// directory. Completes when the process has been started.
+Future<Process> runCommand(List<String> cmd, {String workingDirectory}) async {
+  printTrace(cmd.join(' '));
+  String executable = cmd[0];
+  List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : [];
+  Process process = await Process.start(
+    executable,
+    arguments,
+    workingDirectory: workingDirectory
+  );
+  return process;
+}
+
 /// This runs the command and streams stdout/stderr from the child process to
-/// this process' stdout/stderr.
+/// this process' stdout/stderr. Completes with the process's exit code.
 Future<int> runCommandAndStreamOutput(List<String> cmd, {
   String workingDirectory,
   String prefix: '',
   RegExp filter,
   StringConverter mapFunction
 }) async {
-  printTrace(cmd.join(' '));
-  Process process = await Process.start(
-    cmd[0],
-    cmd.sublist(1),
-    workingDirectory: workingDirectory
-  );
+  Process process = await runCommand(cmd,
+                                     workingDirectory: workingDirectory);
   process.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())

@@ -39,13 +39,30 @@ class LogsCommand extends FlutterCommand {
 
     List<DeviceLogReader> readers = new List<DeviceLogReader>();
     for (Device device in devices) {
-      readers.add(device.createLogReader());
+      if (clear)
+        device.clearLogs();
+
+      readers.add(device.logReader);
     }
 
     printStatus('Showing ${readers.join(', ')} logs:');
 
     List<int> results = await Future.wait(readers.map((DeviceLogReader reader) async {
-      int result = await reader.logs(clear: clear, showPrefix: devices.length > 1);
+      if (!reader.isReading) {
+        // Start reading.
+        await reader.start();
+      }
+      StreamSubscription subscription = reader.lines.listen((String line) {
+        if (devices.length > 1) {
+          // Prefix with the name of the device.
+          print('[${reader.name}] $line');
+        } else {
+          print(line);
+        }
+      });
+      // Wait for the log reader to be finished.
+      int result = await reader.finished;
+      subscription.cancel();
       if (result != 0)
         printError('Error listening to $reader logs.');
       return result;
