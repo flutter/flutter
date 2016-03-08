@@ -166,7 +166,7 @@ abstract class GridDelegate {
   }
 
   /// Returns the smallest width beyond which increasing the width never
-  /// decreases the height.
+  /// decreases the preferred height.
   double getMaxIntrinsicWidth(BoxConstraints constraints, int childCount) {
     return constraints.constrainWidth(_getGridSize(constraints, childCount).width);
   }
@@ -178,7 +178,7 @@ abstract class GridDelegate {
   }
 
   /// Returns the smallest height beyond which increasing the height never
-  /// decreases the width.
+  /// decreases the preferred width.
   double getMaxIntrinsicHeight(BoxConstraints constraints, int childCount) {
     return constraints.constrainHeight(_getGridSize(constraints, childCount).height);
   }

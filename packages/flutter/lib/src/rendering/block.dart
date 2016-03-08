@@ -151,11 +151,6 @@ class RenderBlock extends RenderBlockBase {
       double childExtent = isVertical ?
         child.getMinIntrinsicHeight(innerConstraints) :
         child.getMinIntrinsicWidth(innerConstraints);
-      assert(() {
-        if (isVertical)
-          return childExtent == child.getMaxIntrinsicHeight(innerConstraints);
-        return childExtent == child.getMaxIntrinsicWidth(innerConstraints);
-      });
       extent += childExtent;
       final BlockParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
