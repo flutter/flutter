@@ -235,15 +235,17 @@ if (is_android) {
 
   source_set("ios_scaffolding") {
     sources = [
+      "platform/ios/flutter_app_delegate.h",
+      "platform/ios/flutter_app_delegate.mm",
+      "platform/ios/flutter_dynamic_service_loader.h",
+      "platform/ios/flutter_dynamic_service_loader.mm",
+      "platform/ios/flutter_touch_mapper.h",
+      "platform/ios/flutter_touch_mapper.mm",
+      "platform/ios/flutter_view.h",
+      "platform/ios/flutter_view.mm",
+      "platform/ios/flutter_view_controller.mm",
       "platform/ios/main_ios.mm",
-      "platform/ios/sky_app_delegate.h",
-      "platform/ios/sky_app_delegate.mm",
-      "platform/ios/sky_dynamic_service_loader.h",
-      "platform/ios/sky_dynamic_service_loader.mm",
-      "platform/ios/sky_surface.h",
-      "platform/ios/sky_surface.mm",
-      "platform/ios/sky_view_controller.h",
-      "platform/ios/sky_view_controller.mm",
+      "platform/ios/public/FlutterViewController.h",
     ]
 
     set_sources_assignment_filter([])
@@ -269,6 +271,22 @@ if (is_android) {
       "//ui/gl",
       ":common",
       ":gpu_direct",
+    ]
+  }
+
+  shared_library("flutter_framework") {
+    output_name = "libFlutter"
+
+    deps = [
+      ":ios_scaffolding"
+    ]
+
+    libs = [
+      "UIKit.framework",
+      "OpenGLES.framework",
+      "AVFoundation.framework",
+      "AudioToolbox.framework",
+      "QuartzCore.framework",
     ]
   }
 

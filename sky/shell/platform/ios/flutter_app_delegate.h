@@ -3,12 +3,9 @@
 // found in the LICENSE file.
 
 #import <UIKit/UIKit.h>
-#import "sky/shell/shell_view.h"
 
-@interface SkySurface : UIView
+@interface FlutterAppDelegate : UIResponder<UIApplicationDelegate>
 
-- (instancetype)initWithShellView:(sky::shell::ShellView*)shellView;
-
-- (void)visibilityDidChange:(BOOL)visible;
+@property(strong, nonatomic) UIWindow* window;
 
 @end

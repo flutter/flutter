@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/ios/sky_dynamic_service_loader.h"
+#include "sky/shell/platform/ios/flutter_dynamic_service_loader.h"
 #include "sky/services/dynamic/dynamic_service_embedder.h"
 #include "sky/services/dynamic/dynamic_service_definition.h"
 #include <Foundation/Foundation.h>
 
 #include <dlfcn.h>
 
-@interface SkyServiceDefinition : NSObject
+@interface FlutterServiceDefinition : NSObject
 
 @property(nonatomic, readonly) NSString* serviceName;
 
@@ -22,7 +22,7 @@
 
 @end
 
-@implementation SkyServiceDefinition {
+@implementation FlutterServiceDefinition {
   std::unique_ptr<sky::services::DynamicServiceDefinition> _definition;
   BOOL _initializationAttempted;
 }
@@ -49,7 +49,7 @@
   }
 
   mojo::String dylib_path(
-      [[NSBundle bundleForClass:[SkyDynamicServiceLoader class]]
+      [[NSBundle bundleForClass:[FlutterDynamicServiceLoader class]]
           pathForResource:_containerFramework
                    ofType:@"dylib"
               inDirectory:@"Frameworks"]
@@ -91,7 +91,7 @@
 
 @end
 
-@implementation SkyDynamicServiceLoader {
+@implementation FlutterDynamicServiceLoader {
   NSMutableDictionary* _services;
 }
 
@@ -161,9 +161,9 @@
 
     NSString* serviceName = service[@"name"];
 
-    SkyServiceDefinition* definition =
-        [[SkyServiceDefinition alloc] initWithName:serviceName
-                                         framework:service[@"framework"]];
+    FlutterServiceDefinition* definition =
+        [[FlutterServiceDefinition alloc] initWithName:serviceName
+                                             framework:service[@"framework"]];
 
     if (definition != nil) {
       _services[serviceName] = definition;
