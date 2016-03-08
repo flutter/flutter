@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../build_configuration.dart';
 import '../device.dart';
@@ -64,6 +65,8 @@ class IOSDevice extends Device {
   final String name;
 
   _IOSDeviceLogReader _logReader;
+
+  _IOSDevicePortForwarder _portForwarder;
 
   bool get isLocalEmulator => false;
 
@@ -230,6 +233,13 @@ class IOSDevice extends Device {
     return _logReader;
   }
 
+  DevicePortForwarder get portForwarder {
+    if (_portForwarder == null)
+      _portForwarder = new _IOSDevicePortForwarder(this);
+
+    return _portForwarder;
+  }
+
   void clearLogs() {
   }
 }
@@ -308,5 +318,30 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     if (other is! _IOSDeviceLogReader)
       return false;
     return other.name == name;
+  }
+}
+
+class _IOSDevicePortForwarder extends DevicePortForwarder {
+  _IOSDevicePortForwarder(this.device);
+
+  final IOSDevice device;
+
+  List<ForwardedPort> get forwardedPorts {
+    final List<ForwardedPort> ports = <ForwardedPort>[];
+    // TODO(chinmaygarde): Implement.
+    return ports;
+  }
+
+  Future<int> forward(int devicePort, {int hostPort: null}) async {
+    if ((hostPort == null) || (hostPort == 0)) {
+      // Auto select host port.
+      hostPort = await findAvailablePort();
+    }
+    // TODO(chinmaygarde): Implement.
+    return hostPort;
+  }
+
+  Future unforward(ForwardedPort forwardedPort) async {
+    // TODO(chinmaygarde): Implement.
   }
 }
