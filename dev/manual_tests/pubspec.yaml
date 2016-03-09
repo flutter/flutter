@@ -1,4 +1,4 @@
-name: sky_widgets_examples
+name: flutter_manual_tests
 dependencies:
   flutter:
     path: ../../packages/flutter

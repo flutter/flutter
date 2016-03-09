@@ -15,6 +15,9 @@ Flutter's layered architecture.
  * [*widgets/*](widgets/) These examples use Flutter's widgets to build more
    elaborate apps using a reactive framework.
 
+ * [*services/*](services/) These examples use services available in Flutter to
+   interact with the host platform.
+
 To run each example, use the `-t` argument to the `flutter` tool:
 
 ```
