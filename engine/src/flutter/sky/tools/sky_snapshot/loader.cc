@@ -15,16 +15,6 @@
 
 namespace {
 
-std::string Fetch(const std::string& url) {
-  base::FilePath path(url);
-  std::string source;
-  if (!base::ReadFileToString(path, &source)) {
-    fprintf(stderr, "error: Unable to find Dart library '%s'.\n", url.c_str());
-    exit(1);
-  }
-  return source;
-}
-
 base::FilePath SimplifyPath(const base::FilePath& path) {
   std::vector<base::FilePath::StringType> components;
   path.GetComponents(&components);
@@ -46,12 +36,16 @@ class Loader {
  public:
   Loader(const base::FilePath& package_root);
 
+  const std::set<std::string>& dependencies() const { return dependencies_; }
+
   std::string CanonicalizePackageURL(std::string url);
   Dart_Handle CanonicalizeURL(Dart_Handle library, Dart_Handle url);
+  std::string Fetch(const std::string& url);
   Dart_Handle Import(Dart_Handle url);
   Dart_Handle Source(Dart_Handle library, Dart_Handle url);
 
  private:
+  std::set<std::string> dependencies_;
   base::FilePath package_root_;
 
   DISALLOW_COPY_AND_ASSIGN(Loader);
@@ -77,6 +71,17 @@ Dart_Handle Loader::CanonicalizeURL(Dart_Handle library, Dart_Handle url) {
   base::FilePath resolved_path = base_path.DirName().Append(string);
   base::FilePath normalized_path = SimplifyPath(resolved_path);
   return StringToDart(normalized_path.AsUTF8Unsafe());
+}
+
+std::string Loader::Fetch(const std::string& url) {
+  base::FilePath path(url);
+  std::string source;
+  if (!base::ReadFileToString(path, &source)) {
+    fprintf(stderr, "error: Unable to find Dart library '%s'.\n", url.c_str());
+    exit(1);
+  }
+  dependencies_.insert(url);
+  return source;
 }
 
 Dart_Handle Loader::Import(Dart_Handle url) {
@@ -128,5 +133,10 @@ Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
 
 void LoadScript(const std::string& url) {
   LogIfError(
-      Dart_LoadScript(StringToDart(url), StringToDart(Fetch(url)), 0, 0));
+      Dart_LoadScript(StringToDart(url), StringToDart(GetLoader().Fetch(url)),
+                      0, 0));
+}
+
+const std::set<std::string>& GetDependencies() {
+  return GetLoader().dependencies();
 }

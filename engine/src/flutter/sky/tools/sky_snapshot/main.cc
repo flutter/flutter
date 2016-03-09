@@ -21,6 +21,7 @@
 void Usage() {
   std::cerr << "Usage: sky_snapshot"
             << " --" << switches::kPackageRoot << " --" << switches::kSnapshot
+            << " --" << switches::kDepfile << " --" << switches::kBuildOutput
             << " <lib/main.dart>" << std::endl;
 }
 
@@ -31,6 +32,21 @@ void WriteSnapshot(base::FilePath path) {
 
   CHECK_EQ(base::WriteFile(path, reinterpret_cast<const char*>(buffer), size),
            size);
+}
+
+void WriteDependencies(base::FilePath path,
+                       const std::string& build_output,
+                       const std::set<std::string>& deps) {
+  base::FilePath current_directory;
+  CHECK(base::GetCurrentDirectory(&current_directory));
+  std::string output = build_output + ":";
+  for (const auto& i : deps) {
+    output += " ";
+    output += current_directory.Append(i).MaybeAsASCII();
+  }
+  const char* data = output.c_str();
+  const intptr_t data_length = output.size();
+  CHECK_EQ(base::WriteFile(path, data, data_length), data_length);
 }
 
 int main(int argc, const char* argv[]) {
@@ -62,6 +78,15 @@ int main(int argc, const char* argv[]) {
 
   CHECK(command_line.HasSwitch(switches::kSnapshot)) << "Need --snapshot";
   WriteSnapshot(command_line.GetSwitchValuePath(switches::kSnapshot));
+
+  if (command_line.HasSwitch(switches::kDepfile)) {
+    auto build_output = command_line.HasSwitch(switches::kBuildOutput) ?
+        command_line.GetSwitchValueASCII(switches::kBuildOutput) :
+        command_line.GetSwitchValueASCII(switches::kSnapshot);
+    WriteDependencies(command_line.GetSwitchValuePath(switches::kDepfile),
+                      build_output,
+                      GetDependencies());
+  }
 
   return 0;
 }
