@@ -281,6 +281,7 @@ class ScaffoldState extends State<Scaffold> {
            _snackBarController.status == AnimationStatus.completed);
     _snackBars.first._completer.complete();
     _snackBarController.reverse();
+    _snackBarTimer?.cancel();
     _snackBarTimer = null;
   }
 
