@@ -345,6 +345,12 @@ class ScaffoldState extends State<Scaffold> {
   void initState() {
     super.initState();
     _appBarController = new AnimationController();
+    List<double> scrollValues = PageStorage.of(context)?.readState(context);
+    if (scrollValues != null) {
+      assert(scrollValues.length == 2);
+      _scrollOffset = scrollValues[0];
+      _scrollOffsetDelta = scrollValues[1];
+    }
   }
 
   void dispose() {
@@ -353,6 +359,7 @@ class ScaffoldState extends State<Scaffold> {
     _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
+    PageStorage.of(context)?.writeState(context, <double>[_scrollOffset, _scrollOffsetDelta]);
     super.dispose();
   }
 

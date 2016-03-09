@@ -5,17 +5,6 @@
 import 'package:flutter/material.dart';
 
 class PageSelectorDemo extends StatelessComponent {
-  Widget _buildTabView(IconData icon) {
-    return new Container(
-      key: new ObjectKey(icon),
-      padding: const EdgeDims.all(12.0),
-      child: new Card(
-        child: new Center(
-          child: new Icon(icon: icon, size: 48.0)
-        )
-      )
-    );
-  }
 
   void _handleArrowButtonPress(BuildContext context, int delta) {
     final TabBarSelectionState selection = TabBarSelection.of(context);
@@ -35,10 +24,11 @@ class PageSelectorDemo extends StatelessComponent {
 
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Page Selector')),
-      body: new TabBarSelection(
+      body: new TabBarSelection<IconData>(
         values: icons,
         child: new Builder(
           builder: (BuildContext context) {
+            final Color color = Theme.of(context).accentColor;
             return new Column(
               children: <Widget>[
                 new Container(
@@ -47,12 +37,14 @@ class PageSelectorDemo extends StatelessComponent {
                     children: <Widget>[
                       new IconButton(
                         icon: Icons.arrow_back,
+                        color: color,
                         onPressed: () { _handleArrowButtonPress(context, -1); },
                         tooltip: 'Back'
                       ),
-                      new TabPageSelector<String>(),
+                      new TabPageSelector<IconData>(),
                       new IconButton(
                         icon: Icons.arrow_forward,
+                        color: color,
                         onPressed: () { _handleArrowButtonPress(context, 1); },
                         tooltip: 'Forward'
                       )
@@ -62,7 +54,18 @@ class PageSelectorDemo extends StatelessComponent {
                 ),
                 new Flexible(
                   child: new TabBarView(
-                    children: icons.map(_buildTabView).toList()
+                    children: icons.map((IconData icon) {
+                      return new Container(
+                        key: new ObjectKey(icon),
+                        padding: const EdgeDims.all(12.0),
+                        child: new Card(
+                          child: new Center(
+                            child: new Icon(icon: icon, size: 128.0, color: color)
+                          )
+                        )
+                      );
+                    })
+                    .toList()
                   )
                 )
               ]

@@ -23,7 +23,8 @@ class TabsDemo extends StatelessComponent {
     Icons.language: 'LANGUAGE',
   };
 
-  Widget build(_) {
+  Widget build(BuildContext context) {
+    final Color iconColor = Theme.of(context).accentColor;
     return new TabBarSelection(
       values: icons,
       child: new Scaffold(
@@ -43,7 +44,13 @@ class TabsDemo extends StatelessComponent {
               key: new ObjectKey(icon),
               padding: const EdgeDims.all(12.0),
               child: new Card(
-                child: new Center(child: new Icon(icon: icon, size: 48.0))
+                child: new Center(
+                  child: new Icon(
+                    icon: icon,
+                    color: iconColor,
+                    size: 128.0
+                  )
+                )
               )
             );
           }).toList()

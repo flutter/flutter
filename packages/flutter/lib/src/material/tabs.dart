@@ -999,7 +999,7 @@ class TabPageSelector<T> extends StatelessComponent {
 
   Widget build(BuildContext context) {
     final TabBarSelectionState selection = TabBarSelection.of(context);
-    final Color color = Theme.of(context).primaryColor;
+    final Color color = Theme.of(context).accentColor;
     final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
     final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
     Animation<double> animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
