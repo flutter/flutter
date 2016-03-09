@@ -42,7 +42,12 @@ void WriteDependencies(base::FilePath path,
   std::string output = build_output + ":";
   for (const auto& i : deps) {
     output += " ";
-    output += current_directory.Append(i).MaybeAsASCII();
+    base::FilePath dep_path(i);
+    if (dep_path.IsAbsolute()) {
+      output += dep_path.MaybeAsASCII();
+    } else {
+      output += current_directory.Append(dep_path).MaybeAsASCII();
+    }
   }
   const char* data = output.c_str();
   const intptr_t data_length = output.size();
