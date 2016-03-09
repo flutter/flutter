@@ -108,7 +108,7 @@ class SlideTransition extends AnimatedComponent {
   }
 }
 
-/// Animates the size of a widget.
+/// Animates the scale of transformed widget.
 class ScaleTransition extends AnimatedComponent {
   ScaleTransition({
     Key key,
@@ -167,6 +167,43 @@ class RotationTransition extends AnimatedComponent {
       transform: transform,
       alignment: const FractionalOffset(0.5, 0.5),
       child: child
+    );
+  }
+}
+
+/// Animates a widget's width or height.
+class SizeTransition extends AnimatedComponent {
+  SizeTransition({
+    Key key,
+    this.axis: Axis.vertical,
+    Animation<double> sizeFactor,
+    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.child
+  }) : sizeFactor = sizeFactor, super(key: key, animation: sizeFactor) {
+    assert(axis != null);
+  }
+
+  /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise [Axis.vertical].
+  final Axis axis;
+
+  /// The animation that controls the (clipped) size of the child. If the current value
+  /// of sizeFactor is v then the width or height of the widget will be its intrinsic
+  /// width or height multiplied by v.
+  final Animation<double> sizeFactor;
+
+  /// How to align the child. See the [Align] widget.
+  final FractionalOffset alignment;
+
+  final Widget child;
+
+  Widget build(BuildContext context) {
+    return new ClipRect(
+      child: new Align(
+        alignment: alignment,
+        heightFactor: axis == Axis.vertical ? sizeFactor.value : null,
+        widthFactor: axis == Axis.horizontal ? sizeFactor.value : null,
+        child: child
+      )
     );
   }
 }
