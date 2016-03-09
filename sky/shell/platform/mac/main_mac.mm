@@ -32,7 +32,7 @@ void AttachMessageLoopToMainRunLoop(void) {
 int main(int argc, const char* argv[]) {
   [SkyApplication sharedApplication];
 
-  return sky::shell::PlatformMacMain(argc, argv, ^() {
+  return sky::shell::PlatformMacMain(argc, argv, "", ^() {
     base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
     if (command_line.HasSwitch(sky::shell::switches::kHelp)) {
       sky::shell::switches::PrintUsage("SkyShell");

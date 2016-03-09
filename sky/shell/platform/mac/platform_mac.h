@@ -14,6 +14,7 @@ typedef int (^PlatformMacMainCallback)(void);
 
 int PlatformMacMain(int argc,
                     const char* argv[],
+                    std::string icu_data_path,
                     PlatformMacMainCallback callback);
 
 bool AttemptLaunchFromCommandLineSwitches(sky::SkyEnginePtr& engine);

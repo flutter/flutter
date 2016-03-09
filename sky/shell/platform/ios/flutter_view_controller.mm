@@ -35,12 +35,15 @@
 - (instancetype)initWithDartBundle:(NSBundle*)dartBundleOrNil
                            nibName:(NSString*)nibNameOrNil
                             bundle:(NSBundle*)bundleOrNil {
-  sky::shell::PlatformMacMain(0, nullptr, nullptr);
-
   self = [super initWithNibName:nibNameOrNil bundle:bundleOrNil];
 
   if (self) {
     _dartBundle = [dartBundleOrNil retain];
+
+    NSBundle* bundle = [NSBundle bundleForClass:[self class]];
+    NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
+
+    sky::shell::PlatformMacMain(0, nullptr, icuDataPath.UTF8String, nullptr);
 
     [self performCommonViewControllerInitialization];
   }

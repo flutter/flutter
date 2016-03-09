@@ -8,7 +8,7 @@
 #include "sky/shell/platform/mac/platform_mac.h"
 
 int main(int argc, const char* argv[]) {
-  return sky::shell::PlatformMacMain(argc, argv, ^() {
+  return sky::shell::PlatformMacMain(argc, argv, "", ^() {
     return UIApplicationMain(argc, (char**)argv, nil,
                              NSStringFromClass([FlutterAppDelegate class]));
   });

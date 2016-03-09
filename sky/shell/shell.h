@@ -19,7 +19,8 @@ class Shell {
   ~Shell();
 
   // Init the shell to stand alone from MojoShell.
-  static void InitStandalone();
+  static void InitStandalone(std::string icu_data_path = "");
+
   // Init the shell to run inside MojoShell.
   static void Init();
 

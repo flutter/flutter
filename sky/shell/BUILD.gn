@@ -363,11 +363,21 @@ if (is_android) {
       outputs = [ "$framework_dir/Headers/{{source_file_part}}" ]
     }
 
+    copy("framework_icu") {
+      set_sources_assignment_filter([])
+      sources = [
+        "//third_party/icu/android/icudtl.dat",
+      ]
+      set_sources_assignment_filter(sources_assignment_filter)
+      outputs = [ "$framework_dir/{{source_file_part}}" ]
+    }
+
     deps = [
-      ":framework_install_name",
-      ":framework_info_plist",
-      ":framework_module_map",
       ":framework_headers",
+      ":framework_icu",
+      ":framework_info_plist",
+      ":framework_install_name",
+      ":framework_module_map",
     ]
   }
 
