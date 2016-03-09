@@ -35,6 +35,8 @@
 - (instancetype)initWithDartBundle:(NSBundle*)dartBundleOrNil
                            nibName:(NSString*)nibNameOrNil
                             bundle:(NSBundle*)bundleOrNil {
+  sky::shell::PlatformMacMain(0, nullptr, nullptr);
+
   self = [super initWithNibName:nibNameOrNil bundle:bundleOrNil];
 
   if (self) {

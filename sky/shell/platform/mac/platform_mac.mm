@@ -45,9 +45,12 @@ static void RedirectIOConnectionsToSyslog() {
 #endif
 }
 
-int PlatformMacMain(int argc,
-                    const char* argv[],
-                    PlatformMacMainCallback callback) {
+int PlatformMacMainOnce(int argc,
+                        const char* argv[],
+                        PlatformMacMainCallback callback) {
+  CHECK([NSThread currentThread] == [NSThread mainThread])
+      << "Platform initialization must occur on the main platform thread";
+
   base::mac::ScopedNSAutoreleasePool pool;
 
   base::PlatformThread::SetName("platform_main");
@@ -91,14 +94,28 @@ int PlatformMacMain(int argc,
   CHECK(gfx::GLSurface::InitializeOneOff());
   sky::shell::Shell::InitStandalone();
 
-  result = callback();
+  int exit_code = callback != nullptr ? callback() : EXIT_SUCCESS;
 
 #if !TARGET_OS_IPHONE
-  if (result == EXIT_SUCCESS) {
+  if (callback != nullptr) {
+    // If we control the embedder, the callback is what we use to wrap
+    // UIApplicationMain. If we are here, it means that that method has returned
+    // and we need to perform cleanup.
     message_loop->QuitNow();
   }
 #endif
 
+  return exit_code;
+}
+
+int PlatformMacMain(int argc,
+                    const char* argv[],
+                    PlatformMacMainCallback callback) {
+  __block int result = EXIT_SUCCESS;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    result = PlatformMacMainOnce(argc, argv, callback);
+  });
   return result;
 }
 
