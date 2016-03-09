@@ -221,6 +221,8 @@ if (is_android) {
 
     extensions_to_not_compress = ".flx"
 
+    flutter_dist_jar = "$root_build_dir/flutter.jar"
+
     deps = [
       "//base:base_java",
       ":assets",

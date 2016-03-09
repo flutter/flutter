@@ -1753,6 +1753,47 @@ template("android_apk") {
     }
   }
 
+  if (defined(invoker.flutter_dist_jar)) {
+    flutter_jar_target = "${_template_name}__create_flutter_jar"
+    final_deps += [ ":$flutter_jar_target" ]
+
+    action(flutter_jar_target) {
+      script = "//build/android/gyp/create_flutter_jar.py"
+      depfile = "$target_gen_dir/$target_name.d"
+      inputs = [
+        _dist_jar_path,
+      ]
+      outputs = [
+        invoker.flutter_dist_jar,
+      ]
+      args = [
+        "--depfile",
+        rebase_path(depfile, root_build_dir),
+        "--output",
+        rebase_path(invoker.flutter_dist_jar, root_build_dir),
+        "--dist_jar",
+        rebase_path(_dist_jar_path, root_build_dir),
+        "--android_abi",
+        "$android_app_abi",
+        "--asset_dir",
+        rebase_path(invoker.asset_location, root_build_dir),
+      ]
+      foreach(native_lib, rebase_path(_native_libs, root_build_dir)) {
+        args += [
+          "--native_lib",
+          native_lib,
+        ]
+      }
+      deps = [
+        ":$create_dist_target",
+        ":${_template_name}__prepare_native"
+      ]
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
+    }
+  }
+
   group(target_name) {
     deps = final_deps
     if (defined(invoker.data_deps)) {
