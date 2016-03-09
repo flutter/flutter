@@ -138,14 +138,14 @@ class Instrumentation {
   /// the element's render object has been laid out at least once.
   Size getSize(Element element) {
     assert(element != null);
-    RenderBox box = element.renderObject as RenderBox;
+    RenderBox box = element.renderObject;
     assert(box != null);
     return box.size;
   }
 
   Point _getElementPoint(Element element, SizeToPointFunction sizeToPoint) {
     assert(element != null);
-    RenderBox box = element.renderObject as RenderBox;
+    RenderBox box = element.renderObject;
     assert(box != null);
     return box.localToGlobal(sizeToPoint(box.size));
   }

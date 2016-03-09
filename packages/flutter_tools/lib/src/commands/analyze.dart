@@ -294,9 +294,10 @@ class AnalyzeCommand extends FlutterCommand {
     for (String package in packages.keys)
       packagesBody.writeln('$package:${path.toUri(packages[package])}');
 
-    /// specify analysis options
-    /// note that until there is a default "all-in" lint rule-set we need
-    /// to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843)
+    /// Specify analysis options.
+    /// Note that until there is a default "all-in" lint rule-set we need
+    /// to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843).
+    /// For a list of lints, see: http://dart-lang.github.io/linter/lints/
     String optionsBody = '''
 analyzer:
   errors:
@@ -307,6 +308,8 @@ analyzer:
     todo: ignore
 linter:
   rules:
+    # we'll turn on avoid_as as soon as it doesn't complain about "as dynamic"
+    # - avoid_as
     - camel_case_types
     # sometimes we have no choice (e.g. when matching other platforms)
     # - constant_identifier_names

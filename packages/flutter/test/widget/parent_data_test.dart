@@ -35,7 +35,8 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      child = (decoratedBox.parentData as StackParentData).nextSibling;
+      StackParentData decoratedBoxParentData = decoratedBox.parentData;
+      child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);
   } catch (e) {

@@ -68,7 +68,7 @@ class AndroidApk extends ApplicationPackage {
     String launchActivity;
     for (xml.XmlElement category in document.findAllElements('category')) {
       if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
-        xml.XmlElement activity = category.parent.parent as xml.XmlElement;
+        xml.XmlElement activity = category.parent.parent;
         String activityName = activity.getAttribute('android:name');
         launchActivity = "$id/$activityName";
         break;
