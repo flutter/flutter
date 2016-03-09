@@ -21,24 +21,24 @@ import org.chromium.mojom.editing.SubmitAction;
  * An adaptor between InputConnection and KeyboardClient.
  */
 public class InputConnectionAdaptor extends BaseInputConnection {
-    private KeyboardViewState mState;
-    private EditingState mEditingState;
+    private KeyboardClient mClient;
+    private EditingState mOutgoingState;
 
-    public InputConnectionAdaptor(View view, KeyboardViewState state) {
+    public InputConnectionAdaptor(View view, KeyboardClient client) {
         super(view, true);
-        assert state != null;
-        mState = state;
-        mEditingState = new EditingState();
+        assert client != null;
+        mClient = client;
+        mOutgoingState = new EditingState();
     }
 
     private void updateEditingState() {
         Editable content = getEditable();
-        mEditingState.text = content.toString();
-        mEditingState.selectionBase = Selection.getSelectionStart(content);
-        mEditingState.selectionExtent = Selection.getSelectionEnd(content);
-        mEditingState.composingBase = BaseInputConnection.getComposingSpanStart(content);
-        mEditingState.composingExtent = BaseInputConnection.getComposingSpanEnd(content);
-        mState.getClient().updateEditingState(mEditingState);
+        mOutgoingState.text = content.toString();
+        mOutgoingState.selectionBase = Selection.getSelectionStart(content);
+        mOutgoingState.selectionExtent = Selection.getSelectionEnd(content);
+        mOutgoingState.composingBase = BaseInputConnection.getComposingSpanStart(content);
+        mOutgoingState.composingExtent = BaseInputConnection.getComposingSpanEnd(content);
+        mClient.updateEditingState(mOutgoingState);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class InputConnectionAdaptor extends BaseInputConnection {
 
     @Override
     public boolean performEditorAction(int actionCode) {
-        mState.getClient().submit(SubmitAction.DONE);
+        mClient.submit(SubmitAction.DONE);
         return true;
     }
 }

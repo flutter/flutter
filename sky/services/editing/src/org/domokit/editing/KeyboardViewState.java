@@ -27,20 +27,17 @@ public class KeyboardViewState {
     private View mView;
     private KeyboardClient mClient;
     private KeyboardConfiguration mConfiguration;
-    private InputConnectionAdaptor mInputConnection;
+    private EditingState mIncomingState;
 
     public KeyboardViewState(View view) {
         mView = view;
         mClient = null;
     }
 
-    public KeyboardClient getClient() {
-        return mClient;
-    }
-
     public void setClient(KeyboardClient client, KeyboardConfiguration configuration) {
         if (mClient != null)
             mClient.close();
+        mIncomingState = null;
         mClient = client;
         mConfiguration = configuration;
         InputMethodManager imm =
@@ -49,14 +46,10 @@ public class KeyboardViewState {
     }
 
     public void setEditingState(EditingState state) {
-        Editable content = mInputConnection.getEditable();
-        content.replace(0, content.length(), state.text);
-        mInputConnection.setSelection(state.selectionBase, state.selectionExtent);
-        mInputConnection.setComposingRegion(state.composingBase, state.composingExtent);
+        mIncomingState = state;
         InputMethodManager imm =
                 (InputMethodManager) mView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.updateSelection(mView, state.selectionBase, state.selectionExtent,
-                            state.composingBase, state.composingExtent);
+        imm.restartInput(mView);
     }
 
     private static int inputTypeFromKeyboardType(int keyboardType) {
@@ -75,8 +68,15 @@ public class KeyboardViewState {
         outAttrs.inputType = inputTypeFromKeyboardType(mConfiguration.type);
         outAttrs.actionLabel = mConfiguration.actionLabel;
         outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE;
-        mInputConnection = new InputConnectionAdaptor(mView, this);
-        return mInputConnection;
+        InputConnectionAdaptor connection = new InputConnectionAdaptor(mView, mClient);
+        if (mIncomingState != null) {
+            connection.getEditable().append(mIncomingState.text);
+            connection.setSelection(mIncomingState.selectionBase,
+                                    mIncomingState.selectionExtent);
+            connection.setComposingRegion(mIncomingState.composingBase,
+                                          mIncomingState.composingExtent);
+        }
+        return connection;
     }
 
     public View getView() {
