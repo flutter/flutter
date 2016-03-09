@@ -215,9 +215,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// given recorder.
   Canvas(PictureRecorder recorder, Rect cullRect) {
     if (recorder == null)
-      throw new ArgumentError('[recorder] argument cannot be null.');
+      throw new ArgumentError('The given PictureRecorder was null.');
     if (recorder.isRecording)
-      throw new ArgumentError('You must call endRecording() before reusing a PictureRecorder to create a new Canvas object.');
+      throw new ArgumentError('The given PictureRecorder is already associated with another Canvas.');
+    // TODO(ianh): throw if recorder is defunct (https://github.com/flutter/flutter/issues/2531)
     _constructor(recorder, cullRect);
   }
   void _constructor(PictureRecorder recorder, Rect cullRect) native "Canvas_constructor";
@@ -366,12 +367,14 @@ class Canvas extends NativeFieldWrapperClass2 {
 }
 
 /// An object representing a sequence of recorded graphical operations.
+///
+/// To create a [Picture], use a [PictureRecorder].
 abstract class Picture extends NativeFieldWrapperClass2 {
-  /// Replays the graphical operations on the specified canvas. Note that
-  /// this has the effect of unfurling this picture into the destination
-  /// canvas. Using the Canvas drawPicture entry point gives the destination
-  /// canvas the option of just taking a ref.
-  void playback(Canvas canvas) native "Picture_playback";
+  /// Creates an uninitialized Picture object.
+  ///
+  /// Calling the Picture constructor directly will not create a useable
+  /// object. To create a Picture object, use a [PictureRecorder].
+  Picture(); // (this constructor is here just so we can document it)
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
@@ -381,14 +384,21 @@ abstract class Picture extends NativeFieldWrapperClass2 {
 /// Records a [Picture] containing a sequence of graphical operations.
 ///
 /// To begin recording, construct a [Canvas] to record the commands.
+/// To end recording, use the [PictureRecorder.endRecording] method.
 class PictureRecorder extends NativeFieldWrapperClass2 {
-  void _constructor() native "PictureRecorder_constructor";
+  /// Creates a new idle PictureRecorder. To associate it with a
+  /// [Canvas] and begin recording, pass this [PictureRecorder] to the
+  /// [Canvas] constructor.
   PictureRecorder() { _constructor(); }
+  void _constructor() native "PictureRecorder_constructor";
 
   /// Whether this object is currently recording commands.
   ///
-  /// Specifically, whether a [Canvas] object has been created to record
-  /// commands and recording has not yet ended.
+  /// Specifically, this returns true if a [Canvas] object has been
+  /// created to record commands and recording has not yet ended via a
+  /// call to [endRecording], and false if either this
+  /// [PictureRecorder] has not yet been associated with a [Canvas],
+  /// or the [endRecording] method has already been called.
   bool get isRecording native "PictureRecorder_isRecording";
 
   /// Finishes recording graphical operations.
@@ -396,5 +406,7 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
   /// Returns a picture containing the graphical operations that have been
   /// recorded thus far. After calling this function, both the picture recorder
   /// and the canvas objects are invalid and cannot be used further.
+  ///
+  /// Returns null if the PictureRecorder is not associated with a canvas.
   Picture endRecording() native "PictureRecorder_endRecording";
 }

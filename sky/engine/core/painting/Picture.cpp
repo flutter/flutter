@@ -15,7 +15,6 @@ namespace blink {
 IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 #define FOR_EACH_BINDING(V) \
-  V(Picture, playback) \
   V(Picture, dispose)
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
@@ -33,11 +32,6 @@ Picture::Picture(PassRefPtr<SkPicture> skPicture)
 
 Picture::~Picture()
 {
-}
-
-void Picture::playback(Canvas* canvas)
-{
-    m_picture->playback(canvas->skCanvas());
 }
 
 void Picture::dispose()
