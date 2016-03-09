@@ -13,6 +13,7 @@
 #include "base/lazy_instance.h"
 #include "base/memory/discardable_memory.h"
 #include "base/memory/discardable_memory_allocator.h"
+#include "base/posix/eintr_wrapper.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/message_pump/message_pump_mojo.h"
@@ -72,12 +73,25 @@ Shell::Shell() {
   io_task_runner_ = io_thread_->message_loop()->task_runner();
 }
 
-Shell::~Shell() {
-}
+Shell::~Shell() {}
 
-void Shell::InitStandalone() {
+void Shell::InitStandalone(std::string icu_data_path) {
   TRACE_EVENT0("flutter", "Shell::InitStandalone");
-  CHECK(base::i18n::InitializeICU());
+
+  int file_descriptor =
+      icu_data_path.size() != 0
+          ? HANDLE_EINTR(::open(icu_data_path.data(), O_RDONLY))
+          : -1;
+
+  if (file_descriptor == -1) {
+    // If the embedder did not specify a valid file, fallback to looking through
+    // internal search paths.
+    CHECK(base::i18n::InitializeICU());
+  } else {
+    auto region = base::MemoryMappedFile::Region::kWholeFile;
+    CHECK(base::i18n::InitializeICUWithFileDescriptor(file_descriptor, region));
+    HANDLE_EINTR(::close(file_descriptor));
+  }
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 

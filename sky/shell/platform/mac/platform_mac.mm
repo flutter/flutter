@@ -47,6 +47,7 @@ static void RedirectIOConnectionsToSyslog() {
 
 int PlatformMacMainOnce(int argc,
                         const char* argv[],
+                        std::string icu_data_path,
                         PlatformMacMainCallback callback) {
   CHECK([NSThread currentThread] == [NSThread mainThread])
       << "Platform initialization must occur on the main platform thread";
@@ -92,7 +93,7 @@ int PlatformMacMainOnce(int argc,
   mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
   CHECK(gfx::GLSurface::InitializeOneOff());
-  sky::shell::Shell::InitStandalone();
+  sky::shell::Shell::InitStandalone(icu_data_path);
 
   int exit_code = callback != nullptr ? callback() : EXIT_SUCCESS;
 
@@ -110,11 +111,12 @@ int PlatformMacMainOnce(int argc,
 
 int PlatformMacMain(int argc,
                     const char* argv[],
+                    std::string icu_data_path,
                     PlatformMacMainCallback callback) {
   __block int result = EXIT_SUCCESS;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    result = PlatformMacMainOnce(argc, argv, callback);
+    result = PlatformMacMainOnce(argc, argv, icu_data_path, callback);
   });
   return result;
 }
