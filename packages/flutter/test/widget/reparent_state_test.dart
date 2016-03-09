@@ -47,8 +47,10 @@ void main() {
         )
       );
 
-      (left.currentState as StateMarkerState).marker = "left";
-      (right.currentState as StateMarkerState).marker = "right";
+      StateMarkerState leftState = left.currentState;
+      leftState.marker = "left";
+      StateMarkerState rightState = right.currentState;
+      rightState.marker = "right";
 
       StateMarkerState grandchildState = tester.findStateByConfig(grandchild);
       expect(grandchildState, isNotNull);
@@ -71,8 +73,10 @@ void main() {
         )
       );
 
-      expect((left.currentState as StateMarkerState).marker, equals("left"));
-      expect((right.currentState as StateMarkerState).marker, equals("right"));
+      expect(left.currentState, equals(leftState));
+      expect(leftState.marker, equals("left"));
+      expect(right.currentState, equals(rightState));
+      expect(rightState.marker, equals("right"));
 
       StateMarkerState newGrandchildState = tester.findStateByConfig(newGrandchild);
       expect(newGrandchildState, isNotNull);
@@ -90,7 +94,8 @@ void main() {
         )
       );
 
-      expect((left.currentState as StateMarkerState).marker, equals("left"));
+      expect(left.currentState, equals(leftState));
+      expect(leftState.marker, equals("left"));
       expect(right.currentState, isNull);
     });
   });
@@ -113,8 +118,10 @@ void main() {
         )
       );
 
-      (left.currentState as StateMarkerState).marker = "left";
-      (right.currentState as StateMarkerState).marker = "right";
+      StateMarkerState leftState = left.currentState;
+      leftState.marker = "left";
+      StateMarkerState rightState = right.currentState;
+      rightState.marker = "right";
 
       StateMarkerState grandchildState = tester.findStateByConfig(grandchild);
       expect(grandchildState, isNotNull);
@@ -133,8 +140,10 @@ void main() {
         )
       );
 
-      expect((left.currentState as StateMarkerState).marker, equals("left"));
-      expect((right.currentState as StateMarkerState).marker, equals("right"));
+      expect(left.currentState, equals(leftState));
+      expect(leftState.marker, equals("left"));
+      expect(right.currentState, equals(rightState));
+      expect(rightState.marker, equals("right"));
 
       StateMarkerState newGrandchildState = tester.findStateByConfig(newGrandchild);
       expect(newGrandchildState, isNotNull);
@@ -152,7 +161,8 @@ void main() {
         )
       );
 
-      expect((left.currentState as StateMarkerState).marker, equals("left"));
+      expect(left.currentState, equals(leftState));
+      expect(leftState.marker, equals("left"));
       expect(right.currentState, isNull);
     });
   });
@@ -163,7 +173,8 @@ void main() {
 
       tester.pumpWidget(new StateMarker(key: key));
 
-      (key.currentState as StateMarkerState).marker = "marked";
+      StateMarkerState keyState = key.currentState;
+      keyState.marker = "marked";
 
       tester.pumpWidget(new ScrollableList(
         itemExtent: 100.0,
@@ -176,11 +187,13 @@ void main() {
         ]
       ));
 
-      expect((key.currentState as StateMarkerState).marker, equals("marked"));
+      expect(key.currentState, equals(keyState));
+      expect(keyState.marker, equals("marked"));
 
       tester.pumpWidget(new StateMarker(key: key));
 
-      expect((key.currentState as StateMarkerState).marker, equals("marked"));
+      expect(key.currentState, equals(keyState));
+      expect(keyState.marker, equals("marked"));
     });
   });
 }

@@ -104,10 +104,12 @@ void main() {
         right: new ProbeWidget()
       ));
       expect(ProbeWidgetState.buildCount, equals(2));
-      (flipKey.currentState as FlipComponentState).flip();
+      FlipComponentState flipState1 = flipKey.currentState;
+      flipState1.flip();
       tester.pump();
       expect(ProbeWidgetState.buildCount, equals(3));
-      (flipKey.currentState as FlipComponentState).flip();
+      FlipComponentState flipState2 = flipKey.currentState;
+      flipState2.flip();
       tester.pump();
       expect(ProbeWidgetState.buildCount, equals(3));
       tester.pumpWidget(new Container());

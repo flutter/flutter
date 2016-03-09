@@ -69,7 +69,7 @@ class TestAssetBundle extends AssetBundle {
 }
 
 Future<ui.Image> testDecodeImageFromDataPipe(core.MojoDataPipeConsumer pipe) {
-  TestMojoDataPipeConsumer testPipe = pipe as TestMojoDataPipeConsumer;
+  TestMojoDataPipeConsumer testPipe = pipe;
   assert(testPipe != null);
   ui.Image image = new TestImage(testPipe.scale);
   return (new Completer<ui.Image>()..complete(image)).future;
@@ -108,11 +108,11 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
 }
 
 RenderImage getRenderImage(tester, Key key) {
-  return tester.findElementByKey(key).renderObject as RenderImage;
+  return tester.findElementByKey(key).renderObject;
 }
 
 TestImage getTestImage(tester, Key key) {
-  return getRenderImage(tester, key).image as TestImage;
+  return getRenderImage(tester, key).image;
 }
 
 void pumpTreeToLayout(WidgetTester tester, Widget widget) {

@@ -48,7 +48,8 @@ void main() {
       tester.pumpWidget(builder());
 
       Element input = tester.findElementByKey(inputKey);
-      Size emptyInputSize = (input.renderObject as RenderBox).size;
+      RenderBox inputBox = input.renderObject;
+      Size emptyInputSize = inputBox.size;
 
       void enterText(String testValue) {
         // Simulate entry of text through the keyboard.
@@ -65,10 +66,12 @@ void main() {
       }
 
       enterText(' ');
-      expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
+      expect(input.renderObject, equals(inputBox));
+      expect(inputBox.size, equals(emptyInputSize));
 
       enterText('Test');
-      expect((input.renderObject as RenderBox).size, equals(emptyInputSize));
+      expect(input.renderObject, equals(inputBox));
+      expect(inputBox.size, equals(emptyInputSize));
     });
   });
 
