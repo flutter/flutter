@@ -249,6 +249,7 @@ if (is_android) {
         "platform/ios/flutter_view.mm",
         "platform/ios/flutter_view_controller.mm",
         "platform/ios/main_ios.mm",
+        "platform/ios/public/Flutter.h",
         "platform/ios/public/FlutterMacros.h",
         "platform/ios/public/FlutterViewController.h",
       ]
@@ -290,8 +291,8 @@ if (is_android) {
     is_framework = false
   }
 
-  shared_library("flutter_framework") {
-    output_name = "libFlutter"
+  shared_library("flutter_framework_dylib") {
+    output_name = "Flutter"
 
     scaffolding("framework_scaffolding") {
       is_framework = true
@@ -307,6 +308,66 @@ if (is_android) {
       "AVFoundation.framework",
       "AudioToolbox.framework",
       "QuartzCore.framework",
+    ]
+  }
+
+  group("flutter_framework") {
+    framework_dir = "$root_out_dir/Flutter.framework"
+
+    copy("framework_dylib") {
+      sources = [ "$root_out_dir/libFlutter.dylib" ]
+      outputs = [ "$framework_dir/Flutter" ]
+
+      deps = [
+        ":flutter_framework_dylib",
+      ]
+    }
+
+    action("framework_install_name") {
+      stamp_file = "$root_out_dir/flutter_install_name_stamp"
+      script = "//sky/tools/change_install_name.py"
+
+      inputs = [ "$framework_dir/Flutter" ]
+      outputs = [ stamp_file ]
+
+      args = [
+        "--dylib",
+        rebase_path("$framework_dir/Flutter"),
+        "--install_name",
+        "@rpath/Flutter.framework/Flutter",
+        "--stamp",
+        rebase_path(stamp_file),
+      ]
+
+      deps = [
+        ":framework_dylib"
+      ]
+    }
+
+    copy("framework_info_plist") {
+      sources = [ "platform/ios/framework/Info.plist" ]
+      outputs = [ "$framework_dir/Info.plist" ]
+    }
+
+    copy("framework_module_map") {
+      sources = [ "platform/ios/framework/module.modulemap" ]
+      outputs = [ "$framework_dir/Modules/module.modulemap" ]
+    }
+
+    copy("framework_headers") {
+      sources = [
+        "platform/ios/public/Flutter.h",
+        "platform/ios/public/FlutterMacros.h",
+        "platform/ios/public/FlutterViewController.h",
+      ]
+      outputs = [ "$framework_dir/Headers/{{source_file_part}}" ]
+    }
+
+    deps = [
+      ":framework_install_name",
+      ":framework_info_plist",
+      ":framework_module_map",
+      ":framework_headers",
     ]
   }
 
