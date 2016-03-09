@@ -25,8 +25,7 @@ class TracingController {
 
   void StartTracing();
 
-  void StopTracing(const base::FilePath& path,
-                   bool terminateLoopWhenDone = false);
+  void StopTracing(const base::FilePath& path);
 
   // Enables tracing in base. Only use this if an instance of a tracing
   // controller cannot be obtained (can happen early in the lifecycle of the
@@ -35,7 +34,7 @@ class TracingController {
   static void StartBaseTracing();
 
   base::FilePath PictureTracingPathForCurrentTime() const;
-  
+
   base::FilePath PictureTracingPathForCurrentTime(base::FilePath dir) const;
 
   base::FilePath TracePathForCurrentTime(base::FilePath dir) const;
@@ -58,7 +57,6 @@ class TracingController {
   std::unique_ptr<base::File> trace_file_;
   base::FilePath traces_base_path_;
   bool picture_tracing_enabled_;
-  bool terminate_loop_on_write_;
   bool dart_initialized_;
   bool tracing_active_;
 
@@ -66,7 +64,6 @@ class TracingController {
   void StopDartTracing();
   void StopBaseTracing();
   void FinalizeTraceFile();
-  void StopTracingAsync(const base::FilePath& path, bool terminateLoopWhenDone);
 
   void OnBaseTraceChunk(const scoped_refptr<base::RefCountedString>& chunk,
                         bool has_more_events);
