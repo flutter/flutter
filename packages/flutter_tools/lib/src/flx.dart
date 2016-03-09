@@ -22,6 +22,7 @@ const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'flutter.yaml';
 const String defaultFlxOutputPath = 'build/app.flx';
 const String defaultSnapshotPath = 'build/snapshot_blob.bin';
+const String defaultDepfilePath = 'build/snapshot_blob.bin.d';
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
@@ -160,6 +161,7 @@ Future<int> build(
   String manifestPath: defaultManifestPath,
   String outputPath: defaultFlxOutputPath,
   String snapshotPath: defaultSnapshotPath,
+  String depfilePath: defaultDepfilePath,
   String privateKeyPath: defaultPrivateKeyPath,
   bool precompiledSnapshot: false
 }) async {
@@ -173,7 +175,7 @@ Future<int> build(
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath);
+    int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath, depfilePath: depfilePath, buildOutputPath: outputPath);
     if (result != 0) {
       printError('Failed to run the Flutter compiler. Exit code: $result');
       return result;

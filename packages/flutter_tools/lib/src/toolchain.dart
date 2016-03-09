@@ -18,14 +18,23 @@ class Compiler {
 
   Future<int> compile({
     String mainPath,
-    String snapshotPath
+    String snapshotPath,
+    String depfilePath,
+    String buildOutputPath
   }) {
-    return runCommandAndStreamOutput([
+    final List<String> args = [
       _path,
       mainPath,
       '--package-root=${ArtifactStore.packageRoot}',
       '--snapshot=$snapshotPath'
-    ]);
+    ];
+    if (depfilePath != null) {
+      args.add('--depfile=$depfilePath');
+    }
+    if (buildOutputPath != null) {
+      args.add('--build-output=$buildOutputPath');
+    }
+    return runCommandAndStreamOutput(args);
   }
 }
 
