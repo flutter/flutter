@@ -21,7 +21,7 @@ main() async {
   daemon.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
-    .listen((String line) => print('<== ${line}'));
+    .listen((String line) => print('<== $line'));
   daemon.stderr.listen((data) => stderr.add(data));
 
   stdout.write('> ');
@@ -37,13 +37,13 @@ main() async {
     } else if (line == 'devices') {
       _send({'method': 'device.getDevices'});
     } else {
-      print('command not understood: ${line}');
+      print('command not understood: $line');
     }
     stdout.write('> ');
   });
 
   daemon.exitCode.then((int code) {
-    print('daemon exiting (${code})');
+    print('daemon exiting ($code)');
     exit(code);
   });
 }
@@ -54,5 +54,5 @@ void _send(Map map) {
   map['id'] = id++;
   String str = '[${JSON.encode(map)}]';
   daemon.stdin.writeln(str);
-  print('==> ${str}');
+  print('==> $str');
 }

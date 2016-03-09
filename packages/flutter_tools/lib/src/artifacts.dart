@@ -161,6 +161,13 @@ class ArtifactStore {
   static String flutterRoot;
   static String packageRoot = 'packages';
 
+  /// Whether the tool is running at the root of the Flutter repo.
+  static bool get isFlutterRepo {
+    return FileSystemEntity.isDirectorySync('examples') &&
+      FileSystemEntity.isDirectorySync('packages') &&
+      FileSystemEntity.isFileSync('bin/flutter');
+  }
+
   static bool get isPackageRootValid {
     return FileSystemEntity.isDirectorySync(packageRoot);
   }
