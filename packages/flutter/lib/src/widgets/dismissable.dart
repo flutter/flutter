@@ -7,13 +7,13 @@ import 'transitions.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 
-const Duration _kCardDismissDuration = const Duration(milliseconds: 200);
-const Duration _kCardResizeDuration = const Duration(milliseconds: 300);
-const Curve _kCardResizeTimeCurve = const Interval(0.4, 1.0, curve: Curves.ease);
+const Duration _kDismissDuration = const Duration(milliseconds: 200);
+const Duration _kResizeDuration = const Duration(milliseconds: 300);
+const Curve _kResizeTimeCurve = const Interval(0.4, 1.0, curve: Curves.ease);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
-const double _kDismissCardThreshold = 0.4;
+const double _kDismissThreshold = 0.4;
 
 typedef void DismissDirectionCallback(DismissDirection direction);
 
@@ -93,7 +93,7 @@ class Dismissable extends StatefulComponent {
 class _DismissableState extends State<Dismissable> {
   void initState() {
     super.initState();
-    _moveController = new AnimationController(duration: _kCardDismissDuration)
+    _moveController = new AnimationController(duration: _kDismissDuration)
       ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
   }
@@ -231,7 +231,7 @@ class _DismissableState extends State<Dismissable> {
       double flingVelocity = _directionIsXAxis ? velocity.pixelsPerSecond.dx : velocity.pixelsPerSecond.dy;
       _dragExtent = flingVelocity.sign;
       _moveController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-    } else if (_moveController.value > _kDismissCardThreshold) {
+    } else if (_moveController.value > _kDismissThreshold) {
       _moveController.forward();
     } else {
       _moveController.reverse();
@@ -247,16 +247,16 @@ class _DismissableState extends State<Dismissable> {
     assert(_moveController != null);
     assert(_moveController.isCompleted);
     assert(_resizeController == null);
-    _resizeController = new AnimationController(duration: _kCardResizeDuration)
+    _resizeController = new AnimationController(duration: _kResizeDuration)
       ..addListener(_handleResizeProgressChanged);
     _resizeController.forward();
     setState(() {
       _resizeAnimation = new Tween<double>(
-        begin: _directionIsXAxis ? _findSize().height : _findSize().width,
+        begin: 1.0,
         end: 0.0
       ).animate(new CurvedAnimation(
         parent: _resizeController,
-        curve: _kCardResizeTimeCurve
+        curve: _kResizeTimeCurve
       ));
     });
   }
@@ -293,15 +293,10 @@ class _DismissableState extends State<Dismissable> {
         return true;
       });
 
-      return new AnimatedBuilder(
-        animation: _resizeAnimation,
-        builder: (BuildContext context, Widget child) {
-          return new SizedBox(
-            width: !_directionIsXAxis ? _resizeAnimation.value : null,
-            height: _directionIsXAxis ? _resizeAnimation.value : null,
-            child: background
-          );
-        }
+      return new SizeTransition(
+        sizeFactor: _resizeAnimation,
+        axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
+        child: background
       );
     }
 
