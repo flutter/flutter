@@ -22,6 +22,10 @@ void main() {
       tester.setLocale("es", "US");
       tester.pump();
       expect(tab.widget.data, equals("MERCADO"));
+
+      // TODO(abarth): We're leaking an animation. We should track down the leak
+      // and plug it rather than waiting for the animation to end here.
+      tester.pump(const Duration(seconds: 1));
     });
   });
 }
