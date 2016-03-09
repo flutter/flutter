@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -84,24 +85,6 @@ class GridViewport extends VirtualViewportFromIterable {
   _GridViewportElement createElement() => new _GridViewportElement(this);
 }
 
-// TODO(abarth): This function should go somewhere more general.
-// See https://github.com/dart-lang/collection/pull/16
-int _lowerBound(List sortedList, var value, { int begin: 0 }) {
-  int current = begin;
-  int count = sortedList.length - current;
-  while (count > 0) {
-    int step = count >> 1;
-    int test = current + step;
-    if (sortedList[test] < value) {
-      current = test + 1;
-      count -= step + 1;
-    } else {
-      count = step;
-    }
-  }
-  return current;
-}
-
 class _GridViewportElement extends VirtualViewportElement<GridViewport> {
   _GridViewportElement(GridViewport widget) : super(widget);
 
@@ -133,8 +116,8 @@ class _GridViewportElement extends VirtualViewportElement<GridViewport> {
     double contentExtent = _specification.gridSize.height;
     double containerExtent = renderObject.size.height;
 
-    int materializedRowBase = math.max(0, _lowerBound(_specification.rowOffsets, widget.startOffset) - 1);
-    int materializedRowLimit = math.min(_specification.rowCount, _lowerBound(_specification.rowOffsets, widget.startOffset + containerExtent));
+    int materializedRowBase = math.max(0, lowerBound(_specification.rowOffsets, widget.startOffset) - 1);
+    int materializedRowLimit = math.min(_specification.rowCount, lowerBound(_specification.rowOffsets, widget.startOffset + containerExtent));
 
     _materializedChildBase = (materializedRowBase * _specification.columnCount).clamp(0, renderObject.virtualChildCount);
     _materializedChildCount = (materializedRowLimit * _specification.columnCount).clamp(0, renderObject.virtualChildCount) - _materializedChildBase;
