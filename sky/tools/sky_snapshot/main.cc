@@ -80,10 +80,11 @@ int main(int argc, const char* argv[]) {
   WriteSnapshot(command_line.GetSwitchValuePath(switches::kSnapshot));
 
   if (command_line.HasSwitch(switches::kDepfile)) {
-    CHECK(command_line.HasSwitch(switches::kBuildOutput)) <<
-        "Need --build-output with --depfile";
+    auto build_output = command_line.HasSwitch(switches::kBuildOutput) ?
+        command_line.GetSwitchValueASCII(switches::kBuildOutput) :
+        command_line.GetSwitchValueASCII(switches::kSnapshot);
     WriteDependencies(command_line.GetSwitchValuePath(switches::kDepfile),
-                      command_line.GetSwitchValueASCII(switches::kBuildOutput),
+                      build_output,
                       GetDependencies());
   }
 
