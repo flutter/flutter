@@ -55,9 +55,9 @@ class LogsCommand extends FlutterCommand {
       StreamSubscription subscription = reader.lines.listen((String line) {
         if (devices.length > 1) {
           // Prefix with the name of the device.
-          print('[${reader.name}] $line');
+          printStatus('[${reader.name}] $line');
         } else {
-          print(line);
+          printStatus(line);
         }
       });
       // Wait for the log reader to be finished.

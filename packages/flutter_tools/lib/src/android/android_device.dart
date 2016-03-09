@@ -102,7 +102,7 @@ class AndroidDevice extends Device {
       // output lines like this, which we want to ignore:
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
-      runCheckedSync(adbCommandForDevice(<String>['start-server']));
+      runCheckedSync(<String>[androidSdk.adbPath, 'start-server']);
 
       // Sample output: '22'
       String sdkVersion = runCheckedSync(
@@ -283,7 +283,7 @@ class AndroidDevice extends Device {
   TargetPlatform get platform => TargetPlatform.android;
 
   void clearLogs() {
-    runSync(adbCommandForDevice(<String>['-s', id, 'logcat', '-c']));
+    runSync(adbCommandForDevice(<String>['logcat', '-c']));
   }
 
   DeviceLogReader get logReader {
@@ -306,7 +306,7 @@ class AndroidDevice extends Device {
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
     String output = runCheckedSync(adbCommandForDevice(<String>[
-      '-s', id, 'logcat', '-v', 'time', '-t', '1'
+      'logcat', '-v', 'time', '-t', '1'
     ]));
 
     RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
@@ -332,7 +332,7 @@ class AndroidDevice extends Device {
     String tracePath = null;
     bool isComplete = false;
     while (!isComplete) {
-      List<String> args = <String>['-s', id, 'logcat', '-d'];
+      List<String> args = <String>['logcat', '-d'];
       if (beforeStop != null)
         args.addAll(<String>['-T', beforeStop]);
       String logs = runCheckedSync(adbCommandForDevice(args));
@@ -488,21 +488,11 @@ class _AdbLogReader extends DeviceLogReader {
       throw new StateError('_AdbLogReader must be stopped before it can be started.');
 
     // Start the adb logcat process.
-    List<String> args = <String>[
-      '-s',
-      device.id,
-      'logcat',
-      '-v',
-      'tag', // Only log the tag and the message
-      '-s',
-      'flutter:V',
-      'ActivityManager:W',
-      'System.err:W',
-      '*:F'
-    ];
+    List<String> args = <String>['logcat', '-v', 'tag'];
     String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
       args.addAll(<String>['-T', lastTimestamp]);
+    args.addAll(<String>['-s', 'flutter:V', 'ActivityManager:W', 'System.err:W', '*:F']);
     _process = await runCommand(device.adbCommandForDevice(args));
     _stdoutSubscription =
         _process.stdout.transform(UTF8.decoder)
