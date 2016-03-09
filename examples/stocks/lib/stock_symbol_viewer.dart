@@ -46,6 +46,19 @@ class StockSymbolView extends StatelessComponent {
           ),
           new Text('Market Cap', style: headings),
           new Text('${stock.marketCap}'),
+          new Container(
+            height: 8.0
+          ),
+          new RichText(
+            text: new TextSpan(
+              style: DefaultTextStyle.of(context).merge(new TextStyle(fontSize: 8.0)),
+              text: 'Prices may be delayed by ',
+              children: <TextSpan>[
+                new TextSpan(text: 'several', style: new TextStyle(fontStyle: FontStyle.italic)),
+                new TextSpan(text: ' years.'),
+              ]
+            )
+          ),
         ],
         justifyContent: FlexJustifyContent.collapse
       )

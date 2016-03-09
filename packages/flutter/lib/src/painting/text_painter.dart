@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphStyle, TextBox;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'text_editing.dart';
@@ -51,6 +52,7 @@ class TextSpan {
   final GestureRecognizer recognizer;
 
   void build(ui.ParagraphBuilder builder) {
+    assert(debugAssertValid());
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style.textStyle);
@@ -81,6 +83,7 @@ class TextSpan {
   }
 
   TextSpan getSpanForPosition(TextPosition position) {
+    assert(debugAssertValid());
     TextAffinity affinity = position.affinity;
     int targetOffset = position.offset;
     int offset = 0;
@@ -101,6 +104,7 @@ class TextSpan {
   }
 
   String toPlainText() {
+    assert(debugAssertValid());
     StringBuffer buffer = new StringBuffer();
     visitTextSpan((TextSpan span) {
       buffer.write(span.text);
@@ -113,13 +117,45 @@ class TextSpan {
     StringBuffer buffer = new StringBuffer();
     buffer.writeln('$prefix$runtimeType:');
     String indent = '$prefix  ';
-    buffer.writeln(style.toString(indent));
+    if (style != null)
+      buffer.writeln(style.toString(indent));
     if (text != null)
       buffer.writeln('$indent"$text"');
-    if (children != null)
-      for (TextSpan child in children)
-        buffer.writeln(child.toString(indent));
+    if (children != null) {
+      for (TextSpan child in children) {
+        if (child != null) {
+          buffer.write(child.toString(indent));
+        } else {
+          buffer.writeln('$indent<null>');
+        }
+      }
+    }
+    if (style == null && text == null && children == null)
+      buffer.writeln('$indent(empty)');
     return buffer.toString();
+  }
+
+  bool debugAssertValid() {
+    assert(() {
+      if (!visitTextSpan((TextSpan span) {
+        if (span.children != null) {
+          for (TextSpan child in span.children) {
+            if (child == null)
+              return false;
+          }
+        }
+        return true;
+      })) {
+        throw new FlutterError(
+          'TextSpan contains a null child.\n'
+          'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
+          'The full text in question was:\n'
+          '${toString("  ")}'
+        );
+      }
+      return true;
+    });
+    return true;
   }
 
   bool operator ==(dynamic other) {
@@ -149,6 +185,7 @@ class TextPainter {
   /// The (potentially styled) text to paint.
   TextSpan get text => _text;
   void set text(TextSpan value) {
+    assert(value == null || value.debugAssertValid());
     if (_text == value)
       return;
     _text = value;
