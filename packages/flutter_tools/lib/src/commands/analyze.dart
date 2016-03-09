@@ -307,14 +307,18 @@ analyzer:
     todo: ignore
 linter:
   rules:
+    - avoid_as
+    - avoid_empty_else
     - camel_case_types
     # sometimes we have no choice (e.g. when matching other platforms)
     # - constant_identifier_names
     - empty_constructor_bodies
+    - hash_and_equals
     # disabled until regexp fix is pulled in (https://github.com/flutter/flutter/pull/1996)
     # - library_names
     - library_prefixes
     - non_constant_identifier_names
+    - prefer_is_not_empty
     # too many false-positives; code review should catch real instances
     # - one_member_abstracts
     - slash_for_doc_comments
