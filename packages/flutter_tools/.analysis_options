@@ -13,6 +13,7 @@ analyzer:
     todo: ignore
 linter:
   rules:
+    - avoid_empty_else
     - always_declare_return_types
     # we'll turn on avoid_as as soon as it doesn't complain about "as dynamic"
     # - avoid_as
@@ -20,6 +21,7 @@ linter:
     # sometimes we have no choice (e.g. when matching other platforms)
     # - constant_identifier_names
     - empty_constructor_bodies
+    - hash_and_equals
     # disabled until regexp fix is pulled in (https://github.com/flutter/flutter/pull/1996)
     # - library_names
     - library_prefixes
