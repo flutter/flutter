@@ -289,7 +289,6 @@ class AndroidDevice extends Device {
   DeviceLogReader get logReader {
     if (_logReader == null)
       _logReader = new _AdbLogReader(this);
-
     return _logReader;
   }
 
@@ -303,8 +302,8 @@ class AndroidDevice extends Device {
     ]));
   }
 
-  // Return the most recent timestamp in the Android log. The format can be
-  // passed to logcat's -T option.
+  /// Return the most recent timestamp in the Android log or `null` if there is
+  /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
     String output = runCheckedSync(adbCommandForDevice(<String>[
       '-s', id, 'logcat', '-v', 'time', '-t', '1'
@@ -312,7 +311,7 @@ class AndroidDevice extends Device {
 
     RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
     Match timeMatch = timeRegExp.firstMatch(output);
-    return timeMatch[0];
+    return timeMatch?.group(0);
   }
 
   Future<String> stopTracing(AndroidApk apk, { String outPath }) async {
@@ -333,9 +332,10 @@ class AndroidDevice extends Device {
     String tracePath = null;
     bool isComplete = false;
     while (!isComplete) {
-      String logs = runCheckedSync(adbCommandForDevice(<String>[
-        '-s', id, 'logcat', '-d', '-T', beforeStop
-      ]));
+      List<String> args = <String>['-s', id, 'logcat', '-d'];
+      if (beforeStop != null)
+        args.addAll(<String>['-T', beforeStop]);
+      String logs = runCheckedSync(adbCommandForDevice(args));
       Match fileMatch = traceRegExp.firstMatch(logs);
       if (fileMatch != null && fileMatch[1] != null) {
         tracePath = fileMatch[1];
@@ -481,31 +481,29 @@ class _AdbLogReader extends DeviceLogReader {
 
   bool get isReading => _process != null;
 
-  Future get finished =>
-      _process != null ? _process.exitCode : new Future.value(0);
+  Future get finished => _process != null ? _process.exitCode : new Future.value(0);
 
   Future start() async {
-    if (_process != null) {
-      throw new StateError(
-          '_AdbLogReader must be stopped before it can be started.');
-    }
+    if (_process != null)
+      throw new StateError('_AdbLogReader must be stopped before it can be started.');
 
     // Start the adb logcat process.
-    _process = await runCommand(device.adbCommandForDevice(
-      <String>[
-        '-s',
-        device.id,
-        'logcat',
-        '-v',
-        'tag', // Only log the tag and the message
-        '-T',
-        device.lastLogcatTimestamp,
-        '-s',
-        'flutter:V',
-        'ActivityManager:W',
-        'System.err:W',
-        '*:F',
-      ]));
+    List<String> args = <String>[
+      '-s',
+      device.id,
+      'logcat',
+      '-v',
+      'tag', // Only log the tag and the message
+      '-s',
+      'flutter:V',
+      'ActivityManager:W',
+      'System.err:W',
+      '*:F'
+    ];
+    String lastTimestamp = device.lastLogcatTimestamp;
+    if (lastTimestamp != null)
+      args.addAll(<String>['-T', lastTimestamp]);
+    _process = await runCommand(device.adbCommandForDevice(args));
     _stdoutSubscription =
         _process.stdout.transform(UTF8.decoder)
                        .transform(const LineSplitter()).listen(_onLine);
@@ -516,10 +514,9 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   Future stop() async {
-    if (_process == null) {
-      throw new StateError(
-          '_AdbLogReader must be started before it can be stopped.');
-    }
+    if (_process == null)
+      throw new StateError('_AdbLogReader must be started before it can be stopped.');
+
     _stdoutSubscription?.cancel();
     _stdoutSubscription = null;
     _stderrSubscription?.cancel();
