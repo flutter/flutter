@@ -13,7 +13,7 @@ class _Logger {
   static void _printString(String s) native "Logger_PrintString";
 }
 
-_setupHooks() {
+void _setupHooks() {
   // Wire up timer implementation that is driven by MojoHandleWatcher.
   VMLibraryHooks.eventHandlerSendData = MojoHandleWatcher.timer;
   VMLibraryHooks.timerMillisecondClock = MojoCoreNatives.timerMillisecondClock;

@@ -4,7 +4,6 @@ dart:isolate,::,_startMainIsolate
 dart:mojo.internal,MojoHandleWatcher,mojoControlHandle
 dart:ui,::,_beginFrame
 dart:ui,::,_dispatchPointerPacket
-dart:ui,::,_getCreateTimerClosure
 dart:ui,::,_getGetBaseURLClosure
 dart:ui,::,_getMainClosure
 dart:ui,::,_getPrintClosure
