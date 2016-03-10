@@ -321,7 +321,6 @@ class IOSSimulator extends Device {
   bool get isLocalEmulator => true;
 
   _IOSSimulatorLogReader _logReader;
-  _IOSSimulatorDevicePortForwarder _portForwarder;
 
   String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
 
@@ -543,13 +542,6 @@ class IOSSimulator extends Device {
       _logReader = new _IOSSimulatorLogReader(this);
 
     return _logReader;
-  }
-
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _IOSSimulatorDevicePortForwarder(this);
-
-    return _portForwarder;
   }
 
   void clearLogs() {
@@ -779,29 +771,4 @@ int compareIphoneVersions(String id1, String id2) {
   int q1 = qualifiers.indexOf(m1[2]);
   int q2 = qualifiers.indexOf(m2[2]);
   return q1.compareTo(q2);
-}
-
-class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
-  _IOSSimulatorDevicePortForwarder(this.device);
-
-  final IOSSimulator device;
-
-  final List<ForwardedPort> _ports = <ForwardedPort>[];
-
-  List<ForwardedPort> get forwardedPorts {
-    return _ports;
-  }
-
-  Future<int> forward(int devicePort, {int hostPort: null}) async {
-    if ((hostPort == null) || (hostPort == 0)) {
-      hostPort = devicePort;
-    }
-    assert(devicePort == hostPort);
-    _ports.add(new ForwardedPort(devicePort, hostPort));
-    return hostPort;
-  }
-
-  Future unforward(ForwardedPort forwardedPort) async {
-    _ports.remove(forwardedPort);
-  }
 }

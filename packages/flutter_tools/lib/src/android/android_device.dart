@@ -51,7 +51,6 @@ class AndroidDevice extends Device {
   bool get isLocalEmulator => false;
 
   _AdbLogReader _logReader;
-  _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
     return <String>[androidSdk.adbPath, '-s', id]..addAll(args);
@@ -170,10 +169,19 @@ class AndroidDevice extends Device {
   Future _forwardObservatoryPort(int port) async {
     bool portWasZero = port == 0;
 
+    if (port == 0) {
+      // Auto-bind to a port. Set up forwarding for that port. Emit a stdout
+      // message similar to the command-line VM so that tools can parse the output.
+      // "Observatory listening on http://127.0.0.1:52111"
+      port = await findAvailablePort();
+    }
+
     try {
       // Set up port forwarding for observatory.
-      port = await portForwarder.forward(observatoryDefaultPort,
-                                         hostPort: port);
+      runCheckedSync(adbCommandForDevice(<String>[
+        'forward', 'tcp:$port', 'tcp:$observatoryDefaultPort'
+      ]));
+
       if (portWasZero)
         printStatus('Observatory listening on http://127.0.0.1:$port');
     } catch (e) {
@@ -282,13 +290,6 @@ class AndroidDevice extends Device {
     if (_logReader == null)
       _logReader = new _AdbLogReader(this);
     return _logReader;
-  }
-
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _AndroidDevicePortForwarder(this);
-
-    return _portForwarder;
   }
 
   void startTracing(AndroidApk apk) {
@@ -534,76 +535,5 @@ class _AdbLogReader extends DeviceLogReader {
     if (other is! _AdbLogReader)
       return false;
     return other.device.id == device.id;
-  }
-}
-
-class _AndroidDevicePortForwarder extends DevicePortForwarder {
-  _AndroidDevicePortForwarder(this.device);
-
-  final AndroidDevice device;
-
-  static int _extractPort(String portString) {
-    return int.parse(portString.trim(), onError: (_) => null);
-  }
-
-  List<ForwardedPort> get forwardedPorts {
-    final List<ForwardedPort> ports = <ForwardedPort>[];
-
-    String stdout = runCheckedSync(
-      <String>[
-        androidSdk.adbPath,
-        'forward',
-        '--list'
-      ]);
-
-    List<String> lines = LineSplitter.split(stdout).toList();
-    for (String line in lines) {
-      if (line.startsWith(device.id)) {
-        List<String> splitLine = line.split("tcp:");
-
-        // Sanity check splitLine.
-        if (splitLine.length != 3)
-          continue;
-
-        // Attempt to extract ports.
-        int hostPort = _extractPort(splitLine[1]);
-        int devicePort = _extractPort(splitLine[2]);
-
-        // Failed, skip.
-        if ((hostPort == null) || (devicePort == null))
-          continue;
-
-        ports.add(new ForwardedPort(hostPort, devicePort));
-      }
-    }
-
-    return ports;
-  }
-
-  Future<int> forward(int devicePort, {int hostPort: null}) async {
-    if ((hostPort == null) || (hostPort == 0)) {
-      // Auto select host port.
-      hostPort = await findAvailablePort();
-    }
-
-    runCheckedSync(
-      <String>[
-        androidSdk.adbPath,
-        'forward',
-        hostPort.toString(),
-        devicePort.toString()
-      ]);
-
-    return hostPort;
-  }
-
-  Future unforward(ForwardedPort forwardedPort) async {
-    runCheckedSync(
-      <String>[
-        androidSdk.adbPath,
-        'forward',
-        '--remove',
-        forwardedPort.hostPort.toString()
-      ]);
   }
 }
