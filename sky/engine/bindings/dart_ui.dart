@@ -11,6 +11,7 @@
 /// pointer input system, and functions for image decoding.
 library dart_ui;
 
+import 'dart:_internal';
 import 'dart:math' as math;
 import 'dart:mojo.internal';
 import 'dart:nativewrappers';
