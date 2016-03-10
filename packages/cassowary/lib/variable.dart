@@ -21,7 +21,7 @@ class Variable {
     return res;
   }
 
-  String get debugName => _elvis(name, 'variable$_tick');
+  String get debugName => name ?? 'variable$_tick';
 
   @override
   String toString() => debugName;

@@ -8,7 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flx/signing.dart';
 import 'package:test/test.dart';
 
-main() async {
+Future main() async {
   // The following constant was generated via the openssl shell commands:
   // openssl ecparam -genkey -name prime256v1 -out privatekey.pem
   // openssl ec -in privatekey.pem -outform DER | base64

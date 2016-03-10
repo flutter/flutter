@@ -121,7 +121,7 @@ Widget splashScreen() {
   );
 }
 
-main() async {
+Future main() async {
   runApp(splashScreen());
 
   PianoApp app = new PianoApp();

@@ -23,7 +23,7 @@ class Param extends _EquationMember {
   double get value => variable.value;
 
   String get name => variable.name;
-  set name(String name) { variable.name = name; }
+  void set name(String name) { variable.name = name; }
 
   Expression asExpression() => new Expression([new Term(variable, 1.0)], 0.0);
 }

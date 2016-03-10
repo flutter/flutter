@@ -74,7 +74,7 @@ class PhysicsWorld extends Node {
     return new Offset(g.x, g.y);
   }
 
-  set gravity(Offset gravity) {
+  void set gravity(Offset gravity) {
     // Convert from points/s^2 to m/s^2
     b2World.setGravity(new Vector2(gravity.dx / b2WorldToNodeConversionFactor,
       gravity.dy / b2WorldToNodeConversionFactor));
@@ -83,14 +83,14 @@ class PhysicsWorld extends Node {
   /// If set to true, objects can fall asleep if the haven't moved in a while.
   bool get allowSleep => b2World.isAllowSleep();
 
-  set allowSleep(bool allowSleep) {
+  void set allowSleep(bool allowSleep) {
     b2World.setAllowSleep(allowSleep);
   }
 
   /// True if sub stepping should be used in the simulation.
   bool get subStepping => b2World.isSubStepping();
 
-  set subStepping(bool subStepping) {
+  void set subStepping(bool subStepping) {
     b2World.setSubStepping(subStepping);
   }
 

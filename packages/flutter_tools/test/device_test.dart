@@ -7,9 +7,7 @@ import 'package:test/test.dart';
 
 import 'src/context.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
       // Test that DeviceManager.getDevices() doesn't throw.

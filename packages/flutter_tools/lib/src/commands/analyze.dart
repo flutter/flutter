@@ -288,6 +288,7 @@ analyzer:
     todo: ignore
 linter:
   rules:
+    - always_declare_return_types
     # we'll turn on avoid_as as soon as it doesn't complain about "as dynamic"
     # - avoid_as
     - camel_case_types

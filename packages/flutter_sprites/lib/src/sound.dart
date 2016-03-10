@@ -137,11 +137,8 @@ SoundTrackPlayer _sharedSoundTrackPlayer;
 class SoundTrackPlayer {
   Set<SoundTrack> _soundTracks = new HashSet<SoundTrack>();
 
-  static sharedInstance() {
-    if (_sharedSoundTrackPlayer == null) {
-      _sharedSoundTrackPlayer = new SoundTrackPlayer();
-    }
-    return _sharedSoundTrackPlayer;
+  static SoundTrackPlayer sharedInstance() {
+    return _sharedSoundTrackPlayer ??= new SoundTrackPlayer();
   }
 
   SoundTrackPlayer() {

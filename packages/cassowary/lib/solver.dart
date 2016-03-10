@@ -583,7 +583,7 @@ class Solver {
       }
     }
 
-    return _elvis(entering, new _Symbol(_SymbolType.invalid, 0));
+    return entering ?? new _Symbol(_SymbolType.invalid, 0);
   }
 
   String toString() {

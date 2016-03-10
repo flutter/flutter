@@ -9,7 +9,7 @@ import 'message.dart';
 class GetHealth implements Command {
   final String kind = 'get_health';
 
-  static deserialize(Map<String, String> json) => new GetHealth();
+  static GetHealth deserialize(Map<String, String> json) => new GetHealth();
 
   Map<String, String> serialize() => const {};
 }

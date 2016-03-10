@@ -85,7 +85,7 @@ class Node {
     return _constraints;
   }
 
-  set constraints(List<Constraint> constraints) {
+  void set constraints(List<Constraint> constraints) {
     _constraints = constraints;
     if (_spriteBox != null) _spriteBox._constrainedNodes = null;
   }
@@ -803,7 +803,7 @@ class Node {
   ///     );
   PhysicsBody get physicsBody => _physicsBody;
 
-  set physicsBody(PhysicsBody physicsBody) {
+  void set physicsBody(PhysicsBody physicsBody) {
     if (parent != null) {
       assert(parent is PhysicsWorld);
 
