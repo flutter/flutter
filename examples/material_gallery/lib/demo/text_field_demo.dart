@@ -59,11 +59,14 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     ));
   }
 
-  String _handleInputChanged(InputValue value, int which) {
-    setState(() {
-      _inputs[which] = value;
-    });
-    return value.text;
+  Function _handleInputChanged(int which, Function setter) {
+    return (InputValue value) {
+      setState(() {
+        _inputs[which] = value;
+        if (setter != null)
+          setter(value.text);
+      });
+    };
   }
 
   void _handleInputSubmitted(InputValue value) {
@@ -84,7 +87,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             labelText: 'Name',
             errorText: _login.setName(_inputs[0].text),
             value: _inputs[0],
-            onChanged: (InputValue value) { _login.setName(_handleInputChanged(value, 0)); },
+            onChanged: _handleInputChanged(0, _login.setName),
             onSubmitted: _handleInputSubmitted
           ),
           new Input(
@@ -92,7 +95,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             labelText: 'Phone Number',
             errorText: _login.setPhoneNumber(_inputs[1].text),
             value: _inputs[1],
-            onChanged: (InputValue value) { _login.setPhoneNumber(_handleInputChanged(value, 1)); },
+            onChanged: _handleInputChanged(1, _login.setPhoneNumber),
             onSubmitted: _handleInputSubmitted
           ),
           new Row(
@@ -104,7 +107,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                   labelText: 'New Password',
                   hideText: true,
                   value: _inputs[2],
-                  onChanged: (InputValue value) { _login.setPassword(_handleInputChanged(value, 2), _inputs[3].text); },
+                  onChanged: _handleInputChanged(2, null),
                   onSubmitted: _handleInputSubmitted
                 )
               ),
@@ -115,7 +118,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                   errorText: _login.setPassword(_inputs[2].text, _inputs[3].text),
                   hideText: true,
                   value: _inputs[3],
-                  onChanged: (InputValue value) { _login.setPassword(_inputs[2].text, _handleInputChanged(value, 3)); },
+                  onChanged: _handleInputChanged(3, (String value) { _login.setPassword(_inputs[2].text, value); }),
                   onSubmitted: _handleInputSubmitted
                 )
               )
