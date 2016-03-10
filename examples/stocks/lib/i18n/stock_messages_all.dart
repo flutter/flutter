@@ -1,4 +1,4 @@
-/**
+/*
  * DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
  * This is a library that looks up messages for specific locales by
  * delegating to the appropriate library.
@@ -28,7 +28,7 @@ MessageLookupByLibrary _findExact(localeName) {
   }
 }
 
-/** User programs should call this before using [localeName] for messages.*/
+/// User programs should call this before using [localeName] for messages.
 Future initializeMessages(String localeName) {
   initializeInternalMessageLookup(() => new CompositeMessageLookup());
   var lib = _deferredLibraries[Intl.canonicalizedLocale(localeName)];
