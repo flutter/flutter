@@ -19,7 +19,7 @@ import 'setup_xcodeproj.dart';
 String get homeDirectory => path.absolute(Platform.environment['HOME']);
 
 const int kXcodeRequiredVersionMajor = 7;
-const int kXcodeRequiredVersionMinor = 2;
+const int kXcodeRequiredVersionMinor = 0;
 
 class XCode {
   /// Returns [XCode] active in the current app context.
