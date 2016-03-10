@@ -242,6 +242,16 @@ MojoResult MojoSystemImplDuplicateBufferHandle(
                                      MakeUserPointer(new_buffer_handle));
 }
 
+MojoResult MojoSystemImplGetBufferInformation(MojoSystemImpl system,
+                                              MojoHandle buffer_handle,
+                                              MojoBufferInformation* info,
+                                              uint32_t info_num_bytes) {
+  mojo::system::Core* core = static_cast<mojo::system::Core*>(system);
+  DCHECK(core);
+  return core->GetBufferInformation(buffer_handle, MakeUserPointer(info),
+                                    info_num_bytes);
+}
+
 MojoResult MojoSystemImplMapBuffer(MojoSystemImpl system,
                                    MojoHandle buffer_handle,
                                    uint64_t offset,

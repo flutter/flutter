@@ -518,6 +518,16 @@ MojoResult Core::DuplicateBufferHandle(
   return MOJO_RESULT_OK;
 }
 
+MojoResult Core::GetBufferInformation(MojoHandle buffer_handle,
+                                      UserPointer<MojoBufferInformation> info,
+                                      uint32_t info_num_bytes) {
+  RefPtr<Dispatcher> dispatcher(GetDispatcher(buffer_handle));
+  if (!dispatcher)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  return dispatcher->GetBufferInformation(info, info_num_bytes);
+}
+
 MojoResult Core::MapBuffer(MojoHandle buffer_handle,
                            uint64_t offset,
                            uint64_t num_bytes,

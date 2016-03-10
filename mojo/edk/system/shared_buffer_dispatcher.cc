@@ -232,6 +232,29 @@ MojoResult SharedBufferDispatcher::DuplicateBufferHandleImplNoLock(
   return MOJO_RESULT_OK;
 }
 
+MojoResult SharedBufferDispatcher::GetBufferInformationImplNoLock(
+    UserPointer<MojoBufferInformation> info,
+    uint32_t info_num_bytes) {
+  mutex().AssertHeld();
+
+  // Note: If/when |MojoBufferInformation| is extended beyond its initial
+  // definition, more work will be necessary. (See the definition of
+  // |MojoGetBufferInformation()| in mojo/public/c/system/buffer.h.)
+  static_assert(sizeof(MojoBufferInformation) == 16u,
+                "MojoBufferInformation has been extended!");
+
+  if (info_num_bytes < sizeof(MojoBufferInformation))
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  MojoBufferInformation model_info = {
+      sizeof(MojoBufferInformation),                         // |struct_size|.
+      MOJO_BUFFER_INFORMATION_FLAG_NONE,                     // |flags|.
+      static_cast<uint64_t>(shared_buffer_->GetNumBytes()),  // |num_bytes|.
+  };
+  info.Put(model_info);
+  return MOJO_RESULT_OK;
+}
+
 MojoResult SharedBufferDispatcher::MapBufferImplNoLock(
     uint64_t offset,
     uint64_t num_bytes,

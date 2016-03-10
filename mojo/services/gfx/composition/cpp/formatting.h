@@ -28,6 +28,9 @@ std::ostream& operator<<(std::ostream& os,
 std::ostream& operator<<(
     std::ostream& os,
     const mojo::gfx::composition::MailboxTextureResource& value);
+std::ostream& operator<<(
+    std::ostream& os,
+    const mojo::gfx::composition::MailboxTextureResource::Origin* value);
 
 std::ostream& operator<<(std::ostream& os,
                          const mojo::gfx::composition::Node& value);

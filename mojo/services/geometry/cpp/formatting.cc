@@ -12,8 +12,8 @@ std::ostream& operator<<(std::ostream& os, const mojo::Point& value) {
   return os << "{x=" << value.x << ", y=" << value.y << "}";
 }
 
-std::ostream& operator<<(std::ostream& os, const mojo::Size& value) {
-  return os << "{width=" << value.width << ", height=" << value.height << "}";
+std::ostream& operator<<(std::ostream& os, const mojo::PointF& value) {
+  return os << "{x=" << value.x << ", y=" << value.y << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const mojo::Rect& value) {
@@ -21,7 +21,12 @@ std::ostream& operator<<(std::ostream& os, const mojo::Rect& value) {
             << ", width=" << value.width << ", height=" << value.height << "}";
 }
 
-std::ostream& operator<<(std::ostream& os, const mojo::RRect& value) {
+std::ostream& operator<<(std::ostream& os, const mojo::RectF& value) {
+  return os << "{x=" << value.x << ", y=" << value.y
+            << ", width=" << value.width << ", height=" << value.height << "}";
+}
+
+std::ostream& operator<<(std::ostream& os, const mojo::RRectF& value) {
   return os << "{x=" << value.x << ", y=" << value.y
             << ", width=" << value.width << ", height=" << value.height
             << ", top_left_radius_x=" << value.top_left_radius_x
@@ -32,6 +37,10 @@ std::ostream& operator<<(std::ostream& os, const mojo::RRect& value) {
             << ", bottom_left_radius_y=" << value.bottom_left_radius_y
             << ", bottom_right_radius_x=" << value.bottom_right_radius_x
             << ", bottom_right_radius_y=" << value.bottom_right_radius_y << "}";
+}
+
+std::ostream& operator<<(std::ostream& os, const mojo::Size& value) {
+  return os << "{width=" << value.width << ", height=" << value.height << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const mojo::Transform& value) {

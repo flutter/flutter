@@ -67,6 +67,9 @@ class CoreTestBase_MockHandleInfo {
   unsigned GetReadDataCallCount() const;
   unsigned GetBeginReadDataCallCount() const;
   unsigned GetEndReadDataCallCount() const;
+  unsigned GetDuplicateBufferHandleCallCount() const;
+  unsigned GetGetBufferInformationCallCount() const;
+  unsigned GetMapBufferCallCount() const;
   unsigned GetAddAwakableCallCount() const;
   unsigned GetRemoveAwakableCallCount() const;
   unsigned GetCancelAllAwakablesCallCount() const;
@@ -86,6 +89,9 @@ class CoreTestBase_MockHandleInfo {
   void IncrementReadDataCallCount();
   void IncrementBeginReadDataCallCount();
   void IncrementEndReadDataCallCount();
+  void IncrementDuplicateBufferHandleCallCount();
+  void IncrementGetBufferInformationCallCount();
+  void IncrementMapBufferCallCount();
   void IncrementAddAwakableCallCount();
   void IncrementRemoveAwakableCallCount();
   void IncrementCancelAllAwakablesCallCount();
@@ -96,22 +102,25 @@ class CoreTestBase_MockHandleInfo {
 
  private:
   mutable util::Mutex mutex_;
-  unsigned ctor_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned dtor_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned close_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned write_message_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned read_message_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned write_data_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned begin_write_data_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned end_write_data_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned read_data_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned begin_read_data_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned end_read_data_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned add_awakable_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned remove_awakable_call_count_ MOJO_GUARDED_BY(mutex_);
-  unsigned cancel_all_awakables_call_count_ MOJO_GUARDED_BY(mutex_);
+  unsigned ctor_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned dtor_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned close_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned write_message_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned read_message_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned write_data_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned begin_write_data_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned end_write_data_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned read_data_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned begin_read_data_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned end_read_data_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned duplicate_buffer_handle_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned get_buffer_information_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned map_buffer_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned add_awakable_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned remove_awakable_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
+  unsigned cancel_all_awakables_call_count_ MOJO_GUARDED_BY(mutex_) = 0;
 
-  bool add_awakable_allowed_ MOJO_GUARDED_BY(mutex_);
+  bool add_awakable_allowed_ MOJO_GUARDED_BY(mutex_) = false;
   std::vector<Awakable*> added_awakables_ MOJO_GUARDED_BY(mutex_);
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(CoreTestBase_MockHandleInfo);

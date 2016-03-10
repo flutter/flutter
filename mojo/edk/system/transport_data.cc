@@ -30,10 +30,8 @@ static_assert(kMaxSizePerPlatformHandle % MessageInTransit::kMessageAlignment ==
                   0,
               "kMaxSizePerPlatformHandle not a multiple of alignment");
 
-MOJO_STATIC_CONST_MEMBER_DEFINITION const size_t
-    TransportData::kMaxSerializedDispatcherSize;
-MOJO_STATIC_CONST_MEMBER_DEFINITION const size_t
-    TransportData::kMaxSerializedDispatcherPlatformHandles;
+const size_t TransportData::kMaxSerializedDispatcherSize;
+const size_t TransportData::kMaxSerializedDispatcherPlatformHandles;
 
 // static
 size_t TransportData::GetMaxBufferSize() {

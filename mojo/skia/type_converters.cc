@@ -6,22 +6,37 @@
 
 namespace mojo {
 
-SkPoint TypeConverter<SkPoint, mojo::Point>::Convert(const mojo::Point& input) {
-  return SkPoint::Make(input.x, input.y);
+SkIPoint TypeConverter<SkIPoint, mojo::Point>::Convert(
+    const mojo::Point& input) {
+  return SkIPoint::Make(input.x, input.y);
 }
 
-mojo::Point TypeConverter<mojo::Point, SkPoint>::Convert(const SkPoint& input) {
+mojo::Point TypeConverter<mojo::Point, SkIPoint>::Convert(
+    const SkIPoint& input) {
   mojo::Point output;
   output.x = input.x();
   output.y = input.y();
   return output;
 }
 
-SkRect TypeConverter<SkRect, mojo::Rect>::Convert(const mojo::Rect& input) {
-  return SkRect::MakeXYWH(input.x, input.y, input.width, input.height);
+SkPoint TypeConverter<SkPoint, mojo::PointF>::Convert(
+    const mojo::PointF& input) {
+  return SkPoint::Make(input.x, input.y);
 }
 
-mojo::Rect TypeConverter<mojo::Rect, SkRect>::Convert(const SkRect& input) {
+mojo::PointF TypeConverter<mojo::PointF, SkPoint>::Convert(
+    const SkPoint& input) {
+  mojo::PointF output;
+  output.x = input.x();
+  output.y = input.y();
+  return output;
+}
+
+SkIRect TypeConverter<SkIRect, mojo::Rect>::Convert(const mojo::Rect& input) {
+  return SkIRect::MakeXYWH(input.x, input.y, input.width, input.height);
+}
+
+mojo::Rect TypeConverter<mojo::Rect, SkIRect>::Convert(const SkIRect& input) {
   mojo::Rect output;
   output.x = input.x();
   output.y = input.y();
@@ -30,7 +45,21 @@ mojo::Rect TypeConverter<mojo::Rect, SkRect>::Convert(const SkRect& input) {
   return output;
 }
 
-SkRRect TypeConverter<SkRRect, mojo::RRect>::Convert(const mojo::RRect& input) {
+SkRect TypeConverter<SkRect, mojo::RectF>::Convert(const mojo::RectF& input) {
+  return SkRect::MakeXYWH(input.x, input.y, input.width, input.height);
+}
+
+mojo::RectF TypeConverter<mojo::RectF, SkRect>::Convert(const SkRect& input) {
+  mojo::RectF output;
+  output.x = input.x();
+  output.y = input.y();
+  output.width = input.width();
+  output.height = input.height();
+  return output;
+}
+
+SkRRect TypeConverter<SkRRect, mojo::RRectF>::Convert(
+    const mojo::RRectF& input) {
   SkVector radii[4] = {
       {input.top_left_radius_x, input.top_left_radius_y},
       {input.top_right_radius_x, input.top_right_radius_y},
@@ -42,8 +71,9 @@ SkRRect TypeConverter<SkRRect, mojo::RRect>::Convert(const mojo::RRect& input) {
   return output;
 }
 
-mojo::RRect TypeConverter<mojo::RRect, SkRRect>::Convert(const SkRRect& input) {
-  mojo::RRect output;
+mojo::RRectF TypeConverter<mojo::RRectF, SkRRect>::Convert(
+    const SkRRect& input) {
+  mojo::RRectF output;
   output.x = input.rect().x();
   output.y = input.rect().y();
   output.width = input.rect().width();
@@ -93,6 +123,24 @@ mojo::TransformPtr TypeConverter<mojo::TransformPtr, SkMatrix>::Convert(
   output->matrix[13] = input[7];
   output->matrix[14] = 0.f;
   output->matrix[15] = input[8];
+  return output.Pass();
+}
+
+SkMatrix44 TypeConverter<SkMatrix44, mojo::TransformPtr>::Convert(
+    const mojo::TransformPtr& input) {
+  if (!input)
+    return SkMatrix44::I();
+
+  SkMatrix44 output(SkMatrix44::kUninitialized_Constructor);
+  output.setRowMajorf(input->matrix.data());
+  return output;
+}
+
+mojo::TransformPtr TypeConverter<mojo::TransformPtr, SkMatrix44>::Convert(
+    const SkMatrix44& input) {
+  auto output = mojo::Transform::New();
+  output->matrix.resize(16u);
+  input.asRowMajorf(output->matrix.data());
   return output.Pass();
 }
 

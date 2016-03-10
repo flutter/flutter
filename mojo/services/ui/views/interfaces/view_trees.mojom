@@ -6,6 +6,7 @@
 module mojo.ui;
 
 import "mojo/public/interfaces/application/service_provider.mojom";
+import "mojo/services/gfx/composition/interfaces/renderers.mojom";
 import "mojo/services/ui/views/interfaces/layouts.mojom";
 import "mojo/services/ui/views/interfaces/views.mojom";
 
@@ -73,6 +74,14 @@ interface ViewTree {
   // See |mojo.ui.InputDispatcher|.
   GetServiceProvider(mojo.ServiceProvider& service_provider);
 
+  // Sets where the view tree's scene graph will be rendered.
+  //
+  // If |renderer| is null, disconnects the view tree from the renderer
+  // causing its previous renderer to be destroyed.
+  //
+  // See also: |mojo.gfx.composition.Compositor.CreateRenderer()|.
+  SetRenderer(mojo.gfx.composition.Renderer? renderer);
+
   // Requests that the view tree's OnLayout() method be called to compute a
   // new layout due to a change in the view tree's layout information.
   RequestLayout();
@@ -108,7 +117,7 @@ interface ViewTree {
   //
   // It is an error to call this function if the root was not previously set;
   // the connection will be closed.
-  ResetRoot(mojo.ui.ViewOwner&? transferred_view_owner);
+  ClearRoot(mojo.ui.ViewOwner&? transferred_view_owner);
 
   // Sets the layout parameters of the root of the view tree and retrieves
   // its layout information.
@@ -153,4 +162,10 @@ interface ViewTreeListener {
   // The implementation should invoke the callback once the event has
   // been handled.
   OnRootUnavailable(uint32 root_key) => ();
+
+  // Called when the tree's renderer connection closed unexpectedly.
+  //
+  // The implementation should invoke the callback once the event has
+  // been handled.
+  OnRendererDied() => ();
 };

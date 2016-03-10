@@ -91,6 +91,9 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
   MojoResult DuplicateBufferHandleImplNoLock(
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
       util::RefPtr<Dispatcher>* new_dispatcher) override;
+  MojoResult GetBufferInformationImplNoLock(
+      UserPointer<MojoBufferInformation> info,
+      uint32_t info_num_bytes) override;
   MojoResult MapBufferImplNoLock(
       uint64_t offset,
       uint64_t num_bytes,

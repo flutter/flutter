@@ -95,8 +95,6 @@ class _ServiceDescriberDescribeServiceParams extends bindings.Struct {
 }
 
 
-
-
 class _ServiceDescriptionGetTopLevelInterfaceParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(8, 0)
@@ -153,8 +151,6 @@ class _ServiceDescriptionGetTopLevelInterfaceParams extends bindings.Struct {
     return map;
   }
 }
-
-
 
 
 class ServiceDescriptionGetTopLevelInterfaceResponseParams extends bindings.Struct {
@@ -230,8 +226,6 @@ class ServiceDescriptionGetTopLevelInterfaceResponseParams extends bindings.Stru
 }
 
 
-
-
 class _ServiceDescriptionGetTypeDefinitionParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
@@ -302,8 +296,6 @@ class _ServiceDescriptionGetTypeDefinitionParams extends bindings.Struct {
     return map;
   }
 }
-
-
 
 
 class ServiceDescriptionGetTypeDefinitionResponseParams extends bindings.Struct {
@@ -378,8 +370,6 @@ class ServiceDescriptionGetTypeDefinitionResponseParams extends bindings.Struct 
 }
 
 
-
-
 class _ServiceDescriptionGetAllTypeDefinitionsParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(8, 0)
@@ -436,8 +426,6 @@ class _ServiceDescriptionGetAllTypeDefinitionsParams extends bindings.Struct {
     return map;
   }
 }
-
-
 
 
 class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Struct {
@@ -568,12 +556,7 @@ class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Str
   }
 }
 
-
-
-
 const int _ServiceDescriber_describeServiceName = 0;
-
-
 
 class _ServiceDescriberServiceDescription implements ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>
@@ -767,8 +750,6 @@ class ServiceDescriberStub extends bindings.Stub {
 const int _ServiceDescription_getTopLevelInterfaceName = 0;
 const int _ServiceDescription_getTypeDefinitionName = 1;
 const int _ServiceDescription_getAllTypeDefinitionsName = 2;
-
-
 
 class _ServiceDescriptionServiceDescription implements ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>

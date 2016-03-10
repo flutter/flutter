@@ -46,7 +46,9 @@ GaneshContext::~GaneshContext() {
 }
 
 void GaneshContext::OnContextLost() {
-  ReleaseContext();
+  context_lost_ = true;
+  if (!scope_entered_)
+    ReleaseContext();
 }
 
 void GaneshContext::ReleaseContext() {
@@ -76,12 +78,17 @@ void GaneshContext::ExitScope() {
   CHECK(scope_entered_);
   scope_entered_ = false;
 
-  // Flush the Ganesh context when exiting its scope.
-  if (gr_context_)
-    gr_context_->flush();
+  if (gl_context_) {
+    // Flush the Ganesh context when exiting its scope.
+    if (gr_context_)
+      gr_context_->flush();
 
-  MGLMakeCurrent(previous_mgl_context_);
-  previous_mgl_context_ = MGL_NO_CONTEXT;
+    MGLMakeCurrent(previous_mgl_context_);
+    previous_mgl_context_ = MGL_NO_CONTEXT;
+
+    if (context_lost_)
+      ReleaseContext();
+  }
 }
 
 }  // namespace skia

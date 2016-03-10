@@ -109,8 +109,6 @@ class _ShellConnectToApplicationParams extends bindings.Struct {
 }
 
 
-
-
 class _ShellCreateApplicationConnectorParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
@@ -181,13 +179,8 @@ class _ShellCreateApplicationConnectorParams extends bindings.Struct {
   }
 }
 
-
-
-
 const int _Shell_connectToApplicationName = 0;
 const int _Shell_createApplicationConnectorName = 1;
-
-
 
 class _ShellServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>

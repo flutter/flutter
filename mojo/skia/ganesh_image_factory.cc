@@ -29,6 +29,7 @@ void ReleaseThunk(void* data) {
     uint32_t texture_id,
     uint32_t width,
     uint32_t height,
+    GrSurfaceOrigin origin,
     const base::Closure& release_callback) {
   DCHECK(texture_id);
   DCHECK(width);
@@ -44,7 +45,7 @@ void ReleaseThunk(void* data) {
   desc.fWidth = width;
   desc.fHeight = height;
   desc.fConfig = kSkia8888_GrPixelConfig;
-  desc.fOrigin = kTopLeft_GrSurfaceOrigin;
+  desc.fOrigin = origin;
   desc.fTextureHandle = reinterpret_cast<GrBackendObject>(&info);
   return ::skia::AdoptRef(SkImage::NewFromTexture(
       scope.gr_context(), desc, kPremul_SkAlphaType, &ReleaseThunk,
@@ -55,9 +56,11 @@ MailboxTextureImageGenerator::MailboxTextureImageGenerator(
     const GLbyte mailbox_name[GL_MAILBOX_SIZE_CHROMIUM],
     GLuint sync_point,
     uint32_t width,
-    uint32_t height)
+    uint32_t height,
+    GrSurfaceOrigin origin)
     : SkImageGenerator(SkImageInfo::MakeN32Premul(width, height)),
-      sync_point_(sync_point) {
+      sync_point_(sync_point),
+      origin_(origin) {
   DCHECK(mailbox_name);
   memcpy(mailbox_name_, mailbox_name, GL_MAILBOX_SIZE_CHROMIUM);
 }
@@ -85,7 +88,7 @@ GrTexture* MailboxTextureImageGenerator::onGenerateTexture(
   desc.fWidth = getInfo().width();
   desc.fHeight = getInfo().height();
   desc.fConfig = kSkia8888_GrPixelConfig;
-  desc.fOrigin = kTopLeft_GrSurfaceOrigin;
+  desc.fOrigin = origin_;
   desc.fTextureHandle = reinterpret_cast<GrBackendObject>(&info);
   return context->textureProvider()->wrapBackendTexture(desc,
                                                         kAdopt_GrWrapOwnership);

@@ -126,8 +126,6 @@ class _ApplicationInitializeParams extends bindings.Struct {
 }
 
 
-
-
 class _ApplicationAcceptConnectionParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(40, 0)
@@ -238,8 +236,6 @@ class _ApplicationAcceptConnectionParams extends bindings.Struct {
 }
 
 
-
-
 class _ApplicationRequestQuitParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(8, 0)
@@ -297,14 +293,9 @@ class _ApplicationRequestQuitParams extends bindings.Struct {
   }
 }
 
-
-
-
 const int _Application_initializeName = 0;
 const int _Application_acceptConnectionName = 1;
 const int _Application_requestQuitName = 2;
-
-
 
 class _ApplicationServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>

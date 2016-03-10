@@ -11,9 +11,11 @@
 namespace mojo {
 
 std::ostream& operator<<(std::ostream& os, const mojo::Point& value);
-std::ostream& operator<<(std::ostream& os, const mojo::Size& value);
+std::ostream& operator<<(std::ostream& os, const mojo::PointF& value);
 std::ostream& operator<<(std::ostream& os, const mojo::Rect& value);
-std::ostream& operator<<(std::ostream& os, const mojo::RRect& value);
+std::ostream& operator<<(std::ostream& os, const mojo::RectF& value);
+std::ostream& operator<<(std::ostream& os, const mojo::RRectF& value);
+std::ostream& operator<<(std::ostream& os, const mojo::Size& value);
 std::ostream& operator<<(std::ostream& os, const mojo::Transform& value);
 
 }  // namespace mojo

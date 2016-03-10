@@ -111,8 +111,6 @@ class RunMessageParams extends bindings.Struct {
 }
 
 
-
-
 class RunResponseMessageParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(24, 0)
@@ -214,8 +212,6 @@ class RunResponseMessageParams extends bindings.Struct {
 }
 
 
-
-
 class QueryVersion extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(8, 0)
@@ -272,8 +268,6 @@ class QueryVersion extends bindings.Struct {
     return map;
   }
 }
-
-
 
 
 class QueryVersionResult extends bindings.Struct {
@@ -346,8 +340,6 @@ class QueryVersionResult extends bindings.Struct {
     return map;
   }
 }
-
-
 
 
 class RunOrClosePipeMessageParams extends bindings.Struct {
@@ -451,8 +443,6 @@ class RunOrClosePipeMessageParams extends bindings.Struct {
 }
 
 
-
-
 class RequireVersion extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
@@ -523,9 +513,6 @@ class RequireVersion extends bindings.Struct {
     return map;
   }
 }
-
-
-
 
 
 

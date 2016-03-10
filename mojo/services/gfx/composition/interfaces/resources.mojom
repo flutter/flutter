@@ -37,6 +37,12 @@ struct SceneResource {
 //
 // TODO(jeffbrown): Replace this with Image and ImagePipe.
 struct MailboxTextureResource {
+  // The origin of the texture.
+  enum Origin {
+    TOP_LEFT,
+    BOTTOM_LEFT,
+  };
+
   // The name of the mailbox, as produced by glGenMailboxCHROMIUM().
   array<uint8, 64> mailbox_name;
 
@@ -46,6 +52,9 @@ struct MailboxTextureResource {
 
   // The size of the texture in pixels.
   mojo.Size size;
+
+  // The origin of the texture.
+  Origin origin = Origin.TOP_LEFT;
 
   // The callback interface to be notified when it is safe to release or
   // recycle the underlying texture storage once the resource has been

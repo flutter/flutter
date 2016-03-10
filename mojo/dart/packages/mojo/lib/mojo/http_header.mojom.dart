@@ -95,6 +95,3 @@ class HttpHeader extends bindings.Struct {
 
 
 
-
-
-

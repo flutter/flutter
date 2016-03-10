@@ -99,6 +99,23 @@ TEST_F(CoreTest, Basic) {
   EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED, core()->EndReadData(h, 0));
   EXPECT_EQ(1u, info.GetEndReadDataCallCount());
 
+  EXPECT_EQ(0u, info.GetDuplicateBufferHandleCallCount());
+  EXPECT_EQ(
+      MOJO_RESULT_UNIMPLEMENTED,
+      core()->DuplicateBufferHandle(h, NullUserPointer(), NullUserPointer()));
+  EXPECT_EQ(1u, info.GetDuplicateBufferHandleCallCount());
+
+  EXPECT_EQ(0u, info.GetGetBufferInformationCallCount());
+  EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
+            core()->GetBufferInformation(h, NullUserPointer(), 0));
+  EXPECT_EQ(1u, info.GetGetBufferInformationCallCount());
+
+  EXPECT_EQ(0u, info.GetMapBufferCallCount());
+  EXPECT_EQ(
+      MOJO_RESULT_UNIMPLEMENTED,
+      core()->MapBuffer(h, 0, 0, NullUserPointer(), MOJO_MAP_BUFFER_FLAG_NONE));
+  EXPECT_EQ(1u, info.GetMapBufferCallCount());
+
   EXPECT_EQ(0u, info.GetAddAwakableCallCount());
   EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
             core()->Wait(h, ~MOJO_HANDLE_SIGNAL_NONE, MOJO_DEADLINE_INDEFINITE,
@@ -320,8 +337,20 @@ TEST_F(CoreTest, InvalidArguments) {
     EXPECT_EQ(MOJO_RESULT_OK, core()->Close(handles[1]));
   }
 
-  // |CreateMessagePipe()|: Nothing to check (apart from things that cause
-  // death).
+  // |CreateMessagePipe()|:
+  {
+    // Invalid options: unknown flag.
+    const MojoCreateMessagePipeOptions kOptions = {
+        static_cast<uint32_t>(sizeof(MojoCreateMessagePipeOptions)),
+        ~MOJO_CREATE_MESSAGE_PIPE_OPTIONS_FLAG_NONE};
+    MojoHandle handles[2] = {MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID};
+    EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
+              core()->CreateMessagePipe(MakeUserPointer(&kOptions),
+                                        MakeUserPointer(&handles[0]),
+                                        MakeUserPointer(&handles[1])));
+    EXPECT_EQ(MOJO_HANDLE_INVALID, handles[0]);
+    EXPECT_EQ(MOJO_HANDLE_INVALID, handles[1]);
+  }
 
   // |WriteMessage()|:
   // Only check arguments checked by |Core|, namely |handle|, |handles|, and
@@ -443,6 +472,82 @@ TEST_F(CoreTest, InvalidArguments) {
 
     EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
   }
+
+  // |CreateDataPipe()|:
+  {
+    // Invalid options: unknown flag.
+    const MojoCreateDataPipeOptions kOptions = {
+        static_cast<uint32_t>(sizeof(MojoCreateDataPipeOptions)),
+        ~MOJO_CREATE_DATA_PIPE_OPTIONS_FLAG_NONE, 1u, 0u};
+    MojoHandle handles[2] = {MOJO_HANDLE_INVALID, MOJO_HANDLE_INVALID};
+    EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
+              core()->CreateDataPipe(MakeUserPointer(&kOptions),
+                                     MakeUserPointer(&handles[0]),
+                                     MakeUserPointer(&handles[1])));
+    EXPECT_EQ(MOJO_HANDLE_INVALID, handles[0]);
+    EXPECT_EQ(MOJO_HANDLE_INVALID, handles[1]);
+  }
+
+  // |WriteData()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->WriteData(MOJO_HANDLE_INVALID, NullUserPointer(),
+                              NullUserPointer(), MOJO_WRITE_DATA_FLAG_NONE));
+
+  // |BeginWriteData()|:
+  EXPECT_EQ(
+      MOJO_RESULT_INVALID_ARGUMENT,
+      core()->BeginWriteData(MOJO_HANDLE_INVALID, NullUserPointer(),
+                             NullUserPointer(), MOJO_WRITE_DATA_FLAG_NONE));
+
+  // |EndWriteData()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->EndWriteData(MOJO_HANDLE_INVALID, 0u));
+
+  // |ReadData()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->ReadData(MOJO_HANDLE_INVALID, NullUserPointer(),
+                             NullUserPointer(), MOJO_READ_DATA_FLAG_NONE));
+
+  // |BeginReadData()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->BeginReadData(MOJO_HANDLE_INVALID, NullUserPointer(),
+                                  NullUserPointer(), MOJO_READ_DATA_FLAG_NONE));
+
+  // |EndReadData()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->EndReadData(MOJO_HANDLE_INVALID, 0u));
+
+  // |CreateSharedBuffer()|:
+  {
+    // Invalid options: unknown flag.
+    const MojoCreateSharedBufferOptions kOptions = {
+        static_cast<uint32_t>(sizeof(MojoCreateSharedBufferOptions)),
+        ~MOJO_CREATE_SHARED_BUFFER_OPTIONS_FLAG_NONE};
+    MojoHandle handle = MOJO_HANDLE_INVALID;
+    EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
+              core()->CreateSharedBuffer(MakeUserPointer(&kOptions), 4096u,
+                                         MakeUserPointer(&handle)));
+    EXPECT_EQ(MOJO_HANDLE_INVALID, handle);
+  }
+
+  // |DuplicateBufferHandle()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->DuplicateBufferHandle(
+                MOJO_HANDLE_INVALID, NullUserPointer(), NullUserPointer()));
+
+  // |GetBufferInformation()|:
+  EXPECT_EQ(
+      MOJO_RESULT_INVALID_ARGUMENT,
+      core()->GetBufferInformation(MOJO_HANDLE_INVALID, NullUserPointer(), 0u));
+
+  // |MapBuffer()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->MapBuffer(MOJO_HANDLE_INVALID, 0u, 0u, NullUserPointer(),
+                              MOJO_MAP_BUFFER_FLAG_NONE));
+
+  // |UnmapBuffer()|:
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            core()->UnmapBuffer(NullUserPointer()));
 }
 
 // These test invalid arguments that should cause death if we're being paranoid
@@ -521,6 +626,8 @@ TEST_F(CoreTest, InvalidArgumentsDeath) {
 
     EXPECT_EQ(MOJO_RESULT_OK, core()->Close(h));
   }
+
+  // TODO(vtl): Missing a bunch here.
 }
 
 // TODO(vtl): test |Wait()| and |WaitMany()| properly

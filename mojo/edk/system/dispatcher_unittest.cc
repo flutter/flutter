@@ -74,6 +74,16 @@ TEST(DispatcherTest, Basic) {
             d->BeginReadData(NullUserPointer(), NullUserPointer(),
                              MOJO_READ_DATA_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, d->EndReadData(0));
+  RefPtr<Dispatcher> new_dispatcher;
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->DuplicateBufferHandle(NullUserPointer(), &new_dispatcher));
+  EXPECT_FALSE(new_dispatcher);
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->GetBufferInformation(NullUserPointer(), 0u));
+  std::unique_ptr<PlatformSharedBufferMapping> mapping;
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->MapBuffer(0u, 1u, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
+  EXPECT_FALSE(mapping);
   Waiter w;
   w.Init();
   HandleSignalsState hss;
@@ -113,6 +123,16 @@ TEST(DispatcherTest, Basic) {
             d->BeginReadData(NullUserPointer(), NullUserPointer(),
                              MOJO_READ_DATA_FLAG_NONE));
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, d->EndReadData(0));
+  new_dispatcher = nullptr;
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->DuplicateBufferHandle(NullUserPointer(), &new_dispatcher));
+  EXPECT_FALSE(new_dispatcher);
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->GetBufferInformation(NullUserPointer(), 0u));
+  mapping.reset();
+  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+            d->MapBuffer(0u, 1u, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
+  EXPECT_FALSE(mapping);
   hss = HandleSignalsState();
   EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
             d->AddAwakable(&w, ~MOJO_HANDLE_SIGNAL_NONE, 0, &hss));
@@ -135,9 +155,10 @@ enum class DispatcherOp {
   BEGIN_READ_DATA,
   END_READ_DATA,
   DUPLICATE_BUFFER_HANDLE,
+  GET_BUFFER_INFORMATION,
   MAP_BUFFER,
-  ADD_WAITER,
-  REMOVE_WAITER,
+  ADD_AWAKABLE,
+  REMOVE_AWAKABLE,
   COUNT
 };
 
@@ -196,19 +217,26 @@ void ThreadSafetyStressHelper(ManualResetWaitableEvent* event,
       EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, dispatcher->EndReadData(0));
       break;
     case DispatcherOp::DUPLICATE_BUFFER_HANDLE: {
-      RefPtr<Dispatcher> unused;
+      RefPtr<Dispatcher> new_dispatcher;
       EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
-                dispatcher->DuplicateBufferHandle(NullUserPointer(), &unused));
+                dispatcher->DuplicateBufferHandle(NullUserPointer(),
+                                                  &new_dispatcher));
+      EXPECT_FALSE(new_dispatcher);
       break;
     }
+    case DispatcherOp::GET_BUFFER_INFORMATION:
+      EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+                dispatcher->GetBufferInformation(NullUserPointer(), 0u));
+      break;
     case DispatcherOp::MAP_BUFFER: {
-      std::unique_ptr<PlatformSharedBufferMapping> unused;
+      std::unique_ptr<PlatformSharedBufferMapping> mapping;
       EXPECT_EQ(
           MOJO_RESULT_INVALID_ARGUMENT,
-          dispatcher->MapBuffer(0u, 0u, MOJO_MAP_BUFFER_FLAG_NONE, &unused));
+          dispatcher->MapBuffer(0u, 1u, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
+      EXPECT_FALSE(mapping);
       break;
     }
-    case DispatcherOp::ADD_WAITER: {
+    case DispatcherOp::ADD_AWAKABLE: {
       HandleSignalsState hss;
       MojoResult r =
           dispatcher->AddAwakable(&waiter, ~MOJO_HANDLE_SIGNAL_NONE, 0, &hss);
@@ -218,7 +246,7 @@ void ThreadSafetyStressHelper(ManualResetWaitableEvent* event,
       EXPECT_EQ(0u, hss.satisfiable_signals);
       break;
     }
-    case DispatcherOp::REMOVE_WAITER: {
+    case DispatcherOp::REMOVE_AWAKABLE: {
       HandleSignalsState hss;
       dispatcher->RemoveAwakable(&waiter, &hss);
       EXPECT_EQ(0u, hss.satisfied_signals);

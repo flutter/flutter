@@ -12,6 +12,7 @@
 #include "mojo/skia/ganesh_context.h"
 #include "skia/ext/refptr.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 
 class SkImage;
 
@@ -26,6 +27,7 @@ namespace skia {
     uint32_t texture_id,
     uint32_t width,
     uint32_t height,
+    GrSurfaceOrigin origin,
     const base::Closure& release_callback);
 
 // Generates backing content for SkImages from a texture mailbox.
@@ -39,7 +41,8 @@ class MailboxTextureImageGenerator : public SkImageGenerator {
       const GLbyte mailbox_name[GL_MAILBOX_SIZE_CHROMIUM],
       GLuint sync_point,
       uint32_t width,
-      uint32_t height);
+      uint32_t height,
+      GrSurfaceOrigin origin);
   ~MailboxTextureImageGenerator() override;
 
   GrTexture* onGenerateTexture(GrContext* context,
@@ -48,6 +51,7 @@ class MailboxTextureImageGenerator : public SkImageGenerator {
  private:
   GLbyte mailbox_name_[GL_MAILBOX_SIZE_CHROMIUM];
   GLuint sync_point_;
+  GrSurfaceOrigin origin_;
 };
 
 }  // namespace skia

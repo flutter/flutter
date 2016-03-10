@@ -281,11 +281,9 @@ class MojoEventHandler {
     }
     _isInHandler = true;
     if (MojoHandleSignals.isReadable(signalsReceived)) {
-      assert(_eventSubscription.readyRead);
       handleRead();
     }
     if (MojoHandleSignals.isWritable(signalsReceived)) {
-      assert(_eventSubscription.readyWrite);
       handleWrite();
     }
     _isPeerClosed = MojoHandleSignals.isPeerClosed(signalsReceived) ||
