@@ -175,6 +175,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
+/// Implements the basic material design visual layout structure.
+///
+/// This class provides APIs for showing drawers, snackbars, and bottom sheets.
+///
+/// See: <https://www.google.com/design/spec/layout/structure.html>
 class Scaffold extends StatefulComponent {
   Scaffold({
     Key key,
