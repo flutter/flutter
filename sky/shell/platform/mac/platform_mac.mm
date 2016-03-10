@@ -16,6 +16,7 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
+#include "sky/engine/wtf/MakeUnique.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/switches.h"
 #include "sky/shell/tracing_controller.h"
@@ -45,80 +46,60 @@ static void RedirectIOConnectionsToSyslog() {
 #endif
 }
 
-int PlatformMacMainOnce(int argc,
-                        const char* argv[],
-                        std::string icu_data_path,
-                        PlatformMacMainCallback callback) {
-  CHECK([NSThread currentThread] == [NSThread mainThread])
-      << "Platform initialization must occur on the main platform thread";
+class EmbedderState {
+ public:
+  EmbedderState(int argc, const char* argv[], std::string icu_data_path) {
+    RedirectIOConnectionsToSyslog();
 
-  base::mac::ScopedNSAutoreleasePool pool;
+    base::CommandLine::Init(argc, argv);
 
-  base::PlatformThread::SetName("platform_main");
+    InitializeLogging();
 
-  base::AtExitManager exit_manager;
+    base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+    if (command_line.HasSwitch(sky::shell::switches::kTraceStartup)) {
+      // Usually, all tracing within flutter is managed via the tracing
+      // controller
+      // The tracing controller is accessed via the shell instance. This means
+      // that tracing can only be enabled once that instance is created. Traces
+      // early in startup are lost. This enables tracing only in base manually
+      // till the tracing controller takes over.
+      sky::shell::TracingController::StartBaseTracing();
+    }
 
-  RedirectIOConnectionsToSyslog();
-
-  bool result = false;
-
-  result = base::CommandLine::Init(argc, argv);
-  DLOG_ASSERT(result);
-
-  InitializeLogging();
-
-  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-  if (command_line.HasSwitch(sky::shell::switches::kTraceStartup)) {
-    // Usually, all tracing within flutter is managed via the tracing controller
-    // The tracing controller is accessed via the shell instance. This means
-    // that tracing can only be enabled once that instance is created. Traces
-    // early in startup are lost. This enables tracing only in base manually
-    // till the tracing controller takes over.
-    sky::shell::TracingController::StartBaseTracing();
-  }
-
-  // This is about as early as tracing of any kind can start. Add an instant
-  // marker that can be used as a reference for startup.
-  TRACE_EVENT_INSTANT0("flutter", "main", TRACE_EVENT_SCOPE_PROCESS);
-
-  std::unique_ptr<base::MessageLoopForUI> message_loop(
-      new base::MessageLoopForUI());
+    // This is about as early as tracing of any kind can start. Add an instant
+    // marker that can be used as a reference for startup.
+    TRACE_EVENT_INSTANT0("flutter", "main", TRACE_EVENT_SCOPE_PROCESS);
 
 #if TARGET_OS_IPHONE
-  // One cannot start the message loop on the platform main thread. Instead,
-  // we attach to the CFRunLoop
-  message_loop->Attach();
+    // One cannot start the message loop on the platform main thread. Instead,
+    // we attach to the CFRunLoop
+    embedder_message_loop_.Attach();
 #endif
 
-  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
+    mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
-  CHECK(gfx::GLSurface::InitializeOneOff());
-  sky::shell::Shell::InitStandalone(icu_data_path);
+    CHECK(gfx::GLSurface::InitializeOneOff());
 
-  int exit_code = callback != nullptr ? callback() : EXIT_SUCCESS;
-
-#if !TARGET_OS_IPHONE
-  if (callback != nullptr) {
-    // If we control the embedder, the callback is what we use to wrap
-    // UIApplicationMain. If we are here, it means that that method has returned
-    // and we need to perform cleanup.
-    message_loop->QuitNow();
+    sky::shell::Shell::InitStandalone(icu_data_path);
   }
-#endif
 
-  return exit_code;
-}
+ private:
+  base::AtExitManager exit_manager_;
+  base::MessageLoopForUI embedder_message_loop_;
 
-int PlatformMacMain(int argc,
-                    const char* argv[],
-                    std::string icu_data_path,
-                    PlatformMacMainCallback callback) {
-  __block int result = EXIT_SUCCESS;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    result = PlatformMacMainOnce(argc, argv, icu_data_path, callback);
+  DISALLOW_COPY_AND_ASSIGN(EmbedderState);
+};
+
+void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path) {
+  CHECK([NSThread isMainThread])
+      << "Embedder initialization must occur on the main platform thread";
+
+  static std::unique_ptr<EmbedderState> g_embedder;
+  static std::once_flag once_main;
+
+  std::call_once(once_main, [&]() {
+    g_embedder = WTF::MakeUnique<EmbedderState>(argc, argv, icu_data_path);
   });
-  return result;
 }
 
 static bool FlagsValidForCommandLineLaunch(const std::string& dart_main,

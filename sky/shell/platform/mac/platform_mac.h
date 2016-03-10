@@ -10,12 +10,7 @@
 namespace sky {
 namespace shell {
 
-typedef int (^PlatformMacMainCallback)(void);
-
-int PlatformMacMain(int argc,
-                    const char* argv[],
-                    std::string icu_data_path,
-                    PlatformMacMainCallback callback);
+void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path);
 
 bool AttemptLaunchFromCommandLineSwitches(sky::SkyEnginePtr& engine);
 

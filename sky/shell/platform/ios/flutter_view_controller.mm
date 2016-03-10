@@ -40,11 +40,6 @@
   if (self) {
     _dartBundle = [dartBundleOrNil retain];
 
-    NSBundle* bundle = [NSBundle bundleForClass:[self class]];
-    NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
-
-    sky::shell::PlatformMacMain(0, nullptr, icuDataPath.UTF8String, nullptr);
-
     [self performCommonViewControllerInitialization];
   }
 
@@ -74,6 +69,11 @@
   }
 
   _initialized = YES;
+
+  NSBundle* bundle = [NSBundle bundleForClass:[self class]];
+  NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
+
+  sky::shell::PlatformMacMain(0, nullptr, icuDataPath.UTF8String);
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _dynamicServiceLoader = [[FlutterDynamicServiceLoader alloc] init];
