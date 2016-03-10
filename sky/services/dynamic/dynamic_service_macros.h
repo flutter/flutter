@@ -5,7 +5,16 @@
 #ifndef SKY_SERVICES_DYNAMIC_DYNAMIC_SERVICE_MACROS_H_
 #define SKY_SERVICES_DYNAMIC_DYNAMIC_SERVICE_MACROS_H_
 
+#if defined(DYNAMIC_SERVICE_EMBEDDER)
+
+// Embedder does not export any symbols
+#define FLUTTER_EXPORT
+
+#else  // defined(DYNAMIC_SERVICE_EMBEDDER)
+
 #define FLUTTER_EXPORT __attribute__((visibility("default")))
+
+#endif  // defined(DYNAMIC_SERVICE_EMBEDDER)
 
 #ifdef __cplusplus
 
