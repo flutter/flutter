@@ -40,15 +40,16 @@
 
 namespace blink {
 
-DartController::DartController() : weak_factory_(this) {
+DartController::DartController()
+    : ui_dart_state_(nullptr),
+      weak_factory_(this) {
 }
 
 DartController::~DartController() {
   if (ui_dart_state_) {
     // Don't use a DartIsolateScope here since we never exit the isolate.
     Dart_EnterIsolate(ui_dart_state_->isolate());
-    Dart_ShutdownIsolate();
-    ui_dart_state_->SetIsolate(nullptr);
+    Dart_ShutdownIsolate();  // deletes ui_dart_state_
     ui_dart_state_ = nullptr;
   }
 }
@@ -162,12 +163,12 @@ void DartController::RunFromLibrary(const std::string& name,
 
 void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
   char* error = nullptr;
-  ui_dart_state_ = std::move(state);
   Dart_Isolate isolate = Dart_CreateIsolate(
-      ui_dart_state_->url().c_str(), "main",
+      state->url().c_str(), "main",
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
-      nullptr, static_cast<DartState*>(ui_dart_state_.get()), &error);
+      nullptr, static_cast<DartState*>(state.get()), &error);
   CHECK(isolate) << error;
+  ui_dart_state_ = state.release();
   auto& message_handler = dart_state()->message_handler();
   message_handler.set_quit_message_loop_when_isolate_exits(false);
   DCHECK(Platform::current());

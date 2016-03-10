@@ -102,7 +102,8 @@ const char kFileUriPrefix[] = "file://";
 const char kDartFlags[] = "dart-flags";
 
 void IsolateShutdownCallback(void* callback_data) {
-  // TODO(dart)
+  DartState* dart_state = static_cast<DartState*>(callback_data);
+  delete dart_state;
 }
 
 bool IsServiceIsolateURL(const char* url_name) {
