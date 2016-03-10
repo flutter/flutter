@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 
 import 'package:flutter_tools/src/ios/simulators.dart';
 
-main() {
+void main() {
   group('compareIosVersions', () {
     test('compares correctly', () {
       // This list must be sorted in ascending preference order

@@ -1,0 +1,32 @@
+# Specify analysis options.
+#
+# Note that until there is a default "all-in" lint rule-set we need
+# to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843).
+# For a list of lints, see: http://dart-lang.github.io/linter/lints/
+
+analyzer:
+  errors:
+    # we allow overriding fields (if they use super, ideally...)
+    strong_mode_invalid_field_override: ignore
+    # we allow type narrowing
+    strong_mode_invalid_method_override: ignore
+    todo: ignore
+linter:
+  rules:
+    - always_declare_return_types
+    # we'll turn on avoid_as as soon as it doesn't complain about "as dynamic"
+    # - avoid_as
+    - camel_case_types
+    # sometimes we have no choice (e.g. when matching other platforms)
+    # - constant_identifier_names
+    - empty_constructor_bodies
+    # disabled until regexp fix is pulled in (https://github.com/flutter/flutter/pull/1996)
+    # - library_names
+    - library_prefixes
+    - non_constant_identifier_names
+    # too many false-positives; code review should catch real instances
+    # - one_member_abstracts
+    - slash_for_doc_comments
+    - super_goes_last
+    - type_init_formals
+    - unnecessary_brace_in_string_interp
