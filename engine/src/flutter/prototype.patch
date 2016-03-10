@@ -1,0 +1,254 @@
+diff --git a/sky/shell/platform/android/sky_main.cc b/sky/shell/platform/android/sky_main.cc
+index 2678c3f..ee25242 100644
+--- a/sky/shell/platform/android/sky_main.cc
++++ b/sky/shell/platform/android/sky_main.cc
+@@ -76,8 +76,7 @@ static void Init(JNIEnv* env,
+   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
+   base::MessageLoopForUI::current()->Start();
+ 
+-  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
+-      new mojo::embedder::SimplePlatformSupport()));
++  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
+ 
+   CHECK(gfx::GLSurface::InitializeOneOff());
+   Shell::InitStandalone();
+diff --git a/sky/shell/platform/linux/main_linux.cc b/sky/shell/platform/linux/main_linux.cc
+index b25611e..a60aa1d 100644
+--- a/sky/shell/platform/linux/main_linux.cc
++++ b/sky/shell/platform/linux/main_linux.cc
+@@ -27,8 +27,7 @@ int main(int argc, const char* argv[]) {
+ 
+   base::MessageLoop message_loop;
+ 
+-  mojo::embedder::Init(std::unique_ptr<mojo::embedder::PlatformSupport>(
+-      new mojo::embedder::SimplePlatformSupport()));
++  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
+ 
+   sky::shell::Shell::InitStandalone();
+ 
+diff --git a/sky/shell/platform/mojo/application_impl.cc b/sky/shell/platform/mojo/application_impl.cc
+index 1d32137..f75c0de 100644
+--- a/sky/shell/platform/mojo/application_impl.cc
++++ b/sky/shell/platform/mojo/application_impl.cc
+@@ -26,11 +26,11 @@ ApplicationImpl::~ApplicationImpl() {
+   }
+ }
+ 
+-void ApplicationImpl::Initialize(mojo::ShellPtr shell,
++void ApplicationImpl::Initialize(mojo::InterfaceHandle<mojo::Shell> shell,
+                                  mojo::Array<mojo::String> args,
+                                  const mojo::String& url) {
+   DCHECK(initial_response_);
+-  shell_ = shell.Pass();
++  shell_ = mojo::ShellPtr::Create(shell.Pass());
+   url_ = url;
+   UnpackInitialResponse(shell_.get());
+ }
+@@ -38,7 +38,7 @@ void ApplicationImpl::Initialize(mojo::ShellPtr shell,
+ void ApplicationImpl::AcceptConnection(
+     const mojo::String& requestor_url,
+     mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
+-    mojo::ServiceProviderPtr incoming_services,
++    mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services,
+     const mojo::String& resolved_url) {
+   service_provider_bindings_.AddBinding(this, outgoing_services.Pass());
+ 
+@@ -46,8 +46,10 @@ void ApplicationImpl::AcceptConnection(
+   // get it from the first incomming application connection, which happens to
+   // work for our current use cases, but it's fragile and unsatifying. We'll
+   // probably need to re-think service registry once more of the system exists.
+-  if (incoming_services && !initial_service_registry_)
+-    mojo::ConnectToService(incoming_services.get(), &initial_service_registry_);
++  if (incoming_services && !initial_service_registry_) {
++    auto incoming_services_ptr = mojo::ServiceProviderPtr::Create(incoming_services.Pass());
++    mojo::ConnectToService(incoming_services_ptr.get(), &initial_service_registry_);
++  }
+ }
+ 
+ void ApplicationImpl::RequestQuit() {
+@@ -63,7 +65,7 @@ void ApplicationImpl::ConnectToService(const mojo::String& service_name,
+ 
+ void ApplicationImpl::CreateView(
+     mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
+-    mojo::ServiceProviderPtr incoming_services,
++    mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services,
+     const mojo::ui::ViewProvider::CreateViewCallback& callback) {
+   if (view_created_) {
+     LOG(ERROR) << "We only support creating one view.";
+diff --git a/sky/shell/platform/mojo/application_impl.h b/sky/shell/platform/mojo/application_impl.h
+index 263c09d..2b2b6df 100644
+--- a/sky/shell/platform/mojo/application_impl.h
++++ b/sky/shell/platform/mojo/application_impl.h
+@@ -28,13 +28,13 @@ class ApplicationImpl : public mojo::Application,
+ 
+  private:
+   // mojo::Application
+-  void Initialize(mojo::ShellPtr shell,
++  void Initialize(mojo::InterfaceHandle<mojo::Shell> shell,
+                   mojo::Array<mojo::String> args,
+                   const mojo::String& url) override;
+   void AcceptConnection(
+       const mojo::String& requestor_url,
+       mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services,
+-      mojo::ServiceProviderPtr incoming_services,
++      mojo::InterfaceHandle<mojo::ServiceProvider> incoming_services,
+       const mojo::String& resolved_url) override;
+   void RequestQuit() override;
+ 
+@@ -45,7 +45,7 @@ class ApplicationImpl : public mojo::Application,
+   // mojo::ui::ViewProvider
+   void CreateView(
+       mojo::InterfaceRequest<mojo::ServiceProvider> services,
+-      mojo::ServiceProviderPtr exposed_services,
++      mojo::InterfaceHandle<mojo::ServiceProvider> exposed_services,
+       const mojo::ui::ViewProvider::CreateViewCallback& callback) override;
+ 
+   void UnpackInitialResponse(mojo::Shell* shell);
+diff --git a/sky/shell/platform/mojo/view_impl.cc b/sky/shell/platform/mojo/view_impl.cc
+index 415c016..826a2fd 100644
+--- a/sky/shell/platform/mojo/view_impl.cc
++++ b/sky/shell/platform/mojo/view_impl.cc
+@@ -19,9 +19,13 @@ ViewImpl::ViewImpl(ServicesDataPtr services,
+ 
+   mojo::ui::ViewHostPtr view_host;
+ 
++  // Once we're done invoking |Shell|, we put it back inside |services| and pass
++  // it off.
++  mojo::ShellPtr shell = mojo::ShellPtr::Create(services->shell.Pass());
++
+   // Views
+   mojo::ConnectToService(
+-      services->shell.get(), "mojo:view_manager_service", &view_manager_);
++      shell.get(), "mojo:view_manager_service", &view_manager_);
+   mojo::ui::ViewPtr view;
+   binding_.Bind(mojo::GetProxy(&view));
+   view_manager_->RegisterView(
+@@ -44,8 +48,10 @@ ViewImpl::ViewImpl(ServicesDataPtr services,
+   shell_view_.reset(new ShellView(Shell::Shared()));
+   shell_view_->view()->ConnectToEngine(GetProxy(&engine_));
+   mojo::ApplicationConnectorPtr connector;
+-  services->shell->CreateApplicationConnector(mojo::GetProxy(&connector));
++  shell->CreateApplicationConnector(mojo::GetProxy(&connector));
+   platform_view()->InitRasterizer(connector.Pass(), scene.Pass());
++
++  services->shell = shell.Pass();
+   engine_->SetServices(services.Pass());
+ }
+ 
+diff --git a/sky/shell/ui/animator.h b/sky/shell/ui/animator.h
+index 9761e30..9fc3fa4 100644
+--- a/sky/shell/ui/animator.h
++++ b/sky/shell/ui/animator.h
+@@ -29,8 +29,8 @@ class Animator {
+   void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider);
+ 
+   void set_scene_scheduler(
+-      mojo::gfx::composition::SceneSchedulerPtr scene_scheduler) {
+-    scene_scheduler_ = scene_scheduler.Pass();
++      mojo::InterfaceHandle<mojo::gfx::composition::SceneScheduler> scene_scheduler) {
++    scene_scheduler_ = mojo::gfx::composition::SceneSchedulerPtr::Create(scene_scheduler.Pass());
+   }
+ 
+ 
+diff --git a/sky/shell/ui/engine.cc b/sky/shell/ui/engine.cc
+index af3056d..e8f0ae8 100644
+--- a/sky/shell/ui/engine.cc
++++ b/sky/shell/ui/engine.cc
+@@ -112,11 +112,17 @@ void Engine::SetServices(ServicesDataPtr services) {
+ #if defined(OS_ANDROID) || defined(OS_IOS)
+     vsync::VSyncProviderPtr vsync_provider;
+     if (services_->shell) {
+-      mojo::ConnectToService(services_->shell.get(), "mojo:vsync",
++      // We bind and unbind our Shell here, since this is the only place we use
++      // it in this class.
++      auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
++      mojo::ConnectToService(shell.get(), "mojo:vsync",
+                              &vsync_provider);
++      services_->shell = shell.Pass();
+     } else {
+-      mojo::ConnectToService(services_->services_provided_by_embedder.get(),
++      auto embedder_services = mojo::ServiceProviderPtr::Create(services_->services_provided_by_embedder.Pass());
++      mojo::ConnectToService(embedder_services.get(),
+                              &vsync_provider);
++      services_->services_provided_by_embedder = embedder_services.Pass();
+     }
+     animator_->Reset();
+     animator_->set_vsync_provider(vsync_provider.Pass());
+diff --git a/sky/shell/ui/internals.cc b/sky/shell/ui/internals.cc
+index a413594..f77ffeb 100644
+--- a/sky/shell/ui/internals.cc
++++ b/sky/shell/ui/internals.cc
+@@ -104,8 +104,9 @@ Internals::Internals(ServicesDataPtr services,
+     root_bundle_(root_bundle.Pass()),
+     service_provider_impl_(GetProxy(&service_provider_)) {
+   if (services_ && services_->services_provided_by_embedder) {
++    services_provided_by_embedder_ = mojo::ServiceProviderPtr::Create(services_->services_provided_by_embedder.Pass());
+     service_provider_impl_.set_fallback_service_provider(
+-        services_->services_provided_by_embedder.get());
++        services_provided_by_embedder_.get());
+   }
+   service_provider_impl_.AddService<mojo::asset_bundle::AssetUnpacker>(this);
+   if (services_ && services_->services_provided_to_embedder.is_pending()) {
+@@ -126,19 +127,19 @@ void Internals::Create(
+ }
+ 
+ mojo::Handle Internals::TakeShellProxy() {
+-  return services_ ? services_->shell.PassInterface().PassHandle().release() : mojo::Handle();
++  return services_ ? services_->shell.PassHandle().release() : mojo::Handle();
+ }
+ 
+ mojo::Handle Internals::TakeServiceRegistry() {
+-  return services_ ? services_->service_registry.PassInterface().PassHandle().release() : mojo::Handle();
++  return services_ ? services_->service_registry.PassHandle().release() : mojo::Handle();
+ }
+ 
+ mojo::Handle Internals::TakeServicesProvidedByEmbedder() {
+-  return service_provider_.PassInterface().PassHandle().release();
++  return service_provider_.PassInterfaceHandle().PassHandle().release();
+ }
+ 
+ mojo::Handle Internals::TakeRootBundleHandle() {
+-  return root_bundle_.PassInterface().PassHandle().release();
++  return root_bundle_.PassInterfaceHandle().PassHandle().release();
+ }
+ 
+ mojo::Handle Internals::TakeServicesProvidedToEmbedder() {
+@@ -146,7 +147,7 @@ mojo::Handle Internals::TakeServicesProvidedToEmbedder() {
+ }
+ 
+ mojo::Handle Internals::TakeViewHostHandle() {
+-  return services_ ? services_->view_host.PassInterface().PassHandle().release() : mojo::Handle();
++  return services_ ? services_->view_host.PassHandle().release() : mojo::Handle();
+ }
+ 
+ }  // namespace shell
+diff --git a/sky/shell/ui/internals.h b/sky/shell/ui/internals.h
+index 21470b0..278899d 100644
+--- a/sky/shell/ui/internals.h
++++ b/sky/shell/ui/internals.h
+@@ -52,6 +52,9 @@ class Internals
+   mojo::ServiceProviderPtr service_provider_;
+   mojo::ServiceProviderImpl service_provider_impl_;
+ 
++  // This is extracted out of services_
++  mojo::ServiceProviderPtr services_provided_by_embedder_;
++
+   // We need to hold this object to work around
+   // https://github.com/domokit/mojo/issues/536
+   mojo::ServiceProviderPtr services_from_dart_;
+diff --git a/sky/tools/roll/roll.py b/sky/tools/roll/roll.py
+index e5af098..c46a362 100755
+--- a/sky/tools/roll/roll.py
++++ b/sky/tools/roll/roll.py
+@@ -72,9 +72,8 @@ dirs_from_mojo = [
+     'mojo/icu',
+     'mojo/java',
+     'mojo/message_pump',
+-    'mojo/gpu',
+-    #'mojo/services',
+-    #'services/asset_bundle',
++    'mojo/services',
++    'services/asset_bundle',
+     'services/sensors',
+ ]
+ 
