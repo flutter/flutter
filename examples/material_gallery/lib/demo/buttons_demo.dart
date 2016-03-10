@@ -80,7 +80,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           tooltip: 'Open FAB demos',
           child: new Icon(icon: Icons.add),
           onPressed: () {
-            Navigator.push(context, new MaterialPageRoute(
+            Navigator.push(context, new MaterialPageRoute<Null>(
               builder: (BuildContext context) => new TabsFabDemo()
             ));
           }
@@ -97,7 +97,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new RaisedButton(
             child: new Text("Launch Demo"),
             onPressed: () {
-              Navigator.push(context, new MaterialPageRoute(
+              Navigator.push(context, new MaterialPageRoute<Null>(
                 builder: (BuildContext context) => new SnackBarDemo()
               ));
             }
@@ -127,7 +127,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             new FlatButton(
               child: new Text("Launch Demo"),
               onPressed: () {
-                Navigator.push(context, new MaterialPageRoute(
+                Navigator.push(context, new MaterialPageRoute<Null>(
                   builder: (_) => new DialogDemo()
                 ));
               }
@@ -200,10 +200,10 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           center: new Text("Buttons"),
           tabBar: new TabBar<_ButtonDemo>(
             isScrollable: true,
-            labels: new Map.fromIterable(demos, value: (_ButtonDemo demo) => demo.tabLabel)
+            labels: new Map<_ButtonDemo, TabLabel>.fromIterable(demos, value: (_ButtonDemo demo) => demo.tabLabel)
           )
         ),
-        body: new TabBarView(
+        body: new TabBarView<_ButtonDemo>(
           children: demos.map(buildTabView).toList()
         )
       )

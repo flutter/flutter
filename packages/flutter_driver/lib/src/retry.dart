@@ -48,9 +48,9 @@ Future<dynamic> retry(Action action, Duration timeout,
   if (success)
     return result;
   else if (lastError != null)
-    return new Future.error(lastError, lastStackTrace);
+    return new Future<Null>.error(lastError, lastStackTrace);
   else
-    return new Future.error('Retry timed out');
+    return new Future<Null>.error('Retry timed out');
 }
 
 /// A function that produces a [Stopwatch].

@@ -176,7 +176,7 @@ class RenderPadding extends RenderShiftedBox {
         context.canvas.drawPath(path, paint);
         paint = new Paint()
           ..color = debugPaintPaddingInnerEdgeColor;
-        const kOutline = 2.0;
+        const double kOutline = 2.0;
         path = new Path()
           ..moveTo(offset.dx + math.max(padding.left - kOutline, 0.0), offset.dy + math.max(padding.top - kOutline, 0.0))
           ..lineTo(offset.dx + math.min(size.width - padding.right + kOutline, size.width), offset.dy + math.max(padding.top - kOutline, 0.0))

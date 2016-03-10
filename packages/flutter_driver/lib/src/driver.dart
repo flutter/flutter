@@ -55,7 +55,7 @@ class FlutterDriver {
     //
     // See: https://github.com/dart-lang/sdk/issues/25902
     if (isolate.pauseEvent is VMResumeEvent) {
-      await new Future.delayed(new Duration(milliseconds: 300));
+      await new Future<Null>.delayed(new Duration(milliseconds: 300));
       isolate = await vm.isolates.first.loadRunnable();
     }
 
@@ -64,10 +64,10 @@ class FlutterDriver {
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
-    Future resumeLeniently() {
+    Future<Null> resumeLeniently() {
       _log.trace('Attempting to resume isolate');
-      return isolate.resume().catchError((e) {
-        const vmMustBePausedCode = 101;
+      return isolate.resume().catchError((dynamic e) {
+        const int vmMustBePausedCode = 101;
         if (e is rpc.RpcException && e.code == vmMustBePausedCode) {
           // No biggie; something else must have resumed the isolate
           _log.warning(
@@ -87,7 +87,7 @@ class FlutterDriver {
       _log.trace('Isolate is paused at start.');
 
       // Waits for a signal from the VM service that the extension is registered
-      Future waitForServiceExtension() {
+      Future<Null> waitForServiceExtension() {
         return isolate.onExtensionAdded.firstWhere((String extension) {
           return extension == _kFlutterExtensionMethod;
         });
@@ -96,8 +96,8 @@ class FlutterDriver {
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
-      Future whenResumed = resumeLeniently();
-      Future whenServiceExtensionReady = Future.any(<Future>[
+      Future<Null> whenResumed = resumeLeniently();
+      Future<Null> whenServiceExtensionReady = Future.any(<Future<dynamic>>[
         waitForServiceExtension(),
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
@@ -150,7 +150,7 @@ class FlutterDriver {
     Map<String, String> parameters = <String, String>{'command': command.kind}
       ..addAll(command.serialize());
     return _appIsolate.invokeExtension(_kFlutterExtensionMethod, parameters)
-      .then((Map<String, dynamic> result) => result, onError: (error, stackTrace) {
+      .then((Map<String, dynamic> result) => result, onError: (dynamic error, dynamic stackTrace) {
         throw new DriverError(
           'Failed to fulfill ${command.runtimeType} due to remote error',
           error,
@@ -217,7 +217,7 @@ class FlutterDriver {
       dynamic value = await evaluator();
       MatchResult matchResult = match(value, matcher);
       if (!matchResult.hasMatched) {
-        return new Future.error(matchResult.mismatchDescription);
+        return new Future<Null>.error(matchResult.mismatchDescription);
       }
       return value;
     }, timeout, pauseBetweenRetries);
@@ -227,7 +227,7 @@ class FlutterDriver {
   ///
   /// Returns a [Future] that fires once the connection has been closed.
   // TODO(yjbanov): cleanup object references
-  Future close() => _serviceClient.close().then((_) {
+  Future<Null> close() => _serviceClient.close().then((_) {
     // Don't leak vm_service_client-specific objects, if any
     return null;
   });
@@ -255,10 +255,10 @@ Future<VMServiceClient> _waitAndConnect(String url) async {
   Stopwatch timer = new Stopwatch();
   Future<VMServiceClient> attemptConnection() {
     return VMServiceClient.connect(url)
-      .catchError((e) async {
+      .catchError((dynamic e) async {
         if (timer.elapsed < const Duration(seconds: 30)) {
           _log.info('Waiting for application to start');
-          await new Future.delayed(const Duration(seconds: 1));
+          await new Future<Null>.delayed(const Duration(seconds: 1));
           return attemptConnection();
         } else {
           _log.critical(

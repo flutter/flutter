@@ -198,7 +198,7 @@ abstract class RenderStackBase extends RenderBox
          RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
   RenderStackBase({
     List<RenderBox> children,
-    alignment: const FractionalOffset(0.0, 0.0)
+    FractionalOffset alignment: const FractionalOffset(0.0, 0.0)
   }) : _alignment = alignment {
     addAll(children);
   }
@@ -425,7 +425,7 @@ abstract class RenderStackBase extends RenderBox
 class RenderStack extends RenderStackBase {
   RenderStack({
     List<RenderBox> children,
-    alignment: const FractionalOffset(0.0, 0.0)
+    FractionalOffset alignment: const FractionalOffset(0.0, 0.0)
   }) : super(
    children: children,
    alignment: alignment
@@ -444,7 +444,7 @@ class RenderStack extends RenderStackBase {
 class RenderIndexedStack extends RenderStackBase {
   RenderIndexedStack({
     List<RenderBox> children,
-    alignment: const FractionalOffset(0.0, 0.0),
+    FractionalOffset alignment: const FractionalOffset(0.0, 0.0),
     int index: 0
   }) : _index = index, super(
    children: children,

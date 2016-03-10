@@ -38,7 +38,7 @@ class GridDemoPhotoItem extends StatelessComponent {
   final GridDemoTileStyle tileStyle;
 
   void showPhoto(BuildContext context) {
-    Navigator.push(context, new MaterialPageRoute(
+    Navigator.push(context, new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
         return new Scaffold(
           toolBar: new ToolBar(
@@ -138,7 +138,7 @@ class GridListDemoState extends State<GridListDemo> {
   GridDemoTileStyle tileStyle = GridDemoTileStyle.twoLine;
 
   void showTileStyleMenu(BuildContext context) {
-    final List<PopupMenuItem> items = <PopupMenuItem<GridDemoTileStyle>>[
+    final List<PopupMenuItem<GridDemoTileStyle>> items = <PopupMenuItem<GridDemoTileStyle>>[
       new PopupMenuItem<GridDemoTileStyle>(
         value: GridDemoTileStyle.imageOnly,
         child: new Text('Image only')

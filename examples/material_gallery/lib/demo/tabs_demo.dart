@@ -25,20 +25,20 @@ class TabsDemo extends StatelessComponent {
 
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
-    return new TabBarSelection(
+    return new TabBarSelection<IconData>(
       values: icons,
       child: new Scaffold(
         toolBar: new ToolBar(
           center: new Text("Scrollable Tabs"),
-          tabBar: new TabBar<String>(
+          tabBar: new TabBar<IconData>(
             isScrollable: true,
-            labels: new Map.fromIterable(
+            labels: new Map<IconData, TabLabel>.fromIterable(
               icons,
               value: (IconData icon) => new TabLabel(text: labels[icon], icon: icon)
             )
           )
         ),
-        body: new TabBarView(
+        body: new TabBarView<IconData>(
           children: icons.map((IconData icon) {
             return new Container(
               key: new ObjectKey(icon),

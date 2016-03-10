@@ -65,7 +65,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   _PopupMenuItemState<PopupMenuItem<T>> createState() => new _PopupMenuItemState<PopupMenuItem<T>>();
 }
 
-class _PopupMenuItemState<T extends PopupMenuItem> extends State<T> {
+class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
   // Override this to put something else in the menu entry.
   Widget buildChild() => config.child;
 
@@ -318,7 +318,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       constraints: new BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
       child: new CustomOneChildLayout(
         delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
-        child: new _PopupMenu(route: this)
+        child: new _PopupMenu<T>(route: this)
       )
     );
   }
@@ -329,17 +329,17 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// and the value of [position] implies where the left, center point of the
 /// highlighted item should appear. If [initialValue] is not specified then position
 /// implies the menu's origin.
-Future/*<T>*/ showMenu/*<T>*/({
+Future<dynamic/*=T*/> showMenu/*<T>*/({
   BuildContext context,
   ModalPosition position,
-  List<PopupMenuEntry/*<T>*/> items,
+  List<PopupMenuEntry<dynamic/*=T*/>> items,
   dynamic/*=T*/ initialValue,
   int elevation: 8
 }) {
   assert(context != null);
   assert(items != null && items.length > 0);
-  Completer completer = new Completer/*<T>*/();
-  Navigator.push(context, new _PopupMenuRoute/*<T>*/(
+  Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
+  Navigator.push(context, new _PopupMenuRoute<dynamic/*=T*/>(
     completer: completer,
     position: position,
     items: items,

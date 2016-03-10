@@ -13,7 +13,7 @@ import 'overlay.dart';
 import 'page_storage.dart';
 import 'pages.dart';
 
-const _kTransparent = const Color(0x00000000);
+const Color _kTransparent = const Color(0x00000000);
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -159,8 +159,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didPush();
   }
 
-  void didReplace(Route oldRoute) {
-    if (oldRoute is TransitionRoute)
+  void didReplace(Route<dynamic> oldRoute) {
+    if (oldRoute is TransitionRoute<dynamic>)
       _controller.value = oldRoute._controller.value;
     _animation.addStatusListener(_handleStatusChanged);
     super.didReplace(oldRoute);
@@ -173,18 +173,18 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     return true;
   }
 
-  void didPopNext(Route nextRoute) {
+  void didPopNext(Route<dynamic> nextRoute) {
     _updateForwardAnimation(nextRoute);
     super.didPopNext(nextRoute);
   }
 
-  void didChangeNext(Route nextRoute) {
+  void didChangeNext(Route<dynamic> nextRoute) {
     _updateForwardAnimation(nextRoute);
     super.didChangeNext(nextRoute);
   }
 
-  void _updateForwardAnimation(Route nextRoute) {
-    if (nextRoute is TransitionRoute && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
+  void _updateForwardAnimation(Route<dynamic> nextRoute) {
+    if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       Animation<double> current = _forwardAnimation.parent;
       if (current != null) {
         if (current is TrainHoppingAnimation) {
@@ -216,13 +216,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// Subclasses can override this function to restrict the set of routes they
   /// need to coordinate transitions with.
-  bool canTransitionTo(TransitionRoute nextRoute) => true;
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => true;
 
   /// Whether this route can perform a transition from the given route.
   ///
   /// Subclasses can override this function to restrict the set of routes they
   /// need to coordinate transitions with.
-  bool canTransitionFrom(TransitionRoute nextRoute) => true;
+  bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => true;
 
   void finished() {
     super.finished();
@@ -245,7 +245,7 @@ class LocalHistoryEntry {
   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
   final VoidCallback onRemove;
 
-  LocalHistoryRoute _owner;
+  LocalHistoryRoute<dynamic> _owner;
 
   /// Remove this entry from the history of its associated [LocalHistoryRoute].
   void remove() {
@@ -323,7 +323,7 @@ class _ModalScopeStatus extends InheritedWidget {
   }
 
   final bool isCurrent;
-  final Route route;
+  final Route<dynamic> route;
 
   bool updateShouldNotify(_ModalScopeStatus old) {
     return isCurrent != old.isCurrent ||
@@ -342,7 +342,7 @@ class _ModalScope extends StatefulComponent {
     this.route
   }) : super(key: key);
 
-  final ModalRoute route;
+  final ModalRoute<dynamic> route;
 
   _ModalScopeState createState() => new _ModalScopeState();
 }
@@ -444,7 +444,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Returns the modal route most closely associated with the given context.
   ///
   /// Returns null if the given context is not associated with a modal route.
-  static ModalRoute of(BuildContext context) {
+  static ModalRoute<dynamic> of(BuildContext context) {
     _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
   }
@@ -581,8 +581,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 abstract class PopupRoute<T> extends ModalRoute<T> {
   PopupRoute({ Completer<T> completer }) : super(completer: completer);
   bool get opaque => false;
-  void didChangeNext(Route nextRoute) {
-    assert(nextRoute is! PageRoute);
+  void didChangeNext(Route<dynamic> nextRoute) {
+    assert(nextRoute is! PageRoute<dynamic>);
     super.didChangeNext(nextRoute);
   }
 }

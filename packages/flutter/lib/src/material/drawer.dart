@@ -86,7 +86,7 @@ class DrawerControllerState extends State<DrawerController> {
 
   void _ensureHistoryEntry() {
     if (_historyEntry == null) {
-      ModalRoute route = ModalRoute.of(context);
+      ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route != null) {
         _historyEntry = new LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
         route.addLocalHistoryEntry(_historyEntry);

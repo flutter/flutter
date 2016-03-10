@@ -64,10 +64,10 @@ void main() {
   });
 
   test("should not have a 0 sized colored Box", () {
-    var coloredBox = new RenderDecoratedBox(
+    RenderBox coloredBox = new RenderDecoratedBox(
       decoration: new BoxDecoration()
     );
-    var paddingBox = new RenderPadding(padding: const EdgeDims.all(10.0),
+    RenderBox paddingBox = new RenderPadding(padding: const EdgeDims.all(10.0),
         child: coloredBox);
     RenderBox root = new RenderDecoratedBox(
       decoration: new BoxDecoration(),
