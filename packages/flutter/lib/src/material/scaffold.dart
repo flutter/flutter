@@ -229,24 +229,24 @@ class ScaffoldState extends State<Scaffold> {
 
   // SNACKBAR API
 
-  Queue<ScaffoldFeatureController<SnackBar>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar>>();
+  Queue<ScaffoldFeatureController<SnackBar, Null>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar, Null>>();
   AnimationController _snackBarController;
   Timer _snackBarTimer;
 
-  ScaffoldFeatureController showSnackBar(SnackBar snackbar) {
+  ScaffoldFeatureController<SnackBar, Null> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController()
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
       assert(_snackBarController.isDismissed);
       _snackBarController.forward();
     }
-    ScaffoldFeatureController<SnackBar> controller;
-    controller = new ScaffoldFeatureController<SnackBar>._(
+    ScaffoldFeatureController<SnackBar, Null> controller;
+    controller = new ScaffoldFeatureController<SnackBar, Null>._(
       // We provide a fallback key so that if back-to-back snackbars happen to
       // match in structure, material ink splashes and highlights don't survive
       // from one to the next.
       snackbar.withAnimation(_snackBarController, fallbackKey: new UniqueKey()),
-      new Completer(),
+      new Completer<Null>(),
       () {
         assert(_snackBars.first == controller);
         _hideSnackBar();
@@ -294,14 +294,14 @@ class ScaffoldState extends State<Scaffold> {
   // PERSISTENT BOTTOM SHEET API
 
   List<Widget> _dismissedBottomSheets;
-  ScaffoldFeatureController _currentBottomSheet;
+  PersistentBottomSheetController<dynamic> _currentBottomSheet;
 
-  ScaffoldFeatureController showBottomSheet(WidgetBuilder builder) {
+  PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
     }
-    Completer completer = new Completer();
+    Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
     GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
     AnimationController controller = BottomSheet.createAnimationController()
       ..forward();
@@ -334,7 +334,7 @@ class ScaffoldState extends State<Scaffold> {
     );
     ModalRoute.of(context).addLocalHistoryEntry(entry);
     setState(() {
-      _currentBottomSheet = new ScaffoldFeatureController._(
+      _currentBottomSheet = new PersistentBottomSheetController<dynamic/*=T*/>._(
         bottomSheet,
         completer,
         () => entry.remove(),
@@ -447,7 +447,7 @@ class ScaffoldState extends State<Scaffold> {
     } else if (_scrollOffset > appBarHeight) {
       // scrolled down, show the "floating" toolbar
       _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, toolBarHeight);
-      final toolBarOpacity = _toolBarOpacity(_floatingAppBarHeight / toolBarHeight);
+      final double toolBarOpacity = _toolBarOpacity(_floatingAppBarHeight / toolBarHeight);
       _appBarController.value = (appBarHeight - _floatingAppBarHeight) / appBarHeight;
       appBar = new SizedBox(
         height: _floatingAppBarHeight,
@@ -471,7 +471,7 @@ class ScaffoldState extends State<Scaffold> {
     EdgeDims padding = MediaQuery.of(context)?.padding ?? EdgeDims.zero;
 
     if (_snackBars.length > 0) {
-      ModalRoute route = ModalRoute.of(context);
+      ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarController.isCompleted && _snackBarTimer == null)
           _snackBarTimer = new Timer(_snackBars.first._widget.duration, _hideSnackBar);
@@ -563,11 +563,11 @@ class ScaffoldState extends State<Scaffold> {
   }
 }
 
-class ScaffoldFeatureController<T extends Widget> {
+class ScaffoldFeatureController<T extends Widget, U> {
   const ScaffoldFeatureController._(this._widget, this._completer, this.close, this.setState);
   final T _widget;
-  final Completer _completer;
-  Future get closed => _completer.future;
+  final Completer<U> _completer;
+  Future<U> get closed => _completer.future;
   final VoidCallback close; // call this to close the bottom sheet or snack bar
   final StateSetter setState;
 }
@@ -640,4 +640,16 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
     );
   }
 
+}
+
+/// A [ScaffoldFeatureController] for persistent bottom sheets.
+///
+/// This is the type of objects returned by [Scaffold.showBottomSheet].
+class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_PersistentBottomSheet, T> {
+  const PersistentBottomSheetController._(
+    _PersistentBottomSheet widget,
+    Completer<T> completer,
+    VoidCallback close,
+    StateSetter setState
+  ) : super._(widget, completer, close, setState);
 }

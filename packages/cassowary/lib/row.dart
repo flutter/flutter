@@ -27,7 +27,7 @@ class _Row {
 
   void insertRow(_Row other, [double coefficient = 1.0]) {
     constant += other.constant * coefficient;
-    other.cells.forEach((s, v) => insertSymbol(s, v * coefficient));
+    other.cells.forEach((_Symbol s, double v) => insertSymbol(s, v * coefficient));
   }
 
   void removeSymbol(_Symbol symbol) {
@@ -36,7 +36,7 @@ class _Row {
 
   void reverseSign() {
     constant = -constant;
-    cells.forEach((s, v) => cells[s] = -v);
+    cells.forEach((_Symbol s, double v) => cells[s] = -v);
   }
 
   void solveForSymbol(_Symbol symbol) {
@@ -44,7 +44,7 @@ class _Row {
     double coefficient = -1.0 / cells[symbol];
     cells.remove(symbol);
     constant *= coefficient;
-    cells.forEach((s, v) => cells[s] = v * coefficient);
+    cells.forEach((_Symbol s, double v) => cells[s] = v * coefficient);
   }
 
   void solveForSymbols(_Symbol lhs, _Symbol rhs) {
@@ -70,8 +70,9 @@ class _Row {
 
     buffer.write(constant);
 
-    cells.forEach((symbol, value) =>
-        buffer.write(" + " + value.toString() + " * " + symbol.toString()));
+    cells.forEach((_Symbol symbol, double value) {
+      buffer.write(" + " + value.toString() + " * " + symbol.toString());
+    });
 
     return buffer.toString();
   }

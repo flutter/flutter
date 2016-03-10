@@ -45,7 +45,7 @@ class MaterialApp extends WidgetsApp {
     onGenerateRoute: (RouteSettings settings) {
       RouteBuilder builder = routes[settings.name];
       if (builder != null) {
-        return new MaterialPageRoute(
+        return new MaterialPageRoute<Null>(
           builder: (BuildContext context) {
             return builder(new RouteArguments(context: context));
           },

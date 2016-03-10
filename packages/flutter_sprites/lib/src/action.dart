@@ -424,7 +424,7 @@ class ActionTween extends ActionInterval {
   }
 
   void update(double t) {
-    var newVal;
+    dynamic newVal;
 
     if (startVal is Point) {
       // Point

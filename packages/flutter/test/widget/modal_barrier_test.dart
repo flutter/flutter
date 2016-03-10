@@ -69,7 +69,7 @@ void main() {
       tester.pumpWidget(new MaterialApp(routes: routes));
 
       // Initially the barrier is not visible
-      expect(tester.findElementByKey(const ValueKey('barrier')), isNull);
+      expect(tester.findElementByKey(const ValueKey<String>('barrier')), isNull);
 
       // Tapping on X routes to the barrier
       tester.tap(tester.findText('X'));
@@ -77,11 +77,11 @@ void main() {
       tester.pump(const Duration(seconds: 1));  // end transition
 
       // Tap on the barrier to dismiss it
-      tester.tap(tester.findElementByKey(const ValueKey('barrier')));
+      tester.tap(tester.findElementByKey(const ValueKey<String>('barrier')));
       tester.pump();  // begin transition
       tester.pump(const Duration(seconds: 1));  // end transition
 
-      expect(tester.findElementByKey(const ValueKey('barrier')), isNull,
+      expect(tester.findElementByKey(const ValueKey<String>('barrier')), isNull,
         reason: 'because the barrier was dismissed');
     });
   });
@@ -103,7 +103,7 @@ class FirstComponent extends StatelessComponent {
 class SecondComponent extends StatelessComponent {
   Widget build(BuildContext context) {
     return new ModalBarrier(
-      key: const ValueKey('barrier'),
+      key: const ValueKey<String>('barrier'),
       dismissable: true
     );
   }

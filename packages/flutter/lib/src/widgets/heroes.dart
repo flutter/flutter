@@ -104,10 +104,11 @@ class Hero extends StatefulComponent {
     Map<Object, Map<Key, HeroState>> heroes = <Object, Map<Key, HeroState>>{};
     void visitor(Element element) {
       if (element.widget is Hero) {
-        StatefulComponentElement<Hero, HeroState> hero = element;
-        Object tag = hero.widget.tag;
+        StatefulComponentElement hero = element;
+        Hero heroWidget = element.widget;
+        Object tag = heroWidget.tag;
         assert(tag != null);
-        Key key = hero.widget.key;
+        Key key = heroWidget.key;
         final Map<Key, HeroState> tagHeroes = heroes.putIfAbsent(tag, () => <Key, HeroState>{});
         assert(() {
           if (tagHeroes.containsKey(key)) {
@@ -395,17 +396,17 @@ class HeroController extends NavigatorObserver {
 
   HeroParty _party;
   Animation<double> _animation;
-  PageRoute _from;
-  PageRoute _to;
+  PageRoute<dynamic> _from;
+  PageRoute<dynamic> _to;
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
-  void didPush(Route route, Route previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
     assert(route != null);
-    if (route is PageRoute) {
+    if (route is PageRoute<dynamic>) {
       assert(route.animation != null);
-      if (previousRoute is PageRoute) // could be null
+      if (previousRoute is PageRoute<dynamic>) // could be null
         _from = previousRoute;
       _to = route;
       _animation = route.animation;
@@ -413,12 +414,12 @@ class HeroController extends NavigatorObserver {
     }
   }
 
-  void didPop(Route route, Route previousRoute) {
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
     assert(route != null);
-    if (route is PageRoute) {
+    if (route is PageRoute<dynamic>) {
       assert(route.animation != null);
-      if (previousRoute is PageRoute) {
+      if (previousRoute is PageRoute<dynamic>) {
         _to = previousRoute;
         _from = route;
         _animation = route.animation;

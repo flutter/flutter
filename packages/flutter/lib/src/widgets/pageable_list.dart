@@ -71,7 +71,7 @@ class PageableList extends Scrollable {
   /// The list of pages themselves.
   final Iterable<Widget> children;
 
-  PageableListState createState() => new PageableListState();
+  PageableListState<PageableList> createState() => new PageableListState<PageableList>();
 }
 
 /// State for a [PageableList] widget.
@@ -185,7 +185,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     return _overscrollBehavior;
   }
 
-  ScrollBehavior createScrollBehavior() => scrollBehavior;
+  ScrollBehavior<double, double> createScrollBehavior() => scrollBehavior;
 
   bool get shouldSnapScrollOffset => config.itemsSnapAlignment == ItemsSnapAlignment.item;
 
@@ -196,14 +196,14 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
-  Future _flingToAdjacentItem(double scrollVelocity) {
+  Future<Null> _flingToAdjacentItem(double scrollVelocity) {
     final double newScrollOffset = snapScrollOffset(scrollOffset + scrollVelocity.sign)
       .clamp(snapScrollOffset(scrollOffset - 0.5), snapScrollOffset(scrollOffset + 0.5));
     return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve)
       .then(_notifyPageChanged);
   }
 
-  Future fling(double scrollVelocity) {
+  Future<Null> fling(double scrollVelocity) {
     switch(config.itemsSnapAlignment) {
       case ItemsSnapAlignment.adjacentItem:
         return _flingToAdjacentItem(scrollVelocity);
@@ -212,7 +212,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     }
   }
 
-  Future settleScrollOffset() {
+  Future<Null> settleScrollOffset() {
     return scrollTo(snapScrollOffset(scrollOffset), duration: config.duration, curve: config.curve)
       .then(_notifyPageChanged);
   }
@@ -247,8 +247,10 @@ class PageViewport extends VirtualViewportFromIterable {
   _PageViewportElement createElement() => new _PageViewportElement(this);
 }
 
-class _PageViewportElement extends VirtualViewportElement<PageViewport> {
+class _PageViewportElement extends VirtualViewportElement {
   _PageViewportElement(PageViewport widget) : super(widget);
+
+  PageViewport get widget => super.widget;
 
   RenderList get renderObject => super.renderObject;
 

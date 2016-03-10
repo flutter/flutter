@@ -31,8 +31,10 @@ abstract class _WidgetProvider {
 /// This class is a building block for building a widget that has more children
 /// than it wishes to display at any given time. For example, [ScrollableList]
 /// uses this element to materialize only those children that are visible.
-abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderObjectElement<T> {
-  VirtualViewportElement(T widget) : super(widget);
+abstract class VirtualViewportElement extends RenderObjectElement {
+  VirtualViewportElement(VirtualViewport widget) : super(widget);
+
+  VirtualViewport get widget => super.widget;
 
   /// The index of the first child to materialize.
   int get materializedChildBase;
@@ -70,7 +72,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
 
   List<Element> _materializedChildren = const <Element>[];
 
-  RenderVirtualViewport get renderObject => super.renderObject;
+  RenderVirtualViewport<dynamic> get renderObject => super.renderObject;
 
   void visitChildren(ElementVisitor visitor) {
     if (_materializedChildren == null)
@@ -94,8 +96,8 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     super.unmount();
   }
 
-  void update(T newWidget) {
-    T oldWidget = widget;
+  void update(VirtualViewport newWidget) {
+    VirtualViewport oldWidget = widget;
     _widgetProvider.didUpdateWidget(oldWidget, newWidget);
     super.update(newWidget);
     updateRenderObject(oldWidget);
@@ -107,7 +109,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     renderObject.paintOffset = scrollOffsetToPixelDelta(widget.startOffset - startOffsetBase);
   }
 
-  void updateRenderObject(T oldWidget) {
+  void updateRenderObject(VirtualViewport oldWidget) {
     renderObject.virtualChildCount = _widgetProvider.virtualChildCount;
 
     if (startOffsetBase != null) {
@@ -161,7 +163,7 @@ abstract class VirtualViewportElement<T extends VirtualViewport> extends RenderO
     for (int i = 0; i < count; ++i) {
       int childIndex = base + i;
       Widget child = _widgetProvider.getChild(childIndex);
-      Key key = new ValueKey(child.key ?? childIndex);
+      Key key = new ValueKey<Key>(child.key) ?? new ValueKey<int>(childIndex);
       newWidgets[i] = new RepaintBoundary(key: key, child: child);
     }
     _materializedChildren = updateChildren(_materializedChildren, newWidgets);

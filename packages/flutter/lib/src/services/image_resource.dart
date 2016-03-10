@@ -24,7 +24,12 @@ typedef void ImageListener(ImageInfo image);
 /// or because the underlying image resource was mutated.
 class ImageResource {
   ImageResource(this._futureImage) {
-    _futureImage.then(_handleImageLoaded, onError: (exception, stack) => _handleImageError('Failed to load image:', exception, stack));
+    _futureImage.then(
+      _handleImageLoaded,
+      onError: (dynamic exception, dynamic stack) {
+        _handleImageError('Failed to load image:', exception, stack);
+      }
+    );
   }
 
   bool _resolved = false;

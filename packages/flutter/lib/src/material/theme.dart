@@ -8,7 +8,7 @@ import 'theme_data.dart';
 
 export 'theme_data.dart' show ThemeData, ThemeBrightness;
 
-const kThemeAnimationDuration = const Duration(milliseconds: 200);
+const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 
 /// Applies a theme to descendant widgets.
 class Theme extends InheritedWidget {
@@ -73,7 +73,7 @@ class AnimatedTheme extends AnimatedWidgetBase {
 class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   ThemeDataTween _data;
 
-  void forEachTween(TweenVisitor visitor) {
+  void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
     _data = visitor(_data, config.data, (dynamic value) => new ThemeDataTween(begin: value));
     assert(_data != null);

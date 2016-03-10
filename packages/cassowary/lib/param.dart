@@ -5,18 +5,18 @@
 part of cassowary;
 
 class Param extends _EquationMember {
-  final Variable variable;
-  dynamic context;
-
   Param([double value = 0.0]) : variable = new Variable(value) {
     variable._owner = this;
   }
-
-  Param.withContext(ctx, [double value = 0.0])
-      : variable = new Variable(value),
-        context = ctx {
+  Param.withContext(dynamic context, [double value = 0.0])
+    : variable = new Variable(value),
+      context = context {
     variable._owner = this;
   }
+
+  final Variable variable;
+
+  dynamic context;
 
   bool get isConstant => false;
 
@@ -25,5 +25,5 @@ class Param extends _EquationMember {
   String get name => variable.name;
   void set name(String name) { variable.name = name; }
 
-  Expression asExpression() => new Expression([new Term(variable, 1.0)], 0.0);
+  Expression asExpression() => new Expression(<Term>[new Term(variable, 1.0)], 0.0);
 }

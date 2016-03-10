@@ -89,7 +89,7 @@ class Solver {
 
       _Symbol leaving = rowPair.first;
       row = rowPair.second;
-      var removed = _rows.remove(rowPair.first);
+      _Row removed = _rows.remove(rowPair.first);
       assert(removed != null);
       row.solveForSymbols(leaving, tag.marker);
       _substitute(tag.marker, row);
@@ -170,8 +170,8 @@ class Solver {
     return _dualOptimize();
   }
 
-  Set flushUpdates() {
-    Set updates = new HashSet<dynamic>();
+  Set<dynamic> flushUpdates() {
+    Set<dynamic> updates = new HashSet<dynamic>();
 
     for (Variable variable in _vars.keys) {
       _Symbol symbol = _vars[variable];
@@ -189,10 +189,12 @@ class Solver {
     return updates;
   }
 
-  Result _bulkEdit(Iterable items,
-                   _SolverBulkUpdate applier,
-                   _SolverBulkUpdate undoer) {
-    List applied = new List();
+  Result _bulkEdit(
+    Iterable<dynamic> items,
+    _SolverBulkUpdate applier,
+    _SolverBulkUpdate undoer
+  ) {
+    List<dynamic> applied = <dynamic>[];
     bool needsCleanup = false;
 
     Result result = Result.success;
@@ -231,7 +233,7 @@ class Solver {
     Expression expr = new Expression.fromExpression(constraint.expression);
     _Row row = new _Row(expr.constant);
 
-    expr.terms.forEach((term) {
+    expr.terms.forEach((Term term) {
       if (!_nearZero(term.coefficient)) {
         _Symbol symbol = _symbolForVariable(term.variable);
 
@@ -397,9 +399,9 @@ class Solver {
 
   _Pair<_Symbol, _Row> _leavingRowForEnteringSymbol(_Symbol entering) {
     double ratio = double.MAX_FINITE;
-    _Pair<_Symbol, _Row> result = new _Pair(null, null);
+    _Pair<_Symbol, _Row> result = new _Pair<_Symbol, _Row>(null, null);
 
-    _rows.forEach((symbol, row) {
+    _rows.forEach((_Symbol symbol, _Row row) {
       if (symbol.type != _SymbolType.external) {
         double temp = row.coefficientForSymbol(entering);
 
@@ -423,7 +425,7 @@ class Solver {
   }
 
   void _substitute(_Symbol symbol, _Row row) {
-    _rows.forEach((first, second) {
+    _rows.forEach((_Symbol first, _Row second) {
       second.substitute(symbol, row);
       if (first.type != _SymbolType.external && second.constant < 0.0) {
         _infeasibleRows.add(first);
@@ -470,7 +472,7 @@ class Solver {
 
     _Pair<_Symbol, _Row> first, second, third;
 
-    _rows.forEach((symbol, row) {
+    _rows.forEach((_Symbol symbol, _Row row) {
       double c = row.coefficientForSymbol(marker);
 
       if (c == 0.0) {
@@ -478,18 +480,18 @@ class Solver {
       }
 
       if (symbol.type == _SymbolType.external) {
-        third = new _Pair(symbol, row);
+        third = new _Pair<_Symbol, _Row>(symbol, row);
       } else if (c < 0.0) {
         double r = -row.constant / c;
         if (r < r1) {
           r1 = r;
-          first = new _Pair(symbol, row);
+          first = new _Pair<_Symbol, _Row>(symbol, row);
         }
       } else {
         double r = row.constant / c;
         if (r < r2) {
           r2 = r;
-          second = new _Pair(symbol, row);
+          second = new _Pair<_Symbol, _Row>(symbol, row);
         }
       }
     });
@@ -596,28 +598,33 @@ class Solver {
 
     // Tableau
     buffer.writeln(separator + " Tableau");
-    _rows.forEach((symbol, row) {
-      buffer.write(symbol.toString());
-      buffer.write(" | ");
-      buffer.writeln(row.toString());
+    _rows.forEach((_Symbol symbol, _Row row) {
+      buffer.writeln('$symbol | $row');
     });
 
     // Infeasible
     buffer.writeln(separator + " Infeasible");
-    _infeasibleRows.forEach((symbol) => buffer.writeln(symbol.toString()));
+    _infeasibleRows.forEach((_Symbol symbol) {
+      buffer.writeln(symbol);
+    });
 
     // Variables
     buffer.writeln(separator + " Variables");
-    _vars.forEach((variable, symbol) =>
-        buffer.writeln("${variable.toString()} = ${symbol.toString()}"));
+    _vars.forEach((Variable variable, _Symbol symbol) {
+      buffer.writeln('$variable = $symbol');
+    });
 
     // Edit Variables
     buffer.writeln(separator + " Edit Variables");
-    _edits.forEach((variable, editinfo) => buffer.writeln(variable));
+    _edits.forEach((Variable variable, _EditInfo editinfo) {
+      buffer.writeln(variable);
+    });
 
     // Constraints
     buffer.writeln(separator + " Constraints");
-    _constraints.forEach((constraint, _) => buffer.writeln(constraint));
+    _constraints.forEach((Constraint constraint, _Tag tag) {
+      buffer.writeln(constraint);
+    });
 
     return buffer.toString();
   }
