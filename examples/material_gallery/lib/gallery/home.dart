@@ -32,6 +32,7 @@ import '../demo/slider_demo.dart';
 import '../demo/snack_bar_demo.dart';
 import '../demo/tabs_demo.dart';
 import '../demo/tabs_fab_demo.dart';
+import '../demo/text_field_demo.dart';
 import '../demo/time_picker_demo.dart';
 import '../demo/tooltip_demo.dart';
 import '../demo/two_level_list_demo.dart';
@@ -99,13 +100,13 @@ class GalleryHomeState extends State<GalleryHome> {
                 colors: Colors.amber,
                 demos: <GalleryDemo>[
                   new GalleryDemo(title: 'Buttons', builder: () => new ButtonsDemo()),
+                  new GalleryDemo(title: 'Buttons: Floating Action Button', builder: () => new TabsFabDemo()),
                   new GalleryDemo(title: 'Cards', builder: () => new CardsDemo()),
                   new GalleryDemo(title: 'Chips', builder: () => new ChipDemo()),
                   new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
                   new GalleryDemo(title: 'Dialog', builder: () => new DialogDemo()),
                   new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
                   new GalleryDemo(title: 'Expand/Collapse List Control', builder: () => new TwoLevelListDemo()),
-                  new GalleryDemo(title: 'Floating Action Button', builder: () => new TabsFabDemo()),
                   new GalleryDemo(title: 'Grid', builder: () => new GridListDemo()),
                   new GalleryDemo(title: 'Icons', builder: () => new IconsDemo()),
                   new GalleryDemo(title: 'Leave-behind List Items', builder: () => new LeaveBehindDemo()),
@@ -119,6 +120,7 @@ class GalleryHomeState extends State<GalleryHome> {
                   new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
                   new GalleryDemo(title: 'SnackBar', builder: () => new SnackBarDemo()),
                   new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
+                  new GalleryDemo(title: 'Text Fields', builder: () => new TextFieldDemo()),
                   new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
                   new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
                 ]
