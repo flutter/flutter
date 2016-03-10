@@ -15,6 +15,8 @@ Future<int> _runPub(Directory directory, { bool upgrade: false }) async {
   for (FileSystemEntity dir in directory.listSync()) {
     if (dir is Directory && FileSystemEntity.isFileSync(dir.path + Platform.pathSeparator + 'pubspec.yaml')) {
       updateCount++;
+      // TODO(eseidel): Should this fail immediately if pubGet fails?
+      // Currently we're ignoring the return code.
       await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
     }
   }
