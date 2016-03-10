@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/ios/flutter_dynamic_service_loader.h"
+#include "sky/shell/platform/ios/FlutterDynamicServiceLoader.h"
 #include "sky/services/dynamic/dynamic_service_embedder.h"
 #include "sky/services/dynamic/dynamic_service_definition.h"
 #include <Foundation/Foundation.h>

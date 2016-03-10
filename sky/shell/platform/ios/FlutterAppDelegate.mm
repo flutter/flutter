@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/ios/flutter_app_delegate.h"
+#include "sky/shell/platform/ios/FlutterAppDelegate.h"
 #include "sky/shell/platform/ios/public/FlutterViewController.h"
 #include "base/trace_event/trace_event.h"
 
