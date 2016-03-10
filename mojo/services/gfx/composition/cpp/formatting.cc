@@ -80,7 +80,20 @@ std::ostream& operator<<(
     std::ostream& os,
     const mojo::gfx::composition::MailboxTextureResource& value) {
   return os << "{sync_point=" << value.sync_point << ", size=" << value.size
-            << "}";
+            << ", origin=" << &value.origin << "}";
+}
+
+std::ostream& operator<<(
+    std::ostream& os,
+    const mojo::gfx::composition::MailboxTextureResource::Origin* value) {
+  switch (*value) {
+    case mojo::gfx::composition::MailboxTextureResource::Origin::TOP_LEFT:
+      return os << "TOP_LEFT";
+    case mojo::gfx::composition::MailboxTextureResource::Origin::BOTTOM_LEFT:
+      return os << "BOTTOM_LEFT";
+    default:
+      return os << "???";
+  }
 }
 
 std::ostream& operator<<(std::ostream& os,
@@ -155,7 +168,7 @@ std::ostream& operator<<(std::ostream& os,
 
 std::ostream& operator<<(std::ostream& os,
                          const mojo::gfx::composition::LayerNodeOp& value) {
-  return os << "{layer_size=" << value.layer_size << ", blend=" << value.blend
+  return os << "{layer_rect=" << value.layer_rect << ", blend=" << value.blend
             << "}";
 }
 
@@ -227,8 +240,8 @@ std::ostream& operator<<(std::ostream& os,
 
 std::ostream& operator<<(std::ostream& os,
                          const mojo::gfx::composition::NodeHit& value) {
-  return os << "{node_id=" << value.node_id
-            << ", intersection=" << value.intersection << "}";
+  return os << "{node_id=" << value.node_id << ", transform=" << value.transform
+            << "}";
 }
 
 }  // namespace composition

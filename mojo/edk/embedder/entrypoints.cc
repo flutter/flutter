@@ -14,6 +14,7 @@ using mojo::system::MakeUserPointer;
 
 // Definitions of the system functions.
 extern "C" {
+
 MojoTimeTicks MojoGetTimeTicksNow() {
   return g_core->GetTimeTicksNow();
 }
@@ -137,6 +138,13 @@ MojoResult MojoDuplicateBufferHandle(
     MojoHandle* new_buffer_handle) {
   return g_core->DuplicateBufferHandle(buffer_handle, MakeUserPointer(options),
                                        MakeUserPointer(new_buffer_handle));
+}
+
+MojoResult MojoGetBufferInformation(MojoHandle buffer_handle,
+                                    struct MojoBufferInformation* info,
+                                    uint32_t info_num_bytes) {
+  return g_core->GetBufferInformation(buffer_handle, MakeUserPointer(info),
+                                      info_num_bytes);
 }
 
 MojoResult MojoMapBuffer(MojoHandle buffer_handle,

@@ -27,6 +27,7 @@ template void CheckUserPointer<1, 1>(const void*);
 template void CheckUserPointer<4, 4>(const void*);
 template void CheckUserPointer<8, 4>(const void*);
 template void CheckUserPointer<8, 8>(const void*);
+template void CheckUserPointer<16, 8>(const void*);
 
 template <size_t size, size_t alignment>
 void CheckUserPointerWithCount(const void* pointer, size_t count) {

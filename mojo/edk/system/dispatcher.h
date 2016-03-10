@@ -116,6 +116,8 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   MojoResult DuplicateBufferHandle(
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
       util::RefPtr<Dispatcher>* new_dispatcher);
+  MojoResult GetBufferInformation(UserPointer<MojoBufferInformation> info,
+                                  uint32_t info_num_bytes);
   MojoResult MapBuffer(
       uint64_t offset,
       uint64_t num_bytes,
@@ -265,6 +267,9 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
       util::RefPtr<Dispatcher>* new_dispatcher)
       MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+  virtual MojoResult GetBufferInformationImplNoLock(
+      UserPointer<MojoBufferInformation> info,
+      uint32_t info_num_bytes) MOJO_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
   virtual MojoResult MapBufferImplNoLock(
       uint64_t offset,
       uint64_t num_bytes,

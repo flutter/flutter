@@ -37,6 +37,8 @@ inline bool operator!=(const Point& lhs, const Point& rhs) {
 void SetIdentityTransform(Transform* transform);
 void SetTranslationTransform(Transform* transform, float x, float y, float z);
 
+PointF TransformPoint(const Transform& transform, const PointF& point);
+
 }  // namespace mojo
 
 #endif  // MOJO_SERVICES_GEOMETRY_CPP_GEOMETRY_UTIL_H_

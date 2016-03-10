@@ -152,6 +152,9 @@ class Core {
       MojoHandle buffer_handle,
       UserPointer<const MojoDuplicateBufferHandleOptions> options,
       UserPointer<MojoHandle> new_buffer_handle);
+  MojoResult GetBufferInformation(MojoHandle buffer_handle,
+                                  UserPointer<MojoBufferInformation> info,
+                                  uint32_t info_num_bytes);
   MojoResult MapBuffer(MojoHandle buffer_handle,
                        uint64_t offset,
                        uint64_t num_bytes,

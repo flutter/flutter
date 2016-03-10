@@ -24,13 +24,16 @@ interface Renderer {
   // Use |kSceneVersionNone| to request the most recently published
   // version of the scene if synchronization is unimportant.
   //
-  // The |viewport| specifies the portion of the scene to render.
+  // The |viewport| specifies the portion of the scene to render in pixels.
   //
   // It is an error to create a renderer with an invalid |scene_token|
   // or |size|; the connection will be closed.
   // TODO: make this an event instead
   SetRootScene(SceneToken scene_token, uint32 scene_version,
     mojo.Rect viewport);
+
+  // Dissociates the root scene from the renderer.
+  ClearRootScene();
 
   // Provides an interface which can be used to perform hit tests on the
   // contents of the renderer's scene graph.

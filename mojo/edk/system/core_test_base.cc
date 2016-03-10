@@ -130,6 +130,33 @@ class MockDispatcher : public Dispatcher {
     return MOJO_RESULT_UNIMPLEMENTED;
   }
 
+  MojoResult DuplicateBufferHandleImplNoLock(
+      UserPointer<const MojoDuplicateBufferHandleOptions> /*options*/,
+      RefPtr<Dispatcher>* /*new_dispatcher*/) override {
+    info_->IncrementDuplicateBufferHandleCallCount();
+    mutex().AssertHeld();
+    return MOJO_RESULT_UNIMPLEMENTED;
+  }
+
+  MojoResult GetBufferInformationImplNoLock(
+      UserPointer<MojoBufferInformation> /*info*/,
+      uint32_t /*info_num_bytes*/) override {
+    info_->IncrementGetBufferInformationCallCount();
+    mutex().AssertHeld();
+    return MOJO_RESULT_UNIMPLEMENTED;
+  }
+
+  MojoResult MapBufferImplNoLock(
+      uint64_t /*offset*/,
+      uint64_t /*num_bytes*/,
+      MojoMapBufferFlags /*flags*/,
+      std::unique_ptr<platform::PlatformSharedBufferMapping>* /*mapping*/)
+      override {
+    info_->IncrementMapBufferCallCount();
+    mutex().AssertHeld();
+    return MOJO_RESULT_UNIMPLEMENTED;
+  }
+
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
                                    MojoHandleSignals /*signals*/,
                                    uint32_t /*context*/,
@@ -197,26 +224,9 @@ MojoHandle CoreTestBase::CreateMockHandle(CoreTestBase::MockHandleInfo* info) {
 
 // CoreTestBase_MockHandleInfo -------------------------------------------------
 
-CoreTestBase_MockHandleInfo::CoreTestBase_MockHandleInfo()
-    : ctor_call_count_(0),
-      dtor_call_count_(0),
-      close_call_count_(0),
-      write_message_call_count_(0),
-      read_message_call_count_(0),
-      write_data_call_count_(0),
-      begin_write_data_call_count_(0),
-      end_write_data_call_count_(0),
-      read_data_call_count_(0),
-      begin_read_data_call_count_(0),
-      end_read_data_call_count_(0),
-      add_awakable_call_count_(0),
-      remove_awakable_call_count_(0),
-      cancel_all_awakables_call_count_(0),
-      add_awakable_allowed_(false) {
-}
+CoreTestBase_MockHandleInfo::CoreTestBase_MockHandleInfo() {}
 
-CoreTestBase_MockHandleInfo::~CoreTestBase_MockHandleInfo() {
-}
+CoreTestBase_MockHandleInfo::~CoreTestBase_MockHandleInfo() {}
 
 unsigned CoreTestBase_MockHandleInfo::GetCtorCallCount() const {
   MutexLocker locker(&mutex_);
@@ -271,6 +281,22 @@ unsigned CoreTestBase_MockHandleInfo::GetBeginReadDataCallCount() const {
 unsigned CoreTestBase_MockHandleInfo::GetEndReadDataCallCount() const {
   MutexLocker locker(&mutex_);
   return end_read_data_call_count_;
+}
+
+unsigned CoreTestBase_MockHandleInfo::GetDuplicateBufferHandleCallCount()
+    const {
+  MutexLocker locker(&mutex_);
+  return duplicate_buffer_handle_call_count_;
+}
+
+unsigned CoreTestBase_MockHandleInfo::GetGetBufferInformationCallCount() const {
+  MutexLocker locker(&mutex_);
+  return get_buffer_information_call_count_;
+}
+
+unsigned CoreTestBase_MockHandleInfo::GetMapBufferCallCount() const {
+  MutexLocker locker(&mutex_);
+  return map_buffer_call_count_;
 }
 
 unsigned CoreTestBase_MockHandleInfo::GetAddAwakableCallCount() const {
@@ -351,6 +377,21 @@ void CoreTestBase_MockHandleInfo::IncrementBeginReadDataCallCount() {
 void CoreTestBase_MockHandleInfo::IncrementEndReadDataCallCount() {
   MutexLocker locker(&mutex_);
   end_read_data_call_count_++;
+}
+
+void CoreTestBase_MockHandleInfo::IncrementDuplicateBufferHandleCallCount() {
+  MutexLocker locker(&mutex_);
+  duplicate_buffer_handle_call_count_++;
+}
+
+void CoreTestBase_MockHandleInfo::IncrementGetBufferInformationCallCount() {
+  MutexLocker locker(&mutex_);
+  get_buffer_information_call_count_++;
+}
+
+void CoreTestBase_MockHandleInfo::IncrementMapBufferCallCount() {
+  MutexLocker locker(&mutex_);
+  map_buffer_call_count_++;
 }
 
 void CoreTestBase_MockHandleInfo::IncrementAddAwakableCallCount() {

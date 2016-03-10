@@ -79,6 +79,7 @@ class GaneshContext : public GLContext::Observer {
   ::skia::RefPtr<GrContext> gr_context_;
 
   bool scope_entered_ = false;
+  bool context_lost_ = false;
   MGLContext previous_mgl_context_ = MGL_NO_CONTEXT;
 
   DISALLOW_COPY_AND_ASSIGN(GaneshContext);

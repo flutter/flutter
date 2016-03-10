@@ -218,7 +218,10 @@ class Encoder {
       return;
     }
     if (interface is Stub) {
-      assert(!interface.isBound);
+      if (interface.isBound) {
+        throw new MojoCodecError(
+            'Cannot encode a bound stub for an interface');
+      }
       var pipe = new core.MojoMessagePipe();
       interface.bind(pipe.endpoints[0]);
       interface.beginHandlingEvents();
@@ -226,7 +229,10 @@ class Encoder {
       // Set the version to the version in the stub.
       encodeUint32(interface.version, offset + kSerializedHandleSize);
     } else if (interface is Proxy) {
-      assert(interface.isBound);
+      if (!interface.isBound) {
+        throw new MojoCodecError(
+            'Cannot encode an unbound proxy for an interface');
+      }
       if (!interface.isOpen) {
         // Make sure that we are listening so that state for the proxy is
         // cleaned up when the message is sent and the handle is closed.
@@ -236,25 +242,44 @@ class Encoder {
       // Set the version to the current version of the proxy.
       encodeUint32(interface.version, offset + kSerializedHandleSize);
     } else {
-      throw new MojoCodecError('Trying to encode an unknown MojoEventHandler');
+      throw new MojoCodecError('Cannot encode an unknown MojoEventHandler');
     }
   }
 
-  void encodeInterfaceRequest(ProxyBase client, int offset, bool nullable) {
-    if (client == null) {
+  void encodeInterfaceRequest(Object request, int offset, bool nullable) {
+    if (request == null) {
       encodeInvalideHandle(offset, nullable);
       return;
     }
-    var pipe = new core.MojoMessagePipe();
-    client.impl.bind(pipe.endpoints[0]);
-    client.impl.beginHandlingEvents();
-    encodeMessagePipeHandle(pipe.endpoints[1], offset, nullable);
+    if (request is ProxyBase) {
+      if (request.impl.isBound) {
+        throw new MojoCodecError(
+            'Cannot encode a bound proxy for an interface request');
+      }
+      var pipe = new core.MojoMessagePipe();
+      request.impl.bind(pipe.endpoints[0]);
+      request.impl.beginHandlingEvents();
+      encodeMessagePipeHandle(pipe.endpoints[1], offset, nullable);
+    } else if (request is Stub) {
+      if (!request.isBound) {
+        throw new MojoCodecError(
+            'Cannot encode an unbound stub for an interface request');
+      }
+      if (!request.isOpen) {
+        // Make sure that we are listening so that state for the stub is
+        // cleaned up when the message is sent and the handle is closed.
+        request.beginHandlingEvents();
+      }
+      encodeMessagePipeHandle(request.endpoint, offset, nullable);
+      // Set the version to the current version of the stub.
+      encodeUint32(request.version, offset + kSerializedHandleSize);
+    }
   }
 
   void encodeNullPointer(int offset, bool nullable) {
     if (!nullable) {
       throw new MojoCodecError(
-          'Trying to encode a null pointer for a non-nullable type');
+          'Cannot encode a null pointer for a non-nullable type');
     }
     _buffer.buffer.setUint64(_base + offset, 0, Endianness.LITTLE_ENDIAN);
   }
@@ -262,7 +287,7 @@ class Encoder {
   void encodeInvalideHandle(int offset, bool nullable) {
     if (!nullable) {
       throw new MojoCodecError(
-          'Trying to encode a null pointer for a non-nullable type');
+          'Cannot encode a null pointer for a non-nullable type');
     }
     _buffer.buffer.setInt32(_base + offset, -1, Endianness.LITTLE_ENDIAN);
   }
@@ -282,7 +307,7 @@ class Encoder {
   void encodeUnion(Union value, int offset, bool nullable) {
     if (value == null) {
       if (!nullable) {
-        throw new MojoCodecError('Trying to encode a non-nullable null union.');
+        throw new MojoCodecError('Cannot encode a non-nullable null union.');
       }
       encodeUint64(0, offset);
       encodeUint64(0, offset + 8);
@@ -315,7 +340,7 @@ class Encoder {
     if ((expectedLength != kUnspecifiedArrayLength) &&
         (expectedLength != length)) {
       throw new MojoCodecError(
-          'Trying to encode a fixed array of incorrect length');
+          'Cannot encode a fixed array of incorrect length');
     }
     return encoderForArrayByTotalSize(length * elementSize, length, offset);
   }
@@ -335,7 +360,7 @@ class Encoder {
     if ((expectedLength != kUnspecifiedArrayLength) &&
         (expectedLength != value.length)) {
       throw new MojoCodecError(
-          'Trying to encode a fixed array of incorrect size.');
+          'Cannot encode a fixed array of incorrect size.');
     }
     var bytes = new Uint8List((value.length + 7) >> kAlignmentShift);
     for (int i = 0; i < bytes.length; ++i) {
@@ -613,10 +638,10 @@ class _Validator {
 
   void claimHandle(int handle) {
     if (handle < _minNextClaimedHandle) {
-      throw new MojoCodecError('Trying to access handle out of order.');
+      throw new MojoCodecError('Cannot access handle out of order.');
     }
     if (handle >= _numberOfHandles) {
-      throw new MojoCodecError('Trying to access non present handle.');
+      throw new MojoCodecError('Cannot access non present handle.');
     }
     for (int i = _minNextClaimedHandle; i < handle; i++) {
       _skippedIndices.add(i);
@@ -629,13 +654,13 @@ class _Validator {
       throw new MojoCodecError('Incorrect starting alignment: $start.');
     }
     if (start < _minNextMemory) {
-      throw new MojoCodecError('Trying to access memory out of order.');
+      throw new MojoCodecError('Cannot access memory out of order.');
     }
     if (end < start) {
       throw new MojoCodecError('Incorrect memory range.');
     }
     if (end > _maxMemory) {
-      throw new MojoCodecError('Trying to access out of range memory.');
+      throw new MojoCodecError('Cannot access out of range memory.');
     }
     _minNextMemory = align(end);
   }
@@ -701,7 +726,7 @@ class Decoder {
     if (index == -1) {
       if (!nullable) {
         throw new MojoCodecError(
-            'Trying to decode an invalid handle from a non-nullable type.');
+            'Cannot decode an invalid handle from a non-nullable type.');
       }
       return new core.MojoHandle.invalid();
     }
@@ -746,7 +771,7 @@ class Decoder {
     if (pointerOffset == 0) {
       if (!nullable) {
         throw new MojoCodecError(
-            'Trying to decode a null pointer for a non-nullable type');
+            'Cannot decode a null pointer for a non-nullable type');
       }
       return null;
     }

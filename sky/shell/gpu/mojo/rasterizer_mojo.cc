@@ -91,7 +91,7 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   auto root_node = mojo::gfx::composition::Node::New();
   root_node->op = mojo::gfx::composition::NodeOp::New();
   root_node->op->set_image(mojo::gfx::composition::ImageNodeOp::New());
-  root_node->op->get_image()->content_rect = mojo::Rect::New();
+  root_node->op->get_image()->content_rect = mojo::RectF::New();
   root_node->op->get_image()->content_rect->width = size.width;
   root_node->op->get_image()->content_rect->height = size.height;
   root_node->op->get_image()->image_resource_id = kContentImageResourceId;

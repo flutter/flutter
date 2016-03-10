@@ -17,8 +17,7 @@ using mojo::platform::AlignedAlloc;
 namespace mojo {
 namespace system {
 
-MOJO_STATIC_CONST_MEMBER_DEFINITION const size_t
-    MessageInTransit::kMessageAlignment;
+const size_t MessageInTransit::kMessageAlignment;
 
 struct MessageInTransit::PrivateStructForCompileAsserts {
   // The size of |Header| must be a multiple of the alignment.

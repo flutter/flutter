@@ -34,19 +34,19 @@ struct RectF {
   float height;
 };
 
-struct RRect {
-  int32 x;
-  int32 y;
-  int32 width;
-  int32 height;
-  int32 top_left_radius_x;
-  int32 top_left_radius_y;
-  int32 top_right_radius_x;
-  int32 top_right_radius_y;
-  int32 bottom_left_radius_x;
-  int32 bottom_left_radius_y;
-  int32 bottom_right_radius_x;
-  int32 bottom_right_radius_y;
+struct RRectF {
+  float x;
+  float y;
+  float width;
+  float height;
+  float top_left_radius_x;
+  float top_left_radius_y;
+  float top_right_radius_x;
+  float top_right_radius_y;
+  float bottom_left_radius_x;
+  float bottom_left_radius_y;
+  float bottom_right_radius_x;
+  float bottom_right_radius_y;
 };
 
 struct Transform {

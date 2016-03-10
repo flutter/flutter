@@ -108,8 +108,6 @@ class _ApplicationConnectorConnectToApplicationParams extends bindings.Struct {
 }
 
 
-
-
 class _ApplicationConnectorDuplicateParams extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(16, 0)
@@ -180,13 +178,8 @@ class _ApplicationConnectorDuplicateParams extends bindings.Struct {
   }
 }
 
-
-
-
 const int _ApplicationConnector_connectToApplicationName = 0;
 const int _ApplicationConnector_duplicateName = 1;
-
-
 
 class _ApplicationConnectorServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>

@@ -166,7 +166,7 @@ struct Node {
   // The clip rectangle to apply to this node's content and to its children
   // in content space in addition to any clipping performed by the container.
   // If null, the node does not apply any clipping of its own.
-  mojo.Rect? content_clip;
+  mojo.RectF? content_clip;
 
   // The Combinator to apply when processing the children of this node.
   Combinator combinator = Combinator.MERGE;
@@ -198,7 +198,7 @@ union NodeOp {
 // Fills a rectangle with a solid color.
 struct RectNodeOp {
   // The rectangle to fill in content space.
-  mojo.Rect content_rect;
+  mojo.RectF content_rect;
 
   // The rectangle's color.
   Color color;
@@ -210,11 +210,11 @@ struct RectNodeOp {
 // is not ready for use at draw time.
 struct ImageNodeOp {
   // The rectangle in which to draw the image in content space.
-  mojo.Rect content_rect;
+  mojo.RectF content_rect;
 
   // The portion of the image to draw.
   // If null, draws the entire image.
-  mojo.Rect? image_rect;
+  mojo.RectF? image_rect;
 
   // The resource id of a valid |MailboxTextureResource| to draw.
   // It is an error to specify a resource id that does not refer to an image
@@ -257,12 +257,12 @@ struct SceneNodeOp {
 // Draws a layer.
 //
 // Conceptually, this operation has the effect of drawing the children of
-// the node to a temporary buffer of the specified size which is then
-// composited in place like an image.  This is useful for ensuring
-// correct blending of layered content.
+// the node to a temporary buffer which is then composited in place like an
+// image.  This is useful for ensuring correct blending of layered content.
 struct LayerNodeOp {
-  // The size of the layer to create.
-  mojo.Size layer_size;
+  // The region of the node's content space to render to a layer.
+  // Drawing within this region will be included in the layer.
+  mojo.RectF layer_rect;
 
   // The blending parameters.  If null, uses the default values specified
   // in the |Blend| structure declaration.

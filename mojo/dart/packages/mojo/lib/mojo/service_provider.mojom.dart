@@ -93,12 +93,7 @@ class _ServiceProviderConnectToServiceParams extends bindings.Struct {
   }
 }
 
-
-
-
 const int _ServiceProvider_connectToServiceName = 0;
-
-
 
 class _ServiceProviderServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>

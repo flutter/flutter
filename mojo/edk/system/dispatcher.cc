@@ -206,6 +206,16 @@ MojoResult Dispatcher::DuplicateBufferHandle(
   return DuplicateBufferHandleImplNoLock(options, new_dispatcher);
 }
 
+MojoResult Dispatcher::GetBufferInformation(
+    UserPointer<MojoBufferInformation> info,
+    uint32_t info_num_bytes) {
+  MutexLocker locker(&mutex_);
+  if (is_closed_)
+    return MOJO_RESULT_INVALID_ARGUMENT;
+
+  return GetBufferInformationImplNoLock(info, info_num_bytes);
+}
+
 MojoResult Dispatcher::MapBuffer(
     uint64_t offset,
     uint64_t num_bytes,
@@ -352,6 +362,15 @@ MojoResult Dispatcher::EndReadDataImplNoLock(uint32_t /*num_bytes_read*/) {
 MojoResult Dispatcher::DuplicateBufferHandleImplNoLock(
     UserPointer<const MojoDuplicateBufferHandleOptions> /*options*/,
     RefPtr<Dispatcher>* /*new_dispatcher*/) {
+  mutex_.AssertHeld();
+  DCHECK(!is_closed_);
+  // By default, not supported. Only needed for buffer dispatchers.
+  return MOJO_RESULT_INVALID_ARGUMENT;
+}
+
+MojoResult Dispatcher::GetBufferInformationImplNoLock(
+    UserPointer<MojoBufferInformation> /*info*/,
+    uint32_t /*info_num_bytes*/) {
   mutex_.AssertHeld();
   DCHECK(!is_closed_);
   // By default, not supported. Only needed for buffer dispatchers.

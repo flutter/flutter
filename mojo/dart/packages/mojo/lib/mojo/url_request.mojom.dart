@@ -69,8 +69,6 @@ class UrlRequestCacheMode extends bindings.MojoEnum {
   int toJson() => mojoEnumValue;
 }
 
-
-
 class UrlRequest extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(56, 0)
@@ -240,9 +238,6 @@ class UrlRequest extends bindings.Struct {
         'Object containing handles cannot be encoded to JSON.');
   }
 }
-
-
-
 
 
 

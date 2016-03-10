@@ -10,11 +10,10 @@ component("geometry") {
     "//ui/gfx",
   ]
   deps = [
-    "//skia",
-    "//ui/gfx/geometry",
-    "//mojo/environment:chromium",
     "//mojo/public/c/system",
     "//mojo/services/geometry/interfaces",
+    "//skia",
+    "//ui/gfx/geometry",
   ]
 
   sources = [

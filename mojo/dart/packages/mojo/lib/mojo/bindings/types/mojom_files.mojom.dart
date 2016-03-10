@@ -201,8 +201,6 @@ class MojomFile extends bindings.Struct {
 }
 
 
-
-
 class MojomFileGraph extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
     const bindings.StructDataHeader(32, 0)
@@ -463,8 +461,6 @@ class MojomFileGraph extends bindings.Struct {
     return map;
   }
 }
-
-
 
 
 class KeysByType extends bindings.Struct {
@@ -740,9 +736,6 @@ class KeysByType extends bindings.Struct {
     return map;
   }
 }
-
-
-
 
 
 

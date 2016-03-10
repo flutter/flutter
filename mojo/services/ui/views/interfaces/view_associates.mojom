@@ -6,6 +6,7 @@
 module mojo.ui;
 
 import "mojo/public/interfaces/application/service_provider.mojom";
+import "mojo/services/gfx/composition/interfaces/scene_token.mojom";
 import "mojo/services/ui/views/interfaces/views.mojom";
 import "mojo/services/ui/views/interfaces/view_trees.mojom";
 
@@ -75,5 +76,28 @@ struct ViewAssociateInfo {
 // Provides a view associate with the ability to inspect and perform operations
 // on the contents of views and view trees.
 interface ViewInspector {
+  // Provides an interface which can be used to perform hit tests on the
+  // contents of the view tree's scene graph.
+  //
+  // The |hit_tester| will be closed if the view tree is not attached to a
+  // renderer, when it is reattached to a different renderer, or when the
+  // view tree is destroyed.
+  //
+  // The callback will be invoked the hit tester is invalidated.
+  // If |renderer_changed| is true, the client should call |GetHitTester|
+  // again to obtain a new one.  Otherwise it should assume that the view
+  // tree has become unavailable (so no hit tester is available).
+  GetHitTester(ViewTreeToken view_tree_token,
+      mojo.gfx.composition.HitTester& hit_tester) =>
+      (bool renderer_changed);
 
+  // Given an array of scene tokens, produces an array of view tokens
+  // of equal size containing the view to which the scene belongs or null
+  // if the scene token does not belong to any view.
+  //
+  // It is safe to cache the results of this operation because a scene will
+  // only ever be associated with at most one view although a view may
+  // create several scenes during its lifetime.
+  ResolveScenes(array<mojo.gfx.composition.SceneToken> scene_tokens) =>
+      (array<ViewToken?> view_tokens);
 };
