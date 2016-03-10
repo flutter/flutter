@@ -1,5 +1,6 @@
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +10,9 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MarkdownBody(data: "Hello"));
 
-      Element textElement = tester.findElement((Element element) => element.widget is RichText);
-      RichText textWidget = textElement.widget;
-      TextSpan textSpan = textWidget.text;
-
       List<Element> elements = _listElements(tester);
       _expectWidgetTypes(elements, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
-      expect(textSpan.children[0].text, equals("Hello"));
+      _expectTextStrings(elements, <String>["Hello"]);
     });
   });
 
@@ -23,13 +20,9 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new MarkdownBody(data: "# Header"));
 
-      Element textElement = tester.findElement((Element element) => element.widget is RichText);
-      RichText textWidget = textElement.widget;
-      TextSpan textSpan = textWidget.text;
-
       List<Element> elements = _listElements(tester);
       _expectWidgetTypes(elements, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
-      expect(textSpan.children[0].text, equals("Header"));
+      _expectTextStrings(elements, <String>["Header"]);
     });
   });
 
@@ -79,7 +72,6 @@ void main() {
       tester.pumpWidget(new Markdown(data: ""));
 
       List<Element> elements = _listElements(tester);
-      for (Element element in elements) print("e: $element");
       _expectWidgetTypes(elements, <Type>[
         Markdown,
         ScrollableViewport,
@@ -88,6 +80,18 @@ void main() {
         MarkdownBody,
         Column
       ]);
+    });
+  });
+
+  test("Links", () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Markdown(data: "[Link Text](href)"));
+
+      Element textElement = tester.findElement((Element element) => element.widget is RichText);
+      RichText textWidget = textElement.widget;
+      TextSpan span = textWidget.text;
+
+      expect(span.children[0].recognizer.runtimeType, equals(TapGestureRecognizer));
     });
   });
 }

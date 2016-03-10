@@ -25,22 +25,26 @@ class Markdown extends MarkdownRaw {
   Markdown({
     String data,
     SyntaxHighlighter syntaxHighlighter,
-    MarkdownStyle markdownStyle
+    MarkdownStyle markdownStyle,
+    MarkdownLinkCallback onTapLink
   }) : super(
     data: data,
     syntaxHighlighter: syntaxHighlighter,
-    markdownStyle: markdownStyle
+    markdownStyle: markdownStyle,
+    onTapLink: onTapLink
   );
 
   MarkdownBody createMarkdownBody({
     String data,
     MarkdownStyle markdownStyle,
-    SyntaxHighlighter syntaxHighlighter
+    SyntaxHighlighter syntaxHighlighter,
+    MarkdownLinkCallback onTapLink
   }) {
     return new MarkdownBody(
       data: data,
       markdownStyle: markdownStyle,
-      syntaxHighlighter: syntaxHighlighter
+      syntaxHighlighter: syntaxHighlighter,
+      onTapLink: onTapLink
     );
   }
 }
@@ -71,11 +75,13 @@ class MarkdownBody extends MarkdownBodyRaw {
   MarkdownBody({
     String data,
     SyntaxHighlighter syntaxHighlighter,
-    MarkdownStyle markdownStyle
+    MarkdownStyle markdownStyle,
+    MarkdownLinkCallback onTapLink
   }) : super(
     data: data,
     syntaxHighlighter: syntaxHighlighter,
-    markdownStyle: markdownStyle
+    markdownStyle: markdownStyle,
+    onTapLink: onTapLink
   );
 
   MarkdownStyle createDefaultStyle(BuildContext context) {

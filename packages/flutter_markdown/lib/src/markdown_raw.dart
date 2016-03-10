@@ -4,7 +4,10 @@
 
 import 'package:markdown/markdown.dart' as md;
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
 import 'markdown_style_raw.dart';
+
+typedef void MarkdownLinkCallback(String href);
 
 
 /// A [Widget] that renders markdown formatted text. It supports all standard
@@ -26,7 +29,8 @@ class MarkdownRaw extends StatelessComponent {
     this.data,
     this.markdownStyle,
     this.syntaxHighlighter,
-    this.padding: const EdgeDims.all(16.0)
+    this.padding: const EdgeDims.all(16.0),
+    this.onTapLink
   });
 
   /// Markdown styled text
@@ -41,6 +45,9 @@ class MarkdownRaw extends StatelessComponent {
   /// Padding used
   final EdgeDims padding;
 
+  /// Callback when a link is tapped
+  final MarkdownLinkCallback onTapLink;
+
   Widget build(BuildContext context) {
     return new ScrollableViewport(
       child: new Padding(
@@ -48,7 +55,8 @@ class MarkdownRaw extends StatelessComponent {
         child: createMarkdownBody(
           data: data,
           markdownStyle: markdownStyle,
-          syntaxHighlighter: syntaxHighlighter
+          syntaxHighlighter: syntaxHighlighter,
+          onTapLink: onTapLink
         )
       )
     );
@@ -57,12 +65,14 @@ class MarkdownRaw extends StatelessComponent {
   MarkdownBodyRaw createMarkdownBody({
     String data,
     MarkdownStyleRaw markdownStyle,
-    SyntaxHighlighter syntaxHighlighter
+    SyntaxHighlighter syntaxHighlighter,
+    MarkdownLinkCallback onTapLink
   }) {
     return new MarkdownBodyRaw(
       data: data,
       markdownStyle: markdownStyle,
-      syntaxHighlighter: syntaxHighlighter
+      syntaxHighlighter: syntaxHighlighter,
+      onTapLink: onTapLink
     );
   }
 }
@@ -94,7 +104,8 @@ class MarkdownBodyRaw extends StatefulComponent {
   MarkdownBodyRaw({
     this.data,
     this.markdownStyle,
-    this.syntaxHighlighter
+    this.syntaxHighlighter,
+    this.onTapLink
   });
 
   /// Markdown styled text
@@ -105,6 +116,9 @@ class MarkdownBodyRaw extends StatefulComponent {
 
   /// The syntax highlighter used to color text in code blocks
   final SyntaxHighlighter syntaxHighlighter;
+
+  /// Callback when a link is tapped
+  final MarkdownLinkCallback onTapLink;
 
   _MarkdownBodyRawState createState() => new _MarkdownBodyRawState();
 
@@ -119,10 +133,23 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
     MarkdownStyleRaw markdownStyle = config.markdownStyle ?? config.createDefaultStyle(context);
     SyntaxHighlighter syntaxHighlighter = config.syntaxHighlighter ?? new _DefaultSyntaxHighlighter(markdownStyle.code);
 
-    _cachedBlocks = _blocksFromMarkup(config.data, markdownStyle, syntaxHighlighter);
+    _linkHandler = new _LinkHandler(config.onTapLink);
+
+    // TODO: This can be optimized by doing the split and removing \r at the same time
+    List<String> lines = config.data.replaceAll('\r\n', '\n').split('\n');
+    md.Document document = new md.Document();
+
+    _Renderer renderer = new _Renderer();
+    _cachedBlocks = renderer.render(document.parseLines(lines), markdownStyle, syntaxHighlighter, _linkHandler);
+  }
+
+  void dispose() {
+    _linkHandler.dispose();
+    super.dispose();
   }
 
   List<_Block> _cachedBlocks;
+  _LinkHandler _linkHandler;
 
   Widget build(BuildContext context) {
     List<Widget> blocks = <Widget>[];
@@ -137,23 +164,15 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
   }
 }
 
-List<_Block> _blocksFromMarkup(String data, MarkdownStyleRaw markdownStyle, SyntaxHighlighter syntaxHighlighter) {
-  // TODO: This can be optimized by doing the split and removing \r at the same time
-  List<String> lines = data.replaceAll('\r\n', '\n').split('\n');
-  md.Document document = new md.Document();
-
-  _Renderer renderer = new _Renderer();
-  return renderer.render(document.parseLines(lines), markdownStyle, syntaxHighlighter);
-}
-
 class _Renderer implements md.NodeVisitor {
-  List<_Block> render(List<md.Node> nodes, MarkdownStyleRaw markdownStyle, SyntaxHighlighter syntaxHighlighter) {
+  List<_Block> render(List<md.Node> nodes, MarkdownStyleRaw markdownStyle, SyntaxHighlighter syntaxHighlighter, _LinkHandler linkHandler) {
     assert(markdownStyle != null);
 
     _blocks = <_Block>[];
     _listIndents = <String>[];
     _markdownStyle = markdownStyle;
     _syntaxHighlighter = syntaxHighlighter;
+    _linkHandler = linkHandler;
 
     for (final md.Node node in nodes) {
       node.accept(this);
@@ -166,6 +185,7 @@ class _Renderer implements md.NodeVisitor {
   List<String> _listIndents;
   MarkdownStyleRaw _markdownStyle;
   SyntaxHighlighter _syntaxHighlighter;
+  _LinkHandler _linkHandler;
 
   void visitText(md.Text text) {
     _MarkdownNodeList topList = _currentBlock.stack.last;
@@ -191,8 +211,13 @@ class _Renderer implements md.NodeVisitor {
       _Block newBlock = new _Block(element.tag, element.attributes, _markdownStyle, new List<String>.from(_listIndents), blockList.length);
       blockList.add(newBlock);
     } else {
+      _LinkInfo linkInfo = null;
+      if (element.tag == 'a') {
+        linkInfo = _linkHandler.createLinkInfo(element.attributes['href']);
+      }
+
       TextStyle style = _markdownStyle.styles[element.tag] ?? new TextStyle();
-      List<_MarkdownNode> styleElement = <_MarkdownNode>[new _MarkdownNodeTextStyle(style)];
+      List<_MarkdownNode> styleElement = <_MarkdownNode>[new _MarkdownNodeTextStyle(style, linkInfo)];
       _currentBlock.stack.add(new _MarkdownNodeList(styleElement));
     }
     return true;
@@ -260,8 +285,9 @@ class _MarkdownNodeList extends _MarkdownNode {
 }
 
 class _MarkdownNodeTextStyle extends _MarkdownNode {
-  _MarkdownNodeTextStyle(this.style);
+  _MarkdownNodeTextStyle(this.style, [this.linkInfo = null]);
   TextStyle style;
+  _LinkInfo linkInfo;
 }
 
 class _MarkdownNodeString extends _MarkdownNode {
@@ -325,7 +351,8 @@ class _Block {
         children: subWidgets
       );
     } else {
-      contents = new RichText(text: _stackToTextSpan(new _MarkdownNodeList(stack)));
+      TextSpan span = _stackToTextSpan(new _MarkdownNodeList(stack));
+      contents = new RichText(text: span);
 
       if (listIndents.length > 0) {
         Widget bullet;
@@ -384,13 +411,23 @@ class _Block {
     if (stack is _MarkdownNodeList) {
       List<_MarkdownNode> list = stack.list;
       _MarkdownNodeTextStyle styleNode = list[0];
+      _LinkInfo linkInfo = styleNode.linkInfo;
       TextStyle style = styleNode.style;
 
       List<TextSpan> children = <TextSpan>[];
       for (int i = 1; i < list.length; i++) {
         children.add(_stackToTextSpan(list[i]));
       }
-      return new TextSpan(style: style, children: children);
+
+      String text = null;
+      if (children.length == 1 && _isPlainText(children[0])) {
+        text = children[0].text;
+        children = null;
+      }
+
+      TapGestureRecognizer recognizer = linkInfo?.recognizer;
+
+      return new TextSpan(style: style, children: children, recognizer: recognizer, text: text);
     }
 
     if (stack is _MarkdownNodeString) {
@@ -398,6 +435,10 @@ class _Block {
     }
 
     return null;
+  }
+
+  bool _isPlainText(TextSpan span) {
+    return (span.text != null && span.style == null && span.recognizer == null && span.children == null);
   }
 
   Widget _buildImage(BuildContext context, String src) {
@@ -416,6 +457,39 @@ class _Block {
     }
 
     return new NetworkImage(src: path, width: width, height: height);
+  }
+}
+
+class _LinkInfo {
+  _LinkInfo(this.href, this.recognizer);
+
+  final String href;
+  final TapGestureRecognizer recognizer;
+}
+
+class _LinkHandler {
+  _LinkHandler(this.onTapLink);
+
+  List<_LinkInfo> links = <_LinkInfo>[];
+  MarkdownLinkCallback onTapLink;
+
+  _LinkInfo createLinkInfo(String href) {
+    TapGestureRecognizer recognizer = new TapGestureRecognizer();
+    recognizer.onTap = () {
+      if (onTapLink != null)
+        onTapLink(href);
+    };
+
+    _LinkInfo linkInfo = new _LinkInfo(href, recognizer);
+    links.add(linkInfo);
+
+    return linkInfo;
+  }
+
+  void dispose() {
+    for (_LinkInfo linkInfo in links) {
+      linkInfo.recognizer.dispose();
+    }
   }
 }
 
