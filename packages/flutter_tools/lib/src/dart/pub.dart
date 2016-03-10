@@ -31,8 +31,8 @@ Future<int> pubGet({
   }
 
   if (!checkLastModified || !pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
-    printStatus("Running 'pub get' in $directory${Platform.pathSeparator}...");
     String command = upgrade ? 'upgrade' : 'get';
+    printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}...");
     int code = await runCommandAndStreamOutput(
       <String>[sdkBinaryName('pub'), '--verbosity=warning', command],
       workingDirectory: directory
