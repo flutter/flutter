@@ -73,6 +73,7 @@ dirs_from_mojo = [
     'mojo/java',
     'mojo/message_pump',
     'mojo/services',
+    'mojo/skia',
     'services/sensors',
 ]
 
