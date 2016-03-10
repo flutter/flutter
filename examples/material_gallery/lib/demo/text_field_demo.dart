@@ -4,6 +4,39 @@
 
 import 'package:flutter/material.dart';
 
+class LoginData {
+  String name;
+  String phoneNumber;
+  String password;
+
+  String setName(String value) {
+    if (value.isEmpty)
+      return 'Name is required.';
+    RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
+    if (!nameExp.hasMatch(value))
+      return 'Please enter only alphabetical characters.';
+    this.name = value;
+    return null;
+  }
+
+  String setPhoneNumber(String value) {
+    RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
+    if (!phoneExp.hasMatch(value))
+      return '###-###-#### - Please enter a valid phone number.';
+    this.phoneNumber = value;
+    return null;
+  }
+
+  String setPassword(String value, String retypeValue) {
+    if (value.isEmpty)
+      return 'Please choose a password.';
+    if (value != retypeValue)
+      return 'Passwords don\'t match';
+    this.password = value;
+    return null;
+  }
+}
+
 class TextFieldDemo extends StatefulComponent {
   TextFieldDemo({ Key key }) : super(key: key);
 
@@ -18,6 +51,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     InputValue.empty,
     InputValue.empty,
   ];
+  LoginData _login = new LoginData();
 
   void showInSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
@@ -25,38 +59,15 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     ));
   }
 
-  void _handleInputChanged(InputValue value, int which) {
+  String _handleInputChanged(InputValue value, int which) {
     setState(() {
       _inputs[which] = value;
     });
+    return value.text;
   }
 
   void _handleInputSubmitted(InputValue value) {
-    showInSnackBar('${_inputs[0].text}\'s phone number is ${_inputs[1].text}');
-  }
-
-  String _validateName(InputValue value) {
-    if (value.text.isEmpty)
-      return 'Name is required.';
-    RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
-    if (!nameExp.hasMatch(value.text))
-      return 'Please enter only alphabetical characters.';
-    return null;
-  }
-
-  String _validatePhoneNumber(InputValue value) {
-    RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
-    if (!phoneExp.hasMatch(value.text))
-      return '###-###-#### - Please enter a valid phone number.';
-    return null;
-  }
-
-  String _validatePassword(InputValue value1, InputValue value2) {
-    if (value1.text.isEmpty)
-      return 'Please choose a password.';
-    if (value1.text != value2.text)
-      return 'Passwords don\'t match';
-    return null;
+    showInSnackBar('${_login.name}\'s phone number is ${_login.phoneNumber}');
   }
 
   Widget build(BuildContext context) {
@@ -71,17 +82,17 @@ class TextFieldDemoState extends State<TextFieldDemo> {
           new Input(
             hintText: 'What do people call you?',
             labelText: 'Name',
-            errorText: _validateName(_inputs[0]),
+            errorText: _login.setName(_inputs[0].text),
             value: _inputs[0],
-            onChanged: (InputValue value) { _handleInputChanged(value, 0); },
+            onChanged: (InputValue value) { _login.setName(_handleInputChanged(value, 0)); },
             onSubmitted: _handleInputSubmitted
           ),
           new Input(
             hintText: 'Where can we reach you?',
             labelText: 'Phone Number',
-            errorText: _validatePhoneNumber(_inputs[1]),
+            errorText: _login.setPhoneNumber(_inputs[1].text),
             value: _inputs[1],
-            onChanged: (InputValue value) { _handleInputChanged(value, 1); },
+            onChanged: (InputValue value) { _login.setPhoneNumber(_handleInputChanged(value, 1)); },
             onSubmitted: _handleInputSubmitted
           ),
           new Row(
@@ -93,7 +104,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                   labelText: 'New Password',
                   hideText: true,
                   value: _inputs[2],
-                  onChanged: (InputValue value) { _handleInputChanged(value, 2); },
+                  onChanged: (InputValue value) { _login.setPassword(_handleInputChanged(value, 2), _inputs[3].text); },
                   onSubmitted: _handleInputSubmitted
                 )
               ),
@@ -101,10 +112,10 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                 child: new Input(
                   hintText: 'How do you log in?',
                   labelText: 'Re-type Password',
-                  errorText: _validatePassword(_inputs[2], _inputs[3]),
+                  errorText: _login.setPassword(_inputs[2].text, _inputs[3].text),
                   hideText: true,
                   value: _inputs[3],
-                  onChanged: (InputValue value) { _handleInputChanged(value, 3); },
+                  onChanged: (InputValue value) { _login.setPassword(_inputs[2].text, _handleInputChanged(value, 3)); },
                   onSubmitted: _handleInputSubmitted
                 )
               )
