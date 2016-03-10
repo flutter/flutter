@@ -8,8 +8,9 @@
 #include "sky/shell/platform/mac/platform_mac.h"
 
 int main(int argc, const char* argv[]) {
-  return sky::shell::PlatformMacMain(argc, argv, "", ^() {
-    return UIApplicationMain(argc, (char**)argv, nil,
-                             NSStringFromClass([FlutterAppDelegate class]));
-  });
+  // iOS does use the FlutterViewController that initializes the platform but
+  // we have the command line args here. So call it now.
+  sky::shell::PlatformMacMain(argc, argv, "");
+  return UIApplicationMain(argc, (char**)argv, nil,
+                           NSStringFromClass([FlutterAppDelegate class]));
 }

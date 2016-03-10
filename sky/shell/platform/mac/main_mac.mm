@@ -32,21 +32,21 @@ void AttachMessageLoopToMainRunLoop(void) {
 int main(int argc, const char* argv[]) {
   [SkyApplication sharedApplication];
 
-  return sky::shell::PlatformMacMain(argc, argv, "", ^() {
-    base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-    if (command_line.HasSwitch(sky::shell::switches::kHelp)) {
-      sky::shell::switches::PrintUsage("SkyShell");
-      return EXIT_SUCCESS;
-    }
+  sky::shell::PlatformMacMain(argc, argv, "");
 
-    if (command_line.HasSwitch(sky::shell::switches::kNonInteractive)) {
-      if (!sky::shell::InitForTesting())
-        return 1;
-      base::MessageLoop::current()->Run();
-      return EXIT_SUCCESS;
-    }
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+  if (command_line.HasSwitch(sky::shell::switches::kHelp)) {
+    sky::shell::switches::PrintUsage("SkyShell");
+    return EXIT_SUCCESS;
+  }
 
-    sky::shell::AttachMessageLoopToMainRunLoop();
-    return NSApplicationMain(argc, argv);
-  });
+  if (command_line.HasSwitch(sky::shell::switches::kNonInteractive)) {
+    if (!sky::shell::InitForTesting())
+      return 1;
+    base::MessageLoop::current()->Run();
+    return EXIT_SUCCESS;
+  }
+
+  sky::shell::AttachMessageLoopToMainRunLoop();
+  return NSApplicationMain(argc, argv);
 }
