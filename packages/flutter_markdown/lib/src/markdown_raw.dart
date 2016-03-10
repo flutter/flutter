@@ -129,10 +129,29 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
 
   void initState() {
     super.initState();
+    _buildMarkdownCache();
+  }
 
+  void dispose() {
+    _linkHandler.dispose();
+    super.dispose();
+  }
+
+  void didUpdateConfig(MarkdownBodyRaw oldConfig) {
+    super.didUpdateConfig(oldConfig);
+
+    if (oldConfig.data != config.data ||
+        oldConfig.markdownStyle != config.markdownStyle ||
+        oldConfig.syntaxHighlighter != config.syntaxHighlighter ||
+        oldConfig.onTapLink != config.onTapLink)
+      _buildMarkdownCache();
+  }
+
+  void _buildMarkdownCache() {
     MarkdownStyleRaw markdownStyle = config.markdownStyle ?? config.createDefaultStyle(context);
     SyntaxHighlighter syntaxHighlighter = config.syntaxHighlighter ?? new _DefaultSyntaxHighlighter(markdownStyle.code);
 
+    _linkHandler?.dispose();
     _linkHandler = new _LinkHandler(config.onTapLink);
 
     // TODO: This can be optimized by doing the split and removing \r at the same time
@@ -141,11 +160,6 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
 
     _Renderer renderer = new _Renderer();
     _cachedBlocks = renderer.render(document.parseLines(lines), markdownStyle, syntaxHighlighter, _linkHandler);
-  }
-
-  void dispose() {
-    _linkHandler.dispose();
-    super.dispose();
   }
 
   List<_Block> _cachedBlocks;
@@ -161,6 +175,10 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
       alignItems: FlexAlignItems.stretch,
       children: blocks
     );
+  }
+
+  void debugFillDescription(List<String> description) {
+    description.add('cached blocks identity: ${_cachedBlocks.hashCode}');
   }
 }
 
