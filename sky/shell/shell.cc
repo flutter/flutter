@@ -4,6 +4,7 @@
 
 #include "sky/shell/shell.h"
 
+#include <fcntl.h>
 #include <memory>
 #include <sstream>
 
