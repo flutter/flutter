@@ -151,9 +151,6 @@ abstract class Device {
   /// Get the log reader for this device.
   DeviceLogReader get logReader;
 
-  /// Get the port forwarder for this device.
-  DevicePortForwarder get portForwarder;
-
   /// Clear the device's logs.
   void clearLogs();
 
@@ -187,30 +184,6 @@ abstract class Device {
   }
 
   String toString() => '$runtimeType $id';
-}
-
-class ForwardedPort {
-  ForwardedPort(this.hostPort, this.devicePort);
-
-  final int hostPort;
-  final int devicePort;
-
-  String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
-}
-
-/// Forward ports from the host machine to the device.
-abstract class DevicePortForwarder {
-  /// Returns a Future that completes with the current list of forwarded
-  /// ports for this device.
-  List<ForwardedPort> get forwardedPorts;
-
-  /// Forward [hostPort] on the host to [devicePort] on the device.
-  /// If [hostPort] is null, will auto select a host port.
-  /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, {int hostPort: null});
-
-  /// Stops forwarding [forwardedPort].
-  Future unforward(ForwardedPort forwardedPort);
 }
 
 /// Read the log for a particular device. Subclasses must implement `hashCode`
