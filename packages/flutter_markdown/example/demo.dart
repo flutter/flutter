@@ -15,6 +15,9 @@ Style text as _italic_, __bold__, or `inline code`.
 - To better clarify
 - Your points
 
+## Links
+You can use [hyperlinks](hyperlink) in markdown
+
 ## Code blocks
 Formatted Dart code looks really pretty too. This is an example of how to create your own Markdown widget:
 
