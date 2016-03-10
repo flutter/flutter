@@ -23,8 +23,11 @@ const char kBaseTraceEnd[] = "]}";
 
 const char kObservatoryMethodStartTracing[] = "ext.flutter_startTracing";
 const char kObservatoryMethodStopTracing[] = "ext.flutter_stopTracing";
+const char kObservatoryMethodDownloadTraceData[] = "ext.flutter_downloadTraceData";
+const char kTraceFilePathParamName[] = "trace_file_path";
 const char kObservatoryResultOk[] = "{\"success\" : true}";
 const char kObservatoryResultFail[] = "{\"success\" : false}";
+const char kTraceDataNotReady[] = "{\"status\" : \"not ready\"}";
 
 static const char* ObservatoryInvoke(const char* method,
                                      const char** param_keys,
@@ -51,12 +54,6 @@ static const char* ObservatoryInvoke(const char* method,
   if (strncmp(method, kObservatoryMethodStopTracing,
               sizeof(kObservatoryMethodStopTracing)) == 0) {
     if (tracing_controller->tracing_active()) {
-      // Flushing the trace log requires an active message loop. However,
-      // observatory callbacks are made on a dart worker thread. We setup a
-      // message loop manually and tell the flush completion handler to
-      // terminate the loop when done
-      base::MessageLoop worker_thread_loop;
-
       base::FilePath temp_dir;
       bool temp_access = base::GetTempDir(&temp_dir);
       DCHECK(temp_access) << "Must be able to access the temp directory";
@@ -64,29 +61,50 @@ static const char* ObservatoryInvoke(const char* method,
       base::FilePath path =
           tracing_controller->TracePathForCurrentTime(temp_dir);
 
-      tracing_controller->StopTracing(path, true);
+      tracing_controller->StopTracing(path);
 
-      // Run the loop till the flush callback terminates the activation
-      worker_thread_loop.Run();
-
-      base::File file(
-          path, base::File::Flags::FLAG_OPEN | base::File::Flags::FLAG_READ);
-      int64 length = file.GetLength();
-
-      if (length == 0) {
-        base::DeleteFile(path, false);
-        return strdup(kObservatoryResultFail);
-      }
-
-      char* data = reinterpret_cast<char*>(malloc(length));
-      int length_read = file.Read(0, data, length);
-
-      DCHECK(length == length_read);
-
-      base::DeleteFile(path, false);
-
-      return data;
+      // Calling path.AsUTF8Unsafe() should be safe as we're in charge of
+      // generating the file name.
+      std::stringstream result;
+      result << "{\"" << kTraceFilePathParamName << "\": \""
+             << path.AsUTF8Unsafe() << "\"}";
+      return strdup(result.str().c_str());
     }
+  }
+
+  if (strncmp(method, kObservatoryMethodDownloadTraceData,
+              sizeof(kObservatoryMethodDownloadTraceData)) == 0) {
+    if (tracing_controller->tracing_active()) {
+      return strdup(kTraceDataNotReady);
+    }
+
+    for (int i = 0; i < num_params; i++) {
+      if (strncmp(param_keys[i], kTraceFilePathParamName, sizeof(kTraceFilePathParamName)) == 0) {
+        base::FilePath path(param_values[i]);
+        base::File file(
+            path, base::File::Flags::FLAG_OPEN | base::File::Flags::FLAG_READ);
+        int64 length = file.GetLength();
+
+        if (length == 0) {
+          LOG(ERROR) << "Tracing file is empty: " << param_values[i];
+          return strdup(kObservatoryResultFail);
+        }
+
+        char* data = reinterpret_cast<char*>(malloc(length + 1));
+        int length_read = file.Read(0, data, length);
+
+        DCHECK(length == length_read);
+
+        data[length] = '\0';
+        base::DeleteFile(path, false);
+
+        LOG(INFO) << "Downloading " << length << " bytes of tracing data";
+        return data;
+      }
+    }
+
+    LOG(ERROR) << "Parameter " << kTraceFilePathParamName << " not found";
+    return strdup(kObservatoryResultFail);
   }
 
   return strdup(kObservatoryResultFail);
@@ -94,7 +112,6 @@ static const char* ObservatoryInvoke(const char* method,
 
 TracingController::TracingController()
     : picture_tracing_enabled_(false),
-      terminate_loop_on_write_(false),
       dart_initialized_(false),
       tracing_active_(false),
       weak_factory_(this) {
@@ -123,6 +140,8 @@ void TracingController::ManageObservatoryCallbacks(bool add) {
                                           &ObservatoryInvoke, baton);
   Dart_RegisterRootServiceRequestCallback(kObservatoryMethodStopTracing,
                                           &ObservatoryInvoke, baton);
+  Dart_RegisterRootServiceRequestCallback(kObservatoryMethodDownloadTraceData,
+                                          &ObservatoryInvoke, baton);
 }
 
 void TracingController::StartTracing() {
@@ -136,23 +155,7 @@ void TracingController::StartTracing() {
   StartBaseTracing();
 }
 
-void TracingController::StopTracing(const base::FilePath& path,
-                                    bool terminate_loop_when_done) {
-  base::MessageLoop::current()->PostTask(
-      FROM_HERE,
-      base::Bind(&TracingController::StopTracingAsync,
-                 weak_factory_.GetWeakPtr(), path, terminate_loop_when_done));
-}
-
-void TracingController::StopTracingAsync(const base::FilePath& path,
-                                    bool terminate_loop_when_done) {
-  if (terminate_loop_on_write_) {
-    DLOG(INFO) << "Observatory is attempting to capture a trace.";
-    return;
-  }
-
-  terminate_loop_on_write_ = terminate_loop_when_done;
-
+void TracingController::StopTracing(const base::FilePath& path) {
   LOG(INFO) << "Saving trace to " << path.LossyDisplayName();
 
   trace_file_ = std::unique_ptr<base::File>(new base::File(
@@ -232,11 +235,6 @@ void TracingController::FinalizeTraceFile() {
   if (trace_file_) {
     trace_file_->WriteAtCurrentPos(kBaseTraceEnd, sizeof(kBaseTraceEnd) - 1);
     trace_file_ = nullptr;
-  }
-
-  if (terminate_loop_on_write_) {
-    base::MessageLoop::current()->Quit();
-    terminate_loop_on_write_ = false;
   }
 
   tracing_active_ = false;
