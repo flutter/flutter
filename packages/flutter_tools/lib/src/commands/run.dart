@@ -81,8 +81,11 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> run() async {
-    if (argResults['pub'])
-      await pubGet();
+    if (argResults['pub']) {
+      int exitCode = await pubGet();
+      if (exitCode != 0)
+        return exitCode;
+    }
     return await super.run();
   }
 

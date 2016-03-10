@@ -10,14 +10,6 @@ dependencies:
   vector_math: '>=1.4.5 <2.0.0'
   quiver: '>=0.21.4 <0.22.0'
 
-  # We have to pin analyzer to 0.27.1 because the flx package depends
-  # on pointycastle which depends on reflectable which depends on
-  # analyzer 0.27.1 and if we don't pin it here, then different
-  # packages end up bringing in different analyzer versions which
-  # results in 'flutter analyze' (which uses an entirely different
-  # analyzer, by the way!) complaining about the inconsistency.
-  analyzer: 0.27.1
-
   sky_engine:
     path: ../../bin/cache/pkg/sky_engine
   sky_services:

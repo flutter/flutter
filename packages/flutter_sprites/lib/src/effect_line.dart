@@ -67,7 +67,7 @@ class EffectLine extends Node {
 
   List<Point> get points => _points;
 
-  set points(List<Point> points) {
+  void set points(List<Point> points) {
     _points = points;
     _pointAges = <double>[];
     for (int i = 0; i < _points.length; i++) {

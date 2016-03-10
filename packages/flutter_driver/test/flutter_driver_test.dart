@@ -13,7 +13,7 @@ import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
-main() {
+void main() {
   group('FlutterDriver.connect', () {
     List<LogRecord> log;
     StreamSubscription logSub;
@@ -21,7 +21,7 @@ main() {
     MockVM mockVM;
     MockIsolate mockIsolate;
 
-    expectLogContains(String message) {
+    void expectLogContains(String message) {
       expect(log.map((r) => '$r'), anyElement(contains(message)));
     }
 

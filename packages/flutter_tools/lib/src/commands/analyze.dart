@@ -27,7 +27,7 @@ bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith(
 bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
 bool isDartBenchmarkFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_bench.dart');
 
-bool _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSpecDirectories) {
+void _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSpecDirectories) {
   final int originalDartFilesCount = dartFiles.length;
 
   // .../directoryPath/*/bin/*.dart
@@ -90,11 +90,8 @@ bool _addPackage(String directoryPath, List<String> dartFiles, Set<String> pubSp
     }
   }
 
-  if (originalDartFilesCount != dartFiles.length) {
+  if (originalDartFilesCount != dartFiles.length)
     pubSpecDirectories.add(directoryPath);
-    return true;
-  }
-  return false;
 }
 
 /// Adds all packages in [subPath], assuming a flat directory structure, i.e.
@@ -136,9 +133,6 @@ class AnalyzeCommand extends FlutterCommand {
     Set<String> pubSpecDirectories = new HashSet<String>();
     List<String> dartFiles = argResults.rest.toList();
 
-    bool foundAnyInCurrentDirectory = false;
-    bool foundAnyInFlutterRepo = false;
-
     for (String file in dartFiles) {
       file = path.normalize(path.absolute(file));
       String root = path.rootPrefix(file);
@@ -146,11 +140,6 @@ class AnalyzeCommand extends FlutterCommand {
         file = path.dirname(file);
         if (FileSystemEntity.isFileSync(path.join(file, 'pubspec.yaml'))) {
           pubSpecDirectories.add(file);
-          if (file == path.normalize(path.absolute(ArtifactStore.flutterRoot))) {
-            foundAnyInFlutterRepo = true;
-          } else if (file == path.normalize(path.absolute(path.current))) {
-            foundAnyInCurrentDirectory = true;
-          }
           break;
         }
       }
@@ -166,16 +155,12 @@ class AnalyzeCommand extends FlutterCommand {
           foundOne = true;
         }
       }
-      if (foundOne) {
+      if (foundOne)
         pubSpecDirectories.add('.');
-        foundAnyInCurrentDirectory = true;
-      }
     }
 
-    if (argResults['current-package']) {
-      if (_addPackage('.', dartFiles, pubSpecDirectories))
-        foundAnyInCurrentDirectory = true;
-    }
+    if (argResults['current-package'])
+      _addPackage('.', dartFiles, pubSpecDirectories);
 
     if (argResults['flutter-repo']) {
       //examples/*/ as package
@@ -231,25 +216,24 @@ class AnalyzeCommand extends FlutterCommand {
       mainBody.writeln('import \'${dartFiles[index]}\' as file$index;');
     mainBody.writeln('void main() { }');
 
-    // prepare a union of all the .packages files
-    Map<String, String> packages = <String, String>{};
-    bool hadInconsistentRequirements = false;
+    // determine what all the various .packages files depend on
+    PackageDependencyTracker dependencies = new PackageDependencyTracker();
     for (Directory directory in pubSpecDirectories.map((path) => new Directory(path))) {
       String pubSpecYamlPath = path.join(directory.path, 'pubspec.yaml');
       File pubSpecYamlFile = new File(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
+        // we are analyzing the actual canonical source for this package;
+        // make sure we remember that, in case all the packages are actually
+        // pointing elsewhere somehow.
         Pubspec pubSpecYaml = await Pubspec.load(pubSpecYamlPath);
         String packageName = pubSpecYaml.name;
         String packagePath = path.normalize(path.absolute(path.join(directory.path, 'lib')));
-        if (packages.containsKey(packageName) && packages[packageName] != packagePath) {
-          printError('Inconsistent requirements for $packageName; using $packagePath (and not ${packages[packageName]}).');
-          hadInconsistentRequirements = true;
-        }
-        packages[packageName] = packagePath;
+        dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
       }
-      File dotPackages = new File(path.join(directory.path, '.packages'));
+      String dotPackagesPath = path.join(directory.path, '.packages');
+      File dotPackages = new File(dotPackagesPath);
       if (dotPackages.existsSync()) {
-        Map<String, String> dependencies = <String, String>{};
+        // this directory has opinions about what we should be using
         dotPackages
           .readAsStringSync()
           .split('\n')
@@ -257,27 +241,23 @@ class AnalyzeCommand extends FlutterCommand {
           .forEach((line) {
             int colon = line.indexOf(':');
             if (colon > 0)
-              dependencies[line.substring(0, colon)] = path.normalize(path.absolute(directory.path, path.fromUri(line.substring(colon+1))));
+              dependencies.add(line.substring(0, colon), path.normalize(path.absolute(directory.path, path.fromUri(line.substring(colon+1)))), dotPackagesPath);
           });
-        for (String package in dependencies.keys) {
-          if (packages.containsKey(package)) {
-            if (packages[package] != dependencies[package]) {
-              printError('Inconsistent requirements for $package; using ${packages[package]} (and not ${dependencies[package]}).');
-              hadInconsistentRequirements = true;
-            }
-          } else {
-            packages[package] = dependencies[package];
-          }
-        }
       }
     }
-    if (hadInconsistentRequirements) {
-      if (foundAnyInFlutterRepo)
-        printError('You may need to run "flutter update-packages --upgrade".');
-      if (foundAnyInCurrentDirectory)
-        printError('You may need to run "pub upgrade".');
-    }
 
+    // prepare a union of all the .packages files
+    if (dependencies.hasConflicts) {
+      printError(dependencies.generateConflictReport());
+      printError('Make sure you have run "pub upgrade" in all the directories mentioned above.');
+      if (dependencies.hasConflictsAffectingFlutterRepo)
+        printError('For packages in the flutter repository, try using "flutter update-packages --upgrade" to do all of them at once.');
+      printError('If this does not help, to track down the conflict you can use "pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
+      return 1;
+    }
+    Map<String, String> packages = dependencies.asPackageMap();
+
+    // override the sky_engine and sky_services packages if the user is using a local build
     String buildDir = buildConfigurations.firstWhere((BuildConfiguration config) => config.testable, orElse: () => null)?.buildDir;
     if (buildDir != null) {
       packages['sky_engine'] = path.join(buildDir, 'gen/dart-pkg/sky_engine/lib');
@@ -428,11 +408,11 @@ class AnalyzeCommand extends FlutterCommand {
 
     host.deleteSync(recursive: true);
 
-    if (exitCode < 0 || exitCode > 3) // 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
+    if (exitCode < 0 || exitCode > 3) // analyzer exit codes: 0 = nothing, 1 = hints, 2 = warnings, 3 = errors
       return exitCode;
 
     if (errorCount > 0)
-      return 1; // Doesn't this mean 'hints' per the above comment?
+      return 1; // we consider any level of error to be an error exit (we don't report different levels)
     if (argResults['congratulate'])
       printStatus('No analyzer warnings! (ran in ${elapsed}s)');
     return 0;
@@ -546,6 +526,95 @@ class AnalyzeCommand extends FlutterCommand {
       .expand((FileSystemEntity entity) {
         return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
       });
+  }
+}
+
+class PackageDependency {
+  // This is a map from dependency targets (lib directories) to a list
+  // of places that ask for that target (.packages or pubspec.yaml files)
+  Map<String, List<String>> values = <String, List<String>>{};
+  String canonicalSource;
+  void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
+    assert(canonicalSource == null);
+    add(packagePath, pubSpecYamlPath);
+    canonicalSource = pubSpecYamlPath;
+  }
+  void add(String packagePath, String sourcePath) {
+    values.putIfAbsent(packagePath, () => <String>[]).add(sourcePath);
+  }
+  bool get hasConflict => values.length > 1;
+  bool get hasConflictAffectingFlutterRepo {
+    assert(path.isAbsolute(ArtifactStore.flutterRoot));
+    for (List<String> targetSources in values.values) {
+      for (String source in targetSources) {
+        assert(path.isAbsolute(source));
+        if (path.isWithin(ArtifactStore.flutterRoot, source))
+          return true;
+      }
+    }
+    return false;
+  }
+  void describeConflict(StringBuffer result) {
+    assert(hasConflict);
+    List<String> targets = values.keys.toList();
+    targets.sort((String a, String b) => values[b].length.compareTo(values[a].length));
+    for (String target in targets) {
+      int count = values[target].length;
+      result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
+      bool canonical = false;
+      for (String source in values[target]) {
+        result.writeln('    $source');
+        if (source == canonicalSource)
+          canonical = true;
+      }
+      if (canonical) {
+        result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
+      }
+    }
+  }
+  String get target => values.keys.single;
+}
+
+class PackageDependencyTracker {
+  // This is a map from package names to objects that track the paths
+  // involved (sources and targets).
+  Map<String, PackageDependency> packages = <String, PackageDependency>{};
+
+  PackageDependency getPackageDependency(String packageName) {
+    return packages.putIfAbsent(packageName, () => new PackageDependency());
+  }
+
+  void addCanonicalCase(String packageName, String packagePath, String pubSpecYamlPath) {
+    getPackageDependency(packageName).addCanonicalCase(packagePath, pubSpecYamlPath);
+  }
+
+  void add(String packageName, String packagePath, String dotPackagesPath) {
+    getPackageDependency(packageName).add(packagePath, dotPackagesPath);
+  }
+
+  bool get hasConflicts {
+    return packages.values.any((PackageDependency dependency) => dependency.hasConflict);
+  }
+
+  bool get hasConflictsAffectingFlutterRepo {
+    return packages.values.any((PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo);
+  }
+
+  String generateConflictReport() {
+    assert(hasConflicts);
+    StringBuffer result = new StringBuffer();
+    for (String package in packages.keys.where((String package) => packages[package].hasConflict)) {
+      result.writeln('Package "$package" has conflicts:');
+      packages[package].describeConflict(result);
+    }
+    return result.toString();
+  }
+
+  Map<String, String> asPackageMap() {
+    Map<String, String> result = <String, String>{};
+    for (String package in packages.keys)
+      result[package] = packages[package].target;
+    return result;
   }
 }
 

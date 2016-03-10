@@ -7,9 +7,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:test/test.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('DeviceManager', () {
     test('error', () async {
       AppContext context = new AppContext();

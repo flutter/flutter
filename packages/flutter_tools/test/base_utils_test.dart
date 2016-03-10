@@ -7,9 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:test/test.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('ItemListNotifier', () {
     test('sends notifications', () async {
       ItemListNotifier<String> list = new ItemListNotifier<String>();

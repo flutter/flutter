@@ -13,7 +13,7 @@ class Node3D extends Node {
   /// The node's rotation around the x axis in degrees.
   double get rotationX => _rotationX;
 
-  set rotationX(double rotationX) {
+  void set rotationX(double rotationX) {
     _rotationX = rotationX;
     invalidateTransformMatrix();
   }
@@ -23,7 +23,7 @@ class Node3D extends Node {
   /// The node's rotation around the y axis in degrees.
   double get rotationY => _rotationY;
 
-  set rotationY(double rotationY) {
+  void set rotationY(double rotationY) {
     _rotationY = rotationY;
     invalidateTransformMatrix();
   }
@@ -33,7 +33,7 @@ class Node3D extends Node {
   /// The projection depth. Default value is 500.0.
   double get projectionDepth => _projectionDepth;
 
-  set projectionDepth(double projectionDepth) {
+  void set projectionDepth(double projectionDepth) {
     _projectionDepth = projectionDepth;
     invalidateTransformMatrix();
   }

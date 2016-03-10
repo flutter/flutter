@@ -10,9 +10,7 @@ import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('devices', () {
     testUsingContext('returns 0 when called', () {
       DevicesCommand command = new DevicesCommand();

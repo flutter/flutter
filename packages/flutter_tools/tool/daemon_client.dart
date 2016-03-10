@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,7 +15,7 @@ Process daemon;
 //   stopAll: stop any running app
 //   devices: list devices
 
-main() async {
+Future main() async {
   daemon = await Process.start('flutter', ['daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 

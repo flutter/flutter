@@ -9,9 +9,7 @@ import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('listen', () {
     testUsingContext('returns 1 when no device is connected', () {
       ListenCommand command = new ListenCommand(singleRun: true);

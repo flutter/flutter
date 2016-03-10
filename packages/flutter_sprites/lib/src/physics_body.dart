@@ -91,7 +91,7 @@ class PhysicsBody {
   ///     myBody.density = 0.5;
   double get density => _density;
 
-  set density(double density) {
+  void set density(double density) {
     _density = density;
 
     if (_body == null)
@@ -109,7 +109,7 @@ class PhysicsBody {
   ///     myBody.friction = 0.4;
   double get friction => _friction;
 
-  set friction(double friction) {
+  void set friction(double friction) {
     _friction = friction;
 
     if (_body == null)
@@ -127,7 +127,7 @@ class PhysicsBody {
   /// the range of 0.0 to 1.0.
   ///
   ///     myBody.restitution = 0.5;
-  set restitution(double restitution) {
+  void set restitution(double restitution) {
     _restitution = restitution;
 
     if (_body == null)
@@ -146,7 +146,7 @@ class PhysicsBody {
   ///     myBody.isSensor = true;
   bool get isSensor => _isSensor;
 
-  set isSensor(bool isSensor) {
+  void set isSensor(bool isSensor) {
     _isSensor = isSensor;
 
     if (_body == null)
@@ -171,7 +171,7 @@ class PhysicsBody {
     }
   }
 
-  set linearVelocity(Offset linearVelocity) {
+  void set linearVelocity(Offset linearVelocity) {
     _linearVelocity = linearVelocity;
 
     if (_body != null) {
@@ -195,7 +195,7 @@ class PhysicsBody {
       return _body.angularVelocity;
   }
 
-  set angularVelocity(double angularVelocity) {
+  void set angularVelocity(double angularVelocity) {
     _angularVelocity = angularVelocity;
 
     if (_body != null) {
@@ -217,7 +217,7 @@ class PhysicsBody {
   ///     myBody.angularDampening = 0.1;
   double get angularDampening => _angularDampening;
 
-  set angularDampening(double angularDampening) {
+  void set angularDampening(double angularDampening) {
     _angularDampening = angularDampening;
 
     if (_body != null)
@@ -231,7 +231,7 @@ class PhysicsBody {
   ///     myBody.allowSleep = false;
   bool get allowSleep => _allowSleep;
 
-  set allowSleep(bool allowSleep) {
+  void set allowSleep(bool allowSleep) {
     _allowSleep = allowSleep;
 
     if (_body != null)
@@ -250,7 +250,7 @@ class PhysicsBody {
       return _awake;
   }
 
-  set awake(bool awake) {
+  void set awake(bool awake) {
     _awake = awake;
 
     if (_body != null)
@@ -264,7 +264,7 @@ class PhysicsBody {
   ///     myBody.fixedRotation = true;
   bool get fixedRotation => _fixedRotation;
 
-  set fixedRotation(bool fixedRotation) {
+  void set fixedRotation(bool fixedRotation) {
     _fixedRotation = fixedRotation;
 
     if (_body != null)
@@ -280,7 +280,7 @@ class PhysicsBody {
   /// if neccessary.
   ///
   ///     myBody.bullet = true;
-  set bullet(bool bullet) {
+  void set bullet(bool bullet) {
     _bullet = bullet;
 
     if (_body != null) {
@@ -301,7 +301,7 @@ class PhysicsBody {
       return _active;
   }
 
-  set active(bool active) {
+  void set active(bool active) {
     _active = active;
 
     if (_body != null)
@@ -321,7 +321,7 @@ class PhysicsBody {
     return _collisionCategory;
   }
 
-  set collisionCategory(Object collisionCategory) {
+  void set collisionCategory(Object collisionCategory) {
     _collisionCategory = collisionCategory;
     _updateFilter();
   }
@@ -334,7 +334,7 @@ class PhysicsBody {
   ///     myBody.collisionMask = ["Air", "Ground"];
   List<Object> get collisionMask => _collisionMask;
 
-  set collisionMask(List<Object> collisionMask) {
+  void set collisionMask(List<Object> collisionMask) {
     _collisionMask = collisionMask;
     _updateFilter();
   }
