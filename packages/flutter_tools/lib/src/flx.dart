@@ -24,6 +24,7 @@ const String defaultFlxOutputPath = 'build/app.flx';
 const String defaultSnapshotPath = 'build/snapshot_blob.bin';
 const String defaultDepfilePath = 'build/snapshot_blob.bin.d';
 const String defaultPrivateKeyPath = 'privatekey.der';
+const String defaultWorkingDirPath = 'build/flx';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
 
@@ -163,6 +164,7 @@ Future<int> build(
   String snapshotPath: defaultSnapshotPath,
   String depfilePath: defaultDepfilePath,
   String privateKeyPath: defaultPrivateKeyPath,
+  String workingDirPath: defaultWorkingDirPath,
   bool precompiledSnapshot: false
 }) async {
   Map manifestDescriptor = _loadManifest(manifestPath);
@@ -189,7 +191,8 @@ Future<int> build(
       snapshotFile: snapshotFile,
       assetBasePath: assetBasePath,
       outputPath: outputPath,
-      privateKeyPath: privateKeyPath
+      privateKeyPath: privateKeyPath,
+      workingDirPath: workingDirPath
   );
 }
 
@@ -198,7 +201,8 @@ Future<int> assemble({
   File snapshotFile,
   String assetBasePath: defaultAssetBasePath,
   String outputPath: defaultFlxOutputPath,
-  String privateKeyPath: defaultPrivateKeyPath
+  String privateKeyPath: defaultPrivateKeyPath,
+  String workingDirPath: defaultWorkingDirPath
 }) async {
   printTrace('Building $outputPath');
 
@@ -250,7 +254,7 @@ Future<int> assemble({
 
   File zipFile = new File(outputPath.substring(0, outputPath.length - 4) + '.zip');
   printTrace('Encoding zip file to ${zipFile.path}');
-  zipBuilder.createZip(zipFile, new Directory('build/flx'));
+  zipBuilder.createZip(zipFile, new Directory(workingDirPath));
   List<int> zipBytes = zipFile.readAsBytesSync();
 
   ensureDirectoryExists(outputPath);

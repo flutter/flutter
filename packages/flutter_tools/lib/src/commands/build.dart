@@ -24,6 +24,7 @@ class BuildCommand extends FlutterCommand {
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
+    argParser.addOption('working-dir', defaultsTo: defaultWorkingDirPath);
     addTargetOption();
   }
 
@@ -45,6 +46,7 @@ class BuildCommand extends FlutterCommand {
       snapshotPath: argResults['snapshot'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
+      workingDirPath: argResults['working-dir'],
       precompiledSnapshot: argResults['precompiled']
     ).then((int result) {
       if (result == 0)
