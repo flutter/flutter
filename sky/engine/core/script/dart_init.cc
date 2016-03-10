@@ -82,6 +82,10 @@ static const char *kDartMirrorsArgs[] = {
   "--enable_mirrors=false",
 };
 
+static const char* kDartPrecompilationArgs[] = {
+    "--precompilation",
+};
+
 static const char* kDartBackgroundCompilationArgs[] = {
   "--background_compilation",
 };
@@ -333,6 +337,8 @@ void InitDartVM() {
     args.append(kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
     args.append(kDartBackgroundCompilationArgs,
                 arraysize(kDartBackgroundCompilationArgs));
+  } else {
+    args.append(kDartPrecompilationArgs, arraysize(kDartPrecompilationArgs));
   }
 
   if (enable_checked_mode)

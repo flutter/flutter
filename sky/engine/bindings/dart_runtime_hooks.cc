@@ -76,10 +76,6 @@ static void InitDartInternal(Dart_Handle builtin_library,
       internal_library, ToDart("_printClosure"), print));
 
   if (isolate_type == DartRuntimeHooks::MainIsolate) {
-    // Import internal_library into builtin_library.
-    DART_CHECK_VALID(Dart_LibraryImportLibrary(builtin_library,
-                                               internal_library,
-                                               Dart_Null()));
     // Call |_setupHooks| to configure |VMLibraryHooks|.
     Dart_Handle method_name =
         Dart_NewStringFromCString("_setupHooks");
