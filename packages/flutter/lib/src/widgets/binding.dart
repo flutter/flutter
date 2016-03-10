@@ -35,7 +35,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
     return _instance;
   }
 
-  initInstances() {
+  void initInstances() {
     super.initInstances();
     _instance = this;
     BuildableElement.scheduleBuildFor = scheduleBuildFor;

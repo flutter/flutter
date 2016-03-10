@@ -7,9 +7,7 @@ import 'package:test/test.dart';
 
 import 'src/context.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('android_device', () {
     testUsingContext('stores the requested id', () {
       String deviceId = '1234';

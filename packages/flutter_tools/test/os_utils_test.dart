@@ -8,9 +8,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('OperatingSystemUtils', () {
     Directory temp;
 

@@ -12,9 +12,7 @@ import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('stop', () {
     testUsingContext('returns 0 when Android is connected and ready to be stopped', () {
       StopCommand command = new StopCommand();

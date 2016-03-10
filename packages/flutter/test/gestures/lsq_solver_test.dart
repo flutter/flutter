@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 
 void main() {
-  approx(double value, double expectation) {
+  bool approx(double value, double expectation) {
     const double eps = 1e-6;
     return (value - expectation).abs() < eps;
   }

@@ -9,9 +9,7 @@ import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('logs', () {
     testUsingContext('fail with a bad device id', () {
       LogsCommand command = new LogsCommand();

@@ -9,11 +9,6 @@ bool _nearZero(double value) {
   return value < 0.0 ? -value < epsilon : value < epsilon;
 }
 
-// Workaround for the lack of a null coalescing operator. Uses a ternary
-// instead. Sadly, due the lack of generic types on functions, we have to use
-// dynamic instead.
-_elvis(a, b) => a != null ? a : b;
-
 class _Pair<X, Y> {
   X first;
   Y second;

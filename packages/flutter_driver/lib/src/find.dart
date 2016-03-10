@@ -7,6 +7,10 @@ import 'message.dart';
 
 const List<Type> _supportedKeyValueTypes = const <Type>[String, int];
 
+DriverError _createInvalidKeyValueTypeError(String invalidType) {
+  return new DriverError('Unsupported key value type $invalidType. Flutter Driver only supports ${_supportedKeyValueTypes.join(", ")}');
+}
+
 /// Command to find an element.
 class Find extends Command {
   final String kind = 'find';
@@ -19,10 +23,6 @@ class Find extends Command {
 
   static Find deserialize(Map<String, String> json) {
     return new Find(SearchSpecification.deserialize(json));
-  }
-
-  static _throwInvalidKeyValueType(String invalidType) {
-    throw new DriverError('Unsupported key value type $invalidType. Flutter Driver only supports ${_supportedKeyValueTypes.join(", ")}');
   }
 }
 
@@ -89,7 +89,7 @@ class ByValueKey extends SearchSpecification {
       this.keyValueString = '$keyValue',
       this.keyValueType = '${keyValue.runtimeType}' {
     if (!_supportedKeyValueTypes.contains(keyValue.runtimeType))
-      _throwInvalidKeyValueType('$keyValue.runtimeType');
+      throw _createInvalidKeyValueTypeError('$keyValue.runtimeType');
   }
 
   /// The true value of the key.
@@ -117,12 +117,8 @@ class ByValueKey extends SearchSpecification {
       case 'String':
         return new ByValueKey(keyValueString);
       default:
-        return _throwInvalidKeyValueType(keyValueType);
+        throw _createInvalidKeyValueTypeError(keyValueType);
     }
-  }
-
-  static _throwInvalidKeyValueType(String invalidType) {
-    throw new DriverError('Unsupported key value type $invalidType. Flutter Driver only supports ${_supportedKeyValueTypes.join(", ")}');
   }
 }
 

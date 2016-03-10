@@ -17,9 +17,7 @@ import 'package:test/test.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   Daemon daemon;
   AppContext appContext;
   NotifyingLogger notifyingLogger;

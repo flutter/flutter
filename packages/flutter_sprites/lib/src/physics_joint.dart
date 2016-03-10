@@ -147,7 +147,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
   /// useful you also need to set [motorSpeed] and [maxMotorTorque].
   bool get enableMotor => _enableMotor;
 
-  set enableMotor(bool enableMotor) {
+  void set enableMotor(bool enableMotor) {
     _enableMotor = enableMotor;
     if (_joint != null) {
       box2d.RevoluteJoint revoluteJoint = _joint;
@@ -161,7 +161,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
   /// set to true and [maxMotorTorque] is set to a non zero value.
   double get motorSpeed => _motorSpeed;
 
-  set motorSpeed(double motorSpeed) {
+  void set motorSpeed(double motorSpeed) {
     _motorSpeed = motorSpeed;
     if (_joint != null) {
       box2d.RevoluteJoint revoluteJoint = _joint;
@@ -175,7 +175,7 @@ class PhysicsJointRevolute extends PhysicsJoint {
 
   /// Sets the motor torque of this joint, will only work if [enableMotor] is
   /// set to true and [motorSpeed] is set to a non zero value.
-  set maxMotorTorque(double maxMotorTorque) {
+  void set maxMotorTorque(double maxMotorTorque) {
     _maxMotorTorque = maxMotorTorque;
     if (_joint != null) {
       box2d.RevoluteJoint revoluteJoint = _joint;
@@ -252,7 +252,7 @@ class PhysicsJointPrismatic extends PhysicsJoint {
   /// [maxMotorForce].
   bool get enableMotor => _enableMotor;
 
-  set enableMotor(bool enableMotor) {
+  void set enableMotor(bool enableMotor) {
     _enableMotor = enableMotor;
     if (_joint != null) {
       box2d.PrismaticJoint prismaticJoint = _joint;
@@ -266,7 +266,7 @@ class PhysicsJointPrismatic extends PhysicsJoint {
   /// set to true and [maxMotorForce] is set to a non zero value.
   double get motorSpeed => _motorSpeed;
 
-  set motorSpeed(double motorSpeed) {
+  void set motorSpeed(double motorSpeed) {
     _motorSpeed = motorSpeed;
     if (_joint != null) {
       box2d.PrismaticJoint prismaticJoint = _joint;
@@ -280,7 +280,7 @@ class PhysicsJointPrismatic extends PhysicsJoint {
   /// set to true and [motorSpeed] is set to a non zero value.
   double get maxMotorForce => _maxMotorForce;
 
-  set maxMotorForce(double maxMotorForce) {
+  void set maxMotorForce(double maxMotorForce) {
     _maxMotorForce = maxMotorForce;
     if (_joint != null) {
       box2d.PrismaticJoint prismaticJoint = _joint;

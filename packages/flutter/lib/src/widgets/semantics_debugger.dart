@@ -311,7 +311,7 @@ class _SemanticsDebuggerListener implements mojom.SemanticsListener {
 
   int generation = 0;
 
-  updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
+  void updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
     generation += 1;
     for (mojom.SemanticsNode node in nodes)
       _updateNode(node);

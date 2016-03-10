@@ -9,7 +9,7 @@ import 'package:quiver/testing/time.dart';
 
 import 'package:flutter_driver/src/retry.dart';
 
-main() {
+void main() {
   group('retry', () {
     FakeAsync fakeAsync;
 

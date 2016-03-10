@@ -6,7 +6,7 @@ import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-main() {
+void main() {
   group('scrolling performance test', () {
     FlutterDriver driver;
 

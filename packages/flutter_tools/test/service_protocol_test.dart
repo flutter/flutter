@@ -9,9 +9,7 @@ import 'package:flutter_tools/src/service_protocol.dart';
 
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('service_protocol', () {
     test('Discovery Heartbeat', () async {
       MockDeviceLogReader logReader = new MockDeviceLogReader();

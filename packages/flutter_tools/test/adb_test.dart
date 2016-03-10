@@ -5,9 +5,7 @@
 import 'package:flutter_tools/src/android/adb.dart';
 import 'package:test/test.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   Adb adb = new Adb('adb');
 
   // We only test the [Adb] class is we're able to locate the adb binary.

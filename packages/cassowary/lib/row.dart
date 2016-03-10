@@ -16,7 +16,7 @@ class _Row {
   double add(double value) => constant += value;
 
   void insertSymbol(_Symbol symbol, [double coefficient = 1.0]) {
-    double val = _elvis(cells[symbol], 0.0);
+    double val = cells[symbol] ?? 0.0;
 
     if (_nearZero(val + coefficient)) {
       cells.remove(symbol);
@@ -52,7 +52,7 @@ class _Row {
     solveForSymbol(rhs);
   }
 
-  double coefficientForSymbol(_Symbol symbol) => _elvis(cells[symbol], 0.0);
+  double coefficientForSymbol(_Symbol symbol) => cells[symbol] ?? 0.0;
 
   void substitute(_Symbol symbol, _Row row) {
     double coefficient = cells[symbol];

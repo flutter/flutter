@@ -38,7 +38,8 @@ class SpriteBox extends RenderBox {
       || value.size.height > 0);
 
     // Remove sprite box references
-    if (_rootNode != null) _removeSpriteBoxReference(_rootNode);
+    if (_rootNode != null)
+      _removeSpriteBoxReference(_rootNode);
 
     // Update the value
     _rootNode = value;
@@ -374,7 +375,7 @@ class SpriteBox extends RenderBox {
     double delta = (timeStamp - _lastTimeStamp).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
     _lastTimeStamp = timeStamp;
 
-    _frameRate = 1.0/delta;
+    _frameRate = 1.0 / delta;
 
     if (_initialized) {
       _callConstraintsPreUpdate(delta);
@@ -497,7 +498,7 @@ class SpriteBox extends RenderBox {
     return nodes;
   }
 
-  _addNodesAtPosition(Node node, Point position, List<Node> list) {
+  void _addNodesAtPosition(Node node, Point position, List<Node> list) {
     // Visit children first
     for (Node child in node.children) {
       _addNodesAtPosition(child, position, list);

@@ -20,9 +20,7 @@ import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('drive', () {
     DriveCommand command;
     Device mockDevice;
@@ -182,7 +180,7 @@ defineTests() {
     });
 
     group('findTargetDevice on iOS', () {
-      setOs() {
+      void setOs() {
         when(os.isMacOS).thenReturn(true);
         when(os.isLinux).thenReturn(false);
       }
@@ -222,7 +220,7 @@ defineTests() {
     });
 
     group('findTargetDevice on Linux', () {
-      setOs() {
+      void setOs() {
         when(os.isMacOS).thenReturn(false);
         when(os.isLinux).thenReturn(true);
       }

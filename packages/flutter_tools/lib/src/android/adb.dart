@@ -204,7 +204,7 @@ class AdbDevice {
   /// Device model; can be null. `XT1045`, `Nexus_7`
   String get modelID => _info['model'];
 
-  set modelID(String value) {
+  void set modelID(String value) {
     _info['model'] = value;
   }
 

@@ -125,7 +125,7 @@ class ActionRepeatForever extends Action {
   ///     var myInifiniteLoop = new ActionRepeatForever(myAction);
   ActionRepeatForever(this.action);
 
-  step(double dt) {
+  void step(double dt) {
     _elapsedInAction += dt;
     while (_elapsedInAction > action.duration) {
       _elapsedInAction -= action.duration;

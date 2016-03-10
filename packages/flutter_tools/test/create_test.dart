@@ -13,9 +13,7 @@ import 'package:test/test.dart';
 
 import 'src/context.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('create', () {
     Directory temp;
 

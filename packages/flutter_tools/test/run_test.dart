@@ -9,9 +9,7 @@ import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('run', () {
     testUsingContext('fails when target not found', () {
       RunCommand command = new RunCommand();

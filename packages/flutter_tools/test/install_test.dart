@@ -10,9 +10,7 @@ import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
-main() => defineTests();
-
-defineTests() {
+void main() {
   group('install', () {
     testUsingContext('returns 0 when Android is connected and ready for an install', () {
       InstallCommand command = new InstallCommand();
