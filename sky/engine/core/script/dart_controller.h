@@ -40,14 +40,17 @@ class DartController {
   void CreateIsolateFor(std::unique_ptr<UIDartState> ui_dart_state);
   void Shutdown();
 
-  UIDartState* dart_state() const { return ui_dart_state_.get(); }
+  UIDartState* dart_state() const { return ui_dart_state_; }
 
  private:
   void DidLoadMainLibrary(std::string url);
   void DidLoadSnapshot();
   bool SendStartMessage(Dart_Handle root_library);
 
-  std::unique_ptr<UIDartState> ui_dart_state_;
+  // The DartState associated with the main isolate.  This will be deleted
+  // during isolate shutdown.
+  UIDartState* ui_dart_state_;
+
   std::unique_ptr<DartSnapshotLoader> snapshot_loader_;
 
   base::WeakPtrFactory<DartController> weak_factory_;
