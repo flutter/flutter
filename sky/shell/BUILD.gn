@@ -238,16 +238,19 @@ if (is_android) {
         "Must specific if the scaffolding is exposed as a framework")
 
     source_set(target_name) {
+
       sources = [
-        "platform/ios/flutter_app_delegate.h",
-        "platform/ios/flutter_app_delegate.mm",
-        "platform/ios/flutter_dynamic_service_loader.h",
-        "platform/ios/flutter_dynamic_service_loader.mm",
+        "platform/ios/FlutterAppDelegate.h",
+        "platform/ios/FlutterAppDelegate.mm",
+        "platform/ios/FlutterDynamicServiceLoader.h",
+        "platform/ios/FlutterDynamicServiceLoader.mm",
+        "platform/ios/FlutterView.h",
+        "platform/ios/FlutterView.mm",
+        "platform/ios/FlutterViewController.mm",
         "platform/ios/flutter_touch_mapper.h",
         "platform/ios/flutter_touch_mapper.mm",
-        "platform/ios/flutter_view.h",
-        "platform/ios/flutter_view.mm",
-        "platform/ios/flutter_view_controller.mm",
+        "platform/ios/framework/Info.plist",
+        "platform/ios/framework/module.modulemap",
         "platform/ios/main_ios.mm",
         "platform/ios/public/Flutter.h",
         "platform/ios/public/FlutterMacros.h",

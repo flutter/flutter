@@ -4,7 +4,7 @@
 
 #import <UIKit/UIKit.h>
 
-#include "sky/shell/platform/ios/flutter_app_delegate.h"
+#include "sky/shell/platform/ios/FlutterAppDelegate.h"
 #include "sky/shell/platform/mac/platform_mac.h"
 
 int main(int argc, const char* argv[]) {
