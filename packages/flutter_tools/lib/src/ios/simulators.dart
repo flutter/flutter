@@ -21,6 +21,9 @@ import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
+/// Test device created by Flutter when no other device is available.
+const String _kFlutterTestDevice = 'flutter.test.device';
+
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
@@ -49,16 +52,23 @@ class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
   static SimControl get instance => context[SimControl] ?? (context[SimControl] = new SimControl());
 
-  Future<bool> boot({String deviceId}) async {
+  Future<bool> boot({String deviceName}) async {
     if (_isAnyConnected())
       return true;
 
-    if (deviceId == null)
-      deviceId = 'iPhone 6 (9.2)';
+    if (deviceName == null) {
+      SimDevice testDevice = _createTestDevice();
+      if (testDevice == null) {
+        return false;
+      }
+      deviceName = testDevice.name;
+    }
 
     // `xcrun instruments` requires a template (-t). @yjbanov has no idea what
-    // "template" is but the built-in 'Blank' seems to work.
-    List<String> args = [_xcrunPath, 'instruments', '-w', deviceId, '-t', 'Blank'];
+    // "template" is but the built-in 'Blank' seems to work. -l causes xcrun to
+    // quit after a time limit without killing the simulator. We quit after
+    // 1 second.
+    List<String> args = [_xcrunPath, 'instruments', '-w', deviceName, '-t', 'Blank', '-l', '1'];
     printTrace(args.join(' '));
     runDetached(args);
     printStatus('Waiting for iOS Simulator to boot...');
@@ -83,9 +93,89 @@ class SimControl {
     }
   }
 
-  /// Returns a list of all available devices, both potential and connected.
-  List<SimDevice> getDevices() {
+  SimDevice _createTestDevice() {
+    String deviceType = _findSuitableDeviceType();
+    if (deviceType == null) {
+      return null;
+    }
+
+    String runtime = _findSuitableRuntime();
+    if (runtime == null) {
+      return null;
+    }
+
+    // Delete any old test devices
+    getDevices()
+      .where((d) => d.name == _kFlutterTestDevice)
+      .forEach(_deleteDevice);
+
+    // Create new device
+    List<String> args = [_xcrunPath, 'simctl', 'create', _kFlutterTestDevice, deviceType, runtime];
+    printTrace(args.join(' '));
+    runCheckedSync(args);
+
+    return getDevices().firstWhere((d) => d.name == _kFlutterTestDevice);
+  }
+
+  String _findSuitableDeviceType() {
+    List<Map<String, dynamic>> allTypes = _list(SimControlListSection.devicetypes);
+    List<Map<String, dynamic>> usableTypes = allTypes
+      .where((info) => info['name'].startsWith('iPhone'))
+      .toList()
+      ..sort((r1, r2) => -compareIphoneVersions(r1['identifier'], r2['identifier']));
+
+    if (usableTypes.isEmpty) {
+      printError(
+        'No suitable device type found.'
+        '\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to '
+        'use it.'
+      );
+    }
+
+    return usableTypes.first['identifier'];
+  }
+
+  String _findSuitableRuntime() {
+    List<Map<String, dynamic>> allRuntimes = _list(SimControlListSection.runtimes);
+    List<Map<String, dynamic>> usableRuntimes = allRuntimes
+      .where((info) => info['name'].startsWith('iOS'))
+      .toList()
+      ..sort((r1, r2) => -compareIosVersions(r1['version'], r2['version']));
+
+    if (usableRuntimes.isEmpty) {
+      printError(
+        'No suitable iOS runtime found.'
+        '\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to '
+        'use it.'
+      );
+    }
+
+    return usableRuntimes.first['identifier'];
+  }
+
+  void _deleteDevice(SimDevice device) {
+    try {
+      List<String> args = [_xcrunPath, 'simctl', 'delete', device.name];
+      printTrace(args.join(' '));
+      runCheckedSync(args);
+    } catch(e) {
+      printError(e);
+    }
+  }
+
+  /// Runs `simctl list --json` and returns the JSON of the corresponding
+  /// [section].
+  ///
+  /// The return type depends on the [section] being listed but is usually
+  /// either a [Map] or a [List].
+  dynamic _list(SimControlListSection section) {
+    // Sample output from `simctl list --json`:
+    //
     // {
+    //   "devicetypes": { ... },
+    //   "runtimes": { ... },
     //   "devices" : {
     //     "com.apple.CoreSimulator.SimRuntime.iOS-8-2" : [
     //       {
@@ -95,19 +185,25 @@ class SimControl {
     //         "udid" : "1913014C-6DCB-485D-AC6B-7CD76D322F5B"
     //       },
     //       ...
+    //   },
+    //   "pairs": { ... },
 
-    List<String> args = <String>['simctl', 'list', '--json', 'devices'];
+    List<String> args = <String>['simctl', 'list', '--json', section.name];
     printTrace('$_xcrunPath ${args.join(' ')}');
     ProcessResult results = Process.runSync(_xcrunPath, args);
     if (results.exitCode != 0) {
       printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
-      return <SimDevice>[];
+      return <String, Map<String, dynamic>>{};
     }
 
+    return JSON.decode(results.stdout)[section.name];
+  }
+
+  /// Returns a list of all available devices, both potential and connected.
+  List<SimDevice> getDevices() {
     List<SimDevice> devices = <SimDevice>[];
 
-    Map<String, Map<String, dynamic>> data = JSON.decode(results.stdout);
-    Map<String, dynamic> devicesSection = data['devices'];
+    Map<String, dynamic> devicesSection = _list(SimControlListSection.devices);
 
     for (String deviceCategory in devicesSection.keys) {
       List<dynamic> devicesData = devicesSection[deviceCategory];
@@ -190,6 +286,17 @@ class SimControl {
       args.addAll(launchArgs);
     runCheckedSync(args);
   }
+}
+
+/// Enumerates all data sections of `xcrun simctl list --json` command.
+class SimControlListSection {
+  static const devices = const SimControlListSection._('devices');
+  static const devicetypes = const SimControlListSection._('devicetypes');
+  static const runtimes = const SimControlListSection._('runtimes');
+  static const pairs = const SimControlListSection._('pairs');
+
+  final String name;
+  const SimControlListSection._(this.name);
 }
 
 class SimDevice {
@@ -620,4 +727,48 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       return false;
     return other.device.logFilePath == device.logFilePath;
   }
+}
+
+int compareIosVersions(String v1, String v2) {
+  List<int> v1Fragments = v1.split('.').map(int.parse).toList();
+  List<int> v2Fragments = v2.split('.').map(int.parse).toList();
+
+  int i = 0;
+  while(i < v1Fragments.length && i < v2Fragments.length) {
+    int v1Fragment = v1Fragments[i];
+    int v2Fragment = v2Fragments[i];
+    if (v1Fragment != v2Fragment)
+      return v1Fragment.compareTo(v2Fragment);
+    i++;
+  }
+  return v1Fragments.length.compareTo(v2Fragments.length);
+}
+
+/// Matches on device type given an identifier.
+///
+/// Example device type identifiers:
+///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-5
+///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6
+///   ✓ com.apple.CoreSimulator.SimDeviceType.iPhone-6s-Plus
+///   ✗ com.apple.CoreSimulator.SimDeviceType.iPad-2
+///   ✗ com.apple.CoreSimulator.SimDeviceType.Apple-Watch-38mm
+final RegExp _iosDeviceTypePattern =
+    new RegExp(r'com.apple.CoreSimulator.SimDeviceType.iPhone-(\d+)(.*)');
+
+int compareIphoneVersions(String id1, String id2) {
+  Match m1 = _iosDeviceTypePattern.firstMatch(id1);
+  Match m2 = _iosDeviceTypePattern.firstMatch(id2);
+
+  int v1 = int.parse(m1[1]);
+  int v2 = int.parse(m2[1]);
+
+  if (v1 != v2)
+    return v1.compareTo(v2);
+
+  // Sorted in the least preferred first order.
+  const qualifiers = const <String>['-Plus', '', 's-Plus', 's'];
+
+  int q1 = qualifiers.indexOf(m1[2]);
+  int q2 = qualifiers.indexOf(m2[2]);
+  return q1.compareTo(q2);
 }
