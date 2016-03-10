@@ -101,7 +101,7 @@ class InputValue {
 
   static const InputValue empty = const InputValue();
 
-  String toString() => '$runtimeType(text: $text, selection: $selection, composing: $composing)';
+  String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -207,9 +207,8 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   void didUpdateConfig(RawInputLine oldConfig) {
     if (_keyboardClient.inputValue != config.value) {
       _keyboardClient.inputValue = config.value;
-      if (_isAttachedToKeyboard) {
+      if (_isAttachedToKeyboard)
         _keyboardHandle.setEditingState(_keyboardClient.editingState);
-      }
     }
   }
 

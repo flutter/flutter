@@ -92,6 +92,11 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
   }
 
+  void dispose() {
+    _controller.stop();
+    super.dispose();
+  }
+
   Widget _buildIndicator(BuildContext context, double animationValue) {
     return new Container(
       constraints: new BoxConstraints.tightFor(
@@ -209,13 +214,18 @@ final Animatable<int> _kStepTween = new StepTween(begin: 0, end: 5);
 final Animatable<double> _kRotationTween = new CurveTween(curve: new SawTooth(5));
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
-  AnimationController _animationController;
+  AnimationController _controller;
 
   void initState() {
     super.initState();
-    _animationController = new AnimationController(
+    _controller = new AnimationController(
       duration: const Duration(milliseconds: 6666)
     )..repeat();
+  }
+
+  void dispose() {
+    _controller.stop();
+    super.dispose();
   }
 
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
@@ -242,14 +252,14 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
       return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
 
     return new AnimatedBuilder(
-      animation: _animationController,
+      animation: _controller,
       builder: (BuildContext context, Widget child) {
         return _buildIndicator(
           context,
-          _kStrokeHeadTween.evaluate(_animationController),
-          _kStrokeTailTween.evaluate(_animationController),
-          _kStepTween.evaluate(_animationController),
-          _kRotationTween.evaluate(_animationController)
+          _kStrokeHeadTween.evaluate(_controller),
+          _kStrokeTailTween.evaluate(_controller),
+          _kStepTween.evaluate(_controller),
+          _kRotationTween.evaluate(_controller)
         );
       }
     );

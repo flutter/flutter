@@ -66,6 +66,7 @@ class TextRange {
     end.hashCode
   );
 
+  String toString() => 'TextRange(start: $start, end: $end)';
 }
 
 /// A range of text that represents a selection.

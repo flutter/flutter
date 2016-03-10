@@ -116,6 +116,7 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => 'Analyze the project\'s Dart code.';
 
   AnalyzeCommand() {
+    argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
@@ -176,7 +177,7 @@ class AnalyzeCommand extends FlutterCommand {
         foundAnyInCurrentDirectory = true;
     }
 
-    if (ArtifactStore.isFlutterRepo) {
+    if (argResults['flutter-repo']) {
       //examples/*/ as package
       //examples/layers/*/ as files
       //dev/manual_tests/*/ as package
@@ -287,9 +288,6 @@ class AnalyzeCommand extends FlutterCommand {
     for (String package in packages.keys)
       packagesBody.writeln('$package:${path.toUri(packages[package])}');
 
-    /// specify analysis options
-    /// note that until there is a default "all-in" lint rule-set we need
-    /// to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843)
     File optionsFile = new File(path.join(ArtifactStore.flutterRoot, 'packages', 'flutter_tools', '.analysis_options'));
 
     // save the Dart file and the .packages file to disk

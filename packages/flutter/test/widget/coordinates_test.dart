@@ -38,14 +38,12 @@ void main() {
         )
       );
 
-      expect((tester.findElementByKey(keyA).renderObject as RenderBox).localToGlobal(const Point(0.0, 0.0)),
-             equals(const Point(100.0, 100.0)));
+      RenderBox boxA = tester.findElementByKey(keyA).renderObject;
+      expect(boxA.localToGlobal(const Point(0.0, 0.0)), equals(const Point(100.0, 100.0)));
 
-      expect((tester.findElementByKey(keyB).renderObject as RenderBox).localToGlobal(const Point(0.0, 0.0)),
-             equals(const Point(100.0, 200.0)));
-
-      expect((tester.findElementByKey(keyB).renderObject as RenderBox).globalToLocal(const Point(110.0, 205.0)),
-             equals(const Point(10.0, 5.0)));
+      RenderBox boxB = tester.findElementByKey(keyB).renderObject;
+      expect(boxB.localToGlobal(const Point(0.0, 0.0)), equals(const Point(100.0, 200.0)));
+      expect(boxB.globalToLocal(const Point(110.0, 205.0)), equals(const Point(10.0, 5.0)));
     });
   });
 }

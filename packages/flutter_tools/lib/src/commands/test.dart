@@ -50,7 +50,13 @@ class TestCommand extends FlutterCommand {
     }
   }
 
-  TestCommand();
+  TestCommand() {
+    argParser.addFlag(
+      'flutter-repo',
+      help: 'Run tests from the \'flutter\' package in the Flutter repository instead of the current directory.',
+      defaultsTo: false
+    );
+  }
 
   Iterable<String> _findTests(Directory directory) {
     return directory.listSync(recursive: true, followLinks: false)
@@ -83,7 +89,7 @@ class TestCommand extends FlutterCommand {
   Future<int> runInProject() async {
     List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
 
-    final bool runFlutterTests = ArtifactStore.isFlutterRepo;
+    final bool runFlutterTests = argResults['flutter-repo'];
     if (!runFlutterTests && !projectRootValidator())
       return 1;
 

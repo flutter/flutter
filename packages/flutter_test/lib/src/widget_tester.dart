@@ -78,7 +78,6 @@ class WidgetTester extends Instrumentation {
       super(binding: _SteppedWidgetFlutterBinding.ensureInitialized()) {
     timeDilation = 1.0;
     ui.window.onBeginFrame = null;
-    runApp(new Container(key: new UniqueKey())); // flush out the last build entirely
   }
 
   final FakeAsync async;
@@ -132,6 +131,23 @@ class WidgetTester extends Instrumentation {
 
 void testWidgets(callback(WidgetTester tester)) {
   new FakeAsync().run((FakeAsync async) {
-    callback(new WidgetTester._(async));
+    WidgetTester tester = new WidgetTester._(async);
+    runApp(new Container(key: new UniqueKey())); // Reset the tree to a known state.
+    callback(tester);
+    runApp(new Container(key: new UniqueKey())); // Unmount any remaining widgets.
+    async.flushMicrotasks();
+    assert(() {
+      "An animation is still running even after the widget tree was disposed.";
+      return Scheduler.instance.transientCallbackCount == 0;
+    });
+    assert(() {
+      "A Timer is still running even after the widget tree was disposed.";
+      return async.periodicTimerCount == 0;
+    });
+    assert(() {
+      "A Timer is still running even after the widget tree was disposed.";
+      return async.nonPeriodicTimerCount == 0;
+    });
+    assert(async.microtaskCount == 0); // Shouldn't be possible.
   });
 }
