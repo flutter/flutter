@@ -205,7 +205,7 @@ class RenderChildView extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
     if (_layoutInfo != null)
-      context.pushChildScene(offset, _layoutInfo);
+      context.pushChildScene(offset, scale, _layoutInfo);
   }
 
   void debugFillDescription(List<String> description) {

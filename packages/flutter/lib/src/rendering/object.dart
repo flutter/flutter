@@ -191,9 +191,9 @@ class PaintingContext {
     ));
   }
 
-  void pushChildScene(Offset offset, mojom.ViewLayoutInfo layoutInfo) {
+  void pushChildScene(Offset offset, double devicePixelRatio, mojom.ViewLayoutInfo layoutInfo) {
     _stopRecordingIfNeeded();
-    _appendLayer(new ChildSceneLayer(offset: offset, layoutInfo: layoutInfo));
+    _appendLayer(new ChildSceneLayer(offset: offset, devicePixelRatio: devicePixelRatio, layoutInfo: layoutInfo));
   }
 
   /// Push a rectangular clip rect.
