@@ -289,7 +289,6 @@ class AnalyzeCommand extends FlutterCommand {
       '--strong',
       '--package-warnings',
       '--fatal-warnings',
-      '--strong-hints',
       '--fatal-hints',
       // defines lints
       '--options', optionsFile.path,
@@ -340,8 +339,6 @@ class AnalyzeCommand extends FlutterCommand {
     RegExp generalPattern = new RegExp(r'^\[(error|warning|hint|lint)\] (.+) \(([^(),]+), line ([0-9]+), col ([0-9]+)\)$');
     RegExp allowedIdentifiersPattern = new RegExp(r'_?([A-Z]|_+)\b');
     RegExp constructorTearOffsPattern = new RegExp('.+#.+// analyzer doesn\'t like constructor tear-offs');
-    RegExp ignorePattern = new RegExp(r'// analyzer says "([^"]+)"');
-    RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
     RegExp missingFilePattern = new RegExp('^Target of URI does not exist: \'([^\')]+)\'\$');
 
     Set<String> changedFiles = new Set<String>(); // files about which we've complained that they changed
@@ -374,11 +371,8 @@ class AnalyzeCommand extends FlutterCommand {
           }
           bool shouldIgnore = false;
           if (filename == mainFile.path) {
-            Match libs = conflictingNamesPattern.firstMatch(errorMessage);
             Match missing = missingFilePattern.firstMatch(errorMessage);
-            if (libs != null) {
-              errorLine = '[$level] $errorMessage (${dartFiles[lineNumber-1]})'; // strip the reference to the generated main.dart
-            } else if (missing != null) {
+            if (missing != null) {
               errorLine = '[$level] File does not exist (${missing[1]})';
             } else {
               errorLine += ' (Please file a bug on the "flutter analyze" command saying that you saw this message.)';
@@ -394,14 +388,6 @@ class AnalyzeCommand extends FlutterCommand {
               shouldIgnore = true;
           } else if (constructorTearOffsPattern.allMatches(sourceLine).isNotEmpty) {
             shouldIgnore = true;
-          } else {
-            Iterable<Match> ignoreGroups = ignorePattern.allMatches(sourceLine);
-            for (Match ignoreGroup in ignoreGroups) {
-              if (errorMessage.contains(ignoreGroup[1])) {
-                shouldIgnore = true;
-                break;
-              }
-            }
           }
           if (shouldIgnore)
             continue;
