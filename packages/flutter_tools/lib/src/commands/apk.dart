@@ -242,7 +242,7 @@ Future<_ApkComponents> _findApkComponents(
 
   if (!components.resources.existsSync()) {
     // TODO(eseidel): This level should be higher when path is manually set.
-    printStatus('Can not locate Resources: ${components.resources}, ignoring.');
+    printStatus('Cannot locate Resources: ${components.resources}, ignoring.');
     components.resources = null;
   }
 
@@ -250,7 +250,7 @@ Future<_ApkComponents> _findApkComponents(
     components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
   ]..addAll(components.jars)) {
     if (!f.existsSync()) {
-      printError('Can not locate file: ${f.path}');
+      printError('Cannot locate file: ${f.path}');
       return null;
     }
   }
@@ -453,8 +453,8 @@ Future<int> build(
   String target: ''
 }) async {
   if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
-    printStatus('Using pre-built SkyShell.apk.');
-    return 0;
+    printError('Cannot build APK. Missing $_kDefaultAndroidManifestPath.');
+    return 1;
   }
 
   int result = await buildAndroid(
