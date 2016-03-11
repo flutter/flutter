@@ -108,14 +108,16 @@ class PictureLayer extends Layer {
 }
 
 class ChildSceneLayer extends Layer {
-  ChildSceneLayer({ this.offset, this.layoutInfo });
+  ChildSceneLayer({ this.offset, this.devicePixelRatio, this.layoutInfo });
 
   Offset offset;
+  double devicePixelRatio;
   mojom.ViewLayoutInfo layoutInfo;
 
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addChildScene(
       offset + layerOffset,
+      devicePixelRatio,
       layoutInfo.size.width,
       layoutInfo.size.height,
       layoutInfo.sceneToken.value
