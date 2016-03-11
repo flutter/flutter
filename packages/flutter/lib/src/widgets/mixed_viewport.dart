@@ -192,15 +192,18 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
       // includes some of the state from that component. The component calls
       // setState() on itself. It rebuilds. Part of that involves rebuilding
       // us, but now what? If we don't reinvoke the builders. then they will
-      // not be rebuilt, and so the new state won't be used.
-      // Note that if the builders are to change so much that the _sizes_ of
+      // not be rebuilt, and so the new state won't be used. Therefore, we use
+      // the object identity of the widget to determine whether to reinvoke the
+      // builders.
+      //
+      // If the builders are to change so much that the _sizes_ of
       // the children would change, then the parent must change the 'token'.
       if (!renderObject.needsLayout)
-        reinvokeBuilders();
+        performRebuild();
     }
   }
 
-  void reinvokeBuilders() {
+  void performRebuild() {
     // we just need to redraw our existing widgets as-is
     if (_childrenByKey.length > 0) {
       assert(_firstVisibleChildIndex >= 0);
@@ -223,6 +226,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
         previousChild = newElement;
       }
     }
+    super.performRebuild();
   }
 
   void layout(BoxConstraints constraints) {
@@ -242,7 +246,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
       final double newExtent = _didReachLastChild ? _childOffsets.last : double.INFINITY;
       Size contentSize;
       switch (widget.direction) {
-        case Axis.vertical: 
+        case Axis.vertical:
           contentSize = new Size(containerSize.width, newExtent);
           break;
         case Axis.horizontal:
@@ -257,7 +261,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
         _lastReportedDimensions = dimensions;
         Offset overrideOffset = widget.onPaintOffsetUpdateNeeded(dimensions);
         switch (widget.direction) {
-          case Axis.vertical: 
+          case Axis.vertical:
             assert(overrideOffset.dx == 0.0);
             _overrideStartOffset = overrideOffset.dy;
             break;

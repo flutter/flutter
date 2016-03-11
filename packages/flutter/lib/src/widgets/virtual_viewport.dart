@@ -256,6 +256,8 @@ class _LazyWidgetProvider extends _WidgetProvider {
   List<Widget> _widgets;
 
   void didUpdateWidget(VirtualViewportFromBuilder oldWidget, VirtualViewportFromBuilder newWidget) {
+    // TODO(abarth): We shouldn't check the itemBuilder closure for equality with.
+    // instead, we should use the widget's identity to decide whether to rebuild.
     if (_length != newWidget.itemCount || oldWidget?.itemBuilder != newWidget.itemBuilder) {
       _length = newWidget.itemCount;
       _base = null;

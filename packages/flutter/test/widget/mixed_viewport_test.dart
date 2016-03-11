@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 import 'test_widgets.dart';
@@ -194,6 +194,50 @@ void main() {
       tester.walkElements(collectText);
       expect(text, equals(['0', '1', '2']));
       text.clear();
+    });
+  });
+
+  test('MixedViewport reinvoke builders', () {
+    testWidgets((WidgetTester tester) {
+      StateSetter setState;
+      ThemeData themeData = new ThemeData.light();
+
+      IndexedBuilder itemBuilder = (BuildContext context, int i) {
+        return new Container(
+          key: new ValueKey<int>(i),
+          width: 500.0, // this should be ignored
+          height: 220.0,
+          decoration: new BoxDecoration(
+            backgroundColor: Theme.of(context).primaryColor
+          ),
+          child: new Text("$i")
+        );
+      };
+
+      Widget viewport = new MixedViewport(builder: itemBuilder);
+
+      tester.pumpWidget(
+        new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return new Theme(data: themeData, child: viewport);
+          }
+        )
+      );
+
+      DecoratedBox widget = tester.findWidgetOfType(DecoratedBox);
+      BoxDecoration decoraton = widget.decoration;
+      expect(decoraton.backgroundColor, equals(Colors.blue[500]));
+
+      setState(() {
+        themeData = new ThemeData(primarySwatch: Colors.green);
+      });
+
+      tester.pump();
+
+      widget = tester.findWidgetOfType(DecoratedBox);
+      decoraton = widget.decoration;
+      expect(decoraton.backgroundColor, equals(Colors.green[500]));
     });
   });
 }

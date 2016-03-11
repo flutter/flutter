@@ -1482,14 +1482,11 @@ class InheritedElement extends _ProxyElement<InheritedWidget> {
 
 /// Base class for instantiations of RenderObjectWidget subclasses
 abstract class RenderObjectElement<T extends RenderObjectWidget> extends BuildableElement<T> {
-  RenderObjectElement(T widget)
-    : _renderObject = widget.createRenderObject(), super(widget) {
-    assert(() { debugUpdateRenderObjectOwner(); return true; });
-  }
+  RenderObjectElement(T widget) : super(widget);
 
   /// The underlying [RenderObject] for this element
   RenderObject get renderObject => _renderObject;
-  final RenderObject _renderObject;
+  RenderObject _renderObject;
 
   RenderObjectElement _ancestorRenderObjectElement;
 
@@ -1512,8 +1509,9 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
 
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    assert(_slot == newSlot);
+    _renderObject = widget.createRenderObject();
     assert(() { debugUpdateRenderObjectOwner(); return true; });
+    assert(_slot == newSlot);
     attachRenderObject(newSlot);
     _dirty = false;
   }
@@ -1532,27 +1530,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
   }
 
   void performRebuild() {
-    reinvokeBuilders();
     _dirty = false;
-  }
-
-  void reinvokeBuilders() {
-    // There's no way to mark a normal RenderObjectElement dirty.
-    // We inherit from BuildableElement so that subclasses can themselves
-    // implement reinvokeBuilders() if they do provide a way to mark themeselves
-    // dirty, e.g. if they have a builder callback. (Builder callbacks have a
-    // 'BuildContext' argument which you can pass to Theme.of() and other
-    // InheritedWidget APIs which eventually trigger a rebuild.)
-    assert(() {
-      throw new WidgetError(
-        '$runtimeType failed to implement reinvokeBuilders(), but got marked dirty.\n'
-        'If a RenderObjectElement subclass supports being marked dirty, then the '
-        'reinvokeBuilders() method must be implemented.\n'
-        'If a RenderObjectElement uses a builder callback, it must support being '
-        'marked dirty, because builder callbacks can register the object as having '
-        'an Inherited dependency.'
-      );
-    });
   }
 
   /// Utility function for subclasses that have one or more lists of children.
