@@ -345,22 +345,32 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   }
 }
 
-/// Forces child to layout at a specific aspect ratio.
+/// Attempts to size the child to a specific aspect ratio.
 ///
-/// The width of this render object is the largest width permited by the layout
+/// The render object first tries the largest width permited by the layout
 /// constraints. The height of the render object is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
-/// For example, a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
 ///
-/// For example, given an aspect ratio of 2.0 and layout constraints that
-/// require the width to be between 0.0 and 100.0 and the height to be between
-/// 0.0 and 100.0, we'll select a width of 100.0 (the biggest allowed) and a
-/// height of 50.0 (to match the aspect ratio).
+/// For example, a 16:9 width:height aspect ratio would have a value of
+/// 16.0/9.0. If the maximum width is infinite, the initial width is determined
+/// by applying the aspect ratio to the maximum height.
+///
+/// Now consider a second example, this time with an aspect ratio of 2.0 and
+/// layout constraints that require the width to be between 0.0 and 100.0 and
+/// the height to be between 0.0 and 100.0. We'll select a width of 100.0 (the
+/// biggest allowed) and a height of 50.0 (to match the aspect ratio).
 ///
 /// In that same situation, if the aspect ratio is 0.5, we'll also select a
 /// width of 100.0 (still the biggest allowed) and we'll attempt to use a height
-/// of 200.0. Unfortunately, that violates the constraints and we'll end up with
-/// a height of 100.0 instead.
+/// of 200.0. Unfortunately, that violates the constraints because the child can
+/// be at most 100.0 pixels tall. The render object will then take that value
+/// and apply the aspect ratio again to obtain a width of 50.0. That width is
+/// permitted by the constraints and the child receives a width of 50.0 and a
+/// height of 100.0. If the width were not permitted, the render object would
+/// continue iterating through the constraints. If the render object does not
+/// find a feasible size after consulting each constraint, the render object
+/// will eventually select a size for the child that meets the layout
+/// constraints but fails to meet the aspect ratio constraints.
 class RenderAspectRatio extends RenderProxyBox {
   RenderAspectRatio({
     RenderBox child,
@@ -369,7 +379,7 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(_aspectRatio != null);
   }
 
-  /// The aspect ratio to use when computing the height from the width.
+  /// The aspect ratio to attempt to use.
   ///
   /// The aspect ratio is expressed as a ratio of width to height. For example,
   /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
@@ -383,28 +393,83 @@ class RenderAspectRatio extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  double getMinIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.minWidth;
+  }
+
+  double getMaxIntrinsicWidth(BoxConstraints constraints) {
+    return constraints.maxWidth;
+  }
+
   double getMinIntrinsicHeight(BoxConstraints constraints) {
-    return _applyAspectRatio(constraints).height;
+    return constraints.minHeight;
   }
 
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    return _applyAspectRatio(constraints).height;
+    return constraints.maxHeight;
   }
 
   Size _applyAspectRatio(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
-    double width = constraints.constrainWidth();
-    double height = constraints.constrainHeight(width / _aspectRatio);
-    return new Size(width, height);
-  }
+    assert(() {
+      if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
+        throw new RenderingError(
+          '$runtimeType has unbounded constraints.\n'
+          'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
+          'both unbounded width and unbounded height constraints. Because both '
+          'constraints were unbounded, this render object doesn\'t know how much '
+          'size to consume.'
+        );
+      }
+      return true;
+    });
 
-  bool get sizedByParent => true;
+    if (constraints.isTight)
+      return constraints.smallest;
 
-  void performResize() {
-    size = _applyAspectRatio(constraints);
+    double width = constraints.maxWidth;
+    double height;
+
+    // We default to picking the height based on the width, but if the width
+    // would be infinite, that's not sensible so we try to infer the height
+    // from the width.
+    if (width.isFinite) {
+      height = width / _aspectRatio;
+    } else {
+      height = constraints.maxHeight;
+      width = height * _aspectRatio;
+    }
+
+    // Similar to RenderImage, we iteratively attempt to fit within the given
+    // constraings while maintaining the given aspect ratio. The order of
+    // applying the constraints is also biased towards inferring the height
+    // from the width.
+
+    if (width > constraints.maxWidth) {
+      width = constraints.maxWidth;
+      height = width / _aspectRatio;
+    }
+
+    if (height > constraints.maxHeight) {
+      height = constraints.maxHeight;
+      width = height * _aspectRatio;
+    }
+
+    if (width < constraints.minWidth) {
+      width = constraints.minWidth;
+      height = width / _aspectRatio;
+    }
+
+    if (height < constraints.minHeight) {
+      height = constraints.minHeight;
+      width = height * _aspectRatio;
+    }
+
+    return constraints.constrain(new Size(width, height));
   }
 
   void performLayout() {
+    size = _applyAspectRatio(constraints);
     if (child != null)
       child.layout(new BoxConstraints.tight(size));
   }
