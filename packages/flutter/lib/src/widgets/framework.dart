@@ -1377,8 +1377,10 @@ class StatefulComponentElement<T extends StatefulComponent, U extends State<T>> 
 
 abstract class _ProxyElement<T extends _ProxyComponent> extends ComponentElement<T> {
   _ProxyElement(T widget) : super(widget) {
-    _builder = (BuildContext context) => this.widget.child;
+    _builder = _build;
   }
+
+  Widget _build(BuildContext context) => widget.child;
 
   void update(T newWidget) {
     T oldWidget = widget;
