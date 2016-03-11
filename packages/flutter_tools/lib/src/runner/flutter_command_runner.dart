@@ -150,13 +150,17 @@ class FlutterCommandRunner extends CommandRunner {
     if (Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
       return Platform.environment[kFlutterRootEnvironmentVariableName];
     try {
+      if (Platform.script.scheme == 'data')
+        return '../..'; // we're running as a test
       String script = Platform.script.toFilePath();
       if (path.basename(script) == kSnapshotFileName)
         return path.dirname(path.dirname(path.dirname(script)));
       if (path.basename(script) == kFlutterToolsScriptFileName)
         return path.dirname(path.dirname(path.dirname(path.dirname(script))));
     } catch (error) {
-      printTrace('Unable to locate fluter root: $error');
+      // we don't have a logger at the time this is run
+      // (which is why we don't use printTrace here)
+      print('Unable to locate flutter root: $error');
     }
     return '.';
   }
