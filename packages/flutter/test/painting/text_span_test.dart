@@ -27,4 +27,38 @@ void main() {
     expect(b1 == a2, isFalse);
     expect(c1 == b2, isFalse);
   });
+
+  test("TextSpan ", () {
+    final TextSpan test = new TextSpan(
+      text: 'a',
+      style: new TextStyle(
+        fontSize: 10.0
+      ),
+      children: <TextSpan>[
+        new TextSpan(
+          text: 'b',
+          children: <TextSpan>[
+            new TextSpan()
+          ]
+        ),
+        null,
+        new TextSpan(
+          text: 'c'
+        ),
+      ]
+    );
+    expect(test.toString(), equals(
+      'TextSpan:\n'
+      '  inherit: true\n'
+      '  size: 10.0\n'
+      '  "a"\n'
+      '  TextSpan:\n'
+      '    "b"\n'
+      '    TextSpan:\n'
+      '      (empty)\n'
+      '  <null>\n'
+      '  TextSpan:\n'
+      '    "c"\n'
+    ));
+  });
 }
