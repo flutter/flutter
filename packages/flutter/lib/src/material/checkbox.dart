@@ -67,14 +67,14 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final ValueChanged<bool> onChanged;
 
-  _RenderCheckbox createRenderObject() => new _RenderCheckbox(
+  _RenderCheckbox createRenderObject(BuildContext context) => new _RenderCheckbox(
     value: value,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged
   );
 
-  void updateRenderObject(_RenderCheckbox renderObject, _CheckboxRenderObjectWidget oldWidget) {
+  void updateRenderObject(BuildContext context, _RenderCheckbox renderObject) {
     renderObject
       ..value = value
       ..activeColor = activeColor

@@ -55,13 +55,13 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final ValueChanged<double> onChanged;
 
-  _RenderSlider createRenderObject() => new _RenderSlider(
+  _RenderSlider createRenderObject(BuildContext context) => new _RenderSlider(
     value: value,
     activeColor: activeColor,
     onChanged: onChanged
   );
 
-  void updateRenderObject(_RenderSlider renderObject, _SliderRenderObjectWidget oldWidget) {
+  void updateRenderObject(BuildContext context, _RenderSlider renderObject) {
     renderObject
       ..value = value
       ..activeColor = activeColor

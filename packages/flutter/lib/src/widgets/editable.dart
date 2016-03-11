@@ -365,7 +365,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final Offset paintOffset;
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
-  RenderEditableLine createRenderObject() {
+  RenderEditableLine createRenderObject(BuildContext context) {
     return new RenderEditableLine(
       text: _styledTextSpan,
       cursorColor: cursorColor,
@@ -378,8 +378,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     );
   }
 
-  void updateRenderObject(RenderEditableLine renderObject,
-                          _EditableLineWidget oldWidget) {
+  void updateRenderObject(BuildContext context, RenderEditableLine renderObject) {
     renderObject
       ..text = _styledTextSpan
       ..cursorColor = cursorColor

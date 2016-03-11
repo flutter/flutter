@@ -140,7 +140,7 @@ class _VirtualListViewport extends VirtualViewport {
     return scrollOffset - _leadingPadding;
   }
 
-  RenderList createRenderObject() => new RenderList(itemExtent: itemExtent);
+  RenderList createRenderObject(BuildContext context) => new RenderList(itemExtent: itemExtent);
 
   _VirtualListViewportElement createElement() => new _VirtualListViewportElement(this);
 }

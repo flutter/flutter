@@ -37,7 +37,7 @@ class MixedViewport extends RenderObjectWidget {
 
   // we don't pass constructor arguments to the RenderBlockViewport() because until
   // we know our children, the constructor arguments we could give have no effect
-  RenderBlockViewport createRenderObject() => new RenderBlockViewport();
+  RenderBlockViewport createRenderObject(BuildContext context) => new RenderBlockViewport();
 
   _ChangeDescription evaluateChangesFrom(MixedViewport oldWidget) {
     if (direction != oldWidget.direction ||

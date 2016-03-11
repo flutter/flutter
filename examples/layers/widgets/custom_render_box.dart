@@ -37,7 +37,7 @@ class RenderDots extends RenderConstrainedBox {
 
 class Dots extends OneChildRenderObjectWidget {
   Dots({ Key key, Widget child }) : super(key: key, child: child);
-  RenderDots createRenderObject() => new RenderDots();
+  RenderDots createRenderObject(BuildContext context) => new RenderDots();
 }
 
 void main() {

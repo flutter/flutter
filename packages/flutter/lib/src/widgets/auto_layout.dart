@@ -19,9 +19,9 @@ class AutoLayout extends MultiChildRenderObjectWidget {
 
   final AutoLayoutDelegate delegate;
 
-  RenderAutoLayout createRenderObject() => new RenderAutoLayout(delegate: delegate);
+  RenderAutoLayout createRenderObject(BuildContext context) => new RenderAutoLayout(delegate: delegate);
 
-  void updateRenderObject(RenderAutoLayout renderObject, AutoLayout oldWidget) {
+  void updateRenderObject(BuildContext context, RenderAutoLayout renderObject) {
     renderObject.delegate = delegate;
   }
 }

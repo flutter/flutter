@@ -485,12 +485,12 @@ abstract class RenderObjectWidget extends Widget {
   /// Constructs an instance of the RenderObject class that this
   /// RenderObjectWidget represents, using the configuration described by this
   /// RenderObjectWidget.
-  RenderObject createRenderObject();
+  RenderObject createRenderObject(BuildContext context);
 
   /// Copies the configuration described by this RenderObjectWidget to the given
   /// RenderObject, which must be of the same type as returned by this class'
-  /// createRenderObject().
-  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
+  /// createRenderObject(BuildContext context).
+  void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
   void didUnmountRenderObject(RenderObject renderObject) { }
 }
@@ -1033,7 +1033,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
     } catch (e) { }
     return 'Error';
   }
-  RenderBox createRenderObject() => new RenderErrorBox(message);
+  RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 }
 
 typedef void BuildScheduler(BuildableElement element);
@@ -1509,7 +1509,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
 
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    _renderObject = widget.createRenderObject();
+    _renderObject = widget.createRenderObject(this);
     assert(() { debugUpdateRenderObjectOwner(); return true; });
     assert(_slot == newSlot);
     attachRenderObject(newSlot);
@@ -1517,11 +1517,10 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
   }
 
   void update(T newWidget) {
-    T oldWidget = widget;
     super.update(newWidget);
     assert(widget == newWidget);
     assert(() { debugUpdateRenderObjectOwner(); return true; });
-    widget.updateRenderObject(renderObject, oldWidget);
+    widget.updateRenderObject(this, renderObject);
     _dirty = false;
   }
 

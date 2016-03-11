@@ -68,9 +68,9 @@ class Opacity extends OneChildRenderObjectWidget {
   /// (i.e., invisible).
   final double opacity;
 
-  RenderOpacity createRenderObject() => new RenderOpacity(opacity: opacity);
+  RenderOpacity createRenderObject(BuildContext context) => new RenderOpacity(opacity: opacity);
 
-  void updateRenderObject(RenderOpacity renderObject, Opacity oldWidget) {
+  void updateRenderObject(BuildContext context, RenderOpacity renderObject) {
     renderObject.opacity = opacity;
   }
 
@@ -94,14 +94,14 @@ class ShaderMask extends OneChildRenderObjectWidget {
   final ShaderCallback shaderCallback;
   final TransferMode transferMode;
 
-  RenderShaderMask createRenderObject() {
+  RenderShaderMask createRenderObject(BuildContext context) {
     return new RenderShaderMask(
       shaderCallback: shaderCallback,
       transferMode: transferMode
     );
   }
 
-  void updateRenderObject(RenderShaderMask renderObject, ShaderMask oldWidget) {
+  void updateRenderObject(BuildContext context, RenderShaderMask renderObject) {
     renderObject
       ..shaderCallback = shaderCallback
       ..transferMode = transferMode;
@@ -131,9 +131,9 @@ class DecoratedBox extends OneChildRenderObjectWidget {
   /// Where to paint the box decoration.
   final DecorationPosition position;
 
-  RenderDecoratedBox createRenderObject() => new RenderDecoratedBox(decoration: decoration, position: position);
+  RenderDecoratedBox createRenderObject(BuildContext context) => new RenderDecoratedBox(decoration: decoration, position: position);
 
-  void updateRenderObject(RenderDecoratedBox renderObject, DecoratedBox oldWidget) {
+  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
     renderObject
       ..decoration = decoration
       ..position = position;
@@ -163,12 +163,12 @@ class CustomPaint extends OneChildRenderObjectWidget {
   /// The painter that paints after the children.
   final CustomPainter foregroundPainter;
 
-  RenderCustomPaint createRenderObject() => new RenderCustomPaint(
+  RenderCustomPaint createRenderObject(BuildContext context) => new RenderCustomPaint(
     painter: painter,
     foregroundPainter: foregroundPainter
   );
 
-  void updateRenderObject(RenderCustomPaint renderObject, CustomPaint oldWidget) {
+  void updateRenderObject(BuildContext context, RenderCustomPaint renderObject) {
     renderObject
       ..painter = painter
       ..foregroundPainter = foregroundPainter;
@@ -190,9 +190,9 @@ class ClipRect extends OneChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
-  RenderClipRect createRenderObject() => new RenderClipRect(clipper: clipper);
+  RenderClipRect createRenderObject(BuildContext context) => new RenderClipRect(clipper: clipper);
 
-  void updateRenderObject(RenderClipRect renderObject, ClipRect oldWidget) {
+  void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
     renderObject.clipper = clipper;
   }
 
@@ -222,9 +222,9 @@ class ClipRRect extends OneChildRenderObjectWidget {
   /// object.
   final double yRadius;
 
-  RenderClipRRect createRenderObject() => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
+  RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(xRadius: xRadius, yRadius: yRadius);
 
-  void updateRenderObject(RenderClipRRect renderObject, ClipRRect oldWidget) {
+  void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
       ..xRadius = xRadius
       ..yRadius = yRadius;
@@ -241,9 +241,9 @@ class ClipOval extends OneChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
-  RenderClipOval createRenderObject() => new RenderClipOval(clipper: clipper);
+  RenderClipOval createRenderObject(BuildContext context) => new RenderClipOval(clipper: clipper);
 
-  void updateRenderObject(RenderClipOval renderObject, ClipOval oldWidget) {
+  void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
     renderObject.clipper = clipper;
   }
 
@@ -281,14 +281,14 @@ class Transform extends OneChildRenderObjectWidget {
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
 
-  RenderTransform createRenderObject() => new RenderTransform(
+  RenderTransform createRenderObject(BuildContext context) => new RenderTransform(
     transform: transform,
     origin: origin,
     alignment: alignment,
     transformHitTests: transformHitTests
   );
 
-  void updateRenderObject(RenderTransform renderObject, Transform oldWidget) {
+  void updateRenderObject(BuildContext context, RenderTransform renderObject) {
     renderObject
       ..transform = transform
       ..origin = origin
@@ -311,9 +311,9 @@ class FractionalTranslation extends OneChildRenderObjectWidget {
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
 
-  RenderFractionalTranslation createRenderObject() => new RenderFractionalTranslation(translation: translation, transformHitTests: transformHitTests);
+  RenderFractionalTranslation createRenderObject(BuildContext context) => new RenderFractionalTranslation(translation: translation, transformHitTests: transformHitTests);
 
-  void updateRenderObject(RenderFractionalTranslation renderObject, FractionalTranslation oldWidget) {
+  void updateRenderObject(BuildContext context, RenderFractionalTranslation renderObject) {
     renderObject
       ..translation = translation
       ..transformHitTests = transformHitTests;
@@ -335,9 +335,9 @@ class Padding extends OneChildRenderObjectWidget {
   /// The amount to pad the child in each dimension.
   final EdgeDims padding;
 
-  RenderPadding createRenderObject() => new RenderPadding(padding: padding);
+  RenderPadding createRenderObject(BuildContext context) => new RenderPadding(padding: padding);
 
-  void updateRenderObject(RenderPadding renderObject, Padding oldWidget) {
+  void updateRenderObject(BuildContext context, RenderPadding renderObject) {
     renderObject.padding = padding;
   }
 }
@@ -386,9 +386,9 @@ class Align extends OneChildRenderObjectWidget {
   /// Can be both greater and less than 1.0 but must be positive.
   final double heightFactor;
 
-  RenderPositionedBox createRenderObject() => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
+  RenderPositionedBox createRenderObject(BuildContext context) => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
 
-  void updateRenderObject(RenderPositionedBox renderObject, Align oldWidget) {
+  void updateRenderObject(BuildContext context, RenderPositionedBox renderObject) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
@@ -419,9 +419,9 @@ class CustomOneChildLayout extends OneChildRenderObjectWidget {
 
   final OneChildLayoutDelegate delegate;
 
-  RenderCustomOneChildLayoutBox createRenderObject() => new RenderCustomOneChildLayoutBox(delegate: delegate);
+  RenderCustomOneChildLayoutBox createRenderObject(BuildContext context) => new RenderCustomOneChildLayoutBox(delegate: delegate);
 
-  void updateRenderObject(RenderCustomOneChildLayoutBox renderObject, CustomOneChildLayout oldWidget) {
+  void updateRenderObject(BuildContext context, RenderCustomOneChildLayoutBox renderObject) {
     renderObject.delegate = delegate;
   }
 }
@@ -477,11 +477,11 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// The delegate that controls the layout of the children.
   final MultiChildLayoutDelegate delegate;
 
-  RenderCustomMultiChildLayoutBox createRenderObject() {
+  RenderCustomMultiChildLayoutBox createRenderObject(BuildContext context) {
     return new RenderCustomMultiChildLayoutBox(delegate: delegate);
   }
 
-  void updateRenderObject(RenderCustomMultiChildLayoutBox renderObject, CustomMultiChildLayout oldWidget) {
+  void updateRenderObject(BuildContext context, RenderCustomMultiChildLayoutBox renderObject) {
     renderObject.delegate = delegate;
   }
 }
@@ -500,7 +500,7 @@ class SizedBox extends OneChildRenderObjectWidget {
   /// If non-null, requires the child to have exactly this height.
   final double height;
 
-  RenderConstrainedBox createRenderObject() => new RenderConstrainedBox(
+  RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(
     additionalConstraints: _additionalConstraints
   );
 
@@ -508,7 +508,7 @@ class SizedBox extends OneChildRenderObjectWidget {
     return new BoxConstraints.tightFor(width: width, height: height);
   }
 
-  void updateRenderObject(RenderConstrainedBox renderObject, SizedBox oldWidget) {
+  void updateRenderObject(BuildContext context, RenderConstrainedBox renderObject) {
     renderObject.additionalConstraints = _additionalConstraints;
   }
 
@@ -535,9 +535,9 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
   /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
 
-  RenderConstrainedBox createRenderObject() => new RenderConstrainedBox(additionalConstraints: constraints);
+  RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(additionalConstraints: constraints);
 
-  void updateRenderObject(RenderConstrainedBox renderObject, ConstrainedBox oldWidget) {
+  void updateRenderObject(BuildContext context, RenderConstrainedBox renderObject) {
     renderObject.additionalConstraints = constraints;
   }
 
@@ -566,12 +566,12 @@ class FractionallySizedBox extends OneChildRenderObjectWidget {
   /// incoming height constraint multipled by this factor.
   final double height;
 
-  RenderFractionallySizedBox createRenderObject() => new RenderFractionallySizedBox(
+  RenderFractionallySizedBox createRenderObject(BuildContext context) => new RenderFractionallySizedBox(
     widthFactor: width,
     heightFactor: height
   );
 
-  void updateRenderObject(RenderFractionallySizedBox renderObject, FractionallySizedBox oldWidget) {
+  void updateRenderObject(BuildContext context, RenderFractionallySizedBox renderObject) {
     renderObject
       ..widthFactor = width
       ..heightFactor = height;
@@ -628,7 +628,7 @@ class OverflowBox extends OneChildRenderObjectWidget {
   /// with the center of the parent.
   final FractionalOffset alignment;
 
-  RenderOverflowBox createRenderObject() => new RenderOverflowBox(
+  RenderOverflowBox createRenderObject(BuildContext context) => new RenderOverflowBox(
     minWidth: minWidth,
     maxWidth: maxWidth,
     minHeight: minHeight,
@@ -636,7 +636,7 @@ class OverflowBox extends OneChildRenderObjectWidget {
     alignment: alignment
   );
 
-  void updateRenderObject(RenderOverflowBox renderObject, OverflowBox oldWidget) {
+  void updateRenderObject(BuildContext context, RenderOverflowBox renderObject) {
     renderObject
       ..minWidth = minWidth
       ..maxWidth = maxWidth
@@ -664,9 +664,9 @@ class SizedOverflowBox extends OneChildRenderObjectWidget {
 
   final Size size;
 
-  RenderSizedOverflowBox createRenderObject() => new RenderSizedOverflowBox(requestedSize: size);
+  RenderSizedOverflowBox createRenderObject(BuildContext context) => new RenderSizedOverflowBox(requestedSize: size);
 
-  void updateRenderObject(RenderSizedOverflowBox renderObject, SizedOverflowBox oldWidget) {
+  void updateRenderObject(BuildContext context, RenderSizedOverflowBox renderObject) {
     renderObject.requestedSize = size;
   }
 }
@@ -678,7 +678,7 @@ class OffStage extends OneChildRenderObjectWidget {
   OffStage({ Key key, Widget child })
     : super(key: key, child: child);
 
-  RenderOffStage createRenderObject() => new RenderOffStage();
+  RenderOffStage createRenderObject(BuildContext context) => new RenderOffStage();
 }
 
 /// Forces child to layout at a specific aspect ratio.
@@ -696,9 +696,9 @@ class AspectRatio extends OneChildRenderObjectWidget {
   /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
   final double aspectRatio;
 
-  RenderAspectRatio createRenderObject() => new RenderAspectRatio(aspectRatio: aspectRatio);
+  RenderAspectRatio createRenderObject(BuildContext context) => new RenderAspectRatio(aspectRatio: aspectRatio);
 
-  void updateRenderObject(RenderAspectRatio renderObject, AspectRatio oldWidget) {
+  void updateRenderObject(BuildContext context, RenderAspectRatio renderObject) {
     renderObject.aspectRatio = aspectRatio;
   }
 
@@ -730,9 +730,9 @@ class IntrinsicWidth extends OneChildRenderObjectWidget {
   /// If non-null, force the child's height to be a multiple of this value.
   final double stepHeight;
 
-  RenderIntrinsicWidth createRenderObject() => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+  RenderIntrinsicWidth createRenderObject(BuildContext context) => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
 
-  void updateRenderObject(RenderIntrinsicWidth renderObject, IntrinsicWidth oldWidget) {
+  void updateRenderObject(BuildContext context, RenderIntrinsicWidth renderObject) {
     renderObject
       ..stepWidth = stepWidth
       ..stepHeight = stepHeight;
@@ -748,7 +748,7 @@ class IntrinsicWidth extends OneChildRenderObjectWidget {
 /// This class is relatively expensive. Avoid using it where possible.
 class IntrinsicHeight extends OneChildRenderObjectWidget {
   IntrinsicHeight({ Key key, Widget child }) : super(key: key, child: child);
-  RenderIntrinsicHeight createRenderObject() => new RenderIntrinsicHeight();
+  RenderIntrinsicHeight createRenderObject(BuildContext context) => new RenderIntrinsicHeight();
 }
 
 /// Positions its child vertically according to the child's baseline.
@@ -766,9 +766,9 @@ class Baseline extends OneChildRenderObjectWidget {
   /// The type of baseline to use for positioning the child.
   final TextBaseline baselineType;
 
-  RenderBaseline createRenderObject() => new RenderBaseline(baseline: baseline, baselineType: baselineType);
+  RenderBaseline createRenderObject(BuildContext context) => new RenderBaseline(baseline: baseline, baselineType: baselineType);
 
-  void updateRenderObject(RenderBaseline renderObject, Baseline oldWidget) {
+  void updateRenderObject(BuildContext context, RenderBaseline renderObject) {
     renderObject
       ..baseline = baseline
       ..baselineType = baselineType;
@@ -819,7 +819,7 @@ class Viewport extends OneChildRenderObjectWidget {
 
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 
-  RenderViewport createRenderObject() {
+  RenderViewport createRenderObject(BuildContext context) {
     return new RenderViewport(
       paintOffset: paintOffset,
       scrollDirection: scrollDirection,
@@ -829,7 +829,7 @@ class Viewport extends OneChildRenderObjectWidget {
     );
   }
 
-  void updateRenderObject(RenderViewport renderObject, Viewport oldWidget) {
+  void updateRenderObject(BuildContext context, RenderViewport renderObject) {
     // Order dependency: RenderViewport validates scrollOffset based on scrollDirection.
     renderObject
       ..scrollDirection = scrollDirection
@@ -970,9 +970,9 @@ class BlockBody extends MultiChildRenderObjectWidget {
   /// The direction to use as the main axis.
   final Axis direction;
 
-  RenderBlock createRenderObject() => new RenderBlock(direction: direction);
+  RenderBlock createRenderObject(BuildContext context) => new RenderBlock(direction: direction);
 
-  void updateRenderObject(RenderBlock renderObject, BlockBody oldWidget) {
+  void updateRenderObject(BuildContext context, RenderBlock renderObject) {
     renderObject.direction = direction;
   }
 }
@@ -1010,9 +1010,9 @@ class Stack extends StackRenderObjectWidgetBase {
   /// How to align the non-positioned children in the stack.
   final FractionalOffset alignment;
 
-  RenderStack createRenderObject() => new RenderStack(alignment: alignment);
+  RenderStack createRenderObject(BuildContext context) => new RenderStack(alignment: alignment);
 
-  void updateRenderObject(RenderStack renderObject, Stack oldWidget) {
+  void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject.alignment = alignment;
   }
 }
@@ -1034,10 +1034,9 @@ class IndexedStack extends StackRenderObjectWidgetBase {
   /// How to align the non-positioned children in the stack.
   final FractionalOffset alignment;
 
-  RenderIndexedStack createRenderObject() => new RenderIndexedStack(index: index, alignment: alignment);
+  RenderIndexedStack createRenderObject(BuildContext context) => new RenderIndexedStack(index: index, alignment: alignment);
 
-  void updateRenderObject(RenderIndexedStack renderObject, IndexedStack oldWidget) {
-    super.updateRenderObject(renderObject, oldWidget);
+  void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
     renderObject
       ..index = index
       ..alignment = alignment;
@@ -1172,9 +1171,9 @@ abstract class GridRenderObjectWidgetBase extends MultiChildRenderObjectWidget {
   /// The delegate that controls the layout of the children.
   GridDelegate createDelegate();
 
-  RenderGrid createRenderObject() => new RenderGrid(delegate: _delegate);
+  RenderGrid createRenderObject(BuildContext context) => new RenderGrid(delegate: _delegate);
 
-  void updateRenderObject(RenderGrid renderObject, GridRenderObjectWidgetBase oldWidget) {
+  void updateRenderObject(BuildContext context, RenderGrid renderObject) {
     renderObject.delegate = _delegate;
   }
 }
@@ -1326,9 +1325,9 @@ class Flex extends MultiChildRenderObjectWidget {
   final FlexAlignItems alignItems;
   final TextBaseline textBaseline;
 
-  RenderFlex createRenderObject() => new RenderFlex(direction: direction, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
+  RenderFlex createRenderObject(BuildContext context) => new RenderFlex(direction: direction, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 
-  void updateRenderObject(RenderFlex renderObject, Flex oldWidget) {
+  void updateRenderObject(BuildContext context, RenderFlex renderObject) {
     renderObject
       ..direction = direction
       ..justifyContent = justifyContent
@@ -1425,9 +1424,9 @@ class RichText extends LeafRenderObjectWidget {
 
   final TextSpan text;
 
-  RenderParagraph createRenderObject() => new RenderParagraph(text);
+  RenderParagraph createRenderObject(BuildContext context) => new RenderParagraph(text);
 
-  void updateRenderObject(RenderParagraph renderObject, RichText oldWidget) {
+  void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     renderObject.text = text;
   }
 }
@@ -1567,7 +1566,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
-  RenderImage createRenderObject() => new RenderImage(
+  RenderImage createRenderObject(BuildContext context) => new RenderImage(
     image: image,
     width: width,
     height: height,
@@ -1579,7 +1578,7 @@ class RawImage extends LeafRenderObjectWidget {
     centerSlice: centerSlice
   );
 
-  void updateRenderObject(RenderImage renderObject, RawImage oldWidget) {
+  void updateRenderObject(BuildContext context, RenderImage renderObject) {
     renderObject
       ..image = image
       ..width = width
@@ -2079,9 +2078,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   /// tree will be dirty.
   final VoidCallback onBuild;
 
-  RenderBox createRenderObject() => renderBox;
+  RenderBox createRenderObject(BuildContext context) => renderBox;
 
-  void updateRenderObject(RenderBox renderObject, WidgetToRenderBoxAdapter oldWidget) {
+  void updateRenderObject(BuildContext context, RenderBox renderObject) {
     if (onBuild != null)
       onBuild();
   }
@@ -2109,7 +2108,7 @@ class Listener extends OneChildRenderObjectWidget {
   final PointerCancelEventListener onPointerCancel;
   final HitTestBehavior behavior;
 
-  RenderPointerListener createRenderObject() => new RenderPointerListener(
+  RenderPointerListener createRenderObject(BuildContext context) => new RenderPointerListener(
     onPointerDown: onPointerDown,
     onPointerMove: onPointerMove,
     onPointerUp: onPointerUp,
@@ -2117,7 +2116,7 @@ class Listener extends OneChildRenderObjectWidget {
     behavior: behavior
   );
 
-  void updateRenderObject(RenderPointerListener renderObject, Listener oldWidget) {
+  void updateRenderObject(BuildContext context, RenderPointerListener renderObject) {
     renderObject
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
@@ -2165,7 +2164,7 @@ class Listener extends OneChildRenderObjectWidget {
 /// for the surround tree.
 class RepaintBoundary extends OneChildRenderObjectWidget {
   RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
-  RenderRepaintBoundary createRenderObject() => new RenderRepaintBoundary();
+  RenderRepaintBoundary createRenderObject(BuildContext context) => new RenderRepaintBoundary();
 }
 
 class IgnorePointer extends OneChildRenderObjectWidget {
@@ -2175,12 +2174,12 @@ class IgnorePointer extends OneChildRenderObjectWidget {
   final bool ignoring;
   final bool ignoringSemantics; // if null, defaults to value of ignoring
 
-  RenderIgnorePointer createRenderObject() => new RenderIgnorePointer(
+  RenderIgnorePointer createRenderObject(BuildContext context) => new RenderIgnorePointer(
     ignoring: ignoring,
     ignoringSemantics: ignoringSemantics
   );
 
-  void updateRenderObject(RenderIgnorePointer renderObject, IgnorePointer oldWidget) {
+  void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
     renderObject
       ..ignoring = ignoring
       ..ignoringSemantics = ignoringSemantics;
@@ -2225,13 +2224,13 @@ class Semantics extends OneChildRenderObjectWidget {
   /// Provides a textual description of the widget.
   final String label;
 
-  RenderSemanticAnnotations createRenderObject() => new RenderSemanticAnnotations(
+  RenderSemanticAnnotations createRenderObject(BuildContext context) => new RenderSemanticAnnotations(
     container: container,
     checked: checked,
     label: label
   );
 
-  void updateRenderObject(RenderSemanticAnnotations renderObject, Semantics oldWidget) {
+  void updateRenderObject(BuildContext context, RenderSemanticAnnotations renderObject) {
     renderObject
       ..container = container
       ..checked = checked
@@ -2267,7 +2266,7 @@ class Semantics extends OneChildRenderObjectWidget {
 /// callbacks.
 class MergeSemantics extends OneChildRenderObjectWidget {
   MergeSemantics({ Key key, Widget child }) : super(key: key, child: child);
-  RenderMergeSemantics createRenderObject() => new RenderMergeSemantics();
+  RenderMergeSemantics createRenderObject(BuildContext context) => new RenderMergeSemantics();
 }
 
 /// Drops all semantics in this subtree.
@@ -2278,7 +2277,7 @@ class MergeSemantics extends OneChildRenderObjectWidget {
 /// redundant with the chip label.
 class ExcludeSemantics extends OneChildRenderObjectWidget {
   ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
-  RenderExcludeSemantics createRenderObject() => new RenderExcludeSemantics();
+  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics();
 }
 
 class MetaData extends OneChildRenderObjectWidget {
@@ -2292,12 +2291,12 @@ class MetaData extends OneChildRenderObjectWidget {
   final dynamic metaData;
   final HitTestBehavior behavior;
 
-  RenderMetaData createRenderObject() => new RenderMetaData(
+  RenderMetaData createRenderObject(BuildContext context) => new RenderMetaData(
     metaData: metaData,
     behavior: behavior
   );
 
-  void updateRenderObject(RenderMetaData renderObject, MetaData oldWidget) {
+  void updateRenderObject(BuildContext context, RenderMetaData renderObject) {
     renderObject
       ..metaData = metaData
       ..behavior = behavior;

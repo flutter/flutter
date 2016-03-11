@@ -279,9 +279,9 @@ class InkFeatures extends OneChildRenderObjectWidget {
 
   final Color color;
 
-  RenderInkFeatures createRenderObject() => new RenderInkFeatures(color: color);
+  RenderInkFeatures createRenderObject(BuildContext context) => new RenderInkFeatures(color: color);
 
-  void updateRenderObject(RenderInkFeatures renderObject, InkFeatures oldWidget) {
+  void updateRenderObject(BuildContext context, RenderInkFeatures renderObject) {
     renderObject.color = color;
   }
 }

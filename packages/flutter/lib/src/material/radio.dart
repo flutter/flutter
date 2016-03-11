@@ -72,14 +72,14 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final ValueChanged<bool> onChanged;
 
-  _RenderRadio createRenderObject() => new _RenderRadio(
+  _RenderRadio createRenderObject(BuildContext context) => new _RenderRadio(
     value: selected,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged
   );
 
-  void updateRenderObject(_RenderRadio renderObject, _RadioRenderObjectWidget oldWidget) {
+  void updateRenderObject(BuildContext context, _RenderRadio renderObject) {
     renderObject
       ..value = selected
       ..activeColor = activeColor

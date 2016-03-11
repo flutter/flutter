@@ -80,7 +80,7 @@ class GridViewport extends VirtualViewportFromIterable {
   // TODO(abarth): Support horizontal scrolling;
   Axis get scrollDirection => Axis.vertical;
 
-  RenderGrid createRenderObject() => new RenderGrid(delegate: delegate);
+  RenderGrid createRenderObject(BuildContext context) => new RenderGrid(delegate: delegate);
 
   _GridViewportElement createElement() => new _GridViewportElement(this);
 }
