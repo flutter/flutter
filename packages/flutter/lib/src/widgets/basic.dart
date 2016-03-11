@@ -733,8 +733,9 @@ class IntrinsicWidth extends OneChildRenderObjectWidget {
   RenderIntrinsicWidth createRenderObject() => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
 
   void updateRenderObject(RenderIntrinsicWidth renderObject, IntrinsicWidth oldWidget) {
-    renderObject.stepWidth = stepWidth;
-    renderObject.stepHeight = stepHeight;
+    renderObject
+      ..stepWidth = stepWidth
+      ..stepHeight = stepHeight;
   }
 }
 
@@ -768,8 +769,9 @@ class Baseline extends OneChildRenderObjectWidget {
   RenderBaseline createRenderObject() => new RenderBaseline(baseline: baseline, baselineType: baselineType);
 
   void updateRenderObject(RenderBaseline renderObject, Baseline oldWidget) {
-    renderObject.baseline = baseline;
-    renderObject.baselineType = baselineType;
+    renderObject
+      ..baseline = baseline
+      ..baselineType = baselineType;
   }
 }
 
@@ -1036,8 +1038,9 @@ class IndexedStack extends StackRenderObjectWidgetBase {
 
   void updateRenderObject(RenderIndexedStack renderObject, IndexedStack oldWidget) {
     super.updateRenderObject(renderObject, oldWidget);
-    renderObject.index = index;
-    renderObject.alignment = alignment;
+    renderObject
+      ..index = index
+      ..alignment = alignment;
   }
 }
 
@@ -1326,10 +1329,11 @@ class Flex extends MultiChildRenderObjectWidget {
   RenderFlex createRenderObject() => new RenderFlex(direction: direction, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
 
   void updateRenderObject(RenderFlex renderObject, Flex oldWidget) {
-    renderObject.direction = direction;
-    renderObject.justifyContent = justifyContent;
-    renderObject.alignItems = alignItems;
-    renderObject.textBaseline = textBaseline;
+    renderObject
+      ..direction = direction
+      ..justifyContent = justifyContent
+      ..alignItems = alignItems
+      ..textBaseline = textBaseline;
   }
 }
 
@@ -1576,15 +1580,16 @@ class RawImage extends LeafRenderObjectWidget {
   );
 
   void updateRenderObject(RenderImage renderObject, RawImage oldWidget) {
-    renderObject.image = image;
-    renderObject.width = width;
-    renderObject.height = height;
-    renderObject.scale = scale;
-    renderObject.color = color;
-    renderObject.alignment = alignment;
-    renderObject.fit = fit;
-    renderObject.repeat = repeat;
-    renderObject.centerSlice = centerSlice;
+    renderObject
+      ..image = image
+      ..width = width
+      ..height = height
+      ..scale = scale
+      ..color = color
+      ..alignment = alignment
+      ..fit = fit
+      ..repeat = repeat
+      ..centerSlice = centerSlice;
   }
 
   void debugFillDescription(List<String> description) {
@@ -2113,11 +2118,12 @@ class Listener extends OneChildRenderObjectWidget {
   );
 
   void updateRenderObject(RenderPointerListener renderObject, Listener oldWidget) {
-    renderObject.onPointerDown = onPointerDown;
-    renderObject.onPointerMove = onPointerMove;
-    renderObject.onPointerUp = onPointerUp;
-    renderObject.onPointerCancel = onPointerCancel;
-    renderObject.behavior = behavior;
+    renderObject
+      ..onPointerDown = onPointerDown
+      ..onPointerMove = onPointerMove
+      ..onPointerUp = onPointerUp
+      ..onPointerCancel = onPointerCancel
+      ..behavior = behavior;
   }
 
   void debugFillDescription(List<String> description) {
@@ -2175,8 +2181,9 @@ class IgnorePointer extends OneChildRenderObjectWidget {
   );
 
   void updateRenderObject(RenderIgnorePointer renderObject, IgnorePointer oldWidget) {
-    renderObject.ignoring = ignoring;
-    renderObject.ignoringSemantics = ignoringSemantics;
+    renderObject
+      ..ignoring = ignoring
+      ..ignoringSemantics = ignoringSemantics;
   }
 }
 
@@ -2225,9 +2232,10 @@ class Semantics extends OneChildRenderObjectWidget {
   );
 
   void updateRenderObject(RenderSemanticAnnotations renderObject, Semantics oldWidget) {
-    renderObject.container = container;
-    renderObject.checked = checked;
-    renderObject.label = label;
+    renderObject
+      ..container = container
+      ..checked = checked
+      ..label = label;
   }
 
   void debugFillDescription(List<String> description) {
