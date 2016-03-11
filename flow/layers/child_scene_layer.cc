@@ -38,6 +38,9 @@ void ChildSceneLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
   child_node->op = mojo::gfx::composition::NodeOp::New();
   child_node->op->set_scene(mojo::gfx::composition::SceneNodeOp::New());
   child_node->op->get_scene()->scene_resource_id = id;
+  child_node->content_clip = mojo::RectF::New();
+  child_node->content_clip->width = physical_size_.width();
+  child_node->content_clip->height = physical_size_.height();
   child_node->content_transform = mojo::Transform::From(transform_);
   update->nodes.insert(id, child_node.Pass());
   container->child_node_ids.push_back(id);
