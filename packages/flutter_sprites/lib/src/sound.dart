@@ -135,18 +135,18 @@ class SoundTrack {
 SoundTrackPlayer _sharedSoundTrackPlayer;
 
 class SoundTrackPlayer {
-  Set<SoundTrack> _soundTracks = new HashSet<SoundTrack>();
-
-  static SoundTrackPlayer sharedInstance() {
-    return _sharedSoundTrackPlayer ??= new SoundTrackPlayer();
-  }
-
   SoundTrackPlayer() {
     _mediaService = new MediaServiceProxy.unbound();
     shell.connectToService("mojo:media_service", _mediaService);
   }
 
   MediaServiceProxy _mediaService;
+
+  Set<SoundTrack> _soundTracks = new HashSet<SoundTrack>();
+
+  static SoundTrackPlayer sharedInstance() {
+    return _sharedSoundTrackPlayer ??= new SoundTrackPlayer();
+  }
 
   Future<SoundTrack> load(Future<MojoDataPipeConsumer> pipe) async {
     // Create media player

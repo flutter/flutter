@@ -329,7 +329,7 @@ class AndroidDevice extends Device {
     RegExp traceRegExp = new RegExp(r'Saving trace to (\S+)', multiLine: true);
     RegExp completeRegExp = new RegExp(r'Trace complete', multiLine: true);
 
-    String tracePath = null;
+    String tracePath;
     bool isComplete = false;
     while (!isComplete) {
       List<String> args = <String>['logcat', '-d'];

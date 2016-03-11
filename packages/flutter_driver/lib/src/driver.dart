@@ -26,6 +26,7 @@ typedef dynamic EvaluatorFunction();
 
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
+  FlutterDriver.connectedTo(this._serviceClient, this._appIsolate);
 
   static const String _kFlutterExtensionMethod = 'ext.flutter_driver';
   static const Duration _kDefaultTimeout = const Duration(seconds: 5);
@@ -139,8 +140,6 @@ class FlutterDriver {
     _log.info('Connected to Flutter application.');
     return driver;
   }
-
-  FlutterDriver.connectedTo(this._serviceClient, this._appIsolate);
 
   /// Client connected to the Dart VM running the Flutter application
   final VMServiceClient _serviceClient;

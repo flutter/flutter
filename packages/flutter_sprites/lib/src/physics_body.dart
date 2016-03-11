@@ -310,7 +310,7 @@ class PhysicsBody {
 
   double gravityScale;
 
-  Object _collisionCategory = null;
+  Object _collisionCategory;
 
   /// The collision category assigned to this body. The default value is
   /// "Default". The body will only collide with bodies that have the either
@@ -326,7 +326,7 @@ class PhysicsBody {
     _updateFilter();
   }
 
-  List<Object> _collisionMask = null;
+  List<Object> _collisionMask;
 
   /// A list of collision categories that this object will collide with. If set
   /// to null (the default value) the body will collide with all other bodies.

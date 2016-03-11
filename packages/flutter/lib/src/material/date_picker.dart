@@ -226,7 +226,7 @@ class DayPicker extends StatelessComponent {
         item = new Text("");
       } else {
         // Put a light circle around the selected day
-        BoxDecoration decoration = null;
+        BoxDecoration decoration;
         if (selectedDate.year == year &&
             selectedDate.month == month &&
             selectedDate.day == day)

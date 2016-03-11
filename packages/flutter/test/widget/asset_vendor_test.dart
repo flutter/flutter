@@ -45,7 +45,7 @@ class TestAssetBundle extends AssetBundle {
     return null;
   }
   Future<core.MojoDataPipeConsumer> load(String key) {
-    core.MojoDataPipeConsumer pipe = null;
+    core.MojoDataPipeConsumer pipe;
     switch (key) {
       case 'assets/image.png':
         pipe = new TestMojoDataPipeConsumer(1.0);

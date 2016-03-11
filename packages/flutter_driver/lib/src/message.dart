@@ -16,7 +16,7 @@ abstract class Command {
 
 /// An object sent from a Flutter application back to the Flutter Driver in
 /// response to a command.
-abstract class Result {
+abstract class Result { // ignore: one_member_abstracts
   /// Serializes this message to a JSON map.
   Map<String, dynamic> toJson();
 }

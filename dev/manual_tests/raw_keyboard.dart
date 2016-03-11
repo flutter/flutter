@@ -37,7 +37,7 @@ class RawKeyboardDemo extends StatefulComponent {
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
-  mojom.InputEvent _event = null;
+  mojom.InputEvent _event;
 
   void _handleKey(mojom.InputEvent event) {
     setState(() {

@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:test/src/executable.dart' as executable;
+import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../build_configuration.dart';
@@ -15,9 +15,16 @@ import '../runner/flutter_command.dart';
 import '../test/flutter_platform.dart' as loader;
 
 class TestCommand extends FlutterCommand {
+  TestCommand() {
+    argParser.addFlag(
+      'flutter-repo',
+      help: 'Run tests from the \'flutter\' package in the Flutter repository instead of the current directory.',
+      defaultsTo: false
+    );
+  }
+
   String get name => 'test';
   String get description => 'Run Flutter unit tests for the current project (Linux only).';
-
   bool get requiresProjectRoot => false;
 
   @override
@@ -48,14 +55,6 @@ class TestCommand extends FlutterCommand {
           throw new Exception('Unsupported platform.');
       }
     }
-  }
-
-  TestCommand() {
-    argParser.addFlag(
-      'flutter-repo',
-      help: 'Run tests from the \'flutter\' package in the Flutter repository instead of the current directory.',
-      defaultsTo: false
-    );
   }
 
   Iterable<String> _findTests(Directory directory) {

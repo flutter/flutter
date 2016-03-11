@@ -23,6 +23,45 @@ enum SpriteBoxTransformMode {
 
 class SpriteBox extends RenderBox {
 
+  // Setup
+
+  /// Creates a new SpriteBox with a node as its content, by default uses letterboxing.
+  ///
+  /// The [rootNode] provides the content of the node tree, typically it's a custom subclass of [NodeWithSize]. The
+  /// [mode] provides different ways to scale the content to best fit it to the screen. In most cases it's preferred to
+  /// use a [SpriteWidget] that automatically wraps the SpriteBox.
+  ///
+  ///     var spriteBox = new SpriteBox(myNode, SpriteBoxTransformMode.fixedHeight);
+  SpriteBox(NodeWithSize rootNode, [SpriteBoxTransformMode mode = SpriteBoxTransformMode.letterbox]) {
+    assert(rootNode != null);
+    assert(rootNode._spriteBox == null);
+
+    // Setup transform mode
+    this.transformMode = mode;
+
+    // Setup root node
+    this.rootNode = rootNode;
+  }
+
+  void _removeSpriteBoxReference(Node node) {
+    node._spriteBox = null;
+    for (Node child in node._children) {
+      _removeSpriteBoxReference(child);
+    }
+  }
+
+  void _addSpriteBoxReference(Node node) {
+    node._spriteBox = this;
+    for (Node child in node._children) {
+      _addSpriteBoxReference(child);
+    }
+  }
+
+  void attach() {
+    super.attach();
+    _scheduleTick();
+  }
+
   // Member variables
 
   // Root node for drawing
@@ -91,45 +130,6 @@ class SpriteBox extends RenderBox {
   }
 
   bool _initialized = false;
-
-  // Setup
-
-  /// Creates a new SpriteBox with a node as its content, by default uses letterboxing.
-  ///
-  /// The [rootNode] provides the content of the node tree, typically it's a custom subclass of [NodeWithSize]. The
-  /// [mode] provides different ways to scale the content to best fit it to the screen. In most cases it's preferred to
-  /// use a [SpriteWidget] that automatically wraps the SpriteBox.
-  ///
-  ///     var spriteBox = new SpriteBox(myNode, SpriteBoxTransformMode.fixedHeight);
-  SpriteBox(NodeWithSize rootNode, [SpriteBoxTransformMode mode = SpriteBoxTransformMode.letterbox]) {
-    assert(rootNode != null);
-    assert(rootNode._spriteBox == null);
-
-    // Setup transform mode
-    this.transformMode = mode;
-
-    // Setup root node
-    this.rootNode = rootNode;
-  }
-
-  void _removeSpriteBoxReference(Node node) {
-    node._spriteBox = null;
-    for (Node child in node._children) {
-      _removeSpriteBoxReference(child);
-    }
-  }
-
-  void _addSpriteBoxReference(Node node) {
-    node._spriteBox = this;
-    for (Node child in node._children) {
-      _addSpriteBoxReference(child);
-    }
-  }
-
-  void attach() {
-    super.attach();
-    _scheduleTick();
-  }
 
   // Properties
 

@@ -223,43 +223,6 @@ class DeviceStore {
     this.iOSSimulator
   });
 
-  final AndroidDevice android;
-  final IOSDevice iOS;
-  final IOSSimulator iOSSimulator;
-
-  List<Device> get all {
-    List<Device> result = <Device>[];
-    if (android != null)
-      result.add(android);
-    if (iOS != null)
-      result.add(iOS);
-    if (iOSSimulator != null)
-      result.add(iOSSimulator);
-    return result;
-  }
-
-  static Device _deviceForConfig(BuildConfiguration config, List<Device> devices) {
-    Device device = null;
-
-    if (config.deviceId != null) {
-      // Step 1: If a device identifier is specified, try to find a device
-      // matching that specific identifier
-      device = devices.firstWhere(
-          (Device dev) => (dev.id == config.deviceId),
-          orElse: () => null);
-    } else if (devices.length == 1) {
-      // Step 2: If no identifier is specified and there is only one connected
-      // device, pick that one.
-      device = devices[0];
-    } else if (devices.length > 1) {
-      // Step 3: D:
-      printStatus('Multiple devices are connected, but no device ID was specified.');
-      printStatus('Attempting to launch on all connected devices.');
-    }
-
-    return device;
-  }
-
   factory DeviceStore.forConfigs(List<BuildConfiguration> configs) {
     AndroidDevice android;
     IOSDevice iOS;
@@ -286,5 +249,42 @@ class DeviceStore {
     }
 
     return new DeviceStore(android: android, iOS: iOS, iOSSimulator: iOSSimulator);
+  }
+
+  final AndroidDevice android;
+  final IOSDevice iOS;
+  final IOSSimulator iOSSimulator;
+
+  List<Device> get all {
+    List<Device> result = <Device>[];
+    if (android != null)
+      result.add(android);
+    if (iOS != null)
+      result.add(iOS);
+    if (iOSSimulator != null)
+      result.add(iOSSimulator);
+    return result;
+  }
+
+  static Device _deviceForConfig(BuildConfiguration config, List<Device> devices) {
+    Device device;
+
+    if (config.deviceId != null) {
+      // Step 1: If a device identifier is specified, try to find a device
+      // matching that specific identifier
+      device = devices.firstWhere(
+          (Device dev) => (dev.id == config.deviceId),
+          orElse: () => null);
+    } else if (devices.length == 1) {
+      // Step 2: If no identifier is specified and there is only one connected
+      // device, pick that one.
+      device = devices[0];
+    } else if (devices.length > 1) {
+      // Step 3: D:
+      printStatus('Multiple devices are connected, but no device ID was specified.');
+      printStatus('Attempting to launch on all connected devices.');
+    }
+
+    return device;
   }
 }

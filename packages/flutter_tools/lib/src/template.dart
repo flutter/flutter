@@ -25,12 +25,6 @@ const String _kCopyTemplateExtension = '.copy.tmpl';
 /// Files in the destination will not contain either the '.tmpl' or '.copy.tmpl'
 /// extensions.
 class Template {
-  factory Template.fromName(String name) {
-    // All named templates are placed in the 'templates' directory
-    Directory templateDir = _templateDirectoryInPackage(name);
-    return new Template(templateDir, templateDir);
-  }
-
   Template(Directory templateSource, Directory baseDir) {
     _templateFilePaths = new Map<String, String>();
 
@@ -56,6 +50,12 @@ class Template {
         _templateFilePaths[relativePath] = path.absolute(entity.path);
       }
     }
+  }
+
+  factory Template.fromName(String name) {
+    // All named templates are placed in the 'templates' directory
+    Directory templateDir = _templateDirectoryInPackage(name);
+    return new Template(templateDir, templateDir);
   }
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;

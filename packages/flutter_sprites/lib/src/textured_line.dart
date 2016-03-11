@@ -263,7 +263,7 @@ Vector2 _vectorDirection(Vector2 a, Vector2 b) {
 
 List<Vector2> _computeMiterList(List<Vector2> points, bool closed) {
   List<Vector2> out = <Vector2>[];
-  Vector2 curNormal = null;
+  Vector2 curNormal;
 
   if (closed) {
     points = new List<Vector2>.from(points);

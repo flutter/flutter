@@ -100,7 +100,7 @@ class GestureArena {
       return;  // This arena is being held for a long-lived member
     }
     _arenas.remove(arenaKey);
-    if (!state.members.isEmpty) {
+    if (state.members.isNotEmpty) {
       // First member wins
       state.members.first.acceptGesture(arenaKey);
       // Give all the other members the bad news

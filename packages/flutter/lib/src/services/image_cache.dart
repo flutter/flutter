@@ -12,17 +12,17 @@ import 'fetch.dart';
 import 'image_decoder.dart';
 import 'image_resource.dart';
 
-/// Implements a way to retrieve an image, for example by fetching it from the network.
-/// Also used as a key in the image cache.
-abstract class ImageProvider {
+/// Implements a way to retrieve an image, for example by fetching it from the
+/// network. Also used as a key in the image cache.
+abstract class ImageProvider { // ignore: one_member_abstracts
   Future<ImageInfo> loadImage();
 }
 
 class _UrlFetcher implements ImageProvider {
+  _UrlFetcher(this._url, this._scale);
+
   final String _url;
   final double _scale;
-
-  _UrlFetcher(this._url, this._scale);
 
   Future<ImageInfo> loadImage() async {
     UrlResponse response = await fetchUrl(_url);

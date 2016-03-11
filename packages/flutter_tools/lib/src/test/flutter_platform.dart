@@ -10,9 +10,9 @@ import 'package:async/async.dart';
 import 'package:path/path.dart' as path;
 import 'package:stream_channel/stream_channel.dart';
 
-import 'package:test/src/backend/test_platform.dart';
-import 'package:test/src/runner/plugin/platform.dart';
-import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack;
+import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_imports
+import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
+import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
 import '../artifacts.dart';
 

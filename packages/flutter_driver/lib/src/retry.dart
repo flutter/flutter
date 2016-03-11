@@ -24,9 +24,9 @@ Future<dynamic> retry(Action action, Duration timeout,
   assert(pauseBetweenRetries != null);
 
   Stopwatch sw = stopwatchFactory()..start();
-  dynamic result = null;
-  dynamic lastError = null;
-  dynamic lastStackTrace = null;
+  dynamic result;
+  dynamic lastError;
+  dynamic lastStackTrace;
   bool success = false;
 
   while(!success && sw.elapsed < timeout) {

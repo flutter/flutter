@@ -18,12 +18,12 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint
 ///
 /// Keys must be unique amongst the Elements with the same parent.
 abstract class Key {
-  /// Default constructor, used by subclasses.
-  const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
-
   /// Construct a ValueKey<String> with the given String.
   /// This is the simplest way to create keys.
   factory Key(String value) => new ValueKey<String>(value);
+
+  /// Default constructor, used by subclasses.
+  const Key.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
 }
 
 /// A kind of [Key] that uses a value of a particular type to identify itself.
@@ -72,11 +72,11 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// used by components that need to communicate with other components across the
 /// application's element tree.
 abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
-  const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
-
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
   factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel); // the label is purely for debugging purposes and is otherwise ignored
+
+  const GlobalKey.constructor() : super.constructor(); // so that subclasses can call us, since the Key() factory constructor shadows the implicit constructor
 
   static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
   static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
@@ -149,7 +149,7 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
       message += 'The following GlobalKey was found multiple times among mounted elements: $key (${_debugDuplicates[key]} instances)\n';
       message += 'The most recently registered instance is: ${_registry[key]}\n';
     }
-    if (!_debugDuplicates.isEmpty) {
+    if (_debugDuplicates.isNotEmpty) {
       throw new WidgetError(
         'Incorrect GlobalKey usage.\n'
         '$message'
@@ -1678,7 +1678,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     }
 
     // clean up any of the remaining middle nodes from the old list
-    if (haveOldChildren && !oldKeyedChildren.isEmpty) {
+    if (haveOldChildren && oldKeyedChildren.isNotEmpty) {
       for (Element oldChild in oldKeyedChildren.values)
         _deactivateChild(oldChild);
     }

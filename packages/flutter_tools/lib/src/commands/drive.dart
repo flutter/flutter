@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:path/path.dart' as path;
-import 'package:test/src/executable.dart' as executable;
+import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
 import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';

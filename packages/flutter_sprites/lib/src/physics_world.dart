@@ -385,8 +385,8 @@ class _ContactHandler extends box2d.ContactListener {
 
       if (match) {
         // We have contact and a matched callback, setup contact info
-        List<Point> touchingPoints = null;
-        Offset touchingNormal = null;
+        List<Point> touchingPoints;
+        Offset touchingNormal;
 
         // Fetch touching points, if any
         if (b2Contact.isTouching()) {

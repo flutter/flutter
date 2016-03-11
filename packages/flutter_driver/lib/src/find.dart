@@ -124,26 +124,26 @@ class ByValueKey extends SearchSpecification {
 
 /// Command to read the text from a given element.
 class GetText extends CommandWithTarget {
+  /// [targetRef] identifies an element that contains a piece of text.
+  GetText(ObjectRef targetRef) : super(targetRef);
+
   final String kind = 'get_text';
 
   static GetText deserialize(Map<String, String> json) {
     return new GetText(new ObjectRef(json['targetRef']));
   }
 
-  /// [targetRef] identifies an element that contains a piece of text.
-  GetText(ObjectRef targetRef) : super(targetRef);
-
   Map<String, String> serialize() => super.serialize();
 }
 
 class GetTextResult extends Result {
-  static GetTextResult fromJson(Map<String, dynamic> json) {
-    return new GetTextResult(json['text']);
-  }
-
   GetTextResult(this.text);
 
   final String text;
+
+  static GetTextResult fromJson(Map<String, dynamic> json) {
+    return new GetTextResult(json['text']);
+  }
 
   Map<String, dynamic> toJson() => {
     'text': text,
