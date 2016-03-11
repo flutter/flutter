@@ -20,9 +20,25 @@ import 'snack_bar.dart';
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 400);
 
+/// The Scaffold's appbar is the toolbar, tabbar, and the "flexible space" that's
+/// stacked behind them. The Scaffold's appBarBehavior defines how the appbar
+/// responds to scrolling the application.
 enum AppBarBehavior {
+  /// The tool bar's layout does not respond to scrolling.
   anchor,
+
+  /// The tool bar's appearance and layout depend on the scrollOffset of the
+  /// Scrollable identified by the Scaffold's scrollableKey. With the scrollOffset
+  /// at 0.0, scrolling downwards causes the toolbar's flexible space to shrink,
+  /// and then the entire toolbar fade outs and scrolls off the top of the screen.
+  /// Scrolling upwards always causes the toolbar to reappear.
   scroll,
+
+  /// The tool bar's appearance and layout depend on the scrollOffset of the
+  /// Scrollable identified by the Scaffold's scrollableKey. With the scrollOffset
+  /// at 0.0, Scrolling downwards causes the toolbar's flexible space to shrink.
+  /// Other than that, the toolbar remains anchored at the top.
+  under,
 }
 
 enum _ScaffoldSlot {
@@ -192,7 +208,7 @@ class Scaffold extends StatefulWidget {
     this.appBarHeight
   }) : super(key: key) {
     assert((appBarBehavior == AppBarBehavior.scroll) ? scrollableKey != null : true);
-    assert((appBarBehavior == AppBarBehavior.scroll) ? appBarHeight != null && appBarHeight > kAppBarHeight : true);
+    assert((appBarBehavior == AppBarBehavior.scroll) ? appBarHeight != null && appBarHeight > kToolBarHeight : true);
   }
 
   final AppBar appBar;
@@ -430,36 +446,53 @@ class ScaffoldState extends State<Scaffold> {
     ));
   }
 
+  Widget _buildAnchoredAppBar(double toolBarHeight, EdgeInsets toolBarPadding) {
+    // Drive _appBarController to the point where the flexible space has disappeared.
+    _appBarController.value = (appBarHeight - toolBarHeight) / appBarHeight;
+    return new SizedBox(
+      height: toolBarHeight,
+      child: _getModifiedAppBar(padding: toolBarPadding)
+    );
+  }
+
   Widget _buildScrollableAppBar(BuildContext context) {
-    final EdgeInsets appBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
-    final double appBarHeight = kAppBarHeight + appBarPadding.top;
+    final EdgeInsets toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
+    final double toolBarHeight = kToolBarHeight + toolBarPadding.top;
     Widget appBar;
 
-    if (_scrollOffset <= appBarHeight && _scrollOffset >= appBarHeight - appBarHeight) {
-      // scrolled to the top, only the app bar is (partially) visible
-      final double height = math.max(_floatingAppBarHeight, appBarHeight - _scrollOffset);
-      final double opacity = _appBarOpacity(1.0 - ((appBarHeight - height) / appBarHeight));
-      _appBarController.value = (appBarHeight - height) / appBarHeight;
-      appBar = new SizedBox(
-        height: height,
-        child: _getModifiedAppBar(padding: appBarPadding, foregroundOpacity: opacity)
-      );
+    if (_scrollOffset <= appBarHeight && _scrollOffset >= appBarHeight - toolBarHeight) {
+      // scrolled to the top, only the toolbar is (partially) visible.
+      if (config.appBarBehavior == AppBarBehavior.under) {
+        appBar = _buildAnchoredAppBar(toolBarHeight, toolBarPadding);
+      } else {
+        final double height = math.max(_floatingAppBarHeight, appBarHeight - _scrollOffset);
+        final double opacity = _appBarOpacity(1.0 - ((toolBarHeight - height) / toolBarHeight));
+        _appBarController.value = (appBarHeight - height) / appBarHeight;
+        appBar = new SizedBox(
+          height: height,
+          child: _getModifiedAppBar(padding: toolBarPadding, foregroundOpacity: opacity)
+        );
+      }
     } else if (_scrollOffset > appBarHeight) {
-      // scrolled down, show the "floating" app bar
-      _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, appBarHeight);
-      final double appBarOpacity = _appBarOpacity(_floatingAppBarHeight / appBarHeight);
-      _appBarController.value = (appBarHeight - _floatingAppBarHeight) / appBarHeight;
-      appBar = new SizedBox(
-        height: _floatingAppBarHeight,
-        child: _getModifiedAppBar(padding: appBarPadding, foregroundOpacity: appBarOpacity)
-      );
+      // scrolled past the entire app bar, maybe show the "floating" toolbar.
+      if (config.appBarBehavior == AppBarBehavior.under) {
+        appBar = _buildAnchoredAppBar(toolBarHeight, toolBarPadding);
+      } else {
+        _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, toolBarHeight);
+        final double toolBarOpacity = _appBarOpacity(_floatingAppBarHeight / toolBarHeight);
+        _appBarController.value = (appBarHeight - _floatingAppBarHeight) / appBarHeight;
+        appBar = new SizedBox(
+          height: _floatingAppBarHeight,
+          child: _getModifiedAppBar(padding: toolBarPadding, foregroundOpacity: toolBarOpacity)
+        );
+      }
     } else {
       // _scrollOffset < appBarHeight - appBarHeight, scrolled to the top, flexible space is visible
       final double height = appBarHeight - _scrollOffset.clamp(0.0, appBarHeight);
       _appBarController.value = (appBarHeight - height) / appBarHeight;
       appBar = new SizedBox(
         height: height,
-        child: _getModifiedAppBar(padding: appBarPadding, elevation: 0)
+        child: _getModifiedAppBar(padding: toolBarPadding, elevation: 0)
       );
       _floatingAppBarHeight = 0.0;
     }
@@ -468,10 +501,10 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   Widget build(BuildContext context) {
-    EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
+    final EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
 
     if (_snackBars.length > 0) {
-      ModalRoute<dynamic> route = ModalRoute.of(context);
+      final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarController.isCompleted && _snackBarTimer == null)
           _snackBarTimer = new Timer(_snackBars.first._widget.duration, _hideSnackBar);
@@ -484,7 +517,7 @@ class ScaffoldState extends State<Scaffold> {
     final List<LayoutId> children = new List<LayoutId>();
     _addIfNonNull(children, config.body, _ScaffoldSlot.body);
     if (config.appBarBehavior == AppBarBehavior.anchor) {
-      Widget appBar = new ConstrainedBox(
+      final Widget appBar = new ConstrainedBox(
         child: _getModifiedAppBar(padding: padding),
         constraints: new BoxConstraints(maxHeight: config.appBarHeight ?? kExtendedAppBarHeight + padding.top)
       );
@@ -494,7 +527,7 @@ class ScaffoldState extends State<Scaffold> {
 
     if (_currentBottomSheet != null ||
         (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)) {
-      List<Widget> bottomSheets = <Widget>[];
+      final List<Widget> bottomSheets = <Widget>[];
       if (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)
         bottomSheets.addAll(_dismissedBottomSheets);
       if (_currentBottomSheet != null)
@@ -510,7 +543,7 @@ class ScaffoldState extends State<Scaffold> {
       _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
 
     if (config.floatingActionButton != null) {
-      Widget fab = new _FloatingActionButtonTransition(
+      final Widget fab = new _FloatingActionButtonTransition(
         key: new ValueKey<Key>(config.floatingActionButton.key),
         child: config.floatingActionButton
       );
@@ -529,8 +562,7 @@ class ScaffoldState extends State<Scaffold> {
 
     Widget application;
 
-    if (config.appBarBehavior == AppBarBehavior.scroll) {
-      double overScroll = _scrollOffset.clamp(double.NEGATIVE_INFINITY, 0.0);
+    if (config.appBarBehavior != AppBarBehavior.anchor) {
       application = new NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
         child: new Stack(
@@ -542,7 +574,7 @@ class ScaffoldState extends State<Scaffold> {
               )
             ),
             new Positioned(
-              top: -overScroll,
+              top: 0.0,
               left: 0.0,
               right: 0.0,
               child: _buildScrollableAppBar(context)

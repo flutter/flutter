@@ -72,8 +72,10 @@ class FlexibleSpaceDemo extends StatefulWidget {
 }
 
 class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   final double appBarHeight = 256.0;
   final Key scrollableKey = new UniqueKey();
+  AppBarBehavior _appBarBehavior = AppBarBehavior.scroll;
 
   Widget build(BuildContext context) {
     return new Theme(
@@ -82,18 +84,37 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         primarySwatch: Colors.indigo
       ),
       child: new Scaffold(
+        key: scaffoldKey,
         appBarHeight: appBarHeight,
         scrollableKey: scrollableKey,
-        appBarBehavior: AppBarBehavior.scroll,
+        appBarBehavior: _appBarBehavior,
         appBar: new AppBar(
           actions: <Widget>[
             new IconButton(
               icon: Icons.create,
-              tooltip: 'Search'
+              tooltip: 'Search',
+              onPressed: () {
+                scaffoldKey.currentState.showSnackBar(new SnackBar(
+                  content: new Text('Not supported.')
+                ));
+              }
             ),
-            new IconButton(
-              icon: Icons.more_vert,
-              tooltip: 'Show menu'
+            new PopupMenuButton<AppBarBehavior>(
+              onSelected: (AppBarBehavior value) {
+                setState(() {
+                  _appBarBehavior = value;
+                });
+              },
+              items: <PopupMenuItem<AppBarBehavior>>[
+                new PopupMenuItem<AppBarBehavior>(
+                  value: AppBarBehavior.scroll,
+                  child: new Text('AppBar scrolls away')
+                ),
+                new PopupMenuItem<AppBarBehavior>(
+                  value: AppBarBehavior.under,
+                  child: new Text('AppBar stays put')
+                )
+              ]
             )
           ],
           flexibleSpace: (BuildContext context) {
