@@ -1536,9 +1536,13 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
   /// Attempts to update the given old children list using the given new
   /// widgets, removing obsolete elements and introducing new ones as necessary,
   /// and then returns the new child list.
-  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets) {
+  List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> detachedChildren }) {
     assert(oldChildren != null);
     assert(newWidgets != null);
+
+    Element replaceWithNullIfDetached(Element child) {
+      return detachedChildren != null && detachedChildren.contains(child) ? null : child;
+    }
 
     // This attempts to diff the new child list (this.children) with
     // the old child list (old.children), and update our renderObject
@@ -1582,7 +1586,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
-      Element oldChild = oldChildren[oldChildrenTop];
+      Element oldChild = replaceWithNullIfDetached(oldChildren[oldChildrenTop]);
       Widget newWidget = newWidgets[newChildrenTop];
       assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
@@ -1597,7 +1601,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
 
     // Scan the bottom of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
-      Element oldChild = oldChildren[oldChildrenBottom];
+      Element oldChild = replaceWithNullIfDetached(oldChildren[oldChildrenBottom]);
       Widget newWidget = newWidgets[newChildrenBottom];
       assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
@@ -1612,7 +1616,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     if (haveOldChildren) {
       oldKeyedChildren = new Map<Key, Element>();
       while (oldChildrenTop <= oldChildrenBottom) {
-        Element oldChild = oldChildren[oldChildrenTop];
+        Element oldChild = replaceWithNullIfDetached(oldChildren[oldChildrenTop]);
         assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
         if (oldChild != null) {
           if (oldChild.widget.key != null)
@@ -1663,7 +1667,7 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
     // Update the bottom of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
       Element oldChild = oldChildren[oldChildrenTop];
-      assert(oldChild != null);
+      assert(replaceWithNullIfDetached(oldChild) != null);
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
@@ -1678,8 +1682,10 @@ abstract class RenderObjectElement<T extends RenderObjectWidget> extends Buildab
 
     // clean up any of the remaining middle nodes from the old list
     if (haveOldChildren && oldKeyedChildren.isNotEmpty) {
-      for (Element oldChild in oldKeyedChildren.values)
-        _deactivateChild(oldChild);
+      for (Element oldChild in oldKeyedChildren.values) {
+        if (detachedChildren == null || !detachedChildren.contains(oldChild))
+          _deactivateChild(oldChild);
+      }
     }
 
     return newChildren;
@@ -1808,19 +1814,9 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
   }
 
   List<Element> _children;
-  // We null out detached children lazily to avoid O(n^2) work walking _children
+  // We keep a set of detached children to avoid O(n^2) work walking _children
   // repeatedly to remove children.
-  Set<Element> _detachedChildren;
-
-  void _replaceDetachedChildrenWithNull() {
-    if (_detachedChildren != null && _detachedChildren.isNotEmpty) {
-      for (int i = 0; i < _children.length; ++i) {
-        if (_detachedChildren.contains(_children[i]))
-          _children[i] = null;
-      }
-      _detachedChildren.clear();
-    }
-  }
+  final Set<Element> _detachedChildren = new HashSet<Element>();
 
   void insertChildRenderObject(RenderObject child, Element slot) {
     final ContainerRenderObjectMixin renderObject = this.renderObject;
@@ -1860,15 +1856,13 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
   }
 
   void visitChildren(ElementVisitor visitor) {
-    _replaceDetachedChildrenWithNull();
     for (Element child in _children) {
-      if (child != null)
+      if (!_detachedChildren.contains(child))
         visitor(child);
     }
   }
 
   bool detachChild(Element child) {
-    _detachedChildren ??= new Set<Element>();
     _detachedChildren.add(child);
     _deactivateChild(child);
     return true;
@@ -1888,8 +1882,8 @@ class MultiChildRenderObjectElement<T extends MultiChildRenderObjectWidget> exte
   void update(T newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _replaceDetachedChildrenWithNull();
-    _children = updateChildren(_children, widget.children);
+    _children = updateChildren(_children, widget.children, detachedChildren: _detachedChildren);
+    _detachedChildren.clear();
   }
 }
 
