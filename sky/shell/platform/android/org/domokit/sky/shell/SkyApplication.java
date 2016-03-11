@@ -48,7 +48,7 @@ import org.domokit.vsync.VSyncProviderImpl;
  * state and initializations.
  */
 public class SkyApplication extends BaseChromiumApplication {
-    static final String APP_BUNDLE = "app.flx";
+    public static final String APP_BUNDLE = "app.flx";
     static final String MANIFEST = "flutter.yaml";
     static final String SERVICES = "services.json";
 

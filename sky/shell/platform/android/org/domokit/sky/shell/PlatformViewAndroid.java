@@ -8,6 +8,7 @@ import android.content.Context;
 import android.opengl.Matrix;
 import android.graphics.Rect;
 import android.os.Build;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -74,7 +75,11 @@ public class PlatformViewAndroid extends SurfaceView
     private final AccessibilityManager mAccessibilityManager;
 
     public PlatformViewAndroid(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    public PlatformViewAndroid(Context context, AttributeSet attrs) {
+        super(context, attrs);
 
         mMetrics = new ViewportMetrics();
         mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;
@@ -123,7 +128,7 @@ public class PlatformViewAndroid extends SurfaceView
         return super.onKeyDown(keyCode, event);
     }
 
-    SkyEngine getEngine() {
+    public SkyEngine getEngine() {
         return mSkyEngine;
     }
 
@@ -131,7 +136,7 @@ public class PlatformViewAndroid extends SurfaceView
         return mMetrics.devicePixelRatio;
     }
 
-    void destroy() {
+    public void destroy() {
         getHolder().removeCallback(mSurfaceCallback);
         nativeDetach(mNativePlatformView);
         mNativePlatformView = 0;
@@ -305,7 +310,7 @@ public class PlatformViewAndroid extends SurfaceView
         mServiceProvider = new PlatformServiceProvider(core, getContext(), localRegistry);
     }
 
-    void runFromBundle(String bundlePath, String snapshotPath) {
+    public void runFromBundle(String bundlePath, String snapshotPath) {
 
         if (mServiceProvider != null) {
             mServiceProvider.close();
