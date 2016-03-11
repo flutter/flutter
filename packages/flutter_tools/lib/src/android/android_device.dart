@@ -147,7 +147,11 @@ class AndroidDevice extends Device {
 
   @override
   bool isAppInstalled(ApplicationPackage app) {
-    // Just check for the existence of the application SHA.
+    // This call takes 400ms - 600ms.
+    if (runCheckedSync(adbCommandForDevice(['shell', 'pm', 'path', app.id])).isEmpty)
+      return false;
+
+    // Check the application SHA.
     return _getDeviceApkSha1(app) == _getSourceSha1(app);
   }
 
