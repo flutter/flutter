@@ -422,14 +422,14 @@ Future<int> buildAndroid({
 // TODO(mpcomplete): move this to Device?
 /// This is currently Android specific.
 Future<int> buildAll(
-  DeviceStore devices,
+  List<Device> devices,
   ApplicationPackageStore applicationPackages,
   Toolchain toolchain,
   List<BuildConfiguration> configs, {
   String enginePath,
   String target: ''
 }) async {
-  for (Device device in devices.all) {
+  for (Device device in devices) {
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
     if (package == null)
       continue;
@@ -437,14 +437,6 @@ Future<int> buildAll(
     // TODO(mpcomplete): Temporary hack. We only support the apk builder atm.
     if (package != applicationPackages.android)
       continue;
-
-    // TODO(devoncarew): Remove this warning after a few releases.
-    if (FileSystemEntity.isDirectorySync('apk') && !FileSystemEntity.isDirectorySync('android')) {
-      // Tell people the android directory location changed.
-      printStatus(
-        "Warning: Flutter now looks for Android resources in the android/ directory; "
-        "consider renaming your 'apk/' directory to 'android/'.");
-    }
 
     int result = await build(toolchain, configs, enginePath: enginePath, target: target);
     if (result != 0)

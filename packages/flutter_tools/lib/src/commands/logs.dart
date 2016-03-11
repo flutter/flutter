@@ -25,50 +25,28 @@ class LogsCommand extends FlutterCommand {
   bool get requiresDevice => true;
 
   Future<int> runInProject() async {
-    List<Device> devices = await deviceManager.getDevices();
+    Device device = deviceForCommand;
 
-    if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-      printError("No device found with id '${deviceManager.specifiedDeviceId}'.");
-      return 1;
-    } else if (devices.isEmpty) {
-      printStatus('No connected devices.');
-      return 0;
-    }
+    if (argResults['clear'])
+      device.clearLogs();
 
-    bool clear = argResults['clear'];
+    DeviceLogReader logReader = device.logReader;
 
-    List<DeviceLogReader> readers = new List<DeviceLogReader>();
-    for (Device device in devices) {
-      if (clear)
-        device.clearLogs();
+    printStatus('Showing $logReader logs:');
 
-      readers.add(device.logReader);
-    }
+    // Start reading.
+    if (!logReader.isReading)
+      await logReader.start();
 
-    printStatus('Showing ${readers.join(', ')} logs:');
+    StreamSubscription subscription = logReader.lines.listen(printStatus);
 
-    List<int> results = await Future.wait(readers.map((DeviceLogReader reader) async {
-      if (!reader.isReading) {
-        // Start reading.
-        await reader.start();
-      }
-      StreamSubscription subscription = reader.lines.listen((String line) {
-        if (devices.length > 1) {
-          // Prefix with the name of the device.
-          printStatus('[${reader.name}] $line');
-        } else {
-          printStatus(line);
-        }
-      });
-      // Wait for the log reader to be finished.
-      int result = await reader.finished;
-      subscription.cancel();
-      if (result != 0)
-        printError('Error listening to $reader logs.');
-      return result;
-    }));
+    // Wait for the log reader to be finished.
+    int result = await logReader.finished;
 
-    // If all readers failed, return an error.
-    return results.every((int result) => result != 0) ? 1 : 0;
+    subscription.cancel();
+
+    if (result != 0)
+      printError('Error listening to $logReader logs.');
+    return result;
   }
 }

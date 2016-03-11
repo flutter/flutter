@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_configuration.dart';
@@ -45,13 +46,6 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
   bool isSupported() => true;
 }
 
-class MockDeviceStore extends DeviceStore {
-  MockDeviceStore() : super(
-    android: new MockAndroidDevice(),
-    iOS: new MockIOSDevice(),
-    iOSSimulator: new MockIOSSimulator());
-}
-
 class MockDeviceLogReader extends DeviceLogReader {
   String get name => 'MockLogReader';
 
@@ -89,6 +83,5 @@ void applyMocksToCommand(FlutterCommand command) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
     ..toolchain = new MockToolchain()
-    ..devices = new MockDeviceStore()
     ..projectRootValidator = () => true;
 }

@@ -315,6 +315,6 @@ Future<Null> downloadToolchain(DriveCommand command) async {
   printTrace('Downloading toolchain.');
   await Future.wait([
     command.downloadToolchain(),
-    command.downloadApplicationPackagesAndConnectToDevices(),
+    command.downloadApplicationPackages(),
   ], eagerError: true);
 }

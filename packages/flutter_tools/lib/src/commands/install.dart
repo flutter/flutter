@@ -6,35 +6,34 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../device.dart';
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
   final String name = 'install';
-  final String description = 'Install Flutter apps on attached devices.';
+  final String description = 'Install a Flutter app on an attached device.';
 
   bool get requiresDevice => true;
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackagesAndConnectToDevices();
-    bool installedAny = await installApp(devices, applicationPackages);
-    return installedAny ? 0 : 2;
+    await downloadApplicationPackages();
+
+    Device device = deviceForCommand;
+    ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+
+    printStatus('Installing $package to $device...');
+
+    return installApp(device, package) ? 0 : 2;
   }
 }
 
-Future<bool> installApp(
-  DeviceStore devices,
-  ApplicationPackageStore applicationPackages
-) async {
-  bool installedSomewhere = false;
+bool installApp(Device device, ApplicationPackage package) {
+  if (package == null)
+    return false;
 
-  for (Device device in devices.all) {
-    ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null || device.isAppInstalled(package))
-      continue;
-    if (device.installApp(package))
-      installedSomewhere = true;
-  }
+  if (device.isAppInstalled(package))
+    return true;
 
-  return installedSomewhere;
+  return device.installApp(package);
 }

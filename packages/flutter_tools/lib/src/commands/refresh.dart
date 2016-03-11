@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../android/android_device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -28,13 +29,8 @@ class RefreshCommand extends FlutterCommand {
 
     await Future.wait([
       downloadToolchain(),
-      downloadApplicationPackagesAndConnectToDevices(),
+      downloadApplicationPackages(),
     ], eagerError: true);
-
-    if (devices.android == null) {
-      printError('No device connected.');
-      return 1;
-    }
 
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
     try {
@@ -48,11 +44,13 @@ class RefreshCommand extends FlutterCommand {
         return result;
       }
 
-      bool success = await devices.android.refreshSnapshot(
-          applicationPackages.android, snapshotPath
+      AndroidDevice device = deviceForCommand;
+
+      bool success = await device.refreshSnapshot(
+        applicationPackages.android, snapshotPath
       );
       if (!success) {
-        printError('Error refreshing snapshot on ${devices.android.name}.');
+        printError('Error refreshing snapshot on $device.');
         return 1;
       }
 

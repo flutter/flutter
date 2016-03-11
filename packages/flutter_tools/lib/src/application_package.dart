@@ -29,6 +29,10 @@ abstract class ApplicationPackage {
     assert(localPath != null);
     assert(id != null);
   }
+
+  String get displayName => name;
+
+  String toString() => displayName;
 }
 
 class AndroidApk extends ApplicationPackage {
@@ -99,6 +103,8 @@ class IOSApp extends ApplicationPackage {
     String projectDir = path.join("ios", ".generated");
     return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: value);
   }
+
+  String get displayName => id;
 }
 
 class ApplicationPackageStore {

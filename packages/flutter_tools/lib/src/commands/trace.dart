@@ -31,28 +31,24 @@ class TraceCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackagesAndConnectToDevices();
-
-    if (devices.android == null) {
-      printError('No device connected, so no trace was completed.');
-      return 1;
-    }
+    await downloadApplicationPackages();
 
     ApplicationPackage androidApp = applicationPackages.android;
+    AndroidDevice device = deviceForCommand;
 
     if ((!argResults['start'] && !argResults['stop']) ||
         (argResults['start'] && argResults['stop'])) {
       // Setting neither flags or both flags means do both commands and wait
       // duration seconds in between.
-      devices.android.startTracing(androidApp);
+      device.startTracing(androidApp);
       await new Future.delayed(
-          new Duration(seconds: int.parse(argResults['duration'])),
-          () => _stopTracing(devices.android, androidApp)
+        new Duration(seconds: int.parse(argResults['duration'])),
+        () => _stopTracing(device, androidApp)
       );
     } else if (argResults['stop']) {
-      await _stopTracing(devices.android, androidApp);
+      await _stopTracing(device, androidApp);
     } else {
-      devices.android.startTracing(androidApp);
+      device.startTracing(androidApp);
     }
     return 0;
   }

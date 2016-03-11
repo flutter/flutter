@@ -256,11 +256,11 @@ class AppDomain extends Domain {
     try {
       await Future.wait([
         command.downloadToolchain(),
-        command.downloadApplicationPackagesAndConnectToDevices(),
+        command.downloadApplicationPackages(),
       ], eagerError: true);
 
       int result = await startApp(
-        command.devices,
+        device,
         command.applicationPackages,
         command.toolchain,
         command.buildConfigurations,
