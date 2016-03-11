@@ -7,12 +7,16 @@
 analyzer:
   language:
     enableSuperMixins: true
-  strong-mode: false #TODO(pq): enable once strong-mode runs clean
+  strong-mode: true
   errors:
     # we allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore
     # we allow type narrowing
     strong_mode_invalid_method_override: ignore
+    strong_mode_static_type_error: ignore
+    strong_mode_down_cast_composite: ignore
+    type_argument_not_matching_bounds: ignore
+    # we allow having TODOs in the code
     todo: ignore
 linter:
   rules:
