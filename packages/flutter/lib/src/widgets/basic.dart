@@ -2319,9 +2319,17 @@ class KeyedSubtree extends StatelessComponent {
   Widget build(BuildContext context) => child;
 }
 
+/// A platonic widget that invokes a closure to obtain its child widget.
 class Builder extends StatelessComponent {
   Builder({ Key key, this.builder }) : super(key: key);
+
+  /// Called to obtain the child widget.
+  ///
+  /// This function is invoked whether this widget is included in its parent's
+  /// build and the old widget (if any) that it synchronizes with has a distinct
+  /// object identity.
   final WidgetBuilder builder;
+
   Widget build(BuildContext context) => builder(context);
 }
 
