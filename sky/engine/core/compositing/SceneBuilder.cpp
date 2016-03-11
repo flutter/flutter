@@ -165,6 +165,7 @@ void SceneBuilder::addPicture(const Offset& offset, Picture* picture)
 }
 
 void SceneBuilder::addChildScene(const Offset& offset,
+                                 double device_pixel_ratio,
                                  int physical_width,
                                  int physical_height,
                                  uint32_t scene_token) {
@@ -172,6 +173,7 @@ void SceneBuilder::addChildScene(const Offset& offset,
         return;
     std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
     layer->set_offset(SkPoint::Make(offset.sk_size.width(), offset.sk_size.height()));
+    layer->set_device_pixel_ratio(device_pixel_ratio);
     layer->set_physical_size(SkISize::Make(physical_width, physical_height));
     mojo::gfx::composition::SceneTokenPtr token = mojo::gfx::composition::SceneToken::New();
     token->value = scene_token;

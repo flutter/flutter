@@ -116,6 +116,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// the Mojo view manager, but this function is agnostic as to the source of
   /// scene token.
   void addChildScene(Offset offset,
+                     double devicePixelRatio,
                      int physicalWidth,
                      int physicalHeight,
                      int sceneToken) native "SceneBuilder_addChildScene";
