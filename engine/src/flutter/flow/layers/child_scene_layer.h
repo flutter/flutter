@@ -17,6 +17,10 @@ class ChildSceneLayer : public Layer {
 
   void set_offset(const SkPoint& offset) { offset_ = offset; }
 
+  void set_device_pixel_ratio(float device_pixel_ratio) {
+    device_pixel_ratio_ = device_pixel_ratio;
+  }
+
   void set_physical_size(const SkISize& physical_size) {
     physical_size_ = physical_size;
   }
@@ -32,6 +36,7 @@ class ChildSceneLayer : public Layer {
 
  private:
   SkPoint offset_;
+  float device_pixel_ratio_;
   SkISize physical_size_;
   mojo::gfx::composition::SceneTokenPtr scene_token_;
   SkMatrix transform_;
