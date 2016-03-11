@@ -1,30 +1,29 @@
-/*
- * DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
- * This is a library that looks up messages for specific locales by
- * delegating to the appropriate library.
- */
-
-library messages_all;
+// DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
+// This is a library that looks up messages for specific locales by
+// delegating to the appropriate library.
 
 import 'dart:async';
+
+import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
 import 'package:intl/src/intl_helpers.dart';
-import 'package:intl/intl.dart';
 
 import 'stock_messages_en.dart' as messages_en;
 import 'stock_messages_es.dart' as messages_es;
 
-
 Map<String, Function> _deferredLibraries = {
-  'en' : () => new Future.value(null),
-  'es' : () => new Future.value(null),
+  'en': () => new Future.value(null),
+  'es': () => new Future.value(null),
 };
 
 MessageLookupByLibrary _findExact(localeName) {
   switch (localeName) {
-    case 'en' : return messages_en.messages;
-    case 'es' : return messages_es.messages;
-    default: return null;
+    case 'en':
+      return messages_en.messages;
+    case 'es':
+      return messages_es.messages;
+    default:
+      return null;
   }
 }
 
