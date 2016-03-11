@@ -289,7 +289,6 @@ class AnalyzeCommand extends FlutterCommand {
       '--strong',
       '--package-warnings',
       '--fatal-warnings',
-      '--strong-hints',
       '--fatal-hints',
       // defines lints
       '--options', optionsFile.path,
@@ -340,7 +339,6 @@ class AnalyzeCommand extends FlutterCommand {
     RegExp generalPattern = new RegExp(r'^\[(error|warning|hint|lint)\] (.+) \(([^(),]+), line ([0-9]+), col ([0-9]+)\)$');
     RegExp allowedIdentifiersPattern = new RegExp(r'_?([A-Z]|_+)\b');
     RegExp constructorTearOffsPattern = new RegExp('.+#.+// analyzer doesn\'t like constructor tear-offs');
-    RegExp ignorePattern = new RegExp(r'// analyzer says "([^"]+)"');
     RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
     RegExp missingFilePattern = new RegExp('^Target of URI does not exist: \'([^\')]+)\'\$');
 
@@ -394,14 +392,6 @@ class AnalyzeCommand extends FlutterCommand {
               shouldIgnore = true;
           } else if (constructorTearOffsPattern.allMatches(sourceLine).isNotEmpty) {
             shouldIgnore = true;
-          } else {
-            Iterable<Match> ignoreGroups = ignorePattern.allMatches(sourceLine);
-            for (Match ignoreGroup in ignoreGroups) {
-              if (errorMessage.contains(ignoreGroup[1])) {
-                shouldIgnore = true;
-                break;
-              }
-            }
           }
           if (shouldIgnore)
             continue;
