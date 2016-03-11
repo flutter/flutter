@@ -441,10 +441,14 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 
 - (void)viewDidAppear:(BOOL)animated {
   [self surfaceUpdated:YES];
+
+  [super viewWillAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   [self surfaceUpdated:NO];
+
+  [super viewWillDisappear:animated];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
