@@ -154,6 +154,16 @@ class BoxConstraints extends Constraints {
                               maxHeight: height == null ? maxHeight : height.clamp(minHeight, maxHeight));
   }
 
+  /// A box constraints with the width and height constraints flipped.
+  BoxConstraints get flipped {
+    return new BoxConstraints(
+      minWidth: minHeight,
+      maxWidth: maxHeight,
+      minHeight: minWidth,
+      maxHeight: maxWidth
+    );
+  }
+
   /// Returns box constraints with the same width constraints but with
   /// unconstrainted height.
   BoxConstraints widthConstraints() => new BoxConstraints(minWidth: minWidth, maxWidth: maxWidth);

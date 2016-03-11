@@ -320,6 +320,27 @@ class FractionalTranslation extends OneChildRenderObjectWidget {
   }
 }
 
+/// Rotates its child by a integral number of quarter turns.
+///
+/// Unlike [Transform], which applies a transform just prior to painting,
+/// this object applies its rotation prior to layout, which means the entire
+/// rotated box consumes only as much space as required by the rotated child.
+class RotatedBox extends OneChildRenderObjectWidget {
+  RotatedBox({ Key key, this.quarterTurns, Widget child })
+    : super(key: key, child: child) {
+    assert(quarterTurns != null);
+  }
+
+  /// The number of clockwise quarter turns the child should be rotated.
+  final int quarterTurns;
+
+  RenderRotatedBox createRenderObject(BuildContext context) => new RenderRotatedBox(quarterTurns: quarterTurns);
+
+  void updateRenderObject(BuildContext context, RenderRotatedBox renderObject) {
+    renderObject.quarterTurns = quarterTurns;
+  }
+}
+
 /// Insets its child by the given padding.
 ///
 /// When passing layout constraints to its child, padding shrinks the
