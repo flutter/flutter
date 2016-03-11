@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../flx.dart';
+import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
@@ -25,7 +26,20 @@ class BuildCommand extends FlutterCommand {
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
     argParser.addOption('working-dir', defaultsTo: defaultWorkingDirPath);
+    argParser.addFlag('pub',
+        defaultsTo: true,
+        help: 'Whether to run "pub get" before building the app.');
     addTargetOption();
+  }
+
+  @override
+  Future<int> run() async {
+    if (argResults['pub']) {
+      int exitCode = await pubGet();
+      if (exitCode != 0)
+        return exitCode;
+    }
+    return await super.run();
   }
 
   Future<int> runInProject() async {
