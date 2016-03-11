@@ -5,6 +5,9 @@
 # For a list of lints, see: http://dart-lang.github.io/linter/lints/
 
 analyzer:
+  language:
+    enableSuperMixins: true
+  strong-mode: false #TODO(pq): enable once strong-mode runs clean
   errors:
     # we allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore

@@ -283,10 +283,8 @@ class AnalyzeCommand extends FlutterCommand {
       sdkBinaryName('dartanalyzer'),
       // do not set '--warnings', since that will include the entire Dart SDK
       '--ignore-unrecognized-flags',
-      '--supermixin',
-      '--enable-strict-call-checks',
+      '--enable-strict-call-checks', //TODO(pq): migrate to options once supported (dart/sdk#25983)
       '--enable_type_checks',
-      '--strong',
       '--package-warnings',
       '--fatal-warnings',
       '--fatal-hints',
