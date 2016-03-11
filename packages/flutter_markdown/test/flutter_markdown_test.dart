@@ -94,6 +94,37 @@ void main() {
       expect(span.children[0].recognizer.runtimeType, equals(TapGestureRecognizer));
     });
   });
+
+  test("Changing config - data", () {
+    testWidgets((WidgetTester tester) {
+      tester.pumpWidget(new Markdown(data: "Data1"));
+      _expectTextStrings(_listElements(tester), <String>["Data1"]);
+
+      String stateBefore = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      tester.pumpWidget(new Markdown(data: "Data1"));
+      String stateAfter = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      expect(stateBefore, equals(stateAfter));
+
+      tester.pumpWidget(new Markdown(data: "Data2"));
+      _expectTextStrings(_listElements(tester), <String>["Data2"]);
+    });
+  });
+
+  test("Changing config - style", () {
+    testWidgets((WidgetTester tester) {
+      ThemeData theme = new ThemeData.light();
+
+      MarkdownStyle style1 = new MarkdownStyle.defaultFromTheme(theme);
+      MarkdownStyle style2 = new MarkdownStyle.largeFromTheme(theme);
+
+      tester.pumpWidget(new Markdown(data: "Test", markdownStyle: style1));
+
+      String stateBefore = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      tester.pumpWidget(new Markdown(data: "Test", markdownStyle: style2));
+      String stateAfter = WidgetFlutterBinding.instance.renderViewElement.toStringDeep();
+      expect(stateBefore, isNot(stateAfter));
+    });
+  });
 }
 
 List<Element> _listElements(WidgetTester tester) {
