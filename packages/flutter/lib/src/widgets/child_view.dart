@@ -32,9 +32,9 @@ class _ChildViewWidget extends LeafRenderObjectWidget {
   final ChildViewConnection child;
   final double scale;
 
-  RenderChildView createRenderObject() => new RenderChildView(child: child, scale: scale);
+  RenderChildView createRenderObject(BuildContext context) => new RenderChildView(child: child, scale: scale);
 
-  void updateRenderObject(RenderChildView renderObject, _ChildViewWidget oldWidget) {
+  void updateRenderObject(BuildContext context, RenderChildView renderObject) {
     renderObject
       ..child = child
       ..scale = scale;

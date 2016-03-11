@@ -192,9 +192,9 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 
   RenderObjectToWidgetElement<T> createElement() => new RenderObjectToWidgetElement<T>(this);
 
-  RenderObjectWithChildMixin<T> createRenderObject() => container;
+  RenderObjectWithChildMixin<T> createRenderObject(BuildContext context) => container;
 
-  void updateRenderObject(RenderObject renderObject, RenderObjectWidget oldWidget) { }
+  void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
   RenderObjectToWidgetElement<T> attachToRenderTree([RenderObjectToWidgetElement<T> element]) {
     BuildableElement.lockState(() {

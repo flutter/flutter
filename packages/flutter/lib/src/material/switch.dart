@@ -68,7 +68,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveTrackColor;
   final ValueChanged<bool> onChanged;
 
-  _RenderSwitch createRenderObject() => new _RenderSwitch(
+  _RenderSwitch createRenderObject(BuildContext context) => new _RenderSwitch(
     value: value,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
@@ -77,7 +77,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     onChanged: onChanged
   );
 
-  void updateRenderObject(_RenderSwitch renderObject, _SwitchRenderObjectWidget oldWidget) {
+  void updateRenderObject(BuildContext context, _RenderSwitch renderObject) {
     renderObject
       ..value = value
       ..activeColor = activeColor

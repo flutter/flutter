@@ -303,7 +303,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (!config.excludeFromSemantics) {
       RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       context.visitChildElements((RenderObjectElement element) {
-        element.widget.updateRenderObject(semanticsGestureHandler, null);
+        element.widget.updateRenderObject(context, semanticsGestureHandler);
       });
     }
   }
@@ -458,13 +458,13 @@ class _GestureSemantics extends OneChildRenderObjectWidget {
     assert(false);
   }
 
-  RenderSemanticsGestureHandler createRenderObject() {
+  RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
     RenderSemanticsGestureHandler result = new RenderSemanticsGestureHandler();
-    updateRenderObject(result, null);
+    updateRenderObject(context, result);
     return result;
   }
 
-  void updateRenderObject(RenderSemanticsGestureHandler renderObject, _GestureSemantics oldWidget) {
+  void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
     Map<Type, GestureRecognizer> recognizers = owner._recognizers;
     renderObject
       ..onTap = recognizers.containsKey(TapGestureRecognizer) ? _handleTap : null

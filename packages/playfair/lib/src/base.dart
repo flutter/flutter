@@ -57,9 +57,9 @@ class _ChartWrapper extends LeafRenderObjectWidget {
   final TextTheme textTheme;
   final ChartData data;
 
-  _RenderChart createRenderObject() => new _RenderChart(textTheme: textTheme, data: data);
+  _RenderChart createRenderObject(BuildContext context) => new _RenderChart(textTheme: textTheme, data: data);
 
-  void updateRenderObject(_RenderChart renderObject, _ChartWrapper oldWidget) {
+  void updateRenderObject(BuildContext context, _RenderChart renderObject) {
     renderObject
       ..textTheme = textTheme
       ..data = data;

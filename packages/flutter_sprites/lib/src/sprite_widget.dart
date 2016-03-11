@@ -24,9 +24,9 @@ class SpriteWidget extends OneChildRenderObjectWidget {
   ///     var mySpriteWidget = new SpriteWidget(mySpriteTree, SpriteBoxTransformMode.fixedHeight);
   SpriteWidget(this.rootNode, [this.transformMode = SpriteBoxTransformMode.letterbox]);
 
-  SpriteBox createRenderObject() => new SpriteBox(rootNode, transformMode);
+  SpriteBox createRenderObject(BuildContext context) => new SpriteBox(rootNode, transformMode);
 
-  void updateRenderObject(SpriteBox renderObject, SpriteWidget oldWidget) {
+  void updateRenderObject(BuildContext context, SpriteBox renderObject) {
     renderObject
       ..rootNode = rootNode
       ..transformMode = transformMode;
