@@ -5,13 +5,13 @@
 part of cassowary;
 
 class ConstantMember extends _EquationMember {
+  ConstantMember(this.value);
+
   @override
   final double value;
 
   @override
   bool get isConstant => true;
-
-  ConstantMember(this.value);
 
   @override
   Expression asExpression() => new Expression([], this.value);

@@ -773,7 +773,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool get debugDoingThisResize => _debugDoingThisResize;
   bool _debugDoingThisLayout = false;
   bool get debugDoingThisLayout => _debugDoingThisLayout;
-  static RenderObject _debugActiveLayout = null;
+  static RenderObject _debugActiveLayout;
   static RenderObject get debugActiveLayout => _debugActiveLayout;
   bool _debugMutationsLocked = false;
   bool _debugCanParentUseSize;
@@ -1140,7 +1140,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   static bool get debugDoingPaint => _debugDoingPaint;
   bool _debugDoingThisPaint = false;
   bool get debugDoingThisPaint => _debugDoingThisPaint;
-  static RenderObject _debugActivePaint = null;
+  static RenderObject _debugActivePaint;
   static RenderObject get debugActivePaint => _debugActivePaint;
 
   static List<RenderObject> _nodesNeedingPaint = <RenderObject>[];

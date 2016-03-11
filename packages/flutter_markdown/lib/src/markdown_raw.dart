@@ -211,7 +211,7 @@ class _Renderer implements md.NodeVisitor {
       _Block newBlock = new _Block(element.tag, element.attributes, _markdownStyle, new List<String>.from(_listIndents), blockList.length);
       blockList.add(newBlock);
     } else {
-      _LinkInfo linkInfo = null;
+      _LinkInfo linkInfo;
       if (element.tag == 'a') {
         linkInfo = _linkHandler.createLinkInfo(element.attributes['href']);
       }
@@ -419,7 +419,7 @@ class _Block {
         children.add(_stackToTextSpan(list[i]));
       }
 
-      String text = null;
+      String text;
       if (children.length == 1 && _isPlainText(children[0])) {
         text = children[0].text;
         children = null;
@@ -493,12 +493,13 @@ class _LinkHandler {
   }
 }
 
-abstract class SyntaxHighlighter {
+abstract class SyntaxHighlighter { // ignore: one_member_abstracts
   TextSpan format(String source);
 }
 
 class _DefaultSyntaxHighlighter extends SyntaxHighlighter{
   _DefaultSyntaxHighlighter(this.style);
+
   final TextStyle style;
 
   TextSpan format(String source) {

@@ -15,20 +15,30 @@ linter:
   rules:
     - avoid_empty_else
     - always_declare_return_types
-    # we'll turn on avoid_as as soon as it doesn't complain about "as dynamic"
-    # - avoid_as
+    # - always_specify_types # still a lot of work to do before enabling this one
+    # - annotate_overrides # still a lot of work to do before enabling this one
+    # - avoid_as # https://github.com/dart-lang/linter/issues/195
+    - avoid_init_to_null
+    # - avoid_return_types_on_setters # still a lot of work to do before enabling this one
     - camel_case_types
-    # sometimes we have no choice (e.g. when matching other platforms)
-    # - constant_identifier_names
+    # - constant_identifier_names # still a lot of work to do before enabling this one
     - empty_constructor_bodies
     - hash_and_equals
-    # disabled until regexp fix is pulled in (https://github.com/flutter/flutter/pull/1996)
-    # - library_names
+    # - implementation_imports # "// ignore:" isn't working yet
+    - library_names
     - library_prefixes
     - non_constant_identifier_names
-    # too many false-positives; code review should catch real instances
-    # - one_member_abstracts
+    # - one_member_abstracts # "// ignore:" isn't working yet
+    - package_api_docs
+    - package_names
+    - package_prefixed_library_names
+    - prefer_is_not_empty
+    # - public_member_api_docs # still a lot of work to do before enabling this one
     - slash_for_doc_comments
+    - sort_constructors_first
+    - sort_unnamed_constructors_first
     - super_goes_last
+    # - type_annotate_public_apis # see always_specify_types, which this is a subset of
     - type_init_formals
     - unnecessary_brace_in_string_interp
+    - unnecessary_getters_setters

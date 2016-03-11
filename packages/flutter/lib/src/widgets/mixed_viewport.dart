@@ -210,7 +210,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
       assert(renderObject != null);
       final int startIndex = _firstVisibleChildIndex;
       int lastIndex = startIndex + _childrenByKey.length - 1;
-      Element previousChild = null;
+      Element previousChild;
       for (int index = startIndex; index <= lastIndex; index += 1) {
         final Widget newWidget = _buildWidgetAt(index);
         final _ChildKey key = new _ChildKey.fromWidget(newWidget);
@@ -598,7 +598,7 @@ class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
       assert(index != null);
       // Place all our children in our RenderObject.
       // All the children we are placing are in builtChildren and newChildren.
-      Element previousChild = null;
+      Element previousChild;
       for (int i = startIndex; i < index; ++i) {
         final Element element = builtChildren[i];
         if (element.slot != previousChild)

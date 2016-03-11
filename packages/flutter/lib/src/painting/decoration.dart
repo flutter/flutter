@@ -23,6 +23,6 @@ abstract class Decoration {
   String toString([String prefix = '']) => '$prefix$runtimeType';
 }
 
-abstract class BoxPainter {
+abstract class BoxPainter { // ignore: one_member_abstracts
   void paint(Canvas canvas, Rect rect);
 }

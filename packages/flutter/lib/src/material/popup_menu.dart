@@ -304,7 +304,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   Color get barrierColor => null;
 
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    double selectedItemOffset = null;
+    double selectedItemOffset;
     if (initialValue != null) {
       selectedItemOffset = 0.0;
       for (int i = 0; i < items.length; i++) {

@@ -5,12 +5,12 @@
 import 'events.dart';
 
 /// An object that can hit-test pointers.
-abstract class HitTestable {
+abstract class HitTestable { // ignore: one_member_abstracts
   void hitTest(HitTestResult result, Point position);
 }
 
 /// An object that can handle events.
-abstract class HitTestTarget {
+abstract class HitTestTarget { // ignore: one_member_abstracts
   /// Override this function to receive events.
   void handleEvent(PointerEvent event, HitTestEntry entry);
 }

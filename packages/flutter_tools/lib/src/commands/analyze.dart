@@ -109,9 +109,6 @@ void _addFlatPackageList(String subPath, List<String> dartFiles, Set<String> pub
 class FileChanged { }
 
 class AnalyzeCommand extends FlutterCommand {
-  String get name => 'analyze';
-  String get description => 'Analyze the project\'s Dart code.';
-
   AnalyzeCommand() {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
@@ -121,6 +118,8 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
   }
 
+  String get name => 'analyze';
+  String get description => 'Analyze the project\'s Dart code.';
   bool get requiresProjectRoot => false;
 
   bool get isFlutterRepo {

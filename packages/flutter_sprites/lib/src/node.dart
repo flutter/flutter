@@ -15,6 +15,14 @@ double convertRadians2Degrees(double radians) => radians * 180.0/math.PI;
 /// rotation, and scaling) of a node also affects its children.
 class Node {
 
+  // Constructors
+
+  /// Creates a new [Node] without any transformation.
+  ///
+  ///     Node myNode = new Node();
+  Node();
+
+
   // Member variables
 
   SpriteBox _spriteBox;
@@ -101,12 +109,6 @@ class Node {
     }
   }
 
-  // Constructors
-
-  /// Creates a new [Node] without any transformation.
-  ///
-  ///     Node myNode = new Node();
-  Node();
 
   // Property setters and getters
 

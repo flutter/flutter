@@ -8,16 +8,26 @@ import 'simulation.dart';
 import 'tolerance.dart';
 
 class FrictionSimulation extends Simulation {
+  FrictionSimulation(double drag, double position, double velocity)
+    : _drag = drag,
+      _dragLog = math.log(drag),
+      _x = position,
+      _v = velocity;
+
+  // A friction simulation that starts and ends at the specified positions
+  // and velocities.
+  factory FrictionSimulation.through(double startPosition, double endPosition, double startVelocity, double endVelocity) {
+    return new FrictionSimulation(
+      _dragFor(startPosition, endPosition, startVelocity, endVelocity),
+      startPosition,
+      startVelocity)
+      .. tolerance = new Tolerance(velocity: endVelocity.abs());
+  }
+
   final double _drag;
   final double _dragLog;
   final double _x;
   final double _v;
-
-  FrictionSimulation(double drag, double position, double velocity)
-      : _drag = drag,
-        _dragLog = math.log(drag),
-        _x = position,
-        _v = velocity;
 
   // Return the drag value for a FrictionSimulation whose x() and dx() values pass
   // through the specified start and end position/velocity values.
@@ -28,16 +38,6 @@ class FrictionSimulation extends Simulation {
   // x1 = x0 + (v0 * D^((log(v1) - log(v0)) / log(D))) / log(D) - v0 / log(D), find D
   static double _dragFor(double startPosition, double endPosition, double startVelocity, double endVelocity) {
     return math.pow(math.E, (startVelocity - endVelocity) / (startPosition - endPosition));
-  }
-
-  // A friction simulation that starts and ends at the specified positions
-  // and velocities.
-  factory FrictionSimulation.through(double startPosition, double endPosition, double startVelocity, double endVelocity) {
-    return new FrictionSimulation(
-      _dragFor(startPosition, endPosition, startVelocity, endVelocity),
-      startPosition,
-      startVelocity)
-      .. tolerance = new Tolerance(velocity: endVelocity.abs());
   }
 
   double x(double time) => _x + _v * math.pow(_drag, time) / _dragLog - _v / _dragLog;

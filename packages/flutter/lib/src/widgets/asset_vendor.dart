@@ -15,7 +15,7 @@ import 'basic.dart';
 import 'framework.dart';
 
 // Base class for asset resolvers.
-abstract class _AssetResolver {
+abstract class _AssetResolver { // ignore: one_member_abstracts
   // Return a resolved asset key for the asset named [name].
   Future<String> resolve(String name);
 }
@@ -77,12 +77,15 @@ class _ResolutionAwareAssetBundle extends _ResolvingAssetBundle {
 // of asset variants to choose from.
 abstract class _VariantAssetResolver extends _AssetResolver {
   _VariantAssetResolver({ this.bundle });
+
   final AssetBundle bundle;
+
   // TODO(kgiesing): Ideally, this cache would be on an object with the same
   // lifetime as the asset bundle it wraps. However, that won't matter until we
   // need to change AssetVendors frequently; as of this writing we only have
   // one.
   Map<String, List<String>> _assetManifest;
+
   Future _initializer;
 
   Future _loadManifest() async {

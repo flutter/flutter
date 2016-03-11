@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 
 class TestSchedulerBinding extends BindingBase with Scheduler { }
 
-class TestStrategy implements SchedulingStrategy {
+class TestStrategy {
   int allowedPriority = 10000;
 
   bool shouldRunTaskWithPriority({ int priority, Scheduler scheduler }) {
@@ -22,7 +22,7 @@ void main() {
   test("Tasks are executed in the right order", () {
     Scheduler scheduler = new TestSchedulerBinding();
     TestStrategy strategy = new TestStrategy();
-    scheduler.schedulingStrategy = strategy;
+    scheduler.schedulingStrategy = strategy.shouldRunTaskWithPriority;
     List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];
     List<int> executedTasks = <int>[];
 

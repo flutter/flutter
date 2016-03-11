@@ -42,22 +42,21 @@ typedef void SetterCallback(dynamic value);
 /// The abstract class for an action that changes properties over a time
 /// interval, optionally using an easing curve.
 abstract class ActionInterval extends Action {
-  double _duration;
-
-  bool _firstTick = true;
-  double _elapsed = 0.0;
+  ActionInterval([this._duration = 0.0, this.curve]);
 
   /// The duration, in seconds, of the action.
   ///
   ///     double myTime = myAction.duration;
   double get duration => _duration;
+  double _duration;
 
   /// The animation curve used to ease the animation.
   ///
   ///     myAction.curve = bounceOut;
   Curve curve;
 
-  ActionInterval([this._duration = 0.0, this.curve]);
+  bool _firstTick = true;
+  double _elapsed = 0.0;
 
   void step(double dt) {
     if (_firstTick) {

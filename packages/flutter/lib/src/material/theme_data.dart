@@ -28,55 +28,6 @@ const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
 const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 
 class ThemeData {
-
-  ThemeData.raw({
-    this.brightness,
-    this.primaryColor,
-    this.primaryColorBrightness,
-    this.accentColor,
-    this.accentColorBrightness,
-    this.canvasColor,
-    this.cardColor,
-    this.dividerColor,
-    this.highlightColor,
-    this.splashColor,
-    this.unselectedColor,
-    this.disabledColor,
-    this.buttonColor,
-    this.selectionColor,
-    this.backgroundColor,
-    this.indicatorColor,
-    this.hintColor,
-    this.hintOpacity,
-    this.errorColor,
-    this.text,
-    this.primaryTextTheme,
-    this.primaryIconTheme
-  }) {
-    assert(brightness != null);
-    assert(primaryColor != null);
-    assert(primaryColorBrightness != null);
-    assert(accentColor != null);
-    assert(accentColorBrightness != null);
-    assert(canvasColor != null);
-    assert(cardColor != null);
-    assert(dividerColor != null);
-    assert(highlightColor != null);
-    assert(splashColor != null);
-    assert(unselectedColor != null);
-    assert(disabledColor != null);
-    assert(buttonColor != null);
-    assert(selectionColor != null);
-    assert(disabledColor != null);
-    assert(indicatorColor != null);
-    assert(hintColor != null);
-    assert(hintOpacity != null);
-    assert(errorColor != null);
-    assert(text != null);
-    assert(primaryTextTheme != null);
-    assert(primaryIconTheme != null);
-  }
-
   factory ThemeData({
     ThemeBrightness brightness,
     Map<int, Color> primarySwatch,
@@ -150,6 +101,54 @@ class ThemeData {
       primaryTextTheme: primaryTextTheme,
       primaryIconTheme: primaryIconTheme
     );
+  }
+
+  ThemeData.raw({
+    this.brightness,
+    this.primaryColor,
+    this.primaryColorBrightness,
+    this.accentColor,
+    this.accentColorBrightness,
+    this.canvasColor,
+    this.cardColor,
+    this.dividerColor,
+    this.highlightColor,
+    this.splashColor,
+    this.unselectedColor,
+    this.disabledColor,
+    this.buttonColor,
+    this.selectionColor,
+    this.backgroundColor,
+    this.indicatorColor,
+    this.hintColor,
+    this.hintOpacity,
+    this.errorColor,
+    this.text,
+    this.primaryTextTheme,
+    this.primaryIconTheme
+  }) {
+    assert(brightness != null);
+    assert(primaryColor != null);
+    assert(primaryColorBrightness != null);
+    assert(accentColor != null);
+    assert(accentColorBrightness != null);
+    assert(canvasColor != null);
+    assert(cardColor != null);
+    assert(dividerColor != null);
+    assert(highlightColor != null);
+    assert(splashColor != null);
+    assert(unselectedColor != null);
+    assert(disabledColor != null);
+    assert(buttonColor != null);
+    assert(selectionColor != null);
+    assert(disabledColor != null);
+    assert(indicatorColor != null);
+    assert(hintColor != null);
+    assert(hintOpacity != null);
+    assert(errorColor != null);
+    assert(text != null);
+    assert(primaryTextTheme != null);
+    assert(primaryIconTheme != null);
   }
 
   factory ThemeData.light() => new ThemeData(brightness: ThemeBrightness.light);

@@ -25,6 +25,9 @@ double timeDilation = 1.0;
 typedef void FrameCallback(Duration timeStamp);
 
 typedef void SchedulerExceptionHandler(dynamic exception, StackTrace stack);
+
+typedef bool SchedulingStrategy({ int priority, Scheduler scheduler });
+
 /// This callback is invoked whenever an exception is caught by the scheduler.
 /// The 'exception' argument contains the object that was thrown, and the
 /// 'stack' argument contains the stack trace. If the callback is set, it is
@@ -97,7 +100,7 @@ abstract class Scheduler extends BindingBase {
   static Scheduler _instance;
   static Scheduler get instance => _instance;
 
-  SchedulingStrategy schedulingStrategy = new DefaultSchedulingStrategy();
+  SchedulingStrategy schedulingStrategy = defaultSchedulingStrategy;
 
   static int _taskSorter (_TaskEntry e1, _TaskEntry e2) {
     // Note that we inverse the priority.
@@ -130,7 +133,7 @@ abstract class Scheduler extends BindingBase {
     if (_taskQueue.isEmpty)
       return;
     _TaskEntry entry = _taskQueue.first;
-    if (schedulingStrategy.shouldRunTaskWithPriority(priority: entry.priority, scheduler: this)) {
+    if (schedulingStrategy(priority: entry.priority, scheduler: this)) {
       try {
         (_taskQueue.removeFirst().task)();
       } finally {
@@ -308,17 +311,10 @@ abstract class Scheduler extends BindingBase {
   }
 }
 
-abstract class SchedulingStrategy {
-  bool shouldRunTaskWithPriority({ int priority, Scheduler scheduler });
-}
-
-class DefaultSchedulingStrategy implements SchedulingStrategy {
-  // TODO(floitsch): for now we only expose the priority. It might be
-  // interesting to provide more info (like, how long the task ran the last
-  // time).
-  bool shouldRunTaskWithPriority({ int priority, Scheduler scheduler }) {
-    if (scheduler.transientCallbackCount > 0)
-      return priority >= Priority.animation._value;
-    return true;
-  }
+// TODO(floitsch): for now we only expose the priority. It might be interesting
+// to provide more info (like, how long the task ran the last time).
+bool defaultSchedulingStrategy({ int priority, Scheduler scheduler }) {
+  if (scheduler.transientCallbackCount > 0)
+    return priority >= Priority.animation._value;
+  return true;
 }

@@ -5,14 +5,14 @@
 part of cassowary;
 
 class Term extends _EquationMember {
+  Term(this.variable, this.coefficient);
+
   final Variable variable;
   final double coefficient;
 
   bool get isConstant => false;
 
   double get value => coefficient * variable.value;
-
-  Term(this.variable, this.coefficient);
 
   Expression asExpression() =>
       new Expression([new Term(this.variable, this.coefficient)], 0.0);

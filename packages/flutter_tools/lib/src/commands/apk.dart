@@ -402,7 +402,7 @@ Future<int> buildAndroid({
 
   printStatus('Building APK...');
 
-  if (!flxPath.isEmpty) {
+  if (flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
       printError('FLX does not exist: $flxPath');
       printError('(Omit the --flx option to build the FLX automatically)');
