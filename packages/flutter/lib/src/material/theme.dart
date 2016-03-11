@@ -10,6 +10,7 @@ export 'theme_data.dart' show ThemeData, ThemeBrightness;
 
 const kThemeAnimationDuration = const Duration(milliseconds: 200);
 
+/// Applies a theme to descendant widgets.
 class Theme extends InheritedWidget {
   Theme({
     Key key,
@@ -20,6 +21,7 @@ class Theme extends InheritedWidget {
     assert(data != null);
   }
 
+  /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();

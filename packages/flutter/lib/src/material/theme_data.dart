@@ -27,6 +27,9 @@ const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
 const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
 const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 
+/// Holds the color and typography values for a material design theme.
+///
+/// Use this class to configure a [Theme] widget.
 class ThemeData {
   factory ThemeData({
     ThemeBrightness brightness,
