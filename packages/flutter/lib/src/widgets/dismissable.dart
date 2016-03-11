@@ -15,8 +15,6 @@ const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissThreshold = 0.4;
 
-typedef void DismissDirectionCallback(DismissDirection direction);
-
 /// The direction in which a [Dismissable] can be dismissed.
 enum DismissDirection {
   /// The [Dismissable] can be dismissed by dragging either up or down.
@@ -82,7 +80,7 @@ class Dismissable extends StatefulComponent {
   final VoidCallback onResize;
 
   /// Called when the widget has been dismissed, after finishing resizing.
-  final DismissDirectionCallback onDismissed;
+  final ValueChanged<DismissDirection> onDismissed;
 
   /// The direction in which the widget can be dismissed.
   final DismissDirection direction;
