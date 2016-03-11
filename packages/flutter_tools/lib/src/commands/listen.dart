@@ -28,7 +28,7 @@ class ListenCommand extends RunCommandBase {
 
   @override
   Future<int> runInProject() async {
-    await downloadApplicationPackagesAndConnectToDevices();
+    await downloadApplicationPackages();
     await downloadToolchain();
 
     List<String> watchCommand = _constructWatchCommand(() sync* {
@@ -42,7 +42,7 @@ class ListenCommand extends RunCommandBase {
     do {
       printStatus('Updating running Flutter apps...');
       result = await startApp(
-        devices,
+        deviceForCommand,
         applicationPackages,
         toolchain,
         buildConfigurations,

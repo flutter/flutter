@@ -10,9 +10,9 @@ import 'package:args/command_runner.dart';
 import '../application_package.dart';
 import '../build_configuration.dart';
 import '../device.dart';
+import '../flx.dart' as flx;
 import '../globals.dart';
 import '../toolchain.dart';
-import '../flx.dart' as flx;
 import 'flutter_command_runner.dart';
 
 typedef bool Validator();
@@ -39,17 +39,8 @@ abstract class FlutterCommand extends Command {
     toolchain ??= await Toolchain.forConfigs(buildConfigurations);
   }
 
-  Future downloadApplicationPackagesAndConnectToDevices() async {
-    await downloadApplicationPackages();
-    _connectToDevices();
-  }
-
   Future downloadApplicationPackages() async {
     applicationPackages ??= await ApplicationPackageStore.forConfigs(buildConfigurations);
-  }
-
-  void _connectToDevices() {
-    devices ??= new DeviceStore.forConfigs(buildConfigurations);
   }
 
   Future<int> run() {
@@ -91,13 +82,20 @@ abstract class FlutterCommand extends Command {
       if (androidOnly)
         devices = devices.where((Device device) => device.platform == TargetPlatform.android).toList();
 
-      // TODO(devoncarew): Switch this to just supporting one connected device?
       if (devices.isEmpty) {
         printStatus('No supported devices connected.');
         return 1;
+      } else if (devices.length > 1) {
+        printStatus("More than one device connected; please specify a device with "
+          "the '-d <deviceId>' flag.");
+        printStatus('');
+        devices = await deviceManager.getAllConnectedDevices();
+        for (Device device in devices)
+          printStatus(device.fullDescription);
+        return 1;
+      } else {
+        _deviceForCommand = devices.single;
       }
-
-      _devicesForCommand = await _getDevicesForCommand();
     }
 
     return await runInProject();
@@ -116,38 +114,13 @@ abstract class FlutterCommand extends Command {
 
   Future<int> runInProject();
 
-  List<Device> get devicesForCommand => _devicesForCommand;
-
-  Device get deviceForCommand {
-    // TODO(devoncarew): Switch this to just supporting one connected device?
-    return devicesForCommand.isNotEmpty ? devicesForCommand.first : null;
-  }
-
   // This is caculated in run() if the command has [requiresDevice] specified.
-  List<Device> _devicesForCommand;
+  Device _deviceForCommand;
+
+  Device get deviceForCommand => _deviceForCommand;
 
   ApplicationPackageStore applicationPackages;
   Toolchain toolchain;
-  DeviceStore devices;
-
-  Future<List<Device>> _getDevicesForCommand() async {
-    List<Device> devices = await deviceManager.getDevices();
-
-    if (devices.isEmpty)
-      return null;
-
-    if (deviceManager.hasSpecifiedDeviceId) {
-      Device device = await deviceManager.getDeviceById(deviceManager.specifiedDeviceId);
-      return device == null ? <Device>[] : <Device>[device];
-    }
-
-    devices = devices.where((Device device) => device.isSupported()).toList();
-
-    if (androidOnly)
-      devices = devices.where((Device device) => device.platform == TargetPlatform.android).toList();
-
-    return devices;
-  }
 
   bool _targetSpecified = false;
 

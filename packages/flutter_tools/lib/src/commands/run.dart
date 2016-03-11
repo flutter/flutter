@@ -9,7 +9,6 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/utils.dart';
 import '../build_configuration.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -95,7 +94,7 @@ class RunCommand extends RunCommandBase {
 
     await Future.wait([
       downloadToolchain(),
-      downloadApplicationPackagesAndConnectToDevices(),
+      downloadApplicationPackages(),
     ], eagerError: true);
 
     bool clearLogs = argResults['clear-logs'];
@@ -109,9 +108,8 @@ class RunCommand extends RunCommandBase {
       return 1;
     }
 
-    // TODO(devoncarew): Switch this to using [devicesForCommand].
     int result = await startApp(
-      devices,
+      deviceForCommand,
       applicationPackages,
       toolchain,
       buildConfigurations,
@@ -132,7 +130,7 @@ class RunCommand extends RunCommandBase {
 }
 
 Future<int> startApp(
-  DeviceStore devices,
+  Device device,
   ApplicationPackageStore applicationPackages,
   Toolchain toolchain,
   List<BuildConfiguration> configs, {
@@ -156,10 +154,17 @@ Future<int> startApp(
     return 1;
   }
 
+  ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+
+  if (package == null) {
+    printError('No application found for ${device.platform}.');
+    return 1;
+  }
+
   if (install) {
     printTrace('Running build command.');
     int result = await buildAll(
-      devices, applicationPackages, toolchain, configs,
+      <Device>[device], applicationPackages, toolchain, configs,
       enginePath: enginePath,
       target: target
     );
@@ -172,16 +177,10 @@ Future<int> startApp(
   // plumb a Future through the start command from here, but that seems a little
   // messy.
   if (stop) {
-    for (Device device in devices.all) {
-      if (!device.isSupported())
-        continue;
-
-      ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-      if (package != null) {
-        printTrace("Stopping app '${package.name}' on ${device.name}.");
-        // We don't wait for the stop command to complete.
-        device.stopApp(package);
-      }
+    if (package != null) {
+      printTrace("Stopping app '${package.name}' on ${device.name}.");
+      // We don't wait for the stop command to complete.
+      device.stopApp(package);
     }
   }
 
@@ -190,66 +189,42 @@ Future<int> startApp(
 
   if (install) {
     printTrace('Running install command.');
+
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-    await installApp(devices, applicationPackages);
+    await installApp(device, package);
   }
 
   bool startedSomething = false;
-  int unsupportedCount = 0;
 
-  for (Device device in devices.all) {
-    ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null)
-      continue;
+  Map<String, dynamic> platformArgs = <String, dynamic>{};
 
-    if (!device.isSupported()) {
-      printStatus("Skipping unsupported device '${device.name}'. ${device.supportMessage()}");
-      unsupportedCount++;
-      continue;
-    }
+  if (traceStartup != null)
+    platformArgs['trace-startup'] = traceStartup;
 
-    Map<String, dynamic> platformArgs = <String, dynamic>{};
+  printStatus('Starting ${_getDisplayPath(mainPath)} on ${device.name}...');
 
-    if (traceStartup != null)
-      platformArgs['trace-startup'] = traceStartup;
+  bool result = await device.startApp(
+    package,
+    toolchain,
+    mainPath: mainPath,
+    route: route,
+    checked: checked,
+    clearLogs: clearLogs,
+    startPaused: startPaused,
+    debugPort: debugPort,
+    platformArgs: platformArgs
+  );
 
-    printStatus('Starting ${_getDisplayPath(mainPath)} on ${device.name}...');
+  if (!result) {
+    printError('Error starting application on ${device.name}.');
+  } else {
+    startedSomething = true;
 
-    bool result = await device.startApp(
-      package,
-      toolchain,
-      mainPath: mainPath,
-      route: route,
-      checked: checked,
-      clearLogs: clearLogs,
-      startPaused: startPaused,
-      debugPort: debugPort,
-      platformArgs: platformArgs
-    );
-
-    if (!result) {
-      printError('Error starting application on ${device.name}.');
-    } else {
-      startedSomething = true;
-
-      // If the user specified --start-paused (and the device supports it) then
-      // wait for the observatory port to become available before returning from
-      // `startApp()`.
-      if (startPaused && device.supportsStartPaused)
-        await delayUntilObservatoryAvailable('localhost', debugPort);
-    }
-  }
-
-  if (!startedSomething) {
-    String message = 'Unable to run application';
-
-    if (devices.all.isEmpty) {
-      message += ' - no connected devices.';
-    } else if (unsupportedCount != 0) {
-      message += ' - $unsupportedCount unsupported ${pluralize('device', unsupportedCount)} connected';
-    }
-
-    printError(message);
+    // If the user specified --start-paused (and the device supports it) then
+    // wait for the observatory port to become available before returning from
+    // `startApp()`.
+    if (startPaused && device.supportsStartPaused)
+      await delayUntilObservatoryAvailable('localhost', debugPort);
   }
 
   return startedSomething ? 0 : 2;

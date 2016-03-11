@@ -9,7 +9,6 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/utils.dart';
 import 'build_configuration.dart';
-import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'toolchain.dart';
@@ -39,10 +38,21 @@ class DeviceManager {
   Future<Device> getDeviceById(String deviceId) async {
     deviceId = deviceId.toLowerCase();
     List<Device> devices = await getAllConnectedDevices();
-    return devices.firstWhere(
+    Device device = devices.firstWhere(
       (Device device) => device.id.toLowerCase() == deviceId,
       orElse: () => null
     );
+
+    if (device != null)
+      return device;
+
+    // Match on a close id / name.
+    devices = devices.where((Device device) {
+      return (device.id.toLowerCase().startsWith(deviceId) ||
+        device.name.toLowerCase().startsWith(deviceId));
+    });
+
+    return devices.length == 1 ? devices.first : null;
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
@@ -130,6 +140,11 @@ abstract class Device {
 
   bool get supportsStartPaused => true;
 
+  String get fullDescription {
+    String supportIndicator = isSupported() ? '' : ' - unsupported';
+    return '$name ($id)$supportIndicator';
+  }
+
   /// Whether it is an emulated device running on localhost.
   bool get isLocalEmulator;
 
@@ -186,7 +201,7 @@ abstract class Device {
     return id == other.id;
   }
 
-  String toString() => '$runtimeType $id';
+  String toString() => name;
 }
 
 class ForwardedPort {
@@ -240,78 +255,4 @@ abstract class DeviceLogReader {
   bool operator ==(dynamic other);
 
   String toString() => name;
-}
-
-// TODO(devoncarew): Unify this with [DeviceManager].
-class DeviceStore {
-  DeviceStore({
-    this.android,
-    this.iOS,
-    this.iOSSimulator
-  });
-
-  factory DeviceStore.forConfigs(List<BuildConfiguration> configs) {
-    AndroidDevice android;
-    IOSDevice iOS;
-    IOSSimulator iOSSimulator;
-
-    for (BuildConfiguration config in configs) {
-      switch (config.targetPlatform) {
-        case TargetPlatform.android:
-          assert(android == null);
-          android = _deviceForConfig(config, getAdbDevices());
-          break;
-        case TargetPlatform.iOS:
-          assert(iOS == null);
-          iOS = _deviceForConfig(config, IOSDevice.getAttachedDevices());
-          break;
-        case TargetPlatform.iOSSimulator:
-          assert(iOSSimulator == null);
-          iOSSimulator = _deviceForConfig(config, IOSSimulatorUtils.instance.getAttachedDevices());
-          break;
-        case TargetPlatform.mac:
-        case TargetPlatform.linux:
-          break;
-      }
-    }
-
-    return new DeviceStore(android: android, iOS: iOS, iOSSimulator: iOSSimulator);
-  }
-
-  final AndroidDevice android;
-  final IOSDevice iOS;
-  final IOSSimulator iOSSimulator;
-
-  List<Device> get all {
-    List<Device> result = <Device>[];
-    if (android != null)
-      result.add(android);
-    if (iOS != null)
-      result.add(iOS);
-    if (iOSSimulator != null)
-      result.add(iOSSimulator);
-    return result;
-  }
-
-  static Device _deviceForConfig(BuildConfiguration config, List<Device> devices) {
-    Device device;
-
-    if (config.deviceId != null) {
-      // Step 1: If a device identifier is specified, try to find a device
-      // matching that specific identifier
-      device = devices.firstWhere(
-          (Device dev) => (dev.id == config.deviceId),
-          orElse: () => null);
-    } else if (devices.length == 1) {
-      // Step 2: If no identifier is specified and there is only one connected
-      // device, pick that one.
-      device = devices[0];
-    } else if (devices.length > 1) {
-      // Step 3: D:
-      printStatus('Multiple devices are connected, but no device ID was specified.');
-      printStatus('Attempting to launch on all connected devices.');
-    }
-
-    return device;
-  }
 }
