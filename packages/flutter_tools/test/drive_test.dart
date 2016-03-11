@@ -68,8 +68,9 @@ void main() {
       return createTestCommandRunner(command).run(args).then((int code) {
         expect(code, equals(1));
         BufferLogger buffer = logger;
-        expect(buffer.errorText,
-            contains('Test file not found: /some/app/test_driver/e2e_test.dart'));
+        expect(buffer.errorText, contains(
+          'Test file not found: /some/app/test_driver/e2e_test.dart'
+        ));
       });
     });
 
