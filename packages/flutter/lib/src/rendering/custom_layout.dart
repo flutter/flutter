@@ -32,7 +32,7 @@ abstract class MultiChildLayoutDelegate {
   /// Call this from the [performLayout] or [getSize] methods to
   /// determine which children are available, if the child list might
   /// vary.
-  bool isChild(Object childId) => _idToChild[childId] != null;
+  bool hasChild(Object childId) => _idToChild[childId] != null;
 
   /// Ask the child to update its layout within the limits specified by
   /// the constraints parameter. The child's size is returned.

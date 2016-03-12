@@ -51,12 +51,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     double contentTop = padding.top;
     double contentBottom = size.height - padding.bottom;
 
-    if (isChild(_ScaffoldSlot.toolBar)) {
+    if (hasChild(_ScaffoldSlot.toolBar)) {
       contentTop = layoutChild(_ScaffoldSlot.toolBar, fullWidthConstraints).height;
       positionChild(_ScaffoldSlot.toolBar, Offset.zero);
     }
 
-    if (isChild(_ScaffoldSlot.body)) {
+    if (hasChild(_ScaffoldSlot.body)) {
       final double bodyHeight = contentBottom - contentTop;
       final BoxConstraints bodyConstraints = fullWidthConstraints.tighten(height: bodyHeight);
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
@@ -75,17 +75,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
-    if (isChild(_ScaffoldSlot.bottomSheet)) {
+    if (hasChild(_ScaffoldSlot.bottomSheet)) {
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints);
       positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
     }
 
-    if (isChild(_ScaffoldSlot.snackBar)) {
+    if (hasChild(_ScaffoldSlot.snackBar)) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
       positionChild(_ScaffoldSlot.snackBar, new Offset(0.0, contentBottom - snackBarSize.height));
     }
 
-    if (isChild(_ScaffoldSlot.floatingActionButton)) {
+    if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
       double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
@@ -96,7 +96,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.floatingActionButton, new Offset(fabX, fabY));
     }
 
-    if (isChild(_ScaffoldSlot.drawer)) {
+    if (hasChild(_ScaffoldSlot.drawer)) {
       layoutChild(_ScaffoldSlot.drawer, new BoxConstraints.tight(size));
       positionChild(_ScaffoldSlot.drawer, Offset.zero);
     }
