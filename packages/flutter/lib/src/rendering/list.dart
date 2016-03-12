@@ -15,7 +15,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   RenderList({
     List<RenderBox> children,
     double itemExtent,
-    EdgeDims padding,
+    EdgeInsets padding,
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
@@ -45,9 +45,9 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     markNeedsLayout();
   }
 
-  EdgeDims get padding => _padding;
-  EdgeDims _padding;
-  void set padding (EdgeDims newValue) {
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  void set padding (EdgeInsets newValue) {
     if (_padding == newValue)
       return;
     _padding = newValue;

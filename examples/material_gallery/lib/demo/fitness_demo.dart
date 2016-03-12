@@ -102,11 +102,11 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
             )
           ),
           new Padding(
-            padding: new EdgeDims.only(top: 20.0),
+            padding: new EdgeInsets.only(top: 20.0),
             child: new Text("JUMPING JACKS", style: Theme.of(context).textTheme.title)
           ),
           new Padding(
-            padding: new EdgeDims.only(top: 20.0, bottom: 20.0),
+            padding: new EdgeInsets.only(top: 20.0, bottom: 20.0),
             child: new Row(
               justifyContent: FlexJustifyContent.center,
               children: <Widget>[
@@ -117,7 +117,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
             )
           ),
           new Padding(
-            padding: new EdgeDims.only(bottom: 16.0),
+            padding: new EdgeInsets.only(bottom: 16.0),
             child: new SizedBox(
               width: 300.0,
               height: 72.0,

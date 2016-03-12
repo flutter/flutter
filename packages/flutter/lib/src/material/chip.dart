@@ -45,7 +45,7 @@ class Chip extends StatelessComponent {
       leftPadding = 0.0;
       children.add(new ExcludeSemantics(
         child: new Container(
-          margin: const EdgeDims.only(right: 8.0),
+          margin: const EdgeInsets.only(right: 8.0),
           width: _kAvatarDiamater,
           height: _kAvatarDiamater,
           child: avatar
@@ -65,7 +65,7 @@ class Chip extends StatelessComponent {
         child: new Tooltip(
           message: 'Delete "$label"',
           child: new Container(
-            padding: const EdgeDims.symmetric(horizontal: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: new Icon(
               icon: Icons.cancel,
               size: 18.0,
@@ -80,7 +80,7 @@ class Chip extends StatelessComponent {
       container: true,
       child: new Container(
         height: _kChipHeight,
-        padding: new EdgeDims.only(left: leftPadding, right: rightPadding),
+        padding: new EdgeInsets.only(left: leftPadding, right: rightPadding),
         decoration: new BoxDecoration(
           backgroundColor: Colors.grey[300],
           borderRadius: 16.0

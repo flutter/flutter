@@ -32,7 +32,7 @@ class PageSelectorDemo extends StatelessComponent {
             return new Column(
               children: <Widget>[
                 new Container(
-                  margin: const EdgeDims.only(top: 16.0),
+                  margin: const EdgeInsets.only(top: 16.0),
                   child: new Row(
                     children: <Widget>[
                       new IconButton(
@@ -57,7 +57,7 @@ class PageSelectorDemo extends StatelessComponent {
                     children: icons.map((IconData icon) {
                       return new Container(
                         key: new ObjectKey(icon),
-                        padding: const EdgeDims.all(12.0),
+                        padding: const EdgeInsets.all(12.0),
                         child: new Card(
                           child: new Center(
                             child: new Icon(icon: icon, size: 128.0, color: color)

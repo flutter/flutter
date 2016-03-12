@@ -19,7 +19,7 @@ class Divider extends StatelessComponent {
     final double bottom = (height ~/ 2.0).toDouble();
     return new Container(
       height: 0.0,
-      margin: new EdgeDims.only(
+      margin: new EdgeInsets.only(
         top: height - bottom - 1.0,
         left: indent,
         bottom: bottom

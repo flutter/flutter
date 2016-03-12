@@ -13,7 +13,7 @@ class _ContactCategory extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Container(
-      padding: const EdgeDims.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       decoration: new BoxDecoration(
         border: new Border(bottom: new BorderSide(color: Theme.of(context).dividerColor))
       ),
@@ -58,7 +58,7 @@ class _ContactItem extends StatelessComponent {
       ));
     }
     return new Padding(
-      padding: const EdgeDims.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: new Row(
         justifyContent: FlexJustifyContent.spaceBetween,
         children: rowChildren
@@ -109,7 +109,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         ),
         body: new Block(
           scrollableKey: scrollableKey,
-          padding: new EdgeDims.only(top: appBarHeight),
+          padding: new EdgeInsets.only(top: appBarHeight),
           children: <Widget>[
             new _ContactCategory(
               icon: Icons.call,

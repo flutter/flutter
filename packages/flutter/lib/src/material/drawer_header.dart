@@ -18,7 +18,7 @@ class DrawerHeader extends StatelessComponent {
 
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeDims.zero).top;
+    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
     return new Container(
       height: statusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(
@@ -30,13 +30,13 @@ class DrawerHeader extends StatelessComponent {
           )
         )
       ),
-      padding: const EdgeDims.only(bottom: 7.0),
-      margin: const EdgeDims.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 7.0),
+      margin: const EdgeInsets.only(bottom: 8.0),
       child: new Column(
         children: <Widget>[
           new Flexible(child: new Container()),
           new Container(
-            padding: const EdgeDims.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: new DefaultTextStyle(
               style: Theme.of(context).textTheme.body2,
               child: child

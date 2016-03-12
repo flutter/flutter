@@ -684,7 +684,7 @@ class Block extends StatelessComponent {
   }
 
   final List<Widget> children;
-  final EdgeDims padding;
+  final EdgeInsets padding;
   final double initialScrollOffset;
   final Axis scrollDirection;
   final ViewportAnchor scrollAnchor;

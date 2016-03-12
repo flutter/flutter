@@ -40,7 +40,7 @@ class GridSpecification {
     this.rowOffsets,
     this.columnSpacing: 0.0,
     this.rowSpacing: 0.0,
-    this.padding: EdgeDims.zero
+    this.padding: EdgeInsets.zero
   }) {
     assert(_debugIsMonotonic(columnOffsets));
     assert(_debugIsMonotonic(rowOffsets));
@@ -61,7 +61,7 @@ class GridSpecification {
     int rowCount,
     this.rowSpacing: 0.0,
     this.columnSpacing: 0.0,
-    this.padding: EdgeDims.zero
+    this.padding: EdgeInsets.zero
   }) : columnOffsets = _generateRegularOffsets(columnCount, tileWidth),
        rowOffsets = _generateRegularOffsets(rowCount, tileHeight) {
     assert(_debugIsMonotonic(columnOffsets));
@@ -105,7 +105,7 @@ class GridSpecification {
   ///
   /// The grid's size encloses the spaced rows and columns and is then inflated
   /// by the padding.
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   /// The size of the grid.
   Size get gridSize => new Size(columnOffsets.last + padding.horizontal, rowOffsets.last + padding.vertical);
@@ -189,7 +189,7 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
   GridDelegateWithInOrderChildPlacement({
     this.columnSpacing: 0.0,
     this.rowSpacing: 0.0,
-    this.padding: EdgeDims.zero
+    this.padding: EdgeInsets.zero
   }) {
     assert(columnSpacing != null && columnSpacing >= 0.0);
     assert(rowSpacing != null && rowSpacing >= 0.0);
@@ -203,7 +203,7 @@ abstract class GridDelegateWithInOrderChildPlacement extends GridDelegate {
   final double rowSpacing;
 
   // Insets for the entire grid.
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   GridChildPlacement getChildPlacement(GridSpecification specification, int index, Object placementData) {
     final int columnCount = specification.columnOffsets.length - 1;
@@ -227,7 +227,7 @@ class FixedColumnCountGridDelegate extends GridDelegateWithInOrderChildPlacement
     this.columnCount,
     double columnSpacing: 0.0,
     double rowSpacing: 0.0,
-    EdgeDims padding: EdgeDims.zero,
+    EdgeInsets padding: EdgeInsets.zero,
     this.tileAspectRatio: 1.0
   }) : super(columnSpacing: columnSpacing, rowSpacing: rowSpacing, padding: padding) {
     assert(columnCount != null && columnCount >= 0);
@@ -285,7 +285,7 @@ class MaxTileWidthGridDelegate extends GridDelegateWithInOrderChildPlacement {
     this.tileAspectRatio: 1.0,
     double columnSpacing: 0.0,
     double rowSpacing: 0.0,
-    EdgeDims padding: EdgeDims.zero
+    EdgeInsets padding: EdgeInsets.zero
   }) : super(columnSpacing: columnSpacing, rowSpacing: rowSpacing, padding: padding) {
     assert(maxTileWidth != null && maxTileWidth >= 0.0);
     assert(tileAspectRatio != null && tileAspectRatio > 0.0);

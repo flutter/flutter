@@ -23,7 +23,7 @@ class _BarGraphic extends StatelessComponent {
     return new Container(
       height: height,
       width: 200.0,
-      padding: const EdgeDims.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: new BoxDecoration(backgroundColor: color),
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.body1.copyWith(color: Colors.white),
@@ -90,7 +90,7 @@ class _TechniqueItem extends StatelessComponent {
       child: new InkWell(
         onTap: () { showDemo(context); },
         child: new Padding(
-          padding: const EdgeDims.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: new Row(
             justifyContent: FlexJustifyContent.spaceBetween,
             children :<Widget>[
@@ -115,11 +115,11 @@ class ScrollingTechniquesDemo extends StatelessComponent {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Scrolling Techniques')),
       body: new Padding(
-        padding: const EdgeDims.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: new Block(
           children: <Widget>[
             new Padding(
-              padding: const EdgeDims.symmetric(horizontal: 16.0, vertical: 32.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
               child: new Text(_introText, style: Theme.of(context).textTheme.caption)
             ),
             new _TechniqueItem(

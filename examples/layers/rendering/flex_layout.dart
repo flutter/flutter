@@ -15,7 +15,7 @@ void main() {
   void addAlignmentRow(FlexAlignItems alignItems) {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
     RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$alignItems'));
-    table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
+    table.add(new RenderPadding(child: paragraph, padding: new EdgeInsets.only(top: 20.0)));
     RenderFlex row = new RenderFlex(alignItems: alignItems, textBaseline: TextBaseline.alphabetic);
     style = new TextStyle(fontSize: 15.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
@@ -49,7 +49,7 @@ void main() {
   void addJustificationRow(FlexJustifyContent justify) {
     const TextStyle style = const TextStyle(color: const Color(0xFF000000));
     RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$justify'));
-    table.add(new RenderPadding(child: paragraph, padding: new EdgeDims.only(top: 20.0)));
+    table.add(new RenderPadding(child: paragraph, padding: new EdgeInsets.only(top: 20.0)));
     RenderFlex row = new RenderFlex(direction: FlexDirection.horizontal);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: new Size(80.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: new Size(64.0, 60.0)));
@@ -68,7 +68,7 @@ void main() {
 
   RenderDecoratedBox root = new RenderDecoratedBox(
     decoration: new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),
-    child: new RenderPadding(child: table, padding: new EdgeDims.symmetric(vertical: 50.0))
+    child: new RenderPadding(child: table, padding: new EdgeInsets.symmetric(vertical: 50.0))
   );
 
   new RenderingFlutterBinding(root: root);

@@ -81,7 +81,7 @@ void main() {
 
       scaffoldKey.currentState.showBottomSheet((BuildContext context) {
         return new Container(
-          margin: new EdgeDims.all(40.0),
+          margin: new EdgeInsets.all(40.0),
           child: new Text('BottomSheet')
         );
       }).closed.then((_) {

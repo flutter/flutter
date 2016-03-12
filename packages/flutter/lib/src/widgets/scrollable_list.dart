@@ -37,7 +37,7 @@ class ScrollableList extends Scrollable {
 
   final double itemExtent;
   final bool itemsWrap;
-  final EdgeDims padding;
+  final EdgeInsets padding;
   final ScrollableListPainter scrollableListPainter;
   final Iterable<Widget> children;
 
@@ -110,7 +110,7 @@ class _VirtualListViewport extends VirtualViewport {
   final ViewportAnchor anchor;
   final double itemExtent;
   final bool itemsWrap;
-  final EdgeDims padding;
+  final EdgeInsets padding;
   final RenderObjectPainter overlayPainter;
 
   double get _leadingPadding {
@@ -180,7 +180,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
   void layout(BoxConstraints constraints) {
     final int length = renderObject.virtualChildCount;
     final double itemExtent = widget.itemExtent;
-    final EdgeDims padding = widget.padding ?? EdgeDims.zero;
+    final EdgeInsets padding = widget.padding ?? EdgeInsets.zero;
     final Size containerSize = renderObject.size;
 
     double containerExtent;
@@ -250,7 +250,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     ViewportAnchor anchor: ViewportAnchor.start,
     double itemExtent,
     bool itemsWrap: false,
-    EdgeDims padding,
+    EdgeInsets padding,
     RenderObjectPainter overlayPainter,
     this.children
   }) : super(
@@ -301,7 +301,7 @@ class ScrollableLazyList extends Scrollable {
   final double itemExtent;
   final int itemCount;
   final ItemListBuilder itemBuilder;
-  final EdgeDims padding;
+  final EdgeInsets padding;
   final ScrollableListPainter scrollableListPainter;
 
   ScrollableState createState() => new _ScrollableLazyListState();
@@ -359,7 +359,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
     double itemExtent,
-    EdgeDims padding,
+    EdgeInsets padding,
     RenderObjectPainter overlayPainter,
     this.itemCount,
     this.itemBuilder

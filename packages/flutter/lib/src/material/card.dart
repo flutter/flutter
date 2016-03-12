@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 
-const EdgeDims _kCardMargins = const EdgeDims.all(4.0);
+const EdgeInsets _kCardMargins = const EdgeInsets.all(4.0);
 
 /// A material design card
 ///

@@ -63,7 +63,7 @@ class DrawerItem extends StatelessComponent {
     if (icon != null) {
       children.add(
         new Padding(
-          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: new Icon(
             icon: icon,
             color: _getIconColor(themeData)
@@ -74,7 +74,7 @@ class DrawerItem extends StatelessComponent {
     children.add(
       new Flexible(
         child: new Padding(
-          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
             style: _getTextStyle(themeData),
             child: child

@@ -72,7 +72,7 @@ class IconsDemoState extends State<IconsDemo> {
       body: new IconTheme(
         data: new IconThemeData(opacity: iconOpacity),
         child: new Padding(
-          padding: const EdgeDims.all(24.0),
+          padding: const EdgeInsets.all(24.0),
           child: new Column(
             children: <Widget>[
               new Row(

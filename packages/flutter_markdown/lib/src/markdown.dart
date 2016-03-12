@@ -68,7 +68,7 @@ class MarkdownBody extends MarkdownBodyRaw {
   ///
   ///     new ScrollableViewport(
   ///       child: new Padding(
-  ///         padding: new EdgeDims.all(16.0),
+  ///         padding: new EdgeInsets.all(16.0),
   ///         child: new Markdown(data: markdownSource)
   ///       )
   ///     )

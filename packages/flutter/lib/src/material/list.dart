@@ -28,7 +28,7 @@ class MaterialList extends StatefulComponent {
     this.onScroll,
     this.type: MaterialListType.twoLine,
     this.children,
-    this.scrollablePadding: EdgeDims.zero,
+    this.scrollablePadding: EdgeInsets.zero,
     this.scrollableKey
   }) : super(key: key);
 
@@ -36,7 +36,7 @@ class MaterialList extends StatefulComponent {
   final ScrollListener onScroll;
   final MaterialListType type;
   final Iterable<Widget> children;
-  final EdgeDims scrollablePadding;
+  final EdgeInsets scrollablePadding;
   final Key scrollableKey;
 
   _MaterialListState createState() => new _MaterialListState();
@@ -52,7 +52,7 @@ class _MaterialListState extends State<MaterialList> {
       scrollDirection: Axis.vertical,
       onScroll: config.onScroll,
       itemExtent: kListItemExtent[config.type],
-      padding: const EdgeDims.symmetric(vertical: 8.0) + config.scrollablePadding,
+      padding: const EdgeInsets.symmetric(vertical: 8.0) + config.scrollablePadding,
       scrollableListPainter: _scrollbarPainter,
       children: config.children
     );

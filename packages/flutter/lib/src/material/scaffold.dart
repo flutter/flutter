@@ -37,7 +37,7 @@ enum _ScaffoldSlot {
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({ this.padding });
 
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   void performLayout(Size size) {
     BoxConstraints looseConstraints = new BoxConstraints.loose(size);
@@ -375,11 +375,11 @@ class ScaffoldState extends State<Scaffold> {
 
   bool _shouldShowBackArrow;
 
-  Widget _getModifiedToolBar({ EdgeDims padding, double foregroundOpacity: 1.0, int elevation }) {
+  Widget _getModifiedToolBar({ EdgeInsets padding, double foregroundOpacity: 1.0, int elevation }) {
     ToolBar toolBar = config.toolBar;
     if (toolBar == null)
       return null;
-    EdgeDims toolBarPadding = new EdgeDims.only(top: padding.top);
+    EdgeInsets toolBarPadding = new EdgeInsets.only(top: padding.top);
     Widget left = toolBar.left;
     if (left == null) {
       if (config.drawer != null) {
@@ -431,7 +431,7 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   Widget _buildScrollableAppBar(BuildContext context) {
-    final EdgeDims toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeDims.zero;
+    final EdgeInsets toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
     final double toolBarHeight = kToolBarHeight + toolBarPadding.top;
     Widget appBar;
 
@@ -468,7 +468,7 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   Widget build(BuildContext context) {
-    EdgeDims padding = MediaQuery.of(context)?.padding ?? EdgeDims.zero;
+    EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
 
     if (_snackBars.length > 0) {
       ModalRoute<dynamic> route = ModalRoute.of(context);
@@ -538,7 +538,7 @@ class ScaffoldState extends State<Scaffold> {
             new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
-                padding: EdgeDims.zero
+                padding: EdgeInsets.zero
               )
             ),
             new Positioned(

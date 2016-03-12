@@ -241,7 +241,7 @@ class StockSettingsState extends State<StockSettings> {
     });
     return new Block(
       children: rows,
-      padding: const EdgeDims.symmetric(vertical: 20.0)
+      padding: const EdgeInsets.symmetric(vertical: 20.0)
     );
   }
 

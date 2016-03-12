@@ -40,8 +40,8 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
           new Rectangle(const Color(0xFF00FFFF)),
           new Material(
             child: new Container(
-              padding: new EdgeDims.all(10.0),
-              margin: new EdgeDims.all(10.0),
+              padding: new EdgeInsets.all(10.0),
+              margin: new EdgeInsets.all(10.0),
               child: new Row(
                 children: <Widget>[
                   new RaisedButton(
@@ -95,7 +95,7 @@ void main() {
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
-  RenderPadding root = new RenderPadding(padding: new EdgeDims.all(80.0), child: transformBox);
+  RenderPadding root = new RenderPadding(padding: new EdgeInsets.all(80.0), child: transformBox);
 
   WidgetFlutterBinding.instance.renderView.child = root;
   WidgetFlutterBinding.instance.addPersistentFrameCallback(rotate);

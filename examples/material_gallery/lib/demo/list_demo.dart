@@ -195,7 +195,7 @@ class ListDemoState extends State<ListDemo> {
         ]
       ),
       body: new Block(
-        padding: new EdgeDims.all(_dense ? 4.0 : 8.0),
+        padding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
         children: listItems.toList()
       )
     );

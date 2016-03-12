@@ -12,9 +12,9 @@ import 'theme.dart';
 
 const double _kDefaultTooltipBorderRadius = 2.0;
 const double _kDefaultTooltipHeight = 32.0;
-const EdgeDims _kDefaultTooltipPadding = const EdgeDims.symmetric(horizontal: 16.0);
+const EdgeInsets _kDefaultTooltipPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 const double _kDefaultVerticalTooltipOffset = 24.0;
-const EdgeDims _kDefaultTooltipScreenEdgeMargin = const EdgeDims.all(10.0);
+const EdgeInsets _kDefaultTooltipScreenEdgeMargin = const EdgeInsets.all(10.0);
 const Duration _kDefaultTooltipFadeDuration = const Duration(milliseconds: 200);
 const Duration _kDefaultTooltipShowDuration = const Duration(seconds: 2);
 
@@ -56,9 +56,9 @@ class Tooltip extends StatefulComponent {
   final double opacity;
   final double borderRadius;
   final double height;
-  final EdgeDims padding;
+  final EdgeInsets padding;
   final double verticalOffset;
-  final EdgeDims screenEdgeMargin;
+  final EdgeInsets screenEdgeMargin;
   final bool preferBelow;
   final Duration fadeDuration;
   final Duration showDuration;
@@ -198,7 +198,7 @@ class _TooltipPositionDelegate extends OneChildLayoutDelegate {
   });
   final Point target;
   final double verticalOffset;
-  final EdgeDims screenEdgeMargin;
+  final EdgeInsets screenEdgeMargin;
   final bool preferBelow;
 
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
@@ -257,11 +257,11 @@ class _TooltipOverlay extends StatelessComponent {
   final double opacity;
   final double borderRadius;
   final double height;
-  final EdgeDims padding;
+  final EdgeInsets padding;
   final Animation<double> animation;
   final Point target;
   final double verticalOffset;
-  final EdgeDims screenEdgeMargin;
+  final EdgeInsets screenEdgeMargin;
   final bool preferBelow;
 
   Widget build(BuildContext context) {

@@ -280,7 +280,7 @@ class _FocusState extends State<Focus> {
   }
 
   Size _mediaSize;
-  EdgeDims _mediaPadding;
+  EdgeInsets _mediaPadding;
 
   void _ensureVisibleIfFocused() {
     if (!Focus._atScope(context))
@@ -295,7 +295,7 @@ class _FocusState extends State<Focus> {
     MediaQueryData data = MediaQuery.of(context);
     if (data != null) {
       Size newMediaSize = data.size;
-      EdgeDims newMediaPadding = data.padding;
+      EdgeInsets newMediaPadding = data.padding;
       if (newMediaSize != _mediaSize || newMediaPadding != _mediaPadding) {
         _mediaSize = newMediaSize;
         _mediaPadding = newMediaPadding;

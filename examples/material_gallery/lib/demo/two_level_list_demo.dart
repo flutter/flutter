@@ -9,7 +9,7 @@ class TwoLevelListDemo extends StatelessComponent {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Expand/Collapse List Control')),
       body: new Padding(
-        padding: const EdgeDims.all(0.0),
+        padding: const EdgeInsets.all(0.0),
         child: new TwoLevelList(
           type: MaterialListType.oneLine,
           items: <Widget>[

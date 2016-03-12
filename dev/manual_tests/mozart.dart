@@ -143,7 +143,7 @@ class _WindowState extends State<Window> {
             color: Colors.blue[200]
           ),
           new Container(
-            padding: const EdgeDims.all(_kWindowPadding),
+            padding: const EdgeInsets.all(_kWindowPadding),
             child: new Material(
               elevation: 8,
               child: new ChildView(child: config.child)

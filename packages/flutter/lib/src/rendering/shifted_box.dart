@@ -84,7 +84,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 /// padding, effectively creating empty space around the child.
 class RenderPadding extends RenderShiftedBox {
   RenderPadding({
-    EdgeDims padding,
+    EdgeInsets padding,
     RenderBox child
   }) : _padding = padding, super(child) {
     assert(padding != null);
@@ -92,9 +92,9 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   /// The amount to pad the child in each dimension.
-  EdgeDims get padding => _padding;
-  EdgeDims _padding;
-  void set padding (EdgeDims value) {
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  void set padding (EdgeInsets value) {
     assert(value != null);
     assert(value.isNonNegative);
     if (_padding == value)

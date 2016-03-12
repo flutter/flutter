@@ -46,7 +46,7 @@ class PageableListAppState extends State<PageableListApp> {
       child: new Container(
         width: cardModel.size.width,
         height: cardModel.size.height,
-        padding: const EdgeDims.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
       )
     );

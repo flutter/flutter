@@ -49,7 +49,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         selectedTime: _selectedTime,
         onChanged: _handleTimeChanged
       ),
-      contentPadding: EdgeDims.zero,
+      contentPadding: EdgeInsets.zero,
       actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),

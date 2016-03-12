@@ -126,7 +126,7 @@ class _TimePickerState extends State<TimePicker> {
         new AspectRatio(
           aspectRatio: 1.0,
           child: new Container(
-            margin: const EdgeDims.all(12.0),
+            margin: const EdgeInsets.all(12.0),
             child: new _Dial(
               mode: _mode,
               selectedTime: config.selectedTime,
@@ -214,12 +214,12 @@ class _TimePickerHeader extends StatelessComponent {
             onTap: _handleChangeDayPeriod,
             behavior: HitTestBehavior.opaque,
             child: new Container(
-              padding: const EdgeDims.only(left: 16.0, right: 24.0),
+              padding: const EdgeInsets.only(left: 16.0, right: 24.0),
               child: new Column(
                 children: <Widget>[
                   new Text('AM', style: amStyle),
                   new Container(
-                    padding: const EdgeDims.only(top: 4.0),
+                    padding: const EdgeInsets.only(top: 4.0),
                     child: new Text('PM', style: pmStyle)
                   ),
                 ],

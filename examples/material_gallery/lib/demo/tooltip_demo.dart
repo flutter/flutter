@@ -52,7 +52,7 @@ class TooltipDemo extends StatelessComponent {
             ]
             .map((Widget widget) {
               return new Padding(
-                padding: const EdgeDims.only(top: 16.0, left: 16.0, right: 16.0),
+                padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
                 child: widget
               );
             })

@@ -20,7 +20,7 @@ class TextStyleItem extends StatelessComponent {
     final ThemeData theme = Theme.of(context);
     final TextStyle nameStyle = theme.textTheme.body1.copyWith(color: theme.textTheme.caption.color);
     return new Padding(
-      padding: const EdgeDims.symmetric(horizontal: 8.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
       child: new Row(
         alignItems: FlexAlignItems.start,
         children: <Widget>[

@@ -61,7 +61,7 @@ class SpeakerSeparator extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Container(
       constraints: const BoxConstraints.expand(height: 0.0),
-      margin: const EdgeDims.symmetric(vertical: 10.0, horizontal: 64.0),
+      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 64.0),
       decoration: const BoxDecoration(
         border: const Border(
           bottom: const BorderSide(color: const Color.fromARGB(24, 0, 0, 0))
@@ -104,7 +104,7 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
     return new GestureDetector(
       onTap: _handleTap,
       child: new Container(
-        padding: new EdgeDims.symmetric(horizontal: 8.0),
+        padding: new EdgeInsets.symmetric(horizontal: 8.0),
         child: new Column(
           children: children,
           justifyContent: FlexJustifyContent.center,

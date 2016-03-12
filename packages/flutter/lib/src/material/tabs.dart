@@ -28,7 +28,7 @@ const double _kTextAndIconTabHeight = 72.0;
 const double _kTabIndicatorHeight = 2.0;
 const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
-const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
+const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 300);
 
@@ -342,7 +342,7 @@ class _Tab extends StatelessComponent {
         children: <Widget>[
           new Container(
             child: _buildLabelIcon(context),
-            margin: const EdgeDims.only(bottom: 10.0)
+            margin: const EdgeInsets.only(bottom: 10.0)
           ),
           _buildLabelText()
         ],
@@ -988,7 +988,7 @@ class TabPageSelector<T> extends StatelessComponent {
     return new Container(
       width: 12.0,
       height: 12.0,
-      margin: new EdgeDims.all(4.0),
+      margin: new EdgeInsets.all(4.0),
       decoration: new BoxDecoration(
         backgroundColor: background,
         border: new Border.all(color: selectedColor.end),

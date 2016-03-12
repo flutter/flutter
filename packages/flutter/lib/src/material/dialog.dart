@@ -32,14 +32,14 @@ class Dialog extends StatelessComponent {
 
   // Padding around the title; uses material design default if none is supplied
   // If there is no title, no padding will be provided
-  final EdgeDims titlePadding;
+  final EdgeInsets titlePadding;
 
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   final Widget content;
 
   // Padding around the content; uses material design default if none is supplied
-  final EdgeDims contentPadding;
+  final EdgeInsets contentPadding;
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
@@ -59,9 +59,9 @@ class Dialog extends StatelessComponent {
     List<Widget> dialogBody = new List<Widget>();
 
     if (title != null) {
-      EdgeDims padding = titlePadding;
+      EdgeInsets padding = titlePadding;
       if (padding == null)
-        padding = new EdgeDims.TRBL(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0);
+        padding = new EdgeInsets.TRBL(24.0, 24.0, content == null ? 20.0 : 0.0, 24.0);
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
@@ -72,9 +72,9 @@ class Dialog extends StatelessComponent {
     }
 
     if (content != null) {
-      EdgeDims padding = contentPadding;
+      EdgeInsets padding = contentPadding;
       if (padding == null)
-        padding = const EdgeDims.TRBL(20.0, 24.0, 24.0, 24.0);
+        padding = const EdgeInsets.TRBL(20.0, 24.0, 24.0, 24.0);
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
@@ -98,7 +98,7 @@ class Dialog extends StatelessComponent {
 
     return new Center(
       child: new Container(
-        margin: new EdgeDims.symmetric(horizontal: 40.0, vertical: 24.0),
+        margin: new EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
         child: new ConstrainedBox(
           constraints: new BoxConstraints(minWidth: 280.0),
           child: new Material(

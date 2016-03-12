@@ -354,7 +354,7 @@ class Padding extends OneChildRenderObjectWidget {
   }
 
   /// The amount to pad the child in each dimension.
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   RenderPadding createRenderObject(BuildContext context) => new RenderPadding(padding: padding);
 
@@ -926,18 +926,18 @@ class Container extends StatelessComponent {
   final Decoration foregroundDecoration;
 
   /// Empty space to surround the decoration.
-  final EdgeDims margin;
+  final EdgeInsets margin;
 
   /// Empty space to inscribe inside the decoration.
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  EdgeDims get _paddingIncludingDecoration {
+  EdgeInsets get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
       return padding;
-    EdgeDims decorationPadding = decoration.padding;
+    EdgeInsets decorationPadding = decoration.padding;
     if (padding == null)
       return decorationPadding;
     return padding + decorationPadding;
@@ -949,7 +949,7 @@ class Container extends StatelessComponent {
     if (child == null && (constraints == null || !constraints.isTight))
       current = new ConstrainedBox(constraints: const BoxConstraints.expand());
 
-    EdgeDims effectivePadding = _paddingIncludingDecoration;
+    EdgeInsets effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = new Padding(padding: effectivePadding, child: current);
 
@@ -1248,7 +1248,7 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
     this.columnSpacing,
     this.rowSpacing,
     this.tileAspectRatio: 1.0,
-    this.padding: EdgeDims.zero
+    this.padding: EdgeInsets.zero
   }) : super(key: key, children: children) {
     assert(columnCount != null);
   }
@@ -1266,7 +1266,7 @@ class FixedColumnCountGrid extends GridRenderObjectWidgetBase {
   final double tileAspectRatio;
 
   /// The amount of padding to apply to each child.
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   FixedColumnCountGridDelegate createDelegate() {
     return new FixedColumnCountGridDelegate(
@@ -1290,7 +1290,7 @@ class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
     this.columnSpacing,
     this.rowSpacing,
     this.tileAspectRatio: 1.0,
-    this.padding: EdgeDims.zero
+    this.padding: EdgeInsets.zero
   }) : super(key: key, children: children) {
     assert(maxTileWidth != null);
   }
@@ -1308,7 +1308,7 @@ class MaxTileWidthGrid extends GridRenderObjectWidgetBase {
   final double rowSpacing;
 
   /// The amount of padding to apply to each child.
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   MaxTileWidthGridDelegate createDelegate() {
     return new MaxTileWidthGridDelegate(

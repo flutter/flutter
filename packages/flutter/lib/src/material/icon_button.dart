@@ -56,7 +56,7 @@ class IconButton extends StatelessComponent {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget result = new Padding(
-      padding: const EdgeDims.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Icon(
         size: size,
         icon: icon,

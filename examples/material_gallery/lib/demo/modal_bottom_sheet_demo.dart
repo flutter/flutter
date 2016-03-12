@@ -24,7 +24,7 @@ class ModalBottomSheetDemo extends StatelessComponent {
               showModalBottomSheet/*<Null>*/(context: context, builder: (BuildContext context) {
                 return new Container(
                   child: new Padding(
-                    padding: const EdgeDims.all(32.0),
+                    padding: const EdgeInsets.all(32.0),
                     child: new Text("This is the modal bottom sheet. Click anywhere to dismiss.", style: textStyle)
                   )
                 );

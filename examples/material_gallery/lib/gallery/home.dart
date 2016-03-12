@@ -53,7 +53,7 @@ class GalleryHomeState extends State<GalleryHome> {
       toolBar: new ToolBar(
         flexibleSpace: (BuildContext context) {
           return new Container(
-            padding: const EdgeDims.only(left: 16.0, bottom: 24.0),
+            padding: const EdgeInsets.only(left: 16.0, bottom: 24.0),
             height: 128.0,
             child: new Align(
               alignment: const FractionalOffset(0.0, 1.0),
@@ -63,7 +63,7 @@ class GalleryHomeState extends State<GalleryHome> {
         }
       ),
       body: new Block(
-        padding: const EdgeDims.all(4.0),
+        padding: const EdgeInsets.all(4.0),
         children: <Widget>[
           new Row(
             children: <Widget>[

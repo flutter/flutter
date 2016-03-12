@@ -105,8 +105,8 @@ Widget statusBox(Widget child) {
         backgroundColor: darkGray
       ),
       height: 90.0,
-      padding: const EdgeDims.all(8.0),
-      margin: const EdgeDims.symmetric(horizontal: 50.0),
+      padding: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 50.0),
       child: new Center(child: child)
     )
   );

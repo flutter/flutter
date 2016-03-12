@@ -15,7 +15,7 @@ class AdaptedListItem extends StatelessComponent {
         new Container(
           width: 32.0,
           height: 32.0,
-          margin: const EdgeDims.all(8.0),
+          margin: const EdgeInsets.all(8.0),
           decoration: new BoxDecoration(
             backgroundColor: Colors.lightBlueAccent[100]
           )
@@ -43,7 +43,7 @@ class AdaptedGridItem extends StatelessComponent {
             )
           ),
           new Container(
-            margin: const EdgeDims.only(left: 8.0),
+            margin: const EdgeInsets.only(left: 8.0),
             child: new Row(
               children: <Widget>[
                 new Flexible(

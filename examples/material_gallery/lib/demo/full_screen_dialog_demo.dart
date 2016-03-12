@@ -36,7 +36,7 @@ class DateTimeItem extends StatelessComponent {
         children: <Widget>[
           new Flexible(
             child: new Container(
-              padding: const EdgeDims.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               decoration: new BoxDecoration(
                 border: new Border(bottom: new BorderSide(color: theme.dividerColor))
               ),
@@ -63,8 +63,8 @@ class DateTimeItem extends StatelessComponent {
             )
           ),
           new Container(
-            margin: const EdgeDims.only(left: 8.0),
-            padding: const EdgeDims.symmetric(vertical: 8.0),
+            margin: const EdgeInsets.only(left: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             decoration: new BoxDecoration(
               border: new Border(bottom: new BorderSide(color: theme.dividerColor))
             ),
@@ -157,14 +157,14 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         ]
       ),
       body: new Padding(
-        padding: const EdgeDims.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: new ScrollableViewport(
           child: new Column(
             alignItems: FlexAlignItems.stretch,
             justifyContent: FlexJustifyContent.collapse,
             children: <Widget>[
               new Container(
-                padding: const EdgeDims.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: new BoxDecoration(
                   border: new Border(bottom: new BorderSide(color: theme.dividerColor))
                 ),
@@ -174,7 +174,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 )
               ),
               new Container(
-                padding: const EdgeDims.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: new BoxDecoration(
                   border: new Border(bottom: new BorderSide(color: theme.dividerColor))
                 ),
@@ -237,7 +237,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             ]
             .map((Widget child) {
               return new Container(
-                padding: const EdgeDims.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 height: 96.0,
                 child: child
               );

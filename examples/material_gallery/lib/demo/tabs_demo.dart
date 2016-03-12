@@ -42,7 +42,7 @@ class TabsDemo extends StatelessComponent {
           children: icons.map((IconData icon) {
             return new Container(
               key: new ObjectKey(icon),
-              padding: const EdgeDims.all(12.0),
+              padding: const EdgeInsets.all(12.0),
               child: new Card(
                 child: new Center(
                   child: new Icon(

@@ -22,7 +22,7 @@ class SnackBarDemo extends StatelessComponent {
 
   Widget buildBody(BuildContext context) {
     return new Padding(
-      padding: const EdgeDims.all(24.0),
+      padding: const EdgeInsets.all(24.0),
       child: new Column(
         children: <Widget>[
           new Text(_text1),
@@ -47,7 +47,7 @@ class SnackBarDemo extends StatelessComponent {
         ]
         .map((Widget child) {
           return new Container(
-            margin: const EdgeDims.symmetric(vertical: 12.0),
+            margin: const EdgeInsets.symmetric(vertical: 12.0),
             child: child
           );
         })

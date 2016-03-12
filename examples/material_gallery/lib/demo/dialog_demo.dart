@@ -32,7 +32,7 @@ class DialogDemoItem extends StatelessComponent {
     return new InkWell(
       onTap: onPressed,
       child: new Padding(
-        padding: const EdgeDims.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: new Row(
           justifyContent: FlexJustifyContent.start,
           alignItems: FlexAlignItems.center,
@@ -43,7 +43,7 @@ class DialogDemoItem extends StatelessComponent {
               color: color
             ),
             new Padding(
-              padding: const EdgeDims.only(left: 16.0),
+              padding: const EdgeInsets.only(left: 16.0),
               child: new Text(text)
             )
           ]
@@ -84,7 +84,7 @@ class DialogDemoState extends State<DialogDemo> {
         center: new Text('Dialogs')
       ),
       body: new Block(
-        padding: const EdgeDims.symmetric(vertical: 24.0, horizontal: 72.0),
+        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
           new RaisedButton(
             child: new Text('ALERT'),

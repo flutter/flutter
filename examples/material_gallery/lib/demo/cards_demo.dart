@@ -80,7 +80,7 @@ class TravelDestinationItem extends StatelessComponent {
             // description and share/expore buttons
             new Flexible(
               child: new Padding(
-                padding: const EdgeDims.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: new Column(
                   justifyContent: FlexJustifyContent.start,
                   alignItems: FlexAlignItems.start,
@@ -96,7 +96,7 @@ class TravelDestinationItem extends StatelessComponent {
                         alignItems: FlexAlignItems.end,
                         children: <Widget>[
                           new Padding(
-                            padding: const EdgeDims.only(right: 16.0),
+                            padding: const EdgeInsets.only(right: 16.0),
                             child: new Text('SHARE', style: buttonStyle)
                           ),
                           new Text('EXPLORE', style: buttonStyle)
@@ -121,10 +121,10 @@ class CardsDemo extends StatelessComponent {
         center: new Text("Travel Stream")
       ),
       body: new Block(
-        padding: const EdgeDims.only(top: 8.0, left: 8.0, right: 8.0),
+        padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {
           return new Container(
-            margin: const EdgeDims.only(bottom: 8.0),
+            margin: const EdgeInsets.only(bottom: 8.0),
             child: new TravelDestinationItem(destination: destination)
           );
         })

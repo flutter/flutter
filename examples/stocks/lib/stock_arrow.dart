@@ -71,7 +71,7 @@ class StockArrow extends StatelessComponent {
     return new Container(
       width: 40.0,
       height: 40.0,
-      margin: const EdgeDims.symmetric(horizontal: 5.0),
+      margin: const EdgeInsets.symmetric(horizontal: 5.0),
       child: new CustomPaint(
         painter: new StockArrowPainter(
           // TODO(jackson): This should change colors with the theme

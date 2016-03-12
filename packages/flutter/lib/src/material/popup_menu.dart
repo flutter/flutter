@@ -99,7 +99,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
       child: new MergeSemantics(
         child: new Container(
           height: config.height,
-          padding: const EdgeDims.symmetric(horizontal: _kMenuHorizontalPadding),
+          padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
           child: item
         )
       )
@@ -204,7 +204,7 @@ class _PopupMenu<T> extends StatelessComponent {
         stepWidth: _kMenuWidthStep,
         child: new Block(
           children: children,
-          padding: const EdgeDims.symmetric(
+          padding: const EdgeInsets.symmetric(
             vertical: _kMenuVerticalPadding
           )
         )

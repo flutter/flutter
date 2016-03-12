@@ -26,7 +26,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     assert(debugCheckHasScaffold(context));
     final double appBarHeight = Scaffold.of(context).appBarHeight;
     final Animation<double> animation = Scaffold.of(context).appBarAnimation;
-    final EdgeDims toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeDims.zero;
+    final EdgeInsets toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
     final double toolBarHeight = kToolBarHeight + toolBarPadding.top;
     final List<Widget> children = <Widget>[];
 
@@ -70,7 +70,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         curve: new Interval(0.0, scaleAndAlignEnd)
       );
       children.add(new Padding(
-        padding: const EdgeDims.only(left: 72.0, bottom: 14.0),
+        padding: const EdgeInsets.only(left: 72.0, bottom: 14.0),
         child: new Align(
           alignment: new Tween<FractionalOffset>(
             begin: new FractionalOffset(0.0, yAlignStart),

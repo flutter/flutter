@@ -51,7 +51,7 @@ class SnackBarAction extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Container(
-      margin: const EdgeDims.only(left: _kSideMargins),
+      margin: const EdgeInsets.only(left: _kSideMargins),
       child: new FlatButton(
         onPressed: onPressed,
         textTheme: ButtonColor.accent,
@@ -91,7 +91,7 @@ class SnackBar extends StatelessComponent {
     List<Widget> children = <Widget>[
       new Flexible(
         child: new Container(
-          margin: const EdgeDims.symmetric(vertical: _kSingleLineVerticalPadding),
+          margin: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
             child: content
@@ -120,7 +120,7 @@ class SnackBar extends StatelessComponent {
             elevation: 6,
             color: _kSnackBackground,
             child: new Container(
-              margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
+              margin: const EdgeInsets.symmetric(horizontal: _kSideMargins),
               child: new Theme(
                 data: new ThemeData(
                   brightness: ThemeBrightness.dark,

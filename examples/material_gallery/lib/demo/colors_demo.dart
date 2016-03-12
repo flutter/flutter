@@ -57,7 +57,7 @@ class ColorItem extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Container(
       height: kColorItemHeight,
-      padding: const EdgeDims.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: new BoxDecoration(backgroundColor: color),
       child: new Row(
         justifyContent: FlexJustifyContent.spaceBetween,

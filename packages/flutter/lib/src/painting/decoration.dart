@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 import 'basic_types.dart';
-import 'edge_dims.dart';
+import 'edge_insets.dart';
 
-export 'edge_dims.dart' show EdgeDims;
+export 'edge_insets.dart' show EdgeInsets;
 
 // This group of classes is intended for painting in cartesian coordinates.
 
 abstract class Decoration {
   const Decoration();
   bool debugAssertValid() => true;
-  EdgeDims get padding => null;
+  EdgeInsets get padding => null;
   Decoration lerpFrom(Decoration a, double t) => this;
   Decoration lerpTo(Decoration b, double t) => b;
   bool hitTest(Size size, Point position) => true;

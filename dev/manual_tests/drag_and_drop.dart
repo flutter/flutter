@@ -25,7 +25,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
       builder: (BuildContext context, List<Color> data, List<Color> rejectedData) {
         return new Container(
           height: 100.0,
-          margin: new EdgeDims.all(10.0),
+          margin: new EdgeInsets.all(10.0),
           decoration: new BoxDecoration(
             border: new Border.all(
               width: 3.0,

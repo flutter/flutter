@@ -29,7 +29,7 @@ class MarkdownRaw extends StatelessComponent {
     this.data,
     this.markdownStyle,
     this.syntaxHighlighter,
-    this.padding: const EdgeDims.all(16.0),
+    this.padding: const EdgeInsets.all(16.0),
     this.onTapLink
   });
 
@@ -43,7 +43,7 @@ class MarkdownRaw extends StatelessComponent {
   final SyntaxHighlighter syntaxHighlighter;
 
   /// Padding used
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   /// Callback when a link is tapped
   final MarkdownLinkCallback onTapLink;
@@ -94,7 +94,7 @@ class MarkdownBodyRaw extends StatefulComponent {
   ///
   ///     new ScrollableViewport(
   ///       child: new Padding(
-  ///         padding: new EdgeDims.all(16.0),
+  ///         padding: new EdgeInsets.all(16.0),
   ///         child: new MarkdownBodyRaw(
   ///           data: markdownSource,
   ///           markdownStyle: myStyle
@@ -382,7 +382,7 @@ class _Block {
         }
         else {
           bullet = new Padding(
-            padding: new EdgeDims.only(right: 5.0),
+            padding: new EdgeInsets.only(right: 5.0),
             child: new Text(
               "${blockPosition + 1}.",
               style: new TextStyle(textAlign: TextAlign.right)
@@ -404,19 +404,19 @@ class _Block {
     }
 
     BoxDecoration decoration;
-    EdgeDims padding;
+    EdgeInsets padding;
 
     if (tag == 'blockquote') {
       decoration = markdownStyle.blockquoteDecoration;
-      padding = new EdgeDims.all(markdownStyle.blockquotePadding);
+      padding = new EdgeInsets.all(markdownStyle.blockquotePadding);
     } else if (tag == 'pre') {
       decoration = markdownStyle.codeblockDecoration;
-      padding = new EdgeDims.all(markdownStyle.codeblockPadding);
+      padding = new EdgeInsets.all(markdownStyle.codeblockPadding);
     }
 
     return new Container(
       padding: padding,
-      margin: new EdgeDims.only(bottom: spacing),
+      margin: new EdgeInsets.only(bottom: spacing),
       child: contents,
       decoration: decoration
     );

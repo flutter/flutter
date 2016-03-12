@@ -23,7 +23,7 @@ class ToolBar extends StatelessComponent {
     this.elevation: 4,
     this.backgroundColor,
     this.textTheme,
-    this.padding: EdgeDims.zero
+    this.padding: EdgeInsets.zero
   }) : super(key: key) {
     assert((flexibleSpace != null) ? tabBar == null : true);
     assert((tabBar != null) ? flexibleSpace == null : true);
@@ -38,7 +38,7 @@ class ToolBar extends StatelessComponent {
   final int elevation;
   final Color backgroundColor;
   final TextTheme textTheme;
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   ToolBar copyWith({
     Key key,
@@ -50,7 +50,7 @@ class ToolBar extends StatelessComponent {
     int elevation,
     Color backgroundColor,
     TextTheme textTheme,
-    EdgeDims padding
+    EdgeInsets padding
   }) {
     return new ToolBar(
       key: key ?? this.key,
@@ -103,7 +103,7 @@ class ToolBar extends StatelessComponent {
     toolBarRow.add(
       new Flexible(
         child: new Padding(
-          padding: new EdgeDims.only(left: 24.0),
+          padding: new EdgeInsets.only(left: 24.0),
           child: center != null ? new DefaultTextStyle(style: centerStyle, child: center) : null
         )
       )
@@ -111,7 +111,7 @@ class ToolBar extends StatelessComponent {
     if (right != null)
       toolBarRow.addAll(right);
 
-    EdgeDims combinedPadding = new EdgeDims.symmetric(horizontal: 8.0);
+    EdgeInsets combinedPadding = new EdgeInsets.symmetric(horizontal: 8.0);
     if (padding != null)
       combinedPadding += padding;
 
@@ -121,7 +121,7 @@ class ToolBar extends StatelessComponent {
     final Widget toolBar = new ConstrainedBox(
       constraints: new BoxConstraints(maxHeight: toolBarHeight),
       child: new Padding(
-        padding: new EdgeDims.only(left: combinedPadding.left, right: combinedPadding.right),
+        padding: new EdgeInsets.only(left: combinedPadding.left, right: combinedPadding.right),
         child: new ClipRect(
           child: new OverflowBox(
             alignment: const FractionalOffset(0.0, 1.0), // bottom justify
@@ -130,7 +130,7 @@ class ToolBar extends StatelessComponent {
             child: new DefaultTextStyle(
               style: sideStyle,
               child: new Padding(
-                padding: new EdgeDims.only(top: combinedPadding.top, bottom: combinedPadding.bottom),
+                padding: new EdgeInsets.only(top: combinedPadding.top, bottom: combinedPadding.bottom),
                 child: new Row(children: toolBarRow)
               )
             )

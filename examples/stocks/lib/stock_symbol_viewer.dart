@@ -21,7 +21,7 @@ class StockSymbolView extends StatelessComponent {
 
     TextStyle headings = Theme.of(context).textTheme.body2;
     return new Container(
-      padding: new EdgeDims.all(20.0),
+      padding: new EdgeInsets.all(20.0),
       child: new Column(
         children: <Widget>[
           new Row(
@@ -79,7 +79,7 @@ class StockSymbolPage extends StatelessComponent {
       body: new Block(
         children: <Widget>[
           new Container(
-            margin: new EdgeDims.all(20.0),
+            margin: new EdgeInsets.all(20.0),
             child: new Card(child: new StockSymbolView(stock: stock))
           )
         ]
@@ -95,7 +95,7 @@ class StockSymbolBottomSheet extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Container(
-      padding: new EdgeDims.all(10.0),
+      padding: new EdgeInsets.all(10.0),
       decoration: new BoxDecoration(
         border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
       ),

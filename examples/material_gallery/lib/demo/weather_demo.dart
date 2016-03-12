@@ -140,7 +140,7 @@ class WeatherButton extends StatelessComponent {
       color = const Color(0x33000000);
 
     return new Padding(
-      padding: const EdgeDims.all(15.0),
+      padding: const EdgeInsets.all(15.0),
       child: new Material(
         color: color,
         type: MaterialType.circle,

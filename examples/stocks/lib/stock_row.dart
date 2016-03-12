@@ -64,7 +64,7 @@ class StockRow extends StatelessComponent {
       onDoubleTap: _getHandler(onDoubleTap),
       onLongPress: _getHandler(onLongPressed),
       child: new Container(
-        padding: const EdgeDims.TRBL(16.0, 16.0, 20.0, 16.0),
+        padding: const EdgeInsets.TRBL(16.0, 16.0, 20.0, 16.0),
         decoration: new BoxDecoration(
           border: new Border(
             bottom: new BorderSide(color: Theme.of(context).dividerColor)
@@ -73,7 +73,7 @@ class StockRow extends StatelessComponent {
         child: new Row(
           children: <Widget>[
             new Container(
-              margin: const EdgeDims.only(right: 5.0),
+              margin: const EdgeInsets.only(right: 5.0),
               child: new Hero(
                 tag: StockRowPartKind.arrow,
                 key: _arrowKey,

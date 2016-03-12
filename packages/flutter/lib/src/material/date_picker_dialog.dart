@@ -55,7 +55,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         lastDate: config.lastDate,
         onChanged: _handleDateChanged
       ),
-      contentPadding: EdgeDims.zero,
+      contentPadding: EdgeInsets.zero,
       actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),

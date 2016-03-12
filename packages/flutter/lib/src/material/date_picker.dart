@@ -140,7 +140,7 @@ class _DatePickerHeader extends StatelessComponent {
     TextStyle yearStyle = headerTheme.headline.copyWith(color: yearColor, height: 1.0);
 
     return new Container(
-      padding: new EdgeDims.all(10.0),
+      padding: new EdgeInsets.all(10.0),
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
       child: new Column(
         children: <Widget>[

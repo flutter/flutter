@@ -71,7 +71,7 @@ void main() {
       tester.pumpWidget(
         new ScrollableList(
           itemExtent: 290.0,
-          padding: new EdgeDims.only(top: 250.0),
+          padding: new EdgeInsets.only(top: 250.0),
           scrollDirection: Axis.vertical,
           children: items.map((int item) {
             return new Container(

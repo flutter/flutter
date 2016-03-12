@@ -34,7 +34,7 @@ void main() {
       child: size
     );
     RenderBox padding = new RenderPadding(
-      padding: new EdgeDims.all(50.0),
+      padding: new EdgeInsets.all(50.0),
       child: inner
     );
     RenderBox flex = new RenderFlex(
@@ -67,7 +67,7 @@ void main() {
     RenderBox coloredBox = new RenderDecoratedBox(
       decoration: new BoxDecoration()
     );
-    RenderBox paddingBox = new RenderPadding(padding: const EdgeDims.all(10.0),
+    RenderBox paddingBox = new RenderPadding(padding: const EdgeInsets.all(10.0),
         child: coloredBox);
     RenderBox root = new RenderDecoratedBox(
       decoration: new BoxDecoration(),
@@ -82,7 +82,7 @@ void main() {
     RenderDecoratedBox coloredBox = new RenderDecoratedBox(
       decoration: new BoxDecoration());
     RenderPadding paddedBox = new RenderPadding(
-      child: coloredBox, padding: const EdgeDims.all(10.0));
+      child: coloredBox, padding: const EdgeInsets.all(10.0));
 
     layout(paddedBox);
 
