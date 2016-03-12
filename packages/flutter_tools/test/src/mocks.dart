@@ -32,17 +32,17 @@ class MockToolchain extends Toolchain {
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
-  TargetPlatform get platform => TargetPlatform.android;
+  TargetPlatform get platform => TargetPlatform.android_arm;
   bool isSupported() => true;
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
-  TargetPlatform get platform => TargetPlatform.iOS;
+  TargetPlatform get platform => TargetPlatform.ios_arm;
   bool isSupported() => true;
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
-  TargetPlatform get platform => TargetPlatform.iOSSimulator;
+  TargetPlatform get platform => TargetPlatform.ios_x64;
   bool isSupported() => true;
 }
 

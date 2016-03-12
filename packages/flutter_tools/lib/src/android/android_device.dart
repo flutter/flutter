@@ -48,7 +48,17 @@ class AndroidDevice extends Device {
   final String modelID;
   final String deviceCodeName;
 
-  bool get isLocalEmulator => false;
+  bool _isLocalEmulator;
+
+  bool get isLocalEmulator {
+    if (_isLocalEmulator == null) {
+      // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
+      String value = runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.product.cpu.abi']));
+      _isLocalEmulator = value.startsWith('x86');
+    }
+
+    return _isLocalEmulator;
+  }
 
   _AdbLogReader _logReader;
   _AndroidDevicePortForwarder _portForwarder;
@@ -59,8 +69,7 @@ class AndroidDevice extends Device {
 
   bool _isValidAdbVersion(String adbVersion) {
     // Sample output: 'Android Debug Bridge version 1.0.31'
-    Match versionFields =
-        new RegExp(r'(\d+)\.(\d+)\.(\d+)').firstMatch(adbVersion);
+    Match versionFields = new RegExp(r'(\d+)\.(\d+)\.(\d+)').firstMatch(adbVersion);
     if (versionFields != null) {
       int majorVersion = int.parse(versionFields[1]);
       int minorVersion = int.parse(versionFields[2]);
@@ -275,8 +284,9 @@ class AndroidDevice extends Device {
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
   }
 
+  // TODO(devoncarew): Return android_arm or android_x64 based on [isLocalEmulator].
   @override
-  TargetPlatform get platform => TargetPlatform.android;
+  TargetPlatform get platform => TargetPlatform.android_arm;
 
   void clearLogs() {
     runSync(adbCommandForDevice(<String>['logcat', '-c']));
@@ -581,7 +591,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return ports;
   }
 
-  Future<int> forward(int devicePort, {int hostPort: null}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     if ((hostPort == null) || (hostPort == 0)) {
       // Auto select host port.
       hostPort = await findAvailablePort();

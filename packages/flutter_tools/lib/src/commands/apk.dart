@@ -226,7 +226,7 @@ Future<_ApkComponents> _findApkComponents(
     ];
     Iterable<Future<String>> pathFutures = artifactTypes.map(
         (ArtifactType type) => ArtifactStore.getPath(ArtifactStore.getArtifact(
-            type: type, targetPlatform: TargetPlatform.android)));
+            type: type, targetPlatform: TargetPlatform.android_arm)));
     artifactPaths = await Future.wait(pathFutures);
   }
 
@@ -392,7 +392,7 @@ Future<int> buildAndroid({
   }
 
   BuildConfiguration config = configs.firstWhere(
-    (BuildConfiguration bc) => bc.targetPlatform == TargetPlatform.android
+    (BuildConfiguration bc) => bc.targetPlatform == TargetPlatform.android_arm
   );
   _ApkComponents components = await _findApkComponents(config, enginePath, manifest, resources);
   if (components == null) {

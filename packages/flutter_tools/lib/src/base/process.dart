@@ -132,7 +132,7 @@ String _runWithLoggingSync(List<String> cmd, {
   }
   if (results.stdout.trim().isNotEmpty)
     printTrace(results.stdout.trim());
-  return results.stdout;
+  return results.stdout.trim();
 }
 
 class ProcessExit implements Exception {

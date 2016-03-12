@@ -269,14 +269,13 @@ class FlutterCommandRunner extends CommandRunner {
     if (enginePath == null) {
       configs.add(new BuildConfiguration.prebuilt(
         hostPlatform: hostPlatform,
-        targetPlatform: TargetPlatform.android,
-        deviceId: globalResults['device-id']
+        targetPlatform: TargetPlatform.android_arm
       ));
 
       if (hostPlatform == HostPlatform.linux) {
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.linux,
-          targetPlatform: TargetPlatform.linux,
+          targetPlatform: TargetPlatform.linux_x64,
           testable: true
         ));
       }
@@ -284,14 +283,12 @@ class FlutterCommandRunner extends CommandRunner {
       if (hostPlatform == HostPlatform.mac) {
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.iOS,
-          deviceId: globalResults['device-id']
+          targetPlatform: TargetPlatform.ios_arm
         ));
 
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.iOSSimulator,
-          deviceId: globalResults['device-id']
+          targetPlatform: TargetPlatform.ios_x64
         ));
       }
     } else {
@@ -305,10 +302,9 @@ class FlutterCommandRunner extends CommandRunner {
         configs.add(new BuildConfiguration.local(
           type: BuildType.debug,
           hostPlatform: hostPlatform,
-          targetPlatform: TargetPlatform.android,
+          targetPlatform: TargetPlatform.android_arm,
           enginePath: enginePath,
-          buildPath: globalResults['android-debug-build-path'],
-          deviceId: globalResults['device-id']
+          buildPath: globalResults['android-debug-build-path']
         ));
 
         configs.add(new BuildConfiguration.local(
@@ -324,19 +320,17 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.iOS,
+            targetPlatform: TargetPlatform.ios_arm,
             enginePath: enginePath,
-            buildPath: globalResults['ios-debug-build-path'],
-            deviceId: globalResults['device-id']
+            buildPath: globalResults['ios-debug-build-path']
           ));
 
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.iOSSimulator,
+            targetPlatform: TargetPlatform.ios_x64,
             enginePath: enginePath,
-            buildPath: globalResults['ios-sim-debug-build-path'],
-            deviceId: globalResults['device-id']
+            buildPath: globalResults['ios-sim-debug-build-path']
           ));
         }
       }
@@ -345,10 +339,9 @@ class FlutterCommandRunner extends CommandRunner {
         configs.add(new BuildConfiguration.local(
           type: BuildType.release,
           hostPlatform: hostPlatform,
-          targetPlatform: TargetPlatform.android,
+          targetPlatform: TargetPlatform.android_arm,
           enginePath: enginePath,
-          buildPath: globalResults['android-release-build-path'],
-          deviceId: globalResults['device-id']
+          buildPath: globalResults['android-release-build-path']
         ));
 
         configs.add(new BuildConfiguration.local(
@@ -364,19 +357,17 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.iOS,
+            targetPlatform: TargetPlatform.ios_arm,
             enginePath: enginePath,
-            buildPath: globalResults['ios-release-build-path'],
-            deviceId: globalResults['device-id']
+            buildPath: globalResults['ios-release-build-path']
           ));
 
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.iOSSimulator,
+            targetPlatform: TargetPlatform.ios_x64,
             enginePath: enginePath,
-            buildPath: globalResults['ios-sim-release-build-path'],
-            deviceId: globalResults['device-id']
+            buildPath: globalResults['ios-sim-release-build-path']
           ));
         }
       }

@@ -536,7 +536,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  TargetPlatform get platform => TargetPlatform.iOSSimulator;
+  TargetPlatform get platform => TargetPlatform.ios_x64;
 
   DeviceLogReader get logReader {
     if (_logReader == null)
