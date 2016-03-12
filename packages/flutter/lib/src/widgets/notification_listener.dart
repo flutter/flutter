@@ -13,9 +13,9 @@ abstract class Notification {
   void dispatch(BuildContext target) {
     target.visitAncestorElements((Element element) {
       if (element is StatelessComponentElement &&
-          element.widget is NotificationListener<dynamic>) {
-        final NotificationListener<dynamic> widget = element.widget;
-        if (widget._dispatch(this)) // that function checks the type dynamically
+          element.widget is NotificationListener) {
+        final NotificationListener widget = element.widget;
+        if (widget._dispatch(this))
           return false;
       }
       return true;

@@ -125,7 +125,7 @@ class AnimationController extends Animation<double>
   }
 
   /// Starts running this animation forwards (towards the end).
-  Future<Null> forward({ double from }) {
+  Future forward({ double from }) {
     if (from != null)
       value = from;
     _direction = _AnimationDirection.forward;
@@ -133,7 +133,7 @@ class AnimationController extends Animation<double>
   }
 
   /// Starts running this animation in reverse (towards the beginning).
-  Future<Null> reverse({ double from }) {
+  Future reverse({ double from }) {
     if (from != null)
       value = from;
     _direction = _AnimationDirection.reverse;
@@ -141,7 +141,7 @@ class AnimationController extends Animation<double>
   }
 
   /// Drives the animation from its current value to target.
-  Future<Null> animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
+  Future animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
       double range = upperBound - lowerBound;
@@ -152,7 +152,7 @@ class AnimationController extends Animation<double>
     if (simulationDuration == Duration.ZERO) {
       assert(value == target);
       _checkStatusChanged();
-      return new Future<Null>.value();
+      return new Future.value();
     }
     assert(simulationDuration > Duration.ZERO);
     assert(!isAnimating);
@@ -163,7 +163,7 @@ class AnimationController extends Animation<double>
   /// restarts the animation when it completes.
   ///
   /// Defaults to repeating between the lower and upper bounds.
-  Future<Null> repeat({ double min, double max, Duration period }) {
+  Future repeat({ double min, double max, Duration period }) {
     min ??= lowerBound;
     max ??= upperBound;
     period ??= duration;
@@ -173,24 +173,24 @@ class AnimationController extends Animation<double>
   /// Flings the timeline with an optional force (defaults to a critically
   /// damped spring) and initial velocity. If velocity is positive, the
   /// animation will complete, otherwise it will dismiss.
-  Future<Null> fling({ double velocity: 1.0, Force force }) {
+  Future fling({ double velocity: 1.0, Force force }) {
     force ??= kDefaultSpringForce;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     return animateWith(force.release(value, velocity));
   }
 
   /// Drives the animation according to the given simulation.
-  Future<Null> animateWith(Simulation simulation) {
+  Future animateWith(Simulation simulation) {
     stop();
     return _startSimulation(simulation);
   }
 
-  Future<Null> _startSimulation(Simulation simulation) {
+  Future _startSimulation(Simulation simulation) {
     assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
-    Future<Null> result = _ticker.start();
+    Future result = _ticker.start();
     _checkStatusChanged();
     return result;
   }

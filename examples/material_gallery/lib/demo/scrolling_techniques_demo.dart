@@ -82,7 +82,7 @@ class _TechniqueItem extends StatelessComponent {
   final WidgetBuilder builder;
 
   void showDemo(BuildContext context) {
-    Navigator.push(context, new MaterialPageRoute<Null>(builder: builder));
+    Navigator.push(context, new MaterialPageRoute(builder: builder));
   }
 
   Widget build(BuildContext context) {

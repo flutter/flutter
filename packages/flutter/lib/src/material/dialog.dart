@@ -142,8 +142,8 @@ class _DialogRoute<T> extends PopupRoute<T> {
   }
 }
 
-Future<dynamic/*=T*/> showDialog/*<T>*/({ BuildContext context, Widget child }) {
-  Completer<dynamic/*=T*/> completer = new Completer<int>(); // XXXXXXX MORE ANALYZER CHECKS 
-  Navigator.push(context, new _DialogRoute<dynamic/*=T*/>(completer: completer, child: child));
+Future showDialog({ BuildContext context, Widget child }) {
+  Completer completer = new Completer();
+  Navigator.push(context, new _DialogRoute(completer: completer, child: child));
   return completer.future;
 }

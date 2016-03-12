@@ -145,6 +145,6 @@ Future<Uint8List> readBytes(dynamic url, { Map<String, String> headers }) {
   return _withClient/*<Uint8List>*/((MojoClient client) => client.readBytes(url, headers: headers));
 }
 
-Future<dynamic/*=T*/> _withClient/*<T>*/(Future<dynamic/*=T*/> fn(MojoClient client)) {
+Future/*<T>*/ _withClient/*<T>*/(Future/*<T>*/ fn(MojoClient client)) {
   return fn(new MojoClient());
 }

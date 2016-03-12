@@ -77,8 +77,8 @@ class ColorSwatchTabView extends StatelessComponent {
   }
 
   final ColorSwatch swatch;
-  final TextStyle blackTextStyle = Typography.black.body1;
-  final TextStyle whiteTextStyle = Typography.white.body1;
+  final blackTextStyle = Typography.black.body1;
+  final whiteTextStyle = Typography.white.body1;
 
   Widget build(BuildContext context) {
     List<Widget> colorItems =  swatch.colors.keys.map((int index) {
@@ -116,12 +116,12 @@ class ColorsDemo extends StatelessComponent {
           center: new Text("Colors"),
           tabBar: new TabBar<ColorSwatch>(
             isScrollable: true,
-            labels: new Map<ColorSwatch, TabLabel>.fromIterable(colorSwatches, value: (ColorSwatch swatch) {
+            labels: new Map.fromIterable(colorSwatches, value: (ColorSwatch swatch) {
               return new TabLabel(text: swatch.name);
             })
           )
         ),
-        body: new TabBarView<ColorSwatch>(
+        body: new TabBarView(
           children: colorSwatches.map((ColorSwatch swatch) {
             return new ColorSwatchTabView(swatch: swatch);
           })

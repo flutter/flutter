@@ -21,7 +21,7 @@ class ModalBottomSheetDemo extends StatelessComponent {
           child: new RaisedButton(
             child: new Text('Show the modal bottom sheet', style: textStyle),
             onPressed: () {
-              showModalBottomSheet/*<Null>*/(context: context, builder: (BuildContext context) {
+              showModalBottomSheet(context: context, builder: (_) {
                 return new Container(
                   child: new Padding(
                     padding: const EdgeDims.all(32.0),

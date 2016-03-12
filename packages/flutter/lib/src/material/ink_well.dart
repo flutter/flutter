@@ -44,7 +44,7 @@ class InkResponse extends StatefulComponent {
   final bool containedInWell;
   final BoxShape highlightShape;
 
-  _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
+  _InkResponseState createState() => new _InkResponseState<InkResponse>();
 }
 
 class _InkResponseState<T extends InkResponse> extends State<T> {

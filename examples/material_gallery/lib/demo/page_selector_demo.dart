@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class PageSelectorDemo extends StatelessComponent {
 
   void _handleArrowButtonPress(BuildContext context, int delta) {
-    final TabBarSelectionState<IconData> selection = TabBarSelection.of/*<IconData>*/(context);
+    final TabBarSelectionState selection = TabBarSelection.of(context);
     if (!selection.valueIsChanging)
       selection.value = selection.values[(selection.index + delta).clamp(0, selection.values.length - 1)];
   }
@@ -53,7 +53,7 @@ class PageSelectorDemo extends StatelessComponent {
                   )
                 ),
                 new Flexible(
-                  child: new TabBarView<IconData>(
+                  child: new TabBarView(
                     children: icons.map((IconData icon) {
                       return new Container(
                         key: new ObjectKey(icon),

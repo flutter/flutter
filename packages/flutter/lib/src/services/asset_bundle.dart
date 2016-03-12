@@ -80,7 +80,7 @@ class MojoAssetBundle extends CachingAssetBundle {
     return new MojoAssetBundle(bundle);
   }
 
-  static Future<Null> _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
+  static Future _fetchAndUnpackBundle(String relativeUrl, AssetBundleProxy bundle) async {
     core.MojoDataPipeConsumer bundleData = (await fetchUrl(relativeUrl)).body;
     AssetUnpackerProxy unpacker = new AssetUnpackerProxy.unbound();
     shell.connectToService("mojo:asset_bundle", unpacker);

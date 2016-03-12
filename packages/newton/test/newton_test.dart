@@ -10,7 +10,7 @@ import 'package:newton/newton.dart';
 
 void main() {
   test('test_friction', () {
-    FrictionSimulation friction = new FrictionSimulation(0.3, 100.0, 400.0);
+    var friction = new FrictionSimulation(0.3, 100.0, 400.0);
 
     friction.tolerance = const Tolerance(velocity: 1.0);
 
@@ -32,18 +32,18 @@ void main() {
   test('test_friction_through', () {
     // Use a normal FrictionSimulation to generate start and end
     // velocity and positions with drag = 0.025.
-    double startPosition = 10.0;
-    double startVelocity = 600.0;
-    FrictionSimulation f = new FrictionSimulation(0.025, startPosition, startVelocity);
-    double endPosition = f.x(1.0);
-    double endVelocity = f.dx(1.0);
+    var startPosition = 10.0;
+    var startVelocity = 600.0;
+    var f = new FrictionSimulation(0.025, startPosition, startVelocity);
+    var endPosition = f.x(1.0);
+    var endVelocity = f.dx(1.0);
     expect(endPosition, greaterThan(startPosition));
     expect(endVelocity, lessThan(startVelocity));
 
     // Verify that that the "through" FrictionSimulation ends up at
     // endPosition and endVelocity; implies that it computed the right
     // value for _drag.
-    FrictionSimulation friction = new FrictionSimulation.through(
+    var friction = new FrictionSimulation.through(
         startPosition, endPosition, startVelocity, endVelocity);
     expect(friction.isDone(0.0), false);
     expect(friction.x(0.0), 10.0);
@@ -72,7 +72,7 @@ void main() {
   });
 
   test('test_gravity', () {
-    GravitySimulation gravity = new GravitySimulation(200.0, 100.0, 600.0, 0.0);
+    var gravity = new GravitySimulation(200.0, 100.0, 600.0, 0.0);
 
     expect(gravity.isDone(0.0), false);
     expect(gravity.x(0.0), 100.0);
@@ -102,7 +102,7 @@ void main() {
   });
 
   test('spring_types', () {
-    SpringSimulation crit = new SpringSimulation(new SpringDescription.withDampingRatio(
+    var crit = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0), 0.0, 300.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
@@ -110,23 +110,23 @@ void main() {
         mass: 1.0, springConstant: 100.0, ratio: 1.0), 0.0, 300.0, 0.0);
     expect(crit.type, SpringType.criticallyDamped);
 
-    SpringSimulation under = new SpringSimulation(new SpringDescription.withDampingRatio(
+    var under = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0, ratio: 0.75), 0.0, 300.0, 0.0);
     expect(under.type, SpringType.underDamped);
 
-    SpringSimulation over = new SpringSimulation(new SpringDescription.withDampingRatio(
+    var over = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0, ratio: 1.25), 0.0, 300.0, 0.0);
     expect(over.type, SpringType.overDamped);
 
     // Just so we don't forget how to create a desc without the ratio.
-    SpringSimulation other = new SpringSimulation(
+    var other = new SpringSimulation(
         new SpringDescription(mass: 1.0, springConstant: 100.0, damping: 20.0),
         0.0, 20.0, 20.0);
     expect(other.type, SpringType.criticallyDamped);
   });
 
   test('crit_spring', () {
-    SpringSimulation crit = new SpringSimulation(new SpringDescription.withDampingRatio(
+    var crit = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0, ratio: 1.0), 0.0, 500.0, 0.0);
 
     crit.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
@@ -151,7 +151,7 @@ void main() {
   });
 
   test('overdamped_spring', () {
-    SpringSimulation over = new SpringSimulation(new SpringDescription.withDampingRatio(
+    var over = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0, ratio: 1.25), 0.0, 500.0, 0.0);
 
     over.tolerance = const Tolerance(distance: 0.01, velocity: 0.01);
@@ -173,7 +173,7 @@ void main() {
   });
 
   test('underdamped_spring', () {
-    SpringSimulation under = new SpringSimulation(new SpringDescription.withDampingRatio(
+    var under = new SpringSimulation(new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 100.0, ratio: 0.25), 0.0, 300.0, 0.0);
     expect(under.type, SpringType.underDamped);
 
@@ -190,16 +190,16 @@ void main() {
   });
 
   test('test_kinetic_scroll', () {
-    SpringDescription spring = new SpringDescription.withDampingRatio(
+    var spring = new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 50.0, ratio: 0.5);
 
-    ScrollSimulation scroll = new ScrollSimulation(100.0, 800.0, 0.0, 300.0, spring, 0.3);
+    var scroll = new ScrollSimulation(100.0, 800.0, 0.0, 300.0, spring, 0.3);
     scroll.tolerance = const Tolerance(velocity: 0.5, distance: 0.1);
     expect(scroll.isDone(0.0), false);
     expect(scroll.isDone(0.5), false); // switch from friction to spring
     expect(scroll.isDone(3.5), true);
 
-    ScrollSimulation scroll2 = new ScrollSimulation(100.0, -800.0, 0.0, 300.0, spring, 0.3);
+    var scroll2 = new ScrollSimulation(100.0, -800.0, 0.0, 300.0, spring, 0.3);
     scroll2.tolerance = const Tolerance(velocity: 0.5, distance: 0.1);
     expect(scroll2.isDone(0.0), false);
     expect(scroll2.isDone(0.5), false); // switch from friction to spring
@@ -207,10 +207,10 @@ void main() {
   });
 
   test('scroll_with_inf_edge_ends', () {
-    SpringDescription spring = new SpringDescription.withDampingRatio(
+    var spring = new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 50.0, ratio: 0.5);
 
-    ScrollSimulation scroll =
+    var scroll =
         new ScrollSimulation(100.0, 400.0, 0.0, double.INFINITY, spring, 0.3);
     scroll.tolerance = const Tolerance(velocity: 1.0);
 
@@ -233,8 +233,8 @@ void main() {
   });
 
   test('over/under scroll spring', () {
-    SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
-    ScrollSimulation scroll = new ScrollSimulation(500.0, -7500.0, 0.0, 1000.0, spring, 0.025);
+    var spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
+    var scroll = new ScrollSimulation(500.0, -7500.0, 0.0, 1000.0, spring, 0.025);
     scroll.tolerance = new Tolerance(velocity: 45.0, distance: 1.5);
 
     expect(scroll.isDone(0.0), false);

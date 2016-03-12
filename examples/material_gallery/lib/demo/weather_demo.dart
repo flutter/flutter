@@ -24,7 +24,7 @@ class WeatherDemo extends StatefulComponent {
 
 class _WeatherDemoState extends State<WeatherDemo> {
 
-  Future<Null> _loadAssets(AssetBundle bundle) async {
+  Future _loadAssets(AssetBundle bundle) async {
     _images = new ImageMap(bundle);
     await _images.load(<String>[
       'packages/flutter_gallery_assets/clouds-0.png',

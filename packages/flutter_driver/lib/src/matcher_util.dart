@@ -49,7 +49,7 @@ class _TextDescription implements Description {
     return this;
   }
 
-  Description addDescriptionOf(dynamic value) {
+  Description addDescriptionOf(value) {
     if (value is Matcher) {
       value.describe(this);
       return this;
@@ -58,7 +58,7 @@ class _TextDescription implements Description {
     }
   }
 
-  Description addAll(String start, String separator, String end, Iterable<dynamic> list) {
+  Description addAll(String start, String separator, String end, Iterable list) {
     add(start);
     if (list.isNotEmpty) {
       addDescriptionOf(list.first);

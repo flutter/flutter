@@ -336,7 +336,6 @@ class AnalyzeCommand extends FlutterCommand {
 
     RegExp generalPattern = new RegExp(r'^\[(error|warning|hint|lint)\] (.+) \(([^(),]+), line ([0-9]+), col ([0-9]+)\)$');
     RegExp allowedIdentifiersPattern = new RegExp(r'_?([A-Z]|_+)\b');
-    RegExp classesWithOptionalTypeArgumentsPattern = new RegExp(r'\b(GlobalKey|State|ScrollableState|Element|StatelessComponentElement|TypeMatcher)\b');
     RegExp constructorTearOffsPattern = new RegExp('.+#.+// analyzer doesn\'t like constructor tear-offs');
     RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
     RegExp missingFilePattern = new RegExp('^Target of URI does not exist: \'([^\')]+)\'\$');
@@ -388,11 +387,6 @@ class AnalyzeCommand extends FlutterCommand {
             shouldIgnore = true;
           } else if (level == 'lint' && errorMessage == 'Name non-constant identifiers using lowerCamelCase.') {
             if (allowedIdentifiersPattern.matchAsPrefix(sourceLine, colNumber-1) != null)
-              shouldIgnore = true;
-          } else if (level == 'lint' && errorMessage == 'Specify type annotations.') {
-            // we want the type annotations on certain classes to be optional.
-            // see https://github.com/dart-lang/linter/issues/196
-            if (classesWithOptionalTypeArgumentsPattern.matchAsPrefix(sourceLine, colNumber-1) != null)
               shouldIgnore = true;
           } else if (constructorTearOffsPattern.allMatches(sourceLine).isNotEmpty) {
             shouldIgnore = true;

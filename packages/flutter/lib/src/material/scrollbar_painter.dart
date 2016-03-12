@@ -60,7 +60,7 @@ class ScrollbarPainter extends ScrollableListPainter {
 
   AnimationController _fade;
 
-  Future<Null> scrollStarted() {
+  Future scrollStarted() {
     if (_fade == null) {
       _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
       CurvedAnimation curve = new CurvedAnimation(parent: _fade, curve: Curves.ease);
@@ -72,7 +72,7 @@ class ScrollbarPainter extends ScrollableListPainter {
     return _fade.forward();
   }
 
-  Future<Null> scrollEnded() {
+  Future scrollEnded() {
     return _fade.reverse();
   }
 

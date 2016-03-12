@@ -41,7 +41,7 @@ class ScrollableGrid extends Scrollable {
 }
 
 class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
@@ -85,10 +85,8 @@ class GridViewport extends VirtualViewportFromIterable {
   _GridViewportElement createElement() => new _GridViewportElement(this);
 }
 
-class _GridViewportElement extends VirtualViewportElement {
+class _GridViewportElement extends VirtualViewportElement<GridViewport> {
   _GridViewportElement(GridViewport widget) : super(widget);
-
-  GridViewport get widget => super.widget;
 
   RenderGrid get renderObject => super.renderObject;
 

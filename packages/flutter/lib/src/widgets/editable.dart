@@ -192,7 +192,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   _KeyboardClientImpl _keyboardClient;
   KeyboardHandle _keyboardHandle;
 
-  ScrollBehavior<double, double> createScrollBehavior() => new BoundedBehavior();
+  ScrollBehavior createScrollBehavior() => new BoundedBehavior();
   BoundedBehavior get scrollBehavior => super.scrollBehavior;
 
   void initState() {

@@ -37,7 +37,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   List<LeaveBehindItem> leaveBehindItems;
 
   void initListItems() {
-    leaveBehindItems = new List<LeaveBehindItem>.generate(16, (int index) {
+    leaveBehindItems = new List.generate(16, (int index) {
       return new LeaveBehindItem(
         index: index,
         name: 'Item $index Sender',
@@ -130,7 +130,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         right: <Widget>[
           new PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
-            items: <PopupMenuEntry<LeaveBehindDemoAction>>[
+            items: <PopupMenuEntry>[
               new PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
                 child: new Text('Reset the list')

@@ -27,7 +27,7 @@ class BorderSide {
   final double width;
 
   /// A black border side of zero width.
-  static const BorderSide none = const BorderSide(width: 0.0);
+  static const none = const BorderSide(width: 0.0);
 
   BorderSide copyWith({
     Color color,

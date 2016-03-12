@@ -35,8 +35,8 @@ class PhysicsBody {
     bool bullet: false,
     bool active: true,
     this.gravityScale: 1.0,
-    String collisionCategory: "Default",
-    List<Object> collisionMask
+    collisionCategory: "Default",
+    collisionMask: null
   }) {
     this.density = density;
     this.friction = friction;

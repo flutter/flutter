@@ -321,7 +321,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleCreateCompany() {
-    showModalBottomSheet/*<int, double>*/( // XXXXXX DO NOT CHECK IN XXXXXX THIS IS A CHECK OF THE ANALYZER
+    showModalBottomSheet(
       context: context,
       builder: (BuildContext context) => new _CreateCompanySheet()
     );
@@ -344,7 +344,7 @@ class StockHomeState extends State<StockHome> {
         toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
         floatingActionButton: buildFloatingActionButton(),
         drawer: _buildDrawer(context),
-        body: new TabBarView<StockHomeTab>(
+        body: new TabBarView(
           children: <Widget>[
             _buildStockTab(context, StockHomeTab.market, config.symbols),
             _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),

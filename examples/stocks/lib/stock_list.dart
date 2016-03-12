@@ -18,7 +18,7 @@ class StockList extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new ScrollableList(
-      key: const ValueKey<String>('stock-list'),
+      key: const ValueKey('stock-list'),
       itemExtent: StockRow.kHeight,
       children: stocks.map((Stock stock) {
         return new StockRow(

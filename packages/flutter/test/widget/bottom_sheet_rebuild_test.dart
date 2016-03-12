@@ -10,7 +10,7 @@ void main() {
   test('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', () {
     testWidgets((WidgetTester tester) {
       final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-      PersistentBottomSheetController<Null> bottomSheet;
+      ScaffoldFeatureController bottomSheet;
       int buildCount = 0;
 
       tester.pumpWidget(new MaterialApp(
@@ -24,7 +24,7 @@ void main() {
         }
       ));
 
-      bottomSheet = scaffoldKey.currentState.showBottomSheet/*<Null>*/((_) {
+      bottomSheet = scaffoldKey.currentState.showBottomSheet((_) {
         return new Builder(
           builder: (_) {
             buildCount += 1;
