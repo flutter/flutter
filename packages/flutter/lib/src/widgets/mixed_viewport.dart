@@ -144,7 +144,7 @@ class _MixedViewportElement extends RenderObjectElement {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     renderObject
-      ..direction = widget.direction
+      ..mainAxis = widget.direction
       ..callback = layout
       ..postLayoutCallback = postLayout
       ..totalExtentCallback = _noIntrinsicExtent
@@ -181,7 +181,7 @@ class _MixedViewportElement extends RenderObjectElement {
   void update(MixedViewport newWidget) {
     _ChangeDescription changes = newWidget.evaluateChangesFrom(widget);
     super.update(newWidget);
-    renderObject.direction = widget.direction;
+    renderObject.mainAxis = widget.direction;
     _overrideStartOffset = null;
     if (changes == _ChangeDescription.resized)
       _resetCache();

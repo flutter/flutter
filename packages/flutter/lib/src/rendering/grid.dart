@@ -384,13 +384,13 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     _delegate = newDelegate;
   }
 
-  void set scrollDirection(Axis value) {
+  void set mainAxis(Axis value) {
     assert(() {
       if (value != Axis.vertical)
         throw new RenderingError('RenderGrid doesn\'t yet support horizontal scrolling.');
       return true;
     });
-    super.scrollDirection = value;
+    super.mainAxis = value;
   }
 
   int get virtualChildCount => super.virtualChildCount ?? childCount;

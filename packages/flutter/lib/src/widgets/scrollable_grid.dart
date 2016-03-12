@@ -77,8 +77,8 @@ class GridViewport extends VirtualViewportFromIterable {
   final ExtentsChangedCallback onExtentsChanged;
   final Iterable<Widget> children;
 
-  // TODO(abarth): Support horizontal scrolling;
-  Axis get scrollDirection => Axis.vertical;
+  // TODO(abarth): Support horizontal grids.
+  Axis get mainAxis => Axis.vertical;
 
   RenderGrid createRenderObject(BuildContext context) => new RenderGrid(delegate: delegate);
 

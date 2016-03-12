@@ -165,7 +165,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   Widget buildContent(BuildContext context) {
     return new PageViewport(
       itemsWrap: config.itemsWrap,
-      scrollDirection: config.scrollDirection,
+      mainAxis: config.scrollDirection,
       scrollAnchor: config.scrollAnchor,
       startOffset: scrollOffset,
       overlayPainter: config.scrollableListPainter,
@@ -226,17 +226,17 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 class PageViewport extends VirtualViewportFromIterable {
   PageViewport({
     this.startOffset: 0.0,
-    this.scrollDirection: Axis.vertical,
+    this.mainAxis: Axis.vertical,
     this.scrollAnchor: ViewportAnchor.start,
     this.itemsWrap: false,
     this.overlayPainter,
     this.children
   }) {
-    assert(scrollDirection != null);
+    assert(mainAxis != null);
   }
 
   final double startOffset;
-  final Axis scrollDirection;
+  final Axis mainAxis;
   final ViewportAnchor scrollAnchor;
   final bool itemsWrap;
   final Painter overlayPainter;
@@ -274,7 +274,7 @@ class _PageViewportElement extends VirtualViewportElement {
 
   void updateRenderObject(PageViewport oldWidget) {
     renderObject
-      ..scrollDirection = widget.scrollDirection
+      ..mainAxis = widget.mainAxis
       ..overlayPainter = widget.overlayPainter;
     super.updateRenderObject(oldWidget);
   }
@@ -285,7 +285,7 @@ class _PageViewportElement extends VirtualViewportElement {
     final Size containerSize = renderObject.size;
 
     Size materializedContentSize;
-    switch (widget.scrollDirection) {
+    switch (widget.mainAxis) {
       case Axis.vertical:
         materializedContentSize = new Size(containerSize.width, _materializedChildCount * containerSize.height);
         break;
@@ -299,7 +299,7 @@ class _PageViewportElement extends VirtualViewportElement {
   void layout(BoxConstraints constraints) {
     final int length = renderObject.virtualChildCount;
 
-    switch (widget.scrollDirection) {
+    switch (widget.mainAxis) {
       case Axis.vertical:
         _containerExtent = renderObject.size.height;
         break;

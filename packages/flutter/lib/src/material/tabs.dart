@@ -784,7 +784,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     if (config.isScrollable) {
       return new Viewport(
-        scrollDirection: Axis.horizontal,
+        mainAxis: Axis.horizontal,
         paintOffset: scrollOffsetToPixelDelta(scrollOffset),
         onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
         child: contents
@@ -961,7 +961,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
       _initSelection(newSelection);
     return new PageViewport(
       itemsWrap: config.itemsWrap,
-      scrollDirection: config.scrollDirection,
+      mainAxis: config.scrollDirection,
       startOffset: scrollOffset,
       overlayPainter: config.scrollableListPainter,
       children: _items

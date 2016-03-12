@@ -71,9 +71,9 @@ class ViewportDimensions {
 }
 
 /// An interface that indicates that an object has a scroll direction.
-abstract class HasScrollDirection {
+abstract class HasMainAxis {
   /// Whether this object scrolls horizontally or vertically.
-  Axis get scrollDirection;
+  Axis get mainAxis;
 }
 
 /// A base class for render objects that are bigger on the inside.
@@ -81,19 +81,19 @@ abstract class HasScrollDirection {
 /// This class holds the common fields for viewport render objects but does not
 /// have a child model. See [RenderViewport] for a viewport with a single child
 /// and [RenderVirtualViewport] for a viewport with multiple children.
-class RenderViewportBase extends RenderBox implements HasScrollDirection {
+class RenderViewportBase extends RenderBox implements HasMainAxis {
   RenderViewportBase(
     Offset paintOffset,
-    Axis scrollDirection,
+    Axis mainAxis,
     ViewportAnchor scrollAnchor,
     Painter overlayPainter
   ) : _paintOffset = paintOffset,
-      _scrollDirection = scrollDirection,
+      _mainAxis = mainAxis,
       _scrollAnchor = scrollAnchor,
       _overlayPainter = overlayPainter {
     assert(paintOffset != null);
-    assert(scrollDirection != null);
-    assert(_offsetIsSane(_paintOffset, scrollDirection));
+    assert(mainAxis != null);
+    assert(_offsetIsSane(_paintOffset, mainAxis));
   }
 
   bool _offsetIsSane(Offset offset, Axis direction) {
@@ -107,14 +107,14 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
 
   /// The offset at which to paint the child.
   ///
-  /// The offset can be non-zero only in the [scrollDirection].
+  /// The offset can be non-zero only in the [mainAxis].
   Offset get paintOffset => _paintOffset;
   Offset _paintOffset;
   void set paintOffset(Offset value) {
     assert(value != null);
     if (value == _paintOffset)
       return;
-    assert(_offsetIsSane(value, scrollDirection));
+    assert(_offsetIsSane(value, mainAxis));
     _paintOffset = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -125,14 +125,14 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
   /// If the viewport is scrollable in a particular direction (e.g., vertically),
   /// the child is given layout constraints that are fully unconstrainted in
   /// that direction (e.g., the child can be as tall as it wants).
-  Axis get scrollDirection => _scrollDirection;
-  Axis _scrollDirection;
-  void set scrollDirection(Axis value) {
+  Axis get mainAxis => _mainAxis;
+  Axis _mainAxis;
+  void set mainAxis(Axis value) {
     assert(value != null);
-    if (value == _scrollDirection)
+    if (value == _mainAxis)
       return;
     assert(_offsetIsSane(_paintOffset, value));
-    _scrollDirection = value;
+    _mainAxis = value;
     markNeedsLayout();
   }
 
@@ -198,7 +198,7 @@ class RenderViewportBase extends RenderBox implements HasScrollDirection {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('paintOffset: $paintOffset');
-    description.add('scrollDirection: $scrollDirection');
+    description.add('mainAxis: $mainAxis');
     description.add('scrollAnchor: $scrollAnchor');
     if (overlayPainter != null)
       description.add('overlay painter: $overlayPainter');
@@ -218,11 +218,11 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   RenderViewport({
     RenderBox child,
     Offset paintOffset: Offset.zero,
-    Axis scrollDirection: Axis.vertical,
+    Axis mainAxis: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     Painter overlayPainter,
     this.onPaintOffsetUpdateNeeded
-  }) : super(paintOffset, scrollDirection, scrollAnchor, overlayPainter) {
+  }) : super(paintOffset, mainAxis, scrollAnchor, overlayPainter) {
     this.child = child;
   }
 
@@ -232,7 +232,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     BoxConstraints innerConstraints;
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.horizontal:
         innerConstraints = constraints.heightConstraints();
         break;
@@ -338,12 +338,12 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     int virtualChildCount,
     LayoutCallback callback,
     Offset paintOffset: Offset.zero,
-    Axis scrollDirection: Axis.vertical,
+    Axis mainAxis: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     Painter overlayPainter
   }) : _virtualChildCount = virtualChildCount,
        _callback = callback,
-       super(paintOffset, scrollDirection, scrollAnchor, overlayPainter);
+       super(paintOffset, mainAxis, scrollAnchor, overlayPainter);
 
   int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;

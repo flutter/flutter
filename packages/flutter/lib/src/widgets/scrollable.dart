@@ -8,7 +8,7 @@ import 'dart:ui' as ui show window;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart' show HasScrollDirection;
+import 'package:flutter/rendering.dart' show HasMainAxis;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -657,7 +657,7 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
   Widget buildContent(BuildContext context) {
     return new Viewport(
       paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-      scrollDirection: config.scrollDirection,
+      mainAxis: config.scrollDirection,
       scrollAnchor: config.scrollAnchor,
       onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
       child: config.child
@@ -692,7 +692,7 @@ class Block extends StatelessComponent {
   final Key scrollableKey;
 
   Widget build(BuildContext context) {
-    Widget contents = new BlockBody(children: children, direction: scrollDirection);
+    Widget contents = new BlockBody(children: children, mainAxis: scrollDirection);
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
     return new ScrollableViewport(
@@ -709,15 +709,15 @@ class Block extends StatelessComponent {
 abstract class ScrollableListPainter extends Painter {
   void attach(RenderObject renderObject) {
     assert(renderObject is RenderBox);
-    assert(renderObject is HasScrollDirection);
+    assert(renderObject is HasMainAxis);
     super.attach(renderObject);
   }
 
   RenderBox get renderObject => super.renderObject;
 
   Axis get scrollDirection {
-    HasScrollDirection scrollable = renderObject as dynamic;
-    return scrollable?.scrollDirection;
+    HasMainAxis scrollable = renderObject as dynamic;
+    return scrollable?.mainAxis;
   }
 
   Size get viewportSize => renderObject.size;

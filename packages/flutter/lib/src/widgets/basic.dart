@@ -832,19 +832,19 @@ class Viewport extends OneChildRenderObjectWidget {
   Viewport({
     Key key,
     this.paintOffset: Offset.zero,
-    this.scrollDirection: Axis.vertical,
+    this.mainAxis: Axis.vertical,
     this.scrollAnchor: ViewportAnchor.start,
     this.overlayPainter,
     this.onPaintOffsetUpdateNeeded,
     Widget child
   }) : super(key: key, child: child) {
-    assert(scrollDirection != null);
+    assert(mainAxis != null);
     assert(paintOffset != null);
   }
 
   /// The offset at which to paint the child.
   ///
-  /// The offset can be non-zero only in the [scrollDirection].
+  /// The offset can be non-zero only in the [mainAxis].
   final Offset paintOffset;
 
   /// The direction in which the child is permitted to be larger than the viewport
@@ -852,7 +852,7 @@ class Viewport extends OneChildRenderObjectWidget {
   /// If the viewport is scrollable in a particular direction (e.g., vertically),
   /// the child is given layout constraints that are fully unconstrainted in
   /// that direction (e.g., the child can be as tall as it wants).
-  final Axis scrollDirection;
+  final Axis mainAxis;
 
   final ViewportAnchor scrollAnchor;
 
@@ -866,7 +866,7 @@ class Viewport extends OneChildRenderObjectWidget {
   RenderViewport createRenderObject(BuildContext context) {
     return new RenderViewport(
       paintOffset: paintOffset,
-      scrollDirection: scrollDirection,
+      mainAxis: mainAxis,
       scrollAnchor: scrollAnchor,
       onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded,
       overlayPainter: overlayPainter
@@ -874,9 +874,9 @@ class Viewport extends OneChildRenderObjectWidget {
   }
 
   void updateRenderObject(BuildContext context, RenderViewport renderObject) {
-    // Order dependency: RenderViewport validates scrollOffset based on scrollDirection.
+    // Order dependency: RenderViewport validates scrollOffset based on mainAxis.
     renderObject
-      ..scrollDirection = scrollDirection
+      ..mainAxis = mainAxis
       ..scrollAnchor = scrollAnchor
       ..paintOffset = paintOffset
       ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded
@@ -1006,18 +1006,18 @@ class BlockBody extends MultiChildRenderObjectWidget {
   BlockBody({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    this.direction: Axis.vertical
+    this.mainAxis: Axis.vertical
   }) : super(key: key, children: children) {
-    assert(direction != null);
+    assert(mainAxis != null);
   }
 
   /// The direction to use as the main axis.
-  final Axis direction;
+  final Axis mainAxis;
 
-  RenderBlock createRenderObject(BuildContext context) => new RenderBlock(direction: direction);
+  RenderBlock createRenderObject(BuildContext context) => new RenderBlock(mainAxis: mainAxis);
 
   void updateRenderObject(BuildContext context, RenderBlock renderObject) {
-    renderObject.direction = direction;
+    renderObject.mainAxis = mainAxis;
   }
 }
 

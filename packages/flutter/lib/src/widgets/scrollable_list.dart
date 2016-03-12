@@ -78,7 +78,7 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
     return new ListViewport(
       onExtentsChanged: _handleExtentsChanged,
       scrollOffset: scrollOffset,
-      scrollDirection: config.scrollDirection,
+      mainAxis: config.scrollDirection,
       scrollAnchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
       itemsWrap: config.itemsWrap,
@@ -93,20 +93,20 @@ class _VirtualListViewport extends VirtualViewport {
   _VirtualListViewport(
     this.onExtentsChanged,
     this.scrollOffset,
-    this.scrollDirection,
+    this.mainAxis,
     this.scrollAnchor,
     this.itemExtent,
     this.itemsWrap,
     this.padding,
     this.overlayPainter
   ) {
-    assert(scrollDirection != null);
+    assert(mainAxis != null);
     assert(itemExtent != null);
   }
 
   final ExtentsChangedCallback onExtentsChanged;
   final double scrollOffset;
-  final Axis scrollDirection;
+  final Axis mainAxis;
   final ViewportAnchor scrollAnchor;
   final double itemExtent;
   final bool itemsWrap;
@@ -114,7 +114,7 @@ class _VirtualListViewport extends VirtualViewport {
   final Painter overlayPainter;
 
   double get _leadingPadding {
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         switch (scrollAnchor) {
           case ViewportAnchor.start:
@@ -166,7 +166,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
 
   void updateRenderObject(_VirtualListViewport oldWidget) {
     renderObject
-      ..scrollDirection = widget.scrollDirection
+      ..mainAxis = widget.mainAxis
       ..scrollAnchor = widget.scrollAnchor
       ..itemExtent = widget.itemExtent
       ..padding = widget.padding
@@ -186,7 +186,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
     double containerExtent;
     double contentExtent;
 
-    switch (widget.scrollDirection) {
+    switch (widget.mainAxis) {
       case Axis.vertical:
         containerExtent = containerSize.height;
         contentExtent = length == null ? double.INFINITY : widget.itemExtent * length + padding.vertical;
@@ -222,7 +222,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
     }
 
     Size materializedContentSize;
-    switch (widget.scrollDirection) {
+    switch (widget.mainAxis) {
       case Axis.vertical:
         materializedContentSize = new Size(containerSize.width, _materializedChildCount * itemExtent);
         break;
@@ -246,7 +246,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
   ListViewport({
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,
-    Axis scrollDirection: Axis.vertical,
+    Axis mainAxis: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     double itemExtent,
     bool itemsWrap: false,
@@ -256,7 +256,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
   }) : super(
     onExtentsChanged,
     scrollOffset,
-    scrollDirection,
+    mainAxis,
     scrollAnchor,
     itemExtent,
     itemsWrap,
@@ -341,7 +341,7 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
     return new LazyListViewport(
       onExtentsChanged: _handleExtentsChanged,
       scrollOffset: scrollOffset,
-      scrollDirection: config.scrollDirection,
+      mainAxis: config.scrollDirection,
       scrollAnchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
       itemCount: config.itemCount,
@@ -356,7 +356,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
   LazyListViewport({
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,
-    Axis scrollDirection: Axis.vertical,
+    Axis mainAxis: Axis.vertical,
     ViewportAnchor scrollAnchor: ViewportAnchor.start,
     double itemExtent,
     EdgeDims padding,
@@ -366,7 +366,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
   }) : super(
     onExtentsChanged,
     scrollOffset,
-    scrollDirection,
+    mainAxis,
     scrollAnchor,
     itemExtent,
     false, // Don't support wrapping yet.

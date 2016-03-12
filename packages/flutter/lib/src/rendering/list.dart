@@ -18,7 +18,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     EdgeDims padding,
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
-    Axis scrollDirection: Axis.vertical,
+    Axis mainAxis: Axis.vertical,
     Painter overlayPainter,
     LayoutCallback callback
   }) : _itemExtent = itemExtent,
@@ -26,7 +26,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
        super(
          virtualChildCount: virtualChildCount,
          paintOffset: paintOffset,
-         scrollDirection: scrollDirection,
+         mainAxis: mainAxis,
          overlayPainter: overlayPainter,
          callback: callback
        ) {
@@ -58,7 +58,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   double get _scrollAxisPadding {
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         return padding.vertical;
       case Axis.horizontal:
@@ -80,7 +80,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
 
   double _getIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         return constraints.constrainWidth(0.0);
       case Axis.horizontal:
@@ -98,7 +98,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         return constraints.constrainHeight(_preferredExtent);
       case Axis.horizontal:
@@ -115,7 +115,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   void performLayout() {
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         size = new Size(constraints.maxWidth,
                         constraints.constrainHeight(_preferredExtent));
@@ -138,7 +138,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     double y = 0.0;
     double dy = 0.0;
 
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         itemWidth = math.max(0.0, size.width - (padding == null ? 0.0 : padding.horizontal));
         itemHeight = itemExtent ?? size.height;
