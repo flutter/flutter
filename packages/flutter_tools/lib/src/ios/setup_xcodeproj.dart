@@ -150,8 +150,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   revisionFile.writeAsStringSync(ArtifactStore.engineRevision);
 
   // Step 5: Tell the user the location of the generated project.
-  printStatus('Xcode project created at $xcodeprojPath/.');
-  printStatus('User editable settings are in $iosFilesPath/.');
+  printStatus('Xcode project created in $iosFilesPath/.');
 
   return 0;
 }
