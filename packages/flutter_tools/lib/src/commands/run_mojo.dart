@@ -71,7 +71,7 @@ class RunMojoCommand extends FlutterCommand {
   BuildConfiguration _getCurrentHostConfig() {
     BuildConfiguration result;
     TargetPlatform target = argResults['android'] ?
-      TargetPlatform.android : getCurrentHostPlatformAsTarget();
+      TargetPlatform.android_arm : getCurrentHostPlatformAsTarget();
     for (BuildConfiguration config in buildConfigurations) {
       if (config.targetPlatform == target) {
         result = config;
@@ -93,7 +93,7 @@ class RunMojoCommand extends FlutterCommand {
 
     String flutterPath;
     if (config == null || config.type == BuildType.prebuilt) {
-      TargetPlatform targetPlatform = argResults['android'] ? TargetPlatform.android : TargetPlatform.linux;
+      TargetPlatform targetPlatform = argResults['android'] ? TargetPlatform.android_arm : TargetPlatform.linux_x64;
       Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: targetPlatform);
       flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
     } else {

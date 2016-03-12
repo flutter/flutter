@@ -47,9 +47,9 @@ class TestCommand extends FlutterCommand {
       return await ArtifactStore.getPath(artifact);
     } else {
       switch (config.targetPlatform) {
-        case TargetPlatform.linux:
+        case TargetPlatform.linux_x64:
           return path.join(config.buildDir, 'sky_shell');
-        case TargetPlatform.mac:
+        case TargetPlatform.darwin_x64:
           return path.join(config.buildDir, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
         default:
           throw new Exception('Unsupported platform.');
