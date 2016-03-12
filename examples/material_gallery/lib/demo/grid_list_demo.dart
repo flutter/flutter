@@ -28,7 +28,7 @@ final List<Photo> photos = new List<Photo>.generate(16, (int index) {
   return const Photo(assetName: 'packages/flutter_gallery_assets/kangaroo_valley_safari.png');
 });
 
-class GridDemoPhotoItem extends StatelessComponent {
+class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({ Key key, this.photo, this.tileStyle }) : super(key: key) {
     assert(photo != null && photo.isValid);
     assert(tileStyle != null);
@@ -97,7 +97,7 @@ class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
     this.columnCount,
     double columnSpacing: 0.0,
     double rowSpacing: 0.0,
-    EdgeDims padding: EdgeDims.zero,
+    EdgeInsets padding: EdgeInsets.zero,
     this.tileHeightFactor: 2.75
   }) : super(columnSpacing: columnSpacing, rowSpacing: rowSpacing, padding: padding) {
     assert(columnCount != null && columnCount >= 0);
@@ -128,7 +128,7 @@ class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
   }
 }
 
-class GridListDemo extends StatefulComponent {
+class GridListDemo extends StatefulWidget {
   GridListDemo({ Key key }) : super(key: key);
 
   GridListDemoState createState() => new GridListDemoState();
@@ -153,7 +153,7 @@ class GridListDemoState extends State<GridListDemo> {
       )
     ];
 
-    final EdgeDims padding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
     final ModalPosition position = new ModalPosition(
       right: padding.right + 16.0,
       top: padding.top + 16.0
@@ -187,7 +187,7 @@ class GridListDemoState extends State<GridListDemo> {
           columnCount: (orientation == Orientation.portrait) ? 2 : 3,
           rowSpacing: 4.0,
           columnSpacing: 4.0,
-          padding: const EdgeDims.all(4.0),
+          padding: const EdgeInsets.all(4.0),
           tileHeightFactor: (orientation == Orientation.portrait) ? 2.75 : 1.75
         ),
         children: photos.map((Photo photo) {

@@ -14,7 +14,7 @@ import 'theme.dart';
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 
 /// A material design text input field.
-class Input extends StatefulComponent {
+class Input extends StatefulWidget {
   Input({
     Key key,
     this.value: InputValue.empty,
@@ -84,7 +84,7 @@ class _InputState extends State<Input> {
     BuildContext focusContext = focusKey.currentContext;
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
 
-    TextStyle textStyle = config.style ?? themeData.text.subhead;
+    TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
     Color activeColor = themeData.hintColor;
     if (focused) {
       switch (themeData.brightness) {
@@ -104,10 +104,10 @@ class _InputState extends State<Input> {
 
     if (config.labelText != null) {
       TextStyle labelStyle = hasInlineLabel ?
-        themeData.text.subhead.copyWith(color: themeData.hintColor) :
-        themeData.text.caption.copyWith(color: activeColor);
+        themeData.textTheme.subhead.copyWith(color: themeData.hintColor) :
+        themeData.textTheme.caption.copyWith(color: activeColor);
 
-      double topPaddingIncrement = themeData.text.caption.fontSize + (config.isDense ? 4.0 : 8.0);
+      double topPaddingIncrement = themeData.textTheme.caption.fontSize + (config.isDense ? 4.0 : 8.0);
       double top = topPadding;
       if (hasInlineLabel)
         top += topPaddingIncrement + textStyle.fontSize - labelStyle.fontSize;
@@ -124,7 +124,7 @@ class _InputState extends State<Input> {
     }
 
     if (config.hintText != null && config.value.text.isEmpty && !hasInlineLabel) {
-      TextStyle hintStyle = themeData.text.subhead.copyWith(color: themeData.hintColor);
+      TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         top: topPadding + textStyle.fontSize - hintStyle.fontSize,
@@ -132,8 +132,8 @@ class _InputState extends State<Input> {
       ));
     }
 
-    EdgeDims margin = new EdgeDims.only(bottom: config.isDense ? 4.0 : 8.0);
-    EdgeDims padding = new EdgeDims.only(top: topPadding, bottom: 8.0);
+    EdgeInsets margin = new EdgeInsets.only(bottom: config.isDense ? 4.0 : 8.0);
+    EdgeInsets padding = new EdgeInsets.only(top: topPadding, bottom: 8.0);
     Color borderColor = activeColor;
     double borderWidth = focused ? 2.0 : 1.0;
 
@@ -141,8 +141,8 @@ class _InputState extends State<Input> {
       borderColor = themeData.errorColor;
       borderWidth = 2.0;
       if (!config.isDense) {
-        margin = const EdgeDims.only(bottom: 15.0);
-        padding = new EdgeDims.only(top: topPadding, bottom: 1.0);
+        margin = const EdgeInsets.only(bottom: 15.0);
+        padding = new EdgeInsets.only(top: topPadding, bottom: 1.0);
       }
     }
 
@@ -174,7 +174,7 @@ class _InputState extends State<Input> {
     ));
 
     if (config.errorText != null && !config.isDense) {
-      TextStyle errorStyle = themeData.text.caption.copyWith(color: themeData.errorColor);
+      TextStyle errorStyle = themeData.textTheme.caption.copyWith(color: themeData.errorColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         bottom: 0.0,
@@ -191,7 +191,7 @@ class _InputState extends State<Input> {
         alignItems: FlexAlignItems.start,
         children: [
           new Container(
-            margin: new EdgeDims.only(right: 16.0, top: iconTop),
+            margin: new EdgeInsets.only(right: 16.0, top: iconTop),
             width: config.isDense ? 40.0 : 48.0,
             child: new Icon(
               icon: config.icon,
@@ -208,7 +208,7 @@ class _InputState extends State<Input> {
       behavior: HitTestBehavior.opaque,
       onTap: () => _rawInputLineKey.currentState?.requestKeyboard(),
       child: new Padding(
-        padding: const EdgeDims.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: child
       )
     );

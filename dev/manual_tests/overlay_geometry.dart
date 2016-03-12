@@ -52,7 +52,7 @@ class _MarkerPainter extends CustomPainter {
   }
 }
 
-class Marker extends StatelessComponent {
+class Marker extends StatelessWidget {
   Marker({
     this.type: MarkerType.touch,
     this.position,
@@ -82,7 +82,7 @@ class Marker extends StatelessComponent {
   }
 }
 
-class OverlayGeometryApp extends StatefulComponent {
+class OverlayGeometryApp extends StatefulWidget {
   OverlayGeometryAppState createState() => new OverlayGeometryAppState();
 }
 
@@ -144,7 +144,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         color: cardModel.color,
         child: new Container(
           height: cardModel.height,
-          padding: const EdgeDims.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
         )
       )
@@ -156,7 +156,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       new Scaffold(
         toolBar: new ToolBar(center: new Text('Tap a Card')),
         body: new Container(
-          padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
           child: new ScrollableMixedWidgetList(
             builder: builder,
             token: cardModels.length,

@@ -10,7 +10,7 @@ import 'dialog.dart';
 import 'date_picker.dart';
 import 'flat_button.dart';
 
-class _DatePickerDialog extends StatefulComponent {
+class _DatePickerDialog extends StatefulWidget {
   _DatePickerDialog({
     Key key,
     this.initialDate,
@@ -55,7 +55,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         lastDate: config.lastDate,
         onChanged: _handleDateChanged
       ),
-      contentPadding: EdgeDims.zero,
+      contentPadding: EdgeInsets.zero,
       actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),

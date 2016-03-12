@@ -10,22 +10,22 @@ import 'basic_types.dart';
 ///
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
-class EdgeDims {
-  /// Constructs an EdgeDims from offsets from the top, right, bottom and left.
-  const EdgeDims.TRBL(this.top, this.right, this.bottom, this.left);
+class EdgeInsets {
+  /// Constructs insets from offsets from the top, right, bottom and left.
+  const EdgeInsets.TRBL(this.top, this.right, this.bottom, this.left);
 
-  /// Constructs an EdgeDims where all the offsets are value.
-  const EdgeDims.all(double value)
+  /// Constructs insets where all the offsets are value.
+  const EdgeInsets.all(double value)
       : top = value, right = value, bottom = value, left = value;
 
-  /// Constructs an EdgeDims with only the given values non-zero.
-  const EdgeDims.only({ this.top: 0.0,
+  /// Constructs insets with only the given values non-zero.
+  const EdgeInsets.only({ this.top: 0.0,
                         this.right: 0.0,
                         this.bottom: 0.0,
                         this.left: 0.0 });
 
-  /// Constructs an EdgeDims with symmetrical vertical and horizontal offsets.
-  const EdgeDims.symmetric({ double vertical: 0.0,
+  /// Constructs insets with symmetrical vertical and horizontal offsets.
+  const EdgeInsets.symmetric({ double vertical: 0.0,
                              double horizontal: 0.0 })
     : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
 
@@ -50,18 +50,18 @@ class EdgeDims {
   /// The total offset in the horizontal direction.
   double get vertical => top + bottom;
 
-  /// The size that this EdgeDims would occupy with an empty interior.
+  /// The size that this EdgeInsets would occupy with an empty interior.
   Size get collapsedSize => new Size(horizontal, vertical);
 
-  /// An EdgeDims with top and bottom as well as left and right flipped.
-  EdgeDims get flipped => new EdgeDims.TRBL(bottom, left, top, right);
+  /// An EdgeInsets with top and bottom as well as left and right flipped.
+  EdgeInsets get flipped => new EdgeInsets.TRBL(bottom, left, top, right);
 
   Rect inflateRect(Rect rect) {
     return new Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
   }
 
-  EdgeDims operator -(EdgeDims other) {
-    return new EdgeDims.TRBL(
+  EdgeInsets operator -(EdgeInsets other) {
+    return new EdgeInsets.TRBL(
       top - other.top,
       right - other.right,
       bottom - other.bottom,
@@ -69,8 +69,8 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator +(EdgeDims other) {
-    return new EdgeDims.TRBL(
+  EdgeInsets operator +(EdgeInsets other) {
+    return new EdgeInsets.TRBL(
       top + other.top,
       right + other.right,
       bottom + other.bottom,
@@ -78,8 +78,8 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator *(double other) {
-    return new EdgeDims.TRBL(
+  EdgeInsets operator *(double other) {
+    return new EdgeInsets.TRBL(
       top * other,
       right * other,
       bottom * other,
@@ -87,8 +87,8 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator /(double other) {
-    return new EdgeDims.TRBL(
+  EdgeInsets operator /(double other) {
+    return new EdgeInsets.TRBL(
       top / other,
       right / other,
       bottom / other,
@@ -96,8 +96,8 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator ~/(double other) {
-    return new EdgeDims.TRBL(
+  EdgeInsets operator ~/(double other) {
+    return new EdgeInsets.TRBL(
       (top ~/ other).toDouble(),
       (right ~/ other).toDouble(),
       (bottom ~/ other).toDouble(),
@@ -105,8 +105,8 @@ class EdgeDims {
     );
   }
 
-  EdgeDims operator %(double other) {
-    return new EdgeDims.TRBL(
+  EdgeInsets operator %(double other) {
+    return new EdgeInsets.TRBL(
       top % other,
       right % other,
       bottom % other,
@@ -114,17 +114,17 @@ class EdgeDims {
     );
   }
 
-  /// Linearly interpolate between two EdgeDims.
+  /// Linearly interpolate between two EdgeInsets.
   ///
-  /// If either is null, this function interpolates from [EdgeDims.zero].
-  static EdgeDims lerp(EdgeDims a, EdgeDims b, double t) {
+  /// If either is null, this function interpolates from [EdgeInsets.zero].
+  static EdgeInsets lerp(EdgeInsets a, EdgeInsets b, double t) {
     if (a == null && b == null)
       return null;
     if (a == null)
       return b * t;
     if (b == null)
       return a * (1.0 - t);
-    return new EdgeDims.TRBL(
+    return new EdgeInsets.TRBL(
       ui.lerpDouble(a.top, b.top, t),
       ui.lerpDouble(a.right, b.right, t),
       ui.lerpDouble(a.bottom, b.bottom, t),
@@ -132,15 +132,15 @@ class EdgeDims {
     );
   }
 
-  /// An EdgeDims with zero offsets in each direction.
-  static const EdgeDims zero = const EdgeDims.TRBL(0.0, 0.0, 0.0, 0.0);
+  /// An EdgeInsets with zero offsets in each direction.
+  static const EdgeInsets zero = const EdgeInsets.TRBL(0.0, 0.0, 0.0, 0.0);
 
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! EdgeDims)
+    if (other is! EdgeInsets)
       return false;
-    final EdgeDims typedOther = other;
+    final EdgeInsets typedOther = other;
     return top == typedOther.top &&
            right == typedOther.right &&
            bottom == typedOther.bottom &&
@@ -149,5 +149,5 @@ class EdgeDims {
 
   int get hashCode => hashValues(top, left, bottom, right);
 
-  String toString() => "EdgeDims($top, $right, $bottom, $left)";
+  String toString() => "EdgeInsets($top, $right, $bottom, $left)";
 }

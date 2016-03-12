@@ -22,7 +22,7 @@ import 'theme.dart';
 /// in your project's `flutter.yaml` file. This ensures that the
 /// MaterialIcons font is included in your application. This font is
 /// used to display the icons.
-class Icon extends StatelessComponent {
+class Icon extends StatelessWidget {
   Icon({
     Key key,
     this.icon,

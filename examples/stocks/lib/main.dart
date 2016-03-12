@@ -23,7 +23,7 @@ import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
-class StocksApp extends StatefulComponent {
+class StocksApp extends StatefulWidget {
   StocksAppState createState() => new StocksAppState();
 }
 

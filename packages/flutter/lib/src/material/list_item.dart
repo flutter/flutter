@@ -15,7 +15,7 @@ import 'theme.dart';
 /// isThreeLine: true is specified. If dense: true is specified then the overall
 /// height of this list item and the size of the DefaultTextStyles that wrap
 /// the [primary] and [secondary] widget are reduced.
-class ListItem extends StatelessComponent {
+class ListItem extends StatelessWidget {
   ListItem({
     Key key,
     this.left,
@@ -69,7 +69,7 @@ class ListItem extends StatelessComponent {
 
   TextStyle primaryTextStyle(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle style = theme.text.subhead;
+    final TextStyle style = theme.textTheme.subhead;
     if (!enabled) {
       final Color color = theme.disabledColor;
       return dense ? style.copyWith(fontSize: 13.0, color: color) : style.copyWith(color: color);
@@ -79,8 +79,8 @@ class ListItem extends StatelessComponent {
 
   TextStyle secondaryTextStyle(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color color = theme.text.caption.color;
-    final TextStyle style = theme.text.body1;
+    final Color color = theme.textTheme.caption.color;
+    final TextStyle style = theme.textTheme.body1;
     return dense ? style.copyWith(color: color, fontSize: 12.0) : style.copyWith(color: color);
   }
 
@@ -105,7 +105,7 @@ class ListItem extends StatelessComponent {
 
     if (left != null) {
       children.add(new Container(
-        margin: new EdgeDims.only(right: 16.0, top: iconMarginTop),
+        margin: new EdgeInsets.only(right: 16.0, top: iconMarginTop),
         width: 40.0,
         child: new Align(
           alignment: new FractionalOffset(0.0, isThreeLine ? 0.0 : 0.5),
@@ -138,7 +138,7 @@ class ListItem extends StatelessComponent {
 
     if (right != null) {
       children.add(new Container(
-        margin: new EdgeDims.only(left: 16.0, top: iconMarginTop),
+        margin: new EdgeInsets.only(left: 16.0, top: iconMarginTop),
         child: new Align(
           alignment: new FractionalOffset(1.0, isThreeLine ? 0.0 : 0.5),
           child: right
@@ -151,7 +151,7 @@ class ListItem extends StatelessComponent {
       onLongPress: enabled ? onLongPress : null,
       child: new Container(
         height: itemHeight,
-        padding: const EdgeDims.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: new Row(
           alignItems: FlexAlignItems.center,
           children: children

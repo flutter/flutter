@@ -16,7 +16,7 @@ RenderBox initCircle() {
   );
 }
 
-class SectorApp extends StatefulComponent {
+class SectorApp extends StatefulWidget {
   SectorAppState createState() => new SectorAppState();
 }
 
@@ -92,7 +92,7 @@ class SectorAppState extends State<SectorApp> {
     return new Column(
       children: <Widget>[
         new Container(
-          padding: new EdgeDims.symmetric(horizontal: 8.0, vertical: 25.0),
+          padding: new EdgeInsets.symmetric(horizontal: 8.0, vertical: 25.0),
           child: new Row(
             children: <Widget>[
               new RaisedButton(
@@ -101,8 +101,8 @@ class SectorAppState extends State<SectorApp> {
                   child: new Row(
                     children: <Widget>[
                       new Container(
-                        padding: new EdgeDims.all(4.0),
-                        margin: new EdgeDims.only(right: 10.0),
+                        padding: new EdgeInsets.all(4.0),
+                        margin: new EdgeInsets.only(right: 10.0),
                         child: new WidgetToRenderBoxAdapter(renderBox: sectorAddIcon)
                       ),
                       new Text('ADD SECTOR'),
@@ -116,8 +116,8 @@ class SectorAppState extends State<SectorApp> {
                   child: new Row(
                     children: <Widget>[
                       new Container(
-                        padding: new EdgeDims.all(4.0),
-                        margin: new EdgeDims.only(right: 10.0),
+                        padding: new EdgeInsets.all(4.0),
+                        margin: new EdgeInsets.only(right: 10.0),
                         child: new WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon)
                       ),
                       new Text('REMOVE SECTOR'),
@@ -131,11 +131,11 @@ class SectorAppState extends State<SectorApp> {
         ),
         new Flexible(
           child: new Container(
-            margin: new EdgeDims.all(8.0),
+            margin: new EdgeInsets.all(8.0),
             decoration: new BoxDecoration(
               border: new Border.all(color: new Color(0xFF000000))
             ),
-            padding: new EdgeDims.all(8.0),
+            padding: new EdgeInsets.all(8.0),
             child: new WidgetToRenderBoxAdapter(
               renderBox: sectors,
               onBuild: doUpdates

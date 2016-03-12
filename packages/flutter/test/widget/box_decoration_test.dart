@@ -12,7 +12,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(
         new Container(
-          padding: new EdgeDims.all(50.0),
+          padding: new EdgeInsets.all(50.0),
           decoration: new BoxDecoration(
             shape: BoxShape.circle,
             border: new Border.all(width: 10.0, color: const Color(0x80FF00FF)),

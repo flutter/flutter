@@ -14,7 +14,7 @@ import 'pages.dart';
 import 'transitions.dart';
 
 // Heroes are the parts of an application's screen-to-screen transitions where a
-// component from one screen shifts to a position on the other. For example,
+// widget from one screen shifts to a position on the other. For example,
 // album art from a list of albums growing to become the centerpiece of the
 // album's details view. In this context, a screen is a navigator ModalRoute.
 
@@ -76,7 +76,7 @@ abstract class HeroHandle {
   _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation);
 }
 
-class Hero extends StatefulComponent {
+class Hero extends StatefulWidget {
   Hero({
     Key key,
     this.tag,
@@ -104,7 +104,7 @@ class Hero extends StatefulComponent {
     Map<Object, Map<Key, HeroState>> heroes = <Object, Map<Key, HeroState>>{};
     void visitor(Element element) {
       if (element.widget is Hero) {
-        StatefulComponentElement hero = element;
+        StatefulElement hero = element;
         Hero heroWidget = element.widget;
         Object tag = heroWidget.tag;
         assert(tag != null);

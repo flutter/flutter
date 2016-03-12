@@ -15,7 +15,7 @@ import 'typography.dart';
 /// https://www.google.com/design/spec/components/grid-lists.html#grid-lists-specs
 /// For a one-line header specify title and to add a second line specify caption.
 /// Use left or right to add an icon.
-class GridTileBar extends StatelessComponent {
+class GridTileBar extends StatelessWidget {
   GridTileBar({ Key key, this.backgroundColor, this.left, this.right, this.title, this.caption }) : super(key: key);
 
   final Color backgroundColor;
@@ -29,18 +29,18 @@ class GridTileBar extends StatelessComponent {
     if (backgroundColor != null)
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
 
-    EdgeDims padding;
+    EdgeInsets padding;
     if (left != null && right != null)
-      padding = const EdgeDims.symmetric(vertical: 16.0, horizontal: 8.0);
+      padding = const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0);
     else if (left != null)
-      padding = const EdgeDims.only(left: 8.0, right: 16.0, top: 16.0, bottom: 16.0);
+      padding = const EdgeInsets.only(left: 8.0, right: 16.0, top: 16.0, bottom: 16.0);
     else // right != null || (left == null && right == null)
-      padding = const EdgeDims.only(left: 16.0, right: 8.0, top: 16.0, bottom: 16.0);
+      padding = const EdgeInsets.only(left: 16.0, right: 8.0, top: 16.0, bottom: 16.0);
 
     final List<Widget> children = <Widget>[];
 
     if (left != null)
-      children.add(new Padding(padding: const EdgeDims.only(right: 8.0), child: left));
+      children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: left));
 
     if (title != null && caption != null) {
       children.add(
@@ -72,7 +72,7 @@ class GridTileBar extends StatelessComponent {
     }
 
     if (right != null)
-      children.add(new Padding(padding: const EdgeDims.only(left: 8.0), child: right));
+      children.add(new Padding(padding: const EdgeInsets.only(left: 8.0), child: right));
 
     return new Container(
       padding: padding,

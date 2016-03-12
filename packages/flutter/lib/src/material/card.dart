@@ -6,12 +6,12 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 
-const EdgeDims _kCardMargins = const EdgeDims.all(4.0);
+const EdgeInsets _kCardMargins = const EdgeInsets.all(4.0);
 
 /// A material design card
 ///
 /// <https://www.google.com/design/spec/components/cards.html>
-class Card extends StatelessComponent {
+class Card extends StatelessWidget {
   const Card({ Key key, this.child, this.color }) : super(key: key);
 
   final Widget child;

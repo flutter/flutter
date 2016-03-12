@@ -28,7 +28,7 @@ const double _kTextAndIconTabHeight = 72.0;
 const double _kTabIndicatorHeight = 2.0;
 const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
-const EdgeDims _kTabLabelPadding = const EdgeDims.symmetric(horizontal: 12.0);
+const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 300);
 
@@ -297,7 +297,7 @@ class TabLabel {
   final TabLabelIconBuilder iconBuilder;
 }
 
-class _Tab extends StatelessComponent {
+class _Tab extends StatelessWidget {
   _Tab({
     Key key,
     this.onSelected,
@@ -342,7 +342,7 @@ class _Tab extends StatelessComponent {
         children: <Widget>[
           new Container(
             child: _buildLabelIcon(context),
-            margin: const EdgeDims.only(bottom: 10.0)
+            margin: const EdgeInsets.only(bottom: 10.0)
           ),
           _buildLabelText()
         ],
@@ -374,7 +374,7 @@ class _TabsScrollBehavior extends BoundedBehavior {
 
   bool isScrollable = true;
 
-  Simulation createFlingScrollSimulation(double position, double velocity) {
+  Simulation createScrollSimulation(double position, double velocity) {
     if (!isScrollable)
       return null;
 
@@ -395,7 +395,7 @@ abstract class TabBarSelectionAnimationListener {
   void handleSelectionDeactivate();
 }
 
-class TabBarSelection<T> extends StatefulComponent {
+class TabBarSelection<T> extends StatefulWidget {
   TabBarSelection({
     Key key,
     this.value,
@@ -784,7 +784,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
     if (config.isScrollable) {
       return new Viewport(
-        scrollDirection: Axis.horizontal,
+        mainAxis: Axis.horizontal,
         paintOffset: scrollOffsetToPixelDelta(scrollOffset),
         onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
         child: contents
@@ -961,7 +961,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
       _initSelection(newSelection);
     return new PageViewport(
       itemsWrap: config.itemsWrap,
-      scrollDirection: config.scrollDirection,
+      mainAxis: config.scrollDirection,
       startOffset: scrollOffset,
       overlayPainter: config.scrollableListPainter,
       children: _items
@@ -969,7 +969,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   }
 }
 
-class TabPageSelector<T> extends StatelessComponent {
+class TabPageSelector<T> extends StatelessWidget {
   const TabPageSelector({ Key key }) : super(key: key);
 
   Widget _buildTabIndicator(TabBarSelectionState<T> selection, T tab, Animation<double> animation, ColorTween selectedColor, ColorTween previousColor) {
@@ -988,7 +988,7 @@ class TabPageSelector<T> extends StatelessComponent {
     return new Container(
       width: 12.0,
       height: 12.0,
-      margin: new EdgeDims.all(4.0),
+      margin: new EdgeInsets.all(4.0),
       decoration: new BoxDecoration(
         backgroundColor: background,
         border: new Border.all(color: selectedColor.end),

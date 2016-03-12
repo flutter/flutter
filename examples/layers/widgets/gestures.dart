@@ -54,7 +54,7 @@ class _GesturePainter extends CustomPainter {
   }
 }
 
-class GestureDemo extends StatefulComponent {
+class GestureDemo extends StatefulWidget {
   _GestureDemoState createState() => new _GestureDemoState();
 }
 
@@ -161,7 +161,7 @@ class _GestureDemoState extends State<GestureDemo> {
           left: 0.0,
           child: new Card(
             child: new Container(
-              padding: new EdgeDims.all(4.0),
+              padding: new EdgeInsets.all(4.0),
               child: new Column(
                 children: <Widget>[
                   new Row(

@@ -13,7 +13,7 @@ class Item {
 }
 List<Item> items = <Item>[new Item(), new Item()];
 
-class StatefulLeaf extends StatefulComponent {
+class StatefulLeaf extends StatefulWidget {
   StatefulLeaf({ GlobalKey key }) : super(key: key);
   StatefulLeafState createState() => new StatefulLeafState();
 }
@@ -23,7 +23,7 @@ class StatefulLeafState extends State<StatefulLeaf> {
   Widget build(BuildContext context) => new Text('leaf');
 }
 
-class KeyedWrapper extends StatelessComponent {
+class KeyedWrapper extends StatelessWidget {
   KeyedWrapper(this.key1, this.key2);
   Key key1, key2;
   Widget build(BuildContext context) {

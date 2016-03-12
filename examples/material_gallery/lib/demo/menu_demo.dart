@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class MenuDemo extends StatefulComponent {
+class MenuDemo extends StatefulWidget {
   MenuDemo({ Key key }) : super(key: key);
 
   MenuDemoState createState() => new MenuDemoState();
@@ -79,7 +79,7 @@ class MenuDemoState extends State<MenuDemo> {
         ]
       ),
       body: new Block(
-        padding: const EdgeDims.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         children: <Widget>[
           // Pressing the PopupMenuButton on the right of this item shows
           // a simple menu with one disabled item. Typically the contents

@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-class TimePickerDemo extends StatefulComponent {
+class TimePickerDemo extends StatefulWidget {
   _TimePickerDemoState createState() => new _TimePickerDemoState();
 }
 

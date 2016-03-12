@@ -28,7 +28,7 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
       BoxConstraints constraints = new BoxConstraints.loose(size);
       performLayoutSize0 = layoutChild(0, constraints);
       performLayoutSize1 = layoutChild(1, constraints);
-      performLayoutIsChild = isChild('fred');
+      performLayoutIsChild = hasChild('fred');
     }, returnsNormally);
   }
 

@@ -15,7 +15,7 @@ enum DismissDialogAction {
   save,
 }
 
-class DateTimeItem extends StatelessComponent {
+class DateTimeItem extends StatelessWidget {
   DateTimeItem({ Key key, DateTime dateTime, this.onChanged })
     : date = new DateTime(dateTime.year, dateTime.month, dateTime.day),
       time = new TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
@@ -31,12 +31,12 @@ class DateTimeItem extends StatelessComponent {
     final ThemeData theme = Theme.of(context);
 
     return new DefaultTextStyle(
-      style: theme.text.subhead,
+      style: theme.textTheme.subhead,
       child: new Row(
         children: <Widget>[
           new Flexible(
             child: new Container(
-              padding: const EdgeDims.symmetric(vertical: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               decoration: new BoxDecoration(
                 border: new Border(bottom: new BorderSide(color: theme.dividerColor))
               ),
@@ -63,8 +63,8 @@ class DateTimeItem extends StatelessComponent {
             )
           ),
           new Container(
-            margin: const EdgeDims.only(left: 8.0),
-            padding: const EdgeDims.symmetric(vertical: 8.0),
+            margin: const EdgeInsets.only(left: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             decoration: new BoxDecoration(
               border: new Border(bottom: new BorderSide(color: theme.dividerColor))
             ),
@@ -92,7 +92,7 @@ class DateTimeItem extends StatelessComponent {
   }
 }
 
-class FullScreenDialogDemo extends StatefulComponent {
+class FullScreenDialogDemo extends StatefulWidget {
   FullScreenDialogDemoState createState() => new FullScreenDialogDemoState();
 }
 
@@ -109,7 +109,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     }
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.text.subhead.copyWith(color: theme.text.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     showDialog(
       context: context,
@@ -149,7 +149,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         center: new Text('New Event'),
         right: <Widget> [
           new FlatButton(
-            child: new Text('SAVE', style: theme.text.body1.copyWith(color: Colors.white)),
+            child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             }
@@ -157,37 +157,37 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         ]
       ),
       body: new Padding(
-        padding: const EdgeDims.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: new ScrollableViewport(
           child: new Column(
             alignItems: FlexAlignItems.stretch,
             justifyContent: FlexJustifyContent.collapse,
             children: <Widget>[
               new Container(
-                padding: const EdgeDims.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: new BoxDecoration(
                   border: new Border(bottom: new BorderSide(color: theme.dividerColor))
                 ),
                 child: new Align(
                   alignment: const FractionalOffset(0.0, 1.0),
-                  child: new Text('Event name', style: theme.text.display2)
+                  child: new Text('Event name', style: theme.textTheme.display2)
                 )
               ),
               new Container(
-                padding: const EdgeDims.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: new BoxDecoration(
                   border: new Border(bottom: new BorderSide(color: theme.dividerColor))
                 ),
                 child: new Align(
                   alignment: const FractionalOffset(0.0, 1.0),
-                  child: new Text('Location', style: theme.text.title.copyWith(color: Colors.black54))
+                  child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
                 )
               ),
               new Column(
                 alignItems: FlexAlignItems.stretch,
                 justifyContent: FlexJustifyContent.end,
                 children: <Widget>[
-                  new Text('From', style: theme.text.caption),
+                  new Text('From', style: theme.textTheme.caption),
                   new DateTimeItem(
                     dateTime: fromDateTime,
                     onChanged: (DateTime value) {
@@ -203,7 +203,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 alignItems: FlexAlignItems.stretch,
                 justifyContent: FlexJustifyContent.end,
                 children: <Widget>[
-                  new Text('To', style: theme.text.caption),
+                  new Text('To', style: theme.textTheme.caption),
                   new DateTimeItem(
                     dateTime: toDateTime,
                     onChanged: (DateTime value) {
@@ -237,7 +237,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             ]
             .map((Widget child) {
               return new Container(
-                padding: const EdgeDims.symmetric(vertical: 8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 height: 96.0,
                 child: child
               );

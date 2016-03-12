@@ -27,7 +27,7 @@ class MediaQueryData {
   final double devicePixelRatio;
 
   /// The padding around the edges of the media (e.g., the screen).
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {

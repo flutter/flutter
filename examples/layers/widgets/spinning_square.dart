@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-class SpinningSquare extends StatefulComponent {
+class SpinningSquare extends StatefulWidget {
   _SpinningSquareState createState() => new _SpinningSquareState();
 }
 

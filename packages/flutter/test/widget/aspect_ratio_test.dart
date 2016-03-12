@@ -40,7 +40,7 @@ void main() {
       tester.pumpWidget(
         new Center(
           child: new Viewport(
-            scrollDirection: Axis.horizontal,
+            mainAxis: Axis.horizontal,
             child: new AspectRatio(
               aspectRatio: 2.0,
               child: new Container(

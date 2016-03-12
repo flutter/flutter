@@ -16,7 +16,7 @@ import 'material.dart';
 
 const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
-const EdgeDims _kMenuHorizontalPadding = const EdgeDims.only(left: 36.0, right: 36.0);
+const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.only(left: 36.0, right: 36.0);
 const double _kBaselineOffsetFromBottom = 20.0;
 const Border _kDropDownUnderline = const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 2.0));
 
@@ -56,7 +56,7 @@ class _DropDownMenuPainter extends CustomPainter {
   }
 }
 
-class _DropDownMenu<T> extends StatusTransitionComponent {
+class _DropDownMenu<T> extends StatusTransitionWidget {
   _DropDownMenu({
     Key key,
     _DropDownRoute<T> route
@@ -197,7 +197,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   }
 }
 
-class DropDownMenuItem<T> extends StatelessComponent {
+class DropDownMenuItem<T> extends StatelessWidget {
   DropDownMenuItem({
     Key key,
     this.value,
@@ -210,9 +210,9 @@ class DropDownMenuItem<T> extends StatelessComponent {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      padding: const EdgeDims.only(left: 8.0, right: 8.0, top: 6.0),
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 6.0),
       child: new DefaultTextStyle(
-        style: Theme.of(context).text.subhead,
+        style: Theme.of(context).textTheme.subhead,
         child: new Baseline(
           baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
           child: child
@@ -222,7 +222,7 @@ class DropDownMenuItem<T> extends StatelessComponent {
   }
 }
 
-class DropDownButton<T> extends StatefulComponent {
+class DropDownButton<T> extends StatefulWidget {
   DropDownButton({
     Key key,
     this.items,
@@ -301,7 +301,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
             ),
             new Container(
               child: new Icon(icon: Icons.arrow_drop_down, size: 36.0),
-              padding: const EdgeDims.only(top: 6.0)
+              padding: const EdgeInsets.only(top: 6.0)
             )
           ],
           justifyContent: FlexJustifyContent.collapse

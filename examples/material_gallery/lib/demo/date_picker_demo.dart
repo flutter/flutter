@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class DatePickerDemo extends StatefulComponent {
+class DatePickerDemo extends StatefulWidget {
   _DatePickerDemoState createState() => new _DatePickerDemoState();
 }
 

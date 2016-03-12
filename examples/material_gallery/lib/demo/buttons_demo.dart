@@ -55,7 +55,7 @@ class _ButtonDemo {
   int get hashCode => hashValues(title.hashCode, text.hashCode);
 }
 
-class ButtonsDemo extends StatefulComponent {
+class ButtonsDemo extends StatefulWidget {
   _ButtonsDemoState createState() => new _ButtonsDemoState();
 }
 
@@ -91,7 +91,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildRaisedButton(BuildContext context) {
     return new Container(
-      margin: const EdgeDims.symmetric(vertical: 16.0),
+      margin: const EdgeInsets.symmetric(vertical: 16.0),
       child: new Column(
         children: <Widget>[
           new RaisedButton(
@@ -108,7 +108,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         ]
         .map((Widget child) {
           return new Container(
-            margin: const EdgeDims.symmetric(vertical: 8.0),
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
             child: child
           );
         })
@@ -119,7 +119,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildFlatButton(BuildContext context) {
     return new Container(
-      margin: const EdgeDims.symmetric(vertical: 16.0),
+      margin: const EdgeInsets.symmetric(vertical: 16.0),
       child: new ButtonTheme(
         color: ButtonColor.accent,
         child: new Column(
@@ -138,7 +138,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ]
           .map((Widget child) {
             return new Container(
-              margin: const EdgeDims.symmetric(vertical: 8.0),
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
               child: child
             );
           })
@@ -177,13 +177,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   Widget buildTabView(_ButtonDemo demo) {
     return new Builder(
       builder: (BuildContext context) {
-        final TextStyle textStyle = Theme.of(context).text.caption.copyWith(fontSize: 16.0);
+        final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0);
         return new Column(
           alignItems: FlexAlignItems.stretch,
           children: <Widget>[
             demo.builder(context),
             new Padding(
-              padding: const EdgeDims.symmetric(horizontal: 32.0),
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: new Text(demo.text, style: textStyle)
             )
           ]

@@ -20,7 +20,7 @@ const String _alertWithTitleText =
   "Let Google help apps determine location. This means sending anyonmous location "
   "data to Google, even when no apps are running.";
 
-class DialogDemoItem extends StatelessComponent {
+class DialogDemoItem extends StatelessWidget {
   DialogDemoItem({ Key key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
 
   final IconData icon;
@@ -32,7 +32,7 @@ class DialogDemoItem extends StatelessComponent {
     return new InkWell(
       onTap: onPressed,
       child: new Padding(
-        padding: const EdgeDims.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: new Row(
           justifyContent: FlexJustifyContent.start,
           alignItems: FlexAlignItems.center,
@@ -43,7 +43,7 @@ class DialogDemoItem extends StatelessComponent {
               color: color
             ),
             new Padding(
-              padding: const EdgeDims.only(left: 16.0),
+              padding: const EdgeInsets.only(left: 16.0),
               child: new Text(text)
             )
           ]
@@ -53,7 +53,7 @@ class DialogDemoItem extends StatelessComponent {
   }
 }
 
-class DialogDemo extends StatefulComponent {
+class DialogDemo extends StatefulWidget {
   DialogDemoState createState() => new DialogDemoState();
 }
 
@@ -76,7 +76,7 @@ class DialogDemoState extends State<DialogDemo> {
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.text.subhead.copyWith(color: theme.text.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     return new Scaffold(
       key: scaffoldKey,
@@ -84,7 +84,7 @@ class DialogDemoState extends State<DialogDemo> {
         center: new Text('Dialogs')
       ),
       body: new Block(
-        padding: const EdgeDims.symmetric(vertical: 24.0, horizontal: 72.0),
+        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
           new RaisedButton(
             child: new Text('ALERT'),

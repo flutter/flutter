@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class SliderDemo extends StatefulComponent {
+class SliderDemo extends StatefulWidget {
   _SliderDemoState createState() => new _SliderDemoState();
 }
 
@@ -31,7 +31,7 @@ class _SliderDemoState extends State<SliderDemo> {
                   }
                 ),
                 new Container(
-                  padding: const EdgeDims.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: new Text(_value.round().toString().padLeft(3, '0'))
                 ),
               ],
@@ -47,7 +47,7 @@ class _SliderDemoState extends State<SliderDemo> {
                 // Disabled, but tracking the slider above.
                 new Slider(value: _value / 100.0),
                 new Container(
-                  padding: const EdgeDims.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: new Text((_value / 100.0).toStringAsFixed(2))
                 ),
               ],

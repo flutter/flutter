@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'stock_types.dart';
 
-class StockSettings extends StatefulComponent {
+class StockSettings extends StatefulWidget {
   const StockSettings(this.configuration, this.updater);
 
   final StockConfiguration configuration;
@@ -241,7 +241,7 @@ class StockSettingsState extends State<StockSettings> {
     });
     return new Block(
       children: rows,
-      padding: const EdgeDims.symmetric(vertical: 20.0)
+      padding: const EdgeInsets.symmetric(vertical: 20.0)
     );
   }
 

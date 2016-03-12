@@ -73,7 +73,7 @@ abstract class MaterialInkController {
 /// list on the paper, and it's been scrolled), a LayoutChangedNotification must
 /// be dispatched at the relevant subtree. (This in particular means that
 /// Transitions should not be placed inside Material.)
-class Material extends StatefulComponent {
+class Material extends StatefulWidget {
   Material({
     Key key,
     this.child,
@@ -130,7 +130,7 @@ class _MaterialState extends State<Material> {
     Widget contents = config.child;
     if (contents != null) {
       contents = new DefaultTextStyle(
-        style: config.textStyle ?? Theme.of(context).text.body1,
+        style: config.textStyle ?? Theme.of(context).textTheme.body1,
         child: contents
       );
     }
@@ -274,7 +274,7 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
   }
 }
 
-class InkFeatures extends OneChildRenderObjectWidget {
+class InkFeatures extends SingleChildRenderObjectWidget {
   InkFeatures({ Key key, this.color, Widget child }) : super(key: key, child: child);
 
   final Color color;

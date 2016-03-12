@@ -50,7 +50,7 @@ class StockArrowPainter extends CustomPainter {
   }
 }
 
-class StockArrow extends StatelessComponent {
+class StockArrow extends StatelessWidget {
   StockArrow({ Key key, this.percentChange }) : super(key: key);
 
   final double percentChange;
@@ -71,7 +71,7 @@ class StockArrow extends StatelessComponent {
     return new Container(
       width: 40.0,
       height: 40.0,
-      margin: const EdgeDims.symmetric(horizontal: 5.0),
+      margin: const EdgeInsets.symmetric(horizontal: 5.0),
       child: new CustomPaint(
         painter: new StockArrowPainter(
           // TODO(jackson): This should change colors with the theme

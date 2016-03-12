@@ -191,7 +191,7 @@ class _ResolutionAwareAssetResolver extends _VariantAssetResolver {
 /// icons/1.5x/heart.png
 /// icons/2.0x/heart.png
 /// ```
-class AssetVendor extends StatefulComponent {
+class AssetVendor extends StatefulWidget {
   AssetVendor({
     Key key,
     this.bundle,

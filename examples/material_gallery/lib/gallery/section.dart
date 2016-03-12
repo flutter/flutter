@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'demo.dart';
 
-class GallerySection extends StatelessComponent {
+class GallerySection extends StatelessWidget {
   GallerySection({ this.title, this.image, this.colors, this.demos });
 
   final String title;
@@ -45,7 +45,7 @@ class GallerySection extends StatelessComponent {
             body: new Material(
               child: new MaterialList(
                 scrollableKey: scrollableKey,
-                scrollablePadding: new EdgeDims.only(top: appBarHeight),
+                scrollablePadding: new EdgeInsets.only(top: appBarHeight),
                 type: MaterialListType.oneLine,
                 children: (demos ?? const <GalleryDemo>[]).map((GalleryDemo demo) {
                   return new ListItem(
@@ -66,7 +66,7 @@ class GallerySection extends StatelessComponent {
       brightness: Theme.of(context).brightness,
       primarySwatch: colors
     );
-    final TextStyle titleTextStyle = theme.text.title.copyWith(
+    final TextStyle titleTextStyle = theme.textTheme.title.copyWith(
       color: Colors.white
     );
     return new Flexible(
@@ -75,13 +75,13 @@ class GallerySection extends StatelessComponent {
         onTap: () { showDemos(context); },
         child: new Container(
           height: 256.0,
-          margin: const EdgeDims.all(4.0),
+          margin: const EdgeInsets.all(4.0),
           decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
           child: new Column(
             children: <Widget>[
               new Flexible(
                 child: new Padding(
-                  padding: const EdgeDims.symmetric(horizontal: 12.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   child: new AssetImage(
                     name: image,
                     alignment: const FractionalOffset(0.5, 0.5),
@@ -90,7 +90,7 @@ class GallerySection extends StatelessComponent {
                 )
               ),
               new Padding(
-                padding: const EdgeDims.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: new Align(
                   alignment: const FractionalOffset(0.0, 1.0),
                   child: new Text(title, style: titleTextStyle)

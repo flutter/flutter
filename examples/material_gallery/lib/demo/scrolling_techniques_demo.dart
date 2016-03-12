@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'flexible_space_demo.dart';
 
-class _BarGraphic extends StatelessComponent {
+class _BarGraphic extends StatelessWidget {
   _BarGraphic({ Key key, this.height, this.color, this.leftText, this.rightText: '' })
     : super(key: key) {
     assert(height != null);
@@ -23,10 +23,10 @@ class _BarGraphic extends StatelessComponent {
     return new Container(
       height: height,
       width: 200.0,
-      padding: const EdgeDims.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: new BoxDecoration(backgroundColor: color),
       child: new DefaultTextStyle(
-        style: Theme.of(context).text.body1.copyWith(color: Colors.white),
+        style: Theme.of(context).textTheme.body1.copyWith(color: Colors.white),
         child: new Row(
           justifyContent: FlexJustifyContent.spaceBetween,
           children: <Widget>[
@@ -74,7 +74,7 @@ class _FlexibleSpaceGraphic extends _BarGraphic {
   );
 }
 
-class _TechniqueItem extends StatelessComponent {
+class _TechniqueItem extends StatelessWidget {
   _TechniqueItem({ this.titleText, this.barGraphics, this.builder });
 
   final String titleText;
@@ -90,7 +90,7 @@ class _TechniqueItem extends StatelessComponent {
       child: new InkWell(
         onTap: () { showDemo(context); },
         child: new Padding(
-          padding: const EdgeDims.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: new Row(
             justifyContent: FlexJustifyContent.spaceBetween,
             children :<Widget>[
@@ -110,17 +110,17 @@ const String _introText =
   "it appears behind the device's status bar. When a flexible space Widget is "
   "specified it is stacked on top of the ToolBar.";
 
-class ScrollingTechniquesDemo extends StatelessComponent {
+class ScrollingTechniquesDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Scrolling Techniques')),
       body: new Padding(
-        padding: const EdgeDims.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: new Block(
           children: <Widget>[
             new Padding(
-              padding: const EdgeDims.symmetric(horizontal: 16.0, vertical: 32.0),
-              child: new Text(_introText, style: Theme.of(context).text.caption)
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+              child: new Text(_introText, style: Theme.of(context).textTheme.caption)
             ),
             new _TechniqueItem(
               builder: (BuildContext context) => new FlexibleSpaceDemo(),

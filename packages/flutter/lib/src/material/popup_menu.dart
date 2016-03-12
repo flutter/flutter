@@ -28,7 +28,7 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
-abstract class PopupMenuEntry<T> extends StatefulComponent {
+abstract class PopupMenuEntry<T> extends StatefulWidget {
   PopupMenuEntry({ Key key }) : super(key: key);
 
   double get height;
@@ -75,7 +75,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    TextStyle style = theme.text.subhead;
+    TextStyle style = theme.textTheme.subhead;
     if (!config.enabled)
       style = style.copyWith(color: theme.disabledColor);
 
@@ -99,7 +99,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
       child: new MergeSemantics(
         child: new Container(
           height: config.height,
-          padding: const EdgeDims.symmetric(horizontal: _kMenuHorizontalPadding),
+          padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
           child: item
         )
       )
@@ -159,7 +159,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   }
 }
 
-class _PopupMenu<T> extends StatelessComponent {
+class _PopupMenu<T> extends StatelessWidget {
   _PopupMenu({
     Key key,
     this.route
@@ -204,7 +204,7 @@ class _PopupMenu<T> extends StatelessComponent {
         stepWidth: _kMenuWidthStep,
         child: new Block(
           children: children,
-          padding: const EdgeDims.symmetric(
+          padding: const EdgeInsets.symmetric(
             vertical: _kMenuVerticalPadding
           )
         )
@@ -233,7 +233,7 @@ class _PopupMenu<T> extends StatelessComponent {
   }
 }
 
-class _PopupMenuRouteLayout extends OneChildLayoutDelegate {
+class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   _PopupMenuRouteLayout(this.position, this.selectedItemOffset);
 
   final ModalPosition position;
@@ -316,7 +316,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
       constraints: new BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
-      child: new CustomOneChildLayout(
+      child: new CustomSingleChildLayout(
         delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
         child: new _PopupMenu<T>(route: this)
       )
@@ -357,7 +357,7 @@ typedef void PopupMenuItemSelected<T>(T value);
 /// because an item was selected. The value passed to [onSelected] is the value of
 /// the selected menu item. If child is null then a standard 'navigation/more_vert'
 /// icon is created.
-class PopupMenuButton<T> extends StatefulComponent {
+class PopupMenuButton<T> extends StatefulWidget {
   PopupMenuButton({
     Key key,
     this.items,

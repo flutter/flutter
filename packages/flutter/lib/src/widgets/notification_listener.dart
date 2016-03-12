@@ -12,7 +12,7 @@ abstract class Notification {
   /// Start bubbling this notification at the given build context.
   void dispatch(BuildContext target) {
     target.visitAncestorElements((Element element) {
-      if (element is StatelessComponentElement &&
+      if (element is StatelessElement &&
           element.widget is NotificationListener<dynamic>) {
         final NotificationListener<dynamic> widget = element.widget;
         if (widget._dispatch(this)) // that function checks the type dynamically
@@ -24,7 +24,7 @@ abstract class Notification {
 }
 
 /// Listens for [Notification]s bubbling up the tree.
-class NotificationListener<T extends Notification> extends StatelessComponent {
+class NotificationListener<T extends Notification> extends StatelessWidget {
   NotificationListener({
     Key key,
     this.child,

@@ -84,7 +84,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 /// padding, effectively creating empty space around the child.
 class RenderPadding extends RenderShiftedBox {
   RenderPadding({
-    EdgeDims padding,
+    EdgeInsets padding,
     RenderBox child
   }) : _padding = padding, super(child) {
     assert(padding != null);
@@ -92,9 +92,9 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   /// The amount to pad the child in each dimension.
-  EdgeDims get padding => _padding;
-  EdgeDims _padding;
-  void set padding (EdgeDims value) {
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  void set padding (EdgeInsets value) {
     assert(value != null);
     assert(value.isNonNegative);
     if (_padding == value)
@@ -506,7 +506,7 @@ class RenderOverflowBox extends RenderShiftedBox {
 }
 
 /// A delegate for computing the layout of a render object with a single child.
-class OneChildLayoutDelegate {
+class SingleChildLayoutDelegate {
   /// Returns the size of this object given the incoming constraints.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
@@ -517,7 +517,7 @@ class OneChildLayoutDelegate {
   Offset getPositionForChild(Size size, Size childSize) => Offset.zero;
 
   /// Override this method to return true when the child needs to be laid out.
-  bool shouldRelayout(OneChildLayoutDelegate oldDelegate) => true;
+  bool shouldRelayout(SingleChildLayoutDelegate oldDelegate) => true;
 }
 
 /// Defers the layout of its single child to a delegate.
@@ -526,18 +526,18 @@ class OneChildLayoutDelegate {
 /// decide where to position the child. The delegate can also determine the size
 /// of the parent, but the size of the parent cannot depend on the size of the
 /// child.
-class RenderCustomOneChildLayoutBox extends RenderShiftedBox {
-  RenderCustomOneChildLayoutBox({
+class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
+  RenderCustomSingleChildLayoutBox({
     RenderBox child,
-    OneChildLayoutDelegate delegate
+    SingleChildLayoutDelegate delegate
   }) : _delegate = delegate, super(child) {
     assert(delegate != null);
   }
 
   /// A delegate that controls this object's layout.
-  OneChildLayoutDelegate get delegate => _delegate;
-  OneChildLayoutDelegate _delegate;
-  void set delegate (OneChildLayoutDelegate newDelegate) {
+  SingleChildLayoutDelegate get delegate => _delegate;
+  SingleChildLayoutDelegate _delegate;
+  void set delegate (SingleChildLayoutDelegate newDelegate) {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;

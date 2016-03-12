@@ -36,7 +36,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
   )
 ];
 
-class TravelDestinationItem extends StatelessComponent {
+class TravelDestinationItem extends StatelessWidget {
   TravelDestinationItem({ Key key, this.destination }) : super(key: key) {
     assert(destination != null && destination.isValid);
   }
@@ -45,9 +45,9 @@ class TravelDestinationItem extends StatelessComponent {
 
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    TextStyle titleStyle = theme.text.headline.copyWith(color: Colors.white);
-    TextStyle descriptionStyle = theme.text.subhead;
-    TextStyle buttonStyle = theme.text.button.copyWith(color: theme.primaryColor);
+    TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
+    TextStyle descriptionStyle = theme.textTheme.subhead;
+    TextStyle buttonStyle = theme.textTheme.button.copyWith(color: theme.primaryColor);
 
     return new Card(
       child: new SizedBox(
@@ -80,7 +80,7 @@ class TravelDestinationItem extends StatelessComponent {
             // description and share/expore buttons
             new Flexible(
               child: new Padding(
-                padding: const EdgeDims.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: new Column(
                   justifyContent: FlexJustifyContent.start,
                   alignItems: FlexAlignItems.start,
@@ -96,7 +96,7 @@ class TravelDestinationItem extends StatelessComponent {
                         alignItems: FlexAlignItems.end,
                         children: <Widget>[
                           new Padding(
-                            padding: const EdgeDims.only(right: 16.0),
+                            padding: const EdgeInsets.only(right: 16.0),
                             child: new Text('SHARE', style: buttonStyle)
                           ),
                           new Text('EXPLORE', style: buttonStyle)
@@ -114,17 +114,17 @@ class TravelDestinationItem extends StatelessComponent {
   }
 }
 
-class CardsDemo extends StatelessComponent {
+class CardsDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(
         center: new Text("Travel Stream")
       ),
       body: new Block(
-        padding: const EdgeDims.only(top: 8.0, left: 8.0, right: 8.0),
+        padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {
           return new Container(
-            margin: const EdgeDims.only(bottom: 8.0),
+            margin: const EdgeInsets.only(bottom: 8.0),
             child: new TravelDestinationItem(destination: destination)
           );
         })

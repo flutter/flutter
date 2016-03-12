@@ -12,21 +12,21 @@ class MarkdownStyle extends MarkdownStyleRaw{
   /// Creates a [MarkdownStyle] from the [TextStyle]s in the provided [theme].
   MarkdownStyle.defaultFromTheme(ThemeData theme) : super(
     a: new TextStyle(color: Colors.blue[500]),
-    p: theme.text.body1,
+    p: theme.textTheme.body1,
     code: new TextStyle(
       color: Colors.grey[700],
       fontFamily: "monospace",
-      fontSize: theme.text.body1.fontSize * 0.85
+      fontSize: theme.textTheme.body1.fontSize * 0.85
     ),
-    h1: theme.text.headline,
-    h2: theme.text.title,
-    h3: theme.text.subhead,
-    h4: theme.text.body2,
-    h5: theme.text.body2,
-    h6: theme.text.body2,
+    h1: theme.textTheme.headline,
+    h2: theme.textTheme.title,
+    h3: theme.textTheme.subhead,
+    h4: theme.textTheme.body2,
+    h5: theme.textTheme.body2,
+    h6: theme.textTheme.body2,
     em: new TextStyle(fontStyle: FontStyle.italic),
     strong: new TextStyle(fontWeight: FontWeight.bold),
-    blockquote: theme.text.body1,
+    blockquote: theme.textTheme.body1,
     blockSpacing: 8.0,
     listIndent: 32.0,
     blockquotePadding: 8.0,
@@ -46,21 +46,21 @@ class MarkdownStyle extends MarkdownStyleRaw{
   /// [MarkdownStyle.defaultFromTheme].
   MarkdownStyle.largeFromTheme(ThemeData theme) : super (
     a: new TextStyle(color: Colors.blue[500]),
-    p: theme.text.body1,
+    p: theme.textTheme.body1,
     code: new TextStyle(
       color: Colors.grey[700],
       fontFamily: "monospace",
-      fontSize: theme.text.body1.fontSize * 0.85
+      fontSize: theme.textTheme.body1.fontSize * 0.85
     ),
-    h1: theme.text.display3,
-    h2: theme.text.display2,
-    h3: theme.text.display1,
-    h4: theme.text.headline,
-    h5: theme.text.title,
-    h6: theme.text.subhead,
+    h1: theme.textTheme.display3,
+    h2: theme.textTheme.display2,
+    h3: theme.textTheme.display1,
+    h4: theme.textTheme.headline,
+    h5: theme.textTheme.title,
+    h6: theme.textTheme.subhead,
     em: new TextStyle(fontStyle: FontStyle.italic),
     strong: new TextStyle(fontWeight: FontWeight.bold),
-    blockquote: theme.text.body1,
+    blockquote: theme.textTheme.body1,
     blockSpacing: 8.0,
     listIndent: 32.0,
     blockquotePadding: 8.0,

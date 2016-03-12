@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class PersistentBottomSheetDemo extends StatelessComponent {
+class PersistentBottomSheetDemo extends StatelessWidget {
 
   final TextStyle textStyle = new TextStyle(
     color: Colors.indigo[400],
@@ -19,7 +19,7 @@ class PersistentBottomSheetDemo extends StatelessComponent {
           border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
         ),
         child: new Padding(
-          padding: const EdgeDims.all(32.0),
+          padding: const EdgeInsets.all(32.0),
           child: new Text("This is a Material persistent bottom sheet. Drag downwards to dismiss it.", style: textStyle)
         )
       );

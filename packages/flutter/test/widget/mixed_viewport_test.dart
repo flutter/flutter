@@ -17,7 +17,7 @@ void main() {
       // so if our widget is 100 pixels tall, it should fit exactly 6 times.
 
       Widget builder() {
-        return new FlipComponent(
+        return new FlipWidget(
           left: new MixedViewport(
             builder: (BuildContext context, int i) {
               callbackTracker.add(i);
@@ -35,19 +35,19 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      StatefulComponentElement element = tester.findElement((Element element) => element.widget is FlipComponent);
-      FlipComponentState testComponent = element.state;
+      StatefulElement element = tester.findElement((Element element) => element.widget is FlipWidget);
+      FlipWidgetState testWidget = element.state;
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
       callbackTracker.clear();
-      testComponent.flip();
+      testWidget.flip();
       tester.pump();
 
       expect(callbackTracker, equals([]));
 
       callbackTracker.clear();
-      testComponent.flip();
+      testWidget.flip();
       tester.pump();
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
@@ -75,7 +75,7 @@ void main() {
       };
 
       Widget builder() {
-        return new FlipComponent(
+        return new FlipWidget(
           left: new MixedViewport(
             builder: itemBuilder,
             startOffset: offset
@@ -123,7 +123,7 @@ void main() {
       };
 
       Widget builder() {
-        return new FlipComponent(
+        return new FlipWidget(
           left: new MixedViewport(
             builder: itemBuilder,
             startOffset: offset,

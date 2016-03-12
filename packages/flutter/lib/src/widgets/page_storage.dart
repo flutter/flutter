@@ -82,7 +82,7 @@ class PageStorageBucket {
 }
 
 /// Establishes a page storage bucket for this widget subtree.
-class PageStorage extends StatelessComponent {
+class PageStorage extends StatelessWidget {
   PageStorage({
     Key key,
     this.child,

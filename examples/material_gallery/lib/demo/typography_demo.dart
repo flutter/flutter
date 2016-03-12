@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class TextStyleItem extends StatelessComponent {
+class TextStyleItem extends StatelessWidget {
   TextStyleItem({ Key key, this.name, this.style, this.text }) : super(key: key) {
     assert(name != null);
     assert(style != null);
@@ -18,9 +18,9 @@ class TextStyleItem extends StatelessComponent {
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle nameStyle = theme.text.body1.copyWith(color: theme.text.caption.color);
+    final TextStyle nameStyle = theme.textTheme.body1.copyWith(color: theme.textTheme.caption.color);
     return new Padding(
-      padding: const EdgeDims.symmetric(horizontal: 8.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
       child: new Row(
         alignItems: FlexAlignItems.start,
         children: <Widget>[
@@ -37,9 +37,9 @@ class TextStyleItem extends StatelessComponent {
   }
 }
 
-class TypographyDemo extends StatelessComponent {
+class TypographyDemo extends StatelessWidget {
   Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).text;
+    final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[
       new TextStyleItem(name: 'display3', style: textTheme.display3, text: 'Regular 56sp'),
       new TextStyleItem(name: 'display2', style: textTheme.display2, text: 'Regular 45sp'),

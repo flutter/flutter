@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class IconsDemo extends StatefulComponent {
+class IconsDemo extends StatefulWidget {
   IconsDemoState createState() => new IconsDemoState();
 }
 
@@ -63,7 +63,7 @@ class IconsDemoState extends State<IconsDemo> {
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.text.subhead.copyWith(color: theme.text.caption.color);
+    final TextStyle textStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     return new Scaffold(
       toolBar: new ToolBar(
@@ -72,7 +72,7 @@ class IconsDemoState extends State<IconsDemo> {
       body: new IconTheme(
         data: new IconThemeData(opacity: iconOpacity),
         child: new Padding(
-          padding: const EdgeDims.all(24.0),
+          padding: const EdgeInsets.all(24.0),
           child: new Column(
             children: <Widget>[
               new Row(

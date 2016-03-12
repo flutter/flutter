@@ -36,7 +36,7 @@ typedef Widget RouteBuilder(RouteArguments args);
 
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
-class WidgetsApp extends StatefulComponent {
+class WidgetsApp extends StatefulWidget {
   WidgetsApp({
     Key key,
     this.title,
@@ -108,8 +108,8 @@ class WidgetsApp extends StatefulComponent {
   WidgetsAppState<WidgetsApp> createState() => new WidgetsAppState<WidgetsApp>();
 }
 
-EdgeDims _getPadding(ui.WindowPadding padding) {
-  return new EdgeDims.TRBL(padding.top, padding.right, padding.bottom, padding.left);
+EdgeInsets _getPadding(ui.WindowPadding padding) {
+  return new EdgeInsets.TRBL(padding.top, padding.right, padding.bottom, padding.left);
 }
 
 class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingObserver {

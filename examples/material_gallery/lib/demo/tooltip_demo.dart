@@ -9,7 +9,7 @@ const String _introText =
   "a long press. Tooltip messages are also used by services that make Flutter "
   "apps accessible, like screen readers.";
 
-class TooltipDemo extends StatelessComponent {
+class TooltipDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return new Scaffold(
@@ -21,10 +21,10 @@ class TooltipDemo extends StatelessComponent {
           return new Column(
             alignItems: FlexAlignItems.stretch,
             children: <Widget>[
-              new Text(_introText, style: theme.text.subhead),
+              new Text(_introText, style: theme.textTheme.subhead),
               new Row(
                 children: <Widget>[
-                  new Text('Long press the ', style: theme.text.subhead),
+                  new Text('Long press the ', style: theme.textTheme.subhead),
                   new Tooltip(
                     message: 'call icon',
                     child: new Icon(
@@ -33,7 +33,7 @@ class TooltipDemo extends StatelessComponent {
                       color: theme.primaryColor
                     )
                   ),
-                  new Text(' icon', style: theme.text.subhead)
+                  new Text(' icon', style: theme.textTheme.subhead)
                 ]
               ),
               new Center(
@@ -52,7 +52,7 @@ class TooltipDemo extends StatelessComponent {
             ]
             .map((Widget widget) {
               return new Padding(
-                padding: const EdgeDims.only(top: 16.0, left: 16.0, right: 16.0),
+                padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
                 child: widget
               );
             })

@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 import 'test_widgets.dart';
 
-class ProbeWidget extends StatefulComponent {
+class ProbeWidget extends StatefulWidget {
   ProbeWidgetState createState() => new ProbeWidgetState();
 }
 
@@ -32,7 +32,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
   }
 }
 
-class BadWidget extends StatelessComponent {
+class BadWidget extends StatelessWidget {
   BadWidget(this.parentState);
 
   final State parentState;
@@ -43,7 +43,7 @@ class BadWidget extends StatelessComponent {
   }
 }
 
-class BadWidgetParent extends StatefulComponent {
+class BadWidgetParent extends StatefulWidget {
   BadWidgetParentState createState() => new BadWidgetParentState();
 }
 
@@ -53,7 +53,7 @@ class BadWidgetParentState extends State<BadWidgetParent> {
   }
 }
 
-class BadDisposeWidget extends StatefulComponent {
+class BadDisposeWidget extends StatefulWidget {
   BadDisposeWidgetState createState() => new BadDisposeWidgetState();
 }
 
@@ -98,17 +98,17 @@ void main() {
       expect(ProbeWidgetState.buildCount, equals(1));
       tester.pumpWidget(new ProbeWidget());
       expect(ProbeWidgetState.buildCount, equals(2));
-      tester.pumpWidget(new FlipComponent(
+      tester.pumpWidget(new FlipWidget(
         key: flipKey,
         left: new Container(),
         right: new ProbeWidget()
       ));
       expect(ProbeWidgetState.buildCount, equals(2));
-      FlipComponentState flipState1 = flipKey.currentState;
+      FlipWidgetState flipState1 = flipKey.currentState;
       flipState1.flip();
       tester.pump();
       expect(ProbeWidgetState.buildCount, equals(3));
-      FlipComponentState flipState2 = flipKey.currentState;
+      FlipWidgetState flipState2 = flipKey.currentState;
       flipState2.flip();
       tester.pump();
       expect(ProbeWidgetState.buildCount, equals(3));

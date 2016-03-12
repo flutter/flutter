@@ -62,8 +62,8 @@ void main() {
   test('ModalBarrier pops the Navigator when dismissed', () {
     testWidgets((WidgetTester tester) {
       final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-        '/': (RouteArguments args) => new FirstComponent(),
-        '/modal': (RouteArguments args) => new SecondComponent(),
+        '/': (RouteArguments args) => new FirstWidget(),
+        '/modal': (RouteArguments args) => new SecondWidget(),
       };
 
       tester.pumpWidget(new MaterialApp(routes: routes));
@@ -87,7 +87,7 @@ void main() {
   });
 }
 
-class FirstComponent extends StatelessComponent {
+class FirstWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () {
@@ -100,7 +100,7 @@ class FirstComponent extends StatelessComponent {
   }
 }
 
-class SecondComponent extends StatelessComponent {
+class SecondWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return new ModalBarrier(
       key: const ValueKey<String>('barrier'),

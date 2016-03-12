@@ -107,7 +107,7 @@ class BoxConstraints extends Constraints {
   }
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
-  BoxConstraints deflate(EdgeDims edges) {
+  BoxConstraints deflate(EdgeInsets edges) {
     assert(edges != null);
     assert(debugAssertIsNormalized);
     double horizontal = edges.left + edges.right;

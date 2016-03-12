@@ -12,7 +12,7 @@ void main() {
   setUp(ensureGesturer);
 
   test('Should recognize pan', () {
-    GestureArena gestureArena = Gesturer.instance.gestureArena;
+    GestureArenaManager gestureArena = Gesturer.instance.gestureArena;
     PointerRouter pointerRouter = Gesturer.instance.pointerRouter;
     PanGestureRecognizer pan = new PanGestureRecognizer();
     TapGestureRecognizer tap = new TapGestureRecognizer();

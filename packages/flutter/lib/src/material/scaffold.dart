@@ -37,7 +37,7 @@ enum _ScaffoldSlot {
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({ this.padding });
 
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   void performLayout(Size size) {
     BoxConstraints looseConstraints = new BoxConstraints.loose(size);
@@ -51,12 +51,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     double contentTop = padding.top;
     double contentBottom = size.height - padding.bottom;
 
-    if (isChild(_ScaffoldSlot.toolBar)) {
+    if (hasChild(_ScaffoldSlot.toolBar)) {
       contentTop = layoutChild(_ScaffoldSlot.toolBar, fullWidthConstraints).height;
       positionChild(_ScaffoldSlot.toolBar, Offset.zero);
     }
 
-    if (isChild(_ScaffoldSlot.body)) {
+    if (hasChild(_ScaffoldSlot.body)) {
       final double bodyHeight = contentBottom - contentTop;
       final BoxConstraints bodyConstraints = fullWidthConstraints.tighten(height: bodyHeight);
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
@@ -75,17 +75,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
-    if (isChild(_ScaffoldSlot.bottomSheet)) {
+    if (hasChild(_ScaffoldSlot.bottomSheet)) {
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints);
       positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
     }
 
-    if (isChild(_ScaffoldSlot.snackBar)) {
+    if (hasChild(_ScaffoldSlot.snackBar)) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
       positionChild(_ScaffoldSlot.snackBar, new Offset(0.0, contentBottom - snackBarSize.height));
     }
 
-    if (isChild(_ScaffoldSlot.floatingActionButton)) {
+    if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
       double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
@@ -96,7 +96,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.floatingActionButton, new Offset(fabX, fabY));
     }
 
-    if (isChild(_ScaffoldSlot.drawer)) {
+    if (hasChild(_ScaffoldSlot.drawer)) {
       layoutChild(_ScaffoldSlot.drawer, new BoxConstraints.tight(size));
       positionChild(_ScaffoldSlot.drawer, Offset.zero);
     }
@@ -107,7 +107,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 }
 
-class _FloatingActionButtonTransition extends StatefulComponent {
+class _FloatingActionButtonTransition extends StatefulWidget {
   _FloatingActionButtonTransition({
     Key key,
     this.child
@@ -180,7 +180,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// This class provides APIs for showing drawers, snackbars, and bottom sheets.
 ///
 /// See: <https://www.google.com/design/spec/layout/structure.html>
-class Scaffold extends StatefulComponent {
+class Scaffold extends StatefulWidget {
   Scaffold({
     Key key,
     this.toolBar,
@@ -375,11 +375,11 @@ class ScaffoldState extends State<Scaffold> {
 
   bool _shouldShowBackArrow;
 
-  Widget _getModifiedToolBar({ EdgeDims padding, double foregroundOpacity: 1.0, int elevation }) {
+  Widget _getModifiedToolBar({ EdgeInsets padding, double foregroundOpacity: 1.0, int elevation }) {
     ToolBar toolBar = config.toolBar;
     if (toolBar == null)
       return null;
-    EdgeDims toolBarPadding = new EdgeDims.only(top: padding.top);
+    EdgeInsets toolBarPadding = new EdgeInsets.only(top: padding.top);
     Widget left = toolBar.left;
     if (left == null) {
       if (config.drawer != null) {
@@ -431,7 +431,7 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   Widget _buildScrollableAppBar(BuildContext context) {
-    final EdgeDims toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeDims.zero;
+    final EdgeInsets toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
     final double toolBarHeight = kToolBarHeight + toolBarPadding.top;
     Widget appBar;
 
@@ -468,7 +468,7 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   Widget build(BuildContext context) {
-    EdgeDims padding = MediaQuery.of(context)?.padding ?? EdgeDims.zero;
+    EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
 
     if (_snackBars.length > 0) {
       ModalRoute<dynamic> route = ModalRoute.of(context);
@@ -538,7 +538,7 @@ class ScaffoldState extends State<Scaffold> {
             new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
-                padding: EdgeDims.zero
+                padding: EdgeInsets.zero
               )
             ),
             new Positioned(
@@ -572,7 +572,7 @@ class ScaffoldFeatureController<T extends Widget, U> {
   final StateSetter setState;
 }
 
-class _PersistentBottomSheet extends StatefulComponent {
+class _PersistentBottomSheet extends StatefulWidget {
   _PersistentBottomSheet({
     Key key,
     this.animationController,

@@ -9,9 +9,9 @@ import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'decoration.dart';
-import 'edge_dims.dart';
+import 'edge_insets.dart';
 
-export 'edge_dims.dart' show EdgeDims;
+export 'edge_insets.dart' show EdgeInsets;
 
 /// A side of a border of a box.
 class BorderSide {
@@ -93,9 +93,9 @@ class Border {
   /// The left side of this border.
   final BorderSide left;
 
-  /// The widths of the sides of this border represented as an EdgeDims.
-  EdgeDims get dimensions {
-    return new EdgeDims.TRBL(top.width, right.width, bottom.width, left.width);
+  /// The widths of the sides of this border represented as an EdgeInsets.
+  EdgeInsets get dimensions {
+    return new EdgeInsets.TRBL(top.width, right.width, bottom.width, left.width);
   }
 
   Border scale(double t) {
@@ -797,7 +797,7 @@ class BoxDecoration extends Decoration {
   final BoxShape shape;
 
   /// The inset space occupied by the border.
-  EdgeDims get padding => border?.dimensions;
+  EdgeInsets get padding => border?.dimensions;
 
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {

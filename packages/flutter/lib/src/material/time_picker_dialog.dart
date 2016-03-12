@@ -10,7 +10,7 @@ import 'dialog.dart';
 import 'time_picker.dart';
 import 'flat_button.dart';
 
-class _TimePickerDialog extends StatefulComponent {
+class _TimePickerDialog extends StatefulWidget {
   _TimePickerDialog({
     Key key,
     this.initialTime
@@ -49,7 +49,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         selectedTime: _selectedTime,
         onChanged: _handleTimeChanged
       ),
-      contentPadding: EdgeDims.zero,
+      contentPadding: EdgeInsets.zero,
       actions: <Widget>[
         new FlatButton(
           child: new Text('CANCEL'),

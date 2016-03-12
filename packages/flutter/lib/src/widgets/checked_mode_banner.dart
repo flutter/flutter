@@ -50,7 +50,7 @@ class _CheckedModeBannerPainter extends CustomPainter {
 
 /// Displays a banner saying "CHECKED" when running in checked mode.
 /// Does nothing in release mode.
-class CheckedModeBanner extends StatelessComponent {
+class CheckedModeBanner extends StatelessWidget {
   CheckedModeBanner({
     Key key,
     this.child

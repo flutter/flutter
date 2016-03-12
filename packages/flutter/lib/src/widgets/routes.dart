@@ -336,7 +336,7 @@ class _ModalScopeStatus extends InheritedWidget {
   }
 }
 
-class _ModalScope extends StatefulComponent {
+class _ModalScope extends StatefulWidget {
   _ModalScope({
     Key key,
     this.route

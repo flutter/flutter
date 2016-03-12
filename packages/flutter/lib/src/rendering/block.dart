@@ -28,14 +28,14 @@ typedef double _Constrainer(double value);
 abstract class RenderBlockBase extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData>
-    implements HasScrollDirection {
+    implements HasMainAxis {
 
   RenderBlockBase({
     List<RenderBox> children,
-    Axis direction: Axis.vertical,
+    Axis mainAxis: Axis.vertical,
     double itemExtent,
     double minExtent: 0.0
-  }) : _direction = direction, _itemExtent = itemExtent, _minExtent = minExtent {
+  }) : _mainAxis = mainAxis, _itemExtent = itemExtent, _minExtent = minExtent {
     addAll(children);
   }
 
@@ -45,11 +45,11 @@ abstract class RenderBlockBase extends RenderBox
   }
 
   /// The direction to use as the main axis.
-  Axis get direction => _direction;
-  Axis _direction;
-  void set direction (Axis value) {
-    if (_direction != value) {
-      _direction = value;
+  Axis get mainAxis => _mainAxis;
+  Axis _mainAxis;
+  void set mainAxis (Axis value) {
+    if (_mainAxis != value) {
+      _mainAxis = value;
       markNeedsLayout();
     }
   }
@@ -75,9 +75,7 @@ abstract class RenderBlockBase extends RenderBox
   }
 
   /// Whether the main axis is vertical.
-  bool get isVertical => _direction == Axis.vertical;
-
-  Axis get scrollDirection => _direction;
+  bool get isVertical => _mainAxis == Axis.vertical;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     if (isVertical)
@@ -117,7 +115,7 @@ abstract class RenderBlockBase extends RenderBox
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('direction: $direction');
+    description.add('mainAxis: $mainAxis');
   }
 }
 
@@ -126,10 +124,10 @@ class RenderBlock extends RenderBlockBase {
 
   RenderBlock({
     List<RenderBox> children,
-    Axis direction: Axis.vertical,
+    Axis mainAxis: Axis.vertical,
     double itemExtent,
     double minExtent: 0.0
-  }) : super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
+  }) : super(children: children, mainAxis: mainAxis, itemExtent: itemExtent, minExtent: minExtent);
 
   double _getIntrinsicCrossAxis(BoxConstraints constraints, _ChildSizingFunction childSize, _Constrainer constrainer) {
     double extent = 0.0;
@@ -241,8 +239,8 @@ class RenderBlockViewport extends RenderBlockBase {
     ExtentCallback totalExtentCallback,
     ExtentCallback maxCrossAxisDimensionCallback,
     ExtentCallback minCrossAxisDimensionCallback,
-    Painter overlayPainter,
-    Axis direction: Axis.vertical,
+    RenderObjectPainter overlayPainter,
+    Axis mainAxis: Axis.vertical,
     double itemExtent,
     double minExtent: 0.0,
     double startOffset: 0.0,
@@ -253,7 +251,7 @@ class RenderBlockViewport extends RenderBlockBase {
        _minCrossAxisExtentCallback = minCrossAxisDimensionCallback,
        _overlayPainter = overlayPainter,
        _startOffset = startOffset,
-       super(children: children, direction: direction, itemExtent: itemExtent, minExtent: minExtent);
+       super(children: children, mainAxis: mainAxis, itemExtent: itemExtent, minExtent: minExtent);
 
   bool _inCallback = false;
   bool get isRepaintBoundary => true;
@@ -311,9 +309,9 @@ class RenderBlockViewport extends RenderBlockBase {
     markNeedsLayout();
   }
 
-  Painter get overlayPainter => _overlayPainter;
-  Painter _overlayPainter;
-  void set overlayPainter(Painter value) {
+  RenderObjectPainter get overlayPainter => _overlayPainter;
+  RenderObjectPainter _overlayPainter;
+  void set overlayPainter(RenderObjectPainter value) {
     if (_overlayPainter == value)
       return;
     if (attached)

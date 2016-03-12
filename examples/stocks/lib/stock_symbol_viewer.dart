@@ -8,7 +8,7 @@ import 'stock_data.dart';
 import 'stock_arrow.dart';
 import 'stock_row.dart';
 
-class StockSymbolView extends StatelessComponent {
+class StockSymbolView extends StatelessWidget {
   StockSymbolView({ this.stock });
 
   final Stock stock;
@@ -19,16 +19,16 @@ class StockSymbolView extends StatelessComponent {
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
 
-    TextStyle headings = Theme.of(context).text.body2;
+    TextStyle headings = Theme.of(context).textTheme.body2;
     return new Container(
-      padding: new EdgeDims.all(20.0),
+      padding: new EdgeInsets.all(20.0),
       child: new Column(
         children: <Widget>[
           new Row(
             children: <Widget>[
               new Text(
                 '${stock.symbol}',
-                style: Theme.of(context).text.display2
+                style: Theme.of(context).textTheme.display2
               ),
               new Hero(
                 key: new ObjectKey(stock),
@@ -66,7 +66,7 @@ class StockSymbolView extends StatelessComponent {
   }
 }
 
-class StockSymbolPage extends StatelessComponent {
+class StockSymbolPage extends StatelessWidget {
   StockSymbolPage({ this.stock });
 
   final Stock stock;
@@ -79,7 +79,7 @@ class StockSymbolPage extends StatelessComponent {
       body: new Block(
         children: <Widget>[
           new Container(
-            margin: new EdgeDims.all(20.0),
+            margin: new EdgeInsets.all(20.0),
             child: new Card(child: new StockSymbolView(stock: stock))
           )
         ]
@@ -88,14 +88,14 @@ class StockSymbolPage extends StatelessComponent {
   }
 }
 
-class StockSymbolBottomSheet extends StatelessComponent {
+class StockSymbolBottomSheet extends StatelessWidget {
   StockSymbolBottomSheet({ this.stock });
 
   final Stock stock;
 
   Widget build(BuildContext context) {
     return new Container(
-      padding: new EdgeDims.all(10.0),
+      padding: new EdgeInsets.all(10.0),
       decoration: new BoxDecoration(
         border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
       ),

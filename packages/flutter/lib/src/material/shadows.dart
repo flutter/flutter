@@ -7,7 +7,7 @@ import 'dart:ui' show Color, Offset;
 import 'package:flutter/painting.dart';
 
 // Based on http://www.google.com/design/spec/what-is-material/elevation-shadows.html
-// Currently, only the elevation values that are bound to one or more components are
+// Currently, only the elevation values that are bound to one or more widgets are
 // defined here.
 
 /// Map of elevation offsets used by material design to [BoxShadow] definitions.

@@ -31,7 +31,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
   /// It's the GestureRecognizer's responsibility to then add itself
   /// to the global pointer router (see [PointerRouter]) to receive
   /// subsequent events for this pointer, and to add the pointer to
-  /// the global gesture arena manager (see [GestureArena]) to track
+  /// the global gesture arena manager (see [GestureArenaManager]) to track
   /// that pointer.
   void addPointer(PointerDownEvent event);
 

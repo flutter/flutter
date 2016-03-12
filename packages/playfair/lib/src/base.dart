@@ -41,7 +41,7 @@ const double kIndicatorStrokeWidth = 2.0;
 const Color kIndicatorColor = const Color(0xFFFF4081);
 const double kIndicatorMargin = 2.0;
 
-class Chart extends StatelessComponent {
+class Chart extends StatelessWidget {
   Chart({ Key key, this.data }) : super(key: key);
 
   final ChartData data;

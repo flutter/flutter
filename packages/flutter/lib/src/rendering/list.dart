@@ -15,18 +15,20 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   RenderList({
     List<RenderBox> children,
     double itemExtent,
-    EdgeDims padding,
+    EdgeInsets padding,
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
-    Axis scrollDirection: Axis.vertical,
-    Painter overlayPainter,
+    Axis mainAxis: Axis.vertical,
+    ViewportAnchor anchor: ViewportAnchor.start,
+    RenderObjectPainter overlayPainter,
     LayoutCallback callback
   }) : _itemExtent = itemExtent,
        _padding = padding,
        super(
          virtualChildCount: virtualChildCount,
          paintOffset: paintOffset,
-         scrollDirection: scrollDirection,
+         mainAxis: mainAxis,
+         anchor: anchor,
          overlayPainter: overlayPainter,
          callback: callback
        ) {
@@ -43,9 +45,9 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     markNeedsLayout();
   }
 
-  EdgeDims get padding => _padding;
-  EdgeDims _padding;
-  void set padding (EdgeDims newValue) {
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  void set padding (EdgeInsets newValue) {
     if (_padding == newValue)
       return;
     _padding = newValue;
@@ -58,7 +60,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   double get _scrollAxisPadding {
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         return padding.vertical;
       case Axis.horizontal:
@@ -80,7 +82,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
 
   double _getIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         return constraints.constrainWidth(0.0);
       case Axis.horizontal:
@@ -98,7 +100,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
 
   double _getIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         return constraints.constrainHeight(_preferredExtent);
       case Axis.horizontal:
@@ -115,7 +117,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
   }
 
   void performLayout() {
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         size = new Size(constraints.maxWidth,
                         constraints.constrainHeight(_preferredExtent));
@@ -138,7 +140,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     double y = 0.0;
     double dy = 0.0;
 
-    switch (scrollDirection) {
+    switch (mainAxis) {
       case Axis.vertical:
         itemWidth = math.max(0.0, size.width - (padding == null ? 0.0 : padding.horizontal));
         itemHeight = itemExtent ?? size.height;

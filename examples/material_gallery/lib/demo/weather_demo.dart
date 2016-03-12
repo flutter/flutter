@@ -17,7 +17,7 @@ enum WeatherType {
   snow
 }
 
-class WeatherDemo extends StatefulComponent {
+class WeatherDemo extends StatefulWidget {
   WeatherDemo({ Key key }) : super(key: key);
   _WeatherDemoState createState() => new _WeatherDemoState();
 }
@@ -125,7 +125,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
 const double _kWeatherButtonSize = 56.0;
 const double _kWeatherIconSize = 36.0;
 
-class WeatherButton extends StatelessComponent {
+class WeatherButton extends StatelessWidget {
   WeatherButton({ this.icon, this.selected, this.onPressed, Key key }) : super(key: key);
 
   final String icon;
@@ -140,7 +140,7 @@ class WeatherButton extends StatelessComponent {
       color = const Color(0x33000000);
 
     return new Padding(
-      padding: const EdgeDims.all(15.0),
+      padding: const EdgeInsets.all(15.0),
       child: new Material(
         color: color,
         type: MaterialType.circle,

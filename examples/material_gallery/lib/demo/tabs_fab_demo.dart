@@ -25,7 +25,7 @@ const String _explanatoryText =
   "with a FloatingActionButton that the Scaffold distinguishes from the others "
   "by its key.";
 
-class TabsFabDemo extends StatefulComponent {
+class TabsFabDemo extends StatefulWidget {
   _TabsFabDemoState createState() => new _TabsFabDemoState();
 }
 
@@ -59,8 +59,8 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
           border: new Border(top: new BorderSide(color: Theme.of(context).dividerColor))
         ),
         child: new Padding(
-          padding: const EdgeDims.all(32.0),
-          child: new Text(_explanatoryText, style: Theme.of(context).text.subhead)
+          padding: const EdgeInsets.all(32.0),
+          child: new Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
         )
       );
     });
@@ -77,7 +77,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
 
         return new Container(
           key: new ValueKey<String>(page.label),
-          padding: const EdgeDims.TRBL(48.0, 48.0, 96.0, 48.0),
+          padding: const EdgeInsets.TRBL(48.0, 48.0, 96.0, 48.0),
           child: new Card(
             child: new Center(
               child: new Text(page.label, style: textStyle)

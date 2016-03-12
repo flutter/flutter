@@ -35,8 +35,8 @@ enum DragAnchor {
   pointer,
 }
 
-/// Subclass this component to customize the gesture used to start a drag.
-abstract class DraggableBase<T> extends StatefulComponent {
+/// Subclass this widget to customize the gesture used to start a drag.
+abstract class DraggableBase<T> extends StatefulWidget {
   DraggableBase({
     Key key,
     this.data,
@@ -261,7 +261,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
 }
 
 /// Receives data when a [Draggable] widget is dropped.
-class DragTarget<T> extends StatefulComponent {
+class DragTarget<T> extends StatefulWidget {
   const DragTarget({
     Key key,
     this.builder,

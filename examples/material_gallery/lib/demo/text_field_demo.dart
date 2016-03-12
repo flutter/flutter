@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class TextFieldDemo extends StatefulComponent {
+class TextFieldDemo extends StatefulWidget {
   TextFieldDemo({ Key key }) : super(key: key);
 
   TextFieldDemoState createState() => new TextFieldDemoState();
@@ -66,7 +66,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         center: new Text('Text Fields')
       ),
       body: new Block(
-        padding: const EdgeDims.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         children: <Widget>[
           new Input(
             hintText: 'What do people call you?',

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class ModalBottomSheetDemo extends StatelessComponent {
+class ModalBottomSheetDemo extends StatelessWidget {
   final TextStyle textStyle = new TextStyle(
     color: Colors.indigo[400],
     fontSize: 24.0,
@@ -24,7 +24,7 @@ class ModalBottomSheetDemo extends StatelessComponent {
               showModalBottomSheet/*<Null>*/(context: context, builder: (BuildContext context) {
                 return new Container(
                   child: new Padding(
-                    padding: const EdgeDims.all(32.0),
+                    padding: const EdgeInsets.all(32.0),
                     child: new Text("This is the modal bottom sheet. Click anywhere to dismiss.", style: textStyle)
                   )
                 );

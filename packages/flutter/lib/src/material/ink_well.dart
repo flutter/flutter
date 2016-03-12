@@ -24,7 +24,7 @@ import 'theme.dart';
 /// at the top of its [build] function to call [debugCheckHasMaterial]:
 ///
 ///     assert(debugCheckHasMaterial(context));
-class InkResponse extends StatefulComponent {
+class InkResponse extends StatefulWidget {
   InkResponse({
     Key key,
     this.child,

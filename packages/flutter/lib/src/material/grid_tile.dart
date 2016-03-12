@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 /// Creates a [Stack] with the header anchored across the top or a footer across the
 /// bottom. The [GridTileBar] class can be used to create grid tile headers and footers.
-class GridTile extends StatelessComponent {
+class GridTile extends StatelessWidget {
   GridTile({ Key key, this.header, this.footer, this.child }) : super(key: key) {
     assert(child != null);
   }

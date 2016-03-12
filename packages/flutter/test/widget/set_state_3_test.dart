@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 ChangerState changer;
 
-class Changer extends StatefulComponent {
+class Changer extends StatefulWidget {
   Changer(this.child);
 
   final Widget child;
@@ -29,7 +29,7 @@ class ChangerState extends State<Changer> {
   Widget build(BuildContext context) => _state ? new Wrapper(config.child) : config.child;
 }
 
-class Wrapper extends StatelessComponent {
+class Wrapper extends StatelessWidget {
   Wrapper(this.child);
 
   final Widget child;
@@ -37,7 +37,7 @@ class Wrapper extends StatelessComponent {
   Widget build(BuildContext context) => child;
 }
 
-class Leaf extends StatefulComponent {
+class Leaf extends StatefulWidget {
   LeafState createState() => new LeafState();
 }
 

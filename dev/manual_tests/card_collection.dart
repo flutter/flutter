@@ -16,7 +16,7 @@ class CardModel {
   Key get key => new ObjectKey(this);
 }
 
-class CardCollection extends StatefulComponent {
+class CardCollection extends StatefulWidget {
   CardCollectionState createState() => new CardCollectionState();
 }
 
@@ -279,7 +279,7 @@ class CardCollectionState extends State<CardCollection> {
       ],
       flexibleSpace: (_) {
         return new Container(
-          padding: const EdgeDims.only(left: 72.0),
+          padding: const EdgeInsets.only(left: 72.0),
           height: 128.0,
           child: new Align(
             alignment: const FractionalOffset(0.0, 0.75),
@@ -304,7 +304,7 @@ class CardCollectionState extends State<CardCollection> {
         color: _primaryColor[cardModel.color],
         child: new Container(
           height: cardModel.height,
-          padding: const EdgeDims.all(kCardMargins),
+          padding: const EdgeInsets.all(kCardMargins),
           child: _editable ?
             new Center(
               child: new Input(
@@ -367,7 +367,7 @@ class CardCollectionState extends State<CardCollection> {
       bottom: 0.0,
       left: 0.0,
       child: new Container(
-        margin: const EdgeDims.all(4.0),
+        margin: const EdgeInsets.all(4.0),
         child: new Viewport(
           child: new Container(
             height: cardModel.height,
@@ -428,7 +428,7 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     Widget body = new Container(
-      padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
       decoration: new BoxDecoration(backgroundColor: _primaryColor[50]),
       child: cardCollection
     );

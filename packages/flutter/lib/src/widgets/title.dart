@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Controls the description of this app in the operating system.
-class Title extends StatelessComponent {
+class Title extends StatelessWidget {
   Title({
     Key key,
     this.title,

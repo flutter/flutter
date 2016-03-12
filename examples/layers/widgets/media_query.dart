@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class AdaptedListItem extends StatelessComponent {
+class AdaptedListItem extends StatelessWidget {
   AdaptedListItem({ Key key, this.name }) : super(key: key);
 
   final String name;
@@ -15,7 +15,7 @@ class AdaptedListItem extends StatelessComponent {
         new Container(
           width: 32.0,
           height: 32.0,
-          margin: const EdgeDims.all(8.0),
+          margin: const EdgeInsets.all(8.0),
           decoration: new BoxDecoration(
             backgroundColor: Colors.lightBlueAccent[100]
           )
@@ -26,7 +26,7 @@ class AdaptedListItem extends StatelessComponent {
   }
 }
 
-class AdaptedGridItem extends StatelessComponent {
+class AdaptedGridItem extends StatelessWidget {
   AdaptedGridItem({ Key key, this.name }) : super(key: key);
 
   final String name;
@@ -43,7 +43,7 @@ class AdaptedGridItem extends StatelessComponent {
             )
           ),
           new Container(
-            margin: const EdgeDims.only(left: 8.0),
+            margin: const EdgeInsets.only(left: 8.0),
             child: new Row(
               children: <Widget>[
                 new Flexible(
@@ -65,7 +65,7 @@ const double _kListItemExtent = 50.0;
 const double _kMaxTileWidth = 150.0;
 const double _kGridViewBreakpoint = 450.0;
 
-class AdaptiveContainer extends StatelessComponent {
+class AdaptiveContainer extends StatelessWidget {
   AdaptiveContainer({ Key key, this.names }) : super(key: key);
 
   final List<String> names;

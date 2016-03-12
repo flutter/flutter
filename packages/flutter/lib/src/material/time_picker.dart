@@ -89,7 +89,7 @@ class TimeOfDay {
 
 enum _TimePickerMode { hour, minute }
 
-class TimePicker extends StatefulComponent {
+class TimePicker extends StatefulWidget {
   TimePicker({
     this.selectedTime,
     this.onChanged
@@ -126,7 +126,7 @@ class _TimePickerState extends State<TimePicker> {
         new AspectRatio(
           aspectRatio: 1.0,
           child: new Container(
-            margin: const EdgeDims.all(12.0),
+            margin: const EdgeInsets.all(12.0),
             child: new _Dial(
               mode: _mode,
               selectedTime: config.selectedTime,
@@ -141,7 +141,7 @@ class _TimePickerState extends State<TimePicker> {
 }
 
 // TODO(ianh): Localize!
-class _TimePickerHeader extends StatelessComponent {
+class _TimePickerHeader extends StatelessWidget {
   _TimePickerHeader({
     this.selectedTime,
     this.mode,
@@ -214,12 +214,12 @@ class _TimePickerHeader extends StatelessComponent {
             onTap: _handleChangeDayPeriod,
             behavior: HitTestBehavior.opaque,
             child: new Container(
-              padding: const EdgeDims.only(left: 16.0, right: 24.0),
+              padding: const EdgeInsets.only(left: 16.0, right: 24.0),
               child: new Column(
                 children: <Widget>[
                   new Text('AM', style: amStyle),
                   new Container(
-                    padding: const EdgeDims.only(top: 4.0),
+                    padding: const EdgeInsets.only(top: 4.0),
                     child: new Text('PM', style: pmStyle)
                   ),
                 ],
@@ -312,7 +312,7 @@ class _DialPainter extends CustomPainter {
   }
 }
 
-class _Dial extends StatefulComponent {
+class _Dial extends StatefulWidget {
   _Dial({
     this.selectedTime,
     this.mode,

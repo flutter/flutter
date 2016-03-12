@@ -15,7 +15,7 @@ const double _kCloseProgressThreshold = 0.5;
 const Color _kTransparent = const Color(0x00000000);
 const Color _kBarrierColor = Colors.black54;
 
-class BottomSheet extends StatefulComponent {
+class BottomSheet extends StatefulWidget {
   BottomSheet({
     Key key,
     this.animationController,
@@ -94,7 +94,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // MODAL BOTTOM SHEETS
 
-class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
+class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
   _ModalBottomSheetLayout(this.progress);
 
   final double progress;
@@ -117,7 +117,7 @@ class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
   }
 }
 
-class _ModalBottomSheet<T> extends StatefulComponent {
+class _ModalBottomSheet<T> extends StatefulWidget {
   _ModalBottomSheet({ Key key, this.route }) : super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
@@ -133,7 +133,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         animation: config.route.animation,
         builder: (BuildContext context, Widget child) {
           return new ClipRect(
-            child: new CustomOneChildLayout(
+            child: new CustomSingleChildLayout(
               delegate: new _ModalBottomSheetLayout(config.route.animation.value),
               child: new BottomSheet(
                 animationController: config.route.animation,

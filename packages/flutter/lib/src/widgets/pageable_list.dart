@@ -165,8 +165,8 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
   Widget buildContent(BuildContext context) {
     return new PageViewport(
       itemsWrap: config.itemsWrap,
-      scrollDirection: config.scrollDirection,
-      scrollAnchor: config.scrollAnchor,
+      mainAxis: config.scrollDirection,
+      anchor: config.scrollAnchor,
       startOffset: scrollOffset,
       overlayPainter: config.scrollableListPainter,
       children: config.children
@@ -226,20 +226,20 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 class PageViewport extends VirtualViewportFromIterable {
   PageViewport({
     this.startOffset: 0.0,
-    this.scrollDirection: Axis.vertical,
-    this.scrollAnchor: ViewportAnchor.start,
+    this.mainAxis: Axis.vertical,
+    this.anchor: ViewportAnchor.start,
     this.itemsWrap: false,
     this.overlayPainter,
     this.children
   }) {
-    assert(scrollDirection != null);
+    assert(mainAxis != null);
   }
 
   final double startOffset;
-  final Axis scrollDirection;
-  final ViewportAnchor scrollAnchor;
+  final Axis mainAxis;
+  final ViewportAnchor anchor;
   final bool itemsWrap;
-  final Painter overlayPainter;
+  final RenderObjectPainter overlayPainter;
   final Iterable<Widget> children;
 
   RenderList createRenderObject(BuildContext context) => new RenderList();
@@ -274,7 +274,7 @@ class _PageViewportElement extends VirtualViewportElement {
 
   void updateRenderObject(PageViewport oldWidget) {
     renderObject
-      ..scrollDirection = widget.scrollDirection
+      ..mainAxis = widget.mainAxis
       ..overlayPainter = widget.overlayPainter;
     super.updateRenderObject(oldWidget);
   }
@@ -285,7 +285,7 @@ class _PageViewportElement extends VirtualViewportElement {
     final Size containerSize = renderObject.size;
 
     Size materializedContentSize;
-    switch (widget.scrollDirection) {
+    switch (widget.mainAxis) {
       case Axis.vertical:
         materializedContentSize = new Size(containerSize.width, _materializedChildCount * containerSize.height);
         break;
@@ -299,7 +299,7 @@ class _PageViewportElement extends VirtualViewportElement {
   void layout(BoxConstraints constraints) {
     final int length = renderObject.virtualChildCount;
 
-    switch (widget.scrollDirection) {
+    switch (widget.mainAxis) {
       case Axis.vertical:
         _containerExtent = renderObject.size.height;
         break;
@@ -326,7 +326,7 @@ class _PageViewportElement extends VirtualViewportElement {
       _materializedChildCount = limitItem - startItem;
       _startOffsetBase = startItem.toDouble();
       _startOffsetLimit = (limitItem - 1).toDouble();
-      if (widget.scrollAnchor == ViewportAnchor.end)
+      if (widget.anchor == ViewportAnchor.end)
         _materializedChildBase = (length - _materializedChildBase - _materializedChildCount) % length;
     }
 

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class ProgressIndicatorDemo extends StatefulComponent {
+class ProgressIndicatorDemo extends StatefulWidget {
   _ProgressIndicatorDemoState createState() => new _ProgressIndicatorDemoState();
 }
 
@@ -75,7 +75,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     ];
     return new Column(
       children: indicators
-        .map((Widget c) => new Container(child: c, margin: const EdgeDims.symmetric(vertical: 15.0, horizontal: 20.0)))
+        .map((Widget c) => new Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
       justifyContent: FlexJustifyContent.center
     );
@@ -85,12 +85,12 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Progress Indicators')),
       body: new DefaultTextStyle(
-        style: Theme.of(context).text.title,
+        style: Theme.of(context).textTheme.title,
         child: new GestureDetector(
           onTap: _handleTap,
           behavior: HitTestBehavior.opaque,
           child: new Container(
-            padding: const EdgeDims.symmetric(vertical: 12.0, horizontal: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
             child: new AnimatedBuilder(
               animation: animation,
               builder: _buildIndicators

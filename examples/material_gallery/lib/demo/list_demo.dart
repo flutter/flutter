@@ -10,7 +10,7 @@ enum ListDemoItemSize {
   threeLine
 }
 
-class ListDemo extends StatefulComponent {
+class ListDemo extends StatefulWidget {
   ListDemo({ Key key }) : super(key: key);
 
   ListDemoState createState() => new ListDemoState();
@@ -195,7 +195,7 @@ class ListDemoState extends State<ListDemo> {
         ]
       ),
       body: new Block(
-        padding: new EdgeDims.all(_dense ? 4.0 : 8.0),
+        padding: new EdgeInsets.all(_dense ? 4.0 : 8.0),
         children: listItems.toList()
       )
     );

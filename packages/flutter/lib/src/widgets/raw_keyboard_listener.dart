@@ -9,7 +9,7 @@ import 'package:sky_services/sky/input_event.mojom.dart' as mojom;
 import 'basic.dart';
 import 'framework.dart';
 
-class RawKeyboardListener extends StatefulComponent {
+class RawKeyboardListener extends StatefulWidget {
   RawKeyboardListener({
     Key key,
     this.focused: false,

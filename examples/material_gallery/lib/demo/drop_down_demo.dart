@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class DropDownDemo extends StatefulComponent {
+class DropDownDemo extends StatefulWidget {
   _DropDownDemoState createState() => new _DropDownDemoState();
 }
 

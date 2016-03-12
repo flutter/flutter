@@ -37,7 +37,7 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 ///
 /// See also:
 ///  * https://www.google.com/design/spec/components/snackbars-toasts.html
-class SnackBarAction extends StatelessComponent {
+class SnackBarAction extends StatelessWidget {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
     assert(onPressed != null);
@@ -51,7 +51,7 @@ class SnackBarAction extends StatelessComponent {
 
   Widget build(BuildContext context) {
     return new Container(
-      margin: const EdgeDims.only(left: _kSideMargins),
+      margin: const EdgeInsets.only(left: _kSideMargins),
       child: new FlatButton(
         onPressed: onPressed,
         textTheme: ButtonColor.accent,
@@ -70,7 +70,7 @@ class SnackBarAction extends StatelessComponent {
 ///  * [Scaffold.of] and [ScaffoldState.showSnackBar]
 ///  * [SnackBarAction]
 ///  * https://www.google.com/design/spec/components/snackbars-toasts.html
-class SnackBar extends StatelessComponent {
+class SnackBar extends StatelessWidget {
   SnackBar({
     Key key,
     this.content,
@@ -91,7 +91,7 @@ class SnackBar extends StatelessComponent {
     List<Widget> children = <Widget>[
       new Flexible(
         child: new Container(
-          margin: const EdgeDims.symmetric(vertical: _kSingleLineVerticalPadding),
+          margin: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
             child: content
@@ -120,13 +120,13 @@ class SnackBar extends StatelessComponent {
             elevation: 6,
             color: _kSnackBackground,
             child: new Container(
-              margin: const EdgeDims.symmetric(horizontal: _kSideMargins),
+              margin: const EdgeInsets.symmetric(horizontal: _kSideMargins),
               child: new Theme(
                 data: new ThemeData(
                   brightness: ThemeBrightness.dark,
                   accentColor: theme.accentColor,
                   accentColorBrightness: theme.accentColorBrightness,
-                  text: Typography.white
+                  textTheme: Typography.white
                 ),
                 child: new FadeTransition(
                   opacity: fadeAnimation,

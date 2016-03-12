@@ -8,7 +8,7 @@ import 'dart:ui' as ui show window;
 
 import 'package:newton/newton.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart' show HasScrollDirection;
+import 'package:flutter/rendering.dart' show HasMainAxis;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -34,7 +34,7 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 ///
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
-abstract class Scrollable extends StatefulComponent {
+abstract class Scrollable extends StatefulWidget {
   Scrollable({
     Key key,
     this.initialScrollOffset,
@@ -439,7 +439,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Simulation _createFlingSimulation(double scrollVelocity) {
-    final Simulation simulation =  scrollBehavior.createFlingScrollSimulation(scrollOffset, scrollVelocity);
+    final Simulation simulation =  scrollBehavior.createScrollSimulation(scrollOffset, scrollVelocity);
     if (simulation != null) {
       final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs() * (scrollVelocity < 0.0 ? -1.0 : 1.0);
       final double endDistance = pixelOffsetToScrollOffset(kPixelScrollTolerance.distance).abs();
@@ -604,7 +604,7 @@ class ScrollNotification extends Notification {
   final double scrollOffset;
 }
 
-/// A simple scrollable widget that has a single child. Use this component if
+/// A simple scrollable widget that has a single child. Use this widget if
 /// you are not worried about offscreen widgets consuming resources.
 class ScrollableViewport extends Scrollable {
   ScrollableViewport({
@@ -657,8 +657,8 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
   Widget buildContent(BuildContext context) {
     return new Viewport(
       paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-      scrollDirection: config.scrollDirection,
-      scrollAnchor: config.scrollAnchor,
+      mainAxis: config.scrollDirection,
+      anchor: config.scrollAnchor,
       onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
       child: config.child
     );
@@ -668,7 +668,7 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 /// A mashup of [ScrollableViewport] and [BlockBody]. Useful when you have a small,
 /// fixed number of children that you wish to arrange in a block layout and that
 /// might exceed the height of its container (and therefore need to scroll).
-class Block extends StatelessComponent {
+class Block extends StatelessWidget {
   Block({
     Key key,
     this.children: const <Widget>[],
@@ -684,7 +684,7 @@ class Block extends StatelessComponent {
   }
 
   final List<Widget> children;
-  final EdgeDims padding;
+  final EdgeInsets padding;
   final double initialScrollOffset;
   final Axis scrollDirection;
   final ViewportAnchor scrollAnchor;
@@ -692,7 +692,7 @@ class Block extends StatelessComponent {
   final Key scrollableKey;
 
   Widget build(BuildContext context) {
-    Widget contents = new BlockBody(children: children, direction: scrollDirection);
+    Widget contents = new BlockBody(children: children, mainAxis: scrollDirection);
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
     return new ScrollableViewport(
@@ -706,18 +706,18 @@ class Block extends StatelessComponent {
   }
 }
 
-abstract class ScrollableListPainter extends Painter {
+abstract class ScrollableListPainter extends RenderObjectPainter {
   void attach(RenderObject renderObject) {
     assert(renderObject is RenderBox);
-    assert(renderObject is HasScrollDirection);
+    assert(renderObject is HasMainAxis);
     super.attach(renderObject);
   }
 
   RenderBox get renderObject => super.renderObject;
 
   Axis get scrollDirection {
-    HasScrollDirection scrollable = renderObject as dynamic;
-    return scrollable?.scrollDirection;
+    HasMainAxis scrollable = renderObject as dynamic;
+    return scrollable?.mainAxis;
   }
 
   Size get viewportSize => renderObject.size;

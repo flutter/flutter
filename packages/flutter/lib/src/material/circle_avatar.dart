@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'theme.dart';
 
-class CircleAvatar extends StatelessComponent {
+class CircleAvatar extends StatelessWidget {
   CircleAvatar({
     Key key,
     this.child,

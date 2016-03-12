@@ -20,7 +20,7 @@ import 'tooltip.dart';
 ///
 /// If the [onPressed] callback is not specified or null, then the button will
 /// be disabled, will not react to touch.
-class IconButton extends StatelessComponent {
+class IconButton extends StatelessWidget {
   const IconButton({
     Key key,
     this.size: 24.0,
@@ -56,7 +56,7 @@ class IconButton extends StatelessComponent {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget result = new Padding(
-      padding: const EdgeDims.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Icon(
         size: size,
         icon: icon,

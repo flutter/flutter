@@ -27,11 +27,11 @@ class DecorationTween extends Tween<Decoration> {
   }
 }
 
-/// An interpolation between two [EdgeDims]s.
-class EdgeDimsTween extends Tween<EdgeDims> {
-  EdgeDimsTween({ EdgeDims begin, EdgeDims end }) : super(begin: begin, end: end);
+/// An interpolation between two [EdgeInsets]s.
+class EdgeInsetsTween extends Tween<EdgeInsets> {
+  EdgeInsetsTween({ EdgeInsets begin, EdgeInsets end }) : super(begin: begin, end: end);
 
-  EdgeDims lerp(double t) => EdgeDims.lerp(begin, end, t);
+  EdgeInsets lerp(double t) => EdgeInsets.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Matrix4]s.
@@ -50,9 +50,9 @@ class Matrix4Tween extends Tween<Matrix4> {
   }
 }
 
-/// An abstract widget for building components that gradually change their
+/// An abstract widget for building widgets that gradually change their
 /// values over a period of time.
-abstract class AnimatedWidgetBase extends StatefulComponent {
+abstract class AnimatedWidgetBase extends StatefulWidget {
   AnimatedWidgetBase({
     Key key,
     this.curve: Curves.linear,
@@ -215,10 +215,10 @@ class AnimatedContainer extends AnimatedWidgetBase {
   final Decoration foregroundDecoration;
 
   /// Empty space to surround the decoration.
-  final EdgeDims margin;
+  final EdgeInsets margin;
 
   /// Empty space to inscribe inside the decoration.
-  final EdgeDims padding;
+  final EdgeInsets padding;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
@@ -256,8 +256,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   BoxConstraintsTween _constraints;
   DecorationTween _decoration;
   DecorationTween _foregroundDecoration;
-  EdgeDimsTween _margin;
-  EdgeDimsTween _padding;
+  EdgeInsetsTween _margin;
+  EdgeInsetsTween _padding;
   Matrix4Tween _transform;
   Tween<double> _width;
   Tween<double> _height;
@@ -267,8 +267,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     _constraints = visitor(_constraints, config.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
     _decoration = visitor(_decoration, config.decoration, (dynamic value) => new DecorationTween(begin: value));
     _foregroundDecoration = visitor(_foregroundDecoration, config.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
-    _margin = visitor(_margin, config.margin, (dynamic value) => new EdgeDimsTween(begin: value));
-    _padding = visitor(_padding, config.padding, (dynamic value) => new EdgeDimsTween(begin: value));
+    _margin = visitor(_margin, config.margin, (dynamic value) => new EdgeInsetsTween(begin: value));
+    _padding = visitor(_padding, config.padding, (dynamic value) => new EdgeInsetsTween(begin: value));
     _transform = visitor(_transform, config.transform, (dynamic value) => new Matrix4Tween(begin: value));
     _width = visitor(_width, config.width, (dynamic value) => new Tween<double>(begin: value));
     _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));

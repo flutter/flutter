@@ -17,7 +17,7 @@ import 'typography.dart';
 
 enum _DatePickerMode { day, year }
 
-class DatePicker extends StatefulComponent {
+class DatePicker extends StatefulWidget {
   DatePicker({
     this.selectedDate,
     this.onChanged,
@@ -105,7 +105,7 @@ class _DatePickerState extends State<DatePicker> {
 }
 
 // Shows the selected date in large font and toggles between year and day mode
-class _DatePickerHeader extends StatelessComponent {
+class _DatePickerHeader extends StatelessWidget {
   _DatePickerHeader({ this.selectedDate, this.mode, this.onModeChanged }) {
     assert(selectedDate != null);
     assert(mode != null);
@@ -140,7 +140,7 @@ class _DatePickerHeader extends StatelessComponent {
     TextStyle yearStyle = headerTheme.headline.copyWith(color: yearColor, height: 1.0);
 
     return new Container(
-      padding: new EdgeDims.all(10.0),
+      padding: new EdgeInsets.all(10.0),
       decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
       child: new Column(
         children: <Widget>[
@@ -163,7 +163,7 @@ class _DatePickerHeader extends StatelessComponent {
 }
 
 // Fixed height component shows a single month and allows choosing a day
-class DayPicker extends StatelessComponent {
+class DayPicker extends StatelessWidget {
   DayPicker({
     this.selectedDate,
     this.currentDate,
@@ -183,7 +183,7 @@ class DayPicker extends StatelessComponent {
 
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    TextStyle headerStyle = themeData.text.caption.copyWith(fontWeight: FontWeight.w700);
+    TextStyle headerStyle = themeData.textTheme.caption.copyWith(fontWeight: FontWeight.w700);
     TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, height: 24.0 / 14.0);
     TextStyle dayStyle = headerStyle.copyWith(fontWeight: FontWeight.w500);
     DateFormat dateFormat = new DateFormat();
@@ -269,7 +269,7 @@ class DayPicker extends StatelessComponent {
   }
 }
 
-class MonthPicker extends StatefulComponent {
+class MonthPicker extends StatefulWidget {
   MonthPicker({
     Key key,
     this.selectedDate,
@@ -351,7 +351,7 @@ class _MonthPickerState extends State<MonthPicker> {
 }
 
 // Scrollable list of years to allow picking a year
-class YearPicker extends StatefulComponent {
+class YearPicker extends StatefulWidget {
   YearPicker({
     Key key,
     this.selectedDate,
@@ -376,7 +376,7 @@ class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
 
   List<Widget> buildItems(BuildContext context, int start, int count) {
-    TextStyle style = Theme.of(context).text.body1.copyWith(color: Colors.black54);
+    TextStyle style = Theme.of(context).textTheme.body1.copyWith(color: Colors.black54);
     List<Widget> items = new List<Widget>();
     for (int i = start; i < start + count; i++) {
       int year = config.firstDate.year + i;

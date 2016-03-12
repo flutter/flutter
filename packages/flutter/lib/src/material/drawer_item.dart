@@ -11,7 +11,7 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-class DrawerItem extends StatelessComponent {
+class DrawerItem extends StatelessWidget {
   const DrawerItem({
     Key key,
     this.icon,
@@ -43,7 +43,7 @@ class DrawerItem extends StatelessComponent {
   }
 
   TextStyle _getTextStyle(ThemeData themeData) {
-    TextStyle result = themeData.text.body2;
+    TextStyle result = themeData.textTheme.body2;
     if (selected) {
       switch (themeData.brightness) {
         case ThemeBrightness.light:
@@ -63,7 +63,7 @@ class DrawerItem extends StatelessComponent {
     if (icon != null) {
       children.add(
         new Padding(
-          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: new Icon(
             icon: icon,
             color: _getIconColor(themeData)
@@ -74,7 +74,7 @@ class DrawerItem extends StatelessComponent {
     children.add(
       new Flexible(
         child: new Padding(
-          padding: const EdgeDims.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: new DefaultTextStyle(
             style: _getTextStyle(themeData),
             child: child

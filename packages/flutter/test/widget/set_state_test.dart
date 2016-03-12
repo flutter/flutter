@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-class Inside extends StatefulComponent {
+class Inside extends StatefulWidget {
   InsideState createState() => new InsideState();
 }
 
@@ -23,7 +23,7 @@ class InsideState extends State<Inside> {
   }
 }
 
-class Middle extends StatefulComponent {
+class Middle extends StatefulWidget {
   Middle({ this.child });
 
   final Inside child;
@@ -44,7 +44,7 @@ class MiddleState extends State<Middle> {
   }
 }
 
-class Outside extends StatefulComponent {
+class Outside extends StatefulWidget {
   OutsideState createState() => new OutsideState();
 }
 

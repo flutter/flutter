@@ -39,7 +39,7 @@ Widget buildDismissableItem(int item) {
 
 Widget widgetBuilder() {
   return new Container(
-    padding: const EdgeDims.all(10.0),
+    padding: const EdgeInsets.all(10.0),
     child: new ScrollableList(
       scrollDirection: scrollDirection,
       itemExtent: itemExtent,
@@ -105,8 +105,8 @@ void dismissItem(WidgetTester tester, int item, { DismissDirection gestureDirect
   tester.pumpWidget(widgetBuilder()); // rebuild after the callback removes the entry
 }
 
-class Test1215DismissableComponent extends StatelessComponent {
-  Test1215DismissableComponent(this.text);
+class Test1215DismissableWidget extends StatelessWidget {
+  Test1215DismissableWidget(this.text);
   final String text;
   Widget build(BuildContext context) {
     return new Dismissable(
@@ -270,8 +270,8 @@ void main() {
     });
   });
 
-  // This one is for a case where dssmissing a component above a previously
-  // dismissed component threw an exception, which was documented at the
+  // This one is for a case where dssmissing a widget above a previously
+  // dismissed widget threw an exception, which was documented at the
   // now-obsolete URL https://github.com/flutter/engine/issues/1215 (the URL
   // died in the migration to the new repo). Don't copy this test; it doesn't
   // actually remove the dismissed widget, which is a violation of the
@@ -284,8 +284,8 @@ void main() {
           height: 1000.0,
           child: new Column(
             children: <Widget>[
-              new Test1215DismissableComponent('1'),
-              new Test1215DismissableComponent('2')
+              new Test1215DismissableWidget('1'),
+              new Test1215DismissableWidget('2')
             ]
           )
         )

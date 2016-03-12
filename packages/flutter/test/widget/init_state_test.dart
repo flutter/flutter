@@ -8,11 +8,11 @@ import 'package:test/test.dart';
 
 List<String> ancestors = <String>[];
 
-class TestComponent extends StatefulComponent {
-  TestComponentState createState() => new TestComponentState();
+class TestWidget extends StatefulWidget {
+  TestWidgetState createState() => new TestWidgetState();
 }
 
-class TestComponentState extends State<TestComponent> {
+class TestWidgetState extends State<TestWidget> {
   void initState() {
     super.initState();
     context.visitAncestorElements((Element element) {
@@ -27,7 +27,7 @@ class TestComponentState extends State<TestComponent> {
 void main() {
   test('initState() is called when we are in the tree', () {
     testWidgets((WidgetTester tester) {
-      tester.pumpWidget(new Container(child: new TestComponent()));
+      tester.pumpWidget(new Container(child: new TestWidget()));
       expect(ancestors, equals(<String>['Container', 'RenderObjectToWidgetAdapter<RenderBox>']));
     });
   });

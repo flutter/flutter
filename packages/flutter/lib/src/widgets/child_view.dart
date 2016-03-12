@@ -9,7 +9,7 @@ import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show ChildViewConnection;
 
-class ChildView extends StatelessComponent {
+class ChildView extends StatelessWidget {
   ChildView({ Key key, this.child }) : super(key: key);
 
   final ChildViewConnection child;

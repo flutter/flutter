@@ -39,7 +39,7 @@ class ButtonTheme extends InheritedWidget {
 ///
 /// MaterialButtons whose [onPressed] handler is null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for onPressed.
-abstract class MaterialButton extends StatefulComponent {
+abstract class MaterialButton extends StatefulWidget {
   MaterialButton({
     Key key,
     this.child,
@@ -116,14 +116,14 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
       onTap: config.onPressed,
       onHighlightChanged: _handleHighlightChanged,
       child: new Container(
-        padding: new EdgeDims.symmetric(horizontal: 8.0),
+        padding: new EdgeInsets.symmetric(horizontal: 8.0),
         child: new Center(
           widthFactor: 1.0,
           child: config.child
         )
       )
     );
-    TextStyle style = Theme.of(context).text.button.copyWith(color: getTextColor(context));
+    TextStyle style = Theme.of(context).textTheme.button.copyWith(color: getTextColor(context));
     int elevation = this.elevation;
     Color color = getColor(context);
     if (elevation > 0 || color != null) {
@@ -143,8 +143,8 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
     return new Container(
       height: 36.0,
       constraints: new BoxConstraints(minWidth: 88.0),
-      padding: const EdgeDims.symmetric(horizontal: 8.0),
-      margin: const EdgeDims.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      margin: const EdgeInsets.all(8.0),
       child: contents
     );
   }
