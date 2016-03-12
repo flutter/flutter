@@ -91,7 +91,7 @@ files_not_to_roll = [
 ]
 
 
-def rev(source_dir, dest_dir, dirs_to_rev, name):
+def rev(source_dir, dest_dir, dirs_to_rev, name, revision_file=None):
     for dir_to_rev in dirs_to_rev:
       if type(dir_to_rev) is tuple:
           d, file_subset = dir_to_rev
@@ -122,8 +122,13 @@ def rev(source_dir, dest_dir, dirs_to_rev, name):
     for f in files_not_to_roll:
         system(["git", "checkout", "HEAD", f], cwd=dest_dir)
 
-    system(["git", "add", "."], cwd=dest_dir)
     src_commit = system(["git", "rev-parse", "HEAD"], cwd=source_dir).strip()
+
+    if revision_file:
+      with open(revision_file, 'w') as f:
+        f.write(src_commit)
+
+    system(["git", "add", "."], cwd=dest_dir)
     commit("Update to %s %s" % (name, src_commit), cwd=dest_dir)
 
 
@@ -139,7 +144,8 @@ def main():
   dest_dir = os.path.abspath(args.dest_dir)
 
   if args.mojo_dir:
-      rev(os.path.abspath(args.mojo_dir), dest_dir, dirs_from_mojo, 'mojo')
+      rev(os.path.abspath(args.mojo_dir), dest_dir, dirs_from_mojo, 'mojo',
+          revision_file='mojo/VERSION')
 
   if args.chromium_dir:
       rev(os.path.abspath(args.chromium_dir), dest_dir, dirs_from_chromium, 'chromium')
