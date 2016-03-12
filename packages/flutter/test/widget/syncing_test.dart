@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-class TestWidget extends StatefulComponent {
+class TestWidget extends StatefulWidget {
   TestWidget({ this.child, this.persistentState, this.syncedState });
 
   final Widget child;

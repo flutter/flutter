@@ -49,7 +49,7 @@ class OverlayEntry {
   String toString() => '$runtimeType@$hashCode(opaque: $opaque)';
 }
 
-class _OverlayEntry extends StatefulComponent {
+class _OverlayEntry extends StatefulWidget {
   _OverlayEntry(OverlayEntry entry) : entry = entry, super(key: entry._key);
   final OverlayEntry entry;
   _OverlayEntryState createState() => new _OverlayEntryState();
@@ -59,7 +59,7 @@ class _OverlayEntryState extends State<_OverlayEntry> {
 }
 
 /// A [Stack] of entries that can be managed independently.
-class Overlay extends StatefulComponent {
+class Overlay extends StatefulWidget {
   Overlay({
     Key key,
     this.initialEntries: const <OverlayEntry>[]

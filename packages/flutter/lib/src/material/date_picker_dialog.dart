@@ -10,7 +10,7 @@ import 'dialog.dart';
 import 'date_picker.dart';
 import 'flat_button.dart';
 
-class _DatePickerDialog extends StatefulComponent {
+class _DatePickerDialog extends StatefulWidget {
   _DatePickerDialog({
     Key key,
     this.initialDate,

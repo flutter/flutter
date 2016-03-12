@@ -14,7 +14,7 @@ const double _kCircularProgressIndicatorStrokeWidth = 4.0;
 
 // TODO(hansmuller): implement the support for buffer indicator
 
-abstract class ProgressIndicator extends StatefulComponent {
+abstract class ProgressIndicator extends StatefulWidget {
   ProgressIndicator({
     Key key,
     this.value

@@ -20,7 +20,7 @@ const String _alertWithTitleText =
   "Let Google help apps determine location. This means sending anyonmous location "
   "data to Google, even when no apps are running.";
 
-class DialogDemoItem extends StatelessComponent {
+class DialogDemoItem extends StatelessWidget {
   DialogDemoItem({ Key key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
 
   final IconData icon;
@@ -53,7 +53,7 @@ class DialogDemoItem extends StatelessComponent {
   }
 }
 
-class DialogDemo extends StatefulComponent {
+class DialogDemo extends StatefulWidget {
   DialogDemoState createState() => new DialogDemoState();
 }
 

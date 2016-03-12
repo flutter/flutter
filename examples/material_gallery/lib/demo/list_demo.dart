@@ -10,7 +10,7 @@ enum ListDemoItemSize {
   threeLine
 }
 
-class ListDemo extends StatefulComponent {
+class ListDemo extends StatefulWidget {
   ListDemo({ Key key }) : super(key: key);
 
   ListDemoState createState() => new ListDemoState();

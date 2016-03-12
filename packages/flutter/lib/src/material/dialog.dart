@@ -16,7 +16,7 @@ typedef Widget DialogBuilder(NavigatorState navigator);
 /// A material design dialog
 ///
 /// <https://www.google.com/design/spec/components/dialogs.html>
-class Dialog extends StatelessComponent {
+class Dialog extends StatelessWidget {
   Dialog({
     Key key,
     this.title,

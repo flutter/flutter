@@ -89,7 +89,7 @@ class TimeOfDay {
 
 enum _TimePickerMode { hour, minute }
 
-class TimePicker extends StatefulComponent {
+class TimePicker extends StatefulWidget {
   TimePicker({
     this.selectedTime,
     this.onChanged
@@ -141,7 +141,7 @@ class _TimePickerState extends State<TimePicker> {
 }
 
 // TODO(ianh): Localize!
-class _TimePickerHeader extends StatelessComponent {
+class _TimePickerHeader extends StatelessWidget {
   _TimePickerHeader({
     this.selectedTime,
     this.mode,
@@ -312,7 +312,7 @@ class _DialPainter extends CustomPainter {
   }
 }
 
-class _Dial extends StatefulComponent {
+class _Dial extends StatefulWidget {
   _Dial({
     this.selectedTime,
     this.mode,

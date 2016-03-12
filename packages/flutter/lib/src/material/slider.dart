@@ -11,7 +11,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
 
-class Slider extends StatelessComponent {
+class Slider extends StatelessWidget {
   Slider({
     Key key,
     this.value,

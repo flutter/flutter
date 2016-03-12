@@ -51,7 +51,7 @@ class PianoKey {
   }
 }
 
-class PianoApp extends StatelessComponent {
+class PianoApp extends StatelessWidget {
   final List<PianoKey> keys = <PianoKey>[
     new PianoKey(Colors.red[500], chimes),
     new PianoKey(Colors.orange[500], chainsaw),

@@ -56,7 +56,7 @@ class _DropDownMenuPainter extends CustomPainter {
   }
 }
 
-class _DropDownMenu<T> extends StatusTransitionComponent {
+class _DropDownMenu<T> extends StatusTransitionWidget {
   _DropDownMenu({
     Key key,
     _DropDownRoute<T> route
@@ -197,7 +197,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   }
 }
 
-class DropDownMenuItem<T> extends StatelessComponent {
+class DropDownMenuItem<T> extends StatelessWidget {
   DropDownMenuItem({
     Key key,
     this.value,
@@ -222,7 +222,7 @@ class DropDownMenuItem<T> extends StatelessComponent {
   }
 }
 
-class DropDownButton<T> extends StatefulComponent {
+class DropDownButton<T> extends StatefulWidget {
   DropDownButton({
     Key key,
     this.items,

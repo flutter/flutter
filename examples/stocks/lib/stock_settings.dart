@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'stock_types.dart';
 
-class StockSettings extends StatefulComponent {
+class StockSettings extends StatefulWidget {
   const StockSettings(this.configuration, this.updater);
 
   final StockConfiguration configuration;

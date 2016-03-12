@@ -36,7 +36,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
   )
 ];
 
-class TravelDestinationItem extends StatelessComponent {
+class TravelDestinationItem extends StatelessWidget {
   TravelDestinationItem({ Key key, this.destination }) : super(key: key) {
     assert(destination != null && destination.isValid);
   }
@@ -114,7 +114,7 @@ class TravelDestinationItem extends StatelessComponent {
   }
 }
 
-class CardsDemo extends StatelessComponent {
+class CardsDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(

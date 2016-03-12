@@ -210,7 +210,7 @@ void main() {
           children: <Widget>[
             new Positioned(
               right: 10.0,
-              child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
+              child: new FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)
             ),
           ]
         )
@@ -220,7 +220,7 @@ void main() {
         new TestParentData(right: 10.0),
       ]);
 
-      flipStatefulComponent(tester);
+      flipStatefulWidget(tester);
       tester.pump();
 
       checkTree(tester, <TestParentData>[
@@ -232,7 +232,7 @@ void main() {
           children: <Widget>[
             new Positioned(
               top: 7.0,
-              child: new FlipComponent(left: kDecoratedBoxA, right: kDecoratedBoxB)
+              child: new FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)
             ),
           ]
         )
@@ -242,7 +242,7 @@ void main() {
         new TestParentData(top: 7.0),
       ]);
 
-      flipStatefulComponent(tester);
+      flipStatefulWidget(tester);
       tester.pump();
 
       checkTree(tester, <TestParentData>[

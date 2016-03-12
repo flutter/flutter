@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class ChipDemo extends StatefulComponent {
+class ChipDemo extends StatefulWidget {
   _ChipDemoState createState() => new _ChipDemoState();
 }
 

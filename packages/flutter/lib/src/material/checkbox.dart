@@ -21,7 +21,7 @@ import 'toggleable.dart';
 /// the checkbox.
 ///
 /// <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
-class Checkbox extends StatelessComponent {
+class Checkbox extends StatelessWidget {
   /// Constructs a checkbox
   ///
   /// * `value` determines whether the checkbox is checked.

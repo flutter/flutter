@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart' hide TypeMatcher;
 
-class TestTransition extends AnimatedComponent {
+class TestTransition extends AnimatedWidget {
   TestTransition({
     Key key,
     this.childFirstHalf,

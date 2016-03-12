@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class IconsDemo extends StatefulComponent {
+class IconsDemo extends StatefulWidget {
   IconsDemoState createState() => new IconsDemoState();
 }
 

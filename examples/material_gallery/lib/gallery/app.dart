@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'home.dart';
 
-class GalleryApp extends StatefulComponent {
+class GalleryApp extends StatefulWidget {
   GalleryApp({ Key key }) : super(key: key);
 
   static GalleryAppState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<GalleryAppState>());

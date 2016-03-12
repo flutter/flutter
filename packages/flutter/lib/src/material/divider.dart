@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-class Divider extends StatelessComponent {
+class Divider extends StatelessWidget {
   Divider({ Key key, this.height: 16.0, this.indent: 0.0, this.color }) : super(key: key) {
     assert(height >= 1.0);
   }

@@ -34,7 +34,7 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 ///
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
-abstract class Scrollable extends StatefulComponent {
+abstract class Scrollable extends StatefulWidget {
   Scrollable({
     Key key,
     this.initialScrollOffset,
@@ -604,7 +604,7 @@ class ScrollNotification extends Notification {
   final double scrollOffset;
 }
 
-/// A simple scrollable widget that has a single child. Use this component if
+/// A simple scrollable widget that has a single child. Use this widget if
 /// you are not worried about offscreen widgets consuming resources.
 class ScrollableViewport extends Scrollable {
   ScrollableViewport({
@@ -668,7 +668,7 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
 /// A mashup of [ScrollableViewport] and [BlockBody]. Useful when you have a small,
 /// fixed number of children that you wish to arrange in a block layout and that
 /// might exceed the height of its container (and therefore need to scroll).
-class Block extends StatelessComponent {
+class Block extends StatelessWidget {
   Block({
     Key key,
     this.children: const <Widget>[],

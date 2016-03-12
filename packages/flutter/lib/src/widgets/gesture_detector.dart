@@ -39,7 +39,7 @@ typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer)
 /// [excludeFromSemantics] to true.
 ///
 /// See http://flutter.io/gestures/ for additional information.
-class GestureDetector extends StatelessComponent {
+class GestureDetector extends StatelessWidget {
   GestureDetector({
     Key key,
     this.child,
@@ -235,7 +235,7 @@ class GestureDetector extends StatelessComponent {
 /// For common gestures, use a [GestureRecognizer].
 /// RawGestureDetector is useful primarily when developing your
 /// own gesture recognizers.
-class RawGestureDetector extends StatefulComponent {
+class RawGestureDetector extends StatefulWidget {
   RawGestureDetector({
     Key key,
     this.child,

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class MenuDemo extends StatefulComponent {
+class MenuDemo extends StatefulWidget {
   MenuDemo({ Key key }) : super(key: key);
 
   MenuDemoState createState() => new MenuDemoState();

@@ -11,7 +11,7 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-class DrawerItem extends StatelessComponent {
+class DrawerItem extends StatelessWidget {
   const DrawerItem({
     Key key,
     this.icon,

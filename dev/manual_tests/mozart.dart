@@ -32,7 +32,7 @@ enum WindowSide {
   bottomRight,
 }
 
-class WindowDecoration extends StatelessComponent {
+class WindowDecoration extends StatelessWidget {
   WindowDecoration({
     Key key,
     this.side,
@@ -87,7 +87,7 @@ class WindowDecoration extends StatelessComponent {
   }
 }
 
-class Window extends StatefulComponent {
+class Window extends StatefulWidget {
   Window({ Key key, this.child, this.onClose }) : super(key: key);
 
   final ChildViewConnection child;
@@ -155,7 +155,7 @@ class _WindowState extends State<Window> {
   }
 }
 
-class LauncherItem extends StatelessComponent {
+class LauncherItem extends StatelessWidget {
   LauncherItem({
     Key key,
     this.url,
@@ -175,7 +175,7 @@ class LauncherItem extends StatelessComponent {
   }
 }
 
-class Launcher extends StatelessComponent {
+class Launcher extends StatelessWidget {
   Launcher({ Key key, this.items }) : super(key: key);
 
   final List<Widget> items;
@@ -188,7 +188,7 @@ class Launcher extends StatelessComponent {
   }
 }
 
-class WindowManager extends StatefulComponent {
+class WindowManager extends StatefulWidget {
   _WindowManagerState createState() => new _WindowManagerState();
 }
 

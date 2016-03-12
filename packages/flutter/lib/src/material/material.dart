@@ -73,7 +73,7 @@ abstract class MaterialInkController {
 /// list on the paper, and it's been scrolled), a LayoutChangedNotification must
 /// be dispatched at the relevant subtree. (This in particular means that
 /// Transitions should not be placed inside Material.)
-class Material extends StatefulComponent {
+class Material extends StatefulWidget {
   Material({
     Key key,
     this.child,

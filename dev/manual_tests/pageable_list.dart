@@ -13,7 +13,7 @@ class CardModel {
   Key get key => new ObjectKey(this);
 }
 
-class PageableListApp extends StatefulComponent {
+class PageableListApp extends StatefulWidget {
   PageableListAppState createState() => new PageableListAppState();
 }
 

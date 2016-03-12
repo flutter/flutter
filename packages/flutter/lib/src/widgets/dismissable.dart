@@ -52,7 +52,7 @@ enum DismissDirection {
 /// The [onDimissed] callback runs after Dismissable's size has collapsed to zero.
 /// If the Dismissable is a list item, it must have a key that distinguishes it from
 /// the other items and its onDismissed callback must remove the item from the list.
-class Dismissable extends StatefulComponent {
+class Dismissable extends StatefulWidget {
   Dismissable({
     Key key,
     this.child,

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class ProgressIndicatorDemo extends StatefulComponent {
+class ProgressIndicatorDemo extends StatefulWidget {
   _ProgressIndicatorDemoState createState() => new _ProgressIndicatorDemoState();
 }
 

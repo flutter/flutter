@@ -21,7 +21,7 @@ const TextStyle _kLabelStyle = const TextStyle(
   textBaseline: TextBaseline.alphabetic
 );
 
-class Chip extends StatelessComponent {
+class Chip extends StatelessWidget {
   const Chip({
     Key key,
     this.avatar,

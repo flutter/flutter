@@ -190,8 +190,8 @@ class _MixedViewportElement extends RenderObjectElement {
       renderObject.markNeedsLayout();
     } else {
       // We have to reinvoke our builders because they might return new data.
-      // Consider a stateful component that owns us. The builder it gives us
-      // includes some of the state from that component. The component calls
+      // Consider a stateful widget that owns us. The builder it gives us
+      // includes some of the state from that widget. The widget calls
       // setState() on itself. It rebuilds. Part of that involves rebuilding
       // us, but now what? If we don't reinvoke the builders. then they will
       // not be rebuilt, and so the new state won't be used. Therefore, we use

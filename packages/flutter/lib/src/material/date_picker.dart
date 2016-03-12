@@ -17,7 +17,7 @@ import 'typography.dart';
 
 enum _DatePickerMode { day, year }
 
-class DatePicker extends StatefulComponent {
+class DatePicker extends StatefulWidget {
   DatePicker({
     this.selectedDate,
     this.onChanged,
@@ -105,7 +105,7 @@ class _DatePickerState extends State<DatePicker> {
 }
 
 // Shows the selected date in large font and toggles between year and day mode
-class _DatePickerHeader extends StatelessComponent {
+class _DatePickerHeader extends StatelessWidget {
   _DatePickerHeader({ this.selectedDate, this.mode, this.onModeChanged }) {
     assert(selectedDate != null);
     assert(mode != null);
@@ -163,7 +163,7 @@ class _DatePickerHeader extends StatelessComponent {
 }
 
 // Fixed height component shows a single month and allows choosing a day
-class DayPicker extends StatelessComponent {
+class DayPicker extends StatelessWidget {
   DayPicker({
     this.selectedDate,
     this.currentDate,
@@ -269,7 +269,7 @@ class DayPicker extends StatelessComponent {
   }
 }
 
-class MonthPicker extends StatefulComponent {
+class MonthPicker extends StatefulWidget {
   MonthPicker({
     Key key,
     this.selectedDate,
@@ -351,7 +351,7 @@ class _MonthPickerState extends State<MonthPicker> {
 }
 
 // Scrollable list of years to allow picking a year
-class YearPicker extends StatefulComponent {
+class YearPicker extends StatefulWidget {
   YearPicker({
     Key key,
     this.selectedDate,

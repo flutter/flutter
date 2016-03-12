@@ -15,7 +15,7 @@ typedef void MarkdownLinkCallback(String href);
 /// https://daringfireball.net/projects/markdown/ The rendered markdown is
 /// placed in a padded scrolling view port. If you do not want the scrolling
 /// behaviour, use the [MarkdownBodyRaw] class instead.
-class MarkdownRaw extends StatelessComponent {
+class MarkdownRaw extends StatelessWidget {
 
   /// Creates a new Markdown [Widget] that renders the markdown formatted string
   /// passed in as [data]. By default the markdown will be rendered using the
@@ -82,7 +82,7 @@ class MarkdownRaw extends StatelessComponent {
 /// https://daringfireball.net/projects/markdown/ This class doesn't implement
 /// any scrolling behavior, if you want scrolling either wrap the widget in
 /// a [ScrollableViewport] or use the [MarkdownRaw] widget.
-class MarkdownBodyRaw extends StatefulComponent {
+class MarkdownBodyRaw extends StatefulWidget {
 
   /// Creates a new Markdown [Widget] that renders the markdown formatted string
   /// passed in as [data]. You need to pass in a [markdownStyle] that defines

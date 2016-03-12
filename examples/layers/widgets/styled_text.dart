@@ -57,7 +57,7 @@ Widget toStyledText(String name, String text) {
 
 Widget toPlainText(String name, String text) => new Text(name + ":" + text);
 
-class SpeakerSeparator extends StatelessComponent {
+class SpeakerSeparator extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       constraints: const BoxConstraints.expand(height: 0.0),
@@ -71,7 +71,7 @@ class SpeakerSeparator extends StatelessComponent {
   }
 }
 
-class StyledTextDemo extends StatefulComponent {
+class StyledTextDemo extends StatefulWidget {
   _StyledTextDemoState createState() => new _StyledTextDemoState();
 }
 

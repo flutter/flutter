@@ -5,16 +5,16 @@
 import 'basic.dart';
 import 'framework.dart';
 
-/// A component that rebuilds when the given animation changes status.
-abstract class StatusTransitionComponent extends StatefulComponent {
-  StatusTransitionComponent({
+/// A widget that rebuilds when the given animation changes status.
+abstract class StatusTransitionWidget extends StatefulWidget {
+  StatusTransitionWidget({
     Key key,
     this.animation
   }) : super(key: key) {
     assert(animation != null);
   }
 
-  /// The animation to which this component is listening.
+  /// The animation to which this widget is listening.
   final Animation<double> animation;
 
   Widget build(BuildContext context);
@@ -22,13 +22,13 @@ abstract class StatusTransitionComponent extends StatefulComponent {
   _StatusTransitionState createState() => new _StatusTransitionState();
 }
 
-class _StatusTransitionState extends State<StatusTransitionComponent> {
+class _StatusTransitionState extends State<StatusTransitionWidget> {
   void initState() {
     super.initState();
     config.animation.addStatusListener(_animationStatusChanged);
   }
 
-  void didUpdateConfig(StatusTransitionComponent oldConfig) {
+  void didUpdateConfig(StatusTransitionWidget oldConfig) {
     if (config.animation != oldConfig.animation) {
       oldConfig.animation.removeStatusListener(_animationStatusChanged);
       config.animation.addStatusListener(_animationStatusChanged);

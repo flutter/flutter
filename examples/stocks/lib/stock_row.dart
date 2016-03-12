@@ -30,7 +30,7 @@ class StockRowPartKey extends Key {
 
 typedef void StockRowActionCallback(Stock stock, Key arrowKey);
 
-class StockRow extends StatelessComponent {
+class StockRow extends StatelessWidget {
   StockRow({
     Stock stock,
     Object keySalt,

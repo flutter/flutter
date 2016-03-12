@@ -28,7 +28,7 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
-abstract class PopupMenuEntry<T> extends StatefulComponent {
+abstract class PopupMenuEntry<T> extends StatefulWidget {
   PopupMenuEntry({ Key key }) : super(key: key);
 
   double get height;
@@ -159,7 +159,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   }
 }
 
-class _PopupMenu<T> extends StatelessComponent {
+class _PopupMenu<T> extends StatelessWidget {
   _PopupMenu({
     Key key,
     this.route
@@ -357,7 +357,7 @@ typedef void PopupMenuItemSelected<T>(T value);
 /// because an item was selected. The value passed to [onSelected] is the value of
 /// the selected menu item. If child is null then a standard 'navigation/more_vert'
 /// icon is created.
-class PopupMenuButton<T> extends StatefulComponent {
+class PopupMenuButton<T> extends StatefulWidget {
   PopupMenuButton({
     Key key,
     this.items,

@@ -11,8 +11,8 @@ final BoxDecoration kBoxDecorationA = new BoxDecoration();
 final BoxDecoration kBoxDecorationB = new BoxDecoration();
 final BoxDecoration kBoxDecorationC = new BoxDecoration();
 
-class TestComponent extends StatelessComponent {
-  const TestComponent({ this.child });
+class TestWidget extends StatelessWidget {
+  const TestWidget({ this.child });
   final Widget child;
   Widget build(BuildContext context) => child;
 }
@@ -80,7 +80,7 @@ void main() {
 
       tester.pumpWidget(new DecoratedBox(
         decoration: kBoxDecorationA,
-        child: new TestComponent(
+        child: new TestWidget(
           child: new DecoratedBox(
             decoration: kBoxDecorationB
           )
@@ -106,8 +106,8 @@ void main() {
 
       tester.pumpWidget(new DecoratedBox(
         decoration: kBoxDecorationA,
-        child: new TestComponent(
-          child: new TestComponent(
+        child: new TestWidget(
+          child: new TestWidget(
             child: new DecoratedBox(
               decoration: kBoxDecorationB
             )

@@ -15,7 +15,7 @@ import 'typography.dart';
 /// https://www.google.com/design/spec/components/grid-lists.html#grid-lists-specs
 /// For a one-line header specify title and to add a second line specify caption.
 /// Use left or right to add an icon.
-class GridTileBar extends StatelessComponent {
+class GridTileBar extends StatelessWidget {
   GridTileBar({ Key key, this.backgroundColor, this.left, this.right, this.title, this.caption }) : super(key: key);
 
   final Color backgroundColor;

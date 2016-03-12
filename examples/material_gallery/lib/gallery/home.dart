@@ -39,7 +39,7 @@ import '../demo/two_level_list_demo.dart';
 import '../demo/typography_demo.dart';
 import '../demo/weather_demo.dart';
 
-class GalleryHome extends StatefulComponent {
+class GalleryHome extends StatefulWidget {
   GalleryHome({ Key key }) : super(key: key);
 
   GalleryHomeState createState() => new GalleryHomeState();

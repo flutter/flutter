@@ -18,7 +18,7 @@ final BoxDecoration kBoxDecorationC = new BoxDecoration(
   backgroundColor: const Color(0xFF0000FF)
 );
 
-class TestBuildCounter extends StatelessComponent {
+class TestBuildCounter extends StatelessWidget {
   static int buildCount = 0;
 
   Widget build(BuildContext context) {
@@ -28,16 +28,16 @@ class TestBuildCounter extends StatelessComponent {
 }
 
 
-class FlipComponent extends StatefulComponent {
-  FlipComponent({ Key key, this.left, this.right }) : super(key: key);
+class FlipWidget extends StatefulWidget {
+  FlipWidget({ Key key, this.left, this.right }) : super(key: key);
 
   final Widget left;
   final Widget right;
 
-  FlipComponentState createState() => new FlipComponentState();
+  FlipWidgetState createState() => new FlipWidgetState();
 }
 
-class FlipComponentState extends State<FlipComponent> {
+class FlipWidgetState extends State<FlipWidget> {
   bool _showLeft = true;
 
   void flip() {
@@ -51,11 +51,11 @@ class FlipComponentState extends State<FlipComponent> {
   }
 }
 
-void flipStatefulComponent(WidgetTester tester) {
-  StatefulComponentElement stateElement =
-      tester.findElement((Element element) => element is StatefulComponentElement);
+void flipStatefulWidget(WidgetTester tester) {
+  StatefulElement stateElement =
+      tester.findElement((Element element) => element is StatefulElement);
   expect(stateElement, isNotNull);
-  expect(stateElement.state is FlipComponentState, isTrue);
-  FlipComponentState state = stateElement.state;
+  expect(stateElement.state is FlipWidgetState, isTrue);
+  FlipWidgetState state = stateElement.state;
   state.flip();
 }

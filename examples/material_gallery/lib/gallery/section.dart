@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'demo.dart';
 
-class GallerySection extends StatelessComponent {
+class GallerySection extends StatelessWidget {
   GallerySection({ this.title, this.image, this.colors, this.demos });
 
   final String title;

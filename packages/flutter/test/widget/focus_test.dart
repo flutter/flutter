@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-class TestFocusable extends StatelessComponent {
+class TestFocusable extends StatelessWidget {
   TestFocusable({
     GlobalKey key,
     this.no,

@@ -18,7 +18,7 @@ typedef void ModeUpdater(StockMode mode);
 enum _StockMenuItem { autorefresh, refresh, speedUp, speedDown }
 enum StockHomeTab { market, portfolio }
 
-class _NotImplementedDialog extends StatelessComponent {
+class _NotImplementedDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Dialog(
       title: new Text('Not Implemented'),
@@ -50,7 +50,7 @@ class _NotImplementedDialog extends StatelessComponent {
   }
 }
 
-class StockHome extends StatefulComponent {
+class StockHome extends StatefulWidget {
   const StockHome(this.stocks, this.symbols, this.configuration, this.updater);
 
   final Map<String, Stock> stocks;
@@ -355,7 +355,7 @@ class StockHomeState extends State<StockHome> {
   }
 }
 
-class _CreateCompanySheet extends StatefulComponent {
+class _CreateCompanySheet extends StatefulWidget {
   _CreateCompanySheetState createState() => new _CreateCompanySheetState();
 }
 

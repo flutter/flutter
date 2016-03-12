@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class TextStyleItem extends StatelessComponent {
+class TextStyleItem extends StatelessWidget {
   TextStyleItem({ Key key, this.name, this.style, this.text }) : super(key: key) {
     assert(name != null);
     assert(style != null);
@@ -37,7 +37,7 @@ class TextStyleItem extends StatelessComponent {
   }
 }
 
-class TypographyDemo extends StatelessComponent {
+class TypographyDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[

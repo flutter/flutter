@@ -9,7 +9,7 @@ const String _introText =
   "a long press. Tooltip messages are also used by services that make Flutter "
   "apps accessible, like screen readers.";
 
-class TooltipDemo extends StatelessComponent {
+class TooltipDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return new Scaffold(

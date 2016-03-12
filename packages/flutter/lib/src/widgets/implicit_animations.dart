@@ -50,9 +50,9 @@ class Matrix4Tween extends Tween<Matrix4> {
   }
 }
 
-/// An abstract widget for building components that gradually change their
+/// An abstract widget for building widgets that gradually change their
 /// values over a period of time.
-abstract class AnimatedWidgetBase extends StatefulComponent {
+abstract class AnimatedWidgetBase extends StatefulWidget {
   AnimatedWidgetBase({
     Key key,
     this.curve: Curves.linear,

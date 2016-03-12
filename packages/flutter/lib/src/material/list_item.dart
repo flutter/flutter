@@ -15,7 +15,7 @@ import 'theme.dart';
 /// isThreeLine: true is specified. If dense: true is specified then the overall
 /// height of this list item and the size of the DefaultTextStyles that wrap
 /// the [primary] and [secondary] widget are reduced.
-class ListItem extends StatelessComponent {
+class ListItem extends StatelessWidget {
   ListItem({
     Key key,
     this.left,

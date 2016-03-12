@@ -21,7 +21,7 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
   MaterialListType.threeLine: kThreeLineListItemHeight,
 };
 
-class MaterialList extends StatefulComponent {
+class MaterialList extends StatefulWidget {
   MaterialList({
     Key key,
     this.initialScrollOffset,

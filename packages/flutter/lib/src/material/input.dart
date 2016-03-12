@@ -14,7 +14,7 @@ import 'theme.dart';
 export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 
 /// A material design text input field.
-class Input extends StatefulComponent {
+class Input extends StatefulWidget {
   Input({
     Key key,
     this.value: InputValue.empty,

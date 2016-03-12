@@ -15,7 +15,7 @@ enum DismissDialogAction {
   save,
 }
 
-class DateTimeItem extends StatelessComponent {
+class DateTimeItem extends StatelessWidget {
   DateTimeItem({ Key key, DateTime dateTime, this.onChanged })
     : date = new DateTime(dateTime.year, dateTime.month, dateTime.day),
       time = new TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
@@ -92,7 +92,7 @@ class DateTimeItem extends StatelessComponent {
   }
 }
 
-class FullScreenDialogDemo extends StatefulComponent {
+class FullScreenDialogDemo extends StatefulWidget {
   FullScreenDialogDemoState createState() => new FullScreenDialogDemoState();
 }
 

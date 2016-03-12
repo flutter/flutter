@@ -13,7 +13,7 @@ import 'shadows.dart';
 import 'theme.dart';
 import 'toggleable.dart';
 
-class Switch extends StatelessComponent {
+class Switch extends StatelessWidget {
   Switch({ Key key, this.value, this.activeColor, this.onChanged })
       : super(key: key);
 

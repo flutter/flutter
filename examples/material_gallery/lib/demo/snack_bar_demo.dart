@@ -17,7 +17,7 @@ const String _text2 =
 const String _text3 =
   "By default snackbars automatically disappear after a few seconds ";
 
-class SnackBarDemo extends StatelessComponent {
+class SnackBarDemo extends StatelessWidget {
   SnackBarDemo({ Key key }) : super(key: key);
 
   Widget buildBody(BuildContext context) {

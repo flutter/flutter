@@ -25,7 +25,7 @@ const String _explanatoryText =
   "with a FloatingActionButton that the Scaffold distinguishes from the others "
   "by its key.";
 
-class TabsFabDemo extends StatefulComponent {
+class TabsFabDemo extends StatefulWidget {
   _TabsFabDemoState createState() => new _TabsFabDemoState();
 }
 

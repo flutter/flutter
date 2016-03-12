@@ -14,7 +14,7 @@ import 'theme_data.dart';
 
 const Duration _kExpand = const Duration(milliseconds: 200);
 
-class TwoLevelListItem extends StatelessComponent {
+class TwoLevelListItem extends StatelessWidget {
   TwoLevelListItem({
     Key key,
     this.left,
@@ -49,7 +49,7 @@ class TwoLevelListItem extends StatelessComponent {
   }
 }
 
-class TwoLevelSublist extends StatefulComponent {
+class TwoLevelSublist extends StatefulWidget {
   TwoLevelSublist({ Key key, this.left, this.center, this.children }) : super(key: key);
 
   final Widget left;
@@ -149,7 +149,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
   }
 }
 
-class TwoLevelList extends StatelessComponent {
+class TwoLevelList extends StatelessWidget {
   TwoLevelList({ Key key, this.items, this.type: MaterialListType.twoLine }) : super(key: key);
 
   final List<Widget> items;

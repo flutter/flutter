@@ -46,7 +46,7 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
   bool shouldUpdateConstraints(_MyAutoLayoutDelegate oldDelegate) => true;
 }
 
-class ColoredBoxes extends StatefulComponent {
+class ColoredBoxes extends StatefulWidget {
   _ColoredBoxesState createState() => new _ColoredBoxesState();
 }
 

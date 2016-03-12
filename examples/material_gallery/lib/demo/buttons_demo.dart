@@ -55,7 +55,7 @@ class _ButtonDemo {
   int get hashCode => hashValues(title.hashCode, text.hashCode);
 }
 
-class ButtonsDemo extends StatefulComponent {
+class ButtonsDemo extends StatefulWidget {
   _ButtonsDemoState createState() => new _ButtonsDemoState();
 }
 

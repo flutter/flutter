@@ -69,9 +69,9 @@ class ObjectKey extends Key {
 typedef void GlobalKeyRemoveListener(GlobalKey key);
 
 /// A GlobalKey is one that must be unique across the entire application. It is
-/// used by components that need to communicate with other components across the
+/// used by widgets that need to communicate with other widgets across the
 /// application's element tree.
-abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
+abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
   factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel); // the label is purely for debugging purposes and is otherwise ignored
@@ -119,8 +119,8 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
   Widget get currentWidget => _currentElement?.widget;
   T get currentState {
     Element element = _currentElement;
-    if (element is StatefulComponentElement) {
-      StatefulComponentElement statefulElement = element;
+    if (element is StatefulElement) {
+      StatefulElement statefulElement = element;
       return statefulElement.state;
     }
     return null;
@@ -179,7 +179,7 @@ abstract class GlobalKey<T extends State<StatefulComponent>> extends Key {
 /// Each LabeledGlobalKey instance is a unique key.
 /// The optional label can be used for documentary purposes. It does not affect
 /// the key's identity.
-class LabeledGlobalKey<T extends State<StatefulComponent>> extends GlobalKey<T> {
+class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   const LabeledGlobalKey(this._debugLabel) : super.constructor();
   final String _debugLabel;
   String toString() => '[GlobalKey ${_debugLabel != null ? _debugLabel : hashCode}]';
@@ -241,42 +241,42 @@ abstract class Widget {
   }
 }
 
-/// StatelessComponents describe a way to compose other Widgets to form reusable
+/// StatelessWidgets describe a way to compose other Widgets to form reusable
 /// parts, which doesn't depend on anything other than the configuration
 /// information in the object itself. (For compositions that can change
 /// dynamically, e.g. due to having an internal clock-driven state, or depending
-/// on some system state, use [StatefulComponent].)
-abstract class StatelessComponent extends Widget {
-  const StatelessComponent({ Key key }) : super(key: key);
+/// on some system state, use [StatefulWidget].)
+abstract class StatelessWidget extends Widget {
+  const StatelessWidget({ Key key }) : super(key: key);
 
-  /// StatelessComponents always use StatelessComponentElements to represent
+  /// StatelessWidget always use [StatelessElement]s to represent
   /// themselves in the Element tree.
-  StatelessComponentElement createElement() => new StatelessComponentElement(this);
+  StatelessElement createElement() => new StatelessElement(this);
 
-  /// Returns another Widget out of which this StatelessComponent is built.
+  /// Returns another Widget out of which this StatelessWidget is built.
   /// Typically that Widget will have been configured with further children,
   /// such that really this function returns a tree of configuration.
   ///
   /// The given build context object contains information about the location in
-  /// the tree at which this component is being built. For example, the context
+  /// the tree at which this widget is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree.
   Widget build(BuildContext context);
 }
 
-/// StatefulComponents provide the configuration for
-/// [StatefulComponentElement]s, which wrap [State]s, which hold mutable state
+/// StatefulWidgets provide the configuration for
+/// [StatefulElement]s, which wrap [State]s, which hold mutable state
 /// and can dynamically and spontaneously ask to be rebuilt.
-abstract class StatefulComponent extends Widget {
-  const StatefulComponent({ Key key }) : super(key: key);
+abstract class StatefulWidget extends Widget {
+  const StatefulWidget({ Key key }) : super(key: key);
 
-  /// StatefulComponents always use StatefulComponentElements to represent
+  /// StatefulWidget always use [StatefulElement]s to represent
   /// themselves in the Element tree.
-  StatefulComponentElement createElement() => new StatefulComponentElement(this);
+  StatefulElement createElement() => new StatefulElement(this);
 
-  /// Returns an instance of the state to which this StatefulComponent is
+  /// Returns an instance of the state to which this StatefulWidget is
   /// related, using this object as the configuration. Subclasses should
   /// override this to return a new instance of the State class associated with
-  /// this StatefulComponent class, like this:
+  /// this StatefulWidget class, like this:
   ///
   ///   _MyState createState() => new _MyState();
   State createState();
@@ -292,10 +292,10 @@ enum _StateLifecycle {
 /// The signature of setState() methods.
 typedef void StateSetter(VoidCallback fn);
 
-/// The logic and internal state for a [StatefulComponent].
-abstract class State<T extends StatefulComponent> {
+/// The logic and internal state for a [StatefulWidget].
+abstract class State<T extends StatefulWidget> {
   /// The current configuration (an instance of the corresponding
-  /// StatefulComponent class).
+  /// [StatefulWidget] class).
   T get config => _config;
   T _config;
 
@@ -307,7 +307,7 @@ abstract class State<T extends StatefulComponent> {
   bool _debugTypesAreRight(Widget widget) => widget is T;
 
   /// Pointer to the owner Element object
-  StatefulComponentElement _element;
+  StatefulElement _element;
 
   /// The context in which this object will be built
   BuildContext get context => _element;
@@ -335,7 +335,7 @@ abstract class State<T extends StatefulComponent> {
   ///    setState(() { myState = newValue });
   ///
   /// If you just change the state directly without calling setState(), then the
-  /// component will not be scheduled for rebuilding, meaning that its rendering
+  /// widget will not be scheduled for rebuilding, meaning that its rendering
   /// will not be updated.
   void setState(VoidCallback fn) {
     assert(() {
@@ -376,12 +376,12 @@ abstract class State<T extends StatefulComponent> {
     assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; });
   }
 
-  /// Returns another Widget out of which this StatefulComponent is built.
+  /// Returns another Widget out of which this [StatefulWidget] is built.
   /// Typically that Widget will have been configured with further children,
   /// such that really this function returns a tree of configuration.
   ///
   /// The given build context object contains information about the location in
-  /// the tree at which this component is being built. For example, the context
+  /// the tree at which this widget is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree.
   Widget build(BuildContext context);
 
@@ -410,13 +410,13 @@ abstract class State<T extends StatefulComponent> {
   }
 }
 
-abstract class _ProxyComponent extends Widget {
-  const _ProxyComponent({ Key key, this.child }) : super(key: key);
+abstract class _ProxyWidget extends Widget {
+  const _ProxyWidget({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 }
 
-abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyComponent {
+abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyWidget {
   const ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -464,7 +464,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyComp
   void applyParentData(RenderObject renderObject);
 }
 
-abstract class InheritedWidget extends _ProxyComponent {
+abstract class InheritedWidget extends _ProxyWidget {
   const InheritedWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -938,11 +938,11 @@ abstract class Element implements BuildContext {
   State ancestorStateOfType(TypeMatcher matcher) {
     Element ancestor = _parent;
     while (ancestor != null) {
-      if (ancestor is StatefulComponentElement && matcher.check(ancestor.state))
+      if (ancestor is StatefulElement && matcher.check(ancestor.state))
         break;
       ancestor = ancestor._parent;
     }
-    StatefulComponentElement statefulAncestor = ancestor;
+    StatefulElement statefulAncestor = ancestor;
     return statefulAncestor?.state;
   }
 
@@ -1047,7 +1047,7 @@ abstract class BuildableElement extends Element {
   bool get dirty => _dirty;
   bool _dirty = true;
 
-  // We let component authors call setState from initState, didUpdateConfig, and
+  // We let widget authors call setState from initState, didUpdateConfig, and
   // build even when state is locked because its convenient and a no-op anyway.
   // This flag ensures that this convenience is only allowed on the element
   // currently undergoing initState, didUpdateConfig, or build.
@@ -1065,9 +1065,9 @@ abstract class BuildableElement extends Element {
   static bool _debugBuilding = false;
   static BuildableElement _debugCurrentBuildTarget;
 
-  /// Establishes a scope in which component build functions can run.
+  /// Establishes a scope in which widget build functions can run.
   ///
-  /// Inside a build scope, component build functions are allowed to run, but
+  /// Inside a build scope, widget build functions are allowed to run, but
   /// State.setState() is forbidden. This mechanism prevents build functions
   /// from transitively requiring other build functions to run, potentially
   /// causing infinite loops.
@@ -1106,8 +1106,8 @@ abstract class BuildableElement extends Element {
   /// rebuild in the next frame.
   ///
   /// Since it is inefficient to build an element twice in one frame,
-  /// applications and components should be structured so as to only mark
-  /// components dirty during event handlers before the frame begins, not during
+  /// applications and widgets should be structured so as to only mark
+  /// widgets dirty during event handlers before the frame begins, not during
   /// the build itself.
   void markNeedsBuild() {
     assert(_debugLifecycleState != _ElementLifecycle.defunct);
@@ -1130,7 +1130,7 @@ abstract class BuildableElement extends Element {
       if (_debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
         throw new WidgetError(
           'setState() or markNeedsBuild() called during build.\n'
-          'This component cannot be marked as needing to build because the framework '
+          'This widget cannot be marked as needing to build because the framework '
           'is already in the process of building widgets. A widget can be marked as '
           'needing to be built during the build phase only if one if its ancestors '
           'is currently building. This exception is allowed because the framework '
@@ -1149,7 +1149,7 @@ abstract class BuildableElement extends Element {
   }
 
   /// Called by the binding when scheduleBuild() has been called to mark this
-  /// element dirty, and, in Components, by update() when the Widget has
+  /// element dirty, and, in components, by update() when the widget has
   /// changed.
   void rebuild() {
     assert(_debugLifecycleState != _ElementLifecycle.initial);
@@ -1195,8 +1195,8 @@ abstract class BuildableElement extends Element {
 
 typedef Widget WidgetBuilder(BuildContext context);
 
-/// Base class for the instantiation of StatelessComponent, StatefulComponent,
-/// and ProxyComponent widgets.
+/// Base class for the instantiation of [StatelessWidget], [StatefulWidget],
+/// and [_ProxyWidget] widgets.
 abstract class ComponentElement extends BuildableElement {
   ComponentElement(Widget widget) : super(widget);
 
@@ -1215,8 +1215,8 @@ abstract class ComponentElement extends BuildableElement {
     rebuild();
   }
 
-  /// Reinvokes the build() method of the StatelessComponent object (for
-  /// stateless components) or the State object (for stateful components) and
+  /// Reinvokes the build() method of the [StatelessWidget] object (for
+  /// stateless widgets) or the [State] object (for stateful widgets) and
   /// then updates the widget tree.
   ///
   /// Called automatically during mount() to generate the first build, and by
@@ -1270,15 +1270,15 @@ abstract class ComponentElement extends BuildableElement {
   }
 }
 
-/// Instantiation of StatelessComponent widgets.
-class StatelessComponentElement extends ComponentElement {
-  StatelessComponentElement(StatelessComponent widget) : super(widget) {
+/// Instantiation of [StatelessWidget]s.
+class StatelessElement extends ComponentElement {
+  StatelessElement(StatelessWidget widget) : super(widget) {
     _builder = widget.build;
   }
 
-  StatelessComponent get widget => super.widget;
+  StatelessWidget get widget => super.widget;
 
-  void update(StatelessComponent newWidget) {
+  void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _builder = widget.build;
@@ -1287,9 +1287,9 @@ class StatelessComponentElement extends ComponentElement {
   }
 }
 
-/// Instantiation of StatefulComponent widgets.
-class StatefulComponentElement extends ComponentElement {
-  StatefulComponentElement(StatefulComponent widget)
+/// Instantiation of [StatefulWidget]s.
+class StatefulElement extends ComponentElement {
+  StatefulElement(StatefulWidget widget)
     : _state = widget.createState(), super(widget) {
     assert(_state._debugTypesAreRight(widget));
     assert(_state._element == null);
@@ -1301,8 +1301,8 @@ class StatefulComponentElement extends ComponentElement {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
 
-  State<StatefulComponent> get state => _state;
-  State<StatefulComponent> _state;
+  State<StatefulWidget> get state => _state;
+  State<StatefulWidget> _state;
 
   void _firstBuild() {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
@@ -1325,10 +1325,10 @@ class StatefulComponentElement extends ComponentElement {
     super._firstBuild();
   }
 
-  void update(StatefulComponent newWidget) {
+  void update(StatefulWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    StatefulComponent oldConfig = _state._config;
+    StatefulWidget oldConfig = _state._config;
     // Notice that we mark ourselves as dirty before calling didUpdateConfig to
     // let authors call setState from within didUpdateConfig without triggering
     // asserts.
@@ -1378,16 +1378,16 @@ class StatefulComponentElement extends ComponentElement {
 }
 
 abstract class _ProxyElement extends ComponentElement {
-  _ProxyElement(_ProxyComponent widget) : super(widget) {
+  _ProxyElement(_ProxyWidget widget) : super(widget) {
     _builder = _build;
   }
 
-  _ProxyComponent get widget => super.widget;
+  _ProxyWidget get widget => super.widget;
 
   Widget _build(BuildContext context) => widget.child;
 
-  void update(_ProxyComponent newWidget) {
-    _ProxyComponent oldWidget = widget;
+  void update(_ProxyWidget newWidget) {
+    _ProxyWidget oldWidget = widget;
     assert(widget != null);
     assert(widget != newWidget);
     super.update(newWidget);
@@ -1397,7 +1397,7 @@ abstract class _ProxyElement extends ComponentElement {
     rebuild();
   }
 
-  void notifyDescendants(_ProxyComponent oldWidget);
+  void notifyDescendants(_ProxyWidget oldWidget);
 }
 
 class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {

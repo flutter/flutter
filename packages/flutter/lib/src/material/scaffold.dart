@@ -107,7 +107,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 }
 
-class _FloatingActionButtonTransition extends StatefulComponent {
+class _FloatingActionButtonTransition extends StatefulWidget {
   _FloatingActionButtonTransition({
     Key key,
     this.child
@@ -180,7 +180,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// This class provides APIs for showing drawers, snackbars, and bottom sheets.
 ///
 /// See: <https://www.google.com/design/spec/layout/structure.html>
-class Scaffold extends StatefulComponent {
+class Scaffold extends StatefulWidget {
   Scaffold({
     Key key,
     this.toolBar,
@@ -572,7 +572,7 @@ class ScaffoldFeatureController<T extends Widget, U> {
   final StateSetter setState;
 }
 
-class _PersistentBottomSheet extends StatefulComponent {
+class _PersistentBottomSheet extends StatefulWidget {
   _PersistentBottomSheet({
     Key key,
     this.animationController,

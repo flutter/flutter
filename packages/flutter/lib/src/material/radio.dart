@@ -14,7 +14,7 @@ const double _kDiameter = 16.0;
 const double _kOuterRadius = _kDiameter / 2.0;
 const double _kInnerRadius = 5.0;
 
-class Radio<T> extends StatelessComponent {
+class Radio<T> extends StatelessWidget {
   Radio({
     Key key,
     this.value,

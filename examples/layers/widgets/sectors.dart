@@ -16,7 +16,7 @@ RenderBox initCircle() {
   );
 }
 
-class SectorApp extends StatefulComponent {
+class SectorApp extends StatefulWidget {
   SectorAppState createState() => new SectorAppState();
 }
 

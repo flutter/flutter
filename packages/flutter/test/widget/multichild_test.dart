@@ -113,7 +113,7 @@ void main() {
     });
   });
 
-  test('MultiChildRenderObjectElement with stateless components', () {
+  test('MultiChildRenderObjectElement with stateless widgets', () {
     testWidgets((WidgetTester tester) {
 
       tester.pumpWidget(
@@ -234,7 +234,7 @@ void main() {
     });
   });
 
-  test('MultiChildRenderObjectElement with stateful components', () {
+  test('MultiChildRenderObjectElement with stateful widgets', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(
         new Stack(
@@ -250,7 +250,7 @@ void main() {
       tester.pumpWidget(
         new Stack(
           children: <Widget>[
-            new FlipComponent(
+            new FlipWidget(
               left: new DecoratedBox(decoration: kBoxDecorationA),
               right: new DecoratedBox(decoration: kBoxDecorationB)
             ),
@@ -261,7 +261,7 @@ void main() {
 
       checkTree(tester, <BoxDecoration>[kBoxDecorationA, kBoxDecorationC]);
 
-      flipStatefulComponent(tester);
+      flipStatefulWidget(tester);
       tester.pump();
 
       checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
@@ -269,7 +269,7 @@ void main() {
       tester.pumpWidget(
         new Stack(
           children: <Widget>[
-            new FlipComponent(
+            new FlipWidget(
               left: new DecoratedBox(decoration: kBoxDecorationA),
               right: new DecoratedBox(decoration: kBoxDecorationB)
             ),
@@ -279,7 +279,7 @@ void main() {
 
       checkTree(tester, <BoxDecoration>[kBoxDecorationB]);
 
-      flipStatefulComponent(tester);
+      flipStatefulWidget(tester);
       tester.pump();
 
       checkTree(tester, <BoxDecoration>[kBoxDecorationA]);
@@ -287,7 +287,7 @@ void main() {
       tester.pumpWidget(
         new Stack(
           children: <Widget>[
-            new FlipComponent(
+            new FlipWidget(
               key: new Key('flip'),
               left: new DecoratedBox(decoration: kBoxDecorationA),
               right: new DecoratedBox(decoration: kBoxDecorationB)
@@ -300,7 +300,7 @@ void main() {
         new Stack(
           children: <Widget>[
             new DecoratedBox(key: new Key('c'), decoration: kBoxDecorationC),
-            new FlipComponent(
+            new FlipWidget(
               key: new Key('flip'),
               left: new DecoratedBox(decoration: kBoxDecorationA),
               right: new DecoratedBox(decoration: kBoxDecorationB)
@@ -311,7 +311,7 @@ void main() {
 
       checkTree(tester, <BoxDecoration>[kBoxDecorationC, kBoxDecorationA]);
 
-      flipStatefulComponent(tester);
+      flipStatefulWidget(tester);
       tester.pump();
 
       checkTree(tester, <BoxDecoration>[kBoxDecorationC, kBoxDecorationB]);
@@ -319,7 +319,7 @@ void main() {
       tester.pumpWidget(
         new Stack(
           children: <Widget>[
-            new FlipComponent(
+            new FlipWidget(
               key: new Key('flip'),
               left: new DecoratedBox(decoration: kBoxDecorationA),
               right: new DecoratedBox(decoration: kBoxDecorationB)

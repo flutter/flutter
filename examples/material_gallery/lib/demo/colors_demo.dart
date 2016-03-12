@@ -41,7 +41,7 @@ const List<ColorSwatch> colorSwatches = const <ColorSwatch>[
 ];
 
 
-class ColorItem extends StatelessComponent {
+class ColorItem extends StatelessWidget {
   ColorItem({ Key key, this.index, this.color, this.prefix: '' }) : super(key: key) {
     assert(index != null);
     assert(color != null);
@@ -71,7 +71,7 @@ class ColorItem extends StatelessComponent {
   }
 }
 
-class ColorSwatchTabView extends StatelessComponent {
+class ColorSwatchTabView extends StatelessWidget {
   ColorSwatchTabView({ Key key, this.swatch }) : super(key: key) {
     assert(swatch != null && swatch.isValid);
   }
@@ -106,7 +106,7 @@ class ColorSwatchTabView extends StatelessComponent {
   }
 }
 
-class ColorsDemo extends StatelessComponent {
+class ColorsDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new TabBarSelection<ColorSwatch>(
       values: colorSwatches,

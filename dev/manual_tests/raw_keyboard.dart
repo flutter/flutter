@@ -30,7 +30,7 @@ void main() {
   );
 }
 
-class RawKeyboardDemo extends StatefulComponent {
+class RawKeyboardDemo extends StatefulWidget {
   RawKeyboardDemo({ GlobalKey key }) : super(key: key);
 
   _HardwareKeyDemoState createState() => new _HardwareKeyDemoState();

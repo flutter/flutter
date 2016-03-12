@@ -52,7 +52,7 @@ class _MarkerPainter extends CustomPainter {
   }
 }
 
-class Marker extends StatelessComponent {
+class Marker extends StatelessWidget {
   Marker({
     this.type: MarkerType.touch,
     this.position,
@@ -82,7 +82,7 @@ class Marker extends StatelessComponent {
   }
 }
 
-class OverlayGeometryApp extends StatefulComponent {
+class OverlayGeometryApp extends StatefulWidget {
   OverlayGeometryAppState createState() => new OverlayGeometryAppState();
 }
 

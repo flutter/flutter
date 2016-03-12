@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  test('Stateful component smoke test', () {
+  test('Stateful widget smoke test', () {
     testWidgets((WidgetTester tester) {
 
       void checkTree(BoxDecoration expectedDecoration) {
@@ -23,7 +23,7 @@ void main() {
       }
 
       tester.pumpWidget(
-        new FlipComponent(
+        new FlipWidget(
           left: new DecoratedBox(decoration: kBoxDecorationA),
           right: new DecoratedBox(decoration: kBoxDecorationB)
         )
@@ -32,7 +32,7 @@ void main() {
       checkTree(kBoxDecorationA);
 
       tester.pumpWidget(
-        new FlipComponent(
+        new FlipWidget(
           left: new DecoratedBox(decoration: kBoxDecorationB),
           right: new DecoratedBox(decoration: kBoxDecorationA)
         )
@@ -40,14 +40,14 @@ void main() {
 
       checkTree(kBoxDecorationB);
 
-      flipStatefulComponent(tester);
+      flipStatefulWidget(tester);
 
       tester.pump();
 
       checkTree(kBoxDecorationA);
 
       tester.pumpWidget(
-        new FlipComponent(
+        new FlipWidget(
           left: new DecoratedBox(decoration: kBoxDecorationA),
           right: new DecoratedBox(decoration: kBoxDecorationB)
         )
@@ -57,11 +57,11 @@ void main() {
     });
   });
 
-  test('Don\'t rebuild subcomponents', () {
+  test('Don\'t rebuild subwidgets', () {
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(
-        new FlipComponent(
-          key: new Key('rebuild test'), // this is so we don't get the state from the TestComponentConfig in the last test, but instead instantiate a new element with a new state.
+        new FlipWidget(
+          key: new Key('rebuild test'),
           left: new TestBuildCounter(),
           right: new DecoratedBox(decoration: kBoxDecorationB)
         )
@@ -69,7 +69,7 @@ void main() {
 
       expect(TestBuildCounter.buildCount, equals(1));
 
-      flipStatefulComponent(tester);
+      flipStatefulWidget(tester);
 
       tester.pump();
 

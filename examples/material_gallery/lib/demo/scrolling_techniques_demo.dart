@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'flexible_space_demo.dart';
 
-class _BarGraphic extends StatelessComponent {
+class _BarGraphic extends StatelessWidget {
   _BarGraphic({ Key key, this.height, this.color, this.leftText, this.rightText: '' })
     : super(key: key) {
     assert(height != null);
@@ -74,7 +74,7 @@ class _FlexibleSpaceGraphic extends _BarGraphic {
   );
 }
 
-class _TechniqueItem extends StatelessComponent {
+class _TechniqueItem extends StatelessWidget {
   _TechniqueItem({ this.titleText, this.barGraphics, this.builder });
 
   final String titleText;
@@ -110,7 +110,7 @@ const String _introText =
   "it appears behind the device's status bar. When a flexible space Widget is "
   "specified it is stacked on top of the ToolBar.";
 
-class ScrollingTechniquesDemo extends StatelessComponent {
+class ScrollingTechniquesDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Scrolling Techniques')),

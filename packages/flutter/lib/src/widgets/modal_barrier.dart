@@ -9,7 +9,7 @@ import 'navigator.dart';
 import 'transitions.dart';
 
 /// Prevents the user from interacting with widgets behind itself.
-class ModalBarrier extends StatelessComponent {
+class ModalBarrier extends StatelessWidget {
   ModalBarrier({
     Key key,
     this.color,
@@ -45,7 +45,7 @@ class ModalBarrier extends StatelessComponent {
 }
 
 /// Prevents the user from interacting with widgets behind itself.
-class AnimatedModalBarrier extends AnimatedComponent {
+class AnimatedModalBarrier extends AnimatedWidget {
   AnimatedModalBarrier({
     Key key,
     Animation<Color> color,

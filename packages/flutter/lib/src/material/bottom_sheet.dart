@@ -15,7 +15,7 @@ const double _kCloseProgressThreshold = 0.5;
 const Color _kTransparent = const Color(0x00000000);
 const Color _kBarrierColor = Colors.black54;
 
-class BottomSheet extends StatefulComponent {
+class BottomSheet extends StatefulWidget {
   BottomSheet({
     Key key,
     this.animationController,
@@ -117,7 +117,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
   }
 }
 
-class _ModalBottomSheet<T> extends StatefulComponent {
+class _ModalBottomSheet<T> extends StatefulWidget {
   _ModalBottomSheet({ Key key, this.route }) : super(key: key);
 
   final _ModalBottomSheetRoute<T> route;

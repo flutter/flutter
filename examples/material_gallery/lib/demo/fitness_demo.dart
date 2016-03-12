@@ -13,7 +13,7 @@ import 'package:vector_math/vector_math_64.dart' as vec;
 ImageMap _images;
 SpriteSheet _sprites;
 
-class FitnessDemo extends StatelessComponent {
+class FitnessDemo extends StatelessWidget {
   FitnessDemo({ Key key }) : super(key: key);
 
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class FitnessDemo extends StatelessComponent {
   }
 }
 
-class _FitnessDemoContents extends StatefulComponent {
+class _FitnessDemoContents extends StatefulWidget {
   _FitnessDemoContents({ Key key }) : super(key: key);
   _FitnessDemoContentsState createState() => new _FitnessDemoContentsState();
 }
@@ -510,7 +510,7 @@ class _JumpingJackPart extends Sprite {
   }
 }
 
-class _Fireworks extends StatefulComponent {
+class _Fireworks extends StatefulWidget {
   _Fireworks({ Key key }) : super(key: key);
 
   _FireworksState createState() => new _FireworksState();

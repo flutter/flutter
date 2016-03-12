@@ -336,7 +336,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     RegExp generalPattern = new RegExp(r'^\[(error|warning|hint|lint)\] (.+) \(([^(),]+), line ([0-9]+), col ([0-9]+)\)$');
     RegExp allowedIdentifiersPattern = new RegExp(r'_?([A-Z]|_+)\b');
-    RegExp classesWithOptionalTypeArgumentsPattern = new RegExp(r'\b(GlobalKey|State|ScrollableState|Element|StatelessComponentElement|TypeMatcher)\b');
+    RegExp classesWithOptionalTypeArgumentsPattern = new RegExp(r'\b(GlobalKey|State|ScrollableState|Element|StatelessElement|TypeMatcher)\b');
     RegExp constructorTearOffsPattern = new RegExp('.+#.+// analyzer doesn\'t like constructor tear-offs');
     RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
     RegExp missingFilePattern = new RegExp('^Target of URI does not exist: \'([^\')]+)\'\$');

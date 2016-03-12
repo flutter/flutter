@@ -11,7 +11,7 @@ import 'theme.dart';
 // TODO(jackson): This class should usually render the user's
 // preferred banner image rather than a solid background
 
-class DrawerHeader extends StatelessComponent {
+class DrawerHeader extends StatelessWidget {
   const DrawerHeader({ Key key, this.child }) : super(key: key);
 
   final Widget child;

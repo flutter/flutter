@@ -10,7 +10,7 @@ import 'dialog.dart';
 import 'time_picker.dart';
 import 'flat_button.dart';
 
-class _TimePickerDialog extends StatefulComponent {
+class _TimePickerDialog extends StatefulWidget {
   _TimePickerDialog({
     Key key,
     this.initialTime

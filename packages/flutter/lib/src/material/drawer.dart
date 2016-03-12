@@ -26,7 +26,7 @@ const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 
-class Drawer extends StatelessComponent {
+class Drawer extends StatelessWidget {
   Drawer({
     Key key,
     this.elevation: 16,
@@ -47,7 +47,7 @@ class Drawer extends StatelessComponent {
   }
 }
 
-class DrawerController extends StatefulComponent {
+class DrawerController extends StatefulWidget {
   DrawerController({
     GlobalKey key,
     this.child

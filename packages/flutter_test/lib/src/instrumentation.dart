@@ -92,8 +92,8 @@ class Instrumentation {
   /// the given [runtimeType], if any. Returns null if there is no
   /// matching element.
   State findStateOfType(Type type) {
-    StatefulComponentElement element = findElement((Element element) {
-      return element is StatefulComponentElement && element.state.runtimeType == type;
+    StatefulElement element = findElement((Element element) {
+      return element is StatefulElement && element.state.runtimeType == type;
     });
     return element?.state;
   }
@@ -103,8 +103,8 @@ class Instrumentation {
   /// given configuration is not that of a stateful widget or if there
   /// is no matching element.
   State findStateByConfig(Widget config) {
-    StatefulComponentElement element = findElement((Element element) {
-      return element is StatefulComponentElement && element.state.config == config;
+    StatefulElement element = findElement((Element element) {
+      return element is StatefulElement && element.state.config == config;
     });
     return element?.state;
   }

@@ -10,7 +10,7 @@ import 'media_query.dart';
 import 'scrollable.dart';
 
 // _noFocusedScope is used by Focus to track the case where none of the Focus
-// component's subscopes (e.g. dialogs) are focused. This is distinct from the
+// widget's subscopes (e.g. dialogs) are focused. This is distinct from the
 // focused scope being null, which means that we haven't yet decided which scope
 // is focused and whichever is the first scope to ask for focus will get it.
 final GlobalKey _noFocusedScope = new GlobalKey();
@@ -91,7 +91,7 @@ class _FocusScope extends InheritedWidget {
 /// focused at each level and it hasn't focused any of its enclosed Focus
 /// widgets), then the widget this this global key actually has the focus in the
 /// entire system.
-class Focus extends StatefulComponent {
+class Focus extends StatefulWidget {
   Focus({
     GlobalKey key,
     this.child
@@ -205,7 +205,7 @@ class _FocusState extends State<Focus> {
     super.dispose();
   }
 
-  GlobalKey _focusedWidget; // when null, the first component to ask if it's focused will get the focus
+  GlobalKey _focusedWidget; // when null, the first widget to ask if it's focused will get the focus
   GlobalKey _currentlyRegisteredWidgetRemovalListenerKey;
 
   void _setFocusedWidget(GlobalKey key) {

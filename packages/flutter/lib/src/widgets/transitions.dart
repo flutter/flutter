@@ -12,22 +12,22 @@ import 'framework.dart';
 export 'package:flutter/animation.dart' show AnimationDirection;
 export 'package:flutter/rendering.dart' show RelativeRect;
 
-/// A component that rebuilds when the given animation changes value.
+/// A widget that rebuilds when the given animation changes value.
 ///
-/// AnimatedComponent is most useful for stateless animated widgets. To use
-/// AnimatedComponent, simply subclass it and implement the build function.
+/// AnimatedWidget is most useful for stateless animated widgets. To use
+/// AnimatedWidget, simply subclass it and implement the build function.
 ///
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
-abstract class AnimatedComponent extends StatefulComponent {
-  AnimatedComponent({
+abstract class AnimatedWidget extends StatefulWidget {
+  AnimatedWidget({
     Key key,
     this.animation
   }) : super(key: key) {
     assert(animation != null);
   }
 
-  /// The animation to which this component is listening.
+  /// The animation to which this widget is listening.
   final Animation<Object> animation;
 
   /// Override this function to build widgets that depend on the current value
@@ -35,7 +35,7 @@ abstract class AnimatedComponent extends StatefulComponent {
   Widget build(BuildContext context);
 
   /// Subclasses typically do not override this method.
-  _AnimatedComponentState createState() => new _AnimatedComponentState();
+  _AnimatedState createState() => new _AnimatedState();
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
@@ -43,13 +43,13 @@ abstract class AnimatedComponent extends StatefulComponent {
   }
 }
 
-class _AnimatedComponentState extends State<AnimatedComponent> {
+class _AnimatedState extends State<AnimatedWidget> {
   void initState() {
     super.initState();
     config.animation.addListener(_handleTick);
   }
 
-  void didUpdateConfig(AnimatedComponent oldConfig) {
+  void didUpdateConfig(AnimatedWidget oldConfig) {
     if (config.animation != oldConfig.animation) {
       oldConfig.animation.removeListener(_handleTick);
       config.animation.addListener(_handleTick);
@@ -73,7 +73,7 @@ class _AnimatedComponentState extends State<AnimatedComponent> {
 }
 
 /// Animates the position of a widget relative to its normal position.
-class SlideTransition extends AnimatedComponent {
+class SlideTransition extends AnimatedWidget {
   SlideTransition({
     Key key,
     Animation<FractionalOffset> position,
@@ -109,7 +109,7 @@ class SlideTransition extends AnimatedComponent {
 }
 
 /// Animates the scale of transformed widget.
-class ScaleTransition extends AnimatedComponent {
+class ScaleTransition extends AnimatedWidget {
   ScaleTransition({
     Key key,
     Animation<double> scale,
@@ -145,7 +145,7 @@ class ScaleTransition extends AnimatedComponent {
 }
 
 /// Animates the rotation of a widget.
-class RotationTransition extends AnimatedComponent {
+class RotationTransition extends AnimatedWidget {
   RotationTransition({
     Key key,
     Animation<double> turns,
@@ -172,7 +172,7 @@ class RotationTransition extends AnimatedComponent {
 }
 
 /// Animates a widget's width or height.
-class SizeTransition extends AnimatedComponent {
+class SizeTransition extends AnimatedWidget {
   SizeTransition({
     Key key,
     this.axis: Axis.vertical,
@@ -209,7 +209,7 @@ class SizeTransition extends AnimatedComponent {
 }
 
 /// Animates the opacity of a widget.
-class FadeTransition extends AnimatedComponent {
+class FadeTransition extends AnimatedWidget {
   FadeTransition({
     Key key,
     Animation<double> opacity,
@@ -248,7 +248,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// position to and end position over the lifetime of the animation.
 ///
 /// Only works if it's the child of a [Stack].
-class PositionedTransition extends AnimatedComponent {
+class PositionedTransition extends AnimatedWidget {
   PositionedTransition({
     Key key,
     Animation<RelativeRect> rect,
@@ -278,7 +278,7 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
 /// A general-purpose widget for building animations.
 ///
-/// AnimatedBuilder is useful for more complex components that wish to include
+/// AnimatedBuilder is useful for more complex widgets that wish to include
 /// an animation as part of a larger build function. To use AnimatedBuilder,
 /// simply construct the widget and pass it a builder function.
 ///
@@ -294,8 +294,8 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// performance significantly in some cases and is therefore a good practice.
 ///
 /// For simple cases without additional state, consider using
-/// [AnimatedComponent].
-class AnimatedBuilder extends AnimatedComponent {
+/// [AnimatedWidget].
+class AnimatedBuilder extends AnimatedWidget {
   AnimatedBuilder({
     Key key,
     Animation<Object> animation,

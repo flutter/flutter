@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
-class ThePositiveNumbers extends StatelessComponent {
+class ThePositiveNumbers extends StatelessWidget {
   Widget build(BuildContext context) {
     return new ScrollableLazyList(
       itemExtent: 100.0,
@@ -47,7 +47,7 @@ void main() {
       expect(tester.findText('10'), isNull);
       expect(tester.findText('100'), isNull);
 
-      StatefulComponentElement target =
+      StatefulElement target =
         tester.findElement((Element element) => element.widget is ScrollableLazyList);
       ScrollableState targetState = target.state;
       targetState.scrollTo(1000.0);

@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-class _MaterialPageTransition extends AnimatedComponent {
+class _MaterialPageTransition extends AnimatedWidget {
   _MaterialPageTransition({
     Key key,
     Animation<double> animation,

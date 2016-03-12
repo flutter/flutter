@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class SliderDemo extends StatefulComponent {
+class SliderDemo extends StatefulWidget {
   _SliderDemoState createState() => new _SliderDemoState();
 }
 

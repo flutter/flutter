@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class ToggleControlsDemo extends StatefulComponent {
+class ToggleControlsDemo extends StatefulWidget {
   _ToggleControlsDemoState createState() => new _ToggleControlsDemoState();
 }
 

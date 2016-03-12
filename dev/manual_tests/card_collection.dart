@@ -16,7 +16,7 @@ class CardModel {
   Key get key => new ObjectKey(this);
 }
 
-class CardCollection extends StatefulComponent {
+class CardCollection extends StatefulWidget {
   CardCollectionState createState() => new CardCollectionState();
 }
 

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app.dart';
 
-class GalleryDrawer extends StatelessComponent {
+class GalleryDrawer extends StatelessWidget {
   GalleryDrawer({ Key key }) : super(key: key);
 
   void _changeTheme(BuildContext context, bool value) {

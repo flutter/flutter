@@ -36,7 +36,7 @@ typedef Widget RouteBuilder(RouteArguments args);
 
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
-class WidgetsApp extends StatefulComponent {
+class WidgetsApp extends StatefulWidget {
   WidgetsApp({
     Key key,
     this.title,

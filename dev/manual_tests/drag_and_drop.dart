@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-class ExampleDragTarget extends StatefulComponent {
+class ExampleDragTarget extends StatefulWidget {
   ExampleDragTargetState createState() => new ExampleDragTargetState();
 }
 
@@ -39,7 +39,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
   }
 }
 
-class Dot extends StatefulComponent {
+class Dot extends StatefulWidget {
   Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
   final Color color;
   final double size;
@@ -66,7 +66,7 @@ class DotState extends State<Dot> {
   }
 }
 
-class ExampleDragSource extends StatelessComponent {
+class ExampleDragSource extends StatelessWidget {
   ExampleDragSource({
     Key key,
     this.color,
@@ -162,7 +162,7 @@ class DashOutlineCirclePainter extends CustomPainter {
   bool shouldRepaint(DashOutlineCirclePainter oldPainter) => false;
 }
 
-class MovableBall extends StatelessComponent {
+class MovableBall extends StatelessWidget {
   MovableBall(this.position, this.ballPosition, this.callback);
 
   final int position;
@@ -212,7 +212,7 @@ class MovableBall extends StatelessComponent {
   }
 }
 
-class DragAndDropApp extends StatefulComponent {
+class DragAndDropApp extends StatefulWidget {
   DragAndDropAppState createState() => new DragAndDropAppState();
 }
 

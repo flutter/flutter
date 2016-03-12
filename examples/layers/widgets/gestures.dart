@@ -54,7 +54,7 @@ class _GesturePainter extends CustomPainter {
   }
 }
 
-class GestureDemo extends StatefulComponent {
+class GestureDemo extends StatefulWidget {
   _GestureDemoState createState() => new _GestureDemoState();
 }
 

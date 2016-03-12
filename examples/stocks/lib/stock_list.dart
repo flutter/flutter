@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'stock_data.dart';
 import 'stock_row.dart';
 
-class StockList extends StatelessComponent {
+class StockList extends StatelessWidget {
   StockList({ Key key, this.keySalt, this.stocks, this.onOpen, this.onShow, this.onAction }) : super(key: key);
 
   final Object keySalt;

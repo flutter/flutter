@@ -17,7 +17,7 @@ void main() {
       // so if our widget is 100 pixels tall, it should fit exactly 6 times.
 
       Widget builder() {
-        return new FlipComponent(
+        return new FlipWidget(
           left: new ScrollableLazyList(
             itemBuilder: (BuildContext context, int start, int count) {
               List<Widget> result = <Widget>[];
@@ -39,19 +39,19 @@ void main() {
 
       tester.pumpWidget(builder());
 
-      StatefulComponentElement element = tester.findElement((Element element) => element.widget is FlipComponent);
-      FlipComponentState testComponent = element.state;
+      StatefulElement element = tester.findElement((Element element) => element.widget is FlipWidget);
+      FlipWidgetState testWidget = element.state;
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
 
       callbackTracker.clear();
-      testComponent.flip();
+      testWidget.flip();
       tester.pump();
 
       expect(callbackTracker, equals([]));
 
       callbackTracker.clear();
-      testComponent.flip();
+      testWidget.flip();
       tester.pump();
 
       expect(callbackTracker, equals([0, 1, 2, 3, 4, 5]));
@@ -81,7 +81,7 @@ void main() {
       };
 
       GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
-      FlipComponent testComponent = new FlipComponent(
+      FlipWidget testWidget = new FlipWidget(
         left: new ScrollableLazyList(
           key: scrollableKey,
           itemBuilder: itemBuilder,
@@ -91,7 +91,7 @@ void main() {
         right: new Text('Not Today')
       );
 
-      tester.pumpWidget(testComponent);
+      tester.pumpWidget(testWidget);
 
       expect(callbackTracker, equals([1, 2, 3, 4]));
 
@@ -100,7 +100,7 @@ void main() {
       scrollableKey.currentState.scrollTo(400.0);
       // now only 3 should fit, numbered 2-4.
 
-      tester.pumpWidget(testComponent);
+      tester.pumpWidget(testWidget);
 
       expect(callbackTracker, equals([2, 3, 4]));
 
@@ -131,7 +131,7 @@ void main() {
       };
 
       GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
-      FlipComponent testComponent = new FlipComponent(
+      FlipWidget testWidget = new FlipWidget(
         left: new ScrollableLazyList(
           key: scrollableKey,
           itemBuilder: itemBuilder,
@@ -142,7 +142,7 @@ void main() {
         right: new Text('Not Today')
       );
 
-      tester.pumpWidget(testComponent);
+      tester.pumpWidget(testWidget);
 
       expect(callbackTracker, equals([1, 2, 3, 4, 5]));
 
@@ -151,7 +151,7 @@ void main() {
       scrollableKey.currentState.scrollTo(400.0);
       // now only 4 should fit, numbered 2-5.
 
-      tester.pumpWidget(testComponent);
+      tester.pumpWidget(testWidget);
 
       expect(callbackTracker, equals([2, 3, 4, 5]));
 

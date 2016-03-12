@@ -6,12 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-class InnerComponent extends StatefulComponent {
-  InnerComponent({ Key key }) : super(key: key);
-  InnerComponentState createState() => new InnerComponentState();
+class InnerWidget extends StatefulWidget {
+  InnerWidget({ Key key }) : super(key: key);
+  InnerWidgetState createState() => new InnerWidgetState();
 }
 
-class InnerComponentState extends State<InnerComponent> {
+class InnerWidgetState extends State<InnerWidget> {
   bool _didInitState = false;
 
   void initState() {
@@ -24,10 +24,10 @@ class InnerComponentState extends State<InnerComponent> {
   }
 }
 
-class OuterContainer extends StatefulComponent {
+class OuterContainer extends StatefulWidget {
   OuterContainer({ Key key, this.child }) : super(key: key);
 
-  final InnerComponent child;
+  final InnerWidget child;
 
   OuterContainerState createState() => new OuterContainerState();
 }
@@ -44,20 +44,20 @@ void main() {
       Key innerKey = new Key('inner');
       Key outerKey = new Key('outer');
 
-      InnerComponent inner1 = new InnerComponent(key: innerKey);
-      InnerComponent inner2;
+      InnerWidget inner1 = new InnerWidget(key: innerKey);
+      InnerWidget inner2;
       OuterContainer outer1 = new OuterContainer(key: outerKey, child: inner1);
       OuterContainer outer2;
 
       tester.pumpWidget(outer1);
 
-      StatefulComponentElement innerElement = tester.findElementByKey(innerKey);
-      InnerComponentState innerElementState = innerElement.state;
+      StatefulElement innerElement = tester.findElementByKey(innerKey);
+      InnerWidgetState innerElementState = innerElement.state;
       expect(innerElementState.config, equals(inner1));
       expect(innerElementState._didInitState, isTrue);
       expect(innerElement.renderObject.attached, isTrue);
 
-      inner2 = new InnerComponent(key: innerKey);
+      inner2 = new InnerWidget(key: innerKey);
       outer2 = new OuterContainer(key: outerKey, child: inner2);
 
       tester.pumpWidget(outer2);
@@ -69,7 +69,7 @@ void main() {
       expect(innerElementState._didInitState, isTrue);
       expect(innerElement.renderObject.attached, isTrue);
 
-      StatefulComponentElement outerElement = tester.findElementByKey(outerKey);
+      StatefulElement outerElement = tester.findElementByKey(outerKey);
       expect(outerElement.state.config, equals(outer2));
       outerElement.state.setState(() {});
       tester.pump();

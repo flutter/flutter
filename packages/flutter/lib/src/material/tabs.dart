@@ -297,7 +297,7 @@ class TabLabel {
   final TabLabelIconBuilder iconBuilder;
 }
 
-class _Tab extends StatelessComponent {
+class _Tab extends StatelessWidget {
   _Tab({
     Key key,
     this.onSelected,
@@ -395,7 +395,7 @@ abstract class TabBarSelectionAnimationListener {
   void handleSelectionDeactivate();
 }
 
-class TabBarSelection<T> extends StatefulComponent {
+class TabBarSelection<T> extends StatefulWidget {
   TabBarSelection({
     Key key,
     this.value,
@@ -969,7 +969,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   }
 }
 
-class TabPageSelector<T> extends StatelessComponent {
+class TabPageSelector<T> extends StatelessWidget {
   const TabPageSelector({ Key key }) : super(key: key);
 
   Widget _buildTabIndicator(TabBarSelectionState<T> selection, T tab, Animation<double> animation, ColorTween selectedColor, ColorTween previousColor) {

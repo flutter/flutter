@@ -888,7 +888,7 @@ class Viewport extends SingleChildRenderObjectWidget {
 // CONTAINER
 
 /// A convenience widget that combines common painting, positioning, and sizing widgets.
-class Container extends StatelessComponent {
+class Container extends StatelessWidget {
   Container({
     Key key,
     this.child,
@@ -1090,8 +1090,8 @@ class IndexedStack extends StackRenderObjectWidgetBase {
 /// Controls where a child of a [Stack] is positioned.
 ///
 /// This widget must be a descendant of a [Stack], and the path from this widget
-/// to its enclosing [Stack] must contain only components (e.g., not other
-/// kinds of widgets, like [RenderObjectWidget]s).
+/// to its enclosing [Stack] must contain only [StatelessWidget]s or
+/// [StatefulWidget]s (not other kinds of widgets, like [RenderObjectWidget]s).
 class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
   Positioned({
     Key key,
@@ -1426,8 +1426,8 @@ class Column extends Flex {
 ///
 /// This widget must be a descendant of a [Flex], [Row], or [Column], and the
 /// path from this widget to its enclosing [Flex], [Row], or [Column] must
-/// contain only components (e.g., not other kinds of widgets, like
-/// [RenderObjectWidget]s).
+/// contain only [StatelessWidget]s or [StatefulWidget]s (not other kinds of
+/// widgets, like [RenderObjectWidget]s).
 class Flexible extends ParentDataWidget<Flex> {
   Flexible({ Key key, this.flex: 1, Widget child })
     : super(key: key, child: child);
@@ -1507,7 +1507,7 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// By default, the text will be styled using the closest enclosing
 /// [DefaultTextStyle].
-class Text extends StatelessComponent {
+class Text extends StatelessWidget {
   Text(this.data, { Key key, this.style }) : super(key: key) {
     assert(data != null);
   }
@@ -1666,7 +1666,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// This widget is rarely used directly. Instead, consider using [AssetImage] or
 /// [NetworkImage], depending on whather you wish to display an image from the
 /// assert bundle or from the network.
-class RawImageResource extends StatefulComponent {
+class RawImageResource extends StatefulWidget {
   RawImageResource({
     Key key,
     this.image,
@@ -1785,7 +1785,7 @@ class _RawImageResourceState extends State<RawImageResource> {
 }
 
 /// Displays an image loaded from the network.
-class NetworkImage extends StatelessComponent {
+class NetworkImage extends StatelessWidget {
   NetworkImage({
     Key key,
     this.src,
@@ -1910,7 +1910,7 @@ class DefaultAssetBundle extends InheritedWidget {
 /// This widget lets you customize how images are loaded by supplying your own
 /// image provider. Internally, [NetworkImage] uses an [ImageProvider] that
 /// loads the image from the network.
-class AsyncImage extends StatelessComponent {
+class AsyncImage extends StatelessWidget {
   AsyncImage({
     Key key,
     this.provider,
@@ -2000,7 +2000,7 @@ class AsyncImage extends StatelessComponent {
 ///
 /// By default, asset image will load the image from the closest enclosing
 /// [DefaultAssetBundle].
-class AssetImage extends StatelessComponent {
+class AssetImage extends StatelessWidget {
   // Don't add asserts here unless absolutely necessary, since it will
   // require removing the const constructor, which is an API change.
   const AssetImage({
@@ -2293,7 +2293,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 
 /// Causes all the semantics of the subtree rooted at this node to be
 /// merged into one node in the semantics tree. For example, if you
-/// have a component with a Text node next to a checkbox widget, this
+/// have a widget with a Text node next to a checkbox widget, this
 /// could be used to merge the label from the Text node with the
 /// "checked" semantic state of the checkbox into a single node that
 /// had both the label and the checked state. Otherwise, the label
@@ -2353,7 +2353,7 @@ class MetaData extends SingleChildRenderObjectWidget {
   }
 }
 
-class KeyedSubtree extends StatelessComponent {
+class KeyedSubtree extends StatelessWidget {
   KeyedSubtree({ Key key, this.child })
     : super(key: key);
 
@@ -2363,7 +2363,7 @@ class KeyedSubtree extends StatelessComponent {
 }
 
 /// A platonic widget that invokes a closure to obtain its child widget.
-class Builder extends StatelessComponent {
+class Builder extends StatelessWidget {
   Builder({ Key key, this.builder }) : super(key: key);
 
   /// Called to obtain the child widget.
@@ -2377,7 +2377,7 @@ class Builder extends StatelessComponent {
 }
 
 typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState);
-class StatefulBuilder extends StatefulComponent {
+class StatefulBuilder extends StatefulWidget {
   StatefulBuilder({ Key key, this.builder }) : super(key: key);
   final StatefulWidgetBuilder builder;
   _StatefulBuilderState createState() => new _StatefulBuilderState();

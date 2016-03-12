@@ -39,7 +39,7 @@ class ButtonTheme extends InheritedWidget {
 ///
 /// MaterialButtons whose [onPressed] handler is null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for onPressed.
-abstract class MaterialButton extends StatefulComponent {
+abstract class MaterialButton extends StatefulWidget {
   MaterialButton({
     Key key,
     this.child,

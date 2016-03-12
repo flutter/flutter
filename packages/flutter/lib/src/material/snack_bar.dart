@@ -37,7 +37,7 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 ///
 /// See also:
 ///  * https://www.google.com/design/spec/components/snackbars-toasts.html
-class SnackBarAction extends StatelessComponent {
+class SnackBarAction extends StatelessWidget {
   SnackBarAction({Key key, this.label, this.onPressed }) : super(key: key) {
     assert(label != null);
     assert(onPressed != null);
@@ -70,7 +70,7 @@ class SnackBarAction extends StatelessComponent {
 ///  * [Scaffold.of] and [ScaffoldState.showSnackBar]
 ///  * [SnackBarAction]
 ///  * https://www.google.com/design/spec/components/snackbars-toasts.html
-class SnackBar extends StatelessComponent {
+class SnackBar extends StatelessWidget {
   SnackBar({
     Key key,
     this.content,

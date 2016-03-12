@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
-class FirstComponent extends StatelessComponent {
+class FirstWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () {
@@ -22,11 +22,11 @@ class FirstComponent extends StatelessComponent {
   }
 }
 
-class SecondComponent extends StatefulComponent {
-  SecondComponentState createState() => new SecondComponentState();
+class SecondWidget extends StatefulWidget {
+  SecondWidgetState createState() => new SecondWidgetState();
 }
 
-class SecondComponentState extends State<SecondComponent> {
+class SecondWidgetState extends State<SecondWidget> {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
@@ -42,8 +42,8 @@ class SecondComponentState extends State<SecondComponent> {
 
 typedef void ExceptionCallback(dynamic exception);
 
-class ThirdComponent extends StatelessComponent {
-  ThirdComponent({ this.targetKey, this.onException });
+class ThirdWidget extends StatelessWidget {
+  ThirdWidget({ this.targetKey, this.onException });
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -64,11 +64,11 @@ class ThirdComponent extends StatelessComponent {
 }
 
 void main() {
-  test('Can navigator navigate to and from a stateful component', () {
+  test('Can navigator navigate to and from a stateful widget', () {
     testWidgets((WidgetTester tester) {
       final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-        '/': (RouteArguments args) => new FirstComponent(),
-        '/second': (RouteArguments args) => new SecondComponent(),
+        '/': (RouteArguments args) => new FirstWidget(),
+        '/second': (RouteArguments args) => new SecondWidget(),
       };
 
       tester.pumpWidget(new MaterialApp(routes: routes));
@@ -101,7 +101,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       Key targetKey = new Key('foo');
       dynamic exception;
-      Widget widget = new ThirdComponent(
+      Widget widget = new ThirdWidget(
         targetKey: targetKey,
         onException: (dynamic e) {
           exception = e;

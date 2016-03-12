@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class TabsDemo extends StatelessComponent {
+class TabsDemo extends StatelessWidget {
   final List<IconData> icons = <IconData>[
     Icons.event,
     Icons.home,

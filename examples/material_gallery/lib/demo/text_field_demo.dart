@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class TextFieldDemo extends StatefulComponent {
+class TextFieldDemo extends StatefulWidget {
   TextFieldDemo({ Key key }) : super(key: key);
 
   TextFieldDemoState createState() => new TextFieldDemoState();

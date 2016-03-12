@@ -11,7 +11,7 @@ import 'material.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-class ToolBar extends StatelessComponent {
+class ToolBar extends StatelessWidget {
   ToolBar({
     Key key,
     this.left,

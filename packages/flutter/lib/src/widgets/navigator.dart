@@ -135,7 +135,7 @@ class NavigatorObserver {
 /// the navigator visually transition from one page to another by the widgets
 /// around in the overlay. Similarly, the navigator can be used to show a dialog
 /// by positioning the dialog widget above the current page.
-class Navigator extends StatefulComponent {
+class Navigator extends StatefulWidget {
   Navigator({
     Key key,
     this.initialRoute,

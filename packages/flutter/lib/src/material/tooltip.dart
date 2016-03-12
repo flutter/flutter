@@ -18,7 +18,7 @@ const EdgeInsets _kDefaultTooltipScreenEdgeMargin = const EdgeInsets.all(10.0);
 const Duration _kDefaultTooltipFadeDuration = const Duration(milliseconds: 200);
 const Duration _kDefaultTooltipShowDuration = const Duration(seconds: 2);
 
-class Tooltip extends StatefulComponent {
+class Tooltip extends StatefulWidget {
   Tooltip({
     Key key,
     this.message,
@@ -234,7 +234,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   }
 }
 
-class _TooltipOverlay extends StatelessComponent {
+class _TooltipOverlay extends StatelessWidget {
   _TooltipOverlay({
     Key key,
     this.message,

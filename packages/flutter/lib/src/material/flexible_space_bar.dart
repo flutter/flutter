@@ -11,7 +11,7 @@ import 'constants.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-class FlexibleSpaceBar extends StatefulComponent {
+class FlexibleSpaceBar extends StatefulWidget {
   FlexibleSpaceBar({ Key key, this.title, this.image }) : super(key: key);
 
   final Widget title;

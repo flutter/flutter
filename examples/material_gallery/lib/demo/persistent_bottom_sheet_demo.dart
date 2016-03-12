@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-class PersistentBottomSheetDemo extends StatelessComponent {
+class PersistentBottomSheetDemo extends StatelessWidget {
 
   final TextStyle textStyle = new TextStyle(
     color: Colors.indigo[400],

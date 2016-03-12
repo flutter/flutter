@@ -28,7 +28,7 @@ final List<Photo> photos = new List<Photo>.generate(16, (int index) {
   return const Photo(assetName: 'packages/flutter_gallery_assets/kangaroo_valley_safari.png');
 });
 
-class GridDemoPhotoItem extends StatelessComponent {
+class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({ Key key, this.photo, this.tileStyle }) : super(key: key) {
     assert(photo != null && photo.isValid);
     assert(tileStyle != null);
@@ -128,7 +128,7 @@ class GridListDemoGridDelegate extends FixedColumnCountGridDelegate {
   }
 }
 
-class GridListDemo extends StatefulComponent {
+class GridListDemo extends StatefulWidget {
   GridListDemo({ Key key }) : super(key: key);
 
   GridListDemoState createState() => new GridListDemoState();

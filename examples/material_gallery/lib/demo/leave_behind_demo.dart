@@ -25,7 +25,7 @@ class LeaveBehindItem {
   final String body;
 }
 
-class LeaveBehindDemo extends StatefulComponent {
+class LeaveBehindDemo extends StatefulWidget {
   LeaveBehindDemo({ Key key }) : super(key: key);
 
   LeaveBehindDemoState createState() => new LeaveBehindDemoState();

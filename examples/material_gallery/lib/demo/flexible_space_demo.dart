@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class _ContactCategory extends StatelessComponent {
+class _ContactCategory extends StatelessWidget {
   _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
 
   final IconData icon;
@@ -33,7 +33,7 @@ class _ContactCategory extends StatelessComponent {
   }
 }
 
-class _ContactItem extends StatelessComponent {
+class _ContactItem extends StatelessWidget {
   _ContactItem({ Key key, this.icon, this.lines }) : super(key: key) {
     assert(lines.length > 1);
   }
@@ -67,7 +67,7 @@ class _ContactItem extends StatelessComponent {
   }
 }
 
-class FlexibleSpaceDemo extends StatefulComponent {
+class FlexibleSpaceDemo extends StatefulWidget {
   FlexibleSpaceDemoState createState() => new FlexibleSpaceDemoState();
 }
 
