@@ -296,12 +296,12 @@ class _SemanticsDebuggerListener implements mojom.SemanticsListener {
     }
     entry.updateMessage();
     if (node.children != null) {
-      Set oldChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children ?? const <_SemanticsDebuggerEntry>[]);
+      Set<_SemanticsDebuggerEntry> oldChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children ?? const <_SemanticsDebuggerEntry>[]);
       entry.children?.clear();
       entry.children ??= new List<_SemanticsDebuggerEntry>();
       for (mojom.SemanticsNode child in node.children)
         entry.children.add(_updateNode(child));
-      Set newChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children);
+      Set<_SemanticsDebuggerEntry> newChildren = new Set<_SemanticsDebuggerEntry>.from(entry.children);
       Set<_SemanticsDebuggerEntry> removedChildren = oldChildren.difference(newChildren);
       for (_SemanticsDebuggerEntry oldChild in removedChildren)
         nodes.remove(oldChild.id);

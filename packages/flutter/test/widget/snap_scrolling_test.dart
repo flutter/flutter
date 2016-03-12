@@ -47,7 +47,7 @@ void set scrollOffset(double value) {
   scrollableState.scrollTo(value);
 }
 
-Future fling(double velocity) {
+Future<Null> fling(double velocity) {
   return scrollableState.fling(velocity);
 }
 

@@ -31,7 +31,7 @@ final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
   ),
 };
 
-class ThreeRoute extends MaterialPageRoute {
+class ThreeRoute extends MaterialPageRoute<Null> {
   ThreeRoute() : super(builder: (BuildContext context) {
     return new Material(
       child: new Block(children: <Widget>[

@@ -17,11 +17,12 @@ void main() {
       tester.async.flushMicrotasks(); // see https://github.com/flutter/flutter/issues/1865
       tester.pump();
 
-      Element<Text> tab = tester.findText('MARKET');
+      Element tab = tester.findText('MARKET');
       expect(tab, isNotNull);
       tester.setLocale("es", "US");
       tester.pump();
-      expect(tab.widget.data, equals("MERCADO"));
+      Text text = tab.widget;
+      expect(text.data, equals("MERCADO"));
 
       // TODO(abarth): We're leaking an animation. We should track down the leak
       // and plug it rather than waiting for the animation to end here.

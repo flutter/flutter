@@ -68,11 +68,13 @@ class _ChildKey {
   String toString() => "_ChildKey(type: $type, key: $key)";
 }
 
-class _MixedViewportElement extends RenderObjectElement<MixedViewport> {
+class _MixedViewportElement extends RenderObjectElement {
   _MixedViewportElement(MixedViewport widget) : super(widget) {
     if (widget.onInvalidatorAvailable != null)
       widget.onInvalidatorAvailable(invalidate);
   }
+
+  MixedViewport get widget => super.widget;
 
   /// _childExtents contains the extents of each child from the top of the list
   /// up to the last one we've ever created.

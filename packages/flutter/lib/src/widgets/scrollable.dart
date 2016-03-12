@@ -112,13 +112,13 @@ abstract class Scrollable extends StatefulComponent {
   }
 
   /// Scrolls the closest enclosing scrollable to make the given context visible.
-  static Future ensureVisible(BuildContext context, { Duration duration, Curve curve: Curves.ease }) {
+  static Future<Null> ensureVisible(BuildContext context, { Duration duration, Curve curve: Curves.ease }) {
     assert(context.findRenderObject() is RenderBox);
     // TODO(abarth): This function doesn't handle nested scrollable widgets.
 
     ScrollableState scrollable = Scrollable.of(context);
     if (scrollable == null)
-      return new Future.value();
+      return new Future<Null>.value();
 
     RenderBox targetBox = context.findRenderObject();
     assert(targetBox.attached);
@@ -162,7 +162,7 @@ abstract class Scrollable extends StatefulComponent {
     } else if (targetMax > scrollableMax) {
       scrollOffsetDelta = targetMax - scrollableMax;
     } else {
-      return new Future.value();
+      return new Future<Null>.value();
     }
 
     ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
@@ -172,13 +172,14 @@ abstract class Scrollable extends StatefulComponent {
     if (scrollOffset != scrollable.scrollOffset)
       return scrollable.scrollTo(scrollOffset, duration: duration, curve: curve);
 
-    return new Future.value();
+    return new Future<Null>.value();
   }
 
   ScrollableState createState();
 }
 
-/// Contains the state for common scrolling widgets.
+/// Contains the state for common scrolling widgets that scroll only
+/// along one axis.
 ///
 /// Widgets that subclass [Scrollable] typically use state objects
 /// that subclass [ScrollableState].
@@ -299,14 +300,14 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// Scroll behaviors control where the boundaries of the scrollable are placed
   /// and how the scrolling physics should behave near those boundaries and
   /// after the user stops directly manipulating the scrollable.
-  ScrollBehavior get scrollBehavior {
+  ScrollBehavior<double, double> get scrollBehavior {
     return _scrollBehavior ??= createScrollBehavior();
   }
-  ScrollBehavior _scrollBehavior;
+  ScrollBehavior<double, double> _scrollBehavior;
 
   /// Subclasses should override this function to create the [ScrollBehavior]
   /// they desire.
-  ScrollBehavior createScrollBehavior();
+  ScrollBehavior<double, double> createScrollBehavior();
 
   bool _scrollOffsetIsInBounds(double scrollOffset) {
     if (scrollBehavior is! ExtentScrollBehavior)
@@ -336,7 +337,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   ///
   /// If a non-null [duration] is provided, the widget will animate to the new
   /// scroll offset over the given duration with the given curve.
-  Future scrollBy(double scrollDelta, { Duration duration, Curve curve: Curves.ease }) {
+  Future<Null> scrollBy(double scrollDelta, { Duration duration, Curve curve: Curves.ease }) {
     double newScrollOffset = scrollBehavior.applyCurve(_scrollOffset, scrollDelta);
     return scrollTo(newScrollOffset, duration: duration, curve: curve);
   }
@@ -349,21 +350,21 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// This function does not accept a zero duration. To jump-scroll to
   /// the new offset, do not provide a duration, rather than providing
   /// a zero duration.
-  Future scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
+  Future<Null> scrollTo(double newScrollOffset, { Duration duration, Curve curve: Curves.ease }) {
     if (newScrollOffset == _scrollOffset)
-      return new Future.value();
+      return new Future<Null>.value();
 
     if (duration == null) {
       _controller.stop();
       _setScrollOffset(newScrollOffset);
-      return new Future.value();
+      return new Future<Null>.value();
     }
 
     assert(duration > Duration.ZERO);
     return _animateTo(newScrollOffset, duration, curve);
   }
 
-  Future _animateTo(double newScrollOffset, Duration duration, Curve curve) {
+  Future<Null> _animateTo(double newScrollOffset, Duration duration, Curve curve) {
     _controller.stop();
     _controller.value = scrollOffset;
     _startScroll();
@@ -375,10 +376,10 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// Calling this function starts a physics-based animation of the scroll
   /// offset with the given value as the initial velocity. The physics
   /// simulation used is determined by the scroll behavior.
-  Future fling(double scrollVelocity) {
+  Future<Null> fling(double scrollVelocity) {
     if (scrollVelocity != 0.0 || !_controller.isAnimating)
       return _startToEndAnimation(scrollVelocity);
-    return new Future.value();
+    return new Future<Null>.value();
   }
 
   /// Animate the scroll offset to a value with a local minima of energy.
@@ -386,15 +387,15 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// Calling this function starts a physics-based animation of the scroll
   /// offset either to a snap point or to within the scrolling bounds. The
   /// physics simulation used is determined by the scroll behavior.
-  Future settleScrollOffset() {
+      Future<Null> settleScrollOffset() {
     return _startToEndAnimation(0.0);
   }
 
-  Future _startToEndAnimation(double scrollVelocity) {
+  Future<Null> _startToEndAnimation(double scrollVelocity) {
     _controller.stop();
     Simulation simulation = _createSnapSimulation(scrollVelocity) ?? _createFlingSimulation(scrollVelocity);
     if (simulation == null)
-      return new Future.value();
+      return new Future<Null>.value();
     _startScroll();
     return _controller.animateWith(simulation).then(_endScroll);
   }
@@ -493,7 +494,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     scrollBy(pixelOffsetToScrollOffset(delta));
   }
 
-  Future _handleDragEnd(Velocity velocity) {
+  Future<Null> _handleDragEnd(Velocity velocity) {
     double scrollVelocity = pixelDeltaToScrollOffset(velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
     // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
     return fling(scrollVelocity.clamp(-kMaxFlingVelocity, kMaxFlingVelocity)).then(_endScroll);
@@ -631,7 +632,7 @@ class ScrollableViewport extends Scrollable {
 }
 
 class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
-  ScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollWhenScrollableBehavior();
   OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
 
   double _viewportSize = 0.0;
@@ -745,13 +746,13 @@ abstract class ScrollableListPainter extends Painter {
   /// Called when a scroll starts. Subclasses may override this method to
   /// initialize some state or to play an animation. The returned Future should
   /// complete when the computation triggered by this method has finished.
-  Future scrollStarted() => new Future.value();
+  Future<Null> scrollStarted() => new Future<Null>.value();
 
 
   /// Similar to scrollStarted(). Called when a scroll ends. For fling scrolls
   /// "ended" means that the scroll animation either stopped of its own accord
   /// or was canceled  by the user.
-  Future scrollEnded() => new Future.value();
+  Future<Null> scrollEnded() => new Future<Null>.value();
 }
 
 /// A general scrollable list for a large number of children that might not all
@@ -793,7 +794,7 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
     );
   }
 
-  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
+  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
   Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {

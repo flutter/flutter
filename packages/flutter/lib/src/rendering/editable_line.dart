@@ -11,9 +11,9 @@ import 'box.dart';
 import 'object.dart';
 import 'viewport.dart';
 
-const _kCaretGap = 1.0; // pixels
-const _kCaretHeightOffset = 2.0; // pixels
-const _kCaretWidth = 1.0; // pixels
+const double _kCaretGap = 1.0; // pixels
+const double _kCaretHeightOffset = 2.0; // pixels
+const double _kCaretWidth = 1.0; // pixels
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 

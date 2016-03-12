@@ -54,7 +54,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
   Color get barrierColor => null;
-  bool canTransitionFrom(TransitionRoute nextRoute) => false;
+  bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => false;
 
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     Widget result = builder(context);

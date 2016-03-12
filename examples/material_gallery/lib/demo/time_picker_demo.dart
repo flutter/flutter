@@ -13,7 +13,7 @@ class TimePickerDemo extends StatefulComponent {
 class _TimePickerDemoState extends State<TimePickerDemo> {
   TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 28);
 
-  Future _handleSelectTime() async {
+  Future<Null> _handleSelectTime() async {
     TimeOfDay picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime

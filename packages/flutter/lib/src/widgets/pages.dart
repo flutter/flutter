@@ -17,8 +17,8 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   }) : super(completer: completer, settings: settings);
   bool get opaque => true;
   bool get barrierDismissable => false;
-  bool canTransitionTo(TransitionRoute nextRoute) => nextRoute is PageRoute;
-  bool canTransitionFrom(TransitionRoute nextRoute) => nextRoute is PageRoute;
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute<dynamic>;
+  bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute<dynamic>;
 
   AnimationController createAnimationController() {
     AnimationController controller = super.createAnimationController();

@@ -25,10 +25,11 @@ void main() {
       tester.pump();
       expect(tester.findText('BottomSheet'), isNull);
 
-      showModalBottomSheet(
+      showModalBottomSheet/*<Null>*/(
         context: context,
         builder: (BuildContext context) => new Text('BottomSheet')
-      ).then((_) {
+      ).then((Null result) {
+        expect(result, isNull);
         showBottomSheetThenCalled = true;
       });
 
@@ -45,7 +46,7 @@ void main() {
       tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
       expect(tester.findText('BottomSheet'), isNull);
 
-      showModalBottomSheet(context: context, builder: (BuildContext context) => new Text('BottomSheet'));
+      showModalBottomSheet/*<Null>*/(context: context, builder: (BuildContext context) => new Text('BottomSheet'));
       tester.pump(); // bottom sheet show animation starts
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester.findText('BottomSheet'), isNotNull);
