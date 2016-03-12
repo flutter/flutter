@@ -833,7 +833,7 @@ class Viewport extends OneChildRenderObjectWidget {
     Key key,
     this.paintOffset: Offset.zero,
     this.mainAxis: Axis.vertical,
-    this.scrollAnchor: ViewportAnchor.start,
+    this.anchor: ViewportAnchor.start,
     this.overlayPainter,
     this.onPaintOffsetUpdateNeeded,
     Widget child
@@ -854,7 +854,7 @@ class Viewport extends OneChildRenderObjectWidget {
   /// that direction (e.g., the child can be as tall as it wants).
   final Axis mainAxis;
 
-  final ViewportAnchor scrollAnchor;
+  final ViewportAnchor anchor;
 
   /// Paints an overlay over the viewport.
   ///
@@ -867,7 +867,7 @@ class Viewport extends OneChildRenderObjectWidget {
     return new RenderViewport(
       paintOffset: paintOffset,
       mainAxis: mainAxis,
-      scrollAnchor: scrollAnchor,
+      anchor: anchor,
       onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded,
       overlayPainter: overlayPainter
     );
@@ -877,7 +877,7 @@ class Viewport extends OneChildRenderObjectWidget {
     // Order dependency: RenderViewport validates scrollOffset based on mainAxis.
     renderObject
       ..mainAxis = mainAxis
-      ..scrollAnchor = scrollAnchor
+      ..anchor = anchor
       ..paintOffset = paintOffset
       ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded
       ..overlayPainter = overlayPainter;

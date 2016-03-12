@@ -51,7 +51,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
   /// Returns the pixel offset for a scroll offset, accounting for the scroll
   /// anchor.
   double scrollOffsetToPixelOffset(double scrollOffset) {
-    switch (renderObject.scrollAnchor) {
+    switch (renderObject.anchor) {
       case ViewportAnchor.start:
         return -scrollOffset;
       case ViewportAnchor.end:

@@ -85,11 +85,11 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   RenderViewportBase(
     Offset paintOffset,
     Axis mainAxis,
-    ViewportAnchor scrollAnchor,
+    ViewportAnchor anchor,
     Painter overlayPainter
   ) : _paintOffset = paintOffset,
       _mainAxis = mainAxis,
-      _scrollAnchor = scrollAnchor,
+      _anchor = anchor,
       _overlayPainter = overlayPainter {
     assert(paintOffset != null);
     assert(mainAxis != null);
@@ -139,13 +139,13 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   /// The end of the viewport from which the paint offset is computed.
   ///
   /// See [ViewportAnchor] for more detail.
-  ViewportAnchor get scrollAnchor => _scrollAnchor;
-  ViewportAnchor _scrollAnchor;
-  void set scrollAnchor(ViewportAnchor value) {
+  ViewportAnchor get anchor => _anchor;
+  ViewportAnchor _anchor;
+  void set anchor(ViewportAnchor value) {
     assert(value != null);
-    if (value == _scrollAnchor)
+    if (value == _anchor)
       return;
-    _scrollAnchor = value;
+    _anchor = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -186,7 +186,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
     int dyInDevicePixels = (_paintOffset.dy * devicePixelRatio).round();
     return _dimensions.getAbsolutePaintOffset(
       paintOffset: new Offset(dxInDevicePixels / devicePixelRatio, dyInDevicePixels / devicePixelRatio),
-      anchor: _scrollAnchor
+      anchor: _anchor
     );
   }
 
@@ -199,7 +199,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
     super.debugFillDescription(description);
     description.add('paintOffset: $paintOffset');
     description.add('mainAxis: $mainAxis');
-    description.add('scrollAnchor: $scrollAnchor');
+    description.add('anchor: $anchor');
     if (overlayPainter != null)
       description.add('overlay painter: $overlayPainter');
   }
@@ -219,10 +219,10 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     RenderBox child,
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
-    ViewportAnchor scrollAnchor: ViewportAnchor.start,
+    ViewportAnchor anchor: ViewportAnchor.start,
     Painter overlayPainter,
     this.onPaintOffsetUpdateNeeded
-  }) : super(paintOffset, mainAxis, scrollAnchor, overlayPainter) {
+  }) : super(paintOffset, mainAxis, anchor, overlayPainter) {
     this.child = child;
   }
 
@@ -339,11 +339,11 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     LayoutCallback callback,
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
-    ViewportAnchor scrollAnchor: ViewportAnchor.start,
+    ViewportAnchor anchor: ViewportAnchor.start,
     Painter overlayPainter
   }) : _virtualChildCount = virtualChildCount,
        _callback = callback,
-       super(paintOffset, mainAxis, scrollAnchor, overlayPainter);
+       super(paintOffset, mainAxis, anchor, overlayPainter);
 
   int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;

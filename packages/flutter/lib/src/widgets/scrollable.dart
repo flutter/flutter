@@ -658,7 +658,7 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     return new Viewport(
       paintOffset: scrollOffsetToPixelDelta(scrollOffset),
       mainAxis: config.scrollDirection,
-      scrollAnchor: config.scrollAnchor,
+      anchor: config.scrollAnchor,
       onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded,
       child: config.child
     );

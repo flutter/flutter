@@ -79,7 +79,7 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
       onExtentsChanged: _handleExtentsChanged,
       scrollOffset: scrollOffset,
       mainAxis: config.scrollDirection,
-      scrollAnchor: config.scrollAnchor,
+      anchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
       itemsWrap: config.itemsWrap,
       padding: config.padding,
@@ -94,7 +94,7 @@ class _VirtualListViewport extends VirtualViewport {
     this.onExtentsChanged,
     this.scrollOffset,
     this.mainAxis,
-    this.scrollAnchor,
+    this.anchor,
     this.itemExtent,
     this.itemsWrap,
     this.padding,
@@ -107,7 +107,7 @@ class _VirtualListViewport extends VirtualViewport {
   final ExtentsChangedCallback onExtentsChanged;
   final double scrollOffset;
   final Axis mainAxis;
-  final ViewportAnchor scrollAnchor;
+  final ViewportAnchor anchor;
   final double itemExtent;
   final bool itemsWrap;
   final EdgeDims padding;
@@ -116,7 +116,7 @@ class _VirtualListViewport extends VirtualViewport {
   double get _leadingPadding {
     switch (mainAxis) {
       case Axis.vertical:
-        switch (scrollAnchor) {
+        switch (anchor) {
           case ViewportAnchor.start:
             return padding.top;
           case ViewportAnchor.end:
@@ -124,7 +124,7 @@ class _VirtualListViewport extends VirtualViewport {
         }
         break;
       case Axis.horizontal:
-        switch (scrollAnchor) {
+        switch (anchor) {
           case ViewportAnchor.start:
             return padding.left;
           case ViewportAnchor.end:
@@ -167,7 +167,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
   void updateRenderObject(_VirtualListViewport oldWidget) {
     renderObject
       ..mainAxis = widget.mainAxis
-      ..scrollAnchor = widget.scrollAnchor
+      ..anchor = widget.anchor
       ..itemExtent = widget.itemExtent
       ..padding = widget.padding
       ..overlayPainter = widget.overlayPainter;
@@ -217,7 +217,7 @@ class _VirtualListViewportElement extends VirtualViewportElement {
       _startOffsetBase = startItem * itemExtent;
       _startOffsetLimit = limitItem * itemExtent - containerExtent;
 
-      if (widget.scrollAnchor == ViewportAnchor.end)
+      if (widget.anchor == ViewportAnchor.end)
         _materializedChildBase = (length - _materializedChildBase - _materializedChildCount) % length;
     }
 
@@ -247,7 +247,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,
     Axis mainAxis: Axis.vertical,
-    ViewportAnchor scrollAnchor: ViewportAnchor.start,
+    ViewportAnchor anchor: ViewportAnchor.start,
     double itemExtent,
     bool itemsWrap: false,
     EdgeDims padding,
@@ -257,7 +257,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     onExtentsChanged,
     scrollOffset,
     mainAxis,
-    scrollAnchor,
+    anchor,
     itemExtent,
     itemsWrap,
     padding,
@@ -342,7 +342,7 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
       onExtentsChanged: _handleExtentsChanged,
       scrollOffset: scrollOffset,
       mainAxis: config.scrollDirection,
-      scrollAnchor: config.scrollAnchor,
+      anchor: config.scrollAnchor,
       itemExtent: config.itemExtent,
       itemCount: config.itemCount,
       itemBuilder: config.itemBuilder,
@@ -357,7 +357,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     ExtentsChangedCallback onExtentsChanged,
     double scrollOffset: 0.0,
     Axis mainAxis: Axis.vertical,
-    ViewportAnchor scrollAnchor: ViewportAnchor.start,
+    ViewportAnchor anchor: ViewportAnchor.start,
     double itemExtent,
     EdgeDims padding,
     Painter overlayPainter,
@@ -367,7 +367,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     onExtentsChanged,
     scrollOffset,
     mainAxis,
-    scrollAnchor,
+    anchor,
     itemExtent,
     false, // Don't support wrapping yet.
     padding,

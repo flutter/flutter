@@ -166,7 +166,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
     return new PageViewport(
       itemsWrap: config.itemsWrap,
       mainAxis: config.scrollDirection,
-      scrollAnchor: config.scrollAnchor,
+      anchor: config.scrollAnchor,
       startOffset: scrollOffset,
       overlayPainter: config.scrollableListPainter,
       children: config.children
@@ -227,7 +227,7 @@ class PageViewport extends VirtualViewportFromIterable {
   PageViewport({
     this.startOffset: 0.0,
     this.mainAxis: Axis.vertical,
-    this.scrollAnchor: ViewportAnchor.start,
+    this.anchor: ViewportAnchor.start,
     this.itemsWrap: false,
     this.overlayPainter,
     this.children
@@ -237,7 +237,7 @@ class PageViewport extends VirtualViewportFromIterable {
 
   final double startOffset;
   final Axis mainAxis;
-  final ViewportAnchor scrollAnchor;
+  final ViewportAnchor anchor;
   final bool itemsWrap;
   final Painter overlayPainter;
   final Iterable<Widget> children;
@@ -326,7 +326,7 @@ class _PageViewportElement extends VirtualViewportElement {
       _materializedChildCount = limitItem - startItem;
       _startOffsetBase = startItem.toDouble();
       _startOffsetLimit = (limitItem - 1).toDouble();
-      if (widget.scrollAnchor == ViewportAnchor.end)
+      if (widget.anchor == ViewportAnchor.end)
         _materializedChildBase = (length - _materializedChildBase - _materializedChildCount) % length;
     }
 
