@@ -103,7 +103,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
           ),
           new Padding(
             padding: new EdgeDims.only(top: 20.0),
-            child: new Text("JUMPING JACKS", style: Theme.of(context).text.title)
+            child: new Text("JUMPING JACKS", style: Theme.of(context).textTheme.title)
           ),
           new Padding(
             padding: new EdgeDims.only(top: 20.0, bottom: 20.0),

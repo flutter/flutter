@@ -43,7 +43,7 @@ class DrawerItem extends StatelessComponent {
   }
 
   TextStyle _getTextStyle(ThemeData themeData) {
-    TextStyle result = themeData.text.body2;
+    TextStyle result = themeData.textTheme.body2;
     if (selected) {
       switch (themeData.brightness) {
         case ThemeBrightness.light:

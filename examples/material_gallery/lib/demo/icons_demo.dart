@@ -63,7 +63,7 @@ class IconsDemoState extends State<IconsDemo> {
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.text.subhead.copyWith(color: theme.text.caption.color);
+    final TextStyle textStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     return new Scaffold(
       toolBar: new ToolBar(

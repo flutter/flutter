@@ -45,9 +45,9 @@ class TravelDestinationItem extends StatelessComponent {
 
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    TextStyle titleStyle = theme.text.headline.copyWith(color: Colors.white);
-    TextStyle descriptionStyle = theme.text.subhead;
-    TextStyle buttonStyle = theme.text.button.copyWith(color: theme.primaryColor);
+    TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
+    TextStyle descriptionStyle = theme.textTheme.subhead;
+    TextStyle buttonStyle = theme.textTheme.button.copyWith(color: theme.primaryColor);
 
     return new Card(
       child: new SizedBox(

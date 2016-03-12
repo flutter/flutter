@@ -85,7 +85,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     return new Scaffold(
       toolBar: new ToolBar(center: new Text('Progress Indicators')),
       body: new DefaultTextStyle(
-        style: Theme.of(context).text.title,
+        style: Theme.of(context).textTheme.title,
         child: new GestureDetector(
           onTap: _handleTap,
           behavior: HitTestBehavior.opaque,

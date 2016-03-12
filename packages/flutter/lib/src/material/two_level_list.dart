@@ -110,7 +110,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
             onTap: _handleOnTap,
             left: config.left,
             center: new DefaultTextStyle(
-              style: Theme.of(context).text.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
+              style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
               child: config.center
             ),
             right: new RotationTransition(
@@ -136,7 +136,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
     final ThemeData theme = Theme.of(context);
     _borderColor.end = theme.dividerColor;
     _headerColor
-      ..begin = theme.text.subhead.color
+      ..begin = theme.textTheme.subhead.color
       ..end = theme.accentColor;
     _iconColor
       ..begin = theme.unselectedColor

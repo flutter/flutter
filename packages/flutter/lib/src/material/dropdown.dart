@@ -212,7 +212,7 @@ class DropDownMenuItem<T> extends StatelessComponent {
       height: _kMenuItemHeight,
       padding: const EdgeDims.only(left: 8.0, right: 8.0, top: 6.0),
       child: new DefaultTextStyle(
-        style: Theme.of(context).text.subhead,
+        style: Theme.of(context).textTheme.subhead,
         child: new Baseline(
           baseline: _kMenuItemHeight - _kBaselineOffsetFromBottom,
           child: child

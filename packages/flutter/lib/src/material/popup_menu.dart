@@ -75,7 +75,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    TextStyle style = theme.text.subhead;
+    TextStyle style = theme.textTheme.subhead;
     if (!config.enabled)
       style = style.copyWith(color: theme.disabledColor);
 

@@ -38,7 +38,7 @@ class DrawerHeader extends StatelessComponent {
           new Container(
             padding: const EdgeDims.symmetric(horizontal: 16.0),
             child: new DefaultTextStyle(
-              style: Theme.of(context).text.body2,
+              style: Theme.of(context).textTheme.body2,
               child: child
             )
           )

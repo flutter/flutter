@@ -183,7 +183,7 @@ class DayPicker extends StatelessComponent {
 
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    TextStyle headerStyle = themeData.text.caption.copyWith(fontWeight: FontWeight.w700);
+    TextStyle headerStyle = themeData.textTheme.caption.copyWith(fontWeight: FontWeight.w700);
     TextStyle monthStyle = headerStyle.copyWith(fontSize: 14.0, height: 24.0 / 14.0);
     TextStyle dayStyle = headerStyle.copyWith(fontWeight: FontWeight.w500);
     DateFormat dateFormat = new DateFormat();
@@ -376,7 +376,7 @@ class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
 
   List<Widget> buildItems(BuildContext context, int start, int count) {
-    TextStyle style = Theme.of(context).text.body1.copyWith(color: Colors.black54);
+    TextStyle style = Theme.of(context).textTheme.body1.copyWith(color: Colors.black54);
     List<Widget> items = new List<Widget>();
     for (int i = start; i < start + count; i++) {
       int year = config.firstDate.year + i;

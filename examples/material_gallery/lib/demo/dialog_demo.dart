@@ -76,7 +76,7 @@ class DialogDemoState extends State<DialogDemo> {
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.text.subhead.copyWith(color: theme.text.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     return new Scaffold(
       key: scaffoldKey,

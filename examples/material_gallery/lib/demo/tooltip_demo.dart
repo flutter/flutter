@@ -21,10 +21,10 @@ class TooltipDemo extends StatelessComponent {
           return new Column(
             alignItems: FlexAlignItems.stretch,
             children: <Widget>[
-              new Text(_introText, style: theme.text.subhead),
+              new Text(_introText, style: theme.textTheme.subhead),
               new Row(
                 children: <Widget>[
-                  new Text('Long press the ', style: theme.text.subhead),
+                  new Text('Long press the ', style: theme.textTheme.subhead),
                   new Tooltip(
                     message: 'call icon',
                     child: new Icon(
@@ -33,7 +33,7 @@ class TooltipDemo extends StatelessComponent {
                       color: theme.primaryColor
                     )
                   ),
-                  new Text(' icon', style: theme.text.subhead)
+                  new Text(' icon', style: theme.textTheme.subhead)
                 ]
               ),
               new Center(

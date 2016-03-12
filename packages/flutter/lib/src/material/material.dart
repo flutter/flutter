@@ -130,7 +130,7 @@ class _MaterialState extends State<Material> {
     Widget contents = config.child;
     if (contents != null) {
       contents = new DefaultTextStyle(
-        style: config.textStyle ?? Theme.of(context).text.body1,
+        style: config.textStyle ?? Theme.of(context).textTheme.body1,
         child: contents
       );
     }

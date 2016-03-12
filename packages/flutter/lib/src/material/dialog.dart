@@ -65,7 +65,7 @@ class Dialog extends StatelessComponent {
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
-          style: Theme.of(context).text.title,
+          style: Theme.of(context).textTheme.title,
           child: title
         )
       ));
@@ -78,7 +78,7 @@ class Dialog extends StatelessComponent {
       dialogBody.add(new Padding(
         padding: padding,
         child: new DefaultTextStyle(
-          style: Theme.of(context).text.subhead,
+          style: Theme.of(context).textTheme.subhead,
           child: content
         )
       ));

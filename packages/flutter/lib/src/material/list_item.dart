@@ -69,7 +69,7 @@ class ListItem extends StatelessComponent {
 
   TextStyle primaryTextStyle(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle style = theme.text.subhead;
+    final TextStyle style = theme.textTheme.subhead;
     if (!enabled) {
       final Color color = theme.disabledColor;
       return dense ? style.copyWith(fontSize: 13.0, color: color) : style.copyWith(color: color);
@@ -79,8 +79,8 @@ class ListItem extends StatelessComponent {
 
   TextStyle secondaryTextStyle(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color color = theme.text.caption.color;
-    final TextStyle style = theme.text.body1;
+    final Color color = theme.textTheme.caption.color;
+    final TextStyle style = theme.textTheme.body1;
     return dense ? style.copyWith(color: color, fontSize: 12.0) : style.copyWith(color: color);
   }
 

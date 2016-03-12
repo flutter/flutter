@@ -18,7 +18,7 @@ class _ContactCategory extends StatelessComponent {
         border: new Border(bottom: new BorderSide(color: Theme.of(context).dividerColor))
       ),
       child: new DefaultTextStyle(
-        style: Theme.of(context).text.subhead,
+        style: Theme.of(context).textTheme.subhead,
         child: new Row(
           children: <Widget>[
             new SizedBox(
@@ -43,7 +43,7 @@ class _ContactItem extends StatelessComponent {
 
   Widget build(BuildContext context) {
     List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
-    columnChildren.add(new Text(lines.last, style: Theme.of(context).text.caption));
+    columnChildren.add(new Text(lines.last, style: Theme.of(context).textTheme.caption));
 
     List<Widget> rowChildren = <Widget>[
       new Column(

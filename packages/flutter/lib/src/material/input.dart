@@ -84,7 +84,7 @@ class _InputState extends State<Input> {
     BuildContext focusContext = focusKey.currentContext;
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
 
-    TextStyle textStyle = config.style ?? themeData.text.subhead;
+    TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
     Color activeColor = themeData.hintColor;
     if (focused) {
       switch (themeData.brightness) {
@@ -104,10 +104,10 @@ class _InputState extends State<Input> {
 
     if (config.labelText != null) {
       TextStyle labelStyle = hasInlineLabel ?
-        themeData.text.subhead.copyWith(color: themeData.hintColor) :
-        themeData.text.caption.copyWith(color: activeColor);
+        themeData.textTheme.subhead.copyWith(color: themeData.hintColor) :
+        themeData.textTheme.caption.copyWith(color: activeColor);
 
-      double topPaddingIncrement = themeData.text.caption.fontSize + (config.isDense ? 4.0 : 8.0);
+      double topPaddingIncrement = themeData.textTheme.caption.fontSize + (config.isDense ? 4.0 : 8.0);
       double top = topPadding;
       if (hasInlineLabel)
         top += topPaddingIncrement + textStyle.fontSize - labelStyle.fontSize;
@@ -124,7 +124,7 @@ class _InputState extends State<Input> {
     }
 
     if (config.hintText != null && config.value.text.isEmpty && !hasInlineLabel) {
-      TextStyle hintStyle = themeData.text.subhead.copyWith(color: themeData.hintColor);
+      TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         top: topPadding + textStyle.fontSize - hintStyle.fontSize,
@@ -174,7 +174,7 @@ class _InputState extends State<Input> {
     ));
 
     if (config.errorText != null && !config.isDense) {
-      TextStyle errorStyle = themeData.text.caption.copyWith(color: themeData.errorColor);
+      TextStyle errorStyle = themeData.textTheme.caption.copyWith(color: themeData.errorColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         bottom: 0.0,

@@ -26,7 +26,7 @@ class _BarGraphic extends StatelessComponent {
       padding: const EdgeDims.symmetric(horizontal: 16.0),
       decoration: new BoxDecoration(backgroundColor: color),
       child: new DefaultTextStyle(
-        style: Theme.of(context).text.body1.copyWith(color: Colors.white),
+        style: Theme.of(context).textTheme.body1.copyWith(color: Colors.white),
         child: new Row(
           justifyContent: FlexJustifyContent.spaceBetween,
           children: <Widget>[
@@ -120,7 +120,7 @@ class ScrollingTechniquesDemo extends StatelessComponent {
           children: <Widget>[
             new Padding(
               padding: const EdgeDims.symmetric(horizontal: 16.0, vertical: 32.0),
-              child: new Text(_introText, style: Theme.of(context).text.caption)
+              child: new Text(_introText, style: Theme.of(context).textTheme.caption)
             ),
             new _TechniqueItem(
               builder: (BuildContext context) => new FlexibleSpaceDemo(),

@@ -90,7 +90,7 @@ class ExampleDragSource extends StatelessComponent {
       size *= kHeavyMultiplier;
 
     Widget contents = new DefaultTextStyle(
-      style: Theme.of(context).text.body1.copyWith(textAlign: TextAlign.center),
+      style: Theme.of(context).textTheme.body1.copyWith(textAlign: TextAlign.center),
       child: new Dot(
         color: color,
         size: size,
@@ -174,7 +174,7 @@ class MovableBall extends StatelessComponent {
 
   Widget build(BuildContext context) {
     Widget ball = new DefaultTextStyle(
-      style: Theme.of(context).text.body1.copyWith(
+      style: Theme.of(context).textTheme.body1.copyWith(
         textAlign: TextAlign.center,
         color: Colors.white
       ),

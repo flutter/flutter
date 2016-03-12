@@ -31,7 +31,7 @@ class DateTimeItem extends StatelessComponent {
     final ThemeData theme = Theme.of(context);
 
     return new DefaultTextStyle(
-      style: theme.text.subhead,
+      style: theme.textTheme.subhead,
       child: new Row(
         children: <Widget>[
           new Flexible(
@@ -109,7 +109,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     }
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.text.subhead.copyWith(color: theme.text.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     showDialog(
       context: context,
@@ -149,7 +149,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         center: new Text('New Event'),
         right: <Widget> [
           new FlatButton(
-            child: new Text('SAVE', style: theme.text.body1.copyWith(color: Colors.white)),
+            child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             }
@@ -170,7 +170,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 ),
                 child: new Align(
                   alignment: const FractionalOffset(0.0, 1.0),
-                  child: new Text('Event name', style: theme.text.display2)
+                  child: new Text('Event name', style: theme.textTheme.display2)
                 )
               ),
               new Container(
@@ -180,14 +180,14 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 ),
                 child: new Align(
                   alignment: const FractionalOffset(0.0, 1.0),
-                  child: new Text('Location', style: theme.text.title.copyWith(color: Colors.black54))
+                  child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
                 )
               ),
               new Column(
                 alignItems: FlexAlignItems.stretch,
                 justifyContent: FlexJustifyContent.end,
                 children: <Widget>[
-                  new Text('From', style: theme.text.caption),
+                  new Text('From', style: theme.textTheme.caption),
                   new DateTimeItem(
                     dateTime: fromDateTime,
                     onChanged: (DateTime value) {
@@ -203,7 +203,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 alignItems: FlexAlignItems.stretch,
                 justifyContent: FlexJustifyContent.end,
                 children: <Widget>[
-                  new Text('To', style: theme.text.caption),
+                  new Text('To', style: theme.textTheme.caption),
                   new DateTimeItem(
                     dateTime: toDateTime,
                     onChanged: (DateTime value) {

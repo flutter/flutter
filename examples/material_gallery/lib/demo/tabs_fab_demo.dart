@@ -60,7 +60,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
         ),
         child: new Padding(
           padding: const EdgeDims.all(32.0),
-          child: new Text(_explanatoryText, style: Theme.of(context).text.subhead)
+          child: new Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
         )
       );
     });

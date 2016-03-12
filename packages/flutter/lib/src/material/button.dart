@@ -123,7 +123,7 @@ abstract class MaterialButtonState<T extends MaterialButton> extends State<T> {
         )
       )
     );
-    TextStyle style = Theme.of(context).text.button.copyWith(color: getTextColor(context));
+    TextStyle style = Theme.of(context).textTheme.button.copyWith(color: getTextColor(context));
     int elevation = this.elevation;
     Color color = getColor(context);
     if (elevation > 0 || color != null) {

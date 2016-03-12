@@ -177,7 +177,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   Widget buildTabView(_ButtonDemo demo) {
     return new Builder(
       builder: (BuildContext context) {
-        final TextStyle textStyle = Theme.of(context).text.caption.copyWith(fontSize: 16.0);
+        final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0);
         return new Column(
           alignItems: FlexAlignItems.stretch,
           children: <Widget>[

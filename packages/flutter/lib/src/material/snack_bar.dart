@@ -126,7 +126,7 @@ class SnackBar extends StatelessComponent {
                   brightness: ThemeBrightness.dark,
                   accentColor: theme.accentColor,
                   accentColorBrightness: theme.accentColorBrightness,
-                  text: Typography.white
+                  textTheme: Typography.white
                 ),
                 child: new FadeTransition(
                   opacity: fadeAnimation,

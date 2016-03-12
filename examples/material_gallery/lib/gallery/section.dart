@@ -66,7 +66,7 @@ class GallerySection extends StatelessComponent {
       brightness: Theme.of(context).brightness,
       primarySwatch: colors
     );
-    final TextStyle titleTextStyle = theme.text.title.copyWith(
+    final TextStyle titleTextStyle = theme.textTheme.title.copyWith(
       color: Colors.white
     );
     return new Flexible(

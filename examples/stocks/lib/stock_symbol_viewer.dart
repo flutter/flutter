@@ -19,7 +19,7 @@ class StockSymbolView extends StatelessComponent {
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
 
-    TextStyle headings = Theme.of(context).text.body2;
+    TextStyle headings = Theme.of(context).textTheme.body2;
     return new Container(
       padding: new EdgeDims.all(20.0),
       child: new Column(
@@ -28,7 +28,7 @@ class StockSymbolView extends StatelessComponent {
             children: <Widget>[
               new Text(
                 '${stock.symbol}',
-                style: Theme.of(context).text.display2
+                style: Theme.of(context).textTheme.display2
               ),
               new Hero(
                 key: new ObjectKey(stock),

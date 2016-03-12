@@ -132,7 +132,7 @@ class _TooltipState extends State<Tooltip> {
       RenderBox box = context.findRenderObject();
       Point target = box.localToGlobal(box.size.center(Point.origin));
       _entry = new OverlayEntry(builder: (BuildContext context) {
-        TextStyle textStyle = (config.style ?? Theme.of(context).text.body1).copyWith(color: config.textColor ?? Colors.white);
+        TextStyle textStyle = (config.style ?? Theme.of(context).textTheme.body1).copyWith(color: config.textColor ?? Colors.white);
         return new _TooltipOverlay(
           message: config.message,
           backgroundColor: config.backgroundColor ?? Colors.grey[700],
