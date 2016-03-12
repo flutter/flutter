@@ -549,12 +549,9 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts {
     final List<ForwardedPort> ports = <ForwardedPort>[];
 
-    String stdout = runCheckedSync(
-      <String>[
-        androidSdk.adbPath,
-        'forward',
-        '--list'
-      ]);
+    String stdout = runCheckedSync(device.adbCommandForDevice(
+      <String>['forward', '--list']
+    ));
 
     List<String> lines = LineSplitter.split(stdout).toList();
     for (String line in lines) {
@@ -586,24 +583,16 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
       hostPort = await findAvailablePort();
     }
 
-    runCheckedSync(
-      <String>[
-        androidSdk.adbPath,
-        'forward',
-        'tcp:$hostPort',
-        'tcp:$devicePort',
-      ]);
+    runCheckedSync(device.adbCommandForDevice(
+      <String>['forward', 'tcp:$hostPort', 'tcp:$devicePort']
+    ));
 
     return hostPort;
   }
 
   Future unforward(ForwardedPort forwardedPort) async {
-    runCheckedSync(
-      <String>[
-        androidSdk.adbPath,
-        'forward',
-        '--remove',
-        'tcp:${forwardedPort.hostPort}'
-      ]);
+    runCheckedSync(device.adbCommandForDevice(
+      <String>['forward', '--remove', 'tcp:${forwardedPort.hostPort}']
+    ));
   }
 }
