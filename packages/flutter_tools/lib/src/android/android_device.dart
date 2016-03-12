@@ -52,9 +52,9 @@ class AndroidDevice extends Device {
 
   bool get isLocalEmulator {
     if (_isLocalEmulator == null) {
-      // sample values: x86, armeabi-v7a
+      // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       String value = runCheckedSync(adbCommandForDevice(['shell', 'getprop', 'ro.product.cpu.abi']));
-      _isLocalEmulator = value == 'x86';
+      _isLocalEmulator = value.startsWith('x86');
     }
 
     return _isLocalEmulator;
