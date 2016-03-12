@@ -9,10 +9,10 @@ import 'package:test/test.dart';
 import 'gesture_tester.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {
-  void acceptGesture(Object key) {
+  void acceptGesture(int key) {
     accepted = true;
   }
-  void rejectGesture(Object key) {
+  void rejectGesture(int key) {
     rejected = true;
   }
   bool accepted = false;

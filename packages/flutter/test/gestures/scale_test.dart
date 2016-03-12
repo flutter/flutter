@@ -12,7 +12,7 @@ void main() {
   setUp(ensureGesturer);
 
   test('Should recognize scale gestures', () {
-    GestureArena gestureArena = Gesturer.instance.gestureArena;
+    GestureArenaManager gestureArena = Gesturer.instance.gestureArena;
     PointerRouter pointerRouter = Gesturer.instance.pointerRouter;
     ScaleGestureRecognizer scale = new ScaleGestureRecognizer();
     TapGestureRecognizer tap = new TapGestureRecognizer();

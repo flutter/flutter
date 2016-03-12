@@ -48,7 +48,7 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
 
   /// The gesture arenas used for disambiguating the meaning of sequences of
   /// pointer events.
-  final GestureArena gestureArena = new GestureArena();
+  final GestureArenaManager gestureArena = new GestureArenaManager();
 
   /// State for all pointers which are currently down.
   ///
