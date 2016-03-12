@@ -416,8 +416,8 @@ class TabBarSelection<T> extends StatefulComponent {
 
   TabBarSelectionState<T> createState() => new TabBarSelectionState<T>();
 
-  static TabBarSelectionState of(BuildContext context) {
-    return context.ancestorStateOfType(const TypeMatcher<TabBarSelectionState>());
+  static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
+    return context.ancestorStateOfType(new TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
   }
 }
 
@@ -449,7 +449,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     _initValueToIndex();
   }
 
-  void didUpdateConfig(TabBarSelection oldConfig) {
+  void didUpdateConfig(TabBarSelection<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (values != oldConfig.values)
       _initValueToIndex();
@@ -564,12 +564,12 @@ class TabBar<T> extends Scrollable {
   final Map<T, TabLabel> labels;
   final bool isScrollable;
 
-  _TabBarState createState() => new _TabBarState();
+  _TabBarState<T> createState() => new _TabBarState<T>();
 }
 
 class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelectionAnimationListener {
 
-  TabBarSelectionState _selection;
+  TabBarSelectionState<T> _selection;
   bool _valueIsChanging = false;
 
   void _initSelection(TabBarSelectionState<T> selection) {
@@ -584,7 +584,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     _initSelection(TabBarSelection.of(context));
   }
 
-  void didUpdateConfig(TabBar oldConfig) {
+  void didUpdateConfig(TabBar<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (!config.isScrollable)
       scrollTo(0.0);
@@ -666,7 +666,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     return new Rect.fromLTRB(r.left, r.bottom, r.right, r.bottom + _kTabIndicatorHeight);
   }
 
-  ScrollBehavior createScrollBehavior() => new _TabsScrollBehavior();
+  ScrollBehavior<double, double> createScrollBehavior() => new _TabsScrollBehavior();
   _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   double _centeredTabScrollOffset(int tabIndex) {
@@ -795,7 +795,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 }
 
-class TabBarView extends PageableList {
+class TabBarView<T> extends PageableList {
   TabBarView({
     Key key,
     List<Widget> children
@@ -808,12 +808,12 @@ class TabBarView extends PageableList {
     assert(children.length > 1);
   }
 
-  _TabBarViewState createState() => new _TabBarViewState();
+  _TabBarViewState<T> createState() => new _TabBarViewState<T>();
 }
 
-class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSelectionAnimationListener {
+class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements TabBarSelectionAnimationListener {
 
-  TabBarSelectionState _selection;
+  TabBarSelectionState<T> _selection;
   List<Widget> _items;
 
   int get _tabCount => config.children.length;
@@ -825,7 +825,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     return _boundedBehavior;
   }
 
-  void _initSelection(TabBarSelectionState selection) {
+  void _initSelection(TabBarSelectionState<T> selection) {
     _selection = selection;
     if (_selection != null) {
       _selection.registerAnimationListener(this);
@@ -838,7 +838,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     _initSelection(TabBarSelection.of(context));
   }
 
-  void didUpdateConfig(TabBarView oldConfig) {
+  void didUpdateConfig(TabBarView<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (_selection != null && config.children != oldConfig.children)
       _updateItemsForSelectedIndex(_selection.index);
@@ -931,15 +931,15 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
       controller.value = scrollOffset / 2.0;
   }
 
-  Future fling(double scrollVelocity) {
+  Future<Null> fling(double scrollVelocity) {
     if (_selection == null || _selection.valueIsChanging)
-      return new Future.value();
+      return new Future<Null>.value();
 
     if (scrollVelocity.abs() > _kMinFlingVelocity) {
       final int selectionDelta = scrollVelocity.sign.truncate();
       final int targetIndex = (_selection.index + selectionDelta).clamp(0, _tabCount - 1);
       _selection.value = _selection.values[targetIndex];
-      return new Future.value();
+      return new Future<Null>.value();
     }
 
     final int selectionIndex = _selection.index;
@@ -947,16 +947,16 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
     if (selectionIndex > 0 && settleIndex != 1) {
       final int targetIndex = (selectionIndex + (settleIndex == 2 ? 1 : -1)).clamp(0, _tabCount - 1);
       _selection.value = _selection.values[targetIndex];
-      return new Future.value();
+      return new Future<Null>.value();
     } else if (selectionIndex == 0 && settleIndex == 1) {
       _selection.value = _selection.values[1];
-      return new Future.value();
+      return new Future<Null>.value();
     }
     return settleScrollOffset();
   }
 
   Widget buildContent(BuildContext context) {
-    TabBarSelectionState newSelection = TabBarSelection.of(context);
+    TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
     if (_selection != newSelection)
       _initSelection(newSelection);
     return new PageViewport(
@@ -972,7 +972,7 @@ class _TabBarViewState extends PageableListState<TabBarView> implements TabBarSe
 class TabPageSelector<T> extends StatelessComponent {
   const TabPageSelector({ Key key }) : super(key: key);
 
-  Widget _buildTabIndicator(TabBarSelectionState<T> selection, T tab, Animation animation, ColorTween selectedColor, ColorTween previousColor) {
+  Widget _buildTabIndicator(TabBarSelectionState<T> selection, T tab, Animation<double> animation, ColorTween selectedColor, ColorTween previousColor) {
     Color background;
     if (selection.valueIsChanging) {
       // The selection's animation is animating from previousValue to value.
@@ -998,7 +998,7 @@ class TabPageSelector<T> extends StatelessComponent {
   }
 
   Widget build(BuildContext context) {
-    final TabBarSelectionState selection = TabBarSelection.of(context);
+    final TabBarSelectionState<T> selection = TabBarSelection.of(context);
     final Color color = Theme.of(context).accentColor;
     final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
     final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);

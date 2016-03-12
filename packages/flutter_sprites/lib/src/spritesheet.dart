@@ -19,12 +19,12 @@ class SpriteSheet {
     assert(jsonDefinition != null);
 
     JsonDecoder decoder = new JsonDecoder();
-    Map file = decoder.convert(jsonDefinition);
+    Map<dynamic, dynamic> file = decoder.convert(jsonDefinition);
     assert(file != null);
 
-    List frames = file["frames"];
+    List<dynamic> frames = file["frames"];
 
-    for (Map frameInfo in frames) {
+    for (Map<dynamic, dynamic> frameInfo in frames) {
       String fileName = frameInfo["filename"];
       Rect frame = _readJsonRect(frameInfo["frame"]);
       bool rotated = frameInfo["rotated"];
@@ -33,13 +33,13 @@ class SpriteSheet {
       Size sourceSize = _readJsonSize(frameInfo["sourceSize"]);
       Point pivot = _readJsonPoint(frameInfo["pivot"]);
 
-      var texture = new Texture._fromSpriteFrame(_image, fileName, sourceSize, rotated, trimmed, frame,
+      Texture texture = new Texture._fromSpriteFrame(_image, fileName, sourceSize, rotated, trimmed, frame,
         spriteSourceSize, pivot);
       _textures[fileName] = texture;
     }
   }
 
-  Rect _readJsonRect(Map data) {
+  Rect _readJsonRect(Map<dynamic, dynamic> data) {
     num x = data["x"];
     num y = data["y"];
     num w = data["w"];
@@ -48,14 +48,14 @@ class SpriteSheet {
     return new Rect.fromLTRB(x.toDouble(), y.toDouble(), (x + w).toDouble(), (y + h).toDouble());
   }
 
-  Size _readJsonSize(Map data) {
+  Size _readJsonSize(Map<dynamic, dynamic> data) {
     num w = data["w"];
     num h = data["h"];
 
     return new Size(w.toDouble(), h.toDouble());
   }
 
-  Point _readJsonPoint(Map data) {
+  Point _readJsonPoint(Map<dynamic, dynamic> data) {
     num x = data["x"];
     num y = data["y"];
 

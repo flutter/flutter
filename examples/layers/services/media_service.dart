@@ -39,7 +39,7 @@ class PianoKey {
     player.ptr.pause();
   }
 
-  Future load(MediaServiceProxy mediaService) async {
+  Future<Null> load(MediaServiceProxy mediaService) async {
     try {
       mediaService.ptr.createPlayer(player);
       UrlResponse response = await fetchUrl(soundUrl);
@@ -61,11 +61,11 @@ class PianoApp extends StatelessComponent {
     new PianoKey(Colors.purple[500], iLoveYou),
   ];
 
-  Future loadSounds() async {
+  Future<Null> loadSounds() async {
     MediaServiceProxy mediaService = new MediaServiceProxy.unbound();
     try {
       shell.connectToService("mojo:media_service", mediaService);
-      List<Future<MediaPlayerPrepareResponseParams>> pending = <Future<MediaPlayerPrepareResponseParams>>[];
+      List<Future<Null>> pending = <Future<Null>>[];
       for (PianoKey key in keys)
         pending.add(key.load(mediaService));
       await Future.wait(pending);
@@ -93,8 +93,8 @@ class PianoApp extends StatelessComponent {
 }
 
 Widget statusBox(Widget child) {
-  const mediumGray = const Color(0xff555555);
-  const darkGray = const Color(0xff222222);
+  const Color mediumGray = const Color(0xff555555);
+  const Color darkGray = const Color(0xff222222);
   return new Center(
     child: new Container(
       decoration: const BoxDecoration(
@@ -121,7 +121,7 @@ Widget splashScreen() {
   );
 }
 
-Future main() async {
+Future<Null> main() async {
   runApp(splashScreen());
 
   PianoApp app = new PianoApp();

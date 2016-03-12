@@ -80,7 +80,7 @@ abstract class DraggableBase<T> extends StatefulComponent {
 
   /// Should return a new MultiDragGestureRecognizer instance
   /// constructed with the given arguments.
-  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart);
+  MultiDragGestureRecognizer<dynamic> createRecognizer(GestureMultiDragStartCallback onStart);
 
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
@@ -107,7 +107,7 @@ class Draggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+  ImmediateMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 }
@@ -135,7 +135,7 @@ class HorizontalDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+  HorizontalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new HorizontalMultiDragGestureRecognizer()..onStart = onStart;
   }
 }
@@ -163,7 +163,7 @@ class VerticalDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+  VerticalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new VerticalMultiDragGestureRecognizer()..onStart = onStart;
   }
 }
@@ -190,7 +190,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
-  MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
+  DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Point position) {
         Drag result = onStart(position);
@@ -217,7 +217,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
     _recognizer.addPointer(event);
   }
 
-  _DragAvatar _startDrag(Point position) {
+  _DragAvatar<T> _startDrag(Point position) {
     if (config.maxSimultaneousDrags != null && _activeCount >= config.maxSimultaneousDrags)
       return null;
     Point dragStartPoint;
@@ -361,7 +361,7 @@ class _DragAvatar<T> extends Drag {
   final Offset feedbackOffset;
   final VoidCallback onDragEnd;
 
-  _DragTargetState _activeTarget;
+  _DragTargetState<T> _activeTarget;
   bool _activeTargetWillAcceptDrop = false;
   Point _position;
   Offset _lastOffset;
@@ -384,7 +384,7 @@ class _DragAvatar<T> extends Drag {
     _entry.markNeedsBuild();
     HitTestResult result = new HitTestResult();
     WidgetFlutterBinding.instance.hitTest(result, globalPosition + feedbackOffset);
-    _DragTargetState target = _getDragTarget(result.path);
+    _DragTargetState<T> target = _getDragTarget(result.path);
     if (target == _activeTarget)
       return;
     if (_activeTarget != null)
@@ -393,13 +393,13 @@ class _DragAvatar<T> extends Drag {
     _activeTargetWillAcceptDrop = _activeTarget != null && _activeTarget.didEnter(data);
   }
 
-  _DragTargetState _getDragTarget(List<HitTestEntry> path) {
+  _DragTargetState<T> _getDragTarget(List<HitTestEntry> path) {
     // Look for the RenderBox that corresponds to the hit target (the hit target
     // widget builds a RenderMetadata box for us for this purpose).
     for (HitTestEntry entry in path) {
       if (entry.target is RenderMetaData) {
         RenderMetaData renderMetaData = entry.target;
-        if (renderMetaData.metaData is _DragTargetState)
+        if (renderMetaData.metaData is _DragTargetState<T>)
           return renderMetaData.metaData;
       }
     }

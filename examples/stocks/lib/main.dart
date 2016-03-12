@@ -75,7 +75,7 @@ class StocksAppState extends State<StocksApp> {
     }
   }
 
-  Route _getRoute(RouteSettings settings) {
+  Route<Null> _getRoute(RouteSettings settings) {
     List<String> path = settings.name.split('/');
     if (path[0] != '')
       return null;
@@ -83,7 +83,7 @@ class StocksAppState extends State<StocksApp> {
       if (path.length != 3)
         return null;
       if (_stocks.containsKey(path[2])) {
-        return new MaterialPageRoute(
+        return new MaterialPageRoute<Null>(
           settings: settings,
           builder: (BuildContext context) => new StockSymbolPage(stock: _stocks[path[2]])
         );

@@ -72,7 +72,10 @@ class Instrumentation {
   /// element.
   Element findText(String text) {
     return findElement((Element element) {
-      return element.widget is Text && element.widget.data == text;
+      if (element.widget is! Text)
+        return false;
+      Text textWidget = element.widget;
+      return textWidget.data == text;
     });
   }
 

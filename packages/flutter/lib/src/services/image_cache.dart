@@ -36,8 +36,11 @@ class _UrlFetcher implements ImageProvider {
     );
   }
 
-  bool operator ==(other) {
-    return other is _UrlFetcher && _url == other._url && _scale == other._scale;
+  bool operator ==(dynamic other) {
+    if (other is! _UrlFetcher)
+      return false;
+    final _UrlFetcher typedOther = other;
+    return _url == typedOther._url && _scale == typedOther._scale;
   }
 
   int get hashCode => hashValues(_url, _scale);

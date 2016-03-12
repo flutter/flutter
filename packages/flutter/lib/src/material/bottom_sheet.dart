@@ -44,7 +44,7 @@ class BottomSheet extends StatefulComponent {
 
 class _BottomSheetState extends State<BottomSheet> {
 
-  final _childKey = new GlobalKey(debugLabel: 'BottomSheet child');
+  final GlobalKey _childKey = new GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
     final RenderBox renderBox = _childKey.currentContext.findRenderObject();
@@ -117,15 +117,15 @@ class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
   }
 }
 
-class _ModalBottomSheet extends StatefulComponent {
+class _ModalBottomSheet<T> extends StatefulComponent {
   _ModalBottomSheet({ Key key, this.route }) : super(key: key);
 
-  final _ModalBottomSheetRoute route;
+  final _ModalBottomSheetRoute<T> route;
 
-  _ModalBottomSheetState createState() => new _ModalBottomSheetState();
+  _ModalBottomSheetState<T> createState() => new _ModalBottomSheetState<T>();
 }
 
-class _ModalBottomSheetState extends State<_ModalBottomSheet> {
+class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
@@ -165,15 +165,15 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    return new _ModalBottomSheet(route: this);
+    return new _ModalBottomSheet<T>(route: this);
   }
 }
 
-Future showModalBottomSheet({ BuildContext context, WidgetBuilder builder }) {
+Future<dynamic/*=T*/> showModalBottomSheet/*<T>*/({ BuildContext context, WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);
-  final Completer completer = new Completer();
-  Navigator.push(context, new _ModalBottomSheetRoute(
+  final Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
+  Navigator.push(context, new _ModalBottomSheetRoute<dynamic/*=T*/>(
     completer: completer,
     builder: builder
   ));

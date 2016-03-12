@@ -107,11 +107,11 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
   );
 }
 
-RenderImage getRenderImage(tester, Key key) {
+RenderImage getRenderImage(WidgetTester tester, Key key) {
   return tester.findElementByKey(key).renderObject;
 }
 
-TestImage getTestImage(tester, Key key) {
+TestImage getTestImage(WidgetTester tester, Key key) {
   return getRenderImage(tester, key).image;
 }
 

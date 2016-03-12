@@ -477,7 +477,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     super.dispose();
   }
 
-  void _paintHighlight(Canvas canvas, Rect rect, paint) {
+  void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
     if (shape == BoxShape.rectangle)
       canvas.drawRect(rect, paint);
     else

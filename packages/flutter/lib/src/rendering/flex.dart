@@ -561,7 +561,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
       Paint markerPaint = new Paint()..color = const Color(0xE0FF0000);
       Paint highlightPaint = new Paint()..color = const Color(0x7FFF0000);
-      const kMarkerSize = 0.1;
+      const double kMarkerSize = 0.1;
       Rect markerRect, overflowRect;
       switch(direction) {
         case FlexDirection.horizontal:
