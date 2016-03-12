@@ -14,11 +14,19 @@ import 'theme.dart';
 import 'toggleable.dart';
 
 class Switch extends StatelessComponent {
-  Switch({ Key key, this.value, this.activeColor, this.onChanged })
-      : super(key: key);
+  Switch({
+    Key key,
+    this.value,
+    this.activeColor,
+    this.activeThumbDecoration,
+    this.inactiveThumbDecoration,
+    this.onChanged
+  }) : super(key: key);
 
   final bool value;
   final Color activeColor;
+  final Decoration activeThumbDecoration;
+  final Decoration inactiveThumbDecoration;
   final ValueChanged<bool> onChanged;
 
   Widget build(BuildContext context) {
@@ -43,6 +51,8 @@ class Switch extends StatelessComponent {
       value: value,
       activeColor: activeThumbColor,
       inactiveColor: inactiveThumbColor,
+      activeThumbDecoration: activeThumbDecoration,
+      inactiveThumbDecoration: inactiveThumbDecoration,
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       onChanged: onChanged
@@ -64,6 +74,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final bool value;
   final Color activeColor;
   final Color inactiveColor;
+  final Decoration activeThumbDecoration;
+  final Decoration inactiveThumbDecoration;
   final Color activeTrackColor;
   final Color inactiveTrackColor;
   final ValueChanged<bool> onChanged;
@@ -72,6 +84,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     value: value,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
+    activeThumbDecoration: activeThumbDecoration,
+    inactiveThumbDecoration: inactiveThumbDecoration,
     activeTrackColor: activeTrackColor,
     inactiveTrackColor: inactiveTrackColor,
     onChanged: onChanged
@@ -82,6 +96,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
+      ..activeThumbDecoration = activeThumbDecoration
+      ..inactiveThumbDecoration = inactiveThumbDecoration
       ..activeTrackColor = activeTrackColor
       ..inactiveTrackColor = inactiveTrackColor
       ..onChanged = onChanged;
@@ -100,23 +116,45 @@ class _RenderSwitch extends RenderToggleable {
     bool value,
     Color activeColor,
     Color inactiveColor,
+    Decoration activeThumbDecoration,
+    Decoration inactiveThumbDecoration,
     Color activeTrackColor,
     Color inactiveTrackColor,
     ValueChanged<bool> onChanged
-  }) : super(
-     value: value,
-     activeColor: activeColor,
-     inactiveColor: inactiveColor,
-     onChanged: onChanged,
-     minRadialReactionRadius: _kThumbRadius,
-     size: const Size(_kSwitchWidth, _kSwitchHeight)
-   ) {
-    _activeTrackColor = activeTrackColor;
-    _inactiveTrackColor = inactiveTrackColor;
+  }) : _activeThumbDecoration = activeThumbDecoration,
+       _inactiveThumbDecoration = inactiveThumbDecoration,
+       _activeTrackColor = activeTrackColor,
+       _inactiveTrackColor = inactiveTrackColor,
+       super(
+         value: value,
+         activeColor: activeColor,
+         inactiveColor: inactiveColor,
+         onChanged: onChanged,
+         minRadialReactionRadius: _kThumbRadius,
+         size: const Size(_kSwitchWidth, _kSwitchHeight)
+       ) {
     _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
+  }
+
+  Decoration get activeThumbDecoration => _activeThumbDecoration;
+  Decoration _activeThumbDecoration;
+  void set activeThumbDecoration(Decoration value) {
+    if (value == _activeThumbDecoration)
+      return;
+    _activeThumbDecoration = value;
+    markNeedsPaint();
+  }
+
+  Decoration get inactiveThumbDecoration => _inactiveThumbDecoration;
+  Decoration _inactiveThumbDecoration;
+  void set inactiveThumbDecoration(Decoration value) {
+    if (value == _inactiveThumbDecoration)
+      return;
+    _inactiveThumbDecoration = value;
+    markNeedsPaint();
   }
 
   Color get activeTrackColor => _activeTrackColor;
@@ -174,12 +212,19 @@ class _RenderSwitch extends RenderToggleable {
   Color _cachedThumbColor;
   BoxPainter _thumbPainter;
 
+  BoxDecoration _createDefaultThumbDecoration(Color color) {
+    return new BoxDecoration(
+      backgroundColor: color,
+      shape: BoxShape.circle,
+      boxShadow: elevationToShadow[1]
+    );
+  }
+
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
     final bool isActive = onChanged != null;
 
-    Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, position.value) : inactiveColor;
     Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, position.value) : inactiveTrackColor;
 
     // Paint the track
@@ -202,12 +247,15 @@ class _RenderSwitch extends RenderToggleable {
 
     paintRadialReaction(canvas, thumbOffset);
 
+    Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, position.value) : inactiveColor;
     if (_cachedThumbColor != thumbColor) {
-      _thumbPainter = new BoxDecoration(
-        backgroundColor: thumbColor,
-        shape: BoxShape.circle,
-        boxShadow: elevationToShadow[1]
-      ).createBoxPainter();
+      if (_inactiveThumbDecoration == null && _activeThumbDecoration == null) {
+        _thumbPainter = _createDefaultThumbDecoration(thumbColor).createBoxPainter();
+      } else {
+        Decoration startDecoration = _inactiveThumbDecoration ?? _createDefaultThumbDecoration(inactiveColor);
+        Decoration endDecoration = _activeThumbDecoration ?? _createDefaultThumbDecoration(isActive ? activeTrackColor : inactiveColor);
+        _thumbPainter = startDecoration.lerpTo(endDecoration, position.value).createBoxPainter();
+      }
       _cachedThumbColor = thumbColor;
     }
 
