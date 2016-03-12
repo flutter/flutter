@@ -465,8 +465,11 @@ class AnalyzeCommand extends FlutterCommand {
 
       errors.sort();
 
-      for (AnalysisError error in errors)
+      for (AnalysisError error in errors) {
         printStatus(error.toString());
+        if (error.code != null)
+          printTrace('error code: ${error.code}');
+      }
 
       // Print an analysis summary.
       String errorsMessage;
@@ -744,6 +747,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   int get severityLevel => _severityMap[severity] ?? 0;
   String get type => json['type'];
   String get message => json['message'];
+  String get code => json['code'];
 
   String get file => json['location']['file'];
   int get startLine => json['location']['startLine'];
