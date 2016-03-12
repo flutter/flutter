@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
-class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
+class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   BoxConstraints constraintsFromGetSize;
   BoxConstraints constraintsFromGetConstraintsForChild;
   Size sizeFromGetPositionForChild;
@@ -46,14 +46,14 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   }
 }
 
-Widget buildFrame(OneChildLayoutDelegate delegate) {
-  return new Center(child: new CustomOneChildLayout(delegate: delegate, child: new Container()));
+Widget buildFrame(SingleChildLayoutDelegate delegate) {
+  return new Center(child: new CustomSingleChildLayout(delegate: delegate, child: new Container()));
 }
 
 void main() {
-  test('Control test for CustomOneChildLayout', () {
+  test('Control test for CustomSingleChildLayout', () {
     testWidgets((WidgetTester tester) {
-      TestOneChildLayoutDelegate delegate = new TestOneChildLayoutDelegate();
+      TestSingleChildLayoutDelegate delegate = new TestSingleChildLayoutDelegate();
       tester.pumpWidget(buildFrame(delegate));
 
       expect(delegate.constraintsFromGetSize.minWidth, 0.0);
@@ -74,9 +74,9 @@ void main() {
     });
   });
 
-  test('Test OneChildDelegate shouldRelayout method', () {
+  test('Test SingleChildDelegate shouldRelayout method', () {
     testWidgets((WidgetTester tester) {
-      TestOneChildLayoutDelegate delegate = new TestOneChildLayoutDelegate();
+      TestSingleChildLayoutDelegate delegate = new TestSingleChildLayoutDelegate();
       tester.pumpWidget(buildFrame(delegate));
 
       // Layout happened because the delegate was set.
@@ -84,14 +84,14 @@ void main() {
       expect(delegate.shouldRelayoutCalled, isFalse);
 
       // Layout did not happen because shouldRelayout() returned false.
-      delegate = new TestOneChildLayoutDelegate();
+      delegate = new TestSingleChildLayoutDelegate();
       delegate.shouldRelayoutValue = false;
       tester.pumpWidget(buildFrame(delegate));
       expect(delegate.shouldRelayoutCalled, isTrue);
       expect(delegate.constraintsFromGetConstraintsForChild, isNull);
 
       // Layout happened because shouldRelayout() returned true.
-      delegate = new TestOneChildLayoutDelegate();
+      delegate = new TestSingleChildLayoutDelegate();
       delegate.shouldRelayoutValue = true;
       tester.pumpWidget(buildFrame(delegate));
       expect(delegate.shouldRelayoutCalled, isTrue);

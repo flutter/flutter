@@ -94,7 +94,7 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // MODAL BOTTOM SHEETS
 
-class _ModalBottomSheetLayout extends OneChildLayoutDelegate {
+class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
   _ModalBottomSheetLayout(this.progress);
 
   final double progress;
@@ -133,7 +133,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         animation: config.route.animation,
         builder: (BuildContext context, Widget child) {
           return new ClipRect(
-            child: new CustomOneChildLayout(
+            child: new CustomSingleChildLayout(
               delegate: new _ModalBottomSheetLayout(config.route.animation.value),
               child: new BottomSheet(
                 animationController: config.route.animation,

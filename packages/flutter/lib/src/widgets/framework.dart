@@ -506,12 +506,12 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 /// A superclass for RenderObjectWidgets that configure RenderObject subclasses
 /// that have a single child slot. (This superclass only provides the storage
 /// for that child, it doesn't actually provide the updating logic.)
-abstract class OneChildRenderObjectWidget extends RenderObjectWidget {
-  const OneChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
+abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
+  const SingleChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
-  OneChildRenderObjectElement createElement() => new OneChildRenderObjectElement(this);
+  SingleChildRenderObjectElement createElement() => new SingleChildRenderObjectElement(this);
 }
 
 /// A superclass for RenderObjectWidgets that configure RenderObject subclasses
@@ -1772,10 +1772,10 @@ class LeafRenderObjectElement extends RenderObjectElement {
 }
 
 /// Instantiation of RenderObjectWidgets that have up to one child
-class OneChildRenderObjectElement extends RenderObjectElement {
-  OneChildRenderObjectElement(OneChildRenderObjectWidget widget) : super(widget);
+class SingleChildRenderObjectElement extends RenderObjectElement {
+  SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
 
-  OneChildRenderObjectWidget get widget => super.widget;
+  SingleChildRenderObjectWidget get widget => super.widget;
 
   Element _child;
 
@@ -1796,7 +1796,7 @@ class OneChildRenderObjectElement extends RenderObjectElement {
     _child = updateChild(_child, widget.child, null);
   }
 
-  void update(OneChildRenderObjectWidget newWidget) {
+  void update(SingleChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _child = updateChild(_child, widget.child, null);

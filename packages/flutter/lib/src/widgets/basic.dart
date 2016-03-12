@@ -27,7 +27,7 @@ export 'package:flutter/rendering.dart' show
     HitTestBehavior,
     MaxTileWidthGridDelegate,
     MultiChildLayoutDelegate,
-    OneChildLayoutDelegate,
+    SingleChildLayoutDelegate,
     RenderObjectPainter,
     PaintingContext,
     PlainTextSpan,
@@ -56,7 +56,7 @@ export 'package:flutter/rendering.dart' show
 ///
 /// This class is relatively expensive because it requires painting the child
 /// into an intermediate buffer.
-class Opacity extends OneChildRenderObjectWidget {
+class Opacity extends SingleChildRenderObjectWidget {
   Opacity({ Key key, this.opacity, Widget child })
     : super(key: key, child: child) {
     assert(opacity >= 0.0 && opacity <= 1.0);
@@ -80,7 +80,7 @@ class Opacity extends OneChildRenderObjectWidget {
   }
 }
 
-class ShaderMask extends OneChildRenderObjectWidget {
+class ShaderMask extends SingleChildRenderObjectWidget {
   ShaderMask({
     Key key,
     this.shaderCallback,
@@ -112,7 +112,7 @@ class ShaderMask extends OneChildRenderObjectWidget {
 /// Container insets its child by the widths of the borders, this Widget does not.
 ///
 /// Commonly used with [BoxDecoration].
-class DecoratedBox extends OneChildRenderObjectWidget {
+class DecoratedBox extends SingleChildRenderObjectWidget {
   DecoratedBox({
     Key key,
     this.decoration,
@@ -153,7 +153,7 @@ class DecoratedBox extends OneChildRenderObjectWidget {
 ///
 /// Because custom paint calls its painters during paint, you cannot dirty
 /// layout or paint information during the callback.
-class CustomPaint extends OneChildRenderObjectWidget {
+class CustomPaint extends SingleChildRenderObjectWidget {
   CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
     : super(key: key, child: child);
 
@@ -184,7 +184,7 @@ class CustomPaint extends OneChildRenderObjectWidget {
 /// Clips its child using a rectangle.
 ///
 /// Prevents its child from painting outside its bounds.
-class ClipRect extends OneChildRenderObjectWidget {
+class ClipRect extends SingleChildRenderObjectWidget {
   ClipRect({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
@@ -206,7 +206,7 @@ class ClipRect extends OneChildRenderObjectWidget {
 /// Creates a rounded rectangle from its layout dimensions and the given x and
 /// y radius values and prevents its child from painting outside that rounded
 /// rectangle.
-class ClipRRect extends OneChildRenderObjectWidget {
+class ClipRRect extends SingleChildRenderObjectWidget {
   ClipRRect({ Key key, this.xRadius, this.yRadius, Widget child })
     : super(key: key, child: child);
 
@@ -235,7 +235,7 @@ class ClipRRect extends OneChildRenderObjectWidget {
 ///
 /// Inscribes an oval into its layout dimensions and prevents its child from
 /// painting outside that oval.
-class ClipOval extends OneChildRenderObjectWidget {
+class ClipOval extends SingleChildRenderObjectWidget {
   ClipOval({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
@@ -256,7 +256,7 @@ class ClipOval extends OneChildRenderObjectWidget {
 // POSITIONING AND SIZING NODES
 
 /// Applies a transformation before painting its child.
-class Transform extends OneChildRenderObjectWidget {
+class Transform extends SingleChildRenderObjectWidget {
   Transform({ Key key, this.transform, this.origin, this.alignment, this.transformHitTests: true, Widget child })
     : super(key: key, child: child) {
     assert(transform != null);
@@ -299,7 +299,7 @@ class Transform extends OneChildRenderObjectWidget {
 
 /// Applies a translation expressed as a fraction of the box's size before
 /// painting its child.
-class FractionalTranslation extends OneChildRenderObjectWidget {
+class FractionalTranslation extends SingleChildRenderObjectWidget {
   FractionalTranslation({ Key key, this.translation, this.transformHitTests: true, Widget child })
     : super(key: key, child: child) {
     assert(translation != null);
@@ -325,7 +325,7 @@ class FractionalTranslation extends OneChildRenderObjectWidget {
 /// Unlike [Transform], which applies a transform just prior to painting,
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
-class RotatedBox extends OneChildRenderObjectWidget {
+class RotatedBox extends SingleChildRenderObjectWidget {
   RotatedBox({ Key key, this.quarterTurns, Widget child })
     : super(key: key, child: child) {
     assert(quarterTurns != null);
@@ -347,7 +347,7 @@ class RotatedBox extends OneChildRenderObjectWidget {
 /// constraints by the given padding, causing the child to layout at a smaller
 /// size. Padding then sizes itself to its child's size, inflated by the
 /// padding, effectively creating empty space around the child.
-class Padding extends OneChildRenderObjectWidget {
+class Padding extends SingleChildRenderObjectWidget {
   Padding({ Key key, this.padding, Widget child })
     : super(key: key, child: child) {
     assert(padding != null);
@@ -373,7 +373,7 @@ class Padding extends OneChildRenderObjectWidget {
 /// unconstrained, then in that direction it will be sized to fit the child's
 /// dimensions. Using widthFactor and heightFactor you can force this latter
 /// behavior in all cases.
-class Align extends OneChildRenderObjectWidget {
+class Align extends SingleChildRenderObjectWidget {
   Align({
     Key key,
     this.alignment: const FractionalOffset(0.5, 0.5),
@@ -429,8 +429,8 @@ class Center extends Align {
 /// decide where to position the child. The delegate can also determine the size
 /// of the parent, but the size of the parent cannot depend on the size of the
 /// child.
-class CustomOneChildLayout extends OneChildRenderObjectWidget {
-  CustomOneChildLayout({
+class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
+  CustomSingleChildLayout({
     Key key,
     this.delegate,
     Widget child
@@ -438,11 +438,11 @@ class CustomOneChildLayout extends OneChildRenderObjectWidget {
     assert(delegate != null);
   }
 
-  final OneChildLayoutDelegate delegate;
+  final SingleChildLayoutDelegate delegate;
 
-  RenderCustomOneChildLayoutBox createRenderObject(BuildContext context) => new RenderCustomOneChildLayoutBox(delegate: delegate);
+  RenderCustomSingleChildLayoutBox createRenderObject(BuildContext context) => new RenderCustomSingleChildLayoutBox(delegate: delegate);
 
-  void updateRenderObject(BuildContext context, RenderCustomOneChildLayoutBox renderObject) {
+  void updateRenderObject(BuildContext context, RenderCustomSingleChildLayoutBox renderObject) {
     renderObject.delegate = delegate;
   }
 }
@@ -511,7 +511,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 /// Forces its child to have a specific width and/or height and sizes itself to
 /// match the size of its child.
-class SizedBox extends OneChildRenderObjectWidget {
+class SizedBox extends SingleChildRenderObjectWidget {
   SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
 
@@ -547,7 +547,7 @@ class SizedBox extends OneChildRenderObjectWidget {
 /// For example, if you wanted [child] to have a minimum height of 50.0 logical
 /// pixels, you could use `const BoxConstraints(minHeight: 50.0)`` as the
 /// [additionalConstraints].
-class ConstrainedBox extends OneChildRenderObjectWidget {
+class ConstrainedBox extends SingleChildRenderObjectWidget {
   ConstrainedBox({ Key key, this.constraints, Widget child })
     : super(key: key, child: child) {
     assert(constraints != null);
@@ -571,7 +571,7 @@ class ConstrainedBox extends OneChildRenderObjectWidget {
 /// Sizes itself to a fraction of the total available space.
 ///
 /// See [RenderFractionallySizedBox] for details.
-class FractionallySizedBox extends OneChildRenderObjectWidget {
+class FractionallySizedBox extends SingleChildRenderObjectWidget {
   FractionallySizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
 
@@ -611,7 +611,7 @@ class FractionallySizedBox extends OneChildRenderObjectWidget {
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
 /// See [RenderOverflowBox] for details.
-class OverflowBox extends OneChildRenderObjectWidget {
+class OverflowBox extends SingleChildRenderObjectWidget {
   OverflowBox({
     Key key,
     this.minWidth,
@@ -679,7 +679,7 @@ class OverflowBox extends OneChildRenderObjectWidget {
   }
 }
 
-class SizedOverflowBox extends OneChildRenderObjectWidget {
+class SizedOverflowBox extends SingleChildRenderObjectWidget {
   SizedOverflowBox({ Key key, this.size, Widget child })
     : super(key: key, child: child);
 
@@ -695,7 +695,7 @@ class SizedOverflowBox extends OneChildRenderObjectWidget {
 /// Lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
-class OffStage extends OneChildRenderObjectWidget {
+class OffStage extends SingleChildRenderObjectWidget {
   OffStage({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -728,7 +728,7 @@ class OffStage extends OneChildRenderObjectWidget {
 /// find a feasible size after consulting each constraint, the widget
 /// will eventually select a size for the child that meets the layout
 /// constraints but fails to meet the aspect ratio constraints.
-class AspectRatio extends OneChildRenderObjectWidget {
+class AspectRatio extends SingleChildRenderObjectWidget {
   AspectRatio({ Key key, this.aspectRatio, Widget child })
     : super(key: key, child: child) {
     assert(aspectRatio != null);
@@ -764,7 +764,7 @@ class AspectRatio extends OneChildRenderObjectWidget {
 /// instead size itself to a more reasonable width.
 ///
 /// This class is relatively expensive. Avoid using it where possible.
-class IntrinsicWidth extends OneChildRenderObjectWidget {
+class IntrinsicWidth extends SingleChildRenderObjectWidget {
   IntrinsicWidth({ Key key, this.stepWidth, this.stepHeight, Widget child })
     : super(key: key, child: child);
 
@@ -790,13 +790,13 @@ class IntrinsicWidth extends OneChildRenderObjectWidget {
 /// instead size itself to a more reasonable height.
 ///
 /// This class is relatively expensive. Avoid using it where possible.
-class IntrinsicHeight extends OneChildRenderObjectWidget {
+class IntrinsicHeight extends SingleChildRenderObjectWidget {
   IntrinsicHeight({ Key key, Widget child }) : super(key: key, child: child);
   RenderIntrinsicHeight createRenderObject(BuildContext context) => new RenderIntrinsicHeight();
 }
 
 /// Positions its child vertically according to the child's baseline.
-class Baseline extends OneChildRenderObjectWidget {
+class Baseline extends SingleChildRenderObjectWidget {
   Baseline({ Key key, this.baseline, this.baselineType: TextBaseline.alphabetic, Widget child })
     : super(key: key, child: child) {
     assert(baseline != null);
@@ -828,7 +828,7 @@ class Baseline extends OneChildRenderObjectWidget {
 ///
 /// Viewport is the core scrolling primitive in the system, but it can be used
 /// in other situations.
-class Viewport extends OneChildRenderObjectWidget {
+class Viewport extends SingleChildRenderObjectWidget {
   Viewport({
     Key key,
     this.paintOffset: Offset.zero,
@@ -2133,7 +2133,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 
 // EVENT HANDLING
 
-class Listener extends OneChildRenderObjectWidget {
+class Listener extends SingleChildRenderObjectWidget {
   Listener({
     Key key,
     Widget child,
@@ -2206,12 +2206,12 @@ class Listener extends OneChildRenderObjectWidget {
 /// previously. Similarly, when the child repaints but the surround tree does
 /// not, we can re-record its display list without re-recording the display list
 /// for the surround tree.
-class RepaintBoundary extends OneChildRenderObjectWidget {
+class RepaintBoundary extends SingleChildRenderObjectWidget {
   RepaintBoundary({ Key key, Widget child }) : super(key: key, child: child);
   RenderRepaintBoundary createRenderObject(BuildContext context) => new RenderRepaintBoundary();
 }
 
-class IgnorePointer extends OneChildRenderObjectWidget {
+class IgnorePointer extends SingleChildRenderObjectWidget {
   IgnorePointer({ Key key, Widget child, this.ignoring: true, this.ignoringSemantics })
     : super(key: key, child: child);
 
@@ -2237,7 +2237,7 @@ class IgnorePointer extends OneChildRenderObjectWidget {
 /// of the meaning of the widgets, so that accessibility tools, search
 /// engines, and other semantic analysis software can determine the
 /// meaning of the application.
-class Semantics extends OneChildRenderObjectWidget {
+class Semantics extends SingleChildRenderObjectWidget {
   Semantics({
     Key key,
     Widget child,
@@ -2308,7 +2308,7 @@ class Semantics extends OneChildRenderObjectWidget {
 /// multiple nodes in the merged subtree can handle semantic gestures,
 /// the first one in tree order will be the one to receive the
 /// callbacks.
-class MergeSemantics extends OneChildRenderObjectWidget {
+class MergeSemantics extends SingleChildRenderObjectWidget {
   MergeSemantics({ Key key, Widget child }) : super(key: key, child: child);
   RenderMergeSemantics createRenderObject(BuildContext context) => new RenderMergeSemantics();
 }
@@ -2319,12 +2319,12 @@ class MergeSemantics extends OneChildRenderObjectWidget {
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
-class ExcludeSemantics extends OneChildRenderObjectWidget {
+class ExcludeSemantics extends SingleChildRenderObjectWidget {
   ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
   RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics();
 }
 
-class MetaData extends OneChildRenderObjectWidget {
+class MetaData extends SingleChildRenderObjectWidget {
   MetaData({
     Key key,
     Widget child,

@@ -14,8 +14,8 @@ void main() {
     testWidgets((WidgetTester tester) {
 
       void checkTree(BoxDecoration expectedDecoration) {
-        OneChildRenderObjectElement element =
-            tester.findElement((Element element) => element is OneChildRenderObjectElement);
+        SingleChildRenderObjectElement element =
+            tester.findElement((Element element) => element is SingleChildRenderObjectElement);
         expect(element, isNotNull);
         expect(element.renderObject is RenderDecoratedBox, isTrue);
         RenderDecoratedBox renderObject = element.renderObject;

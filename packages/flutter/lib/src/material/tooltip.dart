@@ -189,7 +189,7 @@ class _TooltipState extends State<Tooltip> {
   }
 }
 
-class _TooltipPositionDelegate extends OneChildLayoutDelegate {
+class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   _TooltipPositionDelegate({
     this.target,
     this.verticalOffset,
@@ -271,7 +271,7 @@ class _TooltipOverlay extends StatelessComponent {
       right: 0.0,
       bottom: 0.0,
       child: new IgnorePointer(
-        child: new CustomOneChildLayout(
+        child: new CustomSingleChildLayout(
           delegate: new _TooltipPositionDelegate(
             target: target,
             verticalOffset: verticalOffset,

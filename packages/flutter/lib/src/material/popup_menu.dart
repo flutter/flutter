@@ -233,7 +233,7 @@ class _PopupMenu<T> extends StatelessComponent {
   }
 }
 
-class _PopupMenuRouteLayout extends OneChildLayoutDelegate {
+class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   _PopupMenuRouteLayout(this.position, this.selectedItemOffset);
 
   final ModalPosition position;
@@ -316,7 +316,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
       constraints: new BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
-      child: new CustomOneChildLayout(
+      child: new CustomSingleChildLayout(
         delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
         child: new _PopupMenu<T>(route: this)
       )

@@ -274,7 +274,7 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
   }
 }
 
-class InkFeatures extends OneChildRenderObjectWidget {
+class InkFeatures extends SingleChildRenderObjectWidget {
   InkFeatures({ Key key, this.color, Widget child }) : super(key: key, child: child);
 
   final Color color;
