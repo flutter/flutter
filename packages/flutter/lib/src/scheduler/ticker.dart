@@ -16,17 +16,17 @@ class Ticker {
 
   final TickerCallback _onTick;
 
-  Completer<Null> _completer;
+  Completer _completer;
   int _animationId;
   Duration _startTime;
 
   /// Starts calling onTick once per animation frame.
   ///
   /// The returned future resolves once the ticker stops ticking.
-  Future<Null> start() {
+  Future start() {
     assert(!isTicking);
     assert(_startTime == null);
-    _completer = new Completer<Null>();
+    _completer = new Completer();
     _scheduleTick();
     return _completer.future;
   }
@@ -48,7 +48,7 @@ class Ticker {
     // We take the _completer into a local variable so that isTicking is false
     // when we actually complete the future (isTicking uses _completer
     // to determine its state).
-    Completer<Null> localCompleter = _completer;
+    Completer localCompleter = _completer;
     _completer = null;
     assert(!isTicking);
     localCompleter.complete();

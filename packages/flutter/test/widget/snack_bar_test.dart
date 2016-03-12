@@ -144,7 +144,7 @@ void main() {
       int snackBarCount = 0;
       Key tapTarget = new Key('tap-target');
       int time;
-      ScaffoldFeatureController<SnackBar, Null> lastController;
+      ScaffoldFeatureController<SnackBar> lastController;
       tester.pumpWidget(new MaterialApp(
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) {
@@ -176,7 +176,7 @@ void main() {
       expect(tester.findText('bar2'), isNull);
       time = 1000;
       tester.tap(tester.findElementByKey(tapTarget)); // queue bar1
-      ScaffoldFeatureController<SnackBar, Null> firstController = lastController;
+      ScaffoldFeatureController<SnackBar> firstController = lastController;
       time = 2;
       tester.tap(tester.findElementByKey(tapTarget)); // queue bar2
       expect(tester.findText('bar1'), isNull);

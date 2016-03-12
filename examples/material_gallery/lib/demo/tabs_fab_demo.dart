@@ -97,7 +97,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
         toolBar: new ToolBar(
           center: new Text("FAB per Tab"),
           tabBar: new TabBar<_Page>(
-            labels: new Map<_Page, TabLabel>.fromIterable(pages, value: (_Page page) => page.tabLabel)
+            labels: new Map.fromIterable(pages, value: (_Page page) => page.tabLabel)
           )
         ),
         floatingActionButton: !selectedPage.fabDefined ? null : new FloatingActionButton(
@@ -107,7 +107,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
           child: selectedPage.fabIcon,
           onPressed: _showExplanatoryText
         ),
-        body: new TabBarView<_Page>(children: pages.map(buildTabView).toList())
+        body: new TabBarView(children: pages.map(buildTabView).toList())
       )
     );
   }

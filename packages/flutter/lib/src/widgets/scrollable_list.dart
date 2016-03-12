@@ -45,7 +45,7 @@ class ScrollableList extends Scrollable {
 }
 
 class _ScrollableListState extends ScrollableState<ScrollableList> {
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
@@ -145,10 +145,8 @@ class _VirtualListViewport extends VirtualViewport {
   _VirtualListViewportElement createElement() => new _VirtualListViewportElement(this);
 }
 
-class _VirtualListViewportElement extends VirtualViewportElement {
+class _VirtualListViewportElement extends VirtualViewportElement<_VirtualListViewport> {
   _VirtualListViewportElement(VirtualViewport widget) : super(widget);
-
-  _VirtualListViewport get widget => super.widget;
 
   RenderList get renderObject => super.renderObject;
 
@@ -308,7 +306,7 @@ class ScrollableLazyList extends Scrollable {
 }
 
 class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+  ScrollBehavior createScrollBehavior() => new OverscrollBehavior();
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {

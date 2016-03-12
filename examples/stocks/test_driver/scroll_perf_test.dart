@@ -27,13 +27,13 @@ void main() {
       // Scroll down 5 times
       for (int i = 0; i < 5; i++) {
         await driver.scroll(stockList, 0.0, -300.0, new Duration(milliseconds: 300));
-        await new Future<Null>.delayed(new Duration(milliseconds: 500));
+        await new Future.delayed(new Duration(milliseconds: 500));
       }
 
       // Scroll up 5 times
       for (int i = 0; i < 5; i++) {
         await driver.scroll(stockList, 0.0, 300.0, new Duration(milliseconds: 300));
-        await new Future<Null>.delayed(new Duration(milliseconds: 500));
+        await new Future.delayed(new Duration(milliseconds: 500));
       }
     });
   });

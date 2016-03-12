@@ -68,7 +68,7 @@ abstract class AnimatedWidgetBase extends StatefulComponent {
   /// The duration over which to animate the parameters of this container.
   final Duration duration;
 
-  AnimatedWidgetBaseState<AnimatedWidgetBase> createState();
+  AnimatedWidgetBaseState createState();
 
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
@@ -105,7 +105,7 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
       _updateCurve();
     _controller.duration = config.duration;
     if (_constructTweens()) {
-      forEachTween((Tween<dynamic> tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
+      forEachTween((Tween tween, dynamic targetValue, TweenConstructor<T> constructor) {
         _updateTween(tween, targetValue);
         return tween;
       });
@@ -131,11 +131,11 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
     setState(() { });
   }
 
-  bool _shouldAnimateTween(Tween<dynamic> tween, dynamic targetValue) {
+  bool _shouldAnimateTween(Tween tween, dynamic targetValue) {
     return targetValue != (tween.end ?? tween.begin);
   }
 
-  void _updateTween(Tween<dynamic> tween, dynamic targetValue) {
+  void _updateTween(Tween tween, dynamic targetValue) {
     if (tween == null)
       return;
     tween
@@ -145,7 +145,7 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
 
   bool _constructTweens() {
     bool shouldStartAnimation = false;
-    forEachTween((Tween<dynamic> tween, dynamic targetValue, TweenConstructor<T> constructor) {
+    forEachTween((Tween tween, dynamic targetValue, TweenConstructor<T> constructor) {
       if (targetValue != null) {
         tween ??= constructor(targetValue);
         if (_shouldAnimateTween(tween, targetValue))
@@ -173,7 +173,7 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
   /// 2. Take the value returned from the callback, and store it. This is the
   /// value to use as the current value the next time that the forEachTween()
   /// method is called.
-  void forEachTween(TweenVisitor<dynamic> visitor);
+  void forEachTween(TweenVisitor visitor);
 }
 
 /// A container that gradually changes its values over a period of time.
@@ -262,7 +262,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   Tween<double> _width;
   Tween<double> _height;
 
-  void forEachTween(TweenVisitor<dynamic> visitor) {
+  void forEachTween(TweenVisitor visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
     _constraints = visitor(_constraints, config.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
     _decoration = visitor(_decoration, config.decoration, (dynamic value) => new DecorationTween(begin: value));
@@ -381,7 +381,7 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   Tween<double> _width;
   Tween<double> _height;
 
-  void forEachTween(TweenVisitor<dynamic> visitor) {
+  void forEachTween(TweenVisitor visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
     _left = visitor(_left, config.left, (dynamic value) => new Tween<double>(begin: value));
     _top = visitor(_top, config.top, (dynamic value) => new Tween<double>(begin: value));

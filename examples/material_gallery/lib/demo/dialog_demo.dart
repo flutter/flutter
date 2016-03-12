@@ -60,12 +60,12 @@ class DialogDemo extends StatefulComponent {
 class DialogDemoState extends State<DialogDemo> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  void showDemoDialog/*<T>*/({ BuildContext context, Dialog dialog }) {
-    showDialog/*<T>*/(
+  void showDemoDialog({ BuildContext context, Dialog dialog }) {
+    showDialog(
       context: context,
       child: dialog
     )
-    .then((dynamic/*=T*/ value) { // The value passed to Navigator.pop() or null.
+    .then((dynamic value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
         scaffoldKey.currentState.showSnackBar(new SnackBar(
           content: new Text('You selected: $value')
@@ -89,7 +89,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('ALERT'),
             onPressed: () {
-              showDemoDialog/*<DialogDemoAction>*/(
+              showDemoDialog(
                 context: context,
                 dialog: new Dialog(
                   content: new Text(
@@ -113,7 +113,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('ALERT WITH TITLE'),
             onPressed: () {
-              showDemoDialog/*<DialogDemoAction>*/(
+              showDemoDialog(
                 context: context,
                 dialog: new Dialog(
                   title: new Text("Use Google's location service?"),
@@ -138,7 +138,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('SIMPLE'),
             onPressed: () {
-              showDemoDialog/*<String>*/(
+              showDemoDialog(
                 context: context,
                 dialog: new Dialog(
                   title: new Text('Set backup account'),
@@ -174,7 +174,7 @@ class DialogDemoState extends State<DialogDemo> {
                 context: context,
                 initialTime: const TimeOfDay(hour: 15, minute: 30)
               )
-              .then((TimeOfDay value) { // The value passed to Navigator.pop() or null.
+              .then((value) { // The value passed to Navigator.pop() or null.
                 if (value != null) {
                   scaffoldKey.currentState.showSnackBar(new SnackBar(
                     content: new Text('You selected: $value')
@@ -186,7 +186,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('FULLSCREEN'),
             onPressed: () {
-              Navigator.push(context, new MaterialPageRoute<Null>(
+              Navigator.push(context, new MaterialPageRoute(
                 builder: (BuildContext context) => new FullScreenDialogDemo()
               ));
             }

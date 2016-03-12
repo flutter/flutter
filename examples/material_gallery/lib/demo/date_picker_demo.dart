@@ -14,7 +14,7 @@ class DatePickerDemo extends StatefulComponent {
 class _DatePickerDemoState extends State<DatePickerDemo> {
   DateTime _selectedDate = new DateTime.now();
 
-  Future<Null> _handleSelectDate() async {
+  Future _handleSelectDate() async {
     DateTime picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,

@@ -10,12 +10,12 @@ import 'framework.dart';
 class _CheckedModeBannerPainter extends CustomPainter {
   const _CheckedModeBannerPainter();
 
-  static const Color kColor = const Color(0xA0B71C1C);
-  static const double kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards from the top right corner
-  static const double kHeight = 12.0; // height of banner
-  static const Offset kTextAlign = const Offset(0.0, -3.0); // offset to move text up
-  static const double kFontSize = kHeight * 0.85;
-  static const double kShadowBlur = 4.0; // shadow blur sigma
+  static const kColor = const Color(0xA0B71C1C);
+  static const kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards from the top right corner
+  static const kHeight = 12.0; // height of banner
+  static const kTextAlign = const Offset(0.0, -3.0); // offset to move text up
+  static const kFontSize = kHeight * 0.85;
+  static const kShadowBlur = 4.0; // shadow blur sigma
   static final Rect kRect = new Rect.fromLTWH(-kOffset, kOffset-kHeight, kOffset * 2.0, kHeight);
   static const TextStyle kTextStyles = const TextStyle(
     color: const Color(0xFFFFFFFF),

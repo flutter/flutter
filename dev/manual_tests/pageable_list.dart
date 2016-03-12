@@ -23,7 +23,7 @@ class PageableListAppState extends State<PageableListApp> {
     List<Size> cardSizes = [
       [100.0, 300.0], [300.0, 100.0], [200.0, 400.0], [400.0, 400.0], [300.0, 400.0]
     ]
-    .map((List<double> args) => new Size(args[0], args[1]))
+    .map((args) => new Size(args[0], args[1]))
     .toList();
 
     cardModels = new List<CardModel>.generate(cardSizes.length, (int i) {

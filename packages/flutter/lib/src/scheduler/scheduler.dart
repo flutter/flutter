@@ -106,7 +106,7 @@ abstract class Scheduler extends BindingBase {
     // Note that we inverse the priority.
     return -e1.priority.compareTo(e2.priority);
   }
-  final PriorityQueue<_TaskEntry> _taskQueue = new HeapPriorityQueue<_TaskEntry>(_taskSorter);
+  final PriorityQueue _taskQueue = new HeapPriorityQueue<_TaskEntry>(_taskSorter);
 
   /// Whether this scheduler already requested to be called from the event loop.
   bool _hasRequestedAnEventLoopCallback = false;

@@ -19,7 +19,7 @@ class ListDemo extends StatefulComponent {
 class ListDemoState extends State<ListDemo> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<Null> _bottomSheet;
+  ScaffoldFeatureController _bottomSheet;
   ListDemoItemSize _itemSize = ListDemoItemSize.threeLine;
   bool _dense = false;
   bool _showAvatars = true;

@@ -28,9 +28,9 @@ void main() {
         key: navigatorKey,
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/')
-            return new MaterialPageRoute<Null>(builder: (_) => new Container(child: new ThePositiveNumbers()));
+            return new MaterialPageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
           else if (settings.name == '/second')
-            return new MaterialPageRoute<Null>(builder: (_) => new Container(child: new ThePositiveNumbers()));
+            return new MaterialPageRoute(builder: (_) => new Container(child: new ThePositiveNumbers()));
           return null;
         }
       ));
@@ -47,10 +47,9 @@ void main() {
       expect(tester.findText('10'), isNull);
       expect(tester.findText('100'), isNull);
 
-      StatefulComponentElement target =
+      StatefulComponentElement<ScrollableLazyList, ScrollableState<ScrollableLazyList>> target =
         tester.findElement((Element element) => element.widget is ScrollableLazyList);
-      ScrollableState targetState = target.state;
-      targetState.scrollTo(1000.0);
+      target.state.scrollTo(1000.0);
       tester.pump(new Duration(seconds: 1));
 
       // we're 600 pixels high, each item is 100 pixels high, scroll position is

@@ -15,19 +15,19 @@ void main() {
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) { return new Column(
             children: <Widget>[
-              new Draggable<int>(
+              new Draggable(
                 data: 1,
                 child: new Text('Source'),
                 feedback: new Text('Dragging')
               ),
-              new DragTarget<int>(
-                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              new DragTarget(
+                builder: (context, data, rejects) {
                   return new Container(
                     height: 100.0,
                     child: new Text('Target')
                   );
                 },
-                onAccept: (int data) {
+                onAccept: (data) {
                   accepted.add(data);
                 }
               ),
@@ -78,7 +78,7 @@ void main() {
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) { return new Column(
             children: <Widget>[
-              new Draggable<int>(
+              new Draggable(
                 data: 1,
                 child: new Text('Source'),
                 feedback: new Text('Dragging')
@@ -94,15 +94,15 @@ void main() {
                       child: new Text('Button')
                     )
                   ),
-                  new DragTarget<int>(
-                    builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                  new DragTarget(
+                    builder: (context, data, rejects) {
                       return new IgnorePointer(
                         child: new Container(
                           child: new Text('Target')
                         )
                       );
                     },
-                    onAccept: (int data) {
+                    onAccept: (data) {
                       events.add('drop');
                     }
                   ),
@@ -176,7 +176,7 @@ void main() {
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) { return new Column(
             children: <Widget>[
-              new Draggable<int>(
+              new Draggable(
                 data: 1,
                 child: new GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -189,11 +189,11 @@ void main() {
                 ),
                 feedback: new Text('Dragging')
               ),
-              new DragTarget<int>(
-                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              new DragTarget(
+                builder: (context, data, rejects) {
                   return new Text('Target');
                 },
-                onAccept: (int data) {
+                onAccept: (data) {
                   events.add('drop');
                 }
               ),
@@ -237,16 +237,16 @@ void main() {
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) { return new Column(
             children: <Widget>[
-              new LongPressDraggable<int>(
+              new LongPressDraggable(
                 data: 1,
                 child: new Text('Source'),
                 feedback: new Text('Dragging')
               ),
-              new DragTarget<int>(
-                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              new DragTarget(
+                builder: (context, data, rejects) {
                   return new Text('Target');
                 },
-                onAccept: (int data) {
+                onAccept: (data) {
                   events.add('drop');
                 }
               ),
@@ -288,16 +288,16 @@ void main() {
         routes: <String, RouteBuilder>{
           '/': (RouteArguments args) { return new Column(
             children: <Widget>[
-              new Draggable<int>(
+              new Draggable(
                 data: 1,
                 child: new Text('Source'),
                 feedback: new Text('Dragging')
               ),
-              new DragTarget<int>(
-                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              new DragTarget(
+                builder: (context, data, rejects) {
                   return new Text('Target');
                 },
-                onAccept: (int data) {
+                onAccept: (data) {
                   events.add('drop');
                 }
               ),
@@ -341,21 +341,21 @@ void main() {
           '/': (RouteArguments args) {
             return new Block(
               children: <Widget>[
-                new DragTarget<int>(
-                  builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                new DragTarget(
+                  builder: (context, data, rejects) {
                     return new Text('Target');
                   },
-                  onAccept: (int data) {
+                  onAccept: (data) {
                     events.add('drop $data');
                   }
                 ),
                 new Container(height: 400.0),
-                new HorizontalDraggable<int>(
+                new HorizontalDraggable(
                   data: 1,
                   child: new Text('H'),
                   feedback: new Text('Dragging')
                 ),
-                new VerticalDraggable<int>(
+                new VerticalDraggable(
                   data: 2,
                   child: new Text('V'),
                   feedback: new Text('Dragging')
@@ -453,21 +453,21 @@ void main() {
             return new Block(
               scrollDirection: Axis.horizontal,
               children: <Widget>[
-                new DragTarget<int>(
-                  builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                new DragTarget(
+                  builder: (context, data, rejects) {
                     return new Text('Target');
                   },
-                  onAccept: (int data) {
+                  onAccept: (data) {
                     events.add('drop $data');
                   }
                 ),
                 new Container(width: 400.0),
-                new HorizontalDraggable<int>(
+                new HorizontalDraggable(
                   data: 1,
                   child: new Text('H'),
                   feedback: new Text('Dragging')
                 ),
-                new VerticalDraggable<int>(
+                new VerticalDraggable(
                   data: 2,
                   child: new Text('V'),
                   feedback: new Text('Dragging')

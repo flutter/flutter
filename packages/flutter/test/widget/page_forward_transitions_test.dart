@@ -70,12 +70,12 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             switch (settings.name) {
               case '/':
-                return new TestRoute<Null>(
+                return new TestRoute(
                   settings: settings,
                   child: new Builder(
                     key: insideKey,
                     builder: (BuildContext context) {
-                      PageRoute<Null> route = ModalRoute.of(context);
+                      PageRoute route = ModalRoute.of(context);
                       return new Column(
                         children: <Widget>[
                           new TestTransition(
@@ -93,9 +93,9 @@ void main() {
                     }
                   )
                 );
-              case '/2': return new TestRoute<Null>(settings: settings, child: new Text('E'));
-              case '/3': return new TestRoute<Null> (settings: settings, child: new Text('F'));
-              case '/4': return new TestRoute<Null> (settings: settings, child: new Text('G'));
+              case '/2': return new TestRoute(settings: settings, child: new Text('E'));
+              case '/3': return new TestRoute(settings: settings, child: new Text('F'));
+              case '/4': return new TestRoute(settings: settings, child: new Text('G'));
             }
           }
         )

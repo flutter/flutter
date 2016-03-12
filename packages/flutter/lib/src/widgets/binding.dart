@@ -222,11 +222,9 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement {
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
-  RenderObjectToWidgetAdapter<T> get widget => super.widget;
-
   Element _child;
 
-  static const Object _rootChildSlot = const Object();
+  static const _rootChildSlot = const Object();
 
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)

@@ -86,9 +86,9 @@ abstract class _VariantAssetResolver extends _AssetResolver {
   // one.
   Map<String, List<String>> _assetManifest;
 
-  Future<Null> _initializer;
+  Future _initializer;
 
-  Future<Null> _loadManifest() async {
+  Future _loadManifest() async {
     String json = await bundle.loadString("AssetManifest.json");
     _assetManifest = JSON.decode(json);
   }

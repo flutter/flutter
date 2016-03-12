@@ -48,7 +48,7 @@ class MimicOverlayEntry {
   /// given curve.
   ///
   /// This function can only be called once per overlay entry.
-  Future<Null> animateTo({
+  Future animateTo({
     GlobalKey targetKey,
     Duration duration,
     Curve curve: Curves.linear

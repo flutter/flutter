@@ -314,7 +314,7 @@ class PhysicsContact {
   final PhysicsShape shapeB;
 
   /// True if the two nodes are touching.
-  final bool isTouching;
+  final isTouching;
 
   /// To ignore the collision to take place, you can set isEnabled to false
   /// during the preSolve phase.

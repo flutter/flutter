@@ -53,7 +53,7 @@ class StockData {
 }
 
 typedef void StockDataCallback(StockData data);
-const int _kChunkCount = 30;
+const _kChunkCount = 30;
 
 String _urlToFetch(int chunk) {
   return 'https://domokit.github.io/examples/stocks/data/stock_data_$chunk.json';

@@ -46,7 +46,7 @@ class TestOneChildLayoutDelegate extends OneChildLayoutDelegate {
   }
 }
 
-Widget buildFrame(OneChildLayoutDelegate delegate) {
+Widget buildFrame(delegate) {
   return new Center(child: new CustomOneChildLayout(delegate: delegate, child: new Container()));
 }
 

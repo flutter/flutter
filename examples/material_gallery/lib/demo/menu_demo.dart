@@ -176,7 +176,7 @@ class MenuDemoState extends State<MenuDemo> {
             right: new PopupMenuButton<String>(
               onSelected: showCheckedMenuSelections,
               items: <PopupMenuItem<String>>[
-                new CheckedPopupMenuItem<String>(
+                new CheckedPopupMenuItem(
                   value: _checkedValue1,
                   checked: isChecked(_checkedValue1),
                   child: new Text(_checkedValue1)

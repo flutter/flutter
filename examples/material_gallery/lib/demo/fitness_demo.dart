@@ -33,7 +33,7 @@ class _FitnessDemoContents extends StatefulComponent {
 
 class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
 
-  Future<Null> _loadAssets(AssetBundle bundle) async {
+  Future _loadAssets(AssetBundle bundle) async {
     _images = new ImageMap(bundle);
     await _images.load(<String>[
       'packages/flutter_gallery_assets/jumpingjack.png',
@@ -267,9 +267,9 @@ class _WorkoutAnimationNode extends NodeWithSize {
 class _ProgressCircle extends NodeWithSize {
   _ProgressCircle(Size size, [this.value = 0.0]) : super(size);
 
-  static const double _kTwoPI = math.PI * 2.0;
-  static const double _kEpsilon = .0000001;
-  static const double _kSweep = _kTwoPI - _kEpsilon;
+  static const _kTwoPI = math.PI * 2.0;
+  static const _kEpsilon = .0000001;
+  static const _kSweep = _kTwoPI - _kEpsilon;
 
   double value;
 

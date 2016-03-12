@@ -16,7 +16,7 @@ class GallerySection extends StatelessComponent {
   final List<GalleryDemo> demos;
 
   void showDemo(GalleryDemo demo, BuildContext context, ThemeData theme) {
-    Navigator.push(context, new MaterialPageRoute<Null>(
+    Navigator.push(context, new MaterialPageRoute(
       builder: (BuildContext context) {
         Widget child = (demo.builder == null) ? null : demo.builder();
         return new Theme(data: theme, child: child);
@@ -31,7 +31,7 @@ class GallerySection extends StatelessComponent {
     );
     final double appBarHeight = 200.0;
     final Key scrollableKey = new ValueKey<String>(title); // assume section titles differ
-    Navigator.push(context, new MaterialPageRoute<Null>(
+    Navigator.push(context, new MaterialPageRoute(
       builder: (BuildContext context) {
         return new Theme(
           data: theme,

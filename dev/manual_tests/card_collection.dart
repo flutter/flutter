@@ -26,9 +26,9 @@ class CardCollectionState extends State<CardCollection> {
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   // TODO(hansmuller): need a local image asset
-  static const String _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
+  static const _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
 
-  static const double kCardMargins = 8.0;
+  static const kCardMargins = 8.0;
 
   final TextStyle backgroundTextStyle =
     Typography.white.title.copyWith(textAlign: TextAlign.center);

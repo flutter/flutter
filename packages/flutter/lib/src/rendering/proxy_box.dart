@@ -756,7 +756,7 @@ abstract class CustomClipper<T> {
   Rect getApproximateClipRect(Size size) => Point.origin & size;
   /// Returns true if the new instance will result in a different clip
   /// than the oldClipper instance.
-  bool shouldRepaint(CustomClipper<T> oldClipper);
+  bool shouldRepaint(CustomClipper oldClipper);
 }
 
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
@@ -1100,13 +1100,13 @@ class RenderTransform extends RenderProxyBox {
   }
 
   /// Concatenates a translation by (x, y, z) into the transform.
-  void translate(double x, [double y = 0.0, double z = 0.0]) {
+  void translate(x, [double y = 0.0, double z = 0.0]) {
     _transform.translate(x, y, z);
     markNeedsPaint();
   }
 
   /// Concatenates a scale into the transform.
-  void scale(double x, [double y, double z]) {
+  void scale(x, [double y, double z]) {
     _transform.scale(x, y, z);
     markNeedsPaint();
   }

@@ -419,7 +419,7 @@ class Align extends OneChildRenderObjectWidget {
 
 /// Centers its child within itself.
 class Center extends Align {
-  Center({ Key key, double widthFactor, double heightFactor, Widget child })
+  Center({ Key key, widthFactor, heightFactor, Widget child })
     : super(key: key, widthFactor: widthFactor, heightFactor: heightFactor, child: child);
 }
 
@@ -453,7 +453,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
     Key key,
     Widget child,
     Object id
-  }) : id = id, super(key: key ?? new ValueKey<Object>(id), child: child) {
+  }) : id = id, super(key: key ?? new ValueKey(id), child: child) {
     assert(child != null);
     assert(id != null);
   }
@@ -1388,9 +1388,9 @@ class Row extends Flex {
   Row({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    FlexJustifyContent justifyContent: FlexJustifyContent.start,
-    FlexAlignItems alignItems: FlexAlignItems.center,
-    TextBaseline textBaseline
+    justifyContent: FlexJustifyContent.start,
+    alignItems: FlexAlignItems.center,
+    textBaseline
   }) : super(
     children: children,
     key: key,
@@ -1409,9 +1409,9 @@ class Column extends Flex {
   Column({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    FlexJustifyContent justifyContent: FlexJustifyContent.start,
-    FlexAlignItems alignItems: FlexAlignItems.center,
-    TextBaseline textBaseline
+    justifyContent: FlexJustifyContent.start,
+    alignItems: FlexAlignItems.center,
+    textBaseline
   }) : super(
     children: children,
     key: key,

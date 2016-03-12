@@ -164,7 +164,7 @@ class SpriteBox extends RenderBox {
   // Event handling
 
   void _addEventTargets(Node node, List<Node> eventTargets) {
-    List<Node> children = node.children;
+    List children = node.children;
     int i = 0;
 
     // Add childrens that are behind this node

@@ -40,7 +40,7 @@ class SecondComponentState extends State<SecondComponent> {
   }
 }
 
-typedef void ExceptionCallback(dynamic exception);
+typedef void ExceptionCallback(exception);
 
 class ThirdComponent extends StatelessComponent {
   ThirdComponent({ this.targetKey, this.onException });
@@ -103,7 +103,7 @@ void main() {
       dynamic exception;
       Widget widget = new ThirdComponent(
         targetKey: targetKey,
-        onException: (dynamic e) {
+        onException: (e) {
           exception = e;
         }
       );

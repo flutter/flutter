@@ -7,9 +7,9 @@ typedef void ValueChanged<T>(T value);
 /// A BitField over an enum (or other class whose values implement "index").
 /// Only the first 63 values of the enum can be used as indices.
 class BitField<T extends dynamic> {
-  static const int _kSMIBits = 63; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
-  static const int _kAllZeros = 0;
-  static const int _kAllOnes = 0x7FFFFFFFFFFFFFFF; // 2^(_kSMIBits+1)-1
+  static const _kSMIBits = 63; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
+  static const _kAllZeros = 0;
+  static const _kAllOnes = 0x7FFFFFFFFFFFFFFF; // 2^(_kSMIBits+1)-1
   BitField(this._length) : _bits = _kAllZeros {
     assert(_length <= _kSMIBits);
   }

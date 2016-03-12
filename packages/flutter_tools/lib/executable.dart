@@ -37,7 +37,7 @@ import 'src/runner/flutter_command_runner.dart';
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the [flutter] command line tool.
-Future<Null> main(List<String> args) async {
+Future main(List<String> args) async {
   bool help = args.contains('-h') || args.contains('--help');
   bool verbose = args.contains('-v') || args.contains('--verbose');
   bool verboseHelp = help && verbose;
@@ -73,7 +73,7 @@ Future<Null> main(List<String> args) async {
 
     if (result is int)
       exit(result);
-  }, onError: (dynamic error, Chain chain) {
+  }, onError: (error, Chain chain) {
     if (error is UsageException) {
       stderr.writeln(error);
       // Argument error exit code.

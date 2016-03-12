@@ -33,7 +33,7 @@ abstract class Route<T> {
   void didPush() { }
 
   /// Called after install() when the route replaced another in the navigator.
-  void didReplace(Route<dynamic> oldRoute) { }
+  void didReplace(Route oldRoute) { }
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
@@ -49,13 +49,13 @@ abstract class Route<T> {
 
   /// The given route, which came after this one, has been popped off the
   /// navigator.
-  void didPopNext(Route<dynamic> nextRoute) { }
+  void didPopNext(Route nextRoute) { }
 
   /// This route's next route has changed to the given new route. This is called
   /// on a route whenever the next route changes for any reason, except for
   /// cases when didPopNext() would be called, so long as it is in the history.
   /// nextRoute will be null if there's no next route.
-  void didChangeNext(Route<dynamic> nextRoute) { }
+  void didChangeNext(Route nextRoute) { }
 
   /// The route should remove its overlays and free any other resources.
   ///
@@ -109,7 +109,7 @@ class RouteSettings {
 }
 
 /// Creates a route for the given route settings.
-typedef Route<dynamic> RouteFactory(RouteSettings settings);
+typedef Route RouteFactory(RouteSettings settings);
 
 /// A callback in during which you can perform a number of navigator operations (e.g., pop, push) that happen atomically.
 typedef void NavigatorTransactionCallback(NavigatorTransaction transaction);
@@ -121,10 +121,10 @@ class NavigatorObserver {
   NavigatorState _navigator;
 
   /// The [Navigator] pushed the given route.
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
+  void didPush(Route route, Route previousRoute) { }
 
   /// THe [Navigator] popped the given route.
-  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
+  void didPop(Route route, Route previousRoute) { }
 }
 
 /// Manages a set of child widgets with a stack discipline.
@@ -189,7 +189,7 @@ class Navigator extends StatefulComponent {
   /// Navigator observer, if any, will have didPush() called on it.
   ///
   /// Uses [openTransaction()]. Only one transaction will be executed per frame.
-  static void push(BuildContext context, Route<dynamic> route) {
+  static void push(BuildContext context, Route route) {
     openTransaction(context, (NavigatorTransaction transaction) {
       transaction.push(route);
     });
@@ -224,7 +224,7 @@ class Navigator extends StatefulComponent {
   /// If it is already the current route, nothing happens.
   ///
   /// Uses [openTransaction()]. Only one transaction will be executed per frame.
-  static void popUntil(BuildContext context, Route<dynamic> targetRoute) {
+  static void popUntil(BuildContext context, Route targetRoute) {
     openTransaction(context, (NavigatorTransaction transaction) {
       transaction.popUntil(targetRoute);
     });
@@ -277,7 +277,7 @@ class Navigator extends StatefulComponent {
 /// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
-  final List<Route<dynamic>> _history = new List<Route<dynamic>>();
+  final List<Route> _history = new List<Route>();
 
   void initState() {
     super.initState();
@@ -301,7 +301,7 @@ class NavigatorState extends State<Navigator> {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     config.observer?._navigator = null;
-    for (Route<dynamic> route in _history) {
+    for (Route route in _history) {
       route.dispose();
       route._navigator = null;
     }
@@ -313,7 +313,7 @@ class NavigatorState extends State<Navigator> {
   OverlayState get overlay => _overlayKey.currentState;
 
   OverlayEntry get _currentOverlayEntry {
-    for (Route<dynamic> route in _history.reversed) {
+    for (Route route in _history.reversed) {
       if (route.overlayEntries.isNotEmpty)
         return route.overlayEntries.last;
     }
@@ -329,7 +329,7 @@ class NavigatorState extends State<Navigator> {
       name: name,
       mostValuableKeys: mostValuableKeys
     );
-    Route<dynamic> route = config.onGenerateRoute(settings);
+    Route route = config.onGenerateRoute(settings);
     if (route == null) {
       assert(config.onUnknownRoute != null);
       route = config.onUnknownRoute(settings);
@@ -338,13 +338,13 @@ class NavigatorState extends State<Navigator> {
     _push(route);
   }
 
-  void _push(Route<dynamic> route) {
+  void _push(Route route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(route != null);
     assert(route._navigator == null);
     setState(() {
-      Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
+      Route oldRoute = _history.isNotEmpty ? _history.last : null;
       route._navigator = this;
       route.install(_currentOverlayEntry);
       _history.add(route);
@@ -357,7 +357,7 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
-  void _replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
+  void _replace({ Route oldRoute, Route newRoute }) {
     assert(!_debugLocked);
     assert(oldRoute != null);
     assert(newRoute != null);
@@ -388,25 +388,25 @@ class NavigatorState extends State<Navigator> {
     assert(() { _debugLocked = false; return true; });
   }
 
-  void _replaceRouteBefore({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
+  void _replaceRouteBefore({ Route anchorRoute, Route newRoute }) {
     assert(anchorRoute != null);
     assert(anchorRoute._navigator == this);
     assert(_history.indexOf(anchorRoute) > 0);
     _replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
   }
 
-  void _removeRouteBefore(Route<dynamic> anchorRoute) {
+  void _removeRouteBefore(Route anchorRoute) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(anchorRoute._navigator == this);
     int index = _history.indexOf(anchorRoute) - 1;
     assert(index >= 0);
-    Route<dynamic> targetRoute = _history[index];
+    Route targetRoute = _history[index];
     assert(targetRoute._navigator == this);
     assert(targetRoute.overlayEntries.isEmpty || !overlay.debugIsVisible(targetRoute.overlayEntries.last));
     setState(() {
       _history.removeAt(index);
-      Route<dynamic> newRoute = index < _history.length ? _history[index] : null;
+      Route newRoute = index < _history.length ? _history[index] : null;
       if (index > 0)
         _history[index - 1].didChangeNext(newRoute);
       targetRoute.dispose();
@@ -418,7 +418,7 @@ class NavigatorState extends State<Navigator> {
   bool _pop([dynamic result]) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
-    Route<dynamic> route = _history.last;
+    Route route = _history.last;
     assert(route._navigator == this);
     bool debugPredictedWouldPop;
     assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; });
@@ -445,7 +445,7 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
-  void _popUntil(Route<dynamic> targetRoute) {
+  void _popUntil(Route targetRoute) {
     assert(_history.contains(targetRoute));
     while (!targetRoute.isCurrent)
       _pop();
@@ -512,7 +512,7 @@ class NavigatorTransaction {
   /// The route will have didPush() and didChangeNext() called on it; the
   /// previous route, if any, will have didChangeNext() called on it; and the
   /// Navigator observer, if any, will have didPush() called on it.
-  void push(Route<dynamic> route) {
+  void push(Route route) {
     assert(_debugOpen);
     _navigator._push(route);
   }
@@ -528,7 +528,7 @@ class NavigatorTransaction {
   ///
   /// It is safe to call this redundantly (replacing a route with itself). Such
   /// calls are ignored.
-  void replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
+  void replace({ Route oldRoute, Route newRoute }) {
     assert(_debugOpen);
     _navigator._replace(oldRoute: oldRoute, newRoute: newRoute);
   }
@@ -541,14 +541,14 @@ class NavigatorTransaction {
   ///
   /// The conditions described for [replace()] apply; for instance, the route
   /// before anchorRoute must have overlay entries.
-  void replaceRouteBefore({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
+  void replaceRouteBefore({ Route anchorRoute, Route newRoute }) {
     assert(_debugOpen);
     _navigator._replaceRouteBefore(anchorRoute: anchorRoute, newRoute: newRoute);
   }
 
   /// Removes the route prior to the given anchorRoute, and calls didChangeNext
   /// on the route prior to that one, if any. The observer is not notified.
-  void removeRouteBefore(Route<dynamic> anchorRoute) {
+  void removeRouteBefore(Route anchorRoute) {
     assert(_debugOpen);
     _navigator._removeRouteBefore(anchorRoute);
   }
@@ -573,7 +573,7 @@ class NavigatorTransaction {
 
   /// Calls pop() repeatedly until the given route is the current route.
   /// If it is already the current route, nothing happens.
-  void popUntil(Route<dynamic> targetRoute) {
+  void popUntil(Route targetRoute) {
     assert(_debugOpen);
     _navigator._popUntil(targetRoute);
   }

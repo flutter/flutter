@@ -154,7 +154,7 @@ class _DropDownRouteResult<T> {
   const _DropDownRouteResult(this.result);
   final T result;
   bool operator ==(dynamic other) {
-    if (other is! _DropDownRouteResult<T>)
+    if (other is! _DropDownRouteResult)
       return false;
     final _DropDownRouteResult<T> typedOther = other;
     return result == typedOther.result;
@@ -193,7 +193,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   }
 
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    return new _DropDownMenu<T>(route: this);
+    return new _DropDownMenu(route: this);
   }
 }
 
@@ -269,7 +269,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   void _handleTap() {
     final RenderBox renderBox = indexedStackKey.currentContext.findRenderObject();
     final Rect rect = renderBox.localToGlobal(Point.origin) & renderBox.size;
-    final Completer<_DropDownRouteResult<T>> completer = new Completer<_DropDownRouteResult<T>>();
+    final Completer completer = new Completer<_DropDownRouteResult<T>>();
     Navigator.push(context, new _DropDownRoute<T>(
       completer: completer,
       items: config.items,
