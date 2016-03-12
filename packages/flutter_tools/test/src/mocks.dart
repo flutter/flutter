@@ -52,7 +52,7 @@ class MockDeviceLogReader extends DeviceLogReader {
   final StreamController<String> _linesStreamController =
       new StreamController<String>.broadcast();
 
-  final Completer _finishedCompleter = new Completer();
+  final Completer<int> _finishedCompleter = new Completer<int>();
 
   Stream<String> get lines => _linesStreamController.stream;
 
@@ -62,21 +62,20 @@ class MockDeviceLogReader extends DeviceLogReader {
 
   bool _started = false;
 
-  Future start() {
+  Future<Null> start() async {
     assert(!_started);
     _started = true;
-    return new Future.value(this);
   }
 
   bool get isReading => _started;
 
-  Future stop() {
+  Future<Null> stop() {
     assert(_started);
     _started = false;
-    return new Future.value(this);
+    return new Future<Null>.value();
   }
 
-  Future get finished => _finishedCompleter.future;
+  Future<int> get finished => _finishedCompleter.future;
 }
 
 void applyMocksToCommand(FlutterCommand command) {

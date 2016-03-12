@@ -253,8 +253,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
       new StreamController<String>.broadcast();
 
   Process _process;
-  StreamSubscription _stdoutSubscription;
-  StreamSubscription _stderrSubscription;
+  StreamSubscription<String> _stdoutSubscription;
+  StreamSubscription<String> _stderrSubscription;
 
   Stream<String> get lines => _linesStreamController.stream;
 
@@ -262,13 +262,15 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 
   bool get isReading => _process != null;
 
-  Future get finished =>
-      _process != null ? _process.exitCode : new Future.value(0);
+  Future<int> get finished {
+    return _process != null ? _process.exitCode : new Future<int>.value(0);
+  }
 
-  Future start() async {
+  Future<Null> start() async {
     if (_process != null) {
       throw new StateError(
-          '_IOSDeviceLogReader must be stopped before it can be started.');
+        '_IOSDeviceLogReader must be stopped before it can be started.'
+      );
     }
     _process = await runCommand(<String>[device.loggerPath]);
     _stdoutSubscription =
@@ -280,10 +282,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     _process.exitCode.then(_onExit);
   }
 
-  Future stop() async {
+  Future<Null> stop() async {
     if (_process == null) {
       throw new StateError(
-          '_IOSDeviceLogReader must be started before it can be stopped.');
+        '_IOSDeviceLogReader must be started before it can be stopped.'
+      );
     }
     _stdoutSubscription?.cancel();
     _stdoutSubscription = null;
@@ -341,7 +344,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
-  Future unforward(ForwardedPort forwardedPort) async {
+  Future<Null> unforward(ForwardedPort forwardedPort) async {
     // TODO(chinmaygarde): Implement.
   }
 }

@@ -79,7 +79,7 @@ class SimControl {
       connected = await _isAnyConnected();
       if (!connected) {
         printStatus('Still waiting for iOS Simulator to boot...');
-        await new Future.delayed(new Duration(seconds: 1));
+        await new Future<Null>.delayed(new Duration(seconds: 1));
       }
       attempted++;
     }
@@ -106,7 +106,7 @@ class SimControl {
 
     // Delete any old test devices
     getDevices()
-      .where((d) => d.name == _kFlutterTestDevice)
+      .where((SimDevice d) => d.name == _kFlutterTestDevice)
       .forEach(_deleteDevice);
 
     // Create new device
@@ -114,15 +114,15 @@ class SimControl {
     printTrace(args.join(' '));
     runCheckedSync(args);
 
-    return getDevices().firstWhere((d) => d.name == _kFlutterTestDevice);
+    return getDevices().firstWhere((SimDevice d) => d.name == _kFlutterTestDevice);
   }
 
   String _findSuitableDeviceType() {
     List<Map<String, dynamic>> allTypes = _list(SimControlListSection.devicetypes);
     List<Map<String, dynamic>> usableTypes = allTypes
-      .where((info) => info['name'].startsWith('iPhone'))
+      .where((Map<String, dynamic> info) => info['name'].startsWith('iPhone'))
       .toList()
-      ..sort((r1, r2) => -compareIphoneVersions(r1['identifier'], r2['identifier']));
+      ..sort((Map<String, dynamic> r1, Map<String, dynamic> r2) => -compareIphoneVersions(r1['identifier'], r2['identifier']));
 
     if (usableTypes.isEmpty) {
       printError(
@@ -139,9 +139,9 @@ class SimControl {
   String _findSuitableRuntime() {
     List<Map<String, dynamic>> allRuntimes = _list(SimControlListSection.runtimes);
     List<Map<String, dynamic>> usableRuntimes = allRuntimes
-      .where((info) => info['name'].startsWith('iOS'))
+      .where((Map<String, dynamic> info) => info['name'].startsWith('iOS'))
       .toList()
-      ..sort((r1, r2) => -compareIosVersions(r1['version'], r2['version']));
+      ..sort((Map<String, dynamic> r1, Map<String, dynamic> r2) => -compareIosVersions(r1['version'], r2['version']));
 
     if (usableRuntimes.isEmpty) {
       printError(
@@ -206,7 +206,7 @@ class SimControl {
     Map<String, dynamic> devicesSection = _list(SimControlListSection.devices);
 
     for (String deviceCategory in devicesSection.keys) {
-      List<dynamic> devicesData = devicesSection[deviceCategory];
+      List<Map<String, String>> devicesData = devicesSection[deviceCategory];
 
       for (Map<String, String> data in devicesData) {
         devices.add(new SimDevice(deviceCategory, data));
@@ -232,15 +232,12 @@ class SimControl {
     if (_trackDevicesControler == null) {
       Timer timer;
       Set<String> deviceIds = new Set<String>();
-
-      _trackDevicesControler = new StreamController.broadcast(
+      _trackDevicesControler = new StreamController<List<SimDevice>>.broadcast(
         onListen: () {
           timer = new Timer.periodic(new Duration(seconds: 4), (Timer timer) {
             List<SimDevice> devices = getConnectedDevices();
-
-            if (_updateDeviceIds(devices, deviceIds)) {
+            if (_updateDeviceIds(devices, deviceIds))
               _trackDevicesControler.add(devices);
-            }
           });
         }, onCancel: () {
           timer?.cancel();
@@ -290,13 +287,14 @@ class SimControl {
 
 /// Enumerates all data sections of `xcrun simctl list --json` command.
 class SimControlListSection {
-  static const devices = const SimControlListSection._('devices');
-  static const devicetypes = const SimControlListSection._('devicetypes');
-  static const runtimes = const SimControlListSection._('runtimes');
-  static const pairs = const SimControlListSection._('pairs');
+  const SimControlListSection._(this.name);
 
   final String name;
-  const SimControlListSection._(this.name);
+
+  static const SimControlListSection devices = const SimControlListSection._('devices');
+  static const SimControlListSection devicetypes = const SimControlListSection._('devicetypes');
+  static const SimControlListSection runtimes = const SimControlListSection._('runtimes');
+  static const SimControlListSection pairs = const SimControlListSection._('pairs');
 }
 
 class SimDevice {
@@ -580,12 +578,12 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   // We log from two logs: the device and the system log.
   Process _deviceProcess;
-  StreamSubscription _deviceStdoutSubscription;
-  StreamSubscription _deviceStderrSubscription;
+  StreamSubscription<String> _deviceStdoutSubscription;
+  StreamSubscription<String> _deviceStderrSubscription;
 
   Process _systemProcess;
-  StreamSubscription _systemStdoutSubscription;
-  StreamSubscription _systemStderrSubscription;
+  StreamSubscription<String> _systemStdoutSubscription;
+  StreamSubscription<String> _systemStderrSubscription;
 
   Stream<String> get lines => _linesStreamController.stream;
 
@@ -593,13 +591,15 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   bool get isReading => (_deviceProcess != null) && (_systemProcess != null);
 
-  Future get finished =>
-      (_deviceProcess != null) ? _deviceProcess.exitCode : new Future.value(0);
+  Future<int> get finished {
+    return (_deviceProcess != null) ? _deviceProcess.exitCode : new Future<int>.value(0);
+  }
 
-  Future start() async {
+  Future<Null> start() async {
     if (isReading) {
       throw new StateError(
-          '_IOSSimulatorLogReader must be stopped before it can be started.');
+        '_IOSSimulatorLogReader must be stopped before it can be started.'
+      );
     }
 
     // TODO(johnmccutchan): Add a ProcessSet abstraction that handles running
@@ -630,10 +630,11 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _systemProcess.exitCode.then(_onSystemExit);
   }
 
-  Future stop() async {
+  Future<Null> stop() async {
     if (!isReading) {
       throw new StateError(
-          '_IOSSimulatorLogReader must be started before it can be stopped.');
+        '_IOSSimulatorLogReader must be started before it can be stopped.'
+      );
     }
     if (_deviceProcess != null) {
       await _deviceProcess.kill();
@@ -774,7 +775,7 @@ int compareIphoneVersions(String id1, String id2) {
     return v1.compareTo(v2);
 
   // Sorted in the least preferred first order.
-  const qualifiers = const <String>['-Plus', '', 's-Plus', 's'];
+  const List<String> qualifiers = const <String>['-Plus', '', 's-Plus', 's'];
 
   int q1 = qualifiers.indexOf(m1[2]);
   int q2 = qualifiers.indexOf(m2[2]);
@@ -801,7 +802,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
-  Future unforward(ForwardedPort forwardedPort) async {
+  Future<Null> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
   }
 }

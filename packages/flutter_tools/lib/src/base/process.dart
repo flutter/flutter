@@ -57,9 +57,9 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   return await process.exitCode;
 }
 
-Future runAndKill(List<String> cmd, Duration timeout) {
+Future<Null> runAndKill(List<String> cmd, Duration timeout) {
   Future<Process> proc = runDetached(cmd);
-  return new Future.delayed(timeout, () async {
+  return new Future<Null>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
     Process.killPid((await proc).pid);
   });

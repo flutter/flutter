@@ -64,7 +64,7 @@ class FlutterDriver {
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
-    Future<Null> resumeLeniently() {
+    Future<dynamic> resumeLeniently() {
       _log.trace('Attempting to resume isolate');
       return isolate.resume().catchError((dynamic e) {
         const int vmMustBePausedCode = 101;
@@ -87,7 +87,7 @@ class FlutterDriver {
       _log.trace('Isolate is paused at start.');
 
       // Waits for a signal from the VM service that the extension is registered
-      Future<Null> waitForServiceExtension() {
+      Future<String> waitForServiceExtension() {
         return isolate.onExtensionAdded.firstWhere((String extension) {
           return extension == _kFlutterExtensionMethod;
         });
@@ -96,8 +96,8 @@ class FlutterDriver {
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
-      Future<Null> whenResumed = resumeLeniently();
-      Future<Null> whenServiceExtensionReady = Future.any(<Future<dynamic>>[
+      Future<dynamic> whenResumed = resumeLeniently();
+      Future<dynamic> whenServiceExtensionReady = Future.any/*dynamic*/(<Future<dynamic>>[
         waitForServiceExtension(),
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
@@ -180,7 +180,7 @@ class FlutterDriver {
   }
 
   Future<Null> tap(ObjectRef ref) async {
-    return await _sendCommand(new Tap(ref)).then((_) => null);
+    return await _sendCommand(new Tap(ref)).then((Map<String, dynamic> _) => null);
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -197,7 +197,7 @@ class FlutterDriver {
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
   Future<Null> scroll(ObjectRef ref, double dx, double dy, Duration duration, {int frequency: 60}) async {
-    return await _sendCommand(new Scroll(ref, dx, dy, duration, frequency)).then((_) => null);
+    return await _sendCommand(new Scroll(ref, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
   }
 
   Future<String> getText(ObjectRef ref) async {

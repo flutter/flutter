@@ -16,13 +16,13 @@ import 'package:vm_service_client/vm_service_client.dart';
 void main() {
   group('FlutterDriver.connect', () {
     List<LogRecord> log;
-    StreamSubscription logSub;
+    StreamSubscription<LogRecord> logSub;
     MockVMServiceClient mockClient;
     MockVM mockVM;
     MockIsolate mockIsolate;
 
     void expectLogContains(String message) {
-      expect(log.map((r) => '$r'), anyElement(contains(message)));
+      expect(log.map((LogRecord r) => '$r'), anyElement(contains(message)));
     }
 
     setUp(() {
@@ -35,8 +35,8 @@ void main() {
       when(mockVM.isolates).thenReturn([mockIsolate]);
       when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
       when(mockIsolate.invokeExtension(any, any))
-          .thenReturn(new Future.value({'status': 'ok'}));
-      vmServiceConnectFunction = (_) => new Future.value(mockClient);
+          .thenReturn(new Future<Map<String, dynamic>>.value(<String, String>{'status': 'ok'}));
+      vmServiceConnectFunction = (String url) => new Future<VMServiceClient>.value(mockClient);
     });
 
     tearDown(() async {
@@ -46,9 +46,8 @@ void main() {
 
     test('connects to isolate paused at start', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseStartEvent());
-      when(mockIsolate.resume()).thenReturn(new Future.value());
-      when(mockIsolate.onExtensionAdded)
-          .thenReturn(new Stream.fromIterable(['ext.flutter_driver']));
+      when(mockIsolate.resume()).thenReturn(new Future<Null>.value());
+      when(mockIsolate.onExtensionAdded).thenReturn(new Stream<String>.fromIterable(<String>['ext.flutter_driver']));
 
       FlutterDriver driver = await FlutterDriver.connect();
       expect(driver, isNotNull);
@@ -57,7 +56,7 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenReturn(new Future.value());
+      when(mockIsolate.resume()).thenReturn(new Future<Null>.value());
 
       FlutterDriver driver = await FlutterDriver.connect();
       expect(driver, isNotNull);
@@ -73,7 +72,7 @@ void main() {
       when(mockIsolate.resume()).thenAnswer((_) {
         // This needs to be wrapped in a closure to not be considered uncaught
         // by package:test
-        return new Future.error(new rpc.RpcException(101, ''));
+        return new Future<Null>.error(new rpc.RpcException(101, ''));
       });
 
       FlutterDriver driver = await FlutterDriver.connect();
@@ -101,7 +100,7 @@ void main() {
     });
 
     test('checks the health of the driver extension', () async {
-      when(mockIsolate.invokeExtension(any, any)).thenReturn(new Future.value({
+      when(mockIsolate.invokeExtension(any, any)).thenReturn(new Future<Map<String, dynamic>>.value(<String, dynamic>{
         'status': 'ok',
       }));
       Health result = await driver.checkHealth();
@@ -109,7 +108,7 @@ void main() {
     });
 
     test('closes connection', () async {
-      when(mockClient.close()).thenReturn(new Future.value());
+      when(mockClient.close()).thenReturn(new Future<Null>.value());
       await driver.close();
     });
 
@@ -127,7 +126,7 @@ void main() {
             'keyValueString': 'foo',
             'keyValueType': 'String'
           });
-          return new Future.value({
+          return new Future<Map<String, dynamic>>.value(<String, dynamic>{
             'objectReferenceKey': '123',
           });
         });
@@ -149,11 +148,11 @@ void main() {
 
       test('sends the tap command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
-          expect(i.positionalArguments[1], {
+          expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'tap',
             'targetRef': '123'
           });
-          return new Future.value();
+          return new Future<Map<String, dynamic>>.value();
         });
         await driver.tap(new ObjectRef('123'));
       });
@@ -171,11 +170,11 @@ void main() {
 
       test('sends the getText command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
-          expect(i.positionalArguments[1], {
+          expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'get_text',
             'targetRef': '123'
           });
-          return new Future.value({
+          return new Future<Map<String, dynamic>>.value({
             'text': 'hello'
           });
         });
@@ -188,7 +187,7 @@ void main() {
       test('waits for a condition', () {
         expect(
           driver.waitFor(() {
-            return new Future.delayed(
+            return new Future<int>.delayed(
               new Duration(milliseconds: 50),
               () => 123
             );
@@ -228,7 +227,7 @@ void main() {
           equals(2),
           timeout: new Duration(milliseconds: 10),
           pauseBetweenRetries: new Duration(milliseconds: 2)
-        ).catchError((err, stack) {
+        ).catchError((dynamic err, dynamic stack) {
           timedOut = true;
         });
 

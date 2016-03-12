@@ -24,7 +24,7 @@ Future<int> _runPub(Directory directory, { bool upgrade: false }) async {
 }
 
 class UpdatePackagesCommand extends FlutterCommand {
-  UpdatePackagesCommand({ hideCommand: false }) : _hideCommand = hideCommand {
+  UpdatePackagesCommand({ bool hideCommand: false }) : _hideCommand = hideCommand {
     argParser.addFlag(
       'upgrade',
       help: 'Run "pub upgrade" rather than "pub get".',

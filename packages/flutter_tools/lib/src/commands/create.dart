@@ -135,7 +135,7 @@ All done! In order to run your application, type:
 
     printStatus('Creating project ${path.basename(projectName)}:');
 
-    Map templateContext = <String, dynamic>{
+    Map<String, dynamic> templateContext = <String, dynamic>{
       'projectName': projectName,
       'androidIdentifier': _createAndroidIdentifier(projectName),
       'iosIdentifier': _createUTIIdentifier(projectName),

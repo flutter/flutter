@@ -19,7 +19,7 @@ class ServiceProtocolDiscovery {
   }
 
   final DeviceLogReader _logReader;
-  Completer _completer = new Completer();
+  Completer<int> _completer = new Completer<int>();
 
   /// The [Future] returned by this function will complete when the next
   /// service protocol port is found.
@@ -32,21 +32,20 @@ class ServiceProtocolDiscovery {
     if (line.startsWith('Observatory listening on http://')) {
       try {
         RegExp portExp = new RegExp(r"\d+.\d+.\d+.\d+:(\d+)");
-        var port = portExp.firstMatch(line).group(1);
+        String port = portExp.firstMatch(line).group(1);
         portNumber = int.parse(port);
       } catch (_) {
         // Ignore errors.
       }
     }
-    if (portNumber != 0) {
+    if (portNumber != 0)
       _located(portNumber);
-    }
   }
 
   void _located(int port) {
     assert(_completer != null);
     assert(!_completer.isCompleted);
     _completer.complete(port);
-    _completer = new Completer();
+    _completer = new Completer<int>();
   }
 }

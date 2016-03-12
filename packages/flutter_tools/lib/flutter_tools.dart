@@ -10,17 +10,17 @@ import 'src/flx.dart' as flx;
 /// Assembles a Flutter .flx file from a pre-existing manifest descriptor and a
 /// pre-compiled snapshot.
 Future<int> assembleFlx({
-  Map manifestDescriptor: const {},
+  Map<String, dynamic> manifestDescriptor: const <String, dynamic>{},
   File snapshotFile: null,
   String assetBasePath: flx.defaultAssetBasePath,
   String outputPath: flx.defaultFlxOutputPath,
   String privateKeyPath: flx.defaultPrivateKeyPath
 }) async {
   return flx.assemble(
-      manifestDescriptor: manifestDescriptor,
-      snapshotFile: snapshotFile,
-      assetBasePath: assetBasePath,
-      outputPath: outputPath,
-      privateKeyPath: privateKeyPath
+    manifestDescriptor: manifestDescriptor,
+    snapshotFile: snapshotFile,
+    assetBasePath: assetBasePath,
+    outputPath: outputPath,
+    privateKeyPath: privateKeyPath
   );
 }

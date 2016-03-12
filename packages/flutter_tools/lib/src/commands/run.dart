@@ -185,7 +185,7 @@ Future<int> startApp(
   }
 
   // Allow any stop commands from above to start work.
-  await new Future.delayed(Duration.ZERO);
+  await new Future<Duration>.delayed(Duration.ZERO);
 
   if (install) {
     printTrace('Running install command.');
@@ -234,7 +234,7 @@ Future<int> startApp(
 ///
 /// This does not fail if we're unable to connect, and times out after the given
 /// [timeout].
-Future delayUntilObservatoryAvailable(String host, int port, {
+Future<Null> delayUntilObservatoryAvailable(String host, int port, {
   Duration timeout: const Duration(seconds: 10)
 }) async {
   Stopwatch stopwatch = new Stopwatch()..start();
@@ -246,10 +246,10 @@ Future delayUntilObservatoryAvailable(String host, int port, {
     try {
       WebSocket ws = await WebSocket.connect(url);
       printTrace('Connected to the observatory port.');
-      ws.close().catchError((error) => null);
+      ws.close().catchError((dynamic error) => null);
       return;
     } catch (error) {
-      await new Future.delayed(new Duration(milliseconds: 250));
+      await new Future<Null>.delayed(new Duration(milliseconds: 250));
     }
   }
 

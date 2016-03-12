@@ -18,7 +18,7 @@ void main() {
       StopCommand command = new StopCommand();
       applyMocksToCommand(command);
       MockAndroidDevice device = new MockAndroidDevice();
-      when(device.stopApp(any)).thenReturn(new Future.value(true));
+      when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
       return createTestCommandRunner(command).run(['stop']).then((int code) {
         expect(code, equals(0));
@@ -29,7 +29,7 @@ void main() {
       StopCommand command = new StopCommand();
       applyMocksToCommand(command);
       MockIOSDevice device = new MockIOSDevice();
-      when(device.stopApp(any)).thenReturn(new Future.value(true));
+      when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
 
       return createTestCommandRunner(command).run(['stop']).then((int code) {

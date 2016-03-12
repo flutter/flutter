@@ -55,11 +55,11 @@ Future<Process> _startProcess(String mainPath, { String packageRoot }) {
 }
 
 class FlutterPlatform extends PlatformPlugin {
-  StreamChannel loadChannel(String mainPath, TestPlatform platform) {
+  StreamChannel<String> loadChannel(String mainPath, TestPlatform platform) {
     return StreamChannelCompleter.fromFuture(_startTest(mainPath));
   }
 
-  Future<StreamChannel> _startTest(String mainPath) async {
+  Future<StreamChannel<String>> _startTest(String mainPath) async {
     _ServerInfo info = await _startServer();
     Directory tempDir = Directory.systemTemp.createTempSync(
         'dart_test_listener');
@@ -108,19 +108,19 @@ void main() {
 
     try {
       WebSocket socket = await info.socket;
-      StreamChannel channel = new StreamChannel(socket.map(JSON.decode), socket);
+      StreamChannel<String> channel = new StreamChannel<String>(socket.map(JSON.decode), socket);
       return channel.transformStream(
-        new StreamTransformer.fromHandlers(
-          handleDone: (sink) {
+        new StreamTransformer<String, String>.fromHandlers(
+          handleDone: (EventSink<String> sink) {
             finalize();
             sink.close();
           }
         )
-      ).transformSink(new StreamSinkTransformer.fromHandlers(
-        handleData: (data, StreamSink sink) {
+      ).transformSink(new StreamSinkTransformer<String, String>.fromHandlers(
+        handleData: (String data, StreamSink<String> sink) {
           sink.add(JSON.encode(data));
         },
-        handleDone: (sink) {
+        handleDone: (EventSink<String> sink) {
           finalize();
           sink.close();
         }

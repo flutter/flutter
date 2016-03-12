@@ -223,7 +223,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     // determine what all the various .packages files depend on
     PackageDependencyTracker dependencies = new PackageDependencyTracker();
-    for (Directory directory in pubSpecDirectories.map((path) => new Directory(path))) {
+    for (Directory directory in pubSpecDirectories.map((String path) => new Directory(path))) {
       String pubSpecYamlPath = path.join(directory.path, 'pubspec.yaml');
       File pubSpecYamlFile = new File(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
@@ -242,8 +242,8 @@ class AnalyzeCommand extends FlutterCommand {
         dotPackages
           .readAsStringSync()
           .split('\n')
-          .where((line) => !line.startsWith(new RegExp(r'^ *#')))
-          .forEach((line) {
+          .where((String line) => !line.startsWith(new RegExp(r'^ *#')))
+          .forEach((String line) {
             int colon = line.indexOf(':');
             if (colon > 0)
               dependencies.add(line.substring(0, colon), path.normalize(path.absolute(directory.path, path.fromUri(line.substring(colon+1)))), dotPackagesPath);
@@ -634,7 +634,7 @@ class AnalysisServer {
 
   int _id = 0;
 
-  Future start() async {
+  Future<Null> start() async {
     String snapshot = path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
     List<String> args = <String>[snapshot, '--sdk', sdk];
 
@@ -687,12 +687,12 @@ class AnalysisServer {
 
     dynamic response = JSON.decode(line);
 
-    if (response is Map) {
+    if (response is Map<dynamic, dynamic>) {
       if (response['event'] != null) {
         String event = response['event'];
         dynamic params = response['params'];
 
-        if (params is Map) {
+        if (params is Map<dynamic, dynamic>) {
           if (event == 'server.status')
             _handleStatus(response['params']);
           else if (event == 'analysis.errors')
@@ -725,7 +725,7 @@ class AnalysisServer {
     _errorsController.add(new FileAnalysisErrors(file, errors));
   }
 
-  Future dispose() async => _process?.kill();
+  Future<bool> dispose() async => _process?.kill();
 }
 
 class FileAnalysisErrors {

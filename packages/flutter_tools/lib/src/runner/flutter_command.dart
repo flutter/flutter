@@ -35,11 +35,11 @@ abstract class FlutterCommand extends Command {
 
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
 
-  Future downloadToolchain() async {
+  Future<Null> downloadToolchain() async {
     toolchain ??= await Toolchain.forConfigs(buildConfigurations);
   }
 
-  Future downloadApplicationPackages() async {
+  Future<Null> downloadApplicationPackages() async {
     applicationPackages ??= await ApplicationPackageStore.forConfigs(buildConfigurations);
   }
 
@@ -127,7 +127,7 @@ abstract class FlutterCommand extends Command {
   void addTargetOption() {
     argParser.addOption('target',
       abbr: 't',
-      callback: (val) => _targetSpecified = true,
+      callback: (dynamic val) => _targetSpecified = true,
       defaultsTo: flx.defaultMainPath,
       help: 'Target app path / main entry-point file.');
     _targetOptionSpecified = true;

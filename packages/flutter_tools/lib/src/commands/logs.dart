@@ -38,7 +38,7 @@ class LogsCommand extends FlutterCommand {
     if (!logReader.isReading)
       await logReader.start();
 
-    StreamSubscription subscription = logReader.lines.listen(printStatus);
+    StreamSubscription<String> subscription = logReader.lines.listen(printStatus);
 
     // Wait for the log reader to be finished.
     int result = await logReader.finished;
