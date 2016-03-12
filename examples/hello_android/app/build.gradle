@@ -1,0 +1,15 @@
+apply plugin: 'com.android.application'
+apply plugin: 'flutter'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '22.0.1'
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+}
+
+flutter {
+    source 'src/flutter'
+}

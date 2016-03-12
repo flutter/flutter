@@ -1,0 +1,7 @@
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compile "com.android.tools.build:gradle:1.5.0"
+}
