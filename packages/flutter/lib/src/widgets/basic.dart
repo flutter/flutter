@@ -28,7 +28,7 @@ export 'package:flutter/rendering.dart' show
     MaxTileWidthGridDelegate,
     MultiChildLayoutDelegate,
     OneChildLayoutDelegate,
-    Painter,
+    RenderObjectPainter,
     PaintingContext,
     PlainTextSpan,
     PointerCancelEvent,
@@ -859,7 +859,7 @@ class Viewport extends OneChildRenderObjectWidget {
   /// Paints an overlay over the viewport.
   ///
   /// Often used to paint scroll bars.
-  final Painter overlayPainter;
+  final RenderObjectPainter overlayPainter;
 
   final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
 

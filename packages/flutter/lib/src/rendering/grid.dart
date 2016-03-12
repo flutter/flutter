@@ -358,7 +358,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     int virtualChildBase: 0,
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
-    Painter overlayPainter,
+    RenderObjectPainter overlayPainter,
     LayoutCallback callback
   }) : _delegate = delegate, _virtualChildBase = virtualChildBase, super(
     virtualChildCount: virtualChildCount,

@@ -239,7 +239,7 @@ class PageViewport extends VirtualViewportFromIterable {
   final Axis mainAxis;
   final ViewportAnchor anchor;
   final bool itemsWrap;
-  final Painter overlayPainter;
+  final RenderObjectPainter overlayPainter;
   final Iterable<Widget> children;
 
   RenderList createRenderObject(BuildContext context) => new RenderList();

@@ -86,7 +86,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
     Offset paintOffset,
     Axis mainAxis,
     ViewportAnchor anchor,
-    Painter overlayPainter
+    RenderObjectPainter overlayPainter
   ) : _paintOffset = paintOffset,
       _mainAxis = mainAxis,
       _anchor = anchor,
@@ -150,9 +150,9 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
     markNeedsSemanticsUpdate();
   }
 
-  Painter get overlayPainter => _overlayPainter;
-  Painter _overlayPainter;
-  void set overlayPainter(Painter value) {
+  RenderObjectPainter get overlayPainter => _overlayPainter;
+  RenderObjectPainter _overlayPainter;
+  void set overlayPainter(RenderObjectPainter value) {
     if (_overlayPainter == value)
       return;
     if (attached)
@@ -220,7 +220,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    Painter overlayPainter,
+    RenderObjectPainter overlayPainter,
     this.onPaintOffsetUpdateNeeded
   }) : super(paintOffset, mainAxis, anchor, overlayPainter) {
     this.child = child;
@@ -340,7 +340,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    Painter overlayPainter
+    RenderObjectPainter overlayPainter
   }) : _virtualChildCount = virtualChildCount,
        _callback = callback,
        super(paintOffset, mainAxis, anchor, overlayPainter);

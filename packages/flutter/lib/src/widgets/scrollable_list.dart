@@ -111,7 +111,7 @@ class _VirtualListViewport extends VirtualViewport {
   final double itemExtent;
   final bool itemsWrap;
   final EdgeDims padding;
-  final Painter overlayPainter;
+  final RenderObjectPainter overlayPainter;
 
   double get _leadingPadding {
     switch (mainAxis) {
@@ -251,7 +251,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     double itemExtent,
     bool itemsWrap: false,
     EdgeDims padding,
-    Painter overlayPainter,
+    RenderObjectPainter overlayPainter,
     this.children
   }) : super(
     onExtentsChanged,
@@ -360,7 +360,7 @@ class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuil
     ViewportAnchor anchor: ViewportAnchor.start,
     double itemExtent,
     EdgeDims padding,
-    Painter overlayPainter,
+    RenderObjectPainter overlayPainter,
     this.itemCount,
     this.itemBuilder
   }) : super(

@@ -239,7 +239,7 @@ class RenderBlockViewport extends RenderBlockBase {
     ExtentCallback totalExtentCallback,
     ExtentCallback maxCrossAxisDimensionCallback,
     ExtentCallback minCrossAxisDimensionCallback,
-    Painter overlayPainter,
+    RenderObjectPainter overlayPainter,
     Axis mainAxis: Axis.vertical,
     double itemExtent,
     double minExtent: 0.0,
@@ -309,9 +309,9 @@ class RenderBlockViewport extends RenderBlockBase {
     markNeedsLayout();
   }
 
-  Painter get overlayPainter => _overlayPainter;
-  Painter _overlayPainter;
-  void set overlayPainter(Painter value) {
+  RenderObjectPainter get overlayPainter => _overlayPainter;
+  RenderObjectPainter _overlayPainter;
+  void set overlayPainter(RenderObjectPainter value) {
     if (_overlayPainter == value)
       return;
     if (attached)

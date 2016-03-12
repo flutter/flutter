@@ -323,7 +323,7 @@ class PaintingContext {
 ///
 /// A renderer may allow its paint() method to be augmented or redefined by
 /// providing a Painter. See for example overlayPainter in BlockViewport.
-abstract class Painter {
+abstract class RenderObjectPainter {
   RenderObject get renderObject => _renderObject;
   RenderObject _renderObject;
 

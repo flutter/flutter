@@ -706,7 +706,7 @@ class Block extends StatelessComponent {
   }
 }
 
-abstract class ScrollableListPainter extends Painter {
+abstract class ScrollableListPainter extends RenderObjectPainter {
   void attach(RenderObject renderObject) {
     assert(renderObject is RenderBox);
     assert(renderObject is HasMainAxis);
