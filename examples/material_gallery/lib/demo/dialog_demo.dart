@@ -34,8 +34,8 @@ class DialogDemoItem extends StatelessWidget {
       child: new Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: new Row(
-          justifyContent: FlexJustifyContent.start,
-          alignItems: FlexAlignItems.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             new Icon(
               size: 36.0,

@@ -142,7 +142,7 @@ class AppBar extends StatelessWidget {
     Widget appBar = toolBar;
     if (tabBar != null) {
       appBar = new Column(
-        justifyContent: FlexJustifyContent.collapse,
+        mainAxisAlignment: MainAxisAlignment.collapse,
         children: <Widget>[toolBar, tabBar]
       );
     } else if (flexibleSpace != null) {

@@ -49,7 +49,7 @@ class PageSelectorDemo extends StatelessWidget {
                         tooltip: 'Forward'
                       )
                     ],
-                    justifyContent: FlexJustifyContent.spaceBetween
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween
                   )
                 ),
                 new Flexible(

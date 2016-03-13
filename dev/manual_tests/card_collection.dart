@@ -325,8 +325,8 @@ class CardCollectionState extends State<CardCollection> {
                 children: <Widget>[
                   new Text(cardModel.inputValue.text)
                 ],
-                alignItems: FlexAlignItems.stretch,
-                justifyContent: FlexJustifyContent.center
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center
               )
             )
         )

@@ -98,7 +98,7 @@ class _DatePickerState extends State<DatePicker> {
           child: picker
         )
       ],
-      alignItems: FlexAlignItems.stretch
+      crossAxisAlignment: CrossAxisAlignment.stretch
     );
   }
 
@@ -197,7 +197,7 @@ class DayPicker extends StatelessWidget {
       new Text(new DateFormat("MMMM y").format(displayedMonth), style: monthStyle),
       new Flex(
         children: headers,
-        justifyContent: FlexJustifyContent.spaceAround
+        mainAxisAlignment: MainAxisAlignment.spaceAround
       )
     ];
     int year = displayedMonth.year;

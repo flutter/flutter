@@ -85,7 +85,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             onSubmitted: _handleInputSubmitted
           ),
           new Row(
-            alignItems: FlexAlignItems.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               new Flexible(
                 child: new Input(

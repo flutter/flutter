@@ -44,8 +44,8 @@ class ListDemoState extends State<ListDemo> {
           border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
         ),
         child: new Column(
-          justifyContent: FlexJustifyContent.collapse,
-          alignItems: FlexAlignItems.stretch,
+          mainAxisAlignment: MainAxisAlignment.collapse,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             new ListItem(
               dense: true,

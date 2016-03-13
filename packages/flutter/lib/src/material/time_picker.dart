@@ -135,7 +135,7 @@ class _TimePickerState extends State<TimePicker> {
           )
         )
       ],
-      alignItems: FlexAlignItems.stretch
+      crossAxisAlignment: CrossAxisAlignment.stretch
     );
   }
 }
@@ -223,12 +223,12 @@ class _TimePickerHeader extends StatelessWidget {
                     child: new Text('PM', style: pmStyle)
                   ),
                 ],
-                justifyContent: FlexJustifyContent.end
+                mainAxisAlignment: MainAxisAlignment.end
               )
             )
           )
         ],
-        justifyContent: FlexJustifyContent.end
+        mainAxisAlignment: MainAxisAlignment.end
       )
     );
   }

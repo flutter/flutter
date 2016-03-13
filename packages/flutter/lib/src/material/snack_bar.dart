@@ -132,7 +132,7 @@ class SnackBar extends StatelessWidget {
                   opacity: fadeAnimation,
                   child: new Row(
                     children: children,
-                    alignItems: FlexAlignItems.center
+                    crossAxisAlignment: CrossAxisAlignment.center
                   )
                 )
               )

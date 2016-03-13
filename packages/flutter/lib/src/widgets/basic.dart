@@ -17,9 +17,9 @@ export 'package:flutter/rendering.dart' show
     CustomClipper,
     CustomPainter,
     FixedColumnCountGridDelegate,
-    FlexAlignItems,
+    CrossAxisAlignment,
     FlexDirection,
-    FlexJustifyContent,
+    MainAxisAlignment,
     FractionalOffsetTween,
     GridDelegate,
     GridDelegateWithInOrderChildPlacement,
@@ -1355,27 +1355,27 @@ class Flex extends MultiChildRenderObjectWidget {
     Key key,
     List<Widget> children: _emptyWidgetList,
     this.direction: FlexDirection.horizontal,
-    this.justifyContent: FlexJustifyContent.start,
-    this.alignItems: FlexAlignItems.center,
+    this.mainAxisAlignment: MainAxisAlignment.start,
+    this.crossAxisAlignment: CrossAxisAlignment.center,
     this.textBaseline
   }) : super(key: key, children: children) {
     assert(direction != null);
-    assert(justifyContent != null);
-    assert(alignItems != null);
+    assert(mainAxisAlignment != null);
+    assert(crossAxisAlignment != null);
   }
 
   final FlexDirection direction;
-  final FlexJustifyContent justifyContent;
-  final FlexAlignItems alignItems;
+  final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
   final TextBaseline textBaseline;
 
-  RenderFlex createRenderObject(BuildContext context) => new RenderFlex(direction: direction, justifyContent: justifyContent, alignItems: alignItems, textBaseline: textBaseline);
+  RenderFlex createRenderObject(BuildContext context) => new RenderFlex(direction: direction, mainAxisAlignment: mainAxisAlignment, crossAxisAlignment: crossAxisAlignment, textBaseline: textBaseline);
 
   void updateRenderObject(BuildContext context, RenderFlex renderObject) {
     renderObject
       ..direction = direction
-      ..justifyContent = justifyContent
-      ..alignItems = alignItems
+      ..mainAxisAlignment = mainAxisAlignment
+      ..crossAxisAlignment = crossAxisAlignment
       ..textBaseline = textBaseline;
   }
 }
@@ -1388,15 +1388,15 @@ class Row extends Flex {
   Row({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    FlexJustifyContent justifyContent: FlexJustifyContent.start,
-    FlexAlignItems alignItems: FlexAlignItems.center,
+    MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline
   }) : super(
     children: children,
     key: key,
     direction: FlexDirection.horizontal,
-    justifyContent: justifyContent,
-    alignItems: alignItems,
+    mainAxisAlignment: mainAxisAlignment,
+    crossAxisAlignment: crossAxisAlignment,
     textBaseline: textBaseline
   );
 }
@@ -1409,15 +1409,15 @@ class Column extends Flex {
   Column({
     Key key,
     List<Widget> children: _emptyWidgetList,
-    FlexJustifyContent justifyContent: FlexJustifyContent.start,
-    FlexAlignItems alignItems: FlexAlignItems.center,
+    MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline
   }) : super(
     children: children,
     key: key,
     direction: FlexDirection.vertical,
-    justifyContent: justifyContent,
-    alignItems: alignItems,
+    mainAxisAlignment: mainAxisAlignment,
+    crossAxisAlignment: crossAxisAlignment,
     textBaseline: textBaseline
   );
 }

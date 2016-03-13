@@ -102,7 +102,7 @@ class StockRow extends StatelessWidget {
                     )
                   ),
                 ],
-                alignItems: FlexAlignItems.baseline,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: DefaultTextStyle.of(context).textBaseline
               )
             ),

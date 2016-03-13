@@ -90,7 +90,7 @@ class Dialog extends StatelessWidget {
         child: new Container(
           child: new Row(
             children: actions,
-            justifyContent: FlexJustifyContent.end
+            mainAxisAlignment: MainAxisAlignment.end
           )
         )
       ));

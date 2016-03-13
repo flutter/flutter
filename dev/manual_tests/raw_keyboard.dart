@@ -67,7 +67,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           new Text('${_event.type}', style: Typography.black.body2),
           new Text('${_event.keyData.keyCode}', style: Typography.black.display4)
         ],
-        justifyContent: FlexJustifyContent.center
+        mainAxisAlignment: MainAxisAlignment.center
       );
     }
     return new RawKeyboardListener(

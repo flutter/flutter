@@ -53,7 +53,7 @@ class GridTileBar extends StatelessWidget {
       children.add(
         new Flexible(
           child: new Column(
-            alignItems: FlexAlignItems.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               new DefaultTextStyle(
                 style: Typography.white.subhead,
@@ -87,7 +87,7 @@ class GridTileBar extends StatelessWidget {
       child: new IconTheme(
         data: new IconThemeData(color: Colors.white),
         child: new Row(
-          alignItems: FlexAlignItems.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: children
         )
       )

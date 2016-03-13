@@ -18,7 +18,7 @@ void main() {
             key: rotatedBoxKey,
             quarterTurns: 1,
             child: new Row(
-              justifyContent: FlexJustifyContent.collapse,
+              mainAxisAlignment: MainAxisAlignment.collapse,
               children: <Widget>[
                 new GestureDetector(
                   onTap: () { log.add('left'); },

@@ -126,7 +126,7 @@ class SectorAppState extends State<SectorApp> {
                 )
               ),
             ],
-            justifyContent: FlexJustifyContent.spaceAround
+            mainAxisAlignment: MainAxisAlignment.spaceAround
           )
         ),
         new Flexible(
@@ -143,7 +143,7 @@ class SectorAppState extends State<SectorApp> {
           )
         ),
       ],
-      justifyContent: FlexJustifyContent.spaceBetween
+      mainAxisAlignment: MainAxisAlignment.spaceBetween
     );
   }
 

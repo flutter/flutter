@@ -250,8 +250,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                   child: new Text('above')
                 ),
               ],
-              alignItems: FlexAlignItems.center,
-              justifyContent: FlexJustifyContent.spaceAround
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround
             )
           ),
           new Flexible(
@@ -271,7 +271,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                 new MovableBall(2, position, moveBall),
                 new MovableBall(3, position, moveBall),
               ],
-              justifyContent: FlexJustifyContent.spaceAround
+              mainAxisAlignment: MainAxisAlignment.spaceAround
             )
           ),
         ]

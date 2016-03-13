@@ -28,7 +28,7 @@ class _BarGraphic extends StatelessWidget {
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.body1.copyWith(color: Colors.white),
         child: new Row(
-          justifyContent: FlexJustifyContent.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             new Text(leftText),
             new Text(rightText)
@@ -92,7 +92,7 @@ class _TechniqueItem extends StatelessWidget {
         child: new Padding(
           padding: const EdgeInsets.all(16.0),
           child: new Row(
-            justifyContent: FlexJustifyContent.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children :<Widget>[
               new Text(titleText),
               new Column(children: barGraphics)

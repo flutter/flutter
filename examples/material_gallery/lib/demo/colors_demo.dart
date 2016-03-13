@@ -60,8 +60,8 @@ class ColorItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: new BoxDecoration(backgroundColor: color),
       child: new Row(
-        justifyContent: FlexJustifyContent.spaceBetween,
-        alignItems: FlexAlignItems.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           new Text('$prefix$index'),
           new Text(colorString())

@@ -107,8 +107,8 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
         padding: new EdgeInsets.symmetric(horizontal: 8.0),
         child: new Column(
           children: children,
-          justifyContent: FlexJustifyContent.center,
-          alignItems: FlexAlignItems.start
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start
         )
       )
     );

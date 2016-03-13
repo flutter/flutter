@@ -35,7 +35,7 @@ class _SliderDemoState extends State<SliderDemo> {
                   child: new Text(_value.round().toString().padLeft(3, '0'))
                 ),
               ],
-              justifyContent: FlexJustifyContent.collapse
+              mainAxisAlignment: MainAxisAlignment.collapse
             )
           )
         ),
@@ -51,7 +51,7 @@ class _SliderDemoState extends State<SliderDemo> {
                   child: new Text((_value / 100.0).toStringAsFixed(2))
                 ),
               ],
-              justifyContent: FlexJustifyContent.collapse
+              mainAxisAlignment: MainAxisAlignment.collapse
             )
           )
         )

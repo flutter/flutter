@@ -201,7 +201,7 @@ class _GestureDemoState extends State<GestureDemo> {
                     ]
                   ),
                 ],
-                alignItems: FlexAlignItems.start
+                crossAxisAlignment: CrossAxisAlignment.start
               )
             )
           )

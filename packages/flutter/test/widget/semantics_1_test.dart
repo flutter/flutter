@@ -58,7 +58,7 @@ void main() {
               )
             ),
           ],
-          alignItems: FlexAlignItems.stretch
+          crossAxisAlignment: CrossAxisAlignment.stretch
         )
       );
       expect(client.updates.length, equals(2));
@@ -95,7 +95,7 @@ void main() {
               )
             ),
           ],
-          alignItems: FlexAlignItems.stretch
+          crossAxisAlignment: CrossAxisAlignment.stretch
         )
       );
       expect(client.updates.length, equals(2));
@@ -160,7 +160,7 @@ void main() {
               )
             ),
           ],
-          alignItems: FlexAlignItems.stretch
+          crossAxisAlignment: CrossAxisAlignment.stretch
         )
       );
       expect(client.updates.length, equals(2));
@@ -197,7 +197,7 @@ void main() {
               )
             ),
           ],
-          alignItems: FlexAlignItems.stretch
+          crossAxisAlignment: CrossAxisAlignment.stretch
         )
       );
       expect(client.updates.length, equals(2));

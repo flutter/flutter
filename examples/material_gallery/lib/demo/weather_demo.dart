@@ -83,7 +83,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
             new Align(
               alignment: new FractionalOffset(0.5, 0.8),
               child: new Row(
-                justifyContent: FlexJustifyContent.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   new WeatherButton(
                     onPressed: () {

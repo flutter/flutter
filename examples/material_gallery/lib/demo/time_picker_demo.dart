@@ -36,7 +36,7 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
             child: new Text('SELECT TIME')
           ),
         ],
-        justifyContent: FlexJustifyContent.center
+        mainAxisAlignment: MainAxisAlignment.center
       )
     );
   }

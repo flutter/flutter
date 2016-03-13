@@ -77,7 +77,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
       children: indicators
         .map((Widget c) => new Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
-      justifyContent: FlexJustifyContent.center
+      mainAxisAlignment: MainAxisAlignment.center
     );
   }
 

@@ -47,7 +47,7 @@ class _ContactItem extends StatelessWidget {
 
     List<Widget> rowChildren = <Widget>[
       new Column(
-        alignItems: FlexAlignItems.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: columnChildren
       )
     ];
@@ -60,7 +60,7 @@ class _ContactItem extends StatelessWidget {
     return new Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: new Row(
-        justifyContent: FlexJustifyContent.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: rowChildren
       )
     );

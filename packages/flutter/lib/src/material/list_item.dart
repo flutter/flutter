@@ -121,8 +121,8 @@ class ListItem extends StatelessWidget {
     Widget center = primaryLine;
     if (isTwoLine || isThreeLine) {
       center = new Column(
-        justifyContent: FlexJustifyContent.collapse,
-        alignItems: FlexAlignItems.start,
+        mainAxisAlignment: MainAxisAlignment.collapse,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           primaryLine,
           new DefaultTextStyle(
@@ -153,7 +153,7 @@ class ListItem extends StatelessWidget {
         height: itemHeight,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: new Row(
-          alignItems: FlexAlignItems.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: children
         )
       )

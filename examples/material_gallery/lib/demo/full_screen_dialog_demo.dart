@@ -53,7 +53,7 @@ class DateTimeItem extends StatelessWidget {
                   });
                 },
                 child: new Row(
-                  justifyContent: FlexJustifyContent.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     new Text(new DateFormat('EEE, MMM d yyyy').format(date)),
                     new Icon(icon: Icons.arrow_drop_down, color: Colors.black54),
@@ -160,8 +160,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         padding: const EdgeInsets.all(16.0),
         child: new ScrollableViewport(
           child: new Column(
-            alignItems: FlexAlignItems.stretch,
-            justifyContent: FlexJustifyContent.collapse,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.collapse,
             children: <Widget>[
               new Container(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -184,8 +184,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 )
               ),
               new Column(
-                alignItems: FlexAlignItems.stretch,
-                justifyContent: FlexJustifyContent.end,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   new Text('From', style: theme.textTheme.caption),
                   new DateTimeItem(
@@ -200,8 +200,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 ]
               ),
               new Column(
-                alignItems: FlexAlignItems.stretch,
-                justifyContent: FlexJustifyContent.end,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   new Text('To', style: theme.textTheme.caption),
                   new DateTimeItem(

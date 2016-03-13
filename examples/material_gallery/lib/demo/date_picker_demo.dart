@@ -40,7 +40,7 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
             child: new Text('SELECT DATE')
           ),
         ],
-        justifyContent: FlexJustifyContent.center
+        mainAxisAlignment: MainAxisAlignment.center
       )
     );
   }

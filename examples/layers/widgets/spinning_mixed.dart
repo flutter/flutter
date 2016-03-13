@@ -58,13 +58,13 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                   ),
                   new CircularProgressIndicator(value: value),
                 ],
-                justifyContent: FlexJustifyContent.spaceAround
+                mainAxisAlignment: MainAxisAlignment.spaceAround
               )
             )
           ),
           new Rectangle(const Color(0xFFFFFF00)),
         ],
-        justifyContent: FlexJustifyContent.spaceBetween
+        mainAxisAlignment: MainAxisAlignment.spaceBetween
       )
     )
   ).attachToRenderTree(element);

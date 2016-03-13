@@ -179,7 +179,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       builder: (BuildContext context) {
         final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0);
         return new Column(
-          alignItems: FlexAlignItems.stretch,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             demo.builder(context),
             new Padding(

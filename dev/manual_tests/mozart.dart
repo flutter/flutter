@@ -182,7 +182,7 @@ class Launcher extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Row(
-      justifyContent: FlexJustifyContent.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: items
     );
   }
