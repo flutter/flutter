@@ -13,17 +13,17 @@ class TwoLevelListDemo extends StatelessWidget {
         child: new TwoLevelList(
           type: MaterialListType.oneLine,
           items: <Widget>[
-            new TwoLevelListItem(center: new Text('Top')),
+            new TwoLevelListItem(title: new Text('Top')),
             new TwoLevelSublist(
               center: new Text('Sublist'),
               children: <Widget>[
-                new TwoLevelListItem(center: new Text('One')),
-                new TwoLevelListItem(center: new Text('Two')),
-                new TwoLevelListItem(center: new Text('Free')),
-                new TwoLevelListItem(center: new Text('Four'))
+                new TwoLevelListItem(title: new Text('One')),
+                new TwoLevelListItem(title: new Text('Two')),
+                new TwoLevelListItem(title: new Text('Free')),
+                new TwoLevelListItem(title: new Text('Four'))
               ]
             ),
-            new TwoLevelListItem(center: new Text('Bottom'))
+            new TwoLevelListItem(title: new Text('Bottom'))
           ]
         )
       )

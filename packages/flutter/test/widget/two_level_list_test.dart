@@ -19,16 +19,16 @@ void main() {
           child: new Viewport(
             child: new TwoLevelList(
               items: <Widget>[
-                new TwoLevelListItem(center: new Text('Top'), key: topKey),
+                new TwoLevelListItem(title: new Text('Top'), key: topKey),
                 new TwoLevelSublist(
                   key: sublistKey,
                   center: new Text('Sublist'),
                   children: <Widget>[
-                    new TwoLevelListItem(center: new Text('0')),
-                    new TwoLevelListItem(center: new Text('1'))
+                    new TwoLevelListItem(title: new Text('0')),
+                    new TwoLevelListItem(title: new Text('1'))
                   ]
                 ),
-                new TwoLevelListItem(center: new Text('Bottom'), key: bottomKey)
+                new TwoLevelListItem(title: new Text('Bottom'), key: bottomKey)
               ]
             )
           )

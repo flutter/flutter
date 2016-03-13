@@ -99,13 +99,13 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       background: new Container(
         decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
         child: new ListItem(
-          left: new Icon(icon: Icons.delete, color: Colors.white, size: 36.0)
+          leading: new Icon(icon: Icons.delete, color: Colors.white, size: 36.0)
         )
       ),
       secondaryBackground: new Container(
         decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
         child: new ListItem(
-          right: new Icon(icon: Icons.archive, color: Colors.white, size: 36.0)
+          trailing: new Icon(icon: Icons.archive, color: Colors.white, size: 36.0)
         )
       ),
       child: new Container(
@@ -114,8 +114,8 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           border: new Border(bottom: new BorderSide(color: theme.dividerColor))
         ),
         child: new ListItem(
-          primary: new Text(item.name),
-          secondary: new Text('${item.subject}\n${item.body}'),
+          title: new Text(item.name),
+          subtitle: new Text('${item.subject}\n${item.body}'),
           isThreeLine: true
         )
       )
