@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class TwoLevelListDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text('Expand/Collapse List Control')),
+      appBar: new AppBar(title: new Text('Expand/Collapse List Control')),
       body: new Padding(
         padding: const EdgeInsets.all(0.0),
         child: new TwoLevelList(

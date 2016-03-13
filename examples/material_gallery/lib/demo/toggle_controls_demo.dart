@@ -33,7 +33,7 @@ class _ToggleControlsDemoState extends State<ToggleControlsDemo> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Selection Controls")),
+      appBar: new AppBar(title: new Text("Selection Controls")),
       body: new Column(
         children: <Widget>[
           new Row(

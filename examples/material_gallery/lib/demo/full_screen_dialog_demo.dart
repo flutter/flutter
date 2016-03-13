@@ -141,13 +141,13 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     final ThemeData theme = Theme.of(context);
 
     return new Scaffold(
-      toolBar: new ToolBar(
-        left: new IconButton(
+      appBar: new AppBar(
+        leading: new IconButton(
           icon: Icons.clear,
           onPressed: () { handleDismissButton(context); }
         ),
-        center: new Text('New Event'),
-        right: <Widget> [
+        title: new Text('New Event'),
+        actions: <Widget> [
           new FlatButton(
             child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
             onPressed: () {

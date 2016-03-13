@@ -27,7 +27,7 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Time Picker")),
+      appBar: new AppBar(title: new Text("Time Picker")),
       body: new Column(
         children: <Widget>[
           new Text('$_selectedTime'),

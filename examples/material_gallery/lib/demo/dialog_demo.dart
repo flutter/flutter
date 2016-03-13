@@ -80,8 +80,8 @@ class DialogDemoState extends State<DialogDemo> {
 
     return new Scaffold(
       key: scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Dialogs')
+      appBar: new AppBar(
+        title: new Text('Dialogs')
       ),
       body: new Block(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),

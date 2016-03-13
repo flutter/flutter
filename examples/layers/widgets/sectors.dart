@@ -154,8 +154,8 @@ class SectorAppState extends State<SectorApp> {
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) {
           return new Scaffold(
-            toolBar: new ToolBar(
-              center: new Text('Sector Layout in a Widget Tree')
+            appBar: new AppBar(
+              title: new Text('Sector Layout in a Widget Tree')
             ),
             body: buildBody()
           );

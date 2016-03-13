@@ -8,6 +8,7 @@
 library material;
 
 export 'src/material/app.dart';
+export 'src/material/app_bar.dart';
 export 'src/material/bottom_sheet.dart';
 export 'src/material/button.dart';
 export 'src/material/card.dart';
@@ -56,7 +57,6 @@ export 'src/material/theme_data.dart';
 export 'src/material/time_picker.dart';
 export 'src/material/time_picker_dialog.dart';
 export 'src/material/toggleable.dart';
-export 'src/material/tool_bar.dart';
 export 'src/material/tooltip.dart';
 export 'src/material/two_level_list.dart';
 export 'src/material/typography.dart';

@@ -121,8 +121,8 @@ void main() {
     routes: <String, WidgetBuilder>{
       '/': (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-            center: new Text('Hal and Dave')),
+          appBar: new AppBar(
+            title: new Text('Hal and Dave')),
           body: new Material(
             color: Colors.grey[50],
             child: new StyledTextDemo()

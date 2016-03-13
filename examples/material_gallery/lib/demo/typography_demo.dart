@@ -62,7 +62,7 @@ class TypographyDemo extends StatelessWidget {
     }
 
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text('Typography')),
+      appBar: new AppBar(title: new Text('Typography')),
       body: new Block(children: styleItems)
     );
   }

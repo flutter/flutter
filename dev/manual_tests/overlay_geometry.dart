@@ -154,7 +154,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   Widget build(BuildContext context) {
     List<Widget> layers = <Widget>[
       new Scaffold(
-        toolBar: new ToolBar(center: new Text('Tap a Card')),
+        appBar: new AppBar(title: new Text('Tap a Card')),
         body: new Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
           child: new ScrollableMixedWidgetList(

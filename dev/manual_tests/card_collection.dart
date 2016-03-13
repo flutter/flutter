@@ -272,9 +272,9 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget _buildToolBar(BuildContext context) {
-    return new ToolBar(
-      right: <Widget>[
+  Widget _buildAppBar(BuildContext context) {
+    return new AppBar(
+      actions: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ],
       flexibleSpace: (_) {
@@ -451,7 +451,7 @@ class CardCollectionState extends State<CardCollection> {
         primarySwatch: _primaryColor
       ),
       child: new Scaffold(
-        toolBar: _buildToolBar(context),
+        appBar: _buildAppBar(context),
         drawer: _buildDrawer(),
         body: body
       )

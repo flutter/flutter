@@ -15,8 +15,8 @@ void main() {
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) {
           return new Scaffold(
-            toolBar: new ToolBar(
-              center: new Text("Hardware Key Demo")
+            appBar: new AppBar(
+              title: new Text("Hardware Key Demo")
             ),
             body: new Material(
               child: new RawKeyboardDemo(

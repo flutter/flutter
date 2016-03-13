@@ -100,8 +100,8 @@ void main() {
     routes: <String, WidgetBuilder>{
       '/': (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-            center: new Text('Media Query Example')
+          appBar: new AppBar(
+            title: new Text('Media Query Example')
           ),
           body: new Material(child: new AdaptiveContainer(names: _kNames))
         );

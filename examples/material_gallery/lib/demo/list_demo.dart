@@ -174,9 +174,9 @@ class ListDemoState extends State<ListDemo> {
 
     return new Scaffold(
       key: scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Scrolling List\n$itemSizeText$layoutText'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Scrolling List\n$itemSizeText$layoutText'),
+        actions: <Widget>[
           new IconButton(
             icon: Icons.sort_by_alpha,
             tooltip: 'Sort',

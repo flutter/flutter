@@ -94,9 +94,9 @@ class StockSettingsState extends State<StockSettings> {
       config.updater(value);
   }
 
-  Widget buildToolBar(BuildContext context) {
-    return new ToolBar(
-      center: new Text('Settings')
+  Widget buildAppBar(BuildContext context) {
+    return new AppBar(
+      title: new Text('Settings')
     );
   }
 
@@ -247,7 +247,7 @@ class StockSettingsState extends State<StockSettings> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: buildToolBar(context),
+      appBar: buildAppBar(context),
       body: buildSettingsPane(context)
     );
   }

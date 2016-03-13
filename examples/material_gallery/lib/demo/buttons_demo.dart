@@ -196,8 +196,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return new TabBarSelection<_ButtonDemo>(
       values: demos,
       child: new Scaffold(
-        toolBar: new ToolBar(
-          center: new Text("Buttons"),
+        appBar: new AppBar(
+          title: new Text("Buttons"),
           tabBar: new TabBar<_ButtonDemo>(
             isScrollable: true,
             labels: new Map<_ButtonDemo, TabLabel>.fromIterable(demos, value: (_ButtonDemo demo) => demo.tabLabel)

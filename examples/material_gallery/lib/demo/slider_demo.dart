@@ -13,7 +13,7 @@ class _SliderDemoState extends State<SliderDemo> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Sliders")),
+      appBar: new AppBar(title: new Text("Sliders")),
       body: new Block(children: <Widget>[
         new Container(
           height: 100.0,

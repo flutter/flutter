@@ -125,9 +125,9 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Swipe Items to Dismiss'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Swipe Items to Dismiss'),
+        actions: <Widget>[
           new PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
             items: <PopupMenuEntry<LeaveBehindDemoAction>>[

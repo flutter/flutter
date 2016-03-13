@@ -56,15 +56,15 @@ class MenuDemoState extends State<MenuDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Menus'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Menus'),
+        actions: <Widget>[
           new PopupMenuButton<String>(
             onSelected: showMenuSelection,
             items: <PopupMenuItem<String>>[
               new PopupMenuItem<String>(
-                value: 'ToolBar Menu',
-                child: new Text('ToolBar Menu')
+                value: 'AppBar Menu',
+                child: new Text('AppBar Menu')
               ),
               new PopupMenuItem<String>(
                 value: 'Right Here',

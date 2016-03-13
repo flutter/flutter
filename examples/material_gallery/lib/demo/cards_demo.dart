@@ -117,8 +117,8 @@ class TravelDestinationItem extends StatelessWidget {
 class CardsDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text("Travel Stream")
+      appBar: new AppBar(
+        title: new Text("Travel Stream")
       ),
       body: new Block(
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),

@@ -13,7 +13,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Modal Bottom Sheet")),
+      appBar: new AppBar(title: new Text("Modal Bottom Sheet")),
       body: new Center(
         child: new Container(
           width: 200.0,

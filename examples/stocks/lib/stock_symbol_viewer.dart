@@ -73,8 +73,8 @@ class StockSymbolPage extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text(stock.name)
+      appBar: new AppBar(
+        title: new Text(stock.name)
       ),
       body: new Block(
         children: <Widget>[

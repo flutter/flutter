@@ -217,8 +217,8 @@ void main() {
     routes: <String, WidgetBuilder>{
       '/': (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-              center: new Text('Gestures Demo')),
+          appBar: new AppBar(
+              title: new Text('Gestures Demo')),
           body: new GestureDemo()
         );
       }

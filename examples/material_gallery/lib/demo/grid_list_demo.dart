@@ -41,8 +41,8 @@ class GridDemoPhotoItem extends StatelessWidget {
     Navigator.push(context, new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-            center: new Text(photo.title)
+          appBar: new AppBar(
+            title: new Text(photo.title)
           ),
           body: new Material(
             child: new AssetImage(
@@ -172,9 +172,9 @@ class GridListDemoState extends State<GridListDemo> {
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('Grid List'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Grid List'),
+        actions: <Widget>[
           new IconButton(
             icon: Icons.more_vert,
             onPressed: () { showTileStyleMenu(context); },

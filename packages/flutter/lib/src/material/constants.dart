@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 // Mobile Landscape: 48dp
 // Mobile Portrait: 56dp
 // Tablet/Desktop: 64dp
-const double kToolBarHeight = 56.0;
-const double kExtendedToolBarHeight = 128.0;
+const double kAppBarHeight = 56.0;
+const double kExtendedAppBarHeight = 128.0;
 
 const double kTextTabBarHeight = 48.0;
 const double kIconTabBarHeight = 48.0;

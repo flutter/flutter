@@ -223,8 +223,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   }
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('Drag and Drop Flutter Demo')
+      appBar: new AppBar(
+        title: new Text('Drag and Drop Flutter Demo')
       ),
       body: new Column(
         children: <Widget>[

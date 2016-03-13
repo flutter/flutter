@@ -83,7 +83,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text('Progress Indicators')),
+      appBar: new AppBar(title: new Text('Progress Indicators')),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.title,
         child: new GestureDetector(

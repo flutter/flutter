@@ -66,8 +66,8 @@ class IconsDemoState extends State<IconsDemo> {
     final TextStyle textStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('Icons')
+      appBar: new AppBar(
+        title: new Text('Icons')
       ),
       body: new IconTheme(
         data: new IconThemeData(opacity: iconOpacity),

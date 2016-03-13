@@ -18,8 +18,8 @@ class FitnessDemo extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text("Fitness")
+      appBar: new AppBar(
+        title: new Text("Fitness")
       ),
       body: new _FitnessDemoContents()
     );

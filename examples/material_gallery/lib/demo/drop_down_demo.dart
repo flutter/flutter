@@ -20,7 +20,7 @@ class _DropDownDemoState extends State<DropDownDemo> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Dropdown Button")),
+      appBar: new AppBar(title: new Text("Dropdown Button")),
       body: new Center(
         child: new DropDownButton<String>(
           items: buildItems(),

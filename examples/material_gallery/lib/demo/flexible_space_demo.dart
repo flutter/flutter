@@ -85,8 +85,8 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         appBarHeight: appBarHeight,
         scrollableKey: scrollableKey,
         appBarBehavior: AppBarBehavior.scroll,
-        toolBar: new ToolBar(
-          right: <Widget>[
+        appBar: new AppBar(
+          actions: <Widget>[
             new IconButton(
               icon: Icons.create,
               tooltip: 'Search'
