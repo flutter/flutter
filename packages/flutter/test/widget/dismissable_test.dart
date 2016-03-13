@@ -58,13 +58,13 @@ void dismissElement(WidgetTester tester, Element itemElement, { DismissDirection
   Point downLocation;
   Point upLocation;
   switch(gestureDirection) {
-    case DismissDirection.left:
+    case DismissDirection.endToStart:
       // getTopRight() returns a point that's just beyond itemWidget's right
       // edge and outside the Dismissable event listener's bounds.
       downLocation = tester.getTopRight(itemElement) + const Offset(-0.1, 0.0);
       upLocation = tester.getTopLeft(itemElement);
       break;
-    case DismissDirection.right:
+    case DismissDirection.startToEnd:
       // we do the same thing here to keep the test symmetric
       downLocation = tester.getTopLeft(itemElement) + const Offset(0.1, 0.0);
       upLocation = tester.getTopRight(itemElement);
@@ -129,15 +129,15 @@ void main() {
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.right);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
       expect(tester.findText('0'), isNull);
       expect(dismissedItems, equals([0]));
-      expect(reportedDismissDirection, DismissDirection.right);
+      expect(reportedDismissDirection, DismissDirection.startToEnd);
 
-      dismissItem(tester, 1, gestureDirection: DismissDirection.left);
+      dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
       expect(tester.findText('1'), isNull);
       expect(dismissedItems, equals([0, 1]));
-      expect(reportedDismissDirection, DismissDirection.left);
+      expect(reportedDismissDirection, DismissDirection.endToStart);
     });
   });
 
@@ -165,38 +165,38 @@ void main() {
   test('drag-left with DismissDirection.left triggers dismiss', () {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.vertical;
-      dismissDirection = DismissDirection.left;
+      dismissDirection = DismissDirection.endToStart;
       dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.right);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
       expect(tester.findText('0'), isNotNull);
       expect(dismissedItems, isEmpty);
-      dismissItem(tester, 1, gestureDirection: DismissDirection.right);
+      dismissItem(tester, 1, gestureDirection: DismissDirection.startToEnd);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.left);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
       expect(tester.findText('0'), isNull);
       expect(dismissedItems, equals([0]));
-      dismissItem(tester, 1, gestureDirection: DismissDirection.left);
+      dismissItem(tester, 1, gestureDirection: DismissDirection.endToStart);
     });
   });
 
   test('drag-right with DismissDirection.right triggers dismiss', () {
     testWidgets((WidgetTester tester) {
       scrollDirection = Axis.vertical;
-      dismissDirection = DismissDirection.right;
+      dismissDirection = DismissDirection.startToEnd;
       dismissedItems = <int>[];
 
       tester.pumpWidget(widgetBuilder());
       expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.left);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
       expect(tester.findText('0'), isNotNull);
       expect(dismissedItems, isEmpty);
 
-      dismissItem(tester, 0, gestureDirection: DismissDirection.right);
+      dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
       expect(tester.findText('0'), isNull);
       expect(dismissedItems, equals([0]));
     });
@@ -292,12 +292,12 @@ void main() {
       ));
       expect(tester.findText('1'), isNotNull);
       expect(tester.findText('2'), isNotNull);
-      dismissElement(tester, tester.findText('2'), gestureDirection: DismissDirection.right);
+      dismissElement(tester, tester.findText('2'), gestureDirection: DismissDirection.startToEnd);
       tester.pump(); // start the slide away
       tester.pump(new Duration(seconds: 1)); // finish the slide away
       expect(tester.findText('1'), isNotNull);
       expect(tester.findText('2'), isNull);
-      dismissElement(tester, tester.findText('1'), gestureDirection: DismissDirection.right);
+      dismissElement(tester, tester.findText('1'), gestureDirection: DismissDirection.startToEnd);
       tester.pump(); // start the slide away
       tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
       expect(tester.findText('1'), isNull);

@@ -61,10 +61,10 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         _dismissDirection = DismissDirection.horizontal;
         break;
       case LeaveBehindDemoAction.leftSwipe:
-        _dismissDirection = DismissDirection.left;
+        _dismissDirection = DismissDirection.endToStart;
         break;
       case LeaveBehindDemoAction.rightSwipe:
-        _dismissDirection = DismissDirection.right;
+        _dismissDirection = DismissDirection.startToEnd;
         break;
     }
   }
@@ -87,7 +87,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         setState(() {
           leaveBehindItems.remove(item);
         });
-        final String action = (direction == DismissDirection.left) ? 'archived' : 'deleted';
+        final String action = (direction == DismissDirection.endToStart) ? 'archived' : 'deleted';
         _scaffoldKey.currentState.showSnackBar(new SnackBar(
           content: new Text('You $action item ${item.index}'),
           action: new SnackBarAction(
@@ -143,12 +143,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
               ),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.leftSwipe,
-                checked: _dismissDirection == DismissDirection.left,
+                checked: _dismissDirection == DismissDirection.endToStart,
                 child: new Text('Only swipe left')
               ),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.rightSwipe,
-                checked: _dismissDirection == DismissDirection.right,
+                checked: _dismissDirection == DismissDirection.startToEnd,
                 child: new Text('Only swipe right')
               )
             ]
