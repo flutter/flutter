@@ -12,8 +12,8 @@ void main() {
   runApp(
     new MaterialApp(
       title: 'Flutter Demo',
-      routes: <String, RouteBuilder>{
-        '/': (RouteArguments args) => new FlutterDemo()
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) => new FlutterDemo()
       }
     )
   );

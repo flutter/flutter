@@ -12,8 +12,8 @@ void main() {
   runApp(
     new MaterialApp(
       title: "Hardware Key Demo",
-      routes: <String, RouteBuilder>{
-        '/': (RouteArguments args) {
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) {
           return new Scaffold(
             toolBar: new ToolBar(
               center: new Text("Hardware Key Demo")

@@ -114,9 +114,9 @@ class StocksAppState extends State<StocksApp> {
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
-      routes: <String, RouteBuilder>{
-         '/':         (RouteArguments args) => new StockHome(_stocks, _symbols, _configuration, configurationUpdater),
-         '/settings': (RouteArguments args) => new StockSettings(_configuration, configurationUpdater)
+      routes: <String, WidgetBuilder>{
+         '/':         (BuildContext context) => new StockHome(_stocks, _symbols, _configuration, configurationUpdater),
+         '/settings': (BuildContext context) => new StockSettings(_configuration, configurationUpdater)
       },
       onGenerateRoute: _getRoute,
       onLocaleChanged: _onLocaleChanged

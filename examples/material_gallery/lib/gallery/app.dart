@@ -28,7 +28,7 @@ class GalleryAppState extends State<GalleryApp> {
       title: 'Flutter Material Gallery',
       theme: lightTheme ? new ThemeData.light() : new ThemeData.dark(),
       routes: {
-        '/': (RouteArguments args) => new GalleryHome()
+        '/': (BuildContext context) => new GalleryHome()
       }
     );
   }

@@ -97,8 +97,8 @@ final List<String> _kNames = _initNames();
 void main() {
   runApp(new MaterialApp(
     title: 'Media Query Example',
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) {
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) {
         return new Scaffold(
           toolBar: new ToolBar(
             center: new Text('Media Query Example')

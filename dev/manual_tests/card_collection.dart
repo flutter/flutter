@@ -462,8 +462,8 @@ class CardCollectionState extends State<CardCollection> {
 void main() {
   runApp(new MaterialApp(
     title: 'Cards',
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new CardCollection(),
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => new CardCollection(),
     }
   ));
 }

@@ -142,8 +142,8 @@ void main() {
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200]
     ),
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new PageableListApp(),
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => new PageableListApp(),
     }
   ));
 }

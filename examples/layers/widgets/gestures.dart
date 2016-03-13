@@ -214,8 +214,8 @@ class _GestureDemoState extends State<GestureDemo> {
 void main() {
   runApp(new MaterialApp(
     theme: new ThemeData.dark(),
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) {
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) {
         return new Scaffold(
           toolBar: new ToolBar(
               center: new Text('Gestures Demo')),

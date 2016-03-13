@@ -238,6 +238,6 @@ class _WindowManagerState extends State<WindowManager> {
 void main() {
   runApp(new MaterialApp(
     title: 'Mozart',
-    routes: <String, RouteBuilder>{ '/': (_) => new WindowManager() }
+    routes: <String, WidgetBuilder>{ '/': (_) => new WindowManager() }
   ));
 }

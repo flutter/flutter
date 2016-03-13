@@ -179,8 +179,8 @@ void main() {
       accentColor: Colors.redAccent[200]
     ),
     title: 'Cards',
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new OverlayGeometryApp()
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => new OverlayGeometryApp()
     }
   ));
 }

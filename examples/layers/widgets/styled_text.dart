@@ -118,8 +118,8 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
 void main() {
   runApp(new MaterialApp(
     theme: new ThemeData.light(),
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) {
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) {
         return new Scaffold(
           toolBar: new ToolBar(
             center: new Text('Hal and Dave')),

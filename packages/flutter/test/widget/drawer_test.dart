@@ -15,9 +15,9 @@ void main() {
       BuildContext context;
       tester.pumpWidget(
         new MaterialApp(
-          routes: <String, RouteBuilder>{
-            '/': (RouteArguments args) {
-              context = args.context;
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext ctx) {
+              context = ctx;
               return new Scaffold(
                 key: scaffoldKey,
                 drawer: new Text('drawer'),
@@ -48,8 +48,8 @@ void main() {
       tester.pumpWidget(new Container()); // throw away the old App and its Navigator
       tester.pumpWidget(
         new MaterialApp(
-          routes: <String, RouteBuilder>{
-            '/': (RouteArguments args) {
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) {
               return new Scaffold(
                 key: scaffoldKey,
                 drawer: new Text('drawer'),

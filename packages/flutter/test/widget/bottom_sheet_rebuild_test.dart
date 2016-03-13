@@ -14,8 +14,8 @@ void main() {
       int buildCount = 0;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) {
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
             return new Scaffold(
               key: scaffoldKey,
               body: new Center(child: new Text('body'))

@@ -66,9 +66,9 @@ class ThirdWidget extends StatelessWidget {
 void main() {
   test('Can navigator navigate to and from a stateful widget', () {
     testWidgets((WidgetTester tester) {
-      final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-        '/': (RouteArguments args) => new FirstWidget(),
-        '/second': (RouteArguments args) => new SecondWidget(),
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => new FirstWidget(),
+        '/second': (BuildContext context) => new SecondWidget(),
       };
 
       tester.pumpWidget(new MaterialApp(routes: routes));

@@ -283,8 +283,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
 void main() {
   runApp(new MaterialApp(
     title: 'Drag and Drop Flutter Demo',
-    routes: <String, RouteBuilder>{
-     '/': (RouteArguments args) => new DragAndDropApp()
+    routes: <String, WidgetBuilder>{
+     '/': (BuildContext context) => new DragAndDropApp()
     }
   ));
 }

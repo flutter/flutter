@@ -13,7 +13,7 @@ void main() {
     final Key sublistKey = new UniqueKey();
     final Key bottomKey = new UniqueKey();
 
-    final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
         return new Material(
           child: new Viewport(

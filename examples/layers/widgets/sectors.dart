@@ -151,8 +151,8 @@ class SectorAppState extends State<SectorApp> {
     return new MaterialApp(
       theme: new ThemeData.light(),
       title: 'Sector Layout',
-      routes: <String, RouteBuilder>{
-        '/': (RouteArguments args) {
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) {
           return new Scaffold(
             toolBar: new ToolBar(
               center: new Text('Sector Layout in a Widget Tree')
