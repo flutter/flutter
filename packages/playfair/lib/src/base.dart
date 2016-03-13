@@ -47,7 +47,7 @@ class Chart extends StatelessWidget {
   final ChartData data;
 
   Widget build(BuildContext context) {
-    return new _ChartWrapper(textTheme: Theme.of(context).text, data: data);
+    return new _ChartWrapper(textTheme: Theme.of(context).textTheme, data: data);
   }
 }
 
