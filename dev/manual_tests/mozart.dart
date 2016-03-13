@@ -182,7 +182,7 @@ class Launcher extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Row(
-      justifyContent: FlexJustifyContent.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: items
     );
   }
@@ -238,6 +238,6 @@ class _WindowManagerState extends State<WindowManager> {
 void main() {
   runApp(new MaterialApp(
     title: 'Mozart',
-    routes: <String, RouteBuilder>{ '/': (_) => new WindowManager() }
+    routes: <String, WidgetBuilder>{ '/': (_) => new WindowManager() }
   ));
 }

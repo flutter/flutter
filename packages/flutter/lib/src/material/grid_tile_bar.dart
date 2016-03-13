@@ -13,16 +13,23 @@ import 'typography.dart';
 /// Typically used to stack a one or two line header or footer on a Grid tile.
 /// The layout is based on the "Grid Lists" section of the Material Design spec:
 /// https://www.google.com/design/spec/components/grid-lists.html#grid-lists-specs
-/// For a one-line header specify title and to add a second line specify caption.
-/// Use left or right to add an icon.
+/// For a one-line header specify [title] and to add a second line specify [subtitle].
+/// Use [leading] or [trailing] to add an icon.
 class GridTileBar extends StatelessWidget {
-  GridTileBar({ Key key, this.backgroundColor, this.left, this.right, this.title, this.caption }) : super(key: key);
+  GridTileBar({
+    Key key,
+    this.backgroundColor,
+    this.leading,
+    this.title,
+    this.subtitle,
+    this.trailing
+  }) : super(key: key);
 
   final Color backgroundColor;
-  final Widget left;
-  final Widget right;
+  final Widget leading;
   final Widget title;
-  final Widget caption;
+  final Widget subtitle;
+  final Widget trailing;
 
   Widget build(BuildContext context) {
     BoxDecoration decoration;
@@ -30,23 +37,23 @@ class GridTileBar extends StatelessWidget {
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
 
     EdgeInsets padding;
-    if (left != null && right != null)
+    if (leading != null && trailing != null)
       padding = const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0);
-    else if (left != null)
+    else if (leading != null)
       padding = const EdgeInsets.only(left: 8.0, right: 16.0, top: 16.0, bottom: 16.0);
-    else // right != null || (left == null && right == null)
+    else // trailing != null || (leading == null && trailing == null)
       padding = const EdgeInsets.only(left: 16.0, right: 8.0, top: 16.0, bottom: 16.0);
 
     final List<Widget> children = <Widget>[];
 
-    if (left != null)
-      children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: left));
+    if (leading != null)
+      children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: leading));
 
-    if (title != null && caption != null) {
+    if (title != null && subtitle != null) {
       children.add(
         new Flexible(
           child: new Column(
-            alignItems: FlexAlignItems.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               new DefaultTextStyle(
                 style: Typography.white.subhead,
@@ -54,25 +61,25 @@ class GridTileBar extends StatelessWidget {
               ),
               new DefaultTextStyle(
                 style: Typography.white.caption,
-                child: caption
+                child: subtitle
               )
             ]
           )
         )
       );
-    } else if (title != null || caption != null) {
+    } else if (title != null || subtitle != null) {
       children.add(
         new Flexible(
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
-            child: title ?? caption
+            child: title ?? subtitle
           )
         )
       );
     }
 
-    if (right != null)
-      children.add(new Padding(padding: const EdgeInsets.only(left: 8.0), child: right));
+    if (trailing != null)
+      children.add(new Padding(padding: const EdgeInsets.only(left: 8.0), child: trailing));
 
     return new Container(
       padding: padding,
@@ -80,7 +87,7 @@ class GridTileBar extends StatelessWidget {
       child: new IconTheme(
         data: new IconThemeData(color: Colors.white),
         child: new Row(
-          alignItems: FlexAlignItems.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: children
         )
       )

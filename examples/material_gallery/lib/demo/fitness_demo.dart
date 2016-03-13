@@ -18,8 +18,8 @@ class FitnessDemo extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text("Fitness")
+      appBar: new AppBar(
+        title: new Text("Fitness")
       ),
       body: new _FitnessDemoContents()
     );
@@ -93,7 +93,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
 
     return new Material(
       child: new Column(
-        justifyContent: FlexJustifyContent.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           new Flexible(
             child: new Container(
@@ -108,7 +108,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
           new Padding(
             padding: new EdgeInsets.only(top: 20.0, bottom: 20.0),
             child: new Row(
-              justifyContent: FlexJustifyContent.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 _createInfoPanelCell(Icons.accessibility, '$count', 'COUNT'),
                 _createInfoPanelCell(Icons.timer, _formatSeconds(time), 'TIME'),

@@ -135,8 +135,8 @@ class CardCollectionState extends State<CardCollection> {
           buildDrawerColorRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
           new Divider(),
           buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
-          buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.left, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
-          buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.right, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
+          buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
+          buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
           new Divider(),
           buildFontRadioItem("Left-align text", new TextStyle(textAlign: TextAlign.left), _textStyle, _changeTextStyle, icon: Icons.format_align_left, enabled: !_editable),
           buildFontRadioItem("Center-align text", new TextStyle(textAlign: TextAlign.center), _textStyle, _changeTextStyle, icon: Icons.format_align_center, enabled: !_editable),
@@ -272,9 +272,9 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget _buildToolBar(BuildContext context) {
-    return new ToolBar(
-      right: <Widget>[
+  Widget _buildAppBar(BuildContext context) {
+    return new AppBar(
+      actions: <Widget>[
         new Text(_dismissDirectionText(_dismissDirection))
       ],
       flexibleSpace: (_) {
@@ -325,8 +325,8 @@ class CardCollectionState extends State<CardCollection> {
                 children: <Widget>[
                   new Text(cardModel.inputValue.text)
                 ],
-                alignItems: FlexAlignItems.stretch,
-                justifyContent: FlexJustifyContent.center
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center
               )
             )
         )
@@ -338,22 +338,24 @@ class CardCollectionState extends State<CardCollection> {
       case DismissDirection.horizontal:
         backgroundMessage = "Swipe in either direction";
         break;
-      case DismissDirection.left:
+      case DismissDirection.endToStart:
         backgroundMessage = "Swipe left to dismiss";
         break;
-      case DismissDirection.right:
+      case DismissDirection.startToEnd:
         backgroundMessage = "Swipe right to dismiss";
         break;
       default:
         backgroundMessage = "Unsupported dismissDirection";
     }
 
+    // TODO(abarth): This icon is wrong in RTL.
     Widget leftArrowIcon =  new Icon(icon: Icons.arrow_back, size: 36.0);
-    if (_dismissDirection == DismissDirection.right)
+    if (_dismissDirection == DismissDirection.startToEnd)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
+      // TODO(abarth): This icon is wrong in RTL.
     Widget rightArrowIcon =  new Icon(icon: Icons.arrow_forward, size: 36.0);
-    if (_dismissDirection == DismissDirection.left)
+    if (_dismissDirection == DismissDirection.endToStart)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 
     // The background Widget appears behind the Dismissable card when the card
@@ -451,7 +453,7 @@ class CardCollectionState extends State<CardCollection> {
         primarySwatch: _primaryColor
       ),
       child: new Scaffold(
-        toolBar: _buildToolBar(context),
+        appBar: _buildAppBar(context),
         drawer: _buildDrawer(),
         body: body
       )
@@ -462,8 +464,8 @@ class CardCollectionState extends State<CardCollection> {
 void main() {
   runApp(new MaterialApp(
     title: 'Cards',
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new CardCollection(),
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => new CardCollection(),
     }
   ));
 }

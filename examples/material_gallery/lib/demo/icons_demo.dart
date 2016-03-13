@@ -66,8 +66,8 @@ class IconsDemoState extends State<IconsDemo> {
     final TextStyle textStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('Icons')
+      appBar: new AppBar(
+        title: new Text('Icons')
       ),
       body: new IconTheme(
         data: new IconThemeData(opacity: iconOpacity),
@@ -76,13 +76,13 @@ class IconsDemoState extends State<IconsDemo> {
           child: new Column(
             children: <Widget>[
               new Row(
-                justifyContent: FlexJustifyContent.spaceBetween,
-                alignItems: FlexAlignItems.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   new Flexible(
                     flex: 0,
                     child: new Column(
-                      alignItems: FlexAlignItems.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         new Text('Size', style: textStyle),
                         buildSizeLabel(18, textStyle),
@@ -94,7 +94,7 @@ class IconsDemoState extends State<IconsDemo> {
                   ),
                   new Flexible(
                     child: new Column(
-                      alignItems: FlexAlignItems.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         new Text('Enabled', style: textStyle),
                         buildIconButton(18.0, Icons.face, true),
@@ -106,7 +106,7 @@ class IconsDemoState extends State<IconsDemo> {
                   ),
                   new Flexible(
                     child: new Column(
-                      alignItems: FlexAlignItems.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         new Text('Disabled', style: textStyle),
                         buildIconButton(18.0, Icons.face, false),
@@ -123,7 +123,7 @@ class IconsDemoState extends State<IconsDemo> {
                   child: new IconTheme(
                     data: new IconThemeData(opacity: 1.0),
                     child: new Row(
-                      justifyContent: FlexJustifyContent.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         new Icon(
                           icon: Icons.brightness_7,

@@ -33,7 +33,7 @@ class _ToggleControlsDemoState extends State<ToggleControlsDemo> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Selection Controls")),
+      appBar: new AppBar(title: new Text("Selection Controls")),
       body: new Column(
         children: <Widget>[
           new Row(
@@ -42,7 +42,7 @@ class _ToggleControlsDemoState extends State<ToggleControlsDemo> {
               new Checkbox(value: false), // Disabled
               new Checkbox(value: true), // Disabled
             ],
-            justifyContent: FlexJustifyContent.spaceAround
+            mainAxisAlignment: MainAxisAlignment.spaceAround
           ),
           new Row(
             children: <int>[0, 1, 2].map((int i) {
@@ -52,13 +52,13 @@ class _ToggleControlsDemoState extends State<ToggleControlsDemo> {
                 onChanged: _setRadioValue
               );
             }).toList(),
-            justifyContent: FlexJustifyContent.spaceAround
+            mainAxisAlignment: MainAxisAlignment.spaceAround
           ),
           new Row(
             children: <int>[0, 1].map((int i) {
               return new Radio<int>(value: i, groupValue: 0); // Disabled
             }).toList(),
-            justifyContent: FlexJustifyContent.spaceAround
+            mainAxisAlignment: MainAxisAlignment.spaceAround
           ),
           new Row(
             children: <Widget>[
@@ -66,10 +66,10 @@ class _ToggleControlsDemoState extends State<ToggleControlsDemo> {
               new Switch(value: false), // Disabled
               new Switch(value: true), // Disabled
             ],
-            justifyContent: FlexJustifyContent.spaceAround
+            mainAxisAlignment: MainAxisAlignment.spaceAround
           ),
         ],
-        justifyContent: FlexJustifyContent.spaceAround
+        mainAxisAlignment: MainAxisAlignment.spaceAround
       )
     );
   }

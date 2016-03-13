@@ -22,7 +22,7 @@ class TextStyleItem extends StatelessWidget {
     return new Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
       child: new Row(
-        alignItems: FlexAlignItems.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new SizedBox(
             width: 64.0,
@@ -62,7 +62,7 @@ class TypographyDemo extends StatelessWidget {
     }
 
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text('Typography')),
+      appBar: new AppBar(title: new Text('Typography')),
       body: new Block(children: styleItems)
     );
   }

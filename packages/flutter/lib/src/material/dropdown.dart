@@ -304,7 +304,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
               padding: const EdgeInsets.only(top: 6.0)
             )
           ],
-          justifyContent: FlexJustifyContent.collapse
+          mainAxisAlignment: MainAxisAlignment.collapse
         )
       )
     );

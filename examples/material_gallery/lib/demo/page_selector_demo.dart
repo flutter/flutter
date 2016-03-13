@@ -23,7 +23,7 @@ class PageSelectorDemo extends StatelessWidget {
     ];
 
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text('Page Selector')),
+      appBar: new AppBar(title: new Text('Page Selector')),
       body: new TabBarSelection<IconData>(
         values: icons,
         child: new Builder(
@@ -49,7 +49,7 @@ class PageSelectorDemo extends StatelessWidget {
                         tooltip: 'Forward'
                       )
                     ],
-                    justifyContent: FlexJustifyContent.spaceBetween
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween
                   )
                 ),
                 new Flexible(

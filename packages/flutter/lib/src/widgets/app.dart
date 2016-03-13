@@ -28,12 +28,6 @@ AssetBundle _initDefaultBundle() {
 
 final AssetBundle _defaultBundle = _initDefaultBundle();
 
-class RouteArguments {
-  const RouteArguments({ this.context });
-  final BuildContext context;
-}
-typedef Widget RouteBuilder(RouteArguments args);
-
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
 class WidgetsApp extends StatefulWidget {
@@ -42,7 +36,7 @@ class WidgetsApp extends StatefulWidget {
     this.title,
     this.textStyle,
     this.color,
-    this.routes: const <String, RouteBuilder>{},
+    this.routes: const <String, WidgetBuilder>{},
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
@@ -72,7 +66,7 @@ class WidgetsApp extends StatefulWidget {
   /// [Navigator] is given a named route, the name will be looked up
   /// in this table first. If the name is not available, then
   /// [onGenerateRoute] will be called instead.
-  final Map<String, RouteBuilder> routes;
+  final Map<String, WidgetBuilder> routes;
 
   /// The route generator callback used when the app is navigated to a
   /// named route but the name is not in the [routes] table.

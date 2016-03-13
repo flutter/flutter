@@ -13,13 +13,13 @@ class TooltipDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('Tooltip')
+      appBar: new AppBar(
+        title: new Text('Tooltip')
       ),
       body: new Builder(
         builder: (BuildContext context) {
           return new Column(
-            alignItems: FlexAlignItems.stretch,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               new Text(_introText, style: theme.textTheme.subhead),
               new Row(

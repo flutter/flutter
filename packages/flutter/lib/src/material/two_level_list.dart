@@ -17,18 +17,18 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 class TwoLevelListItem extends StatelessWidget {
   TwoLevelListItem({
     Key key,
-    this.left,
-    this.center,
-    this.right,
+    this.leading,
+    this.title,
+    this.trailing,
     this.onTap,
     this.onLongPress
   }) : super(key: key) {
-    assert(center != null);
+    assert(title != null);
   }
 
-  final Widget left;
-  final Widget center;
-  final Widget right;
+  final Widget leading;
+  final Widget title;
+  final Widget trailing;
   final GestureTapCallback onTap;
   final GestureLongPressCallback onLongPress;
 
@@ -39,9 +39,9 @@ class TwoLevelListItem extends StatelessWidget {
     return new SizedBox(
       height: kListItemExtent[parentList.type],
       child: new ListItem(
-        left: left,
-        primary: center,
-        right: right,
+        leading: leading,
+        title: title,
+        trailing: trailing,
         onTap: onTap,
         onLongPress: onLongPress
       )
@@ -108,12 +108,12 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
         children: <Widget>[
           new TwoLevelListItem(
             onTap: _handleOnTap,
-            left: config.left,
-            center: new DefaultTextStyle(
+            leading: config.left,
+            title: new DefaultTextStyle(
               style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
               child: config.center
             ),
-            right: new RotationTransition(
+            trailing: new RotationTransition(
               turns: _iconTurns,
               child: new Icon(
                 icon: Icons.expand_more,

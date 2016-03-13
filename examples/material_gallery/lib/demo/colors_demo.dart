@@ -60,8 +60,8 @@ class ColorItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: new BoxDecoration(backgroundColor: color),
       child: new Row(
-        justifyContent: FlexJustifyContent.spaceBetween,
-        alignItems: FlexAlignItems.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           new Text('$prefix$index'),
           new Text(colorString())
@@ -111,9 +111,9 @@ class ColorsDemo extends StatelessWidget {
     return new TabBarSelection<ColorSwatch>(
       values: colorSwatches,
       child: new Scaffold(
-        toolBar: new ToolBar(
+        appBar: new AppBar(
           elevation: 0,
-          center: new Text("Colors"),
+          title: new Text("Colors"),
           tabBar: new TabBar<ColorSwatch>(
             isScrollable: true,
             labels: new Map<ColorSwatch, TabLabel>.fromIterable(colorSwatches, value: (ColorSwatch swatch) {

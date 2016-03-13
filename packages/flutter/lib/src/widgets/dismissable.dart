@@ -25,11 +25,13 @@ enum DismissDirection {
   /// The [Dismissable] can be dismissed by dragging either left or right.
   horizontal,
 
-  /// The [Dismissable] can be dismissed by dragging left only.
-  left,
+  /// The [Dismissable] can be dismissed by dragging in the reverse of the
+  /// reading direction (e.g., from right to left in left-to-right languages).
+  endToStart,
 
-  /// The [Dismissable] can be dismissed by dragging right only.
-  right,
+  /// The [Dismissable] can be dismissed by dragging in the reading direction
+  /// (e.g., from left to right in left-to-right languages).
+  startToEnd,
 
   /// The [Dismissable] can be dismissed by dragging up only.
   up,
@@ -115,13 +117,13 @@ class _DismissableState extends State<Dismissable> {
 
   bool get _directionIsXAxis {
     return config.direction == DismissDirection.horizontal
-        || config.direction == DismissDirection.left
-        || config.direction == DismissDirection.right;
+        || config.direction == DismissDirection.endToStart
+        || config.direction == DismissDirection.startToEnd;
   }
 
   DismissDirection get _dismissDirection {
     if (_directionIsXAxis)
-      return  _dragExtent > 0 ? DismissDirection.right : DismissDirection.left;
+      return  _dragExtent > 0 ? DismissDirection.startToEnd : DismissDirection.endToStart;
     return _dragExtent > 0 ? DismissDirection.down : DismissDirection.up;
   }
 
@@ -162,13 +164,13 @@ class _DismissableState extends State<Dismissable> {
         break;
 
       case DismissDirection.up:
-      case DismissDirection.left:
+      case DismissDirection.endToStart:
         if (_dragExtent + delta < 0)
           _dragExtent += delta;
         break;
 
       case DismissDirection.down:
-      case DismissDirection.right:
+      case DismissDirection.startToEnd:
         if (_dragExtent + delta > 0)
           _dragExtent += delta;
         break;
@@ -201,7 +203,7 @@ class _DismissableState extends State<Dismissable> {
       switch(config.direction) {
         case DismissDirection.horizontal:
           return vx.abs() > _kMinFlingVelocity;
-        case DismissDirection.left:
+        case DismissDirection.endToStart:
           return -vx > _kMinFlingVelocity;
         default:
           return vx > _kMinFlingVelocity;
@@ -275,7 +277,7 @@ class _DismissableState extends State<Dismissable> {
     Widget background = config.background;
     if (config.secondaryBackground != null) {
       final DismissDirection direction = _dismissDirection;
-      if (direction == DismissDirection.left || direction == DismissDirection.up)
+      if (direction == DismissDirection.endToStart || direction == DismissDirection.up)
         background = config.secondaryBackground;
     }
 

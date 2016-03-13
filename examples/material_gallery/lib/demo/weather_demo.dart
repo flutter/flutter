@@ -61,8 +61,8 @@ class _WeatherDemoState extends State<WeatherDemo> {
   Widget build(BuildContext context) {
     if (!assetsLoaded) {
       return new Scaffold(
-        toolBar: new ToolBar(
-          center: new Text("Weather")
+        appBar: new AppBar(
+          title: new Text("Weather")
         ),
         body: new Container(
           decoration: new BoxDecoration(
@@ -73,8 +73,8 @@ class _WeatherDemoState extends State<WeatherDemo> {
     }
 
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text("Weather")
+      appBar: new AppBar(
+        title: new Text("Weather")
       ),
       body: new Material(
         child: new Stack(
@@ -83,7 +83,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
             new Align(
               alignment: new FractionalOffset(0.5, 0.8),
               child: new Row(
-                justifyContent: FlexJustifyContent.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   new WeatherButton(
                     onPressed: () {

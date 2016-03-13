@@ -29,7 +29,7 @@ enum FlexDirection {
 }
 
 /// How the children should be placed along the main axis in a flex layout
-enum FlexJustifyContent {
+enum MainAxisAlignment {
   /// Place the children as close to the start of the main axis as possible
   start,
   /// Place the children as close to the end of the main axis as possible
@@ -45,7 +45,7 @@ enum FlexJustifyContent {
 }
 
 /// How the children should be placed along the cross axis in a flex layout
-enum FlexAlignItems {
+enum CrossAxisAlignment {
   /// Place the children as close to the start of the cross axis as possible
   start,
   /// Place the children as close to the end of the cross axis as possible
@@ -70,23 +70,23 @@ typedef double _ChildSizingFunction(RenderBox child, BoxConstraints constraints)
 /// children. Otherwise, the flex expands to the maximum max-axis size and the
 /// remaining space along is divided among the flexible children according to
 /// their flex factors. Any remaining free space (i.e., if there aren't any
-/// flexible children) is allocated according to the [justifyContent] property.
+/// flexible children) is allocated according to the [mainAxisAlignment] property.
 ///
 /// In the cross axis, children determine their own size. The flex then sizes
 /// its cross axis to fix the largest of its children. The children are then
-/// positioned along the cross axis according to the [alignItems] property.
+/// positioned along the cross axis according to the [crossAxisAlignment] property.
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
 
   RenderFlex({
     List<RenderBox> children,
     FlexDirection direction: FlexDirection.horizontal,
-    FlexJustifyContent justifyContent: FlexJustifyContent.start,
-    FlexAlignItems alignItems: FlexAlignItems.center,
+    MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline
   }) : _direction = direction,
-       _justifyContent = justifyContent,
-       _alignItems = alignItems,
+       _mainAxisAlignment = mainAxisAlignment,
+       _crossAxisAlignment = crossAxisAlignment,
        _textBaseline = textBaseline {
     addAll(children);
   }
@@ -102,21 +102,21 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   /// How the children should be placed along the main axis
-  FlexJustifyContent get justifyContent => _justifyContent;
-  FlexJustifyContent _justifyContent;
-  void set justifyContent (FlexJustifyContent value) {
-    if (_justifyContent != value) {
-      _justifyContent = value;
+  MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
+  MainAxisAlignment _mainAxisAlignment;
+  void set mainAxisAlignment (MainAxisAlignment value) {
+    if (_mainAxisAlignment != value) {
+      _mainAxisAlignment = value;
       markNeedsLayout();
     }
   }
 
   /// How the children should be placed along the cross axis
-  FlexAlignItems get alignItems => _alignItems;
-  FlexAlignItems _alignItems;
-  void set alignItems (FlexAlignItems value) {
-    if (_alignItems != value) {
-      _alignItems = value;
+  CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
+  CrossAxisAlignment _crossAxisAlignment;
+  void set crossAxisAlignment (CrossAxisAlignment value) {
+    if (_crossAxisAlignment != value) {
+      _crossAxisAlignment = value;
       markNeedsLayout();
     }
   }
@@ -336,7 +336,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final double mainSize = (_direction == FlexDirection.horizontal) ? constraints.constrainWidth() : constraints.constrainHeight();
-    final bool canFlex = mainSize < double.INFINITY && justifyContent != FlexJustifyContent.collapse;
+    final bool canFlex = mainSize < double.INFINITY && mainAxisAlignment != MainAxisAlignment.collapse;
     double crossSize = 0.0;  // This is determined as we lay out the children
     double freeSpace = canFlex ? mainSize : 0.0;
     RenderBox child = firstChild;
@@ -352,7 +352,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         totalFlex += childParentData.flex;
       } else {
         BoxConstraints innerConstraints;
-        if (alignItems == FlexAlignItems.stretch) {
+        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
           switch (_direction) {
             case FlexDirection.horizontal:
               innerConstraints = new BoxConstraints(minHeight: constraints.maxHeight,
@@ -386,7 +386,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     // Distribute remaining space to flexible children, and determine baseline.
     double maxBaselineDistance = 0.0;
     double usedSpace = 0.0;
-    if (totalFlex > 0 || alignItems == FlexAlignItems.baseline) {
+    if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
       double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
       child = firstChild;
       while (child != null) {
@@ -394,7 +394,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (flex > 0) {
           double spaceForChild = spacePerFlex * flex;
           BoxConstraints innerConstraints;
-          if (alignItems == FlexAlignItems.stretch) {
+          if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case FlexDirection.horizontal:
                 innerConstraints = new BoxConstraints(minWidth: spaceForChild,
@@ -427,7 +427,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           usedSpace += _getMainSize(child);
           crossSize = math.max(crossSize, _getCrossSize(child));
         }
-        if (alignItems == FlexAlignItems.baseline) {
+        if (crossAxisAlignment == CrossAxisAlignment.baseline) {
           assert(textBaseline != null && 'To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.' is String);
           double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
           if (distance != null)
@@ -473,25 +473,25 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
       _overflow = 0.0;
     }
-    switch (_justifyContent) {
-      case FlexJustifyContent.start:
-      case FlexJustifyContent.collapse:
+    switch (_mainAxisAlignment) {
+      case MainAxisAlignment.start:
+      case MainAxisAlignment.collapse:
         leadingSpace = 0.0;
         betweenSpace = 0.0;
         break;
-      case FlexJustifyContent.end:
+      case MainAxisAlignment.end:
         leadingSpace = remainingSpace;
         betweenSpace = 0.0;
         break;
-      case FlexJustifyContent.center:
+      case MainAxisAlignment.center:
         leadingSpace = remainingSpace / 2.0;
         betweenSpace = 0.0;
         break;
-      case FlexJustifyContent.spaceBetween:
+      case MainAxisAlignment.spaceBetween:
         leadingSpace = 0.0;
         betweenSpace = totalChildren > 1 ? remainingSpace / (totalChildren - 1) : 0.0;
         break;
-      case FlexJustifyContent.spaceAround:
+      case MainAxisAlignment.spaceAround:
         betweenSpace = totalChildren > 0 ? remainingSpace / totalChildren : 0.0;
         leadingSpace = betweenSpace / 2.0;
         break;
@@ -503,18 +503,18 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     while (child != null) {
       final FlexParentData childParentData = child.parentData;
       double childCrossPosition;
-      switch (_alignItems) {
-        case FlexAlignItems.stretch:
-        case FlexAlignItems.start:
+      switch (_crossAxisAlignment) {
+        case CrossAxisAlignment.stretch:
+        case CrossAxisAlignment.start:
           childCrossPosition = 0.0;
           break;
-        case FlexAlignItems.end:
+        case CrossAxisAlignment.end:
           childCrossPosition = crossSize - _getCrossSize(child);
           break;
-        case FlexAlignItems.center:
+        case CrossAxisAlignment.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
           break;
-        case FlexAlignItems.baseline:
+        case CrossAxisAlignment.baseline:
           childCrossPosition = 0.0;
           if (_direction == FlexDirection.horizontal) {
             assert(textBaseline != null);
@@ -595,8 +595,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('direction: $_direction');
-    description.add('justifyContent: $_justifyContent');
-    description.add('alignItems: $_alignItems');
+    description.add('mainAxisAlignment: $_mainAxisAlignment');
+    description.add('crossAxisAlignment: $_crossAxisAlignment');
     description.add('textBaseline: $_textBaseline');
   }
 

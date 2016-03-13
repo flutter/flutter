@@ -97,11 +97,11 @@ final List<String> _kNames = _initNames();
 void main() {
   runApp(new MaterialApp(
     title: 'Media Query Example',
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) {
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-            center: new Text('Media Query Example')
+          appBar: new AppBar(
+            title: new Text('Media Query Example')
           ),
           body: new Material(child: new AdaptiveContainer(names: _kNames))
         );

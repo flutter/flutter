@@ -29,9 +29,9 @@ Enjoy!
 void main() {
   runApp(new MaterialApp(
     title: "Markdown Demo",
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new Scaffold(
-        toolBar: new ToolBar(center: new Text("Markdown Demo")),
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => new Scaffold(
+        appBar: new AppBar(title: new Text("Markdown Demo")),
         body: new Markdown(data: _kMarkdownData)
       )
     }

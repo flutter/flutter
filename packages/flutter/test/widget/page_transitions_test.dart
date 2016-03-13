@@ -18,7 +18,7 @@ void main() {
     testWidgets((WidgetTester tester) {
       GlobalKey containerKey1 = new GlobalKey();
       GlobalKey containerKey2 = new GlobalKey();
-      final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (_) => new Container(key: containerKey1, child: new Text('Home')),
         '/settings': (_) => new Container(key: containerKey2, child: new Text('Settings')),
       };

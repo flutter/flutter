@@ -58,8 +58,8 @@ class SnackBarDemo extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('SnackBar')
+      appBar: new AppBar(
+        title: new Text('SnackBar')
       ),
       body: new Builder(
         // Create an inner BuildContext so that the snackBar onPressed methods

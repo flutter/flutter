@@ -62,8 +62,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Text Fields')
+      appBar: new AppBar(
+        title: new Text('Text Fields')
       ),
       body: new Block(
         padding: const EdgeInsets.all(8.0),
@@ -85,7 +85,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             onSubmitted: _handleInputSubmitted
           ),
           new Row(
-            alignItems: FlexAlignItems.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               new Flexible(
                 child: new Input(

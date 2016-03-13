@@ -28,8 +28,8 @@ class TabsDemo extends StatelessWidget {
     return new TabBarSelection<IconData>(
       values: icons,
       child: new Scaffold(
-        toolBar: new ToolBar(
-          center: new Text("Scrollable Tabs"),
+        appBar: new AppBar(
+          title: new Text("Scrollable Tabs"),
           tabBar: new TabBar<IconData>(
             isScrollable: true,
             labels: new Map<IconData, TabLabel>.fromIterable(

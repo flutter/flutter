@@ -13,7 +13,7 @@ class _SliderDemoState extends State<SliderDemo> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Sliders")),
+      appBar: new AppBar(title: new Text("Sliders")),
       body: new Block(children: <Widget>[
         new Container(
           height: 100.0,
@@ -35,7 +35,7 @@ class _SliderDemoState extends State<SliderDemo> {
                   child: new Text(_value.round().toString().padLeft(3, '0'))
                 ),
               ],
-              justifyContent: FlexJustifyContent.collapse
+              mainAxisAlignment: MainAxisAlignment.collapse
             )
           )
         ),
@@ -51,7 +51,7 @@ class _SliderDemoState extends State<SliderDemo> {
                   child: new Text((_value / 100.0).toStringAsFixed(2))
                 ),
               ],
-              justifyContent: FlexJustifyContent.collapse
+              mainAxisAlignment: MainAxisAlignment.collapse
             )
           )
         )

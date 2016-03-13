@@ -223,8 +223,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   }
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('Drag and Drop Flutter Demo')
+      appBar: new AppBar(
+        title: new Text('Drag and Drop Flutter Demo')
       ),
       body: new Column(
         children: <Widget>[
@@ -250,8 +250,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                   child: new Text('above')
                 ),
               ],
-              alignItems: FlexAlignItems.center,
-              justifyContent: FlexJustifyContent.spaceAround
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround
             )
           ),
           new Flexible(
@@ -271,7 +271,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                 new MovableBall(2, position, moveBall),
                 new MovableBall(3, position, moveBall),
               ],
-              justifyContent: FlexJustifyContent.spaceAround
+              mainAxisAlignment: MainAxisAlignment.spaceAround
             )
           ),
         ]
@@ -283,8 +283,8 @@ class DragAndDropAppState extends State<DragAndDropApp> {
 void main() {
   runApp(new MaterialApp(
     title: 'Drag and Drop Flutter Demo',
-    routes: <String, RouteBuilder>{
-     '/': (RouteArguments args) => new DragAndDropApp()
+    routes: <String, WidgetBuilder>{
+     '/': (BuildContext context) => new DragAndDropApp()
     }
   ));
 }

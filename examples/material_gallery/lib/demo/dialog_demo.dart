@@ -34,8 +34,8 @@ class DialogDemoItem extends StatelessWidget {
       child: new Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: new Row(
-          justifyContent: FlexJustifyContent.start,
-          alignItems: FlexAlignItems.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             new Icon(
               size: 36.0,
@@ -80,8 +80,8 @@ class DialogDemoState extends State<DialogDemo> {
 
     return new Scaffold(
       key: scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Dialogs')
+      appBar: new AppBar(
+        title: new Text('Dialogs')
       ),
       body: new Block(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),

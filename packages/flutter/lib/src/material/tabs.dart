@@ -346,8 +346,8 @@ class _Tab extends StatelessWidget {
           ),
           _buildLabelText()
         ],
-        justifyContent: FlexJustifyContent.center,
-        alignItems: FlexAlignItems.center
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center
       );
     }
 
@@ -1010,7 +1010,7 @@ class TabPageSelector<T> extends StatelessWidget {
           label: 'Page ${selection.index + 1} of ${selection.values.length}',
           child: new Row(
             children: selection.values.map((T tab) => _buildTabIndicator(selection, tab, animation, selectedColor, previousColor)).toList(),
-            justifyContent: FlexJustifyContent.collapse
+            mainAxisAlignment: MainAxisAlignment.collapse
           )
         );
       }

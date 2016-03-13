@@ -61,10 +61,10 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         _dismissDirection = DismissDirection.horizontal;
         break;
       case LeaveBehindDemoAction.leftSwipe:
-        _dismissDirection = DismissDirection.left;
+        _dismissDirection = DismissDirection.endToStart;
         break;
       case LeaveBehindDemoAction.rightSwipe:
-        _dismissDirection = DismissDirection.right;
+        _dismissDirection = DismissDirection.startToEnd;
         break;
     }
   }
@@ -87,7 +87,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         setState(() {
           leaveBehindItems.remove(item);
         });
-        final String action = (direction == DismissDirection.left) ? 'archived' : 'deleted';
+        final String action = (direction == DismissDirection.endToStart) ? 'archived' : 'deleted';
         _scaffoldKey.currentState.showSnackBar(new SnackBar(
           content: new Text('You $action item ${item.index}'),
           action: new SnackBarAction(
@@ -99,13 +99,13 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       background: new Container(
         decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
         child: new ListItem(
-          left: new Icon(icon: Icons.delete, color: Colors.white, size: 36.0)
+          leading: new Icon(icon: Icons.delete, color: Colors.white, size: 36.0)
         )
       ),
       secondaryBackground: new Container(
         decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
         child: new ListItem(
-          right: new Icon(icon: Icons.archive, color: Colors.white, size: 36.0)
+          trailing: new Icon(icon: Icons.archive, color: Colors.white, size: 36.0)
         )
       ),
       child: new Container(
@@ -114,8 +114,8 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           border: new Border(bottom: new BorderSide(color: theme.dividerColor))
         ),
         child: new ListItem(
-          primary: new Text(item.name),
-          secondary: new Text('${item.subject}\n${item.body}'),
+          title: new Text(item.name),
+          subtitle: new Text('${item.subject}\n${item.body}'),
           isThreeLine: true
         )
       )
@@ -125,9 +125,9 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Swipe Items to Dismiss'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Swipe Items to Dismiss'),
+        actions: <Widget>[
           new PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
             items: <PopupMenuEntry<LeaveBehindDemoAction>>[
@@ -143,12 +143,12 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
               ),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.leftSwipe,
-                checked: _dismissDirection == DismissDirection.left,
+                checked: _dismissDirection == DismissDirection.endToStart,
                 child: new Text('Only swipe left')
               ),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.rightSwipe,
-                checked: _dismissDirection == DismissDirection.right,
+                checked: _dismissDirection == DismissDirection.startToEnd,
                 child: new Text('Only swipe right')
               )
             ]

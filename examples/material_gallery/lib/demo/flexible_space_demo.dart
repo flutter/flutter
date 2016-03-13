@@ -47,7 +47,7 @@ class _ContactItem extends StatelessWidget {
 
     List<Widget> rowChildren = <Widget>[
       new Column(
-        alignItems: FlexAlignItems.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: columnChildren
       )
     ];
@@ -60,7 +60,7 @@ class _ContactItem extends StatelessWidget {
     return new Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: new Row(
-        justifyContent: FlexJustifyContent.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: rowChildren
       )
     );
@@ -85,8 +85,8 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         appBarHeight: appBarHeight,
         scrollableKey: scrollableKey,
         appBarBehavior: AppBarBehavior.scroll,
-        toolBar: new ToolBar(
-          right: <Widget>[
+        appBar: new AppBar(
+          actions: <Widget>[
             new IconButton(
               icon: Icons.create,
               tooltip: 'Search'

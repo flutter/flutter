@@ -201,7 +201,7 @@ class _GestureDemoState extends State<GestureDemo> {
                     ]
                   ),
                 ],
-                alignItems: FlexAlignItems.start
+                crossAxisAlignment: CrossAxisAlignment.start
               )
             )
           )
@@ -214,11 +214,11 @@ class _GestureDemoState extends State<GestureDemo> {
 void main() {
   runApp(new MaterialApp(
     theme: new ThemeData.dark(),
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) {
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-              center: new Text('Gestures Demo')),
+          appBar: new AppBar(
+              title: new Text('Gestures Demo')),
           body: new GestureDemo()
         );
       }

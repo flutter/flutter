@@ -61,9 +61,9 @@ void main() {
 
   test('ModalBarrier pops the Navigator when dismissed', () {
     testWidgets((WidgetTester tester) {
-      final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-        '/': (RouteArguments args) => new FirstWidget(),
-        '/modal': (RouteArguments args) => new SecondWidget(),
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => new FirstWidget(),
+        '/modal': (BuildContext context) => new SecondWidget(),
       };
 
       tester.pumpWidget(new MaterialApp(routes: routes));

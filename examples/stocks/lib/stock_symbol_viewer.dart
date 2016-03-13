@@ -37,7 +37,7 @@ class StockSymbolView extends StatelessWidget {
                 child: new StockArrow(percentChange: stock.percentChange)
               ),
             ],
-            justifyContent: FlexJustifyContent.spaceBetween
+            mainAxisAlignment: MainAxisAlignment.spaceBetween
           ),
           new Text('Last Sale', style: headings),
           new Text('$lastSale ($changeInPrice)'),
@@ -60,7 +60,7 @@ class StockSymbolView extends StatelessWidget {
             )
           ),
         ],
-        justifyContent: FlexJustifyContent.collapse
+        mainAxisAlignment: MainAxisAlignment.collapse
       )
     );
   }
@@ -73,8 +73,8 @@ class StockSymbolPage extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text(stock.name)
+      appBar: new AppBar(
+        title: new Text(stock.name)
       ),
       body: new Block(
         children: <Widget>[

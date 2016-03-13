@@ -56,15 +56,15 @@ class MenuDemoState extends State<MenuDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Menus'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Menus'),
+        actions: <Widget>[
           new PopupMenuButton<String>(
             onSelected: showMenuSelection,
             items: <PopupMenuItem<String>>[
               new PopupMenuItem<String>(
-                value: 'ToolBar Menu',
-                child: new Text('ToolBar Menu')
+                value: 'AppBar Menu',
+                child: new Text('AppBar Menu')
               ),
               new PopupMenuItem<String>(
                 value: 'Right Here',
@@ -85,8 +85,8 @@ class MenuDemoState extends State<MenuDemo> {
           // a simple menu with one disabled item. Typically the contents
           // of this "contextual menu" would reflect the app's state.
           new ListItem(
-            primary: new Text('An item with a context menu button'),
-            right: new PopupMenuButton<String>(
+            title: new Text('An item with a context menu button'),
+            trailing: new PopupMenuButton<String>(
               onSelected: showMenuSelection,
               items: <PopupMenuItem<String>>[
                 new PopupMenuItem<String>(
@@ -108,37 +108,37 @@ class MenuDemoState extends State<MenuDemo> {
           // a menu whose items have text labels and icons and a divider
           // That separates the first three items from the last one.
           new ListItem(
-            primary: new Text('An item with a sectioned menu'),
-            right: new PopupMenuButton<String>(
+            title: new Text('An item with a sectioned menu'),
+            trailing: new PopupMenuButton<String>(
               onSelected: showMenuSelection,
               items: <PopupMenuEntry<String>>[
                 new PopupMenuItem<String>(
                   value: 'Preview',
                   child: new ListItem(
-                    left: new Icon(icon: Icons.visibility),
-                    primary: new Text('Preview')
+                    leading: new Icon(icon: Icons.visibility),
+                    title: new Text('Preview')
                   )
                 ),
                 new PopupMenuItem<String>(
                   value: 'Share',
                   child: new ListItem(
-                    left: new Icon(icon: Icons.person_add),
-                    primary: new Text('Share')
+                    leading: new Icon(icon: Icons.person_add),
+                    title: new Text('Share')
                   )
                 ),
                 new PopupMenuItem<String>(
                   value: 'Get Link',
                   child: new ListItem(
-                    left: new Icon(icon: Icons.link),
-                    primary: new Text('Get Link')
+                    leading: new Icon(icon: Icons.link),
+                    title: new Text('Get Link')
                   )
                 ),
                 new PopupMenuDivider(),
                 new PopupMenuItem<String>(
                   value: 'Remove',
                   child: new ListItem(
-                    left: new Icon(icon: Icons.delete),
-                    primary: new Text('Remove')
+                    leading: new Icon(icon: Icons.delete),
+                    title: new Text('Remove')
                   )
                 )
               ]
@@ -151,8 +151,8 @@ class MenuDemoState extends State<MenuDemo> {
             initialValue: _simpleValue,
             onSelected: showMenuSelection,
             child: new ListItem(
-              primary: new Text('An item with a simple menu'),
-              secondary: new Text(_simpleValue)
+              title: new Text('An item with a simple menu'),
+              subtitle: new Text(_simpleValue)
             ),
             items: <PopupMenuItem<String>>[
               new PopupMenuItem<String>(
@@ -172,8 +172,8 @@ class MenuDemoState extends State<MenuDemo> {
           // Pressing the PopupMenuButton on the right of this item shows a menu
           // whose items have checked icons that reflect this app's state.
           new ListItem(
-            primary: new Text('An item with a checklist menu'),
-            right: new PopupMenuButton<String>(
+            title: new Text('An item with a checklist menu'),
+            trailing: new PopupMenuButton<String>(
               onSelected: showCheckedMenuSelections,
               items: <PopupMenuItem<String>>[
                 new CheckedPopupMenuItem<String>(

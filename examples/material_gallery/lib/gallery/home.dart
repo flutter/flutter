@@ -50,7 +50,7 @@ class GalleryHomeState extends State<GalleryHome> {
     return new Scaffold(
       appBarHeight: 128.0,
       drawer: new GalleryDrawer(),
-      toolBar: new ToolBar(
+      appBar: new AppBar(
         flexibleSpace: (BuildContext context) {
           return new Container(
             padding: const EdgeInsets.only(left: 16.0, bottom: 24.0),

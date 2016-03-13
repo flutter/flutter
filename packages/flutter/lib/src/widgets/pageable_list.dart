@@ -12,10 +12,10 @@ import 'scroll_behavior.dart';
 import 'scrollable.dart';
 import 'virtual_viewport.dart';
 
-/// Controls what alignment items use when settling.
-enum ItemsSnapAlignment {
-  item,
-  adjacentItem
+/// Controls how a pageable list should behave during a fling.
+enum PageableListFlingBehavior {
+  canFlingAcrossMultiplePages,
+  stopAtNextPage
 }
 
 /// Scrollable widget that scrolls one "page" at a time.
@@ -33,7 +33,7 @@ class PageableList extends Scrollable {
     ScrollListener onScrollEnd,
     SnapOffsetCallback snapOffsetCallback,
     this.itemsWrap: false,
-    this.itemsSnapAlignment: ItemsSnapAlignment.adjacentItem,
+    this.itemsSnapAlignment: PageableListFlingBehavior.stopAtNextPage,
     this.onPageChanged,
     this.scrollableListPainter,
     this.duration: const Duration(milliseconds: 200),
@@ -48,13 +48,15 @@ class PageableList extends Scrollable {
     onScroll: onScroll,
     onScrollEnd: onScrollEnd,
     snapOffsetCallback: snapOffsetCallback
-  );
+  ) {
+    assert(itemsSnapAlignment != null);
+  }
 
   /// Whether the first item should be revealed after scrolling past the last item.
   final bool itemsWrap;
 
   /// Controls whether a fling always reveals the adjacent item or whether flings can traverse many items.
-  final ItemsSnapAlignment itemsSnapAlignment;
+  final PageableListFlingBehavior itemsSnapAlignment;
 
   /// Called when the currently visible page changes.
   final ValueChanged<int> onPageChanged;
@@ -187,7 +189,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 
   ScrollBehavior<double, double> createScrollBehavior() => scrollBehavior;
 
-  bool get shouldSnapScrollOffset => config.itemsSnapAlignment == ItemsSnapAlignment.item;
+  bool get shouldSnapScrollOffset => config.itemsSnapAlignment == PageableListFlingBehavior.canFlingAcrossMultiplePages;
 
   double snapScrollOffset(double newScrollOffset) {
     final double previousItemOffset = newScrollOffset.floorToDouble();
@@ -205,10 +207,10 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 
   Future<Null> fling(double scrollVelocity) {
     switch(config.itemsSnapAlignment) {
-      case ItemsSnapAlignment.adjacentItem:
-        return _flingToAdjacentItem(scrollVelocity);
-      default:
+      case PageableListFlingBehavior.canFlingAcrossMultiplePages:
         return super.fling(scrollVelocity).then(_notifyPageChanged);
+      case PageableListFlingBehavior.stopAtNextPage:
+        return _flingToAdjacentItem(scrollVelocity);
     }
   }
 

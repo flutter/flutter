@@ -172,7 +172,7 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
     }
 
     return new Column(
-      alignItems: FlexAlignItems.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: blocks
     );
   }
@@ -365,7 +365,7 @@ class _Block {
       }
 
       contents = new Column(
-        alignItems: FlexAlignItems.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: subWidgets
       );
     } else {
@@ -391,7 +391,7 @@ class _Block {
         }
 
         contents = new Row(
-          alignItems: FlexAlignItems.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             new SizedBox(
               width: listIndents.length * markdownStyle.listIndent,

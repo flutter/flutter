@@ -54,7 +54,7 @@ void main() {
   test('Row, Column and FlexJustifyContent.collapse', () {
     final Key flexKey = new Key('flexKey');
 
-    // Row without justifyContent: FlexJustifyContent.collapse
+    // Row without mainAxisAlignment: FlexJustifyContent.collapse
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Center(
         child: new Row(
@@ -69,7 +69,7 @@ void main() {
       expect(renderBox.size.width, equals(800.0));
       expect(renderBox.size.height, equals(100.0));
 
-      // Row with justifyContent: FlexJustifyContent.collapse
+      // Row with mainAxisAlignment: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
         child: new Row(
           children: <Widget>[
@@ -77,7 +77,7 @@ void main() {
             new Container(width: 30.0, height: 100.0)
           ],
           key: flexKey,
-          justifyContent: FlexJustifyContent.collapse
+          mainAxisAlignment: MainAxisAlignment.collapse
         )
       ));
       renderBox = tester.findElementByKey(flexKey).renderObject;
@@ -85,7 +85,7 @@ void main() {
       expect(renderBox.size.height, equals(100.0));
     });
 
-    // Column without justifyContent: FlexJustifyContent.collapse
+    // Column without mainAxisAlignment: FlexJustifyContent.collapse
     testWidgets((WidgetTester tester) {
       tester.pumpWidget(new Center(
         child: new Column(
@@ -100,7 +100,7 @@ void main() {
       expect(renderBox.size.width, equals(100.0));
       expect(renderBox.size.height, equals(600.0));
 
-      // Column with justifyContent: FlexJustifyContent.collapse
+      // Column with mainAxisAlignment: FlexJustifyContent.collapse
       tester.pumpWidget(new Center(
         child: new Column(
           children: <Widget>[
@@ -108,7 +108,7 @@ void main() {
             new Container(width: 100.0, height: 150.0)
           ],
           key: flexKey,
-          justifyContent: FlexJustifyContent.collapse
+          mainAxisAlignment: MainAxisAlignment.collapse
         )
       ));
       renderBox = tester.findElementByKey(flexKey).renderObject;
@@ -133,7 +133,7 @@ void main() {
                 height: 100.0
               )
             ],
-            justifyContent: FlexJustifyContent.collapse
+            mainAxisAlignment: MainAxisAlignment.collapse
           )
         )
       ));
@@ -154,7 +154,7 @@ void main() {
                 height: 100.0
               )
             ],
-            justifyContent: FlexJustifyContent.collapse
+            mainAxisAlignment: MainAxisAlignment.collapse
           )
         )
       ));

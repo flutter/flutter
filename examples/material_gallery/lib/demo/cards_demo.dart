@@ -82,8 +82,8 @@ class TravelDestinationItem extends StatelessWidget {
               child: new Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: new Column(
-                  justifyContent: FlexJustifyContent.start,
-                  alignItems: FlexAlignItems.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     // three line description
                     new Text(destination.description[0], style: descriptionStyle),
@@ -92,8 +92,8 @@ class TravelDestinationItem extends StatelessWidget {
                     // share, explore buttons
                     new Flexible(
                       child: new Row(
-                        justifyContent: FlexJustifyContent.start,
-                        alignItems: FlexAlignItems.end,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
                           new Padding(
                             padding: const EdgeInsets.only(right: 16.0),
@@ -117,8 +117,8 @@ class TravelDestinationItem extends StatelessWidget {
 class CardsDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text("Travel Stream")
+      appBar: new AppBar(
+        title: new Text("Travel Stream")
       ),
       body: new Block(
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),

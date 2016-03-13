@@ -94,8 +94,8 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
       onChanged: _handleTabSelection,
       child: new Scaffold(
         key: scaffoldKey,
-        toolBar: new ToolBar(
-          center: new Text("FAB per Tab"),
+        appBar: new AppBar(
+          title: new Text("FAB per Tab"),
           tabBar: new TabBar<_Page>(
             labels: new Map<_Page, TabLabel>.fromIterable(pages, value: (_Page page) => page.tabLabel)
           )

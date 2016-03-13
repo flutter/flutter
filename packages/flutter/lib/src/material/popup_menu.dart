@@ -150,11 +150,11 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   Widget buildChild() {
     return new ListItem(
       enabled: config.enabled,
-      left: new FadeTransition(
+      leading: new FadeTransition(
         opacity: _opacity,
         child: new Icon(icon: _controller.isDismissed ? null : Icons.done)
       ),
-      primary: config.child
+      title: config.child
     );
   }
 }

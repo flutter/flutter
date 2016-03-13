@@ -105,10 +105,10 @@ class PageableListAppState extends State<PageableListApp> {
     );
   }
 
-  Widget _buildToolBar() {
-    return new ToolBar(
-      center: new Text('PageableList'),
-      right: <Widget>[
+  Widget _buildAppBar() {
+    return new AppBar(
+      title: new Text('PageableList'),
+      actions: <Widget>[
         new Text(scrollDirection == Axis.horizontal ? "horizontal" : "vertical")
       ]
     );
@@ -126,7 +126,7 @@ class PageableListAppState extends State<PageableListApp> {
     return new IconTheme(
       data: const IconThemeData(color: Colors.white),
       child: new Scaffold(
-        toolBar: _buildToolBar(),
+        appBar: _buildAppBar(),
         drawer: _buildDrawer(),
         body: _buildBody(context)
       )
@@ -142,8 +142,8 @@ void main() {
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200]
     ),
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) => new PageableListApp(),
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => new PageableListApp(),
     }
   ));
 }

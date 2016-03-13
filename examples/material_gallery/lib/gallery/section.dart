@@ -39,7 +39,7 @@ class GallerySection extends StatelessWidget {
             appBarHeight: appBarHeight,
             appBarBehavior: AppBarBehavior.scroll,
             scrollableKey: scrollableKey,
-            toolBar: new ToolBar(
+            appBar: new AppBar(
               flexibleSpace: (BuildContext context) => new FlexibleSpaceBar(title: new Text(title))
             ),
             body: new Material(
@@ -49,7 +49,7 @@ class GallerySection extends StatelessWidget {
                 type: MaterialListType.oneLine,
                 children: (demos ?? const <GalleryDemo>[]).map((GalleryDemo demo) {
                   return new ListItem(
-                    primary: new Text(demo.title),
+                    title: new Text(demo.title),
                     onTap: () { showDemo(demo, context, theme); }
                   );
                 })

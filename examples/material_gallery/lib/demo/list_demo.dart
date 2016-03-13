@@ -44,13 +44,13 @@ class ListDemoState extends State<ListDemo> {
           border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
         ),
         child: new Column(
-          justifyContent: FlexJustifyContent.collapse,
-          alignItems: FlexAlignItems.stretch,
+          mainAxisAlignment: MainAxisAlignment.collapse,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             new ListItem(
               dense: true,
-              primary: new Text('One-line'),
-              right: new Radio<ListDemoItemSize>(
+              title: new Text('One-line'),
+              trailing: new Radio<ListDemoItemSize>(
                 value: ListDemoItemSize.oneLine,
                 groupValue: _itemSize,
                 onChanged: changeItemSize
@@ -58,8 +58,8 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              primary: new Text('Two-line'),
-              right: new Radio<ListDemoItemSize>(
+              title: new Text('Two-line'),
+              trailing: new Radio<ListDemoItemSize>(
                 value: ListDemoItemSize.twoLine,
                 groupValue: _itemSize,
                 onChanged: changeItemSize
@@ -67,8 +67,8 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              primary: new Text('Three-line'),
-              right: new Radio<ListDemoItemSize>(
+              title: new Text('Three-line'),
+              trailing: new Radio<ListDemoItemSize>(
                 value: ListDemoItemSize.threeLine,
                 groupValue: _itemSize,
                 onChanged: changeItemSize
@@ -76,8 +76,8 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              primary: new Text('Show Avatar'),
-              right: new Checkbox(
+              title: new Text('Show Avatar'),
+              trailing: new Checkbox(
                 value: _showAvatars,
                 onChanged: (bool value) {
                   setState(() {
@@ -89,8 +89,8 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              primary: new Text('Show Icon'),
-              right: new Checkbox(
+              title: new Text('Show Icon'),
+              trailing: new Checkbox(
                 value: _showIcons,
                 onChanged: (bool value) {
                   setState(() {
@@ -102,8 +102,8 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              primary: new Text('Show Dividers'),
-              right: new Checkbox(
+              title: new Text('Show Dividers'),
+              trailing: new Checkbox(
                 value: _showDividers,
                 onChanged: (bool value) {
                   setState(() {
@@ -115,8 +115,8 @@ class ListDemoState extends State<ListDemo> {
             ),
             new ListItem(
               dense: true,
-              primary: new Text('Dense Layout'),
-              right: new Checkbox(
+              title: new Text('Dense Layout'),
+              trailing: new Checkbox(
                 value: _dense,
                 onChanged: (bool value) {
                   setState(() {
@@ -146,10 +146,10 @@ class ListDemoState extends State<ListDemo> {
     return new ListItem(
       isThreeLine: _itemSize == ListDemoItemSize.threeLine,
       dense: _dense,
-      left: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
-      primary: new Text('This item represents $item'),
-      secondary: secondary,
-      right: _showIcons ? new Icon(icon: Icons.info, color: Theme.of(context).disabledColor) : null
+      leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
+      title: new Text('This item represents $item'),
+      subtitle: secondary,
+      trailing: _showIcons ? new Icon(icon: Icons.info, color: Theme.of(context).disabledColor) : null
     );
   }
 
@@ -174,9 +174,9 @@ class ListDemoState extends State<ListDemo> {
 
     return new Scaffold(
       key: scaffoldKey,
-      toolBar: new ToolBar(
-        center: new Text('Scrolling List\n$itemSizeText$layoutText'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Scrolling List\n$itemSizeText$layoutText'),
+        actions: <Widget>[
           new IconButton(
             icon: Icons.sort_by_alpha,
             tooltip: 'Sort',

@@ -206,11 +206,11 @@ class StockHomeState extends State<StockHome> {
     Navigator.popAndPushNamed(context, '/settings');
   }
 
-  Widget buildToolBar() {
-    return new ToolBar(
+  Widget buildAppBar() {
+    return new AppBar(
       elevation: 0,
-      center: new Text(StockStrings.of(context).title()),
-      right: <Widget>[
+      title: new Text(StockStrings.of(context).title()),
+      actions: <Widget>[
         new IconButton(
           icon: Icons.search,
           onPressed: _handleSearchBegin,
@@ -303,14 +303,14 @@ class StockHomeState extends State<StockHome> {
 
   // TODO(abarth): Should we factor this into a SearchBar in the framework?
   Widget buildSearchBar() {
-    return new ToolBar(
-      left: new IconButton(
+    return new AppBar(
+      leading: new IconButton(
         icon: Icons.arrow_back,
         color: Theme.of(context).accentColor,
         onPressed: _handleSearchEnd,
         tooltip: 'Back'
       ),
-      center: new Input(
+      title: new Input(
         value: _searchQuery,
         autofocus: true,
         hintText: 'Search stocks',
@@ -341,7 +341,7 @@ class StockHomeState extends State<StockHome> {
       values: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
       child: new Scaffold(
         key: _scaffoldKey,
-        toolBar: _isSearching ? buildSearchBar() : buildToolBar(),
+        appBar: _isSearching ? buildSearchBar() : buildAppBar(),
         floatingActionButton: buildFloatingActionButton(),
         drawer: _buildDrawer(context),
         body: new TabBarView<StockHomeTab>(

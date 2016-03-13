@@ -9,32 +9,32 @@ import 'ink_well.dart';
 import 'theme.dart';
 
 /// Material List items are one to three lines of text optionally flanked by icons.
-/// Icons are defined with the [left] and [right] parameters. The first line of text
-/// is not optional and is specified with [primary]. The value of [secondary] will
+/// Icons are defined with the [leading] and [trailing] parameters. The first line of text
+/// is not optional and is specified with [title]. The value of [subtitle] will
 /// occupy the space allocated for an aditional line of text, or two lines if
 /// isThreeLine: true is specified. If dense: true is specified then the overall
 /// height of this list item and the size of the DefaultTextStyles that wrap
-/// the [primary] and [secondary] widget are reduced.
+/// the [title] and [subtitle] widget are reduced.
 class ListItem extends StatelessWidget {
   ListItem({
     Key key,
-    this.left,
-    this.primary,
-    this.secondary,
-    this.right,
+    this.leading,
+    this.title,
+    this.subtitle,
+    this.trailing,
     this.isThreeLine: false,
     this.dense: false,
     this.enabled: true,
     this.onTap,
     this.onLongPress
   }) : super(key: key) {
-    assert(isThreeLine ? secondary != null : true);
+    assert(isThreeLine ? subtitle != null : true);
   }
 
-  final Widget left;
-  final Widget primary;
-  final Widget secondary;
-  final Widget right;
+  final Widget leading;
+  final Widget title;
+  final Widget subtitle;
+  final Widget trailing;
   final bool isThreeLine;
   final bool dense;
   final bool enabled;
@@ -86,7 +86,7 @@ class ListItem extends StatelessWidget {
 
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final bool isTwoLine = !isThreeLine && secondary != null;
+    final bool isTwoLine = !isThreeLine && subtitle != null;
     final bool isOneLine = !isThreeLine && !isTwoLine;
     double itemHeight;
     if (isOneLine)
@@ -103,31 +103,31 @@ class ListItem extends StatelessWidget {
     // Overall, the list item is a Row() with these children.
     final List<Widget> children = <Widget>[];
 
-    if (left != null) {
+    if (leading != null) {
       children.add(new Container(
         margin: new EdgeInsets.only(right: 16.0, top: iconMarginTop),
         width: 40.0,
         child: new Align(
           alignment: new FractionalOffset(0.0, isThreeLine ? 0.0 : 0.5),
-          child: left
+          child: leading
         )
       ));
     }
 
     final Widget primaryLine = new DefaultTextStyle(
       style: primaryTextStyle(context),
-      child: primary ?? new Container()
+      child: title ?? new Container()
     );
     Widget center = primaryLine;
     if (isTwoLine || isThreeLine) {
       center = new Column(
-        justifyContent: FlexJustifyContent.collapse,
-        alignItems: FlexAlignItems.start,
+        mainAxisAlignment: MainAxisAlignment.collapse,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           primaryLine,
           new DefaultTextStyle(
             style: secondaryTextStyle(context),
-            child: secondary
+            child: subtitle
           )
         ]
       );
@@ -136,12 +136,12 @@ class ListItem extends StatelessWidget {
       child: center
     ));
 
-    if (right != null) {
+    if (trailing != null) {
       children.add(new Container(
         margin: new EdgeInsets.only(left: 16.0, top: iconMarginTop),
         child: new Align(
           alignment: new FractionalOffset(1.0, isThreeLine ? 0.0 : 0.5),
-          child: right
+          child: trailing
         )
       ));
     }
@@ -153,7 +153,7 @@ class ListItem extends StatelessWidget {
         height: itemHeight,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: new Row(
-          alignItems: FlexAlignItems.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: children
         )
       )

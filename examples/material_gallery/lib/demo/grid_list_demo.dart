@@ -41,8 +41,8 @@ class GridDemoPhotoItem extends StatelessWidget {
     Navigator.push(context, new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-            center: new Text(photo.title)
+          appBar: new AppBar(
+            title: new Text(photo.title)
           ),
           body: new Material(
             child: new AssetImage(
@@ -72,7 +72,7 @@ class GridDemoPhotoItem extends StatelessWidget {
         return new GridTile(
           header: new GridTileBar(
             backgroundColor: Colors.black.withAlpha(0x08),
-            left: new Icon(icon: Icons.info, color: Colors.white70),
+            leading: new Icon(icon: Icons.info, color: Colors.white70),
             title: new Text(photo.title)
           ),
           child: image
@@ -83,8 +83,8 @@ class GridDemoPhotoItem extends StatelessWidget {
           footer: new GridTileBar(
             backgroundColor: Colors.black.withAlpha(0x08),
             title: new Text(photo.title),
-            caption: new Text(photo.caption),
-            right: new Icon(icon: Icons.info, color: Colors.white70)
+            subtitle: new Text(photo.caption),
+            trailing: new Icon(icon: Icons.info, color: Colors.white70)
           ),
           child: image
         );
@@ -172,9 +172,9 @@ class GridListDemoState extends State<GridListDemo> {
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(
-      toolBar: new ToolBar(
-        center: new Text('Grid List'),
-        right: <Widget>[
+      appBar: new AppBar(
+        title: new Text('Grid List'),
+        actions: <Widget>[
           new IconButton(
             icon: Icons.more_vert,
             onPressed: () { showTileStyleMenu(context); },

@@ -188,7 +188,7 @@ class _InputState extends State<Input> {
       double iconSize = config.isDense ? 18.0 : 24.0;
       double iconTop = topPadding + (textStyle.fontSize - iconSize) / 2.0;
       child = new Row(
-        alignItems: FlexAlignItems.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           new Container(
             margin: new EdgeInsets.only(right: 16.0, top: iconTop),

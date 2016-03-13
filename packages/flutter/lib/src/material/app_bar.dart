@@ -11,12 +11,12 @@ import 'material.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-class ToolBar extends StatelessWidget {
-  ToolBar({
+class AppBar extends StatelessWidget {
+  AppBar({
     Key key,
-    this.left,
-    this.center,
-    this.right,
+    this.leading,
+    this.title,
+    this.actions,
     this.flexibleSpace,
     this.foregroundOpacity: 1.0,
     this.tabBar,
@@ -29,9 +29,9 @@ class ToolBar extends StatelessWidget {
     assert((tabBar != null) ? flexibleSpace == null : true);
   }
 
-  final Widget left;
-  final Widget center;
-  final List<Widget> right;
+  final Widget leading;
+  final Widget title;
+  final List<Widget> actions;
   final WidgetBuilder flexibleSpace;
   final double foregroundOpacity;
   final Widget tabBar;
@@ -40,7 +40,7 @@ class ToolBar extends StatelessWidget {
   final TextTheme textTheme;
   final EdgeInsets padding;
 
-  ToolBar copyWith({
+  AppBar copyWith({
     Key key,
     Widget left,
     Widget center,
@@ -52,11 +52,11 @@ class ToolBar extends StatelessWidget {
     TextTheme textTheme,
     EdgeInsets padding
   }) {
-    return new ToolBar(
+    return new AppBar(
       key: key ?? this.key,
-      left: left ?? this.left,
-      center: center ?? this.center,
-      right: right ?? this.right,
+      leading: left ?? this.leading,
+      title: center ?? this.title,
+      actions: right ?? this.actions,
       flexibleSpace: flexibleSpace ?? this.flexibleSpace,
       foregroundOpacity: foregroundOpacity ?? this.foregroundOpacity,
       tabBar: tabBar ?? this.tabBar,
@@ -98,18 +98,18 @@ class ToolBar extends StatelessWidget {
     }
 
     final List<Widget> toolBarRow = <Widget>[];
-    if (left != null)
-      toolBarRow.add(left);
+    if (leading != null)
+      toolBarRow.add(leading);
     toolBarRow.add(
       new Flexible(
         child: new Padding(
           padding: new EdgeInsets.only(left: 24.0),
-          child: center != null ? new DefaultTextStyle(style: centerStyle, child: center) : null
+          child: title != null ? new DefaultTextStyle(style: centerStyle, child: title) : null
         )
       )
     );
-    if (right != null)
-      toolBarRow.addAll(right);
+    if (actions != null)
+      toolBarRow.addAll(actions);
 
     EdgeInsets combinedPadding = new EdgeInsets.symmetric(horizontal: 8.0);
     if (padding != null)
@@ -117,7 +117,7 @@ class ToolBar extends StatelessWidget {
 
     // If the toolBar's height shrinks below toolBarHeight, it will be clipped and bottom
     // justified. This is so that the toolbar appears to move upwards as its height is reduced.
-    final double toolBarHeight = kToolBarHeight + combinedPadding.top + combinedPadding.bottom;
+    final double toolBarHeight = kAppBarHeight + combinedPadding.top + combinedPadding.bottom;
     final Widget toolBar = new ConstrainedBox(
       constraints: new BoxConstraints(maxHeight: toolBarHeight),
       child: new Padding(
@@ -142,7 +142,7 @@ class ToolBar extends StatelessWidget {
     Widget appBar = toolBar;
     if (tabBar != null) {
       appBar = new Column(
-        justifyContent: FlexJustifyContent.collapse,
+        mainAxisAlignment: MainAxisAlignment.collapse,
         children: <Widget>[toolBar, tabBar]
       );
     } else if (flexibleSpace != null) {

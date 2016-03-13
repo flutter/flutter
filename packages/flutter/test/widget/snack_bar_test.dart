@@ -12,8 +12,8 @@ void main() {
       String helloSnackBar = 'Hello SnackBar';
       Key tapTarget = new Key('tap-target');
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) {
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
             return new Scaffold(
               body: new Builder(
                 builder: (BuildContext context) {
@@ -63,8 +63,8 @@ void main() {
       int snackBarCount = 0;
       Key tapTarget = new Key('tap-target');
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) {
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
             return new Scaffold(
               body: new Builder(
                 builder: (BuildContext context) {
@@ -146,8 +146,8 @@ void main() {
       int time;
       ScaffoldFeatureController<SnackBar, Null> lastController;
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) {
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
             return new Scaffold(
               body: new Builder(
                 builder: (BuildContext context) {

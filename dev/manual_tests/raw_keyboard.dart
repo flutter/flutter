@@ -12,11 +12,11 @@ void main() {
   runApp(
     new MaterialApp(
       title: "Hardware Key Demo",
-      routes: <String, RouteBuilder>{
-        '/': (RouteArguments args) {
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) {
           return new Scaffold(
-            toolBar: new ToolBar(
-              center: new Text("Hardware Key Demo")
+            appBar: new AppBar(
+              title: new Text("Hardware Key Demo")
             ),
             body: new Material(
               child: new RawKeyboardDemo(
@@ -67,7 +67,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           new Text('${_event.type}', style: Typography.black.body2),
           new Text('${_event.keyData.keyCode}', style: Typography.black.display4)
         ],
-        justifyContent: FlexJustifyContent.center
+        mainAxisAlignment: MainAxisAlignment.center
       );
     }
     return new RawKeyboardListener(

@@ -28,7 +28,7 @@ class PersistentBottomSheetDemo extends StatelessWidget {
 
   Widget build(BuildContext notUsed) { // Can't find the Scaffold from this context.
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text("Persistent Bottom Sheet")),
+      appBar: new AppBar(title: new Text("Persistent Bottom Sheet")),
       floatingActionButton: new FloatingActionButton(
         child: new Icon(icon: Icons.add),
         backgroundColor: Colors.redAccent[200]

@@ -28,7 +28,7 @@ class MaterialApp extends WidgetsApp {
     Key key,
     String title,
     ThemeData theme,
-    Map<String, RouteBuilder> routes: const <String, RouteBuilder>{},
+    Map<String, WidgetBuilder> routes: const <String, WidgetBuilder>{},
     RouteFactory onGenerateRoute,
     LocaleChangedCallback onLocaleChanged,
     this.debugShowMaterialGrid: false,
@@ -43,12 +43,10 @@ class MaterialApp extends WidgetsApp {
     color: theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
     routes: routes,
     onGenerateRoute: (RouteSettings settings) {
-      RouteBuilder builder = routes[settings.name];
+      WidgetBuilder builder = routes[settings.name];
       if (builder != null) {
         return new MaterialPageRoute<Null>(
-          builder: (BuildContext context) {
-            return builder(new RouteArguments(context: context));
-          },
+          builder: builder,
           settings: settings
         );
       }

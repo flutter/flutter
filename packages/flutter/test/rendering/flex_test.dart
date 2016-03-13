@@ -80,7 +80,7 @@ void main() {
 
   test('Defaults', () {
     RenderFlex flex = new RenderFlex();
-    expect(flex.alignItems, equals(FlexAlignItems.center));
+    expect(flex.crossAxisAlignment, equals(CrossAxisAlignment.center));
     expect(flex.direction, equals(FlexDirection.horizontal));
   });
 
@@ -122,7 +122,7 @@ void main() {
     expect(box2.size.width, equals(100.0));
     expect(box2.size.height, equals(0.0));
 
-    flex.alignItems = FlexAlignItems.stretch;
+    flex.crossAxisAlignment = CrossAxisAlignment.stretch;
     pumpFrame();
     expect(box1.size.width, equals(0.0));
     expect(box1.size.height, equals(100.0));

@@ -77,13 +77,13 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
       children: indicators
         .map((Widget c) => new Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
-      justifyContent: FlexJustifyContent.center
+      mainAxisAlignment: MainAxisAlignment.center
     );
   }
 
   Widget build(BuildContext context) {
     return new Scaffold(
-      toolBar: new ToolBar(center: new Text('Progress Indicators')),
+      appBar: new AppBar(title: new Text('Progress Indicators')),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.title,
         child: new GestureDetector(

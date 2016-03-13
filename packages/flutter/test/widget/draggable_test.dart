@@ -12,8 +12,8 @@ void main() {
       List<dynamic> accepted = <dynamic>[];
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) { return new Column(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
             children: <Widget>[
               new Draggable<int>(
                 data: 1,
@@ -75,8 +75,8 @@ void main() {
       Point firstLocation, secondLocation;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) { return new Column(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
             children: <Widget>[
               new Draggable<int>(
                 data: 1,
@@ -173,8 +173,8 @@ void main() {
       Point firstLocation, secondLocation;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) { return new Column(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
             children: <Widget>[
               new Draggable<int>(
                 data: 1,
@@ -234,8 +234,8 @@ void main() {
       Point firstLocation, secondLocation;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) { return new Column(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
             children: <Widget>[
               new LongPressDraggable<int>(
                 data: 1,
@@ -285,8 +285,8 @@ void main() {
       Point firstLocation, secondLocation;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) { return new Column(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
             children: <Widget>[
               new Draggable<int>(
                 data: 1,
@@ -337,8 +337,8 @@ void main() {
       Point firstLocation, secondLocation, thirdLocation;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) {
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
             return new Block(
               children: <Widget>[
                 new DragTarget<int>(
@@ -448,8 +448,8 @@ void main() {
       Point firstLocation, secondLocation, thirdLocation;
 
       tester.pumpWidget(new MaterialApp(
-        routes: <String, RouteBuilder>{
-          '/': (RouteArguments args) {
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) {
             return new Block(
               scrollDirection: Axis.horizontal,
               children: <Widget>[

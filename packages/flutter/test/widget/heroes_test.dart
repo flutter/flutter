@@ -12,21 +12,21 @@ Key firstKey = new Key('first');
 Key secondKey = new Key('second');
 Key thirdKey = new Key('third');
 
-final Map<String, RouteBuilder> routes = <String, RouteBuilder>{
-  '/': (RouteArguments args) => new Material(
+final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+  '/': (BuildContext context) => new Material(
     child: new Block(children: <Widget>[
       new Container(height: 100.0, width: 100.0),
       new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
       new Container(height: 100.0, width: 100.0),
-      new FlatButton(child: new Text('two'), onPressed: () => Navigator.pushNamed(args.context, '/two')),
+      new FlatButton(child: new Text('two'), onPressed: () => Navigator.pushNamed(context, '/two')),
     ])
   ),
-  '/two': (RouteArguments args) => new Material(
+  '/two': (BuildContext context) => new Material(
     child: new Block(children: <Widget>[
       new Container(height: 150.0, width: 150.0),
       new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
       new Container(height: 150.0, width: 150.0),
-      new FlatButton(child: new Text('three'), onPressed: () => Navigator.push(args.context, new ThreeRoute())),
+      new FlatButton(child: new Text('three'), onPressed: () => Navigator.push(context, new ThreeRoute())),
     ])
   ),
 };

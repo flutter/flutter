@@ -87,7 +87,7 @@ class Chip extends StatelessWidget {
         ),
         child: new Row(
           children: children,
-          justifyContent: FlexJustifyContent.collapse
+          mainAxisAlignment: MainAxisAlignment.collapse
         )
       )
     );

@@ -126,7 +126,7 @@ class SectorAppState extends State<SectorApp> {
                 )
               ),
             ],
-            justifyContent: FlexJustifyContent.spaceAround
+            mainAxisAlignment: MainAxisAlignment.spaceAround
           )
         ),
         new Flexible(
@@ -143,7 +143,7 @@ class SectorAppState extends State<SectorApp> {
           )
         ),
       ],
-      justifyContent: FlexJustifyContent.spaceBetween
+      mainAxisAlignment: MainAxisAlignment.spaceBetween
     );
   }
 
@@ -151,11 +151,11 @@ class SectorAppState extends State<SectorApp> {
     return new MaterialApp(
       theme: new ThemeData.light(),
       title: 'Sector Layout',
-      routes: <String, RouteBuilder>{
-        '/': (RouteArguments args) {
+      routes: <String, WidgetBuilder>{
+        '/': (BuildContext context) {
           return new Scaffold(
-            toolBar: new ToolBar(
-              center: new Text('Sector Layout in a Widget Tree')
+            appBar: new AppBar(
+              title: new Text('Sector Layout in a Widget Tree')
             ),
             body: buildBody()
           );

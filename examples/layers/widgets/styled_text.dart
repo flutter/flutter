@@ -107,8 +107,8 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
         padding: new EdgeInsets.symmetric(horizontal: 8.0),
         child: new Column(
           children: children,
-          justifyContent: FlexJustifyContent.center,
-          alignItems: FlexAlignItems.start
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start
         )
       )
     );
@@ -118,11 +118,11 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
 void main() {
   runApp(new MaterialApp(
     theme: new ThemeData.light(),
-    routes: <String, RouteBuilder>{
-      '/': (RouteArguments args) {
+    routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) {
         return new Scaffold(
-          toolBar: new ToolBar(
-            center: new Text('Hal and Dave')),
+          appBar: new AppBar(
+            title: new Text('Hal and Dave')),
           body: new Material(
             color: Colors.grey[50],
             child: new StyledTextDemo()
