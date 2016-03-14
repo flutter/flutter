@@ -37,7 +37,7 @@ class GallerySection extends StatelessWidget {
           data: theme,
           child: new Scaffold(
             appBarHeight: appBarHeight,
-            appBarBehavior: AppBarBehavior.scroll,
+            appBarBehavior: AppBarBehavior.under,
             scrollableKey: scrollableKey,
             appBar: new AppBar(
               flexibleSpace: (BuildContext context) => new FlexibleSpaceBar(title: new Text(title))

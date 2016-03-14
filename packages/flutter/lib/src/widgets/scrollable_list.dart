@@ -45,7 +45,7 @@ class ScrollableList extends Scrollable {
 }
 
 class _ScrollableListState extends ScrollableState<ScrollableList> {
-  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+  ScrollBehavior<double, double> createScrollBehavior() => new OverscrollWhenScrollableBehavior();
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {

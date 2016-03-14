@@ -117,7 +117,7 @@ class AppBar extends StatelessWidget {
 
     // If the toolBar's height shrinks below toolBarHeight, it will be clipped and bottom
     // justified. This is so that the toolbar appears to move upwards as its height is reduced.
-    final double toolBarHeight = kAppBarHeight + combinedPadding.top + combinedPadding.bottom;
+    final double toolBarHeight = kToolBarHeight + combinedPadding.top + combinedPadding.bottom;
     final Widget toolBar = new ConstrainedBox(
       constraints: new BoxConstraints(maxHeight: toolBarHeight),
       child: new Padding(
