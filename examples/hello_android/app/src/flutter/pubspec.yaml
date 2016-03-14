@@ -1,0 +1,4 @@
+name: gradle
+dependencies:
+  flutter:
+    path: ../../../../../packages/flutter
