@@ -5,6 +5,7 @@
 package org.domokit.sky.shell;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.opengl.Matrix;
 import android.graphics.Rect;
 import android.os.Build;
@@ -39,6 +40,7 @@ import org.chromium.mojom.pointer.PointerPacket;
 import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
 import org.chromium.mojom.semantics.SemanticsServer;
+import org.chromium.mojom.sky.AppLifecycleState;
 import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
@@ -46,6 +48,7 @@ import org.chromium.mojom.sky.ViewportMetrics;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.domokit.editing.KeyboardImpl;
@@ -112,6 +115,8 @@ public class PlatformViewAndroid extends SurfaceView
         mRawKeyboardState = new RawKeyboardServiceState();
 
         mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
+
+        setLocale(getResources().getConfiguration().locale);
     }
 
     @Override
@@ -128,8 +133,34 @@ public class PlatformViewAndroid extends SurfaceView
         return super.onKeyDown(keyCode, event);
     }
 
-    public SkyEngine getEngine() {
+    SkyEngine getEngine() {
         return mSkyEngine;
+    }
+
+    public void onPause() {
+        mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.PAUSED);
+    }
+
+    public void onResume() {
+        mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.RESUMED);
+    }
+
+    public void pushRoute(String route) {
+        mSkyEngine.pushRoute(route);
+    }
+
+    public void popRoute() {
+        mSkyEngine.popRoute();
+    }
+
+    private void setLocale(Locale locale) {
+        mSkyEngine.onLocaleChanged(locale.getLanguage(), locale.getCountry());
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setLocale(newConfig.locale);
     }
 
     float getDevicePixelRatio() {
