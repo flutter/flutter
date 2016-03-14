@@ -46,7 +46,7 @@ void restoreFileSystem() {
 }
 
 /// Uses in-memory replacments for `dart:io` functionality. Useful in tests.
-void useInMemoryFileSystem({ cwd: '/', ExitFunction exitFunction }) {
+void useInMemoryFileSystem({ String cwd: '/', ExitFunction exitFunction }) {
   MemoryFileSystem memFs = new MemoryFileSystem();
   fs = memFs;
   syncFs = new SyncMemoryFileSystem(backedBy: memFs.storage);

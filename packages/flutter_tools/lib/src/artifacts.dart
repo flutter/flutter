@@ -235,7 +235,7 @@ class ArtifactStore {
   /// Download a file from the given url and write it to the cache.
   /// If [unzip] is true, treat the url as a zip file, and unzip it to the
   /// directory given.
-  static Future _downloadFileToCache(Uri url, FileSystemEntity cachedFile, bool unzip) async {
+  static Future<Null> _downloadFileToCache(Uri url, FileSystemEntity cachedFile, bool unzip) async {
     if (!cachedFile.parent.existsSync())
       cachedFile.parent.createSync(recursive: true);
 

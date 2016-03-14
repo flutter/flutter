@@ -82,7 +82,7 @@ class Adb {
     Socket socket;
     bool isFirstNotification = true;
 
-    controller = new StreamController(
+    controller = new StreamController<List<AdbDevice>>(
       onListen: () async {
         socket = await Socket.connect(InternetAddress.LOOPBACK_IP_V4, adbServerPort);
         printTrace('--> host:track-devices');
@@ -121,7 +121,7 @@ class Adb {
     return controller.stream;
   }
 
-  Future _populateDeviceNames(List<AdbDevice> devices) async {
+  Future<Null> _populateDeviceNames(List<AdbDevice> devices) async {
     for (AdbDevice device in devices) {
       if (device.modelID == null) {
         // If we don't have a name of a device in our cache, call `device -l` to populate it.
@@ -135,7 +135,7 @@ class Adb {
     }
   }
 
-  Future _populateDeviceCache() async {
+  Future<Null> _populateDeviceCache() async {
     List<AdbDevice> devices = await listDevices();
     for (AdbDevice device in devices)
       _idToNameCache[device.id] = device.modelID;

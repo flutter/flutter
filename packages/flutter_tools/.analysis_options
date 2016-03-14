@@ -16,14 +16,13 @@ analyzer:
     strong_mode_static_type_error: ignore
     strong_mode_down_cast_composite: ignore
     type_argument_not_matching_bounds: ignore
-    argument_type_not_assignable: ignore
     # we allow having TODOs in the code
     todo: ignore
 linter:
   rules:
     - avoid_empty_else
     - always_declare_return_types
-    # - always_specify_types # still a lot of work to do before enabling this one
+    - always_specify_types
     # - annotate_overrides # still a lot of work to do before enabling this one
     # - avoid_as # https://github.com/dart-lang/linter/issues/195
     - avoid_init_to_null

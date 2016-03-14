@@ -22,7 +22,7 @@ class RunMojoCommand extends FlutterCommand {
   final String description = 'Run a Flutter app in mojo (from github.com/domokit/mojo).';
   final bool _hideCommand;
 
-  RunMojoCommand({ hideCommand: false }) : _hideCommand = hideCommand {
+  RunMojoCommand({ bool hideCommand: false }) : _hideCommand = hideCommand {
     argParser.addFlag('android', negatable: false, help: 'Run on an Android device');
     argParser.addFlag('checked', negatable: false, help: 'Run Flutter in checked mode');
     argParser.addFlag('mojo-debug', negatable: false, help: 'Use Debug build of mojo');
@@ -64,7 +64,7 @@ class RunMojoCommand extends FlutterCommand {
   }
 
   String _getMojoShellPath() {
-    final mojoBuildType = argResults['mojo-debug']  ? 'Debug' : 'Release';
+    final String mojoBuildType = argResults['mojo-debug']  ? 'Debug' : 'Release';
     return _makePathAbsolute(path.join(argResults['mojo-path'], 'out', mojoBuildType, 'mojo_shell'));
   }
 

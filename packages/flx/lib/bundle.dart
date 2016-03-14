@@ -72,14 +72,14 @@ class Bundle {
     this.path,
     this.manifest,
     List<int> contentBytes,
-    AsymmetricKeyPair keyPair
+    AsymmetricKeyPair<PublicKey, PrivateKey> keyPair
   }) : _contentBytes = contentBytes {
     assert(path != null);
     assert(manifest != null);
     assert(_contentBytes != null);
     manifestBytes = serializeManifest(manifest, keyPair?.publicKey, _contentBytes);
     signatureBytes = signManifest(manifestBytes, keyPair?.privateKey);
-    _openContentStream = () => new Stream.fromIterable(<List<int>>[_contentBytes]);
+    _openContentStream = () => new Stream<List<int>>.fromIterable(<List<int>>[_contentBytes]);
   }
 
   final String path;

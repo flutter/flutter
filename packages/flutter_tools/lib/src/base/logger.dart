@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-final _terminal = new _AnsiTerminal();
+final _AnsiTerminal _terminal = new _AnsiTerminal();
 
 abstract class Logger {
   bool get isVerbose => false;

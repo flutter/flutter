@@ -240,7 +240,7 @@ abstract class DevicePortForwarder {
   Future<int> forward(int devicePort, {int hostPort: null});
 
   /// Stops forwarding [forwardedPort].
-  Future unforward(ForwardedPort forwardedPort);
+  Future<Null> unforward(ForwardedPort forwardedPort);
 }
 
 /// Read the log for a particular device. Subclasses must implement `hashCode`
@@ -255,16 +255,16 @@ abstract class DeviceLogReader {
   Stream<String> get lines;
 
   /// Start reading logs from the device.
-  Future start();
+  Future<Null> start();
 
   /// Actively reading lines from the log?
   bool get isReading;
 
   /// Actively stop reading logs from the device.
-  Future stop();
+  Future<Null> stop();
 
   /// Completes when the log is finished.
-  Future get finished;
+  Future<int> get finished;
 
   int get hashCode;
   bool operator ==(dynamic other);

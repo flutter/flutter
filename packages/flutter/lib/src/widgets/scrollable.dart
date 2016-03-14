@@ -500,10 +500,11 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     return fling(scrollVelocity.clamp(-kMaxFlingVelocity, kMaxFlingVelocity)).then(_endScroll);
   }
 
-  void _endScroll([_]) {
+  Null _endScroll([Null _]) {
     _numberOfInProgressScrolls -= 1;
     if (_numberOfInProgressScrolls == 0)
       dispatchOnScrollEnd();
+    return null;
   }
 
   /// Calls the dispatchOnScrollEnd callback.

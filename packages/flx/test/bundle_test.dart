@@ -8,7 +8,7 @@ import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
 import 'package:test/test.dart';
 
-Future main() async {
+Future<Null> main() async {
   // The following constant was generated via the openssl shell commands:
   // openssl ecparam -genkey -name prime256v1 -out privatekey.pem
   // openssl ec -in privatekey.pem -outform DER | base64
@@ -28,9 +28,10 @@ Future main() async {
   Directory tempDir = await Directory.systemTemp.createTempSync('bundle_test');
   String bundlePath = tempDir.path + '/bundle.flx';
 
-  AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
+  AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
   Map<String, dynamic> manifest = JSON.decode(UTF8.decode(
-      serializeManifest(kManifest, keyPair.publicKey, kTestBytes)));
+    serializeManifest(kManifest, keyPair.publicKey, kTestBytes)
+  ));
 
   test('verifyContent works', () async {
     Bundle bundle = new Bundle.fromContent(

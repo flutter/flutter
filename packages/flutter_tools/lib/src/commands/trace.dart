@@ -41,7 +41,7 @@ class TraceCommand extends FlutterCommand {
       // Setting neither flags or both flags means do both commands and wait
       // duration seconds in between.
       device.startTracing(androidApp);
-      await new Future.delayed(
+      await new Future<Null>.delayed(
         new Duration(seconds: int.parse(argResults['duration'])),
         () => _stopTracing(device, androidApp)
       );
@@ -53,7 +53,7 @@ class TraceCommand extends FlutterCommand {
     return 0;
   }
 
-  Future _stopTracing(AndroidDevice android, AndroidApk androidApp) async {
+  Future<Null> _stopTracing(AndroidDevice android, AndroidApk androidApp) async {
     String tracePath = await android.stopTracing(androidApp, outPath: argResults['out']);
     if (tracePath == null) {
       printError('No trace file saved.');

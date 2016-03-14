@@ -62,7 +62,7 @@ void main() {
             () async => retryCount++,
             new Duration(milliseconds: 30),
             new Duration(milliseconds: 10),
-            predicate: (value) => value == 2
+            predicate: (int value) => value == 2
           ),
           completion(2)
         );
@@ -85,7 +85,7 @@ void main() {
           },
           new Duration(milliseconds: 7),
           new Duration(milliseconds: 2)
-        ).catchError((error, stackTrace) {
+        ).catchError((dynamic error, dynamic stackTrace) {
           timedOut = true;
           lastError = error;
           lastStackTrace = stackTrace;

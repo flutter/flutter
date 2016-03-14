@@ -16,7 +16,7 @@ void main() {
       ServiceProtocolDiscovery discoverer =
           new ServiceProtocolDiscovery(logReader);
       // Get next port future.
-      Future nextPort = discoverer.nextPort();
+      Future<int> nextPort = discoverer.nextPort();
       expect(nextPort, isNotNull);
       // Inject some lines.
       logReader.addLine('HELLO WORLD');

@@ -106,7 +106,7 @@ class DriveCommand extends RunCommandBase {
     try {
       return await testRunner([testFile])
         .then((_) => 0)
-        .catchError((error, stackTrace) {
+        .catchError((dynamic error, dynamic stackTrace) {
           printError('CAUGHT EXCEPTION: $error\n$stackTrace');
           return 1;
         });
@@ -182,9 +182,9 @@ Future<Device> findTargetDevice() async {
     // we look for an Android device. If there's one, we use that. Otherwise,
     // we launch a new iOS Simulator.
     Device reusableDevice = devices.firstWhere(
-      (d) => d.isLocalEmulator,
+      (Device d) => d.isLocalEmulator,
       orElse: () {
-        return devices.firstWhere((d) => d is AndroidDevice,
+        return devices.firstWhere((Device d) => d is AndroidDevice,
             orElse: () => null);
       }
     );
@@ -210,7 +210,7 @@ Future<Device> findTargetDevice() async {
       return null;
     } else if (devices.length > 1) {
       printStatus('Found multiple connected devices:');
-      printStatus(devices.map((d) => '  - ${d.name}\n').join(''));
+      printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
     }
     printStatus('Using device ${devices.first.name}.');
     return devices.first;

@@ -8,7 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flx/signing.dart';
 import 'package:test/test.dart';
 
-Future main() async {
+Future<Null> main() async {
   // The following constant was generated via the openssl shell commands:
   // openssl ecparam -genkey -name prime256v1 -out privatekey.pem
   // openssl ec -in privatekey.pem -outform DER | base64
@@ -42,18 +42,21 @@ Future main() async {
   keyGenerator.init(keyGeneratorParams);
 
   test('can read openssl key pair', () {
-    AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
+    AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
     expect(keyPair != null, equals(true));
-    expect(keyPair.privateKey.d.intValue(), equals(kPrivateKeyD));
-    expect(keyPair.publicKey.Q.x.toBigInteger().intValue(), equals(kPublicKeyQx));
-    expect(keyPair.publicKey.Q.y.toBigInteger().intValue(), equals(kPublicKeyQy));
+    ECPrivateKey keyPairPrivateKey = keyPair.privateKey;
+    ECPublicKey keyPairPublicKey = keyPair.publicKey;
+    expect(keyPairPrivateKey.d.intValue(), equals(kPrivateKeyD));
+    expect(keyPairPublicKey.Q.x.toBigInteger().intValue(), equals(kPublicKeyQx));
+    expect(keyPairPublicKey.Q.y.toBigInteger().intValue(), equals(kPublicKeyQy));
   });
 
   test('serializeManifest adds key and content-hash', () {
-    AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
-    Uint8List manifestBytes = serializeManifest(kManifest, keyPair.publicKey, kTestBytes);
+    AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
+    ECPublicKey keyPairPublicKey = keyPair.publicKey;
+    Uint8List manifestBytes = serializeManifest(kManifest, keyPairPublicKey, kTestBytes);
     Map<String, dynamic> decodedManifest = JSON.decode(UTF8.decode(manifestBytes));
-    String expectedKey = BASE64.encode(keyPair.publicKey.Q.getEncoded());
+    String expectedKey = BASE64.encode(keyPairPublicKey.Q.getEncoded());
     expect(decodedManifest != null, equals(true));
     expect(decodedManifest['name'], equals(kManifest['name']));
     expect(decodedManifest['version'], equals(kManifest['version']));
@@ -62,10 +65,13 @@ Future main() async {
   });
 
   test('signManifest and verifyManifestSignature work', () {
-    AsymmetricKeyPair keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
+    AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyPairFromPrivateKeyBytes(kPrivateKeyDER);
+    ECPrivateKey keyPairPrivateKey = keyPair.privateKey;
+    ECPublicKey keyPairPublicKey = keyPair.publicKey;
     Map<String, dynamic> manifest = JSON.decode(UTF8.decode(
-        serializeManifest(kManifest, keyPair.publicKey, kTestBytes)));
-    Uint8List signatureBytes = signManifest(kTestBytes, keyPair.privateKey);
+      serializeManifest(kManifest, keyPairPublicKey, kTestBytes))
+    );
+    Uint8List signatureBytes = signManifest(kTestBytes, keyPairPrivateKey);
 
     bool verifies = verifyManifestSignature(manifest, kTestBytes, signatureBytes);
     expect(verifies, equals(true));
@@ -79,11 +85,14 @@ Future main() async {
   });
 
   test('signing works with arbitrary key', () {
-    AsymmetricKeyPair keyPair = keyGenerator.generateKeyPair();
-    String failReason = 'offending private key: ${keyPair.privateKey.d}';
+    AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyGenerator.generateKeyPair();
+    ECPrivateKey keyPairPrivateKey = keyPair.privateKey;
+    ECPublicKey keyPairPublicKey = keyPair.publicKey;
+    String failReason = 'offending private key: ${keyPairPrivateKey.d}';
     Map<String, dynamic> manifest = JSON.decode(UTF8.decode(
-        serializeManifest(kManifest, keyPair.publicKey, kTestBytes)));
-    Uint8List signatureBytes = signManifest(kTestBytes, keyPair.privateKey);
+      serializeManifest(kManifest, keyPairPublicKey, kTestBytes))
+    );
+    Uint8List signatureBytes = signManifest(kTestBytes, keyPairPrivateKey);
 
     bool verifies = verifyManifestSignature(manifest, kTestBytes, signatureBytes);
     expect(verifies, equals(true), reason: failReason);
@@ -97,17 +106,18 @@ Future main() async {
   });
 
   test('verifyContentHash works', () async {
-    Stream contentStream = new Stream.fromIterable(kTestBytesList);
+    Stream<Uint8List> contentStream = new Stream<Uint8List>.fromIterable(kTestBytesList);
     bool verifies = await verifyContentHash(new BigInteger(kTestHash), contentStream);
     expect(verifies, equals(true));
 
     // Ensure it fails with invalid hash or content.
-    contentStream = new Stream.fromIterable(kTestBytesList);
+    contentStream = new Stream<Uint8List>.fromIterable(kTestBytesList);
     verifies = await verifyContentHash(new BigInteger(0xdeadbeef), contentStream);
     expect(verifies, equals(false));
 
-    Stream badContentStream =
-        new Stream.fromIterable([new Uint8List.fromList(<int>[42])]);
+    Stream<Uint8List> badContentStream = new Stream<Uint8List>.fromIterable(
+      <Uint8List>[new Uint8List.fromList(<int>[42])]
+    );
     verifies = await verifyContentHash(new BigInteger(kTestHash), badContentStream);
     expect(verifies, equals(false));
   });

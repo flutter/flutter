@@ -38,7 +38,7 @@ class _Asset {
 
 const String _kMaterialIconsKey = 'fonts/MaterialIcons-Regular.ttf';
 
-List _getMaterialFonts() {
+List<Map<String, dynamic>> _getMaterialFonts() {
   return [{
     'family': 'MaterialIcons',
     'fonts': [{
@@ -57,7 +57,7 @@ List<_Asset> _getMaterialAssets() {
   ];
 }
 
-Map<_Asset, List<_Asset>> _parseAssets(Map manifestDescriptor, String assetBase) {
+Map<_Asset, List<_Asset>> _parseAssets(Map<String, dynamic> manifestDescriptor, String assetBase) {
   Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
   if (manifestDescriptor == null)
     return result;
@@ -112,8 +112,8 @@ ZipEntry _createAssetManifest(Map<_Asset, List<_Asset>> assets) {
   return new ZipEntry.fromString('AssetManifest.json', JSON.encode(json));
 }
 
-ZipEntry _createFontManifest(Map manifestDescriptor, List additionalFonts) {
-  List fonts = [];
+ZipEntry _createFontManifest(Map<String, dynamic> manifestDescriptor, List<Map<String, dynamic>> additionalFonts) {
+  List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (additionalFonts != null)
     fonts.addAll(additionalFonts);
   if (manifestDescriptor != null && manifestDescriptor.containsKey('fonts'))
@@ -167,7 +167,7 @@ Future<int> build(
   String workingDirPath: defaultWorkingDirPath,
   bool precompiledSnapshot: false
 }) async {
-  Map manifestDescriptor = _loadManifest(manifestPath);
+  Map<String, dynamic> manifestDescriptor = _loadManifest(manifestPath);
   String assetBasePath = path.dirname(path.absolute(manifestPath));
 
   File snapshotFile;
@@ -197,7 +197,7 @@ Future<int> build(
 }
 
 Future<int> assemble({
-  Map manifestDescriptor: const {},
+  Map<String, dynamic> manifestDescriptor: const <String, dynamic>{},
   File snapshotFile,
   String assetBasePath: defaultAssetBasePath,
   String outputPath: defaultFlxOutputPath,
@@ -244,7 +244,7 @@ Future<int> assemble({
   if (fontManifest != null)
     zipBuilder.addEntry(fontManifest);
 
-  AsymmetricKeyPair keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
+  AsymmetricKeyPair<PublicKey, PrivateKey> keyPair = keyPairFromPrivateKeyFileSync(privateKeyPath);
   printTrace('KeyPair from $privateKeyPath: $keyPair.');
 
   if (keyPair != null) {

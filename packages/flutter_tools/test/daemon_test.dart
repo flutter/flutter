@@ -45,15 +45,15 @@ void main() {
     });
 
     _testUsingContext('daemon.version', () async {
-      StreamController<Map<String, dynamic>> commands = new StreamController();
-      StreamController<Map<String, dynamic>> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
         (Map<String, dynamic> result) => responses.add(result),
         notifyingLogger: notifyingLogger
       );
-      commands.add({'id': 0, 'method': 'daemon.version'});
-      Map response = await responses.stream.where(_notEvent).first;
+      commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.version'});
+      Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
       expect(response['result'] is String, true);
@@ -61,8 +61,8 @@ void main() {
 
     _testUsingContext('daemon.logMessage', () {
       return appContext.runInZone(() async {
-        StreamController<Map<String, dynamic>> commands = new StreamController();
-        StreamController<Map<String, dynamic>> responses = new StreamController();
+        StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+        StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
         daemon = new Daemon(
           commands.stream,
           (Map<String, dynamic> result) => responses.add(result),
@@ -81,8 +81,8 @@ void main() {
     });
 
     _testUsingContext('daemon.shutdown', () async {
-      StreamController<Map<String, dynamic>> commands = new StreamController();
-      StreamController<Map<String, dynamic>> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
         (Map<String, dynamic> result) => responses.add(result),
@@ -98,8 +98,8 @@ void main() {
       DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
-      StreamController<Map<String, dynamic>> commands = new StreamController();
-      StreamController<Map<String, dynamic>> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
         (Map<String, dynamic> result) => responses.add(result),
@@ -108,21 +108,21 @@ void main() {
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });
-      Map response = await responses.stream.where(_notEvent).first;
+      Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['error'], contains('deviceId is required'));
     });
 
     _testUsingContext('device.getDevices', () async {
-      StreamController<Map<String, dynamic>> commands = new StreamController();
-      StreamController<Map<String, dynamic>> responses = new StreamController();
+      StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
         (Map<String, dynamic> result) => responses.add(result),
         notifyingLogger: notifyingLogger
       );
       commands.add({'id': 0, 'method': 'device.getDevices'});
-      Map response = await responses.stream.where(_notEvent).first;
+      Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['result'], isList);
     });

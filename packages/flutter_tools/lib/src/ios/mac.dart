@@ -181,7 +181,7 @@ String _getIOSEngineRevision(ApplicationPackage app) {
   }
 }
 
-Future _addServicesToBundle(Directory bundle) async {
+Future<Null> _addServicesToBundle(Directory bundle) async {
   List<Map<String, String>> services = [];
   printTrace("Trying to resolve native pub services.");
 
@@ -200,7 +200,7 @@ Future _addServicesToBundle(Directory bundle) async {
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
-Future _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
+Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
   printTrace("Copying service frameworks to '${path.absolute(frameworksDirectory.path)}'.");
   frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {

@@ -12,7 +12,7 @@ import 'package:bignum/bignum.dart';
 import 'package:crypto/crypto.dart';
 import 'package:pointycastle/pointycastle.dart';
 
-export 'package:pointycastle/pointycastle.dart' show AsymmetricKeyPair;
+export 'package:pointycastle/pointycastle.dart' show AsymmetricKeyPair, PublicKey, PrivateKey;
 
 // The ECDSA algorithm parameters we're using. These match the parameters used
 // by the Flutter updater package.
@@ -50,7 +50,7 @@ class CipherParameters {
   SecureRandom _random;
   void _initRandom(Uint8List key, Uint8List iv) {
     KeyParameter keyParam = new KeyParameter(key);
-    ParametersWithIV params = new ParametersWithIV(keyParam, iv);
+    ParametersWithIV<KeyParameter> params = new ParametersWithIV<KeyParameter>(keyParam, iv);
     _random = new SecureRandom('AES/CTR/AUTO-SEED-PRNG')
         ..seed(params);
   }
@@ -65,7 +65,7 @@ final CipherParameters _params = CipherParameters._init();
 
 // Returns a serialized manifest, with the public key and hash of the content
 // included.
-Uint8List serializeManifest(Map manifestDescriptor, ECPublicKey publicKey, Uint8List zipBytes) {
+Uint8List serializeManifest(Map<String, dynamic> manifestDescriptor, ECPublicKey publicKey, Uint8List zipBytes) {
   if (manifestDescriptor == null)
     return null;
   final List<String> kSavedKeys = <String>[
@@ -73,8 +73,8 @@ Uint8List serializeManifest(Map manifestDescriptor, ECPublicKey publicKey, Uint8
     'version',
     'update-url'
   ];
-  Map outputManifest = new Map();
-  manifestDescriptor.forEach((key, value) {
+  Map<String, dynamic> outputManifest = new Map<String, dynamic>();
+  manifestDescriptor.forEach((String key, dynamic value) {
     if (kSavedKeys.contains(key))
       outputManifest[key] = value;
   });
@@ -97,8 +97,8 @@ Uint8List signManifest(Uint8List manifestBytes, ECPrivateKey privateKey) {
   if (manifestBytes == null || privateKey == null)
     return new Uint8List(0);
   Signer signer = new Signer(_params.signerAlgorithm);
-  PrivateKeyParameter params = new PrivateKeyParameter(privateKey);
-  signer.init(true, new ParametersWithRandom(params, _params.random));
+  PrivateKeyParameter<PrivateKey> params = new PrivateKeyParameter<PrivateKey>(privateKey);
+  signer.init(true, new ParametersWithRandom<PrivateKeyParameter<PrivateKey>>(params, _params.random));
   ECSignature signature = signer.generateSignature(manifestBytes);
   ASN1Sequence asn1 = new ASN1Sequence()
     ..add(new ASN1Integer(signature.r))
@@ -115,10 +115,10 @@ bool verifyManifestSignature(Map<String, dynamic> manifest,
 
   List<int> keyBytes = BASE64.decode(manifest['key']);
   ECPoint q = _params.domain.curve.decodePoint(keyBytes);
-  ECPublicKey publicKey = new ECPublicKey(q, _params.domain);
+  PublicKey publicKey = new ECPublicKey(q, _params.domain);
 
   Signer signer = new Signer(_params.signerAlgorithm);
-  signer.init(false, new PublicKeyParameter(publicKey));
+  signer.init(false, new PublicKeyParameter<PublicKey>(publicKey));
   return signer.verifySignature(manifestBytes, signature);
 }
 
@@ -166,24 +166,24 @@ ECSignature _asn1ParseSignature(Uint8List signature) {
   }
 }
 
-ECPublicKey _publicKeyFromPrivateKey(ECPrivateKey privateKey) {
+PublicKey _publicKeyFromPrivateKey(ECPrivateKey privateKey) {
   ECPoint Q = privateKey.parameters.G * privateKey.d;
   return new ECPublicKey(Q, privateKey.parameters);
 }
 
-AsymmetricKeyPair keyPairFromPrivateKeyFileSync(String privateKeyPath) {
+AsymmetricKeyPair<PublicKey, PrivateKey> keyPairFromPrivateKeyFileSync(String privateKeyPath) {
   File file = new File(privateKeyPath);
   if (!file.existsSync())
     return null;
   return keyPairFromPrivateKeyBytes(file.readAsBytesSync());
 }
 
-AsymmetricKeyPair keyPairFromPrivateKeyBytes(List<int> privateKeyBytes) {
+AsymmetricKeyPair<PublicKey, PrivateKey> keyPairFromPrivateKeyBytes(List<int> privateKeyBytes) {
   ECPrivateKey privateKey = _asn1ParsePrivateKey(
       _params.domain, new Uint8List.fromList(privateKeyBytes));
   if (privateKey == null)
     return null;
 
-  ECPublicKey publicKey = _publicKeyFromPrivateKey(privateKey);
-  return new AsymmetricKeyPair(publicKey, privateKey);
+  PublicKey publicKey = _publicKeyFromPrivateKey(privateKey);
+  return new AsymmetricKeyPair<PublicKey, PrivateKey>(publicKey, privateKey);
 }

@@ -180,7 +180,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future _forwardObservatoryPort(int port) async {
+  Future<Null> _forwardObservatoryPort(int port) async {
     bool portWasZero = port == 0;
 
     try {
@@ -485,8 +485,8 @@ class _AdbLogReader extends DeviceLogReader {
       new StreamController<String>.broadcast();
 
   Process _process;
-  StreamSubscription _stdoutSubscription;
-  StreamSubscription _stderrSubscription;
+  StreamSubscription<String> _stdoutSubscription;
+  StreamSubscription<String> _stderrSubscription;
 
   Stream<String> get lines => _linesStreamController.stream;
 
@@ -494,9 +494,9 @@ class _AdbLogReader extends DeviceLogReader {
 
   bool get isReading => _process != null;
 
-  Future get finished => _process != null ? _process.exitCode : new Future.value(0);
+  Future<int> get finished => _process != null ? _process.exitCode : new Future<int>.value(0);
 
-  Future start() async {
+  Future<Null> start() async {
     if (_process != null)
       throw new StateError('_AdbLogReader must be stopped before it can be started.');
 
@@ -516,7 +516,7 @@ class _AdbLogReader extends DeviceLogReader {
     _process.exitCode.then(_onExit);
   }
 
-  Future stop() async {
+  Future<Null> stop() async {
     if (_process == null)
       throw new StateError('_AdbLogReader must be started before it can be stopped.');
 
@@ -604,7 +604,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
-  Future unforward(ForwardedPort forwardedPort) async {
+  Future<Null> unforward(ForwardedPort forwardedPort) async {
     runCheckedSync(device.adbCommandForDevice(
       <String>['forward', '--remove', 'tcp:${forwardedPort.hostPort}']
     ));

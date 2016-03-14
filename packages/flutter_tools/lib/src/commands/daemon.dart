@@ -53,7 +53,7 @@ class DaemonCommand extends FlutterCommand {
           return JSON.decode(line);
         });
 
-      Daemon daemon = new Daemon(commandStream, (Map command) {
+      Daemon daemon = new Daemon(commandStream, (Map<String, dynamic> command) {
         stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
       }, daemonCommand: this, notifyingLogger: notifyingLogger);
 
@@ -73,7 +73,7 @@ typedef void DispatchComand(Map<String, dynamic> command);
 typedef Future<dynamic> CommandHandler(dynamic args);
 
 class Daemon {
-  Daemon(Stream<Map> commandStream, this.sendCommand, {
+  Daemon(Stream<Map<String, dynamic>> commandStream, this.sendCommand, {
     this.daemonCommand,
     this.notifyingLogger
   }) {
@@ -84,7 +84,7 @@ class Daemon {
 
     // Start listening.
     commandStream.listen(
-      (Map request) => _handleRequest(request),
+      (Map<String, dynamic> request) => _handleRequest(request),
       onDone: () => _onExitCompleter.complete(0)
     );
   }
@@ -106,7 +106,7 @@ class Daemon {
 
   Future<int> get onExit => _onExitCompleter.future;
 
-  void _handleRequest(Map request) {
+  void _handleRequest(Map<String, dynamic> request) {
     // {id, method, params}
 
     // [id] is an opaque type to us.
@@ -133,7 +133,7 @@ class Daemon {
     }
   }
 
-  void _send(Map map) => sendCommand(map);
+  void _send(Map<String, dynamic> map) => sendCommand(map);
 
   void shutdown() {
     _domainMap.values.forEach((Domain domain) => domain.dispose());
@@ -147,7 +147,7 @@ abstract class Domain {
 
   final Daemon daemon;
   final String name;
-  final Map<String, CommandHandler> _handlers = {};
+  final Map<String, CommandHandler> _handlers = <String, CommandHandler>{};
 
   void registerHandler(String name, CommandHandler handler) {
     _handlers[name] = handler;
@@ -158,18 +158,18 @@ abstract class Domain {
   String toString() => name;
 
   void handleCommand(String command, dynamic id, dynamic args) {
-    new Future.sync(() {
+    new Future<dynamic>.sync(() {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
       throw 'command not understood: $name.$command';
-    }).then((result) {
+    }).then((dynamic result) {
       if (result == null) {
-        _send({'id': id});
+        _send(<String, dynamic>{'id': id});
       } else {
-        _send({'id': id, 'result': _toJsonable(result)});
+        _send(<String, dynamic>{'id': id, 'result': _toJsonable(result)});
       }
-    }).catchError((error, trace) {
-      _send({'id': id, 'error': _toJsonable(error)});
+    }).catchError((dynamic error, dynamic trace) {
+      _send(<String, dynamic>{'id': id, 'error': _toJsonable(error)});
     });
   }
 
@@ -180,7 +180,7 @@ abstract class Domain {
     _send(map);
   }
 
-  void _send(Map map) => daemon._send(map);
+  void _send(Map<String, dynamic> map) => daemon._send(map);
 
   void dispose() { }
 }
@@ -212,12 +212,12 @@ class DaemonDomain extends Domain {
   StreamSubscription<LogMessage> _subscription;
 
   Future<String> version(dynamic args) {
-    return new Future.value(protocolVersion);
+    return new Future<String>.value(protocolVersion);
   }
 
-  Future shutdown(dynamic args) {
+  Future<Null> shutdown(dynamic args) {
     Timer.run(() => daemon.shutdown());
-    return new Future.value();
+    return new Future<Null>.value();
   }
 
   void dispose() {
@@ -352,23 +352,23 @@ class DeviceDomain extends Domain {
     List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
       return discoverer.devices;
     }).toList();
-    return new Future.value(devices);
+    return new Future<List<Device>>.value(devices);
   }
 
   /// Enable device events.
-  Future enable(dynamic args) {
+  Future<Null> enable(dynamic args) {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.startPolling();
     }
-    return new Future.value();
+    return new Future<Null>.value();
   }
 
   /// Disable device events.
-  Future disable(dynamic args) {
+  Future<Null> disable(dynamic args) {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.stopPolling();
     }
-    return new Future.value();
+    return new Future<Null>.value();
   }
 
   void dispose() {
@@ -398,7 +398,7 @@ String _enumToString(dynamic enumValue) {
 }
 
 dynamic _toJsonable(dynamic obj) {
-  if (obj is String || obj is int || obj is bool || obj is Map || obj is List || obj == null)
+  if (obj is String || obj is int || obj is bool || obj is Map<dynamic, dynamic> || obj is List<dynamic> || obj == null)
     return obj;
   if (obj is Device)
     return obj;
