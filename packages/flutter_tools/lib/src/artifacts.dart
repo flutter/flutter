@@ -74,13 +74,7 @@ class Artifact {
 class ArtifactStore {
   static const List<Artifact> knownArtifacts = const <Artifact>[
     const Artifact._(
-      name: 'Sky Shell',
-      fileName: 'SkyShell.apk',
-      type: ArtifactType.shell,
-      targetPlatform: TargetPlatform.android_arm
-    ),
-    const Artifact._(
-      name: 'Sky Shell',
+      name: 'Flutter Tester',
       fileName: 'sky_shell',
       type: ArtifactType.shell,
       targetPlatform: TargetPlatform.linux_x64

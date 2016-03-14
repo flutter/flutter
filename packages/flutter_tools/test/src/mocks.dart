@@ -16,7 +16,11 @@ import 'package:mockito/mockito.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
-    android: new AndroidApk(localPath: '/mock/path/to/android/SkyShell.apk'),
+    android: new AndroidApk(
+      localPath: '/mock/path/to/android/SkyShell.apk',
+      id: 'io.flutter.android.mock',
+      launchActivity: 'io.flutter.android.mock.MockActivity'
+    ),
     iOS: new IOSApp(
       iosProjectDir: '/mock/path/to/iOS/SkyShell.app',
       iosProjectBundleId: 'io.flutter.ios.mock'

@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
-import 'artifacts.dart';
 import 'build_configuration.dart';
 import 'ios/plist_utils.dart';
 
@@ -36,32 +35,23 @@ abstract class ApplicationPackage {
 }
 
 class AndroidApk extends ApplicationPackage {
-  static const String _defaultName = 'SkyShell.apk';
-  static const String _defaultId = 'org.domokit.sky.shell';
-  static const String _defaultLaunchActivity = '$_defaultId/$_defaultId.SkyActivity';
-  static const String _defaultManifestPath = 'android/AndroidManifest.xml';
-  static const String _defaultOutputPath = 'build/app.apk';
-
   /// The path to the activity that should be launched.
-  /// Defaults to 'org.domokit.sky.shell/org.domokit.sky.shell.SkyActivity'
   final String launchActivity;
 
   AndroidApk({
     String localPath,
-    String id: _defaultId,
-    this.launchActivity: _defaultLaunchActivity
+    String id,
+    this.launchActivity
   }) : super(localPath: localPath, id: id) {
     assert(launchActivity != null);
   }
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  static AndroidApk getCustomApk({
-    String localPath: _defaultOutputPath,
-    String manifest: _defaultManifestPath
-  }) {
-    if (!FileSystemEntity.isFileSync(manifest))
+  factory AndroidApk.fromBuildConfiguration(BuildConfiguration config) {
+    String manifestPath = path.join('android', 'AndroidManifest.xml');
+    if (!FileSystemEntity.isFileSync(manifestPath))
       return null;
-    String manifestString = new File(manifest).readAsStringSync();
+    String manifestString = new File(manifestPath).readAsStringSync();
     xml.XmlDocument document = xml.parse(manifestString);
 
     Iterable<xml.XmlElement> manifests = document.findElements('manifest');
@@ -81,6 +71,7 @@ class AndroidApk extends ApplicationPackage {
     if (id == null || launchActivity == null)
       return null;
 
+    String localPath = path.join('build', 'app.apk');
     return new AndroidApk(localPath: localPath, id: id, launchActivity: launchActivity);
   }
 }
@@ -95,12 +86,12 @@ class IOSApp extends ApplicationPackage {
     if (getCurrentHostPlatform() != HostPlatform.mac)
       return null;
 
-    String plistPath = path.join("ios", "Info.plist");
+    String plistPath = path.join('ios', 'Info.plist');
     String value = getValueFromFile(plistPath, kCFBundleIdentifierKey);
     if (value == null)
       return null;
 
-    String projectDir = path.join("ios", ".generated");
+    String projectDir = path.join('ios', '.generated');
     return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: value);
   }
 
@@ -134,20 +125,7 @@ class ApplicationPackageStore {
       switch (config.targetPlatform) {
         case TargetPlatform.android_arm:
           assert(android == null);
-          android = AndroidApk.getCustomApk();
-          // Fall back to the prebuilt or engine-provided apk if we can't build
-          // a custom one.
-          // TODO(mpcomplete): we should remove both these fallbacks.
-          if (android != null) {
-            break;
-          } else if (config.type != BuildType.prebuilt) {
-            String localPath = path.join(config.buildDir, 'apks', AndroidApk._defaultName);
-            android = new AndroidApk(localPath: localPath);
-          } else {
-            Artifact artifact = ArtifactStore.getArtifact(
-              type: ArtifactType.shell, targetPlatform: TargetPlatform.android_arm);
-            android = new AndroidApk(localPath: await ArtifactStore.getPath(artifact));
-          }
+          android = new AndroidApk.fromBuildConfiguration(config);
           break;
 
         case TargetPlatform.ios_arm:

@@ -129,6 +129,18 @@ class RunCommand extends RunCommandBase {
   }
 }
 
+String _getMissingPackageHintForPlatform(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.android_arm:
+      return 'Is your project missing an android/AndroidManifest.xml?';
+    case TargetPlatform.ios_arm:
+    case TargetPlatform.ios_x64:
+      return 'Is your project missing an ios/Info.plist?';
+    default:
+      return null;
+  }
+}
+
 Future<int> startApp(
   Device device,
   ApplicationPackageStore applicationPackages,
@@ -157,7 +169,11 @@ Future<int> startApp(
   ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
 
   if (package == null) {
-    printError('No application found for ${device.platform}.');
+    String message = 'No application found for ${device.platform}.';
+    String hint = _getMissingPackageHintForPlatform(device.platform);
+    if (hint != null)
+      message += '\n$hint';
+    printError(message);
     return 1;
   }
 
