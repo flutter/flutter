@@ -6,10 +6,10 @@ source_set("common") {
   sources = [
     "gpu/picture_serializer.cc",
     "gpu/picture_serializer.h",
-    "rasterizer.cc",
-    "rasterizer.h",
     "platform_view.cc",
     "platform_view.h",
+    "rasterizer.cc",
+    "rasterizer.h",
     "shell.cc",
     "shell.h",
     "shell_view.cc",
