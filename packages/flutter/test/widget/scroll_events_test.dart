@@ -46,7 +46,7 @@ void main() {
 
   test('Scroll scrollTo animation', () {
     testWidgets((WidgetTester tester) {
-      GlobalKey<ScrollableState> scrollKey = new GlobalKey<ScrollableState>();
+      GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
@@ -64,7 +64,7 @@ void main() {
 
   test('Scroll scrollTo no animation', () {
     testWidgets((WidgetTester tester) {
-      GlobalKey<ScrollableState> scrollKey = new GlobalKey<ScrollableState>();
+      GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
@@ -76,7 +76,7 @@ void main() {
 
   test('Scroll during animation', () {
     testWidgets((WidgetTester tester) {
-      GlobalKey<ScrollableState> scrollKey = new GlobalKey<ScrollableState>();
+      GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
@@ -98,7 +98,7 @@ void main() {
 
   test('Scroll during animation', () {
     testWidgets((WidgetTester tester) {
-      GlobalKey<ScrollableState> scrollKey = new GlobalKey<ScrollableState>();
+      GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
@@ -120,7 +120,7 @@ void main() {
 
   test('fling, fling generates one start/end pair', () {
     testWidgets((WidgetTester tester) {
-      GlobalKey<ScrollableState> scrollKey = new GlobalKey<ScrollableState>();
+      GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
       List<String> log = <String>[];
       tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 

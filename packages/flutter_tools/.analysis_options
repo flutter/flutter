@@ -15,7 +15,6 @@ analyzer:
     strong_mode_invalid_method_override: ignore
     strong_mode_static_type_error: ignore
     strong_mode_down_cast_composite: ignore
-    type_argument_not_matching_bounds: ignore
     # we allow having TODOs in the code
     todo: ignore
 linter:

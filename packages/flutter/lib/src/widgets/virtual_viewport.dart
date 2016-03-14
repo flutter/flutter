@@ -72,7 +72,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
 
   List<Element> _materializedChildren = const <Element>[];
 
-  RenderVirtualViewport<dynamic> get renderObject => super.renderObject;
+  RenderVirtualViewport<ContainerBoxParentDataMixin<RenderBox>> get renderObject => super.renderObject;
 
   void visitChildren(ElementVisitor visitor) {
     if (_materializedChildren == null)

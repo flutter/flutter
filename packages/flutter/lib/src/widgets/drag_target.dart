@@ -80,7 +80,7 @@ abstract class DraggableBase<T> extends StatefulWidget {
 
   /// Should return a new MultiDragGestureRecognizer instance
   /// constructed with the given arguments.
-  MultiDragGestureRecognizer<dynamic> createRecognizer(GestureMultiDragStartCallback onStart);
+  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer(GestureMultiDragStartCallback onStart);
 
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
