@@ -11,14 +11,29 @@ import 'binding.dart';
 
 export 'package:sky_services/activity/activity.mojom.dart';
 
-/// Dart wrapper around Activity mojo service available in Flutter on Android.
-///
-/// Most clients will want to use these methods instead of the activity service
-/// directly.
+// Dart wrapper around Activity mojo service available in Flutter on Android.
+//
+// Most clients will want to use these methods instead of the activity service
+// directly.
 
-const int NEW_DOCUMENT = 0x00080000;
-const int NEW_TASK = 0x10000000;
-const int MULTIPLE_TASK = 0x08000000;
+// The constants below are from
+// http://developer.android.com/reference/android/content/Intent.html
+
+/// Open a document into a new task rooted at the activity launched by
+/// this Intent.
+/// 
+/// See Android's Intent.FLAG_ACTIVITY_NEW_DOCUMENT.
+const int NEW_DOCUMENT = 0x00080000; // ignore: constant_identifier_names
+
+/// Start a new task on this history stack.
+///
+/// See Android's Intent.FLAG_ACTIVITY_NEW_TASK.
+const int NEW_TASK = 0x10000000; // ignore: constant_identifier_names
+
+/// Create a new task and launch an activity into it.
+///
+/// See Android's Intent.FLAG_ACTIVITY_MULTIPLE_TASK.
+const int MULTIPLE_TASK = 0x08000000; // ignore: constant_identifier_names
 
 ActivityProxy _initActivityProxy() {
   ActivityProxy activity = new ActivityProxy.unbound();
