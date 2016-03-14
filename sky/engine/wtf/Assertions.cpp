@@ -64,7 +64,7 @@ WTF_ATTRIBUTE_PRINTF(1, 0)
 static void vprintf_stderr_common(const char* format, va_list args)
 {
 #if OS(ANDROID)
-    __android_log_vprint(ANDROID_LOG_WARN, "WebKit", format, args);
+    __android_log_vprint(ANDROID_LOG_WARN, "flutter", format, args);
 #endif
     vfprintf(stderr, format, args);
 }
