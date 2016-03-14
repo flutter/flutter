@@ -42,6 +42,12 @@ Future<Null> main(List<String> args) async {
   bool verbose = args.contains('-v') || args.contains('--verbose');
   bool verboseHelp = help && verbose;
 
+  if (verboseHelp) {
+    // Remove the verbose option; for help, users don't need to see verbose logs.
+    args = new List<String>.from(args);
+    args.removeWhere((String option) => option == '-v' || option == '--verbose');
+  }
+
   FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
     ..addCommand(new AnalyzeCommand())
     ..addCommand(new ApkCommand())
@@ -75,7 +81,10 @@ Future<Null> main(List<String> args) async {
       exit(result);
   }, onError: (dynamic error, Chain chain) {
     if (error is UsageException) {
-      stderr.writeln(error);
+      stderr.writeln(error.message);
+      stderr.writeln();
+      stderr.writeln("Run 'flutter -h' (or 'flutter <command> -h') for available "
+        "flutter commands and options.");
       // Argument error exit code.
       exit(64);
     } else if (error is ProcessExit) {

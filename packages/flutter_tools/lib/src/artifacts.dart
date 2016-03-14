@@ -21,7 +21,7 @@ String _getNameForHostPlatform(HostPlatform platform) {
   }
 }
 
-String _getNameForTargetPlatform(TargetPlatform platform) {
+String getNameForTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
@@ -63,7 +63,7 @@ class Artifact {
 
   String get platform {
     if (targetPlatform != null)
-      return _getNameForTargetPlatform(targetPlatform);
+      return getNameForTargetPlatform(targetPlatform);
     if (hostPlatform != null)
       return _getNameForHostPlatform(hostPlatform);
     assert(false);

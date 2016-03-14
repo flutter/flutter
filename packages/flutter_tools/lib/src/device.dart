@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/utils.dart';
 import 'build_configuration.dart';
+import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'toolchain.dart';
@@ -140,11 +143,6 @@ abstract class Device {
 
   bool get supportsStartPaused => true;
 
-  String get fullDescription {
-    String supportIndicator = isSupported() ? '' : ' - unsupported';
-    return '$name ($id)$supportIndicator';
-  }
-
   /// Whether it is an emulated device running on localhost.
   bool get isLocalEmulator;
 
@@ -202,6 +200,23 @@ abstract class Device {
   }
 
   String toString() => name;
+
+  static void printDevices(List<Device> devices) {
+    int nameWidth = 0;
+    int idWidth = 0;
+
+    for (Device device in devices) {
+      nameWidth = math.max(nameWidth, device.name.length);
+      idWidth = math.max(idWidth, device.id.length);
+    }
+
+    for (Device device in devices) {
+      String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
+      printStatus('${device.name.padRight(nameWidth)} • '
+        '${device.id.padRight(idWidth)} • '
+        '${getNameForTargetPlatform(device.platform)}$supportIndicator');
+    }
+  }
 }
 
 class ForwardedPort {

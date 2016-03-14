@@ -72,9 +72,7 @@ class Template {
           .replaceAll(_kCopyTemplateExtension, '')
           .replaceAll(_kTemplateExtension, '');
       File finalDestinationFile = new File(finalDestinationPath);
-      String relativePathForLogging = relativeDestPath
-          .replaceAll(_kCopyTemplateExtension, '')
-          .replaceAll(_kTemplateExtension, '');
+      String relativePathForLogging = path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
