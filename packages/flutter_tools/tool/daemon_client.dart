@@ -15,7 +15,7 @@ Process daemon;
 //   stopAll: stop any running app
 //   devices: list devices
 
-Future main() async {
+Future<Null> main() async {
   daemon = await Process.start('flutter', ['daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
@@ -23,7 +23,7 @@ Future main() async {
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .listen((String line) => print('<== $line'));
-  daemon.stderr.listen((data) => stderr.add(data));
+  daemon.stderr.listen((dynamic data) => stderr.add(data));
 
   stdout.write('> ');
   stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
@@ -51,7 +51,7 @@ Future main() async {
 
 int id = 0;
 
-void _send(Map map) {
+void _send(Map<String, dynamic> map) {
   map['id'] = id++;
   String str = '[${JSON.encode(map)}]';
   daemon.stdin.writeln(str);
