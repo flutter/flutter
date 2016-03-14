@@ -9,6 +9,7 @@ class ParserException implements Exception {
   List<_EquationMember> members;
   ParserException(this.message, this.members);
 
+  @override
   String toString() {
     if (message == null) return "Error while parsing constraint or expression";
     return "Error: '$message' while trying to parse constraint or expression";

@@ -66,13 +66,18 @@ class RenderPerformanceOverlay extends RenderBox {
     markNeedsPaint();
   }
 
+  @override
   bool get sizedByParent => true;
+
+  @override
   bool get alwaysNeedsCompositing => true;
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
@@ -89,18 +94,22 @@ class RenderPerformanceOverlay extends RenderBox {
     return result;
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(intrinsicHeight);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(intrinsicHeight);
   }
 
+  @override
   void performResize() {
     size = constraints.constrain(new Size(double.INFINITY, intrinsicHeight));
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
     context.pushPerformanceOverlay(offset, optionsMask, rasterizerThreshold, size);

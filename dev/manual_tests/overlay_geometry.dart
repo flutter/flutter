@@ -27,6 +27,7 @@ class _MarkerPainter extends CustomPainter {
   final double size;
   final MarkerType type;
 
+  @override
   void paint(Canvas canvas, _) {
     Paint paint = new Paint()..color = const Color(0x8000FF00);
     double r = size / 2.0;
@@ -46,6 +47,7 @@ class _MarkerPainter extends CustomPainter {
     }
   }
 
+  @override
   bool shouldRepaint(_MarkerPainter oldPainter) {
     return oldPainter.size != size
         || oldPainter.type != type;
@@ -64,6 +66,7 @@ class Marker extends StatelessWidget {
   final double size;
   final MarkerType type;
 
+  @override
   Widget build(BuildContext context) {
     return new Positioned(
       left: position.x - size / 2.0,
@@ -83,6 +86,7 @@ class Marker extends StatelessWidget {
 }
 
 class OverlayGeometryApp extends StatefulWidget {
+  @override
   OverlayGeometryAppState createState() => new OverlayGeometryAppState();
 }
 
@@ -96,6 +100,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   double markersScrollOffset;
   ScrollListener scrollListener;
 
+  @override
   void initState() {
     super.initState();
     List<double> cardHeights = <double>[
@@ -151,6 +156,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> layers = <Widget>[
       new Scaffold(

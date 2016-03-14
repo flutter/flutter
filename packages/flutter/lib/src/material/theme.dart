@@ -34,8 +34,10 @@ class Theme extends InheritedWidget {
     return theme?.data ?? _kFallbackTheme;
   }
 
+  @override
   bool updateShouldNotify(Theme old) => data != old.data;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$data');
@@ -46,6 +48,7 @@ class Theme extends InheritedWidget {
 class ThemeDataTween extends Tween<ThemeData> {
   ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
 
+  @override
   ThemeData lerp(double t) => ThemeData.lerp(begin, end, t);
 }
 
@@ -67,18 +70,21 @@ class AnimatedTheme extends AnimatedWidgetBase {
 
   final Widget child;
 
+  @override
   _AnimatedThemeState createState() => new _AnimatedThemeState();
 }
 
 class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   ThemeDataTween _data;
 
+  @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
     _data = visitor(_data, config.data, (dynamic value) => new ThemeDataTween(begin: value));
     assert(_data != null);
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Theme(
       child: config.child,
@@ -86,6 +92,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (_data != null)

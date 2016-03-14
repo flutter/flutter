@@ -32,20 +32,29 @@ abstract class Key {
 /// their values match.
 class ValueKey<T> extends Key {
   const ValueKey(this.value) : super.constructor();
+
   final T value;
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! ValueKey<T>)
       return false;
     final ValueKey<T> typedOther = other;
     return value == typedOther.value;
   }
+
+  @override
   int get hashCode => value.hashCode;
+
+  @override
   String toString() => '[\'$value\']';
 }
 
 /// A [Key] that is only equal to itself.
 class UniqueKey extends Key {
   const UniqueKey() : super.constructor();
+
+  @override
   String toString() => '[$hashCode]';
 }
 
@@ -55,14 +64,21 @@ class UniqueKey extends Key {
 /// generate that Widget.
 class ObjectKey extends Key {
   const ObjectKey(this.value) : super.constructor();
+
   final Object value;
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! ObjectKey)
       return false;
     final ObjectKey typedOther = other;
     return identical(value, typedOther.value);
   }
+
+  @override
   int get hashCode => identityHashCode(value);
+
+  @override
   String toString() => '[${value.runtimeType}(${value.hashCode})]';
 }
 
@@ -181,7 +197,10 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
 /// the key's identity.
 class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   const LabeledGlobalKey(this._debugLabel) : super.constructor();
+
   final String _debugLabel;
+
+  @override
   String toString() => '[GlobalKey ${_debugLabel != null ? _debugLabel : hashCode}]';
 }
 
@@ -192,13 +211,19 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 class GlobalObjectKey extends GlobalKey {
   const GlobalObjectKey(this.value) : super.constructor();
   final Object value;
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! GlobalObjectKey)
       return false;
     final GlobalObjectKey typedOther = other;
     return identical(value, typedOther.value);
   }
+
+  @override
   int get hashCode => identityHashCode(value);
+
+  @override
   String toString() => '[$runtimeType ${value.runtimeType}(${value.hashCode})]';
 }
 
@@ -224,6 +249,7 @@ abstract class Widget {
     return key == null ? '$runtimeType' : '$runtimeType-$key';
   }
 
+  @override
   String toString() {
     final String name = toStringShort();
     final List<String> data = <String>[];
@@ -251,6 +277,7 @@ abstract class StatelessWidget extends Widget {
 
   /// StatelessWidget always use [StatelessElement]s to represent
   /// themselves in the Element tree.
+  @override
   StatelessElement createElement() => new StatelessElement(this);
 
   /// Returns another Widget out of which this StatelessWidget is built.
@@ -271,6 +298,7 @@ abstract class StatefulWidget extends Widget {
 
   /// StatefulWidget always use [StatefulElement]s to represent
   /// themselves in the Element tree.
+  @override
   StatefulElement createElement() => new StatefulElement(this);
 
   /// Returns an instance of the state to which this StatefulWidget is
@@ -390,6 +418,7 @@ abstract class State<T extends StatefulWidget> {
   /// called.
   void dependenciesChanged(Type affectedWidgetType) { }
 
+  @override
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
@@ -420,6 +449,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyWidg
   const ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
+  @override
   ParentDataElement<T> createElement() => new ParentDataElement<T>(this);
 
   /// Subclasses should override this function to return true if the given
@@ -468,6 +498,7 @@ abstract class InheritedWidget extends _ProxyWidget {
   const InheritedWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
+  @override
   InheritedElement createElement() => new InheritedElement(this);
 
   bool updateShouldNotify(InheritedWidget oldWidget);
@@ -480,6 +511,7 @@ abstract class RenderObjectWidget extends Widget {
   const RenderObjectWidget({ Key key }) : super(key: key);
 
   /// RenderObjectWidgets always inflate to a RenderObjectElement subclass.
+  @override
   RenderObjectElement createElement();
 
   /// Constructs an instance of the RenderObject class that this
@@ -500,6 +532,7 @@ abstract class RenderObjectWidget extends Widget {
 abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   const LeafRenderObjectWidget({ Key key }) : super(key: key);
 
+  @override
   LeafRenderObjectElement createElement() => new LeafRenderObjectElement(this);
 }
 
@@ -511,6 +544,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 
   final Widget child;
 
+  @override
   SingleChildRenderObjectElement createElement() => new SingleChildRenderObjectElement(this);
 }
 
@@ -527,6 +561,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
   final List<Widget> children;
 
+  @override
   MultiChildRenderObjectElement createElement() => new MultiChildRenderObjectElement(this);
 }
 
@@ -633,6 +668,7 @@ abstract class Element implements BuildContext {
   int _depth;
 
   /// The configuration for this element.
+  @override
   Widget get widget => _widget;
   Widget _widget;
 
@@ -658,6 +694,7 @@ abstract class Element implements BuildContext {
   void visitChildren(ElementVisitor visitor) { }
 
   /// Wrapper around visitChildren for BuildContext.
+  @override
   void visitChildElements(void visitor(Element element)) {
     // don't allow visitChildElements() during build, since children aren't necessarily built yet
     assert(!BuildableElement._debugStateLocked);
@@ -908,10 +945,13 @@ abstract class Element implements BuildContext {
     assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; });
   }
 
+  @override
   RenderObject findRenderObject() => renderObject;
 
   Map<Type, InheritedElement> _inheritedWidgets;
   Set<InheritedElement> _dependencies;
+
+  @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
     InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
@@ -928,6 +968,7 @@ abstract class Element implements BuildContext {
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
+  @override
   Widget ancestorWidgetOfExactType(Type targetType) {
     Element ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != targetType)
@@ -935,6 +976,7 @@ abstract class Element implements BuildContext {
     return ancestor?.widget;
   }
 
+  @override
   State ancestorStateOfType(TypeMatcher matcher) {
     Element ancestor = _parent;
     while (ancestor != null) {
@@ -946,6 +988,7 @@ abstract class Element implements BuildContext {
     return statefulAncestor?.state;
   }
 
+  @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
     Element ancestor = _parent;
     while (ancestor != null) {
@@ -957,6 +1000,7 @@ abstract class Element implements BuildContext {
     return renderObjectAncestor?.renderObject;
   }
 
+  @override
   void visitAncestorElements(bool visitor(Element element)) {
     Element ancestor = _parent;
     while (ancestor != null && visitor(ancestor))
@@ -983,6 +1027,7 @@ abstract class Element implements BuildContext {
     return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
   }
 
+  @override
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
@@ -1026,13 +1071,17 @@ class ErrorWidget extends LeafRenderObjectWidget {
     Object exception
   ) : message = _stringify(exception),
       super(key: new UniqueKey());
+
   final String message;
+
   static String _stringify(Object exception) {
     try {
       return exception.toString();
     } catch (e) { }
     return 'Error';
   }
+
+  @override
   RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 }
 
@@ -1182,10 +1231,12 @@ abstract class BuildableElement extends Element {
   /// Called by rebuild() after the appropriate checks have been made.
   void performRebuild();
 
+  @override
   void dependenciesChanged(Type affectedWidgetType) {
     markNeedsBuild();
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (dirty)
@@ -1203,6 +1254,7 @@ abstract class ComponentElement extends BuildableElement {
   WidgetBuilder _builder;
   Element _child;
 
+  @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     assert(_child == null);
@@ -1221,6 +1273,7 @@ abstract class ComponentElement extends BuildableElement {
   ///
   /// Called automatically during mount() to generate the first build, and by
   /// rebuild() when the element needs updating.
+  @override
   void performRebuild() {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
@@ -1257,11 +1310,13 @@ abstract class ComponentElement extends BuildableElement {
     }
   }
 
+  @override
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)
       visitor(_child);
   }
 
+  @override
   bool detachChild(Element child) {
     assert(child == _child);
     _deactivateChild(_child);
@@ -1276,8 +1331,10 @@ class StatelessElement extends ComponentElement {
     _builder = widget.build;
   }
 
+  @override
   StatelessWidget get widget => super.widget;
 
+  @override
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
@@ -1304,6 +1361,7 @@ class StatefulElement extends ComponentElement {
   State<StatefulWidget> get state => _state;
   State<StatefulWidget> _state;
 
+  @override
   void _firstBuild() {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
     try {
@@ -1325,6 +1383,7 @@ class StatefulElement extends ComponentElement {
     super._firstBuild();
   }
 
+  @override
   void update(StatefulWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
@@ -1343,11 +1402,13 @@ class StatefulElement extends ComponentElement {
     rebuild();
   }
 
+  @override
   void deactivate() {
     _state.deactivate();
     super.deactivate();
   }
 
+  @override
   void unmount() {
     super.unmount();
     _state.dispose();
@@ -1365,11 +1426,13 @@ class StatefulElement extends ComponentElement {
     _state = null;
   }
 
+  @override
   void dependenciesChanged(Type affectedWidgetType) {
     super.dependenciesChanged(affectedWidgetType);
     _state.dependenciesChanged(affectedWidgetType);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (state != null)
@@ -1382,10 +1445,12 @@ abstract class _ProxyElement extends ComponentElement {
     _builder = _build;
   }
 
+  @override
   _ProxyWidget get widget => super.widget;
 
   Widget _build(BuildContext context) => widget.child;
 
+  @override
   void update(_ProxyWidget newWidget) {
     _ProxyWidget oldWidget = widget;
     assert(widget != null);
@@ -1403,8 +1468,10 @@ abstract class _ProxyElement extends ComponentElement {
 class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
 
+  @override
   ParentDataWidget<T> get widget => super.widget;
 
+  @override
   void mount(Element parent, dynamic slot) {
     assert(() {
       List<Widget> badAncestors = <Widget>[];
@@ -1434,6 +1501,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
     super.mount(parent, slot);
   }
 
+  @override
   void notifyDescendants(ParentDataWidget<T> oldWidget) {
     void notifyChildren(Element child) {
       if (child is RenderObjectElement) {
@@ -1452,10 +1520,12 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
 class InheritedElement extends _ProxyElement {
   InheritedElement(InheritedWidget widget) : super(widget);
 
+  @override
   InheritedWidget get widget => super.widget;
 
   final Set<Element> _dependants = new HashSet<Element>();
 
+  @override
   void _updateInheritance() {
     final Map<Type, InheritedElement> incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
@@ -1465,6 +1535,7 @@ class InheritedElement extends _ProxyElement {
     _inheritedWidgets[widget.runtimeType] = this;
   }
 
+  @override
   void debugDeactivated() {
     assert(() {
       assert(_dependants.isEmpty);
@@ -1473,6 +1544,7 @@ class InheritedElement extends _ProxyElement {
     super.debugDeactivated();
   }
 
+  @override
   void notifyDescendants(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
@@ -1494,9 +1566,11 @@ class InheritedElement extends _ProxyElement {
 abstract class RenderObjectElement extends BuildableElement {
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
 
+  @override
   RenderObjectWidget get widget => super.widget;
 
   /// The underlying [RenderObject] for this element
+  @override
   RenderObject get renderObject => _renderObject;
   RenderObject _renderObject;
 
@@ -1519,6 +1593,7 @@ abstract class RenderObjectElement extends BuildableElement {
     return null;
   }
 
+  @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _renderObject = widget.createRenderObject(this);
@@ -1528,6 +1603,7 @@ abstract class RenderObjectElement extends BuildableElement {
     _dirty = false;
   }
 
+  @override
   void update(RenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
@@ -1540,6 +1616,7 @@ abstract class RenderObjectElement extends BuildableElement {
     _renderObject.debugOwner = debugGetOwnershipChain(10);
   }
 
+  @override
   void performRebuild() {
     _dirty = false;
   }
@@ -1703,11 +1780,13 @@ abstract class RenderObjectElement extends BuildableElement {
     return newChildren;
   }
 
+  @override
   void deactivate() {
     super.deactivate();
     assert(!renderObject.attached);
   }
 
+  @override
   void unmount() {
     super.unmount();
     assert(!renderObject.attached);
@@ -1718,6 +1797,7 @@ abstract class RenderObjectElement extends BuildableElement {
     parentData.applyParentData(renderObject);
   }
 
+  @override
   void _updateSlot(dynamic newSlot) {
     assert(slot != newSlot);
     super._updateSlot(newSlot);
@@ -1725,6 +1805,7 @@ abstract class RenderObjectElement extends BuildableElement {
     _ancestorRenderObjectElement.moveChildRenderObject(renderObject, slot);
   }
 
+  @override
   void attachRenderObject(dynamic newSlot) {
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
@@ -1735,6 +1816,7 @@ abstract class RenderObjectElement extends BuildableElement {
       updateParentData(parentDataElement.widget);
   }
 
+  @override
   void detachRenderObject() {
     if (_ancestorRenderObjectElement != null) {
       _ancestorRenderObjectElement.removeChildRenderObject(renderObject);
@@ -1747,6 +1829,7 @@ abstract class RenderObjectElement extends BuildableElement {
   void moveChildRenderObject(RenderObject child, dynamic slot);
   void removeChildRenderObject(RenderObject child);
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (renderObject != null)
@@ -1758,14 +1841,17 @@ abstract class RenderObjectElement extends BuildableElement {
 class LeafRenderObjectElement extends RenderObjectElement {
   LeafRenderObjectElement(LeafRenderObjectWidget widget): super(widget);
 
+  @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(false);
   }
 
+  @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     assert(false);
   }
 
+  @override
   void removeChildRenderObject(RenderObject child) {
     assert(false);
   }
@@ -1775,15 +1861,18 @@ class LeafRenderObjectElement extends RenderObjectElement {
 class SingleChildRenderObjectElement extends RenderObjectElement {
   SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
 
+  @override
   SingleChildRenderObjectWidget get widget => super.widget;
 
   Element _child;
 
+  @override
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)
       visitor(_child);
   }
 
+  @override
   bool detachChild(Element child) {
     assert(child == _child);
     _deactivateChild(_child);
@@ -1791,17 +1880,20 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
     return true;
   }
 
+  @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _child = updateChild(_child, widget.child, null);
   }
 
+  @override
   void update(SingleChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _child = updateChild(_child, widget.child, null);
   }
 
+  @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(slot == null);
@@ -1809,10 +1901,12 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
     assert(renderObject == this.renderObject);
   }
 
+  @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     assert(false);
   }
 
+  @override
   void removeChildRenderObject(RenderObject child) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
@@ -1827,6 +1921,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     assert(!_debugHasDuplicateIds());
   }
 
+  @override
   MultiChildRenderObjectWidget get widget => super.widget;
 
   List<Element> _children;
@@ -1834,18 +1929,21 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   // repeatedly to remove children.
   final Set<Element> _detachedChildren = new HashSet<Element>();
 
+  @override
   void insertChildRenderObject(RenderObject child, Element slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     renderObject.insert(child, after: slot?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
+  @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     renderObject.move(child, after: slot?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
+  @override
   void removeChildRenderObject(RenderObject child) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(child.parent == renderObject);
@@ -1871,6 +1969,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     return false;
   }
 
+  @override
   void visitChildren(ElementVisitor visitor) {
     for (Element child in _children) {
       if (!_detachedChildren.contains(child))
@@ -1878,12 +1977,14 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     }
   }
 
+  @override
   bool detachChild(Element child) {
     _detachedChildren.add(child);
     _deactivateChild(child);
     return true;
   }
 
+  @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _children = new List<Element>(widget.children.length);
@@ -1895,6 +1996,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     }
   }
 
+  @override
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
@@ -1906,6 +2008,8 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 class WidgetError extends AssertionError {
   WidgetError(this.message);
   final String message;
+
+  @override
   String toString() => message;
 }
 

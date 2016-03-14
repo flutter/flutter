@@ -69,16 +69,22 @@ void testUsingContext(String description, dynamic testMethod(), {
 class MockDeviceManager implements DeviceManager {
   List<Device> devices = <Device>[];
 
+  @override
   String specifiedDeviceId;
+
+  @override
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
+  @override
   Future<List<Device>> getAllConnectedDevices() => new Future<List<Device>>.value(devices);
 
+  @override
   Future<Device> getDeviceById(String deviceId) {
     Device device = devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
     return new Future<Device>.value(device);
   }
 
+  @override
   Future<List<Device>> getDevices() async {
     if (specifiedDeviceId == null) {
       return getAllConnectedDevices();
@@ -93,6 +99,7 @@ class MockDeviceManager implements DeviceManager {
 
 class MockDoctor extends Doctor {
   // True for testing.
+  @override
   bool get canLaunchAnything => true;
 }
 

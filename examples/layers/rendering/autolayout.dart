@@ -14,6 +14,7 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
   AutoLayoutRect p3 = new AutoLayoutRect();
   AutoLayoutRect p4 = new AutoLayoutRect();
 
+  @override
   List<al.Constraint> getConstraints(AutoLayoutRect parent) {
     return <al.Constraint>[
       // Sum of widths of each box must be equal to that of the container
@@ -44,6 +45,7 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
     ];
   }
 
+  @override
   bool shouldUpdateConstraints(AutoLayoutDelegate oldDelegate) => true;
 }
 

@@ -25,6 +25,7 @@ class Layer extends Node with SpritePaint {
     ..filterQuality = FilterQuality.low
     ..isAntiAlias = false;
 
+  @override
   void _prePaint(Canvas canvas, Matrix4 matrix) {
     super._prePaint(canvas, matrix);
 
@@ -32,6 +33,7 @@ class Layer extends Node with SpritePaint {
     canvas.saveLayer(layerRect, _cachedPaint);
   }
 
+  @override
   void _postPaint(Canvas canvas, Matrix4 totalMatrix) {
     canvas.restore();
     super._postPaint(canvas, totalMatrix);

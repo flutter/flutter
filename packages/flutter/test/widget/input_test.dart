@@ -11,14 +11,18 @@ import 'package:test/test.dart';
 class MockKeyboard implements mojom.Keyboard {
   mojom.KeyboardClient client;
 
+  @override
   void setClient(mojom.KeyboardClientStub client, mojom.KeyboardConfiguration configuraiton) {
     this.client = client.impl;
   }
 
+  @override
   void show() {}
 
+  @override
   void hide() {}
 
+  @override
   void setEditingState(mojom.EditingState state) {}
 }
 

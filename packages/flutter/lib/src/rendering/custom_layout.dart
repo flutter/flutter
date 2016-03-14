@@ -12,6 +12,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
   /// An object representing the identity of this child.
   Object id;
 
+  @override
   String toString() => '${super.toString()}; id=$id';
 }
 
@@ -191,6 +192,7 @@ abstract class MultiChildLayoutDelegate {
   /// debugging data printed by [debugDumpRenderTree] and friends.
   ///
   /// By default, returns the [runtimeType] of the class.
+  @override
   String toString() => '$runtimeType';
 }
 
@@ -211,6 +213,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
     addAll(children);
   }
 
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! MultiChildLayoutParentData)
       child.parentData = new MultiChildLayoutParentData();
@@ -233,31 +236,38 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
     return constraints.constrain(_delegate.getSize(constraints));
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return _getSize(constraints).width;
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return _getSize(constraints).width;
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return _getSize(constraints).height;
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return _getSize(constraints).height;
   }
 
+  @override
   void performLayout() {
     size = _getSize(constraints);
     delegate._callPerformLayout(size, firstChild);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     defaultPaint(context, offset);
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position);
   }

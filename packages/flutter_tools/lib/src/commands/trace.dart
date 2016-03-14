@@ -10,8 +10,13 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class TraceCommand extends FlutterCommand {
+  @override
   final String name = 'trace';
+
+  @override
   final String description = 'Start and stop tracing for a running Flutter app (Android only).';
+
+  @override
   final String usageFooter =
     '\`trace\` called with no arguments will automatically start tracing, delay a set amount of\n'
     'time (controlled by --duration), and stop tracing. To explicitly control tracing, call trace\n'
@@ -25,8 +30,10 @@ class TraceCommand extends FlutterCommand {
         defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
   }
 
+  @override
   bool get androidOnly => true;
 
+  @override
   bool get requiresDevice => true;
 
   @override

@@ -16,6 +16,7 @@ class TextStyleItem extends StatelessWidget {
   final TextStyle style;
   final String text;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle nameStyle = theme.textTheme.body1.copyWith(color: theme.textTheme.caption.color);
@@ -38,6 +39,7 @@ class TextStyleItem extends StatelessWidget {
 }
 
 class TypographyDemo extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[

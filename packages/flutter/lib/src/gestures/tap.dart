@@ -27,6 +27,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   bool _wonArena = false;
   Point _finalPosition;
 
+  @override
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
       _finalPosition = event.position;
@@ -34,6 +35,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
+  @override
   void resolve(GestureDisposition disposition) {
     if (_wonArena && disposition == GestureDisposition.rejected) {
       if (onTapCancel != null)
@@ -43,10 +45,12 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     super.resolve(disposition);
   }
 
+  @override
   void didExceedDeadline() {
     _checkDown();
   }
 
+  @override
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
     if (pointer == primaryPointer) {
@@ -56,6 +60,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
+  @override
   void rejectGesture(int pointer) {
     super.rejectGesture(pointer);
     if (pointer == primaryPointer) {
@@ -91,5 +96,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     _finalPosition = null;
   }
 
+  @override
   String toStringShort() => 'tap';
 }

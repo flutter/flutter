@@ -26,6 +26,7 @@ class PersistentBottomSheetDemo extends StatelessWidget {
     });
   }
 
+  @override
   Widget build(BuildContext notUsed) { // Can't find the Scaffold from this context.
     return new Scaffold(
       appBar: new AppBar(title: new Text("Persistent Bottom Sheet")),

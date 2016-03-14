@@ -11,6 +11,7 @@ class _ContactCategory extends StatelessWidget {
   final IconData icon;
   final List<Widget> children;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -41,6 +42,7 @@ class _ContactItem extends StatelessWidget {
   final IconData icon;
   final List<String> lines;
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
     columnChildren.add(new Text(lines.last, style: Theme.of(context).textTheme.caption));
@@ -68,6 +70,7 @@ class _ContactItem extends StatelessWidget {
 }
 
 class FlexibleSpaceDemo extends StatefulWidget {
+  @override
   FlexibleSpaceDemoState createState() => new FlexibleSpaceDemoState();
 }
 
@@ -77,6 +80,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
   final Key scrollableKey = new UniqueKey();
   AppBarBehavior _appBarBehavior = AppBarBehavior.scroll;
 
+  @override
   Widget build(BuildContext context) {
     return new Theme(
       data: new ThemeData(

@@ -48,10 +48,12 @@ class ConstraintRotationToMovement extends Constraint {
 
   Point _lastPosition;
 
+  @override
   void preUpdate(Node node, double dt) {
     _lastPosition = node.position;
   }
 
+  @override
   void constrain(Node node, double dt) {
     if (_lastPosition == null) return;
     if (_lastPosition == node.position) return;
@@ -83,6 +85,7 @@ class ConstraintRotationToNode extends Constraint {
   /// values are in the range 0.0 to 1.0
   final double dampening;
 
+  @override
   void constrain(Node node, double dt) {
     Offset offset;
 
@@ -117,6 +120,7 @@ class ConstraintPositionToNode extends Constraint {
   final Offset offset;
   final double dampening;
 
+  @override
   void constrain(Node node, double dt) {
     Point targetPosition;
 

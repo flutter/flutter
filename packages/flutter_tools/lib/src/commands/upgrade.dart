@@ -11,7 +11,10 @@ import '../runner/flutter_command.dart';
 import '../runner/version.dart';
 
 class UpgradeCommand extends FlutterCommand {
+  @override
   final String name = 'upgrade';
+
+  @override
   final String description = 'Upgrade your copy of Flutter.';
 
   @override

@@ -16,6 +16,7 @@ class DrawerHeader extends StatelessWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;

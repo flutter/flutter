@@ -13,6 +13,7 @@ class TestWidget extends StatefulWidget {
   final int persistentState;
   final int syncedState;
 
+  @override
   TestWidgetState createState() => new TestWidgetState();
 }
 
@@ -21,12 +22,14 @@ class TestWidgetState extends State<TestWidget> {
   int syncedState;
   int updates = 0;
 
+  @override
   void initState() {
     super.initState();
     persistentState = config.persistentState;
     syncedState = config.syncedState;
   }
 
+  @override
   void didUpdateConfig(TestWidget oldConfig) {
     syncedState = config.syncedState;
     // we explicitly do NOT sync the persistentState from the new instance
@@ -34,6 +37,7 @@ class TestWidgetState extends State<TestWidget> {
     updates += 1;
   }
 
+  @override
   Widget build(BuildContext context) => config.child;
 }
 

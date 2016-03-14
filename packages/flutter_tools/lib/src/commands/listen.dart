@@ -10,9 +10,14 @@ import '../globals.dart';
 import 'run.dart';
 
 class ListenCommand extends RunCommandBase {
+  @override
   final String name = 'listen';
+
+  @override
   final String description =
     'Listen for changes to files and reload the running app (Android only).';
+
+  @override
   final String usageFooter =
     'By default, only listens to "./" and "./lib/". To listen to additional directories, list them on\n'
     'the command line.';
@@ -22,8 +27,10 @@ class ListenCommand extends RunCommandBase {
 
   ListenCommand({ this.singleRun: false });
 
+  @override
   bool get androidOnly => true;
 
+  @override
   bool get requiresDevice => true;
 
   @override

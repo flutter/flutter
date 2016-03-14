@@ -32,6 +32,7 @@ class TwoLevelListItem extends StatelessWidget {
   final GestureTapCallback onTap;
   final GestureLongPressCallback onLongPress;
 
+  @override
   Widget build(BuildContext context) {
     final TwoLevelList parentList = context.ancestorWidgetOfExactType(TwoLevelList);
     assert(parentList != null);
@@ -56,6 +57,7 @@ class TwoLevelSublist extends StatefulWidget {
   final Widget title;
   final List<Widget> children;
 
+  @override
   _TwoLevelSublistState createState() => new _TwoLevelSublistState();
 }
 
@@ -70,6 +72,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
 
   bool _isExpanded = false;
 
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: _kExpand);
@@ -132,6 +135,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     _borderColor.end = theme.dividerColor;
@@ -155,5 +159,6 @@ class TwoLevelList extends StatelessWidget {
   final List<Widget> items;
   final MaterialListType type;
 
+  @override
   Widget build(BuildContext context) => new Block(children: items);
 }

@@ -146,6 +146,7 @@ class Hero extends StatefulWidget {
     return result;
   }
 
+  @override
   HeroState createState() => new HeroState();
 }
 
@@ -154,8 +155,10 @@ class HeroState extends State<Hero> implements HeroHandle {
   GlobalKey _key = new GlobalKey();
   Size _placeholderSize;
 
+  @override
   bool get alwaysAnimate => config.alwaysAnimate;
 
+  @override
   _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation) {
     assert(mounted);
     final RenderBox renderObject = context.findRenderObject();
@@ -198,6 +201,7 @@ class HeroState extends State<Hero> implements HeroHandle {
       _setChild(null);
   }
 
+  @override
   Widget build(BuildContext context) {
     if (_placeholderSize != null) {
       assert(_key == null);
@@ -237,10 +241,13 @@ class _HeroQuestState implements HeroHandle {
   final RelativeRectTween currentRect;
   final Tween<double> currentTurns;
 
+  @override
   bool get alwaysAnimate => true;
 
   bool get taken => _taken;
   bool _taken = false;
+
+  @override
   _HeroManifest _takeChild(Rect animationArea, Animation<double> currentAnimation) {
     assert(!taken);
     _taken = true;
@@ -386,6 +393,7 @@ class HeroParty {
     }
   }
 
+  @override
   String toString() => '$_heroes';
 }
 
@@ -401,6 +409,7 @@ class HeroController extends NavigatorObserver {
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
+  @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
     assert(route != null);
@@ -414,6 +423,7 @@ class HeroController extends NavigatorObserver {
     }
   }
 
+  @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
     assert(route != null);

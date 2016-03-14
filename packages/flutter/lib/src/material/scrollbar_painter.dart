@@ -52,6 +52,7 @@ class ScrollbarPainter extends ScrollableListPainter {
     paintThumb(context, thumbOrigin & thumbSize);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_alpha == 0)
       return;
@@ -60,6 +61,7 @@ class ScrollbarPainter extends ScrollableListPainter {
 
   AnimationController _fade;
 
+  @override
   Future<Null> scrollStarted() {
     if (_fade == null) {
       _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
@@ -72,10 +74,12 @@ class ScrollbarPainter extends ScrollableListPainter {
     return _fade.forward();
   }
 
+  @override
   Future<Null> scrollEnded() {
     return _fade.reverse();
   }
 
+  @override
   void detach() {
     super.detach();
     _fade?.stop();

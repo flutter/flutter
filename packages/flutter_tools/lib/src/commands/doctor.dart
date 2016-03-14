@@ -10,11 +10,16 @@ import '../runner/flutter_command.dart';
 import '../runner/version.dart';
 
 class DoctorCommand extends FlutterCommand {
+  @override
   final String name = 'doctor';
+
+  @override
   final String description = 'Show information about the installed tooling.';
 
+  @override
   bool get requiresProjectRoot => false;
 
+  @override
   Future<int> runInProject() async {
     // general info
     String flutterRoot = ArtifactStore.flutterRoot;

@@ -38,12 +38,14 @@ abstract class OperatingSystemUtils {
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
+  @override
   ProcessResult makeExecutable(File file) {
     return Process.runSync('chmod', ['u+x', file.path]);
   }
 
   /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
+  @override
   File which(String execName) {
     ProcessResult result = Process.runSync('which', <String>[execName]);
     if (result.exitCode != 0)
@@ -57,10 +59,12 @@ class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils() : super._private();
 
   // This is a no-op.
+  @override
   ProcessResult makeExecutable(File file) {
     return new ProcessResult(0, 0, null, null);
   }
 
+  @override
   File which(String execName) {
     throw new UnimplementedError('_WindowsUtils.which');
   }

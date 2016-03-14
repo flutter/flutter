@@ -20,6 +20,7 @@ class _GridPaperPainter extends CustomPainter {
   final int divisions;
   final int subDivisions;
 
+  @override
   void paint(Canvas canvas, Size size) {
     Paint linePaint = new Paint()
       ..color = color;
@@ -34,6 +35,7 @@ class _GridPaperPainter extends CustomPainter {
     }
   }
 
+  @override
   bool shouldRepaint(_GridPaperPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.interval != interval
@@ -41,6 +43,7 @@ class _GridPaperPainter extends CustomPainter {
         || oldPainter.subDivisions != subDivisions;
   }
 
+  @override
   bool hitTest(Point position) => false;
 }
 
@@ -70,6 +73,7 @@ class GridPaper extends StatelessWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new CustomPaint(
       foregroundPainter: new _GridPaperPainter(

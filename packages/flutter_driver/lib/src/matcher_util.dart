@@ -36,19 +36,23 @@ class MatchResult {
 class _TextDescription implements Description {
   final StringBuffer _text = new StringBuffer();
 
+  @override
   int get length => _text.length;
 
+  @override
   Description add(String text) {
     _text.write(text);
     return this;
   }
 
+  @override
   Description replace(String text) {
     _text.clear();
     _text.write(text);
     return this;
   }
 
+  @override
   Description addDescriptionOf(dynamic value) {
     if (value is Matcher) {
       value.describe(this);
@@ -58,6 +62,7 @@ class _TextDescription implements Description {
     }
   }
 
+  @override
   Description addAll(String start, String separator, String end, Iterable<dynamic> list) {
     add(start);
     if (list.isNotEmpty) {
@@ -71,5 +76,6 @@ class _TextDescription implements Description {
     return this;
   }
 
+  @override
   String toString() => '$_text';
 }

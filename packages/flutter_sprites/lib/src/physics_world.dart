@@ -229,6 +229,7 @@ class PhysicsWorld extends Node {
     }
   }
 
+  @override
   void addChild(Node node) {
     super.addChild(node);
     if (node.physicsBody != null) {
@@ -236,6 +237,7 @@ class PhysicsWorld extends Node {
     }
   }
 
+  @override
   void removeChild(Node node) {
     super.removeChild(node);
     if (node.physicsBody != null) {
@@ -267,6 +269,7 @@ class PhysicsWorld extends Node {
     _contactHandler.addContactCallback(callback, tagA, tagB, type);
   }
 
+  @override
   void paint(Canvas canvas) {
     if (drawDebug) {
       _debugDrawTransform = new Matrix4.fromFloat64List(canvas.getTotalMatrix());
@@ -423,17 +426,22 @@ class _ContactHandler extends box2d.ContactListener {
     }
   }
 
+  @override
   void beginContact(box2d.Contact contact) {
     handleCallback(PhysicsContactType.begin, contact, null, null);
   }
 
+  @override
   void endContact(box2d.Contact contact) {
     handleCallback(PhysicsContactType.end, contact, null, null);
   }
 
+  @override
   void preSolve(box2d.Contact contact, box2d.Manifold oldManifold) {
     handleCallback(PhysicsContactType.preSolve, contact, oldManifold, null);
   }
+
+  @override
   void postSolve(box2d.Contact contact, box2d.ContactImpulse impulse) {
     handleCallback(PhysicsContactType.postSolve, contact, null, impulse);
   }

@@ -129,6 +129,7 @@ class Mimic extends StatelessWidget {
   /// A handle to the widget that this widget should copy.
   final MimicableHandle original;
 
+  @override
   Widget build(BuildContext context) {
     if (original != null && original._state.mounted && original._state._placeholderSize != null)
       return original._state.config.child;
@@ -145,6 +146,7 @@ class Mimicable extends StatefulWidget {
 
   final Widget child;
 
+  @override
   MimicableState createState() => new MimicableState();
 }
 
@@ -222,6 +224,7 @@ class MimicableState extends State<Mimicable> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     if (_placeholderSize != null) {
       return new ConstrainedBox(

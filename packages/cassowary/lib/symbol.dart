@@ -12,6 +12,7 @@ class _Symbol {
 
   _Symbol(this.type, this.tick);
 
+  @override
   String toString() {
     String typeString = 'unknown';
     switch (type) {

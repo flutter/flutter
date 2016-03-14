@@ -33,6 +33,7 @@ void main() {
 class RawKeyboardDemo extends StatefulWidget {
   RawKeyboardDemo({ GlobalKey key }) : super(key: key);
 
+  @override
   _HardwareKeyDemoState createState() => new _HardwareKeyDemoState();
 }
 
@@ -45,6 +46,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context)  {
     bool focused = Focus.at(context);
     Widget child;

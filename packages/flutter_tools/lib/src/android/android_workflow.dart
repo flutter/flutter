@@ -7,14 +7,19 @@ import '../globals.dart';
 import 'android_sdk.dart';
 
 class AndroidWorkflow extends Workflow {
+  @override
   String get label => 'Android toolchain';
 
+  @override
   bool get appliesToHostPlatform => true;
 
+  @override
   bool get canListDevices => getAdbPath(androidSdk) != null;
 
+  @override
   bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed(complain: false);
 
+  @override
   ValidationResult validate() {
     Validator androidValidator = new Validator(
       label,
@@ -36,5 +41,6 @@ class AndroidWorkflow extends Workflow {
     return androidValidator.validate();
   }
 
+  @override
   void diagnose() => validate().print();
 }

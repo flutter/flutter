@@ -13,6 +13,7 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
   AutoLayoutRect p3 = new AutoLayoutRect();
   AutoLayoutRect p4 = new AutoLayoutRect();
 
+  @override
   List<al.Constraint> getConstraints(AutoLayoutRect parent) {
     return <al.Constraint>[
       // Sum of widths of each box must be equal to that of the container
@@ -43,16 +44,19 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
     ];
   }
 
+  @override
   bool shouldUpdateConstraints(_MyAutoLayoutDelegate oldDelegate) => true;
 }
 
 class ColoredBoxes extends StatefulWidget {
+  @override
   _ColoredBoxesState createState() => new _ColoredBoxesState();
 }
 
 class _ColoredBoxesState extends State<ColoredBoxes> {
   final _MyAutoLayoutDelegate delegate = new _MyAutoLayoutDelegate();
 
+  @override
   Widget build(BuildContext context) {
     return new AutoLayout(
       delegate: delegate,

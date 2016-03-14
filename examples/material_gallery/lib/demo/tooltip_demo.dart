@@ -10,6 +10,7 @@ const String _introText =
   "apps accessible, like screen readers.";
 
 class TooltipDemo extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return new Scaffold(

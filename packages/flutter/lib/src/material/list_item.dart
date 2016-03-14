@@ -84,6 +84,7 @@ class ListItem extends StatelessWidget {
     return dense ? style.copyWith(color: color, fontSize: 12.0) : style.copyWith(color: color);
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final bool isTwoLine = !isThreeLine && subtitle != null;

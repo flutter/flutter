@@ -26,6 +26,7 @@ const String _explanatoryText =
   "by its key.";
 
 class TabsFabDemo extends StatefulWidget {
+  @override
   _TabsFabDemoState createState() => new _TabsFabDemoState();
 }
 
@@ -41,6 +42,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
   ];
   _Page selectedPage;
 
+  @override
   void initState() {
     super.initState();
     selectedPage = pages[0];
@@ -88,6 +90,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new TabBarSelection<_Page>(
       values: pages,

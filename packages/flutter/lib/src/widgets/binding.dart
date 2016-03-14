@@ -35,6 +35,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
     return _instance;
   }
 
+  @override
   void initInstances() {
     super.initInstances();
     _instance = this;
@@ -60,6 +61,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
   void addObserver(BindingObserver observer) => _observers.add(observer);
   bool removeObserver(BindingObserver observer) => _observers.remove(observer);
 
+  @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
     for (BindingObserver observer in _observers)
@@ -88,6 +90,7 @@ class WidgetFlutterBinding extends BindingBase with Scheduler, Gesturer, Service
       observer.didChangeAppLifecycleState(state);
   }
 
+  @override
   void beginFrame() {
     buildDirtyElements();
     super.beginFrame();
@@ -190,10 +193,13 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   final RenderObjectWithChildMixin<T> container;
   final String debugShortDescription;
 
+  @override
   RenderObjectToWidgetElement<T> createElement() => new RenderObjectToWidgetElement<T>(this);
 
+  @override
   RenderObjectWithChildMixin<T> createRenderObject(BuildContext context) => container;
 
+  @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
   RenderObjectToWidgetElement<T> attachToRenderTree([RenderObjectToWidgetElement<T> element]) {
@@ -208,6 +214,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
     return element;
   }
 
+  @override
   String toStringShort() => debugShortDescription ?? super.toStringShort();
 }
 
@@ -222,40 +229,48 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement {
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
+  @override
   RenderObjectToWidgetAdapter<T> get widget => super.widget;
 
   Element _child;
 
   static const Object _rootChildSlot = const Object();
 
+  @override
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)
       visitor(_child);
   }
 
+  @override
   void mount(Element parent, dynamic newSlot) {
     assert(parent == null);
     super.mount(parent, newSlot);
     _child = updateChild(_child, widget.child, _rootChildSlot);
   }
 
+  @override
   void update(RenderObjectToWidgetAdapter<T> newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _child = updateChild(_child, widget.child, _rootChildSlot);
   }
 
+  @override
   RenderObjectWithChildMixin<T> get renderObject => super.renderObject;
 
+  @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(slot == _rootChildSlot);
     renderObject.child = child;
   }
 
+  @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
     assert(false);
   }
 
+  @override
   void removeChildRenderObject(RenderObject child) {
     assert(renderObject.child == child);
     renderObject.child = null;

@@ -17,8 +17,10 @@ class GravitySimulation extends Simulation {
         _v = velocity,
         _end = endDistance;
 
+  @override
   double x(double time) => _x + _v * time + 0.5 * _a * time * time;
 
+  @override
   double dx(double time) => _v + time * _a;
 
   @override

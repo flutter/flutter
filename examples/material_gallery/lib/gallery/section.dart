@@ -61,6 +61,7 @@ class GallerySection extends StatelessWidget {
     ));
   }
 
+  @override
   Widget build (BuildContext context) {
     final ThemeData theme = new ThemeData(
       brightness: Theme.of(context).brightness,

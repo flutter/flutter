@@ -12,6 +12,7 @@ class PageSelectorDemo extends StatelessWidget {
       selection.value = selection.values[(selection.index + delta).clamp(0, selection.values.length - 1)];
   }
 
+  @override
   Widget build(BuildContext notUsed) { // Can't find the TabBarSelection from this context.
     final List<IconData> icons = <IconData>[
       Icons.event,

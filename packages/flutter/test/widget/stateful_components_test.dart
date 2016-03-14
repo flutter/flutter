@@ -8,17 +8,21 @@ import 'package:test/test.dart';
 
 class InnerWidget extends StatefulWidget {
   InnerWidget({ Key key }) : super(key: key);
+
+  @override
   InnerWidgetState createState() => new InnerWidgetState();
 }
 
 class InnerWidgetState extends State<InnerWidget> {
   bool _didInitState = false;
 
+  @override
   void initState() {
     super.initState();
     _didInitState = true;
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Container();
   }
@@ -29,10 +33,12 @@ class OuterContainer extends StatefulWidget {
 
   final InnerWidget child;
 
+  @override
   OuterContainerState createState() => new OuterContainerState();
 }
 
 class OuterContainerState extends State<OuterContainer> {
+  @override
   Widget build(BuildContext context) {
     return config.child;
   }

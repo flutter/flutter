@@ -15,11 +15,20 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     Completer<T> completer,
     RouteSettings settings: const RouteSettings()
   }) : super(completer: completer, settings: settings);
+
+  @override
   bool get opaque => true;
+
+  @override
   bool get barrierDismissable => false;
+
+  @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute<dynamic>;
+
+  @override
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute<dynamic>;
 
+  @override
   AnimationController createAnimationController() {
     AnimationController controller = super.createAnimationController();
     if (settings.isInitialRoute)

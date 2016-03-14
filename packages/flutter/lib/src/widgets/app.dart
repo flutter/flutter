@@ -99,6 +99,7 @@ class WidgetsApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
+  @override
   WidgetsAppState<WidgetsApp> createState() => new WidgetsAppState<WidgetsApp>();
 }
 
@@ -112,6 +113,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
 
   LocaleQueryData _localeData;
 
+  @override
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey(this);
@@ -119,11 +121,13 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     WidgetFlutterBinding.instance.addObserver(this);
   }
 
+  @override
   void dispose() {
     WidgetFlutterBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  @override
   bool didPopRoute() {
     assert(mounted);
     NavigatorState navigator = _navigator.currentState;
@@ -135,6 +139,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     return result;
   }
 
+  @override
   void didChangeMetrics() {
     setState(() {
       // The properties of ui.window have changed. We use them in our build
@@ -142,6 +147,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     });
   }
 
+  @override
   void didChangeLocale(Locale locale) {
     if (config.onLocaleChanged != null) {
       config.onLocaleChanged(locale).then((LocaleQueryData data) {
@@ -151,10 +157,12 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     }
   }
 
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   NavigatorObserver get navigatorObserver => null;
 
+  @override
   Widget build(BuildContext context) {
     if (config.onLocaleChanged != null && _localeData == null) {
       // If the app expects a locale but we don't yet know the locale, then

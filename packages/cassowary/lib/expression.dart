@@ -153,6 +153,7 @@ class Expression extends _EquationMember {
     return null;
   }
 
+  @override
   _EquationMember operator *(_EquationMember m) {
     _Pair<Expression, double> args = _findMulitplierAndMultiplicand(m);
 
@@ -166,6 +167,7 @@ class Expression extends _EquationMember {
     return args.first._applyMultiplicand(args.second);
   }
 
+  @override
   _EquationMember operator /(_EquationMember m) {
     if (!m.isConstant) {
       throw new ParserException(
@@ -176,6 +178,7 @@ class Expression extends _EquationMember {
     return this._applyMultiplicand(1.0 / m.value);
   }
 
+  @override
   String toString() {
     StringBuffer buffer = new StringBuffer();
 

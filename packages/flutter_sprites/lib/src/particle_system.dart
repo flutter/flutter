@@ -196,6 +196,7 @@ class ParticleSystem extends Node {
     if (colorSequence == null) colorSequence = new ColorSequence.fromStartAndEndColor(new Color(0xffffffff), new Color(0x00ffffff));
   }
 
+  @override
   void update(double dt) {
     // TODO: Fix this (it's a temp fix for low framerates)
     if (dt > 0.1) dt = 0.1;
@@ -359,6 +360,7 @@ class ParticleSystem extends Node {
     _numEmittedParticles++;
   }
 
+  @override
   void paint(Canvas canvas) {
     if (opacity == 0.0) return;
 

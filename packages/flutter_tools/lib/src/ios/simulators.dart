@@ -27,7 +27,10 @@ const String _kFlutterTestDevice = 'flutter.test.device';
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
+  @override
   bool get supportsPlatform => Platform.isMacOS;
+
+  @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
 }
 
@@ -314,8 +317,10 @@ class SimDevice {
 class IOSSimulator extends Device {
   IOSSimulator(String id, { this.name }) : super(id);
 
+  @override
   final String name;
 
+  @override
   bool get isLocalEmulator => true;
 
   _IOSSimulatorLogReader _logReader;
@@ -536,6 +541,7 @@ class IOSSimulator extends Device {
   @override
   TargetPlatform get platform => TargetPlatform.ios_x64;
 
+  @override
   DeviceLogReader get logReader {
     if (_logReader == null)
       _logReader = new _IOSSimulatorLogReader(this);
@@ -543,6 +549,7 @@ class IOSSimulator extends Device {
     return _logReader;
   }
 
+  @override
   DevicePortForwarder get portForwarder {
     if (_portForwarder == null)
       _portForwarder = new _IOSSimulatorDevicePortForwarder(this);
@@ -550,6 +557,7 @@ class IOSSimulator extends Device {
     return _portForwarder;
   }
 
+  @override
   void clearLogs() {
     File logFile = new File(logFilePath);
     if (logFile.existsSync()) {
@@ -585,16 +593,21 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   StreamSubscription<String> _systemStdoutSubscription;
   StreamSubscription<String> _systemStderrSubscription;
 
+  @override
   Stream<String> get lines => _linesStreamController.stream;
 
+  @override
   String get name => device.name;
 
+  @override
   bool get isReading => (_deviceProcess != null) && (_systemProcess != null);
 
+  @override
   Future<int> get finished {
     return (_deviceProcess != null) ? _deviceProcess.exitCode : new Future<int>.value(0);
   }
 
+  @override
   Future<Null> start() async {
     if (isReading) {
       throw new StateError(
@@ -630,6 +643,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _systemProcess.exitCode.then(_onSystemExit);
   }
 
+  @override
   Future<Null> stop() async {
     if (!isReading) {
       throw new StateError(
@@ -727,8 +741,10 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _linesStreamController.add(filteredLine);
   }
 
+  @override
   int get hashCode => device.logFilePath.hashCode;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -789,10 +805,12 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   final List<ForwardedPort> _ports = <ForwardedPort>[];
 
+  @override
   List<ForwardedPort> get forwardedPorts {
     return _ports;
   }
 
+  @override
   Future<int> forward(int devicePort, {int hostPort: null}) async {
     if ((hostPort == null) || (hostPort == 0)) {
       hostPort = devicePort;
@@ -802,6 +820,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
+  @override
   Future<Null> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
   }

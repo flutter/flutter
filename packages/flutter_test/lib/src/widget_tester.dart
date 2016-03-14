@@ -36,6 +36,7 @@ class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
   EnginePhase phase = EnginePhase.sendSemanticsTree;
 
   // Pump the rendering pipeline up to the given phase.
+  @override
   void beginFrame() {
     buildDirtyElements();
     _beginFrame();
@@ -123,6 +124,7 @@ class WidgetTester extends Instrumentation {
     async.flushMicrotasks();
   }
 
+  @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     super.dispatchEvent(event, result);
     async.flushMicrotasks();

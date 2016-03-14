@@ -18,7 +18,10 @@ import 'run.dart';
 const String _kDefaultBundlePath = 'build/app.flx';
 
 class RunMojoCommand extends FlutterCommand {
+  @override
   final String name = 'run_mojo';
+
+  @override
   final String description = 'Run a Flutter app in mojo (from github.com/domokit/mojo).';
   final bool _hideCommand;
 
@@ -37,7 +40,10 @@ class RunMojoCommand extends FlutterCommand {
     argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
 
+  @override
   bool get requiresProjectRoot => false;
+
+  @override
   bool get hidden => _hideCommand;
 
   // TODO(abarth): Why not use path.absolute?

@@ -68,6 +68,7 @@ class ScrollSimulation extends SimulationGroup {
     return false;
   }
 
+  @override
   String toString() {
     return 'ScrollSimulation(leadingExtent: $_leadingExtent, trailingExtent: $_trailingExtent)';
   }

@@ -11,9 +11,12 @@ enum StockRowPartKind { arrow }
 
 class StockRowPartKey extends Key {
   const StockRowPartKey(this.keySalt, this.stock, this.part) : super.constructor();
+
   final Object keySalt;
   final Stock stock;
   final StockRowPartKind part;
+
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -24,7 +27,11 @@ class StockRowPartKey extends Key {
         && stock == typedOther.stock
         && part == typedOther.part;
   }
+
+  @override
   int get hashCode => hashValues(keySalt, stock, part);
+
+  @override
   String toString() => '[$runtimeType ${keySalt.toString().split(".")[1]}:${stock.symbol}:${part.toString().split(".")[1]}]';
 }
 
@@ -54,6 +61,7 @@ class StockRow extends StatelessWidget {
     return callback == null ? null : () => callback(stock, _arrowKey);
   }
 
+  @override
   Widget build(BuildContext context) {
     final String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";

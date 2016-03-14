@@ -23,6 +23,7 @@ class _MaterialPageTransition extends AnimatedWidget {
     end: Point.origin
   );
 
+  @override
   Widget build(BuildContext context) {
     Point position = _position.evaluate(animation);
     Matrix4 transform = new Matrix4.identity()
@@ -52,10 +53,16 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   final WidgetBuilder builder;
 
+  @override
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
+
+  @override
   Color get barrierColor => null;
+
+  @override
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => false;
 
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     Widget result = builder(context);
     assert(() {
@@ -67,6 +74,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
+  @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     return new _MaterialPageTransition(
       animation: animation,
@@ -74,5 +82,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     );
   }
 
+  @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';
 }

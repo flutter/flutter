@@ -25,6 +25,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   Color _getBackgroundColor(BuildContext context) => Theme.of(context).backgroundColor;
   Color _getValueColor(BuildContext context) => Theme.of(context).primaryColor;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
@@ -44,6 +45,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   final double value;
   final double animationValue;
 
+  @override
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = backgroundColor
@@ -63,6 +65,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
   }
 
+  @override
   bool shouldRepaint(_LinearProgressIndicatorPainter oldPainter) {
     return oldPainter.backgroundColor != backgroundColor
         || oldPainter.valueColor != valueColor
@@ -77,6 +80,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     double value
   }) : super(key: key, value: value);
 
+  @override
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
 }
 
@@ -84,6 +88,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
   Animation<double> _animation;
   AnimationController _controller;
 
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
@@ -92,6 +97,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
   }
 
+  @override
   void dispose() {
     _controller.stop();
     super.dispose();
@@ -114,6 +120,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     if (config.value != null)
       return _buildIndicator(context, _animation.value);
@@ -150,6 +157,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   final int stepValue;
   final double rotationValue;
 
+  @override
   void paint(Canvas canvas, Size size) {
     Paint paint = new Paint()
       ..color = valueColor
@@ -177,6 +185,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     }
   }
 
+  @override
   bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
     return oldPainter.valueColor != valueColor
         || oldPainter.value != value
@@ -193,6 +202,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     double value
   }) : super(key: key, value: value);
 
+  @override
   _CircularProgressIndicatorState createState() => new _CircularProgressIndicatorState();
 }
 
@@ -216,6 +226,7 @@ final Animatable<double> _kRotationTween = new CurveTween(curve: new SawTooth(5)
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   AnimationController _controller;
 
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
@@ -223,6 +234,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
     )..repeat();
   }
 
+  @override
   void dispose() {
     _controller.stop();
     super.dispose();
@@ -247,6 +259,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     if (config.value != null)
       return _buildIndicator(context, 0.0, 0.0, 0, 0.0);

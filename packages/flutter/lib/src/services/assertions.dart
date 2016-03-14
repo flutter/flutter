@@ -4,6 +4,9 @@
 
 class FlutterError extends AssertionError {
   FlutterError(this.message);
+
   final String message;
+
+  @override
   String toString() => message;
 }

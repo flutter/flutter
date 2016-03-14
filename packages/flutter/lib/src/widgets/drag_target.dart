@@ -82,6 +82,7 @@ abstract class DraggableBase<T> extends StatefulWidget {
   /// constructed with the given arguments.
   MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer(GestureMultiDragStartCallback onStart);
 
+  @override
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
 
@@ -107,6 +108,7 @@ class Draggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
+  @override
   ImmediateMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
@@ -135,6 +137,7 @@ class HorizontalDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
+  @override
   HorizontalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new HorizontalMultiDragGestureRecognizer()..onStart = onStart;
   }
@@ -163,6 +166,7 @@ class VerticalDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
+  @override
   VerticalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new VerticalMultiDragGestureRecognizer()..onStart = onStart;
   }
@@ -190,6 +194,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
     maxSimultaneousDrags: maxSimultaneousDrags
   );
 
+  @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Point position) {
@@ -203,6 +208,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
 
 class _DraggableState<T> extends State<DraggableBase<T>> {
 
+  @override
   void initState() {
     super.initState();
     _recognizer = config.createRecognizer(_startDrag);
@@ -248,6 +254,7 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: config) != null);
     final bool canDrag = config.maxSimultaneousDrags == null ||
@@ -282,6 +289,7 @@ class DragTarget<T> extends StatefulWidget {
   /// Called when an acceptable piece of data was dropped over this drag target.
   final DragTargetAccept<T> onAccept;
 
+  @override
   _DragTargetState<T> createState() => new _DragTargetState<T>();
 }
 
@@ -319,6 +327,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       config.onAccept(data);
   }
 
+  @override
   Widget build(BuildContext context) {
     return new MetaData(
       metaData: this,
@@ -368,13 +377,18 @@ class _DragAvatar<T> extends Drag {
   OverlayEntry _entry;
 
   // Drag API
+  @override
   void move(Offset offset) {
     _position += offset;
     update(_position);
   }
+
+  @override
   void end(Velocity velocity) {
     finish(_DragEndKind.dropped);
   }
+
+  @override
   void cancel() {
     finish(_DragEndKind.canceled);
   }

@@ -48,6 +48,7 @@ class BorderSide {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -58,8 +59,10 @@ class BorderSide {
            width == typedOther.width;
   }
 
+  @override
   int get hashCode => hashValues(color, width);
 
+  @override
   String toString() => 'BorderSide($color, $width)';
 }
 
@@ -122,6 +125,7 @@ class Border {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -134,8 +138,10 @@ class Border {
            left == typedOther.left;
   }
 
+  @override
   int get hashCode => hashValues(top, right, bottom, left);
 
+  @override
   String toString() => 'Border($top, $right, $bottom, $left)';
 }
 
@@ -218,6 +224,7 @@ class BoxShadow {
     return result;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -230,8 +237,10 @@ class BoxShadow {
            spreadRadius == typedOther.spreadRadius;
   }
 
+  @override
   int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
 
+  @override
   String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
 }
 
@@ -287,6 +296,7 @@ class LinearGradient extends Gradient {
   /// How this gradient should tile the plane.
   final TileMode tileMode;
 
+  @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.linear(
       <Point>[_offsetToPoint(begin, rect), _offsetToPoint(end, rect)],
@@ -294,6 +304,7 @@ class LinearGradient extends Gradient {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -325,8 +336,10 @@ class LinearGradient extends Gradient {
     return true;
   }
 
+  @override
   int get hashCode => hashValues(begin, end, tileMode, hashList(colors), hashList(stops));
 
+  @override
   String toString() {
     return 'LinearGradient($begin, $end, $colors, $stops, $tileMode)';
   }
@@ -373,6 +386,7 @@ class RadialGradient extends Gradient {
   /// How this gradient should tile the plane.
   final TileMode tileMode;
 
+  @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.radial(
       _offsetToPoint(center, rect),
@@ -381,6 +395,7 @@ class RadialGradient extends Gradient {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -412,8 +427,10 @@ class RadialGradient extends Gradient {
     return true;
   }
 
+  @override
   int get hashCode => hashValues(center, radius, tileMode, hashList(colors), hashList(stops));
 
+  @override
   String toString() {
     return 'RadialGradient($center, $radius, $colors, $stops, $tileMode)';
   }
@@ -595,9 +612,12 @@ void paintImage({
 /// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
 class FractionalOffset {
   const FractionalOffset(this.dx, this.dy);
+
   final double dx;
   final double dy;
+
   static const FractionalOffset zero = const FractionalOffset(0.0, 0.0);
+
   FractionalOffset operator -() {
     return new FractionalOffset(-dx, -dy);
   }
@@ -625,6 +645,8 @@ class FractionalOffset {
   Offset alongSize(Size other) {
     return new Offset(dx * other.width, dy * other.height);
   }
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! FractionalOffset)
       return false;
@@ -632,6 +654,8 @@ class FractionalOffset {
     return dx == typedOther.dx &&
            dy == typedOther.dy;
   }
+
+  @override
   int get hashCode => hashValues(dx, dy);
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     if (a == null && b == null)
@@ -642,6 +666,8 @@ class FractionalOffset {
       return new FractionalOffset(b.dx * (1.0 - t), b.dy * (1.0 - t));
     return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
   }
+
+  @override
   String toString() => '$runtimeType($dx, $dy)';
 }
 
@@ -719,6 +745,7 @@ class BackgroundImage {
       listener();
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -733,8 +760,10 @@ class BackgroundImage {
            _imageResource == typedOther._imageResource;
   }
 
+  @override
   int get hashCode => hashValues(fit, repeat, centerSlice, colorFilter, alignment, _imageResource);
 
+  @override
   String toString() => 'BackgroundImage($fit, $repeat)';
 }
 
@@ -764,6 +793,7 @@ class BoxDecoration extends Decoration {
     this.shape: BoxShape.rectangle
   });
 
+  @override
   bool debugAssertValid() {
     assert(shape != BoxShape.circle ||
            borderRadius == null); // Can't have a border radius if you're a circle.
@@ -797,6 +827,7 @@ class BoxDecoration extends Decoration {
   final BoxShape shape;
 
   /// The inset space occupied by the border.
+  @override
   EdgeInsets get padding => border?.dimensions;
 
   /// Returns a new box decoration that is scaled by the given factor.
@@ -835,18 +866,21 @@ class BoxDecoration extends Decoration {
     );
   }
 
+  @override
   BoxDecoration lerpFrom(Decoration a, double t) {
     if (a is! BoxDecoration)
       return BoxDecoration.lerp(null, this, t);
     return BoxDecoration.lerp(a, this, t);
   }
 
+  @override
   BoxDecoration lerpTo(Decoration b, double t) {
     if (b is! BoxDecoration)
       return BoxDecoration.lerp(this, null, t);
     return BoxDecoration.lerp(this, b, t);
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -862,6 +896,7 @@ class BoxDecoration extends Decoration {
            shape == typedOther.shape;
   }
 
+  @override
   int get hashCode {
     return hashValues(
       backgroundColor,
@@ -877,6 +912,7 @@ class BoxDecoration extends Decoration {
   /// Stringifies the BoxDecoration. By default, the output will be on one line.
   /// If the method is passed a non-empty string argument, then the output will
   /// span multiple lines, each prefixed by that argument.
+  @override
   String toString([String prefix = '']) {
     List<String> result = <String>[];
     if (backgroundColor != null)
@@ -900,11 +936,15 @@ class BoxDecoration extends Decoration {
     return result.join('\n');
   }
 
+  @override
   bool get needsListeners => backgroundImage != null;
 
+  @override
   void addChangeListener(VoidCallback listener) {
     backgroundImage?._addChangeListener(listener);
   }
+
+  @override
   void removeChangeListener(VoidCallback listener) {
     backgroundImage?._removeChangeListener(listener);
   }
@@ -917,6 +957,7 @@ class BoxDecoration extends Decoration {
     return borderRadius > shortestSide ? shortestSide : borderRadius;
   }
 
+  @override
   bool hitTest(Size size, Point position) {
     assert(shape != null);
     assert((Point.origin & size).contains(position));
@@ -935,6 +976,7 @@ class BoxDecoration extends Decoration {
     }
   }
 
+  @override
   _BoxDecorationPainter createBoxPainter() => new _BoxDecorationPainter(this);
 }
 
@@ -1136,6 +1178,7 @@ class _BoxDecorationPainter extends BoxPainter {
   }
 
   /// Paint the box decoration into the given location on the given canvas
+  @override
   void paint(Canvas canvas, Rect rect) {
     _paintShadows(canvas, rect);
     _paintBackgroundColor(canvas, rect);

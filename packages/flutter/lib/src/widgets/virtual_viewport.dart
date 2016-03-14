@@ -34,6 +34,7 @@ abstract class _WidgetProvider {
 abstract class VirtualViewportElement extends RenderObjectElement {
   VirtualViewportElement(VirtualViewport widget) : super(widget);
 
+  @override
   VirtualViewport get widget => super.widget;
 
   /// The index of the first child to materialize.
@@ -72,8 +73,10 @@ abstract class VirtualViewportElement extends RenderObjectElement {
 
   List<Element> _materializedChildren = const <Element>[];
 
+  @override
   RenderVirtualViewport<ContainerBoxParentDataMixin<RenderBox>> get renderObject => super.renderObject;
 
+  @override
   void visitChildren(ElementVisitor visitor) {
     if (_materializedChildren == null)
       return;
@@ -83,6 +86,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
 
   _WidgetProvider _widgetProvider;
 
+  @override
   void mount(Element parent, dynamic newSlot) {
     _widgetProvider = widget._createWidgetProvider();
     _widgetProvider.didUpdateWidget(null, widget);
@@ -91,11 +95,13 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     updateRenderObject(null);
   }
 
+  @override
   void unmount() {
     renderObject.callback = null;
     super.unmount();
   }
 
+  @override
   void update(VirtualViewport newWidget) {
     VirtualViewport oldWidget = widget;
     _widgetProvider.didUpdateWidget(oldWidget, newWidget);
@@ -169,15 +175,18 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     _materializedChildren = updateChildren(_materializedChildren, newWidgets);
   }
 
+  @override
   void insertChildRenderObject(RenderObject child, Element slot) {
     renderObject.insert(child, after: slot?.renderObject);
   }
 
+  @override
   void moveChildRenderObject(RenderObject child, Element slot) {
     assert(child.parent == renderObject);
     renderObject.move(child, after: slot?.renderObject);
   }
 
+  @override
   void removeChildRenderObject(RenderObject child) {
     assert(child.parent == renderObject);
     renderObject.remove(child);
@@ -192,6 +201,7 @@ abstract class VirtualViewportFromIterable extends VirtualViewport {
   /// The children, some of which might be materialized.
   Iterable<Widget> get children;
 
+  @override
   _IterableWidgetProvider _createWidgetProvider() => new _IterableWidgetProvider();
 }
 
@@ -200,6 +210,7 @@ class _IterableWidgetProvider extends _WidgetProvider {
   Iterator<Widget> _iterator;
   List<Widget> _widgets;
 
+  @override
   void didUpdateWidget(VirtualViewportFromIterable oldWidget, VirtualViewportFromIterable newWidget) {
     if (oldWidget == null || newWidget.children != oldWidget.children) {
       _iterator = null;
@@ -208,8 +219,10 @@ class _IterableWidgetProvider extends _WidgetProvider {
     }
   }
 
+  @override
   int get virtualChildCount => _length;
 
+  @override
   void prepareChildren(VirtualViewportElement context, int base, int count) {
     int limit = base < 0 ? _length : math.min(_length, base + count);
     if (limit <= _widgets.length)
@@ -229,6 +242,7 @@ class _IterableWidgetProvider extends _WidgetProvider {
     }
   }
 
+  @override
   Widget getChild(int i) => _widgets[(i % _length).abs()];
 }
 
@@ -249,6 +263,7 @@ abstract class VirtualViewportFromBuilder extends VirtualViewport {
   /// determine which children are visible).
   ItemListBuilder get itemBuilder;
 
+  @override
   _LazyWidgetProvider _createWidgetProvider() => new _LazyWidgetProvider();
 }
 
@@ -257,6 +272,7 @@ class _LazyWidgetProvider extends _WidgetProvider {
   int _base;
   List<Widget> _widgets;
 
+  @override
   void didUpdateWidget(VirtualViewportFromBuilder oldWidget, VirtualViewportFromBuilder newWidget) {
     // TODO(abarth): We shouldn't check the itemBuilder closure for equality with.
     // instead, we should use the widget's identity to decide whether to rebuild.
@@ -267,8 +283,10 @@ class _LazyWidgetProvider extends _WidgetProvider {
     }
   }
 
+  @override
   int get virtualChildCount => _length;
 
+  @override
   void prepareChildren(VirtualViewportElement context, int base, int count) {
     if (_widgets != null && _widgets.length == count && _base == base)
       return;
@@ -277,6 +295,7 @@ class _LazyWidgetProvider extends _WidgetProvider {
     _widgets = widget.itemBuilder(context, base, count);
   }
 
+  @override
   Widget getChild(int i) {
     int n = _length ?? _widgets.length;
     return _widgets[(i % n).abs()];

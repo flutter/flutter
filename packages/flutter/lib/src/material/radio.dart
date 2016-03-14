@@ -39,6 +39,7 @@ class Radio<T> extends StatelessWidget {
       onChanged(value);
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
@@ -72,6 +73,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final ValueChanged<bool> onChanged;
 
+  @override
   _RenderRadio createRenderObject(BuildContext context) => new _RenderRadio(
     value: selected,
     activeColor: activeColor,
@@ -79,6 +81,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     onChanged: onChanged
   );
 
+  @override
   void updateRenderObject(BuildContext context, _RenderRadio renderObject) {
     renderObject
       ..value = selected
@@ -102,8 +105,10 @@ class _RenderRadio extends RenderToggleable {
     size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius)
   );
 
+  @override
   bool get isInteractive => super.isInteractive && !value;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 

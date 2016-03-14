@@ -24,6 +24,7 @@ class _UrlFetcher implements ImageProvider {
   final String _url;
   final double _scale;
 
+  @override
   Future<ImageInfo> loadImage() async {
     UrlResponse response = await fetchUrl(_url);
     if (response.statusCode >= 400) {
@@ -36,6 +37,7 @@ class _UrlFetcher implements ImageProvider {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! _UrlFetcher)
       return false;
@@ -43,6 +45,7 @@ class _UrlFetcher implements ImageProvider {
     return _url == typedOther._url && _scale == typedOther._scale;
   }
 
+  @override
   int get hashCode => hashValues(_url, _scale);
 }
 

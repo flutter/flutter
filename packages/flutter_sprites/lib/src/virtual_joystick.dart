@@ -30,6 +30,7 @@ class VirtualJoystick extends NodeWithSize {
   Paint _paintHandle;
   Paint _paintControl;
 
+  @override
   bool handleEvent(SpriteBoxEvent event) {
     if (event.type == PointerDownEvent) {
       _pointerDownAt = event.boxPosition;
@@ -54,6 +55,7 @@ class VirtualJoystick extends NodeWithSize {
     return true;
   }
 
+  @override
   void paint(Canvas canvas) {
     applyTransformForPivot(canvas);
     canvas.drawCircle(_handlePos, 25.0, _paintHandle);

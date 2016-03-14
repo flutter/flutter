@@ -588,6 +588,7 @@ class Solver {
     return entering ?? new _Symbol(_SymbolType.invalid, 0);
   }
 
+  @override
   String toString() {
     StringBuffer buffer = new StringBuffer();
     String separator = "\n~~~~~~~~~";

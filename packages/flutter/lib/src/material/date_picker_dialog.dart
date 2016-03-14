@@ -22,10 +22,12 @@ class _DatePickerDialog extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
 
+  @override
   _DatePickerDialogState createState() => new _DatePickerDialogState();
 }
 
 class _DatePickerDialogState extends State<_DatePickerDialog> {
+  @override
   void initState() {
     super.initState();
     _selectedDate = config.initialDate;
@@ -47,6 +49,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     Navigator.pop(context, _selectedDate);
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Dialog(
       content: new DatePicker(

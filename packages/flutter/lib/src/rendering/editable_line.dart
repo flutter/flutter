@@ -131,29 +131,36 @@ class RenderEditableLine extends RenderBox {
     return _layoutTemplate.height;
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(0.0);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(0.0);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_preferredHeight);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_preferredHeight);
   }
 
+  @override
   bool hitTestSelf(Point position) => true;
 
   TapGestureRecognizer _tap;
+
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent && onSelectionChanged != null)
       _tap.addPointer(event);
@@ -201,6 +208,7 @@ class RenderEditableLine extends RenderBox {
 
   Rect _caretPrototype;
 
+  @override
   void performLayout() {
     Size oldSize = hasSize ? size : null;
     size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight));
@@ -250,6 +258,7 @@ class RenderEditableLine extends RenderBox {
 
   bool get _hasVisualOverflow => _contentSize.width > size.width;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow)
       context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
@@ -257,5 +266,6 @@ class RenderEditableLine extends RenderBox {
       _paintContents(context, offset);
   }
 
+  @override
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
 }

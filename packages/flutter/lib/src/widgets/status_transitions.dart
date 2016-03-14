@@ -19,15 +19,18 @@ abstract class StatusTransitionWidget extends StatefulWidget {
 
   Widget build(BuildContext context);
 
+  @override
   _StatusTransitionState createState() => new _StatusTransitionState();
 }
 
 class _StatusTransitionState extends State<StatusTransitionWidget> {
+  @override
   void initState() {
     super.initState();
     config.animation.addStatusListener(_animationStatusChanged);
   }
 
+  @override
   void didUpdateConfig(StatusTransitionWidget oldConfig) {
     if (config.animation != oldConfig.animation) {
       oldConfig.animation.removeStatusListener(_animationStatusChanged);
@@ -35,6 +38,7 @@ class _StatusTransitionState extends State<StatusTransitionWidget> {
     }
   }
 
+  @override
   void dispose() {
     config.animation.removeStatusListener(_animationStatusChanged);
     super.dispose();
@@ -46,6 +50,7 @@ class _StatusTransitionState extends State<StatusTransitionWidget> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return config.build(context);
   }

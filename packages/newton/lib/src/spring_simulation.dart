@@ -47,15 +47,18 @@ class _CriticalSolution implements _SpringSolution {
 
   final double _r, _c1, _c2;
 
+  @override
   double x(double time) {
     return (_c1 + _c2 * time) * math.pow(math.E, _r * time);
   }
 
+  @override
   double dx(double time) {
     final double power = math.pow(math.E, _r * time);
     return _r * (_c1 + _c2 * time) * power + _c2 * power;
   }
 
+  @override
   SpringType get type => SpringType.criticallyDamped;
 }
 
@@ -81,16 +84,19 @@ class _OverdampedSolution implements _SpringSolution {
 
   final double _r1, _r2, _c1, _c2;
 
+  @override
   double x(double time) {
     return _c1 * math.pow(math.E, _r1 * time) +
            _c2 * math.pow(math.E, _r2 * time);
   }
 
+  @override
   double dx(double time) {
     return _c1 * _r1 * math.pow(math.E, _r1 * time) +
            _c2 * _r2 * math.pow(math.E, _r2 * time);
   }
 
+  @override
   SpringType get type => SpringType.overDamped;
 }
 
@@ -116,11 +122,13 @@ class _UnderdampedSolution implements _SpringSolution {
 
   final double _w, _r, _c1, _c2;
 
+  @override
   double x(double time) {
     return math.pow(math.E, _r * time) *
            (_c1 * math.cos(_w * time) + _c2 * math.sin(_w * time));
   }
 
+  @override
   double dx(double time) {
     final double power = math.pow(math.E, _r * time);
     final double cosine = math.cos(_w * time);
@@ -129,6 +137,7 @@ class _UnderdampedSolution implements _SpringSolution {
            _r * power * (_c2 *      sine   + _c1 *      cosine);
   }
 
+  @override
   SpringType get type => SpringType.underDamped;
 }
 
@@ -185,10 +194,13 @@ class SpringSimulation extends Simulation {
 
   SpringType get type => _solution.type;
 
+  @override
   double x(double time) => _endPosition + _solution.x(time);
 
+  @override
   double dx(double time) => _solution.dx(time);
 
+  @override
   bool isDone(double time) {
     return nearZero(_solution.x(time), tolerance.distance) &&
            nearZero(_solution.dx(time), tolerance.velocity);
@@ -205,5 +217,6 @@ class ScrollSpringSimulation extends SpringSimulation {
     double velocity
   ) : super(desc, start, end, velocity);
 
+  @override
   double x(double time) => isDone(time) ? _endPosition : super.x(time);
 }

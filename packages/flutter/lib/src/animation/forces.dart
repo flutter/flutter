@@ -37,6 +37,7 @@ class SpringForce extends Force {
     distance: 0.01
   );
 
+  @override
   Simulation release(double position, double velocity) {
     double target = velocity < 0.0 ? this.left - tolerance.distance
                                    : this.right + tolerance.distance;

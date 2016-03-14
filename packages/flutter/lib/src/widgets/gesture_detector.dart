@@ -157,6 +157,7 @@ class GestureDetector extends StatelessWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  @override
   Widget build(BuildContext context) {
     Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
@@ -261,6 +262,7 @@ class RawGestureDetector extends StatefulWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
+  @override
   RawGestureDetectorState createState() => new RawGestureDetectorState();
 }
 
@@ -268,11 +270,13 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
 
+  @override
   void initState() {
     super.initState();
     _syncAll(config.gestures);
   }
 
+  @override
   void didUpdateConfig(RawGestureDetector oldConfig) {
     _syncAll(config.gestures);
   }
@@ -308,6 +312,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
+  @override
   void dispose() {
     for (GestureRecognizer recognizer in _recognizers.values)
       recognizer.dispose();
@@ -340,6 +345,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return config.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget result = new Listener(
       onPointerDown: _handlePointerDown,
@@ -351,6 +357,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return result;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (_recognizers == null) {
@@ -458,12 +465,14 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     assert(false);
   }
 
+  @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
     RenderSemanticsGestureHandler result = new RenderSemanticsGestureHandler();
     updateRenderObject(context, result);
     return result;
   }
 
+  @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
     Map<Type, GestureRecognizer> recognizers = owner._recognizers;
     renderObject

@@ -17,6 +17,7 @@ class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// according to the flex factors of the flexible children.
   int flex;
 
+  @override
   String toString() => '${super.toString()}; flex=$flex';
 }
 
@@ -134,6 +135,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// Set during layout if overflow occurred on the main axis
   double _overflow;
 
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! FlexParentData)
       child.parentData = new FlexParentData();
@@ -278,6 +280,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return _getIntrinsicSize(
       constraints: constraints,
@@ -286,6 +289,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     );
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return _getIntrinsicSize(
       constraints: constraints,
@@ -294,6 +298,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     );
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return _getIntrinsicSize(
       constraints: constraints,
@@ -302,6 +307,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     );
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return _getIntrinsicSize(
       constraints: constraints,
@@ -309,6 +315,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       childSize: (RenderBox child, BoxConstraints innerConstraints) => child.getMaxIntrinsicHeight(innerConstraints));
   }
 
+  @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (_direction == FlexDirection.horizontal)
       return defaultComputeDistanceToHighestActualBaseline(baseline);
@@ -328,6 +335,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return (_direction == FlexDirection.horizontal) ? child.size.width : child.size.height;
   }
 
+  @override
   void performLayout() {
     // Originally based on http://www.w3.org/TR/css-flexbox-1/ Section 9.7 Resolving Flexible Lengths
 
@@ -537,10 +545,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_overflow <= 0.0) {
       defaultPaint(context, offset);
@@ -583,8 +593,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     });
   }
 
+  @override
   Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Point.origin & size : null;
 
+  @override
   String toString() {
     String header = super.toString();
     if (_overflow is double && _overflow > 0.0)
@@ -592,6 +604,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return header;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('direction: $_direction');

@@ -34,6 +34,7 @@ class Markdown extends MarkdownRaw {
     onTapLink: onTapLink
   );
 
+  @override
   MarkdownBody createMarkdownBody({
     String data,
     MarkdownStyle markdownStyle,
@@ -84,6 +85,7 @@ class MarkdownBody extends MarkdownBodyRaw {
     onTapLink: onTapLink
   );
 
+  @override
   MarkdownStyle createDefaultStyle(BuildContext context) {
     return new MarkdownStyle.defaultFromTheme(Theme.of(context));
   }

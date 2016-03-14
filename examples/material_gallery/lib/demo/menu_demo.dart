@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 class MenuDemo extends StatefulWidget {
   MenuDemo({ Key key }) : super(key: key);
 
+  @override
   MenuDemoState createState() => new MenuDemoState();
 }
 
@@ -24,6 +25,7 @@ class MenuDemoState extends State<MenuDemo> {
   final String _checkedValue4 = 'Four';
   List<String> _checkedValues;
 
+  @override
   void initState() {
     super.initState();
     _simpleValue = _simpleValue2;
@@ -53,6 +55,7 @@ class MenuDemoState extends State<MenuDemo> {
 
   bool isChecked(String value) => _checkedValues.contains(value);
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,

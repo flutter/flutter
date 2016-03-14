@@ -57,11 +57,12 @@ class RaisedButton extends MaterialButton {
   final int highlightElevation;
   final int disabledElevation;
 
+  @override
   _RaisedButtonState createState() => new _RaisedButtonState();
 }
 
 class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
-
+  @override
   int get elevation {
     if (config.enabled) {
       if (highlight)
@@ -72,6 +73,7 @@ class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
     }
   }
 
+  @override
   Color getColor(BuildContext context) {
     if (config.enabled) {
       return config.color ?? Theme.of(context).buttonColor;
@@ -87,8 +89,8 @@ class _RaisedButtonState extends MaterialButtonState<RaisedButton> {
     }
   }
 
+  @override
   ThemeBrightness getColorBrightness(BuildContext context) {
     return config.colorBrightness ?? Theme.of(context).brightness;
   }
-
 }

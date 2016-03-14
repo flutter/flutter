@@ -22,6 +22,7 @@ export 'package:flutter/gestures.dart' show HitTestResult;
 abstract class Renderer extends Object with Scheduler, Services
   implements HitTestable {
 
+  @override
   void initInstances() {
     super.initInstances();
     _instance = this;
@@ -90,6 +91,7 @@ abstract class Renderer extends Object with Scheduler, Services
     }
   }
 
+  @override
   void hitTest(HitTestResult result, Point position) {
     assert(renderView != null);
     renderView.hitTest(result, position: position);

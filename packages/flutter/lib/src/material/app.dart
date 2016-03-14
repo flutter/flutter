@@ -71,14 +71,17 @@ class MaterialApp extends WidgetsApp {
   /// Only available in checked mode.
   final bool debugShowMaterialGrid;
 
+  @override
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
 class _MaterialAppState extends WidgetsAppState<MaterialApp> {
-
   final HeroController _heroController = new HeroController();
+
+  @override
   NavigatorObserver get navigatorObserver => _heroController;
 
+  @override
   Widget build(BuildContext context) {
     ThemeData theme = config.theme ?? new ThemeData.fallback();
     Widget result = new AnimatedTheme(

@@ -136,7 +136,10 @@ class ApkKeystoreInfo {
 }
 
 class ApkCommand extends FlutterCommand {
+  @override
   final String name = 'apk';
+
+  @override
   final String description = 'Build an Android APK package.';
 
   ApkCommand() {

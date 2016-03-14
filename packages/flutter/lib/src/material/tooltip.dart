@@ -64,8 +64,10 @@ class Tooltip extends StatefulWidget {
   final Duration showDuration;
   final Widget child;
 
+  @override
   _TooltipState createState() => new _TooltipState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('"$message"');
@@ -80,6 +82,7 @@ class _TooltipState extends State<Tooltip> {
   OverlayEntry _entry;
   Timer _timer;
 
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: config.fadeDuration)
@@ -102,6 +105,7 @@ class _TooltipState extends State<Tooltip> {
       });
   }
 
+  @override
   void didUpdateConfig(Tooltip oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (config.fadeDuration != oldConfig.fadeDuration)
@@ -169,12 +173,14 @@ class _TooltipState extends State<Tooltip> {
     _controller.reverse();
   }
 
+  @override
   void deactivate() {
     if (_entry != null)
       hideTooltip();
     super.deactivate();
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: config) != null);
     return new GestureDetector(
@@ -201,8 +207,10 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   final EdgeInsets screenEdgeMargin;
   final bool preferBelow;
 
+  @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
 
+  @override
   Offset getPositionForChild(Size size, Size childSize) {
     // VERTICAL DIRECTION
     final bool fitsBelow = target.y + verticalOffset + childSize.height <= size.height - screenEdgeMargin.bottom;
@@ -226,6 +234,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     return new Offset(x, y);
   }
 
+  @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != target
         || verticalOffset != verticalOffset
@@ -264,6 +273,7 @@ class _TooltipOverlay extends StatelessWidget {
   final EdgeInsets screenEdgeMargin;
   final bool preferBelow;
 
+  @override
   Widget build(BuildContext context) {
     return new Positioned(
       top: 0.0,

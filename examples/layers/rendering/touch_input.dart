@@ -45,20 +45,24 @@ class RenderDots extends RenderBox {
 
   /// Indicates that the size of this render object depends only on the
   /// layout constraints provided by the parent.
+  @override
   bool get sizedByParent => true;
 
   /// By selecting the biggest value permitted by the incomming constraints
   /// during layout, this function makes this render object as large as
   /// possible (i.e., fills the entire screen).
+  @override
   void performResize() {
     size = constraints.biggest;
   }
 
   /// Makes this render object hittable so that it receives pointer events.
+  @override
   bool hitTestSelf(Point position) => true;
 
   /// Processes pointer events by mutating state and invalidating its previous
   /// painting commands.
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
       Color color = _kColors[event.pointer.remainder(_kColors.length)];
@@ -78,6 +82,7 @@ class RenderDots extends RenderBox {
   }
 
   /// Issues new painting commands.
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
     // The "size" property indicates the size of that this render box was

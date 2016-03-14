@@ -26,22 +26,28 @@ abstract class Logger {
 }
 
 class StdoutLogger implements Logger {
+  @override
   bool get isVerbose => false;
 
+  @override
   void printError(String message, [StackTrace stackTrace]) {
     stderr.writeln(message);
     if (stackTrace != null)
       stderr.writeln(stackTrace);
   }
 
+  @override
   void printStatus(String message) => print(message);
 
+  @override
   void printTrace(String message) { }
 
+  @override
   void flush() { }
 }
 
 class BufferLogger implements Logger {
+  @override
   bool get isVerbose => false;
 
   StringBuffer _error = new StringBuffer();
@@ -52,33 +58,44 @@ class BufferLogger implements Logger {
   String get statusText => _status.toString();
   String get traceText => _trace.toString();
 
+  @override
   void printError(String message, [StackTrace stackTrace]) => _error.writeln(message);
+
+  @override
   void printStatus(String message) => _status.writeln(message);
+
+  @override
   void printTrace(String message) => _trace.writeln(message);
 
+  @override
   void flush() { }
 }
 
 class VerboseLogger implements Logger {
   _LogMessage lastMessage;
 
+  @override
   bool get isVerbose => true;
 
+  @override
   void printError(String message, [StackTrace stackTrace]) {
     _emit();
     lastMessage = new _LogMessage(_LogType.error, message, stackTrace);
   }
 
+  @override
   void printStatus(String message) {
     _emit();
     lastMessage = new _LogMessage(_LogType.status, message);
   }
 
+  @override
   void printTrace(String message) {
     _emit();
     lastMessage = new _LogMessage(_LogType.trace, message);
   }
 
+  @override
   void flush() => _emit();
 
   void _emit() {

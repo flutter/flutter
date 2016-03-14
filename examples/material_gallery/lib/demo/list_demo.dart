@@ -13,6 +13,7 @@ enum ListDemoItemSize {
 class ListDemo extends StatefulWidget {
   ListDemo({ Key key }) : super(key: key);
 
+  @override
   ListDemoState createState() => new ListDemoState();
 }
 
@@ -153,6 +154,7 @@ class ListDemoState extends State<ListDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final String layoutText = _dense ? " \u2013 Dense" : "";
     String  itemSizeText;

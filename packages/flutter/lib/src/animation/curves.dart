@@ -31,13 +31,18 @@ abstract class Curve {
 /// The identity map over the unit interval.
 class Linear extends Curve {
   const Linear();
+
+  @override
   double transform(double t) => t;
 }
 
 /// A sawtooth curve that repeats a given number of times over the unit interval.
 class SawTooth extends Curve {
   const SawTooth(this.count);
+
   final int count;
+
+  @override
   double transform(double t) {
     t *= count;
     return t - t.truncateToDouble();
@@ -57,6 +62,7 @@ class Interval extends Curve {
   /// The curve to apply between [start] and [end].
   final Curve curve;
 
+  @override
   double transform(double t) {
     assert(start >= 0.0);
     assert(start <= 1.0);
@@ -79,6 +85,7 @@ class Cubic extends Curve {
   final double c;
   final double d;
 
+  @override
   double transform(double t) {
     double start = 0.0;
     double end = 1.0;
@@ -112,13 +119,18 @@ double _bounce(double t) {
 /// A curve that is the reversed inversion of its given curve.
 class FlippedCurve extends Curve {
   FlippedCurve(this.curve);
+
   final Curve curve;
+
+  @override
   double transform(double t) => 1.0 - curve.transform(1.0 - t);
 }
 
 /// An oscillating curve that grows in magnitude.
 class BounceInCurve extends Curve {
   const BounceInCurve();
+
+  @override
   double transform(double t) {
     return 1.0 - _bounce(1.0 - t);
   }
@@ -127,6 +139,8 @@ class BounceInCurve extends Curve {
 /// An oscillating curve that shrink in magnitude.
 class BounceOutCurve extends Curve {
   const BounceOutCurve();
+
+  @override
   double transform(double t) {
     return _bounce(t);
   }
@@ -135,6 +149,8 @@ class BounceOutCurve extends Curve {
 /// An oscillating curve that first grows and then shrink in magnitude.
 class BounceInOutCurve extends Curve {
   const BounceInOutCurve();
+
+  @override
   double transform(double t) {
     if (t < 0.5)
       return (1.0 - _bounce(1.0 - t)) * 0.5;
@@ -146,7 +162,10 @@ class BounceInOutCurve extends Curve {
 /// An oscillating curve that grows in magnitude while overshooting its bounds.
 class ElasticInCurve extends Curve {
   const ElasticInCurve([this.period = 0.4]);
+
   final double period;
+
+  @override
   double transform(double t) {
     double s = period / 4.0;
     t = t - 1.0;
@@ -157,7 +176,10 @@ class ElasticInCurve extends Curve {
 /// An oscillating curve that shrinks in magnitude while overshooting its bounds.
 class ElasticOutCurve extends Curve {
   const ElasticOutCurve([this.period = 0.4]);
+
   final double period;
+
+  @override
   double transform(double t) {
     double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.PI * 2.0) / period) + 1.0;
@@ -167,7 +189,10 @@ class ElasticOutCurve extends Curve {
 /// An oscillating curve that grows and then shrinks in magnitude while overshooting its bounds.
 class ElasticInOutCurve extends Curve {
   const ElasticInOutCurve([this.period = 0.4]);
+
   final double period;
+
+  @override
   double transform(double t) {
     double s = period / 4.0;
     t = 2.0 * t - 1.0;

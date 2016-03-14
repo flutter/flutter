@@ -18,6 +18,7 @@ import 'flutter_command_runner.dart';
 typedef bool Validator();
 
 abstract class FlutterCommand extends Command {
+  @override
   FlutterCommandRunner get runner => super.runner;
 
   /// Whether this command needs to be run from the root of a project.
@@ -43,6 +44,7 @@ abstract class FlutterCommand extends Command {
     applicationPackages ??= await ApplicationPackageStore.forConfigs(buildConfigurations);
   }
 
+  @override
   Future<int> run() {
     Stopwatch stopwatch = new Stopwatch()..start();
 

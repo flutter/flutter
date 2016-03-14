@@ -31,6 +31,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
+  @override
   void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     if (_state == ScaleState.ready) {
@@ -41,6 +42,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
+  @override
   void handleEvent(PointerEvent event) {
     assert(_state != ScaleState.ready);
     bool configChanged = false;
@@ -101,6 +103,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       onUpdate(_scaleFactor, focalPoint);
   }
 
+  @override
   void acceptGesture(int pointer) {
     if (_state != ScaleState.accepted) {
       _state = ScaleState.accepted;
@@ -108,6 +111,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
+  @override
   void didStopTrackingLastPointer(int pointer) {
     switch(_state) {
       case ScaleState.possible:
@@ -125,5 +129,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _state = ScaleState.ready;
   }
 
+  @override
   String toStringShort() => 'scale';
 }

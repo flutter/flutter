@@ -135,6 +135,7 @@ class EdgeInsets {
   /// An EdgeInsets with zero offsets in each direction.
   static const EdgeInsets zero = const EdgeInsets.TRBL(0.0, 0.0, 0.0, 0.0);
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -147,7 +148,9 @@ class EdgeInsets {
            left == typedOther.left;
   }
 
+  @override
   int get hashCode => hashValues(top, left, bottom, right);
 
+  @override
   String toString() => "EdgeInsets($top, $right, $bottom, $left)";
 }

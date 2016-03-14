@@ -33,6 +33,7 @@ class Chip extends StatelessWidget {
   final Widget label;
   final VoidCallback onDeleted;
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final bool deletable = onDeleted != null;

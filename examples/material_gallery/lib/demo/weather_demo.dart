@@ -19,6 +19,8 @@ enum WeatherType {
 
 class WeatherDemo extends StatefulWidget {
   WeatherDemo({ Key key }) : super(key: key);
+
+  @override
   _WeatherDemoState createState() => new _WeatherDemoState();
 }
 
@@ -42,6 +44,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
     _sprites = new SpriteSheet(_images['packages/flutter_gallery_assets/weathersprites.png'], json);
   }
 
+  @override
   void initState() {
     super.initState();
 
@@ -58,6 +61,7 @@ class _WeatherDemoState extends State<WeatherDemo> {
 
   WeatherWorld weatherWorld;
 
+  @override
   Widget build(BuildContext context) {
     if (!assetsLoaded) {
       return new Scaffold(
@@ -132,6 +136,7 @@ class WeatherButton extends StatelessWidget {
   final bool selected;
   final VoidCallback onPressed;
 
+  @override
   Widget build(BuildContext context) {
     Color color;
     if (selected)
@@ -262,6 +267,7 @@ class WeatherWorld extends NodeWithSize {
     _snow.active = weatherType == WeatherType.snow;
   }
 
+  @override
   void spriteBoxPerformedLayout() {
     _sun.position = spriteBox.visibleArea.topLeft + const Offset(350.0, 180.0);
   }
@@ -273,6 +279,7 @@ class GradientNode extends NodeWithSize {
   Color colorTop;
   Color colorBottom;
 
+  @override
   void paint(Canvas canvas) {
     applyTransformForPivot(canvas);
 
@@ -426,6 +433,7 @@ class Ray extends Sprite {
     ));
   }
 
+  @override
   void update(double dt) {
     rotation += dt * _rotationSpeed;
   }

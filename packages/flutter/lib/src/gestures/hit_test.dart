@@ -25,6 +25,7 @@ class HitTestEntry {
   /// The [HitTestTarget] encountered during the hit test.
   final HitTestTarget target;
 
+  @override
   String toString() => '$target';
 }
 
@@ -49,5 +50,6 @@ class HitTestResult {
     path.add(entry);
   }
 
+  @override
   String toString() => 'HitTestResult(${path.isEmpty ? "<empty path>" : path.join(", ")})';
 }

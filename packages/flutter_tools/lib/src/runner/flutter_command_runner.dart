@@ -124,6 +124,7 @@ class FlutterCommandRunner extends CommandRunner {
         defaultsTo: 'out/ios_sim_Release/');
   }
 
+  @override
   String get usageFooter {
     return 'Run "flutter -h -v" for verbose help output, including less commonly used options.\n'
            '\n'
@@ -165,6 +166,7 @@ class FlutterCommandRunner extends CommandRunner {
     return '.';
   }
 
+  @override
   Future<dynamic> run(Iterable<String> args) {
     return super.run(args).then((dynamic result) {
       logger.flush();
@@ -172,6 +174,7 @@ class FlutterCommandRunner extends CommandRunner {
     });
   }
 
+  @override
   Future<int> runCommand(ArgResults globalResults) {
     _globalResults = globalResults;
 

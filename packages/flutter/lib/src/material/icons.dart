@@ -6,13 +6,18 @@ class IconData {
   const IconData(this.codePoint);
   final int codePoint;
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! IconData)
       return false;
     final IconData typedOther = other;
     return codePoint == typedOther.codePoint;
   }
+
+  @override
   int get hashCode => codePoint.hashCode;
+
+  @override
   String toString() => 'IconData(codePoint: $codePoint)';
 }
 

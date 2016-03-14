@@ -11,11 +11,22 @@ import 'listener_helpers.dart';
 class _AlwaysCompleteAnimation extends Animation<double> {
   const _AlwaysCompleteAnimation();
 
+  @override
   void addListener(VoidCallback listener) { }
+
+  @override
   void removeListener(VoidCallback listener) { }
+
+  @override
   void addStatusListener(AnimationStatusListener listener) { }
+
+  @override
   void removeStatusListener(AnimationStatusListener listener) { }
+
+  @override
   AnimationStatus get status => AnimationStatus.completed;
+
+  @override
   double get value => 1.0;
 }
 
@@ -29,11 +40,22 @@ const Animation<double> kAlwaysCompleteAnimation = const _AlwaysCompleteAnimatio
 class _AlwaysDismissedAnimation extends Animation<double> {
   const _AlwaysDismissedAnimation();
 
+  @override
   void addListener(VoidCallback listener) { }
+
+  @override
   void removeListener(VoidCallback listener) { }
+
+  @override
   void addStatusListener(AnimationStatusListener listener) { }
+
+  @override
   void removeStatusListener(AnimationStatusListener listener) { }
+
+  @override
   AnimationStatus get status => AnimationStatus.dismissed;
+
+  @override
   double get value => 0.0;
 }
 
@@ -48,12 +70,22 @@ const Animation<double> kAlwaysDismissedAnimation = const _AlwaysDismissedAnimat
 class AlwaysStoppedAnimation<T> extends Animation<T> {
   const AlwaysStoppedAnimation(this.value);
 
+  @override
   final T value;
 
+  @override
   void addListener(VoidCallback listener) { }
+
+  @override
   void removeListener(VoidCallback listener) { }
+
+  @override
   void addStatusListener(AnimationStatusListener listener) { }
+
+  @override
   void removeStatusListener(AnimationStatusListener listener) { }
+
+  @override
   AnimationStatus get status => AnimationStatus.forward;
 }
 
@@ -123,6 +155,7 @@ class ProxyAnimation extends Animation<double>
     }
   }
 
+  @override
   void didStartListening() {
     if (_parent != null) {
       _parent.addListener(notifyListeners);
@@ -130,6 +163,7 @@ class ProxyAnimation extends Animation<double>
     }
   }
 
+  @override
   void didStopListening() {
     if (_parent != null) {
       _parent.removeListener(notifyListeners);
@@ -137,7 +171,10 @@ class ProxyAnimation extends Animation<double>
     }
   }
 
+  @override
   AnimationStatus get status => _parent != null ? _parent.status : _status;
+
+  @override
   double get value => _parent != null ? _parent.value : _value;
 }
 
@@ -155,19 +192,24 @@ class ReverseAnimation extends Animation<double>
   /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
 
+  @override
   void addListener(VoidCallback listener) {
     didRegisterListener();
     parent.addListener(listener);
   }
+
+  @override
   void removeListener(VoidCallback listener) {
     parent.removeListener(listener);
     didUnregisterListener();
   }
 
+  @override
   void didStartListening() {
     parent.addStatusListener(_statusChangeHandler);
   }
 
+  @override
   void didStopListening() {
     parent.removeStatusListener(_statusChangeHandler);
   }
@@ -176,7 +218,10 @@ class ReverseAnimation extends Animation<double>
     notifyStatusListeners(_reverseStatus(status));
   }
 
+  @override
   AnimationStatus get status => _reverseStatus(parent.status);
+
+  @override
   double get value => 1.0 - parent.value;
 
   AnimationStatus _reverseStatus(AnimationStatus status) {
@@ -206,6 +251,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   }
 
   /// The animation to which this animation applies a curve.
+  @override
   final Animation<double> parent;
 
   /// The curve to use in the forward direction.
@@ -238,6 +284,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     }
   }
 
+  @override
   double get value {
     final bool useForwardCurve = reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
     Curve activeCurve = useForwardCurve ? curve : reverseCurve;
@@ -306,6 +353,7 @@ class TrainHoppingAnimation extends Animation<double>
     assert(_lastStatus != null);
   }
 
+  @override
   AnimationStatus get status => _currentTrain.status;
 
   double _lastValue;
@@ -342,10 +390,12 @@ class TrainHoppingAnimation extends Animation<double>
       onSwitchedTrain();
   }
 
+  @override
   double get value => _currentTrain.value;
 
   /// Frees all the resources used by this performance.
   /// After this is called, this object is no longer usable.
+  @override
   void dispose() {
     assert(_currentTrain != null);
     _currentTrain.removeStatusListener(_statusChangeHandler);

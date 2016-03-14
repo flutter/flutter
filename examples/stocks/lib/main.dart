@@ -24,6 +24,7 @@ import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
 class StocksApp extends StatefulWidget {
+  @override
   StocksAppState createState() => new StocksAppState();
 }
 
@@ -45,6 +46,7 @@ class StocksAppState extends State<StocksApp> {
     showSemanticsDebugger: false
   );
 
+  @override
   void initState() {
     super.initState();
     new StockDataFetcher((StockData data) {
@@ -99,6 +101,7 @@ class StocksAppState extends State<StocksApp> {
     return StockStrings.instance;
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(() {
       debugPaintSizeEnabled = _configuration.debugShowSizes;

@@ -51,6 +51,7 @@ class TextRange {
     return text.substring(start, end);
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -61,11 +62,13 @@ class TextRange {
         && typedOther.end == end;
   }
 
+  @override
   int get hashCode => hashValues(
     start.hashCode,
     end.hashCode
   );
 
+  @override
   String toString() => 'TextRange(start: $start, end: $end)';
 }
 
@@ -136,10 +139,12 @@ class TextSelection extends TextRange {
   /// Might be larger than, smaller than, or equal to base.
   TextPosition get extent => new TextPosition(offset: extentOffset, affinity: affinity);
 
+  @override
   String toString() {
     return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -152,6 +157,7 @@ class TextSelection extends TextRange {
         && typedOther.isDirectional == isDirectional;
   }
 
+  @override
   int get hashCode => hashValues(
     baseOffset.hashCode,
     extentOffset.hashCode,

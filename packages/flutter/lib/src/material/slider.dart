@@ -37,6 +37,7 @@ class Slider extends StatelessWidget {
     onChanged(value * (max - min) + min);
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new _SliderRenderObjectWidget(
@@ -55,12 +56,14 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final ValueChanged<double> onChanged;
 
+  @override
   _RenderSlider createRenderObject(BuildContext context) => new _RenderSlider(
     value: value,
     activeColor: activeColor,
     onChanged: onChanged
   );
 
+  @override
   void updateRenderObject(BuildContext context, _RenderSlider renderObject) {
     renderObject
       ..value = value
@@ -155,13 +158,16 @@ class _RenderSlider extends RenderConstrainedBox {
     }
   }
 
+  @override
   bool hitTestSelf(Point position) => true;
 
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent && onChanged != null)
       _drag.addPointer(event);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 

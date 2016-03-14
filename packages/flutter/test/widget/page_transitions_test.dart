@@ -9,6 +9,7 @@ import 'package:test/test.dart';
 import 'test_matchers.dart';
 
 class TestOverlayRoute extends OverlayRoute<Null> {
+  @override
   List<WidgetBuilder> get builders => <WidgetBuilder>[ _build ];
   Widget _build(BuildContext context) => new Text('Overlay');
 }

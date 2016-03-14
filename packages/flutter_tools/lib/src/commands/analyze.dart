@@ -118,8 +118,13 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
   }
 
+  @override
   String get name => 'analyze';
+
+  @override
   String get description => 'Analyze the project\'s Dart code.';
+
+  @override
   bool get requiresProjectRoot => false;
 
   bool get isFlutterRepo {
@@ -760,6 +765,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   int get startColumn => json['location']['startColumn'];
   int get offset => json['location']['offset'];
 
+  @override
   int compareTo(AnalysisError other) {
     // Sort in order of file path, error location, severity, and message.
     if (file != other.file)
@@ -775,6 +781,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     return message.compareTo(other.message);
   }
 
+  @override
   String toString() {
     String relativePath = path.relative(file);
     return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';

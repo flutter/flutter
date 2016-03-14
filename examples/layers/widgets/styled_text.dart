@@ -58,6 +58,7 @@ Widget toStyledText(String name, String text) {
 Widget toPlainText(String name, String text) => new Text(name + ":" + text);
 
 class SpeakerSeparator extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new Container(
       constraints: const BoxConstraints.expand(height: 0.0),
@@ -72,10 +73,12 @@ class SpeakerSeparator extends StatelessWidget {
 }
 
 class StyledTextDemo extends StatefulWidget {
+  @override
   _StyledTextDemoState createState() => new _StyledTextDemoState();
 }
 
 class _StyledTextDemoState extends State<StyledTextDemo> {
+  @override
   void initState() {
     super.initState();
     _toText = toStyledText;
@@ -89,6 +92,7 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> lines = _kNameLines
       .map((List<String> nameAndText) => Function.apply(_toText, nameAndText))

@@ -22,7 +22,7 @@ linter:
     - avoid_empty_else
     - always_declare_return_types
     - always_specify_types
-    # - annotate_overrides # still a lot of work to do before enabling this one
+    - annotate_overrides
     # - avoid_as # https://github.com/dart-lang/linter/issues/195
     - avoid_init_to_null
     # - avoid_return_types_on_setters # https://github.com/dart-lang/linter/issues/202

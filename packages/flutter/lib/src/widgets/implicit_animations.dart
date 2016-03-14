@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math_64.dart';
 class BoxConstraintsTween extends Tween<BoxConstraints> {
   BoxConstraintsTween({ BoxConstraints begin, BoxConstraints end }) : super(begin: begin, end: end);
 
+  @override
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
@@ -18,6 +19,7 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 class DecorationTween extends Tween<Decoration> {
   DecorationTween({ Decoration begin, Decoration end }) : super(begin: begin, end: end);
 
+  @override
   Decoration lerp(double t) {
     if (begin == null && end == null)
       return null;
@@ -31,6 +33,7 @@ class DecorationTween extends Tween<Decoration> {
 class EdgeInsetsTween extends Tween<EdgeInsets> {
   EdgeInsetsTween({ EdgeInsets begin, EdgeInsets end }) : super(begin: begin, end: end);
 
+  @override
   EdgeInsets lerp(double t) => EdgeInsets.lerp(begin, end, t);
 }
 
@@ -40,6 +43,7 @@ class EdgeInsetsTween extends Tween<EdgeInsets> {
 class Matrix4Tween extends Tween<Matrix4> {
   Matrix4Tween({ Matrix4 begin, Matrix4 end }) : super(begin: begin, end: end);
 
+  @override
   Matrix4 lerp(double t) {
     // TODO(mpcomplete): Animate the full matrix. Will animating the cells
     // separately work?
@@ -68,8 +72,10 @@ abstract class AnimatedWidgetBase extends StatefulWidget {
   /// The duration over which to animate the parameters of this container.
   final Duration duration;
 
+  @override
   AnimatedWidgetBaseState<AnimatedWidgetBase> createState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('duration: ${duration.inMilliseconds}ms');
@@ -90,6 +96,7 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
   Animation<double> get animation => _animation;
   Animation<double> _animation;
 
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
@@ -100,6 +107,7 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
     _constructTweens();
   }
 
+  @override
   void didUpdateConfig(T oldConfig) {
     if (config.curve != oldConfig.curve)
       _updateCurve();
@@ -122,6 +130,7 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
       _animation = _controller;
   }
 
+  @override
   void dispose() {
     _controller.stop();
     super.dispose();
@@ -229,8 +238,10 @@ class AnimatedContainer extends AnimatedWidgetBase {
   /// If non-null, requires the decoration to have this height.
   final double height;
 
+  @override
   _AnimatedContainerState createState() => new _AnimatedContainerState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (constraints != null)
@@ -262,6 +273,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   Tween<double> _width;
   Tween<double> _height;
 
+  @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
     _constraints = visitor(_constraints, config.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
@@ -274,6 +286,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       child: config.child,
@@ -288,6 +301,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (_constraints != null)
@@ -370,6 +384,7 @@ class AnimatedPositioned extends AnimatedWidgetBase {
   /// set. The third must be null.
   final double height;
 
+  @override
   _AnimatedPositionedState createState() => new _AnimatedPositionedState();
 }
 
@@ -381,6 +396,7 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   Tween<double> _width;
   Tween<double> _height;
 
+  @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
     _left = visitor(_left, config.left, (dynamic value) => new Tween<double>(begin: value));
@@ -391,6 +407,7 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
     _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Positioned(
       child: config.child,
@@ -403,6 +420,7 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (_left != null)

@@ -12,10 +12,12 @@ class TestCustomPainter extends CustomPainter {
   List<String> log;
   String name;
 
+  @override
   void paint(Canvas canvas, Size size) {
     log.add(name);
   }
 
+  @override
   bool shouldRepaint(TestCustomPainter oldPainter) => true;
 }
 

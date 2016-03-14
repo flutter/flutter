@@ -12,23 +12,30 @@ class RenderTestBox extends RenderBox {
 
   final BoxConstraints _intrinsicDimensions;
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(_intrinsicDimensions.minWidth);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(_intrinsicDimensions.maxWidth);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(_intrinsicDimensions.minHeight);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(_intrinsicDimensions.maxHeight);
   }
 
+  @override
   bool get sizedByParent => true;
+
+  @override
   void performResize() {
     size = constraints.constrain(new Size(_intrinsicDimensions.minWidth + (_intrinsicDimensions.maxWidth-_intrinsicDimensions.minWidth) / 2.0,
                                           _intrinsicDimensions.minHeight + (_intrinsicDimensions.maxHeight-_intrinsicDimensions.minHeight) / 2.0));

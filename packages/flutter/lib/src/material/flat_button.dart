@@ -59,21 +59,23 @@ class FlatButton extends MaterialButton {
   /// Controls the default text color if the text color isn't explicit set.
   final ThemeBrightness colorBrightness;
 
+  @override
   _FlatButtonState createState() => new _FlatButtonState();
 }
 
 class _FlatButtonState extends MaterialButtonState<FlatButton> {
-
+  @override
   int get elevation => 0;
 
+  @override
   Color getColor(BuildContext context) {
     if (!config.enabled)
       return config.disabledColor;
     return config.color;
   }
 
+  @override
   ThemeBrightness getColorBrightness(BuildContext context) {
     return config.colorBrightness ?? Theme.of(context).brightness;
   }
-
 }

@@ -28,42 +28,50 @@ class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<R
     markNeedsLayout();
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(_requestedSize.width);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainWidth(_requestedSize.width);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_requestedSize.height);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return constraints.constrainHeight(_requestedSize.height);
   }
 
+  @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (child != null)
       return child.getDistanceToActualBaseline(baseline);
     return super.computeDistanceToActualBaseline(baseline);
   }
 
+  @override
   void performLayout() {
     size = constraints.constrain(_requestedSize);
     if (child != null)
       child.layout(constraints);
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset);
@@ -78,23 +86,38 @@ class RenderOffStage extends RenderBox with RenderObjectWithChildMixin<RenderBox
     this.child = child;
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) => constraints.minWidth;
+
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) => constraints.minWidth;
+
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) => constraints.minHeight;
+
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) => constraints.minHeight;
 
+  @override
   bool get sizedByParent => true;
 
+  @override
   void performResize() {
     size = constraints.smallest;
   }
 
+  @override
   void performLayout() {
     if (child != null)
       child.layout(constraints);
   }
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) => false;
+
+  @override
   void paint(PaintingContext context, Offset offset) { }
+
+  @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) { }
 }

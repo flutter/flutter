@@ -34,6 +34,7 @@ class DatePicker extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
 
+  @override
   _DatePickerState createState() => new _DatePickerState();
 }
 
@@ -64,6 +65,7 @@ class _DatePickerState extends State<DatePicker> {
 
   static const double _calendarHeight = 210.0;
 
+  @override
   Widget build(BuildContext context) {
     Widget header = new _DatePickerHeader(
       selectedDate: config.selectedDate,
@@ -120,6 +122,7 @@ class _DatePickerHeader extends StatelessWidget {
       onModeChanged(value);
   }
 
+  @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     TextTheme headerTheme = theme.primaryTextTheme;
@@ -181,6 +184,7 @@ class DayPicker extends StatelessWidget {
   final ValueChanged<DateTime> onChanged;
   final DateTime displayedMonth;
 
+  @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     TextStyle headerStyle = themeData.textTheme.caption.copyWith(fontWeight: FontWeight.w700);
@@ -289,10 +293,12 @@ class MonthPicker extends StatefulWidget {
   final DateTime lastDate;
   final double itemExtent;
 
+  @override
   _MonthPickerState createState() => new _MonthPickerState();
 }
 
 class _MonthPickerState extends State<MonthPicker> {
+  @override
   void initState() {
     super.initState();
     _updateCurrentDate();
@@ -335,6 +341,7 @@ class _MonthPickerState extends State<MonthPicker> {
     return result;
   }
 
+  @override
   Widget build(BuildContext context) {
     return new ScrollableLazyList(
       itemExtent: config.itemExtent,
@@ -343,6 +350,7 @@ class _MonthPickerState extends State<MonthPicker> {
     );
   }
 
+  @override
   void dispose() {
     if (_timer != null)
       _timer.cancel();
@@ -369,6 +377,7 @@ class YearPicker extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
 
+  @override
   _YearPickerState createState() => new _YearPickerState();
 }
 
@@ -403,6 +412,7 @@ class _YearPickerState extends State<YearPicker> {
     return items;
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new ScrollableLazyList(

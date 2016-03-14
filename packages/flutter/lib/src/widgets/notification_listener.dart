@@ -42,6 +42,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
     return false;
   }
 
+  @override
   Widget build(BuildContext context) => child;
 }
 

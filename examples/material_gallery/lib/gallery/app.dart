@@ -11,6 +11,7 @@ class GalleryApp extends StatefulWidget {
 
   static GalleryAppState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<GalleryAppState>());
 
+  @override
   GalleryAppState createState() => new GalleryAppState();
 }
 
@@ -23,6 +24,7 @@ class GalleryAppState extends State<GalleryApp> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Flutter Material Gallery',

@@ -7,13 +7,17 @@ import 'framework.dart';
 class _StorageEntryIdentifier {
   Type clientType;
   List<Key> keys;
+
   void addKey(Key key) {
     assert(key != null);
     assert(key is! GlobalKey);
     keys ??= <Key>[];
     keys.add(key);
   }
+
   GlobalKey scopeKey;
+
+  @override
   bool operator ==(dynamic other) {
     if (other is! _StorageEntryIdentifier)
       return false;
@@ -30,8 +34,11 @@ class _StorageEntryIdentifier {
     }
     return true;
   }
+
+  @override
   int get hashCode => hashValues(clientType, scopeKey, hashList(keys));
 
+  @override
   String toString() {
     return 'StorageEntryIdentifier($clientType, $scopeKey, ${keys?.join(":")})';
   }
@@ -102,5 +109,6 @@ class PageStorage extends StatelessWidget {
     return widget?.bucket;
   }
 
+  @override
   Widget build(BuildContext context) => child;
 }

@@ -21,6 +21,8 @@ abstract class AssetBundle {
   ImageResource loadImage(String key);
   Future<String> loadString(String key);
   Future<core.MojoDataPipeConsumer> load(String key);
+
+  @override
   String toString() => '$runtimeType@$hashCode()';
 }
 
@@ -31,16 +33,20 @@ class NetworkAssetBundle extends AssetBundle {
 
   String _urlFromKey(String key) => _baseUrl.resolve(key).toString();
 
+  @override
   Future<core.MojoDataPipeConsumer> load(String key) async {
     return (await fetchUrl(_urlFromKey(key))).body;
   }
 
+  @override
   ImageResource loadImage(String key) => imageCache.load(_urlFromKey(key));
 
+  @override
   Future<String> loadString(String key) async {
     return (await http.get(_urlFromKey(key))).body;
   }
 
+  @override
   String toString() => '$runtimeType@$hashCode($_baseUrl)';
 }
 
@@ -54,6 +60,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     return new ImageInfo(image: await decodeImageFromDataPipe(await load(key)));
   }
 
+  @override
   ImageResource loadImage(String key) {
     return imageResourceCache.putIfAbsent(key, () {
       return new ImageResource(fetchImage(key));
@@ -66,6 +73,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     return new String.fromCharCodes(new Uint8List.view(data.buffer));
   }
 
+  @override
   Future<String> loadString(String key) {
     return _stringCache.putIfAbsent(key, () => _fetchString(key));
   }
@@ -90,6 +98,7 @@ class MojoAssetBundle extends CachingAssetBundle {
 
   AssetBundleProxy _bundle;
 
+  @override
   Future<core.MojoDataPipeConsumer> load(String key) async {
     return (await _bundle.ptr.getAsStream(key)).assetData;
   }
