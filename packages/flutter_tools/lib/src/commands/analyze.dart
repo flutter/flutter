@@ -332,8 +332,6 @@ class AnalyzeCommand extends FlutterCommand {
       'Analyzing [${mainFile.path}]...',
       new RegExp('^\\[(hint|error)\\] Unused import \\(${mainFile.path},'),
       new RegExp(r'^\[.+\] .+ \(.+/\.pub-cache/.+'),
-      new RegExp('^\\[error\\] The argument type \'List<T>\' cannot be assigned to the parameter type \'List<.+>\''), // until we have generic methods, there's not much choice if you want to use map()
-      new RegExp(r'^\[error\] Type check failed: .*\(dynamic\) is not of type'), // allow unchecked casts from dynamic
       new RegExp('\\[warning\\] Missing concrete implementation of \'RenderObject\\.applyPaintTransform\''), // https://github.com/dart-lang/sdk/issues/25232
       new RegExp(r'[0-9]+ (error|warning|hint|lint).+found\.'),
       new RegExp(r'^$'),
