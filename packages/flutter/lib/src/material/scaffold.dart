@@ -406,10 +406,10 @@ class ScaffoldState extends State<Scaffold> {
     if (appBar == null)
       return null;
     EdgeInsets appBarPadding = new EdgeInsets.only(top: padding.top);
-    Widget left = appBar.leading;
-    if (left == null) {
+    Widget leading = appBar.leading;
+    if (leading == null) {
       if (config.drawer != null) {
-        left = new IconButton(
+        leading = new IconButton(
           icon: Icons.menu,
           onPressed: openDrawer,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
@@ -417,7 +417,7 @@ class ScaffoldState extends State<Scaffold> {
       } else {
         _shouldShowBackArrow ??= Navigator.canPop(context);
         if (_shouldShowBackArrow) {
-          left = new IconButton(
+          leading = new IconButton(
             icon: Icons.arrow_back,
             onPressed: () => Navigator.pop(context),
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
@@ -429,7 +429,7 @@ class ScaffoldState extends State<Scaffold> {
       elevation: elevation ?? appBar.elevation ?? 4,
       padding: appBarPadding,
       foregroundOpacity: foregroundOpacity,
-      left: left
+      leading: leading
     );
   }
 

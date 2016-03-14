@@ -42,9 +42,9 @@ class AppBar extends StatelessWidget {
 
   AppBar copyWith({
     Key key,
-    Widget left,
-    Widget center,
-    List<Widget> right,
+    Widget leading,
+    Widget title,
+    List<Widget> actions,
     WidgetBuilder flexibleSpace,
     double foregroundOpacity,
     int elevation,
@@ -54,9 +54,9 @@ class AppBar extends StatelessWidget {
   }) {
     return new AppBar(
       key: key ?? this.key,
-      leading: left ?? this.leading,
-      title: center ?? this.title,
-      actions: right ?? this.actions,
+      leading: leading ?? this.leading,
+      title: title ?? this.title,
+      actions: actions ?? this.actions,
       flexibleSpace: flexibleSpace ?? this.flexibleSpace,
       foregroundOpacity: foregroundOpacity ?? this.foregroundOpacity,
       tabBar: tabBar ?? this.tabBar,
