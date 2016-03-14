@@ -1410,7 +1410,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
       List<Widget> badAncestors = <Widget>[];
       Element ancestor = parent;
       while (ancestor != null) {
-        if (ancestor is ParentDataElement<dynamic>) {
+        if (ancestor is ParentDataElement<RenderObjectWidget>) {
           badAncestors.add(ancestor.widget);
         } else if (ancestor is RenderObjectElement) {
           if (widget.debugIsValidAncestor(ancestor.widget))
@@ -1439,7 +1439,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
       if (child is RenderObjectElement) {
         child.updateParentData(widget);
       } else {
-        assert(child is! ParentDataElement<dynamic>);
+        assert(child is! ParentDataElement<RenderObjectWidget>);
         child.visitChildren(notifyChildren);
       }
     }
@@ -1509,10 +1509,10 @@ abstract class RenderObjectElement extends BuildableElement {
     return ancestor;
   }
 
-  ParentDataElement<dynamic> _findAncestorParentDataElement() {
+  ParentDataElement<RenderObjectWidget> _findAncestorParentDataElement() {
     Element ancestor = _parent;
     while (ancestor != null && ancestor is! RenderObjectElement) {
-      if (ancestor is ParentDataElement<dynamic>)
+      if (ancestor is ParentDataElement<RenderObjectWidget>)
         return ancestor;
       ancestor = ancestor._parent;
     }
@@ -1714,7 +1714,7 @@ abstract class RenderObjectElement extends BuildableElement {
     widget.didUnmountRenderObject(renderObject);
   }
 
-  void updateParentData(ParentDataWidget<dynamic> parentData) {
+  void updateParentData(ParentDataWidget<RenderObjectWidget> parentData) {
     parentData.applyParentData(renderObject);
   }
 
@@ -1730,7 +1730,7 @@ abstract class RenderObjectElement extends BuildableElement {
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
-    ParentDataElement<dynamic> parentDataElement = _findAncestorParentDataElement();
+    ParentDataElement<RenderObjectWidget> parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       updateParentData(parentDataElement.widget);
   }
@@ -1803,7 +1803,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 
   void insertChildRenderObject(RenderObject child, dynamic slot) {
-    final RenderObjectWithChildMixin<dynamic> renderObject = this.renderObject;
+    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(slot == null);
     renderObject.child = child;
     assert(renderObject == this.renderObject);
@@ -1814,7 +1814,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 
   void removeChildRenderObject(RenderObject child) {
-    final RenderObjectWithChildMixin<dynamic> renderObject = this.renderObject;
+    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
@@ -1835,19 +1835,19 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   final Set<Element> _detachedChildren = new HashSet<Element>();
 
   void insertChildRenderObject(RenderObject child, Element slot) {
-    final ContainerRenderObjectMixin<dynamic, dynamic> renderObject = this.renderObject;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     renderObject.insert(child, after: slot?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
   void moveChildRenderObject(RenderObject child, dynamic slot) {
-    final ContainerRenderObjectMixin<dynamic, dynamic> renderObject = this.renderObject;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     renderObject.move(child, after: slot?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
   void removeChildRenderObject(RenderObject child) {
-    final ContainerRenderObjectMixin<dynamic, dynamic> renderObject = this.renderObject;
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject = this.renderObject;
     assert(child.parent == renderObject);
     renderObject.remove(child);
     assert(renderObject == this.renderObject);
