@@ -164,7 +164,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   /// Additional constraints to apply to [child] during layout
   BoxConstraints get additionalConstraints => _additionalConstraints;
   BoxConstraints _additionalConstraints;
-  void set additionalConstraints (BoxConstraints newConstraints) {
+  set additionalConstraints (BoxConstraints newConstraints) {
     assert(newConstraints != null);
     assert(newConstraints.debugAssertIsNormalized);
     if (_additionalConstraints == newConstraints)
@@ -255,7 +255,7 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   /// given the incoming width constraings.
   double get widthFactor => _widthFactor;
   double _widthFactor;
-  void set widthFactor (double value) {
+  set widthFactor (double value) {
     assert(value == null || value >= 0.0);
     if (_widthFactor == value)
       return;
@@ -270,7 +270,7 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   /// given the incoming width constraings.
   double get heightFactor => _heightFactor;
   double _heightFactor;
-  void set heightFactor (double value) {
+  set heightFactor (double value) {
     assert(value == null || value >= 0.0);
     if (_heightFactor == value)
       return;
@@ -385,7 +385,7 @@ class RenderAspectRatio extends RenderProxyBox {
   /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
   double get aspectRatio => _aspectRatio;
   double _aspectRatio;
-  void set aspectRatio (double newAspectRatio) {
+  set aspectRatio (double newAspectRatio) {
     assert(newAspectRatio != null);
     if (_aspectRatio == newAspectRatio)
       return;
@@ -503,7 +503,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   /// If non-null, force the child's width to be a multiple of this value.
   double get stepWidth => _stepWidth;
   double _stepWidth;
-  void set stepWidth(double newStepWidth) {
+  set stepWidth(double newStepWidth) {
     if (newStepWidth == _stepWidth)
       return;
     _stepWidth = newStepWidth;
@@ -513,7 +513,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   /// If non-null, force the child's height to be a multiple of this value.
   double get stepHeight => _stepHeight;
   double _stepHeight;
-  void set stepHeight(double newStepHeight) {
+  set stepHeight(double newStepHeight) {
     if (newStepHeight == _stepHeight)
       return;
     _stepHeight = newStepHeight;
@@ -665,7 +665,7 @@ class RenderOpacity extends RenderProxyBox {
   /// (i.e., invisible).
   double get opacity => _opacity;
   double _opacity;
-  void set opacity (double newOpacity) {
+  set opacity (double newOpacity) {
     assert(newOpacity != null);
     assert(newOpacity >= 0.0 && newOpacity <= 1.0);
     if (_opacity == newOpacity)
@@ -711,7 +711,7 @@ class RenderShaderMask extends RenderProxyBox {
 
   ShaderCallback get shaderCallback => _shaderCallback;
   ShaderCallback _shaderCallback;
-  void set shaderCallback (ShaderCallback newShaderCallback) {
+  set shaderCallback (ShaderCallback newShaderCallback) {
     assert(newShaderCallback != null);
     if (_shaderCallback == newShaderCallback)
       return;
@@ -721,7 +721,7 @@ class RenderShaderMask extends RenderProxyBox {
 
   TransferMode get transferMode => _transferMode;
   TransferMode _transferMode;
-  void set transferMode (TransferMode newTransferMode) {
+  set transferMode (TransferMode newTransferMode) {
     assert(newTransferMode != null);
     if (_transferMode == newTransferMode)
       return;
@@ -768,7 +768,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
   CustomClipper<T> _clipper;
-  void set clipper (CustomClipper<T> newClipper) {
+  set clipper (CustomClipper<T> newClipper) {
     if (_clipper == newClipper)
       return;
     CustomClipper<T> oldClipper = _clipper;
@@ -838,7 +838,7 @@ class RenderClipRRect extends RenderProxyBox {
   /// object.
   double get xRadius => _xRadius;
   double _xRadius;
-  void set xRadius (double newXRadius) {
+  set xRadius (double newXRadius) {
     assert(newXRadius != null);
     if (_xRadius == newXRadius)
       return;
@@ -852,7 +852,7 @@ class RenderClipRRect extends RenderProxyBox {
   /// object.
   double get yRadius => _yRadius;
   double _yRadius;
-  void set yRadius (double newYRadius) {
+  set yRadius (double newYRadius) {
     assert(newYRadius != null);
     if (_yRadius == newYRadius)
       return;
@@ -943,7 +943,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// What decoration to paint.
   Decoration get decoration => _decoration;
   Decoration _decoration;
-  void set decoration (Decoration newDecoration) {
+  set decoration (Decoration newDecoration) {
     assert(newDecoration != null);
     if (newDecoration == _decoration)
       return;
@@ -957,7 +957,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// Where to paint the box decoration.
   DecorationPosition get position => _position;
   DecorationPosition _position;
-  void set position (DecorationPosition newPosition) {
+  set position (DecorationPosition newPosition) {
     assert(newPosition != null);
     if (newPosition == _position)
       return;
@@ -1034,7 +1034,7 @@ class RenderTransform extends RenderProxyBox {
   /// translation. This property is provided just for convenience.
   Offset get origin => _origin;
   Offset _origin;
-  void set origin (Offset newOrigin) {
+  set origin (Offset newOrigin) {
     if (_origin == newOrigin)
       return;
     _origin = newOrigin;
@@ -1047,7 +1047,7 @@ class RenderTransform extends RenderProxyBox {
   /// If it is specificed at the same time as an offset, both are applied.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  void set alignment (FractionalOffset newAlignment) {
+  set alignment (FractionalOffset newAlignment) {
     assert(newAlignment == null || (newAlignment.dx != null && newAlignment.dy != null));
     if (_alignment == newAlignment)
       return;
@@ -1067,7 +1067,7 @@ class RenderTransform extends RenderProxyBox {
   Matrix4 _transform;
 
   /// The matrix to transform the child by during painting.
-  void set transform(Matrix4 newTransform) {
+  set transform(Matrix4 newTransform) {
     assert(newTransform != null);
     if (_transform == newTransform)
       return;
@@ -1190,7 +1190,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   /// The translation to apply to the child, as a multiple of the size.
   FractionalOffset get translation => _translation;
   FractionalOffset _translation;
-  void set translation (FractionalOffset newTranslation) {
+  set translation (FractionalOffset newTranslation) {
     assert(newTranslation == null || (newTranslation.dx != null && newTranslation.dy != null));
     if (_translation == newTranslation)
       return;
@@ -1261,7 +1261,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
   CustomPainter get painter => _painter;
   CustomPainter _painter;
-  void set painter (CustomPainter newPainter) {
+  set painter (CustomPainter newPainter) {
     if (_painter == newPainter)
       return;
     CustomPainter oldPainter = _painter;
@@ -1271,7 +1271,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
   CustomPainter get foregroundPainter => _foregroundPainter;
   CustomPainter _foregroundPainter;
-  void set foregroundPainter (CustomPainter newPainter) {
+  set foregroundPainter (CustomPainter newPainter) {
     if (_foregroundPainter == newPainter)
       return;
     CustomPainter oldPainter = _foregroundPainter;
@@ -1433,7 +1433,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   bool get ignoring => _ignoring;
   bool _ignoring;
-  void set ignoring(bool value) {
+  set ignoring(bool value) {
     assert(value != null);
     if (value == _ignoring)
       return;
@@ -1444,7 +1444,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   bool get ignoringSemantics => _ignoringSemantics;
   bool _ignoringSemantics;
-  void set ignoringSemantics(bool value) {
+  set ignoringSemantics(bool value) {
     if (value == _ignoringSemantics)
       return;
     bool oldEffectiveValue = _effectiveIgnoringSemantics;
@@ -1509,7 +1509,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
 
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
-  void set onTap(GestureTapCallback value) {
+  set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
     bool didHaveSemantics = hasSemantics;
@@ -1521,7 +1521,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
 
   GestureLongPressCallback get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
-  void set onLongPress(GestureLongPressCallback value) {
+  set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
     bool didHaveSemantics = hasSemantics;
@@ -1533,7 +1533,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
 
   GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onHorizontalDragUpdate;
-  void set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
+  set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
     bool didHaveSemantics = hasSemantics;
@@ -1545,7 +1545,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
 
   GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
-  void set onVerticalDragUpdate(GestureDragUpdateCallback value) {
+  set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
     bool didHaveSemantics = hasSemantics;
@@ -1637,7 +1637,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
   /// you can use a [RenderMergeSemantics].
   bool get container => _container;
   bool _container;
-  void set container(bool value) {
+  set container(bool value) {
     assert(value != null);
     if (container == value)
       return;
@@ -1649,7 +1649,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
   /// "isChecked" semantic to the given value.
   bool get checked => _checked;
   bool _checked;
-  void set checked(bool value) {
+  set checked(bool value) {
     if (checked == value)
       return;
     bool hadValue = checked != null;
@@ -1660,7 +1660,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
   /// If non-null, sets the "label" semantic to the given value.
   String get label => _label;
   String _label;
-  void set label(String value) {
+  set label(String value) {
     if (label == value)
       return;
     bool hadValue = label != null;

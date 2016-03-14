@@ -101,7 +101,7 @@ class _RenderSlider extends RenderConstrainedBox {
 
   double get value => _value;
   double _value;
-  void set value(double newValue) {
+  set value(double newValue) {
     assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
     if (newValue == _value)
       return;
@@ -111,7 +111,7 @@ class _RenderSlider extends RenderConstrainedBox {
 
   Color get activeColor => _activeColor;
   Color _activeColor;
-  void set activeColor(Color value) {
+  set activeColor(Color value) {
     if (value == _activeColor)
       return;
     _activeColor = value;

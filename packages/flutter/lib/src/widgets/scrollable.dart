@@ -725,7 +725,7 @@ abstract class ScrollableListPainter extends RenderObjectPainter {
 
   double get contentExtent => _contentExtent;
   double _contentExtent = 0.0;
-  void set contentExtent (double value) {
+  set contentExtent (double value) {
     assert(value != null);
     assert(value >= 0.0);
     if (_contentExtent == value)
@@ -736,7 +736,7 @@ abstract class ScrollableListPainter extends RenderObjectPainter {
 
   double get scrollOffset => _scrollOffset;
   double _scrollOffset = 0.0;
-  void set scrollOffset (double value) {
+  set scrollOffset (double value) {
     assert(value != null);
     if (_scrollOffset == value)
       return;

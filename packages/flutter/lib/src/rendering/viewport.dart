@@ -110,7 +110,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   /// The offset can be non-zero only in the [mainAxis].
   Offset get paintOffset => _paintOffset;
   Offset _paintOffset;
-  void set paintOffset(Offset value) {
+  set paintOffset(Offset value) {
     assert(value != null);
     if (value == _paintOffset)
       return;
@@ -127,7 +127,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   /// that direction (e.g., the child can be as tall as it wants).
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
-  void set mainAxis(Axis value) {
+  set mainAxis(Axis value) {
     assert(value != null);
     if (value == _mainAxis)
       return;
@@ -141,7 +141,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   /// See [ViewportAnchor] for more detail.
   ViewportAnchor get anchor => _anchor;
   ViewportAnchor _anchor;
-  void set anchor(ViewportAnchor value) {
+  set anchor(ViewportAnchor value) {
     assert(value != null);
     if (value == _anchor)
       return;
@@ -152,7 +152,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
 
   RenderObjectPainter get overlayPainter => _overlayPainter;
   RenderObjectPainter _overlayPainter;
-  void set overlayPainter(RenderObjectPainter value) {
+  set overlayPainter(RenderObjectPainter value) {
     if (_overlayPainter == value)
       return;
     if (attached)
@@ -175,7 +175,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
 
   ViewportDimensions get dimensions => _dimensions;
   ViewportDimensions _dimensions = ViewportDimensions.zero;
-  void set dimensions(ViewportDimensions value) {
+  set dimensions(ViewportDimensions value) {
     assert(debugDoingThisLayout);
     _dimensions = value;
   }
@@ -347,7 +347,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
 
   int get virtualChildCount => _virtualChildCount;
   int _virtualChildCount;
-  void set virtualChildCount(int value) {
+  set virtualChildCount(int value) {
     if (_virtualChildCount == value)
       return;
     _virtualChildCount = value;
@@ -360,7 +360,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   /// example so the child list contains only visible children.
   LayoutCallback get callback => _callback;
   LayoutCallback _callback;
-  void set callback(LayoutCallback value) {
+  set callback(LayoutCallback value) {
     if (value == _callback)
       return;
     _callback = value;

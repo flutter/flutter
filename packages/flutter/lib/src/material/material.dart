@@ -49,7 +49,7 @@ abstract class InkHighlight {
   void dispose();
   bool get active;
   Color get color;
-  void set color(Color value);
+  set color(Color value);
 }
 
 abstract class MaterialInkController {
@@ -442,7 +442,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
 
   Color get color => _color;
   Color _color;
-  void set color(Color value) {
+  set color(Color value) {
     if (value == _color)
       return;
     _color = value;

@@ -233,7 +233,7 @@ class WeatherWorld extends NodeWithSize {
 
   WeatherType _weatherType = WeatherType.sun;
 
-  void set weatherType(WeatherType weatherType) {
+  set weatherType(WeatherType weatherType) {
     if (weatherType == _weatherType)
       return;
 
@@ -323,7 +323,7 @@ class CloudLayer extends Node {
     return sprite;
   }
 
-  void set active(bool active) {
+  set active(bool active) {
     double opacity;
     if (active) opacity = 1.0;
     else opacity = 0.0;
@@ -360,7 +360,7 @@ class Sun extends Node {
   Sprite _sun;
   List<Ray> _rays;
 
-  void set active(bool active) {
+  set active(bool active) {
     actions.stopAll();
 
     double targetOpacity;
@@ -464,7 +464,7 @@ class Rain extends Node {
     addChild(particles);
   }
 
-  void set active(bool active) {
+  set active(bool active) {
     actions.stopAll();
     for (ParticleSystem system in _particles) {
       if (active) {
@@ -533,7 +533,7 @@ class Snow extends Node {
     addChild(particles);
   }
 
-  void set active(bool active) {
+  set active(bool active) {
     actions.stopAll();
     for (ParticleSystem system in _particles) {
       if (active) {

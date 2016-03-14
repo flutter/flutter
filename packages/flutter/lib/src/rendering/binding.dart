@@ -50,7 +50,7 @@ abstract class Renderer extends Object with Scheduler, Services
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _renderView;
   RenderView _renderView;
-  void set renderView(RenderView value) {
+  set renderView(RenderView value) {
     assert(value != null);
     if (_renderView == value)
       return;

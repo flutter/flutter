@@ -382,7 +382,7 @@ class BoxParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system
   Offset get offset => _offset;
   Offset _offset = Offset.zero;
-  void set offset(Offset value) {
+  set offset(Offset value) {
     assert(RenderObject.debugDoingLayout);
     _offset = value;
   }
@@ -492,7 +492,7 @@ abstract class RenderBox extends RenderObject {
   }
   bool get hasSize => _size != null;
   Size _size;
-  void set size(Size value) {
+  set size(Size value) {
     assert((sizedByParent && debugDoingThisResize) ||
            (!sizedByParent && debugDoingThisLayout));
     assert(() {

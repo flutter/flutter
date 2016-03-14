@@ -47,7 +47,7 @@ abstract class RenderBlockBase extends RenderBox
   /// The direction to use as the main axis.
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
-  void set mainAxis (Axis value) {
+  set mainAxis (Axis value) {
     if (_mainAxis != value) {
       _mainAxis = value;
       markNeedsLayout();
@@ -57,7 +57,7 @@ abstract class RenderBlockBase extends RenderBox
   /// If non-null, forces children to be exactly this large in the main axis.
   double get itemExtent => _itemExtent;
   double _itemExtent;
-  void set itemExtent(double value) {
+  set itemExtent(double value) {
     if (value != _itemExtent) {
       _itemExtent = value;
       markNeedsLayout();
@@ -67,7 +67,7 @@ abstract class RenderBlockBase extends RenderBox
   /// Forces the block to be at least this large in the main-axis.
   double get minExtent => _minExtent;
   double _minExtent;
-  void set minExtent(double value) {
+  set minExtent(double value) {
     if (value != _minExtent) {
       _minExtent = value;
       markNeedsLayout();
@@ -262,7 +262,7 @@ class RenderBlockViewport extends RenderBlockBase {
   /// example so the child list contains only visible children.
   LayoutCallback get callback => _callback;
   LayoutCallback _callback;
-  void set callback(LayoutCallback value) {
+  set callback(LayoutCallback value) {
     assert(!_inCallback);
     if (value == _callback)
       return;
@@ -279,7 +279,7 @@ class RenderBlockViewport extends RenderBlockBase {
   /// Returns the total main-axis extent of all the children that could be included by [callback] in one go.
   ExtentCallback get totalExtentCallback => _totalExtentCallback;
   ExtentCallback _totalExtentCallback;
-  void set totalExtentCallback(ExtentCallback value) {
+  set totalExtentCallback(ExtentCallback value) {
     assert(!_inCallback);
     if (value == _totalExtentCallback)
       return;
@@ -290,7 +290,7 @@ class RenderBlockViewport extends RenderBlockBase {
   /// Returns the minimum cross-axis extent across all the children that could be included by [callback] in one go.
   ExtentCallback get minCrossAxisExtentCallback => _minCrossAxisExtentCallback;
   ExtentCallback _minCrossAxisExtentCallback;
-  void set minCrossAxisExtentCallback(ExtentCallback value) {
+  set minCrossAxisExtentCallback(ExtentCallback value) {
     assert(!_inCallback);
     if (value == _minCrossAxisExtentCallback)
       return;
@@ -301,7 +301,7 @@ class RenderBlockViewport extends RenderBlockBase {
   /// Returns the maximum cross-axis extent across all the children that could be included by [callback] in one go.
   ExtentCallback get maxCrossAxisExtentCallback => _maxCrossAxisExtentCallback;
   ExtentCallback _maxCrossAxisExtentCallback;
-  void set maxCrossAxisExtentCallback(ExtentCallback value) {
+  set maxCrossAxisExtentCallback(ExtentCallback value) {
     assert(!_inCallback);
     if (value == _maxCrossAxisExtentCallback)
       return;
@@ -311,7 +311,7 @@ class RenderBlockViewport extends RenderBlockBase {
 
   RenderObjectPainter get overlayPainter => _overlayPainter;
   RenderObjectPainter _overlayPainter;
-  void set overlayPainter(RenderObjectPainter value) {
+  set overlayPainter(RenderObjectPainter value) {
     if (_overlayPainter == value)
       return;
     if (attached)
@@ -337,7 +337,7 @@ class RenderBlockViewport extends RenderBlockBase {
   /// Note: you can modify this property from within [callback], if necessary.
   double get startOffset => _startOffset;
   double _startOffset;
-  void set startOffset(double value) {
+  set startOffset(double value) {
     if (value != _startOffset) {
       _startOffset = value;
       markNeedsPaint();

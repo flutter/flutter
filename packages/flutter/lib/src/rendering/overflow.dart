@@ -20,7 +20,7 @@ class RenderSizedOverflowBox extends RenderBox with RenderObjectWithChildMixin<R
   /// The size this render box should attempt to be.
   Size get requestedSize => _requestedSize;
   Size _requestedSize;
-  void set requestedSize (Size value) {
+  set requestedSize (Size value) {
     assert(value != null);
     if (_requestedSize == value)
       return;
