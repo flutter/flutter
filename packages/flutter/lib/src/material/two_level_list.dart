@@ -50,10 +50,10 @@ class TwoLevelListItem extends StatelessWidget {
 }
 
 class TwoLevelSublist extends StatefulWidget {
-  TwoLevelSublist({ Key key, this.left, this.center, this.children }) : super(key: key);
+  TwoLevelSublist({ Key key, this.leading, this.title, this.children }) : super(key: key);
 
-  final Widget left;
-  final Widget center;
+  final Widget leading;
+  final Widget title;
   final List<Widget> children;
 
   _TwoLevelSublistState createState() => new _TwoLevelSublistState();
@@ -108,10 +108,10 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
         children: <Widget>[
           new TwoLevelListItem(
             onTap: _handleOnTap,
-            leading: config.left,
+            leading: config.leading,
             title: new DefaultTextStyle(
               style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
-              child: config.center
+              child: config.title
             ),
             trailing: new RotationTransition(
               turns: _iconTurns,

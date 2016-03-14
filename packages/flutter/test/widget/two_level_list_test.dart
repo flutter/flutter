@@ -22,7 +22,7 @@ void main() {
                 new TwoLevelListItem(title: new Text('Top'), key: topKey),
                 new TwoLevelSublist(
                   key: sublistKey,
-                  center: new Text('Sublist'),
+                  title: new Text('Sublist'),
                   children: <Widget>[
                     new TwoLevelListItem(title: new Text('0')),
                     new TwoLevelListItem(title: new Text('1'))
