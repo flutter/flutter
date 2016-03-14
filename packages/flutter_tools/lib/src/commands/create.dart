@@ -34,7 +34,7 @@ class CreateCommand extends Command {
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help: 'Also add Flutter Driver dependencies and generate a sample driver test.'
+      help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
   }
 
