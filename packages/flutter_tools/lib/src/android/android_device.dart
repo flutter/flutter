@@ -200,8 +200,10 @@ class AndroidDevice extends Device {
     String route,
     bool clearLogs: false,
     bool startPaused: false,
-    int debugPort: observatoryDefaultPort
+    int debugPort: observatoryDefaultPort,
+    String dartFlags
   }) async {
+    // TODO(johnmccutchan): Do something with dartFlags.
     printTrace('$this startBundle');
 
     if (!FileSystemEntity.isFileSync(bundlePath)) {
@@ -231,6 +233,7 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'start-paused', 'true']);
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
+
     cmd.add(apk.launchActivity);
     String result = runCheckedSync(cmd);
     // This invocation returns 0 even when it fails.
@@ -251,7 +254,8 @@ class AndroidDevice extends Device {
     bool clearLogs: false,
     bool startPaused: false,
     int debugPort: observatoryDefaultPort,
-    Map<String, dynamic> platformArgs
+    Map<String, dynamic> platformArgs,
+    String dartFlags
   }) async {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
@@ -271,7 +275,8 @@ class AndroidDevice extends Device {
       route: route,
       clearLogs: clearLogs,
       startPaused: startPaused,
-      debugPort: debugPort
+      debugPort: debugPort,
+      dartFlags: dartFlags
     )) {
       return true;
     } else {

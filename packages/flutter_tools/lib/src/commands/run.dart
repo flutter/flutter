@@ -41,6 +41,8 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: true,
         defaultsTo: false,
         help: 'Start tracing during startup.');
+    // Hidden flag for passing options to the VM.
+    argParser.addOption('dart-flags', hide:true);
     argParser.addOption('route',
         help: 'Which route to load when starting the app.');
     addTargetOption();
@@ -122,7 +124,8 @@ class RunCommand extends RunCommandBase {
       route: route,
       clearLogs: clearLogs,
       startPaused: argResults['start-paused'],
-      debugPort: debugPort
+      debugPort: debugPort,
+      dartFlags: argResults['dart-flags']
     );
 
     return result;
@@ -143,7 +146,8 @@ Future<int> startApp(
   String route,
   bool clearLogs: false,
   bool startPaused: false,
-  int debugPort: observatoryDefaultPort
+  int debugPort: observatoryDefaultPort,
+  String dartFlags
 }) async {
   String mainPath = findMainDartFile(target);
   if (!FileSystemEntity.isFileSync(mainPath)) {
@@ -212,7 +216,8 @@ Future<int> startApp(
     clearLogs: clearLogs,
     startPaused: startPaused,
     debugPort: debugPort,
-    platformArgs: platformArgs
+    platformArgs: platformArgs,
+    dartFlags: dartFlags
   );
 
   if (!result) {
