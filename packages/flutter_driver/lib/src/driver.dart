@@ -97,7 +97,7 @@ class FlutterDriver {
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
       Future<dynamic> whenResumed = resumeLeniently();
-      Future<dynamic> whenServiceExtensionReady = Future.any/*dynamic*/(<Future<dynamic>>[
+      Future<dynamic> whenServiceExtensionReady = Future.any/*<dynamic>*/(<Future<dynamic>>[
         waitForServiceExtension(),
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
