@@ -19,11 +19,8 @@ import 'object.dart';
 
 mojom.ViewProxy _initViewProxy() {
   int viewHandle = ui.takeViewHandle();
-  assert(() {
-    if (viewHandle == core.MojoHandle.INVALID)
-      debugPrint('Child view are supported only when running in Mojo shell.');
-    return true;
-  });
+  if (viewHandle == core.MojoHandle.INVALID)
+    return null;
   return new mojom.ViewProxy.fromHandle(new core.MojoHandle(viewHandle));
 }
 
@@ -74,7 +71,7 @@ class ChildViewConnection {
     assert(_viewOwner != null);
     assert(_viewKey == null);
     _viewKey = _nextViewKey++;
-    _view.addChild(_viewKey, _viewOwner.impl);
+    _view?.addChild(_viewKey, _viewOwner.impl);
     _viewOwner = null;
   }
 
@@ -83,7 +80,7 @@ class ChildViewConnection {
     assert(_viewOwner == null);
     assert(_viewKey != null);
     _viewOwner = new mojom.ViewOwnerProxy.unbound();
-    _view.removeChild(_viewKey, _viewOwner);
+    _view?.removeChild(_viewKey, _viewOwner);
     _viewKey = null;
   }
 
@@ -117,6 +114,8 @@ class ChildViewConnection {
     assert(_attached);
     assert(_attachments == 1);
     assert(_viewKey != null);
+    if (_view == null)
+      return new Future<mojom.ViewLayoutInfo>.value(null);
     int width = (size.width * scale).round();
     int height = (size.height * scale).round();
     // TODO(abarth): Ideally we would propagate our actually constraints to be
@@ -188,9 +187,25 @@ class RenderChildView extends RenderBox {
     size = constraints.biggest;
   }
 
+  TextPainter _debugErrorMessage;
+
   void performLayout() {
-    if (_child != null)
+    if (_child != null) {
       _child._layout(size: size, scale: scale).then(_handleLayoutInfoChanged);
+      assert(() {
+        if (_view == null) {
+          _debugErrorMessage ??= new TextPainter()
+            ..text = new TextSpan(text: 'Child view are supported only when running in Mojo shell.');
+          _debugErrorMessage
+            ..minWidth = size.width
+            ..maxWidth = size.width
+            ..minHeight = size.height
+            ..maxHeight = size.height
+            ..layout();
+        }
+        return true;
+      });
+    }
   }
 
   mojom.ViewLayoutInfo _layoutInfo;
@@ -206,6 +221,13 @@ class RenderChildView extends RenderBox {
     assert(needsCompositing);
     if (_layoutInfo != null)
       context.pushChildScene(offset, scale, _layoutInfo);
+    assert(() {
+      if (_view == null) {
+        context.canvas.drawRect(offset & size, new Paint()..color = const Color(0xFF0000FF));
+        _debugErrorMessage.paint(context.canvas, offset);
+      }
+      return true;
+    });
   }
 
   void debugFillDescription(List<String> description) {
