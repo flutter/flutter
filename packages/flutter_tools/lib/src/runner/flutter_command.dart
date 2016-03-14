@@ -47,8 +47,8 @@ abstract class FlutterCommand extends Command {
     Stopwatch stopwatch = new Stopwatch()..start();
 
     return _run().then((int exitCode) {
-      printTrace("'flutter $name' exiting with code $exitCode; "
-        "elasped time ${stopwatch.elapsedMilliseconds}ms.");
+      int ms = stopwatch.elapsedMilliseconds;
+      printTrace("'flutter $name' took ${ms}ms; exiting with code $exitCode.");
       return exitCode;
     });
   }
@@ -90,8 +90,7 @@ abstract class FlutterCommand extends Command {
           "the '-d <deviceId>' flag.");
         printStatus('');
         devices = await deviceManager.getAllConnectedDevices();
-        for (Device device in devices)
-          printStatus(device.fullDescription);
+        Device.printDevices(devices);
         return 1;
       } else {
         _deviceForCommand = devices.single;

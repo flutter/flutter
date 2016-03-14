@@ -29,9 +29,7 @@ class DevicesCommand extends FlutterCommand {
       printStatus('No connected devices.');
     } else {
       printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
-
-      for (Device device in devices)
-        printStatus(device.fullDescription);
+      Device.printDevices(devices);
     }
 
     return 0;
