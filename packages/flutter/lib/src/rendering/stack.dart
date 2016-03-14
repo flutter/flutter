@@ -157,7 +157,7 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
 
   /// Get or set the current values in terms of a RelativeRect object.
   RelativeRect get rect => new RelativeRect.fromLTRB(left, top, right, bottom);
-  void set rect(RelativeRect value) {
+  set rect(RelativeRect value) {
     top = value.top;
     right = value.right;
     bottom = value.bottom;
@@ -212,7 +212,7 @@ abstract class RenderStackBase extends RenderBox
 
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  void set alignment (FractionalOffset value) {
+  set alignment (FractionalOffset value) {
     if (_alignment != value) {
       _alignment = value;
       markNeedsLayout();
@@ -455,7 +455,7 @@ class RenderIndexedStack extends RenderStackBase {
 
   int get index => _index;
   int _index;
-  void set index (int value) {
+  set index (int value) {
     assert(value != null);
     if (_index != value) {
       _index = value;

@@ -184,7 +184,7 @@ class TextPainter {
   TextSpan _text;
   /// The (potentially styled) text to paint.
   TextSpan get text => _text;
-  void set text(TextSpan value) {
+  set text(TextSpan value) {
     assert(value == null || value.debugAssertValid());
     if (_text == value)
       return;
@@ -197,7 +197,7 @@ class TextPainter {
 
   /// The minimum width at which to layout the text.
   double get minWidth => _paragraph.minWidth;
-  void set minWidth(double value) {
+  set minWidth(double value) {
     if (_paragraph.minWidth == value)
       return;
     _paragraph.minWidth = value;
@@ -206,7 +206,7 @@ class TextPainter {
 
   /// The maximum width at which to layout the text.
   double get maxWidth => _paragraph.maxWidth;
-  void set maxWidth(double value) {
+  set maxWidth(double value) {
     if (_paragraph.maxWidth == value)
       return;
     _paragraph.maxWidth = value;
@@ -215,7 +215,7 @@ class TextPainter {
 
   /// The minimum height at which to layout the text.
   double get minHeight => _paragraph.minHeight;
-  void set minHeight(double value) {
+  set minHeight(double value) {
     if (_paragraph.minHeight == value)
       return;
     _paragraph.minHeight = value;
@@ -224,7 +224,7 @@ class TextPainter {
 
   /// The maximum height at which to layout the text.
   double get maxHeight => _paragraph.maxHeight;
-  void set maxHeight(double value) {
+  set maxHeight(double value) {
     if (_paragraph.maxHeight == value)
       return;
     _paragraph.maxHeight = value;

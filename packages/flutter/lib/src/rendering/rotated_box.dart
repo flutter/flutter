@@ -29,7 +29,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   /// The number of clockwise quarter turns the child should be rotated.
   int get quarterTurns => _quarterTurns;
   int _quarterTurns;
-  void set quarterTurns(int value) {
+  set quarterTurns(int value) {
     assert(value != null);
     if (_quarterTurns == value)
       return;

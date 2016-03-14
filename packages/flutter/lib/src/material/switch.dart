@@ -121,7 +121,7 @@ class _RenderSwitch extends RenderToggleable {
 
   Color get activeTrackColor => _activeTrackColor;
   Color _activeTrackColor;
-  void set activeTrackColor(Color value) {
+  set activeTrackColor(Color value) {
     assert(value != null);
     if (value == _activeTrackColor)
       return;
@@ -131,7 +131,7 @@ class _RenderSwitch extends RenderToggleable {
 
   Color get inactiveTrackColor => _inactiveTrackColor;
   Color _inactiveTrackColor;
-  void set inactiveTrackColor(Color value) {
+  set inactiveTrackColor(Color value) {
     assert(value != null);
     if (value == _inactiveTrackColor)
       return;

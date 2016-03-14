@@ -101,7 +101,7 @@ class AnimationController extends Animation<double>
   /// listeners.
   double get value => _value;
   double _value;
-  void set value(double newValue) {
+  set value(double newValue) {
     assert(newValue != null);
     stop();
     _value = newValue.clamp(lowerBound, upperBound);

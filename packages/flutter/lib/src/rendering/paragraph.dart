@@ -24,7 +24,7 @@ class RenderParagraph extends RenderBox {
 
   /// The text to display
   TextSpan get text => _textPainter.text;
-  void set text(TextSpan value) {
+  set text(TextSpan value) {
     assert(value.debugAssertValid());
     if (_textPainter.text == value)
       return;

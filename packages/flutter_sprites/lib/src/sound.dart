@@ -33,7 +33,7 @@ class SoundEffectStream {
 
   bool get paused => _paused;
   bool _paused;
-  void set paused(bool value) {
+  set paused(bool value) {
     _paused = value;
     if (_paused) {
       _soundPool.ptr.pause(_streamId);
@@ -44,21 +44,21 @@ class SoundEffectStream {
 
   double get leftVolume => _leftVolume;
   double _leftVolume;
-  void set leftVolume(double value) {
+  set leftVolume(double value) {
     _leftVolume = value;
     _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
   double get rightVolume => _rightVolume;
   double _rightVolume;
-  void set rightVolume(double value) {
+  set rightVolume(double value) {
     _rightVolume = value;
     _soundPool.ptr.setVolume(_streamId, <double>[_leftVolume, _rightVolume]);
   }
 
   double get pitch => _pitch;
   double _pitch;
-  void set pitch(double value) {
+  set pitch(double value) {
     _pitch = value;
     _soundPool.ptr.setRate(_streamId, _pitch);
   }
@@ -108,7 +108,7 @@ class SoundEffectPlayer {
 
   bool get paused => _paused;
 
-  void set paused(bool value) {
+  set paused(bool value) {
     _paused = value;
     if (_paused) {
       _soundPool.ptr.pauseAll();

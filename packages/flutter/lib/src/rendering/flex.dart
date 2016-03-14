@@ -94,7 +94,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// The direction to use as the main axis
   FlexDirection get direction => _direction;
   FlexDirection _direction;
-  void set direction (FlexDirection value) {
+  set direction (FlexDirection value) {
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
@@ -104,7 +104,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// How the children should be placed along the main axis
   MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
   MainAxisAlignment _mainAxisAlignment;
-  void set mainAxisAlignment (MainAxisAlignment value) {
+  set mainAxisAlignment (MainAxisAlignment value) {
     if (_mainAxisAlignment != value) {
       _mainAxisAlignment = value;
       markNeedsLayout();
@@ -114,7 +114,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// How the children should be placed along the cross axis
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
   CrossAxisAlignment _crossAxisAlignment;
-  void set crossAxisAlignment (CrossAxisAlignment value) {
+  set crossAxisAlignment (CrossAxisAlignment value) {
     if (_crossAxisAlignment != value) {
       _crossAxisAlignment = value;
       markNeedsLayout();
@@ -124,7 +124,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// If using aligning items according to their baseline, which baseline to use
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
-  void set textBaseline (TextBaseline value) {
+  set textBaseline (TextBaseline value) {
     if (_textBaseline != value) {
       _textBaseline = value;
       markNeedsLayout();

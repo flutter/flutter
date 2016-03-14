@@ -338,7 +338,7 @@ class _Block {
   List<_Block> subBlocks;
 
   bool get open => _open;
-  void set open(bool open) {
+  set open(bool open) {
     _open = open;
     if (!open && subBlocks.length > 0)
       subBlocks.last.isLast = true;

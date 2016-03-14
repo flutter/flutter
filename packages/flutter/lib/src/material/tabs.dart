@@ -46,7 +46,7 @@ class _RenderTabBar extends RenderBox with
 
   int _selectedIndex;
   int get selectedIndex => _selectedIndex;
-  void set selectedIndex(int value) {
+  set selectedIndex(int value) {
     if (_selectedIndex != value) {
       _selectedIndex = value;
       markNeedsPaint();
@@ -55,7 +55,7 @@ class _RenderTabBar extends RenderBox with
 
   Color _indicatorColor;
   Color get indicatorColor => _indicatorColor;
-  void set indicatorColor(Color value) {
+  set indicatorColor(Color value) {
     if (_indicatorColor != value) {
       _indicatorColor = value;
       markNeedsPaint();
@@ -64,7 +64,7 @@ class _RenderTabBar extends RenderBox with
 
   Rect _indicatorRect;
   Rect get indicatorRect => _indicatorRect;
-  void set indicatorRect(Rect value) {
+  set indicatorRect(Rect value) {
     if (_indicatorRect != value) {
       _indicatorRect = value;
       markNeedsPaint();
@@ -73,7 +73,7 @@ class _RenderTabBar extends RenderBox with
 
   bool _textAndIcons;
   bool get textAndIcons => _textAndIcons;
-  void set textAndIcons(bool value) {
+  set textAndIcons(bool value) {
     if (_textAndIcons != value) {
       _textAndIcons = value;
       markNeedsLayout();
@@ -82,7 +82,7 @@ class _RenderTabBar extends RenderBox with
 
   bool _isScrollable;
   bool get isScrollable => _isScrollable;
-  void set isScrollable(bool value) {
+  set isScrollable(bool value) {
     if (_isScrollable != value) {
       _isScrollable = value;
       markNeedsLayout();
@@ -473,7 +473,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   T get value => _value;
   T _value;
-  void set value(T newValue) {
+  set value(T newValue) {
     if (newValue == _value)
       return;
     if (!_valueIsChanging)

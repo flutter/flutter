@@ -55,7 +55,7 @@ class ImageCache {
       new LruMap<ImageProvider, ImageResource>(maximumSize: _kDefaultSize);
 
   int get maximumSize => _cache.maximumSize;
-  void set maximumSize(int value) { _cache.maximumSize = value; }
+  set maximumSize(int value) { _cache.maximumSize = value; }
 
   ImageResource loadProvider(ImageProvider provider) {
     return _cache.putIfAbsent(provider, () {
