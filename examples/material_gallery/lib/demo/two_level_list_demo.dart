@@ -15,7 +15,7 @@ class TwoLevelListDemo extends StatelessWidget {
           items: <Widget>[
             new TwoLevelListItem(title: new Text('Top')),
             new TwoLevelSublist(
-              center: new Text('Sublist'),
+              title: new Text('Sublist'),
               children: <Widget>[
                 new TwoLevelListItem(title: new Text('One')),
                 new TwoLevelListItem(title: new Text('Two')),
