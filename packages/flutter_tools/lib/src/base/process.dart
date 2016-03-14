@@ -136,8 +136,12 @@ String _runWithLoggingSync(List<String> cmd, {
 }
 
 class ProcessExit implements Exception {
-  final int exitCode;
   ProcessExit(this.exitCode);
+
+  final int exitCode;
+
   String get message => 'ProcessExit: $exitCode';
+
+  @override
   String toString() => message;
 }

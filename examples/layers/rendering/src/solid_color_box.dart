@@ -13,34 +13,40 @@ class RenderSolidColorBox extends RenderDecoratedBox {
       : backgroundColor = backgroundColor,
         super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainHeight(
       this.desiredSize == Size.infinite ? 0.0 : desiredSize.width
     );
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(
       this.desiredSize == Size.infinite ? 0.0 : desiredSize.width
     );
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(
       this.desiredSize == Size.infinite ? 0.0 : desiredSize.height
     );
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(
       this.desiredSize == Size.infinite ? 0.0 : desiredSize.height
     );
   }
 
+  @override
   void performLayout() {
     size = constraints.constrain(desiredSize);
   }
 
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
       decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));

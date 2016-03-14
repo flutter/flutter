@@ -39,12 +39,15 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
 class PopupMenuDivider extends PopupMenuEntry<dynamic> {
   PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
 
+  @override
   final double height;
 
+  @override
   _PopupMenuDividerState createState() => new _PopupMenuDividerState();
 }
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
+  @override
   Widget build(BuildContext context) => new Divider(height: config.height);
 }
 
@@ -56,12 +59,18 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     this.child
   }) : super(key: key);
 
+  @override
   final T value;
+
+  @override
   final bool enabled;
+
   final Widget child;
 
+  @override
   double get height => _kMenuItemHeight;
 
+  @override
   _PopupMenuItemState<PopupMenuItem<T>> createState() => new _PopupMenuItemState<PopupMenuItem<T>>();
 }
 
@@ -73,6 +82,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
     Navigator.pop(context, config.value);
   }
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     TextStyle style = theme.textTheme.subhead;
@@ -123,6 +133,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
 
   final bool checked;
 
+  @override
   _CheckedPopupMenuItemState<T> createState() => new _CheckedPopupMenuItemState<T>();
 }
 
@@ -131,6 +142,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
 
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: _kFadeDuration)
@@ -138,6 +150,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
       ..addListener(() => setState(() { /* animation changed */ }));
   }
 
+  @override
   void onTap() {
     // This fades the checkmark in or out when tapped.
     if (config.checked)
@@ -147,6 +160,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
     super.onTap();
   }
 
+  @override
   Widget buildChild() {
     return new ListItem(
       enabled: config.enabled,
@@ -167,6 +181,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
   final _PopupMenuRoute<T> route;
 
+  @override
   Widget build(BuildContext context) {
     double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     List<Widget> children = <Widget>[];
@@ -239,6 +254,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   final ModalPosition position;
   final double selectedItemOffset;
 
+  @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return new BoxConstraints(
       minWidth: 0.0,
@@ -251,6 +267,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   // Put the child wherever position specifies, so long as it will fit within the
   // specified parent size padded (inset) by 8. If necessary, adjust the child's
   // position so that it fits.
+  @override
   Offset getPositionForChild(Size size, Size childSize) {
     double x = position?.left
       ?? (position?.right != null ? size.width - (position.right + childSize.width) : _kMenuScreenPadding);
@@ -271,6 +288,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     return new Offset(x, y);
   }
 
+  @override
   bool shouldRelayout(_PopupMenuRouteLayout oldDelegate) {
     return position != oldDelegate.position;
   }
@@ -290,8 +308,10 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final dynamic initialValue;
   final int elevation;
 
+  @override
   ModalPosition getPosition(BuildContext context) => null;
 
+  @override
   Animation<double> createAnimation() {
     return new CurvedAnimation(
       parent: super.createAnimation(),
@@ -299,10 +319,16 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     );
   }
 
+  @override
   Duration get transitionDuration => _kMenuDuration;
+
+  @override
   bool get barrierDismissable => true;
+
+  @override
   Color get barrierColor => null;
 
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     double selectedItemOffset;
     if (initialValue != null) {
@@ -375,6 +401,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   final int elevation;
   final Widget child;
 
+  @override
   _PopupMenuButtonState<T> createState() => new _PopupMenuButtonState<T>();
 }
 
@@ -398,6 +425,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     if (config.child == null) {
       return new IconButton(

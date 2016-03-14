@@ -10,13 +10,17 @@ class Term extends _EquationMember {
   final Variable variable;
   final double coefficient;
 
+  @override
   bool get isConstant => false;
 
+  @override
   double get value => coefficient * variable.value;
 
+  @override
   Expression asExpression() =>
       new Expression([new Term(this.variable, this.coefficient)], 0.0);
 
+  @override
   String toString() {
     StringBuffer buffer = new StringBuffer();
 

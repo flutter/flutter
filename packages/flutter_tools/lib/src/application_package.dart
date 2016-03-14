@@ -31,6 +31,7 @@ abstract class ApplicationPackage {
 
   String get displayName => name;
 
+  @override
   String toString() => displayName;
 }
 
@@ -95,6 +96,7 @@ class IOSApp extends ApplicationPackage {
     return new IOSApp(iosProjectDir: projectDir, iosProjectBundleId: value);
   }
 
+  @override
   String get displayName => id;
 }
 

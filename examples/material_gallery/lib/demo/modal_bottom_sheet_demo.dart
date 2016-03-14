@@ -11,6 +11,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
     textAlign: TextAlign.center
   );
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text("Modal Bottom Sheet")),

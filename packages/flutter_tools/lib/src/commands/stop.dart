@@ -10,9 +10,13 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class StopCommand extends FlutterCommand {
+  @override
   final String name = 'stop';
+
+  @override
   final String description = 'Stop your Flutter app on an attached device.';
 
+  @override
   bool get requiresDevice => true;
 
   @override

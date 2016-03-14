@@ -15,6 +15,7 @@ class DriverError extends Error {
   final dynamic originalError;
   final dynamic originalStackTrace;
 
+  @override
   String toString() {
     return '''DriverError: $message
 Original error: $originalError
@@ -56,6 +57,7 @@ class LogRecord {
   final String loggerName;
   final String message;
 
+  @override
   String toString() => '[${"$level".split(".").last}] $loggerName: $message';
 }
 

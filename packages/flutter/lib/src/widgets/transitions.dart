@@ -35,8 +35,10 @@ abstract class AnimatedWidget extends StatefulWidget {
   Widget build(BuildContext context);
 
   /// Subclasses typically do not override this method.
+  @override
   _AnimatedState createState() => new _AnimatedState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('animation: $animation');
@@ -44,11 +46,13 @@ abstract class AnimatedWidget extends StatefulWidget {
 }
 
 class _AnimatedState extends State<AnimatedWidget> {
+  @override
   void initState() {
     super.initState();
     config.animation.addListener(_handleTick);
   }
 
+  @override
   void didUpdateConfig(AnimatedWidget oldConfig) {
     if (config.animation != oldConfig.animation) {
       oldConfig.animation.removeListener(_handleTick);
@@ -56,6 +60,7 @@ class _AnimatedState extends State<AnimatedWidget> {
     }
   }
 
+  @override
   void dispose() {
     config.animation.removeListener(_handleTick);
     super.dispose();
@@ -67,6 +72,7 @@ class _AnimatedState extends State<AnimatedWidget> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return config.build(context);
   }
@@ -99,6 +105,7 @@ class SlideTransition extends AnimatedWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new FractionalTranslation(
       translation: position.value,
@@ -132,6 +139,7 @@ class ScaleTransition extends AnimatedWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     double scaleValue = scale.value;
     Matrix4 transform = new Matrix4.identity()
@@ -160,6 +168,7 @@ class RotationTransition extends AnimatedWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     double turnsValue = turns.value;
     Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
@@ -196,6 +205,7 @@ class SizeTransition extends AnimatedWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new ClipRect(
       child: new Align(
@@ -226,6 +236,7 @@ class FadeTransition extends AnimatedWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new Opacity(opacity: opacity.value, child: child);
   }
@@ -240,6 +251,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
   RelativeRectTween({ RelativeRect begin, RelativeRect end })
     : super(begin: begin, end: end);
 
+  @override
   RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
 }
 
@@ -262,6 +274,7 @@ class PositionedTransition extends AnimatedWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new Positioned(
       top: rect.value.top,
@@ -318,6 +331,7 @@ class AnimatedBuilder extends AnimatedWidget {
   /// performance significantly in some cases and is therefore a good practice.
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return builder(context, child);
   }

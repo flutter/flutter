@@ -55,6 +55,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final EdgeInsets padding;
 
+  @override
   void performLayout(Size size) {
     BoxConstraints looseConstraints = new BoxConstraints.loose(size);
 
@@ -118,6 +119,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
   }
 
+  @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return padding != oldDelegate.padding;
   }
@@ -133,6 +135,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 
   final Widget child;
 
+  @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
 }
 
@@ -140,6 +143,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   final AnimationController controller = new AnimationController(duration: _kFloatingActionButtonSegue);
   Widget oldChild;
 
+  @override
   void initState() {
     super.initState();
     controller.forward().then((_) {
@@ -147,11 +151,13 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     });
   }
 
+  @override
   void dispose() {
     controller.stop();
     super.dispose();
   }
 
+  @override
   void didUpdateConfig(_FloatingActionButtonTransition oldConfig) {
     if (Widget.canUpdate(oldConfig.child, config.child))
       return;
@@ -163,6 +169,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       });
   }
 
+  @override
   Widget build(BuildContext context) {
     final List<Widget> children = new List<Widget>();
     if (oldChild != null) {
@@ -222,6 +229,7 @@ class Scaffold extends StatefulWidget {
   /// The state from the closest instance of this class that encloses the given context.
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
 
+  @override
   ScaffoldState createState() => new ScaffoldState();
 }
 
@@ -363,6 +371,7 @@ class ScaffoldState extends State<Scaffold> {
 
   // INTERNALS
 
+  @override
   void initState() {
     super.initState();
     _appBarController = new AnimationController();
@@ -374,6 +383,7 @@ class ScaffoldState extends State<Scaffold> {
     }
   }
 
+  @override
   void dispose() {
     _appBarController.stop();
     _snackBarController?.stop();
@@ -500,6 +510,7 @@ class ScaffoldState extends State<Scaffold> {
     return appBar;
   }
 
+  @override
   Widget build(BuildContext context) {
     final EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
 
@@ -618,6 +629,7 @@ class _PersistentBottomSheet extends StatefulWidget {
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
 
+  @override
   _PersistentBottomSheetState createState() => new _PersistentBottomSheetState();
 }
 
@@ -626,17 +638,20 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
   // We take ownership of the animation controller given in the first configuration.
   // We also share control of that animation with out BottomSheet widget.
 
+  @override
   void initState() {
     super.initState();
     assert(config.animationController.status == AnimationStatus.forward);
     config.animationController.addStatusListener(_handleStatusChange);
   }
 
+  @override
   void didUpdateConfig(_PersistentBottomSheet oldConfig) {
     super.didUpdateConfig(oldConfig);
     assert(config.animationController == oldConfig.animationController);
   }
 
+  @override
   void dispose() {
     config.animationController.stop();
     super.dispose();
@@ -651,6 +666,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       config.onDismissed();
   }
 
+  @override
   Widget build(BuildContext context) {
     return new AnimatedBuilder(
       animation: config.animationController,

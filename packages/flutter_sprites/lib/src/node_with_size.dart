@@ -49,6 +49,7 @@ class NodeWithSize extends Node {
     }
   }
 
+  @override
   bool isPointInside (Point nodePoint) {
 
     double minX = -size.width * pivot.x;

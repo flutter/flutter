@@ -53,26 +53,33 @@ class RenderErrorBox extends RenderBox {
 
   ui.Paragraph _paragraph;
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(0.0);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return constraints.constrainWidth(_kMaxWidth);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(0.0);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return constraints.constrainHeight(_kMaxHeight);
   }
 
+  @override
   bool get sizedByParent => true;
 
+  @override
   bool hitTestSelf(Point position) => true;
 
+  @override
   void performResize() {
     size = constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
   }
@@ -92,6 +99,7 @@ class RenderErrorBox extends RenderBox {
     lineHeight: 0.25 // TODO(ianh): https://github.com/flutter/flutter/issues/2460 will affect this
   );
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     try {
       context.canvas.drawRect(offset & size, new Paint() .. color = backgroundColor);

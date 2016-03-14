@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class ExampleDragTarget extends StatefulWidget {
+  @override
   ExampleDragTargetState createState() => new ExampleDragTargetState();
 }
 
@@ -19,6 +20,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return new DragTarget<Color>(
       onAccept: _handleAccept,
@@ -41,14 +43,19 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 
 class Dot extends StatefulWidget {
   Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
+
   final Color color;
   final double size;
   final Widget child;
   final bool tappable;
+
+  @override
   DotState createState() => new DotState();
 }
 class DotState extends State<Dot> {
   int taps = 0;
+
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: config.tappable ? () { setState(() { taps += 1; }); } : null,
@@ -84,6 +91,7 @@ class ExampleDragSource extends StatelessWidget {
   static const double kHeavyMultiplier = 1.5;
   static const double kFingerSize = 50.0;
 
+  @override
   Widget build(BuildContext context) {
     double size = kDotSize;
     if (heavy)
@@ -146,6 +154,7 @@ class DashOutlineCirclePainter extends CustomPainter {
   static const double segmentArc = deltaTheta / 2.0; // radians
   static const double startOffset = 1.0; // radians
 
+  @override
   void paint(Canvas canvas, Size size) {
     final double radius = size.shortestSide / 2.0;
     final Paint paint = new Paint()
@@ -159,6 +168,7 @@ class DashOutlineCirclePainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
+  @override
   bool shouldRepaint(DashOutlineCirclePainter oldPainter) => false;
 }
 
@@ -172,6 +182,7 @@ class MovableBall extends StatelessWidget {
   static final GlobalKey kBallKey = new GlobalKey();
   static const double kBallSize = 50.0;
 
+  @override
   Widget build(BuildContext context) {
     Widget ball = new DefaultTextStyle(
       style: Theme.of(context).textTheme.body1.copyWith(
@@ -213,14 +224,18 @@ class MovableBall extends StatelessWidget {
 }
 
 class DragAndDropApp extends StatefulWidget {
+  @override
   DragAndDropAppState createState() => new DragAndDropAppState();
 }
 
 class DragAndDropAppState extends State<DragAndDropApp> {
   int position = 1;
+
   void moveBall(int newPosition) {
     setState(() { position = newPosition; });
   }
+
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(

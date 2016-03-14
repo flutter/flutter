@@ -17,6 +17,7 @@ class CardModel {
 }
 
 class CardCollection extends StatefulWidget {
+  @override
   CardCollectionState createState() => new CardCollectionState();
 }
 
@@ -72,6 +73,7 @@ class CardCollectionState extends State<CardCollection> {
       _initVariableSizedCardModels();
   }
 
+  @override
   void initState() {
     super.initState();
     _initCardModels();
@@ -403,6 +405,7 @@ class CardCollectionState extends State<CardCollection> {
     .createShader(bounds);
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget cardCollection;
     if (_fixedSizeCards) {

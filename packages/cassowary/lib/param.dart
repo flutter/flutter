@@ -18,12 +18,15 @@ class Param extends _EquationMember {
 
   dynamic context;
 
+  @override
   bool get isConstant => false;
 
+  @override
   double get value => variable.value;
 
   String get name => variable.name;
   void set name(String name) { variable.name = name; }
 
+  @override
   Expression asExpression() => new Expression(<Term>[new Term(variable, 1.0)], 0.0);
 }

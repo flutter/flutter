@@ -19,8 +19,10 @@ class AutoLayout extends MultiChildRenderObjectWidget {
 
   final AutoLayoutDelegate delegate;
 
+  @override
   RenderAutoLayout createRenderObject(BuildContext context) => new RenderAutoLayout(delegate: delegate);
 
+  @override
   void updateRenderObject(BuildContext context, RenderAutoLayout renderObject) {
     renderObject.delegate = delegate;
   }
@@ -32,6 +34,7 @@ class AutoLayoutChild extends ParentDataWidget<AutoLayout> {
 
   final AutoLayoutRect rect;
 
+  @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is AutoLayoutParentData);
     final AutoLayoutParentData parentData = renderObject.parentData;

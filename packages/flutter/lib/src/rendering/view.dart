@@ -26,6 +26,7 @@ class ViewConfiguration {
   /// The orientation of the output surface (aspirational).
   final int orientation;
 
+  @override
   String toString() => '$size';
 }
 
@@ -77,12 +78,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
+  @override
   void debugAssertDoesMeetConstraints() { assert(false); }
 
+  @override
   void performResize() {
     assert(false);
   }
 
+  @override
   void performLayout() {
     if (configuration.orientation != _orientation) {
       if (_orientation != null && child != null)
@@ -96,6 +100,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       child.layout(new BoxConstraints.tight(_size));
   }
 
+  @override
   void rotate({ int oldAngle, int newAngle, Duration time }) {
     assert(false); // nobody tells the screen to rotate, the whole rotate() dance is started from our performResize()
   }
@@ -107,8 +112,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
+  @override
   bool get isRepaintBoundary => true;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset);
@@ -138,9 +145,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  @override
   Rect get paintBounds => Point.origin & size;
+
+  @override
   Rect get semanticBounds => Point.origin & size;
 
+  @override
   void debugFillDescription(List<String> description) {
     // call to ${super.debugFillDescription(prefix)} is omitted because the root superclasses don't include any interesting information for this class
     description.add('window size: ${ui.window.size} (in device pixels)');

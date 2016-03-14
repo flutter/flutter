@@ -26,8 +26,10 @@ class LocaleQuery extends InheritedWidget {
     return query?.data;
   }
 
+  @override
   bool updateShouldNotify(LocaleQuery old) => data != old.data;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$data');

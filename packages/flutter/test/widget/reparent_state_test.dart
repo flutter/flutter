@@ -11,12 +11,14 @@ class StateMarker extends StatefulWidget {
 
   final Widget child;
 
+  @override
   StateMarkerState createState() => new StateMarkerState();
 }
 
 class StateMarkerState extends State<StateMarker> {
   String marker;
 
+  @override
   Widget build(BuildContext context) {
     if (config.child != null)
       return config.child;

@@ -10,12 +10,19 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
+  @override
   final String name = 'devices';
+
+  @override
   final String description = 'List all connected devices.';
+
+  @override
   final List<String> aliases = <String>['list'];
 
+  @override
   bool get requiresProjectRoot => false;
 
+  @override
   Future<int> runInProject() async {
     if (!doctor.canListAnything) {
       printError("Unable to locate a development device; please run 'flutter doctor' for "

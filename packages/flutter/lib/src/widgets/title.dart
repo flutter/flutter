@@ -24,11 +24,13 @@ class Title extends StatelessWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     updateTaskDescription(label: title, color: color);
     return child;
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (title != null)

@@ -57,6 +57,7 @@ class FloatingActionButton extends StatefulWidget {
   final int highlightElevation;
   final bool mini;
 
+  @override
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }
 
@@ -64,6 +65,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   Animation<double> _childSegue;
   AnimationController _childSegueController;
 
+  @override
   void initState() {
     super.initState();
     _childSegueController = new AnimationController(duration: _kChildSegue)
@@ -77,6 +79,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     ));
   }
 
+  @override
   void didUpdateConfig(FloatingActionButton oldConfig) {
     super.didUpdateConfig(oldConfig);
     if (Widget.canUpdate(oldConfig.child, config.child) && config.backgroundColor == oldConfig.backgroundColor)
@@ -94,6 +97,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     Color iconColor = Colors.white;
     Color materialColor = config.backgroundColor;

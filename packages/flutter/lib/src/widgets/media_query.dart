@@ -34,6 +34,7 @@ class MediaQueryData {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
+  @override
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
@@ -43,12 +44,14 @@ class MediaQueryData {
         && typedOther.devicePixelRatio == devicePixelRatio;
   }
 
+  @override
   int get hashCode => hashValues(
     size.hashCode,
     padding.hashCode,
     devicePixelRatio.hashCode
   );
 
+  @override
   String toString() => '$runtimeType($size, $orientation)';
 }
 
@@ -76,8 +79,10 @@ class MediaQuery extends InheritedWidget {
     return query == null ? null : query.data;
   }
 
+  @override
   bool updateShouldNotify(MediaQuery old) => data != old.data;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$data');

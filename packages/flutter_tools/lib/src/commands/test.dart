@@ -23,8 +23,13 @@ class TestCommand extends FlutterCommand {
     );
   }
 
+  @override
   String get name => 'test';
+
+  @override
   String get description => 'Run Flutter unit tests for the current project (Linux only).';
+
+  @override
   bool get requiresProjectRoot => false;
 
   @override

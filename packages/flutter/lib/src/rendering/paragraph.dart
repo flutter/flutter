@@ -52,11 +52,13 @@ class RenderParagraph extends RenderBox {
     _constraintsForCurrentLayout = constraints;
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     _layoutText(constraints);
     return constraints.constrainWidth(_textPainter.minIntrinsicWidth);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     _layoutText(constraints);
     return constraints.constrainWidth(_textPainter.maxIntrinsicWidth);
@@ -67,24 +69,29 @@ class RenderParagraph extends RenderBox {
     return constraints.constrainHeight(_textPainter.size.height);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _getIntrinsicHeight(constraints);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _getIntrinsicHeight(constraints);
   }
 
+  @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!needsLayout);
     _layoutText(constraints);
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
+  @override
   bool hitTestSelf(Point position) => true;
 
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is! PointerDownEvent)
       return;
@@ -95,11 +102,13 @@ class RenderParagraph extends RenderBox {
     span?.recognizer?.addPointer(event);
   }
 
+  @override
   void performLayout() {
     _layoutText(constraints);
     size = constraints.constrain(_textPainter.size);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     // Ideally we could compute the min/max intrinsic width/height with a
     // non-destructive operation. However, currently, computing these values
@@ -112,12 +121,14 @@ class RenderParagraph extends RenderBox {
     _textPainter.paint(context.canvas, offset);
   }
 
+  @override
   Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
     yield (SemanticsNode node) {
       node.label = text.toPlainText();
     };
   }
 
+  @override
   String debugDescribeChildren(String prefix) {
     return '$prefix \u2558\u2550\u2566\u2550\u2550 text \u2550\u2550\u2550\n'
            '${text.toString("$prefix   \u2551 ")}\n'

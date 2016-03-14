@@ -89,10 +89,12 @@ class Dismissable extends StatefulWidget {
   /// The direction in which the widget can be dismissed.
   final DismissDirection direction;
 
+  @override
   _DismissableState createState() => new _DismissableState();
 }
 
 class _DismissableState extends State<Dismissable> {
+  @override
   void initState() {
     super.initState();
     _moveController = new AnimationController(duration: _kDismissDuration)
@@ -109,6 +111,7 @@ class _DismissableState extends State<Dismissable> {
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
 
+  @override
   void dispose() {
     _moveController?.stop();
     _resizeController?.stop();
@@ -273,6 +276,7 @@ class _DismissableState extends State<Dismissable> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget background = config.background;
     if (config.secondaryBackground != null) {

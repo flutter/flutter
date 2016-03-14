@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 class TextFieldDemo extends StatefulWidget {
   TextFieldDemo({ Key key }) : super(key: key);
 
+  @override
   TextFieldDemoState createState() => new TextFieldDemoState();
 }
 
@@ -59,6 +60,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     return null;
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,

@@ -64,8 +64,13 @@ class DriveCommand extends RunCommandBase {
         help: 'Listen to the given port for a debug connection.');
   }
 
+  @override
   final String name = 'drive';
+
+  @override
   final String description = 'Runs Flutter Driver tests for the current project.';
+
+  @override
   final List<String> aliases = <String>['driver'];
 
   Device _device;

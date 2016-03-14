@@ -9,7 +9,10 @@ class TestSemanticsListener implements mojom.SemanticsListener {
   TestSemanticsListener() {
     SemanticsNode.addListener(this);
   }
+
   final List<mojom.SemanticsNode> updates = <mojom.SemanticsNode>[];
+
+  @override
   void updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
     assert(!nodes.any((mojom.SemanticsNode node) => node == null));
     updates.addAll(nodes);

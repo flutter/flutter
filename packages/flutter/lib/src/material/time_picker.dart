@@ -73,6 +73,7 @@ class TimeOfDay {
   /// The hour at which the current period starts.
   int get periodOffset => period == DayPeriod.am ? 0 : _kHoursPerPeriod;
 
+  @override
   bool operator ==(dynamic other) {
     if (other is! TimeOfDay)
       return false;
@@ -81,9 +82,11 @@ class TimeOfDay {
         && typedOther.minute == minute;
   }
 
+  @override
   int get hashCode => hashValues(hour, minute);
 
   // TODO(ianh): Localize.
+  @override
   String toString() => '$hourOfPeriodLabel:$minuteLabel $periodLabel';
 }
 
@@ -100,6 +103,7 @@ class TimePicker extends StatefulWidget {
   final TimeOfDay selectedTime;
   final ValueChanged<TimeOfDay> onChanged;
 
+  @override
   _TimePickerState createState() => new _TimePickerState();
 }
 
@@ -113,6 +117,7 @@ class _TimePickerState extends State<TimePicker> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     Widget header = new _TimePickerHeader(
       selectedTime: config.selectedTime,
@@ -167,6 +172,7 @@ class _TimePickerHeader extends StatelessWidget {
     onChanged(selectedTime.replacing(hour: newHour));
   }
 
+  @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     TextTheme headerTheme = theme.primaryTextTheme;
@@ -274,6 +280,7 @@ class _DialPainter extends CustomPainter {
   final Color primaryColor;
   final double theta;
 
+  @override
   void paint(Canvas canvas, Size size) {
     double radius = size.shortestSide / 2.0;
     Offset center = new Offset(size.width / 2.0, size.height / 2.0);
@@ -305,6 +312,7 @@ class _DialPainter extends CustomPainter {
     }
   }
 
+  @override
   bool shouldRepaint(_DialPainter oldPainter) {
     return oldPainter.labels != labels
         || oldPainter.primaryColor != primaryColor
@@ -325,10 +333,12 @@ class _Dial extends StatefulWidget {
   final _TimePickerMode mode;
   final ValueChanged<TimeOfDay> onChanged;
 
+  @override
   _DialState createState() => new _DialState();
 }
 
 class _DialState extends State<_Dial> {
+  @override
   void initState() {
     super.initState();
     _thetaController = new AnimationController(duration: _kDialAnimateDuration);
@@ -339,6 +349,7 @@ class _DialState extends State<_Dial> {
     ))..addListener(() => setState(() { }));
   }
 
+  @override
   void didUpdateConfig(_Dial oldConfig) {
     if (config.mode != oldConfig.mode && !_dragging)
       _animateTo(_getThetaForTime(config.selectedTime));
@@ -434,6 +445,7 @@ class _DialState extends State<_Dial> {
   final List<TextPainter> _hours = _initHours();
   final List<TextPainter> _minutes = _initMinutes();
 
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       onPanStart: _handlePanStart,

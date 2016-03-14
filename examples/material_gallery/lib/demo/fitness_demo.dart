@@ -16,6 +16,7 @@ SpriteSheet _sprites;
 class FitnessDemo extends StatelessWidget {
   FitnessDemo({ Key key }) : super(key: key);
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
@@ -28,6 +29,8 @@ class FitnessDemo extends StatelessWidget {
 
 class _FitnessDemoContents extends StatefulWidget {
   _FitnessDemoContents({ Key key }) : super(key: key);
+
+  @override
   _FitnessDemoContentsState createState() => new _FitnessDemoContentsState();
 }
 
@@ -43,6 +46,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
     _sprites = new SpriteSheet(_images['packages/flutter_gallery_assets/jumpingjack.png'], json);
   }
 
+  @override
   void initState() {
     super.initState();
 
@@ -73,6 +77,7 @@ class _FitnessDemoContentsState extends State<_FitnessDemoContents> {
 
   _WorkoutAnimationNode workoutAnimation;
 
+  @override
   Widget build(BuildContext context) {
     if (!assetsLoaded)
       return new Container();
@@ -248,6 +253,7 @@ class _WorkoutAnimationNode extends NodeWithSize {
     _jumpingJack.neutralPose();
   }
 
+  @override
   void update(double dt) {
     if (workingOut) {
       int millis = new DateTime.now().millisecondsSinceEpoch - _startTimeMillis;
@@ -273,6 +279,7 @@ class _ProgressCircle extends NodeWithSize {
 
   double value;
 
+  @override
   void paint(Canvas canvas) {
     applyTransformForPivot(canvas);
 
@@ -513,10 +520,12 @@ class _JumpingJackPart extends Sprite {
 class _Fireworks extends StatefulWidget {
   _Fireworks({ Key key }) : super(key: key);
 
+  @override
   _FireworksState createState() => new _FireworksState();
 }
 
 class _FireworksState extends State<_Fireworks> {
+  @override
   void initState() {
     super.initState();
     fireworks = new _FireworksNode();
@@ -524,6 +533,7 @@ class _FireworksState extends State<_Fireworks> {
 
   _FireworksNode fireworks;
 
+  @override
   Widget build(BuildContext context) {
     return new SpriteWidget(fireworks);
   }
@@ -533,6 +543,7 @@ class _FireworksNode extends NodeWithSize {
   _FireworksNode() : super(const Size(1024.0, 1024.0));
   double _countDown = 0.0;
 
+  @override
   void update(double dt) {
     if (_countDown <= 0.0) {
       _addExplosion();

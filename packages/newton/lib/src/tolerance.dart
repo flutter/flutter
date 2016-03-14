@@ -10,6 +10,7 @@ class Tolerance {
   const Tolerance({this.distance: epsilonDefault, this.time: epsilonDefault,
       this.velocity: epsilonDefault});
 
+  @override
   String toString() => 'Tolerance(distance: $distance, time=$time, velocity: $velocity)';
 }
 

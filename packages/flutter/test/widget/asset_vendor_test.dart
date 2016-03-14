@@ -15,8 +15,14 @@ import 'package:test/test.dart';
 class TestImage extends ui.Image {
   TestImage(this.scale);
   final double scale;
+
+  @override
   int get width => (48*scale).floor();
+
+  @override
   int get height => (48*scale).floor();
+
+  @override
   void dispose() { }
 }
 
@@ -38,12 +44,17 @@ String testManifest = '''
 
 class TestAssetBundle extends AssetBundle {
   // Image loading logic routes through load(key)
+  @override
   ImageResource loadImage(String key) => null;
+
+  @override
   Future<String> loadString(String key) {
     if (key == 'AssetManifest.json')
       return (new Completer<String>()..complete(testManifest)).future;
     return null;
   }
+
+  @override
   Future<core.MojoDataPipeConsumer> load(String key) {
     core.MojoDataPipeConsumer pipe;
     switch (key) {
@@ -65,6 +76,8 @@ class TestAssetBundle extends AssetBundle {
     }
     return (new Completer<core.MojoDataPipeConsumer>()..complete(pipe)).future;
   }
+
+  @override
   String toString() => '$runtimeType@$hashCode()';
 }
 

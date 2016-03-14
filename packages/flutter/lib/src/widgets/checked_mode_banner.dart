@@ -30,6 +30,7 @@ class _CheckedModeBannerPainter extends CustomPainter {
     ..maxHeight = kHeight
     ..layout();
 
+  @override
   void paint(Canvas canvas, Size size) {
     final Paint paintShadow = new Paint()
       ..color = const Color(0x7F000000)
@@ -44,7 +45,10 @@ class _CheckedModeBannerPainter extends CustomPainter {
     textPainter.paint(canvas, kRect.topLeft.toOffset() + kTextAlign);
   }
 
+  @override
   bool shouldRepaint(_CheckedModeBannerPainter oldPainter) => false;
+
+  @override
   bool hitTest(Point position) => false;
 }
 
@@ -58,6 +62,7 @@ class CheckedModeBanner extends StatelessWidget {
 
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     Widget result = child;
     assert(() {

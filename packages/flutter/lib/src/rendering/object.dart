@@ -30,6 +30,7 @@ class ParentData {
   /// Called when the RenderObject is removed from the tree.
   void detach() { }
 
+  @override
   String toString() => '<none>';
 }
 
@@ -469,6 +470,7 @@ abstract class _SemanticsFragment {
   bool _debugCompiled = false;
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics });
 
+  @override
   String toString() => '$runtimeType($hashCode)';
 }
 
@@ -482,6 +484,7 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
     assert(owner._semantics != null);
   }
 
+  @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
@@ -506,6 +509,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 
   bool get haveConcreteNode => true;
 
+  @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
@@ -537,6 +541,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     Iterable<_SemanticsFragment> children
   }) : super(owner: owner, annotators: annotators, children: children);
 
+  @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     assert(_ancestorChain.length == 1);
     assert(geometry == null);
@@ -552,6 +557,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     return node;
   }
 
+  @override
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
     return new _SemanticsGeometry();
   }
@@ -564,6 +570,7 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
     Iterable<_SemanticsFragment> children
   }) : super(owner: owner, annotators: annotators, children: children);
 
+  @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     owner._semantics ??= new SemanticsNode(
       handler: owner is SemanticActionHandler ? owner as dynamic : null
@@ -578,6 +585,7 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
     return node;
   }
 
+  @override
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
     return new _SemanticsGeometry.withClipFrom(geometry);
   }
@@ -590,9 +598,11 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     Iterable<_SemanticsFragment> children
   }) : super(owner: owner, annotators: annotators, children: children);
 
+  @override
   bool get haveConcreteNode => _haveConcreteNode;
   bool _haveConcreteNode;
 
+  @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     SemanticsNode node;
     assert(_haveConcreteNode == null);
@@ -616,6 +626,7 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     return node;
   }
 
+  @override
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
     if (haveConcreteNode)
       return new _SemanticsGeometry.withClipFrom(geometry);
@@ -632,6 +643,7 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
     assert(children.length > 1);
   }
 
+  @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
@@ -691,6 +703,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
+  @override
   void adoptChild(RenderObject child) {
     assert(debugCanPerformMutations);
     assert(child != null);
@@ -704,6 +717,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// Only for use by subclasses when changing their child lists. Calling this
   /// in other cases will lead to an inconsistent tree and probably cause crashes.
+  @override
   void dropChild(RenderObject child) {
     assert(debugCanPerformMutations);
     assert(child != null);
@@ -1651,6 +1665,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // EVENTS
 
   /// Override this function to handle pointer events that hit this render object.
+  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) { }
 
 
@@ -1675,6 +1690,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
 
   /// Returns a human understandable name.
+  @override
   String toString() {
     String header = '$runtimeType';
     if (_relayoutSubtreeRoot != null && _relayoutSubtreeRoot != this) {
@@ -1759,20 +1775,28 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
     if (_child != null)
       adoptChild(_child);
   }
+
+  @override
   void attach() {
     super.attach();
     if (_child != null)
       _child.attach();
   }
+
+  @override
   void detach() {
     super.detach();
     if (_child != null)
       _child.detach();
   }
+
+  @override
   void visitChildren(RenderObjectVisitor visitor) {
     if (_child != null)
       visitor(_child);
   }
+
+  @override
   String debugDescribeChildren(String prefix) {
     if (child != null)
       return '$prefix \u2502\n${child.toStringDeep('$prefix \u2514\u2500child: ', '$prefix  ')}';
@@ -1788,6 +1812,7 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> implemen
   ChildType nextSibling;
 
   /// Clear the sibling pointers.
+  @override
   void detach() {
     super.detach();
     if (previousSibling != null) {
@@ -1971,6 +1996,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     markNeedsLayout();
   }
 
+  @override
   void attach() {
     super.attach();
     ChildType child = _firstChild;
@@ -1981,6 +2007,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
   }
 
+  @override
   void detach() {
     super.detach();
     ChildType child = _firstChild;
@@ -1991,6 +2018,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
   }
 
+  @override
   void redepthChildren() {
     ChildType child = _firstChild;
     while (child != null) {
@@ -2000,6 +2028,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
   }
 
+  @override
   void visitChildren(RenderObjectVisitor visitor) {
     ChildType child = _firstChild;
     while (child != null) {
@@ -2021,6 +2050,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     return childParentData.nextSibling;
   }
 
+  @override
   String debugDescribeChildren(String prefix) {
     String result = '$prefix \u2502\n';
     if (_firstChild != null) {
@@ -2044,6 +2074,9 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
 /// Error thrown when the rendering library encounters a contract violation.
 class RenderingError extends AssertionError {
   RenderingError(this.message);
+
   final String message;
+
+  @override
   String toString() => message;
 }

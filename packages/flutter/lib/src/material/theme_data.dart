@@ -241,6 +241,7 @@ class ThemeData {
     );
   }
 
+  @override
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
@@ -268,6 +269,8 @@ class ThemeData {
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme);
   }
+
+  @override
   int get hashCode {
     return hashValues(
       brightness,
@@ -297,5 +300,6 @@ class ThemeData {
     );
   }
 
+  @override
   String toString() => '$runtimeType($brightness $primaryColor etc...)';
 }

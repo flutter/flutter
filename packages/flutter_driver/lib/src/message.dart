@@ -39,6 +39,7 @@ class ObjectRef extends Result {
   /// tests should not generate these keys.
   final String objectReferenceKey;
 
+  @override
   Map<String, dynamic> toJson() => {
     'objectReferenceKey': objectReferenceKey,
   };
@@ -69,6 +70,7 @@ abstract class CommandWithTarget extends Command {
   ///     Map<String, String> toJson() => super.toJson()..addAll({
   ///       'foo': this.foo,
   ///     });
+  @override
   Map<String, String> serialize() => <String, String>{
     'targetRef': targetRef,
   };

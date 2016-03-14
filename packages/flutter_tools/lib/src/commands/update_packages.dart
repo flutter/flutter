@@ -32,12 +32,17 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
   }
 
+  @override
   final String name = 'update-packages';
+
+  @override
   final String description = 'Update the packages inside the Flutter repo.';
 
+  @override
   bool get hidden => _hideCommand;
   final bool _hideCommand;
 
+  @override
   bool get requiresProjectRoot => false;
 
   @override

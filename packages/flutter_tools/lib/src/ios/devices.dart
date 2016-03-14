@@ -25,7 +25,10 @@ const String _ideviceinstallerInstructions =
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('IOSDevices');
 
+  @override
   bool get supportsPlatform => Platform.isMacOS;
+
+  @override
   List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();
 }
 
@@ -62,14 +65,17 @@ class IOSDevice extends Device {
   String _pusherPath;
   String get pusherPath => _pusherPath;
 
+  @override
   final String name;
 
   _IOSDeviceLogReader _logReader;
 
   _IOSDevicePortForwarder _portForwarder;
 
+  @override
   bool get isLocalEmulator => false;
 
+  @override
   bool get supportsStartPaused => false;
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
@@ -226,6 +232,7 @@ class IOSDevice extends Device {
   @override
   TargetPlatform get platform => TargetPlatform.ios_arm;
 
+  @override
   DeviceLogReader get logReader {
     if (_logReader == null)
       _logReader = new _IOSDeviceLogReader(this);
@@ -233,6 +240,7 @@ class IOSDevice extends Device {
     return _logReader;
   }
 
+  @override
   DevicePortForwarder get portForwarder {
     if (_portForwarder == null)
       _portForwarder = new _IOSDevicePortForwarder(this);
@@ -240,6 +248,7 @@ class IOSDevice extends Device {
     return _portForwarder;
   }
 
+  @override
   void clearLogs() {
   }
 }
@@ -256,16 +265,21 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   StreamSubscription<String> _stdoutSubscription;
   StreamSubscription<String> _stderrSubscription;
 
+  @override
   Stream<String> get lines => _linesStreamController.stream;
 
+  @override
   String get name => device.name;
 
+  @override
   bool get isReading => _process != null;
 
+  @override
   Future<int> get finished {
     return _process != null ? _process.exitCode : new Future<int>.value(0);
   }
 
+  @override
   Future<Null> start() async {
     if (_process != null) {
       throw new StateError(
@@ -282,6 +296,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     _process.exitCode.then(_onExit);
   }
 
+  @override
   Future<Null> stop() async {
     if (_process == null) {
       throw new StateError(
@@ -313,8 +328,10 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     _linesStreamController.add(line);
   }
 
+  @override
   int get hashCode => name.hashCode;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -329,12 +346,14 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
   final IOSDevice device;
 
+  @override
   List<ForwardedPort> get forwardedPorts {
     final List<ForwardedPort> ports = <ForwardedPort>[];
     // TODO(chinmaygarde): Implement.
     return ports;
   }
 
+  @override
   Future<int> forward(int devicePort, {int hostPort: null}) async {
     if ((hostPort == null) || (hostPort == 0)) {
       // Auto select host port.
@@ -344,6 +363,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
+  @override
   Future<Null> unforward(ForwardedPort forwardedPort) async {
     // TODO(chinmaygarde): Implement.
   }

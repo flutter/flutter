@@ -23,6 +23,7 @@ class TabsDemo extends StatelessWidget {
     Icons.language: 'LANGUAGE',
   };
 
+  @override
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
     return new TabBarSelection<IconData>(

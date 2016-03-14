@@ -16,8 +16,13 @@ import '../globals.dart';
 import '../template.dart';
 
 class CreateCommand extends Command {
+  @override
   final String name = 'create';
+
+  @override
   final String description = 'Create a new Flutter project.';
+
+  @override
   final List<String> aliases = <String>['init'];
 
   CreateCommand() {
@@ -38,6 +43,7 @@ class CreateCommand extends Command {
     );
   }
 
+  @override
   String get invocation => "${runner.executableName} $name <output directory>";
 
   @override

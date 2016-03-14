@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 class IconsDemo extends StatefulWidget {
+  @override
   IconsDemoState createState() => new IconsDemoState();
 }
 
@@ -61,6 +62,7 @@ class IconsDemoState extends State<IconsDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle textStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);

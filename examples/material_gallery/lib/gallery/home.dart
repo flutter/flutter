@@ -42,10 +42,12 @@ import '../demo/weather_demo.dart';
 class GalleryHome extends StatefulWidget {
   GalleryHome({ Key key }) : super(key: key);
 
+  @override
   GalleryHomeState createState() => new GalleryHomeState();
 }
 
 class GalleryHomeState extends State<GalleryHome> {
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBarHeight: 128.0,

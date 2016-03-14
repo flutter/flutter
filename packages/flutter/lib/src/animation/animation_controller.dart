@@ -99,6 +99,7 @@ class AnimationController extends Animation<double>
   /// Setting this value also stops the controller if it is currently
   /// running; if this happens, it also notifies all the status
   /// listeners.
+  @override
   double get value => _value;
   double _value;
   void set value(double newValue) {
@@ -114,6 +115,7 @@ class AnimationController extends Animation<double>
 
   _AnimationDirection _direction;
 
+  @override
   AnimationStatus get status {
     if (!isAnimating && value == upperBound)
       return AnimationStatus.completed;
@@ -202,6 +204,7 @@ class AnimationController extends Animation<double>
   }
 
   /// Stops running this animation.
+  @override
   void dispose() {
     stop();
   }
@@ -224,6 +227,7 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
 
+  @override
   String toStringDetails() {
     String paused = isAnimating ? '' : '; paused';
     String label = debugLabel == null ? '' : '; for $debugLabel';
@@ -245,6 +249,7 @@ class _InterpolationSimulation extends Simulation {
   final double _end;
   final Curve _curve;
 
+  @override
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
     double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
@@ -256,8 +261,10 @@ class _InterpolationSimulation extends Simulation {
       return _begin + (_end - _begin) * _curve.transform(t);
   }
 
+  @override
   double dx(double timeInSeconds) => 1.0;
 
+  @override
   bool isDone(double timeInSeconds) => timeInSeconds > _durationInSeconds;
 }
 
@@ -272,13 +279,16 @@ class _RepeatingSimulation extends Simulation {
 
   final double _periodInSeconds;
 
+  @override
   double x(double timeInSeconds) {
     assert(timeInSeconds >= 0.0);
     final double t = (timeInSeconds / _periodInSeconds) % 1.0;
     return ui.lerpDouble(min, max, t);
   }
 
+  @override
   double dx(double timeInSeconds) => 1.0;
 
+  @override
   bool isDone(double timeInSeconds) => false;
 }

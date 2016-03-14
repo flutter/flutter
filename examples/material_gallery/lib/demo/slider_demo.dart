@@ -5,12 +5,14 @@
 import 'package:flutter/material.dart';
 
 class SliderDemo extends StatefulWidget {
+  @override
   _SliderDemoState createState() => new _SliderDemoState();
 }
 
 class _SliderDemoState extends State<SliderDemo> {
   double _value = 25.0;
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text("Sliders")),

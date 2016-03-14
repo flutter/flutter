@@ -7,10 +7,12 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 class Inside extends StatefulWidget {
+  @override
   InsideState createState() => new InsideState();
 }
 
 class InsideState extends State<Inside> {
+  @override
   Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
@@ -28,10 +30,12 @@ class Middle extends StatefulWidget {
 
   final Inside child;
 
+  @override
   MiddleState createState() => new MiddleState();
 }
 
 class MiddleState extends State<Middle> {
+  @override
   Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
@@ -45,10 +49,12 @@ class MiddleState extends State<Middle> {
 }
 
 class Outside extends StatefulWidget {
+  @override
   OutsideState createState() => new OutsideState();
 }
 
 class OutsideState extends State<Outside> {
+  @override
   Widget build(BuildContext context) {
     return new Middle(child: new Inside());
   }

@@ -36,6 +36,7 @@ abstract class ScrollBehavior<T, U> {
   /// Whether this scroll behavior currently permits scrolling
   bool get isScrollable => true;
 
+  @override
   String toString() {
     List<String> description = <String>[];
     debugFillDescription(description);
@@ -85,6 +86,7 @@ abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
   /// The maximum value the scroll offset can obtain.
   double get maxScrollOffset;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('content: ${contentExtent.toStringAsFixed(1)}');
@@ -104,6 +106,7 @@ class BoundedBehavior extends ExtentScrollBehavior {
 
   double _minScrollOffset;
 
+  @override
   double updateExtents({
     double contentExtent,
     double containerExtent,
@@ -121,9 +124,13 @@ class BoundedBehavior extends ExtentScrollBehavior {
     );
   }
 
+  @override
   double get minScrollOffset => _minScrollOffset;
+
+  @override
   double get maxScrollOffset => math.max(minScrollOffset, minScrollOffset + _contentExtent - _containerExtent);
 
+  @override
   double applyCurve(double scrollOffset, double scrollDelta) {
     return (scrollOffset + scrollDelta).clamp(minScrollOffset, maxScrollOffset);
   }
@@ -145,6 +152,7 @@ class UnboundedBehavior extends ExtentScrollBehavior {
   UnboundedBehavior({ double contentExtent: 0.0, double containerExtent: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent);
 
+  @override
   Simulation createScrollSimulation(double position, double velocity) {
     double velocityPerSecond = velocity * 1000.0;
     return new BoundedFrictionSimulation(
@@ -152,13 +160,18 @@ class UnboundedBehavior extends ExtentScrollBehavior {
     );
   }
 
+  @override
   Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
     return _createSnapScrollSimulation(startOffset, endOffset, startVelocity, endVelocity);
   }
 
+  @override
   double get minScrollOffset => double.NEGATIVE_INFINITY;
+
+  @override
   double get maxScrollOffset => double.INFINITY;
 
+  @override
   double applyCurve(double scrollOffset, double scrollDelta) {
     return scrollOffset + scrollDelta;
   }
@@ -169,14 +182,17 @@ class OverscrollBehavior extends BoundedBehavior {
   OverscrollBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
 
+  @override
   Simulation createScrollSimulation(double position, double velocity) {
     return _createScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
   }
 
+  @override
   Simulation createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
     return _createSnapScrollSimulation(startOffset, endOffset, startVelocity, endVelocity);
   }
 
+  @override
   double applyCurve(double scrollOffset, double scrollDelta) {
     double newScrollOffset = scrollOffset + scrollDelta;
     // If we're overscrolling, we want move the scroll offset 2x
@@ -199,14 +215,17 @@ class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
   OverscrollWhenScrollableBehavior({ double contentExtent: 0.0, double containerExtent: 0.0, double minScrollOffset: 0.0 })
     : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
 
+  @override
   bool get isScrollable => contentExtent > containerExtent;
 
+  @override
   Simulation createScrollSimulation(double position, double velocity) {
     if (isScrollable || position < minScrollOffset || position > maxScrollOffset)
       return super.createScrollSimulation(position, velocity);
     return null;
   }
 
+  @override
   double applyCurve(double scrollOffset, double scrollDelta) {
     if (isScrollable)
       return super.applyCurve(scrollOffset, scrollDelta);

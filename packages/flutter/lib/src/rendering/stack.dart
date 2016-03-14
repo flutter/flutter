@@ -114,6 +114,7 @@ class RelativeRect {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -126,8 +127,10 @@ class RelativeRect {
            bottom == typedOther.bottom;
   }
 
+  @override
   int get hashCode => hashValues(left, top, right, bottom);
 
+  @override
   String toString() => "RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})";
 }
 
@@ -172,6 +175,7 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// children in the stack.
   bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
 
+  @override
   String toString() {
     List<String> values = <String>[];
     if (top != null)
@@ -205,6 +209,7 @@ abstract class RenderStackBase extends RenderBox
 
   bool _hasVisualOverflow = false;
 
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData)
       child.parentData = new StackParentData();
@@ -219,6 +224,7 @@ abstract class RenderStackBase extends RenderBox
     }
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     double width = constraints.minWidth;
@@ -234,6 +240,7 @@ abstract class RenderStackBase extends RenderBox
     return width;
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     bool hasNonPositionedChildren = false;
@@ -254,6 +261,7 @@ abstract class RenderStackBase extends RenderBox
     return width;
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     double height = constraints.minHeight;
@@ -269,6 +277,7 @@ abstract class RenderStackBase extends RenderBox
     return height;
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     bool hasNonPositionedChildren = false;
@@ -289,10 +298,12 @@ abstract class RenderStackBase extends RenderBox
     return height;
   }
 
+  @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
+  @override
   void performLayout() {
     _hasVisualOverflow = false;
     bool hasNonPositionedChildren = false;
@@ -375,12 +386,14 @@ abstract class RenderStackBase extends RenderBox
     }
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
   void paintStack(PaintingContext context, Offset offset);
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow) {
       context.pushClipRect(needsCompositing, offset, Point.origin & size, paintStack);
@@ -389,6 +402,7 @@ abstract class RenderStackBase extends RenderBox
     }
   }
 
+  @override
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
 }
 
@@ -431,6 +445,7 @@ class RenderStack extends RenderStackBase {
    alignment: alignment
  );
 
+  @override
   void paintStack(PaintingContext context, Offset offset) {
     defaultPaint(context, offset);
   }
@@ -476,6 +491,7 @@ class RenderIndexedStack extends RenderStackBase {
     return child;
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (firstChild == null)
       return false;
@@ -487,6 +503,7 @@ class RenderIndexedStack extends RenderStackBase {
     return child.hitTest(result, position: transformed);
   }
 
+  @override
   void paintStack(PaintingContext context, Offset offset) {
     if (firstChild == null)
       return;

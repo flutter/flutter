@@ -65,6 +65,7 @@ class _Row {
     insertRow(row, coefficient);
   }
 
+  @override
   String toString() {
     StringBuffer buffer = new StringBuffer();
 

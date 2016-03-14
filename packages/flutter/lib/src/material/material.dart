@@ -98,8 +98,10 @@ class Material extends StatefulWidget {
     return result;
   }
 
+  @override
   _MaterialState createState() => new _MaterialState();
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$type');
@@ -125,6 +127,7 @@ class _MaterialState extends State<Material> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     Color backgroundColor = _getBackgroundColor(context);
     Widget contents = config.child;
@@ -189,10 +192,12 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
   // This is here to satisfy the MaterialInkController contract.
   // The actual painting of this color is done by a Container in the
   // MaterialState build method.
+  @override
   Color color;
 
   final List<InkFeature> _inkFeatures = <InkFeature>[];
 
+  @override
   InkSplash splashAt({
     RenderBox referenceBox,
     Point position,
@@ -228,6 +233,7 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
     return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
   }
 
+  @override
   InkHighlight highlightAt({
     RenderBox referenceBox,
     Color color,
@@ -245,6 +251,7 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
     return highlight;
   }
 
+  @override
   void addInkFeature(InkFeature feature) {
     assert(!feature._debugDisposed);
     assert(feature.renderer == this);
@@ -258,8 +265,10 @@ class RenderInkFeatures extends RenderProxyBox implements MaterialInkController 
     markNeedsPaint();
   }
 
+  @override
   bool hitTestSelf(Point position) => true;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_inkFeatures.isNotEmpty) {
       final Canvas canvas = context.canvas;
@@ -279,8 +288,10 @@ class InkFeatures extends SingleChildRenderObjectWidget {
 
   final Color color;
 
+  @override
   RenderInkFeatures createRenderObject(BuildContext context) => new RenderInkFeatures(color: color);
 
+  @override
   void updateRenderObject(BuildContext context, RenderInkFeatures renderObject) {
     renderObject.color = color;
   }
@@ -328,6 +339,7 @@ abstract class InkFeature {
 
   void paintFeature(Canvas canvas, Matrix4 transform);
 
+  @override
   String toString() => "$runtimeType@$hashCode";
 }
 
@@ -371,6 +383,7 @@ class _InkSplash extends InkFeature implements InkSplash {
   Animation<int> _alpha;
   AnimationController _alphaController;
 
+  @override
   void confirm() {
     int duration = (targetRadius / _kSplashConfirmedVelocity).floor();
     _radiusController
@@ -379,6 +392,7 @@ class _InkSplash extends InkFeature implements InkSplash {
     _alphaController.forward();
   }
 
+  @override
   void cancel() {
     _alphaController.forward();
   }
@@ -388,12 +402,14 @@ class _InkSplash extends InkFeature implements InkSplash {
       dispose();
   }
 
+  @override
   void dispose() {
     _radiusController.stop();
     _alphaController.stop();
     super.dispose();
   }
 
+  @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
     Point center = position;
@@ -440,8 +456,11 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     ).animate(_alphaController);
   }
 
+  @override
   Color get color => _color;
   Color _color;
+
+  @override
   void set color(Color value) {
     if (value == _color)
       return;
@@ -451,17 +470,20 @@ class _InkHighlight extends InkFeature implements InkHighlight {
 
   final BoxShape shape;
 
+  @override
   bool get active => _active;
   bool _active = true;
 
   Animation<int> _alpha;
   AnimationController _alphaController;
 
+  @override
   void activate() {
     _active = true;
     _alphaController.forward();
   }
 
+  @override
   void deactivate() {
     _active = false;
     _alphaController.reverse();
@@ -472,6 +494,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
       dispose();
   }
 
+  @override
   void dispose() {
     _alphaController.stop();
     super.dispose();
@@ -484,6 +507,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
       canvas.drawCircle(rect.center, _kDefaultSplashRadius, paint);
   }
 
+  @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
     Offset originOffset = MatrixUtils.getAsTranslation(transform);

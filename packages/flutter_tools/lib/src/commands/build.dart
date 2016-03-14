@@ -11,7 +11,10 @@ import '../runner/flutter_command.dart';
 import '../toolchain.dart';
 
 class BuildCommand extends FlutterCommand {
+  @override
   final String name = 'build';
+
+  @override
   final String description = 'Package your Flutter app into an FLX.';
 
   BuildCommand() {
@@ -42,6 +45,7 @@ class BuildCommand extends FlutterCommand {
     return await super.run();
   }
 
+  @override
   Future<int> runInProject() async {
     String compilerPath = argResults['compiler'];
 

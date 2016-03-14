@@ -37,6 +37,7 @@ class Checkbox extends StatelessWidget {
   final Color activeColor;
   final ValueChanged<bool> onChanged;
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
@@ -67,6 +68,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final ValueChanged<bool> onChanged;
 
+  @override
   _RenderCheckbox createRenderObject(BuildContext context) => new _RenderCheckbox(
     value: value,
     activeColor: activeColor,
@@ -74,6 +76,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     onChanged: onChanged
   );
 
+  @override
   void updateRenderObject(BuildContext context, _RenderCheckbox renderObject) {
     renderObject
       ..value = value
@@ -103,6 +106,7 @@ class _RenderCheckbox extends RenderToggleable {
     size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius)
   );
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
     final double offsetX = _kOffset + offset.dx;

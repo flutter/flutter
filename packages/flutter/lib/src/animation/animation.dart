@@ -62,6 +62,7 @@ abstract class Animation<T> {
   /// Whether this animation is stopped at the end.
   bool get isCompleted => status == AnimationStatus.completed;
 
+  @override
   String toString() {
     return '$runtimeType(${toStringDetails()})';
   }

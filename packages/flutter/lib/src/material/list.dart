@@ -39,12 +39,14 @@ class MaterialList extends StatefulWidget {
   final EdgeInsets scrollablePadding;
   final Key scrollableKey;
 
+  @override
   _MaterialListState createState() => new _MaterialListState();
 }
 
 class _MaterialListState extends State<MaterialList> {
   ScrollbarPainter _scrollbarPainter = new ScrollbarPainter();
 
+  @override
   Widget build(BuildContext context) {
     return new ScrollableList(
       key: config.scrollableKey,

@@ -36,6 +36,7 @@ class Drawer extends StatelessWidget {
   final int elevation;
   final Widget child;
 
+  @override
   Widget build(BuildContext context) {
     return new ConstrainedBox(
       constraints: const BoxConstraints.expand(width: _kWidth),
@@ -55,10 +56,12 @@ class DrawerController extends StatefulWidget {
 
   final Widget child;
 
+  @override
   DrawerControllerState createState() => new DrawerControllerState();
 }
 
 class DrawerControllerState extends State<DrawerController> {
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: _kBaseSettleDuration)
@@ -66,6 +69,7 @@ class DrawerControllerState extends State<DrawerController> {
       ..addStatusListener(_animationStatusChanged);
   }
 
+  @override
   void dispose() {
     _controller
       ..removeListener(_animationChanged)
@@ -158,6 +162,7 @@ class DrawerControllerState extends State<DrawerController> {
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
+  @override
   Widget build(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(

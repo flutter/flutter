@@ -55,6 +55,7 @@ Future<Process> _startProcess(String mainPath, { String packageRoot }) {
 }
 
 class FlutterPlatform extends PlatformPlugin {
+  @override
   StreamChannel<String> loadChannel(String mainPath, TestPlatform platform) {
     return StreamChannelCompleter.fromFuture(_startTest(mainPath));
   }

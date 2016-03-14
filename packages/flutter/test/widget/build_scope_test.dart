@@ -10,21 +10,25 @@ import 'package:test/test.dart';
 import 'test_widgets.dart';
 
 class ProbeWidget extends StatefulWidget {
+  @override
   ProbeWidgetState createState() => new ProbeWidgetState();
 }
 
 class ProbeWidgetState extends State<ProbeWidget> {
   static int buildCount = 0;
 
+  @override
   void initState() {
     super.initState();
     setState(() {});
   }
 
+  @override
   void didUpdateConfig(ProbeWidget oldConfig) {
     setState(() {});
   }
 
+  @override
   Widget build(BuildContext context) {
     setState(() {});
     buildCount++;
@@ -37,6 +41,7 @@ class BadWidget extends StatelessWidget {
 
   final State parentState;
 
+  @override
   Widget build(BuildContext context) {
     parentState.setState(() {});
     return new Container();
@@ -44,24 +49,29 @@ class BadWidget extends StatelessWidget {
 }
 
 class BadWidgetParent extends StatefulWidget {
+  @override
   BadWidgetParentState createState() => new BadWidgetParentState();
 }
 
 class BadWidgetParentState extends State<BadWidgetParent> {
+  @override
   Widget build(BuildContext context) {
     return new BadWidget(this);
   }
 }
 
 class BadDisposeWidget extends StatefulWidget {
+  @override
   BadDisposeWidgetState createState() => new BadDisposeWidgetState();
 }
 
 class BadDisposeWidgetState extends State<BadDisposeWidget> {
+  @override
   Widget build(BuildContext context) {
     return new Container();
   }
 
+  @override
   void dispose() {
     setState(() {});
     super.dispose();

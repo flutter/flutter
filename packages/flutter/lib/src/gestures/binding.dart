@@ -21,6 +21,7 @@ typedef void GesturerExceptionHandler(PointerEvent event, HitTestTarget target, 
 /// A binding for the gesture subsystem.
 abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestable {
 
+  @override
   void initInstances() {
     super.initInstances();
     _instance = this;
@@ -76,6 +77,7 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
+  @override
   void hitTest(HitTestResult result, Point position) {
     result.add(new HitTestEntry(this));
   }
@@ -113,6 +115,7 @@ abstract class Gesturer extends BindingBase implements HitTestTarget, HitTestabl
     }
   }
 
+  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     pointerRouter.route(event);
     if (event is PointerDownEvent) {

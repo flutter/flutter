@@ -171,6 +171,7 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
+  @override
   String toString() => '$runtimeType($position)';
 
   String toStringFull() {

@@ -9,17 +9,22 @@ import '../doctor.dart';
 import 'mac.dart';
 
 class IOSWorkflow extends Workflow {
+  @override
   String get label => 'iOS toolchain';
 
+  @override
   bool get appliesToHostPlatform => Platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
+  @override
   bool get canListDevices => XCode.instance.isInstalledAndMeetsVersionCheck;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
+  @override
   bool get canLaunchDevices => XCode.instance.isInstalledAndMeetsVersionCheck;
 
+  @override
   ValidationResult validate() {
     Validator iosValidator = new Validator(
       label,
@@ -101,6 +106,7 @@ class IOSWorkflow extends Workflow {
     return iosValidator.validate();
   }
 
+  @override
   void diagnose() => validate().print();
 
   bool get hasIdeviceId => exitsHappy(<String>['idevice_id', '-h']);

@@ -203,6 +203,7 @@ class RenderImage extends RenderBox {
     return constraints.constrain(new Size(width, height));
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (_width == null && _height == null)
@@ -210,11 +211,13 @@ class RenderImage extends RenderBox {
     return _sizeForConstraints(constraints).width;
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _sizeForConstraints(constraints).width;
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (_width == null && _height == null)
@@ -222,17 +225,21 @@ class RenderImage extends RenderBox {
     return _sizeForConstraints(constraints).height;
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     return _sizeForConstraints(constraints).height;
   }
 
+  @override
   bool hitTestSelf(Point position) => true;
 
+  @override
   void performLayout() {
     size = _sizeForConstraints(constraints);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (_image == null)
       return;
@@ -248,6 +255,7 @@ class RenderImage extends RenderBox {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('image: $image');

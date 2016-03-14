@@ -55,6 +55,7 @@ class DrawerItem extends StatelessWidget {
     return result;
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);

@@ -5,11 +5,13 @@
 import 'package:flutter/material.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
+  @override
   _ProgressIndicatorDemoState createState() => new _ProgressIndicatorDemoState();
 }
 
 class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
 
+  @override
   void initState() {
     super.initState();
     controller = new AnimationController(
@@ -81,6 +83,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Progress Indicators')),

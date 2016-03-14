@@ -17,11 +17,12 @@ class FlexibleSpaceBar extends StatefulWidget {
   final Widget title;
   final Widget image;
 
+  @override
   _FlexibleSpaceBarState createState() => new _FlexibleSpaceBarState();
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
-
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasScaffold(context));
     final double appBarHeight = Scaffold.of(context).appBarHeight;

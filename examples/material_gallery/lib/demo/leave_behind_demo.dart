@@ -28,6 +28,7 @@ class LeaveBehindItem {
 class LeaveBehindDemo extends StatefulWidget {
   LeaveBehindDemo({ Key key }) : super(key: key);
 
+  @override
   LeaveBehindDemoState createState() => new LeaveBehindDemoState();
 }
 
@@ -47,6 +48,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     });
   }
 
+  @override
   void initState() {
     super.initState();
     initListItems();
@@ -122,6 +124,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,

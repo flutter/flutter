@@ -91,6 +91,7 @@ class Priority {
 abstract class Scheduler extends BindingBase {
   /// Requires clients to use the [scheduler] singleton
 
+  @override
   void initInstances() {
     super.initInstances();
     _instance = this;

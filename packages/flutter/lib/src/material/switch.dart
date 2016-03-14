@@ -21,6 +21,7 @@ class Switch extends StatelessWidget {
   final Color activeColor;
   final ValueChanged<bool> onChanged;
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
@@ -68,6 +69,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveTrackColor;
   final ValueChanged<bool> onChanged;
 
+  @override
   _RenderSwitch createRenderObject(BuildContext context) => new _RenderSwitch(
     value: value,
     activeColor: activeColor,
@@ -77,6 +79,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     onChanged: onChanged
   );
 
+  @override
   void updateRenderObject(BuildContext context, _RenderSwitch renderObject) {
     renderObject
       ..value = value
@@ -165,6 +168,7 @@ class _RenderSwitch extends RenderToggleable {
     reactionController.reverse();
   }
 
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent && onChanged != null)
       _drag.addPointer(event);
@@ -174,6 +178,7 @@ class _RenderSwitch extends RenderToggleable {
   Color _cachedThumbColor;
   BoxPainter _thumbPainter;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 

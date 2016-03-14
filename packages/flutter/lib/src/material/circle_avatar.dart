@@ -19,6 +19,7 @@ class CircleAvatar extends StatelessWidget {
   final Color backgroundColor;
   final double radius;
 
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color color = backgroundColor ?? theme.primaryColor;

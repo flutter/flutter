@@ -34,10 +34,12 @@ abstract class BindingBase {
     assert(() { _debugInitialized = true; return true; });
   }
 
+  @override
   String toString() => '<$runtimeType>';
 }
 
 abstract class Services extends BindingBase {
+  @override
   void initInstances() {
     super.initInstances();
     new MojoShell();

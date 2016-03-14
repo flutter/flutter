@@ -22,6 +22,7 @@ class ModalBarrier extends StatelessWidget {
   /// Whether touching the barrier will pop the current route off the [Navigator].
   final bool dismissable;
 
+  @override
   Widget build(BuildContext context) {
     return new Semantics(
       container: true,
@@ -58,6 +59,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// Whether touching the barrier will pop the current route off the [Navigator].
   final bool dismissable;
 
+  @override
   Widget build(BuildContext context) {
     return new ModalBarrier(
       color: color.value,

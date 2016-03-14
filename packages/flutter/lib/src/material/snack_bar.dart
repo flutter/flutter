@@ -49,6 +49,7 @@ class SnackBarAction extends StatelessWidget {
   /// The callback to be invoked when the button is pressed. Must be non-null.
   final VoidCallback onPressed;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       margin: const EdgeInsets.only(left: _kSideMargins),
@@ -86,6 +87,7 @@ class SnackBar extends StatelessWidget {
   final Duration duration;
   final Animation<double> animation;
 
+  @override
   Widget build(BuildContext context) {
     assert(animation != null);
     List<Widget> children = <Widget>[

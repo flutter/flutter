@@ -175,6 +175,7 @@ class AndroidSdk {
     _latestVersion = _sdkVersions.isEmpty ? null : _sdkVersions.last;
   }
 
+  @override
   String toString() => 'AndroidSdk: $directory';
 }
 
@@ -211,10 +212,12 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     return path.join(sdk.directory, 'build-tools', buildToolsVersion, binaryName);
   }
 
+  @override
   int compareTo(AndroidSdkVersion other) {
     return sdkLevel - other.sdkLevel;
   }
 
+  @override
   String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersion]';
 
   bool _exists(String path, { bool complain: false }) {

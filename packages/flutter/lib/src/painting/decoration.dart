@@ -20,6 +20,8 @@ abstract class Decoration {
   void addChangeListener(VoidCallback listener) { assert(false); }
   void removeChangeListener(VoidCallback listener) { assert(false); }
   BoxPainter createBoxPainter();
+
+  @override
   String toString([String prefix = '']) => '$prefix$runtimeType';
 }
 

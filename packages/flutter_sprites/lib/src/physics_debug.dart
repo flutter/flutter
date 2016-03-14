@@ -16,6 +16,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
 
   Canvas canvas;
 
+  @override
   void drawSegment(Vector2 p1, Vector2 p2, box2d.Color3i color) {
     Paint paint = new Paint()
       ..color = _toColor(color)
@@ -23,6 +24,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     canvas.drawLine(_toPoint(p1), _toPoint(p2), paint);
   }
 
+  @override
   void drawSolidPolygon(
     List<Vector2> vertices,
     int vertexCount,
@@ -40,6 +42,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     canvas.drawPath(path, paint);
   }
 
+  @override
   void drawCircle(Vector2 center, num radius, box2d.Color3i color, [Vector2 axis]) {
     Paint paint = new Paint()
       ..color = _toColor(color)
@@ -49,6 +52,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     canvas.drawCircle(_toPoint(center), _scale(radius), paint);
   }
 
+  @override
   void drawSolidCircle(Vector2 center, num radius, Vector2 axis, box2d.Color3i color) {
     Paint paint = new Paint()
       ..color = _toColor(color);
@@ -56,10 +60,12 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     canvas.drawCircle(_toPoint(center), _scale(radius), paint);
   }
 
+  @override
   void drawPoint(Vector2 point, num radiusOnScreen, box2d.Color3i color) {
     drawSolidCircle(point, radiusOnScreen, null, color);
   }
 
+  @override
   void drawParticles(
     List<Vector2> centers,
     double radius,
@@ -69,6 +75,7 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     // TODO: Implement
   }
 
+  @override
   void drawParticlesWireframe(
     List<Vector2> centers,
     double radius,
@@ -78,11 +85,13 @@ class _PhysicsDebugDraw extends box2d.DebugDraw {
     // TODO: Implement
   }
 
+  @override
   void drawTransform(box2d.Transform xf, box2d.Color3i color) {
     drawCircle(xf.p, 0.1, color);
     // TODO: Improve
   }
 
+  @override
   void drawStringXY(num x, num y, String s, box2d.Color3i color) {
     // TODO: Implement
   }

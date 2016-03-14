@@ -67,6 +67,7 @@ class AppBar extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     Color color = backgroundColor;
     IconThemeData iconThemeData;

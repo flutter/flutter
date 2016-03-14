@@ -9,8 +9,11 @@ import 'print.dart';
 
 class ImageInfo {
   ImageInfo({ this.image, this.scale: 1.0 });
+
   final ui.Image image;
   final double scale;
+
+  @override
   String toString() => '$image @ ${scale}x';
 }
 
@@ -89,6 +92,7 @@ class ImageResource {
     debugPrint('------------------------------------------------------------------------');
   }
 
+  @override
   String toString() {
     StringBuffer result = new StringBuffer();
     result.write('$runtimeType(');

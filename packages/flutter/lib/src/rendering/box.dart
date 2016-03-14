@@ -211,6 +211,7 @@ class BoxConstraints extends Constraints {
   bool get hasTightHeight => minHeight >= maxHeight;
 
   /// Whether there is exactly one size that satifies the constraints.
+  @override
   bool get isTight => hasTightWidth && hasTightHeight;
 
   /// Whether there is an upper bound on the maximum width.
@@ -293,6 +294,7 @@ class BoxConstraints extends Constraints {
   /// normalized and have undefined behavior when they are not. In
   /// checked mode, many of these APIs will assert if the constraints
   /// are not normalized.
+  @override
   bool get isNormalized {
     return minWidth >= 0.0 &&
            minWidth <= maxWidth &&
@@ -300,6 +302,7 @@ class BoxConstraints extends Constraints {
            minHeight <= maxHeight;
   }
 
+  @override
   bool get debugAssertIsNormalized {
     assert(() {
       if (minWidth < 0.0 && minHeight < 0.0)
@@ -328,6 +331,7 @@ class BoxConstraints extends Constraints {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     assert(debugAssertIsNormalized);
     if (identical(this, other))
@@ -342,11 +346,13 @@ class BoxConstraints extends Constraints {
            maxHeight == typedOther.maxHeight;
   }
 
+  @override
   int get hashCode {
     assert(debugAssertIsNormalized);
     return hashValues(minWidth, maxWidth, minHeight, maxHeight);
   }
 
+  @override
   String toString() {
     String annotation = isNormalized ? '' : '; NOT NORMALIZED';
     if (minWidth == double.INFINITY && minHeight == double.INFINITY)
@@ -369,11 +375,13 @@ class BoxConstraints extends Constraints {
 class BoxHitTestEntry extends HitTestEntry {
   const BoxHitTestEntry(RenderBox target, this.localPosition) : super(target);
 
+  @override
   RenderBox get target => super.target;
 
   /// The position of the hit test in the local coordinates of [target].
   final Point localPosition;
 
+  @override
   String toString() => '${target.runtimeType}@$localPosition';
 }
 
@@ -387,6 +395,7 @@ class BoxParentData extends ParentData {
     _offset = value;
   }
 
+  @override
   String toString() => 'offset=$offset';
 }
 
@@ -413,7 +422,7 @@ abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> exten
 /// width value (and pass true for parentUsesSize). After the child determines
 /// its height, use the child's height to determine your size.
 abstract class RenderBox extends RenderObject {
-
+  @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! BoxParentData)
       child.parentData = new BoxParentData();
@@ -512,8 +521,10 @@ abstract class RenderBox extends RenderObject {
     assert(() { debugAssertDoesMeetConstraints(); return true; });
   }
 
+  @override
   Rect get semanticBounds => Point.origin & size;
 
+  @override
   void debugResetSize() {
     // updates the value of size._canBeUsedByParent if necessary
     size = size;
@@ -593,7 +604,10 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// The box constraints most recently received from the parent.
+  @override
   BoxConstraints get constraints => super.constraints;
+
+  @override
   void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
     assert(_size != null);
@@ -681,6 +695,7 @@ abstract class RenderBox extends RenderObject {
     }
   }
 
+  @override
   void markNeedsLayout() {
     if (_cachedBaselines != null && _cachedBaselines.isNotEmpty) {
       // if we have cached data, then someone must have used our data
@@ -699,11 +714,15 @@ abstract class RenderBox extends RenderObject {
     }
     super.markNeedsLayout();
   }
+
+  @override
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true
     size = constraints.constrain(Size.zero);
     assert(!size.isInfinite);
   }
+
+  @override
   void performLayout() {
     assert(() {
       if (!sizedByParent) {
@@ -759,6 +778,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// The RenderBox implementation takes care of adjusting the matrix for the
   /// position of the given child.
+  @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
     BoxParentData childParentData = child.parentData;
@@ -811,9 +831,12 @@ abstract class RenderBox extends RenderObject {
   /// can lead to undefined behavior.
   ///
   /// The returned paint bounds are in the local coordinate system of this box.
+  @override
   Rect get paintBounds => Point.origin & size;
 
   int _debugActivePointers = 0;
+
+  @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
     assert(() {
@@ -829,6 +852,7 @@ abstract class RenderBox extends RenderObject {
     });
   }
 
+  @override
   void debugPaint(PaintingContext context, Offset offset) {
     assert(() {
       if (debugPaintSizeEnabled)
@@ -888,6 +912,7 @@ abstract class RenderBox extends RenderObject {
     });
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('size: ${ hasSize ? size : "MISSING" }');
@@ -974,5 +999,6 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
 class FractionalOffsetTween extends Tween<FractionalOffset> {
   FractionalOffsetTween({ FractionalOffset begin, FractionalOffset end }) : super(begin: begin, end: end);
 
+  @override
   FractionalOffset lerp(double t) => FractionalOffset.lerp(begin, end, t);
 }

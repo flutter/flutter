@@ -70,6 +70,7 @@ abstract class Layer {
   /// origin of the builder's coordinate system.
   void addToScene(ui.SceneBuilder builder, Offset layerOffset);
 
+  @override
   String toString() => '$runtimeType';
 
   dynamic debugOwner;
@@ -102,6 +103,7 @@ class PictureLayer extends Layer {
   /// The picture's coodinate system matches this layer's coodinate system
   ui.Picture picture;
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addPicture(layerOffset, picture);
   }
@@ -114,6 +116,7 @@ class ChildSceneLayer extends Layer {
   double devicePixelRatio;
   mojom.ViewLayoutInfo layoutInfo;
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addChildScene(
       offset + layerOffset,
@@ -124,6 +127,7 @@ class ChildSceneLayer extends Layer {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('offset: $offset');
@@ -150,6 +154,7 @@ class PerformanceOverlayLayer extends Layer {
 
   final int rasterizerThreshold;
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
     builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
@@ -243,6 +248,7 @@ class ContainerLayer extends Layer {
     _lastChild = null;
   }
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     addChildrenToScene(builder, layerOffset);
   }
@@ -256,6 +262,7 @@ class ContainerLayer extends Layer {
     }
   }
 
+  @override
   String debugDescribeChildren(String prefix) {
     String result = '$prefix \u2502\n';
     if (_firstChild != null) {
@@ -281,10 +288,12 @@ class OffsetLayer extends ContainerLayer {
   /// Offset from parent in the parent's coordinate system.
   Offset offset;
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     addChildrenToScene(builder, offset + layerOffset);
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('offset: $offset');
@@ -301,12 +310,14 @@ class ClipRectLayer extends ContainerLayer {
   // TODO(abarth): Why is the rectangle in the parent's coordinate system
   // instead of in the coordinate system of this layer?
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipRect(clipRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('clipRect: $clipRect');
@@ -322,12 +333,14 @@ class ClipRRectLayer extends ContainerLayer {
   // TODO(abarth): Why is the rounded-rect in the parent's coordinate system
   // instead of in the coordinate system of this layer?
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipRRect(clipRRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('clipRRect: $clipRRect');
@@ -343,12 +356,14 @@ class ClipPathLayer extends ContainerLayer {
   // TODO(abarth): Why is the path in the parent's coordinate system instead of
   // in the coordinate system of this layer?
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushClipPath(clipPath.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('clipPath: $clipPath');
@@ -362,6 +377,7 @@ class TransformLayer extends OffsetLayer {
   /// The matrix to apply
   Matrix4 transform;
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     Matrix4 offsetTransform = new Matrix4.identity();
     offsetTransform.translate(offset.dx + layerOffset.dx, offset.dy + layerOffset.dy);
@@ -370,6 +386,7 @@ class TransformLayer extends OffsetLayer {
     builder.pop();
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('transform:');
@@ -387,12 +404,14 @@ class OpacityLayer extends ContainerLayer {
   /// transparent and 255 is fully opaque.
   int alpha;
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushOpacity(alpha);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('alpha: $alpha');
@@ -412,12 +431,14 @@ class ShaderMaskLayer extends ContainerLayer {
   /// The tranfer mode to apply when blending the shader with the children.
   TransferMode transferMode;
 
+  @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushShaderMask(shader, maskRect.shift(layerOffset), transferMode);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('shader: $shader');

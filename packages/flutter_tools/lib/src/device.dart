@@ -111,6 +111,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     _timer = null;
   }
 
+  @override
   List<Device> get devices {
     if (_items == null)
       _items = new ItemListNotifier<Device>.from(pollingGetDevices());
@@ -131,6 +132,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   void dispose() => stopPolling();
 
+  @override
   String toString() => '$name device discovery';
 }
 
@@ -189,8 +191,10 @@ abstract class Device {
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
 
+  @override
   int get hashCode => id.hashCode;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -199,6 +203,7 @@ abstract class Device {
     return id == other.id;
   }
 
+  @override
   String toString() => name;
 
   static void printDevices(List<Device> devices) {
@@ -225,6 +230,7 @@ class ForwardedPort {
   final int hostPort;
   final int devicePort;
 
+  @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
 }
 
@@ -266,8 +272,12 @@ abstract class DeviceLogReader {
   /// Completes when the log is finished.
   Future<int> get finished;
 
+  @override
   int get hashCode;
+
+  @override
   bool operator ==(dynamic other);
 
+  @override
   String toString() => name;
 }

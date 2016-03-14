@@ -19,6 +19,7 @@ class _BarGraphic extends StatelessWidget {
   final String leftText;
   final String rightText;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       height: height,
@@ -85,6 +86,7 @@ class _TechniqueItem extends StatelessWidget {
     Navigator.push(context, new MaterialPageRoute<Null>(builder: builder));
   }
 
+  @override
   Widget build(BuildContext context) {
     return new Card(
       child: new InkWell(
@@ -111,6 +113,7 @@ const String _introText =
   "specified it is stacked on top of the ToolBar.";
 
 class ScrollingTechniquesDemo extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Scrolling Techniques')),

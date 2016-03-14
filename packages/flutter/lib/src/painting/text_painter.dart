@@ -113,6 +113,7 @@ class TextSpan {
     return buffer.toString();
   }
 
+  @override
   String toString([String prefix = '']) {
     StringBuffer buffer = new StringBuffer();
     buffer.writeln('$prefix$runtimeType:');
@@ -158,6 +159,7 @@ class TextSpan {
     return true;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -169,6 +171,8 @@ class TextSpan {
         && typedOther.recognizer == recognizer
         && _deepEquals(typedOther.children, children);
   }
+
+  @override
   int get hashCode => hashValues(style, text, recognizer, hashList(children));
 }
 

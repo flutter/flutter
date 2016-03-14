@@ -55,6 +55,7 @@ class ViewportDimensions {
     }
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -65,8 +66,10 @@ class ViewportDimensions {
            containerSize == typedOther.containerSize;
   }
 
+  @override
   int get hashCode => hashValues(contentSize, containerSize);
 
+  @override
   String toString() => 'ViewportDimensions(container: $containerSize, content: $contentSize)';
 }
 
@@ -125,6 +128,7 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   /// If the viewport is scrollable in a particular direction (e.g., vertically),
   /// the child is given layout constraints that are fully unconstrainted in
   /// that direction (e.g., the child can be as tall as it wants).
+  @override
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
   void set mainAxis(Axis value) {
@@ -163,11 +167,13 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
     markNeedsPaint();
   }
 
+  @override
   void attach() {
     super.attach();
     _overlayPainter?.attach(this);
   }
 
+  @override
   void detach() {
     super.detach();
     _overlayPainter?.detach();
@@ -190,11 +196,13 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
     );
   }
 
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final Offset effectivePaintOffset = _effectivePaintOffset;
     super.applyPaintTransform(child, transform.translate(effectivePaintOffset.dx, effectivePaintOffset.dy));
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('paintOffset: $paintOffset');
@@ -243,6 +251,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     return innerConstraints;
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -250,6 +259,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     return super.getMinIntrinsicWidth(constraints);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -257,6 +267,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     return super.getMaxIntrinsicWidth(constraints);
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -264,6 +275,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     return super.getMinIntrinsicHeight(constraints);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
@@ -276,6 +288,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
   // scroll the RenderViewport, it would shift in its parent if the
   // parent was baseline-aligned, which makes no sense.
 
+  @override
   void performLayout() {
     ViewportDimensions oldDimensions = dimensions;
     if (child != null) {
@@ -298,6 +311,7 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     return paintOffset < Offset.zero || !(Offset.zero & size).contains((paintOffset & child.size).bottomRight);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       final Offset effectivePaintOffset = _effectivePaintOffset;
@@ -315,12 +329,14 @@ class RenderViewport extends RenderViewportBase with RenderObjectWithChildMixin<
     }
   }
 
+  @override
   Rect describeApproximatePaintClip(RenderObject child) {
     if (child != null && _shouldClipAtPaintOffset(_effectivePaintOffset))
       return Point.origin & size;
     return null;
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
       assert(child.parentData is BoxParentData);
@@ -367,6 +383,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     markNeedsLayout();
   }
 
+  @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return defaultHitTestChildren(result, position: position + -_effectivePaintOffset);
   }
@@ -376,12 +393,15 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
     _overlayPainter?.paint(context, offset);
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
   }
 
+  @override
   Rect describeApproximatePaintClip(RenderObject child) => Point.origin & size;
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('virtual child count: $virtualChildCount');

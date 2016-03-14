@@ -67,6 +67,7 @@ class Input extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<InputValue> onSubmitted;
 
+  @override
   _InputState createState() => new _InputState();
 }
 
@@ -78,6 +79,7 @@ class _InputState extends State<Input> {
 
   GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputLineKey;
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);

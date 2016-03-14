@@ -17,6 +17,7 @@ class Card extends StatelessWidget {
   final Widget child;
   final Color color;
 
+  @override
   Widget build(BuildContext context) {
     return new Container(
       margin: _kCardMargins,

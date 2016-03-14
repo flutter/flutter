@@ -48,6 +48,7 @@ class MarkdownRaw extends StatelessWidget {
   /// Callback when a link is tapped
   final MarkdownLinkCallback onTapLink;
 
+  @override
   Widget build(BuildContext context) {
     return new ScrollableViewport(
       child: new Padding(
@@ -120,6 +121,7 @@ class MarkdownBodyRaw extends StatefulWidget {
   /// Callback when a link is tapped
   final MarkdownLinkCallback onTapLink;
 
+  @override
   _MarkdownBodyRawState createState() => new _MarkdownBodyRawState();
 
   MarkdownStyleRaw createDefaultStyle(BuildContext context) => null;
@@ -127,16 +129,19 @@ class MarkdownBodyRaw extends StatefulWidget {
 
 class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
 
+  @override
   void initState() {
     super.initState();
     _buildMarkdownCache();
   }
 
+  @override
   void dispose() {
     _linkHandler.dispose();
     super.dispose();
   }
 
+  @override
   void didUpdateConfig(MarkdownBodyRaw oldConfig) {
     super.didUpdateConfig(oldConfig);
 
@@ -165,6 +170,7 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
   List<_Block> _cachedBlocks;
   _LinkHandler _linkHandler;
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> blocks = <Widget>[];
     for (_Block block in _cachedBlocks) {
@@ -177,6 +183,7 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     description.add('cached blocks identity: ${_cachedBlocks.hashCode}');
   }
@@ -205,6 +212,7 @@ class _Renderer implements md.NodeVisitor {
   SyntaxHighlighter _syntaxHighlighter;
   _LinkHandler _linkHandler;
 
+  @override
   void visitText(md.Text text) {
     _MarkdownNodeList topList = _currentBlock.stack.last;
     List<_MarkdownNode> top = topList.list;
@@ -215,6 +223,7 @@ class _Renderer implements md.NodeVisitor {
       top.add(new _MarkdownNodeString(text.text));
   }
 
+  @override
   bool visitElementBefore(md.Element element) {
     if (_isListTag(element.tag))
       _listIndents.add(element.tag);
@@ -241,6 +250,7 @@ class _Renderer implements md.NodeVisitor {
     return true;
   }
 
+  @override
   void visitElementAfter(md.Element element) {
     if (_isListTag(element.tag))
       _listIndents.removeLast();
@@ -520,6 +530,7 @@ class _DefaultSyntaxHighlighter extends SyntaxHighlighter{
 
   final TextStyle style;
 
+  @override
   TextSpan format(String source) {
     return new TextSpan(style: style, children: <TextSpan>[new TextSpan(text: source)]);
   }

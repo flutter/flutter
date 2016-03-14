@@ -10,9 +10,13 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
+  @override
   final String name = 'install';
+
+  @override
   final String description = 'Install a Flutter app on an attached device.';
 
+  @override
   bool get requiresDevice => true;
 
   @override

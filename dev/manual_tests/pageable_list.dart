@@ -14,10 +14,12 @@ class CardModel {
 }
 
 class PageableListApp extends StatefulWidget {
+  @override
   PageableListAppState createState() => new PageableListAppState();
 }
 
 class PageableListAppState extends State<PageableListApp> {
+  @override
   void initState() {
     super.initState();
     List<Size> cardSizes = [
@@ -122,6 +124,7 @@ class PageableListAppState extends State<PageableListApp> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return new IconTheme(
       data: const IconThemeData(color: Colors.white),

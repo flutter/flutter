@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ChipDemo extends StatefulWidget {
+  @override
   _ChipDemoState createState() => new _ChipDemoState();
 }
 
@@ -17,6 +18,7 @@ class _ChipDemoState extends State<ChipDemo> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     List<Widget> chips = <Widget>[
       new Chip(

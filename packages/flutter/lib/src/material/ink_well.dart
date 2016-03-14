@@ -44,6 +44,7 @@ class InkResponse extends StatefulWidget {
   final bool containedInWell;
   final BoxShape highlightShape;
 
+  @override
   _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
 }
 
@@ -133,6 +134,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       config.onLongPress();
   }
 
+  @override
   void deactivate() {
     if (_splashes != null) {
       Set<InkSplash> splashes = _splashes;
@@ -147,11 +149,13 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     super.deactivate();
   }
 
+  @override
   void dependenciesChanged(Type affectedWidgetType) {
     if (affectedWidgetType == Theme && _lastHighlight != null)
       _lastHighlight.color = Theme.of(context).highlightColor;
   }
 
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final bool enabled = config.onTap != null || config.onDoubleTap != null || config.onLongPress != null;

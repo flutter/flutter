@@ -54,6 +54,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     markNeedsLayout();
   }
 
+  @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! ListParentData)
       child.parentData = new ListParentData();
@@ -90,10 +91,12 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     }
   }
 
+  @override
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     return _getIntrinsicWidth(constraints);
   }
 
+  @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     return _getIntrinsicWidth(constraints);
   }
@@ -108,14 +111,17 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     }
   }
 
+  @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     return _getIntrinsicHeight(constraints);
   }
 
+  @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     return _getIntrinsicHeight(constraints);
   }
 
+  @override
   void performLayout() {
     switch (mainAxis) {
       case Axis.vertical:

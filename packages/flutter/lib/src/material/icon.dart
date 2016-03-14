@@ -56,6 +56,7 @@ class Icon extends StatelessWidget {
     return IconTheme.of(context)?.color ?? _getDefaultColorForThemeBrightness(Theme.of(context).brightness);
   }
 
+  @override
   Widget build(BuildContext context) {
     if (icon == null)
       return new SizedBox(width: size, height: size);
@@ -84,6 +85,7 @@ class Icon extends StatelessWidget {
     );
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$icon');

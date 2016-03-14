@@ -13,12 +13,14 @@ DriverError _createInvalidKeyValueTypeError(String invalidType) {
 
 /// Command to find an element.
 class Find extends Command {
+  @override
   final String kind = 'find';
 
   Find(this.searchSpec);
 
   final SearchSpecification searchSpec;
 
+  @override
   Map<String, String> serialize() => searchSpec.serialize();
 
   static Find deserialize(Map<String, String> json) {
@@ -47,6 +49,7 @@ abstract class SearchSpecification {
 
 /// Tells [Find] to search by tooltip text.
 class ByTooltipMessage extends SearchSpecification {
+  @override
   final String searchSpecType = 'ByTooltipMessage';
 
   ByTooltipMessage(this.text);
@@ -54,6 +57,7 @@ class ByTooltipMessage extends SearchSpecification {
   /// Tooltip message text.
   final String text;
 
+  @override
   Map<String, String> serialize() => super.serialize()..addAll({
     'text': text,
   });
@@ -65,12 +69,14 @@ class ByTooltipMessage extends SearchSpecification {
 
 /// Tells [Find] to search for `Text` widget by text.
 class ByText extends SearchSpecification {
+  @override
   final String searchSpecType = 'ByText';
 
   ByText(this.text);
 
   final String text;
 
+  @override
   Map<String, String> serialize() => super.serialize()..addAll({
     'text': text,
   });
@@ -82,6 +88,7 @@ class ByText extends SearchSpecification {
 
 /// Tells [Find] to search by `ValueKey`.
 class ByValueKey extends SearchSpecification {
+  @override
   final String searchSpecType = 'ByValueKey';
 
   ByValueKey(dynamic keyValue)
@@ -103,6 +110,7 @@ class ByValueKey extends SearchSpecification {
   /// May be one of "String", "int". The list of supported types may change.
   final String keyValueType;
 
+  @override
   Map<String, String> serialize() => super.serialize()..addAll({
     'keyValueString': keyValueString,
     'keyValueType': keyValueType,
@@ -127,12 +135,14 @@ class GetText extends CommandWithTarget {
   /// [targetRef] identifies an element that contains a piece of text.
   GetText(ObjectRef targetRef) : super(targetRef);
 
+  @override
   final String kind = 'get_text';
 
   static GetText deserialize(Map<String, String> json) {
     return new GetText(new ObjectRef(json['targetRef']));
   }
 
+  @override
   Map<String, String> serialize() => super.serialize();
 }
 
@@ -145,6 +155,7 @@ class GetTextResult extends Result {
     return new GetTextResult(json['text']);
   }
 
+  @override
   Map<String, dynamic> toJson() => {
     'text': text,
   };

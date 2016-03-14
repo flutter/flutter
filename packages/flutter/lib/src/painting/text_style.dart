@@ -176,6 +176,7 @@ class TextStyle {
     );
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -198,6 +199,7 @@ class TextStyle {
            decorationStyle == typedOther.decorationStyle;
   }
 
+  @override
   int get hashCode {
     return hashValues(
       inherit,
@@ -217,6 +219,7 @@ class TextStyle {
     );
   }
 
+  @override
   String toString([String prefix = '']) {
     List<String> result = <String>[];
     result.add('${prefix}inherit: $inherit');

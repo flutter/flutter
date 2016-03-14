@@ -237,7 +237,10 @@ class SemanticsNode extends AbstractNode {
       _markDirty();
   }
 
+  @override
   SemanticsNode get parent => super.parent;
+
+  @override
   void redepthChildren() {
     if (_children != null) {
       for (SemanticsNode child in _children)
@@ -261,6 +264,7 @@ class SemanticsNode extends AbstractNode {
   static Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   static Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
 
+  @override
   void attach() {
     super.attach();
     assert(!_nodes.containsKey(_id));
@@ -273,6 +277,8 @@ class SemanticsNode extends AbstractNode {
         child.attach();
     }
   }
+
+  @override
   void detach() {
     super.detach();
     assert(_nodes.containsKey(_id));
@@ -440,6 +446,7 @@ class SemanticsNode extends AbstractNode {
     return result._actionHandler;
   }
 
+  @override
   String toString() {
     return '$runtimeType($_id'
              '${_dirty ? " (${ _dirtyNodes.contains(this) ? 'dirty' : 'STALE' })" : ""}'
@@ -469,24 +476,37 @@ class SemanticsNode extends AbstractNode {
 }
 
 class SemanticsServer extends mojom.SemanticsServer {
+  @override
   void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
     SemanticsNode.addListener(listener.ptr);
   }
+
+  @override
   void tap(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeTapped)?.handleSemanticTap();
   }
+
+  @override
   void longPress(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeLongPressed)?.handleSemanticLongPress();
   }
+
+  @override
   void scrollLeft(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollLeft();
   }
+
+  @override
   void scrollRight(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledHorizontally)?.handleSemanticScrollRight();
   }
+
+  @override
   void scrollUp(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollUp();
   }
+
+  @override
   void scrollDown(int nodeID) {
     SemanticsNode.getSemanticActionHandlerForId(nodeID, neededFlag: _SemanticFlags.canBeScrolledVertically)?.handleSemanticScrollDown();
   }

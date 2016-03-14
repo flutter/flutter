@@ -53,8 +53,13 @@ abstract class RunCommandBase extends FlutterCommand {
 }
 
 class RunCommand extends RunCommandBase {
+  @override
   final String name = 'run';
+
+  @override
   final String description = 'Run your Flutter app on an attached device.';
+
+  @override
   final List<String> aliases = <String>['start'];
 
   RunCommand() {
@@ -76,6 +81,7 @@ class RunCommand extends RunCommandBase {
         help: 'Listen to the given port for a debug connection.');
   }
 
+  @override
   bool get requiresDevice => true;
 
   @override

@@ -13,7 +13,10 @@ final BoxDecoration kBoxDecorationC = new BoxDecoration();
 
 class TestWidget extends StatelessWidget {
   const TestWidget({ this.child });
+
   final Widget child;
+
+  @override
   Widget build(BuildContext context) => child;
 }
 

@@ -19,6 +19,7 @@ class TestTransition extends AnimatedWidget {
   final Widget childFirstHalf;
   final Widget childSecondHalf;
 
+  @override
   Widget build(BuildContext context) {
     final Animation<double> animation = this.animation;
     if (animation.value >= 0.5)
@@ -29,9 +30,16 @@ class TestTransition extends AnimatedWidget {
 
 class TestRoute<T> extends PageRoute<T> {
   TestRoute({ this.child, RouteSettings settings}) : super(settings: settings);
+
   final Widget child;
+
+  @override
   Duration get transitionDuration => kMaterialPageRouteTransitionDuration;
+
+  @override
   Color get barrierColor => null;
+
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return child;
   }

@@ -88,6 +88,7 @@ void main() {
 }
 
 class FirstWidget extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new GestureDetector(
       onTap: () {
@@ -101,6 +102,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return new ModalBarrier(
       key: const ValueKey<String>('barrier'),

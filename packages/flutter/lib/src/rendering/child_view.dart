@@ -170,25 +170,32 @@ class RenderChildView extends RenderBox {
       markNeedsLayout();
   }
 
+  @override
   void attach() {
     super.attach();
     _child?._attach();
   }
 
+  @override
   void detach() {
     _child?._detach();
     super.detach();
   }
 
+  @override
   bool get alwaysNeedsCompositing => true;
+
+  @override
   bool get sizedByParent => true;
 
+  @override
   void performResize() {
     size = constraints.biggest;
   }
 
   TextPainter _debugErrorMessage;
 
+  @override
   void performLayout() {
     if (_child != null) {
       _child._layout(size: size, scale: scale).then(_handleLayoutInfoChanged);
@@ -215,8 +222,10 @@ class RenderChildView extends RenderBox {
     markNeedsPaint();
   }
 
+  @override
   bool hitTestSelf(Point position) => true;
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
     if (_layoutInfo != null)
@@ -230,6 +239,7 @@ class RenderChildView extends RenderBox {
     });
   }
 
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('child: $child');

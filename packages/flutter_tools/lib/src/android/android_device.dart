@@ -32,7 +32,10 @@ const String _deviceSnapshotPath = '/data/local/tmp/dev_snapshot.bin';
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices() : super('AndroidDevices');
 
+  @override
   bool get supportsPlatform => true;
+
+  @override
   List<Device> pollingGetDevices() => getAdbDevices();
 }
 
@@ -50,6 +53,7 @@ class AndroidDevice extends Device {
 
   bool _isLocalEmulator;
 
+  @override
   bool get isLocalEmulator {
     if (_isLocalEmulator == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
@@ -152,6 +156,7 @@ class AndroidDevice extends Device {
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
+  @override
   String get name => modelID;
 
   @override
@@ -279,6 +284,7 @@ class AndroidDevice extends Device {
     }
   }
 
+  @override
   Future<bool> stopApp(ApplicationPackage app) {
     List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
@@ -288,16 +294,19 @@ class AndroidDevice extends Device {
   @override
   TargetPlatform get platform => TargetPlatform.android_arm;
 
+  @override
   void clearLogs() {
     runSync(adbCommandForDevice(<String>['logcat', '-c']));
   }
 
+  @override
   DeviceLogReader get logReader {
     if (_logReader == null)
       _logReader = new _AdbLogReader(this);
     return _logReader;
   }
 
+  @override
   DevicePortForwarder get portForwarder {
     if (_portForwarder == null)
       _portForwarder = new _AndroidDevicePortForwarder(this);
@@ -382,6 +391,7 @@ class AndroidDevice extends Device {
     return null;
   }
 
+  @override
   bool isSupported() => true;
 
   Future<bool> refreshSnapshot(AndroidApk apk, String snapshotPath) async {
@@ -488,14 +498,19 @@ class _AdbLogReader extends DeviceLogReader {
   StreamSubscription<String> _stdoutSubscription;
   StreamSubscription<String> _stderrSubscription;
 
+  @override
   Stream<String> get lines => _linesStreamController.stream;
 
+  @override
   String get name => device.name;
 
+  @override
   bool get isReading => _process != null;
 
+  @override
   Future<int> get finished => _process != null ? _process.exitCode : new Future<int>.value(0);
 
+  @override
   Future<Null> start() async {
     if (_process != null)
       throw new StateError('_AdbLogReader must be stopped before it can be started.');
@@ -516,6 +531,7 @@ class _AdbLogReader extends DeviceLogReader {
     _process.exitCode.then(_onExit);
   }
 
+  @override
   Future<Null> stop() async {
     if (_process == null)
       throw new StateError('_AdbLogReader must be started before it can be stopped.');
@@ -540,8 +556,10 @@ class _AdbLogReader extends DeviceLogReader {
     _linesStreamController.add(line);
   }
 
+  @override
   int get hashCode => name.hashCode;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -560,6 +578,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return int.parse(portString.trim(), onError: (_) => null);
   }
 
+  @override
   List<ForwardedPort> get forwardedPorts {
     final List<ForwardedPort> ports = <ForwardedPort>[];
 
@@ -591,6 +610,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return ports;
   }
 
+  @override
   Future<int> forward(int devicePort, { int hostPort }) async {
     if ((hostPort == null) || (hostPort == 0)) {
       // Auto select host port.
@@ -604,6 +624,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     return hostPort;
   }
 
+  @override
   Future<Null> unforward(ForwardedPort forwardedPort) async {
     runCheckedSync(device.adbCommandForDevice(
       <String>['forward', '--remove', 'tcp:${forwardedPort.hostPort}']

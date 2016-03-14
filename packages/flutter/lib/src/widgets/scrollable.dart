@@ -175,6 +175,7 @@ abstract class Scrollable extends StatefulWidget {
     return new Future<Null>.value();
   }
 
+  @override
   ScrollableState createState();
 }
 
@@ -218,6 +219,7 @@ abstract class Scrollable extends StatefulWidget {
 /// terms of the [pixelOffsetToScrollOffset] and
 /// [scrollOffsetToPixelOffset] methods.
 abstract class ScrollableState<T extends Scrollable> extends State<T> {
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController.unbounded()..addListener(_handleAnimationChanged);
@@ -226,6 +228,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   AnimationController _controller;
 
+  @override
   void dispose() {
     _controller.stop();
     super.dispose();
@@ -518,6 +521,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
+  @override
   Widget build(BuildContext context) {
     return new RawGestureDetector(
       key: _gestureDetectorKey,
@@ -629,11 +633,15 @@ class ScrollableViewport extends Scrollable {
 
   final Widget child;
 
+  @override
   ScrollableState createState() => new _ScrollableViewportState();
 }
 
 class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => new OverscrollWhenScrollableBehavior();
+
+  @override
   OverscrollWhenScrollableBehavior get scrollBehavior => super.scrollBehavior;
 
   double _viewportSize = 0.0;
@@ -655,6 +663,7 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     return scrollOffsetToPixelDelta(scrollOffset);
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     return new Viewport(
       paintOffset: scrollOffsetToPixelDelta(scrollOffset),
@@ -692,6 +701,7 @@ class Block extends StatelessWidget {
   final ScrollListener onScroll;
   final Key scrollableKey;
 
+  @override
   Widget build(BuildContext context) {
     Widget contents = new BlockBody(children: children, mainAxis: scrollDirection);
     if (padding != null)
@@ -708,12 +718,14 @@ class Block extends StatelessWidget {
 }
 
 abstract class ScrollableListPainter extends RenderObjectPainter {
+  @override
   void attach(RenderObject renderObject) {
     assert(renderObject is RenderBox);
     assert(renderObject is HasMainAxis);
     super.attach(renderObject);
   }
 
+  @override
   RenderBox get renderObject => super.renderObject;
 
   Axis get scrollDirection {
@@ -784,10 +796,12 @@ class ScrollableMixedWidgetList extends Scrollable {
   final Object token;
   final InvalidatorAvailableCallback onInvalidatorAvailable;
 
+  @override
   ScrollableMixedWidgetListState createState() => new ScrollableMixedWidgetListState();
 }
 
 class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidgetList> {
+  @override
   void initState() {
     super.initState();
     scrollBehavior.updateExtents(
@@ -795,7 +809,10 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
     );
   }
 
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+
+  @override
   OverscrollBehavior get scrollBehavior => super.scrollBehavior;
 
   Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
@@ -812,6 +829,7 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
     return scrollOffsetToPixelDelta(scrollOffset);
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     return new MixedViewport(
       startOffset: scrollOffset,

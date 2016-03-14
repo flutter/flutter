@@ -57,6 +57,7 @@ class SpriteBox extends RenderBox {
     }
   }
 
+  @override
   void attach() {
     super.attach();
     _scheduleTick();
@@ -138,6 +139,7 @@ class SpriteBox extends RenderBox {
   ///     var rootNode = mySpriteBox.rootNode;
   NodeWithSize get rootNode => _rootNode;
 
+  @override
   void performLayout() {
     size = constraints.biggest;
     _invalidateTransformMatrix();
@@ -189,6 +191,7 @@ class SpriteBox extends RenderBox {
     }
   }
 
+  @override
   void handleEvent(PointerEvent event, _SpriteBoxHitTestEntry entry) {
     if (!attached)
       return;
@@ -238,6 +241,7 @@ class SpriteBox extends RenderBox {
     }
   }
 
+  @override
   bool hitTest(HitTestResult result, { Point position }) {
     result.add(new _SpriteBoxHitTestEntry(this, position));
     return true;
@@ -333,6 +337,7 @@ class SpriteBox extends RenderBox {
     _rootNode._invalidateToBoxTransformMatrix();
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
     canvas.save();

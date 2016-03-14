@@ -28,14 +28,20 @@ const String protocolVersion = '0.1.0';
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({ bool hideCommand: false }) : _hideCommand = hideCommand;
 
+  @override
   final String name = 'daemon';
+
+  @override
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
   final bool _hideCommand;
 
+  @override
   bool get requiresProjectRoot => false;
 
+  @override
   bool get hidden => _hideCommand;
 
+  @override
   Future<int> runInProject() {
     printStatus('Starting device daemon...');
 
@@ -155,6 +161,7 @@ abstract class Domain {
 
   FlutterCommand get command => daemon.daemonCommand;
 
+  @override
   String toString() => name;
 
   void handleCommand(String command, dynamic id, dynamic args) {
@@ -220,6 +227,7 @@ class DaemonDomain extends Domain {
     return new Future<Null>.value();
   }
 
+  @override
   void dispose() {
     _subscription?.cancel();
   }
@@ -371,6 +379,7 @@ class DeviceDomain extends Domain {
     return new Future<Null>.value();
   }
 
+  @override
   void dispose() {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.dispose();
@@ -410,14 +419,17 @@ class NotifyingLogger extends Logger {
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
+  @override
   void printError(String message, [StackTrace stackTrace]) {
     _messageController.add(new LogMessage('error', message, stackTrace));
   }
 
+  @override
   void printStatus(String message) {
     _messageController.add(new LogMessage('status', message));
   }
 
+  @override
   void printTrace(String message) {
     // This is a lot of traffic to send over the wire.
   }

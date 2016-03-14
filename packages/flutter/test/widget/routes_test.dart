@@ -16,6 +16,7 @@ class TestRoute extends Route<String> {
   TestRoute(this.name);
   final String name;
 
+  @override
   List<OverlayEntry> get overlayEntries => _entries;
 
   List<OverlayEntry> _entries = <OverlayEntry>[];
@@ -24,6 +25,7 @@ class TestRoute extends Route<String> {
     results.add('$name: $s');
   }
 
+  @override
   void install(OverlayEntry insertionPoint) {
     log('install');
     OverlayEntry entry = new OverlayEntry(
@@ -35,14 +37,17 @@ class TestRoute extends Route<String> {
     routes.add(this);
   }
 
+  @override
   void didPush() {
     log('didPush');
   }
 
+  @override
   void didReplace(TestRoute oldRoute) {
     log('didReplace ${oldRoute.name}');
   }
 
+  @override
   bool didPop(String result) {
     log('didPop $result');
     bool returnValue;
@@ -51,14 +56,17 @@ class TestRoute extends Route<String> {
     return returnValue;
   }
 
+  @override
   void didPopNext(TestRoute nextRoute) {
     log('didPopNext ${nextRoute.name}');
   }
 
+  @override
   void didChangeNext(TestRoute nextRoute) {
     log('didChangeNext ${nextRoute?.name}');
   }
 
+  @override
   void dispose() {
     log('dispose');
     _entries.forEach((OverlayEntry entry) { entry.remove(); });

@@ -228,8 +228,10 @@ class _AtomValidator extends DoctorValidator {
       : path.join(env['HOME'], '.atom');
   }
 
+  @override
   String get label => 'Atom development environment';
 
+  @override
   ValidationResult validate() {
     Validator atomValidator = new Validator(
       label,
@@ -263,5 +265,6 @@ class _AtomValidator extends DoctorValidator {
     return atomValidator.validate();
   }
 
+  @override
   void diagnose() => validate().print();
 }

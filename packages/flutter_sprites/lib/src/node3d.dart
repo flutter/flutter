@@ -38,6 +38,7 @@ class Node3D extends Node {
     invalidateTransformMatrix();
   }
 
+  @override
   Matrix4 computeTransformMatrix() {
     // Apply normal 2d transforms
     Matrix4 matrix = super.computeTransformMatrix();

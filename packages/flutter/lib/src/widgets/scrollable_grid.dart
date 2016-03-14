@@ -37,11 +37,15 @@ class ScrollableGrid extends Scrollable {
   final GridDelegate delegate;
   final Iterable<Widget> children;
 
+  @override
   ScrollableState createState() => new _ScrollableGridState();
 }
 
 class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
+  @override
   ScrollBehavior<double, double> createScrollBehavior() => new OverscrollBehavior();
+
+  @override
   ExtentScrollBehavior get scrollBehavior => super.scrollBehavior;
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
@@ -54,6 +58,7 @@ class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
     });
   }
 
+  @override
   Widget buildContent(BuildContext context) {
     return new GridViewport(
       startOffset: scrollOffset,
@@ -72,38 +77,50 @@ class GridViewport extends VirtualViewportFromIterable {
     this.children
   });
 
+  @override
   final double startOffset;
   final GridDelegate delegate;
   final ExtentsChangedCallback onExtentsChanged;
+
+  @override
   final Iterable<Widget> children;
 
   // TODO(abarth): Support horizontal grids.
   Axis get mainAxis => Axis.vertical;
 
+  @override
   RenderGrid createRenderObject(BuildContext context) => new RenderGrid(delegate: delegate);
 
+  @override
   _GridViewportElement createElement() => new _GridViewportElement(this);
 }
 
 class _GridViewportElement extends VirtualViewportElement {
   _GridViewportElement(GridViewport widget) : super(widget);
 
+  @override
   GridViewport get widget => super.widget;
 
+  @override
   RenderGrid get renderObject => super.renderObject;
 
+  @override
   int get materializedChildBase => _materializedChildBase;
   int _materializedChildBase;
 
+  @override
   int get materializedChildCount => _materializedChildCount;
   int _materializedChildCount;
 
+  @override
   double get startOffsetBase => _startOffsetBase;
   double _startOffsetBase;
 
+  @override
   double get startOffsetLimit =>_startOffsetLimit;
   double _startOffsetLimit;
 
+  @override
   void updateRenderObject(GridViewport oldWidget) {
     renderObject.delegate = widget.delegate;
     super.updateRenderObject(oldWidget);
@@ -113,6 +130,7 @@ class _GridViewportElement extends VirtualViewportElement {
   double _containerExtent;
   GridSpecification _specification;
 
+  @override
   void layout(BoxConstraints constraints) {
     _specification = renderObject.specification;
     double contentExtent = _specification.gridSize.height;
