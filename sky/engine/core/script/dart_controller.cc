@@ -83,7 +83,8 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
                                          ToDart("_getMainClosure"),
                                          0,
                                          NULL);
-  DART_CHECK_VALID(main_closure);
+  if (LogIfError(main_closure))
+    return true;
 
   // Send the start message containing the entry point by calling
   // _startMainIsolate in dart:isolate.
@@ -122,8 +123,9 @@ void DartController::DidLoadSnapshot() {
   DartApiScope dart_api_scope;
   Dart_Handle library = Dart_RootLibrary();
   if (LogIfError(library))
-    return;
-  SendStartMessage(library);
+    exit(1);
+  if (SendStartMessage(library))
+    exit(1);
 }
 
 void DartController::RunFromPrecompiledSnapshot() {
@@ -143,8 +145,9 @@ void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
   LogIfError(Dart_LoadScriptFromSnapshot(buffer, size));
   Dart_Handle library = Dart_RootLibrary();
   if (LogIfError(library))
-    return;
-  SendStartMessage(library);
+    exit(1);
+  if (SendStartMessage(library))
+    exit(1);
 }
 
 void DartController::RunFromLibrary(const std::string& name,
