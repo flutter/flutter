@@ -547,7 +547,18 @@ class TextPosition {
 ///
 /// A paragraph retains the size and position of each glyph in the text and can
 /// be efficiently resized and painted.
+///
+/// To create a Paragraph object, use a [ParagraphBuilder].
+///
+/// Paragraph objects can be displayed on a [Canvas] using the [paint]
+/// method.
 abstract class Paragraph extends NativeFieldWrapperClass2 {
+  /// Creates an uninitialized Paragraph object.
+  ///
+  /// Calling the Paragraph constructor directly will not create a useable
+  /// object. To create a Paragraph object, use a [ParagraphBuilder].
+  Paragraph(); // (this constructor is here just so we can document it)
+
   /// The minimum amount of horizontal space this paragraph of text is permitted to occupy.
   double get minWidth native "Paragraph_minWidth";
   void set minWidth(double value) native "Paragraph_setMinWidth";
@@ -586,10 +597,12 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// Valid only after [layout] has been called.
   double get maxIntrinsicWidth native "Paragraph_maxIntrinsicWidth";
 
-  /// The distance from the top of the paragraph to the alphabetic baseline of the first line, in logical pixels.
+  /// The distance from the top of the paragraph to the alphabetic
+  /// baseline of the first line, in logical pixels.
   double get alphabeticBaseline native "Paragraph_alphabeticBaseline";
 
-  /// The distance from the top of the paragraph to the ideographic baseline of the first line, in logical pixels.
+  /// The distance from the top of the paragraph to the ideographic
+   /// baseline of the first line, in logical pixels.
   double get ideographicBaseline native "Paragraph_ideographicBaseline";
 
   /// Computes the size and position of each glyph in the paragraph.
@@ -607,19 +620,20 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// Returns a list of text boxes that enclose the given text range.
   List<TextBox> getBoxesForRange(int start, int end) native "Paragraph_getRectsForRange";
 
-  List<int> _getPositionForOffset(Offset offset) native "Paragraph_getPositionForOffset";
-
   /// Returns the text position closest to the given offset.
   TextPosition getPositionForOffset(Offset offset) {
     List<int> encoded = _getPositionForOffset(offset);
     return new TextPosition(offset: encoded[0], affinity: TextAffinity.values[encoded[1]]);
   }
+  List<int> _getPositionForOffset(Offset offset) native "Paragraph_getPositionForOffset";
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
 class ParagraphBuilder extends NativeFieldWrapperClass2 {
-  void _constructor() native "ParagraphBuilder_constructor";
+  /// Creates a [ParagraphBuilder] object, which is used to create a
+  /// [Paragraph].
   ParagraphBuilder() { _constructor(); }
+  void _constructor() native "ParagraphBuilder_constructor";
 
   /// Applies the given style to the added text until [pop] is called.
   ///
