@@ -1165,6 +1165,13 @@ abstract class BuildableElement extends Element {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(() {
       if (_debugBuilding) {
+        if (_debugCurrentBuildTarget == null) {
+          // If _debugCurrentBuildTarget is null, we're not actually building a
+          // widget but instead building the root of the tree via runApp.
+          // TODO(abarth): Remove these cases and ensure that we always have
+          // a current build target when we're building.
+          return true;
+        }
         bool foundTarget = false;
         visitAncestorElements((Element element) {
           if (element == _debugCurrentBuildTarget) {
@@ -1214,17 +1221,12 @@ abstract class BuildableElement extends Element {
       _debugCurrentBuildTarget = this;
      return true;
     });
-    try {
-      performRebuild();
-    } catch (e, stack) {
-      _debugReportException('rebuilding $this', e, stack);
-    } finally {
-      assert(() {
-        assert(_debugCurrentBuildTarget == this);
-        _debugCurrentBuildTarget = debugPreviousBuildTarget;
-        return true;
-      });
-    }
+    performRebuild();
+    assert(() {
+      assert(_debugCurrentBuildTarget == this);
+      _debugCurrentBuildTarget = debugPreviousBuildTarget;
+      return true;
+    });
     assert(!_dirty);
   }
 
@@ -1618,6 +1620,7 @@ abstract class RenderObjectElement extends BuildableElement {
 
   @override
   void performRebuild() {
+    widget.updateRenderObject(this, renderObject);
     _dirty = false;
   }
 
