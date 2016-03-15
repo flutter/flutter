@@ -32,14 +32,17 @@ Future<int> pubGet({
 
   if (!checkLastModified || !pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
     String command = upgrade ? 'upgrade' : 'get';
-    printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}...");
+    printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}... " +
+        (pubSpecLock.existsSync() ? "has lockfile" : "no lockfile"));
     int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command],
+      <String>[sdkBinaryName('pub'), '--verbosity=io', command],
       workingDirectory: directory
     );
     if (code != 0)
       return code;
   }
+
+  printStatus(pubSpecLock.existsSync() ? "Now has lockfile" : "Still no lockfile");
 
   if ((pubSpecLock.existsSync() && pubSpecLock.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())) &&
       (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync())))
