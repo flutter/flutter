@@ -1540,8 +1540,8 @@ class Flexible extends ParentDataWidget<Flex> {
 
 /// A paragraph of rich text.
 ///
-/// This class is rarely used directly. Instead, consider using [Text], which
-/// integrates with [DefaultTextStyle].
+/// Consider using [Text], which integrates with [DefaultTextStyle], rather than
+/// this widget, which requires explicit styling.
 class RichText extends LeafRenderObjectWidget {
   RichText({ Key key, this.text }) : super(key: key) {
     assert(text != null);
