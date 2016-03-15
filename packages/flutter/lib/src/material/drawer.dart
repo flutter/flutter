@@ -122,9 +122,19 @@ class DrawerControllerState extends State<DrawerController> {
 
   AnimationController _controller;
 
-  void _handleTapDown(Point position) {
+  void _handleDragDown(Point position) {
     _controller.stop();
     _ensureHistoryEntry();
+  }
+
+  void _handleDragCancel() {
+    if (_controller.isDismissed || _controller.isAnimating)
+      return;
+    if (_controller.value < 0.5) {
+      close();
+    } else {
+      open();
+    }
   }
 
   double get _width {
@@ -179,8 +189,10 @@ class DrawerControllerState extends State<DrawerController> {
     } else {
       return new GestureDetector(
         key: _gestureDetectorKey,
+        onHorizontalDragDown: _handleDragDown,
         onHorizontalDragUpdate: _move,
         onHorizontalDragEnd: _settle,
+        onHorizontalDragCancel: _handleDragCancel,
         child: new RepaintBoundary(
           child: new Stack(
             children: <Widget>[
@@ -195,16 +207,13 @@ class DrawerControllerState extends State<DrawerController> {
               ),
               new Align(
                 alignment: const FractionalOffset(0.0, 0.5),
-                child: new GestureDetector(
-                  onTapDown: _handleTapDown,
-                  child: new Align(
-                    alignment: const FractionalOffset(1.0, 0.5),
-                    widthFactor: _controller.value,
-                    child: new RepaintBoundary(
-                      child: new Focus(
-                        key: _drawerKey,
-                        child: config.child
-                      )
+                child: new Align(
+                  alignment: const FractionalOffset(1.0, 0.5),
+                  widthFactor: _controller.value,
+                  child: new RepaintBoundary(
+                    child: new Focus(
+                      key: _drawerKey,
+                      child: config.child
                     )
                   )
                 )

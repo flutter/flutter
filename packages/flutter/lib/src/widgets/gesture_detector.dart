@@ -14,15 +14,16 @@ export 'package:flutter/gestures.dart' show
   GestureTapCallback,
   GestureTapCancelCallback,
   GestureLongPressCallback,
+  GestureDragDownCallback,
   GestureDragStartCallback,
   GestureDragUpdateCallback,
   GestureDragEndCallback,
-  GestureDragStartCallback,
-  GestureDragUpdateCallback,
-  GestureDragEndCallback,
+  GestureDragCancelCallback,
+  GesturePanDownCallback,
   GesturePanStartCallback,
   GesturePanUpdateCallback,
   GesturePanEndCallback,
+  GesturePanCancelCallback,
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback,
@@ -49,15 +50,21 @@ class GestureDetector extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
     this.onVerticalDragEnd,
+    this.onVerticalDragCancel,
+    this.onHorizontalDragDown,
     this.onHorizontalDragStart,
     this.onHorizontalDragUpdate,
     this.onHorizontalDragEnd,
+    this.onHorizontalDragCancel,
+    this.onPanDown,
     this.onPanStart,
     this.onPanUpdate,
     this.onPanEnd,
+    this.onPanCancel,
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
@@ -116,6 +123,9 @@ class GestureDetector extends StatelessWidget {
   final GestureLongPressCallback onLongPress;
 
   /// A pointer has contacted the screen and might begin to move vertically.
+  final GestureDragDownCallback onVerticalDragDown;
+
+  /// A pointer has contacted the screen and has begun to move vertically.
   final GestureDragStartCallback onVerticalDragStart;
 
   /// A pointer that is in contact with the screen and moving vertically has
@@ -127,7 +137,14 @@ class GestureDetector extends StatelessWidget {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onVerticalDragEnd;
 
+  /// The pointer that previously triggered the [onVerticalDragDown] did not
+  /// end up moving vertically.
+  final GestureDragCancelCallback onVerticalDragCancel;
+
   /// A pointer has contacted the screen and might begin to move horizontally.
+  final GestureDragDownCallback onHorizontalDragDown;
+
+  /// A pointer has contacted the screen and has begun to move horizontally.
   final GestureDragStartCallback onHorizontalDragStart;
 
   /// A pointer that is in contact with the screen and moving horizontally has
@@ -139,9 +156,15 @@ class GestureDetector extends StatelessWidget {
   /// specific velocity when it stopped contacting the screen.
   final GestureDragEndCallback onHorizontalDragEnd;
 
+  /// The pointer that previously triggered the [onHorizontalDragDown] did not
+  /// end up moving horizontally.
+  final GestureDragCancelCallback onHorizontalDragCancel;
+
+  final GesturePanDownCallback onPanDown;
   final GesturePanStartCallback onPanStart;
   final GesturePanUpdateCallback onPanUpdate;
   final GesturePanEndCallback onPanEnd;
+  final GesturePanCancelCallback onPanCancel;
 
   final GestureScaleStartCallback onScaleStart;
   final GestureScaleUpdateCallback onScaleUpdate;
@@ -185,30 +208,48 @@ class GestureDetector extends StatelessWidget {
       };
     }
 
-    if (onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null) {
+    if (onVerticalDragDown != null ||
+        onVerticalDragStart != null ||
+        onVerticalDragUpdate != null ||
+        onVerticalDragEnd != null ||
+        onVerticalDragCancel != null) {
       gestures[VerticalDragGestureRecognizer] = (VerticalDragGestureRecognizer recognizer) {
         return (recognizer ??= new VerticalDragGestureRecognizer())
+          ..onDown = onVerticalDragDown
           ..onStart = onVerticalDragStart
           ..onUpdate = onVerticalDragUpdate
-          ..onEnd = onVerticalDragEnd;
+          ..onEnd = onVerticalDragEnd
+          ..onCancel = onVerticalDragCancel;
       };
     }
 
-    if (onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null) {
+    if (onHorizontalDragDown != null ||
+        onHorizontalDragStart != null ||
+        onHorizontalDragUpdate != null ||
+        onHorizontalDragEnd != null ||
+        onHorizontalDragCancel != null) {
       gestures[HorizontalDragGestureRecognizer] = (HorizontalDragGestureRecognizer recognizer) {
         return (recognizer ??= new HorizontalDragGestureRecognizer())
+          ..onDown = onHorizontalDragDown
           ..onStart = onHorizontalDragStart
           ..onUpdate = onHorizontalDragUpdate
-          ..onEnd = onHorizontalDragEnd;
+          ..onEnd = onHorizontalDragEnd
+          ..onCancel = onHorizontalDragCancel;
       };
     }
 
-    if (onPanStart != null || onPanUpdate != null || onPanEnd != null) {
+    if (onPanDown != null ||
+        onPanStart != null ||
+        onPanUpdate != null ||
+        onPanEnd != null ||
+        onPanCancel != null) {
       gestures[PanGestureRecognizer] = (PanGestureRecognizer recognizer) {
         return (recognizer ??= new PanGestureRecognizer())
+          ..onDown = onPanDown
           ..onStart = onPanStart
           ..onUpdate = onPanUpdate
-          ..onEnd = onPanEnd;
+          ..onEnd = onPanEnd
+          ..onCancel = onPanCancel;
       };
     }
 

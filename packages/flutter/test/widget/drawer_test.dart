@@ -45,7 +45,6 @@ void main() {
   test('Drawer tap test', () {
     testWidgets((WidgetTester tester) {
       GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-      tester.pumpWidget(new Container()); // throw away the old App and its Navigator
       tester.pumpWidget(
         new MaterialApp(
           routes: <String, WidgetBuilder>{
@@ -78,6 +77,65 @@ void main() {
       expect(tester.findText('drawer'), isNotNull);
       tester.pump(new Duration(seconds: 1)); // animation done
       expect(tester.findText('drawer'), isNull);
+    });
+  });
+
+  test('Drawer drag cancel resume', () {
+    testWidgets((WidgetTester tester) {
+      GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+      tester.pumpWidget(
+        new MaterialApp(
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) {
+              return new Scaffold(
+                key: scaffoldKey,
+                drawer: new Drawer(
+                  child: new Block(
+                    children: <Widget>[
+                      new Text('drawer'),
+                      new Container(
+                        height: 1000.0,
+                        decoration: new BoxDecoration(
+                          backgroundColor: Colors.blue[500]
+                        )
+                      ),
+                    ]
+                  )
+                ),
+                body: new Container()
+              );
+            }
+          }
+        )
+      );
+      expect(tester.findText('drawer'), isNull);
+      scaffoldKey.currentState.openDrawer();
+      tester.pump(); // drawer should be starting to animate in
+      expect(tester.findText('drawer'), isNotNull);
+      tester.pump(new Duration(seconds: 1)); // animation done
+      expect(tester.findText('drawer'), isNotNull);
+
+      tester.tapAt(const Point(750.0, 100.0)); // on the mask
+      tester.pump();
+      tester.pump(new Duration(milliseconds: 10));
+      // drawer should be starting to animate away
+      RenderBox textBox = tester.findText('drawer').renderObject;
+      double textLeft = textBox.localToGlobal(Point.origin).x;
+      expect(textLeft, lessThan(0.0));
+
+      TestGesture gesture = tester.startGesture(new Point(100.0, 100.0));
+      // drawer should be stopped.
+      tester.pump();
+      tester.pump(new Duration(milliseconds: 10));
+      expect(textBox.localToGlobal(Point.origin).x, equals(textLeft));
+
+      gesture.moveBy(new Offset(0.0, -50.0));
+      // drawer should be returning to visible
+      tester.pump();
+      tester.pump(new Duration(seconds: 1));
+      expect(textBox.localToGlobal(Point.origin).x, equals(0.0));
+
+      gesture.up();
     });
   });
 
