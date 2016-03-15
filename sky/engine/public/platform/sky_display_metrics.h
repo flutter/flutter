@@ -11,8 +11,8 @@ namespace blink {
 
 struct SkyDisplayMetrics {
   float device_pixel_ratio = 1.0;
-  int physical_width;
-  int physical_height;
+  int physical_width = 0;
+  int physical_height = 0;
   int physical_padding_top = 0;
   int physical_padding_right = 0;
   int physical_padding_bottom = 0;
