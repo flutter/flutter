@@ -22,7 +22,7 @@ import 'mac.dart';
 const String _xcrunPath = '/usr/bin/xcrun';
 
 /// Test device created by Flutter when no other device is available.
-const String _kFlutterTestDevice = 'flutter.test.device';
+const String _kFlutterTestDeviceSuffix = '(Flutter)';
 
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
@@ -97,7 +97,7 @@ class SimControl {
   }
 
   SimDevice _createTestDevice() {
-    String deviceType = _findSuitableDeviceType();
+    SimDeviceType deviceType = _findSuitableDeviceType();
     if (deviceType == null) {
       return null;
     }
@@ -109,18 +109,19 @@ class SimControl {
 
     // Delete any old test devices
     getDevices()
-      .where((SimDevice d) => d.name == _kFlutterTestDevice)
+      .where((SimDevice d) => d.name.endsWith(_kFlutterTestDeviceSuffix))
       .forEach(_deleteDevice);
 
     // Create new device
-    List<String> args = [_xcrunPath, 'simctl', 'create', _kFlutterTestDevice, deviceType, runtime];
+    String deviceName = '${deviceType.name} $_kFlutterTestDeviceSuffix';
+    List<String> args = [_xcrunPath, 'simctl', 'create', deviceName, deviceType.identifier, runtime];
     printTrace(args.join(' '));
     runCheckedSync(args);
 
-    return getDevices().firstWhere((SimDevice d) => d.name == _kFlutterTestDevice);
+    return getDevices().firstWhere((SimDevice d) => d.name == deviceName);
   }
 
-  String _findSuitableDeviceType() {
+  SimDeviceType _findSuitableDeviceType() {
     List<Map<String, dynamic>> allTypes = _list(SimControlListSection.devicetypes);
     List<Map<String, dynamic>> usableTypes = allTypes
       .where((Map<String, dynamic> info) => info['name'].startsWith('iPhone'))
@@ -136,7 +137,10 @@ class SimControl {
       );
     }
 
-    return usableTypes.first['identifier'];
+    return new SimDeviceType(
+      usableTypes.first['name'],
+      usableTypes.first['identifier']
+    );
   }
 
   String _findSuitableRuntime() {
@@ -298,6 +302,30 @@ class SimControlListSection {
   static const SimControlListSection devicetypes = const SimControlListSection._('devicetypes');
   static const SimControlListSection runtimes = const SimControlListSection._('runtimes');
   static const SimControlListSection pairs = const SimControlListSection._('pairs');
+}
+
+/// A simulated device type.
+///
+/// Simulated device types can be listed using the command
+/// `xcrun simctl list devicetypes`.
+class SimDeviceType {
+  SimDeviceType(this.name, this.identifier);
+
+  /// The name of the device type.
+  ///
+  /// Examples:
+  ///
+  ///     "iPhone 6s"
+  ///     "iPhone 6 Plus"
+  final String name;
+
+  /// The identifier of the device type.
+  ///
+  /// Examples:
+  ///
+  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6s"
+  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6-Plus"
+  final String identifier;
 }
 
 class SimDevice {
