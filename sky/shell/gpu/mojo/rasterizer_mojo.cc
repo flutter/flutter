@@ -60,7 +60,10 @@ void RasterizerMojo::Draw(uint64_t layer_tree_ptr,
   size.width = layer_tree->frame_size().width();
   size.height = layer_tree->frame_size().height();
 
-  // TODO(abarth): Handle size == 0x0.
+  if (size.width <= 0 || size.height <= 0.0) {
+    callback.Run();
+    return;
+  }
 
   std::unique_ptr<mojo::GLTexture> texture =
       gl_state_->gl_texture_recycler.GetTexture(size);
