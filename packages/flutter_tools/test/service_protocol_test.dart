@@ -40,6 +40,11 @@ void main() {
       const Duration(milliseconds: 100), onTimeout: () => 77);
       // Expect the timeout port.
       expect(port, 77);
+      // Get next port future.
+      nextPort = discoverer.nextPort();
+      logReader.addLine(
+          'I/flutter : Observatory listening on http://127.0.0.1:52584');
+      expect(await nextPort, 52584);
     });
   });
 }

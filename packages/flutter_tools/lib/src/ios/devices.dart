@@ -199,7 +199,6 @@ class IOSDevice extends Device {
       return false;
     }
 
-    printTrace('Installation successful.');
     return true;
   }
 

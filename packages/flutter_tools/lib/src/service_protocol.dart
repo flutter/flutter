@@ -29,7 +29,7 @@ class ServiceProtocolDiscovery {
 
   void _onLine(String line) {
     int portNumber = 0;
-    if (line.startsWith('Observatory listening on http://')) {
+    if (line.contains('Observatory listening on http://')) {
       try {
         RegExp portExp = new RegExp(r"\d+.\d+.\d+.\d+:(\d+)");
         String port = portExp.firstMatch(line).group(1);
