@@ -6,7 +6,6 @@ package org.domokit.sky.shell;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +15,6 @@ import android.view.WindowManager;
 
 import org.chromium.base.PathUtils;
 import org.chromium.base.TraceEvent;
-import org.chromium.mojom.sky.AppLifecycleState;
 import org.chromium.mojom.sky.EventType;
 import org.chromium.mojom.sky.InputEvent;
 
@@ -24,7 +22,6 @@ import org.domokit.activity.ActivityImpl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Locale;
 
 
 /**
@@ -97,7 +94,7 @@ public class SkyActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (mView != null) {
-            mView.getEngine().popRoute();
+            mView.popRoute();
             return;
         }
         super.onBackPressed();
@@ -107,7 +104,7 @@ public class SkyActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if (mView != null) {
-            mView.getEngine().onAppLifecycleStateChanged(AppLifecycleState.PAUSED);
+            mView.onPause();
         }
     }
 
@@ -121,7 +118,7 @@ public class SkyActivity extends Activity {
     protected void onPostResume() {
         super.onPostResume();
         if (mView != null) {
-            mView.getEngine().onAppLifecycleStateChanged(AppLifecycleState.RESUMED);
+            mView.onResume();
         }
     }
 
@@ -130,10 +127,6 @@ public class SkyActivity extends Activity {
       */
     protected void onSkyReady() {
         TraceEvent.instant("SkyActivity.onSkyReady");
-
-        Locale locale = getResources().getConfiguration().locale;
-        mView.getEngine().onLocaleChanged(locale.getLanguage(),
-                                          locale.getCountry());
 
         if (loadIntent(getIntent())) {
             return;
@@ -158,18 +151,10 @@ public class SkyActivity extends Activity {
                                 intent.getStringExtra("snapshot"));
             String route = intent.getStringExtra("route");
             if (route != null)
-                mView.getEngine().pushRoute(route);
+                mView.pushRoute(route);
             return true;
         }
 
         return false;
-    }
-
-    public void onConfigurationChanged(Configuration newConfig) {
-    	super.onConfigurationChanged(newConfig);
-
-        Locale locale = getResources().getConfiguration().locale;
-        mView.getEngine().onLocaleChanged(locale.getLanguage(),
-                                          locale.getCountry());
     }
 }
