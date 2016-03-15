@@ -14,13 +14,17 @@ enum DragState {
   accepted
 }
 
+typedef void GestureDragDownCallback(Point globalPosition);
 typedef void GestureDragStartCallback(Point globalPosition);
 typedef void GestureDragUpdateCallback(double delta);
 typedef void GestureDragEndCallback(Velocity velocity);
+typedef void GestureDragCancelCallback();
 
+typedef void GesturePanDownCallback(Point globalPosition);
 typedef void GesturePanStartCallback(Point globalPosition);
 typedef void GesturePanUpdateCallback(Offset delta);
 typedef void GesturePanEndCallback(Velocity velocity);
+typedef void GesturePanCancelCallback();
 
 typedef void _GesturePolymorphicUpdateCallback<T>(T delta);
 
@@ -32,9 +36,11 @@ bool _isFlingGesture(Velocity velocity) {
 }
 
 abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
+  GestureDragDownCallback onDown;
   GestureDragStartCallback onStart;
   _GesturePolymorphicUpdateCallback<T> onUpdate;
   GestureDragEndCallback onEnd;
+  GestureDragCancelCallback onCancel;
 
   DragState _state = DragState.ready;
   Point _initialPosition;
@@ -54,6 +60,8 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
       _state = DragState.possible;
       _initialPosition = event.position;
       _pendingDragDelta = _initialPendingDragDelta;
+      if (onDown != null)
+        onDown(_initialPosition);
     }
   }
 
@@ -91,10 +99,17 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
   }
 
   @override
+  void rejectGesture(int pointer) {
+    ensureNotTrackingPointer(pointer);
+  }
+
+  @override
   void didStopTrackingLastPointer(int pointer) {
     if (_state == DragState.possible) {
       resolve(GestureDisposition.rejected);
       _state = DragState.ready;
+      if (onCancel != null)
+        onCancel();
       return;
     }
     bool wasAccepted = (_state == DragState.accepted);

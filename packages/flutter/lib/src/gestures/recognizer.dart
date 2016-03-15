@@ -99,6 +99,11 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
       didStopTrackingLastPointer(pointer);
   }
 
+  void ensureNotTrackingPointer(int pointer) {
+    if (_trackedPointers.contains(pointer))
+      stopTrackingPointer(pointer);
+  }
+
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
     if (event is PointerUpEvent || event is PointerCancelEvent)
       stopTrackingPointer(event.pointer);

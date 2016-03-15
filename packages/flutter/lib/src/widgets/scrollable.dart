@@ -470,7 +470,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       config.onScroll(_scrollOffset);
   }
 
-  void _handlePointerDown(_) {
+  void _handleDragDown(_) {
     _controller.stop();
   }
 
@@ -527,10 +527,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       key: _gestureDetectorKey,
       gestures: buildGestureDetectors(),
       behavior: HitTestBehavior.opaque,
-      child: new Listener(
-        child: buildContent(context),
-        onPointerDown: _handlePointerDown
-      )
+      child: buildContent(context)
     );
   }
 
@@ -559,6 +556,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
           return <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {
               return (recognizer ??= new VerticalDragGestureRecognizer())
+                ..onDown = _handleDragDown
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd;
@@ -568,6 +566,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
           return <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {
               return (recognizer ??= new HorizontalDragGestureRecognizer())
+                ..onDown = _handleDragDown
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd;
