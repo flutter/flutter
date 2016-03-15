@@ -4,8 +4,12 @@
 
 part of dart_ui;
 
-/// List of predefined filter quality modes. This list comes from Skia's
-/// SkFitlerQuality.h and the values (order) should be kept in sync.
+// List of predefined filter quality modes. This list comes from Skia's
+// SkFilterQuality.h and the values (order) should be kept in sync.
+
+/// Quality levels for image filters.
+///
+/// See [Paint.filterQuality].
 enum FilterQuality {
   none,
   low,

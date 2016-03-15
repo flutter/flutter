@@ -73,8 +73,10 @@ class Path extends NativeFieldWrapperClass2 {
   Path shift(Offset offset) native "Path_shift";
 }
 
-/// Blur styles. These mirror SkBlurStyle and must be kept in sync.
+/// Styles to use for blurs in [MaskFilter] objects.
 enum BlurStyle {
+  // These mirror SkBlurStyle and must be kept in sync.
+
   /// Fuzzy inside and outside.
   normal,
 
@@ -88,24 +90,29 @@ enum BlurStyle {
   inner,
 }
 
-// Convert constructor parameters to the SkBlurMaskFilter::BlurFlags type.
-int _makeBlurFlags(bool ignoreTransform, bool highQuality) {
-  int flags = 0;
-  if (ignoreTransform)
-    flags |= 0x01;
-  if (highQuality)
-    flags |= 0x02;
-  return flags;
-}
-
 class MaskFilter extends NativeFieldWrapperClass2 {
-  MaskFilter.blur(BlurStyle style, double sigma,
-                  {bool ignoreTransform: false, bool highQuality: false}) {
+  MaskFilter.blur(BlurStyle style, double sigma, {
+    bool ignoreTransform: false,
+    bool highQuality: false
+  }) {
     _constructor(style.index, sigma, _makeBlurFlags(ignoreTransform, highQuality));
   }
   void _constructor(int style, double sigma, int flags) native "MaskFilter_constructor";
+
+  // Convert constructor parameters to the SkBlurMaskFilter::BlurFlags type.
+  static int _makeBlurFlags(bool ignoreTransform, bool highQuality) {
+    int flags = 0;
+    if (ignoreTransform)
+      flags |= 0x01;
+    if (highQuality)
+      flags |= 0x02;
+    return flags;
+  }
 }
 
+/// A description of a filter to apply when drawing with a particular [Paint].
+///
+/// See [Paint.colorFilter].
 class ColorFilter extends NativeFieldWrapperClass2 {
   ColorFilter.mode(Color color, TransferMode transferMode) {
     _constructor(color, transferMode);
@@ -113,6 +120,8 @@ class ColorFilter extends NativeFieldWrapperClass2 {
   void _constructor(Color color, TransferMode transferMode) native "ColorFilter_constructor";
 }
 
+/// Base class for objects such as [Gradient] and [ImageShader] which
+/// correspond to shaders.
 abstract class Shader extends NativeFieldWrapperClass2 { }
 
 /// Defines what happens at the edge of the gradient.
@@ -123,12 +132,6 @@ enum TileMode {
   repeated,
   /// Edge is mirrored from last color to first.
   mirror
-}
-
-void _validateColorStops(List<Color> colors, List<double> colorStops) {
-  if (colorStops != null && (colors == null || colors.length != colorStops.length)) {
-    throw new ArgumentError("[colors] and [colorStops] parameters must be equal length.");
-  }
 }
 
 class Gradient extends Shader {
@@ -169,6 +172,11 @@ class Gradient extends Shader {
     _initRadial(center, radius, colors, colorStops, tileMode.index);
   }
   void _initRadial(Point center, double radius, List<Color> colors, List<double> colorStops, int tileMode) native "Gradient_initRadial";
+
+  static void _validateColorStops(List<Color> colors, List<double> colorStops) {
+    if (colorStops != null && (colors == null || colors.length != colorStops.length))
+      throw new ArgumentError("[colors] and [colorStops] parameters must be equal length.");
+  }
 }
 
 class ImageShader extends Shader {
