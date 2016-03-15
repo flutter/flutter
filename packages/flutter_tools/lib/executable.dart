@@ -53,7 +53,7 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CreateCommand())
-    ..addCommand(new DaemonCommand(hideCommand: !verboseHelp))
+    ..addCommand(new DaemonCommand(hidden: !verboseHelp))
     ..addCommand(new DevicesCommand())
     ..addCommand(new DoctorCommand())
     ..addCommand(new DriveCommand())
@@ -62,11 +62,11 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new LogsCommand())
     ..addCommand(new RefreshCommand())
     ..addCommand(new RunCommand())
-    ..addCommand(new RunMojoCommand(hideCommand: !verboseHelp))
+    ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
-    ..addCommand(new UpdatePackagesCommand(hideCommand: !verboseHelp))
+    ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
     ..addCommand(new UpgradeCommand());
 
   return Chain.capture(() async {

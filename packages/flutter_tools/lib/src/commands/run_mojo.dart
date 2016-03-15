@@ -23,9 +23,11 @@ class RunMojoCommand extends FlutterCommand {
 
   @override
   final String description = 'Run a Flutter app in mojo (from github.com/domokit/mojo).';
-  final bool _hideCommand;
 
-  RunMojoCommand({ bool hideCommand: false }) : _hideCommand = hideCommand {
+  @override
+  final bool hidden;
+
+  RunMojoCommand({ this.hidden: false }) {
     argParser.addFlag('android', negatable: false, help: 'Run on an Android device');
     argParser.addFlag('checked', negatable: false, help: 'Run Flutter in checked mode');
     argParser.addFlag('mojo-debug', negatable: false, help: 'Use Debug build of mojo');
@@ -42,9 +44,6 @@ class RunMojoCommand extends FlutterCommand {
 
   @override
   bool get requiresProjectRoot => false;
-
-  @override
-  bool get hidden => _hideCommand;
 
   // TODO(abarth): Why not use path.absolute?
   String _makePathAbsolute(String relativePath) {

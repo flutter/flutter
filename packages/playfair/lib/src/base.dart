@@ -46,6 +46,7 @@ class Chart extends StatelessWidget {
 
   final ChartData data;
 
+  @override
   Widget build(BuildContext context) {
     return new _ChartWrapper(textTheme: Theme.of(context).textTheme, data: data);
   }
@@ -57,8 +58,10 @@ class _ChartWrapper extends LeafRenderObjectWidget {
   final TextTheme textTheme;
   final ChartData data;
 
+  @override
   _RenderChart createRenderObject(BuildContext context) => new _RenderChart(textTheme: textTheme, data: data);
 
+  @override
   void updateRenderObject(BuildContext context, _RenderChart renderObject) {
     renderObject
       ..textTheme = textTheme
@@ -93,6 +96,7 @@ class _RenderChart extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     assert(size.width != null);
     assert(size.height != null);
