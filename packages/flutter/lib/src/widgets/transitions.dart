@@ -186,7 +186,7 @@ class SizeTransition extends AnimatedWidget {
     Key key,
     this.axis: Axis.vertical,
     Animation<double> sizeFactor,
-    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.axisAlignment: 0.5,
     this.child
   }) : sizeFactor = sizeFactor, super(key: key, animation: sizeFactor) {
     assert(axis != null);
@@ -200,13 +200,18 @@ class SizeTransition extends AnimatedWidget {
   /// width or height multiplied by v.
   final Animation<double> sizeFactor;
 
-  /// How to align the child. See the [Align] widget.
-  final FractionalOffset alignment;
+  /// How to align the child along the axis that sizeFactor is modifying.
+  final double axisAlignment;
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    FractionalOffset alignment;
+    if (axis == Axis.vertical)
+      alignment = new FractionalOffset(0.0, axisAlignment);
+    else
+      alignment = new FractionalOffset(axisAlignment, 0.0);
     return new ClipRect(
       child: new Align(
         alignment: alignment,
