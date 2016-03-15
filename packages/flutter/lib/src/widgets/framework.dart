@@ -84,9 +84,21 @@ class ObjectKey extends Key {
 
 typedef void GlobalKeyRemoveListener(GlobalKey key);
 
-/// A GlobalKey is one that must be unique across the entire application. It is
-/// used by widgets that need to communicate with other widgets across the
-/// application's element tree.
+/// A GlobalKey is a [Key] that must be unique across the widget tree.
+///
+/// Global keys uniquely indentify widget subtrees.  The GlobalKey object provides
+/// access to other objects that are associated with the subtree, such as the subtree's
+/// [BuildContext] and, for [StatefulWidget]s, the subtree's [State].
+///
+/// Widgets that have global keys reparent their subtrees when they are moved
+/// from one location in the tree to another location in the tree. In order to
+/// reparent its subtree, a widget must arrive at its new location in the tree
+/// in the same animation frame in which it was removed from its old location in
+/// the tree.
+///
+/// GlobalKeys are relatively expensive. If you don't need any of the features
+/// listed above, consider using a [Key], [ValueKey], [ObjectKey], or
+/// [UniqueKey] instead.
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Constructs a LabeledGlobalKey, which is a GlobalKey with a label used for debugging.
   /// The label is not used for comparing the identity of the key.
