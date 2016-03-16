@@ -37,6 +37,7 @@ export PATH="$DART_SDK_PATH/bin:$PATH"
 
 set +e
 
+"$DART" "--version"
 "$DART" "$SNAPSHOT_PATH" "$@"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
