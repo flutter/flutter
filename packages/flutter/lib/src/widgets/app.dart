@@ -30,21 +30,28 @@ final AssetBundle _defaultBundle = _initDefaultBundle();
 
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
+/// A convenience class that wraps a number of widgets that are commonly
+/// required for an application.
+///
+/// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
+/// [LocaleQuery], [AssetVendor], [Title], [Navigator], [Overlay],
+/// [SemanticsDebugger] (the widgets wrapped by this one).
+///
+/// The [onGenerateRoute] argument is required, and corresponds to
+/// [Navigator.onGenerateRoute].
 class WidgetsApp extends StatefulWidget {
   WidgetsApp({
     Key key,
     this.title,
     this.textStyle,
     this.color,
-    this.routes: const <String, WidgetBuilder>{},
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
-    assert(routes != null);
-    assert(routes.containsKey(Navigator.defaultRouteName) || onGenerateRoute != null);
+    assert(onGenerateRoute != null);
     assert(showPerformanceOverlay != null);
     assert(showSemanticsDebugger != null);
   }
@@ -62,14 +69,8 @@ class WidgetsApp extends StatefulWidget {
   /// application switcher.
   final Color color;
 
-  /// The default table of routes for the application. When the
-  /// [Navigator] is given a named route, the name will be looked up
-  /// in this table first. If the name is not available, then
-  /// [onGenerateRoute] will be called instead.
-  final Map<String, WidgetBuilder> routes;
-
   /// The route generator callback used when the app is navigated to a
-  /// named route but the name is not in the [routes] table.
+  /// named route.
   final RouteFactory onGenerateRoute;
 
   /// Callback that is invoked when the operating system changes the
@@ -179,25 +180,28 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
       ),
       child: new LocaleQuery(
         data: _localeData,
-        child: new DefaultTextStyle(
-          style: config.textStyle,
-          child: new AssetVendor(
-            bundle: _defaultBundle,
-            devicePixelRatio: ui.window.devicePixelRatio,
-            child: new Title(
-              title: config.title,
-              color: config.color,
-              child: new Navigator(
-                key: _navigator,
-                initialRoute: ui.window.defaultRouteName,
-                onGenerateRoute: config.onGenerateRoute,
-                observer: navigatorObserver
-              )
+        child: new AssetVendor(
+          bundle: _defaultBundle,
+          devicePixelRatio: ui.window.devicePixelRatio,
+          child: new Title(
+            title: config.title,
+            color: config.color,
+            child: new Navigator(
+              key: _navigator,
+              initialRoute: ui.window.defaultRouteName,
+              onGenerateRoute: config.onGenerateRoute,
+              observer: navigatorObserver
             )
           )
         )
       )
     );
+    if (config.textStyle != null) {
+      new DefaultTextStyle(
+        style: config.textStyle,
+        child: result
+      );
+    }
     if (config.showPerformanceOverlay) {
       result = new Stack(
         children: <Widget>[
