@@ -13,6 +13,16 @@ export 'package:flutter/shell.dart';
 /// [initInstances()]. The mixin is guaranteed to only be constructed once in
 /// the lifetime of the app (more precisely, it will assert if constructed twice
 /// in checked mode).
+///
+/// The top-most layer used to write the application will have a
+/// concrete class that inherits from BindingBase and uses all the
+/// various BindingBase mixins (such as [Services]). For example, the
+/// Widgets library in flutter introduces a binding called
+/// [WidgetFlutterBinding]. The relevant library defines how to create
+/// the binding. It could be implied (for example,
+/// [WidgetFlutterBinding] is automatically started from [runApp]), or
+/// the application might be required to explicitly call the
+/// constructor.
 abstract class BindingBase {
   BindingBase() {
     assert(!_debugInitialized);

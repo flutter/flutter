@@ -118,6 +118,13 @@ void debugDumpSemanticsTree() {
 
 /// A concrete binding for applications that use the Rendering framework
 /// directly. This is the glue that binds the framework to the Flutter engine.
+///
+/// You would only use this binding if you are writing to the
+/// rendering layer directly. If you are writing to a higher-level
+/// library, such as the Flutter Widgets library, then you would use
+/// that layer's binding.
+///
+/// See also [BindingBase].
 class RenderingFlutterBinding extends BindingBase with Scheduler, Gesturer, Services, Renderer {
   RenderingFlutterBinding({ RenderBox root }) {
     assert(renderView != null);
