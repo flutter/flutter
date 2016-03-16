@@ -69,6 +69,22 @@ TEST_F(WordBreakerTest, softHyphen) {
     EXPECT_EQ(0, breaker.breakBadness());
 }
 
+TEST_F(WordBreakerTest, postfixAndPrefix) {
+    uint16_t buf[] = {'U', 'S', 0x00A2, ' ', 'J', 'P', 0x00A5}; // US¢ JP¥
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+
+    EXPECT_EQ(4, breaker.next());  // after CENT SIGN
+    EXPECT_EQ(0, breaker.wordStart());  // "US¢"
+    EXPECT_EQ(3, breaker.wordEnd());
+
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end of string
+    EXPECT_EQ(4, breaker.wordStart());  // "JP¥"
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.wordEnd());
+}
+
 TEST_F(WordBreakerTest, zwjEmojiSequences) {
     uint16_t buf[] = {
         // man + zwj + heart + zwj + man
