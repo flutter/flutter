@@ -15,7 +15,7 @@ import '../base/os.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
-import 'apk.dart' as apk;
+import 'build_apk.dart' as build_apk;
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -244,7 +244,7 @@ Future<int> startApp(DriveCommand command) async {
 
   if (command.device is AndroidDevice) {
     printTrace('Building an APK.');
-    int result = await apk.build(command.toolchain, command.buildConfigurations,
+    int result = await build_apk.build(command.toolchain, command.buildConfigurations,
       enginePath: command.runner.enginePath, target: command.target);
 
     if (result != 0)

@@ -127,22 +127,19 @@ class _ApkComponents {
 }
 
 class ApkKeystoreInfo {
-  ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, this.keyPassword });
+  ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, this.keyPassword }) {
+    assert(keystore != null);
+  }
 
-  String keystore;
-  String password;
-  String keyAlias;
-  String keyPassword;
+  final String keystore;
+  final String password;
+  final String keyAlias;
+  final String keyPassword;
 }
 
-class ApkCommand extends FlutterCommand {
-  @override
-  final String name = 'apk';
-
-  @override
-  final String description = 'Build an Android APK package.';
-
-  ApkCommand() {
+class BuildApkCommand extends FlutterCommand {
+  BuildApkCommand() {
+    usesTargetOption();
     argParser.addOption('manifest',
         abbr: 'm',
         defaultsTo: _kDefaultAndroidManifestPath,
@@ -157,22 +154,23 @@ class ApkCommand extends FlutterCommand {
         help: 'Output APK file.');
     argParser.addOption('flx',
         abbr: 'f',
-        defaultsTo: '',
         help: 'Path to the FLX file. If this is not provided, an FLX will be built.');
     argParser.addOption('keystore',
-        defaultsTo: '',
         help: 'Path to the keystore used to sign the app.');
     argParser.addOption('keystore-password',
-        defaultsTo: '',
         help: 'Password used to access the keystore.');
     argParser.addOption('keystore-key-alias',
-        defaultsTo: '',
         help: 'Alias of the entry within the keystore.');
     argParser.addOption('keystore-key-password',
-        defaultsTo: '',
         help: 'Password for the entry within the keystore.');
-    addTargetOption();
+    usesPubOption();
   }
+
+  @override
+  final String name = 'apk';
+
+  @override
+  final String description = 'Build an Android APK file from your app.';
 
   @override
   Future<int> runInProject() async {
@@ -199,7 +197,7 @@ class ApkCommand extends FlutterCommand {
       outputFile: argResults['output-file'],
       target: argResults['target'],
       flxPath: argResults['flx'],
-      keystore: argResults['keystore'].isEmpty ? null : new ApkKeystoreInfo(
+      keystore: (argResults['keystore'] ?? '').isEmpty ? null : new ApkKeystoreInfo(
         keystore: argResults['keystore'],
         password: argResults['keystore-password'],
         keyAlias: argResults['keystore-key-alias'],
@@ -324,13 +322,13 @@ int _signApk(
     keyPassword = _kDebugKeystorePassword;
   } else {
     keystore = new File(keystoreInfo.keystore);
-    keystorePassword = keystoreInfo.password;
-    keyAlias = keystoreInfo.keyAlias;
+    keystorePassword = keystoreInfo.password ?? '';
+    keyAlias = keystoreInfo.keyAlias ?? '';
     if (keystorePassword.isEmpty || keyAlias.isEmpty) {
       printError('Must provide a keystore password and a key alias.');
       return 1;
     }
-    keyPassword = keystoreInfo.keyPassword;
+    keyPassword = keystoreInfo.keyPassword ?? '';
     if (keyPassword.isEmpty)
       keyPassword = keystorePassword;
   }
@@ -375,7 +373,7 @@ Future<int> buildAndroid({
   String resources: _kDefaultResourcesPath,
   String outputFile: _kDefaultOutputPath,
   String target: '',
-  String flxPath: '',
+  String flxPath,
   ApkKeystoreInfo keystore
 }) async {
   // Validate that we can find an android sdk.
@@ -405,7 +403,7 @@ Future<int> buildAndroid({
 
   printStatus('Building APK...');
 
-  if (flxPath.isNotEmpty) {
+  if (flxPath != null && flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
       printError('FLX does not exist: $flxPath');
       printError('(Omit the --flx option to build the FLX automatically)');

@@ -101,5 +101,5 @@ void applyMocksToCommand(FlutterCommand command) {
   command
     ..applicationPackages = new MockApplicationPackageStore()
     ..toolchain = new MockToolchain()
-    ..projectRootValidator = () => true;
+    ..commandValidator = () => true;
 }

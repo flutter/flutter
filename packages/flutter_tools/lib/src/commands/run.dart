@@ -15,7 +15,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../toolchain.dart';
-import 'apk.dart';
+import 'build_apk.dart';
 import 'install.dart';
 
 /// Given the value of the --target option, return the path of the Dart file
@@ -43,7 +43,7 @@ abstract class RunCommandBase extends FlutterCommand {
         help: 'Start tracing during startup.');
     argParser.addOption('route',
         help: 'Which route to load when starting the app.');
-    addTargetOption();
+    usesTargetOption();
   }
 
   bool get checked => argResults['checked'];
@@ -73,12 +73,10 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
-    argParser.addFlag('pub',
-        defaultsTo: true,
-        help: 'Whether to run "pub get" before running the app.');
     argParser.addOption('debug-port',
         defaultsTo: observatoryDefaultPort.toString(),
         help: 'Listen to the given port for a debug connection.');
+    usesPubOption();
   }
 
   @override
