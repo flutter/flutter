@@ -38,14 +38,22 @@ void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
 
 /// A complex, one-dimensional subset of a plane.
 ///
-/// A path consists of a number of segments of various types, such as lines,
-/// arcs, or beziers. Paths can be open or closed and can self-intersect. A path
-/// also encloses a (possibly discontiguous) region of the plane based on
-/// whether a line from a given point on the plane to a point at infinity
-/// intersects the path an even (non-enclosed) or an odd (enclosed) number of
-/// times.
+/// A path consists of a number of subpaths, and a _current point_.
 ///
-/// Paths can be drawn on canvases using [Canvas.drapPath], and can
+/// Subpaths consist of segments of various types, such as lines,
+/// arcs, or beziers. Subpaths can be open or closed, and can
+/// self-intersect.
+///
+/// Closed subpaths enclose a (possibly discontiguous) region of the
+/// plane based on whether a line from a given point on the plane to a
+/// point at infinity intersects the path an even (non-enclosed) or an
+/// odd (enclosed) number of times.
+///
+/// The _current point_ is initially at the origin. After each
+/// operation adding a segment to a subpath, the current point is
+/// updated to the end of that segment.
+///
+/// Paths can be drawn on canvases using [Canvas.drawPath], and can
 /// used to create clip regions using [Canvas.clipPath].
 class Path extends NativeFieldWrapperClass2 {
 
@@ -53,23 +61,109 @@ class Path extends NativeFieldWrapperClass2 {
   Path() { _constructor(); }
   void _constructor() native "Path_constructor";
 
+  /// Starts a new subpath at the given coordinate.
   void moveTo(double x, double y) native "Path_moveTo";
+
+  /// Starts a new subpath at the given offset from the current point.
   void relativeMoveTo(double dx, double dy) native "Path_relativeMoveTo";
+
+  /// Adds a straight line segment from the current point to the given
+  /// point.
   void lineTo(double x, double y) native "Path_lineTo";
+
+  /// Adds a straight line segment from the current point to the point
+  /// at the given offset from the current point.
   void relativeLineTo(double dx, double dy) native "Path_relativeLineTo";
+
+  /// Adds a quadratic bezier segment that curves from the current
+  /// point to the given point (x2,y2), using the control point
+  /// (x1,y1).
   void quadraticBezierTo(double x1, double y1, double x2, double y2) native "Path_quadraticBezierTo";
+
+  /// Adds a quadratic bezier segment that curves from the current
+  /// point to the point at the offset (x2,y2) from the current point,
+  /// using the control point at the offset (x1,y1) from the current
+  /// point.
   void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2) native "Path_relativeQuadraticBezierTo";
+
+  /// Adds a cubic bezier segment that curves from the current point
+  /// to the given point (x3,y3), using the control points (x1,y1) and
+  /// (x2,y2).
   void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native "Path_cubicTo";
+
+  /// Adds a cubcic bezier segment that curves from the current point
+  /// to the point at the offset (x3,y3) from the current point, using
+  /// the control points at the offsets (x1,y1) and (x2,y2) from the
+  /// current point.
   void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native "Path_relativeCubicTo";
+
+  /// Adds a bezier segment that curves from the current point to the
+  /// given point (x2,y2), using the control points (x1,y1) and the
+  /// weight w. If the weight is greater than 1, then the curve is a
+  /// hyperbola; if the weight equals 1, it's a parabola; and if it is
+  /// less than 1, it is an ellipse.
   void conicTo(double x1, double y1, double x2, double y2, double w) native "Path_conicTo";
+
+  /// Adds a bezier segment that curves from the current point to the
+  /// point at the offset (x2,y2) from the current point, using the
+  /// control point at the offset (x1,y1) from the current point and
+  /// the weight w. If the weight is greater than 1, then the curve is
+  /// a hyperbola; if the weight equals 1, it's a parabola; and if it
+  /// is less than 1, it is an ellipse.
   void relativeConicTo(double x1, double y1, double x2, double y2, double w) native "Path_relativeConicTo";
+
+  /// If the [forceMoveTo] argument is false, adds a straight line
+  /// segment and an arc segment.
+  ///
+  /// If the [forceMoveTo] argument is true, starts a new subpath
+  /// consisting of an arc segment.
+  ///
+  /// In either case, the arc segment consists of the arc that follows
+  /// the edge of the oval bounded by the given rectangle, from
+  /// startAngle radians around the oval up to startAngle + sweepAngle
+  /// radians around the oval, with zero radians being the point on
+  /// the right hand side of the oval that crosses the horizontal line
+  /// that intersects the center of the rectangle and with positive
+  /// angles going clockwise around the oval.
+  ///
+  /// The line segment added if [forceMoveTo] is false starts at the
+  /// current point and ends at the start of the arc.
   void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) native "Path_arcTo";
+
+  /// Adds a new subpath that consists of four lines that outline the
+  /// given rectangle.
   void addRect(Rect rect) native "Path_addRect";
+
+  /// Adds a new subpath that consists of a curve that forms the
+  /// ellipse that fills the given rectangle.
   void addOval(Rect oval) native "Path_addOval";
+
+  /// Adds a new subpath with one arc segment that consists of the arc
+  /// that follows the edge of the oval bounded by the given
+  /// rectangle, from startAngle radians around the oval up to
+  /// startAngle + sweepAngle radians around the oval, with zero
+  /// radians being the point on the right hand side of the oval that
+  /// crosses the horizontal line that intersects the center of the
+  /// rectangle and with positive angles going clockwise around the
+  /// oval.
   void addArc(Rect oval, double startAngle, double sweepAngle) native "Path_addArc";
+
+  /// Adds a new subpath that consists of the straight lines and
+  /// curves needed to form the rounded rectangle described by the
+  /// argument.
   void addRRect(RRect rrect) native "Path_addRRect";
+
+  /// Closes the last subpath, as if a straight line had been drawn
+  /// from the current point to the first point of the subpath.
   void close() native "Path_close";
+
+  /// Clears the [Path] object of all subpaths, returning it to the
+  /// same state it had when it was created. The _current point_ is
+  /// reset to the origin.
   void reset() native "Path_reset";
+
+  /// Returns a copy of the path with all the segments of every
+  /// subpath translated by the given offset.
   Path shift(Offset offset) native "Path_shift";
 }
 
