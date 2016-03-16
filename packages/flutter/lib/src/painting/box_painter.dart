@@ -244,12 +244,6 @@ class BoxShadow {
   String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
 }
 
-// TODO(ianh): We should probably expose something that does this on Rect.
-// https://github.com/flutter/flutter/issues/2318
-Point _offsetToPoint(Offset offset, Rect rect) {
-  return new Point(rect.left + offset.dx * rect.width, rect.top + offset.dy * rect.height);
-}
-
 /// A 2D gradient.
 abstract class Gradient {
   const Gradient();
@@ -259,8 +253,8 @@ abstract class Gradient {
 /// A 2D linear gradient.
 class LinearGradient extends Gradient {
   const LinearGradient({
-    this.begin: const Offset(0.0, 0.5),
-    this.end: const Offset(1.0, 0.5),
+    this.begin: const FractionalOffset(0.0, 0.5),
+    this.end: const FractionalOffset(1.0, 0.5),
     this.colors,
     this.stops,
     this.tileMode: TileMode.clamp
@@ -272,7 +266,7 @@ class LinearGradient extends Gradient {
   ///
   /// For example, a begin offset of (0.0,0.5) is half way down the
   /// left side of the box.
-  final Offset begin;
+  final FractionalOffset begin;
 
   /// The offset from coordinate (0.0,0.0) at which stop 1.0 of the
   /// gradient is placed, in a coordinate space that maps the top left
@@ -280,7 +274,7 @@ class LinearGradient extends Gradient {
   ///
   /// For example, an end offset of (1.0,0.5) is half way down the
   /// right side of the box.
-  final Offset end;
+  final FractionalOffset end;
 
   /// The colors the gradient should obtain at each of the stops.
   ///
@@ -299,7 +293,7 @@ class LinearGradient extends Gradient {
   @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.linear(
-      <Point>[_offsetToPoint(begin, rect), _offsetToPoint(end, rect)],
+      <Point>[begin.withinRect(rect), end.withinRect(rect)],
       colors, stops, tileMode
     );
   }
@@ -348,7 +342,7 @@ class LinearGradient extends Gradient {
 /// A 2D radial gradient.
 class RadialGradient extends Gradient {
   const RadialGradient({
-    this.center: const Offset(0.5, 0.5),
+    this.center: const FractionalOffset(0.5, 0.5),
     this.radius: 0.5,
     this.colors,
     this.stops,
@@ -360,7 +354,7 @@ class RadialGradient extends Gradient {
   ///
   /// For example, an offset of (0.5,0.5) will place the radial
   /// gradient in the center of the box.
-  final Offset center;
+  final FractionalOffset center;
 
   /// The radius of the gradient, as a fraction of the shortest side
   /// of the paint box.
@@ -389,7 +383,7 @@ class RadialGradient extends Gradient {
   @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.radial(
-      _offsetToPoint(center, rect),
+      center.withinRect(rect),
       radius * rect.shortestSide,
       colors, stops, tileMode
     );
@@ -644,6 +638,9 @@ class FractionalOffset {
   }
   Offset alongSize(Size other) {
     return new Offset(dx * other.width, dy * other.height);
+  }
+  Point withinRect(Rect rect) {
+    return new Point(rect.left + dx * rect.width, rect.top + dy * rect.height);
   }
 
   @override

@@ -285,8 +285,8 @@ class GradientNode extends NodeWithSize {
 
     Rect rect = Point.origin & size;
     Paint gradientPaint = new Paint()..shader = new LinearGradient(
-      begin: const Offset(0.0, 0.0),
-      end: const Offset(0.0, 1.0),
+      begin: const FractionalOffset(0.0, 0.0),
+      end: const FractionalOffset(0.0, 1.0),
       colors: <Color>[colorTop, colorBottom],
       stops: <double>[0.0, 1.0]
     ).createShader(rect);
