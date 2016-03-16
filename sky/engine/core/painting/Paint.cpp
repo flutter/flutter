@@ -22,17 +22,18 @@
 namespace blink {
 namespace {
 
+// Must match Paint._value getter in Paint.dart.
 enum PaintFields {
+  kStyle,
   kStrokeWidth,
+  kStrokeCap,
   kIsAntiAlias,
   kColor,
-  kColorFilter,
-  kFilterQuality,
-  kMaskFilter,
-  kShader,
-  kStyle,
   kTransferMode,
-  kStrokeCap,
+  kColorFilter,
+  kMaskFilter,
+  kFilterQuality,
+  kShader,
 
   // kNumberOfPaintFields must be last.
   kNumberOfPaintFields,
@@ -73,26 +74,27 @@ Paint DartConverter<Paint>::FromDart(Dart_Handle dart_paint) {
   }
 
   SkPaint& paint = result.sk_paint;
+
+  if (!Dart_IsNull(values[kStyle]))
+    paint.setStyle(DartConverter<PaintingStyle>::FromDart(values[kStyle]));
   if (!Dart_IsNull(values[kStrokeWidth]))
     paint.setStrokeWidth(DartConverter<SkScalar>::FromDart(values[kStrokeWidth]));
+  if (!Dart_IsNull(values[kStrokeCap]))
+    paint.setStrokeCap(DartConverter<StrokeCap>::FromDart(values[kStrokeCap]));
   if (!Dart_IsNull(values[kIsAntiAlias]))
     paint.setAntiAlias(DartConverter<bool>::FromDart(values[kIsAntiAlias]));
   if (!Dart_IsNull(values[kColor]))
     paint.setColor(DartConverter<CanvasColor>::FromDart(values[kColor]));
-  if (!Dart_IsNull(values[kColorFilter]))
-    paint.setColorFilter(DartConverter<ColorFilter*>::FromDart(values[kColorFilter])->filter());
-  if (!Dart_IsNull(values[kFilterQuality]))
-    paint.setFilterQuality(DartConverter<FilterQuality>::FromDart(values[kFilterQuality]));
-  if (!Dart_IsNull(values[kMaskFilter]))
-    paint.setMaskFilter(DartConverter<MaskFilter*>::FromDart(values[kMaskFilter])->filter());
-  if (!Dart_IsNull(values[kShader]))
-    paint.setShader(DartConverter<Shader*>::FromDart(values[kShader])->shader());
-  if (!Dart_IsNull(values[kStyle]))
-    paint.setStyle(DartConverter<PaintingStyle>::FromDart(values[kStyle]));
   if (!Dart_IsNull(values[kTransferMode]))
     paint.setXfermodeMode(DartConverter<TransferMode>::FromDart(values[kTransferMode]));
-  if (!Dart_IsNull(values[kStrokeCap]))
-    paint.setStrokeCap(DartConverter<StrokeCap>::FromDart(values[kStrokeCap]));
+  if (!Dart_IsNull(values[kColorFilter]))
+    paint.setColorFilter(DartConverter<ColorFilter*>::FromDart(values[kColorFilter])->filter());
+  if (!Dart_IsNull(values[kMaskFilter]))
+    paint.setMaskFilter(DartConverter<MaskFilter*>::FromDart(values[kMaskFilter])->filter());
+  if (!Dart_IsNull(values[kFilterQuality]))
+    paint.setFilterQuality(DartConverter<FilterQuality>::FromDart(values[kFilterQuality]));
+  if (!Dart_IsNull(values[kShader]))
+    paint.setShader(DartConverter<Shader*>::FromDart(values[kShader])->shader());
 
   result.is_null = false;
   return result;
