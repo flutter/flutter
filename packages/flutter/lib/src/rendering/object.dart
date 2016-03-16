@@ -662,8 +662,27 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 
 /// An object in the render tree.
 ///
-/// Render objects have a reference to their parent but do not commit to a model
-/// for their children.
+/// The [RenderObject] class hierarchy is the core of the rendering
+/// library's reason for being.
+///
+/// [RenderObject]s have a [parent], and have a slot called
+/// [parentData] in which the parent [RenderObject] can store
+/// child-specific data, for example, the child position. The
+/// [RenderObject] class also implements the basic layout and paint
+/// protocols.
+///
+/// The [RenderObject] class, however, does not define a child model
+/// (e.g. whether a node has zero, one, or more children). It also
+/// doesn't define a coordinate system (e.g. whether children are
+/// positioned in cartesian coordinates, in polar coordinates, etc) or
+/// a specific layout protocol (e.g. whether the layout is
+/// width-in-height-out, or constraint-in-size-out, or whether the
+/// parent sets the size and position of the child before or after the
+/// child lays out, etc; or indeed whether the children are allowed to
+/// read their parent's [parentData] slot).
+///
+/// The [RenderBox] subclass introduces the opinion that the layout
+/// system uses cartesian coordinates.
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   RenderObject() {
