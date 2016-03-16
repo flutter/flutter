@@ -14,7 +14,7 @@ abstract class Simulation {
   double x(double time);
 
   /// The current velocity of the object in the simulation
-  double dx(double time); // TODO(ianh): remove this; see https://github.com/flutter/flutter/issues/2092
+  double dx(double time);
 
   /// Returns if the simulation is done at a given time
   bool isDone(double time);

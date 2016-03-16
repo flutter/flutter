@@ -45,7 +45,7 @@ class ScrollSimulation extends SimulationGroup {
     if (_spring == null && (position > _trailingExtent || position < _leadingExtent))
       return false;
 
-    /// This simulation can only step forward.
+    // This simulation can only step forward.
     if (!_isSpringing) {
       if (position > _trailingExtent) {
         _isSpringing = true;
