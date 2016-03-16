@@ -10,17 +10,18 @@ import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-Future<int> _runPub(Directory directory, { bool upgrade: false }) async {
-  int updateCount = 0;
+List<Future<Null>> _runPub(Directory directory, { bool upgrade: false, bool offline: false }) {
+  List<Future<Null>> result = <Future<Null>>[];
   for (FileSystemEntity dir in directory.listSync()) {
     if (dir is Directory && FileSystemEntity.isFileSync(dir.path + Platform.pathSeparator + 'pubspec.yaml')) {
-      updateCount++;
-      // TODO(eseidel): Should this fail immediately if pubGet fails?
-      // Currently we're ignoring the return code.
-      await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
+      result.add(pubGet(directory: dir.path, upgrade: upgrade, offline: offline, checkLastModified: false).then/*<Null>*/((int result) {
+        if (result != 0)
+          throw 'pub failed with exit code $result in ${dir.path}';
+        return null;
+      }));
     }
   }
-  return updateCount;
+  return result;
 }
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -28,6 +29,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     argParser.addFlag(
       'upgrade',
       help: 'Run "pub upgrade" rather than "pub get".',
+      defaultsTo: false
+    );
+    argParser.addFlag(
+      'offline',
+      help: 'Pass --offline to pub, forcing it to use cached packages instead of accessing the network.',
       defaultsTo: false
     );
   }
@@ -47,11 +53,14 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   Future<int> runInProject() async {
     Stopwatch timer = new Stopwatch()..start();
-    int count = 0;
     bool upgrade = argResults['upgrade'];
-    count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/packages"), upgrade: upgrade);
-    count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/examples"), upgrade: upgrade);
-    count += await _runPub(new Directory("${ArtifactStore.flutterRoot}/dev"), upgrade: upgrade);
+    bool offline = argResults['offline'];
+    List<Future<Null>> processes = <Future<Null>>[];
+    processes.addAll(_runPub(new Directory("${ArtifactStore.flutterRoot}/packages"), upgrade: upgrade, offline: offline));
+    processes.addAll(_runPub(new Directory("${ArtifactStore.flutterRoot}/examples"), upgrade: upgrade, offline: offline));
+    processes.addAll(_runPub(new Directory("${ArtifactStore.flutterRoot}/dev"), upgrade: upgrade, offline: offline));
+    printTrace('Waiting for pub...');
+    int count = (await Future.wait(processes, eagerError: true)).length;
     printStatus('Ran "pub" $count time${count == 1 ? "" : "s"} in ${timer.elapsedMilliseconds} ms');
     return 0;
   }
