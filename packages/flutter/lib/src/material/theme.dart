@@ -54,7 +54,7 @@ class ThemeDataTween extends Tween<ThemeData> {
 
 /// Animated version of [Theme] which automatically transitions the colours,
 /// etc, over a given duration whenever the given theme changes.
-class AnimatedTheme extends AnimatedWidgetBase {
+class AnimatedTheme extends ImplicitlyAnimatedWidget {
   AnimatedTheme({
     Key key,
     this.data,

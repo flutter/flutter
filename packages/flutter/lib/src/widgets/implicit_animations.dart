@@ -56,8 +56,8 @@ class Matrix4Tween extends Tween<Matrix4> {
 
 /// An abstract widget for building widgets that gradually change their
 /// values over a period of time.
-abstract class AnimatedWidgetBase extends StatefulWidget {
-  AnimatedWidgetBase({
+abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
+  ImplicitlyAnimatedWidget({
     Key key,
     this.curve: Curves.linear,
     this.duration
@@ -73,7 +73,7 @@ abstract class AnimatedWidgetBase extends StatefulWidget {
   final Duration duration;
 
   @override
-  AnimatedWidgetBaseState<AnimatedWidgetBase> createState();
+  AnimatedWidgetBaseState<ImplicitlyAnimatedWidget> createState();
 
   @override
   void debugFillDescription(List<String> description) {
@@ -89,7 +89,7 @@ typedef Tween<T> TweenConstructor<T>(T targetValue);
 typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for widgets with implicit animations.
-abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends State<T> {
+abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> {
   AnimationController _controller;
 
   /// The animation driving this widget's implicit animations.
@@ -191,7 +191,7 @@ abstract class AnimatedWidgetBaseState<T extends AnimatedWidgetBase> extends Sta
 /// different parameters to [Container]. For more complex animations, you'll
 /// likely want to use a subclass of [Transition] or use an
 /// [AnimationController] yourself.
-class AnimatedContainer extends AnimatedWidgetBase {
+class AnimatedContainer extends ImplicitlyAnimatedWidget {
   AnimatedContainer({
     Key key,
     this.child,
@@ -327,7 +327,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// position over a given duration whenever the given position changes.
 ///
 /// Only works if it's the child of a [Stack].
-class AnimatedPositioned extends AnimatedWidgetBase {
+class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   AnimatedPositioned({
     Key key,
     this.child,
