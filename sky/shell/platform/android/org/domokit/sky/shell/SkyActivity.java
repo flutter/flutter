@@ -132,7 +132,7 @@ public class SkyActivity extends Activity {
             return;
         }
         File dataDir = new File(PathUtils.getDataDirectory(this));
-        File appBundle = new File(dataDir, SkyApplication.APP_BUNDLE);
+        File appBundle = new File(dataDir, SkyMain.APP_BUNDLE);
         if (appBundle.exists()) {
             mView.runFromBundle(appBundle.getPath(), null);
             return;
