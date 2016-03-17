@@ -36,8 +36,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, ideographicBaseline) \
   V(Paragraph, layout) \
   V(Paragraph, getRectsForRange) \
-  V(Paragraph, getPositionForOffset) \
-  V(Paragraph, paint)
+  V(Paragraph, getPositionForOffset)
 
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
