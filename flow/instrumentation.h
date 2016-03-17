@@ -13,6 +13,8 @@
 namespace flow {
 namespace instrumentation {
 
+static const double kOneFrameMS = 1e3 / 60.0;
+
 class Stopwatch {
  public:
   class ScopedLap {
@@ -36,6 +38,8 @@ class Stopwatch {
 
   base::TimeDelta currentLap() const { return base::TimeTicks::Now() - _start; }
 
+  base::TimeDelta maxDelta() const;
+
   void visualize(SkCanvas& canvas, const SkRect& rect) const;
 
   void start();
@@ -48,8 +52,6 @@ class Stopwatch {
   base::TimeTicks _start;
   std::vector<base::TimeDelta> _laps;
   size_t _current_sample;
-
-  base::TimeDelta maxDelta() const;
 
   DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };

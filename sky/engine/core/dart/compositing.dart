@@ -104,10 +104,10 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// controls where the statistics are displayed.
   ///
   /// enabledOptions is a bit field with the following bits defined:
-  /// * 0x01: displayRasterizerStatistics - show GPU thread frame time
-  /// * 0x02: visualizeRasterizerStatistics - graph GPU thread frame times
-  /// * 0x04: displayEngineStatistics - show UI thread frame time
-  /// * 0x08: visualizeEngineStatistics - graph UI thread frame times
+  ///  - 0x01: displayRasterizerStatistics - show GPU thread frame time
+  ///  - 0x02: visualizeRasterizerStatistics - graph GPU thread frame times
+  ///  - 0x04: displayEngineStatistics - show UI thread frame time
+  ///  - 0x08: visualizeEngineStatistics - graph UI thread frame times
   /// Set enabledOptions to 0x0F to enable all the currently defined features.
   ///
   /// The "UI thread" is the thread that includes all the execution of

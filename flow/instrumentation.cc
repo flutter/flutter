@@ -13,7 +13,6 @@ namespace instrumentation {
 
 static const size_t kMaxSamples = 120;
 static const size_t kMaxFrameMarkers = 8;
-static const double kOneFrameMS = 1e3 / 60.0;
 
 Stopwatch::Stopwatch() : _start(base::TimeTicks::Now()), _current_sample(0) {
   const base::TimeDelta delta;
@@ -42,6 +41,13 @@ static inline constexpr double UnitFrameInterval(double frameTimeMS) {
   return frameTimeMS * 60.0 * 1e-3;
 }
 
+static inline double UnitHeight(double frameTimeMS, double maxUnitInterval) {
+  double unitHeight = UnitFrameInterval(frameTimeMS) / maxUnitInterval;
+  if (unitHeight > 1.0)
+    unitHeight = 1.0;
+  return unitHeight;
+}
+
 base::TimeDelta Stopwatch::maxDelta() const {
   base::TimeDelta maxDelta;
   for (size_t i = 0; i < kMaxSamples; i++) {
@@ -55,52 +61,53 @@ base::TimeDelta Stopwatch::maxDelta() const {
 void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
   SkPaint paint;
 
-  // Paint the background
-  paint.setColor(0xAAFFFFFF);
+  // Paint the background.
+  paint.setColor(0x99FFFFFF);
   canvas.drawRect(rect, paint);
 
-  // Paint the graph
-  SkPath path;
+  // Establish the graph position.
+  const SkScalar x = rect.x();
+  const SkScalar y = rect.y();
   const SkScalar width = rect.width();
   const SkScalar height = rect.height();
+  const SkScalar bottom = y + height;
+  const SkScalar right = x + width;
 
-  // Find the max delta. We use this to scale the graph
-
-  double maxInterval = maxDelta().InMillisecondsF();
-
-  if (maxInterval < kOneFrameMS) {
-    maxInterval = kOneFrameMS;
-  } else {
-    maxInterval =
-        kOneFrameMS * (static_cast<size_t>(maxInterval / kOneFrameMS) + 1);
-  }
-
+  // Scale the graph to show frame times up to those that are 4 times the frame time.
+  const double maxInterval = kOneFrameMS * 3.0;
   const double maxUnitInterval = UnitFrameInterval(maxInterval);
 
-  // Draw the path
-  double unitHeight =
-      UnitFrameInterval(_laps[0].InMillisecondsF()) / maxUnitInterval;
-
-  path.moveTo(0, height);
-  path.lineTo(0, height * (1.0 - unitHeight));
-
-  for (size_t i = 0; i < kMaxSamples; i++) {
-    double unitWidth = (static_cast<double>(i + 1) / kMaxSamples);
-    unitHeight =
-        UnitFrameInterval(_laps[i].InMillisecondsF()) / maxUnitInterval;
-    path.lineTo(width * unitWidth, height * (1.0 - unitHeight));
+  // Prepare a path for the data.
+  // we start at the height of the last point, so it looks like we wrap around
+  SkPath path;
+  const double sampleMarginUnitWidth = (1.0 / kMaxSamples) / 6.0;
+  const double sampleMarginWidth = width * sampleMarginUnitWidth;
+  path.moveTo(x, bottom);
+  path.lineTo(x, y + height * (1.0 - UnitHeight(_laps[0].InMillisecondsF(),
+                                                maxUnitInterval)));
+  double unitX;
+  double unitNextX = 0.0;
+  for (size_t i = 0; i < kMaxSamples; i += 1) {
+    unitX = unitNextX;
+    unitNextX = (static_cast<double>(i + 1) / kMaxSamples);
+    const double sampleY = y + height * (1.0 - UnitHeight(_laps[i].InMillisecondsF(),
+                                                          maxUnitInterval));
+    path.lineTo(x + width * unitX + sampleMarginWidth, sampleY);
+    path.lineTo(x + width * unitNextX - sampleMarginWidth, sampleY);
   }
-
-  path.lineTo(width, height);
-
+  path.lineTo(right, y + height * (1.0 - UnitHeight(_laps[kMaxSamples - 1].InMillisecondsF(),
+                                                    maxUnitInterval)));
+  path.lineTo(right, bottom);
   path.close();
 
+  // Draw the graph.
   paint.setColor(0xAA0000FF);
   canvas.drawPath(path, paint);
 
-  paint.setStrokeWidth(1);
+  // Draw horizontal markers.
+  paint.setStrokeWidth(0); // hairline
   paint.setStyle(SkPaint::Style::kStroke_Style);
-  paint.setColor(0xAAFFFFFF);
+  paint.setColor(0xCC000000);
 
   if (maxInterval > kOneFrameMS) {
     // Paint the horizontal markers
@@ -116,11 +123,12 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
       const double frameHeight =
           height * (1.0 - (UnitFrameInterval((frameIndex + 1) * kOneFrameMS) /
                            maxUnitInterval));
-      canvas.drawLine(0, frameHeight, width, frameHeight, paint);
+      canvas.drawLine(x, y + frameHeight, right, y + frameHeight, paint);
     }
   }
 
-  // Paint the vertical marker
+  // Paint the vertical marker for the last frame.
+  paint.setStyle(SkPaint::Style::kFill_Style);
   if (UnitFrameInterval(lastLap().InMillisecondsF()) > 1.0) {
     // budget exceeded
     paint.setColor(SK_ColorRED);
@@ -128,10 +136,9 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
     // within budget
     paint.setColor(SK_ColorGREEN);
   }
-
-  double sampleX = width * (static_cast<double>(_current_sample) / kMaxSamples);
-  paint.setStrokeWidth(3);
-  canvas.drawLine(sampleX, 0, sampleX, height, paint);
+  double sampleX = x + width * (static_cast<double>(_current_sample + 1) / kMaxSamples)
+                     - sampleMarginWidth;
+  canvas.drawRectCoords(sampleX, y, sampleX + sampleMarginWidth * 2.0, bottom, paint);
 }
 
 Stopwatch::~Stopwatch() = default;
