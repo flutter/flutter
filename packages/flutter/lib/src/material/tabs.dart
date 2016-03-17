@@ -32,6 +32,10 @@ const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0
 const double _kTabBarScrollDrag = 0.025;
 const Duration _kTabBarScroll = const Duration(milliseconds: 300);
 
+// Curves for the leading and trailing edge of the selected tab indicator.
+const Curve _kTabIndicatorLeadingCurve = const Interval(0.0, 0.6, curve: Curves.easeOut);
+const Curve _kTabIndicatorTrailingCurve = const Interval(0.3, 1.0, curve: Curves.easeIn);
+
 // The scrollOffset (velocity) provided to fling() is pixels/ms, and the
 // tolerance velocity is pixels/sec.
 final double _kMinFlingVelocity = kPixelScrollTolerance.velocity / 2000.0;
@@ -589,9 +593,9 @@ class TabBar<T> extends Scrollable {
 }
 
 class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelectionAnimationListener {
-
   TabBarSelectionState<T> _selection;
   bool _valueIsChanging = false;
+  int _lastSelectedIndex = -1;
 
   void _initSelection(TabBarSelectionState<T> selection) {
     _selection?.unregisterAnimationListener(this);
@@ -645,13 +649,15 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     if (config.labels.length == 0 || _selection == null)
       return;
 
-    if (!_valueIsChanging && _selection.valueIsChanging) {
+    if (_lastSelectedIndex != _selection.index) {
+      // Initialize our indicator animation when we change selected tabs.
       if (config.isScrollable)
         scrollTo(_centeredTabScrollOffset(_selection.index), duration: _kTabBarScroll);
       _indicatorTween
         ..begin = _indicatorRect ?? _tabIndicatorRect(_selection.previousIndex)
         ..end = _tabIndicatorRect(_selection.index);
       _valueIsChanging = true;
+      _lastSelectedIndex = _selection.index;
     }
     Rect oldRect = _indicatorRect;
     double t = _selection.animation.value;
@@ -660,13 +666,29 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       // want to curve the animation. When _valueIsChanging is false, we're
       // animating based on a pointer event and want linear feedback. It's
       // possible we should move this curve into the selection animation.
-      t = Curves.ease.transform(t);
+      // We animate the leading and trailing edges of the rect differently.
+      // The easiest way to do this is to lerp 2 rects, and piece them together
+      // into 1.
+      Rect leftRect, rightRect;
+      if (_selection.index > _selection.previousIndex) {
+        // Moving to the right - right edge is leading.
+        rightRect = _indicatorTween.lerp(_kTabIndicatorLeadingCurve.transform(t));
+        leftRect = _indicatorTween.lerp(_kTabIndicatorTrailingCurve.transform(t));
+      } else {
+        // Moving to the left - left edge is leading.
+        leftRect = _indicatorTween.lerp(_kTabIndicatorLeadingCurve.transform(t));
+        rightRect = _indicatorTween.lerp(_kTabIndicatorTrailingCurve.transform(t));
+      }
+      _indicatorRect = new Rect.fromLTRB(
+        leftRect.left, leftRect.top, rightRect.right, rightRect.bottom
+      );
+    } else {
+      // TODO(abarth): If we've never gone through handleStatusChange before, we
+      // might not have set up our _indicatorTween yet.
+      _indicatorRect = _indicatorTween.lerp(t);
     }
-    // TODO(abarth): If we've never gone through handleStatusChange before, we
-    // might not have set up our _indicatorTween yet.
-    _indicatorRect = _indicatorTween.lerp(t);
     if (oldRect != _indicatorRect)
-      setState(() { });
+      setState(() { /* The indicator rect has changed. */ });
   }
 
   Size _viewportSize = Size.zero;
