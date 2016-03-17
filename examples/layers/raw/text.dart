@@ -21,7 +21,7 @@ ui.Picture paint(ui.Rect paintBounds) {
 
   // The paint method of Pargraph draws the contents of the paragraph unto the
   // given canvas.
-  paragraph.paint(canvas, new ui.Offset(paragraph.maxWidth / -2.0, (paragraph.maxWidth / 2.0) - 125));
+  canvas.drawParagraph(paragraph, new ui.Offset(paragraph.maxWidth / -2.0, (paragraph.maxWidth / 2.0) - 125));
 
   return recorder.endRecording();
 }

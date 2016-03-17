@@ -113,7 +113,7 @@ class RenderErrorBox extends RenderBox {
           _paragraph.maxWidth = size.width;
         }
         _paragraph.layout();
-        _paragraph.paint(context.canvas, offset);
+        context.canvas.drawParagraph(_paragraph, offset);
       }
     } catch (e) { }
   }
