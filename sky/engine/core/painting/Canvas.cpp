@@ -8,6 +8,7 @@
 
 #include "sky/engine/core/painting/CanvasImage.h"
 #include "sky/engine/core/painting/Matrix.h"
+#include "sky/engine/core/text/Paragraph.h"
 #include "sky/engine/platform/geometry/IntRect.h"
 #include "sky/engine/tonic/dart_args.h"
 #include "sky/engine/tonic/dart_binding_macros.h"
@@ -52,6 +53,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, drawImageRect) \
   V(Canvas, drawImageNine) \
   V(Canvas, drawPicture) \
+  V(Canvas, drawParagraph) \
   V(Canvas, drawVertices) \
   V(Canvas, drawAtlas)
 
@@ -276,6 +278,13 @@ void Canvas::drawPicture(Picture* picture)
         return;
     ASSERT(picture);
     m_canvas->drawPicture(picture->toSkia());
+}
+
+void Canvas::drawParagraph(Paragraph* paragraph, const Offset& offset) {
+    if (!m_canvas)
+        return;
+    ASSERT(paragraph);
+    paragraph->paint(this, offset);
 }
 
 void Canvas::drawVertices(SkCanvas::VertexMode vertexMode,

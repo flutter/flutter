@@ -22,8 +22,9 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {
-class DartLibraryNatives;
 class CanvasImage;
+class DartLibraryNatives;
+class Paragraph;
 
 template <>
 struct DartConverter<SkCanvas::VertexMode> : public DartConverterInteger<SkCanvas::VertexMode> {};
@@ -66,6 +67,7 @@ public:
     void drawImageRect(const CanvasImage* image, Rect& src, Rect& dst, const Paint& paint);
     void drawImageNine(const CanvasImage* image, Rect& center, Rect& dst, const Paint& paint);
     void drawPicture(Picture* picture);
+    void drawParagraph(Paragraph* paragraph, const Offset& offset);
 
     void drawVertices(SkCanvas::VertexMode vertexMode,
         const std::vector<Point>& vertices,
