@@ -59,7 +59,7 @@ PackageProject() {
   # containing the pubspec
   RunCommand pushd ${project_path}
 
-  RunCommand ${FLUTTER_ROOT}/bin/flutter build                                 \
+  RunCommand ${FLUTTER_ROOT}/bin/flutter build flx                             \
       --target ${dart_main}                                                    \
       --output-file ${derived_dir}/app.flx                                     \
       --package-root ${package_root}                                           \
