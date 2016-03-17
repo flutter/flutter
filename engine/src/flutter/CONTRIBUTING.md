@@ -87,6 +87,11 @@ connected Android device, from that directory you would run:
 
  * `flutter start --engine-src-path /path/to/engine/src -t tabs.dart`
 
+If you're going to be debugging crashes in the engine, make sure you add
+`android:debuggable="true"` to the `<application>` element in the
+`android/AndroidManifest.xml` file for the Flutter app you are using
+to test the engine.
+
 ### Desktop (Mac and Linux), for tests
 
  * `gclient sync` to update your dependencies.
