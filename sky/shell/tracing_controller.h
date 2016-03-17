@@ -5,15 +5,8 @@
 #ifndef __SKY_SHELL_TRACING_CONTROLLER__
 #define __SKY_SHELL_TRACING_CONTROLLER__
 
-#include "base/files/file.h"
 #include "base/macros.h"
-#include "base/memory/ref_counted_memory.h"
-#include "base/memory/weak_ptr.h"
-#include "base/time/time.h"
-#include "mojo/public/cpp/system/data_pipe.h"
-#include "sky/shell/shell_view.h"
-
-#include <memory>
+#include "base/files/file.h"
 
 namespace sky {
 namespace shell {
@@ -25,7 +18,7 @@ class TracingController {
 
   void StartTracing();
 
-  void StopTracing(const base::FilePath& path);
+  void StopTracing();
 
   // Enables tracing in base. Only use this if an instance of a tracing
   // controller cannot be obtained (can happen early in the lifecycle of the
@@ -36,10 +29,6 @@ class TracingController {
   base::FilePath PictureTracingPathForCurrentTime() const;
 
   base::FilePath PictureTracingPathForCurrentTime(base::FilePath dir) const;
-
-  base::FilePath TracePathForCurrentTime(base::FilePath dir) const;
-
-  void SetDartInitialized();
 
   bool tracing_active() const { return tracing_active_; }
 
@@ -54,25 +43,17 @@ class TracingController {
   bool picture_tracing_enabled() const { return picture_tracing_enabled_; }
 
  private:
-  std::unique_ptr<base::File> trace_file_;
   base::FilePath traces_base_path_;
   bool picture_tracing_enabled_;
-  bool dart_initialized_;
   bool tracing_active_;
+
+  void StopBaseTracing();
 
   void StartDartTracing();
   void StopDartTracing();
-  void StopBaseTracing();
-  void FinalizeTraceFile();
-
-  void OnBaseTraceChunk(const scoped_refptr<base::RefCountedString>& chunk,
-                        bool has_more_events);
-  void ManageObservatoryCallbacks(bool addOrRemove);
 
   base::FilePath TracePathWithExtension(base::FilePath dir,
                                         std::string extension) const;
-
-  base::WeakPtrFactory<TracingController> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(TracingController);
 };

@@ -8,6 +8,7 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
+#include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
@@ -307,6 +308,36 @@ bool IsRunningPrecompiledCode() {
 
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
+static base::LazyInstance<std::unique_ptr<EmbedderTracingCallbacks>>::Leaky
+    g_tracing_callbacks = LAZY_INSTANCE_INITIALIZER;
+
+EmbedderTracingCallbacks::EmbedderTracingCallbacks(
+    EmbedderTracingCallback start,
+    EmbedderTracingCallback stop)
+    : start_tracing_callback(start),
+      stop_tracing_callback(stop) {}
+
+void SetEmbedderTracingCallbacks(
+    std::unique_ptr<EmbedderTracingCallbacks> callbacks) {
+  g_tracing_callbacks.Get() = std::move(callbacks);
+}
+
+static void EmbedderTimelineStartRecording() {
+  auto& callbacks = g_tracing_callbacks.Get();
+  if (!callbacks) {
+    return;
+  }
+  callbacks->start_tracing_callback.Run();
+}
+
+static void EmbedderTimelineStopRecording() {
+  auto& callbacks = g_tracing_callbacks.Get();
+  if (!callbacks) {
+    return;
+  }
+  callbacks->stop_tracing_callback.Run();
+}
+
 void InitDartVM() {
   TRACE_EVENT0("flutter", __func__);
 
@@ -377,6 +408,11 @@ void InitDartVM() {
 #ifdef OS_ANDROID
   DartJni::InitForGlobal();
 #endif
+
+  // Setup embedder tracing hooks. To avoid data races, it is recommended that
+  // these hooks be installed before the DartInitialize, so do that setup now.
+  Dart_SetEmbedderTimelineCallbacks(&EmbedderTimelineStartRecording,
+                                    &EmbedderTimelineStopRecording);
 
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");

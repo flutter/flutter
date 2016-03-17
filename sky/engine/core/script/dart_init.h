@@ -5,8 +5,11 @@
 #ifndef SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_
 #define SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_
 
+#include "base/callback.h"
 #include "dart/runtime/include/dart_api.h"
 #include "sky/engine/wtf/OperatingSystem.h"
+
+#include <string>
 
 namespace blink {
 
@@ -38,7 +41,21 @@ extern const char kSnapshotAssetKey[];
 
 bool IsRunningPrecompiledCode();
 
+using EmbedderTracingCallback = base::Callback<void(void)>;
+
+struct EmbedderTracingCallbacks {
+  EmbedderTracingCallback start_tracing_callback;
+  EmbedderTracingCallback stop_tracing_callback;
+
+  EmbedderTracingCallbacks(EmbedderTracingCallback start,
+                           EmbedderTracingCallback stop);
+};
+
 void InitDartVM();
+
+void SetEmbedderTracingCallbacks(
+    std::unique_ptr<EmbedderTracingCallbacks> callbacks);
+
 Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
                                   Dart_Handle library,
                                   Dart_Handle url);
