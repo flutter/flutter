@@ -14,6 +14,7 @@ Future<int> pubGet({
   String directory,
   bool skipIfAbsent: false,
   bool upgrade: false,
+  bool offline: false,
   bool checkLastModified: true
 }) async {
   if (directory == null)
@@ -33,10 +34,16 @@ Future<int> pubGet({
   if (!checkLastModified || !pubSpecLock.existsSync() || pubSpecYaml.lastModifiedSync().isAfter(pubSpecLock.lastModifiedSync())) {
     String command = upgrade ? 'upgrade' : 'get';
     printStatus("Running 'pub $command' in $directory${Platform.pathSeparator}...");
+    List<String> arguments = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks'];
+    if (offline)
+      arguments.add('--offline');
+    Stopwatch stopwatch = new Stopwatch();
+    stopwatch.start();
     int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command],
+      arguments,
       workingDirectory: directory
     );
+    printTrace("'pub $command' in $directory${Platform.pathSeparator} completed with exit code $code in ${stopwatch.elapsedMilliseconds}ms");
     if (code != 0)
       return code;
   }
