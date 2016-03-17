@@ -11,7 +11,9 @@ namespace blink {
 
 struct SkySettings {
   bool enable_observatory = false;
-  uint32_t observatory_port = 8181;
+  // Port on target will be auto selected by the OS. A message will be printed
+  // on the target with the port after it has been selected.
+  uint32_t observatory_port = 0;
   bool start_paused = false;
   bool enable_dart_checked_mode = false;
 

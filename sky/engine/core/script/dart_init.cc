@@ -360,7 +360,7 @@ void InitDartVM() {
 
   Vector<const char*> args;
   args.append(kDartProfilingArgs, arraysize(kDartProfilingArgs));
-  
+
   if (!IsRunningPrecompiledCode()) {
     // The version of the VM setup to run precompiled code does not recognize
     // the mirrors or the background compilation flags. They are never enabled.

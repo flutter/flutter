@@ -110,7 +110,8 @@ void Shell::InitStandalone(std::string icu_data_path) {
       settings.observatory_port = port;
     } else {
       LOG(INFO)
-          << "Observatory port specified was malformed. Will default to 8181";
+          << "Observatory port specified was malformed. Will default to "
+          << settings.observatory_port;
     }
   }
   settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
