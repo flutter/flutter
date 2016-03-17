@@ -22,7 +22,7 @@ if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` 
 
   echo Building flutter tool...
   FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
-  (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get > /dev/null)
+  (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=warning)
   "$DART" --snapshot="$SNAPSHOT_PATH" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH"
   echo $REVISION > "$STAMP_PATH"
 fi
