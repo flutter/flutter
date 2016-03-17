@@ -25,10 +25,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasScaffold(context));
-    final double appBarHeight = Scaffold.of(context).appBarHeight;
+    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
     final Animation<double> animation = Scaffold.of(context).appBarAnimation;
-    final EdgeInsets toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
-    final double toolBarHeight = kToolBarHeight + toolBarPadding.top;
+    final double appBarHeight = Scaffold.of(context).appBarHeight + statusBarHeight;
+    final double toolBarHeight = kToolBarHeight + statusBarHeight;
     final List<Widget> children = <Widget>[];
 
     // background image
@@ -46,7 +46,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         right: 0.0,
         child: new Opacity(
           opacity: new Tween<double>(begin: 1.0, end: 0.0).evaluate(opacityCurve),
-          child: config.image
+          child: new SizedBox(
+            height: appBarHeight + statusBarHeight,
+            child: config.image
+          )
         )
        ));
     }
@@ -64,7 +67,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         color: titleStyle.color.withAlpha(new Tween<double>(begin: 255.0, end: 0.0).evaluate(opacityCurve).toInt())
       );
       final double yAlignStart = 1.0;
-      final double yAlignEnd = (toolBarPadding.top + kToolBarHeight / 2.0) / toolBarHeight;
+      final double yAlignEnd = (statusBarHeight + kToolBarHeight / 2.0) / toolBarHeight;
       final double scaleAndAlignEnd = (appBarHeight - toolBarHeight) / appBarHeight;
       final CurvedAnimation scaleAndAlignCurve = new CurvedAnimation(
         parent: animation,

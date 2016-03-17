@@ -592,6 +592,14 @@ class TabBar<T> extends Scrollable {
   final Map<T, TabLabel> labels;
   final bool isScrollable;
 
+  double get minimumHeight {
+    for (TabLabel label in labels.values) {
+      if (label.text != null && (label.icon != null || label.iconBuilder != null))
+        return _kTextAndIconTabHeight + _kTabIndicatorHeight;
+    }
+    return _kTabHeight + _kTabIndicatorHeight;
+  }
+
   @override
   _TabBarState<T> createState() => new _TabBarState<T>();
 }
@@ -810,9 +818,9 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
       indicatorColor = Colors.white;
     }
 
-    TextStyle textStyle = themeData.primaryTextTheme.body1;
+    TextStyle textStyle = themeData.primaryTextTheme.body2;
     IconThemeData iconTheme = themeData.primaryIconTheme;
-    Color textColor = themeData.primaryTextTheme.body1.color.withAlpha(0xB2); // 70% alpha
+    Color textColor = themeData.primaryTextTheme.body2.color.withAlpha(0xB2); // 70% alpha
 
     List<Widget> tabs = <Widget>[];
     bool textAndIcons = false;

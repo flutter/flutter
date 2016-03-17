@@ -82,6 +82,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
@@ -89,10 +90,10 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
       ),
       child: new Scaffold(
         key: scaffoldKey,
-        appBarHeight: appBarHeight,
         scrollableKey: scrollableKey,
         appBarBehavior: _appBarBehavior,
         appBar: new AppBar(
+          expandedHeight: appBarHeight,
           actions: <Widget>[
             new IconButton(
               icon: Icons.create,
@@ -134,7 +135,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
         ),
         body: new Block(
           scrollableKey: scrollableKey,
-          padding: new EdgeInsets.only(top: appBarHeight),
+          padding: new EdgeInsets.only(top: appBarHeight + statusBarHeight),
           children: <Widget>[
             new _ContactCategory(
               icon: Icons.call,

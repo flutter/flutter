@@ -25,6 +25,7 @@ class GallerySection extends StatelessWidget {
   }
 
   void showDemos(BuildContext context) {
+    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
     final ThemeData theme = new ThemeData(
       brightness: Theme.of(context).brightness,
       primarySwatch: colors
@@ -36,16 +37,16 @@ class GallerySection extends StatelessWidget {
         return new Theme(
           data: theme,
           child: new Scaffold(
-            appBarHeight: appBarHeight,
             appBarBehavior: AppBarBehavior.under,
             scrollableKey: scrollableKey,
             appBar: new AppBar(
+              expandedHeight: appBarHeight,
               flexibleSpace: (BuildContext context) => new FlexibleSpaceBar(title: new Text(title))
             ),
             body: new Material(
               child: new MaterialList(
                 scrollableKey: scrollableKey,
-                scrollablePadding: new EdgeInsets.only(top: appBarHeight),
+                scrollablePadding: new EdgeInsets.only(top: appBarHeight + statusBarHeight),
                 type: MaterialListType.oneLine,
                 children: (demos ?? const <GalleryDemo>[]).map((GalleryDemo demo) {
                   return new ListItem(
