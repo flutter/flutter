@@ -407,6 +407,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// [PictureRecorder].
   void drawPicture(Picture picture) native "Canvas_drawPicture";
 
+  void drawParagraph(Paragraph paragraph, Offset offset) native "Canvas_drawParagraph";
+
   void drawVertices(VertexMode vertexMode,
                     List<Point> vertices,
                     List<Point> textureCoordinates,
