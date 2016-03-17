@@ -18,7 +18,6 @@ import 'object.dart';
 /// If you create the RelativeRect with null values, the methods on
 /// RelativeRect will not work usefully (or at all).
 class RelativeRect {
-
   /// Creates a RelativeRect with the given values.
   const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
@@ -136,16 +135,16 @@ class RelativeRect {
 
 /// Parent data for use with [RenderStack]
 class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
-  /// The offset of the child's top edge from the top of the stack.
+  /// The distance by which the child's top edge is inset from the top of the stack.
   double top;
 
-  /// The offset of the child's right edge from the right of the stack.
+  /// The distance by which the child's right edge is inset from the right of the stack.
   double right;
 
-  /// The offset of the child's bottom edge from the bottom of the stack.
+  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
   double bottom;
 
-  /// The offset of the child's left edge from the left of the stack.
+  /// The distance by which the child's left edge is inset from the left of the stack.
   double left;
 
   /// The child's width.
@@ -167,9 +166,9 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
     left = value.left;
   }
 
-  /// Whether this child is considered positioned
+  /// Whether this child is considered positioned.
   ///
-  /// A child is positioned if any of the top, right, bottom, or left offsets
+  /// A child is positioned if any of the top, right, bottom, or left properties
   /// are non-null. Positioned children do not factor into determining the size
   /// of the stack but are instead placed relative to the non-positioned
   /// children in the stack.
@@ -411,7 +410,7 @@ abstract class RenderStackBase extends RenderBox
 /// In a stack layout, the children are positioned on top of each other in the
 /// order in which they appear in the child list. First, the non-positioned
 /// children (those with null values for top, right, bottom, and left) are
-/// initially layed out and placed in the upper-left corner of the stack. The
+/// laid out and initially placed in the upper-left corner of the stack. The
 /// stack is then sized to enclose all of the non-positioned children. If there
 /// are no non-positioned children, the stack becomes as large as possible.
 ///
@@ -419,23 +418,25 @@ abstract class RenderStackBase extends RenderBox
 /// parameter. The left of each non-positioned child becomes the
 /// difference between the child's width and the stack's width scaled by
 /// alignment.x. The top of each non-positioned child is computed
-/// similarly and scaled by alignement.y. So if the alignment x and y properties
+/// similarly and scaled by alignment.y. So if the alignment x and y properties
 /// are 0.0 (the default) then the non-positioned children remain in the
 /// upper-left corner. If the alignment x and y properties are 0.5 then the
 /// non-positioned children are centered within the stack.
 ///
 /// Next, the positioned children are laid out. If a child has top and bottom
 /// values that are both non-null, the child is given a fixed height determined
-/// by deflating the width of the stack by the sum of the top and bottom values.
-/// Similarly, if the child has rigth and left values that are both non-null,
-/// the child is given a fixed width. Otherwise, the child is given unbounded
-/// space in the non-fixed dimensions.
+/// by subtracting the sum of the top and bottom values from the height of the stack.
+/// Similarly, if the child has right and left values that are both non-null,
+/// the child is given a fixed width derived from the stack's width.
+/// Otherwise, the child is given unbounded constraints in the non-fixed dimensions.
 ///
-/// Once the child is laid out, the stack positions the child according to the
-/// top, right, bottom, and left offsets. For example, if the top value is 10.0,
-/// the top edge of the child will be placed 10.0 pixels from the top edge of
-/// the stack. If the child extends beyond the bounds of the stack, the stack
-/// will clip the child's painting to the bounds of the stack.
+/// Once the child is laid out, the stack positions the child
+/// according to the top, right, bottom, and left properties of their
+/// [StackParentData]. For example, if the bottom value is 10.0, the
+/// bottom edge of the child will be inset 10.0 pixels from the bottom
+/// edge of the stack. If the child extends beyond the bounds of the
+/// stack, the stack will clip the child's painting to the bounds of
+/// the stack.
 class RenderStack extends RenderStackBase {
   RenderStack({
     List<RenderBox> children,
