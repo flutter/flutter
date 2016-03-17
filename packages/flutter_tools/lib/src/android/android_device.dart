@@ -17,6 +17,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../service_protocol.dart';
 import '../toolchain.dart';
 import 'adb.dart';
 import 'android.dart';
@@ -185,12 +186,12 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<Null> _forwardObservatoryPort(int port) async {
-    bool portWasZero = port == 0;
+  Future<Null> _forwardObservatoryPort(int devicePort, int port) async {
+    bool portWasZero = (port == null) || (port == 0);
 
     try {
       // Set up port forwarding for observatory.
-      port = await portForwarder.forward(observatoryDefaultPort,
+      port = await portForwarder.forward(devicePort,
                                          hostPort: port);
       if (portWasZero)
         printStatus('Observatory listening on http://127.0.0.1:$port');
@@ -214,12 +215,17 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    await _forwardObservatoryPort(debugPort);
-
     if (clearLogs)
       this.clearLogs();
 
     runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
+
+    ServiceProtocolDiscovery serviceProtocolDiscovery =
+        new ServiceProtocolDiscovery(logReader);
+
+    // We take this future here but do not wait for completion until *after*
+    // we start the bundle.
+    Future<int> serviceProtocolPort = serviceProtocolDiscovery.nextPort();
 
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
@@ -243,6 +249,13 @@ class AndroidDevice extends Device {
       printError(result.trim());
       return false;
     }
+
+    // Wait for the service protocol port here. This will complete once
+    // the device has printed "Observatory is listening on..."
+    int devicePort = await serviceProtocolPort;
+    printTrace('service protocol port = $devicePort');
+    await _forwardObservatoryPort(devicePort, debugPort);
+
     return true;
   }
 

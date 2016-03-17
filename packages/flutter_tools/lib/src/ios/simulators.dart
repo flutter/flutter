@@ -16,6 +16,7 @@ import '../build_configuration.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../service_protocol.dart';
 import '../toolchain.dart';
 import 'mac.dart';
 
@@ -462,6 +463,13 @@ class IOSSimulator extends Device {
     if (!(await _setupUpdatedApplicationBundle(app, toolchain)))
       return false;
 
+    ServiceProtocolDiscovery serviceProtocolDiscovery =
+        new ServiceProtocolDiscovery(logReader);
+
+    // We take this future here but do not wait for completion until *after*
+    // we start the application.
+    Future<int> serviceProtocolPort = serviceProtocolDiscovery.nextPort();
+
     // Prepare launch arguments.
     List<String> args = <String>[
       "--flx=${path.absolute(path.join('build', 'app.flx'))}",
@@ -486,7 +494,12 @@ class IOSSimulator extends Device {
       return false;
     }
 
+    // Wait for the service protocol port here. This will complete once
+    // the device has printed "Observatory is listening on..."
+    int devicePort = await serviceProtocolPort;
+    printTrace('service protocol port = $devicePort');
     printTrace('Successfully started ${app.name} on $id.');
+    printStatus('Observatory listening on http://127.0.0.1:$devicePort');
 
     return true;
   }
