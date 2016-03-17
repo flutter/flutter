@@ -55,6 +55,16 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 }
 
 /// A linear interpolation between a beginning and ending value.
+///
+/// [Tween] is useful if you want to interpolate across a range.
+///
+/// To use a [Tween] object with an animation, call the [Tween] object's `animate()` method and
+/// pass it the [Animation] object that you want to modify.
+///
+/// You can chain [Tween] objects together using the `chain()` method, so that a single
+/// [Animation] object is configured by multiple [Tween] objects called in succession. This is
+/// different than calling the `animate()` method twice, which results in two [Animation]
+/// separate objects, each configured with a single [Tween].
 class Tween<T extends dynamic> extends Animatable<T> {
   Tween({ this.begin, this.end });
 
@@ -68,6 +78,8 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) => begin + (end - begin) * t;
 
   /// Returns the interpolated value for the current value of the given animation.
+  ///
+  /// This method returns `begin` and `end` when the animation values are 0.0 or 1.0, respectively.
   @override
   T evaluate(Animation<double> animation) {
     if (end == null)
