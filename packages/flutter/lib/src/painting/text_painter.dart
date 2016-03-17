@@ -294,7 +294,7 @@ class TextPainter {
   /// Paints the text onto the given canvas at the given offset.
   void paint(Canvas canvas, Offset offset) {
     assert(!_needsLayout && "Please call layout() before paint() to position the text before painting it." is String);
-    _paragraph.paint(canvas, offset);
+    canvas.drawParagraph(_paragraph, offset);
   }
 
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
