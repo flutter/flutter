@@ -19,7 +19,7 @@ class RefreshCommand extends FlutterCommand {
   final String description = 'Build and deploy the Dart code in a Flutter app (Android only).';
 
   RefreshCommand() {
-    addTargetOption();
+    usesTargetOption();
   }
 
   @override

@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
+import '../dart/pub.dart';
 import '../application_package.dart';
 import '../build_configuration.dart';
 import '../device.dart';
@@ -18,6 +19,10 @@ import 'flutter_command_runner.dart';
 typedef bool Validator();
 
 abstract class FlutterCommand extends Command {
+  FlutterCommand() {
+    commandValidator = _commandValidator;
+  }
+
   @override
   FlutterCommandRunner get runner => super.runner;
 
@@ -30,11 +35,27 @@ abstract class FlutterCommand extends Command {
   /// Whether this command only applies to Android devices.
   bool get androidOnly => false;
 
-  /// Whether this command allows usage of the 'target' option.
-  bool get allowsTarget => _targetOptionSpecified;
-  bool _targetOptionSpecified = false;
+  /// Whether this command uses the 'target' option.
+  bool _usesTargetOption = false;
+
+  bool _usesPubOption = false;
 
   List<BuildConfiguration> get buildConfigurations => runner.buildConfigurations;
+
+  void usesTargetOption() {
+    argParser.addOption('target',
+      abbr: 't',
+      defaultsTo: flx.defaultMainPath,
+      help: 'Target app path / main entry-point file.');
+    _usesTargetOption = true;
+  }
+
+  void usesPubOption() {
+    argParser.addFlag('pub',
+      defaultsTo: true,
+      help: 'Whether to run "pub get" before executing this command.');
+    _usesPubOption = true;
+  }
 
   Future<Null> downloadToolchain() async {
     toolchain ??= await Toolchain.forConfigs(buildConfigurations);
@@ -56,8 +77,7 @@ abstract class FlutterCommand extends Command {
   }
 
   Future<int> _run() async {
-    bool _checkRoot = requiresProjectRoot && allowsTarget && !_targetSpecified;
-    if (_checkRoot && !projectRootValidator())
+    if (requiresProjectRoot && !commandValidator())
       return 1;
 
     // Ensure at least one toolchain is installed.
@@ -99,19 +119,36 @@ abstract class FlutterCommand extends Command {
       }
     }
 
+    if (_usesPubOption && argResults['pub']) {
+      int exitCode = await pubGet();
+      if (exitCode != 0)
+        return exitCode;
+    }
+
     return await runInProject();
   }
 
   // This is a field so that you can modify the value for testing.
-  Validator projectRootValidator = () {
+  Validator commandValidator;
+
+  bool _commandValidator() {
     if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
       printError('Error: No pubspec.yaml file found.\n'
         'This command should be run from the root of your Flutter project.\n'
         'Do not run this command from the root of your git clone of Flutter.');
       return false;
     }
+
+    if (_usesTargetOption) {
+      String targetPath = argResults['target'];
+      if (!FileSystemEntity.isFileSync(targetPath)) {
+        printError('Target file "$targetPath" not found.');
+        return false;
+      }
+    }
+
     return true;
-  };
+  }
 
   Future<int> runInProject();
 
@@ -122,15 +159,4 @@ abstract class FlutterCommand extends Command {
 
   ApplicationPackageStore applicationPackages;
   Toolchain toolchain;
-
-  bool _targetSpecified = false;
-
-  void addTargetOption() {
-    argParser.addOption('target',
-      abbr: 't',
-      callback: (dynamic val) => _targetSpecified = true,
-      defaultsTo: flx.defaultMainPath,
-      help: 'Target app path / main entry-point file.');
-    _targetOptionSpecified = true;
-  }
 }

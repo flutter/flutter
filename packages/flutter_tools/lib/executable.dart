@@ -12,7 +12,6 @@ import 'src/base/context.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/commands/analyze.dart';
-import 'src/commands/apk.dart';
 import 'src/commands/build.dart';
 import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
@@ -50,7 +49,6 @@ Future<Null> main(List<String> args) async {
 
   FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
     ..addCommand(new AnalyzeCommand())
-    ..addCommand(new ApkCommand())
     ..addCommand(new BuildCommand())
     ..addCommand(new CreateCommand())
     ..addCommand(new DaemonCommand(hidden: !verboseHelp))
