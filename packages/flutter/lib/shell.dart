@@ -48,6 +48,9 @@ class MojoShell {
   }
   final ApplicationConnection _embedderConnection = _initEmbedderConnection();
 
+  /// Whether [connectToApplication] is able to connect to other applications.
+  bool get canConnectToOtherApplications => _shell != null;
+
   /// Attempts to connect to an application via the Mojo shell.
   ApplicationConnection connectToApplication(String url) {
     if (_shell == null)
