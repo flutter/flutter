@@ -43,15 +43,6 @@ class TracingController {
         mContext.unregisterReceiver(mBroadcastReceiver);
     }
 
-    private String generateTracingFilePath() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US);
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        File dir = mContext.getCacheDir();
-        String date = formatter.format(new Date());
-        File file = new File(dir, "sky-trace-" + date + ".json");
-        return file.getPath();
-    }
-
     class TracingIntentFilter extends IntentFilter {
         TracingIntentFilter(Context context) {
             addAction(context.getPackageName() + TRACING_START);
@@ -65,7 +56,7 @@ class TracingController {
             if (intent.getAction().endsWith(TRACING_START)) {
                 nativeStartTracing();
             } else if (intent.getAction().endsWith(TRACING_STOP)) {
-                nativeStopTracing(generateTracingFilePath());
+                nativeStopTracing();
             } else {
                 Log.e(TAG, "Unexpected intent: " + intent);
             }
@@ -73,5 +64,5 @@ class TracingController {
     }
 
     private static native void nativeStartTracing();
-    private static native void nativeStopTracing(String path);
+    private static native void nativeStopTracing();
 }
