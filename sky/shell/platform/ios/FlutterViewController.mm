@@ -11,6 +11,7 @@
 #include "sky/services/engine/sky_engine.mojom.h"
 #include "sky/services/platform/ios/system_chrome_impl.h"
 #include "sky/shell/platform/ios/flutter_touch_mapper.h"
+#include "sky/shell/platform/ios/FlutterDartProject_Internal.h"
 #include "sky/shell/platform/ios/FlutterDynamicServiceLoader.h"
 #include "sky/shell/platform/ios/FlutterView.h"
 #include "sky/shell/platform/mac/platform_mac.h"
@@ -20,7 +21,7 @@
 #include "sky/shell/shell_view.h"
 
 @implementation FlutterViewController {
-  NSBundle* _dartBundle;
+  FlutterDartProject* _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
   FlutterDynamicServiceLoader* _dynamicServiceLoader;
   sky::ViewportMetricsPtr _viewportMetrics;
@@ -32,13 +33,13 @@
 
 #pragma mark - Manage and override all designated initializers
 
-- (instancetype)initWithDartBundle:(NSBundle*)dartBundleOrNil
-                           nibName:(NSString*)nibNameOrNil
-                            bundle:(NSBundle*)bundleOrNil {
-  self = [super initWithNibName:nibNameOrNil bundle:bundleOrNil];
+- (instancetype)initWithProject:(FlutterDartProject*)project
+                        nibName:(NSString*)nibNameOrNil
+                         bundle:(NSBundle*)nibBundleOrNil {
+  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 
   if (self) {
-    _dartBundle = [dartBundleOrNil retain];
+    _dartProject = [project retain];
 
     [self performCommonViewControllerInitialization];
   }
@@ -48,17 +49,11 @@
 
 - (instancetype)initWithNibName:(NSString*)nibNameOrNil
                          bundle:(NSBundle*)nibBundleOrNil {
-  return [self initWithDartBundle:nil nibName:nil bundle:nil];
+  return [self initWithProject:nil nibName:nil bundle:nil];
 }
 
 - (instancetype)initWithCoder:(NSCoder*)aDecoder {
-  return [self initWithDartBundle:nil nibName:nil bundle:nil];
-}
-
-#pragma mark - Implement convenience initializers
-
-- (instancetype)initWithDartBundle:(NSBundle*)dartBundle {
-  return [self initWithDartBundle:dartBundle nibName:nil bundle:nil];
+  return [self initWithProject:nil nibName:nil bundle:nil];
 }
 
 #pragma mark - Common view controller initialization tasks
@@ -140,11 +135,28 @@
 
   [self setupPlatformServiceProvider];
 
+  enum VMType type = VMTypeInvalid;
+
 #if TARGET_IPHONE_SIMULATOR
-  [self runFromDartSource];
+  type = VMTypeInterpreter;
 #else
-  [self runFromPrecompiledSource];
+  type = VMTypePrecompilation;
 #endif
+
+  [_dartProject launchInEngine:_engine
+                embedderVMType:type
+                        result:^(BOOL success, NSString* message) {
+                          if (!success) {
+                            UIAlertView* alert = [[UIAlertView alloc]
+                                    initWithTitle:@"Launch Error"
+                                          message:message
+                                         delegate:nil
+                                cancelButtonTitle:@"OK"
+                                otherButtonTitles:nil];
+                            [alert show];
+                            [alert release];
+                          }
+                        }];
 }
 
 static void DynamicServiceResolve(void* baton,
@@ -170,52 +182,6 @@ static void DynamicServiceResolve(void* baton,
   services->services_provided_by_embedder = serviceProvider.Pass();
   _engine->SetServices(services.Pass());
 }
-
-#if TARGET_IPHONE_SIMULATOR
-
-- (void)runFromDartSource {
-  if (sky::shell::AttemptLaunchFromCommandLineSwitches(_engine)) {
-    return;
-  }
-
-  UIAlertView* alert = [[UIAlertView alloc]
-          initWithTitle:@"Error"
-                message:@"Could not resolve one or all of either the main dart "
-                        @"file path, the FLX bundle path or the package root "
-                        @"on the host. Use the tooling to relaunch the "
-                        @"application."
-               delegate:self
-      cancelButtonTitle:@"OK"
-      otherButtonTitles:nil];
-  [alert show];
-  [alert release];
-}
-
-#else
-
-- (void)runFromPrecompiledSource {
-  mojo::String bundle_path([self flxBundlePath]);
-  CHECK(bundle_path.size() != 0)
-      << "There must be a valid FLX bundle to run the application";
-  _engine->RunFromPrecompiledSnapshot(bundle_path);
-}
-
-- (const char*)flxBundlePath {
-  // In case this runner is part of the precompilation SDK, the FLX bundle is
-  // present in the application bundle instead of the runner bundle. Attempt
-  // to resolve the path there first.
-
-  NSString* path = [_dartBundle pathForResource:@"app" ofType:@"flx"];
-
-  if (path.length != 0) {
-    return path.UTF8String;
-  }
-
-  return
-      [[NSBundle mainBundle] pathForResource:@"app" ofType:@"flx"].UTF8String;
-}
-
-#endif  // TARGET_IPHONE_SIMULATOR
 
 #pragma mark - Loading the view
 
@@ -459,7 +425,7 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
   [_dynamicServiceLoader release];
-  [_dartBundle release];
+  [_dartProject release];
 
   [super dealloc];
 }
