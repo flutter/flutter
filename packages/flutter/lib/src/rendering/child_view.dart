@@ -48,7 +48,7 @@ class ChildViewConnection {
     _connection = new ApplicationConnection(outgoingServices, incomingServices);
   }
 
-  /// Wraps an already-established connection ot a child app.
+  /// Wraps an already-established connection to a child app.
   ChildViewConnection.fromViewOwner({
     mojom.ViewOwnerProxy viewOwner,
     ApplicationConnection connection
@@ -118,7 +118,7 @@ class ChildViewConnection {
       return new Future<mojom.ViewLayoutInfo>.value(null);
     int width = (size.width * scale).round();
     int height = (size.height * scale).round();
-    // TODO(abarth): Ideally we would propagate our actually constraints to be
+    // TODO(abarth): Ideally we would propagate our actual constraints to be
     // able to support rich cross-app layout. For now, we give the child tight
     // constraints for simplicity.
     mojom.BoxConstraints childConstraints = new mojom.BoxConstraints()
