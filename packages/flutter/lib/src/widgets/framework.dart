@@ -932,7 +932,7 @@ abstract class Element implements BuildContext {
     assert(_active);
     if (_dependencies != null) {
       for (InheritedElement dependency in _dependencies)
-        dependency._dependants.remove(this);
+        dependency._dependents.remove(this);
       _dependencies.clear();
     }
     _active = false;
@@ -970,7 +970,7 @@ abstract class Element implements BuildContext {
       assert(ancestor is InheritedElement);
       _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
-      ancestor._dependants.add(this);
+      ancestor._dependents.add(this);
       return ancestor.widget;
     }
     return null;
@@ -1537,7 +1537,7 @@ class InheritedElement extends _ProxyElement {
   @override
   InheritedWidget get widget => super.widget;
 
-  final Set<Element> _dependants = new HashSet<Element>();
+  final Set<Element> _dependents = new HashSet<Element>();
 
   @override
   void _updateInheritance() {
@@ -1552,7 +1552,7 @@ class InheritedElement extends _ProxyElement {
   @override
   void debugDeactivated() {
     assert(() {
-      assert(_dependants.isEmpty);
+      assert(_dependents.isEmpty);
       return true;
     });
     super.debugDeactivated();
@@ -1563,7 +1563,7 @@ class InheritedElement extends _ProxyElement {
     if (!widget.updateShouldNotify(oldWidget))
       return;
     final Type ourRuntimeType = widget.runtimeType;
-    for (Element dependant in _dependants) {
+    for (Element dependant in _dependents) {
       dependant.dependenciesChanged(ourRuntimeType);
       assert(() {
         // check that it really is our descendant
