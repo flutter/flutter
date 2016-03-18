@@ -312,7 +312,7 @@ void restoreVmServiceConnectFunction() {
 ///
 /// Times out after 30 seconds.
 Future<VMServiceClient> _waitAndConnect(String url) async {
-  Stopwatch timer = new Stopwatch();
+  Stopwatch timer = new Stopwatch()..start();
   Future<VMServiceClient> attemptConnection() {
     return VMServiceClient.connect(url)
       .catchError((dynamic e) async {
