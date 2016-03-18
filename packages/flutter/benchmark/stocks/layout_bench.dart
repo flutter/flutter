@@ -31,7 +31,7 @@ void main() {
 
   for (int i = 0; i < _kNumberOfIterations || _kRunForever; ++i) {
     renderView.configuration = (i % 2 == 0) ? big : small;
-    RenderObject.flushLayout();
+    WidgetFlutterBinding.instance.pipelineOwner.flushLayout();
   }
 
   watch.stop();

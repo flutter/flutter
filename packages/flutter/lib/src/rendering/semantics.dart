@@ -58,10 +58,11 @@ class SemanticsNode extends AbstractNode {
        _actionHandler = handler;
 
   SemanticsNode.root({
-    SemanticActionHandler handler
+    SemanticActionHandler handler,
+    Object owner
   }) : _id = 0,
        _actionHandler = handler {
-    attach();
+    attach(owner);
   }
 
   static int _lastIdentifier = 0;
@@ -265,8 +266,8 @@ class SemanticsNode extends AbstractNode {
   static Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
 
   @override
-  void attach() {
-    super.attach();
+  void attach(Object owner) {
+    super.attach(owner);
     assert(!_nodes.containsKey(_id));
     _nodes[_id] = this;
     _detachedNodes.remove(this);
@@ -274,7 +275,7 @@ class SemanticsNode extends AbstractNode {
       _inheritedMergeAllDescendantsIntoThisNode = parent._shouldMergeAllDescendantsIntoThisNode;
     if (_children != null) {
       for (SemanticsNode child in _children)
-        child.attach();
+        child.attach(owner);
     }
   }
 
@@ -404,7 +405,7 @@ class SemanticsNode extends AbstractNode {
               child._inheritedMergeAllDescendantsIntoThisNode = false; // this can add the node to the dirty list
           }
         }
-      } 
+      }
       assert(_dirtyNodes[index] == node); // make sure nothing went in front of us in the list
     }
     _dirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);

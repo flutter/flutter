@@ -51,7 +51,7 @@ class AbstractNode {
 
   /// Call only from overrides of [redepthChildren]
   void redepthChild(AbstractNode child) {
-    assert(child._attached == _attached);
+    assert(child.owner == owner);
     if (child._depth <= _depth) {
       child._depth = _depth + 1;
       child.redepthChildren();
@@ -62,16 +62,21 @@ class AbstractNode {
   /// redepthChild(child) for each child. Do not call directly.
   void redepthChildren() { }
 
-  bool _attached = false;
-  /// Whether this node is in a tree whose root is attached to something.
-  bool get attached => _attached;
+  Object _owner;
+  /// The owner for this node (null if unattached).
+  Object get owner => _owner;
 
-  /// Mark this node as attached.
+  /// Whether this node is in a tree whose root is attached to something.
+  bool get attached => _owner != null;
+
+  /// Mark this node as attached to the given owner.
   ///
   /// Typically called only from the parent's attach(), and to mark the root of
   /// a tree attached.
-  void attach() {
-    _attached = true;
+  void attach(Object owner) {
+    assert(owner != null);
+    assert(_owner == null);
+    _owner = owner;
   }
 
   /// Mark this node as detached.
@@ -79,7 +84,8 @@ class AbstractNode {
   /// Typically called only from the parent's detach(), and to mark the root of
   /// a tree detached.
   void detach() {
-    _attached = false;
+    assert(_owner != null);
+    _owner = null;
   }
 
   AbstractNode _parent;
@@ -99,7 +105,7 @@ class AbstractNode {
     });
     child._parent = this;
     if (attached)
-      child.attach();
+      child.attach(_owner);
     redepthChild(child);
   }
 

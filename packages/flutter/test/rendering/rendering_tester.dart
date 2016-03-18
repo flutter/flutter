@@ -41,16 +41,16 @@ class TestRenderingFlutterBinding extends BindingBase with Scheduler, Services, 
 
   @override
   void beginFrame() {
-    RenderObject.flushLayout();
+    pipelineOwner.flushLayout();
     if (phase == EnginePhase.layout)
       return;
-    RenderObject.flushCompositingBits();
+    pipelineOwner.flushCompositingBits();
     if (phase == EnginePhase.compositingBits)
       return;
-    RenderObject.flushPaint();
+    pipelineOwner.flushPaint();
     if (phase == EnginePhase.paint)
       return;
-    renderer.renderView.compositeFrame();
+    renderView.compositeFrame();
   }
 }
 
