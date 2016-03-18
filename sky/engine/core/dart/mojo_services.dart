@@ -4,8 +4,25 @@
 
 part of dart_ui;
 
-int takeRootBundleHandle() native "takeRootBundleHandle";
-int takeServicesProvidedByEmbedder() native "takeServicesProvidedByEmbedder";
-int takeServicesProvidedToEmbedder() native "takeServicesProvidedToEmbedder";
-int takeShellProxyHandle() native "takeShellProxyHandle";
-int takeViewHandle() native "takeViewHandle";
+/// Mojo handles provided to the application at startup.
+///
+/// The application can take ownership of these handles by calling the static
+/// "take" functions on this object. Once taken, the application is responsible
+/// for managing the handles.
+class MojoServices {
+  MojoServices._();
+
+  static int takeRootBundle() native "MojoServices_takeRootBundle";
+  static int takeIncomingServices() native "MojoServices_takeIncomingServices";
+  static int takeOutgoingServices() native "MojoServices_takeOutgoingServices";
+  static int takeShell() native "MojoServices_takeShell";
+  static int takeView() native "MojoServices_takeView";
+  static int takeViewServices() native "MojoServices_takeViewServices";
+}
+
+// TODO(abarth): Remove these once clients have migrated to [MojoServices].
+int takeRootBundleHandle() => MojoServices.takeRootBundle();
+int takeServicesProvidedByEmbedder() => MojoServices.takeIncomingServices();
+int takeServicesProvidedToEmbedder() => MojoServices.takeOutgoingServices();
+int takeShellProxyHandle() => MojoServices.takeShell();
+int takeViewHandle() => MojoServices.takeView();

@@ -102,11 +102,11 @@ void Engine::OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) {
 void Engine::SetServices(ServicesDataPtr services) {
   services_ = services.Pass();
 
-  if (services_->services_provided_by_embedder) {
-    services_provided_by_embedder_ = mojo::ServiceProviderPtr::Create(
-        services_->services_provided_by_embedder.Pass());
+  if (services_->incoming_services) {
+    incoming_services_ = mojo::ServiceProviderPtr::Create(
+        services_->incoming_services.Pass());
     service_provider_impl_.set_fallback_service_provider(
-        services_provided_by_embedder_.get());
+        incoming_services_.get());
   }
 
   if (services_->scene_scheduler) {
@@ -122,7 +122,7 @@ void Engine::SetServices(ServicesDataPtr services) {
       mojo::ConnectToService(shell.get(), "mojo:vsync", &vsync_provider);
       services_->shell = shell.Pass();
     } else {
-      mojo::ConnectToService(services_provided_by_embedder_.get(), &vsync_provider);
+      mojo::ConnectToService(incoming_services_.get(), &vsync_provider);
     }
     animator_->Reset();
     animator_->set_vsync_provider(vsync_provider.Pass());

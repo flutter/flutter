@@ -179,7 +179,7 @@ static void DynamicServiceResolve(void* baton,
                                           serviceResolutionCallback);
 
   sky::ServicesDataPtr services = sky::ServicesData::New();
-  services->services_provided_by_embedder = serviceProvider.Pass();
+  services->incoming_services = serviceProvider.Pass();
   _engine->SetServices(services.Pass());
 }
 
