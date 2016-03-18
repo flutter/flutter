@@ -24,34 +24,32 @@ class MojoServices {
 
   static void Create(Dart_Isolate isolate,
                      sky::ServicesDataPtr services,
-                     mojo::ServiceProviderPtr services_from_embedder,
+                     mojo::ServiceProviderPtr incoming_services,
                      mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   static void RegisterNatives(DartLibraryNatives* natives);
 
-  mojo::Handle TakeShellProxy();
-  mojo::Handle TakeServicesProvidedByEmbedder();
-  mojo::Handle TakeServicesProvidedToEmbedder();
-  mojo::Handle TakeRootBundleHandle();
-  mojo::Handle TakeViewHandle();
+  int TakeRootBundle();
+  int TakeIncomingServices();
+  int TakeOutgoingServices();
+  int TakeShell();
+  int TakeView();
+  int TakeViewServices();
 
  private:
   explicit MojoServices(sky::ServicesDataPtr services,
-                        mojo::ServiceProviderPtr services_from_embedder,
+                        mojo::ServiceProviderPtr incoming_services,
                         mojo::asset_bundle::AssetBundlePtr root_bundle);
 
   sky::ServicesDataPtr services_;
-  mojo::ServiceProviderPtr services_from_embedder_;
+
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
+  mojo::ServiceProviderPtr incoming_services_;
+  mojo::InterfaceRequest<mojo::ServiceProvider> outgoing_services_;
 
   // We need to hold this object to work around
   // https://github.com/domokit/mojo/issues/536
   mojo::ServiceProviderPtr services_from_dart_;
-
-  // A ServiceProvider supplied by the application that exposes services to
-  // the embedder.
-  mojo::InterfaceRequest<mojo::ServiceProvider>
-      services_provided_to_embedder_;
 
   MOJO_DISALLOW_COPY_AND_ASSIGN(MojoServices);
 };

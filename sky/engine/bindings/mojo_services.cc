@@ -20,87 +20,97 @@ MojoServices* GetMojoServices() {
   return static_cast<FlutterDartState*>(DartState::Current())->mojo_services();
 }
 
-void DartTakeRootBundleHandle(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(
-      args, GetMojoServices()->TakeRootBundleHandle().value());
+void DartTakeRootBundle(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeRootBundle());
 }
 
-void DartTakeShellProxyHandle(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(
-      args, GetMojoServices()->TakeShellProxy().value());
+void DartTakeIncomingServices(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeIncomingServices());
 }
 
-void DartTakeServicesProvidedByEmbedder(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(
-      args, GetMojoServices()->TakeServicesProvidedByEmbedder().value());
+void DartTakeOutgoingServices(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeOutgoingServices());
 }
 
-void DartTakeServicesProvidedToEmbedder(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(
-      args, GetMojoServices()->TakeServicesProvidedToEmbedder().value());
+void DartTakeShell(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeShell());
 }
 
-void DartTakeViewHandle(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(
-      args, GetMojoServices()->TakeViewHandle().value());
+void DartTakeView(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeView());
+}
+
+void DartTakeViewServices(Dart_NativeArguments args) {
+  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeViewServices());
 }
 
 }  // namespace
 
 void MojoServices::RegisterNatives(DartLibraryNatives* natives) {
   natives->Register({
-    {"takeRootBundleHandle", DartTakeRootBundleHandle, 0, true},
-    {"takeServicesProvidedByEmbedder", DartTakeServicesProvidedByEmbedder, 0, true},
-    {"takeServicesProvidedToEmbedder", DartTakeServicesProvidedToEmbedder, 0, true},
-    {"takeShellProxyHandle", DartTakeShellProxyHandle, 0, true},
-    {"takeViewHandle", DartTakeViewHandle, 0, true},
+    {"MojoServices_takeRootBundle", DartTakeRootBundle, 0, true},
+    {"MojoServices_takeIncomingServices", DartTakeIncomingServices, 0, true},
+    {"MojoServices_takeOutgoingServices", DartTakeOutgoingServices, 0, true},
+    {"MojoServices_takeShell", DartTakeShell, 0, true},
+    {"MojoServices_takeView", DartTakeView, 0, true},
+    {"MojoServices_takeViewServices", DartTakeViewServices, 0, true},
   });
 }
 
 void MojoServices::Create(Dart_Isolate isolate,
                           sky::ServicesDataPtr services,
-                          mojo::ServiceProviderPtr services_from_embedder,
+                          mojo::ServiceProviderPtr incoming_services,
                           mojo::asset_bundle::AssetBundlePtr root_bundle) {
   FlutterDartState* state = static_cast<FlutterDartState*>(
       DartState::From(isolate));
   state->set_mojo_services(std::unique_ptr<MojoServices>(new MojoServices(
-      services.Pass(), services_from_embedder.Pass(), root_bundle.Pass())));
+      services.Pass(), incoming_services.Pass(), root_bundle.Pass())));
 }
 
 MojoServices::MojoServices(sky::ServicesDataPtr services,
-                           mojo::ServiceProviderPtr services_from_embedder,
+                           mojo::ServiceProviderPtr incoming_services,
                            mojo::asset_bundle::AssetBundlePtr root_bundle)
   : services_(services.Pass()),
-    services_from_embedder_(services_from_embedder.Pass()),
-    root_bundle_(root_bundle.Pass()) {
-  if (services_ && services_->services_provided_to_embedder.is_pending()) {
-    services_provided_to_embedder_ = services_->services_provided_to_embedder.Pass();
+    root_bundle_(root_bundle.Pass()),
+    incoming_services_(incoming_services.Pass()) {
+  if (services_ && services_->outgoing_services.is_pending()) {
+    outgoing_services_ = services_->outgoing_services.Pass();
   } else {
-    services_provided_to_embedder_ = GetProxy(&services_from_dart_);
+    outgoing_services_ = GetProxy(&services_from_dart_);
   }
 }
 
 MojoServices::~MojoServices() {
 }
 
-mojo::Handle MojoServices::TakeShellProxy() {
-  return services_ ? services_->shell.PassHandle().release() : mojo::Handle();
+int MojoServices::TakeRootBundle() {
+  return root_bundle_.PassInterfaceHandle().PassHandle().release().value();
 }
 
-mojo::Handle MojoServices::TakeServicesProvidedByEmbedder() {
-  return services_from_embedder_.PassInterfaceHandle().PassHandle().release();
+int MojoServices::TakeIncomingServices() {
+  return incoming_services_.PassInterfaceHandle().PassHandle().release().value();
 }
 
-mojo::Handle MojoServices::TakeRootBundleHandle() {
-  return root_bundle_.PassInterfaceHandle().PassHandle().release();
+int MojoServices::TakeOutgoingServices() {
+  return outgoing_services_.PassMessagePipe().release().value();
 }
 
-mojo::Handle MojoServices::TakeServicesProvidedToEmbedder() {
-  return services_provided_to_embedder_.PassMessagePipe().release();
+int MojoServices::TakeShell() {
+  if (services_)
+    return services_->shell.PassHandle().release().value();
+  return MOJO_HANDLE_INVALID;
 }
 
-mojo::Handle MojoServices::TakeViewHandle() {
-  return services_ ? services_->view.PassHandle().release() : mojo::Handle();
+int MojoServices::TakeView() {
+  if (services_)
+    return services_->view.PassHandle().release().value();
+  return MOJO_HANDLE_INVALID;
+}
+
+int MojoServices::TakeViewServices() {
+  if (services_)
+    return services_->view_services.PassHandle().release().value();
+  return MOJO_HANDLE_INVALID;
 }
 
 }  // namespace blink

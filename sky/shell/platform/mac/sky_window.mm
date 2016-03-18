@@ -82,7 +82,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
   new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider),
                                           base::Bind(DynamicServiceResolve));
   sky::ServicesDataPtr services = sky::ServicesData::New();
-  services->services_provided_by_embedder = service_provider.Pass();
+  services->incoming_services = service_provider.Pass();
   _sky_engine->SetServices(services.Pass());
 
   if (sky::shell::AttemptLaunchFromCommandLineSwitches(_sky_engine)) {

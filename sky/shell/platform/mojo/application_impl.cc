@@ -78,8 +78,8 @@ void ApplicationImpl::CreateView(
 
   ServicesDataPtr services = ServicesData::New();
   services->shell = shell.Pass();
-  services->services_provided_by_embedder = incoming_services.Pass();
-  services->services_provided_to_embedder = outgoing_services.Pass();
+  services->incoming_services = incoming_services.Pass();
+  services->outgoing_services = outgoing_services.Pass();
 
   ViewImpl* view = new ViewImpl(view_owner.Pass(), services.Pass(), url_);
   view->Run(bundle_path_);

@@ -109,7 +109,7 @@ class Engine : public UIDelegate,
 
   ServicesDataPtr services_;
   mojo::ServiceProviderImpl service_provider_impl_;
-  mojo::ServiceProviderPtr services_provided_by_embedder_;
+  mojo::ServiceProviderPtr incoming_services_;
   mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
 
   mojo::asset_bundle::AssetBundlePtr root_bundle_;

@@ -360,8 +360,8 @@ public class PlatformViewAndroid extends SurfaceView
         mDartServiceProvider = dartServiceProvider.first;
 
         ServicesData services = new ServicesData();
-        services.servicesProvidedByEmbedder = serviceProvider.first;
-        services.servicesProvidedToEmbedder = dartServiceProvider.second;
+        services.incomingServices = serviceProvider.first;
+        services.outgoingServices = dartServiceProvider.second;
         mSkyEngine.setServices(services);
 
         resetAccessibilityTree();
