@@ -238,6 +238,7 @@
 				9E07CFB91BE82D2600BCD8DE /* Embed Frameworks */,
 				9E40465C1C1B6DEC00A4B87C /* Replace Fake Runner with Actual Flutter Runner */,
 				9EA2FB831C6E940F00670B03 /* Copy Native Service Assets */,
+				9E046CD71C9CA1AC00A1E391 /* Copy Extra Assets */,
 			);
 			buildRules = (
 			);
@@ -307,6 +308,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		9E046CD71C9CA1AC00A1E391 /* Copy Extra Assets */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Extra Assets";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "RESOURCES_DIR=${SOURCE_ROOT}/../Resources\nAPPLICATION_BUNDLE=${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}\n\nshopt -s dotglob\n\nif [ -d \"${RESOURCES_DIR}\" ]; then\n  ditto ${RESOURCES_DIR}/ ${APPLICATION_BUNDLE}\nfi\n";
+			showEnvVarsInLog = 0;
+		};
 		9E07CFCD1BE98FCD00BCD8DE /* Generate Precompiled Snapshot */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
