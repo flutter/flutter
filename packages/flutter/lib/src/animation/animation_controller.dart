@@ -24,10 +24,17 @@ enum _AnimationDirection {
 
 /// A controller for an animation.
 ///
-/// An animation controller can drive an animation forward or backward and can
-/// set the animation to a particular value. The controller also defines the
-/// bounds of the animation and can drive an animation using a physics
-/// simulation.
+/// This class lets you perform tasks such as:
+///
+/// * Play an animation [forward] or in [reverse], or [stop] an animation.
+/// * Set the animation to a specific [value].
+/// * Define the [upperBound] and [lowerBound] values of an animation.
+/// * Create a [fling] animation effect using a physics simulation.
+///
+/// By default, an [AnimationController] linearly produces values that range from 0.0 to 1.0, during
+/// a given duration. The animation controller generates a new value whenever the device running
+/// your app is ready to display a new frame (typically, this rate is around 60 values per second).
+///
 class AnimationController extends Animation<double>
   with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
 

@@ -236,9 +236,23 @@ class ReverseAnimation extends Animation<double>
 
 /// An animation that applies a curve to another animation.
 ///
-/// [CurvedAnimation] is useful when you wish to apply a [Curve] and you already
-/// have the underlying animation object. If you don't yet have an animation and
-/// want to apply a [Curve] to a [Tween], consider using [CurveTween].
+/// [CurvedAnimation] is useful when you want to apply a non-linear [Curve] to
+/// an animation object wrapped in the [CurvedAnimation].
+///
+/// For example, the following code snippet shows how you can apply a curve to a linear animation
+/// produced by an [AnimationController]:
+///
+/// ``` dart
+///     final AnimationController controller =
+///         new AnimationController(duration: const Duration(milliseconds: 500));
+///     final CurvedAnimation animation =
+///         new CurvedAnimation(parent: controller, curve: Curves.ease);
+///```
+/// Depending on the given curve, the output of the [CurvedAnimation] could have a wider range
+/// than its input. For example, elastic curves such as [Curves.elasticIn] will significantly
+/// overshoot or undershoot the default range of 0.0 to 1.0.
+///
+/// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   CurvedAnimation({
     this.parent,
