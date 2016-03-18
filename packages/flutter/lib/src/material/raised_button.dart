@@ -24,8 +24,9 @@ import 'theme.dart';
 /// handler.
 ///
 /// See also:
+///
 ///  * [FlatButton] class
-///  * https://www.google.com/design/spec/components/buttons.html
+///  * <https://www.google.com/design/spec/components/buttons.html>
 class RaisedButton extends MaterialButton {
   RaisedButton({
     Key key,
