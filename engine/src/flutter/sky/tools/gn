@@ -97,6 +97,7 @@ def to_gn_args(args):
 
     gn_args['enable_firebase'] = args.enable_firebase
     gn_args['enable_gcm'] = args.enable_gcm
+    gn_args['enable_google_sign_in'] = args.enable_google_sign_in
     gn_args['use_glfw'] = args.use_glfw
 
     return gn_args
@@ -126,6 +127,7 @@ def parse_args(args):
 
   parser.add_argument('--enable-firebase', action='store_true', default=False)
   parser.add_argument('--enable-gcm', action='store_true', default=False)
+  parser.add_argument('--enable-google-sign-in', action='store_true', default=False)
   parser.add_argument('--use-glfw', action='store_true', default=False)
 
   return parser.parse_args(args)
