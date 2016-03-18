@@ -36,12 +36,12 @@ class MaterialApp extends WidgetsApp {
     bool showSemanticsDebugger: false,
     bool debugShowCheckedModeBanner: true
   }) : theme = theme,
+       routes = routes,
        super(
     key: key,
     title: title,
     textStyle: _errorTextStyle,
     color: theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
-    routes: routes,
     onGenerateRoute: (RouteSettings settings) {
       WidgetBuilder builder = routes[settings.name];
       if (builder != null) {
@@ -64,6 +64,8 @@ class MaterialApp extends WidgetsApp {
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
+
+  final Map<String, WidgetBuilder> routes;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps:
