@@ -306,17 +306,17 @@ class BoxConstraints extends Constraints {
   bool get debugAssertIsNormalized {
     assert(() {
       if (minWidth < 0.0 && minHeight < 0.0)
-        throw new RenderingError('BoxConstraints has both a negative minimum width and a negative minimum height.\n$this');
+        throw new FlutterError('BoxConstraints has both a negative minimum width and a negative minimum height.\n$this');
       if (minWidth < 0.0)
-        throw new RenderingError('BoxConstraints has a negative minimum width.\n$this');
+        throw new FlutterError('BoxConstraints has a negative minimum width.\n$this');
       if (minHeight < 0.0)
-        throw new RenderingError('BoxConstraints has a negative minimum height.\n$this');
+        throw new FlutterError('BoxConstraints has a negative minimum height.\n$this');
       if (maxWidth < minWidth && maxHeight < minHeight)
-        throw new RenderingError('BoxConstraints has both width and height constraints non-normalized.\n$this');
+        throw new FlutterError('BoxConstraints has both width and height constraints non-normalized.\n$this');
       if (maxWidth < minWidth)
-        throw new RenderingError('BoxConstraints has non-normalized width constraints.\n$this');
+        throw new FlutterError('BoxConstraints has non-normalized width constraints.\n$this');
       if (maxHeight < minHeight)
-        throw new RenderingError('BoxConstraints has non-normalized height constraints.\n$this');
+        throw new FlutterError('BoxConstraints has non-normalized height constraints.\n$this');
       return isNormalized;
     });
     return isNormalized;
@@ -636,7 +636,7 @@ abstract class RenderBox extends RenderObject {
         for (String line in description)
         information.writeln('  $line');
       }
-      throw new RenderingError(
+      throw new FlutterError(
         '$runtimeType object was given an infinite size during layout.\n'
         'This probably means that it is a render object that tries to be\n'
         'as big as possible, but it was put inside another render object\n'
@@ -647,7 +647,7 @@ abstract class RenderBox extends RenderObject {
     }
     // verify that the size is within the constraints
     if (!constraints.isSatisfiedBy(_size)) {
-      throw new RenderingError(
+      throw new FlutterError(
         '$runtimeType does not meet its constraints.\n'
         'Constraints: $constraints\n'
         'Size: $_size\n'
@@ -684,7 +684,7 @@ abstract class RenderBox extends RenderObject {
     RenderObject.debugCheckingIntrinsics = false;
     if (failures.isNotEmpty) {
       assert(failureCount > 0);
-      throw new RenderingError(
+      throw new FlutterError(
         'The intrinsic dimension methods of the $runtimeType class returned values that violate the given constraints.\n'
         'The constraints were: $constraints\n'
         'The following method${failureCount > 1 ? "s" : ""} returned values outside of those constraints:\n'

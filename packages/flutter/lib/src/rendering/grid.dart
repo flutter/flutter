@@ -399,7 +399,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   void set mainAxis(Axis value) {
     assert(() {
       if (value != Axis.vertical)
-        throw new RenderingError('RenderGrid doesn\'t yet support horizontal scrolling.');
+        throw new FlutterError('RenderGrid doesn\'t yet support horizontal scrolling.');
       return true;
     });
     super.mainAxis = value;

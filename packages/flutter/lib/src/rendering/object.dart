@@ -20,6 +20,7 @@ import 'binding.dart';
 
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
+export 'package:flutter/services.dart' show FlutterError;
 
 /// Base class for data associated with a [RenderObject] by its parent.
 ///
@@ -2088,14 +2089,4 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
     return result;
   }
-}
-
-/// Error thrown when the rendering library encounters a contract violation.
-class RenderingError extends AssertionError {
-  RenderingError(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
 }
