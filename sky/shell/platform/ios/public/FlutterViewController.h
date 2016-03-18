@@ -6,39 +6,16 @@
 #define FLUTTER_FLUTTERVIEWCONTROLLER_H_
 
 #include "FlutterMacros.h"
+#include "FlutterDartProject.h"
 
 #import <UIKit/UIKit.h>
 
 FLUTTER_EXPORT
 @interface FlutterViewController : UIViewController
 
-/**
- *  Initialize the view controller using the specified framework bundle
- *  containing the precompiled Dart code.
- *
- *  @param dartBundle the framework bundle containing the precompiled Dart code.
- *
- *  @return the initialized view controller.
- */
-- (instancetype)initWithDartBundle:(NSBundle*)dartBundle;
-
-/**
- *  Initialze the view controller using the specified framework bundle
- *  containing the precompiled dart code.
- *
- *  @param dartBundleOrNil the framework bundle containing the precompiled Dart
- *                         code.
- *  @param nibNameOrNil    the nib name.
- *  @param nibBundleOrNil  the bundle containing the nib.
- *
- *  @return the initialized view controller.
- *
- *  @discussion this is the designated initializer for this class. Subclasses
- *              must call this method during initialzation.
- */
-- (instancetype)initWithDartBundle:(NSBundle*)dartBundleOrNil
-                           nibName:(NSString*)nibNameOrNil
-                            bundle:(NSBundle*)nibBundleOrNil
+- (instancetype)initWithProject:(FlutterDartProject*)project
+                        nibName:(NSString*)nibNameOrNil
+                         bundle:(NSBundle*)nibBundleOrNil
     NS_DESIGNATED_INITIALIZER;
 
 @end

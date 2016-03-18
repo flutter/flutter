@@ -244,6 +244,10 @@ if (is_android) {
       sources = [
         "platform/ios/FlutterAppDelegate.h",
         "platform/ios/FlutterAppDelegate.mm",
+        "platform/ios/FlutterDartProject.mm",
+        "platform/ios/FlutterDartProject_Internal.h",
+        "platform/ios/FlutterDartSource.h",
+        "platform/ios/FlutterDartSource.mm",
         "platform/ios/FlutterDynamicServiceLoader.h",
         "platform/ios/FlutterDynamicServiceLoader.mm",
         "platform/ios/FlutterView.h",
@@ -251,10 +255,9 @@ if (is_android) {
         "platform/ios/FlutterViewController.mm",
         "platform/ios/flutter_touch_mapper.h",
         "platform/ios/flutter_touch_mapper.mm",
-        "platform/ios/framework/Info.plist",
-        "platform/ios/framework/module.modulemap",
         "platform/ios/main_ios.mm",
         "platform/ios/public/Flutter.h",
+        "platform/ios/public/FlutterDartProject.h",
         "platform/ios/public/FlutterMacros.h",
         "platform/ios/public/FlutterViewController.h",
       ]
