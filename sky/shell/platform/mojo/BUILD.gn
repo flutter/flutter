@@ -43,6 +43,7 @@ mojo_native_application("mojo") {
     "//sky/engine/public/sky",
     "//sky/engine/tonic",
     "//sky/engine/web",
+    "//sky/services/raw_keyboard:interfaces",
     "//sky/shell:common",
     "//sky/shell:gpu_mojo",
     "//third_party/icu",
