@@ -69,7 +69,8 @@ public class PlatformViewAndroid extends SurfaceView
 
     private long mNativePlatformView;
     private SkyEngine.Proxy mSkyEngine;
-    private PlatformServiceProvider mServiceProvider;
+    private ServiceProviderImpl mPlatformServiceProvider;
+    private ServiceProviderImpl mViewServiceProvider;
     private ServiceProvider.Proxy mDartServiceProvider;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
@@ -113,6 +114,14 @@ public class PlatformViewAndroid extends SurfaceView
 
         mKeyboardState = new KeyboardViewState(this);
         mRawKeyboardState = new RawKeyboardServiceState();
+
+        Core core = CoreImpl.getInstance();
+
+        mPlatformServiceProvider = new ServiceProviderImpl(core, getContext(), ServiceRegistry.SHARED);
+
+        ServiceRegistry localRegistry = new ServiceRegistry();
+        configureLocalServices(localRegistry);
+        mViewServiceProvider = new ServiceProviderImpl(core, getContext(), localRegistry);
 
         mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
 
@@ -334,34 +343,33 @@ public class PlatformViewAndroid extends SurfaceView
                 SkyEngine.MANAGER.getInterfaceRequest(core);
         mSkyEngine = engine.first;
         mNativePlatformView = nativeAttach(engine.second.passHandle().releaseNativeHandle());
+    }
 
-        ServiceRegistry localRegistry = new ServiceRegistry();
-        configureLocalServices(localRegistry);
-
-        mServiceProvider = new PlatformServiceProvider(core, getContext(), localRegistry);
+    private ServiceProvider.Proxy getServiceProviderProxy(Core core, ServiceProviderImpl impl) {
+        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
+                ServiceProvider.MANAGER.getInterfaceRequest(core);
+        ServiceProvider.MANAGER.bind(impl, serviceProvider.second);
+        return serviceProvider.first;
     }
 
     public void runFromBundle(String bundlePath, String snapshotPath) {
-
-        if (mServiceProvider != null) {
-            mServiceProvider.close();
+        if (mPlatformServiceProvider != null) {
+            mPlatformServiceProvider.close();
         }
         if (mDartServiceProvider != null) {
             mDartServiceProvider.close();
         }
 
         Core core = CoreImpl.getInstance();
-        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> serviceProvider =
-                ServiceProvider.MANAGER.getInterfaceRequest(core);
-        ServiceProvider.MANAGER.bind(mServiceProvider, serviceProvider.second);
 
         Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> dartServiceProvider =
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
         mDartServiceProvider = dartServiceProvider.first;
 
         ServicesData services = new ServicesData();
-        services.incomingServices = serviceProvider.first;
+        services.incomingServices = getServiceProviderProxy(core, mPlatformServiceProvider);
         services.outgoingServices = dartServiceProvider.second;
+        services.viewServices = getServiceProviderProxy(core, mViewServiceProvider);
         mSkyEngine.setServices(services);
 
         resetAccessibilityTree();

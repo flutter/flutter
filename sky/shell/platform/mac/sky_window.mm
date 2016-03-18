@@ -11,6 +11,7 @@
 #include "sky/shell/platform/mac/platform_mac.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
 #include "sky/shell/platform/mac/platform_service_provider.h"
+#include "sky/shell/platform/mac/view_service_provider.h"
 #include "sky/shell/shell_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/switches.h"
@@ -81,8 +82,13 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
   mojo::ServiceProviderPtr service_provider;
   new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider),
                                           base::Bind(DynamicServiceResolve));
+
+  mojo::ServiceProviderPtr view_service_provider;
+  new sky::shell::ViewServiceProvider(mojo::GetProxy(&view_service_provider));
+
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->incoming_services = service_provider.Pass();
+  services->view_services = view_service_provider.Pass();
   _sky_engine->SetServices(services.Pass());
 
   if (sky::shell::AttemptLaunchFromCommandLineSwitches(_sky_engine)) {

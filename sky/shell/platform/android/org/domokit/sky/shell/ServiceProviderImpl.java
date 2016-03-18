@@ -13,19 +13,19 @@ import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.mojo.ServiceProvider;
 
 /**
- * A collection of services implemented in Java.
+ * A collection of services.
  **/
-public class PlatformServiceProvider implements ServiceProvider {
+public class ServiceProviderImpl implements ServiceProvider {
     private Core mCore;
     private Context mContext;
-    private ServiceRegistry mLocalRegistry;
+    private ServiceRegistry mRegistry;
 
-    public PlatformServiceProvider(Core core, Context context, ServiceRegistry localRegistry) {
+    public ServiceProviderImpl(Core core, Context context, ServiceRegistry registry) {
         assert core != null;
         assert context != null;
         mCore = core;
         mContext = context;
-        mLocalRegistry = localRegistry;
+        mRegistry = registry;
     }
 
     @Override
@@ -36,10 +36,7 @@ public class PlatformServiceProvider implements ServiceProvider {
 
     @Override
     public void connectToService(String interfaceName, MessagePipeHandle pipe) {
-        ServiceFactory factory = mLocalRegistry.get(interfaceName);
-        if (factory == null) {
-            factory = ServiceRegistry.SHARED.get(interfaceName);
-        }
+        ServiceFactory factory = mRegistry.get(interfaceName);
         if (factory == null) {
             pipe.close();
             return;

@@ -24,11 +24,6 @@ void PlatformServiceProvider::ConnectToService(
     return;
   }
 #if TARGET_OS_IPHONE
-  if (service_name == ::editing::Keyboard::Name_) {
-    keyboard_.Create(
-        nullptr, mojo::MakeRequest<::editing::Keyboard>(client_handle.Pass()));
-    return;
-  }
   if (service_name == ::media::MediaPlayer::Name_) {
     media_player_.Create(
         nullptr, mojo::MakeRequest<::media::MediaPlayer>(client_handle.Pass()));
