@@ -57,8 +57,8 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
 ViewImpl::~ViewImpl() {
 }
 
-void ViewImpl::Run(base::FilePath flx_path) {
-  engine_->RunFromBundle(mojo::String(flx_path.value()));
+void ViewImpl::Run(base::FilePath bundle_path) {
+  engine_->RunFromBundle(url_, bundle_path.value());
 }
 
 void ViewImpl::OnLayout(mojo::ui::ViewLayoutParamsPtr layout_params,

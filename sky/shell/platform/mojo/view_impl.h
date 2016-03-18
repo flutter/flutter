@@ -28,7 +28,7 @@ class ViewImpl : public mojo::ui::ViewListener,
            const std::string& url);
   ~ViewImpl() override;
 
-  void Run(base::FilePath flx_path);
+  void Run(base::FilePath bundle_path);
 
  private:
   // mojo::ui::ViewListener

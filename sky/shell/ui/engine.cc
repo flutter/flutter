@@ -176,10 +176,9 @@ void Engine::RunFromLibrary(const std::string& name) {
 }
 
 void Engine::RunFromSnapshotStream(
-    const std::string& bundle_path,
+    const std::string& script_uri,
     mojo::ScopedDataPipeConsumerHandle snapshot) {
   TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
-  std::string script_uri = std::string("file://") + bundle_path;
   sky_view_ = blink::SkyView::Create(this);
   sky_view_->CreateView(script_uri);
   sky_view_->RunFromSnapshot(snapshot.Pass());
@@ -223,7 +222,8 @@ void Engine::RunFromFile(const mojo::String& main,
   RunFromLibrary(main);
 }
 
-void Engine::RunFromBundle(const mojo::String& path) {
+void Engine::RunFromBundle(const mojo::String& script_uri,
+                           const mojo::String& path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
 
   ConfigureZipAssetBundle(path);
@@ -231,10 +231,11 @@ void Engine::RunFromBundle(const mojo::String& path) {
   root_bundle_->GetAsStream(
       blink::kSnapshotAssetKey,
       base::Bind(&Engine::RunFromSnapshotStream, weak_factory_.GetWeakPtr(),
-                 std::string{path}));
+                 script_uri));
 }
 
-void Engine::RunFromBundleAndSnapshot(const mojo::String& bundle_path,
+void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
+                                      const mojo::String& bundle_path,
                                       const mojo::String& snapshot_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundleAndSnapshot");
 
@@ -247,7 +248,7 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& bundle_path,
   root_bundle_->GetAsStream(
       blink::kSnapshotAssetKey,
       base::Bind(&Engine::RunFromSnapshotStream, weak_factory_.GetWeakPtr(),
-                 std::string{bundle_path}));
+                 script_uri));
 }
 
 void Engine::PushRoute(const mojo::String& route) {

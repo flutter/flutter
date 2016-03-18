@@ -20,8 +20,8 @@ ApplicationImpl::ApplicationImpl(
 }
 
 ApplicationImpl::~ApplicationImpl() {
-  if (!flx_path_.empty()) {
-    base::DeleteFile(flx_path_, false);
+  if (!bundle_path_.empty()) {
+    base::DeleteFile(bundle_path_, false);
   }
 }
 
@@ -82,18 +82,18 @@ void ApplicationImpl::CreateView(
   services->services_provided_to_embedder = outgoing_services.Pass();
 
   ViewImpl* view = new ViewImpl(view_owner.Pass(), services.Pass(), url_);
-  view->Run(flx_path_);
+  view->Run(bundle_path_);
 }
 
 void ApplicationImpl::UnpackInitialResponse(mojo::Shell* shell) {
   DCHECK(initial_response_);
-  DCHECK(flx_path_.empty());
+  DCHECK(bundle_path_.empty());
 
-  if (!base::CreateTemporaryFile(&flx_path_)) {
+  if (!base::CreateTemporaryFile(&bundle_path_)) {
     LOG(ERROR) << "Unable to create temporary file";
     return;
   }
-  FILE* temp_file = base::OpenFile(flx_path_, "w");
+  FILE* temp_file = base::OpenFile(bundle_path_, "w");
   if (temp_file == nullptr) {
     LOG(ERROR) << "Unable to open temporary file";
     return;

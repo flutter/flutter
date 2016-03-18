@@ -366,10 +366,11 @@ public class PlatformViewAndroid extends SurfaceView
 
         resetAccessibilityTree();
 
+        String scriptUri = "file://" + bundlePath;
         if (snapshotPath != null) {
-            mSkyEngine.runFromBundleAndSnapshot(bundlePath, snapshotPath);
+            mSkyEngine.runFromBundleAndSnapshot(scriptUri, bundlePath, snapshotPath);
         } else {
-            mSkyEngine.runFromBundle(bundlePath);
+            mSkyEngine.runFromBundle(scriptUri, bundlePath);
         }
     }
 
