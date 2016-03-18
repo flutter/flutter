@@ -1161,6 +1161,12 @@ class IndexedStack extends StackRenderObjectWidgetBase {
 /// to its enclosing [Stack] must contain only [StatelessWidget]s or
 /// [StatefulWidget]s (not other kinds of widgets, like [RenderObjectWidget]s).
 class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
+  /// Creates a Positioned object with the given values.
+  ///
+  /// Only two out of the three horizontal values ([left], [right],
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
   Positioned({
     Key key,
     Widget child,
@@ -1175,6 +1181,11 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
     assert(top == null || bottom == null || height == null);
   }
 
+  /// Creates a Positioned object with the values from the given [Rect].
+  ///
+  /// This sets the [left], [top], [width], and [height] properties
+  /// from the given [Rect]. The [right] and [bottom] properties are
+  /// set to null.
   Positioned.fromRect({
     Key key,
     Widget child,
@@ -1187,27 +1198,39 @@ class Positioned extends ParentDataWidget<StackRenderObjectWidgetBase> {
        bottom = null,
        super(key: key, child: child);
 
-  /// The offset of the child's left edge from the left of the stack.
+  /// The distance that the child's left edge is inset from the left of the stack.
+  ///
+  /// Only two out of the three horizontal values ([left], [right], [width]) can be
+  /// set. The third must be null.
   final double left;
 
-  /// The offset of the child's top edge from the top of the stack.
+  /// The distance that the child's top edge is inset from the top of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
   final double top;
 
-  /// The offset of the child's right edge from the right of the stack.
+  /// The distance that the child's right edge is inset from the right of the stack.
+  ///
+  /// Only two out of the three horizontal values ([left], [right], [width]) can be
+  /// set. The third must be null.
   final double right;
 
-  /// The offset of the child's bottom edge from the bottom of the stack.
+  /// The distance that the child's bottom edge is inset from the bottom of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
   final double bottom;
 
   /// The child's width.
   ///
-  /// Only two out of the three horizontal values (left, right, width) can be
+  /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
   final double width;
 
   /// The child's height.
   ///
-  /// Only two out of the three vertical values (top, bottom, height) can be
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
   final double height;
 
