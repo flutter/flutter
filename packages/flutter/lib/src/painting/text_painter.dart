@@ -221,6 +221,22 @@ class TextSpan {
 }
 
 /// An object that paints a [TextSpan] tree into a [Canvas].
+///
+/// To use a [TextPainter], follow these steps:
+///
+/// 1. Create a [TextSpan] tree and pass it to the [TextPainter]
+///    constructor.
+///
+/// 2. Set the [maxWidth] property of the [TextPainter] to the width
+///    of the area into which the text should be painted.
+///
+/// 3. Call [layout] to prepare the paragraph.
+///
+/// 4. Call [paint] as often as desired to paint the paragraph.
+///
+/// If the width of the area into which the text is being painted
+/// changes, return to step 2. If the text to be painted changes,
+/// return to step 1.
 class TextPainter {
   TextPainter([ TextSpan text ]) {
     this.text = text;
