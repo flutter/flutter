@@ -424,6 +424,7 @@ void InitDartVM() {
                           nullptr,  // Isolate interrupt callback.
                           nullptr,
                           IsolateShutdownCallback,
+                          nullptr,
                           // File IO callbacks.
                           nullptr, nullptr, nullptr, nullptr,
                           // Entroy source
