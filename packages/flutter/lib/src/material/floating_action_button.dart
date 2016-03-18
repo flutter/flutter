@@ -31,8 +31,7 @@ const Interval _kChildSegueInterval = const Interval(0.65, 1.0);
 /// If the [onPressed] callback is not specified or null, then the button will
 /// be disabled, will not react to touch.
 ///
-/// See also:
-///  * https://www.google.com/design/spec/components/buttons-floating-action-button.html
+/// See also: <https://www.google.com/design/spec/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
   const FloatingActionButton({
     Key key,
