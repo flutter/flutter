@@ -10,11 +10,44 @@
 
 namespace sky {
 namespace shell {
+namespace {
+
+sky::InputEventPtr ConvertKeyEvent(mojo::EventPtr event) {
+  if (!event->key_data)
+    return nullptr;
+  sky::InputEventPtr result = sky::InputEvent::New();
+  result->time_stamp = event->time_stamp;
+  switch (event->action) {
+    case mojo::EventType::KEY_PRESSED:
+      result->type = sky::EventType::KEY_PRESSED;
+      break;
+    case mojo::EventType::KEY_RELEASED:
+      result->type = sky::EventType::KEY_RELEASED;
+      break;
+    default:
+      return nullptr;
+  }
+  result->key_data = sky::KeyData::New();
+  result->key_data->key_code = event->key_data->key_code;
+  if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::SHIFT_DOWN))
+    result->key_data->meta_state |= 0x00000001;
+  if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::CONTROL_DOWN))
+    result->key_data->meta_state |= 0x00001000;
+  if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::ALT_DOWN))
+    result->key_data->meta_state |= 0x00000002;
+
+  return result.Pass();
+}
+
+}  // namespace
 
 ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
                    ServicesDataPtr services,
                    const std::string& url)
-    : binding_(this), url_(url), listener_binding_(this) {
+    : binding_(this),
+      url_(url),
+      listener_binding_(this),
+      view_services_binding_(this) {
   DCHECK(services);
 
   // Once we're done invoking |Shell|, we put it back inside |services| and pass
@@ -50,7 +83,11 @@ ViewImpl::ViewImpl(mojo::InterfaceRequest<mojo::ui::ViewOwner> view_owner,
   shell->CreateApplicationConnector(mojo::GetProxy(&connector));
   platform_view()->InitRasterizer(connector.Pass(), scene.Pass());
 
+  mojo::ServiceProviderPtr view_services;
+  view_services_binding_.Bind(mojo::GetProxy(&view_services));
+
   services->shell = shell.Pass();
+  services->view_services = view_services.Pass();
   engine_->SetServices(services.Pass());
 }
 
@@ -96,10 +133,32 @@ void ViewImpl::OnEvent(mojo::EventPtr event, const OnEventCallback& callback) {
       }
       break;
     }
+    case mojo::EventType::KEY_PRESSED:
+    case mojo::EventType::KEY_RELEASED: {
+      auto sky_event = ConvertKeyEvent(event.Pass());
+      for (auto& listener : raw_keyboard_listeners_)
+        listener->OnKey(sky_event.Clone());
+      break;
+    }
     default:
       break;
   }
   callback.Run(consumed);
+}
+
+void ViewImpl::ConnectToService(const mojo::String& service_name,
+                                mojo::ScopedMessagePipeHandle handle) {
+  if (service_name == raw_keyboard::RawKeyboardService::Name_) {
+    raw_keyboard_bindings_.AddBinding(
+        this,
+        mojo::MakeRequest<raw_keyboard::RawKeyboardService>(handle.Pass()));
+  }
+}
+
+void ViewImpl::AddListener(
+    mojo::InterfaceHandle<raw_keyboard::RawKeyboardListener> listener) {
+  raw_keyboard_listeners_.push_back(
+      raw_keyboard::RawKeyboardListenerPtr::Create(listener.Pass()));
 }
 
 }  // namespace shell
