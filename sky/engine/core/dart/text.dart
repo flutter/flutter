@@ -550,8 +550,8 @@ class TextPosition {
 ///
 /// To create a Paragraph object, use a [ParagraphBuilder].
 ///
-/// Paragraph objects can be displayed on a [Canvas] using the [paint]
-/// method.
+/// Paragraph objects can be displayed on a [Canvas] using the
+/// [Canvas.drawParagraph] method.
 abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// Creates an uninitialized Paragraph object.
   ///
@@ -611,11 +611,6 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// invalidates the layout of this paragraph, requiring a call to this
   /// function before painting or reading geometry from this paragraph.
   void layout() native "Paragraph_layout";
-
-  /// Draws the text in this paragraph into the given canvas at the given offset.
-  ///
-  /// Valid only after [layout] has been called.
-  void paint(Canvas canvas, Offset offset) native "Paragraph_paint";
 
   /// Returns a list of text boxes that enclose the given text range.
   List<TextBox> getBoxesForRange(int start, int end) native "Paragraph_getRectsForRange";

@@ -407,6 +407,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// [PictureRecorder].
   void drawPicture(Picture picture) native "Canvas_drawPicture";
 
+  /// Draws the text in the given paragraph into this canvas at the given offset.
+  ///
+  /// Valid only after [Paragraph.layout] has been called on the paragraph.
   void drawParagraph(Paragraph paragraph, Offset offset) native "Canvas_drawParagraph";
 
   void drawVertices(VertexMode vertexMode,
