@@ -219,7 +219,12 @@ class DropDownMenuItem<T> extends StatelessWidget {
     this.child
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
+  /// The value to return if the user selects this menu item.
+  ///
+  /// Eventually returned in a call to [DropDownButton.onChanged].
   final T value;
 
   @override

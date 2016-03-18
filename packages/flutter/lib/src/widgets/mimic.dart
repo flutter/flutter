@@ -144,6 +144,7 @@ class Mimic extends StatelessWidget {
 class Mimicable extends StatefulWidget {
   Mimicable({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

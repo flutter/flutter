@@ -22,6 +22,7 @@ class Title extends StatelessWidget {
   /// A color that the window manager should use to identify this app.
   final Color color;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

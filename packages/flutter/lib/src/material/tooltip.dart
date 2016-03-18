@@ -50,18 +50,32 @@ class Tooltip extends StatefulWidget {
   }
 
   final String message;
+
   final Color backgroundColor;
+
   final Color textColor;
+
   final TextStyle style;
+
   final double opacity;
+
   final double borderRadius;
+
   final double height;
+
   final EdgeInsets padding;
+
   final double verticalOffset;
+
   final EdgeInsets screenEdgeMargin;
+
   final bool preferBelow;
+
   final Duration fadeDuration;
+
   final Duration showDuration;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

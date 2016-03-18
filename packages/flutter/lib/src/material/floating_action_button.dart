@@ -44,16 +44,25 @@ class FloatingActionButton extends StatefulWidget {
     this.mini: false
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final String tooltip;
+
+  /// The color to use when filling the button.
+  ///
+  /// Defaults to the accent color of the current theme.
   final Color backgroundColor;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
   final int elevation;
+
   final int highlightElevation;
+
   final bool mini;
 
   @override

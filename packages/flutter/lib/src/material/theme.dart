@@ -66,8 +66,10 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     assert(data != null);
   }
 
+  /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

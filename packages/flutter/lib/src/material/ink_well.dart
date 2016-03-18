@@ -36,12 +36,19 @@ class InkResponse extends StatefulWidget {
     this.highlightShape: BoxShape.circle
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final GestureTapCallback onTap;
+
   final GestureTapCallback onDoubleTap;
+
   final GestureLongPressCallback onLongPress;
+
   final ValueChanged<bool> onHighlightChanged;
+
   final bool containedInWell;
+
   final BoxShape highlightShape;
 
   @override

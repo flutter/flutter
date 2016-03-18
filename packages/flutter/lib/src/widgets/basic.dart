@@ -971,7 +971,7 @@ class Container extends StatelessWidget {
     assert(decoration == null || decoration.debugAssertValid());
   }
 
-  /// The child to contain in the container.
+  /// The child contained by the container.
   ///
   /// If null, the container will expand to fill all available space in its parent.
   final Widget child;
@@ -2502,6 +2502,7 @@ class KeyedSubtree extends StatelessWidget {
   KeyedSubtree({ Key key, this.child })
     : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

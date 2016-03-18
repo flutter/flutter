@@ -60,6 +60,7 @@ class CheckedModeBanner extends StatelessWidget {
     this.child
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

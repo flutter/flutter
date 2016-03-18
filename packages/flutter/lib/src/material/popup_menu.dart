@@ -65,6 +65,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   @override
   final bool enabled;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -395,10 +396,16 @@ class PopupMenuButton<T> extends StatefulWidget {
   }) : super(key: key);
 
   final List<PopupMenuEntry<T>> items;
+
   final T initialValue;
+
   final PopupMenuItemSelected<T> onSelected;
+
   final String tooltip;
+
   final int elevation;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

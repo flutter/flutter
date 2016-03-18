@@ -630,6 +630,7 @@ class ScrollableViewport extends Scrollable {
     onScrollEnd: onScrollEnd
   );
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

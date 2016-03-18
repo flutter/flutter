@@ -20,7 +20,10 @@ class RawKeyboardListener extends StatefulWidget {
   }
 
   final bool focused;
+
   final ValueChanged<mojom.InputEvent> onKey;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

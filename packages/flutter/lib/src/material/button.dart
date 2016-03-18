@@ -50,9 +50,13 @@ abstract class MaterialButton extends StatefulWidget {
     this.onPressed
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final ButtonColor textTheme;
+
   final Color textColor;
+
   final Color disabledTextColor;
 
   /// The callback that is invoked when the button is tapped or otherwise activated.

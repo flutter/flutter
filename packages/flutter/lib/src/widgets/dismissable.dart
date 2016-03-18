@@ -68,6 +68,7 @@ class Dismissable extends StatefulWidget {
     assert(secondaryBackground != null ? background != null : true);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// A widget that is stacked behind the child. If secondaryBackground is also

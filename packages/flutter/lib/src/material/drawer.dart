@@ -34,6 +34,8 @@ class Drawer extends StatelessWidget {
   }) : super(key: key);
 
   final int elevation;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

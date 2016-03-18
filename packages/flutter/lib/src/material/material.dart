@@ -86,10 +86,15 @@ class Material extends StatefulWidget {
     assert(elevation != null);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final MaterialType type;
+
   final int elevation;
+
   final Color color;
+
   final TextStyle textStyle;
 
   /// The ink controller from the closest instance of this class that encloses the given context.

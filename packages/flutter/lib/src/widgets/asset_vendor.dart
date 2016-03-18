@@ -206,8 +206,12 @@ class AssetVendor extends StatefulWidget {
   }) : super(key: key);
 
   final AssetBundle bundle;
+
   final double devicePixelRatio;
+
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final ImageDecoder imageDecoder;
 
   @override
