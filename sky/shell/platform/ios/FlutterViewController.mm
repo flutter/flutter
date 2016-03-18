@@ -16,6 +16,8 @@
 #include "sky/shell/platform/ios/FlutterView.h"
 #include "sky/shell/platform/mac/platform_mac.h"
 #include "sky/shell/platform/mac/platform_view_mac.h"
+#include "sky/shell/platform/mac/platform_service_provider.h"
+#include "sky/shell/platform/mac/view_service_provider.h"
 #include "sky/shell/platform_view.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/shell_view.h"
@@ -178,8 +180,12 @@ static void DynamicServiceResolve(void* baton,
   new sky::shell::PlatformServiceProvider(serviceProviderProxy.Pass(),
                                           serviceResolutionCallback);
 
+  mojo::ServiceProviderPtr viewServiceProvider;
+  new sky::shell::ViewServiceProvider(mojo::GetProxy(&viewServiceProvider));
+
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->incoming_services = serviceProvider.Pass();
+  services->view_services = viewServiceProvider.Pass();
   _engine->SetServices(services.Pass());
 }
 

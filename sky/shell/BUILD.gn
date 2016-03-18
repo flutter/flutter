@@ -160,11 +160,11 @@ if (is_android) {
   android_library("java") {
     java_files = [
       "platform/android/org/domokit/sky/shell/FlutterSemanticsToAndroidAccessibilityBridge.java",
-      "platform/android/org/domokit/sky/shell/PlatformServiceProvider.java",
       "platform/android/org/domokit/sky/shell/PlatformViewAndroid.java",
       "platform/android/org/domokit/sky/shell/ResourceCleaner.java",
       "platform/android/org/domokit/sky/shell/ResourceExtractor.java",
       "platform/android/org/domokit/sky/shell/ServiceFactory.java",
+      "platform/android/org/domokit/sky/shell/ServiceProviderImpl.java",
       "platform/android/org/domokit/sky/shell/ServiceRegistry.java",
       "platform/android/org/domokit/sky/shell/SkyActivity.java",
       "platform/android/org/domokit/sky/shell/SkyApplication.java",
@@ -270,6 +270,8 @@ if (is_android) {
         "platform/mac/platform_service_provider.h",
         "platform/mac/platform_view_mac.h",
         "platform/mac/platform_view_mac.mm",
+        "platform/mac/view_service_provider.cc",
+        "platform/mac/view_service_provider.h",
       ]
       set_sources_assignment_filter(sources_assignment_filter)
 
@@ -428,6 +430,8 @@ if (is_android) {
       "platform/mac/sky_application.mm",
       "platform/mac/sky_window.h",
       "platform/mac/sky_window.mm",
+      "platform/mac/view_service_provider.cc",
+      "platform/mac/view_service_provider.h",
     ]
 
     deps = [
