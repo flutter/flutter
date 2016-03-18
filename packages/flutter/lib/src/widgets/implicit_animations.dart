@@ -20,13 +20,7 @@ class DecorationTween extends Tween<Decoration> {
   DecorationTween({ Decoration begin, Decoration end }) : super(begin: begin, end: end);
 
   @override
-  Decoration lerp(double t) {
-    if (begin == null && end == null)
-      return null;
-    if (end == null)
-      return begin.lerpTo(end, t);
-    return end.lerpFrom(begin, t);
-  }
+  Decoration lerp(double t) => Decoration.lerp(begin, end, t);
 }
 
 /// An interpolation between two [EdgeInsets]s.
