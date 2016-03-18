@@ -27,33 +27,36 @@ static void DrawStatisticsText(SkCanvas& canvas,
 
 static void VisualizeStopWatch(SkCanvas& canvas,
                                const instrumentation::Stopwatch& stopwatch,
+                               SkScalar x,
+                               SkScalar y,
                                SkScalar width,
+                               SkScalar height,
                                bool show_graph,
                                bool show_labels,
                                std::string label_prefix) {
-  const int x = 8;
-  const int y = 70;
-  const int height = 80;
+  const int labelX = 8; // distance from x
+  const int labelY = -10; // distance from y+height
 
   if (show_graph) {
-    SkRect visualizationRect = SkRect::MakeWH(width, height);
+    SkRect visualizationRect = SkRect::MakeXYWH(x, y, width, height);
     stopwatch.visualize(canvas, visualizationRect);
   }
 
   if (show_labels) {
-    double msPerFrame = stopwatch.lastLap().InMillisecondsF();
-    double fps = 1e3 / msPerFrame;
+    double msPerFrame = stopwatch.maxDelta().InMillisecondsF();
+    double fps;
+    if (msPerFrame < instrumentation::kOneFrameMS) {
+      fps = 1e3 / instrumentation::kOneFrameMS; 
+    } else {
+      fps = 1e3 / msPerFrame;
+    }
 
     std::stringstream stream;
     stream.setf(std::ios::fixed | std::ios::showpoint);
-    stream << std::setprecision(2);
-    stream << label_prefix << " " << fps << " FPS | " << msPerFrame
-           << "ms/frame";
-    DrawStatisticsText(canvas, stream.str(), x, y);
-  }
-
-  if (show_labels || show_graph) {
-    canvas.translate(0, height);
+    stream << std::setprecision(1);
+    stream << label_prefix << "  " << fps        << " fps  "
+                                   << msPerFrame << "ms/frame";
+    DrawStatisticsText(canvas, stream.str(), x + labelX, y + height + labelY);
   }
 }
 
@@ -62,15 +65,20 @@ void PerformanceOverlayLayer::Paint(PaintContext::ScopedFrame& frame) {
     return;
   }
 
-  SkScalar width = has_paint_bounds() ? paint_bounds().width() : 0;
+  SkScalar x = paint_bounds().x();
+  SkScalar y = paint_bounds().y();
+  SkScalar width = paint_bounds().width();
+  SkScalar height = paint_bounds().height() / 2;
   SkAutoCanvasRestore save(&frame.canvas(), true);
 
-  VisualizeStopWatch(frame.canvas(), frame.context().frame_time(), width,
+  VisualizeStopWatch(frame.canvas(), frame.context().frame_time(),
+                     x, y, width, height,
                      options_ & kVisualizeRasterizerStatistics,
                      options_ & kDisplayRasterizerStatistics,
                      "Rasterizer");
 
-  VisualizeStopWatch(frame.canvas(), frame.context().engine_time(), width,
+  VisualizeStopWatch(frame.canvas(), frame.context().engine_time(),
+                     x, y + height, width, height,
                      options_ & kVisualizeEngineStatistics,
                      options_ & kDisplayEngineStatistics,
                      "Engine");
