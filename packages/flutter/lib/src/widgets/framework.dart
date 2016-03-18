@@ -554,6 +554,7 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   const SingleChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

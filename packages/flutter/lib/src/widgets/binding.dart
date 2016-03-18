@@ -189,8 +189,11 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
     this.debugShortDescription
   }) : container = container, super(key: new GlobalObjectKey(container));
 
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final RenderObjectWithChildMixin<T> container;
+
   final String debugShortDescription;
 
   @override

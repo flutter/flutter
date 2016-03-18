@@ -71,6 +71,7 @@ class GridPaper extends StatelessWidget {
   /// The number of minor divisions within each major division.
   final int subDivisions;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

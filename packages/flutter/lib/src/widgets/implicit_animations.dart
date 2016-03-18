@@ -206,6 +206,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     assert(padding == null || padding.isNonNegative);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// Additional constraints to apply to the child.
@@ -352,6 +353,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
        bottom = null,
        super(key: key, curve: curve, duration: duration);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.

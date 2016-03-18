@@ -103,6 +103,7 @@ class SlideTransition extends AnimatedWidget {
   /// location and you want the user to benefit from "muscle memory".
   final bool transformHitTests;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -137,6 +138,7 @@ class ScaleTransition extends AnimatedWidget {
   /// an alignment of (0.5, 1.0).
   final FractionalOffset alignment;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -166,6 +168,7 @@ class RotationTransition extends AnimatedWidget {
   /// rotated v * 2 * pi radians before being painted.
   final Animation<double> turns;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -203,6 +206,7 @@ class SizeTransition extends AnimatedWidget {
   /// How to align the child along the axis that sizeFactor is modifying.
   final double axisAlignment;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -239,6 +243,7 @@ class FadeTransition extends AnimatedWidget {
   /// completely transparent.
   final Animation<double> opacity;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -277,6 +282,7 @@ class PositionedTransition extends AnimatedWidget {
   /// The animation that controls the child's size and position.
   final Animation<RelativeRect> rect;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

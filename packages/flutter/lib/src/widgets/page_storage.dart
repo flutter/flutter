@@ -96,6 +96,7 @@ class PageStorage extends StatelessWidget {
     this.bucket
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// The page storage bucket to use for this subtree.

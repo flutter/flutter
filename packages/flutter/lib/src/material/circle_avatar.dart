@@ -23,6 +23,7 @@ class CircleAvatar extends StatelessWidget {
     this.radius: 40.0
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// The color with which to fill the circle. Changing the background

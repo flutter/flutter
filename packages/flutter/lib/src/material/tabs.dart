@@ -429,8 +429,12 @@ class TabBarSelection<T> extends StatefulWidget {
   }
 
   final T value;
+
   List<T> values;
+
   final ValueChanged<T> onChanged;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

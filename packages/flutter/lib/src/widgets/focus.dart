@@ -101,6 +101,7 @@ class Focus extends StatefulWidget {
     assert(key != null);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// The key that currently has focus globally in the entire focus tree.

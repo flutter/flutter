@@ -53,6 +53,8 @@ abstract class DraggableBase<T> extends StatefulWidget {
   }
 
   final T data;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// The widget to show instead of [child] when a drag is under way.

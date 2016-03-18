@@ -14,6 +14,7 @@ import 'theme.dart';
 class DrawerHeader extends StatelessWidget {
   const DrawerHeader({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

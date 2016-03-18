@@ -88,7 +88,10 @@ class Hero extends StatefulWidget {
   }
 
   final Object tag;
+
+  /// The widget below this widget in the tree.
   final Widget child;
+
   final int turns;
 
   /// If true, the hero will always animate, even if it has no matching hero to

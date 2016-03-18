@@ -97,6 +97,7 @@ class GestureDetector extends StatelessWidget {
     });
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   /// A pointer that might cause a tap has contacted the screen at a particular
@@ -289,6 +290,7 @@ class RawGestureDetector extends StatefulWidget {
     assert(excludeFromSemantics != null);
   }
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   final Map<Type, GestureRecognizerFactory> gestures;

@@ -18,6 +18,7 @@ import 'gesture_detector.dart';
 class SemanticsDebugger extends StatefulWidget {
   const SemanticsDebugger({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
