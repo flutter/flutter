@@ -59,7 +59,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mo
       return;
     _stub = new mojom.RawKeyboardListenerStub.unbound()..impl = this;
     mojom.RawKeyboardServiceProxy keyboard = new mojom.RawKeyboardServiceProxy.unbound();
-    shell.connectToService(null, keyboard);
+    shell.connectToViewAssociatedService(keyboard);
     keyboard.ptr.addListener(_stub);
     keyboard.close();
   }

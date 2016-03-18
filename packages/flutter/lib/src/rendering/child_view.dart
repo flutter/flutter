@@ -18,7 +18,7 @@ import 'box.dart';
 import 'object.dart';
 
 mojom.ViewProxy _initViewProxy() {
-  int viewHandle = ui.takeViewHandle();
+  int viewHandle = ui.MojoServices.takeView();
   if (viewHandle == core.MojoHandle.INVALID)
     return null;
   return new mojom.ViewProxy.fromHandle(new core.MojoHandle(viewHandle));
