@@ -30,7 +30,7 @@ class MojoShell {
   static MojoShell _instance;
 
   static mojom.ShellProxy _initShellProxy() {
-    core.MojoHandle shellHandle = new core.MojoHandle(ui.takeShellProxyHandle());
+    core.MojoHandle shellHandle = new core.MojoHandle(ui.MojoServices.takeShell());
     if (!shellHandle.isValid)
       return null;
     return new mojom.ShellProxy.fromHandle(shellHandle);
@@ -38,13 +38,13 @@ class MojoShell {
   final mojom.Shell _shell = _initShellProxy()?.ptr;
 
   static ApplicationConnection _initEmbedderConnection() {
-    core.MojoHandle servicesHandle = new core.MojoHandle(ui.takeServicesProvidedByEmbedder());
-    core.MojoHandle exposedServicesHandle = new core.MojoHandle(ui.takeServicesProvidedToEmbedder());
-    if (!servicesHandle.isValid || !exposedServicesHandle.isValid)
+    core.MojoHandle incomingServicesHandle = new core.MojoHandle(ui.MojoServices.takeIncomingServices());
+    core.MojoHandle outgoingServicesHandle = new core.MojoHandle(ui.MojoServices.takeOutgoingServices());
+    if (!incomingServicesHandle.isValid || !outgoingServicesHandle.isValid)
       return null;
-    mojom.ServiceProviderProxy services = new mojom.ServiceProviderProxy.fromHandle(servicesHandle);
-    mojom.ServiceProviderStub exposedServices = new mojom.ServiceProviderStub.fromHandle(exposedServicesHandle);
-    return new ApplicationConnection(exposedServices, services);
+    mojom.ServiceProviderProxy incomingServices = new mojom.ServiceProviderProxy.fromHandle(incomingServicesHandle);
+    mojom.ServiceProviderStub outgoingServices = new mojom.ServiceProviderStub.fromHandle(outgoingServicesHandle);
+    return new ApplicationConnection(outgoingServices, incomingServices);
   }
   final ApplicationConnection _embedderConnection = _initEmbedderConnection();
 
@@ -90,6 +90,24 @@ class MojoShell {
     proxy.impl.bind(pipe.endpoints[0]);
     services.ptr.connectToService(proxy.serviceName, pipe.endpoints[1]);
     services.close();
+  }
+
+  static mojom.ServiceProviderProxy _takeViewServices() {
+    core.MojoHandle services = new core.MojoHandle(ui.MojoServices.takeViewServices());
+    if (!services.isValid)
+      return null;
+    return new mojom.ServiceProviderProxy.fromHandle(services);
+  }
+  final mojom.ServiceProviderProxy _viewServices = _takeViewServices();
+
+  void connectToViewAssociatedService(bindings.ProxyBase proxy) {
+    if (overrideConnectToService != null && overrideConnectToService(null, proxy))
+      return;
+    if (_viewServices == null)
+      return;
+    core.MojoMessagePipe pipe = new core.MojoMessagePipe();
+    proxy.impl.bind(pipe.endpoints[0]);
+    _viewServices.ptr.connectToService(proxy.serviceName, pipe.endpoints[1]);
   }
 
   /// Registers a service to expose to the embedder.
