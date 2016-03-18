@@ -30,11 +30,11 @@ const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
 const double _kTabBarScrollDrag = 0.025;
-const Duration _kTabBarScroll = const Duration(milliseconds: 300);
+const Duration _kTabBarScroll = const Duration(milliseconds: 200);
 
 // Curves for the leading and trailing edge of the selected tab indicator.
-const Curve _kTabIndicatorLeadingCurve = const Interval(0.0, 0.6, curve: Curves.easeOut);
-const Curve _kTabIndicatorTrailingCurve = const Interval(0.3, 1.0, curve: Curves.easeIn);
+const Curve _kTabIndicatorLeadingCurve = Curves.easeOut;
+const Curve _kTabIndicatorTrailingCurve = Curves.easeIn;
 
 // The scrollOffset (velocity) provided to fling() is pixels/ms, and the
 // tolerance velocity is pixels/sec.
