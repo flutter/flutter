@@ -8,8 +8,10 @@
 /// engine's painting API for more specialised purposes, such as painting scaled
 /// images, interpolating between shadows, painting borders around boxes, etc.
 ///
-/// This library depends only on the core Dart libraries and animation.dart.
-/// Note: animation.dart depends on the `newton` package.
+/// In particular:
+///  * Use the [TextPainter] class for painting text.
+///  * Use [Decoration] (and more concretely [BoxDecoration]) for
+///    painting boxes.
 library painting;
 
 export 'src/painting/basic_types.dart';

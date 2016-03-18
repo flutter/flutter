@@ -844,6 +844,8 @@ class BoxDecoration extends Decoration {
   /// Linearly interpolate between two box decorations.
   ///
   /// Interpolates each parameter of the box decoration separately.
+  ///
+  /// See also [Decoration.lerp].
   static BoxDecoration lerp(BoxDecoration a, BoxDecoration b, double t) {
     if (a == null && b == null)
       return null;
@@ -933,6 +935,11 @@ class BoxDecoration extends Decoration {
     return result.join('\n');
   }
 
+  /// Whether this [Decoration] subclass needs its painters to use
+  /// [addChangeListener] to listen for updates.
+  ///
+  /// [BoxDecoration] objects only need a listener if they have a
+  /// background image.
   @override
   bool get needsListeners => backgroundImage != null;
 
@@ -951,6 +958,8 @@ class BoxDecoration extends Decoration {
     // In principle, we should use shortestSide / 2.0, but we don't want to
     // run into floating point rounding errors. Instead, we just use
     // shortestSide and let Canvas do any remaining clamping.
+    // The right long-term fix is to do layout using fixed precision
+    // arithmetic. (see also "_applyFloatingPointHack")
     return borderRadius > shortestSide ? shortestSide : borderRadius;
   }
 
