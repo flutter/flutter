@@ -80,7 +80,8 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
   // Prepare a path for the data.
   // we start at the height of the last point, so it looks like we wrap around
   SkPath path;
-  const double sampleMarginUnitWidth = (1.0 / kMaxSamples) / 6.0;
+  const double sampleUnitWidth = (1.0 / kMaxSamples);
+  const double sampleMarginUnitWidth = sampleUnitWidth / 6.0;
   const double sampleMarginWidth = width * sampleMarginUnitWidth;
   path.moveTo(x, bottom);
   path.lineTo(x, y + height * (1.0 - UnitHeight(_laps[0].InMillisecondsF(),
@@ -127,7 +128,9 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
     }
   }
 
-  // Paint the vertical marker for the last frame.
+  // Paint the vertical marker for the current frame.
+  // We paint it over the current frame, not after it, because when we
+  // paint this we don't yet have all the times for the current frame.
   paint.setStyle(SkPaint::Style::kFill_Style);
   if (UnitFrameInterval(lastLap().InMillisecondsF()) > 1.0) {
     // budget exceeded
@@ -136,9 +139,9 @@ void Stopwatch::visualize(SkCanvas& canvas, const SkRect& rect) const {
     // within budget
     paint.setColor(SK_ColorGREEN);
   }
-  double sampleX = x + width * (static_cast<double>(_current_sample + 1) / kMaxSamples)
+  double sampleX = x + width * (static_cast<double>(_current_sample) / kMaxSamples)
                      - sampleMarginWidth;
-  canvas.drawRectCoords(sampleX, y, sampleX + sampleMarginWidth * 2.0, bottom, paint);
+  canvas.drawRectCoords(sampleX, y, sampleX + width * sampleUnitWidth + sampleMarginWidth * 2, bottom, paint);
 }
 
 Stopwatch::~Stopwatch() = default;
