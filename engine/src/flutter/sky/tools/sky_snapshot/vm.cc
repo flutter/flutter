@@ -24,7 +24,7 @@ void InitDartVM() {
   CHECK(Dart_Initialize(
             reinterpret_cast<uint8_t*>(&kDartVmIsolateSnapshotBuffer), nullptr,
             nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-            nullptr, nullptr, nullptr, nullptr) == nullptr);
+            nullptr, nullptr, nullptr, nullptr, nullptr) == nullptr);
 }
 
 Dart_Isolate CreateDartIsolate() {
