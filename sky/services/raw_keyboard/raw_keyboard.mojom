@@ -7,7 +7,6 @@ module raw_keyboard;
 
 import "sky/services/engine/input_event.mojom";
 
-[ServiceName="raw_keyboard::RawKeyboardListener"]
 interface RawKeyboardListener {
   OnKey(sky.InputEvent event);
 };
