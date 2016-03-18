@@ -236,8 +236,8 @@ class Icons {
   /// <p><i class="material-icons md-48">audiotrack</i> &#x2014; material icon named "audiotrack".</p>
   static const IconData audiotrack = const IconData(0xe3a1);
 
-  /// <p><i class="material-icons md-48">autoreconst</i> &#x2014; material icon named "autoreconst".</p>
-  static const IconData autoreconst = const IconData(0xe863);
+  /// <p><i class="material-icons md-48">autorenew</i> &#x2014; material icon named "autorenew".</p>
+  static const IconData autorenew = const IconData(0xe863);
 
   /// <p><i class="material-icons md-48">av_timer</i> &#x2014; material icon named "av timer".</p>
   static const IconData av_timer = const IconData(0xe01b);
@@ -617,8 +617,8 @@ class Icons {
   /// <p><i class="material-icons md-48">create</i> &#x2014; material icon named "create".</p>
   static const IconData create = const IconData(0xe150);
 
-  /// <p><i class="material-icons md-48">create_const_folder</i> &#x2014; material icon named "create const folder".</p>
-  static const IconData create_const_folder = const IconData(0xe2cc);
+  /// <p><i class="material-icons md-48">create_new_folder</i> &#x2014; material icon named "create new folder".</p>
+  static const IconData create_new_folder = const IconData(0xe2cc);
 
   /// <p><i class="material-icons md-48">credit_card</i> &#x2014; material icon named "credit card".</p>
   static const IconData credit_card = const IconData(0xe870);
@@ -902,8 +902,8 @@ class Icons {
   /// <p><i class="material-icons md-48">fiber_manual_record</i> &#x2014; material icon named "fiber manual record".</p>
   static const IconData fiber_manual_record = const IconData(0xe061);
 
-  /// <p><i class="material-icons md-48">fiber_const</i> &#x2014; material icon named "fiber const".</p>
-  static const IconData fiber_const = const IconData(0xe05e);
+  /// <p><i class="material-icons md-48">fiber_new</i> &#x2014; material icon named "fiber new".</p>
+  static const IconData fiber_new = const IconData(0xe05e);
 
   /// <p><i class="material-icons md-48">fiber_pin</i> &#x2014; material icon named "fiber pin".</p>
   static const IconData fiber_pin = const IconData(0xe06a);
@@ -1712,8 +1712,8 @@ class Icons {
   /// <p><i class="material-icons md-48">network_wifi</i> &#x2014; material icon named "network wifi".</p>
   static const IconData network_wifi = const IconData(0xe1ba);
 
-  /// <p><i class="material-icons md-48">const_releases</i> &#x2014; material icon named "const releases".</p>
-  static const IconData const_releases = const IconData(0xe031);
+  /// <p><i class="material-icons md-48">new_releases</i> &#x2014; material icon named "new releases".</p>
+  static const IconData new_releases = const IconData(0xe031);
 
   /// <p><i class="material-icons md-48">next_week</i> &#x2014; material icon named "next week".</p>
   static const IconData next_week = const IconData(0xe16a);
@@ -1763,8 +1763,8 @@ class Icons {
   /// <p><i class="material-icons md-48">open_in_browser</i> &#x2014; material icon named "open in browser".</p>
   static const IconData open_in_browser = const IconData(0xe89d);
 
-  /// <p><i class="material-icons md-48">open_in_const</i> &#x2014; material icon named "open in const".</p>
-  static const IconData open_in_const = const IconData(0xe89e);
+  /// <p><i class="material-icons md-48">open_in_new</i> &#x2014; material icon named "open in new".</p>
+  static const IconData open_in_new = const IconData(0xe89e);
 
   /// <p><i class="material-icons md-48">open_with</i> &#x2014; material icon named "open with".</p>
   static const IconData open_with = const IconData(0xe89f);
@@ -1997,8 +1997,8 @@ class Icons {
   /// <p><i class="material-icons md-48">power_input</i> &#x2014; material icon named "power input".</p>
   static const IconData power_input = const IconData(0xe336);
 
-  /// <p><i class="material-icons md-48">power_settings_const</i> &#x2014; material icon named "power settings const".</p>
-  static const IconData power_settings_const = const IconData(0xe8ac);
+  /// <p><i class="material-icons md-48">power_settings_new</i> &#x2014; material icon named "power settings new".</p>
+  static const IconData power_settings_new = const IconData(0xe8ac);
 
   /// <p><i class="material-icons md-48">pregnant_woman</i> &#x2014; material icon named "pregnant woman".</p>
   static const IconData pregnant_woman = const IconData(0xe91e);
