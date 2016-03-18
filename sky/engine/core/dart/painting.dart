@@ -476,6 +476,10 @@ class Canvas extends NativeFieldWrapperClass2 {
 /// An object representing a sequence of recorded graphical operations.
 ///
 /// To create a [Picture], use a [PictureRecorder].
+///
+/// A [Picture] can be placed in a [Scene] using a [SceneBuilder], via
+/// the [SceneBuilder.addPicture] method. A [Picture] can also be
+/// drawn into a [Canvas], using the [Canvas.drawPicture] method.
 abstract class Picture extends NativeFieldWrapperClass2 {
   /// Creates an uninitialized Picture object.
   ///
