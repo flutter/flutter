@@ -297,7 +297,8 @@ class _LazyWidgetProvider extends _WidgetProvider {
 
   @override
   Widget getChild(int i) {
-    int n = _length ?? _widgets.length;
-    return _widgets[(i % n).abs()];
+    final int childCount = virtualChildCount;
+    final int index = childCount != null ? (i % childCount).abs() : i;
+    return _widgets[index - _base];
   }
 }

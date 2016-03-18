@@ -158,4 +158,51 @@ void main() {
       callbackTracker.clear();
     });
   });
+
+  test('ScrollableLazyList 10 items, 2-3 items visible', () {
+    testWidgets((WidgetTester tester) {
+      List<int> callbackTracker = <int>[];
+
+      // The root view is 800x600 in the test environment and our list
+      // items are 300 tall. Scrolling should cause two or three items
+      // to be built.
+
+      ItemListBuilder itemBuilder = (BuildContext context, int start, int count) {
+        List<Widget> result = <Widget>[];
+        for (int index = start; index < start + count; index += 1) {
+          callbackTracker.add(index);
+          result.add(new Text('$index', key: new ValueKey<int>(index)));
+        }
+        return result;
+      };
+
+      GlobalKey<ScrollableState<ScrollableLazyList>> scrollableKey = new GlobalKey<ScrollableState<ScrollableLazyList>>();
+      Widget testWidget = new ScrollableLazyList(
+        key: scrollableKey,
+        itemBuilder: itemBuilder,
+        itemExtent: 300.0,
+        itemCount: 10
+      );
+
+      tester.pumpWidget(testWidget);
+      expect(callbackTracker, equals([0, 1]));
+      callbackTracker.clear();
+
+      scrollableKey.currentState.scrollTo(150.0);
+      tester.pumpWidget(testWidget);
+      expect(callbackTracker, equals([0, 1, 2]));
+      callbackTracker.clear();
+
+      scrollableKey.currentState.scrollTo(600.0);
+      tester.pumpWidget(testWidget);
+      expect(callbackTracker, equals([2, 3]));
+      callbackTracker.clear();
+
+      scrollableKey.currentState.scrollTo(750.0);
+      tester.pumpWidget(testWidget);
+      expect(callbackTracker, equals([2, 3, 4]));
+      callbackTracker.clear();
+    });
+  });
+
 }
