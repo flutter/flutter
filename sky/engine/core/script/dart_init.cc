@@ -160,9 +160,9 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   if (!IsRunningPrecompiledCode()) {
     CHECK(base::StartsWith(script_uri, kFileUriPrefix,
                            base::CompareCase::SENSITIVE));
-    base::FilePath flx_path(script_uri + strlen(kFileUriPrefix));
+    base::FilePath bundle_path(script_uri + strlen(kFileUriPrefix));
     scoped_refptr<ZipAssetBundle> zip_asset_bundle(
-        new ZipAssetBundle(flx_path, nullptr));
+        new ZipAssetBundle(bundle_path, nullptr));
     CHECK(zip_asset_bundle->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
   }
 

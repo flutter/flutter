@@ -66,7 +66,7 @@ class ApplicationImpl : public mojo::Application,
   mojo::BindingSet<mojo::ui::ViewProvider> view_provider_bindings_;
   std::string url_;
   mojo::ShellPtr shell_;
-  base::FilePath flx_path_;
+  base::FilePath bundle_path_;
 };
 
 }  // namespace shell

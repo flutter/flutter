@@ -93,10 +93,11 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  std::string flx =
+  std::string bundle_path =
       command_line.GetSwitchValueASCII(sky::shell::switches::kFLX);
-  if (!flx.empty()) {
-    _sky_engine->RunFromBundle(flx);
+  if (!bundle_path.empty()) {
+    std::string script_uri = std::string("file://") + bundle_path;
+    _sky_engine->RunFromBundle(script_uri, bundle_path);
     return;
   }
 

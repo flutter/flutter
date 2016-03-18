@@ -74,8 +74,10 @@ class Engine : public UIDelegate,
                    const mojo::String& package_root,
                    const mojo::String& bundle) override;
   void RunFromPrecompiledSnapshot(const mojo::String& bundle_path) override;
-  void RunFromBundle(const mojo::String& path) override;
-  void RunFromBundleAndSnapshot(const mojo::String& bundle_path,
+  void RunFromBundle(const mojo::String& script_uri,
+                     const mojo::String& bundle_path) override;
+  void RunFromBundleAndSnapshot(const mojo::String& script_uri,
+                                const mojo::String& bundle_path,
                                 const mojo::String& snapshot_path) override;
   void PushRoute(const mojo::String& route) override;
   void PopRoute() override;
@@ -92,7 +94,7 @@ class Engine : public UIDelegate,
       mojo::InterfaceRequest<mojo::ServiceProvider> request);
 
   void RunFromLibrary(const std::string& name);
-  void RunFromSnapshotStream(const std::string& name,
+  void RunFromSnapshotStream(const std::string& script_uri,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
 
   void SetupAssetBundle(const mojo::String& bundle_path);
