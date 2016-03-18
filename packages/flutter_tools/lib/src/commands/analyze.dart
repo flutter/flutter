@@ -138,6 +138,25 @@ class AnalyzeCommand extends FlutterCommand {
     return argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
   }
 
+  List<String> flutterRootComponents;
+  bool isFlutterLibrary(String filename) {
+    flutterRootComponents ??= path.normalize(path.absolute(ArtifactStore.flutterRoot)).split(path.separator);
+    List<String> filenameComponents = path.normalize(path.absolute(filename)).split(path.separator);
+    if (filenameComponents.length < flutterRootComponents.length + 4) // the 4: 'packages', package_name, 'lib', file_name
+      return false;
+    for (int index = 0; index < flutterRootComponents.length; index += 1) {
+      if (flutterRootComponents[index] != filenameComponents[index])
+        return false;
+    }
+    if (filenameComponents[flutterRootComponents.length] != 'packages')
+      return false;
+    if (filenameComponents[flutterRootComponents.length + 1] == 'flutter_tools')
+      return false;
+    if (filenameComponents[flutterRootComponents.length + 2] != 'lib')
+      return false;
+    return true;
+  }
+
   Future<int> _analyzeOnce() async {
     Stopwatch stopwatch = new Stopwatch()..start();
     Set<String> pubSpecDirectories = new HashSet<String>();
@@ -343,6 +362,7 @@ class AnalyzeCommand extends FlutterCommand {
     RegExp constructorTearOffsPattern = new RegExp('.+#.+// analyzer doesn\'t like constructor tear-offs');
     RegExp conflictingNamesPattern = new RegExp('^The imported libraries \'([^\']+)\' and \'([^\']+)\' cannot have the same name \'([^\']+)\'\$');
     RegExp missingFilePattern = new RegExp('^Target of URI does not exist: \'([^\')]+)\'\$');
+    RegExp documentAllMembersPattern = new RegExp('^Document all public memm?bers\$');
 
     Set<String> changedFiles = new Set<String>(); // files about which we've complained that they changed
 
@@ -373,7 +393,11 @@ class AnalyzeCommand extends FlutterCommand {
             colNumber = 1;
           }
           bool shouldIgnore = false;
-          if (filename == mainFile.path) {
+          if (documentAllMembersPattern.firstMatch(errorMessage) != null) {
+            // https://github.com/dart-lang/linter/issues/207
+            // https://github.com/dart-lang/linter/issues/208
+            shouldIgnore = !isFlutterLibrary(filename);
+          } else if (filename == mainFile.path) {
             Match libs = conflictingNamesPattern.firstMatch(errorMessage);
             Match missing = missingFilePattern.firstMatch(errorMessage);
             if (libs != null) {
