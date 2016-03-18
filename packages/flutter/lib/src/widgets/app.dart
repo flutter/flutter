@@ -202,7 +202,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
       result = new Stack(
         children: <Widget>[
           result,
-          new Positioned(bottom: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
+          new Positioned(top: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
         ]
       );
     }
