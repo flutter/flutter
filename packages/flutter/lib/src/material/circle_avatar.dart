@@ -7,6 +7,14 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'theme.dart';
 
+/// A circle that represents a user.
+///
+/// Typicially used with a user's profile image, or, in the absence of
+/// such an image, the user's initials. A given user's initials should
+/// always be paired with the same background color, for consistency.
+///
+/// This class is used by [Chip].
+/// See also: <https://www.google.com/design/spec/components/chips.html#chips-contact-chips>
 class CircleAvatar extends StatelessWidget {
   CircleAvatar({
     Key key,
@@ -16,7 +24,13 @@ class CircleAvatar extends StatelessWidget {
   }) : super(key: key);
 
   final Widget child;
+
+  /// The color with which to fill the circle. Changing the background
+  /// color will cause the avatar to animate to the new color.
   final Color backgroundColor;
+
+  /// The size of the avatar. Changing the radius will cause the
+  /// avatar to animate to the new size.
   final double radius;
 
   @override
