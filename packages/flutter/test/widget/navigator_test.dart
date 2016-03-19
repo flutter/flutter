@@ -113,7 +113,7 @@ void main() {
       );
       tester.pumpWidget(widget);
       tester.tap(tester.findElementByKey(targetKey));
-      expect(exception, new isInstanceOf<WidgetError>());
+      expect(exception, new isInstanceOf<FlutterError>());
       expect('$exception', startsWith('openTransaction called with a context'));
     });
   });

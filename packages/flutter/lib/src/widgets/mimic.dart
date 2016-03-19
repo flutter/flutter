@@ -181,7 +181,7 @@ class MimicableState extends State<Mimicable> {
   MimicableHandle startMimic() {
     assert(() {
       if (_placeholderSize != null) {
-        throw new WidgetError(
+        throw new FlutterError(
           'Mimicable started while already active.\n'
           'When startMimic() or liftToOverlay() is called on a MimicableState, the mimic becomes active. '
           'While active, it cannot be reactivated until it is stopped. '

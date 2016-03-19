@@ -115,7 +115,7 @@ class Hero extends StatefulWidget {
         final Map<Key, HeroState> tagHeroes = heroes.putIfAbsent(tag, () => <Key, HeroState>{});
         assert(() {
           if (tagHeroes.containsKey(key)) {
-            new WidgetError(
+            new FlutterError(
               'There are multiple heroes that share the same key within the same subtree.\n'
               'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
               'either each Hero must have a unique tag, or, all the heroes with a particular tag must '

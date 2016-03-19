@@ -11,7 +11,7 @@ bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
     if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
       Element element = context;
-      throw new WidgetError(
+      throw new FlutterError(
         'No Material widget found.\n'
         '${context.widget.runtimeType} widgets require a Material widget ancestor.\n'
         'In material design, most widgets are conceptually "printed" on a sheet of material. In Flutter\'s material library, '
@@ -35,7 +35,7 @@ bool debugCheckHasScaffold(BuildContext context) {
   assert(() {
     if (Scaffold.of(context) == null) {
       Element element = context;
-      throw new WidgetError(
+      throw new FlutterError(
         'No Scaffold widget found.\n'
         '${context.widget.runtimeType} widgets require a Scaffold widget ancestor.\n'
         'The specific widget that could not find a Scaffold ancestor was:\n'

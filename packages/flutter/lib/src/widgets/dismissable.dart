@@ -291,7 +291,7 @@ class _DismissableState extends State<Dismissable> {
       assert(() {
         if (_resizeAnimation.status != AnimationStatus.forward) {
           assert(_resizeAnimation.status == AnimationStatus.completed);
-          throw new WidgetError(
+          throw new FlutterError(
             'A dismissed Dismissable widget is still part of the tree.\n' +
             'Make sure to implement the onDismissed handler and to immediately remove the Dismissable\n' +
             'widget from the application once that handler has fired.'

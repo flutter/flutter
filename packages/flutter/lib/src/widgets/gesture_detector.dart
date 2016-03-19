@@ -79,14 +79,14 @@ class GestureDetector extends StatelessWidget {
       bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
       if (havePan || haveScale) {
         if (havePan && haveScale) {
-          throw new WidgetError(
+          throw new FlutterError(
             'Incorrect GestureDetector arguments.\n'
             'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
           );
         }
         String recognizer = havePan ? 'pan' : 'scale';
         if (haveVerticalDrag && haveHorizontalDrag) {
-          throw new WidgetError(
+          throw new FlutterError(
             'Incorrect GestureDetector arguments.\n'
             'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
             'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
@@ -336,7 +336,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
       if (!RenderObject.debugDoingLayout) {
-        throw new WidgetError(
+        throw new FlutterError(
           'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
           'The replaceGestureRecognizers() method can only be called during the layout phase. '
           'To set the gesture recognisers at other times, trigger a new build using setState() '

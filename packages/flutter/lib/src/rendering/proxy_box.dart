@@ -441,7 +441,7 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(constraints.debugAssertIsNormalized);
     assert(() {
       if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-        throw new RenderingError(
+        throw new FlutterError(
           '$runtimeType has unbounded constraints.\n'
           'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
           'both unbounded width and unbounded height constraints. Because both '
@@ -1386,7 +1386,7 @@ class RenderCustomPaint extends RenderProxyBox {
       // below that number.
       int debugNewCanvasSaveCount = canvas.getSaveCount();
       if (debugNewCanvasSaveCount > debugPreviousCanvasSaveCount) {
-        throw new RenderingError(
+        throw new FlutterError(
           'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
           '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
           'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
@@ -1396,7 +1396,7 @@ class RenderCustomPaint extends RenderProxyBox {
         );
       }
       if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
-        throw new RenderingError(
+        throw new FlutterError(
           'The $painter custom painter called canvas.restore() '
           '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
           'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '

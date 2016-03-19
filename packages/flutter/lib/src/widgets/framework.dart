@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 
 export 'dart:ui' show hashValues, hashList;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint;
+export 'package:flutter/services.dart' show FlutterError;
 
 // KEYS
 
@@ -178,7 +179,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       message += 'The most recently registered instance is: ${_registry[key]}\n';
     }
     if (_debugDuplicates.isNotEmpty) {
-      throw new WidgetError(
+      throw new FlutterError(
         'Incorrect GlobalKey usage.\n'
         '$message'
       );
@@ -380,7 +381,7 @@ abstract class State<T extends StatefulWidget> {
   void setState(VoidCallback fn) {
     assert(() {
       if (_debugLifecycleState == _StateLifecycle.defunct) {
-        throw new WidgetError(
+        throw new FlutterError(
           'setState() called after dipose(): $this\n'
           'This error happens if you call setState() on State object for a widget that\n'
           'no longer appears in the widget tree (e.g., whose parent widget no longer\n'
@@ -1197,7 +1198,7 @@ abstract class BuildableElement extends Element {
           return true;
       }
       if (_debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
-        throw new WidgetError(
+        throw new FlutterError(
           'setState() or markNeedsBuild() called during build.\n'
           'This widget cannot be marked as needing to build because the framework '
           'is already in the process of building widgets. A widget can be marked as '
@@ -1296,7 +1297,7 @@ abstract class ComponentElement extends BuildableElement {
       built = _builder(this);
       assert(() {
         if (built == null) {
-          throw new WidgetError(
+          throw new FlutterError(
             'A build function returned null.\n'
             'The offending widget is: $widget\n'
             'Build functions must never return null. '
@@ -1388,7 +1389,7 @@ class StatefulElement extends ComponentElement {
     assert(() {
       if (_state._debugLifecycleState == _StateLifecycle.initialized)
         return true;
-      throw new WidgetError(
+      throw new FlutterError(
         '${_state.runtimeType}.initState failed to call super.initState.\n'
         'initState() implementations must always call their superclass initState() method, to ensure '
         'that the entire widget is initialized correctly.'
@@ -1430,7 +1431,7 @@ class StatefulElement extends ComponentElement {
     assert(() {
       if (_state._debugLifecycleState == _StateLifecycle.defunct)
         return true;
-      throw new WidgetError(
+      throw new FlutterError(
         '${_state.runtimeType}.dispose failed to call super.dispose.\n'
         'dispose() implementations must always call their superclass dispose() method, to ensure '
         'that all the resources used by the widget are fully released.'
@@ -1503,7 +1504,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
       }
       if (ancestor != null && badAncestors.isEmpty)
         return true;
-      throw new WidgetError(
+      throw new FlutterError(
         'Incorrect use of ParentDataWidget.\n' +
         widget.debugDescribeInvalidAncestorChain(
           description: "$this",
@@ -1975,7 +1976,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
         continue; // when these nodes are reordered, we just reassign the data
 
       if (!idSet.add(child.key)) {
-        throw new WidgetError(
+        throw new FlutterError(
           'Duplicate keys found.\n'
           'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
           '$widget has multiple children with key "${child.key}".'
@@ -2019,14 +2020,6 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     _children = updateChildren(_children, widget.children, detachedChildren: _detachedChildren);
     _detachedChildren.clear();
   }
-}
-
-class WidgetError extends AssertionError {
-  WidgetError(this.message);
-  final String message;
-
-  @override
-  String toString() => message;
 }
 
 typedef void WidgetsExceptionHandler(String context, dynamic exception, StackTrace stack);
