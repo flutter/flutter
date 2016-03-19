@@ -3,22 +3,23 @@
 // found in the LICENSE file.
 
 /// An implementation of the Cassowary constraint solving algorithm in Dart.
+///
+/// This is used by the [RenderAutoLayout] render object in the rendering
+/// library and by the [AutoLayout] widget in the widget library.
+///
+/// See also:
+///
+/// * <https://en.wikipedia.org/wiki/Cassowary_(software)>
+/// * <https://constraints.cs.washington.edu/solvers/cassowary-tochi.pdf>
 library cassowary;
 
-import 'dart:collection';
-import 'dart:math';
-
-part 'constraint.dart';
-part 'expression.dart';
-part 'term.dart';
-part 'variable.dart';
-part 'equation_member.dart';
-part 'constant_member.dart';
-part 'solver.dart';
-part 'symbol.dart';
-part 'row.dart';
-part 'utils.dart';
-part 'result.dart';
-part 'parser_exception.dart';
-part 'param.dart';
-part 'priority.dart';
+export 'src/constraint.dart';
+export 'src/expression.dart';
+export 'src/term.dart';
+export 'src/equation_member.dart';
+export 'src/constant_member.dart';
+export 'src/solver.dart';
+export 'src/result.dart';
+export 'src/parser_exception.dart';
+export 'src/param.dart';
+export 'src/priority.dart';

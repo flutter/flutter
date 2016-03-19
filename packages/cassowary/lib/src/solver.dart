@@ -2,7 +2,148 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of cassowary;
+import 'dart:collection';
+
+import 'constraint.dart';
+import 'expression.dart';
+import 'priority.dart';
+import 'result.dart';
+import 'param.dart';
+import 'term.dart';
+
+enum _SymbolType { invalid, external, slack, error, dummy, }
+
+class _Symbol {
+  const _Symbol(this.type, this.tick);
+  final _SymbolType type;
+  final int tick;
+
+  @override
+  String toString() {
+    String typeString = 'unknown';
+    switch (type) {
+      case _SymbolType.invalid:
+        typeString = 'i';
+        break;
+      case _SymbolType.external:
+        typeString = 'v';
+        break;
+      case _SymbolType.slack:
+        typeString = 's';
+        break;
+      case _SymbolType.error:
+        typeString = 'e';
+        break;
+      case _SymbolType.dummy:
+        typeString = 'd';
+        break;
+    }
+    return '$typeString$tick';
+  }
+}
+
+class _Tag {
+  _Tag(this.marker, this.other);
+  _Tag.fromTag(_Tag tag)
+      : this.marker = tag.marker,
+        this.other = tag.other;
+  _Symbol marker;
+  _Symbol other;
+}
+
+class _EditInfo {
+  _Tag tag;
+  Constraint constraint;
+  double constant;
+}
+
+bool _isValidNonRequiredPriority(double priority) {
+  return (priority >= 0.0 && priority < Priority.required);
+}
+
+typedef Result _SolverBulkUpdate(dynamic item);
+
+bool _nearZero(double value) {
+  const double epsilon = 1.0e-8;
+  return value < 0.0 ? -value < epsilon : value < epsilon;
+}
+
+class _Row {
+  _Row(this.constant) : this.cells = new Map<_Symbol, double>();
+
+  _Row.fromRow(_Row row)
+      : this.cells = new Map<_Symbol, double>.from(row.cells),
+        this.constant = row.constant;
+
+  final Map<_Symbol, double> cells;
+
+  double constant = 0.0;
+
+  double add(double value) => constant += value;
+
+  void insertSymbol(_Symbol symbol, [double coefficient = 1.0]) {
+    double val = cells[symbol] ?? 0.0;
+
+    if (_nearZero(val + coefficient)) {
+      cells.remove(symbol);
+    } else {
+      cells[symbol] = val + coefficient;
+    }
+  }
+
+  void insertRow(_Row other, [double coefficient = 1.0]) {
+    constant += other.constant * coefficient;
+    other.cells.forEach((_Symbol s, double v) => insertSymbol(s, v * coefficient));
+  }
+
+  void removeSymbol(_Symbol symbol) {
+    cells.remove(symbol);
+  }
+
+  void reverseSign() {
+    constant = -constant;
+    cells.forEach((_Symbol s, double v) => cells[s] = -v);
+  }
+
+  void solveForSymbol(_Symbol symbol) {
+    assert(cells.containsKey(symbol));
+    double coefficient = -1.0 / cells[symbol];
+    cells.remove(symbol);
+    constant *= coefficient;
+    cells.forEach((_Symbol s, double v) => cells[s] = v * coefficient);
+  }
+
+  void solveForSymbols(_Symbol lhs, _Symbol rhs) {
+    insertSymbol(lhs, -1.0);
+    solveForSymbol(rhs);
+  }
+
+  double coefficientForSymbol(_Symbol symbol) => cells[symbol] ?? 0.0;
+
+  void substitute(_Symbol symbol, _Row row) {
+    double coefficient = cells[symbol];
+
+    if (coefficient == null) {
+      return;
+    }
+
+    cells.remove(symbol);
+    insertRow(row, coefficient);
+  }
+
+  @override
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+
+    buffer.write(constant);
+
+    cells.forEach((_Symbol symbol, double value) {
+      buffer.write(" + " + value.toString() + " * " + symbol.toString());
+    });
+
+    return buffer.toString();
+  }
+}
 
 class Solver {
   final Map<Constraint, _Tag> _constraints = new Map<Constraint, _Tag>();
@@ -25,9 +166,8 @@ class Solver {
   }
 
   Result addConstraint(Constraint constraint) {
-    if (_constraints.containsKey(constraint)) {
+    if (_constraints.containsKey(constraint))
       return Result.duplicateConstraint;
-    }
 
     _Tag tag = new _Tag(new _Symbol(_SymbolType.invalid, 0),
         new _Symbol(_SymbolType.invalid, 0));
@@ -45,9 +185,8 @@ class Solver {
     }
 
     if (subject.type == _SymbolType.invalid) {
-      if (!_addWithArtificialVariableOnRow(row)) {
+      if (!_addWithArtificialVariableOnRow(row))
         return Result.unsatisfiableConstraint;
-      }
     } else {
       row.solveForSymbol(subject);
       _substitute(subject, row);
@@ -68,9 +207,8 @@ class Solver {
 
   Result removeConstraint(Constraint constraint) {
     _Tag tag = _constraints[constraint];
-    if (tag == null) {
+    if (tag == null)
       return Result.unknownConstraint;
-    }
 
     tag = new _Tag.fromTag(tag);
     _constraints.remove(constraint);
@@ -81,16 +219,11 @@ class Solver {
     if (row != null) {
       _rows.remove(tag.marker);
     } else {
-      _Pair<_Symbol, _Row> rowPair = _leavingRowPairForMarkerSymbol(tag.marker);
+      _Symbol leaving = _leavingSymbolForMarkerSymbol(tag.marker);
+      assert(leaving != null);
 
-      if (rowPair == null) {
-        return Result.internalSolverError;
-      }
-
-      _Symbol leaving = rowPair.first;
-      row = rowPair.second;
-      _Row removed = _rows.remove(rowPair.first);
-      assert(removed != null);
+      row = _rows.remove(leaving);
+      assert(row != null);
       row.solveForSymbols(leaving, tag.marker);
       _substitute(tag.marker, row);
     }
@@ -110,21 +243,19 @@ class Solver {
   }
 
   Result addEditVariable(Variable variable, double priority) {
-    if (_edits.containsKey(variable)) {
+    if (_edits.containsKey(variable))
       return Result.duplicateEditVariable;
-    }
 
-    if (!_isValidNonRequiredPriority(priority)) {
+    if (!_isValidNonRequiredPriority(priority))
       return Result.badRequiredStrength;
-    }
 
     Constraint constraint = new Constraint(
-        new Expression([new Term(variable, 1.0)], 0.0), Relation.equalTo);
+      new Expression([new Term(variable, 1.0)], 0.0),
+      Relation.equalTo
+    );
     constraint.priority = priority;
 
-    if (addConstraint(constraint) != Result.success) {
-      return Result.internalSolverError;
-    }
+    assert(addConstraint(constraint) == Result.success);
 
     _EditInfo info = new _EditInfo();
     info.tag = _constraints[constraint];
@@ -149,8 +280,7 @@ class Solver {
     if (info == null)
       return Result.unknownEditVariable;
 
-    if (removeConstraint(info.constraint) != Result.success)
-      return Result.internalSolverError;
+    assert(removeConstraint(info.constraint) == Result.success);
 
     _edits.remove(variable);
     return Result.success;
@@ -161,9 +291,8 @@ class Solver {
   }
 
   Result suggestValueForVariable(Variable variable, double value) {
-    if (!_edits.containsKey(variable)) {
+    if (!_edits.containsKey(variable))
       return Result.unknownEditVariable;
-    }
 
     _suggestValueForEditInfoWithoutDualOptimization(_edits[variable], value);
 
@@ -179,8 +308,8 @@ class Solver {
 
       double updatedValue = row == null ? 0.0 : row.constant;
 
-      if (variable._applyUpdate(updatedValue) && variable._owner != null) {
-        dynamic context = variable._owner.context;
+      if (variable.applyUpdate(updatedValue) && variable.owner != null) {
+        dynamic context = variable.owner.context;
         if (context != null)
           updates.add(context);
       }
@@ -293,23 +422,20 @@ class Solver {
 
   _Symbol _chooseSubjectForRow(_Row row, _Tag tag) {
     for (_Symbol symbol in row.cells.keys) {
-      if (symbol.type == _SymbolType.external) {
+      if (symbol.type == _SymbolType.external)
         return symbol;
-      }
     }
 
     if (tag.marker.type == _SymbolType.slack ||
         tag.marker.type == _SymbolType.error) {
-      if (row.coefficientForSymbol(tag.marker) < 0.0) {
+      if (row.coefficientForSymbol(tag.marker) < 0.0)
         return tag.marker;
-      }
     }
 
     if (tag.other.type == _SymbolType.slack ||
         tag.other.type == _SymbolType.error) {
-      if (row.coefficientForSymbol(tag.other) < 0.0) {
+      if (row.coefficientForSymbol(tag.other) < 0.0)
         return tag.other;
-      }
     }
 
     return new _Symbol(_SymbolType.invalid, 0);
@@ -317,9 +443,8 @@ class Solver {
 
   bool _allDummiesInRow(_Row row) {
     for (_Symbol symbol in row.cells.keys) {
-      if (symbol.type != _SymbolType.dummy) {
+      if (symbol.type != _SymbolType.dummy)
         return false;
-      }
     }
     return true;
   }
@@ -342,23 +467,20 @@ class Solver {
     _Row foundRow = _rows[artificial];
     if (foundRow != null) {
       _rows.remove(artificial);
-      if (foundRow.cells.isEmpty) {
+      if (foundRow.cells.isEmpty)
         return success;
-      }
 
       _Symbol entering = _anyPivotableSymbol(foundRow);
-      if (entering.type == _SymbolType.invalid) {
+      if (entering.type == _SymbolType.invalid)
         return false;
-      }
 
       foundRow.solveForSymbols(artificial, entering);
       _substitute(entering, foundRow);
       _rows[entering] = foundRow;
     }
 
-    for (_Row row in _rows.values) {
+    for (_Row row in _rows.values)
       row.removeSymbol(artificial);
-    }
     _objective.removeSymbol(artificial);
     return success;
   }
@@ -366,19 +488,13 @@ class Solver {
   Result _optimizeObjectiveRow(_Row objective) {
     while (true) {
       _Symbol entering = _enteringSymbolForObjectiveRow(objective);
-      if (entering.type == _SymbolType.invalid) {
+      if (entering.type == _SymbolType.invalid)
         return Result.success;
-      }
 
-      _Pair<_Symbol, _Row> leavingPair = _leavingRowForEnteringSymbol(entering);
+      _Symbol leaving = _leavingSymbolForEnteringSymbol(entering);
+      assert(leaving != null);
 
-      if (leavingPair == null) {
-        return Result.internalSolverError;
-      }
-
-      _Symbol leaving = leavingPair.first;
-      _Row row = leavingPair.second;
-      _rows.remove(leavingPair.first);
+      _Row row = _rows.remove(leaving);
       row.solveForSymbols(leaving, entering);
       _substitute(entering, row);
       _rows[entering] = row;
@@ -389,38 +505,28 @@ class Solver {
     Map<_Symbol, double> cells = objective.cells;
 
     for (_Symbol symbol in cells.keys) {
-      if (symbol.type != _SymbolType.dummy && cells[symbol] < 0.0) {
+      if (symbol.type != _SymbolType.dummy && cells[symbol] < 0.0)
         return symbol;
-      }
     }
 
     return new _Symbol(_SymbolType.invalid, 0);
   }
 
-  _Pair<_Symbol, _Row> _leavingRowForEnteringSymbol(_Symbol entering) {
+  _Symbol _leavingSymbolForEnteringSymbol(_Symbol entering) {
     double ratio = double.MAX_FINITE;
-    _Pair<_Symbol, _Row> result = new _Pair<_Symbol, _Row>(null, null);
-
+    _Symbol result;
     _rows.forEach((_Symbol symbol, _Row row) {
       if (symbol.type != _SymbolType.external) {
         double temp = row.coefficientForSymbol(entering);
-
         if (temp < 0.0) {
           double tempRatio = -row.constant / temp;
-
           if (tempRatio < ratio) {
             ratio = tempRatio;
-            result.first = symbol;
-            result.second = row;
+            result = symbol;
           }
         }
       }
     });
-
-    if (result.first == null || result.second == null) {
-      return null;
-    }
-
     return result;
   }
 
@@ -431,11 +537,9 @@ class Solver {
         _infeasibleRows.add(first);
       }
     });
-
     _objective.substitute(symbol, row);
-    if (_artificial != null) {
+    if (_artificial != null)
       _artificial.substitute(symbol, row);
-    }
   }
 
   _Symbol _anyPivotableSymbol(_Row row) {
@@ -466,43 +570,34 @@ class Solver {
     }
   }
 
-  _Pair<_Symbol, _Row> _leavingRowPairForMarkerSymbol(_Symbol marker) {
+  _Symbol _leavingSymbolForMarkerSymbol(_Symbol marker) {
     double r1 = double.MAX_FINITE;
     double r2 = double.MAX_FINITE;
 
-    _Pair<_Symbol, _Row> first, second, third;
+    _Symbol first, second, third;
 
     _rows.forEach((_Symbol symbol, _Row row) {
       double c = row.coefficientForSymbol(marker);
-
-      if (c == 0.0) {
+      if (c == 0.0)
         return;
-      }
-
       if (symbol.type == _SymbolType.external) {
-        third = new _Pair<_Symbol, _Row>(symbol, row);
+        third = symbol;
       } else if (c < 0.0) {
         double r = -row.constant / c;
         if (r < r1) {
           r1 = r;
-          first = new _Pair<_Symbol, _Row>(symbol, row);
+          first = symbol;
         }
       } else {
         double r = row.constant / c;
         if (r < r2) {
           r2 = r;
-          second = new _Pair<_Symbol, _Row>(symbol, row);
+          second = symbol;
         }
       }
     });
 
-    if (first != null) {
-      return first;
-    }
-    if (second != null) {
-      return second;
-    }
-    return third;
+    return first ?? second ?? third;
   }
 
   void _suggestValueForEditInfoWithoutDualOptimization(
@@ -551,9 +646,7 @@ class Solver {
       if (row != null && row.constant < 0.0) {
         _Symbol entering = _dualEnteringSymbolForRow(row);
 
-        if (entering.type == _SymbolType.invalid) {
-          return Result.internalSolverError;
-        }
+        assert(entering.type != _SymbolType.invalid);
 
         _rows.remove(leaving);
 
@@ -630,25 +723,3 @@ class Solver {
     return buffer.toString();
   }
 }
-
-class _Tag {
-  _Symbol marker;
-  _Symbol other;
-
-  _Tag(this.marker, this.other);
-  _Tag.fromTag(_Tag tag)
-      : this.marker = tag.marker,
-        this.other = tag.other;
-}
-
-class _EditInfo {
-  _Tag tag;
-  Constraint constraint;
-  double constant;
-}
-
-bool _isValidNonRequiredPriority(double priority) {
-  return (priority >= 0.0 && priority < Priority.required);
-}
-
-typedef Result _SolverBulkUpdate(dynamic item);

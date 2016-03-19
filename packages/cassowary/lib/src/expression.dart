@@ -2,10 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of cassowary;
+import 'constant_member.dart';
+import 'constraint.dart';
+import 'equation_member.dart';
+import 'param.dart';
+import 'parser_exception.dart';
+import 'term.dart';
 
-class Expression extends _EquationMember {
+class _Multiplication {
+  const _Multiplication(this.multiplier, this.multiplicand);
+  final Expression multiplier;
+  final double multiplicand;
+}
+
+class Expression extends EquationMember {
   Expression(this.terms, this.constant);
+
   Expression.fromExpression(Expression expr)
     : this.terms = new List<Term>.from(expr.terms),
       this.constant = expr.constant;
@@ -15,15 +27,30 @@ class Expression extends _EquationMember {
   final double constant;
 
   @override
+  Expression asExpression() => this;
+
+  @override
   bool get isConstant => terms.length == 0;
 
   @override
   double get value => terms.fold(constant, (double value, Term term) => value + term.value);
 
   @override
-  Expression asExpression() => this;
+  Constraint operator >=(EquationMember value) {
+    return _createConstraint(value, Relation.greaterThanOrEqualTo);
+  }
 
-  Constraint _createConstraint(_EquationMember /* rhs */ value, Relation relation) {
+  @override
+  Constraint operator <=(EquationMember value) {
+    return _createConstraint(value, Relation.lessThanOrEqualTo);
+  }
+
+  @override
+  Constraint equals(EquationMember value) {
+    return _createConstraint(value, Relation.equalTo);
+  }
+
+  Constraint _createConstraint(EquationMember /* rhs */ value, Relation relation) {
     if (value is ConstantMember) {
       return new Constraint(
         new Expression(new List<Term>.from(terms), constant - value.value),
@@ -60,22 +87,7 @@ class Expression extends _EquationMember {
   }
 
   @override
-  Constraint operator >=(_EquationMember value) {
-    return _createConstraint(value, Relation.greaterThanOrEqualTo);
-  }
-
-  @override
-  Constraint operator <=(_EquationMember value) {
-    return _createConstraint(value, Relation.lessThanOrEqualTo);
-  }
-
-  @override
-  Constraint equals(_EquationMember value) {
-    return _createConstraint(value, Relation.equalTo);
-  }
-
-  @override
-  Expression operator +(_EquationMember m) {
+  Expression operator +(EquationMember m) {
     if (m is ConstantMember)
       return new Expression(new List<Term>.from(terms), constant + m.value);
 
@@ -100,7 +112,7 @@ class Expression extends _EquationMember {
   }
 
   @override
-  Expression operator -(_EquationMember m) {
+  Expression operator -(EquationMember m) {
     if (m is ConstantMember)
       return new Expression(new List<Term>.from(terms), constant - m.value);
 
@@ -126,49 +138,22 @@ class Expression extends _EquationMember {
     return null;
   }
 
-  _EquationMember _applyMultiplicand(double m) {
-    List<Term> newTerms = terms.fold(
-      new List<Term>(),
-      (List<Term> list, Term term) {
-        return list..add(new Term(term.variable, term.coefficient * m));
-      }
-    );
-    return new Expression(newTerms, constant * m);
-  }
-
-  _Pair<Expression, double> _findMulitplierAndMultiplicand(_EquationMember m) {
-    // At least on of the the two members must be constant for the resulting
-    // expression to be linear
-
-    if (!this.isConstant && !m.isConstant)
-      return null;
-
-    if (this.isConstant)
-      return new _Pair<Expression, double>(m.asExpression(), this.value);
-
-    if (m.isConstant)
-      return new _Pair<Expression, double>(this.asExpression(), m.value);
-
-    assert(false);
-    return null;
-  }
-
   @override
-  _EquationMember operator *(_EquationMember m) {
-    _Pair<Expression, double> args = _findMulitplierAndMultiplicand(m);
+  EquationMember operator *(EquationMember m) {
+    _Multiplication args = _findMulitplierAndMultiplicand(m);
 
     if (args == null) {
       throw new ParserException(
         'Could not find constant multiplicand or multiplier',
-        <_EquationMember>[this, m]
+        <EquationMember>[this, m]
       );
     }
 
-    return args.first._applyMultiplicand(args.second);
+    return args.multiplier._applyMultiplicand(args.multiplicand);
   }
 
   @override
-  _EquationMember operator /(_EquationMember m) {
+  EquationMember operator /(EquationMember m) {
     if (!m.isConstant) {
       throw new ParserException(
           'The divisor was not a constant expression', [this, m]);
@@ -176,6 +161,32 @@ class Expression extends _EquationMember {
     }
 
     return this._applyMultiplicand(1.0 / m.value);
+  }
+
+  _Multiplication _findMulitplierAndMultiplicand(EquationMember m) {
+    // At least one of the the two members must be constant for the resulting
+    // expression to be linear
+
+    if (!this.isConstant && !m.isConstant)
+      return null;
+
+    if (this.isConstant)
+      return new _Multiplication(m.asExpression(), this.value);
+
+    if (m.isConstant)
+      return new _Multiplication(this.asExpression(), m.value);
+    assert(false);
+    return null;
+  }
+
+  EquationMember _applyMultiplicand(double m) {
+    List<Term> newTerms = terms.fold(
+      new List<Term>(),
+      (List<Term> list, Term term) {
+        return list..add(new Term(term.variable, term.coefficient * m));
+      }
+    );
+    return new Expression(newTerms, constant * m);
   }
 
   @override

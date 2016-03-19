@@ -26,8 +26,7 @@ class _MyAutoLayoutDelegate extends AutoLayoutDelegate {
       // The widths of the first and the third boxes should be equal
       p1.width.equals(p3.width),
 
-      // The width of the second box should be twice as much as that of the first
-      // and third
+      // The width of the first box should be twice as much as that of the second
       p1.width.equals(p2.width * al.cm(2.0)),
 
       // The height of the three boxes should be equal to that of the container

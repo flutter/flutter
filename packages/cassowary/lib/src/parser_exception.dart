@@ -2,16 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of cassowary;
+import 'equation_member.dart';
 
 class ParserException implements Exception {
-  final String message;
-  List<_EquationMember> members;
   ParserException(this.message, this.members);
+
+  final String message;
+
+  List<EquationMember> members;
 
   @override
   String toString() {
-    if (message == null) return "Error while parsing constraint or expression";
-    return "Error: '$message' while trying to parse constraint or expression";
+    if (message == null)
+      return 'Error while parsing constraint or expression';
+    return 'Error: "$message" while trying to parse constraint or expression';
   }
 }
