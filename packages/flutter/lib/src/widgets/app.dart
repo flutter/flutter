@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'asset_vendor.dart';
+import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'checked_mode_banner.dart';
 import 'framework.dart';
 import 'locale_query.dart';
 import 'media_query.dart';
