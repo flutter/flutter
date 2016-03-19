@@ -63,9 +63,13 @@ class PaintingContext {
   /// The render object must have a composited layer and must be in need of
   /// painting. The render object's layer is re-used, along with any layers in
   /// the subtree that don't need to be repainted.
-  static void repaintCompositedChild(RenderObject child) {
+  static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent: false }) {
     assert(child.isRepaintBoundary);
     assert(child.needsPaint);
+    assert(() {
+      child.debugRegisterRepaintBoundaryPaint(includedParent: debugAlsoPaintedParent, includedChild: true);
+      return true;
+    });
     child._layer ??= new OffsetLayer();
     child._layer.removeAllChildren();
     assert(() {
@@ -98,9 +102,13 @@ class PaintingContext {
 
     // Create a layer for our child, and paint the child into it.
     if (child.needsPaint) {
-      repaintCompositedChild(child);
+      repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
       assert(child._layer != null);
+      assert(() {
+        child.debugRegisterRepaintBoundaryPaint(includedParent: true, includedChild: false);
+        return true;
+      });
       child._layer.detach();
       assert(() {
         child._layer.debugOwner = child.debugOwner ?? child.runtimeType;
@@ -1189,6 +1197,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// Warning: This getter must not change value over the lifetime of this object.
   bool get isRepaintBoundary => false;
+
+  /// Called, in checked mode, if [isRepaintBoundary] is true, when either the
+  /// this render object or its parent attempt to paint.
+  ///
+  /// This can be used to record metrics about whether the node should actually
+  /// be a repaint boundary.
+  void debugRegisterRepaintBoundaryPaint({ bool includedParent: true, bool includedChild: false }) { }
 
   /// Whether this render object always needs compositing.
   ///
