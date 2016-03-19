@@ -1480,11 +1480,113 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 /// previously. Similarly, when the child repaints but the surround tree does
 /// not, we can re-record its display list without re-recording the display list
 /// for the surround tree.
+///
+/// In some cases, it is necessary to place _two_ (or more) repaint boundaries
+/// to get a useful effect. Consider, for example, an e-mail application that
+/// shows an unread count and a list of e-mails. Whenever a new e-mail comes in,
+/// the list would update, but so would the unread count. If only one of these
+/// two parts of the application was behind a repaint boundary, the entire
+/// application would repaint each time. On the other hand, if both were behind
+/// a repaint boundary, a new e-mail would only change those two parts of the
+/// application and the rest of the application would not repaint.
+///
+/// To tell if a particular RenderRepaintBoundary is useful, run your
+/// application in checked mode, interacting with it in typical ways, and then
+/// call [debugDumpRenderTree]. Each RenderRepaintBoundary will include the
+/// ratio of cases where the repaint boundary was useful vs the cases where it
+/// was not. These counts can also be inspected programmatically using
+/// [debugAsymmetricPaintCount] and [debugSymmetricPaintCount] respectively.
 class RenderRepaintBoundary extends RenderProxyBox {
   RenderRepaintBoundary({ RenderBox child }) : super(child);
 
   @override
   bool get isRepaintBoundary => true;
+
+  /// The number of times that this render object repainted at the same time as
+  /// its parent. Repaint boundaries are only useful when the parent and child
+  /// paint at different times. When both paint at the same time, the repaint
+  /// boundary is redundant, and may be actually making performance worse.
+  ///
+  /// Only valid in checked mode. In release builds, always returns zero.
+  ///
+  /// Can be reset using [debugResetMetrics]. See [debugAsymmetricPaintCount]
+  /// for the corresponding count of times where only the parent or only the
+  /// child painted.
+  int get debugSymmetricPaintCount => _debugSymmetricPaintCount;
+  int _debugSymmetricPaintCount = 0;
+
+  /// The number of times that either this render object repainted without the
+  /// parent being painted, or the parent repainted without this object being
+  /// painted. When a repaint boundary is used at a seam in the render tree
+  /// where the parent tends to repaint at entirely different times than the
+  /// child, it can improve performance by reducing the number of paint
+  /// operations that have to be recorded each frame.
+  ///
+  /// Only valid in checked mode. In release builds, always returns zero.
+  ///
+  /// Can be reset using [debugResetMetrics]. See [debugSymmetricPaintCount] for
+  /// the corresponding count of times where both the parent and the child
+  /// painted together.
+  int get debugAsymmetricPaintCount => _debugAsymmetricPaintCount;
+  int _debugAsymmetricPaintCount = 0;
+
+  /// Resets the [debugSymmetricPaintCount] and [debugAsymmetricPaintCount]
+  /// counts to zero.
+  ///
+  /// Only valid in checked mode. Does nothing in release builds.
+  void debugResetMetrics() {
+    assert(() {
+      _debugSymmetricPaintCount = 0;
+      _debugAsymmetricPaintCount = 0;
+      return true;
+    });
+  }
+
+  @override
+  void debugRegisterRepaintBoundaryPaint({ bool includedParent: true, bool includedChild: false }) {
+    assert(() {
+      if (includedParent && includedChild)
+        _debugSymmetricPaintCount += 1;
+      else
+        _debugAsymmetricPaintCount += 1;
+      return true;
+    });
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    bool inReleaseMode = true;
+    assert(() {
+      inReleaseMode = false;
+      if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
+        description.add('usefulness ratio: no metrics collected yet (never painted)');
+      } else {
+        double percentage = 100.0 * debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
+        String diagnosis;
+        if (debugSymmetricPaintCount + debugAsymmetricPaintCount < 5) {
+          diagnosis = 'insufficient data to draw conclusion (less than five repaints)';
+        } else if (percentage > 90.0) {
+          diagnosis = 'this is an outstandingly useful repaint boundary and should definitely be kept';
+        } else if (percentage > 50.0) {
+          diagnosis = 'this is a useful repaint boundary and should be kept';
+        } else if (percentage > 30.0) {
+          diagnosis = 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere';
+        } else if (percentage > 10.0) {
+          diagnosis = 'this repaint boundary does sometimes show value, though currently not that often';
+        } else if (debugAsymmetricPaintCount == 0) {
+          diagnosis = 'this repaint boundary is astoundingly ineffectual and should be removed';
+        } else {
+          diagnosis = 'this repaint boundary is not very effective and should probably be removed';
+        }
+        description.add('metrics: ${percentage.toStringAsFixed(1)}% useful ($debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good)');
+        description.add('diagnosis: $diagnosis');
+      }
+      return true;
+    });
+    if (inReleaseMode)
+      description.add('(run in checked mode to collect repaint boundary statistics)');
+  }
 }
 
 /// Is invisible during hit testing.
