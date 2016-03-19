@@ -97,7 +97,7 @@ class FlutterTask extends DefaultTask {
         project.exec {
             executable "${sdkDir}/bin/flutter"
             workingDir sourceDir
-            args "build"
+            args "build", "flx"
             args "-o", flxPath
             args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
             args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
