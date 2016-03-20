@@ -31,7 +31,7 @@ void main() {
       CreateCommand command = new CreateCommand();
       CommandRunner runner = new CommandRunner('test_flutter', '')
         ..addCommand(command);
-      await runner.run(['create', '--out', temp.path])
+      await runner.run(['create', temp.path])
           .then((int code) => expect(code, equals(0)));
 
       String mainPath = path.join(temp.path, 'lib', 'main.dart');
