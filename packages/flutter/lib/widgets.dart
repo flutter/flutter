@@ -12,6 +12,7 @@ export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
 export 'src/widgets/child_view.dart';
+export 'src/widgets/debug.dart';
 export 'src/widgets/dismissable.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/editable.dart';
