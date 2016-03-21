@@ -246,6 +246,8 @@ class BoxShadow {
 
 /// A 2D gradient.
 abstract class Gradient {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Gradient();
   Shader createShader(Rect rect);
 }

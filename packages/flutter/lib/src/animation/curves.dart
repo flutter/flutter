@@ -16,6 +16,8 @@ const double _kCubicErrorBound = 0.001;
 ///
 /// See [Curves] for a collection of common animation curves.
 abstract class Curve {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Curve();
 
   /// Returns the value of the curve at point [t].

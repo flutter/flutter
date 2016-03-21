@@ -109,6 +109,13 @@ class AnimationController extends Animation<double>
   @override
   double get value => _value;
   double _value;
+  /// Stops the animation controller and sets the current value of the
+  /// animation.
+  ///
+  /// The new value is clamped to the range set by [lowerBound] and [upperBound].
+  ///
+  /// Value listeners are notified even if this does not change the value.
+  /// Status listeners are notified if the animation was previously playing.
   void set value(double newValue) {
     assert(newValue != null);
     stop();

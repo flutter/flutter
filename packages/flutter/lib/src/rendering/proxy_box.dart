@@ -1300,6 +1300,8 @@ class RenderFractionalTranslation extends RenderProxyBox {
 }
 
 abstract class CustomPainter {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const CustomPainter();
 
   void paint(Canvas canvas, Size size);
