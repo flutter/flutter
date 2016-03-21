@@ -178,8 +178,8 @@ class _ApplicationConnectorDuplicateParams extends bindings.Struct {
   }
 }
 
-const int _ApplicationConnector_connectToApplicationName = 0;
-const int _ApplicationConnector_duplicateName = 1;
+const int _applicationConnectorMethodConnectToApplicationName = 0;
+const int _applicationConnectorMethodDuplicateName = 1;
 
 class _ApplicationConnectorServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>
@@ -246,7 +246,7 @@ class _ApplicationConnectorProxyCalls implements ApplicationConnector {
       params.applicationUrl = applicationUrl;
       params.services = services;
       params.exposedServices = exposedServices;
-      _proxyImpl.sendMessage(params, _ApplicationConnector_connectToApplicationName);
+      _proxyImpl.sendMessage(params, _applicationConnectorMethodConnectToApplicationName);
     }
     void duplicate(Object applicationConnectorRequest) {
       if (!_proxyImpl.isBound) {
@@ -255,7 +255,7 @@ class _ApplicationConnectorProxyCalls implements ApplicationConnector {
       }
       var params = new _ApplicationConnectorDuplicateParams();
       params.applicationConnectorRequest = applicationConnectorRequest;
-      _proxyImpl.sendMessage(params, _ApplicationConnector_duplicateName);
+      _proxyImpl.sendMessage(params, _applicationConnectorMethodDuplicateName);
     }
 }
 
@@ -347,12 +347,12 @@ class ApplicationConnectorStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case _ApplicationConnector_connectToApplicationName:
+      case _applicationConnectorMethodConnectToApplicationName:
         var params = _ApplicationConnectorConnectToApplicationParams.deserialize(
             message.payload);
         _impl.connectToApplication(params.applicationUrl, params.services, params.exposedServices);
         break;
-      case _ApplicationConnector_duplicateName:
+      case _applicationConnectorMethodDuplicateName:
         var params = _ApplicationConnectorDuplicateParams.deserialize(
             message.payload);
         _impl.duplicate(params.applicationConnectorRequest);

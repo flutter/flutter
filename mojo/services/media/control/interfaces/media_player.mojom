@@ -17,6 +17,11 @@ interface MediaPlayer {
   // Pauses playback.
   Pause();
 
+  // Seeks to the specified position, specified in nanoseconds.
+  // TODO(dalesat): Consider adding relative vs remote flag.
+  // TODO(dalesat): Consider adding parameters regarding desired precision.
+  Seek(int64 position);
+
   // Gets the status. To get the status immediately, call GetStatus(0). To
   // get updates thereafter, pass the version sent in the previous callback.
   GetStatus(uint64 version_last_seen) =>

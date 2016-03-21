@@ -766,12 +766,14 @@ class TypeReference extends bindings.Struct {
 
 class StructField extends bindings.Struct {
   static const List<bindings.StructDataHeader> kVersions = const [
-    const bindings.StructDataHeader(56, 0)
+    const bindings.StructDataHeader(64, 0)
   ];
   DeclarationData declData = null;
   Type type = null;
   DefaultFieldValue defaultValue = null;
   int offset = 0;
+  int bit = 0;
+  int minVersion = 0;
 
   StructField() : super(kVersions.last.size);
 
@@ -829,6 +831,14 @@ class StructField extends bindings.Struct {
       
       result.offset = decoder0.decodeInt32(48);
     }
+    if (mainDataHeader.version >= 0) {
+      
+      result.bit = decoder0.decodeInt8(52);
+    }
+    if (mainDataHeader.version >= 0) {
+      
+      result.minVersion = decoder0.decodeUint32(56);
+    }
     return result;
   }
 
@@ -862,6 +872,20 @@ class StructField extends bindings.Struct {
           "offset of struct StructField: $e";
       rethrow;
     }
+    try {
+      encoder0.encodeInt8(bit, 52);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "bit of struct StructField: $e";
+      rethrow;
+    }
+    try {
+      encoder0.encodeUint32(minVersion, 56);
+    } on bindings.MojoCodecError catch(e) {
+      e.message = "Error encountered while encoding field "
+          "minVersion of struct StructField: $e";
+      rethrow;
+    }
   }
 
   String toString() {
@@ -869,7 +893,9 @@ class StructField extends bindings.Struct {
            "declData: $declData" ", "
            "type: $type" ", "
            "defaultValue: $defaultValue" ", "
-           "offset: $offset" ")";
+           "offset: $offset" ", "
+           "bit: $bit" ", "
+           "minVersion: $minVersion" ")";
   }
 
   Map toJson() {
@@ -878,6 +904,8 @@ class StructField extends bindings.Struct {
     map["type"] = type;
     map["defaultValue"] = defaultValue;
     map["offset"] = offset;
+    map["bit"] = bit;
+    map["minVersion"] = minVersion;
     return map;
   }
 }
@@ -2887,7 +2915,7 @@ enum TypeTag {
 }
 
 class Type extends bindings.Union {
-  static final _tag_to_int = const {
+  static final _tagToInt = const {
     TypeTag.simpleType: 0,
     TypeTag.stringType: 1,
     TypeTag.arrayType: 2,
@@ -2896,7 +2924,7 @@ class Type extends bindings.Union {
     TypeTag.typeReference: 5,
   };
 
-  static final _int_to_tag = const {
+  static final _intToTag = const {
     0: TypeTag.simpleType,
     1: TypeTag.stringType,
     2: TypeTag.arrayType,
@@ -2984,7 +3012,7 @@ class Type extends bindings.Union {
     Type result = new Type();
 
     
-    TypeTag tag = _int_to_tag[decoder0.decodeUint32(offset + 4)];
+    TypeTag tag = _intToTag[decoder0.decodeUint32(offset + 4)];
     switch (tag) {
       case TypeTag.simpleType:
         
@@ -3029,7 +3057,7 @@ class Type extends bindings.Union {
   void encode(bindings.Encoder encoder0, int offset) {
     
     encoder0.encodeUint32(16, offset);
-    encoder0.encodeUint32(_tag_to_int[_tag], offset + 4);
+    encoder0.encodeUint32(_tagToInt[_tag], offset + 4);
     switch (_tag) {
       case TypeTag.simpleType:
         encoder0.encodeEnum(simpleType, offset + 8);
@@ -3093,14 +3121,14 @@ enum UserDefinedTypeTag {
 }
 
 class UserDefinedType extends bindings.Union {
-  static final _tag_to_int = const {
+  static final _tagToInt = const {
     UserDefinedTypeTag.enumType: 0,
     UserDefinedTypeTag.structType: 1,
     UserDefinedTypeTag.unionType: 2,
     UserDefinedTypeTag.interfaceType: 3,
   };
 
-  static final _int_to_tag = const {
+  static final _intToTag = const {
     0: UserDefinedTypeTag.enumType,
     1: UserDefinedTypeTag.structType,
     2: UserDefinedTypeTag.unionType,
@@ -3164,7 +3192,7 @@ class UserDefinedType extends bindings.Union {
     UserDefinedType result = new UserDefinedType();
 
     
-    UserDefinedTypeTag tag = _int_to_tag[decoder0.decodeUint32(offset + 4)];
+    UserDefinedTypeTag tag = _intToTag[decoder0.decodeUint32(offset + 4)];
     switch (tag) {
       case UserDefinedTypeTag.enumType:
         
@@ -3196,7 +3224,7 @@ class UserDefinedType extends bindings.Union {
   void encode(bindings.Encoder encoder0, int offset) {
     
     encoder0.encodeUint32(16, offset);
-    encoder0.encodeUint32(_tag_to_int[_tag], offset + 4);
+    encoder0.encodeUint32(_tagToInt[_tag], offset + 4);
     switch (_tag) {
       case UserDefinedTypeTag.enumType:
         encoder0.encodeStruct(enumType, offset + 8, false);
@@ -3246,12 +3274,12 @@ enum DefaultFieldValueTag {
 }
 
 class DefaultFieldValue extends bindings.Union {
-  static final _tag_to_int = const {
+  static final _tagToInt = const {
     DefaultFieldValueTag.value: 0,
     DefaultFieldValueTag.defaultKeyword: 1,
   };
 
-  static final _int_to_tag = const {
+  static final _intToTag = const {
     0: DefaultFieldValueTag.value,
     1: DefaultFieldValueTag.defaultKeyword,
   };
@@ -3291,7 +3319,7 @@ class DefaultFieldValue extends bindings.Union {
     DefaultFieldValue result = new DefaultFieldValue();
 
     
-    DefaultFieldValueTag tag = _int_to_tag[decoder0.decodeUint32(offset + 4)];
+    DefaultFieldValueTag tag = _intToTag[decoder0.decodeUint32(offset + 4)];
     switch (tag) {
       case DefaultFieldValueTag.value:
         var decoder1 = decoder0.decodePointer(offset + 8, false);
@@ -3312,7 +3340,7 @@ class DefaultFieldValue extends bindings.Union {
   void encode(bindings.Encoder encoder0, int offset) {
     
     encoder0.encodeUint32(16, offset);
-    encoder0.encodeUint32(_tag_to_int[_tag], offset + 4);
+    encoder0.encodeUint32(_tagToInt[_tag], offset + 4);
     switch (_tag) {
       case DefaultFieldValueTag.value:
         encoder0.encodeNestedUnion(value, offset + 8, false);
@@ -3351,13 +3379,13 @@ enum ValueTag {
 }
 
 class Value extends bindings.Union {
-  static final _tag_to_int = const {
+  static final _tagToInt = const {
     ValueTag.literalValue: 0,
     ValueTag.userValueReference: 1,
     ValueTag.builtinValue: 2,
   };
 
-  static final _int_to_tag = const {
+  static final _intToTag = const {
     0: ValueTag.literalValue,
     1: ValueTag.userValueReference,
     2: ValueTag.builtinValue,
@@ -3409,7 +3437,7 @@ class Value extends bindings.Union {
     Value result = new Value();
 
     
-    ValueTag tag = _int_to_tag[decoder0.decodeUint32(offset + 4)];
+    ValueTag tag = _intToTag[decoder0.decodeUint32(offset + 4)];
     switch (tag) {
       case ValueTag.literalValue:
         var decoder1 = decoder0.decodePointer(offset + 8, false);
@@ -3438,7 +3466,7 @@ class Value extends bindings.Union {
   void encode(bindings.Encoder encoder0, int offset) {
     
     encoder0.encodeUint32(16, offset);
-    encoder0.encodeUint32(_tag_to_int[_tag], offset + 4);
+    encoder0.encodeUint32(_tagToInt[_tag], offset + 4);
     switch (_tag) {
       case ValueTag.literalValue:
         encoder0.encodeNestedUnion(literalValue, offset + 8, false);
@@ -3492,7 +3520,7 @@ enum LiteralValueTag {
 }
 
 class LiteralValue extends bindings.Union {
-  static final _tag_to_int = const {
+  static final _tagToInt = const {
     LiteralValueTag.boolValue: 0,
     LiteralValueTag.doubleValue: 1,
     LiteralValueTag.floatValue: 2,
@@ -3507,7 +3535,7 @@ class LiteralValue extends bindings.Union {
     LiteralValueTag.uint64Value: 11,
   };
 
-  static final _int_to_tag = const {
+  static final _intToTag = const {
     0: LiteralValueTag.boolValue,
     1: LiteralValueTag.doubleValue,
     2: LiteralValueTag.floatValue,
@@ -3667,7 +3695,7 @@ class LiteralValue extends bindings.Union {
     LiteralValue result = new LiteralValue();
 
     
-    LiteralValueTag tag = _int_to_tag[decoder0.decodeUint32(offset + 4)];
+    LiteralValueTag tag = _intToTag[decoder0.decodeUint32(offset + 4)];
     switch (tag) {
       case LiteralValueTag.boolValue:
         
@@ -3727,7 +3755,7 @@ class LiteralValue extends bindings.Union {
   void encode(bindings.Encoder encoder0, int offset) {
     
     encoder0.encodeUint32(16, offset);
-    encoder0.encodeUint32(_tag_to_int[_tag], offset + 4);
+    encoder0.encodeUint32(_tagToInt[_tag], offset + 4);
     switch (_tag) {
       case LiteralValueTag.boolValue:
         encoder0.encodeBool(boolValue, offset + 8, 0);
@@ -3825,12 +3853,12 @@ enum UserDefinedValueTag {
 }
 
 class UserDefinedValue extends bindings.Union {
-  static final _tag_to_int = const {
+  static final _tagToInt = const {
     UserDefinedValueTag.enumValue: 0,
     UserDefinedValueTag.declaredConstant: 1,
   };
 
-  static final _int_to_tag = const {
+  static final _intToTag = const {
     0: UserDefinedValueTag.enumValue,
     1: UserDefinedValueTag.declaredConstant,
   };
@@ -3870,7 +3898,7 @@ class UserDefinedValue extends bindings.Union {
     UserDefinedValue result = new UserDefinedValue();
 
     
-    UserDefinedValueTag tag = _int_to_tag[decoder0.decodeUint32(offset + 4)];
+    UserDefinedValueTag tag = _intToTag[decoder0.decodeUint32(offset + 4)];
     switch (tag) {
       case UserDefinedValueTag.enumValue:
         
@@ -3892,7 +3920,7 @@ class UserDefinedValue extends bindings.Union {
   void encode(bindings.Encoder encoder0, int offset) {
     
     encoder0.encodeUint32(16, offset);
-    encoder0.encodeUint32(_tag_to_int[_tag], offset + 4);
+    encoder0.encodeUint32(_tagToInt[_tag], offset + 4);
     switch (_tag) {
       case UserDefinedValueTag.enumValue:
         encoder0.encodeStruct(enumValue, offset + 8, false);

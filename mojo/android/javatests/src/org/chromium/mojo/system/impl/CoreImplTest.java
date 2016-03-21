@@ -24,6 +24,8 @@ import org.chromium.mojo.system.MojoResult;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.ResultAnd;
 import org.chromium.mojo.system.SharedBufferHandle;
+import org.chromium.mojo.system.SharedBufferHandle.BufferInformation;
+import org.chromium.mojo.system.SharedBufferHandle.BufferInformationFlags;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -533,6 +535,19 @@ public class CoreImplTest extends MojoTestCase {
 
         checkSharing(handle, newHandle);
         checkSharing(newHandle, handle);
+    }
+
+    /**
+     * Testing {@link SharedBufferHandle}.
+     */
+    @SmallTest
+    public void testSharedBufferInformation() {
+        Core core = CoreImpl.getInstance();
+        SharedBufferHandle handle = core.createSharedBuffer(null, 8);
+        addHandleToClose(handle);
+        BufferInformation information = handle.getBufferInformation();
+        assertEquals(BufferInformationFlags.NONE, information.getFlags());
+        assertEquals(8, information.getBufferSize());
     }
 
     /**
