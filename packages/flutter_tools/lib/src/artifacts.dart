@@ -42,6 +42,7 @@ enum ArtifactType {
   androidIcuData,
   androidKeystore,
   androidLibSkyShell,
+  iosXcodeProject,
 }
 
 class Artifact {
@@ -124,6 +125,12 @@ class ArtifactStore {
       fileName: 'libsky_shell.so',
       type: ArtifactType.androidLibSkyShell,
       targetPlatform: TargetPlatform.android_arm
+    ),
+    const Artifact._(
+      name: 'iOS Runner (Xcode Project)',
+      fileName: 'FlutterXcode.zip',
+      type: ArtifactType.iosXcodeProject,
+      targetPlatform: TargetPlatform.ios
     ),
   ];
 
