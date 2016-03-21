@@ -2,12 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of cassowary;
+import 'equation_member.dart';
+import 'expression.dart';
+import 'term.dart';
 
-class Param extends _EquationMember {
+class Variable {
+  static int _total = 0;
+
+  Variable(this.value) : _tick = _total++;
+
+  final int _tick;
+
+  double value;
+
+  String name;
+
+  Param get owner => _owner;
+  Param _owner;
+
+  bool applyUpdate(double updated) {
+    bool res = updated != value;
+    value = updated;
+    return res;
+  }
+
+  String get debugName => name ?? 'variable$_tick';
+
+  @override
+  String toString() => debugName;
+}
+
+class Param extends EquationMember {
   Param([double value = 0.0]) : variable = new Variable(value) {
     variable._owner = this;
   }
+
   Param.withContext(dynamic context, [double value = 0.0])
     : variable = new Variable(value),
       context = context {
@@ -19,6 +48,9 @@ class Param extends _EquationMember {
   dynamic context;
 
   @override
+  Expression asExpression() => new Expression(<Term>[new Term(variable, 1.0)], 0.0);
+
+  @override
   bool get isConstant => false;
 
   @override
@@ -26,7 +58,4 @@ class Param extends _EquationMember {
 
   String get name => variable.name;
   void set name(String name) { variable.name = name; }
-
-  @override
-  Expression asExpression() => new Expression(<Term>[new Term(variable, 1.0)], 0.0);
 }

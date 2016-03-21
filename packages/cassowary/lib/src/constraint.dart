@@ -2,16 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of cassowary;
+import 'priority.dart';
+import 'expression.dart';
 
-enum Relation { equalTo, lessThanOrEqualTo, greaterThanOrEqualTo, }
+enum Relation {
+  equalTo,
+  lessThanOrEqualTo,
+  greaterThanOrEqualTo,
+}
 
 class Constraint {
-  final Relation relation;
-  final Expression expression;
-  double priority = Priority.required;
-
   Constraint(this.expression, this.relation);
+
+  final Relation relation;
+
+  final Expression expression;
+
+  double priority = Priority.required;
 
   Constraint operator |(double p) => this..priority = p;
 
@@ -34,9 +41,8 @@ class Constraint {
 
     buffer.write(' | priority = $priority');
 
-    if (priority == Priority.required) {
+    if (priority == Priority.required)
       buffer.write(' (required)');
-    }
 
     return buffer.toString();
   }
