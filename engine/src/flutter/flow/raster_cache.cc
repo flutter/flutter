@@ -80,7 +80,7 @@ skia::RefPtr<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
                    "height", physical_size.height());
       SkImageInfo info = SkImageInfo::MakeN32Premul(physical_size);
       skia::RefPtr<SkSurface> surface = skia::AdoptRef(
-          SkSurface::NewRenderTarget(context, SkSurface::kYes_Budgeted, info));
+          SkSurface::NewRenderTarget(context, SkBudgeted::kYes, info));
       if (surface) {
         SkCanvas* canvas = surface->getCanvas();
         canvas->clear(SK_ColorTRANSPARENT);
