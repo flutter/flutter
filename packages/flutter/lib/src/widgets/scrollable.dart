@@ -444,7 +444,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   Simulation _createFlingSimulation(double scrollVelocity) {
     final Simulation simulation =  scrollBehavior.createScrollSimulation(scrollOffset, scrollVelocity);
     if (simulation != null) {
-      final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs() * (scrollVelocity < 0.0 ? -1.0 : 1.0);
+      final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs();
       final double endDistance = pixelOffsetToScrollOffset(kPixelScrollTolerance.distance).abs();
       simulation.tolerance = new Tolerance(velocity: endVelocity, distance: endDistance);
     }

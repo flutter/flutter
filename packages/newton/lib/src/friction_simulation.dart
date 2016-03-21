@@ -47,7 +47,7 @@ class FrictionSimulation extends Simulation {
   double dx(double time) => _v * math.pow(_drag, time);
 
   @override
-  bool isDone(double time) => dx(time).abs() < this.tolerance.velocity;
+  bool isDone(double time) => dx(time).abs() < tolerance.velocity;
 }
 
 class BoundedFrictionSimulation extends FrictionSimulation {
