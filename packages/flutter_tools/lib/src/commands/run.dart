@@ -137,8 +137,7 @@ String _getMissingPackageHintForPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'Is your project missing an android/AndroidManifest.xml?';
-    case TargetPlatform.ios_arm:
-    case TargetPlatform.ios_x64:
+    case TargetPlatform.ios:
       return 'Is your project missing an ios/Info.plist?';
     default:
       return null;

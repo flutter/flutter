@@ -110,8 +110,7 @@ class ApplicationPackageStore {
     switch (platform) {
       case TargetPlatform.android_arm:
         return android;
-      case TargetPlatform.ios_arm:
-      case TargetPlatform.ios_x64:
+      case TargetPlatform.ios:
         return iOS;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
@@ -130,8 +129,7 @@ class ApplicationPackageStore {
           android = new AndroidApk.fromBuildConfiguration(config);
           break;
 
-        case TargetPlatform.ios_arm:
-        case TargetPlatform.ios_x64:
+        case TargetPlatform.ios:
           iOS ??= new IOSApp.fromBuildConfiguration(config);
           break;
 

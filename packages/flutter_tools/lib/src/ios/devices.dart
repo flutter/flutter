@@ -229,7 +229,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  TargetPlatform get platform => TargetPlatform.ios_arm;
+  TargetPlatform get platform => TargetPlatform.ios;
 
   @override
   DeviceLogReader get logReader {

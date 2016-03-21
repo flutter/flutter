@@ -286,12 +286,7 @@ class FlutterCommandRunner extends CommandRunner {
       if (hostPlatform == HostPlatform.mac) {
         configs.add(new BuildConfiguration.prebuilt(
           hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.ios_arm
-        ));
-
-        configs.add(new BuildConfiguration.prebuilt(
-          hostPlatform: HostPlatform.mac,
-          targetPlatform: TargetPlatform.ios_x64
+          targetPlatform: TargetPlatform.ios
         ));
       }
     } else {
@@ -323,7 +318,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_arm,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-debug-build-path']
           ));
@@ -331,7 +326,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.debug,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_x64,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-sim-debug-build-path']
           ));
@@ -360,7 +355,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_arm,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-release-build-path']
           ));
@@ -368,7 +363,7 @@ class FlutterCommandRunner extends CommandRunner {
           configs.add(new BuildConfiguration.local(
             type: BuildType.release,
             hostPlatform: hostPlatform,
-            targetPlatform: TargetPlatform.ios_x64,
+            targetPlatform: TargetPlatform.ios,
             enginePath: enginePath,
             buildPath: globalResults['ios-sim-release-build-path']
           ));
