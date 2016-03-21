@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/ui/view_containers.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/view_provider.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/ui/view_token.mojom.dart' as mojom;
 import 'package:mojo_services/mojo/ui/views.mojom.dart' as mojom;
 import 'package:mojo/application.dart';
 import 'package:mojo/core.dart' as core;
@@ -31,6 +34,37 @@ mojom.ViewProxy _initViewProxy() {
 // provide a mechanism for coordinating about view keys.
 final mojom.ViewProxy _viewProxy = _initViewProxy();
 final mojom.View _view = _viewProxy?.ptr;
+
+mojom.ViewContainer _initViewContainer() {
+  mojom.ViewContainerProxy viewContainerProxy = new mojom.ViewContainerProxy.unbound();
+  _view.getContainer(viewContainerProxy);
+  viewContainerProxy.ptr.setListener(new mojom.ViewContainerListenerStub.unbound()..impl = _ViewContainerListenerImpl.instance);
+  return viewContainerProxy.ptr;
+}
+
+final mojom.ViewContainer _viewContainer = _initViewContainer();
+
+typedef dynamic _ResponseFactory();
+
+class _ViewContainerListenerImpl extends mojom.ViewContainerListener {
+  static final _ViewContainerListenerImpl instance = new _ViewContainerListenerImpl();
+
+  @override
+  dynamic onChildAttached(int childKey, mojom.ViewInfo childViewInfo, [_ResponseFactory responseFactory = null]) {
+    ChildViewConnection connection = _connections[childKey];
+    connection?._onAttachedToContainer(childViewInfo);
+    return responseFactory();
+  }
+
+  @override
+  dynamic onChildUnavailable(int childKey, [_ResponseFactory responseFactory = null]) {
+    ChildViewConnection connection = _connections[childKey];
+    connection?._onUnavailable();
+    return responseFactory();
+  }
+
+  final Map<int, ChildViewConnection> _connections = new HashMap<int, ChildViewConnection>();
+}
 
 /// (mojo-only) A connection with a child view.
 ///
@@ -66,22 +100,42 @@ class ChildViewConnection {
   static int _nextViewKey = 1;
   int _viewKey;
 
+  VoidCallback _onViewInfoAvailable;
+  mojom.ViewInfo _viewInfo;
+
+  void _onAttachedToContainer(mojom.ViewInfo viewInfo) {
+    assert(_viewInfo == null);
+    _viewInfo = viewInfo;
+    if (_onViewInfoAvailable != null)
+      _onViewInfoAvailable();
+  }
+
+  void _onUnavailable() {
+    _viewInfo = null;
+  }
+
   void _addChildToViewHost() {
     assert(_attached);
     assert(_viewOwner != null);
     assert(_viewKey == null);
     _viewKey = _nextViewKey++;
-    _view?.addChild(_viewKey, _viewOwner.impl);
+    _viewInfo = null;
+    _viewContainer?.addChild(_viewKey, _viewOwner.impl);
     _viewOwner = null;
+    assert(!_ViewContainerListenerImpl.instance._connections.containsKey(_viewKey));
+    _ViewContainerListenerImpl.instance._connections[_viewKey] = this;
   }
 
   void _removeChildFromViewHost() {
     assert(!_attached);
     assert(_viewOwner == null);
     assert(_viewKey != null);
+    assert(_ViewContainerListenerImpl.instance._connections[_viewKey] == this);
+    _ViewContainerListenerImpl.instance._connections.remove(_viewKey);
     _viewOwner = new mojom.ViewOwnerProxy.unbound();
-    _view?.removeChild(_viewKey, _viewOwner);
+    _viewContainer?.removeChild(_viewKey, _viewOwner);
     _viewKey = null;
+    _viewInfo = null;
   }
 
   // The number of render objects attached to this view. In between frames, we
@@ -110,26 +164,24 @@ class ChildViewConnection {
       _removeChildFromViewHost();
   }
 
-  Future<mojom.ViewLayoutInfo> _layout({ Size size, double scale }) async {
+  void _layout({ int physicalWidth, int physicalHeight, double devicePixelRatio }) {
     assert(_attached);
     assert(_attachments == 1);
     assert(_viewKey != null);
     if (_view == null)
-      return new Future<mojom.ViewLayoutInfo>.value(null);
-    int width = (size.width * scale).round();
-    int height = (size.height * scale).round();
+      return;
     // TODO(abarth): Ideally we would propagate our actual constraints to be
     // able to support rich cross-app layout. For now, we give the child tight
     // constraints for simplicity.
     mojom.BoxConstraints childConstraints = new mojom.BoxConstraints()
-      ..minWidth = width
-      ..maxWidth = width
-      ..minHeight = height
-      ..maxHeight = height;
+      ..minWidth = physicalWidth
+      ..maxWidth = physicalWidth
+      ..minHeight = physicalHeight
+      ..maxHeight = physicalHeight;
     mojom.ViewLayoutParams layoutParams = new mojom.ViewLayoutParams()
       ..constraints = childConstraints
-      ..devicePixelRatio = scale;
-    return (await _view.layoutChild(_viewKey, layoutParams)).info;
+      ..devicePixelRatio = devicePixelRatio;
+    _viewContainer.layoutChild(_viewKey, layoutParams);
   }
 }
 
@@ -138,7 +190,9 @@ class RenderChildView extends RenderBox {
   RenderChildView({
     ChildViewConnection child,
     double scale
-  }) : _child = child, _scale = scale;
+  }) : _scale = scale {
+    this.child = child;
+  }
 
   /// The child to display.
   ChildViewConnection get child => _child;
@@ -146,12 +200,17 @@ class RenderChildView extends RenderBox {
   void set child (ChildViewConnection value) {
     if (value == _child)
       return;
-    if (attached)
-      _child?._detach();
+    if (attached && _child != null) {
+      _child._detach();
+      assert(_child._onViewInfoAvailable != null);
+      _child._onViewInfoAvailable = null;
+    }
     _child = value;
-    _layoutInfo = null;
-    if (attached)
-      _child?._attach();
+    if (attached && _child != null) {
+      _child._attach();
+      assert(_child._onViewInfoAvailable == null);
+      _child._onViewInfoAvailable = markNeedsPaint;
+    }
     if (_child == null) {
       markNeedsPaint();
     } else {
@@ -185,20 +244,18 @@ class RenderChildView extends RenderBox {
   @override
   bool get alwaysNeedsCompositing => true;
 
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performResize() {
-    size = constraints.biggest;
-  }
-
   TextPainter _debugErrorMessage;
+
+  int _physicalWidth;
+  int _physicalHeight;
 
   @override
   void performLayout() {
+    size = constraints.biggest;
     if (_child != null) {
-      _child._layout(size: size, scale: scale).then(_handleLayoutInfoChanged);
+      _physicalWidth = (size.width * scale).round();
+      _physicalHeight = (size.height * scale).round();
+      _child._layout(physicalWidth: _physicalWidth, physicalHeight: _physicalHeight, devicePixelRatio: scale);
       assert(() {
         if (_view == null) {
           _debugErrorMessage ??= new TextPainter()
@@ -215,21 +272,14 @@ class RenderChildView extends RenderBox {
     }
   }
 
-  mojom.ViewLayoutInfo _layoutInfo;
-
-  void _handleLayoutInfoChanged(mojom.ViewLayoutInfo layoutInfo) {
-    _layoutInfo = layoutInfo;
-    markNeedsPaint();
-  }
-
   @override
   bool hitTestSelf(Point position) => true;
 
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    if (_layoutInfo != null)
-      context.pushChildScene(offset, scale, _layoutInfo);
+    if (_child?._viewInfo != null)
+      context.pushChildScene(offset, scale, _physicalWidth, _physicalHeight, _child._viewInfo.sceneToken);
     assert(() {
       if (_view == null) {
         context.canvas.drawRect(offset & size, new Paint()..color = const Color(0xFF0000FF));
