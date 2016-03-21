@@ -538,7 +538,7 @@ source_set("skia_opts") {
                 "ext/convolver_SSE2.h",
               ]
 
-    if (is_linux || is_mac) {
+    if (is_linux || is_mac || is_ios) {
       cflags += [ "-msse4.1" ]
     }
   } else if (current_cpu == "arm") {
