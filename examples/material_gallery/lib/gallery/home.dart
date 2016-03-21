@@ -17,6 +17,7 @@ import '../demo/date_picker_demo.dart';
 import '../demo/dialog_demo.dart';
 import '../demo/drop_down_demo.dart';
 import '../demo/fitness_demo.dart';
+import '../demo/flexible_space_demo.dart';
 import '../demo/grid_list_demo.dart';
 import '../demo/icons_demo.dart';
 import '../demo/leave_behind_demo.dart';
@@ -103,6 +104,7 @@ class GalleryHomeState extends State<GalleryHome> {
                 image: 'assets/section_components.png',
                 colors: Colors.amber,
                 demos: <GalleryDemo>[
+                  new GalleryDemo(title: 'App Bar', builder: () => new FlexibleSpaceDemo()),
                   new GalleryDemo(title: 'Buttons', builder: () => new ButtonsDemo()),
                   new GalleryDemo(title: 'Buttons: Floating Action Button', builder: () => new TabsFabDemo()),
                   new GalleryDemo(title: 'Cards', builder: () => new CardsDemo()),
