@@ -63,23 +63,13 @@ Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) asyn
   // Cleanup the temp directory after unzipping
   runSync(['/bin/rm', '-rf', tempDir.path]);
 
-  Directory flutterDir = new Directory(path.join(directory, 'Flutter'));
-  bool flutterDirExists = await flutterDir.exists();
-  if (!flutterDirExists)
+  // Verify that we have an Xcode project
+  Directory flutterProj = new Directory(path.join(directory, 'FlutterApplication.xcodeproj'));
+  bool flutterProjExists = await flutterProj.exists();
+  if (!flutterProjExists) {
+    printError("${flutterProj.path} does not exist");
     return false;
-
-  // Move contents of the Flutter directory one level up
-  // There is no dart:io API to do this. See https://github.com/dart-lang/sdk/issues/8148
-
-  for (FileSystemEntity file in flutterDir.listSync()) {
-    try {
-      runCheckedSync(['/bin/mv', file.path, directory]);
-    } catch (error) {
-      return false;
-    }
   }
-
-  runSync(['/bin/rm', '-rf', flutterDir.path]);
 
   return true;
 }
