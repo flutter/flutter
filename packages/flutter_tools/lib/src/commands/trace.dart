@@ -10,6 +10,14 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class TraceCommand extends FlutterCommand {
+  TraceCommand() {
+    argParser.addFlag('start', negatable: false, help: 'Start tracing.');
+    argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
+    argParser.addOption('out', help: 'Specify the path of the saved trace file.');
+    argParser.addOption('duration',
+        defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
+  }
+
   @override
   final String name = 'trace';
 
@@ -21,14 +29,6 @@ class TraceCommand extends FlutterCommand {
     '\`trace\` called with no arguments will automatically start tracing, delay a set amount of\n'
     'time (controlled by --duration), and stop tracing. To explicitly control tracing, call trace\n'
     'with --start and later with --stop.';
-
-  TraceCommand() {
-    argParser.addFlag('start', negatable: false, help: 'Start tracing.');
-    argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
-    argParser.addOption('out', help: 'Specify the path of the saved trace file.');
-    argParser.addOption('duration',
-        defaultsTo: '10', abbr: 'd', help: 'Duration in seconds to trace.');
-  }
 
   @override
   bool get androidOnly => true;

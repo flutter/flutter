@@ -99,14 +99,12 @@ class SimControl {
 
   SimDevice _createTestDevice() {
     SimDeviceType deviceType = _findSuitableDeviceType();
-    if (deviceType == null) {
+    if (deviceType == null)
       return null;
-    }
 
     String runtime = _findSuitableRuntime();
-    if (runtime == null) {
+    if (runtime == null)
       return null;
-    }
 
     // Delete any old test devices
     getDevices()
@@ -131,10 +129,8 @@ class SimControl {
 
     if (usableTypes.isEmpty) {
       printError(
-        'No suitable device type found.'
-        '\n'
-        'You may launch an iOS Simulator manually and Flutter will attempt to '
-        'use it.'
+        'No suitable device type found.\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
       );
     }
 
@@ -153,10 +149,8 @@ class SimControl {
 
     if (usableRuntimes.isEmpty) {
       printError(
-        'No suitable iOS runtime found.'
-        '\n'
-        'You may launch an iOS Simulator manually and Flutter will attempt to '
-        'use it.'
+        'No suitable iOS runtime found.\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
       );
     }
 
@@ -165,7 +159,7 @@ class SimControl {
 
   void _deleteDevice(SimDevice device) {
     try {
-      List<String> args = [_xcrunPath, 'simctl', 'delete', device.name];
+      List<String> args = <String>[_xcrunPath, 'simctl', 'delete', device.name];
       printTrace(args.join(' '));
       runCheckedSync(args);
     } catch(e) {
@@ -426,9 +420,8 @@ class IOSSimulator extends Device {
 
   @override
   String supportMessage() {
-    if (isSupported()) {
+    if (isSupported())
       return "Supported";
-    }
 
     return _supportMessage != null ? _supportMessage : "Unknown";
   }

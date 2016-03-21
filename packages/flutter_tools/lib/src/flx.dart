@@ -177,7 +177,11 @@ Future<int> build(
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    int result = await toolchain.compiler.compile(mainPath: mainPath, snapshotPath: snapshotPath, depfilePath: depfilePath, buildOutputPath: outputPath);
+    int result = await toolchain.compiler.createSnapshot(
+      mainPath: mainPath,
+      snapshotPath: snapshotPath,
+      depfilePath: depfilePath
+    );
     if (result != 0) {
       printError('Failed to run the Flutter compiler. Exit code: $result');
       return result;

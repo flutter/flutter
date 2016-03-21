@@ -9,12 +9,6 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
-  @override
-  final String name = 'logs';
-
-  @override
-  final String description = 'Show log output for running Flutter apps.';
-
   LogsCommand() {
     argParser.addFlag('clear',
       negatable: false,
@@ -22,6 +16,12 @@ class LogsCommand extends FlutterCommand {
       help: 'Clear log history before reading from logs.'
     );
   }
+
+  @override
+  final String name = 'logs';
+
+  @override
+  final String description = 'Show log output for running Flutter apps.';
 
   @override
   bool get requiresProjectRoot => false;

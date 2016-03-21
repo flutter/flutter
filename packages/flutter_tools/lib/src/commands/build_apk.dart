@@ -94,9 +94,8 @@ class _ApkBuilder {
       '-I', _androidJar.path,
       '-F', outputApk.path,
     ];
-    if (resources != null) {
+    if (resources != null)
       packageArgs.addAll(['-S', resources.absolute.path]);
-    }
     packageArgs.add(artifacts.path);
     runCheckedSync(packageArgs);
   }
@@ -146,7 +145,6 @@ class BuildApkCommand extends FlutterCommand {
         help: 'Android manifest XML file.');
     argParser.addOption('resources',
         abbr: 'r',
-        defaultsTo: _kDefaultResourcesPath,
         help: 'Resources directory path.');
     argParser.addOption('output-file',
         abbr: 'o',
@@ -237,21 +235,15 @@ Future<_ApkComponents> _findApkComponents(
   components.jars = [new File(artifactPaths[1])];
   components.libSkyShell = new File(artifactPaths[2]);
   components.debugKeystore = new File(artifactPaths[3]);
-  components.resources = new Directory(resources);
+  components.resources = resources == null ? null : new Directory(resources);
 
   await parseServiceConfigs(components.services, jars: components.jars);
 
-  if (!components.resources.existsSync()) {
-    // TODO(eseidel): This level should be higher when path is manually set.
-    printStatus('Cannot locate Resources: ${components.resources}, ignoring.');
-    components.resources = null;
-  }
-
-  for (File f in [
+  for (File file in [
     components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
   ]..addAll(components.jars)) {
-    if (!f.existsSync()) {
-      printError('Cannot locate file: ${f.path}');
+    if (!file.existsSync()) {
+      printError('Cannot locate file: ${file.path}');
       return null;
     }
   }
@@ -295,6 +287,7 @@ int _buildApk(
     ensureDirectoryExists(finalApk.path);
     builder.align(unalignedApk, finalApk);
 
+    printTrace('calculateSha: $outputFile');
     File apkShaFile = new File('$outputFile.sha1');
     apkShaFile.writeAsStringSync(calculateSha(finalApk));
 
@@ -370,7 +363,7 @@ Future<int> buildAndroid({
   String enginePath,
   bool force: false,
   String manifest: _kDefaultAndroidManifestPath,
-  String resources: _kDefaultResourcesPath,
+  String resources,
   String outputFile: _kDefaultOutputPath,
   String target: '',
   String flxPath,
@@ -392,6 +385,16 @@ Future<int> buildAndroid({
     return 0;
   }
 
+  if (resources != null) {
+    if (!FileSystemEntity.isDirectorySync(resources)) {
+      printError('Resources directory "$resources" not found.');
+      return 1;
+    }
+  } else {
+    if (FileSystemEntity.isDirectorySync(_kDefaultResourcesPath))
+      resources = _kDefaultResourcesPath;
+  }
+
   BuildConfiguration config = configs.firstWhere(
     (BuildConfiguration bc) => bc.targetPlatform == TargetPlatform.android_arm
   );
@@ -411,11 +414,10 @@ Future<int> buildAndroid({
     }
     return _buildApk(components, flxPath, keystore, outputFile);
   } else {
-    // Find the path to the main Dart file.
+    // Find the path to the main Dart file; build the FLX.
     String mainPath = findMainDartFile(target);
-
-    // Build the FLX.
     String localBundlePath = await flx.buildFlx(toolchain, mainPath: mainPath);
+
     return _buildApk(components, localBundlePath, keystore, outputFile);
   }
 }

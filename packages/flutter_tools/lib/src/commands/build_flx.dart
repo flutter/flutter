@@ -43,7 +43,7 @@ class BuildFlxCommand extends FlutterCommand {
     if (compilerPath == null)
       await downloadToolchain();
     else
-      toolchain = new Toolchain(compiler: new Compiler(compilerPath));
+      toolchain = new Toolchain(compiler: new SnapshotCompiler(compilerPath));
 
     String outputPath = argResults['output-file'];
 
