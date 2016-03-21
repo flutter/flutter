@@ -332,7 +332,6 @@ component("skia") {
     "//third_party/skia/src/utils/SkNinePatch.cpp",
     "//third_party/skia/src/utils/SkOSFile.cpp",
     "//third_party/skia/src/utils/SkParsePath.cpp",
-    "//third_party/skia/src/utils/SkTFitsIn.h",
 
     #testing
     "//third_party/skia/src/fonts/SkGScalerContext.cpp",

@@ -32,6 +32,7 @@
 
 #include "sky/engine/platform/geometry/FloatSize.h"
 #include "sky/engine/platform/graphics/Color.h"
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
@@ -53,7 +54,7 @@ PassOwnPtr<DrawLooperBuilder> DrawLooperBuilder::create()
 
 PassRefPtr<SkDrawLooper> DrawLooperBuilder::detachDrawLooper()
 {
-    return adoptRef(m_skDrawLooperBuilder.detachLooper());
+    return fromSkSp(m_skDrawLooperBuilder.detach());
 }
 
 void DrawLooperBuilder::addUnmodifiedContent()

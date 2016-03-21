@@ -137,6 +137,9 @@ class RefPtr {
   friend RefPtr<U> AdoptRef(U* ptr);
 
   template<typename U>
+  friend RefPtr<U> AdoptRef(sk_sp<U> ptr);
+
+  template<typename U>
   friend RefPtr<U> SharePtr(U* ptr);
 
   template <typename U>
@@ -146,6 +149,9 @@ class RefPtr {
 // For objects that have an unowned reference (such as newly created objects).
 template<typename T>
 RefPtr<T> AdoptRef(T* ptr) { return RefPtr<T>(ptr); }
+
+template<typename T>
+RefPtr<T> AdoptRef(sk_sp<T> ptr) { return RefPtr<T>(ptr.release()); }
 
 // For objects that are already owned. This doesn't take ownership of existing
 // references and adds a new one.

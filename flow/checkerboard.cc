@@ -8,14 +8,15 @@
 
 namespace flow {
 
-static SkShader* CreateCheckerboardShader(SkColor c1, SkColor c2, int size) {
+static sk_sp<SkShader> CreateCheckerboardShader(SkColor c1, SkColor c2,
+                                                int size) {
   SkBitmap bm;
   bm.allocN32Pixels(2 * size, 2 * size);
   bm.eraseColor(c1);
   bm.eraseArea(SkIRect::MakeLTRB(0, 0, size, size), c2);
   bm.eraseArea(SkIRect::MakeLTRB(size, size, 2 * size, 2 * size), c2);
-  return SkShader::CreateBitmapShader(bm, SkShader::kRepeat_TileMode,
-                                      SkShader::kRepeat_TileMode);
+  return SkShader::MakeBitmapShader(bm, SkShader::kRepeat_TileMode,
+                                    SkShader::kRepeat_TileMode);
 }
 
 static void DrawCheckerboard(SkCanvas* canvas,
@@ -23,7 +24,7 @@ static void DrawCheckerboard(SkCanvas* canvas,
                              SkColor c2,
                              int size) {
   SkPaint paint;
-  paint.setShader(CreateCheckerboardShader(c1, c2, size))->unref();
+  paint.setShader(CreateCheckerboardShader(c1, c2, size));
   canvas->drawPaint(paint);
 }
 

@@ -27,6 +27,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sky/engine/platform/graphics/StrokeData.h"
+
+#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "sky/engine/wtf/OwnPtr.h"
 #include "sky/engine/wtf/PassOwnPtr.h"
 
@@ -53,7 +55,7 @@ void StrokeData::setLineDash(const DashArray& dashes, float dashOffset)
     for (unsigned i = 0; i < count; i++)
         intervals[i] = dashes[i % dashLength];
 
-    m_dash = adoptRef(SkDashPathEffect::Create(intervals.get(), count, dashOffset));
+    m_dash = fromSkSp(SkDashPathEffect::Make(intervals.get(), count, dashOffset));
 }
 
 void StrokeData::setupPaint(SkPaint* paint, int length) const
@@ -71,7 +73,7 @@ void StrokeData::setupPaintDashPathEffect(SkPaint* paint, int length) const
 {
     float width = m_thickness;
     if (m_dash) {
-        paint->setPathEffect(m_dash.get());
+        paint->setPathEffect(toSkSp(m_dash));
     } else {
         switch (m_style) {
         case NoStroke:
@@ -104,8 +106,7 @@ void StrokeData::setupPaintDashPathEffect(SkPaint* paint, int length) const
             }
             SkScalar dashLengthSk = SkIntToScalar(dashLength);
             SkScalar intervals[2] = { dashLengthSk, dashLengthSk };
-            RefPtr<SkPathEffect> pathEffect = adoptRef(SkDashPathEffect::Create(intervals, 2, SkIntToScalar(phase)));
-            paint->setPathEffect(pathEffect.get());
+            paint->setPathEffect(SkDashPathEffect::Make(intervals, 2, SkIntToScalar(phase)));
         }
     }
 }

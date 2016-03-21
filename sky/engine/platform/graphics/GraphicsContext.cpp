@@ -465,7 +465,7 @@ void GraphicsContext::drawFocusRingPath(const SkPath& path, const Color& color, 
     SkPaint paint;
     float cornerRadius = prepareFocusRingPaint(paint, color, width);
 
-    paint.setPathEffect(SkCornerPathEffect::Create(SkFloatToScalar(cornerRadius)))->unref();
+    paint.setPathEffect(SkCornerPathEffect::Make(SkFloatToScalar(cornerRadius)));
 
     // Outer path
     drawPath(path, paint);
@@ -642,11 +642,10 @@ void GraphicsContext::drawLineForDocumentMarker(const FloatPoint& pt, float widt
 
     SkMatrix localMatrix;
     localMatrix.setTranslate(originX, originY);
-    RefPtr<SkShader> shader = adoptRef(SkShader::CreateBitmapShader(
-        *misspellBitmap[index], SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix));
 
     SkPaint paint;
-    paint.setShader(shader.get());
+    paint.setShader(SkShader::MakeBitmapShader(
+        *misspellBitmap[index], SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix));
 
     SkRect rect;
     rect.set(originX, originY, originX + WebCoreFloatToSkScalar(width) * deviceScaleFactor, originY + SkIntToScalar(misspellBitmap[index]->height()));
@@ -1640,7 +1639,7 @@ void GraphicsContext::preparePaintForDrawRectToRect(
     paint->setXfermodeMode(WebCoreCompositeToSkiaComposite(compositeOp, blendMode));
     paint->setColorFilter(this->colorFilter());
     paint->setAlpha(this->getNormalizedAlpha());
-    paint->setLooper(this->drawLooper());
+    paint->setLooper(toSkSp(this->drawLooper()));
     paint->setAntiAlias(shouldDrawAntiAliased(this, destRect));
 
     InterpolationQuality resampling;

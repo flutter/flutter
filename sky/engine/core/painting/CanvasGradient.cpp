@@ -51,10 +51,9 @@ void CanvasGradient::initLinear(const std::vector<Point>& end_points,
   for (const CanvasColor& color : colors)
     sk_colors.push_back(color);
 
-  SkShader* shader = SkGradientShader::CreateLinear(
+  set_shader(SkGradientShader::MakeLinear(
       sk_end_points, sk_colors.data(), color_stops.data(), sk_colors.size(),
-      tile_mode);
-  set_shader(adoptRef(shader));
+      tile_mode));
 }
 
 void CanvasGradient::initRadial(const Point& center,
@@ -69,10 +68,9 @@ void CanvasGradient::initRadial(const Point& center,
   for (const CanvasColor& color : colors)
     sk_colors.push_back(color);
 
-  SkShader* shader = SkGradientShader::CreateRadial(
+  set_shader(SkGradientShader::MakeRadial(
       center.sk_point, radius, sk_colors.data(), color_stops.data(),
-      sk_colors.size(), tile_mode);
-  set_shader(adoptRef(shader));
+      sk_colors.size(), tile_mode));
 }
 
 CanvasGradient::CanvasGradient()
