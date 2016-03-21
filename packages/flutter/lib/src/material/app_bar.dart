@@ -8,6 +8,7 @@ import 'constants.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'material.dart';
+import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -23,8 +24,16 @@ class AppBar extends StatelessWidget {
     this.elevation: 4,
     this.backgroundColor,
     this.textTheme,
-    this.padding: EdgeInsets.zero
-  }) : super(key: key) {
+    this.padding: EdgeInsets.zero,
+    double expandedHeight,
+    double collapsedHeight,
+    double minimumHeight,
+    double actualHeight
+  }) : _expandedHeight = expandedHeight,
+       _collapsedHeight = collapsedHeight,
+       _minimumHeight = minimumHeight,
+       _actualHeight = actualHeight,
+       super(key: key) {
     assert((flexibleSpace != null) ? tabBar == null : true);
     assert((tabBar != null) ? flexibleSpace == null : true);
   }
@@ -34,11 +43,15 @@ class AppBar extends StatelessWidget {
   final List<Widget> actions;
   final WidgetBuilder flexibleSpace;
   final double foregroundOpacity;
-  final Widget tabBar;
+  final TabBar<dynamic> tabBar;
   final int elevation;
   final Color backgroundColor;
   final TextTheme textTheme;
   final EdgeInsets padding;
+  final double _expandedHeight;
+  final double _collapsedHeight;
+  final double _minimumHeight;
+  final double _actualHeight;
 
   AppBar copyWith({
     Key key,
@@ -50,7 +63,10 @@ class AppBar extends StatelessWidget {
     int elevation,
     Color backgroundColor,
     TextTheme textTheme,
-    EdgeInsets padding
+    EdgeInsets padding,
+    double expandedHeight,
+    double collapsedHeight,
+    double actualHeight
   }) {
     return new AppBar(
       key: key ?? this.key,
@@ -63,37 +79,56 @@ class AppBar extends StatelessWidget {
       elevation: elevation ?? this.elevation,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       textTheme: textTheme ?? this.textTheme,
-      padding: padding ?? this.padding
+      padding: padding ?? this.padding,
+      expandedHeight: expandedHeight ?? this._expandedHeight,
+      collapsedHeight: collapsedHeight ?? this._collapsedHeight,
+      actualHeight: actualHeight ?? this._actualHeight
     );
+  }
+
+  double get _tabBarHeight => tabBar == null ? null : tabBar.minimumHeight;
+
+  double get _toolBarHeight => kToolBarHeight;
+
+  double get expandedHeight => _expandedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
+
+  double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + (_tabBarHeight ?? 0.0));
+
+  double get minimumHeight => _minimumHeight ?? _tabBarHeight ?? _toolBarHeight;
+
+  double get actualHeight => _actualHeight ?? expandedHeight;
+
+  // Defines the opacity of the toolbar's text and icons.
+  double _toolBarOpacity(double statusBarHeight) {
+    return ((actualHeight - (_tabBarHeight ?? 0.0) - statusBarHeight) / _toolBarHeight).clamp(0.0, 1.0);
+  }
+
+  double _tabBarOpacity(double statusBarHeight) {
+    final double tabBarHeight = _tabBarHeight ?? 0.0;
+    return ((actualHeight - statusBarHeight) / tabBarHeight).clamp(0.0, 1.0);
   }
 
   @override
   Widget build(BuildContext context) {
-    Color color = backgroundColor;
-    IconThemeData iconThemeData;
-    TextStyle centerStyle = textTheme?.title;
-    TextStyle sideStyle = textTheme?.body1;
+    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final ThemeData theme = Theme.of(context);
 
-    if (color == null || iconThemeData == null || textTheme == null) {
-      ThemeData themeData = Theme.of(context);
-      color ??= themeData.primaryColor;
-      iconThemeData ??= themeData.primaryIconTheme;
+    IconThemeData iconTheme = theme.primaryIconTheme;
+    TextStyle centerStyle = textTheme?.title ?? theme.primaryTextTheme.title;
+    TextStyle sideStyle = textTheme?.body1 ?? theme.primaryTextTheme.body1;
 
-      TextTheme primaryTextTheme = themeData.primaryTextTheme;
-      centerStyle ??= primaryTextTheme.title;
-      sideStyle ??= primaryTextTheme.body2;
-    }
-
-    if (foregroundOpacity != 1.0) {
-      final int alpha = (foregroundOpacity.clamp(0.0, 1.0) * 255.0).round();
+    final double toolBarOpacity = _toolBarOpacity(statusBarHeight);
+    if (toolBarOpacity != 1.0) {
+      final double opacity = const Interval(0.25, 1.0, curve: Curves.ease).transform(toolBarOpacity);
       if (centerStyle?.color != null)
-        centerStyle = centerStyle.copyWith(color: centerStyle.color.withAlpha(alpha));
+        centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
-        sideStyle = sideStyle.copyWith(color: sideStyle.color.withAlpha(alpha));
-      if (iconThemeData != null) {
-        iconThemeData = new IconThemeData(
-          opacity: foregroundOpacity * iconThemeData.clampedOpacity,
-          color: iconThemeData.color
+        sideStyle = sideStyle.copyWith(color: sideStyle.color.withOpacity(opacity));
+
+      if (iconTheme != null) {
+        iconTheme = new IconThemeData(
+          opacity: opacity * iconTheme.clampedOpacity,
+          color: iconTheme.color
         );
       }
     }
@@ -112,59 +147,72 @@ class AppBar extends StatelessWidget {
     if (actions != null)
       toolBarRow.addAll(actions);
 
+    Widget appBar = new SizedBox(
+      height: kToolBarHeight,
+      child: new IconTheme(
+        data: iconTheme,
+        child: new DefaultTextStyle(
+          style: sideStyle,
+          child: new Row(children: toolBarRow)
+        )
+      )
+    );
+
+    final double tabBarOpacity = _tabBarOpacity(statusBarHeight);
+    if (tabBar != null) {
+      appBar = new Column(
+        children: <Widget>[
+          appBar,
+          tabBarOpacity == 1.0 ? tabBar : new Opacity(
+            child: tabBar,
+            opacity: const Interval(0.25, 1.0, curve: Curves.ease).transform(tabBarOpacity)
+          )
+        ]
+      );
+    }
+
     EdgeInsets combinedPadding = new EdgeInsets.symmetric(horizontal: 8.0);
     if (padding != null)
       combinedPadding += padding;
 
-    // If the toolBar's height shrinks below toolBarHeight, it will be clipped and bottom
-    // justified. This is so that the toolbar appears to move upwards as its height is reduced.
-    final double toolBarHeight = kToolBarHeight + combinedPadding.top + combinedPadding.bottom;
-    final Widget toolBar = new ConstrainedBox(
-      constraints: new BoxConstraints(maxHeight: toolBarHeight),
+    // If the appBar's height shrinks below collapsedHeight, it will be clipped and bottom
+    // justified. This is so that the toolBar/tabBar appear to move upwards as the appBar's
+    // height is reduced.
+    final double paddedCollapsedHeight = collapsedHeight + combinedPadding.top + combinedPadding.bottom;
+    appBar = new ConstrainedBox(
+      constraints: new BoxConstraints(maxHeight: paddedCollapsedHeight),
       child: new Padding(
         padding: new EdgeInsets.only(left: combinedPadding.left, right: combinedPadding.right),
         child: new ClipRect(
           child: new OverflowBox(
             alignment: const FractionalOffset(0.0, 1.0), // bottom justify
-            minHeight: toolBarHeight,
-            maxHeight: toolBarHeight,
-            child: new DefaultTextStyle(
-              style: sideStyle,
-              child: new Padding(
-                padding: new EdgeInsets.only(top: combinedPadding.top, bottom: combinedPadding.bottom),
-                child: new Row(children: toolBarRow)
-              )
+            minHeight: paddedCollapsedHeight,
+            maxHeight: paddedCollapsedHeight,
+            child: new Padding(
+              padding: new EdgeInsets.only(top: combinedPadding.top, bottom: combinedPadding.bottom),
+              child: appBar
             )
           )
         )
       )
     );
 
-    Widget appBar = toolBar;
-    if (tabBar != null) {
-      appBar = new Column(
-        mainAxisAlignment: MainAxisAlignment.collapse,
-        children: <Widget>[toolBar, tabBar]
-      );
-    } else if (flexibleSpace != null) {
+    if (flexibleSpace != null) {
       appBar = new Stack(
         children: <Widget>[
           flexibleSpace(context),
-          new Align(child: toolBar, alignment: const FractionalOffset(0.0, 0.0))
+          new Align(child: appBar, alignment: const FractionalOffset(0.0, 0.0))
         ]
       );
     }
 
-    Widget contents = new Material(
-      color: color,
+    appBar = new Material(
+      color: backgroundColor ?? theme.primaryColor,
       elevation: elevation,
       child: appBar
     );
 
-    if (iconThemeData != null)
-      contents = new IconTheme(data: iconThemeData, child: contents);
-
-    return contents;
+    return appBar;
   }
 
 }

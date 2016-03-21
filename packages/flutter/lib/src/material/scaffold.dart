@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
-import 'constants.dart';
 import 'drawer.dart';
 import 'icons.dart';
 import 'icon_button.dart';
@@ -211,11 +210,9 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.drawer,
     this.scrollableKey,
-    this.appBarBehavior: AppBarBehavior.anchor,
-    this.appBarHeight
+    this.appBarBehavior: AppBarBehavior.anchor
   }) : super(key: key) {
     assert((appBarBehavior == AppBarBehavior.scroll) ? scrollableKey != null : true);
-    assert((appBarBehavior == AppBarBehavior.scroll) ? appBarHeight != null && appBarHeight > kToolBarHeight : true);
   }
 
   final AppBar appBar;
@@ -224,7 +221,6 @@ class Scaffold extends StatefulWidget {
   final Widget drawer;
   final Key scrollableKey;
   final AppBarBehavior appBarBehavior;
-  final double appBarHeight;
 
   /// The state from the closest instance of this class that encloses the given context.
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
@@ -241,7 +237,7 @@ class ScaffoldState extends State<Scaffold> {
 
   Animation<double> get appBarAnimation => _appBarController.view;
 
-  double get appBarHeight => config.appBarHeight;
+  double get appBarHeight => config.appBar?.expandedHeight ?? 0.0;
 
   // DRAWER API
 
@@ -401,11 +397,10 @@ class ScaffoldState extends State<Scaffold> {
 
   bool _shouldShowBackArrow;
 
-  Widget _getModifiedAppBar({ EdgeInsets padding, double foregroundOpacity: 1.0, int elevation }) {
+  Widget _getModifiedAppBar({ EdgeInsets padding, int elevation, double actualHeight}) {
     AppBar appBar = config.appBar;
     if (appBar == null)
       return null;
-    EdgeInsets appBarPadding = new EdgeInsets.only(top: padding.top);
     Widget leading = appBar.leading;
     if (leading == null) {
       if (config.drawer != null) {
@@ -427,9 +422,9 @@ class ScaffoldState extends State<Scaffold> {
     }
     return appBar.copyWith(
       elevation: elevation ?? appBar.elevation ?? 4,
-      padding: appBarPadding,
-      foregroundOpacity: foregroundOpacity,
-      leading: leading
+      padding: new EdgeInsets.only(top: padding.top),
+      leading: leading,
+      actualHeight: actualHeight
     );
   }
 
@@ -438,73 +433,66 @@ class ScaffoldState extends State<Scaffold> {
   double _floatingAppBarHeight = 0.0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    final double newScrollOffset = notification.scrollable.scrollOffset;
-    if (config.scrollableKey != null && config.scrollableKey == notification.scrollable.config.key)
+    if (config.scrollableKey != null && config.scrollableKey == notification.scrollable.config.key) {
+      final double newScrollOffset = notification.scrollable.scrollOffset;
       setState(() {
         _scrollOffsetDelta = _scrollOffset - newScrollOffset;
         _scrollOffset = newScrollOffset;
       });
+    }
     return false;
   }
 
-  double _appBarOpacity(double progress) {
-    // The value of progress is 1.0 if the entire (padded) app bar is visible, 0.0
-    // if the app bar's height is zero.
-    return new Tween<double>(begin: 0.0, end: 1.0).evaluate(new CurvedAnimation(
-      parent: new AnimationController()..value = progress.clamp(0.0, 1.0),
-      curve: new Interval(0.50, 1.0)
-    ));
-  }
-
-  Widget _buildAnchoredAppBar(double toolBarHeight, EdgeInsets toolBarPadding) {
+  Widget _buildAnchoredAppBar(double expandedHeight, double height, EdgeInsets padding) {
     // Drive _appBarController to the point where the flexible space has disappeared.
-    _appBarController.value = (appBarHeight - toolBarHeight) / appBarHeight;
+    _appBarController.value = (expandedHeight - height) / expandedHeight;
     return new SizedBox(
-      height: toolBarHeight,
-      child: _getModifiedAppBar(padding: toolBarPadding)
+      height: height,
+      child: _getModifiedAppBar(padding: padding, actualHeight: height)
     );
   }
 
   Widget _buildScrollableAppBar(BuildContext context) {
-    final EdgeInsets toolBarPadding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
-    final double toolBarHeight = kToolBarHeight + toolBarPadding.top;
+    final EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
+    final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
+    final double collapsedHeight = (config.appBar?.collapsedHeight ?? 0.0) + padding.top;
+    final double minimumHeight = (config.appBar?.minimumHeight ?? 0.0) + padding.top;
     Widget appBar;
 
-    if (_scrollOffset <= appBarHeight && _scrollOffset >= appBarHeight - toolBarHeight) {
-      // scrolled to the top, only the toolbar is (partially) visible.
+    if (_scrollOffset <= expandedHeight && _scrollOffset >= expandedHeight - minimumHeight) {
+      // scrolled to the top, flexible space collapsed, only the toolbar and tabbar are (partially) visible.
       if (config.appBarBehavior == AppBarBehavior.under) {
-        appBar = _buildAnchoredAppBar(toolBarHeight, toolBarPadding);
+        appBar = _buildAnchoredAppBar(expandedHeight, minimumHeight, padding);
       } else {
-        final double height = math.max(_floatingAppBarHeight, appBarHeight - _scrollOffset);
-        final double opacity = _appBarOpacity(1.0 - ((toolBarHeight - height) / toolBarHeight));
-        _appBarController.value = (appBarHeight - height) / appBarHeight;
+        final double height = math.max(_floatingAppBarHeight, expandedHeight - _scrollOffset);
+        _appBarController.value = (expandedHeight - height) / expandedHeight;
         appBar = new SizedBox(
           height: height,
-          child: _getModifiedAppBar(padding: toolBarPadding, foregroundOpacity: opacity)
+          child: _getModifiedAppBar(padding: padding, actualHeight: height)
         );
       }
-    } else if (_scrollOffset > appBarHeight) {
+    } else if (_scrollOffset > expandedHeight) {
       // scrolled past the entire app bar, maybe show the "floating" toolbar.
       if (config.appBarBehavior == AppBarBehavior.under) {
-        appBar = _buildAnchoredAppBar(toolBarHeight, toolBarPadding);
+        appBar = _buildAnchoredAppBar(expandedHeight, minimumHeight, padding);
       } else {
-        _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, toolBarHeight);
-        final double toolBarOpacity = _appBarOpacity(_floatingAppBarHeight / toolBarHeight);
-        _appBarController.value = (appBarHeight - _floatingAppBarHeight) / appBarHeight;
+        _floatingAppBarHeight = (_floatingAppBarHeight + _scrollOffsetDelta).clamp(0.0, collapsedHeight);
+        _appBarController.value = (expandedHeight - _floatingAppBarHeight) / expandedHeight;
         appBar = new SizedBox(
           height: _floatingAppBarHeight,
-          child: _getModifiedAppBar(padding: toolBarPadding, foregroundOpacity: toolBarOpacity)
+          child: _getModifiedAppBar(padding: padding, actualHeight: _floatingAppBarHeight)
         );
       }
     } else {
-      // _scrollOffset < appBarHeight - appBarHeight, scrolled to the top, flexible space is visible
-      final double height = appBarHeight - _scrollOffset.clamp(0.0, appBarHeight);
-      _appBarController.value = (appBarHeight - height) / appBarHeight;
+      // _scrollOffset < expandedHeight - collapsedHeight, scrolled to the top, flexible space is visible]
+      final double height = expandedHeight - _scrollOffset.clamp(0.0, expandedHeight);
+      _appBarController.value = (expandedHeight - height) / expandedHeight;
       appBar = new SizedBox(
         height: height,
-        child: _getModifiedAppBar(padding: toolBarPadding, elevation: 0)
+        child: _getModifiedAppBar(padding: padding, elevation: 0, actualHeight: height)
       );
       _floatingAppBarHeight = 0.0;
+
     }
 
     return appBar;
@@ -528,9 +516,10 @@ class ScaffoldState extends State<Scaffold> {
     final List<LayoutId> children = new List<LayoutId>();
     _addIfNonNull(children, config.body, _ScaffoldSlot.body);
     if (config.appBarBehavior == AppBarBehavior.anchor) {
+      final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
       final Widget appBar = new ConstrainedBox(
-        child: _getModifiedAppBar(padding: padding),
-        constraints: new BoxConstraints(maxHeight: config.appBarHeight ?? kExtendedAppBarHeight + padding.top)
+          child: _getModifiedAppBar(padding: padding, actualHeight: expandedHeight),
+        constraints: new BoxConstraints(maxHeight: expandedHeight)
       );
       _addIfNonNull(children, appBar, _ScaffoldSlot.appBar);
     }

@@ -4,55 +4,74 @@
 
 import 'package:flutter/material.dart';
 
-class TabsDemo extends StatelessWidget {
-  final List<IconData> icons = <IconData>[
-    Icons.event,
-    Icons.home,
-    Icons.android,
-    Icons.alarm,
-    Icons.face,
-    Icons.language,
-  ];
+class _Page {
+  _Page({ this.label });
 
-  final Map<IconData, String> labels = <IconData, String>{
-    Icons.event: 'EVENT',
-    Icons.home: 'HOME',
-    Icons.android: 'ANDROID',
-    Icons.alarm: 'ALARM',
-    Icons.face: 'FACE',
-    Icons.language: 'LANGUAGE',
-  };
+  final GlobalKey<ScrollableState<Scrollable>> key = new GlobalKey<ScrollableState<Scrollable>>();
+  final String label;
+}
+
+final List<_Page> _pages = <_Page>[
+  new _Page(label: 'ONE'),
+  new _Page(label: 'TWO'),
+  new _Page(label: 'FREE'),
+  new _Page(label: 'FOUR')
+];
+
+class TabsDemo extends StatefulWidget {
+  @override
+  TabsDemoState createState() => new TabsDemoState();
+}
+
+class TabsDemoState extends State<TabsDemo> {
+  _Page _selectedPage;
+  double _scrollOffset = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPage = _pages[0];
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Color iconColor = Theme.of(context).accentColor;
-    return new TabBarSelection<IconData>(
-      values: icons,
+    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    return new TabBarSelection<_Page>(
+      values: _pages,
+      onChanged: (_Page value) {
+        setState(() {
+          _selectedPage = value;
+          _selectedPage.key.currentState.scrollTo(_scrollOffset);
+        });
+      },
       child: new Scaffold(
+        scrollableKey: _selectedPage.key,
+        appBarBehavior: AppBarBehavior.under,
         appBar: new AppBar(
-          title: new Text("Scrollable Tabs"),
-          tabBar: new TabBar<IconData>(
-            isScrollable: true,
-            labels: new Map<IconData, TabLabel>.fromIterable(
-              icons,
-              value: (IconData icon) => new TabLabel(text: labels[icon], icon: icon)
-            )
+          title: new Text('Tabs and Scrolling'),
+          tabBar: new TabBar<_Page>(
+            labels: new Map<_Page, TabLabel>.fromIterable(_pages, value: (_Page page) {
+              return new TabLabel(text: page.label);
+            })
           )
         ),
-        body: new TabBarView<IconData>(
-          children: icons.map((IconData icon) {
-            return new Container(
-              key: new ObjectKey(icon),
-              padding: const EdgeInsets.all(12.0),
-              child: new Card(
-                child: new Center(
-                  child: new Icon(
-                    icon: icon,
-                    color: iconColor,
-                    size: 128.0
+        body: new TabBarView<_Page>(
+          children: _pages.map((_Page page) {
+            return new Block(
+              padding: new EdgeInsets.only(top: kTextTabBarHeight + kToolBarHeight + statusBarHeight),
+              scrollableKey: page.key,
+              onScroll: (double value) { _scrollOffset = value; },
+              children: new List<Widget>.generate(6, (int i) {
+                return new Container(
+                  padding: const EdgeInsets.all(8.0),
+                  height: 192.0,
+                  child: new Card(
+                    child: new Center(
+                      child: new Text('Tab $page.label, item $i')
+                    )
                   )
-                )
-              )
+                );
+              })
             );
           }).toList()
         )

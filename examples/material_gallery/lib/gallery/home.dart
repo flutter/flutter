@@ -30,6 +30,7 @@ import '../demo/toggle_controls_demo.dart';
 import '../demo/scrolling_techniques_demo.dart';
 import '../demo/slider_demo.dart';
 import '../demo/snack_bar_demo.dart';
+import '../demo/scrollable_tabs_demo.dart';
 import '../demo/tabs_demo.dart';
 import '../demo/tabs_fab_demo.dart';
 import '../demo/text_field_demo.dart';
@@ -49,14 +50,15 @@ class GalleryHome extends StatefulWidget {
 class GalleryHomeState extends State<GalleryHome> {
   @override
   Widget build(BuildContext context) {
+    final double appBarHeight = 128.0;
     return new Scaffold(
-      appBarHeight: 128.0,
       drawer: new GalleryDrawer(),
       appBar: new AppBar(
+        expandedHeight: appBarHeight,
         flexibleSpace: (BuildContext context) {
           return new Container(
-            padding: const EdgeInsets.only(left: 16.0, bottom: 24.0),
-            height: 128.0,
+            padding: const EdgeInsets.only(left: 64.0),
+            height: appBarHeight,
             child: new Align(
               alignment: const FractionalOffset(0.0, 1.0),
               child: new Text('Flutter Gallery', style: Typography.white.headline)
@@ -118,6 +120,7 @@ class GalleryHomeState extends State<GalleryHome> {
                   new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
                   new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
                   new GalleryDemo(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
+                  new GalleryDemo(title: 'Scrollable Tabs', builder: () => new ScrollableTabsDemo()),
                   new GalleryDemo(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
                   new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
                   new GalleryDemo(title: 'SnackBar', builder: () => new SnackBarDemo()),

@@ -13,8 +13,8 @@ const double kToolBarHeight = 56.0;
 const double kExtendedAppBarHeight = 128.0;
 
 const double kTextTabBarHeight = 48.0;
-const double kIconTabBarHeight = 48.0;
-const double kTextandIconTabBarHeight = 72.0;
+const double kIconTabBarHeight = 26.0;
+const double kTextAndIconTabBarHeight = 74.0;
 
 // https://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double kListTitleHeight = 72.0;
