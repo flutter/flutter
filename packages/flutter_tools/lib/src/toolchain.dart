@@ -11,12 +11,12 @@ import 'artifacts.dart';
 import 'base/process.dart';
 import 'build_configuration.dart';
 
-class Compiler {
-  Compiler(this._path);
+class SnapshotCompiler {
+  SnapshotCompiler(this._path);
 
-  String _path;
+  final String _path;
 
-  Future<int> compile({
+  Future<int> createSnapshot({
     String mainPath,
     String snapshotPath,
     String depfilePath,
@@ -28,12 +28,10 @@ class Compiler {
       '--package-root=${ArtifactStore.packageRoot}',
       '--snapshot=$snapshotPath'
     ];
-    if (depfilePath != null) {
+    if (depfilePath != null)
       args.add('--depfile=$depfilePath');
-    }
-    if (buildOutputPath != null) {
+    if (buildOutputPath != null)
       args.add('--build-output=$buildOutputPath');
-    }
     return runCommandAndStreamOutput(args);
   }
 }
@@ -56,13 +54,13 @@ Future<String> _getCompilerPath(BuildConfiguration config) async {
 class Toolchain {
   Toolchain({ this.compiler });
 
-  final Compiler compiler;
+  final SnapshotCompiler compiler;
 
   static Future<Toolchain> forConfigs(List<BuildConfiguration> configs) async {
     for (BuildConfiguration config in configs) {
       String compilerPath = await _getCompilerPath(config);
       if (compilerPath != null)
-        return new Toolchain(compiler: new Compiler(compilerPath));
+        return new Toolchain(compiler: new SnapshotCompiler(compilerPath));
     }
     return null;
   }

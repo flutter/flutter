@@ -18,11 +18,6 @@ import '../dart/sdk.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-// TODO(devoncarew): Possible improvements to flutter analyze --watch:
-// - Auto-detect new issues introduced by changes and highlight then in the output.
-// - Use ANSI codes to improve the display when the terminal supports it (screen
-//   clearing, cursor position manipulation, bold and faint codes, ...)
-
 bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('.dart');
 bool isDartTestFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_test.dart');
 bool isDartBenchmarkFile(FileSystemEntity entry) => entry is File && entry.path.endsWith('_bench.dart');
@@ -449,10 +444,13 @@ class AnalyzeCommand extends FlutterCommand {
   Future<int> _analyzeWatch() async {
     List<String> directories;
 
-    if (isFlutterRepo) {
+    if (argResults['flutter-repo']) {
+      String root = path.absolute(ArtifactStore.flutterRoot);
+
       directories = <String>[];
-      directories.addAll(_gatherProjectPaths(path.absolute('examples')));
-      directories.addAll(_gatherProjectPaths(path.absolute('packages')));
+      directories.addAll(_gatherProjectPaths(path.join(root, 'examples')));
+      directories.addAll(_gatherProjectPaths(path.join(root, 'packages')));
+      directories.addAll(_gatherProjectPaths(path.join(root, 'dev')));
       printStatus('Analyzing Flutter repository (${directories.length} projects).');
       for (String projectPath in directories)
         printTrace('  ${path.relative(projectPath)}');
@@ -511,8 +509,6 @@ class AnalyzeCommand extends FlutterCommand {
       int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
 
-      // TODO(devoncarew): If there were no issues found, and no change in the
-      // issue count, do we want to print anything?
       if (firstAnalysis)
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
       else if (issueDiff > 0)

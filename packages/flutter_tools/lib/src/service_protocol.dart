@@ -21,11 +21,9 @@ class ServiceProtocolDiscovery {
   final DeviceLogReader _logReader;
   Completer<int> _completer = new Completer<int>();
 
-  /// The [Future] returned by this function will complete when the next
-  /// service protocol port is found.
-  Future<int> nextPort() {
-    return _completer.future;
-  }
+  /// The [Future] returned by this function will complete when the next service
+  /// protocol port is found.
+  Future<int> nextPort() => _completer.future;
 
   void _onLine(String line) {
     int portNumber = 0;

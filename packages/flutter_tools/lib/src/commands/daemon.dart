@@ -8,6 +8,7 @@ import 'dart:io';
 
 import '../android/android_device.dart';
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../device.dart';
@@ -386,22 +387,12 @@ class DeviceDomain extends Domain {
   }
 }
 
-Map<String, dynamic> _deviceToMap(Device device) {
-  return <String, dynamic>{
+Map<String, String> _deviceToMap(Device device) {
+  return <String, String>{
     'id': device.id,
     'name': device.name,
-    'platform': _enumToString(device.platform)
+    'platform': getNameForTargetPlatform(device.platform)
   };
-}
-
-/// Take an enum value and get the best string representation of that.
-///
-/// toString() on enums returns 'EnumType.enumName'.
-String _enumToString(dynamic enumValue) {
-  String str = '$enumValue';
-  if (str.contains('.'))
-    return str.substring(str.indexOf('.') + 1);
-  return str;
 }
 
 dynamic _toJsonable(dynamic obj) {

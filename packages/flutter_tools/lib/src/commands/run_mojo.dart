@@ -18,15 +18,6 @@ import 'run.dart';
 const String _kDefaultBundlePath = 'build/app.flx';
 
 class RunMojoCommand extends FlutterCommand {
-  @override
-  final String name = 'run_mojo';
-
-  @override
-  final String description = 'Run a Flutter app in mojo (from github.com/domokit/mojo).';
-
-  @override
-  final bool hidden;
-
   RunMojoCommand({ this.hidden: false }) {
     argParser.addFlag('android', negatable: false, help: 'Run on an Android device');
     argParser.addFlag('checked', negatable: false, help: 'Run Flutter in checked mode');
@@ -41,6 +32,15 @@ class RunMojoCommand extends FlutterCommand {
     argParser.addOption('mojo-path', help: 'Path to directory containing mojo_shell and services.');
     argParser.addOption('devtools-path', help: 'Path to mojo devtools\' mojo_run command.');
   }
+
+  @override
+  final String name = 'run_mojo';
+
+  @override
+  final String description = 'Run a Flutter app in mojo (from github.com/domokit/mojo).';
+
+  @override
+  final bool hidden;
 
   @override
   bool get requiresProjectRoot => false;

@@ -28,11 +28,11 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   );
 }
 
-class MockCompiler extends Mock implements Compiler {
+class MockSnapshotCompiler extends Mock implements SnapshotCompiler {
 }
 
 class MockToolchain extends Toolchain {
-  MockToolchain() : super(compiler: new MockCompiler());
+  MockToolchain() : super(compiler: new MockSnapshotCompiler());
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {

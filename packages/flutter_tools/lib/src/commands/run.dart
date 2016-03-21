@@ -42,7 +42,7 @@ abstract class RunCommandBase extends FlutterCommand {
         defaultsTo: false,
         help: 'Start tracing during startup.');
     argParser.addOption('route',
-        help: 'Which route to load when starting the app.');
+        help: 'Which route to load when running the app.');
     usesTargetOption();
   }
 
@@ -65,10 +65,10 @@ class RunCommand extends RunCommandBase {
   RunCommand() {
     argParser.addFlag('full-restart',
         defaultsTo: true,
-        help: 'Stop any currently running application process before starting the app.');
+        help: 'Stop any currently running application process before running the app.');
     argParser.addFlag('clear-logs',
         defaultsTo: true,
-        help: 'Clear log history before starting the app.');
+        help: 'Clear log history before running the app.');
     argParser.addFlag('start-paused',
         defaultsTo: false,
         negatable: false,
@@ -214,14 +214,12 @@ Future<int> startApp(
     await installApp(device, package);
   }
 
-  bool startedSomething = false;
-
   Map<String, dynamic> platformArgs = <String, dynamic>{};
 
   if (traceStartup != null)
     platformArgs['trace-startup'] = traceStartup;
 
-  printStatus('Starting ${_getDisplayPath(mainPath)} on ${device.name}...');
+  printStatus('Running ${_getDisplayPath(mainPath)} on ${device.name}...');
 
   bool result = await device.startApp(
     package,
@@ -236,10 +234,8 @@ Future<int> startApp(
   );
 
   if (!result) {
-    printError('Error starting application on ${device.name}.');
+    printError('Error running application on ${device.name}.');
   } else {
-    startedSomething = true;
-
     // If the user specified --start-paused (and the device supports it) then
     // wait for the observatory port to become available before returning from
     // `startApp()`.
@@ -247,7 +243,7 @@ Future<int> startApp(
       await delayUntilObservatoryAvailable('localhost', debugPort);
   }
 
-  return startedSomething ? 0 : 2;
+  return result ? 0 : 2;
 }
 
 /// Delay until the Observatory / service protocol is available.
@@ -257,6 +253,8 @@ Future<int> startApp(
 Future<Null> delayUntilObservatoryAvailable(String host, int port, {
   Duration timeout: const Duration(seconds: 10)
 }) async {
+  printTrace('Waiting until Observatory is available (port $port).');
+
   Stopwatch stopwatch = new Stopwatch()..start();
 
   final String url = 'ws://$host:$port/ws';
