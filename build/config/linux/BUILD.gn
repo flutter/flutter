@@ -45,6 +45,14 @@ config("x11") {
   ]
 }
 
+config("xrandr") {
+  libs = [ "Xrandr" ]
+}
+
+config("xinerama") {
+  libs = [ "Xinerama" ]
+}
+
 config("xcomposite") {
   libs = [ "Xcomposite" ]
 }
