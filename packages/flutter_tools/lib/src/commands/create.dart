@@ -20,17 +20,12 @@ class CreateCommand extends Command {
   final String name = 'create';
 
   @override
-  final String description = 'Create a new Flutter project.';
+  final String description = 'Create a new Flutter project.\nIf run on a project that already exists, this will repair the project, recreating any files that are missing.';
 
   @override
   final List<String> aliases = <String>['init'];
 
   CreateCommand() {
-    argParser.addOption('out',
-      abbr: 'o',
-      hide: true,
-      help: 'The output directory.'
-    );
     argParser.addFlag('pub',
       defaultsTo: true,
       help: 'Whether to run "pub get" after the project has been created.'
@@ -41,6 +36,11 @@ class CreateCommand extends Command {
       defaultsTo: false,
       help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
+    argParser.addOption(
+      'description',
+      defaultsTo: 'A new flutter project.',
+      help: 'The description to use for your new flutter project. This string ends up in the pubspec.yaml file.'
+    );
   }
 
   @override
@@ -48,9 +48,15 @@ class CreateCommand extends Command {
 
   @override
   Future<int> run() async {
-    if (!argResults.wasParsed('out') && argResults.rest.isEmpty) {
+    if (argResults.rest.isEmpty) {
       printStatus('No option specified for the output directory.');
       printStatus(usage);
+      return 2;
+    }
+
+    if (argResults.rest.length > 1) {
+      printStatus('Multiple output directories specified.');
+      printStatus('To create (or repair) a flutter application directory, run "flutter create dirname" where "dirname" is the application directory.');
       return 2;
     }
 
@@ -75,14 +81,7 @@ class CreateCommand extends Command {
       return 2;
     }
 
-    Directory projectDir;
-
-    if (argResults.wasParsed('out')) {
-      projectDir = new Directory(argResults['out']);
-    } else {
-      projectDir = new Directory(argResults.rest.first);
-    }
-
+    Directory projectDir = new Directory(argResults.rest.first);
     String dirPath = path.normalize(projectDir.absolute.path);
     String projectName = _normalizeProjectName(path.basename(dirPath));
 
@@ -91,8 +90,13 @@ class CreateCommand extends Command {
       return 1;
     }
 
-    _renderTemplates(projectName, dirPath, flutterPackagesDirectory,
-        renderDriverTest: argResults['with-driver-test']);
+    _renderTemplates(
+      projectName,
+      argResults['description'],
+      dirPath,
+      flutterPackagesDirectory,
+      renderDriverTest: argResults['with-driver-test']
+    );
 
     printStatus('');
 
@@ -132,7 +136,7 @@ All done! In order to run your application, type:
     return 0;
   }
 
-  void _renderTemplates(String projectName, String dirPath,
+  void _renderTemplates(String projectName, String projectDescription, String dirPath,
       String flutterPackagesDirectory, { bool renderDriverTest: false }) {
     new Directory(dirPath).createSync(recursive: true);
 
@@ -145,7 +149,7 @@ All done! In order to run your application, type:
       'projectName': projectName,
       'androidIdentifier': _createAndroidIdentifier(projectName),
       'iosIdentifier': _createUTIIdentifier(projectName),
-      'description': description,
+      'description': projectDescription,
       'flutterPackagesDirectory': flutterPackagesDirectory,
       'androidMinApiLevel': android.minApiLevel
     };
