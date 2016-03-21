@@ -45,7 +45,7 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
 class MockIOSDevice extends Mock implements IOSDevice {
   @override
-  TargetPlatform get platform => TargetPlatform.ios_arm;
+  TargetPlatform get platform => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
@@ -53,7 +53,7 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
   @override
-  TargetPlatform get platform => TargetPlatform.ios_x64;
+  TargetPlatform get platform => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
