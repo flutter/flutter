@@ -31,8 +31,8 @@ import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.editing.Keyboard;
+import org.chromium.mojom.flutter.platform.ApplicationMessages;
 import org.chromium.mojom.mojo.ServiceProvider;
 import org.chromium.mojom.pointer.Pointer;
 import org.chromium.mojom.pointer.PointerKind;
@@ -72,6 +72,9 @@ public class PlatformViewAndroid extends SurfaceView
     private ServiceProviderImpl mPlatformServiceProvider;
     private ServiceProviderImpl mViewServiceProvider;
     private ServiceProvider.Proxy mDartServiceProvider;
+    private ApplicationMessages.Proxy mFlutterAppMessages;
+    private HashMap<String, OnMessageListener> mOnMessageListeners;
+    private HashMap<String, OnMessageListenerAsync> mAsyncOnMessageListeners;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
     private final KeyboardViewState mKeyboardState;
@@ -124,6 +127,9 @@ public class PlatformViewAndroid extends SurfaceView
         mViewServiceProvider = new ServiceProviderImpl(core, getContext(), localRegistry);
 
         mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
+
+        mOnMessageListeners = new HashMap<String, OnMessageListener>();
+        mAsyncOnMessageListeners = new HashMap<String, OnMessageListenerAsync>();
 
         setLocale(getResources().getConfiguration().locale);
     }
@@ -335,6 +341,13 @@ public class PlatformViewAndroid extends SurfaceView
                 RawKeyboardService.MANAGER.bind(new RawKeyboardServiceImpl(mRawKeyboardState), pipe);
             }
         });
+
+        registry.register(ApplicationMessages.MANAGER.getName(), new ServiceFactory() {
+            @Override
+            public void connectToService(Context context, Core core, MessagePipeHandle pipe) {
+                ApplicationMessages.MANAGER.bind(new ApplicationMessagesImpl(), pipe);
+            }
+        });
     }
 
     private void attach() {
@@ -380,6 +393,13 @@ public class PlatformViewAndroid extends SurfaceView
         } else {
             mSkyEngine.runFromBundle(scriptUri, bundlePath);
         }
+
+        // Connect to the ApplicationMessages service exported by the Flutter framework
+        Pair<ApplicationMessages.Proxy, InterfaceRequest<ApplicationMessages>> appMessages =
+                  ApplicationMessages.MANAGER.getInterfaceRequest(core);
+        mDartServiceProvider.connectToService(ApplicationMessages.MANAGER.getName(),
+                                              appMessages.second.passHandle());
+        mFlutterAppMessages = appMessages.first;
     }
 
     private static native long nativeAttach(int inputObserverHandle);
@@ -488,4 +508,107 @@ public class PlatformViewAndroid extends SurfaceView
         return true;
     }
 
+    /**
+     * Send a message to the Flutter application.  The Flutter Dart code can register a
+     * host message handler that will receive these messages.
+     */
+    public void sendToFlutter(String messageName, String message,
+                              final MessageReplyCallback callback) {
+        mFlutterAppMessages.sendString(messageName, message,
+            new ApplicationMessages.SendStringResponse() {
+                @Override
+                public void call(String reply) {
+                    if (callback != null) {
+                        callback.onReply(reply);
+                    }
+                }
+            });
+    }
+
+    public void sendToFlutter(String messageName, String message) {
+        sendToFlutter(messageName, message, null);
+    }
+
+    /** Callback invoked when the app replies to a message sent with sendToFlutter. */
+    public interface MessageReplyCallback {
+        void onReply(String reply);
+    }
+
+    /**
+     * Register a callback to be invoked when the Flutter application sends a message
+     * to its host.
+     */
+    public void addOnMessageListener(String messageName, OnMessageListener listener) {
+        mOnMessageListeners.put(messageName, listener);
+    }
+
+    /**
+     * Register a callback to be invoked when the Flutter application sends a message
+     * to its host.  The reply to the message can be provided asynchronously.
+     */
+    public void addOnMessageListenerAsync(String messageName, OnMessageListenerAsync listener) {
+        mAsyncOnMessageListeners.put(messageName, listener);
+    }
+
+    public interface OnMessageListener {
+        /**
+         * Called when a message is received from the Flutter app.
+         * @return the reply to the message (can be null)
+         */
+        String onMessage(String message);
+    };
+
+    public interface OnMessageListenerAsync {
+        /**
+         * Called when a message is received from the Flutter app.
+         * @param response Used to send a reply back to the app.
+         */
+        void onMessage(String message, MessageResponse response);
+    }
+
+    public interface MessageResponse {
+        void send(String reply);
+    }
+
+    private class ApplicationMessagesImpl implements ApplicationMessages {
+        @Override
+        public void close() {}
+
+        @Override
+        public void onConnectionError(MojoException e) {}
+
+        @Override
+        public void sendString(String messageName, String message, SendStringResponse callback) {
+            OnMessageListener listener = mOnMessageListeners.get(messageName);
+            if (listener != null) {
+                callback.call(listener.onMessage(message));
+                return;
+            }
+
+            OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(messageName);
+            if (asyncListener != null) {
+                asyncListener.onMessage(message, new MessageResponseAdapter(callback));
+                return;
+            }
+
+            callback.call(null);
+        }
+    }
+
+    /**
+     * This class wraps the raw Mojo callback object in an interface that is owned
+     * by Flutter and can be safely given to host apps.
+     */
+    private static class MessageResponseAdapter implements MessageResponse {
+        private ApplicationMessages.SendStringResponse callback;
+
+        MessageResponseAdapter(ApplicationMessages.SendStringResponse callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void send(String reply) {
+            callback.call(reply);
+        }
+    }
 }
