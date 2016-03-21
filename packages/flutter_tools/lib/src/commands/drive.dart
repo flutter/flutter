@@ -242,6 +242,7 @@ Future<int> startApp(DriveCommand command) async {
     return 1;
   }
 
+  // TODO(devoncarew): We should remove the need to special case here.
   if (command.device is AndroidDevice) {
     printTrace('Building an APK.');
     int result = await build_apk.build(command.toolchain, command.buildConfigurations,
@@ -274,7 +275,7 @@ Future<int> startApp(DriveCommand command) async {
     }
   );
 
-  if (command.device.supportsStartPaused) {
+  if (started && command.device.supportsStartPaused) {
     await delayUntilObservatoryAvailable('localhost', command.debugPort);
   }
 
