@@ -37,7 +37,12 @@ export PATH="$DART_SDK_PATH/bin:$PATH"
 
 set +e
 
-"$DART" "$SNAPSHOT_PATH" "$@"
+if [ $FLUTTER_DEV ]; then
+  echo -e "(FLUTTER_DEV set - ignoring $SNAPSHOT_PATH)\n"
+  "$DART" --package-root="$FLUTTER_TOOLS_DIR/packages" "$SCRIPT_PATH" "$@"
+else
+  "$DART" "$SNAPSHOT_PATH" "$@"
+fi
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
 # If it is, we need to snapshot it again.
