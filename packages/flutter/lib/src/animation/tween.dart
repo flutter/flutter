@@ -10,6 +10,8 @@ import 'curves.dart';
 
 /// An object that can produce a value of type T given an [Animation] as input.
 abstract class Animatable<T> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Animatable();
 
   /// The current value of this object for the given animation.

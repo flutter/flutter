@@ -356,6 +356,8 @@ abstract class RenderObjectPainter {
 /// Concrete layout models (such as box) will create concrete subclasses to
 /// communicate layout constraints between parents and children.
 abstract class Constraints {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Constraints();
 
   /// Whether there is exactly one size possible given these constraints

@@ -67,7 +67,16 @@ class _AlwaysDismissedAnimation extends Animation<double> {
 const Animation<double> kAlwaysDismissedAnimation = const _AlwaysDismissedAnimation();
 
 /// An animation that is always stopped at a given value.
+///
+/// The [status] is always [AnimationStatus.forward].
 class AlwaysStoppedAnimation<T> extends Animation<T> {
+  /// Creates an [AlwaysStoppedAnimation] with the given value.
+  ///
+  /// Since the [value] and [status] of an [AlwaysStoppedAnimation] can never
+  /// change, the listeners can never be invoked. It is therefore safe to reuse
+  /// an [AlwaysStoppedAnimation] instance in multiple places. If the [value] to
+  /// be used is known at compile time, the constructor should be invoked as a
+  /// `const` constructor.
   const AlwaysStoppedAnimation(this.value);
 
   @override
@@ -96,15 +105,25 @@ abstract class AnimationWithParentMixin<T> {
   /// The animation whose value this animation will proxy.
   ///
   /// This animation must remain the same for the lifetime of this object. If
-  /// you wish to proxy a different animation at different times, conside using
+  /// you wish to proxy a different animation at different times, consider using
   /// [ProxyAnimation].
   Animation<T> get parent;
 
+  // keep these next five dartdocs in sync with the dartdocs in Animation<T>
+
+  /// Calls the listener every time the value of the animation changes.
   void addListener(VoidCallback listener) => parent.addListener(listener);
+
+  /// Stop calling the listener every time the value of the animation changes.
   void removeListener(VoidCallback listener) => parent.removeListener(listener);
+
+  /// Calls listener every time the status of the animation changes.
   void addStatusListener(AnimationStatusListener listener) => parent.addStatusListener(listener);
+
+  /// Stops calling the listener every time the status of the animation changes.
   void removeStatusListener(AnimationStatusListener listener) => parent.removeStatusListener(listener);
 
+  /// The current status of this animation.
   AnimationStatus get status => parent.status;
 }
 

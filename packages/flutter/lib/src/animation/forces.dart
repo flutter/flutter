@@ -8,6 +8,8 @@ export 'package:newton/newton.dart' show SpringDescription;
 
 /// A factory for simulations.
 abstract class Force {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Force();
 
   /// Creates a new physics simulation with the given initial conditions.

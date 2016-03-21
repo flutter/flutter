@@ -19,7 +19,8 @@ export 'edge_insets.dart' show EdgeInsets;
 /// shared between boxes; [BoxPainter] objects can cache resources to
 /// make painting on a particular surface faster.
 abstract class Decoration {
-  /// Abstract const constructor.
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const Decoration();
 
   /// In checked mode, throws an exception if the object is not in a

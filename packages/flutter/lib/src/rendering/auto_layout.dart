@@ -114,6 +114,8 @@ class AutoLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
 }
 
 abstract class AutoLayoutDelegate {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const AutoLayoutDelegate();
 
   List<al.Constraint> getConstraints(AutoLayoutRect parent);
