@@ -109,7 +109,7 @@ public:
     void setFillRule(WindRule rule) { m_fillRule = rule; }
 
     // Shadow. (This will need tweaking if we use draw loopers for other things.)
-    SkDrawLooper* drawLooper() const { return m_looper.get(); }
+    const RefPtr<SkDrawLooper>& drawLooper() const { return m_looper; }
     void setDrawLooper(PassRefPtr<SkDrawLooper>);
     void clearDrawLooper();
 

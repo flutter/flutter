@@ -25,7 +25,7 @@ void ShaderMaskLayer::Paint(PaintContext::ScopedFrame& frame) {
 
   SkPaint paint;
   paint.setXfermodeMode(transfer_mode_);
-  paint.setShader(shader_.get());
+  paint.setShader(shader_);
   canvas.translate(mask_rect_.left(), mask_rect_.top());
   canvas.drawRect(SkRect::MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
 }

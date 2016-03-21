@@ -143,7 +143,7 @@ public:
     void setFillGradient(PassRefPtr<Gradient>);
     Gradient* fillGradient() const { return immutableState()->fillGradient(); }
 
-    SkDrawLooper* drawLooper() const { return immutableState()->drawLooper(); }
+    const RefPtr<SkDrawLooper>& drawLooper() const { return immutableState()->drawLooper(); }
 
     bool getTransformedClipBounds(FloatRect* bounds) const;
     SkMatrix getTotalMatrix() const;

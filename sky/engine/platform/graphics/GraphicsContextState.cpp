@@ -188,15 +188,15 @@ void GraphicsContextState::clearFillPattern()
 void GraphicsContextState::setDrawLooper(PassRefPtr<SkDrawLooper> drawLooper)
 {
     m_looper = drawLooper;
-    m_strokePaint.setLooper(m_looper.get());
-    m_fillPaint.setLooper(m_looper.get());
+    m_strokePaint.setLooper(toSkSp(m_looper));
+    m_fillPaint.setLooper(toSkSp(m_looper));
 }
 
 void GraphicsContextState::clearDrawLooper()
 {
     m_looper.clear();
-    m_strokePaint.setLooper(0);
-    m_fillPaint.setLooper(0);
+    m_strokePaint.setLooper(nullptr);
+    m_fillPaint.setLooper(nullptr);
 }
 
 void GraphicsContextState::setAlphaAsFloat(float alpha)

@@ -56,7 +56,7 @@ void ImageShader::initWithImage(CanvasImage* image,
   SkBitmap bitmap;
   image->image()->asLegacyBitmap(&bitmap, SkImage::kRO_LegacyBitmapMode);
 
-  set_shader(adoptRef(SkShader::CreateBitmapShader(bitmap, tmx, tmy, &sk_matrix)));
+  set_shader(SkShader::MakeBitmapShader(bitmap, tmx, tmy, &sk_matrix));
 }
 
 ImageShader::ImageShader() : Shader(nullptr) {

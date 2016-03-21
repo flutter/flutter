@@ -17,14 +17,14 @@ class Shader : public RefCounted<Shader>, public DartWrappable {
  public:
   ~Shader() override;
 
-  SkShader* shader() { return shader_.get(); }
-  void set_shader(PassRefPtr<SkShader> shader) { shader_ = shader; }
+  sk_sp<SkShader> shader() { return shader_; }
+  void set_shader(sk_sp<SkShader> shader) { shader_ = shader; }
 
  protected:
-  Shader(PassRefPtr<SkShader> shader);
+  Shader(sk_sp<SkShader> shader);
 
  private:
-  RefPtr<SkShader> shader_;
+  sk_sp<SkShader> shader_;
 };
 
 } // namespace blink

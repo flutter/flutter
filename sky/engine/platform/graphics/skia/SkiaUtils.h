@@ -42,6 +42,7 @@
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
 namespace blink {
@@ -105,6 +106,83 @@ InterpolationQuality computeInterpolationQuality(
     bool isDataComplete = true);
 
 bool shouldDrawAntiAliased(const GraphicsContext*, const SkRect& destRect);
+
+// Skia's smart pointer APIs are preferable over their legacy raw pointer counterparts.
+// The following helpers ensure interoperability between Skia's SkRefCnt wrapper sk_sp<T> and
+// Blink's RefPtr<T>/PassRefPtr<T>.
+//
+//   - fromSkSp(sk_sp<T>):       adopts an sk_sp into a PassRefPtr (to be used when transferring
+//                               ownership from Skia to Blink).
+//   - toSkSp(PassRefPtr<T>):    releases a PassRefPtr into a sk_sp (to be used when transferring
+//                               ownership from Blink to Skia).
+//   - toSkSp(const RefPtr<T>&): shares a RefPtr as a new sk_sp (to be used when sharing
+//                               ownership).
+//
+// General guidelines
+//
+// When receiving ref counted objects from Skia:
+//
+//   1) use sk_sp-based Skia factories if available (e.g. SkShader::MakeFoo() instead of
+//      SkShader::CreateFoo())
+//
+//   2) use sk_sp<T> locals for temporary objects (to be immediately transferred back to Skia)
+//
+//   3) use RefPtr<T>/PassRefPtr<T> for objects to be retained in Blink, use
+//      fromSkSp(sk_sp<T>) to convert
+//
+// When passing ref counted objects to Skia:
+//
+//   1) use sk_sk-based Skia APIs when available (e.g. SkPaint::setShader(sk_sp<SkShader>)
+//      instead of SkPaint::setShader(SkShader*))
+//
+//   2) if the object ownership is being passed to Skia, use std::move(sk_sp<T>) or
+//      toSkSp(PassRefPtr<T>) to transfer without refcount churn
+//
+//   3) if the object ownership is shared with Skia (Blink retains a reference), use
+//      toSkSp(const RefPtr<T>&)
+//
+// Example (creating a SkShader and setting it on SkPaint):
+//
+// a) legacy/old style
+//
+//     RefPtr<SkShader> shader = adoptRef(SkShader::CreateFoo(...));
+//     paint.setShader(shader.get());
+//
+//  (Note: the legacy approach introduces refcount churn as Skia grabs a ref while Blink is
+//   temporarily holding on to its own)
+//
+// b) new style, ownership transferred
+//
+//     // using Skia smart pointer locals
+//     sk_sp<SkShader> shader = SkShader::MakeFoo(...);
+//     paint.setShader(std::move(shader));
+//
+//     // using Blink smart pointer locals
+//     RefPtr<SkShader> shader = fromSkSp(SkShader::MakeFoo(...));
+//     paint.setShader(toSkSp(shader.release());
+//
+//     // using no locals
+//     paint.setShader(SkShader::MakeFoo(...));
+//
+// c) new style, shared ownership
+//
+//     RefPtr<SkShader> shader = fromSkSp(SkShader::MakeFoo(...));
+//     paint.setShader(toSkSp(shader));
+//
+template <typename T> PassRefPtr<T> fromSkSp(sk_sp<T> sp)
+{
+    return adoptRef(sp.release());
+}
+
+template <typename T> sk_sp<T> toSkSp(PassRefPtr<T> ref)
+{
+    return sk_sp<T>(ref.leakRef());
+}
+
+template <typename T> sk_sp<T> toSkSp(const RefPtr<T>& ref)
+{
+    return toSkSp(PassRefPtr<T>(ref));
+}
 
 } // namespace blink
 

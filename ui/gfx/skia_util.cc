@@ -79,7 +79,7 @@ skia::RefPtr<SkShader> CreateGradientShader(int start_point,
   grad_points[0].iset(0, start_point);
   grad_points[1].iset(0, end_point);
 
-  return skia::AdoptRef(SkGradientShader::CreateLinear(
+  return skia::AdoptRef(SkGradientShader::MakeLinear(
       grad_points, grad_colors, NULL, 2, SkShader::kRepeat_TileMode));
 }
 

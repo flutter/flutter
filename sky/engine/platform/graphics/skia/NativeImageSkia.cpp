@@ -237,7 +237,7 @@ void NativeImageSkia::drawPattern(
     const float adjustedY = phase.y() + normSrcRect.y() * scale.height();
     localMatrix.setTranslate(SkFloatToScalar(adjustedX), SkFloatToScalar(adjustedY));
 
-    RefPtr<SkShader> shader;
+    sk_sp<SkShader> shader;
     SkFilterQuality filterLevel = static_cast<SkFilterQuality>(resampling);
 
     // Bicubic filter is only applied to defer-decoded images, see
@@ -263,11 +263,11 @@ void NativeImageSkia::drawPattern(
         // boundaries.
         SkBitmap resampled = extractScaledImageFragment(normSrcRect, scaleX, scaleY, &scaledSrcRect);
         if (repeatSpacing.isZero()) {
-            shader = adoptRef(SkShader::CreateBitmapShader(resampled, SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix));
+            shader = SkShader::MakeBitmapShader(resampled, SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix);
         } else {
-            shader = adoptRef(SkShader::CreateBitmapShader(
+            shader = SkShader::MakeBitmapShader(
                 createBitmapWithSpace(resampled, repeatSpacing.width() * ctmScaleX, repeatSpacing.height() * ctmScaleY),
-                SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix));
+                SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix);
         }
     } else {
         // Because no resizing occurred, the shader transform should be
@@ -278,16 +278,16 @@ void NativeImageSkia::drawPattern(
         SkBitmap srcSubset;
         bitmap().extractSubset(&srcSubset, enclosingIntRect(normSrcRect));
         if (repeatSpacing.isZero()) {
-            shader = adoptRef(SkShader::CreateBitmapShader(srcSubset, SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix));
+            shader = SkShader::MakeBitmapShader(srcSubset, SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix);
         } else {
-            shader = adoptRef(SkShader::CreateBitmapShader(
+            shader = SkShader::MakeBitmapShader(
                 createBitmapWithSpace(srcSubset, repeatSpacing.width() * ctmScaleX, repeatSpacing.height() * ctmScaleY),
-                SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix));
+                SkShader::kRepeat_TileMode, SkShader::kRepeat_TileMode, &localMatrix);
         }
     }
 
     SkPaint paint;
-    paint.setShader(shader.get());
+    paint.setShader(shader);
     paint.setXfermodeMode(WebCoreCompositeToSkiaComposite(compositeOp, blendMode));
     paint.setColorFilter(context->colorFilter());
     paint.setFilterQuality(filterLevel);

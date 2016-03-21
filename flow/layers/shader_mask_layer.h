@@ -16,7 +16,7 @@ class ShaderMaskLayer : public ContainerLayer {
   ShaderMaskLayer();
   ~ShaderMaskLayer() override;
 
-  void set_shader(SkShader* shader) { shader_ = skia::SharePtr(shader); }
+  void set_shader(sk_sp<SkShader> shader) { shader_ = shader; }
 
   void set_mask_rect(const SkRect& mask_rect) {
     mask_rect_ = mask_rect;
@@ -31,7 +31,7 @@ class ShaderMaskLayer : public ContainerLayer {
   void Paint(PaintContext::ScopedFrame& frame) override;
 
  private:
-  skia::RefPtr<SkShader> shader_;
+  sk_sp<SkShader> shader_;
   SkRect mask_rect_;
   SkXfermode::Mode transfer_mode_;
 
