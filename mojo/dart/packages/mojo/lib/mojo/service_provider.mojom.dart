@@ -93,7 +93,7 @@ class _ServiceProviderConnectToServiceParams extends bindings.Struct {
   }
 }
 
-const int _ServiceProvider_connectToServiceName = 0;
+const int _serviceProviderMethodConnectToServiceName = 0;
 
 class _ServiceProviderServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>
@@ -158,7 +158,7 @@ class _ServiceProviderProxyCalls implements ServiceProvider {
       var params = new _ServiceProviderConnectToServiceParams();
       params.interfaceName = interfaceName;
       params.pipe = pipe;
-      _proxyImpl.sendMessage(params, _ServiceProvider_connectToServiceName);
+      _proxyImpl.sendMessage(params, _serviceProviderMethodConnectToServiceName);
     }
 }
 
@@ -250,7 +250,7 @@ class ServiceProviderStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case _ServiceProvider_connectToServiceName:
+      case _serviceProviderMethodConnectToServiceName:
         var params = _ServiceProviderConnectToServiceParams.deserialize(
             message.payload);
         _impl.connectToService(params.interfaceName, params.pipe);

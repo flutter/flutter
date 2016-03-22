@@ -7,9 +7,6 @@
 #ifndef MOJO_EDK_SYSTEM_TEST_PERF_LOG_H_
 #define MOJO_EDK_SYSTEM_TEST_PERF_LOG_H_
 
-//#include "mojo/public/c/system/types.h"
-//#include "mojo/public/cpp/system/macros.h"
-
 namespace mojo {
 namespace system {
 namespace test {

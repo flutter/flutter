@@ -11,7 +11,7 @@
 #include "base/callback_forward.h"
 #include "base/files/scoped_file.h"
 #include "base/threading/platform_thread.h"
-#include "mojo/public/cpp/system/core.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 
 namespace base {
 class FilePath;
@@ -54,6 +54,11 @@ base::ScopedFILE BlockingCopyToTempFile(ScopedDataPipeConsumerHandle source);
 // (rather than a newly created temp file) and do not unlink the file.
 // Returns true on success, false on failure.
 bool BlockingCopyToFile(ScopedDataPipeConsumerHandle source, FILE* fp);
+
+// Copies the string |contents| to a temporary data pipe and returns the
+// consumer handle.
+ScopedDataPipeConsumerHandle WriteStringToConsumerHandle(
+    const std::string& source);
 
 }  // namespace common
 }  // namespace mojo

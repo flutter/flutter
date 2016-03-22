@@ -6,9 +6,10 @@
 module mojo.ui;
 
 import "mojo/public/interfaces/application/service_provider.mojom";
+import "mojo/services/gfx/composition/interfaces/hit_tests.mojom";
 import "mojo/services/gfx/composition/interfaces/scene_token.mojom";
-import "mojo/services/ui/views/interfaces/views.mojom";
-import "mojo/services/ui/views/interfaces/view_trees.mojom";
+import "mojo/services/ui/views/interfaces/view_token.mojom";
+import "mojo/services/ui/views/interfaces/view_tree_token.mojom";
 
 // View associates are trusted components that are attached to a view manager
 // instance with the purpose of offering additional services to views and

@@ -14,6 +14,7 @@
 #include "mojo/public/cpp/bindings/lib/message_builder.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "mojo/public/cpp/system/message_pipe.h"
+#include "mojo/public/cpp/system/time.h"
 #include "mojo/services/log/interfaces/entry.mojom.h"
 #include "mojo/services/log/interfaces/log.mojom.h"
 

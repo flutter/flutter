@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "mojo/public/c/system/types.h"
+#include "mojo/public/c/system/result.h"
 
 namespace mojo {
 namespace system {

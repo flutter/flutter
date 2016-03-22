@@ -5,7 +5,7 @@
 #ifndef MOJO_EDK_PLATFORM_TIME_TICKS_H_
 #define MOJO_EDK_PLATFORM_TIME_TICKS_H_
 
-#include "mojo/public/c/system/types.h"
+#include "mojo/public/c/system/time.h"
 
 namespace mojo {
 namespace platform {

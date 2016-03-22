@@ -41,8 +41,6 @@ class ViewImpl : public mojo::ui::ViewListener,
   void OnLayout(mojo::ui::ViewLayoutParamsPtr layout_params,
                 mojo::Array<uint32_t> children_needing_layout,
                 const OnLayoutCallback& callback) override;
-  void OnChildUnavailable(uint32_t child_key,
-                          const OnChildUnavailableCallback& callback) override;
 
   // mojo::ui::InputListener
   void OnEvent(mojo::EventPtr event, const OnEventCallback& callback) override;
