@@ -29,7 +29,7 @@ source_set("embedder") {
   ]
 }
 
-static_library("sdk_lib") {
+static_library("sdk_lib_single_arch") {
   output_name = "FlutterServices"
   complete_static_lib = true
 
@@ -47,4 +47,53 @@ static_library("sdk_lib") {
     "//mojo/public/cpp/environment:standalone",
     "//mojo/public/platform/native:system",
   ]
+}
+
+
+group("sdk_lib") {
+  action("generate_fat_binary") {
+    stamp_file = "$root_out_dir/dynamic_service_dylib_lipo"
+    script = "//sky/tools/lipo.py"
+
+    device_target = ":sdk_lib_single_arch(//build/toolchain/mac:ios_clang_arm)"
+    sim_target = ":sdk_lib_single_arch(//build/toolchain/mac:clang_x64)"
+
+    device_binary = "$root_build_dir/obj/sky/services/dynamic/libFlutterServices.a"
+    sim_binary    = "$root_build_dir/clang_x64/obj/sky/services/dynamic/libFlutterServices.a"
+    fat_binary = "$root_out_dir/FlutterServicesIOS.a"
+
+    inputs = [
+      device_binary,
+      sim_binary,
+    ]
+
+    outputs = [
+      stamp_file,
+      fat_binary,
+    ]
+
+    args = [
+      "--stamp",
+      rebase_path(stamp_file),
+      "--path",
+      rebase_path(device_binary),
+      "--path",
+      rebase_path(sim_binary),
+      "--output",
+      rebase_path(fat_binary),
+    ]
+
+    deps = [
+      "$device_target",
+      "$sim_target",
+    ]
+  }
+
+  deps = []
+
+  if (is_ios) {
+    deps += [
+      ":generate_fat_binary",
+    ]
+  }
 }
