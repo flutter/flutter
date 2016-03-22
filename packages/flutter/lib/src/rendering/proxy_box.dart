@@ -29,7 +29,6 @@ export 'package:flutter/gestures.dart' show
 /// for render objects that wish to mimic most, but not all, of the properties
 /// of their child.
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-
   RenderProxyBox([RenderBox child = null]) {
     this.child = child;
   }
@@ -244,128 +243,6 @@ class RenderConstrainedBox extends RenderProxyBox {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('additionalConstraints: $additionalConstraints');
-  }
-}
-
-/// Sizes its child to a fraction of the total available space.
-///
-/// For both its width and height, this render object imposes a tight
-/// constraint on its child that is a multiple (typically less than 1.0) of the
-/// maximum constraint it received from its parent on that axis. If the factor
-/// for a given axis is null, then the constraints from the parent are just
-/// passed through instead.
-///
-/// It then tries to size itself to the size of its child.
-class RenderFractionallySizedBox extends RenderProxyBox {
-  RenderFractionallySizedBox({
-    RenderBox child,
-    double widthFactor,
-    double heightFactor
-  }) : _widthFactor = widthFactor, _heightFactor = heightFactor, super(child) {
-    assert(_widthFactor == null || _widthFactor >= 0.0);
-    assert(_heightFactor == null || _heightFactor >= 0.0);
-  }
-
-  /// If non-null, the factor of the incoming width to use.
-  ///
-  /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
-  double get widthFactor => _widthFactor;
-  double _widthFactor;
-  void set widthFactor (double value) {
-    assert(value == null || value >= 0.0);
-    if (_widthFactor == value)
-      return;
-    _widthFactor = value;
-    markNeedsLayout();
-  }
-
-  /// If non-null, the factor of the incoming height to use.
-  ///
-  /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
-  /// given the incoming width constraings.
-  double get heightFactor => _heightFactor;
-  double _heightFactor;
-  void set heightFactor (double value) {
-    assert(value == null || value >= 0.0);
-    if (_heightFactor == value)
-      return;
-    _heightFactor = value;
-    markNeedsLayout();
-  }
-
-  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    double minWidth = constraints.minWidth;
-    double maxWidth = constraints.maxWidth;
-    if (_widthFactor != null) {
-      double width = maxWidth * _widthFactor;
-      minWidth = width;
-      maxWidth = width;
-    }
-    double minHeight = constraints.minHeight;
-    double maxHeight = constraints.maxHeight;
-    if (_heightFactor != null) {
-      double height = maxHeight * _heightFactor;
-      minHeight = height;
-      maxHeight = height;
-    }
-    return new BoxConstraints(
-      minWidth: minWidth,
-      maxWidth: maxWidth,
-      minHeight: minHeight,
-      maxHeight: maxHeight
-    );
-  }
-
-  @override
-  double getMinIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return constraints.constrainWidth(child.getMinIntrinsicWidth(_getInnerConstraints(constraints)));
-    return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
-  }
-
-  @override
-  double getMaxIntrinsicWidth(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return constraints.constrainWidth(child.getMaxIntrinsicWidth(_getInnerConstraints(constraints)));
-    return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
-  }
-
-  @override
-  double getMinIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return constraints.constrainHeight(child.getMinIntrinsicHeight(_getInnerConstraints(constraints)));
-    return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
-  }
-
-  @override
-  double getMaxIntrinsicHeight(BoxConstraints constraints) {
-    assert(constraints.debugAssertIsNormalized);
-    if (child != null)
-      return constraints.constrainHeight(child.getMaxIntrinsicHeight(_getInnerConstraints(constraints)));
-    return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
-  }
-
-  @override
-  void performLayout() {
-    if (child != null) {
-      child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      size = constraints.constrain(child.size);
-    } else {
-      size = constraints.constrain(_getInnerConstraints(constraints).constrain(Size.zero));
-    }
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('widthFactor: ${_widthFactor ?? "pass-through"}');
-    description.add('heightFactor: ${_heightFactor ?? "pass-through"}');
   }
 }
 

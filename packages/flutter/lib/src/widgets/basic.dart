@@ -293,7 +293,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The alignment of the origin, relative to the size of the box.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
-  /// If it is specificed at the same time as an offset, both are applied.
+  /// If it is specified at the same time as an offset, both are applied.
   final FractionalOffset alignment;
 
   /// Whether to apply the translation when performing hit tests.
@@ -442,6 +442,16 @@ class Align extends SingleChildRenderObjectWidget {
       ..alignment = alignment
       ..widthFactor = widthFactor
       ..heightFactor = heightFactor;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('alignment: $alignment');
+    if (widthFactor != null)
+      description.add('widthFactor: $widthFactor');
+    if (heightFactor != null)
+      description.add('heightFactor: $heightFactor');
   }
 }
 
@@ -610,10 +620,17 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 
 /// Sizes itself to a fraction of the total available space.
 ///
-/// See [RenderFractionallySizedBox] for details.
+/// See [RenderFractionallySizedOverflowBox] for details.
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
-  FractionallySizedBox({ Key key, this.width, this.height, Widget child })
-    : super(key: key, child: child);
+  FractionallySizedBox({
+    Key key,
+    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.width,
+    this.height,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
 
   /// If non-null, the factor of the incoming width to use.
   ///
@@ -627,15 +644,28 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// incoming height constraint multipled by this factor.
   final double height;
 
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
+  final FractionalOffset alignment;
+
   @override
-  RenderFractionallySizedBox createRenderObject(BuildContext context) => new RenderFractionallySizedBox(
+  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) => new RenderFractionallySizedOverflowBox(
+    alignment: alignment,
     widthFactor: width,
     heightFactor: height
   );
 
   @override
-  void updateRenderObject(BuildContext context, RenderFractionallySizedBox renderObject) {
+  void updateRenderObject(BuildContext context, RenderFractionallySizedOverflowBox renderObject) {
     renderObject
+      ..alignment = alignment
       ..widthFactor = width
       ..heightFactor = height;
   }
@@ -643,6 +673,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
+    description.add('alignment: $alignment');
     if (width != null)
       description.add('width: $width');
     if (height != null)
@@ -657,13 +688,24 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 class OverflowBox extends SingleChildRenderObjectWidget {
   OverflowBox({
     Key key,
+    this.alignment: const FractionalOffset(0.5, 0.5),
     this.minWidth,
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
-    this.alignment: const FractionalOffset(0.5, 0.5),
     Widget child
   }) : super(key: key, child: child);
+
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
+  final FractionalOffset alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -681,39 +723,29 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// default) to use the constraint from the parent instead.
   final double maxHeight;
 
-  /// How to align the child.
-  ///
-  /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
-  /// the child is aligned with the left edge of the parent whereas an x value
-  /// of 1.0 means that the right edge of the child is aligned with the right
-  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
-  /// with the center of the parent.
-  final FractionalOffset alignment;
-
   @override
-  RenderOverflowBox createRenderObject(BuildContext context) => new RenderOverflowBox(
+  RenderConstrainedOverflowBox createRenderObject(BuildContext context) => new RenderConstrainedOverflowBox(
+    alignment: alignment,
     minWidth: minWidth,
     maxWidth: maxWidth,
     minHeight: minHeight,
-    maxHeight: maxHeight,
-    alignment: alignment
+    maxHeight: maxHeight
   );
 
   @override
-  void updateRenderObject(BuildContext context, RenderOverflowBox renderObject) {
+  void updateRenderObject(BuildContext context, RenderConstrainedOverflowBox renderObject) {
     renderObject
+      ..alignment = alignment
       ..minWidth = minWidth
       ..maxWidth = maxWidth
       ..minHeight = minHeight
-      ..maxHeight = maxHeight
-      ..alignment = alignment;
+      ..maxHeight = maxHeight;
   }
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
+    description.add('alignment: $alignment');
     if (minWidth != null)
       description.add('minWidth: $minWidth');
     if (maxWidth != null)
@@ -726,17 +758,49 @@ class OverflowBox extends SingleChildRenderObjectWidget {
 }
 
 class SizedOverflowBox extends SingleChildRenderObjectWidget {
-  SizedOverflowBox({ Key key, this.size, Widget child })
-    : super(key: key, child: child);
+  SizedOverflowBox({
+    Key key,
+    this.alignment: const FractionalOffset(0.5, 0.5),
+    this.size,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
+
+  /// How to align the child.
+  ///
+  /// The x and y values of the alignment control the horizontal and vertical
+  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// with the center of the parent.
+  final FractionalOffset alignment;
 
   final Size size;
 
   @override
-  RenderSizedOverflowBox createRenderObject(BuildContext context) => new RenderSizedOverflowBox(requestedSize: size);
+  RenderSizedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderSizedOverflowBox(
+      alignment: alignment,
+      requestedSize: size
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderSizedOverflowBox renderObject) {
-    renderObject.requestedSize = size;
+    renderObject
+      ..alignment = alignment
+      ..requestedSize = size;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('alignment: $alignment');
+    if (size != null)
+      description.add('size: $size');
   }
 }
 
