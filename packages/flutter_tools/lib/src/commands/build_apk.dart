@@ -239,7 +239,7 @@ Future<_ApkComponents> _findApkComponents(
 
   await parseServiceConfigs(components.services, jars: components.jars);
 
-  for (File file in [
+  for (File file in <File>[
     components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
   ]..addAll(components.jars)) {
     if (!file.existsSync()) {

@@ -13,7 +13,7 @@ import '../base/process.dart';
 import '../globals.dart';
 import '../runner/flutter_command_runner.dart';
 
-Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) async {
+bool _inflateXcodeArchive(String directory, List<int> archiveBytes) {
   printStatus('Unzipping Xcode project to local directory...');
 
   // We cannot use ArchiveFile because this archive contains files that are exectuable
@@ -21,28 +21,33 @@ Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) asyn
   // or after creation. See https://github.com/dart-lang/sdk/issues/15078.
   // So we depend on the platform to unzip the archive for us.
 
-  Directory tempDir = await Directory.systemTemp.create();
+  Directory tempDir = Directory.systemTemp.createTempSync('flutter_xcode');
   File tempFile = new File(path.join(tempDir.path, 'FlutterXcode.zip'))..createSync();
   tempFile.writeAsBytesSync(archiveBytes);
 
   try {
+    Directory dir = new Directory(directory);
+
     // Remove the old generated project if one is present
-    runCheckedSync(['/bin/rm', '-rf', directory]);
+    if (dir.existsSync())
+      dir.deleteSync(recursive: true);
+
     // Create the directory so unzip can write to it
-    runCheckedSync(['/bin/mkdir', '-p', directory]);
+    dir.createSync(recursive: true);
+
     // Unzip the Xcode project into the new empty directory
-    runCheckedSync(['/usr/bin/unzip', tempFile.path, '-d', directory]);
+    runCheckedSync(['/usr/bin/unzip', tempFile.path, '-d', dir.path]);
   } catch (error) {
+    printTrace('$error');
     return false;
   }
 
   // Cleanup the temp directory after unzipping
-  runSync(['/bin/rm', '-rf', tempDir.path]);
+  tempDir.deleteSync(recursive: true);
 
   // Verify that we have an Xcode project
   Directory flutterProj = new Directory(path.join(directory, 'FlutterApplication.xcodeproj'));
-  bool flutterProjExists = await flutterProj.exists();
-  if (!flutterProjExists) {
+  if (!flutterProj.existsSync()) {
     printError("${flutterProj.path} does not exist");
     return false;
   }
@@ -108,7 +113,7 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   }
 
   // Step 2: Inflate the archive into the user project directory
-  bool result = await _inflateXcodeArchive(xcodeprojPath, archiveBytes);
+  bool result = _inflateXcodeArchive(xcodeprojPath, archiveBytes);
   if (!result) {
     printError('Could not inflate the Xcode project archive.');
     return 1;
