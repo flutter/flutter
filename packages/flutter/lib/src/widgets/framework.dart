@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'debug.dart';
+
 import 'package:flutter/rendering.dart';
 
 export 'dart:ui' show hashValues, hashList;
@@ -1935,7 +1937,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 /// Instantiation of RenderObjectWidgets that can have a list of children
 class MultiChildRenderObjectElement extends RenderObjectElement {
   MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget) : super(widget) {
-    assert(!_debugHasDuplicateIds());
+    assert(!debugHasDuplicateKeys(widget, widget.children));
   }
 
   @override
@@ -1966,24 +1968,6 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     assert(child.parent == renderObject);
     renderObject.remove(child);
     assert(renderObject == this.renderObject);
-  }
-
-  bool _debugHasDuplicateIds() {
-    Set<Key> idSet = new HashSet<Key>();
-    for (Widget child in widget.children) {
-      assert(child != null);
-      if (child.key == null)
-        continue; // when these nodes are reordered, we just reassign the data
-
-      if (!idSet.add(child.key)) {
-        throw new FlutterError(
-          'Duplicate keys found.\n'
-          'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-          '$widget has multiple children with key "${child.key}".'
-        );
-      }
-    }
-    return false;
   }
 
   @override
