@@ -64,32 +64,47 @@ copy("sky_shell") {
 }
 
 if (is_android) {
-  import("//build/config/android/rules.gni")
+  action("sky_engine") {
+    script = "//sky/tools/dist_dart_pkg.py"
 
-  copy_ex("sky_engine") {
-    clear_dir = true
-    # Note: The package actually ends up in $root_dist_dir/packages/sky_engine/sky_engine
+    source = "$root_gen_dir/dart-pkg/sky_engine"
     dest = "$root_dist_dir/packages/sky_engine"
-    sources = [
-      "$root_gen_dir/dart-pkg/sky_engine",
+
+    inputs = [ source ]
+    outputs = [ dest ]
+
+    args = [
+      "--source",
+      rebase_path(source),
+      "--dest",
+      rebase_path(dest),
     ]
+
     deps = [
       "//sky/packages/sky_engine",
     ]
   }
 
-  copy_ex("sky_services") {
-    clear_dir = true
-    # Note: The package actually ends up in $root_dist_dir/packages/sky_services/sky_services
+  action("sky_services") {
+    script = "//sky/tools/dist_dart_pkg.py"
+
+    source = "$root_gen_dir/dart-pkg/sky_services"
     dest = "$root_dist_dir/packages/sky_services"
-    sources = [
-      "$root_gen_dir/dart-pkg/sky_services",
+
+    inputs = [ source ]
+    outputs = [ dest ]
+
+    args = [
+      "--source",
+      rebase_path(source),
+      "--dest",
+      rebase_path(dest),
     ]
+
     deps = [
       "//sky/packages/sky_services",
     ]
   }
-
 }
 
 group("dist") {
