@@ -154,14 +154,25 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
 }
 
 class TwoLevelList extends StatelessWidget {
-  TwoLevelList({ Key key, this.scrollableKey, this.items, this.type: MaterialListType.twoLine }) : super(key: key);
+  TwoLevelList({
+    Key key,
+    this.scrollableKey,
+    this.items,
+    this.type: MaterialListType.twoLine,
+    this.scrollablePadding
+  }) : super(key: key);
 
   final List<Widget> items;
   final MaterialListType type;
   final Key scrollableKey;
+  final EdgeInsets scrollablePadding;
 
   @override
   Widget build(BuildContext context) {
-    return new Block(children: KeyedSubtree.ensureUniqueKeysForList(items), scrollableKey: scrollableKey);
+    return new Block(
+      padding: scrollablePadding,
+      children: KeyedSubtree.ensureUniqueKeysForList(items),
+      scrollableKey: scrollableKey
+    );
   }
 }
