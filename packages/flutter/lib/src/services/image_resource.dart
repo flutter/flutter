@@ -7,24 +7,55 @@ import 'dart:ui' as ui show Image;
 
 import 'print.dart';
 
+/// A [ui.Image] object with its corresponding scale.
+///
+/// ImageInfo objects are used by [ImageResource] objects to represent the
+/// actual data of the image once it has been obtained.
 class ImageInfo {
-  ImageInfo({ this.image, this.scale: 1.0 });
+  /// Creates an [ImageInfo] object for the given image and scale.
+  ///
+  /// Both the image and the scale must be non-null.
+  ImageInfo({ this.image, this.scale: 1.0 }) {
+    assert(image != null);
+    assert(scale != null);
+  }
 
+  /// The raw image pixels.
+  ///
+  /// This is the object to pass to the [Canvas.drawImage],
+  /// [Canvas.drawImageRect], or [Canvas.drawImageNine] methods when painting
+  /// the image.
   final ui.Image image;
+
+  /// The linear scale factor for drawing this image at its intended size.
+  ///
+  /// The scale factor applies to the width and the height.
+  ///
+  /// For example, if this is 2.0 it means that there are four image pixels for
+  /// every one logical pixel, and the image's actual width and height (as given
+  /// by the [ui.Image.width] and [ui.Image.height] properties) are double the
+  /// height and width that should be used when painting the image (e.g. in the
+  /// arguments given to [Canvas.drawImage]).
   final double scale;
 
   @override
   String toString() => '$image @ ${scale}x';
 }
 
-/// A callback for when the image is available.
+/// Signature for callbacks reporting that an image is available.
+///
+/// Used by [ImageResource].
 typedef void ImageListener(ImageInfo image);
 
-/// A handle to an image resource
+/// A handle to an image resource.
 ///
-/// ImageResource represents a handle to a [ui.Image] object. The underlying
-/// image object might change over time, either because the image is animating
-/// or because the underlying image resource was mutated.
+/// ImageResource represents a handle to a [ui.Image] object and its scale
+/// (together represented by an [ImageInfo] object). The underlying image object
+/// might change over time, either because the image is animating or because the
+/// underlying image resource was mutated.
+///
+/// ImageResource objects can also represent an image that hasn't finished
+/// loading.
 class ImageResource {
   ImageResource(this._futureImage) {
     _futureImage.then(
@@ -40,15 +71,15 @@ class ImageResource {
   ImageInfo _image;
   final List<ImageListener> _listeners = new List<ImageListener>();
 
-  /// The first concrete [ui.Image] object represented by this handle.
+  /// The first concrete [ImageInfo] object represented by this handle.
   ///
   /// Instead of receivingly only the first image, most clients will want to
   /// [addListener] to be notified whenever a a concrete image is available.
   Future<ImageInfo> get first => _futureImage;
 
-  /// Adds a listener callback that is called whenever a concrete [ui.Image]
-  /// object is available. Note: If a concrete image is available currently,
-  /// this object will call the listener synchronously.
+  /// Adds a listener callback that is called whenever a concrete [ImageInfo]
+  /// object is available. If a concrete image is already available, this object
+  /// will call the listener synchronously.
   void addListener(ImageListener listener) {
     _listeners.add(listener);
     if (_resolved) {
@@ -60,7 +91,7 @@ class ImageResource {
     }
   }
 
-  /// Stop listening for new concrete [ui.Image] objects.
+  /// Stop listening for new concrete [ImageInfo] objects.
   void removeListener(ImageListener listener) {
     _listeners.remove(listener);
   }
