@@ -247,15 +247,15 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 }
 
-/// Sizes itself to a fraction of the total available space.
+/// Sizes its child to a fraction of the total available space.
 ///
-/// For both its width and width height, this render object imposes a tight
+/// For both its width and height, this render object imposes a tight
 /// constraint on its child that is a multiple (typically less than 1.0) of the
 /// maximum constraint it received from its parent on that axis. If the factor
 /// for a given axis is null, then the constraints from the parent are just
 /// passed through instead.
 ///
-/// It then tries to size itself t the size of its child.
+/// It then tries to size itself to the size of its child.
 class RenderFractionallySizedBox extends RenderProxyBox {
   RenderFractionallySizedBox({
     RenderBox child,
@@ -323,41 +323,41 @@ class RenderFractionallySizedBox extends RenderProxyBox {
   double getMinIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
-      return child.getMinIntrinsicWidth(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainWidth(0.0);
+      return constraints.constrainWidth(child.getMinIntrinsicWidth(_getInnerConstraints(constraints)));
+    return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
   }
 
   @override
   double getMaxIntrinsicWidth(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
-      return child.getMaxIntrinsicWidth(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainWidth(0.0);
+      return constraints.constrainWidth(child.getMaxIntrinsicWidth(_getInnerConstraints(constraints)));
+    return constraints.constrainWidth(_getInnerConstraints(constraints).constrainWidth(0.0));
   }
 
   @override
   double getMinIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
-      return child.getMinIntrinsicHeight(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainHeight(0.0);
+      return constraints.constrainHeight(child.getMinIntrinsicHeight(_getInnerConstraints(constraints)));
+    return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
   }
 
   @override
   double getMaxIntrinsicHeight(BoxConstraints constraints) {
     assert(constraints.debugAssertIsNormalized);
     if (child != null)
-      return child.getMaxIntrinsicHeight(_getInnerConstraints(constraints));
-    return _getInnerConstraints(constraints).constrainHeight(0.0);
+      return constraints.constrainHeight(child.getMaxIntrinsicHeight(_getInnerConstraints(constraints)));
+    return constraints.constrainHeight(_getInnerConstraints(constraints).constrainHeight(0.0));
   }
 
   @override
   void performLayout() {
     if (child != null) {
       child.layout(_getInnerConstraints(constraints), parentUsesSize: true);
-      size = child.size;
+      size = constraints.constrain(child.size);
     } else {
-      size = _getInnerConstraints(constraints).constrain(Size.zero);
+      size = constraints.constrain(_getInnerConstraints(constraints).constrain(Size.zero));
     }
   }
 
