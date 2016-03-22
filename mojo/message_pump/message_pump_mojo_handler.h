@@ -5,7 +5,8 @@
 #ifndef MOJO_MESSAGE_PUMP_MESSAGE_PUMP_MOJO_HANDLER_H_
 #define MOJO_MESSAGE_PUMP_MESSAGE_PUMP_MOJO_HANDLER_H_
 
-#include "mojo/public/cpp/system/core.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/cpp/system/handle.h"
 
 namespace mojo {
 namespace common {

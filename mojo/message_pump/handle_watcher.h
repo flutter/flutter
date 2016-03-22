@@ -5,11 +5,12 @@
 #ifndef MOJO_MESSAGE_PUMP_HANDLE_WATCHER_H_
 #define MOJO_MESSAGE_PUMP_HANDLE_WATCHER_H_
 
-#include "base/basictypes.h"
 #include "base/callback_forward.h"
+#include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/run_loop.h"
-#include "mojo/public/cpp/system/core.h"
+#include "mojo/public/c/system/time.h"
+#include "mojo/public/cpp/system/handle.h"
 
 namespace base {
 class Thread;

@@ -34,13 +34,19 @@ HandleTable::~HandleTable() {
   // the singleton |Core|, which lives forever), except in tests.
 }
 
-Dispatcher* HandleTable::GetDispatcher(MojoHandle handle) {
+MojoResult HandleTable::GetDispatcher(MojoHandle handle,
+                                      RefPtr<Dispatcher>* dispatcher) {
   DCHECK_NE(handle, MOJO_HANDLE_INVALID);
+  DCHECK(dispatcher);
 
   HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle);
   if (it == handle_to_entry_map_.end())
-    return nullptr;
-  return it->second.dispatcher.get();
+    return MOJO_RESULT_INVALID_ARGUMENT;
+  if (it->second.busy)
+    return MOJO_RESULT_BUSY;
+  *dispatcher = it->second.dispatcher;
+
+  return MOJO_RESULT_OK;
 }
 
 MojoResult HandleTable::GetAndRemoveDispatcher(MojoHandle handle,

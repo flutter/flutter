@@ -6,7 +6,6 @@
 module mojo.ui;
 
 import "mojo/services/geometry/interfaces/geometry.mojom";
-import "mojo/services/gfx/composition/interfaces/scene_token.mojom";
 
 // Box constraints for layout.
 //
@@ -64,10 +63,8 @@ struct ViewLayoutParams {
 };
 
 // Layout information for a view.
+// TODO(jeffbrown): Delete this while redesigning layout protocol.
 struct ViewLayoutInfo {
-  // The view's scene token for composition by the parent.
-  mojo.gfx.composition.SceneToken scene_token;
-
   // The actual size of the view in device pixels.
   mojo.Size size;
 };

@@ -6,7 +6,7 @@
 #define MOJO_DATA_PIPE_UTILS_DATA_PIPE_UTILS_INTERNAL_H_
 
 #include "base/callback_forward.h"
-#include "mojo/public/cpp/system/core.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 
 namespace mojo {
 namespace common {

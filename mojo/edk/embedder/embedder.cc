@@ -6,12 +6,13 @@
 
 #include "base/logging.h"
 #include "mojo/edk/embedder/embedder_internal.h"
-//#include "mojo/edk/embedder/platform_support.h"
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/core.h"
 #include "mojo/edk/system/platform_handle_dispatcher.h"
+#include "mojo/edk/util/ref_ptr.h"
 
 using mojo::platform::ScopedPlatformHandle;
+using mojo::util::RefPtr;
 
 namespace mojo {
 namespace embedder {
@@ -69,10 +70,11 @@ MojoResult PassWrappedPlatformHandle(MojoHandle platform_handle_wrapper_handle,
   DCHECK(platform_handle);
 
   DCHECK(internal::g_core);
-  auto dispatcher =
-      internal::g_core->GetDispatcher(platform_handle_wrapper_handle);
-  if (!dispatcher)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+  RefPtr<system::Dispatcher> dispatcher;
+  MojoResult result = internal::g_core->GetDispatcher(
+      platform_handle_wrapper_handle, &dispatcher);
+  if (result != MOJO_RESULT_OK)
+    return result;
 
   if (dispatcher->GetType() != system::Dispatcher::Type::PLATFORM_HANDLE)
     return MOJO_RESULT_INVALID_ARGUMENT;

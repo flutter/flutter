@@ -14,7 +14,13 @@
 #include "base/message_loop/message_loop.h"
 #include "jni/CoreImpl_jni.h"
 #include "mojo/public/c/environment/async_waiter.h"
-#include "mojo/public/c/system/core.h"
+#include "mojo/public/c/system/buffer.h"
+#include "mojo/public/c/system/data_pipe.h"
+#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/message_pipe.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/time.h"
+#include "mojo/public/c/system/wait.h"
 #include "mojo/public/cpp/environment/environment.h"
 
 namespace {
@@ -398,6 +404,19 @@ static jint GetNativeBufferOffset(JNIEnv* env,
   if (offset == 0)
     return 0;
   return alignment - offset;
+}
+
+static jobject GetBufferInformation(JNIEnv* env,
+                                    jobject jcaller,
+                                    jint mojo_handle) {
+  MojoBufferInformation buffer_information;
+  MojoResult result =
+      MojoGetBufferInformation(static_cast<MojoHandle>(mojo_handle),
+                               &buffer_information, sizeof(buffer_information));
+  return Java_CoreImpl_newResultAndBufferInformation(
+             env, result, buffer_information.flags,
+             buffer_information.num_bytes)
+      .Release();
 }
 
 bool RegisterCoreImpl(JNIEnv* env) {
