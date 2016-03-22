@@ -13,7 +13,7 @@ namespace shell {
 namespace {
 
 sky::InputEventPtr ConvertKeyEvent(mojo::EventPtr event) {
-  if (!event->key_data)
+  if (!event->key_data || event->key_data->is_char)
     return nullptr;
   sky::InputEventPtr result = sky::InputEvent::New();
   result->time_stamp = event->time_stamp;
@@ -28,7 +28,7 @@ sky::InputEventPtr ConvertKeyEvent(mojo::EventPtr event) {
       return nullptr;
   }
   result->key_data = sky::KeyData::New();
-  result->key_data->key_code = event->key_data->key_code;
+  result->key_data->key_code = static_cast<int>(event->key_data->windows_key_code);
   if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::SHIFT_DOWN))
     result->key_data->meta_state |= 0x00000001;
   if (static_cast<int>(event->flags) & static_cast<int>(mojo::EventFlags::CONTROL_DOWN))
@@ -136,6 +136,8 @@ void ViewImpl::OnEvent(mojo::EventPtr event, const OnEventCallback& callback) {
     case mojo::EventType::KEY_PRESSED:
     case mojo::EventType::KEY_RELEASED: {
       auto sky_event = ConvertKeyEvent(event.Pass());
+      if (!sky_event)
+        break;
       for (auto& listener : raw_keyboard_listeners_)
         listener->OnKey(sky_event.Clone());
       break;
