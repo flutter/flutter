@@ -8,34 +8,10 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
+import '../build_configuration.dart';
 import '../base/process.dart';
 import '../globals.dart';
 import '../runner/flutter_command_runner.dart';
-
-Uri _xcodeProjectUri(String revision) {
-  String uriString = 'https://storage.googleapis.com/flutter_infra/flutter/$revision/ios/FlutterXcode.zip';
-  return Uri.parse(uriString);
-}
-
-Future<List<int>> _fetchXcodeArchive() async {
-  printStatus('Fetching the Xcode project archive from the cloud...');
-
-  HttpClient client = new HttpClient();
-
-  Uri xcodeProjectUri = _xcodeProjectUri(ArtifactStore.engineRevision);
-  printStatus('Downloading $xcodeProjectUri...');
-  HttpClientRequest request = await client.getUrl(xcodeProjectUri);
-  HttpClientResponse response = await request.close();
-
-  if (response.statusCode != 200)
-    throw new Exception(response.reasonPhrase);
-
-  BytesBuilder bytesBuilder = new BytesBuilder(copy: false);
-  await for (List<int> chunk in response)
-    bytesBuilder.add(chunk);
-
-  return bytesBuilder.takeBytes();
-}
 
 Future<bool> _inflateXcodeArchive(String directory, List<int> archiveBytes) async {
   printStatus('Unzipping Xcode project to local directory...');
@@ -117,7 +93,14 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
   // Step 1: Fetch the archive from the cloud
   String iosFilesPath = path.join(flutterProjectPath, 'ios');
   String xcodeprojPath = path.join(iosFilesPath, '.generated');
-  List<int> archiveBytes = await _fetchXcodeArchive();
+
+  Artifact xcodeProject = ArtifactStore.getArtifact(
+    type: ArtifactType.iosXcodeProject,
+    targetPlatform: TargetPlatform.ios
+  );
+
+  String xcodeProjectPath = await ArtifactStore.getPath(xcodeProject);
+  List<int> archiveBytes = await new File(xcodeProjectPath).readAsBytes();
 
   if (archiveBytes.isEmpty) {
     printError('Error: No archive bytes received.');
