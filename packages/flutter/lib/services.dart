@@ -12,6 +12,7 @@
 library services;
 
 export 'src/services/activity.dart';
+export 'src/services/app_messages.dart';
 export 'src/services/assertions.dart';
 export 'src/services/asset_bundle.dart';
 export 'src/services/binding.dart';
