@@ -78,9 +78,9 @@ const double kWindowTouchSlop = 16.0;  // Logical pixels
 /// gesture.
 // TODO(ianh): Make sure nobody has their own version of this.
 const double kMinFlingVelocity = 50.0;  // Logical pixels / second
+// const Velocity kMinFlingVelocity = const Velocity(pixelsPerSecond: 50.0);
 
-/// The maximum velocity of a touch to consider that touch to trigger a fling
-/// gesture.
+/// Drag gesture fling velocities are clipped to this value.
 // TODO(ianh): Make sure nobody has their own version of this.
 const double kMaxFlingVelocity = 8000.0;  // Logical pixels / second
 
