@@ -9,11 +9,8 @@
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/public/c/system/buffer.h"
 #include "mojo/public/c/system/data_pipe.h"
-#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/functions.h"
 #include "mojo/public/c/system/message_pipe.h"
-#include "mojo/public/c/system/result.h"
-#include "mojo/public/c/system/time.h"
-#include "mojo/public/c/system/wait.h"
 #include "mojo/public/platform/native/system_impl_private.h"
 
 using mojo::embedder::internal::g_core;

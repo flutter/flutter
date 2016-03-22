@@ -13,9 +13,8 @@
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/message_in_transit.h"
-#include "mojo/public/c/system/handle.h"
 #include "mojo/public/c/system/message_pipe.h"
-#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

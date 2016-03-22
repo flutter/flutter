@@ -4,14 +4,6 @@
 
 part of core;
 
-class MojoSharedBufferInformation {
-  final int flags;
-  final int sizeInBytes;
-
-  MojoSharedBufferInformation(this.flags, this.sizeInBytes);
-}
-
-
 class MojoSharedBuffer {
   static const int createFlagNone = 0;
   static const int duplicateFlagNone = 0;
@@ -52,23 +44,6 @@ class MojoSharedBuffer {
     MojoSharedBuffer dupe =
         new MojoSharedBuffer(new MojoHandle(result[1]), result[0]);
     return dupe;
-  }
-
-  MojoSharedBufferInformation get information {
-    if (handle == null) {
-      _status = MojoResult.kInvalidArgument;
-      return null;
-    }
-
-    List result =
-        MojoSharedBufferNatives.GetInformation(handle.h);
-
-    if (result[0] != MojoResult.kOk) {
-      _status = result[0];
-      return null;
-    }
-
-    return new MojoSharedBufferInformation(result[1], result[2]);
   }
 
   int close() {

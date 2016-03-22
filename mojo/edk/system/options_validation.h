@@ -18,6 +18,7 @@
 
 #include "base/logging.h"
 #include "mojo/edk/system/memory.h"
+#include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

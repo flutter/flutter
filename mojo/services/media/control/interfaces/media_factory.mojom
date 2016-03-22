@@ -9,7 +9,6 @@ import "mojo/services/media/common/interfaces/media_types.mojom";
 import "mojo/services/media/control/interfaces/media_player.mojom";
 import "mojo/services/media/control/interfaces/media_sink.mojom";
 import "mojo/services/media/control/interfaces/media_source.mojom";
-import "mojo/services/media/core/interfaces/media_type_converter.mojom";
 
 // Exposed by the factory service to create media-related agents.
 [ServiceName="mojo::media::MediaFactory"]
@@ -32,7 +31,4 @@ interface MediaFactory {
   // convert the indicated media type to a type compatible with the
   // destination.
   CreateSink(string destination_url, MediaType media_type, MediaSink& sink);
-
-  // Creates a decoder.
-  CreateDecoder(MediaType input_media_type, MediaTypeConverter& decoder);
 };

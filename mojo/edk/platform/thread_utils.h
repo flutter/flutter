@@ -5,7 +5,7 @@
 #ifndef MOJO_EDK_PLATFORM_THREAD_UTILS_H_
 #define MOJO_EDK_PLATFORM_THREAD_UTILS_H_
 
-#include "mojo/public/c/system/time.h"
+#include "mojo/public/c/system/types.h"
 
 namespace mojo {
 namespace platform {

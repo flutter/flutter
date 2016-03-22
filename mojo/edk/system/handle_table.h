@@ -10,8 +10,7 @@
 #include <vector>
 
 #include "mojo/edk/util/ref_ptr.h"
-#include "mojo/public/c/system/handle.h"
-#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -42,16 +41,19 @@ class HandleTable {
   HandleTable();
   ~HandleTable();
 
-  // On success, gets the dispatcher for a given handle (which should not be
-  // |MOJO_HANDLE_INVALID|). On failure, returns an appropriate result (and
-  // leaves |dispatcher| alone), namely |MOJO_RESULT_INVALID_ARGUMENT| if
-  // there's no dispatcher for the given handle or |MOJO_RESULT_BUSY| if the
-  // handle is marked as busy.
-  MojoResult GetDispatcher(MojoHandle handle,
-                           util::RefPtr<Dispatcher>* dispatcher);
+  // Gets the dispatcher for a given handle (which should not be
+  // |MOJO_HANDLE_INVALID|). Returns null if there's no dispatcher for the given
+  // handle.
+  // WARNING: For efficiency, this returns a dumb pointer. If you're going to
+  // use the result outside |Core|'s lock, you MUST take a reference (e.g., by
+  // storing the result inside a |util::RefPtr|).
+  Dispatcher* GetDispatcher(MojoHandle handle);
 
-  // Like |GetDispatcher()|, but on success also removes the handle from the
-  // handle table.
+  // On success, gets the dispatcher for a given handle (which should not be
+  // |MOJO_HANDLE_INVALID|) and removes it. (On failure, returns an appropriate
+  // result (and leaves |dispatcher| alone), namely
+  // |MOJO_RESULT_INVALID_ARGUMENT| if there's no dispatcher for the given
+  // handle or |MOJO_RESULT_BUSY| if the handle is marked as busy.)
   MojoResult GetAndRemoveDispatcher(MojoHandle handle,
                                     util::RefPtr<Dispatcher>* dispatcher);
 

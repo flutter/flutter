@@ -40,14 +40,8 @@ interface MediaSource {
   // Prepares the source.
   Prepare() => ();
 
-  // Primes the source and downstream components.
-  Prime() => ();
-
-  // Flushes the source and downstream components.
+  // Flushes the source.
   Flush() => ();
-
-  // Seeks to the specified position, specified in nanoseconds.
-  Seek(int64 position) => ();
 };
 
 // Describes a media stream produced by a source.

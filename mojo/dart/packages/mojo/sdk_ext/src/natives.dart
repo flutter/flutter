@@ -540,17 +540,4 @@ class MojoSharedBufferNatives {
   /// set to [MojoSharedBuffer.mapFlagNone] (equal to 0).
   static List Map(int bufferHandleToken, int offset, int numBytes, int flags)
       native "MojoSharedBuffer_Map";
-
-
-  /// Returns information about [bufferHandleToken].
-  ///
-  /// Returns a list of exactly 3 elements:
-  /// 1. The result integer, encoded as specified in [MojoResult]. In
-  ///   particular, [MojoResult.kOk] signals a successful operation.
-  /// 2. The flags of the buffer (currently unused).
-  /// 3. The size of the buffer (in bytes).
-  ///
-  /// The [bufferHandleToken] must be a handle created by [Create].
-  static List GetInformation(int bufferHandleToken)
-      native "MojoSharedBuffer_GetInformation";
 }

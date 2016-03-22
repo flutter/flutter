@@ -18,7 +18,7 @@ interface AuthenticationService {
   SelectAccount(bool return_last_selected) => (string? username, string? error);
 
   // Requests an oauth2 token for the given Google account with the given
-  // scopes.  In case of error, token will be null and error will contain a
+  // scopes.  In case of error, username will be null and error will contain a
   // description of the error.
   GetOAuth2Token(string username, array<string> scopes) =>
       (string? token, string? error);
@@ -27,22 +27,4 @@ interface AuthenticationService {
   // token is refused by a server component before requesting a new token to
   // clear the token from any cache.
   ClearOAuth2Token(string token);
-
-  // Requests an oauth2 device code response for the given set of scopes. In
-  // case of error, all response parameters other than error, namely
-  // verifcation_url, device_code and user_code will be null and error will
-  // contain a description of the error. To provision FNL like systems with
-  // Google account credentials, invoke GetOAuth2DeviceCode() method followed by
-  // AddAccount() instead of using SelectAccount(), which only works for
-  // Android.
-  GetOAuth2DeviceCode(array<string> scopes) => (string? verification_url,
-                                                string? device_code,
-                                                string? user_code,
-                                                string? error);
-
-  // Exchanges an oauth2 device code to a refresh token for the granted user,
-  // and stores it locally in a secure storage location on FNL. For future
-  // GetOAuth2Token requests, a new access token is minted from this refresh
-  // token and returned to the calling mojo app.
-  AddAccount(string device_code) => (string? username, string? error);
 };

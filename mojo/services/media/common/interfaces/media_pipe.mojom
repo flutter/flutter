@@ -1,0 +1,98 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.media;
+
+import "mojo/services/media/common/interfaces/media_common.mojom";
+
+// MediaPacketRegion
+//
+// A small structure used to keep track of a portion of a shared buffer used by
+// a MediaPacket to hold its payload.
+struct MediaPacketRegion {
+  uint64 offset;
+  uint64 length;
+};
+
+// MediaPacket
+//
+// A structure which hold the definition of an atomic unit of media which may be
+// sent across a media pipe.  MediaPackets consist of the metadata for the unit
+// of media, as well as the set of offset/lengths in the pipe's shared buffer
+// which define the payload of the packet itself.
+struct MediaPacket {
+  const int64 kNoTimestamp = 0x7fffffffffffffff;
+
+  // Presentation Time Stamp.  Time at which the media should be presented,
+  // according to the media timeline.
+  int64 pts = kNoTimestamp;
+
+  // Duration represented by the packet.
+  uint64 duration;
+
+  // Indicates whether this is the last packet in the stream.
+  bool end_of_stream;
+
+  // Bookkeeping to determine where this MediaPacket's payload exists in its
+  // MediaPipe's shared buffer.
+  //
+  // For simple cases, only the payload field is used.  It provides the offset
+  // into the shared buffer for the payload, as well as its length.  In more
+  // complicated cases (circular buffer, arbitrary scatter-gather), additional
+  // regions may be described in the extra_payload array.  Logically, the
+  // payload is the concatination of the payload region, followed by the extra
+  // payload regions, from index 0 to index N-1.
+  //
+  // TODO(johngro): Depending on what happens with mojo struct marshalling,
+  // consider merging payload and extra_payload into just a single array.  The
+  // intention was to not need any extra allocations if there way only a single
+  // payload region, but right now we always need to allocate an array, even if
+  // it is zero length.  If this is not going to change, then we should just
+  // merge these two fields.
+  MediaPacketRegion payload;
+  array<MediaPacketRegion>? extra_payload;
+
+  // TODO(johngro): do we need to describe the MediaType of this payload, or is
+  // its type implicit based on the channel over which it is being pushed?
+
+  // TODO(johngro): how do we attach per-packet media specific metadata to this
+  // packet?
+};
+
+// MediaPipe
+//
+// An interface exposed by consumers of media which provides the means for
+// producers to send media to consumers.  A pipe logically consists of a shared
+// memory region, and an ordered queue of MediaPackets.  Users obtain access to
+// the shared buffer via the GetState method.  They may then send packet to the
+// other side of the pipe using the SendPacket method and be informed about when
+// the media has been consumed via the SendPacket callback they provide.
+// Finally, the pipeline may be flushed using the Flush method.
+interface MediaPipe {
+  const uint64 kMaxBufferLen = 0x3FFFFFFFFFFFFFFF;
+
+  // An enumeration used to indicate the ultimate fate of packets sent across
+  // the pipe using the SendPacket method.
+  enum SendResult {
+    CONSUMED,  // Media was completely consumed.
+    FLUSHED,   // Some or all of the media was flushed before being consumed.
+  };
+
+  // Sets the shared buffer in which sent Packet payloads will be located.
+  SetBuffer(handle<shared_buffer> buffer, uint64 size);
+
+  // Place a media packet into the pipeline to be consumed.  When the consumer
+  // is finished with the packet, it will invoke the supplied callback to
+  // indicate that the region of the shared buffer indicated by the MediaPacket
+  // object is now available for new data.  In addition, a SendResult will be
+  // providid indicating whether or not the packet was consumed or flushed.
+  SendPacket(MediaPacket packet) => (SendResult result);
+
+  // Flush the pipe, discarding all queued packets in order (from front to back)
+  // as we go.  When the flush operation is complete, the provided callback will
+  // be invoked to indicate that the consumer end of the pipe has finished
+  // flushing and that the pipeline is now empty.
+  Flush() => ();
+};

@@ -11,7 +11,6 @@
 #include "base/threading/platform_thread.h"
 #include "base/trace_event/trace_event.h"
 #include "mojo/data_pipe_utils/data_pipe_utils_internal.h"
-#include "mojo/public/cpp/system/wait.h"
 
 namespace mojo {
 namespace common {
@@ -110,19 +109,6 @@ bool BlockingCopyFromString(const std::string& source,
       return result == MOJO_RESULT_FAILED_PRECONDITION;
     }
   }
-}
-
-ScopedDataPipeConsumerHandle WriteStringToConsumerHandle(
-    const std::string& source) {
-  TRACE_EVENT0("data_pipe_utils", "WriteStringToConsumerHandle");
-  static const size_t max_buffer_size = 2 * 1024 * 1024;  // 2MB
-  CHECK_LE(static_cast<uint32_t>(source.size()), max_buffer_size);
-  MojoCreateDataPipeOptions options = {sizeof(MojoCreateDataPipeOptions),
-                                       MOJO_CREATE_DATA_PIPE_OPTIONS_FLAG_NONE,
-                                       1, source.size()};
-  DataPipe pipe(options);
-  BlockingCopyFromString(source, pipe.producer_handle.Pass());
-  return pipe.consumer_handle.Pass();
 }
 
 }  // namespace common

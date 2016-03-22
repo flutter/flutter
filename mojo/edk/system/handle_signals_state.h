@@ -5,7 +5,7 @@
 #ifndef MOJO_EDK_SYSTEM_HANDLE_SIGNALS_STATE_H_
 #define MOJO_EDK_SYSTEM_HANDLE_SIGNALS_STATE_H_
 
-#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/types.h"
 
 namespace mojo {
 namespace system {

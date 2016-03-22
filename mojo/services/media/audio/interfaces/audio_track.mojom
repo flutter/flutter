@@ -6,7 +6,7 @@
 module mojo.media;
 
 import "mojo/services/media/common/interfaces/media_common.mojom";
-import "mojo/services/media/common/interfaces/media_transport.mojom";
+import "mojo/services/media/common/interfaces/media_pipe.mojom";
 import "mojo/services/media/common/interfaces/media_types.mojom";
 import "mojo/services/media/common/interfaces/rate_control.mojom";
 
@@ -48,7 +48,7 @@ interface AudioTrack {
   Describe() => (AudioTrackDescriptor descriptor);
 
   // Set the configuration, receive a pipe to send data to in return.
-  Configure(AudioTrackConfiguration configuration, MediaConsumer& pipe);
+  Configure(AudioTrackConfiguration configuration, MediaPipe& pipe);
 
   // Request the rate control interface for this AudioTrack
   GetRateControl(RateControl& rate_control);

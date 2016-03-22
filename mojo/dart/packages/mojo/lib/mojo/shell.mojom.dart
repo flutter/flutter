@@ -179,8 +179,8 @@ class _ShellCreateApplicationConnectorParams extends bindings.Struct {
   }
 }
 
-const int _shellMethodConnectToApplicationName = 0;
-const int _shellMethodCreateApplicationConnectorName = 1;
+const int _Shell_connectToApplicationName = 0;
+const int _Shell_createApplicationConnectorName = 1;
 
 class _ShellServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>
@@ -247,7 +247,7 @@ class _ShellProxyCalls implements Shell {
       params.applicationUrl = applicationUrl;
       params.services = services;
       params.exposedServices = exposedServices;
-      _proxyImpl.sendMessage(params, _shellMethodConnectToApplicationName);
+      _proxyImpl.sendMessage(params, _Shell_connectToApplicationName);
     }
     void createApplicationConnector(Object applicationConnectorRequest) {
       if (!_proxyImpl.isBound) {
@@ -256,7 +256,7 @@ class _ShellProxyCalls implements Shell {
       }
       var params = new _ShellCreateApplicationConnectorParams();
       params.applicationConnectorRequest = applicationConnectorRequest;
-      _proxyImpl.sendMessage(params, _shellMethodCreateApplicationConnectorName);
+      _proxyImpl.sendMessage(params, _Shell_createApplicationConnectorName);
     }
 }
 
@@ -348,12 +348,12 @@ class ShellStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case _shellMethodConnectToApplicationName:
+      case _Shell_connectToApplicationName:
         var params = _ShellConnectToApplicationParams.deserialize(
             message.payload);
         _impl.connectToApplication(params.applicationUrl, params.services, params.exposedServices);
         break;
-      case _shellMethodCreateApplicationConnectorName:
+      case _Shell_createApplicationConnectorName:
         var params = _ShellCreateApplicationConnectorParams.deserialize(
             message.payload);
         _impl.createApplicationConnector(params.applicationConnectorRequest);

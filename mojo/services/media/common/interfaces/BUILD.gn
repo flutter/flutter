@@ -10,6 +10,7 @@ mojom("interfaces") {
     "media_clock.mojom",
     "media_common.mojom",
     "media_metadata.mojom",
+    "media_pipe.mojom",
     "media_state.mojom",
     "media_transport.mojom",
     "media_types.mojom",

@@ -7,8 +7,23 @@ module mojo.ui;
 
 import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/services/gfx/composition/interfaces/renderers.mojom";
-import "mojo/services/ui/views/interfaces/view_containers.mojom";
-import "mojo/services/ui/views/interfaces/view_tree_token.mojom";
+import "mojo/services/ui/views/interfaces/layouts.mojom";
+import "mojo/services/ui/views/interfaces/views.mojom";
+
+// A view tree token is an opaque transferable reference to a view tree.
+//
+// The ViewManager provides each view tree with a unique view tree token when
+// it is registered.  The token can subsequently be passed to other
+// applications and used as a way to refer to the tree.
+//
+// View tree tokens should be kept secret and should only be shared with
+// trusted services.
+//
+// TODO(jeffbrown): This implementation is a temporary placeholder until
+// we extend Mojo to provide a way to create tokens which cannot be forged.
+struct ViewTreeToken {
+  uint32 value;
+};
 
 // A view tree is a top-level container for a hierarchy of views.
 // Each view is intended to operate independently from others and will
@@ -29,11 +44,10 @@ import "mojo/services/ui/views/interfaces/view_tree_token.mojom";
 //
 // To destroy a view tree, simply close the |ViewTree| message pipe.
 //
-// SETTING A ROOT VIEW
+// LAYOUT
 //
-// Use |GetContainer()| to obtain an interface for manipulating the root view.
-//
-// See |mojo.ui.ViewContainer| for more information.
+// TODO(jeffbrown): Elaborate this once the layout protocol has been
+// redesigned.
 //
 // GETTING SERVICES
 //
@@ -72,8 +86,53 @@ interface ViewTree {
   // new layout due to a change in the view tree's layout information.
   RequestLayout();
 
-  // Gets an interface for managing the view tree's root.
-  GetContainer(ViewContainer& container);
+  // Sets the root of the view tree and assigns it the provided |root_key|
+  // to distinguish it from any other roots this view tree has had.
+  //
+  // It is a good idea to provide a distinct |root_key| each time a new root
+  // is set so that callbacks related to the root can be clearly distinguished
+  // across these changes.
+  //
+  // If |root_view_owner| refers to a view which is already unavailable
+  // then the call proceeds as if it succeeded but an OnChildUnavailable()
+  // message will be sent.
+  //
+  // If |root_view_owner| refers to a view which already has a parent or is
+  // the root of a view tree then an OnChildUnavailable() or OnRootUnavailable()
+  // message will be sent to its old parent or root and the the view will be
+  // used as the root of the new view tree as usual.  This special case also
+  // applies when the specified view is already the root of this view tree, in
+  // which case the behavior is similar to the view having been transferred to
+  // some other view tree and then back again.
+  //
+  // It is an error to call this function if the root has already been set;
+  // the connection will be closed.
+  SetRoot(uint32 root_key, mojo.ui.ViewOwner root_view_owner);
+
+  // Removes the root of the view tree.
+  //
+  // If |transferred_view_owner| is not null, associates it with the previously
+  // configured view or closes the |transferred_view_owner| message pipe
+  // if there was none.
+  //
+  // It is an error to call this function if the root was not previously set;
+  // the connection will be closed.
+  ClearRoot(mojo.ui.ViewOwner&? transferred_view_owner);
+
+  // Sets the layout parameters of the root of the view tree and retrieves
+  // its layout information.
+  //
+  // The returned |info| is null if this layout request was canceled either
+  // because it has been superceded by a subsequently issued layout request
+  // or because the root has become unavailable.
+  //
+  // It is an error to call this function if the view tree does not currently
+  // have a root; the connection will be closed.
+  //
+  // It is an error to specify malformed |root_layout_params| such
+  // as invalid size constraints; the connection will be closed.
+  LayoutRoot(mojo.ui.ViewLayoutParams root_layout_params) =>
+      (mojo.ui.ViewLayoutInfo? info);
 };
 
 // An interface clients may implement to receive events from a view tree.
@@ -93,6 +152,16 @@ interface ViewTreeListener {
   // The implementation should invoke the callback once the event has
   // been handled and the view tree is ready to be shown in its new aspect.
   OnLayout() => ();
+
+  // Called when the root view has become unavailable.
+  //
+  // The root may become unavailable for many reasons such being unregistered
+  // by its application, abnormal termination of its application, or
+  // being reparented into a different view tree.
+  //
+  // The implementation should invoke the callback once the event has
+  // been handled.
+  OnRootUnavailable(uint32 root_key) => ();
 
   // Called when the tree's renderer connection closed unexpectedly.
   //

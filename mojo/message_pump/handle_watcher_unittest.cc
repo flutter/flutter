@@ -15,7 +15,7 @@
 #include "base/threading/thread.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "mojo/message_pump/time_helper.h"
-#include "mojo/public/cpp/system/message_pipe.h"
+#include "mojo/public/cpp/system/core.h"
 #include "mojo/public/cpp/test_support/test_utils.h"
 #include "testing/gtest/include/gtest/gtest.h"
 

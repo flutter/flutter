@@ -19,7 +19,7 @@ class MojomFile extends bindings.Struct {
   List<mojom_types_mojom.Attribute> attributes = null;
   List<String> imports = null;
   KeysByType declaredMojomObjects = null;
-  String serializedRuntimeTypeInfo = null;
+  List<int> serializedRuntimeTypeInfo = null;
 
   MojomFile() : super(kVersions.last.size);
 
@@ -104,7 +104,7 @@ class MojomFile extends bindings.Struct {
     }
     if (mainDataHeader.version >= 0) {
       
-      result.serializedRuntimeTypeInfo = decoder0.decodeString(56, true);
+      result.serializedRuntimeTypeInfo = decoder0.decodeUint8Array(56, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
     }
     return result;
   }
@@ -168,7 +168,7 @@ class MojomFile extends bindings.Struct {
       rethrow;
     }
     try {
-      encoder0.encodeString(serializedRuntimeTypeInfo, 56, true);
+      encoder0.encodeUint8Array(serializedRuntimeTypeInfo, 56, bindings.kArrayNullable, bindings.kUnspecifiedArrayLength);
     } on bindings.MojoCodecError catch(e) {
       e.message = "Error encountered while encoding field "
           "serializedRuntimeTypeInfo of struct MojomFile: $e";

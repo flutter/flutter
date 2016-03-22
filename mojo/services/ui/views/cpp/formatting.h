@@ -21,8 +21,6 @@ std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewToken& value);
 std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::ViewTreeToken& value);
 
-std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewInfo& value);
-
 std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::BoxConstraints& value);
 std::ostream& operator<<(std::ostream& os,

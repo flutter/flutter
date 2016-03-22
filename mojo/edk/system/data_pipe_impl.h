@@ -17,7 +17,7 @@
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/data_pipe.h"
 #include "mojo/public/c/system/macros.h"
-#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/types.h"
 
 namespace mojo {
 namespace system {

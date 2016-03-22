@@ -7,7 +7,7 @@
 #include "base/message_loop/message_loop_test.h"
 #include "base/run_loop.h"
 #include "mojo/message_pump/message_pump_mojo_handler.h"
-#include "mojo/public/cpp/system/message_pipe.h"
+#include "mojo/public/cpp/system/core.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {

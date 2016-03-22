@@ -19,8 +19,6 @@ import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.ResultAnd;
 import org.chromium.mojo.system.RunLoop;
 import org.chromium.mojo.system.SharedBufferHandle;
-import org.chromium.mojo.system.SharedBufferHandle.BufferInformation;
-import org.chromium.mojo.system.SharedBufferHandle.BufferInformationFlags;
 import org.chromium.mojo.system.SharedBufferHandle.DuplicateOptions;
 import org.chromium.mojo.system.SharedBufferHandle.MapFlags;
 import org.chromium.mojo.system.UntypedHandle;
@@ -472,17 +470,6 @@ public class CoreImpl implements Core, AsyncWaiter {
     }
 
     /**
-     * @see SharedBufferHandle#getBufferInformation()
-     */
-    BufferInformation getBufferInformation(SharedBufferHandleImpl handle) {
-        ResultAnd<BufferInformation> result = nativeGetBufferInformation(handle.getMojoHandle());
-        if (result.getMojoResult() != MojoResult.OK) {
-            throw new MojoException(result.getMojoResult());
-        }
-        return result.getValue();
-    }
-
-    /**
      * @return the mojo handle associated to the given handle, considering invalid handles.
      */
     private int getMojoHandle(Handle handle) {
@@ -578,13 +565,6 @@ public class CoreImpl implements Core, AsyncWaiter {
         return new ResultAnd<>(mojoResult, buffer);
     }
 
-    @CalledByNative
-    private static ResultAnd<BufferInformation> newResultAndBufferInformation(
-            int mojoResult, int flags, long bufferSize) {
-        return new ResultAnd<>(
-                mojoResult, new BufferInformation(new BufferInformationFlags(flags), bufferSize));
-    }
-
     /**
      * Trivial alias for Pair<Integer, Integer>. This is needed because our jni generator is unable
      * to handle class that contains space.
@@ -665,6 +645,4 @@ public class CoreImpl implements Core, AsyncWaiter {
     private native void nativeCancelAsyncWait(long mId, long dataPtr);
 
     private native int nativeGetNativeBufferOffset(ByteBuffer buffer, int alignment);
-
-    private native ResultAnd<BufferInformation> nativeGetBufferInformation(int mojoHandle);
 }

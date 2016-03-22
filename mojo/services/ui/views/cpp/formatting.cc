@@ -18,10 +18,6 @@ std::ostream& operator<<(std::ostream& os,
   return os << "{value=" << value.value << "}";
 }
 
-std::ostream& operator<<(std::ostream& os, const mojo::ui::ViewInfo& value) {
-  return os << "{scene_token=" << value.scene_token << "}";
-}
-
 std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::BoxConstraints& value) {
   return os << "{min_width=" << value.min_width
@@ -38,7 +34,8 @@ std::ostream& operator<<(std::ostream& os,
 
 std::ostream& operator<<(std::ostream& os,
                          const mojo::ui::ViewLayoutInfo& value) {
-  return os << "{size=" << value.size << "}";
+  return os << "{size=" << value.size << ", scene_token=" << value.scene_token
+            << "}";
 }
 
 std::ostream& operator<<(std::ostream& os,

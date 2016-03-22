@@ -293,9 +293,9 @@ class _ApplicationRequestQuitParams extends bindings.Struct {
   }
 }
 
-const int _applicationMethodInitializeName = 0;
-const int _applicationMethodAcceptConnectionName = 1;
-const int _applicationMethodRequestQuitName = 2;
+const int _Application_initializeName = 0;
+const int _Application_acceptConnectionName = 1;
+const int _Application_requestQuitName = 2;
 
 class _ApplicationServiceDescription implements service_describer.ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>
@@ -363,7 +363,7 @@ class _ApplicationProxyCalls implements Application {
       params.shell = shell;
       params.args = args;
       params.url = url;
-      _proxyImpl.sendMessage(params, _applicationMethodInitializeName);
+      _proxyImpl.sendMessage(params, _Application_initializeName);
     }
     void acceptConnection(String requestorUrl, Object services, Object exposedServices, String resolvedUrl) {
       if (!_proxyImpl.isBound) {
@@ -375,7 +375,7 @@ class _ApplicationProxyCalls implements Application {
       params.services = services;
       params.exposedServices = exposedServices;
       params.resolvedUrl = resolvedUrl;
-      _proxyImpl.sendMessage(params, _applicationMethodAcceptConnectionName);
+      _proxyImpl.sendMessage(params, _Application_acceptConnectionName);
     }
     void requestQuit() {
       if (!_proxyImpl.isBound) {
@@ -383,7 +383,7 @@ class _ApplicationProxyCalls implements Application {
         return;
       }
       var params = new _ApplicationRequestQuitParams();
-      _proxyImpl.sendMessage(params, _applicationMethodRequestQuitName);
+      _proxyImpl.sendMessage(params, _Application_requestQuitName);
     }
 }
 
@@ -475,17 +475,17 @@ class ApplicationStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case _applicationMethodInitializeName:
+      case _Application_initializeName:
         var params = _ApplicationInitializeParams.deserialize(
             message.payload);
         _impl.initialize(params.shell, params.args, params.url);
         break;
-      case _applicationMethodAcceptConnectionName:
+      case _Application_acceptConnectionName:
         var params = _ApplicationAcceptConnectionParams.deserialize(
             message.payload);
         _impl.acceptConnection(params.requestorUrl, params.services, params.exposedServices, params.resolvedUrl);
         break;
-      case _applicationMethodRequestQuitName:
+      case _Application_requestQuitName:
         _impl.requestQuit();
         break;
       default:

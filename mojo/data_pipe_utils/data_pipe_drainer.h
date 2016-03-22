@@ -5,10 +5,9 @@
 #ifndef MOJO_DATA_PIPE_UTILS_DATA_PIPE_DRAINER_H_
 #define MOJO_DATA_PIPE_UTILS_DATA_PIPE_DRAINER_H_
 
-#include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 #include "mojo/message_pump/handle_watcher.h"
-#include "mojo/public/cpp/system/data_pipe.h"
+#include "mojo/public/cpp/system/core.h"
 
 namespace mojo {
 namespace common {

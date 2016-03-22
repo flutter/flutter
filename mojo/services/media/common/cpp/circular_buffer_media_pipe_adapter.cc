@@ -6,7 +6,7 @@
 #include "mojo/public/cpp/utility/run_loop.h"
 #include "mojo/services/media/common/cpp/circular_buffer_media_pipe_adapter.h"
 #include "mojo/services/media/common/interfaces/media_common.mojom.h"
-#include "mojo/services/media/common/interfaces/media_transport.mojom.h"
+#include "mojo/services/media/common/interfaces/media_pipe.mojom.h"
 
 namespace mojo {
 namespace media {
@@ -26,20 +26,20 @@ CircularBufferMediaPipeAdapter::MappedPacket::~MappedPacket() {
 CircularBufferMediaPipeAdapter::PacketState::PacketState(
     uint64_t post_consume_rd,
     uint32_t seq_num,
-    const MediaConsumer::SendPacketCallback& cbk)
+    const MediaPipe::SendPacketCallback& cbk)
   : post_consume_rd_(post_consume_rd),
     seq_num_(seq_num),
     cbk_(cbk) {}
 CircularBufferMediaPipeAdapter::PacketState::~PacketState() { }
 
 CircularBufferMediaPipeAdapter::CircularBufferMediaPipeAdapter(
-    MediaConsumerPtr pipe)
+    MediaPipePtr pipe)
   : pipe_(pipe.Pass())
   , thiz_(new CircularBufferMediaPipeAdapter*(this)) {
   MOJO_DCHECK(pipe_);
   MOJO_DCHECK(RunLoop::current());
 
-  pipe_flush_cbk_ = MediaConsumer::FlushCallback(
+  pipe_flush_cbk_ = MediaPipe::FlushCallback(
   [this] () {
     HandleFlush();
   });
@@ -117,7 +117,7 @@ void CircularBufferMediaPipeAdapter::Init(uint64_t size) {
 
   // TODO(johngro) : We should not have to send the buffer size, it should be an
   // intrinsic property of the buffer itself and be query-able via the handle.
-  pipe_->SetBuffer(duplicated_handle.Pass(), buffer_size_, []() {});
+  pipe_->SetBuffer(duplicated_handle.Pass(), buffer_size_);
 }
 
 void CircularBufferMediaPipeAdapter::SetSignalCallback(SignalCbk cbk) {
@@ -244,7 +244,7 @@ MediaResult CircularBufferMediaPipeAdapter::CreateMediaPacket(
 
 MediaResult CircularBufferMediaPipeAdapter::SendMediaPacket(
     MappedPacket* packet,
-    const MediaConsumer::SendPacketCallback& cbk) {
+    const MediaPipe::SendPacketCallback& cbk) {
   MOJO_DCHECK(packet && !packet->packet_.is_null());
   if (!packet || packet->packet_.is_null()) {
     return MediaResult::INVALID_ARGUMENT;
@@ -297,7 +297,7 @@ MediaResult CircularBufferMediaPipeAdapter::SendMediaPacket(
 
   pipe_->SendPacket(
       packet->packet_.Pass(),
-      [this, seq_num](MediaConsumer::SendResult result) {
+      [this, seq_num](MediaPipe::SendResult result) {
         HandleSendPacket(seq_num, result);
       });
 
@@ -346,8 +346,8 @@ MediaResult CircularBufferMediaPipeAdapter::Flush() {
 
 void CircularBufferMediaPipeAdapter::HandleSendPacket(
     uint32_t seq_num,
-    MediaConsumer::SendResult result) {
-  MediaConsumer::SendPacketCallback cbk;
+    MediaPipe::SendResult result) {
+  MediaPipe::SendPacketCallback cbk;
 
   do {
     // There should be at least one element in the in-flight queue, and the

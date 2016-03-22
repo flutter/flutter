@@ -556,7 +556,7 @@ class ServiceDescriptionGetAllTypeDefinitionsResponseParams extends bindings.Str
   }
 }
 
-const int _serviceDescriberMethodDescribeServiceName = 0;
+const int _ServiceDescriber_describeServiceName = 0;
 
 class _ServiceDescriberServiceDescription implements ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>
@@ -621,7 +621,7 @@ class _ServiceDescriberProxyCalls implements ServiceDescriber {
       var params = new _ServiceDescriberDescribeServiceParams();
       params.interfaceName = interfaceName;
       params.descriptionRequest = descriptionRequest;
-      _proxyImpl.sendMessage(params, _serviceDescriberMethodDescribeServiceName);
+      _proxyImpl.sendMessage(params, _ServiceDescriber_describeServiceName);
     }
 }
 
@@ -713,7 +713,7 @@ class ServiceDescriberStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case _serviceDescriberMethodDescribeServiceName:
+      case _ServiceDescriber_describeServiceName:
         var params = _ServiceDescriberDescribeServiceParams.deserialize(
             message.payload);
         _impl.describeService(params.interfaceName, params.descriptionRequest);
@@ -747,9 +747,9 @@ class ServiceDescriberStub extends bindings.Stub {
   }
 }
 
-const int _serviceDescriptionMethodGetTopLevelInterfaceName = 0;
-const int _serviceDescriptionMethodGetTypeDefinitionName = 1;
-const int _serviceDescriptionMethodGetAllTypeDefinitionsName = 2;
+const int _ServiceDescription_getTopLevelInterfaceName = 0;
+const int _ServiceDescription_getTypeDefinitionName = 1;
+const int _ServiceDescription_getAllTypeDefinitionsName = 2;
 
 class _ServiceDescriptionServiceDescription implements ServiceDescription {
   dynamic getTopLevelInterface([Function responseFactory]) =>
@@ -790,7 +790,7 @@ class _ServiceDescriptionProxyImpl extends bindings.Proxy {
 
   void handleResponse(bindings.ServiceMessage message) {
     switch (message.header.type) {
-      case _serviceDescriptionMethodGetTopLevelInterfaceName:
+      case _ServiceDescription_getTopLevelInterfaceName:
         var r = ServiceDescriptionGetTopLevelInterfaceResponseParams.deserialize(
             message.payload);
         if (!message.header.hasRequestId) {
@@ -810,7 +810,7 @@ class _ServiceDescriptionProxyImpl extends bindings.Proxy {
         }
         c.complete(r);
         break;
-      case _serviceDescriptionMethodGetTypeDefinitionName:
+      case _ServiceDescription_getTypeDefinitionName:
         var r = ServiceDescriptionGetTypeDefinitionResponseParams.deserialize(
             message.payload);
         if (!message.header.hasRequestId) {
@@ -830,7 +830,7 @@ class _ServiceDescriptionProxyImpl extends bindings.Proxy {
         }
         c.complete(r);
         break;
-      case _serviceDescriptionMethodGetAllTypeDefinitionsName:
+      case _ServiceDescription_getAllTypeDefinitionsName:
         var r = ServiceDescriptionGetAllTypeDefinitionsResponseParams.deserialize(
             message.payload);
         if (!message.header.hasRequestId) {
@@ -872,7 +872,7 @@ class _ServiceDescriptionProxyCalls implements ServiceDescription {
       var params = new _ServiceDescriptionGetTopLevelInterfaceParams();
       return _proxyImpl.sendMessageWithRequestId(
           params,
-          _serviceDescriptionMethodGetTopLevelInterfaceName,
+          _ServiceDescription_getTopLevelInterfaceName,
           -1,
           bindings.MessageHeader.kMessageExpectsResponse);
     }
@@ -881,7 +881,7 @@ class _ServiceDescriptionProxyCalls implements ServiceDescription {
       params.typeKey = typeKey;
       return _proxyImpl.sendMessageWithRequestId(
           params,
-          _serviceDescriptionMethodGetTypeDefinitionName,
+          _ServiceDescription_getTypeDefinitionName,
           -1,
           bindings.MessageHeader.kMessageExpectsResponse);
     }
@@ -889,7 +889,7 @@ class _ServiceDescriptionProxyCalls implements ServiceDescription {
       var params = new _ServiceDescriptionGetAllTypeDefinitionsParams();
       return _proxyImpl.sendMessageWithRequestId(
           params,
-          _serviceDescriptionMethodGetAllTypeDefinitionsName,
+          _ServiceDescription_getAllTypeDefinitionsName,
           -1,
           bindings.MessageHeader.kMessageExpectsResponse);
     }
@@ -974,20 +974,20 @@ class ServiceDescriptionStub extends bindings.Stub {
   }
 
 
-  ServiceDescriptionGetTopLevelInterfaceResponseParams _serviceDescriptionGetTopLevelInterfaceResponseParamsFactory(mojom_types_mojom.MojomInterface mojomInterface) {
-    var result = new ServiceDescriptionGetTopLevelInterfaceResponseParams();
-    result.mojomInterface = mojomInterface;
-    return result;
+  ServiceDescriptionGetTopLevelInterfaceResponseParams _ServiceDescriptionGetTopLevelInterfaceResponseParamsFactory(mojom_types_mojom.MojomInterface mojomInterface) {
+    var mojo_factory_result = new ServiceDescriptionGetTopLevelInterfaceResponseParams();
+    mojo_factory_result.mojomInterface = mojomInterface;
+    return mojo_factory_result;
   }
-  ServiceDescriptionGetTypeDefinitionResponseParams _serviceDescriptionGetTypeDefinitionResponseParamsFactory(mojom_types_mojom.UserDefinedType type) {
-    var result = new ServiceDescriptionGetTypeDefinitionResponseParams();
-    result.type = type;
-    return result;
+  ServiceDescriptionGetTypeDefinitionResponseParams _ServiceDescriptionGetTypeDefinitionResponseParamsFactory(mojom_types_mojom.UserDefinedType type) {
+    var mojo_factory_result = new ServiceDescriptionGetTypeDefinitionResponseParams();
+    mojo_factory_result.type = type;
+    return mojo_factory_result;
   }
-  ServiceDescriptionGetAllTypeDefinitionsResponseParams _serviceDescriptionGetAllTypeDefinitionsResponseParamsFactory(Map<String, mojom_types_mojom.UserDefinedType> definitions) {
-    var result = new ServiceDescriptionGetAllTypeDefinitionsResponseParams();
-    result.definitions = definitions;
-    return result;
+  ServiceDescriptionGetAllTypeDefinitionsResponseParams _ServiceDescriptionGetAllTypeDefinitionsResponseParamsFactory(Map<String, mojom_types_mojom.UserDefinedType> definitions) {
+    var mojo_factory_result = new ServiceDescriptionGetAllTypeDefinitionsResponseParams();
+    mojo_factory_result.definitions = definitions;
+    return mojo_factory_result;
   }
 
   dynamic handleMessage(bindings.ServiceMessage message) {
@@ -998,14 +998,14 @@ class ServiceDescriptionStub extends bindings.Stub {
     }
     assert(_impl != null);
     switch (message.header.type) {
-      case _serviceDescriptionMethodGetTopLevelInterfaceName:
-        var response = _impl.getTopLevelInterface(_serviceDescriptionGetTopLevelInterfaceResponseParamsFactory);
+      case _ServiceDescription_getTopLevelInterfaceName:
+        var response = _impl.getTopLevelInterface(_ServiceDescriptionGetTopLevelInterfaceResponseParamsFactory);
         if (response is Future) {
           return response.then((response) {
             if (response != null) {
               return buildResponseWithId(
                   response,
-                  _serviceDescriptionMethodGetTopLevelInterfaceName,
+                  _ServiceDescription_getTopLevelInterfaceName,
                   message.header.requestId,
                   bindings.MessageHeader.kMessageIsResponse);
             }
@@ -1013,21 +1013,21 @@ class ServiceDescriptionStub extends bindings.Stub {
         } else if (response != null) {
           return buildResponseWithId(
               response,
-              _serviceDescriptionMethodGetTopLevelInterfaceName,
+              _ServiceDescription_getTopLevelInterfaceName,
               message.header.requestId,
               bindings.MessageHeader.kMessageIsResponse);
         }
         break;
-      case _serviceDescriptionMethodGetTypeDefinitionName:
+      case _ServiceDescription_getTypeDefinitionName:
         var params = _ServiceDescriptionGetTypeDefinitionParams.deserialize(
             message.payload);
-        var response = _impl.getTypeDefinition(params.typeKey,_serviceDescriptionGetTypeDefinitionResponseParamsFactory);
+        var response = _impl.getTypeDefinition(params.typeKey,_ServiceDescriptionGetTypeDefinitionResponseParamsFactory);
         if (response is Future) {
           return response.then((response) {
             if (response != null) {
               return buildResponseWithId(
                   response,
-                  _serviceDescriptionMethodGetTypeDefinitionName,
+                  _ServiceDescription_getTypeDefinitionName,
                   message.header.requestId,
                   bindings.MessageHeader.kMessageIsResponse);
             }
@@ -1035,19 +1035,19 @@ class ServiceDescriptionStub extends bindings.Stub {
         } else if (response != null) {
           return buildResponseWithId(
               response,
-              _serviceDescriptionMethodGetTypeDefinitionName,
+              _ServiceDescription_getTypeDefinitionName,
               message.header.requestId,
               bindings.MessageHeader.kMessageIsResponse);
         }
         break;
-      case _serviceDescriptionMethodGetAllTypeDefinitionsName:
-        var response = _impl.getAllTypeDefinitions(_serviceDescriptionGetAllTypeDefinitionsResponseParamsFactory);
+      case _ServiceDescription_getAllTypeDefinitionsName:
+        var response = _impl.getAllTypeDefinitions(_ServiceDescriptionGetAllTypeDefinitionsResponseParamsFactory);
         if (response is Future) {
           return response.then((response) {
             if (response != null) {
               return buildResponseWithId(
                   response,
-                  _serviceDescriptionMethodGetAllTypeDefinitionsName,
+                  _ServiceDescription_getAllTypeDefinitionsName,
                   message.header.requestId,
                   bindings.MessageHeader.kMessageIsResponse);
             }
@@ -1055,7 +1055,7 @@ class ServiceDescriptionStub extends bindings.Stub {
         } else if (response != null) {
           return buildResponseWithId(
               response,
-              _serviceDescriptionMethodGetAllTypeDefinitionsName,
+              _ServiceDescription_getAllTypeDefinitionsName,
               message.header.requestId,
               bindings.MessageHeader.kMessageIsResponse);
         }

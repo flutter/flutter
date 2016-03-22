@@ -17,10 +17,8 @@
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/public/c/system/buffer.h"
 #include "mojo/public/c/system/data_pipe.h"
-#include "mojo/public/c/system/handle.h"
 #include "mojo/public/c/system/message_pipe.h"
-#include "mojo/public/c/system/result.h"
-#include "mojo/public/c/system/time.h"
+#include "mojo/public/c/system/types.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -50,16 +48,16 @@ class Core {
   // |MOJO_HANDLE_INVALID| on failure, namely if the handle table is full.
   MojoHandle AddDispatcher(Dispatcher* dispatcher);
 
-  // Looks up the dispatcher for the given handle. On success, gets the
-  // dispatcher for a given handle. On failure, returns an appropriate result
-  // and leaves |dispatcher| alone), namely |MOJO_RESULT_INVALID_ARGUMENT| if
-  // the handle is invalid or |MOJO_RESULT_BUSY| if the handle is marked as
-  // busy.
-  MojoResult GetDispatcher(MojoHandle handle,
-                           util::RefPtr<Dispatcher>* dispatcher);
+  // Looks up the dispatcher for the given handle. Returns null if the handle is
+  // invalid.
+  util::RefPtr<Dispatcher> GetDispatcher(MojoHandle handle);
 
-  // Like |GetDispatcher()|, but on success also removes the handle from the
-  // handle table.
+  // Like |GetDispatcher()|, but also removes the handle from the handle table.
+  // On success, gets the dispatcher for a given handle (which should not be
+  // |MOJO_HANDLE_INVALID|) and removes it. (On failure, returns an appropriate
+  // result (and leaves |dispatcher| alone), namely
+  // |MOJO_RESULT_INVALID_ARGUMENT| if there's no dispatcher for the given
+  // handle or |MOJO_RESULT_BUSY| if the handle is marked as busy.)
   MojoResult GetAndRemoveDispatcher(MojoHandle handle,
                                     util::RefPtr<Dispatcher>* dispatcher);
 
@@ -83,17 +81,10 @@ class Core {
   // of these methods is to look at the header files defining the corresponding
   // API functions, referenced below.
 
-  // This method corresponds to the API function defined in
-  // "mojo/public/c/system/time.h":
-
-  MojoTimeTicks GetTimeTicksNow();
-
-  // This method corresponds to the API function defined in
-  // "mojo/public/c/system/handle.h":
-  MojoResult Close(MojoHandle handle);
-
   // These methods correspond to the API functions defined in
-  // "mojo/public/c/system/wait.h":
+  // "mojo/public/c/system/functions.h":
+  MojoTimeTicks GetTimeTicksNow();
+  MojoResult Close(MojoHandle handle);
   MojoResult Wait(MojoHandle handle,
                   MojoHandleSignals signals,
                   MojoDeadline deadline,

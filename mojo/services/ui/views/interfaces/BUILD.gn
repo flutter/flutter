@@ -9,11 +9,8 @@ mojom("interfaces") {
   sources = [
     "layouts.mojom",
     "view_associates.mojom",
-    "view_containers.mojom",
     "view_manager.mojom",
     "view_provider.mojom",
-    "view_token.mojom",
-    "view_tree_token.mojom",
     "view_trees.mojom",
     "views.mojom",
   ]

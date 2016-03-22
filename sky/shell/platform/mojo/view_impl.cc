@@ -113,6 +113,11 @@ void ViewImpl::OnLayout(mojo::ui::ViewLayoutParamsPtr layout_params,
   callback.Run(info.Pass());
 }
 
+void ViewImpl::OnChildUnavailable(uint32_t child_key,
+                                  const OnChildUnavailableCallback& callback) {
+  callback.Run();
+}
+
 void ViewImpl::OnEvent(mojo::EventPtr event, const OnEventCallback& callback) {
   DCHECK(event);
   bool consumed = false;

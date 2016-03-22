@@ -7,12 +7,11 @@
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/debug/stack_trace.h"
+#include "base/memory/scoped_ptr.h"
 #include "base/message_loop/message_loop.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "mojo/public/cpp/application/application_delegate.h"
 #include "mojo/public/cpp/application/application_impl.h"
-#include "mojo/public/cpp/system/handle.h"
-#include "mojo/public/cpp/system/message_pipe.h"
 
 namespace mojo {
 
@@ -24,7 +23,7 @@ void ApplicationImpl::Terminate() {
 
 ApplicationRunnerChromium::ApplicationRunnerChromium(
     ApplicationDelegate* delegate)
-    : delegate_(delegate),
+    : delegate_(scoped_ptr<ApplicationDelegate>(delegate)),
       message_loop_type_(base::MessageLoop::TYPE_CUSTOM),
       has_run_(false) {}
 
@@ -51,7 +50,7 @@ MojoResult ApplicationRunnerChromium::Run(
 #endif
 
   {
-    std::unique_ptr<base::MessageLoop> loop;
+    scoped_ptr<base::MessageLoop> loop;
     if (message_loop_type_ == base::MessageLoop::TYPE_CUSTOM)
       loop.reset(new base::MessageLoop(common::MessagePumpMojo::Create()));
     else

@@ -5,12 +5,9 @@
 #ifndef MOJO_APPLICATION_APPLICATION_RUNNER_CHROMIUM_H_
 #define MOJO_APPLICATION_APPLICATION_RUNNER_CHROMIUM_H_
 
-#include <memory>
-
+#include "base/memory/scoped_ptr.h"
 #include "base/message_loop/message_loop.h"
-#include "mojo/public/c/system/handle.h"
-#include "mojo/public/c/system/result.h"
-#include "mojo/public/cpp/system/macros.h"
+#include "mojo/public/cpp/system/core.h"
 
 namespace mojo {
 
@@ -41,7 +38,7 @@ class ApplicationRunnerChromium {
   MojoResult Run(MojoHandle application_request);
 
  private:
-  std::unique_ptr<ApplicationDelegate> delegate_;
+  scoped_ptr<ApplicationDelegate> delegate_;
 
   // MessageLoop type. TYPE_CUSTOM is default (MessagePumpMojo will be used as
   // the underlying message pump).
