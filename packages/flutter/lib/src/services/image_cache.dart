@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ui' show hashValues;
 
 import 'package:mojo/mojo/url_response.mojom.dart';
-import 'package:quiver/collection.dart';
 
 import 'fetch.dart';
 import 'image_decoder.dart';
@@ -25,6 +25,12 @@ import 'image_resource.dart';
 /// share the same cache as all the other image loading codepaths that used the
 /// [imageCache].
 abstract class ImageProvider { // ignore: one_member_abstracts
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const ImageProvider();
+
+  /// Subclasses must implement this method by having it asynchronously return
+  /// an [ImageInfo] that represents the image provided by this [ImageProvider].
   Future<ImageInfo> loadImage();
 
   /// Subclasses must implement the `==` operator so that the image cache can
@@ -88,22 +94,34 @@ const int _kDefaultSize = 1000;
 class ImageCache {
   ImageCache._();
 
-  final LruMap<ImageProvider, ImageResource> _cache =
-      new LruMap<ImageProvider, ImageResource>(maximumSize: _kDefaultSize);
+  final LinkedHashMap<ImageProvider, ImageResource> _cache =
+      new LinkedHashMap<ImageProvider, ImageResource>();
 
   /// Maximum number of entries to store in the cache.
   ///
   /// Once this many entries have been cached, the least-recently-used entry is
   /// evicted when adding a new entry.
-  int get maximumSize => _cache.maximumSize;
+  int get maximumSize => _maximumSize;
+  int _maximumSize = _kDefaultSize;
   /// Changes the maximum cache size.
   ///
   /// If the new size is smaller than the current number of elements, the
   /// extraneous elements are evicted immediately. Setting this to zero and then
   /// returning it to its original value will therefore immediately clear the
-  /// cache. However, doing this is not very efficient.
-  // (the quiver library does it one at a time rather than using clear())
-  void set maximumSize(int value) { _cache.maximumSize = value; }
+  /// cache.
+  void set maximumSize(int value) {
+    assert(value != null);
+    assert(value >= 0);
+    if (value == maximumSize)
+      return;
+    _maximumSize = value;
+    if (maximumSize == 0) {
+      _cache.clear();
+    } else {
+      while (_cache.length > maximumSize)
+        _cache.remove(_cache.keys.first);
+    }
+  }
 
   /// Calls the [ImageProvider.loadImage] method on the given image provider, if
   /// necessary, and returns an [ImageResource] that encapsulates a [Future] for
@@ -113,9 +131,20 @@ class ImageCache {
   /// cache, then the [ImageResource] object is immediately usable and the
   /// provider is not invoked.
   ImageResource loadProvider(ImageProvider provider) {
-    return _cache.putIfAbsent(provider, () {
-      return new ImageResource(provider.loadImage());
-    });
+    ImageResource result = _cache[provider];
+    if (result != null) {
+      _cache.remove(provider);
+    } else {
+      if (_cache.length == maximumSize && maximumSize > 0)
+        _cache.remove(_cache.keys.first);
+      result = new ImageResource(provider.loadImage());;
+    }
+    if (maximumSize > 0) {
+      assert(_cache.length < maximumSize);
+      _cache[provider] = result;
+    }
+    assert(_cache.length <= maximumSize);
+    return result;
   }
 
   /// Fetches the given URL, associating it with the given scale.
