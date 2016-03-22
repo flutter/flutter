@@ -31,8 +31,7 @@ typedef void _GesturePolymorphicUpdateCallback<T>(T delta);
 bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);
   final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
-  return speedSquared > kMinFlingVelocity * kMinFlingVelocity
-      && speedSquared < kMaxFlingVelocity * kMaxFlingVelocity;
+  return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
 }
 
 abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGestureRecognizer {
@@ -119,10 +118,14 @@ abstract class _DragGestureRecognizer<T extends dynamic> extends OneSequenceGest
       assert(tracker != null);
 
       Velocity velocity = tracker.getVelocity();
-      if (velocity != null && _isFlingGesture(velocity))
+      if (velocity != null && _isFlingGesture(velocity)) {
+        final Offset pixelsPerSecond = velocity.pixelsPerSecond;
+        if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
+          velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
         onEnd(velocity);
-      else
+      } else {
         onEnd(Velocity.zero);
+      }
     }
     _velocityTrackers.clear();
   }

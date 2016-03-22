@@ -499,8 +499,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
 
   Future<Null> _handleDragEnd(Velocity velocity) {
     double scrollVelocity = pixelDeltaToScrollOffset(velocity.pixelsPerSecond) / Duration.MILLISECONDS_PER_SECOND;
-    // The gesture velocity properties are pixels/second, config min,max limits are pixels/ms
-    return fling(scrollVelocity.clamp(-kMaxFlingVelocity, kMaxFlingVelocity)).then(_endScroll);
+    return fling(scrollVelocity).then(_endScroll);
   }
 
   Null _endScroll([Null _]) {
