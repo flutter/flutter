@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 import 'package:flutter/rendering.dart';
@@ -169,9 +170,10 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     for (int i = 0; i < count; ++i) {
       int childIndex = base + i;
       Widget child = _widgetProvider.getChild(childIndex);
-      Key key = new ValueKey<Key>(child.key) ?? new ValueKey<int>(childIndex);
+      Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
       newWidgets[i] = new RepaintBoundary(key: key, child: child);
     }
+    assert(!debugHasDuplicateKeys(widget, newWidgets));
     _materializedChildren = updateChildren(_materializedChildren, newWidgets);
   }
 
