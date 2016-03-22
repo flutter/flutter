@@ -10,9 +10,7 @@ namespace blink {
 
 FloatRect mapImageFilterRect(ImageFilter* filter, const FloatRect& rect)
 {
-    SkRect dest;
-    filter->computeFastBounds(rect, &dest);
-    return dest;
+    return filter->computeFastBounds(rect);
 }
 
 } // namespace blink
