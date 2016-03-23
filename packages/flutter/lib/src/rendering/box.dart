@@ -305,6 +305,29 @@ class BoxConstraints extends Constraints {
   @override
   bool get debugAssertIsNormalized {
     assert(() {
+      if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
+        List<String> affectedFieldsList = <String>[];
+        if (minWidth.isNaN)
+          affectedFieldsList.add('minWidth');
+        if (maxWidth.isNaN)
+          affectedFieldsList.add('maxWidth');
+        if (minHeight.isNaN)
+          affectedFieldsList.add('minHeight');
+        if (maxHeight.isNaN)
+          affectedFieldsList.add('maxHeight');
+        assert(affectedFieldsList.length > 0);
+        if (affectedFieldsList.length > 1)
+          affectedFieldsList.add('and ${affectedFieldsList.removeLast()}');
+        String whichFields = '';
+        if (affectedFieldsList.length > 2) {
+          whichFields = affectedFieldsList.join(', ');
+        } else if (affectedFieldsList.length == 2) {
+          whichFields = affectedFieldsList.join(' ');
+        } else {
+          whichFields = affectedFieldsList.single;
+        }
+        throw new FlutterError('BoxConstraints has ${affectedFieldsList.length == 1 ? 'a NaN value' : 'NaN values' } in $whichFields.\n$this');
+      }
       if (minWidth < 0.0 && minHeight < 0.0)
         throw new FlutterError('BoxConstraints has both a negative minimum width and a negative minimum height.\n$this');
       if (minWidth < 0.0)
