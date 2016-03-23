@@ -147,19 +147,25 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Delegates its painting.
+/// Provides a canvas on which to draw during the paint phase.
 ///
-/// When asked to paint, custom paint first asks painter to paint with the
-/// current canvas and then paints its children. After painting its children,
-/// custom paint asks foregroundPainter to paint. The coodinate system of the
-/// canvas matches the coordinate system of the custom paint object. The
-/// painters are expected to paint within a rectangle starting at the origin
-/// and encompassing a region of the given size. If the painters paints outside
-/// those bounds, there might be insufficient memory allocated to rasterize the
-/// painting commands and the resulting behavior is undefined.
+/// When asked to paint, [CustomPaint] objects first ask their [painter] to
+/// paint on the current canvas, then they paint their children, and then, after
+/// painting their children, ask their [foregroundPainter] to paint. The
+/// coodinate system of the canvas matches the coordinate system of the
+/// [CustomPaint] object. The painters are expected to paint within a rectangle
+/// starting at the origin and encompassing a region of the given size. (If the
+/// painters paints outside those bounds, there might be insufficient memory
+/// allocated to rasterize the painting commands and the resulting behavior is
+/// undefined.)
 ///
-/// Because custom paint calls its painters during paint, you cannot dirty
-/// layout or paint information during the callback.
+/// Painters are implemented by subclassing [CustomPainter].
+///
+/// Because custom paint calls its painters during paint, you cannot mark the
+/// tree as needing a new layout during the callback (the layout for this frame
+/// has already happened).
+///
+/// See: [CustomPainter], [Canvas].
 class CustomPaint extends SingleChildRenderObjectWidget {
   CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
     : super(key: key, child: child);

@@ -678,7 +678,7 @@ abstract class CustomClipper<T> {
   /// same size as the RenderObject (e.g. it's a rounded rectangle
   /// with very small arcs in the corners), then this may be adequate.
   Rect getApproximateClipRect(Size size) => Point.origin & size;
-  /// Returns true if the new instance will result in a different clip
+  /// Returns `true` if the new instance will result in a different clip
   /// than the oldClipper instance.
   bool shouldRepaint(CustomClipper<T> oldClipper);
 }
@@ -992,8 +992,8 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// When set to true, hit tests are performed based on the position of the
-  /// child as it is painted. When set to false, hit tests are performed
+  /// When set to `true`, hit tests are performed based on the position of the
+  /// child as it is painted. When set to `false`, hit tests are performed
   /// ignoring the transformation.
   ///
   /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
@@ -1139,8 +1139,8 @@ class RenderFractionalTranslation extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// When set to true, hit tests are performed based on the position of the
-  /// child as it is painted. When set to false, hit tests are performed
+  /// When set to `true`, hit tests are performed based on the position of the
+  /// child as it is painted. When set to `false`, hit tests are performed
   /// ignoring the transformation.
   ///
   /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
@@ -1176,13 +1176,93 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 }
 
+/// The interface used by [CustomPaint] (in the widgets library) and
+/// [RenderCustomPaint] (in the rendering library).
+///
+/// To implement a custom painter, subclass this interface to define your custom
+/// paint delegate. [CustomPaint] subclasses must implement the [paint] and
+/// [shouldRepaint] methods, and may optionally also implement the [hitTest]
+/// method.
+///
+/// The [paint] method is called whenever the custom object needs to be repainted.
+///
+/// The [shouldRepaint] method is called when a new instance of the class
+/// is provided, to check if the new instance actually represents different
+/// information.
+///
+/// The [hitTest] method is invoked when the user interacts with the underlying
+/// render object, to determine if the user hit the object or missed it.
 abstract class CustomPainter {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const CustomPainter();
 
+  /// Called whenever the object needs to paint. The given [Canvas] has its
+  /// coordinate space configured such that the origin is at the top left of the
+  /// box. The area of the box is the size of the [size] argument.
+  ///
+  /// Paint operations should remain inside the given area. Graphical operations
+  /// outside the bounds may be silently ignored, clipped, or not clipped.
+  ///
+  /// Implementations should be wary of correctly pairing any calls to
+  /// [Canvas.save]/[Canvas.saveLayer] and [Canvas.restore], otherwise all
+  /// subsequent painting on this canvas may be affected, with potentially
+  /// hilarious but confusing results.
+  ///
+  /// To paint text on a [Canvas], use a [TextPainter].
+  ///
+  /// To paint an image on a [Canvas]:
+  ///
+  /// 1. Obtain an [ImageResource], for example by using the [ImageCache.load]
+  ///    method on the [imageCache] singleton.
+  ///
+  /// 2. Whenever the [ImageResource]'s underlying [ImageInfo] object changes
+  ///    (see [ImageResource.addListener]), create a new instance of your custom
+  ///    paint delegate, giving it the new [ImageInfo] object.
+  ///
+  /// 3. In your delegate's [paint] method, call the [Canvas.drawImage],
+  ///    [Canvas.drawImageRect], or [Canvas.drawImageNine] methods to paint the
+  ///    [ImageInfo.image] object, applying the [ImageInfo.scale] value to
+  ///    obtain the correct rendering size.
   void paint(Canvas canvas, Size size);
+
+  /// Called whenever a new instance of the custom painter delegate class is
+  /// provided to the [RenderCustomPaint] object, or any time that a new
+  /// [CustomPaint] object is created with a new instance of the custom painter
+  /// delegate class (which amounts to the same thing, since the latter is
+  /// implemented in terms of the former).
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return `true`, otherwise it should return
+  /// `false`.
+  ///
+  /// If the method returns `false`, then the paint call might be optimized away.
+  ///
+  /// It's possible that the [paint] method will get invoked even if
+  /// [shouldRepaint] returns `false` (e.g. if an ancestor or descendant needed to
+  /// be repainted). It's also possible that the [paint] method will get invoked
+  /// without [shouldRepaint] being called at all (e.g. if the box changes
+  /// size).
+  ///
+  /// If a custom delegate has a particularly expensive paint function such that
+  /// repaints should be avoided as much as possible, a [RepaintBoundary] or
+  /// [RenderRepaintBoundary] (or other render object with [isRepaintBoundary]
+  /// set to `true`) might be helpful.
   bool shouldRepaint(CustomPainter oldDelegate);
+
+  /// Called whenever a hit test is being performed on an object that is using
+  /// this custom paint delegate.
+  ///
+  /// The given point is relative to the same coordinate space as the last
+  /// [paint] call.
+  ///
+  /// The default behavior is to consider all points to be hits for
+  /// background painters, and no points to be hits for foreground painters.
+  ///
+  /// Return `true` if the given position corresponds to a point on the drawn
+  /// image that should be considered a "hit", `false` if it corresponds to a
+  /// point that should be considered outside the painted image, and null to use
+  /// the default behavior.
   bool hitTest(Point position) => null;
 }
 
@@ -1206,8 +1286,23 @@ class RenderCustomPaint extends RenderProxyBox {
     RenderBox child
   }) : _painter = painter, _foregroundPainter = foregroundPainter, super(child);
 
+  /// The background custom paint delegate.
+  ///
+  /// This painter, if non-null, is invoked to paint behind the children.
   CustomPainter get painter => _painter;
   CustomPainter _painter;
+  /// Set a new background custom paint delegate.
+  ///
+  /// If the new delegate is the same as the previous one, this does nothing.
+  ///
+  /// If the new delegate is the same class as the previous one, then the new
+  /// delegate has its [CustomPainter.shouldRepaint] invoked; if the result is
+  /// `true`, then the delegate will be invoked.
+  ///
+  /// If the new delegate is a different class than the previous one, then the
+  /// delegate will be invoked.
+  ///
+  /// If the new value is null, then there is no background custom painter.
   void set painter (CustomPainter newPainter) {
     if (_painter == newPainter)
       return;
@@ -1216,8 +1311,23 @@ class RenderCustomPaint extends RenderProxyBox {
     _checkForRepaint(_painter, oldPainter);
   }
 
+  /// The foreground custom paint delegate.
+  ///
+  /// This painter, if non-null, is invoked to paint in front of the children.
   CustomPainter get foregroundPainter => _foregroundPainter;
   CustomPainter _foregroundPainter;
+  /// Set a new foreground custom paint delegate.
+  ///
+  /// If the new delegate is the same as the previous one, this does nothing.
+  ///
+  /// If the new delegate is the same class as the previous one, then the new
+  /// delegate has its [CustomPainter.shouldRepaint] invoked; if the result is
+  /// `true`, then the delegate will be invoked.
+  ///
+  /// If the new delegate is a different class than the previous one, then the
+  /// delegate will be invoked.
+  ///
+  /// If the new value is null, then there is no foreground custom painter.
   void set foregroundPainter (CustomPainter newPainter) {
     if (_foregroundPainter == newPainter)
       return;
@@ -1470,12 +1580,12 @@ class RenderRepaintBoundary extends RenderProxyBox {
 
 /// Is invisible during hit testing.
 ///
-/// When [ignoring] is true, this render object (and its subtree) is invisible
+/// When [ignoring] is `true`, this render object (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
 /// as usual. It just cannot be the target of located events because it returns
-/// false from [hitTest].
+/// `false` from [hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// When [ignoringSemantics] is `true`, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
 class RenderIgnorePointer extends RenderProxyBox {
@@ -1693,11 +1803,11 @@ class RenderSemanticAnnotations extends RenderProxyBox {
     assert(container != null);
   }
 
-  /// If 'container' is true, this RenderObject will introduce a new
+  /// If 'container' is `true`, this RenderObject will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors.
   ///
-  /// The 'container' flag is implicitly set to true on the immediate
+  /// The 'container' flag is implicitly set to `true` on the immediate
   /// semantics-providing descendants of a node where multiple
   /// children have semantics or have descendants providing semantics.
   /// In other words, the semantics of siblings are not merged. To
@@ -1713,7 +1823,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the "hasCheckedState" semantic to true and the
+  /// If non-null, sets the "hasCheckedState" semantic to `true` and the
   /// "isChecked" semantic to the given value.
   bool get checked => _checked;
   bool _checked;
