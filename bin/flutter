@@ -5,7 +5,19 @@
 
 set -e
 
-export FLUTTER_ROOT=$(dirname $(dirname "${BASH_SOURCE[0]}"))
+function follow_links() {
+  file="$1"
+  while [ -h "$file" ]; do
+    # On Mac OS, readlink -f doesn't work.
+    file="$(readlink "$file")"
+  done
+  echo "$file"
+}
+
+PROG_NAME="$(follow_links "$BASH_SOURCE")"
+BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
+
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
 STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
