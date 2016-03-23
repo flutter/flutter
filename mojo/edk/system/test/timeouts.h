@@ -7,7 +7,7 @@
 #ifndef MOJO_EDK_SYSTEM_TEST_TIMEOUTS_H_
 #define MOJO_EDK_SYSTEM_TEST_TIMEOUTS_H_
 
-#include "mojo/public/c/system/types.h"
+#include "mojo/public/c/system/time.h"
 
 namespace mojo {
 namespace system {

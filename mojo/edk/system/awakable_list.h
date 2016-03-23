@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include "mojo/public/c/system/types.h"
+#include "mojo/public/c/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

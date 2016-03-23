@@ -15,7 +15,9 @@
 #include "base/observer_list.h"
 #include "base/synchronization/lock.h"
 #include "base/time/time.h"
-#include "mojo/public/cpp/system/core.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/time.h"
+#include "mojo/public/cpp/system/handle.h"
 
 namespace mojo {
 namespace common {

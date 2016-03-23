@@ -59,4 +59,11 @@ class SharedBufferHandleImpl extends HandleBase implements SharedBufferHandle {
         mCore.unmap(buffer);
     }
 
+    /**
+     * @see SharedBufferHandle#getBufferInformation()
+     */
+    @Override
+    public BufferInformation getBufferInformation() {
+        return mCore.getBufferInformation(this);
+    }
 }

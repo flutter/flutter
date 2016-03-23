@@ -226,4 +226,12 @@ public class HandleMock implements UntypedHandle, MessagePipeHandle,
         // Do nothing.
     }
 
+    /**
+     * @see SharedBufferHandle#getBufferInformation()
+     */
+    @Override
+    public BufferInformation getBufferInformation() {
+        // Do nothing.
+        return null;
+    }
 }

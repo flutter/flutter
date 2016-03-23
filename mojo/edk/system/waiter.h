@@ -11,7 +11,8 @@
 #include "mojo/edk/util/cond_var.h"
 #include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/thread_annotations.h"
-#include "mojo/public/c/system/types.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/time.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
