@@ -38,8 +38,6 @@ template("mac_toolchain") {
            "mac_toolchain() must specify a \"toolchain_cpu\"")
     assert(defined(invoker.toolchain_os),
            "mac_toolchain() must specify a \"toolchain_os\"")
-    assert(defined(invoker.switch_sysroot),
-           "mac_toolchain() must specify a \"switch_sysroot\"")
 
     # We can't do string interpolation ($ in strings) on things with dots in
     # them. To allow us to use $cc below, for example, we create copies of
@@ -54,16 +52,8 @@ template("mac_toolchain") {
 
     sysroot_flags = ""
 
-    if (invoker.switch_sysroot) {
-      version_flags = ""
-
-      if (use_ios_simulator) {
-        version_flags = "-mios-simulator-version-min=$ios_deployment_target"
-      } else {
-        version_flags = "-miphoneos-version-min=$ios_deployment_target"
-      }
-
-      sysroot_flags = "-isysroot $sysroot $version_flags"
+    if (defined(invoker.sysroot_flags)) {
+      sysroot_flags = invoker.sysroot_flags
     }
 
     toolchain_flags = ""
@@ -226,7 +216,6 @@ mac_toolchain("clang_arm") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
-  switch_sysroot = false
 }
 
 mac_toolchain("ios_clang_arm") {
@@ -238,7 +227,19 @@ mac_toolchain("ios_clang_arm") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
-  switch_sysroot = true
+  sysroot_flags = "-isysroot $sysroot -miphoneos-version-min=$ios_deployment_target"
+}
+
+mac_toolchain("ios_clang_x64") {
+  toolchain_cpu = "x64"
+  toolchain_os = "mac"
+  prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
+                       root_build_dir)
+  cc = "${goma_prefix}$prefix/clang"
+  cxx = "${goma_prefix}$prefix/clang++"
+  ld = cxx
+  is_clang = true
+  sysroot_flags = "-isysroot $sysroot -mios-simulator-version-min=$ios_deployment_target"
 }
 
 mac_toolchain("arm") {
@@ -248,7 +249,6 @@ mac_toolchain("arm") {
   cxx = "${goma_prefix}/g++"
   ld = cxx
   is_clang = false
-  switch_sysroot = false
 }
 
 mac_toolchain("clang_x64") {
@@ -260,7 +260,6 @@ mac_toolchain("clang_x64") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
-  switch_sysroot = false
 }
 
 mac_toolchain("clang_i386") {
@@ -272,7 +271,6 @@ mac_toolchain("clang_i386") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
-  switch_sysroot = false
 }
 
 
@@ -283,5 +281,4 @@ mac_toolchain("x64") {
   cxx = "${goma_prefix}/g++"
   ld = cxx
   is_clang = false
-  switch_sysroot = false
 }
