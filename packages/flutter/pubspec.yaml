@@ -8,7 +8,6 @@ dependencies:
   collection: '>=1.4.0 <2.0.0'
   intl: '>=0.12.4+2 <0.13.0'
   vector_math: '>=1.4.5 <2.0.0'
-  quiver: '>=0.21.4 <0.22.0'
 
   sky_engine:
     path: ../../bin/cache/pkg/sky_engine
