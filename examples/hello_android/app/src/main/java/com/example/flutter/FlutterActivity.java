@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import org.chromium.base.PathUtils;
-import org.domokit.sky.shell.SkyApplication;
 import org.domokit.sky.shell.SkyMain;
 import org.domokit.sky.shell.PlatformViewAndroid;
 
@@ -25,7 +24,7 @@ public class FlutterActivity extends Activity {
         setContentView(R.layout.flutter_layout);
 
         flutterView = (PlatformViewAndroid) findViewById(R.id.flutter_view);
-        File appBundle = new File(PathUtils.getDataDirectory(this), SkyApplication.APP_BUNDLE);
+        File appBundle = new File(PathUtils.getDataDirectory(this), SkyMain.APP_BUNDLE);
         flutterView.runFromBundle(appBundle.getPath(), null);
     }
 
