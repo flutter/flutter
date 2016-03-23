@@ -79,7 +79,7 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
-    if (!doctor.iosWorkflow.hasIdeviceId)
+    if (!doctor.iosWorkflow.hasIDeviceId)
       return <IOSDevice>[];
 
     List<IOSDevice> devices = [];

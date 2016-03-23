@@ -178,7 +178,9 @@ class BuildApkCommand extends FlutterCommand {
       return 1;
     }
 
-    if (!androidSdk.validateSdkWellFormed(complain: true)) {
+    List<String> validationResult = androidSdk.validateSdkWellFormed();
+    if (validationResult.isNotEmpty) {
+      validationResult.forEach(printError);
       printError('Try re-installing or updating your Android SDK.');
       return 1;
     }
@@ -375,7 +377,9 @@ Future<int> buildAndroid({
     return 1;
   }
 
-  if (!androidSdk.validateSdkWellFormed(complain: true)) {
+  List<String> validationResult = androidSdk.validateSdkWellFormed();
+  if (validationResult.isNotEmpty) {
+    validationResult.forEach(printError);
     printError('Try re-installing or updating your Android SDK.');
     return 1;
   }

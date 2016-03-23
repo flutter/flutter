@@ -6,9 +6,8 @@ import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
 
-class AndroidWorkflow extends Workflow {
-  @override
-  String get label => 'Android toolchain';
+class AndroidWorkflow extends DoctorValidator implements Workflow {
+  AndroidWorkflow() : super('Android toolchain - develop for Android devices');
 
   @override
   bool get appliesToHostPlatform => true;
@@ -17,30 +16,43 @@ class AndroidWorkflow extends Workflow {
   bool get canListDevices => getAdbPath(androidSdk) != null;
 
   @override
-  bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed(complain: false);
+  bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
   ValidationResult validate() {
-    Validator androidValidator = new Validator(
-      label,
-      description: 'develop for Android devices'
-    );
+    List<ValidationMessage> messages = <ValidationMessage>[];
+    ValidationType type = ValidationType.missing;
+    String sdkVersionText;
 
-    ValidationType sdkExists() {
-      return androidSdk == null ? ValidationType.missing : ValidationType.installed;
-    };
+    if (androidSdk == null) {
+      messages.add(new ValidationMessage.error(
+        'Android Studio / Android SDK not found. Download from https://developer.android.com/sdk/\n'
+        '(or visit https://flutter.io/setup/#android-setup for detailed instructions).'
+      ));
+    } else {
+      type = ValidationType.partial;
 
-    androidValidator.addValidator(new Validator(
-      'Android Studio / Android SDK',
-      description: 'enable development for Android devices',
-      resolution: 'Download from https://developer.android.com/sdk/ (or visit '
-        'https://flutter.io/setup/#android-setup for detailed instructions)',
-      validatorFunction: sdkExists
-    ));
+      messages.add(new ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
-    return androidValidator.validate();
+      if (androidSdk.latestVersion != null) {
+        sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
+
+        messages.add(new ValidationMessage('Platform ${androidSdk.latestVersion.platformVersionName}'));
+        messages.add(new ValidationMessage('Build-tools ${androidSdk.latestVersion.buildToolsVersionName}'));
+      }
+
+      List<String> validationResult = androidSdk.validateSdkWellFormed();
+
+      if (validationResult.isEmpty) {
+        type = ValidationType.installed;
+      } else {
+        messages.addAll(validationResult.map((String message) {
+          return new ValidationMessage.error(message);
+        }));
+        messages.add(new ValidationMessage('Try re-installing or updating your Android SDK.'));
+      }
+    }
+
+    return new ValidationResult(type, messages, statusInfo: sdkVersionText);
   }
-
-  @override
-  void diagnose() => validate().print();
 }

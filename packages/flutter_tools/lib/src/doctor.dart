@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show JSON;
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -11,18 +12,19 @@ import 'base/context.dart';
 import 'base/os.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
-
-// TODO(devoncarew): Make it easy to add version information to the `doctor` printout.
+import 'runner/version.dart';
 
 class Doctor {
   Doctor() {
-    _iosWorkflow = new IOSWorkflow();
-    if (_iosWorkflow.appliesToHostPlatform)
-      _validators.add(_iosWorkflow);
+    _validators.add(new _FlutterValidator());
 
     _androidWorkflow = new AndroidWorkflow();
     if (_androidWorkflow.appliesToHostPlatform)
       _validators.add(_androidWorkflow);
+
+    _iosWorkflow = new IOSWorkflow();
+    if (_iosWorkflow.appliesToHostPlatform)
+      _validators.add(_iosWorkflow);
 
     _validators.add(new _AtomValidator());
   }
@@ -55,13 +57,19 @@ class Doctor {
 
     for (DoctorValidator validator in _validators) {
       ValidationResult result = validator.validate();
-      buffer.write('${result.leadingBox} The ${validator.label} is ');
+      buffer.write('${result.leadingBox} ${validator.title} is ');
       if (result.type == ValidationType.missing)
-        buffer.writeln('not installed.');
+        buffer.write('not installed.');
       else if (result.type == ValidationType.partial)
-        buffer.writeln('partially installed; more components are available.');
+        buffer.write('partially installed; more components are available.');
       else
-        buffer.writeln('fully installed.');
+        buffer.write('fully installed.');
+
+      if (result.statusInfo != null)
+        buffer.write(' (${result.statusInfo})');
+
+      buffer.writeln();
+
       if (result.type != ValidationType.installed)
         allGood = false;
     }
@@ -77,11 +85,26 @@ class Doctor {
   /// Print verbose information about the state of installed tooling.
   void diagnose() {
     bool firstLine = true;
+
     for (DoctorValidator validator in _validators) {
       if (!firstLine)
         printStatus('');
       firstLine = false;
-      validator.diagnose();
+
+      ValidationResult result = validator.validate();
+
+      if (result.statusInfo != null)
+        printStatus('${result.leadingBox} ${validator.title} (${result.statusInfo})');
+      else
+        printStatus('${result.leadingBox} ${validator.title}');
+
+      for (ValidationMessage message in result.messages) {
+        if (message.isError) {
+          printStatus('    x ${message.message.replaceAll('\n', '\n      ')}');
+        } else {
+          printStatus('    • ${message.message.replaceAll('\n', '\n      ')}');
+        }
+      }
     }
   }
 
@@ -90,17 +113,8 @@ class Doctor {
   bool get canLaunchAnything => workflows.any((Workflow workflow) => workflow.canLaunchDevices);
 }
 
-abstract class DoctorValidator {
-  String get label;
-
-  ValidationResult validate();
-
-  /// Print verbose information about the state of the workflow.
-  void diagnose();
-}
-
 /// A series of tools and required install steps for a target platform (iOS or Android).
-abstract class Workflow extends DoctorValidator {
+abstract class Workflow {
   /// Whether the workflow applies to this platform (as in, should we ever try and use it).
   bool get appliesToHostPlatform;
 
@@ -117,57 +131,21 @@ enum ValidationType {
   installed
 }
 
-typedef ValidationType ValidationFunction();
+abstract class DoctorValidator {
+  DoctorValidator(this.title);
 
-class Validator {
-  Validator(this.name, { this.description, this.resolution, this.validatorFunction });
+  final String title;
 
-  final String name;
-  final String description;
-  final String resolution;
-  final ValidationFunction validatorFunction;
-
-  List<Validator> _children = <Validator>[];
-
-  ValidationResult validate() {
-    List<ValidationResult> childResults;
-    ValidationType type;
-
-    if (validatorFunction != null)
-      type = validatorFunction();
-
-    childResults = _children.map((Validator child) => child.validate()).toList();
-
-    // If there's no immediate validator, the result we return is synthesized
-    // from the sub-tree of children. This is so we can show that the branch is
-    // not fully installed.
-    if (type == null) {
-      type = _combine(childResults
-        .expand((ValidationResult child) => child._allResults)
-        .map((ValidationResult result) => result.type)
-      );
-    }
-
-    return new ValidationResult(type, this, childResults);
-  }
-
-  ValidationType _combine(Iterable<ValidationType> types) {
-    if (types.contains(ValidationType.missing) && types.contains(ValidationType.installed))
-      return ValidationType.partial;
-    if (types.contains(ValidationType.missing))
-      return ValidationType.missing;
-    return ValidationType.installed;
-  }
-
-  void addValidator(Validator validator) => _children.add(validator);
+  ValidationResult validate();
 }
 
 class ValidationResult {
-  ValidationResult(this.type, this.validator, [this.childResults = const <ValidationResult>[]]);
+  ValidationResult(this.type, this.messages, { this.statusInfo });
 
   final ValidationType type;
-  final Validator validator;
-  final List<ValidationResult> childResults;
+  // A short message about the status.
+  final String statusInfo;
+  final List<ValidationMessage> messages;
 
   String get leadingBox {
     if (type == ValidationType.missing)
@@ -177,49 +155,42 @@ class ValidationResult {
     else
       return '[-]';
   }
+}
 
-  void print([String indent = '']) {
-    printSelf(indent);
+class ValidationMessage {
+  ValidationMessage(this.message) : isError = false;
+  ValidationMessage.error(this.message) : isError = true;
 
-    for (ValidationResult child in childResults)
-      child.print(indent + '  ');
-  }
+  final bool isError;
+  final String message;
 
-  void printSelf([String indent = '']) {
-    String result = indent;
+  @override
+  String toString() => message;
+}
 
-    if (type == ValidationType.missing)
-      result += '$leadingBox ';
-    else if (type == ValidationType.installed)
-      result += '$leadingBox ';
-    else
-      result += '$leadingBox ';
+class _FlutterValidator extends DoctorValidator {
+  _FlutterValidator() : super('Flutter');
 
-    result += '${validator.name} ';
+  @override
+  ValidationResult validate() {
+    List<ValidationMessage> messages = <ValidationMessage>[];
 
-    if (validator.description != null)
-      result += '- ${validator.description} ';
+    FlutterVersion version = FlutterVersion.getVersion();
 
-    if (type == ValidationType.missing)
-      result += '(missing)';
-    else if (type == ValidationType.installed)
-      result += '(installed)';
+    messages.add(new ValidationMessage('Flutter root at ${version.flutterRoot}'));
+    messages.add(new ValidationMessage('Framework revision ${version.frameworkRevisionShort} '
+      '(${version.frameworkAge})'));
+    messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
 
-    printStatus(result);
-
-    if (type == ValidationType.missing && validator.resolution != null)
-      printStatus('$indent    ${validator.resolution}');
-  }
-
-  List<ValidationResult> get _allResults {
-    List<ValidationResult> results = <ValidationResult>[this];
-    results.addAll(childResults);
-    return results;
+    return new ValidationResult(ValidationType.installed, messages,
+      statusInfo: '${version.frameworkRevisionShort} - channel ${version.channel}');
   }
 }
 
 class _AtomValidator extends DoctorValidator {
-  static String getAtomHomePath() {
+  _AtomValidator() : super('Atom - a lightweight development environment for Flutter');
+
+  static String _getAtomHomePath() {
     final Map<String, String> env = Platform.environment;
     if (env['ATOM_HOME'] != null)
       return env['ATOM_HOME'];
@@ -229,42 +200,42 @@ class _AtomValidator extends DoctorValidator {
   }
 
   @override
-  String get label => 'Atom development environment';
-
-  @override
   ValidationResult validate() {
-    Validator atomValidator = new Validator(
-      label,
-      description: 'a lightweight development environment for Flutter'
+    List<ValidationMessage> messages = <ValidationMessage>[];
+
+    int installCount = 0;
+
+    bool atomDirExists = FileSystemEntity.isDirectorySync(_getAtomHomePath());
+    if (!atomDirExists) {
+      messages.add(new ValidationMessage.error(
+        'Atom not installed; download at https://atom.io.'
+      ));
+    } else {
+      installCount++;
+    }
+
+    String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', 'flutter');
+    if (!FileSystemEntity.isDirectorySync(flutterPluginPath)) {
+      messages.add(new ValidationMessage.error(
+        'Flutter plugin not installed; this adds Flutter specific functionality to Atom.\n'
+        'Install the \'flutter\' plugin in Atom or run \'apm install flutter\'.'
+      ));
+    } else {
+      installCount++;
+
+      try {
+        File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
+        dynamic packageInfo = JSON.decode(packageFile.readAsStringSync());
+        String version = packageInfo['version'];
+        messages.add(new ValidationMessage('Atom installed; flutter plugin version $version'));
+      } catch (error) {
+        printTrace('Unable to read flutter plugin version: $error');
+      }
+    }
+
+    return new ValidationResult(
+      installCount == 2 ? ValidationType.installed : installCount == 1 ? ValidationType.partial : ValidationType.missing,
+      messages
     );
-
-    ValidationType atomExists() {
-      bool atomDirExists = FileSystemEntity.isDirectorySync(getAtomHomePath());
-      return atomDirExists ? ValidationType.installed : ValidationType.missing;
-    };
-
-    ValidationType flutterPluginExists() {
-      String flutterPluginPath = path.join(getAtomHomePath(), 'packages', 'flutter');
-      bool flutterPluginExists = FileSystemEntity.isDirectorySync(flutterPluginPath);
-      return flutterPluginExists ? ValidationType.installed : ValidationType.missing;
-    };
-
-    atomValidator.addValidator(new Validator(
-      'Atom editor',
-      resolution: 'Download at https://atom.io',
-      validatorFunction: atomExists
-    ));
-
-    atomValidator.addValidator(new Validator(
-      'Flutter plugin',
-      description: 'adds Flutter specific functionality to Atom',
-      resolution: "Install the 'flutter' plugin in Atom or run 'apm install flutter'",
-      validatorFunction: flutterPluginExists
-    ));
-
-    return atomValidator.validate();
   }
-
-  @override
-  void diagnose() => validate().print();
 }

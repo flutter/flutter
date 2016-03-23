@@ -200,16 +200,8 @@ class FlutterCommandRunner extends CommandRunner {
       }
     }
 
-    if (androidSdk != null) {
-      printTrace('Using Android SDK at ${androidSdk.directory}.');
-      if (androidSdk.latestVersion != null)
-        printTrace('${androidSdk.latestVersion}');
-    }
-
     if (globalResults['version']) {
-      printStatus(getVersion(ArtifactStore.flutterRoot));
-      printStatus('');
-      doctor.summary();
+      printStatus(FlutterVersion.getVersion(ArtifactStore.flutterRoot).toString());
       return new Future<int>.value(0);
     }
 

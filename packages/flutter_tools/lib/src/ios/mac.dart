@@ -54,27 +54,24 @@ class XCode {
     }
   }
 
-  bool _xcodeVersionSatisfactory;
+  String _xcodeVersionText;
+
+  String get xcodeVersionText {
+    if (_xcodeVersionText == null)
+      _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
+    return _xcodeVersionText;
+  }
+
   bool get xcodeVersionSatisfactory {
-    if (_xcodeVersionSatisfactory != null)
-      return _xcodeVersionSatisfactory;
+    RegExp regex = new RegExp(r'Xcode ([0-9.]+)');
 
-    try {
-      String output = runSync(<String>['xcodebuild', '-version']);
-      RegExp regex = new RegExp(r'Xcode ([0-9.]+)');
+    String version = regex.firstMatch(xcodeVersionText).group(1);
+    List<String> components = version.split('.');
 
-      String version = regex.firstMatch(output).group(1);
-      List<String> components = version.split('.');
+    int major = int.parse(components[0]);
+    int minor = components.length == 1 ? 0 : int.parse(components[1]);
 
-      int major = int.parse(components[0]);
-      int minor = components.length == 1 ? 0 : int.parse(components[1]);
-
-      _xcodeVersionSatisfactory = _xcodeVersionCheckValid(major, minor);
-    } catch (error) {
-      _xcodeVersionSatisfactory = false;
-    }
-
-    return _xcodeVersionSatisfactory;
+    return _xcodeVersionCheckValid(major, minor);
   }
 }
 
