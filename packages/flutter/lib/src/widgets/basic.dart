@@ -2593,7 +2593,7 @@ class KeyedSubtree extends StatelessWidget {
     }
 
     assert(!debugItemsHaveDuplicateKeys(itemsWithUniqueKeys));
-    return items;
+    return itemsWithUniqueKeys;
   }
 
 
