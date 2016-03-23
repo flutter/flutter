@@ -9,7 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -201,9 +201,15 @@ class PaintingContext {
     ));
   }
 
-  void pushChildScene(Offset offset, double devicePixelRatio, mojom.ViewLayoutInfo layoutInfo) {
+  void pushChildScene(Offset offset, double devicePixelRatio, int physicalWidth, int physicalHeight, mojom.SceneToken sceneToken) {
     _stopRecordingIfNeeded();
-    _appendLayer(new ChildSceneLayer(offset: offset, devicePixelRatio: devicePixelRatio, layoutInfo: layoutInfo));
+    _appendLayer(new ChildSceneLayer(
+      offset: offset,
+      devicePixelRatio: devicePixelRatio,
+      physicalWidth: physicalWidth,
+      physicalHeight: physicalHeight,
+      sceneToken: sceneToken
+    ));
   }
 
   /// Push a rectangular clip rect.

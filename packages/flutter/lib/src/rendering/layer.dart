@@ -7,7 +7,7 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:mojo_services/mojo/ui/layouts.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
 
 import 'debug.dart';
 
@@ -110,20 +110,22 @@ class PictureLayer extends Layer {
 }
 
 class ChildSceneLayer extends Layer {
-  ChildSceneLayer({ this.offset, this.devicePixelRatio, this.layoutInfo });
+  ChildSceneLayer({ this.offset, this.devicePixelRatio, this.physicalWidth, this.physicalHeight, this.sceneToken });
 
   Offset offset;
   double devicePixelRatio;
-  mojom.ViewLayoutInfo layoutInfo;
+  int physicalWidth;
+  int physicalHeight;
+  mojom.SceneToken sceneToken;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addChildScene(
       offset + layerOffset,
       devicePixelRatio,
-      layoutInfo.size.width,
-      layoutInfo.size.height,
-      layoutInfo.sceneToken.value
+      physicalWidth,
+      physicalHeight,
+      sceneToken.value
     );
   }
 
@@ -131,9 +133,9 @@ class ChildSceneLayer extends Layer {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('offset: $offset');
-    description.add('physicalWidth: ${layoutInfo.size.width}');
-    description.add('physicalHeight: ${layoutInfo.size.height}');
-    description.add('sceneToken.value: ${layoutInfo.sceneToken.value}');
+    description.add('physicalWidth: $physicalWidth');
+    description.add('physicalHeight: $physicalHeight');
+    description.add('sceneToken.value: ${sceneToken.value}');
   }
 }
 
