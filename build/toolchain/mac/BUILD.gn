@@ -207,17 +207,7 @@ template("mac_toolchain") {
   }
 }
 
-mac_toolchain("clang_arm") {
-  toolchain_cpu = "arm"
-  toolchain_os = "mac"
-  prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
-                       root_build_dir)
-  cc = "${goma_prefix}$prefix/clang"
-  cxx = "${goma_prefix}$prefix/clang++"
-  ld = cxx
-  is_clang = true
-}
-
+# Toolchain used for iOS device targets.
 mac_toolchain("ios_clang_arm") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
@@ -230,6 +220,7 @@ mac_toolchain("ios_clang_arm") {
   sysroot_flags = "-isysroot $sysroot -miphoneos-version-min=$ios_deployment_target"
 }
 
+# Toolchain used for iOS simulator targets.
 mac_toolchain("ios_clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
@@ -242,15 +233,7 @@ mac_toolchain("ios_clang_x64") {
   sysroot_flags = "-isysroot $sysroot -mios-simulator-version-min=$ios_deployment_target"
 }
 
-mac_toolchain("arm") {
-  toolchain_cpu = "arm"
-  toolchain_os = "mac"
-  cc = "${goma_prefix}/gcc"
-  cxx = "${goma_prefix}/g++"
-  ld = cxx
-  is_clang = false
-}
-
+# Toolchain used for Mac host targets.
 mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
@@ -262,6 +245,7 @@ mac_toolchain("clang_x64") {
   is_clang = true
 }
 
+# Toolchain used for Mac host (i386) targets.
 mac_toolchain("clang_i386") {
   toolchain_cpu = "i386"
   toolchain_os = "mac"
@@ -271,14 +255,4 @@ mac_toolchain("clang_i386") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
-}
-
-
-mac_toolchain("x64") {
-  toolchain_cpu = "x64"
-  toolchain_os = "mac"
-  cc = "${goma_prefix}/gcc"
-  cxx = "${goma_prefix}/g++"
-  ld = cxx
-  is_clang = false
 }
