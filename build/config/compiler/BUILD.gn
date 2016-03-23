@@ -830,7 +830,9 @@ if (is_win) {
   ]
 
   if (is_mac) {
-    default_warning_flags += [ "-Wnewline-eof" ]
+    # TODO(abarth): Re-enable once https://github.com/domokit/mojo/issues/728
+    #               is fixed.
+    # default_warning_flags += [ "-Wnewline-eof" ]
     if (!is_nacl) {
       # When compiling Objective-C, warns if a method is used whose
       # availability is newer than the deployment target. This is not
