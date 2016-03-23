@@ -51,7 +51,6 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   }
 } else if (is_mac) {
   import("//build/config/mac/mac_sdk.gni")
-
   sysroot = mac_sdk_path
 } else if (is_ios) {
   import("//build/config/ios/ios_sdk.gni")
