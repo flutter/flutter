@@ -30,4 +30,44 @@ void main() {
     expect(leaf.size.width, equals(400.0));
     expect(leaf.size.height, equals(100.0));
   });
+
+  test("BoxConstraints with NaN", () {
+    String result;
+
+    result = 'no exception';
+    try {
+      BoxConstraints constraints = new BoxConstraints(minWidth: double.NAN, maxWidth: double.NAN, minHeight: 2.0, maxHeight: double.NAN);
+      assert(constraints.debugAssertIsNormalized);
+    } on FlutterError catch (e) {
+      result = '$e';
+    }
+    expect(result, equals(
+      'BoxConstraints has NaN values in minWidth, maxWidth, and maxHeight.\n'
+      'BoxConstraints(NaN<=w<=NaN, 2.0<=h<=NaN; NOT NORMALIZED)'
+    ));
+
+    result = 'no exception';
+    try {
+      BoxConstraints constraints = new BoxConstraints(minHeight: double.NAN);
+      assert(constraints.debugAssertIsNormalized);
+    } on FlutterError catch (e) {
+      result = '$e';
+    }
+    expect(result, equals(
+      'BoxConstraints has a NaN value in minHeight.\n'
+      'BoxConstraints(0.0<=w<=Infinity, NaN<=h<=Infinity; NOT NORMALIZED)'
+    ));
+
+    result = 'no exception';
+    try {
+      BoxConstraints constraints = new BoxConstraints(minHeight: double.NAN, maxWidth: 0.0/0.0);
+      assert(constraints.debugAssertIsNormalized);
+    } on FlutterError catch (e) {
+      result = '$e';
+    }
+    expect(result, equals(
+      'BoxConstraints has NaN values in maxWidth and minHeight.\n'
+      'BoxConstraints(0.0<=w<=NaN, NaN<=h<=Infinity; NOT NORMALIZED)'
+    ));
+  });
 }
