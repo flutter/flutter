@@ -25,21 +25,38 @@ bool debugCheckHasMediaQuery(BuildContext context) {
   return true;
 }
 
-bool debugHasDuplicateKeys(Widget parent, Iterable<Widget> children) {
+Key _firstNonUniqueKey(Iterable<Widget> widgets) {
+  Set<Key> keySet = new HashSet<Key>();
+  for (Widget widget in widgets) {
+    assert(widget != null);
+    if (widget.key == null)
+      continue;
+    if (!keySet.add(widget.key))
+      return widget.key;
+  }
+  return null;
+}
+
+bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   assert(() {
-    Set<Key> keySet = new HashSet<Key>();
-    for (Widget child in children) {
-      assert(child != null);
-      if (child.key == null)
-        continue;
-      if (!keySet.add(child.key)) {
-        throw new FlutterError(
-          'Duplicate keys found.\n'
-          'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-          '$parent has multiple children with key "${child.key}".'
-        );
-      }
+    final Key nonUniqueKey = _firstNonUniqueKey(children);
+    if (nonUniqueKey != null) {
+      throw new FlutterError(
+        'Duplicate keys found.\n'
+        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        '$parent has multiple children with key $nonUniqueKey.'
+      );
     }
+    return true;
+  });
+  return false;
+}
+
+bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
+  assert(() {
+    final Key nonUniqueKey = _firstNonUniqueKey(items);
+    if (nonUniqueKey != null)
+      throw new FlutterError('Duplicate key found: $nonUniqueKey.\n');
     return true;
   });
   return false;

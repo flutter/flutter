@@ -173,8 +173,9 @@ abstract class VirtualViewportElement extends RenderObjectElement {
       Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
       newWidgets[i] = new RepaintBoundary(key: key, child: child);
     }
-    assert(!debugHasDuplicateKeys(widget, newWidgets));
-    _materializedChildren = updateChildren(_materializedChildren, newWidgets);
+
+    assert(!debugChildrenHaveDuplicateKeys(widget, newWidgets));
+    _materializedChildren = updateChildren(_materializedChildren, newWidgets.toList());
   }
 
   @override

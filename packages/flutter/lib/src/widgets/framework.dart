@@ -1937,7 +1937,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 /// Instantiation of RenderObjectWidgets that can have a list of children
 class MultiChildRenderObjectElement extends RenderObjectElement {
   MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget) : super(widget) {
-    assert(!debugHasDuplicateKeys(widget, widget.children));
+    assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
   }
 
   @override
