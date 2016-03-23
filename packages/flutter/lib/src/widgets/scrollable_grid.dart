@@ -50,7 +50,7 @@ class _ScrollableGridState extends ScrollableState<ScrollableGrid> {
 
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
     setState(() {
-      scrollTo(scrollBehavior.updateExtents(
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(
         contentExtent: contentExtent,
         containerExtent: containerExtent,
         scrollOffset: scrollOffset

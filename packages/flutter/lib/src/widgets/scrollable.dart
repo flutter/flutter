@@ -226,10 +226,12 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
     _scrollOffset = PageStorage.of(context)?.readState(context) ?? config.initialScrollOffset ?? 0.0;
   }
 
+  Simulation _simulation;
   AnimationController _controller;
 
   @override
   void dispose() {
+    _simulation = null;
     _controller.stop();
     super.dispose();
   }
@@ -358,6 +360,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
       return new Future<Null>.value();
 
     if (duration == null) {
+      _simulation = null;
       _controller.stop();
       _setScrollOffset(newScrollOffset);
       return new Future<Null>.value();
@@ -368,10 +371,25 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Future<Null> _animateTo(double newScrollOffset, Duration duration, Curve curve) {
+    _simulation = null;
     _controller.stop();
     _controller.value = scrollOffset;
     _startScroll();
     return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then(_endScroll);
+  }
+
+  void didUpdateScrollBehavior(double newScrollOffset) {
+    if (newScrollOffset == _scrollOffset)
+      return;
+    if (_numberOfInProgressScrolls > 0) {
+      if (_simulation != null) {
+        double dx = _simulation.dx(_controller.lastElapsedDuration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND);
+        // TODO(abarth): We should be consistent about the units we use for velocity (i.e., per second).
+        _startToEndAnimation(dx / Duration.MILLISECONDS_PER_SECOND);
+      }
+      return;
+    }
+    scrollTo(newScrollOffset);
   }
 
   /// Fling the scroll offset with the given velocity.
@@ -390,17 +408,18 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   /// Calling this function starts a physics-based animation of the scroll
   /// offset either to a snap point or to within the scrolling bounds. The
   /// physics simulation used is determined by the scroll behavior.
-      Future<Null> settleScrollOffset() {
+  Future<Null> settleScrollOffset() {
     return _startToEndAnimation(0.0);
   }
 
   Future<Null> _startToEndAnimation(double scrollVelocity) {
+    _simulation = null;
     _controller.stop();
-    Simulation simulation = _createSnapSimulation(scrollVelocity) ?? _createFlingSimulation(scrollVelocity);
-    if (simulation == null)
+    _simulation = _createSnapSimulation(scrollVelocity) ?? _createFlingSimulation(scrollVelocity);
+    if (_simulation == null)
       return new Future<Null>.value();
     _startScroll();
-    return _controller.animateWith(simulation).then(_endScroll);
+    return _controller.animateWith(_simulation).then(_endScroll);
   }
 
   /// Whether this scrollable should attempt to snap scroll offsets.
@@ -471,6 +490,7 @@ abstract class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragDown(_) {
+    _simulation = null;
     _controller.stop();
   }
 
@@ -653,7 +673,7 @@ class _ScrollableViewportState extends ScrollableState<ScrollableViewport> {
     // render object via our return value.
     _viewportSize = config.scrollDirection == Axis.vertical ? dimensions.containerSize.height : dimensions.containerSize.width;
     _childSize = config.scrollDirection == Axis.vertical ? dimensions.contentSize.height : dimensions.contentSize.width;
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: _childSize,
       containerExtent: _viewportSize,
       scrollOffset: scrollOffset
@@ -819,7 +839,7 @@ class ScrollableMixedWidgetListState extends ScrollableState<ScrollableMixedWidg
     // setState() callback because we are called during layout and all
     // we're updating is the new offset, which we are providing to the
     // render object via our return value.
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: dimensions.contentSize.height,
       containerExtent: dimensions.containerSize.height,
       scrollOffset: scrollOffset

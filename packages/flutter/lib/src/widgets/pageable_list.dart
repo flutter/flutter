@@ -147,7 +147,7 @@ class PageableListState<T extends PageableList> extends ScrollableState<T> {
 
   void _updateScrollBehavior() {
     config.scrollableListPainter?.contentExtent = _itemCount.toDouble();
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: _itemCount.toDouble(),
       containerExtent: 1.0,
       scrollOffset: scrollOffset

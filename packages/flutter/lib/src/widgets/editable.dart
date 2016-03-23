@@ -235,7 +235,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     // render object via our return value.
     _containerWidth = dimensions.containerSize.width;
     _contentWidth = dimensions.contentSize.width;
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: _contentWidth,
       containerExtent: _containerWidth,
       // Set the scroll offset to match the content width so that the
