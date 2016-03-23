@@ -7,6 +7,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'debug.dart';
 import 'framework.dart';
 
 export 'package:flutter/animation.dart';
@@ -2574,6 +2575,27 @@ class KeyedSubtree extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   final Widget child;
+
+  /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
+  /// its list index + baseIndex.
+  static List<Widget> ensureUniqueKeysForList(Iterable<Widget> items, { int baseIndex: 0 }) {
+    if (items == null || items.isEmpty)
+      return items;
+
+    List<Widget> itemsWithUniqueKeys = <Widget>[];
+    int itemIndex = baseIndex;
+    for(Widget item in items) {
+      itemsWithUniqueKeys.add(new KeyedSubtree(
+        key: item.key != null ? new ValueKey<Key>(item.key) : new ValueKey<int>(itemIndex),
+        child: item
+      ));
+      itemIndex += 1;
+    }
+
+    assert(!debugItemsHaveDuplicateKeys(itemsWithUniqueKeys));
+    return items;
+  }
+
 
   @override
   Widget build(BuildContext context) => child;
