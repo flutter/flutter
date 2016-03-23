@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' hide BASE64;
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
 import 'package:bignum/bignum.dart';
-import 'package:crypto/crypto.dart';
+import 'package:crypto/crypto.dart' hide BASE64, Digest;
 import 'package:pointycastle/pointycastle.dart';
 
 export 'package:pointycastle/pointycastle.dart' show AsymmetricKeyPair, PublicKey, PrivateKey;
@@ -82,9 +82,7 @@ Uint8List serializeManifest(Map<String, dynamic> manifestDescriptor, ECPublicKey
   if (publicKey != null)
     outputManifest['key'] = BASE64.encode(publicKey.Q.getEncoded());
 
-  SHA256 sha = new SHA256();
-  sha.add(zipBytes);
-  List<int> hash = sha.close();
+  List<int> hash = sha256.convert(zipBytes).bytes;
 
   BigInteger zipHashInt = new BigInteger.fromBytes(1, hash);
   outputManifest['content-hash'] = zipHashInt.intValue();

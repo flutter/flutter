@@ -7,10 +7,15 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
+String hex(List<int> bytes) {
+  StringBuffer result = new StringBuffer();
+  for (int part in bytes)
+    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+  return result.toString();
+}
+
 String calculateSha(File file) {
-  SHA1 sha1 = new SHA1();
-  sha1.add(file.readAsBytesSync());
-  return CryptoUtils.bytesToHex(sha1.close());
+  return hex(sha1.convert(file.readAsBytesSync()).bytes);
 }
 
 /// Convert `foo_bar` to `fooBar`.
