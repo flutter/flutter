@@ -18,7 +18,7 @@ class IconData {
   int get hashCode => codePoint.hashCode;
 
   @override
-  String toString() => 'IconData(codePoint: $codePoint)';
+  String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
 }
 
 /// Identifiers for the supported material design icons.
