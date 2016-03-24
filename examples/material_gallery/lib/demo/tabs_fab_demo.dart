@@ -78,7 +78,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
 
         return new Container(
           key: new ValueKey<String>(page.label),
-          padding: const EdgeInsets.TRBL(48.0, 48.0, 96.0, 48.0),
+          padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
           child: new Card(
             child: new Center(
               child: new Text(page.label, style: textStyle)
