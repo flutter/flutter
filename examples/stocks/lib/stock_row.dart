@@ -72,7 +72,7 @@ class StockRow extends StatelessWidget {
       onDoubleTap: _getHandler(onDoubleTap),
       onLongPress: _getHandler(onLongPressed),
       child: new Container(
-        padding: const EdgeInsets.TRBL(16.0, 16.0, 20.0, 16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
         decoration: new BoxDecoration(
           border: new Border(
             bottom: new BorderSide(color: Theme.of(context).dividerColor)

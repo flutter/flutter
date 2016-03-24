@@ -12,7 +12,14 @@ import 'basic_types.dart';
 /// example, the padding inside a box can be represented using this class.
 class EdgeInsets {
   /// Constructs insets from offsets from the top, right, bottom and left.
+  ///
+  /// We'll be removing this function sometime soon. Please use
+  /// [EdgeInsets.fromLTRB] instead.
+  @Deprecated('soon. Use fromLTRB instead.')
   const EdgeInsets.TRBL(this.top, this.right, this.bottom, this.left);
+
+  /// Constructs insets from offsets from the left, top, right, and bottom.
+  const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Constructs insets where all the offsets are value.
   const EdgeInsets.all(double value)
@@ -56,63 +63,63 @@ class EdgeInsets {
   Size get collapsedSize => new Size(horizontal, vertical);
 
   /// An EdgeInsets with top and bottom as well as left and right flipped.
-  EdgeInsets get flipped => new EdgeInsets.TRBL(bottom, left, top, right);
+  EdgeInsets get flipped => new EdgeInsets.fromLTRB(left, top, right, bottom);
 
   Rect inflateRect(Rect rect) {
     return new Rect.fromLTRB(rect.left - left, rect.top - top, rect.right + right, rect.bottom + bottom);
   }
 
   EdgeInsets operator -(EdgeInsets other) {
-    return new EdgeInsets.TRBL(
+    return new EdgeInsets.fromLTRB(
+      left - other.left,
       top - other.top,
       right - other.right,
-      bottom - other.bottom,
-      left - other.left
+      bottom - other.bottom
     );
   }
 
   EdgeInsets operator +(EdgeInsets other) {
-    return new EdgeInsets.TRBL(
+    return new EdgeInsets.fromLTRB(
+      left + other.left,
       top + other.top,
       right + other.right,
-      bottom + other.bottom,
-      left + other.left
+      bottom + other.bottom
     );
   }
 
   EdgeInsets operator *(double other) {
-    return new EdgeInsets.TRBL(
+    return new EdgeInsets.fromLTRB(
+      left * other,
       top * other,
       right * other,
-      bottom * other,
-      left * other
+      bottom * other
     );
   }
 
   EdgeInsets operator /(double other) {
-    return new EdgeInsets.TRBL(
+    return new EdgeInsets.fromLTRB(
+      left / other,
       top / other,
       right / other,
-      bottom / other,
-      left / other
+      bottom / other
     );
   }
 
   EdgeInsets operator ~/(double other) {
-    return new EdgeInsets.TRBL(
+    return new EdgeInsets.fromLTRB(
+      (left ~/ other).toDouble(),
       (top ~/ other).toDouble(),
       (right ~/ other).toDouble(),
-      (bottom ~/ other).toDouble(),
-      (left ~/ other).toDouble()
+      (bottom ~/ other).toDouble()
     );
   }
 
   EdgeInsets operator %(double other) {
-    return new EdgeInsets.TRBL(
+    return new EdgeInsets.fromLTRB(
+      left % other,
       top % other,
       right % other,
-      bottom % other,
-      left % other
+      bottom % other
     );
   }
 
@@ -126,16 +133,16 @@ class EdgeInsets {
       return b * t;
     if (b == null)
       return a * (1.0 - t);
-    return new EdgeInsets.TRBL(
+    return new EdgeInsets.fromLTRB(
+      ui.lerpDouble(a.left, b.left, t),
       ui.lerpDouble(a.top, b.top, t),
       ui.lerpDouble(a.right, b.right, t),
-      ui.lerpDouble(a.bottom, b.bottom, t),
-      ui.lerpDouble(a.left, b.left, t)
+      ui.lerpDouble(a.bottom, b.bottom, t)
     );
   }
 
   /// An EdgeInsets with zero offsets in each direction.
-  static const EdgeInsets zero = const EdgeInsets.TRBL(0.0, 0.0, 0.0, 0.0);
+  static const EdgeInsets zero = const EdgeInsets.all(0.0);
 
   @override
   bool operator ==(dynamic other) {

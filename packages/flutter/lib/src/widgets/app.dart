@@ -105,7 +105,7 @@ class WidgetsApp extends StatefulWidget {
 }
 
 EdgeInsets _getPadding(ui.WindowPadding padding) {
-  return new EdgeInsets.TRBL(padding.top, padding.right, padding.bottom, padding.left);
+  return new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, padding.bottom);
 }
 
 class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingObserver {

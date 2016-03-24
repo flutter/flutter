@@ -112,7 +112,7 @@ class Border {
 
   /// The widths of the sides of this border represented as an EdgeInsets.
   EdgeInsets get dimensions {
-    return new EdgeInsets.TRBL(top.width, right.width, bottom.width, left.width);
+    return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
   /// Whether all four sides of the border are identical.

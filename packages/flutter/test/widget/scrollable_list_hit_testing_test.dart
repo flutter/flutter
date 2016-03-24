@@ -100,7 +100,7 @@ void main() {
         new ScrollableList(
           key: new GlobalKey(),
           itemExtent: 290.0,
-          padding: new EdgeInsets.TRBL(20.0, 15.0, 10.0, 5.0),
+          padding: new EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map((int item) {
             return new Container(
               child: new GestureDetector(
@@ -135,7 +135,7 @@ void main() {
           key: new GlobalKey(),
           itemExtent: 290.0,
           scrollAnchor: ViewportAnchor.end,
-          padding: new EdgeInsets.TRBL(20.0, 15.0, 10.0, 5.0),
+          padding: new EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map((int item) {
             return new Container(
               child: new GestureDetector(
