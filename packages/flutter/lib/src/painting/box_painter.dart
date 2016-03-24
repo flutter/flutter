@@ -29,6 +29,7 @@ class BorderSide {
   /// A black border side of zero width.
   static const BorderSide none = const BorderSide(width: 0.0);
 
+  /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
     Color color,
     double width
@@ -39,6 +40,7 @@ class BorderSide {
     );
   }
 
+  /// Linearly interpolate between two border sides.
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
     assert(a != null);
     assert(b != null);
@@ -80,7 +82,7 @@ class Border {
     Color color: const Color(0xFF000000),
     double width: 1.0
   }) {
-    BorderSide side = new BorderSide(color: color, width: width);
+    final BorderSide side = new BorderSide(color: color, width: width);
     return new Border(top: side, right: side, bottom: side, left: side);
   }
 
@@ -101,6 +103,29 @@ class Border {
     return new EdgeInsets.TRBL(top.width, right.width, bottom.width, left.width);
   }
 
+  /// Whether all four sides of the border are identical.
+  bool get isUniform {
+    assert(top != null);
+    assert(right != null);
+    assert(bottom != null);
+    assert(left != null);
+
+    final Color topColor = top.color;
+    if (right.color != topColor ||
+        bottom.color != topColor ||
+        left.color != topColor)
+      return false;
+
+    final double topWidth = top.width;
+    if (right.width != topWidth ||
+        bottom.width != topWidth ||
+        left.width != topWidth)
+      return false;
+
+    return true;
+  }
+
+  /// Creates a new border with the widths of this border multiplied by [t].
   Border scale(double t) {
     return new Border(
       top: top.copyWith(width: t * top.width),
@@ -110,6 +135,7 @@ class Border {
     );
   }
 
+  /// Linearly interpolate between two borders.
   static Border lerp(Border a, Border b, double t) {
     if (a == null && b == null)
       return null;
@@ -129,7 +155,7 @@ class Border {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! Border)
+    if (other.runtimeType != runtimeType)
       return false;
     final Border typedOther = other;
     return top == typedOther.top &&
@@ -1021,25 +1047,6 @@ class _BoxDecorationPainter extends BoxPainter {
     return _cachedBackgroundPaint;
   }
 
-  bool get _hasUniformBorder {
-    Color color = _decoration.border.top.color;
-    bool hasUniformColor =
-      _decoration.border.right.color == color &&
-      _decoration.border.bottom.color == color &&
-      _decoration.border.left.color == color;
-
-    if (!hasUniformColor)
-      return false;
-
-    double width = _decoration.border.top.width;
-    bool hasUniformWidth =
-      _decoration.border.right.width == width &&
-      _decoration.border.bottom.width == width &&
-      _decoration.border.left.width == width;
-
-    return hasUniformWidth;
-  }
-
   void _paintBox(Canvas canvas, Rect rect, Paint paint) {
     switch (_decoration.shape) {
       case BoxShape.circle:
@@ -1098,7 +1105,7 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_decoration.border == null)
       return;
 
-    if (_hasUniformBorder) {
+    if (_decoration.border.isUniform) {
       if (_decoration.borderRadius != null) {
         _paintBorderWithRadius(canvas, rect);
         return;
@@ -1158,7 +1165,7 @@ class _BoxDecorationPainter extends BoxPainter {
   }
 
   void _paintBorderWithRadius(Canvas canvas, Rect rect) {
-    assert(_hasUniformBorder);
+    assert(_decoration.border.isUniform);
     assert(_decoration.shape == BoxShape.rectangle);
     Color color = _decoration.border.top.color;
     double width = _decoration.border.top.width;
@@ -1170,7 +1177,7 @@ class _BoxDecorationPainter extends BoxPainter {
   }
 
   void _paintBorderWithCircle(Canvas canvas, Rect rect) {
-    assert(_hasUniformBorder);
+    assert(_decoration.border.isUniform);
     assert(_decoration.shape == BoxShape.circle);
     assert(_decoration.borderRadius == null);
     double width = _decoration.border.top.width;
