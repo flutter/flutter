@@ -46,20 +46,20 @@ class _SteppedWidgetFlutterBinding extends WidgetFlutterBinding {
   // Cloned from Renderer.beginFrame() but with early-exit semantics.
   void _beginFrame() {
     assert(renderView != null);
-    RenderObject.flushLayout();
+    pipelineOwner.flushLayout();
     if (phase == EnginePhase.layout)
       return;
-    RenderObject.flushCompositingBits();
+    pipelineOwner.flushCompositingBits();
     if (phase == EnginePhase.compositingBits)
       return;
-    RenderObject.flushPaint();
+    pipelineOwner.flushPaint();
     if (phase == EnginePhase.paint)
       return;
     renderView.compositeFrame(); // this sends the bits to the GPU
     if (phase == EnginePhase.composite)
       return;
     if (SemanticsNode.hasListeners) {
-      RenderObject.flushSemantics();
+      pipelineOwner.flushSemantics();
       if (phase == EnginePhase.flushSemantics)
         return;
       SemanticsNode.sendSemanticsTree();

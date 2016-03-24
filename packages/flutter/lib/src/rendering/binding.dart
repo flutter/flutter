@@ -48,6 +48,10 @@ abstract class Renderer extends Object with Scheduler, Services
     handleMetricsChanged(); // configures renderView's metrics
   }
 
+  /// The render tree's owner, which maintains dirty state for layout,
+  /// composite, paint, and accessibility semantics
+  final PipelineOwner pipelineOwner = new PipelineOwner();
+
   /// The render tree that's attached to the output surface.
   RenderView get renderView => _renderView;
   RenderView _renderView;
@@ -58,7 +62,7 @@ abstract class Renderer extends Object with Scheduler, Services
     if (_renderView != null)
       _renderView.detach();
     _renderView = value;
-    _renderView.attach();
+    _renderView.attach(pipelineOwner);
   }
 
   void handleMetricsChanged() {
@@ -81,12 +85,12 @@ abstract class Renderer extends Object with Scheduler, Services
   /// Pump the rendering pipeline to generate a frame.
   void beginFrame() {
     assert(renderView != null);
-    RenderObject.flushLayout();
-    RenderObject.flushCompositingBits();
-    RenderObject.flushPaint();
+    pipelineOwner.flushLayout();
+    pipelineOwner.flushCompositingBits();
+    pipelineOwner.flushPaint();
     renderView.compositeFrame(); // this sends the bits to the GPU
     if (SemanticsNode.hasListeners) {
-      RenderObject.flushSemantics();
+      pipelineOwner.flushSemantics();
       SemanticsNode.sendSemanticsTree();
     }
   }

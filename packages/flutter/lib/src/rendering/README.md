@@ -20,8 +20,8 @@ The last phase of a frame is the Semantics phase. This only occurs if
 a semantics server has been installed, for example if the user is
 using an accessibility tool.
 
-Each frame, the semantics phase starts with a call to the static
-`RenderObject.flushSemantics()` method from the `Renderer` binding's
+Each frame, the semantics phase starts with a call to the
+`PipelineOwner.flushSemantics()` method from the `Renderer` binding's
 `beginFrame()` method.
 
 Each node marked as needing semantics (which initially is just the

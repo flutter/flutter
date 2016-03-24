@@ -565,7 +565,8 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(currentSemantics == null);
     assert(parentSemantics == null);
     owner._semantics ??= new SemanticsNode.root(
-      handler: owner is SemanticActionHandler ? owner as dynamic : null
+      handler: owner is SemanticActionHandler ? owner as dynamic : null,
+      owner: owner.owner
     );
     SemanticsNode node = owner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
@@ -675,6 +676,105 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
       );
     }
   }
+}
+
+class PipelineOwner {
+
+  List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
+  bool _debugDoingLayout = false;
+  bool get debugDoingLayout => _debugDoingLayout;
+  /// Update the layout information for all dirty render objects.
+  ///
+  /// This function is one of the core stages of the rendering pipeline. Layout
+  /// information is cleaned prior to painting so that render objects will
+  /// appear on screen in their up-to-date locations.
+  ///
+  /// See [FlutterBinding] for an example of how this function is used.
+  void flushLayout() {
+    Timeline.startSync('Layout');
+    _debugDoingLayout = true;
+    try {
+      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
+      while (_nodesNeedingLayout.isNotEmpty) {
+        List<RenderObject> dirtyNodes = _nodesNeedingLayout;
+        _nodesNeedingLayout = <RenderObject>[];
+        for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
+          if (node._needsLayout && node.owner == this)
+            node._layoutWithoutResize();
+        }
+      }
+    } finally {
+      _debugDoingLayout = false;
+      Timeline.finishSync();
+    }
+  }
+
+  List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
+  /// Updates the [needsCompositing] bits.
+  ///
+  /// Called as part of the rendering pipeline after [flushLayout] and before
+  /// [flushPaint].
+  void flushCompositingBits() {
+    Timeline.startSync('Compositing Bits');
+    _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+    for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
+      if (node.owner == this)
+        node._updateCompositingBits();
+    }
+    _nodesNeedingCompositingBitsUpdate.clear();
+    Timeline.finishSync();
+  }
+
+  List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
+  bool _debugDoingPaint = false;
+  bool get debugDoingPaint => _debugDoingPaint;
+  /// Update the display lists for all render objects.
+  ///
+  /// This function is one of the core stages of the rendering pipeline.
+  /// Painting occurs after layout and before the scene is recomposited so that
+  /// scene is composited with up-to-date display lists for every render object.
+  ///
+  /// See [FlutterBinding] for an example of how this function is used.
+  void flushPaint() {
+    Timeline.startSync('Paint');
+    _debugDoingPaint = true;
+    try {
+      List<RenderObject> dirtyNodes = _nodesNeedingPaint;
+      _nodesNeedingPaint = <RenderObject>[];
+      // Sort the dirty nodes in reverse order (deepest first).
+      for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
+        assert(node._needsPaint);
+        if (node.owner == this)
+          PaintingContext.repaintCompositedChild(node);
+      };
+      assert(_nodesNeedingPaint.length == 0);
+    } finally {
+      _debugDoingPaint = false;
+      Timeline.finishSync();
+    }
+  }
+
+  bool _semanticsEnabled = false;
+  bool _debugDoingSemantics = false;
+  List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
+
+  void flushSemantics() {
+    Timeline.startSync('Semantics');
+    assert(_semanticsEnabled);
+    assert(() { _debugDoingSemantics = true; return true; });
+    try {
+      _nodesNeedingSemantics.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+      for (RenderObject node in _nodesNeedingSemantics) {
+        if (node._needsSemanticsUpdate && node.owner == this)
+          node._updateSemantics();
+      }
+    } finally {
+      _nodesNeedingSemantics.clear();
+      assert(() { _debugDoingSemantics = false; return true; });
+      Timeline.finishSync();
+    }
+  }
+
 }
 
 /// An object in the render tree.
@@ -817,8 +917,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  static bool _debugDoingLayout = false;
-  static bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingThisResize = false;
   bool get debugDoingThisResize => _debugDoingThisResize;
   bool _debugDoingThisLayout = false;
@@ -841,7 +939,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  static List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
+  @override
+  PipelineOwner get owner => super.owner;
+
   bool _needsLayout = true;
   /// Whether this render object's layout information is dirty.
   bool get needsLayout => _needsLayout;
@@ -918,7 +1018,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
           debugPrintStack();
         return true;
       });
-      _nodesNeedingLayout.add(this);
+      if (owner != null)
+        owner._nodesNeedingLayout.add(this);
       Scheduler.instance.ensureVisualUpdate();
     }
   }
@@ -942,41 +1043,16 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void scheduleInitialLayout() {
     assert(attached);
     assert(parent is! RenderObject);
-    assert(!_debugDoingLayout);
+    assert(!owner._debugDoingLayout);
     assert(_relayoutSubtreeRoot == null);
     _relayoutSubtreeRoot = this;
     assert(() {
       _debugCanParentUseSize = false;
       return true;
     });
-    _nodesNeedingLayout.add(this);
+    owner._nodesNeedingLayout.add(this);
   }
 
-  /// Update the layout information for all dirty render objects.
-  ///
-  /// This function is one of the core stages of the rendering pipeline. Layout
-  /// information is cleaned prior to painting so that render objects will
-  /// appear on screen in their up-to-date locations.
-  ///
-  /// See [FlutterBinding] for an example of how this function is used.
-  static void flushLayout() {
-    Timeline.startSync('Layout');
-    _debugDoingLayout = true;
-    try {
-      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
-      while (_nodesNeedingLayout.isNotEmpty) {
-        List<RenderObject> dirtyNodes = _nodesNeedingLayout;
-        _nodesNeedingLayout = <RenderObject>[];
-        for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
-          if (node._needsLayout && node.attached)
-            node._layoutWithoutResize();
-        }
-      }
-    } finally {
-      _debugDoingLayout = false;
-      Timeline.finishSync();
-    }
-  }
   void _layoutWithoutResize() {
     assert(_relayoutSubtreeRoot == this);
     RenderObject debugPreviousActiveLayout;
@@ -1186,15 +1262,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // PAINTING
 
-  static bool _debugDoingPaint = false;
-  static bool get debugDoingPaint => _debugDoingPaint;
   bool _debugDoingThisPaint = false;
   bool get debugDoingThisPaint => _debugDoingThisPaint;
   static RenderObject _debugActivePaint;
   static RenderObject get debugActivePaint => _debugActivePaint;
-
-  static List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
-  static List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
 
   /// Whether this render object repaints separately from its parent.
   ///
@@ -1266,22 +1337,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     // parent is fine (or there isn't one), but we are dirty
-    _nodesNeedingCompositingBitsUpdate.add(this);
-  }
-
-  /// Updates the [needsCompositing] bits.
-  ///
-  /// Called as part of the rendering pipeline after [flushLayout] and before
-  /// [flushPaint].
-  static void flushCompositingBits() {
-    Timeline.startSync('Compositing Bits');
-    _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
-    for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
-      if (node.attached)
-        node._updateCompositingBits();
-    }
-    _nodesNeedingCompositingBitsUpdate.clear();
-    Timeline.finishSync();
+    if (owner != null)
+      owner._nodesNeedingCompositingBitsUpdate.add(this);
   }
 
   bool _needsCompositing; // initialised in the constructor
@@ -1325,7 +1382,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// This mechanism batches the painting work so that multiple sequential
   /// writes are coalesced, removing redundant computation.
   void markNeedsPaint() {
-    assert(!debugDoingPaint);
+    assert(owner == null || !owner.debugDoingPaint);
     if (!attached)
       return; // Don't try painting things that aren't in the hierarchy
     if (_needsPaint)
@@ -1340,7 +1397,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
       assert(_layer != null);
-      _nodesNeedingPaint.add(this);
+      if (owner != null)
+        owner._nodesNeedingPaint.add(this);
       Scheduler.instance.ensureVisualUpdate();
     } else if (parent is RenderObject) {
       // We don't have our own layer; one of our ancestors will take
@@ -1359,32 +1417,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  /// Update the display lists for all render objects.
-  ///
-  /// This function is one of the core stages of the rendering pipeline.
-  /// Painting occurs after layout and before the scene is recomposited so that
-  /// scene is composited with up-to-date display lists for every render object.
-  ///
-  /// See [FlutterBinding] for an example of how this function is used.
-  static void flushPaint() {
-    Timeline.startSync('Paint');
-    _debugDoingPaint = true;
-    try {
-      List<RenderObject> dirtyNodes = _nodesNeedingPaint;
-      _nodesNeedingPaint = <RenderObject>[];
-      // Sort the dirty nodes in reverse order (deepest first).
-      for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
-        assert(node._needsPaint);
-        if (node.attached)
-          PaintingContext.repaintCompositedChild(node);
-      };
-      assert(_nodesNeedingPaint.length == 0);
-    } finally {
-      _debugDoingPaint = false;
-      Timeline.finishSync();
-    }
-  }
-
   /// Bootstrap the rendering pipeline by scheduling the very first paint.
   ///
   /// Requires that this render object is attached, is the root of the render
@@ -1394,12 +1426,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void scheduleInitialPaint(ContainerLayer rootLayer) {
     assert(attached);
     assert(parent is! RenderObject);
-    assert(!_debugDoingPaint);
+    assert(!owner._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layer == null);
     _layer = rootLayer;
     assert(_needsPaint);
-    _nodesNeedingPaint.add(this);
+    owner._nodesNeedingPaint.add(this);
   }
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(!_debugDoingThisPaint);
@@ -1483,10 +1515,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // SEMANTICS
 
-  static bool _semanticsEnabled = false;
-  static bool _debugDoingSemantics = false;
-  static List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
-
   /// Bootstrap the semantics reporting mechanism by marking this node
   /// as needing a semantics update.
   ///
@@ -1497,30 +1525,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void scheduleInitialSemantics() {
     assert(attached);
     assert(parent is! RenderObject);
-    assert(!_debugDoingSemantics);
+    assert(!owner._debugDoingSemantics);
     assert(_semantics == null);
     assert(_needsSemanticsUpdate);
-    assert(_semanticsEnabled == false);
-    _semanticsEnabled = true;
-    _nodesNeedingSemantics.add(this);
+    assert(owner._semanticsEnabled == false);
+    owner._semanticsEnabled = true;
+    owner._nodesNeedingSemantics.add(this);
     Scheduler.instance.ensureVisualUpdate();
-  }
-
-  static void flushSemantics() {
-    Timeline.startSync('Semantics');
-    assert(_semanticsEnabled);
-    assert(() { _debugDoingSemantics = true; return true; });
-    try {
-      _nodesNeedingSemantics.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
-      for (RenderObject node in _nodesNeedingSemantics) {
-        if (node._needsSemanticsUpdate)
-          node._updateSemantics();
-      }
-    } finally {
-      _nodesNeedingSemantics.clear();
-      assert(() { _debugDoingSemantics = false; return true; });
-      Timeline.finishSync();
-    }
   }
 
   /// Whether this RenderObject introduces a new box for accessibility purposes.
@@ -1567,8 +1578,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// 'noGeometry: true' when the geometry did change, the semantic
   /// tree will be out of date.
   void markNeedsSemanticsUpdate({ bool onlyChanges: false, bool noGeometry: false }) {
-    assert(!_debugDoingSemantics);
-    if (!_semanticsEnabled || !attached || (_needsSemanticsUpdate && onlyChanges && (_needsSemanticsGeometryUpdate || noGeometry)))
+    assert(!attached || !owner._debugDoingSemantics);
+    if (!attached || !owner._semanticsEnabled || (_needsSemanticsUpdate && onlyChanges && (_needsSemanticsGeometryUpdate || noGeometry)))
       return;
     if (!noGeometry && (_semantics == null || (_semantics.hasChildren && _semantics.wasAffectedByClip))) {
       // Since the geometry might have changed, we need to make sure to reapply any clips.
@@ -1588,7 +1599,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        _nodesNeedingSemantics.add(node);
+        owner._nodesNeedingSemantics.add(node);
       }
     } else {
       // The shape of the semantics tree around us may have changed.
@@ -1607,7 +1618,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       node._semantics?.reset();
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        _nodesNeedingSemantics.add(node);
+        owner._nodesNeedingSemantics.add(node);
       }
     }
   }
@@ -1820,10 +1831,10 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   }
 
   @override
-  void attach() {
-    super.attach();
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     if (_child != null)
-      _child.attach();
+      _child.attach(owner);
   }
 
   @override
@@ -2040,11 +2051,11 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   }
 
   @override
-  void attach() {
-    super.attach();
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     ChildType child = _firstChild;
     while (child != null) {
-      child.attach();
+      child.attach(owner);
       final ParentDataType childParentData = child.parentData;
       child = childParentData.nextSibling;
     }

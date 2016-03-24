@@ -168,8 +168,8 @@ class RenderViewportBase extends RenderBox implements HasMainAxis {
   }
 
   @override
-  void attach() {
-    super.attach();
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     _overlayPainter?.attach(this);
   }
 

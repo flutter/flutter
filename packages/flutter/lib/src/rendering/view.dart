@@ -33,7 +33,7 @@ class ViewConfiguration {
 /// The root of the render tree.
 ///
 /// The view represents the total output surface of the render tree and handles
-/// bootstraping the rendering pipeline. The view has a unique child
+/// bootstrapping the rendering pipeline. The view has a unique child
 /// [RenderBox], which is required to fill the entire output surface.
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
   RenderView({

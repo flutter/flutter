@@ -411,12 +411,7 @@ class BoxHitTestEntry extends HitTestEntry {
 /// Parent data used by [RenderBox] and its subclasses.
 class BoxParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system
-  Offset get offset => _offset;
-  Offset _offset = Offset.zero;
-  void set offset(Offset value) {
-    assert(RenderObject.debugDoingLayout);
-    _offset = value;
-  }
+  Offset offset = Offset.zero;
 
   @override
   String toString() => 'offset=$offset';
@@ -579,9 +574,9 @@ abstract class RenderBox extends RenderObject {
     assert(!_debugDoingBaseline);
     assert(() {
       final RenderObject parent = this.parent;
-      if (RenderObject.debugDoingLayout)
+      if (owner.debugDoingLayout)
         return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
-      if (RenderObject.debugDoingPaint)
+      if (owner.debugDoingPaint)
         return ((RenderObject.debugActivePaint == parent) && parent.debugDoingThisPaint) ||
                ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
       assert(parent == this.parent);

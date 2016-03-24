@@ -230,8 +230,8 @@ class RenderChildView extends RenderBox {
   }
 
   @override
-  void attach() {
-    super.attach();
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     _child?._attach();
   }
 
