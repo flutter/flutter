@@ -8,6 +8,7 @@
 
 import("../goma.gni")
 import("//build/config/ios/ios_sdk.gni")
+import("//build/config/mac/mac_sdk.gni")
 
 assert(host_os == "mac")
 
@@ -217,7 +218,7 @@ mac_toolchain("ios_clang_arm") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
-  sysroot_flags = "-isysroot $sysroot -miphoneos-version-min=$ios_deployment_target"
+  sysroot_flags = "-isysroot $ios_device_sdk_path -miphoneos-version-min=$ios_deployment_target"
 }
 
 # Toolchain used for iOS simulator targets.
@@ -230,7 +231,7 @@ mac_toolchain("ios_clang_x64") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
-  sysroot_flags = "-isysroot $sysroot -mios-simulator-version-min=$ios_deployment_target"
+  sysroot_flags = "-isysroot $ios_simulator_sdk_path -mios-simulator-version-min=$ios_deployment_target"
 }
 
 # Toolchain used for Mac host targets.
@@ -243,6 +244,7 @@ mac_toolchain("clang_x64") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
+  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_sdk_min"
 }
 
 # Toolchain used for Mac host (i386) targets.
@@ -255,4 +257,5 @@ mac_toolchain("clang_i386") {
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
   is_clang = true
+  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_sdk_min"
 }
