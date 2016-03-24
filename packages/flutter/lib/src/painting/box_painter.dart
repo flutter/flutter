@@ -13,6 +13,18 @@ import 'edge_insets.dart';
 
 export 'edge_insets.dart' show EdgeInsets;
 
+double _getEffectiveBorderRadius(Rect rect, double borderRadius) {
+  assert(rect != null);
+  assert(borderRadius != null);
+  double shortestSide = rect.shortestSide;
+  // In principle, we should use shortestSide / 2.0, but we don't want to
+  // run into floating point rounding errors. Instead, we just use
+  // shortestSide and let Canvas do any remaining clamping.
+  // The right long-term fix is to do layout using fixed precision
+  // arithmetic. (see also "_applyFloatingPointHack")
+  return borderRadius > shortestSide ? shortestSide : borderRadius;
+}
+
 /// A side of a border of a box.
 class BorderSide {
   const BorderSide({
@@ -149,6 +161,93 @@ class Border {
       bottom: BorderSide.lerp(a.bottom, b.bottom, t),
       left: BorderSide.lerp(a.left, b.left, t)
     );
+  }
+
+  void paint(Canvas canvas, Rect rect, {
+    BoxShape shape: BoxShape.rectangle,
+    double borderRadius: null
+  }) {
+    if (isUniform) {
+      if (borderRadius != null) {
+        _paintBorderWithRadius(canvas, rect, borderRadius);
+        return;
+      }
+      if (shape == BoxShape.circle) {
+        _paintBorderWithCircle(canvas, rect);
+        return;
+      }
+    }
+
+    assert(borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
+    assert(shape == BoxShape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
+
+    assert(top != null);
+    assert(right != null);
+    assert(bottom != null);
+    assert(left != null);
+
+    Paint paint = new Paint();
+    Path path;
+
+    // TODO(ianh): Handle hairline border by drawing a single line instead of a wedge
+
+    paint.color = top.color;
+    path = new Path();
+    path.moveTo(rect.left, rect.top);
+    path.lineTo(rect.left + left.width, rect.top + top.width);
+    path.lineTo(rect.right - right.width, rect.top + top.width);
+    path.lineTo(rect.right, rect.top);
+    path.close();
+    canvas.drawPath(path, paint);
+
+    paint.color = right.color;
+    path = new Path();
+    path.moveTo(rect.right, rect.top);
+    path.lineTo(rect.right - right.width, rect.top + top.width);
+    path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+    path.lineTo(rect.right, rect.bottom);
+    path.close();
+    canvas.drawPath(path, paint);
+
+    paint.color = bottom.color;
+    path = new Path();
+    path.moveTo(rect.right, rect.bottom);
+    path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+    path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+    path.lineTo(rect.left, rect.bottom);
+    path.close();
+    canvas.drawPath(path, paint);
+
+    paint.color = left.color;
+    path = new Path();
+    path.moveTo(rect.left, rect.bottom);
+    path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+    path.lineTo(rect.left + left.width, rect.top + top.width);
+    path.lineTo(rect.left, rect.top);
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  void _paintBorderWithRadius(Canvas canvas, Rect rect, double borderRadius) {
+    assert(isUniform);
+    Color color = top.color;
+    double width = top.width;
+    double radius = _getEffectiveBorderRadius(rect, borderRadius);
+    // TODO(ianh): Handle hairline borders by just drawing an RRect instead
+    RRect outer = new RRect.fromRectXY(rect, radius, radius);
+    RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
+    canvas.drawDRRect(outer, inner, new Paint()..color = color);
+  }
+
+  void _paintBorderWithCircle(Canvas canvas, Rect rect) {
+    assert(isUniform);
+    double width = top.width;
+    Paint paint = new Paint()
+      ..color = top.color
+      ..strokeWidth = width
+      ..style = PaintingStyle.stroke;
+    double radius = (rect.shortestSide - width) / 2.0;
+    canvas.drawCircle(rect.center, radius, paint);
   }
 
   @override
@@ -981,16 +1080,6 @@ class BoxDecoration extends Decoration {
     backgroundImage?._removeChangeListener(listener);
   }
 
-  double getEffectiveBorderRadius(Rect rect) {
-    double shortestSide = rect.shortestSide;
-    // In principle, we should use shortestSide / 2.0, but we don't want to
-    // run into floating point rounding errors. Instead, we just use
-    // shortestSide and let Canvas do any remaining clamping.
-    // The right long-term fix is to do layout using fixed precision
-    // arithmetic. (see also "_applyFloatingPointHack")
-    return borderRadius > shortestSide ? shortestSide : borderRadius;
-  }
-
   @override
   bool hitTest(Size size, Point position) {
     assert(shape != null);
@@ -1059,7 +1148,7 @@ class _BoxDecorationPainter extends BoxPainter {
         if (_decoration.borderRadius == null) {
           canvas.drawRect(rect, paint);
         } else {
-          double radius = _decoration.getEffectiveBorderRadius(rect);
+          double radius = _getEffectiveBorderRadius(rect, _decoration.borderRadius);
           canvas.drawRRect(new RRect.fromRectXY(rect, radius, radius), paint);
         }
         break;
@@ -1101,103 +1190,17 @@ class _BoxDecorationPainter extends BoxPainter {
     );
   }
 
-  void _paintBorder(Canvas canvas, Rect rect) {
-    if (_decoration.border == null)
-      return;
-
-    if (_decoration.border.isUniform) {
-      if (_decoration.borderRadius != null) {
-        _paintBorderWithRadius(canvas, rect);
-        return;
-      }
-      if (_decoration.shape == BoxShape.circle) {
-        _paintBorderWithCircle(canvas, rect);
-        return;
-      }
-    }
-
-    assert(_decoration.borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
-    assert(_decoration.shape == BoxShape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
-
-    assert(_decoration.border.top != null);
-    assert(_decoration.border.right != null);
-    assert(_decoration.border.bottom != null);
-    assert(_decoration.border.left != null);
-
-    Paint paint = new Paint();
-    Path path;
-
-    paint.color = _decoration.border.top.color;
-    path = new Path();
-    path.moveTo(rect.left, rect.top);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.right, rect.top);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    paint.color = _decoration.border.right.color;
-    path = new Path();
-    path.moveTo(rect.right, rect.top);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.right, rect.bottom);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    paint.color = _decoration.border.bottom.color;
-    path = new Path();
-    path.moveTo(rect.right, rect.bottom);
-    path.lineTo(rect.right - _decoration.border.right.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.left, rect.bottom);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    paint.color = _decoration.border.left.color;
-    path = new Path();
-    path.moveTo(rect.left, rect.bottom);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.bottom - _decoration.border.bottom.width);
-    path.lineTo(rect.left + _decoration.border.left.width, rect.top + _decoration.border.top.width);
-    path.lineTo(rect.left, rect.top);
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  void _paintBorderWithRadius(Canvas canvas, Rect rect) {
-    assert(_decoration.border.isUniform);
-    assert(_decoration.shape == BoxShape.rectangle);
-    Color color = _decoration.border.top.color;
-    double width = _decoration.border.top.width;
-    double radius = _decoration.getEffectiveBorderRadius(rect);
-
-    RRect outer = new RRect.fromRectXY(rect, radius, radius);
-    RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
-    canvas.drawDRRect(outer, inner, new Paint()..color = color);
-  }
-
-  void _paintBorderWithCircle(Canvas canvas, Rect rect) {
-    assert(_decoration.border.isUniform);
-    assert(_decoration.shape == BoxShape.circle);
-    assert(_decoration.borderRadius == null);
-    double width = _decoration.border.top.width;
-    if (width <= 0.0)
-      return;
-    Paint paint = new Paint()
-      ..color = _decoration.border.top.color
-      ..strokeWidth = width
-      ..style = PaintingStyle.stroke;
-    Point center = rect.center;
-    double radius = (rect.shortestSide - width) / 2.0;
-    canvas.drawCircle(center, radius, paint);
-  }
-
   /// Paint the box decoration into the given location on the given canvas
   @override
   void paint(Canvas canvas, Rect rect) {
     _paintShadows(canvas, rect);
     _paintBackgroundColor(canvas, rect);
     _paintBackgroundImage(canvas, rect);
-    _paintBorder(canvas, rect);
+    _decoration.border?.paint(
+      canvas,
+      rect,
+      shape: _decoration.shape,
+      borderRadius: _decoration.borderRadius
+    );
   }
 }
