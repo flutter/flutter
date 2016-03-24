@@ -94,7 +94,6 @@ class RunMojoCommand extends FlutterCommand {
     args.add(command);
 
     BuildConfiguration config = _getCurrentHostConfig();
-    final String appPath = _makePathAbsolute(bundlePath);
 
     String flutterPath;
     if (config == null || config.type == BuildType.prebuilt) {
@@ -108,17 +107,31 @@ class RunMojoCommand extends FlutterCommand {
 
     if (argResults['android']) {
       args.add('--android');
-      final String appName = path.basename(appPath);
-      final String appDir = path.dirname(appPath);
-      args.add('mojo:launcher http://app/$appName');
-      args.add('--map-origin=http://app/=$appDir');
+    }
 
+    try {
+      final String appPath = _makePathAbsolute(bundlePath);
+      if (argResults['android']) {
+	final String appName = path.basename(appPath);
+	final String appDir = path.dirname(appPath);
+	args.add('mojo:launcher http://app/$appName');
+	args.add('--map-origin=http://app/=$appDir');
+      } else {
+        args.add('mojo:launcher file://$appPath');
+      }
+    } catch(_) {
+      // This means that |bundlePath| is not on the file-system, so let us treat
+      // it as a URL.
+      args.add('mojo:launcher $bundlePath');
+    }
+
+    // Add url-mapping for mojo:flutter.
+    if (argResults['android']) {
       final String flutterName = path.basename(flutterPath);
       final String flutterDir = path.dirname(flutterPath);
       args.add('--map-origin=http://flutter/=$flutterDir');
       args.add('--url-mappings=mojo:flutter=http://flutter/$flutterName');
     } else {
-      args.add('mojo:launcher file://$appPath');
       args.add('--url-mappings=mojo:flutter=file://$flutterPath');
     }
 
