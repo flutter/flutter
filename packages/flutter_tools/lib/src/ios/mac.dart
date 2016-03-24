@@ -22,45 +22,49 @@ const int kXcodeRequiredVersionMajor = 7;
 const int kXcodeRequiredVersionMinor = 0;
 
 class XCode {
+  XCode() {
+    _eulaSigned = false;
+
+    try {
+      _xcodeSelectPath = runSync(<String>['xcode-select', '--print-path']);
+      _isInstalled = true;
+
+      _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
+
+      try {
+        printTrace('xcrun clang');
+
+        ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
+        if (result.stdout != null && result.stdout.contains('license'))
+          _eulaSigned = false;
+        else if (result.stderr != null && result.stderr.contains('license'))
+          _eulaSigned = false;
+        else
+          _eulaSigned = true;
+      } catch (error) {
+      }
+    } catch (error) {
+      _isInstalled = false;
+    }
+  }
+
   /// Returns [XCode] active in the current app context.
   static XCode get instance => context[XCode] ?? (context[XCode] = new XCode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
+  String _xcodeSelectPath;
+  String get xcodeSelectPath => _xcodeSelectPath;
+
   bool _isInstalled;
-  bool get isInstalled {
-    if (_isInstalled != null) {
-      return _isInstalled;
-    }
+  bool get isInstalled => _isInstalled;
 
-    _isInstalled = exitsHappy(<String>['xcode-select', '--print-path']);
-    return _isInstalled;
-  }
-
+  bool _eulaSigned;
   /// Has the EULA been signed?
-  bool get eulaSigned {
-    if (!isInstalled)
-      return false;
-
-    try {
-      ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
-      if (result.stdout != null && result.stdout.contains('license'))
-        return false;
-      if (result.stderr != null && result.stderr.contains('license'))
-        return false;
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
+  bool get eulaSigned => _eulaSigned;
 
   String _xcodeVersionText;
-
-  String get xcodeVersionText {
-    if (_xcodeVersionText == null)
-      _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
-    return _xcodeVersionText;
-  }
+  String get xcodeVersionText => _xcodeVersionText;
 
   bool get xcodeVersionSatisfactory {
     RegExp regex = new RegExp(r'Xcode ([0-9.]+)');
