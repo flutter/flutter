@@ -381,7 +381,7 @@ class AndroidDevice extends Device {
     if (tracePath != null) {
       String localPath = (outPath != null) ? outPath : path.basename(tracePath);
 
-      // Run cat via ADB to print the captured trace file.  (adb pull will be unable
+      // Run cat via ADB to print the captured trace file. (adb pull will be unable
       // to access the file if it does not have root permissions)
       IOSink catOutput = new File(localPath).openWrite();
       List<String> catCommand = adbCommandForDevice(
@@ -566,6 +566,10 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   void _onLine(String line) {
+    // Filter out some noisy ActivityManager notifications.
+    if (line.startsWith('W/ActivityManager: getRunningAppProcesses'))
+      return;
+
     _linesStreamController.add(line);
   }
 
