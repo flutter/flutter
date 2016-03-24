@@ -8,112 +8,96 @@ import '../base/process.dart';
 import '../doctor.dart';
 import 'mac.dart';
 
-class IOSWorkflow extends Workflow {
-  @override
-  String get label => 'iOS toolchain';
+XCode get xcode => XCode.instance;
+
+class IOSWorkflow extends DoctorValidator implements Workflow {
+  IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
 
   @override
   bool get appliesToHostPlatform => Platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
   @override
-  bool get canListDevices => XCode.instance.isInstalledAndMeetsVersionCheck;
+  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
   @override
-  bool get canLaunchDevices => XCode.instance.isInstalledAndMeetsVersionCheck;
+  bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
+
+  bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
 
   @override
   ValidationResult validate() {
-    Validator iosValidator = new Validator(
-      label,
-      description: 'develop for iOS devices'
+    List<ValidationMessage> messages = <ValidationMessage>[];
+    int installCount = 0;
+    String xcodeVersionInfo;
+
+    if (xcode.isInstalled) {
+      installCount++;
+
+      xcodeVersionInfo = xcode.xcodeVersionText;
+      if (xcodeVersionInfo.contains(','))
+        xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
+
+      messages.add(new ValidationMessage(xcode.xcodeVersionText));
+
+      if (!xcode.isInstalledAndMeetsVersionCheck) {
+        messages.add(new ValidationMessage.error(
+          'Flutter requires a minimum XCode version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0.\n'
+          'Download the latest version or update via the Mac App Store.'
+        ));
+      }
+
+      if (!xcode.eulaSigned) {
+        messages.add(new ValidationMessage.error(
+          'XCode end user license agreement not signed; open XCode or run the command \'sudo xcodebuild -license\'.'
+        ));
+      }
+    } else {
+      messages.add(new ValidationMessage.error(
+        'XCode not installed; this is necessary for iOS development.\n'
+        'Download at https://developer.apple.com/xcode/download/.'
+      ));
+    }
+
+    // brew installed
+    if (exitsHappy(<String>['brew', '-v'])) {
+      installCount++;
+
+      List<String> installed = <String>[];
+
+      if (!exitsHappy(<String>['ideviceinstaller', '-h'])) {
+        messages.add(new ValidationMessage.error(
+          'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
+          'Install via \'brew install ideviceinstaller\'.'
+        ));
+      } else {
+        installed.add('ideviceinstaller');
+      }
+
+      if (!hasIDeviceId) {
+        messages.add(new ValidationMessage.error(
+          'ios-deploy not available; this is used to deploy to connected iOS devices.\n'
+          'Install via \'brew install ios-deploy\'.'
+        ));
+      } else {
+        installed.add('ios-deploy');
+      }
+
+      if (installed.isNotEmpty)
+          messages.add(new ValidationMessage(installed.join(', ') + ' installed'));
+    } else {
+      messages.add(new ValidationMessage.error(
+        'Brew not installed; use this to install tools for iOS device development.\n'
+        'Download brew at http://brew.sh/.'
+      ));
+    }
+
+    return new ValidationResult(
+      installCount == 2 ? ValidationType.installed : installCount == 1 ? ValidationType.partial : ValidationType.missing,
+      messages,
+      statusInfo: xcodeVersionInfo
     );
-
-    ValidationType xcodeExists() {
-      return XCode.instance.isInstalled ? ValidationType.installed : ValidationType.missing;
-    };
-
-    ValidationType xcodeVersionSatisfactory() {
-      return XCode.instance.isInstalledAndMeetsVersionCheck ? ValidationType.installed : ValidationType.missing;
-    };
-
-    ValidationType xcodeEulaSigned() {
-      return XCode.instance.eulaSigned ? ValidationType.installed : ValidationType.missing;
-    };
-
-    ValidationType brewExists() {
-      return exitsHappy(<String>['brew', '-v'])
-        ? ValidationType.installed : ValidationType.missing;
-    };
-
-    ValidationType ideviceinstallerExists() {
-      return exitsHappy(<String>['ideviceinstaller', '-h'])
-        ? ValidationType.installed : ValidationType.missing;
-    };
-
-    ValidationType iosdeployExists() {
-      return hasIdeviceId ? ValidationType.installed : ValidationType.missing;
-    };
-
-    Validator xcodeValidator = new Validator(
-      'XCode',
-      description: 'enable development for iOS devices',
-      resolution: 'Download at https://developer.apple.com/xcode/download/',
-      validatorFunction: xcodeExists
-    );
-
-    iosValidator.addValidator(xcodeValidator);
-
-    xcodeValidator.addValidator(new Validator(
-      'version',
-      description: 'Xcode minimum version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0',
-      resolution: 'Download the latest version or update via the Mac App Store',
-      validatorFunction: xcodeVersionSatisfactory
-    ));
-
-    xcodeValidator.addValidator(new Validator(
-      'EULA',
-      description: 'XCode end user license agreement',
-      resolution: "Open XCode or run the command 'sudo xcodebuild -license'",
-      validatorFunction: xcodeEulaSigned
-    ));
-
-    Validator brewValidator = new Validator(
-      'brew',
-      description: 'install additional development packages',
-      resolution: 'Download at http://brew.sh/',
-      validatorFunction: brewExists
-    );
-
-    iosValidator.addValidator(brewValidator);
-
-    brewValidator.addValidator(new Validator(
-      'ideviceinstaller',
-      description: 'discover connected iOS devices',
-      resolution: "Install via 'brew install ideviceinstaller'",
-      validatorFunction: ideviceinstallerExists
-    ));
-
-    brewValidator.addValidator(new Validator(
-      'ios-deploy',
-      description: 'deploy to connected iOS devices',
-      resolution: "Install via 'brew install ios-deploy'",
-      validatorFunction: iosdeployExists
-    ));
-
-    return iosValidator.validate();
-  }
-
-  @override
-  void diagnose() => validate().print();
-
-  bool get hasIdeviceId => exitsHappy(<String>['idevice_id', '-h']);
-
-  /// Return whether the tooling to list and deploy to real iOS devices (not the
-  /// simulator) is installed on the user's machine.
-  bool get canWorkWithIOSDevices {
-    return exitsHappy(<String>['ideviceinstaller', '-h']) && hasIdeviceId;
   }
 }

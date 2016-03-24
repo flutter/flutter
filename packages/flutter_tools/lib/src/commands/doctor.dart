@@ -4,10 +4,8 @@
 
 import 'dart:async';
 
-import '../artifacts.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../runner/version.dart';
 
 class DoctorCommand extends FlutterCommand {
   @override
@@ -21,18 +19,8 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    // general info
-    String flutterRoot = ArtifactStore.flutterRoot;
-    printStatus('Flutter root: $flutterRoot.');
-    printStatus('');
-
     // doctor
     doctor.diagnose();
-    printStatus('');
-
-    // version
-    printStatus(getVersion(flutterRoot));
-
     return 0;
   }
 }

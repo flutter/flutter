@@ -102,20 +102,16 @@ class AndroidSdk {
 
   String get adbPath => getPlatformToolsPath('adb');
 
-  bool validateSdkWellFormed({ bool complain: false }) {
-    if (!FileSystemEntity.isFileSync(adbPath)) {
-      if (complain)
-        printError('Android SDK file not found: $adbPath.');
-      return false;
-    }
+  /// Validate the Android SDK. This returns an empty list if there are no
+  /// issues; otherwise, it returns a list of issues found.
+  List<String> validateSdkWellFormed() {
+    if (!FileSystemEntity.isFileSync(adbPath))
+      return <String>['Android SDK file not found: $adbPath.'];
 
-    if (sdkVersions.isEmpty) {
-      if (complain)
-        printError('Android SDK does not have the proper build-tools.');
-      return false;
-    }
+    if (sdkVersions.isEmpty || latestVersion == null)
+      return <String>['Android SDK does not have the proper build-tools.'];
 
-    return latestVersion.validateSdkWellFormed(complain: complain);
+    return latestVersion.validateSdkWellFormed();
   }
 
   String getPlatformToolsPath(String binaryName) {
@@ -215,12 +211,20 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get zipalignPath => getBuildToolsPath('zipalign');
 
-  bool validateSdkWellFormed({ bool complain: false }) {
-    return
-      _exists(androidJarPath, complain: complain) &&
-      _exists(aaptPath, complain: complain) &&
-      _exists(dxPath, complain: complain) &&
-      _exists(zipalignPath, complain: complain);
+  List<String> validateSdkWellFormed() {
+    if (_exists(androidJarPath) != null)
+      return <String>[_exists(androidJarPath)];
+
+    if (_exists(aaptPath) != null)
+      return <String>[_exists(aaptPath)];
+
+    if (_exists(dxPath) != null)
+      return <String>[_exists(dxPath)];
+
+    if (_exists(zipalignPath) != null)
+      return <String>[_exists(zipalignPath)];
+
+    return <String>[];
   }
 
   String getPlatformsPath(String itemName) {
@@ -237,13 +241,9 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   @override
   String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersionName]';
 
-  bool _exists(String path, { bool complain: false }) {
-    if (!FileSystemEntity.isFileSync(path)) {
-      if (complain)
-        printError('Android SDK file not found: $path.');
-      return false;
-    }
-
-    return true;
+  String _exists(String path) {
+    if (!FileSystemEntity.isFileSync(path))
+      return 'Android SDK file not found: $path.';
+    return null;
   }
 }
