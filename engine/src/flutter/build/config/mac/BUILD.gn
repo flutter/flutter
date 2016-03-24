@@ -6,9 +6,6 @@ import("//build/config/sysroot.gni")
 
 config("sdk") {
   common_flags = [
-    "-isysroot",
-    sysroot,
-    "-mmacosx-version-min=$mac_sdk_min",
     "-stdlib=libc++",
   ]
 
