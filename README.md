@@ -1,6 +1,9 @@
 Flutter
 =======
+
 [![Build Status](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter)
+[![Issue Stats](http://issuestats.com/github/flutter/flutter/badge/pr?style=flat)](http://issuestats.com/github/flutter/flutter)
+[![Issue Stats](http://issuestats.com/github/flutter/flutter/badge/issue?style=flat)](http://issuestats.com/github/flutter/flutter)
 
 Flutter is a new way to build high-performance, cross-platform mobile apps.
 Flutter is optimized for today's, and tomorrow's, mobile devices. We are
