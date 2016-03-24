@@ -19,10 +19,12 @@ class EdgeInsets {
       : top = value, right = value, bottom = value, left = value;
 
   /// Constructs insets with only the given values non-zero.
-  const EdgeInsets.only({ this.top: 0.0,
-                        this.right: 0.0,
-                        this.bottom: 0.0,
-                        this.left: 0.0 });
+  const EdgeInsets.only({
+    this.top: 0.0,
+    this.right: 0.0,
+    this.bottom: 0.0,
+    this.left: 0.0
+  });
 
   /// Constructs insets with symmetrical vertical and horizontal offsets.
   const EdgeInsets.symmetric({ double vertical: 0.0,
