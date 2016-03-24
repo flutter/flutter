@@ -124,6 +124,12 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
 
+  /// The amount of time that has passed between the time the animation started and the most recent tick of the animation.
+  ///
+  /// If the controller is not animating, the last elapsed duration is null;
+  Duration get lastElapsedDuration => _lastElapsedDuration;
+  Duration _lastElapsedDuration;
+
   /// Whether this animation is currently animating in either the forward or reverse direction.
   bool get isAnimating => _ticker.isTicking;
 
@@ -205,6 +211,7 @@ class AnimationController extends Animation<double>
     assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
+    _lastElapsedDuration = const Duration();
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
     Future<Null> result = _ticker.start();
     _checkStatusChanged();
@@ -214,6 +221,7 @@ class AnimationController extends Animation<double>
   /// Stops running this animation.
   void stop() {
     _simulation = null;
+    _lastElapsedDuration = null;
     _ticker.stop();
   }
 
@@ -233,6 +241,7 @@ class AnimationController extends Animation<double>
   }
 
   void _tick(Duration elapsed) {
+    _lastElapsedDuration = elapsed;
     double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
     _value = _simulation.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation.isDone(elapsedInSeconds))

@@ -55,7 +55,7 @@ class _ScrollableListState extends ScrollableState<ScrollableList> {
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
     config.scrollableListPainter?.contentExtent = contentExtent;
     setState(() {
-      scrollTo(scrollBehavior.updateExtents(
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(
         contentExtent: config.itemsWrap ? double.INFINITY : contentExtent,
         containerExtent: containerExtent,
         scrollOffset: scrollOffset
@@ -338,7 +338,7 @@ class _ScrollableLazyListState extends ScrollableState<ScrollableLazyList> {
   void _handleExtentsChanged(double contentExtent, double containerExtent) {
     config.scrollableListPainter?.contentExtent = contentExtent;
     setState(() {
-      scrollTo(scrollBehavior.updateExtents(
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(
         contentExtent: contentExtent,
         containerExtent: containerExtent,
         scrollOffset: scrollOffset

@@ -768,7 +768,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   void _updateScrollBehavior() {
-    scrollTo(scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
       containerExtent: config.scrollDirection == Axis.vertical ? _viewportSize.height : _viewportSize.width,
       contentExtent: _tabWidths.reduce((double sum, double width) => sum + width),
       scrollOffset: scrollOffset
@@ -943,11 +943,11 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
   void _updateScrollBehaviorForSelectedIndex(int selectedIndex) {
     if (selectedIndex == 0) {
-      scrollTo(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 0.0));
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 0.0));
     } else if (selectedIndex == _tabCount - 1) {
-      scrollTo(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 1.0));
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(contentExtent: 2.0, containerExtent: 1.0, scrollOffset: 1.0));
     } else {
-      scrollTo(scrollBehavior.updateExtents(contentExtent: 3.0, containerExtent: 1.0, scrollOffset: 1.0));
+      didUpdateScrollBehavior(scrollBehavior.updateExtents(contentExtent: 3.0, containerExtent: 1.0, scrollOffset: 1.0));
     }
   }
 
