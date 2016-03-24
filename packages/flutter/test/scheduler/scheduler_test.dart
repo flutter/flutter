@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test is disabled because it triggers https://github.com/dart-lang/sdk/issues/25246
-
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:test/test.dart';
