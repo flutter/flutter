@@ -2,6 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+config("glfw_config") {
+  include_dirs = [ "//third_party/glfw/include" ]
+}
+
 source_set("glfw") {
   sources = [
     "src/context.c",
@@ -26,10 +30,6 @@ source_set("glfw") {
     "src/xkb_unicode.h",
   ]
 
-  include_dirs = [
-    "include",
-  ]
-
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
 
@@ -38,6 +38,8 @@ source_set("glfw") {
     "//build/config/linux:xrandr",
     "//build/config/linux:xinerama",
   ]
+
+  public_configs = [ ":glfw_config" ]
 
   defines = [
     "_GLFW_USE_OPENGL",

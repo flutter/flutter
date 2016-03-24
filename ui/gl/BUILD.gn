@@ -81,6 +81,17 @@ source_set("gl") {
   if (is_linux) {
     deps += [ "//third_party/libevent" ]
   }
+  if (use_glfw) {
+    sources += [
+      "gl_context_glfw.cc",
+      "gl_context_glfw.h",
+      "gl_implementation_glfw.cc",
+      "gl_surface_glfw.cc",
+      "gl_surface_glfw.h",
+    ]
+
+    deps += [ "//third_party/glfw" ]
+  }
   if (use_x11) {
     sources += [
       "gl_context_osmesa_x11.cc",

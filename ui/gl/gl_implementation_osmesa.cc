@@ -15,7 +15,7 @@
 
 namespace gfx {
 
-#if defined(OS_LINUX)
+#if defined(OS_LINUX) && !defined(USE_GLFW)
 // On Linux, we always use the OSMesa implementation of GL so we hardcode these
 // functions here.
 

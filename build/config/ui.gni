@@ -20,6 +20,12 @@ declare_args() {
   # that does not require X11.
   use_ozone = false
 
+  # Indicates if GLFW is enabled. GLFW is an abstraction layer for the
+  # windowing system and OpenGL rendering, providing cross-platform support
+  # for creating windows and OpenGL surfaces and contexts, and handling
+  # window system events and input.
+  use_glfw = false
+
   # Support ChromeOS touchpad gestures with ozone.
   use_evdev_gestures = false
 
@@ -51,7 +57,7 @@ ui_compositor_image_transport = use_aura && is_linux
 use_default_render_theme = use_aura || is_linux
 
 # Indicates if the UI toolkit depends on X11.
-use_x11 = is_linux && !use_ozone
+use_x11 = is_linux && !use_ozone && !use_glfw
 
 use_ozone_evdev = use_ozone
 

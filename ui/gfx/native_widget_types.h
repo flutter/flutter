@@ -61,6 +61,10 @@ class ViewAndroid;
 #endif
 class SkBitmap;
 
+#if defined(USE_GLFW)
+struct GLFWwindow;
+#endif
+
 namespace gfx {
 
 #if defined(OS_LINUX)
@@ -148,7 +152,10 @@ struct GLSurfaceHandle {
 };
 
 // AcceleratedWidget provides a surface to compositors to paint pixels.
-#if defined(USE_X11)
+#if defined(USE_GLFW)
+typedef GLFWwindow* AcceleratedWidget;
+const AcceleratedWidget kNullAcceleratedWidget = 0;
+#elif defined(USE_X11)
 typedef unsigned long AcceleratedWidget;
 const AcceleratedWidget kNullAcceleratedWidget = 0;
 #elif defined(OS_ANDROID)
