@@ -14,6 +14,18 @@ import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'runner/version.dart';
 
+
+const Map<String, String> _osNames = const <String, String>{
+  'macos': 'Mac OS',
+  'linux': 'Linux',
+  'windows': 'Windows'
+};
+
+String osName() {
+  String os = Platform.operatingSystem;
+  return _osNames.containsKey(os) ? _osNames[os] : os;
+}
+
 class Doctor {
   Doctor() {
     _validators.add(new _FlutterValidator());
@@ -179,11 +191,10 @@ class _FlutterValidator extends DoctorValidator {
 
     messages.add(new ValidationMessage('Flutter root at ${version.flutterRoot}'));
     messages.add(new ValidationMessage('Framework revision ${version.frameworkRevisionShort} '
-      '(${version.frameworkAge})'));
+      '(${version.frameworkAge}, channel ${version.channel})'));
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
 
-    return new ValidationResult(ValidationType.installed, messages,
-      statusInfo: '${version.frameworkRevisionShort} - channel ${version.channel}');
+    return new ValidationResult(ValidationType.installed, messages, statusInfo: osName());
   }
 }
 
