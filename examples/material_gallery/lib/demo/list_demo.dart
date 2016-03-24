@@ -42,7 +42,7 @@ class ListDemoState extends State<ListDemo> {
     _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
       return new Container(
         decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
+          border: new Border(top: new BorderSide(color: Colors.black26))
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.collapse,

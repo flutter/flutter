@@ -64,7 +64,7 @@ class DotState extends State<Dot> {
         height: config.size,
         decoration: new BoxDecoration(
           backgroundColor: config.color,
-          border: new Border.all(color: const Color(0xFF000000), width: taps.toDouble()),
+          border: new Border.all(width: taps.toDouble()),
           shape: BoxShape.circle
         ),
         child: config.child

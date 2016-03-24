@@ -25,30 +25,52 @@ double _getEffectiveBorderRadius(Rect rect, double borderRadius) {
   return borderRadius > shortestSide ? shortestSide : borderRadius;
 }
 
+/// The style of line to draw for a [BorderSide] in a [Border].
+enum BorderStyle {
+  /// Skip the border.
+  none,
+
+  /// Draw the border as a solid line.
+  solid,
+
+  // if you add more, think about how they will lerp
+}
+
 /// A side of a border of a box.
 class BorderSide {
   const BorderSide({
     this.color: const Color(0xFF000000),
-    this.width: 1.0
+    this.width: 1.0,
+    this.style: BorderStyle.solid
   });
 
   /// The color of this side of the border.
   final Color color;
 
-  /// The width of this side of the border.
+  /// The width of this side of the border, in logical pixels. A
+  /// zero-width border is a hairline border. To omit the border
+  /// entirely, set the [style] to [BorderStyle.none].
   final double width;
 
-  /// A black border side of zero width.
-  static const BorderSide none = const BorderSide(width: 0.0);
+  /// The style of this side of the border.
+  ///
+  /// To omit a side, set [style] to [BorderStyle.none]. This skips
+  /// painting the border, but the border still has a [width].
+  final BorderStyle style;
+
+  /// A hairline black border that is not rendered.
+  static const BorderSide none = const BorderSide(width: 0.0, style: BorderStyle.none);
 
   /// Creates a copy of this border but with the given fields replaced with the new values.
   BorderSide copyWith({
     Color color,
-    double width
+    double width,
+    BorderStyle style
   }) {
     return new BorderSide(
       color: color ?? this.color,
-      width: width ?? this.width
+      width: width ?? this.width,
+      style: style ?? this.style
     );
   }
 
@@ -56,9 +78,38 @@ class BorderSide {
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
     assert(a != null);
     assert(b != null);
+    if (t == 0.0)
+      return a;
+    if (t == 1.0)
+      return b;
+    if (a.style == b.style) {
+      return new BorderSide(
+        color: Color.lerp(a.color, b.color, t),
+        width: ui.lerpDouble(a.width, b.width, t),
+        style: a.style // == b.style
+      );
+    }
+    Color colorA, colorB;
+    switch (a.style) {
+      case BorderStyle.solid:
+        colorA = a.color;
+        break;
+      case BorderStyle.none:
+        colorA = a.color.withAlpha(0x00);
+        break;
+    }
+    switch (b.style) {
+      case BorderStyle.solid:
+        colorB = b.color;
+        break;
+      case BorderStyle.none:
+        colorB = b.color.withAlpha(0x00);
+        break;
+    }
     return new BorderSide(
-      color: Color.lerp(a.color, b.color, t),
-      width: ui.lerpDouble(a.width, b.width, t)
+      color: Color.lerp(colorA, colorB, t),
+      width: ui.lerpDouble(a.width, b.width, t),
+      style: BorderStyle.solid
     );
   }
 
@@ -70,14 +121,15 @@ class BorderSide {
       return false;
     final BorderSide typedOther = other;
     return color == typedOther.color &&
-           width == typedOther.width;
+           width == typedOther.width &&
+           style == typedOther.style;
   }
 
   @override
-  int get hashCode => hashValues(color, width);
+  int get hashCode => hashValues(color, width, style);
 
   @override
-  String toString() => 'BorderSide($color, $width)';
+  String toString() => 'BorderSide($color, $width, $style)';
 }
 
 /// A border of a box, comprised of four sides.
@@ -92,9 +144,10 @@ class Border {
   /// A uniform border with all sides the same color and width.
   factory Border.all({
     Color color: const Color(0xFF000000),
-    double width: 1.0
+    double width: 1.0,
+    BorderStyle style: BorderStyle.solid
   }) {
-    final BorderSide side = new BorderSide(color: color, width: width);
+    final BorderSide side = new BorderSide(color: color, width: width, style: style);
     return new Border(top: side, right: side, bottom: side, left: side);
   }
 
@@ -132,6 +185,12 @@ class Border {
     if (right.width != topWidth ||
         bottom.width != topWidth ||
         left.width != topWidth)
+      return false;
+
+    final BorderStyle topStyle = top.style;
+    if (right.style != topStyle ||
+        bottom.style != topStyle ||
+        left.style != topStyle)
       return false;
 
     return true;
@@ -186,57 +245,99 @@ class Border {
     assert(bottom != null);
     assert(left != null);
 
-    Paint paint = new Paint();
+    Paint paint = new Paint()
+      ..strokeWidth = 0.0; // used for hairline borders
     Path path;
 
-    // TODO(ianh): Handle hairline border by drawing a single line instead of a wedge
+    switch (top.style) {
+      case BorderStyle.solid:
+        paint.color = top.color;
+        path = new Path();
+        path.moveTo(rect.left, rect.top);
+        path.lineTo(rect.right, rect.top);
+        if (top.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.right - right.width, rect.top + top.width);
+          path.lineTo(rect.left + left.width, rect.top + top.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
 
-    paint.color = top.color;
-    path = new Path();
-    path.moveTo(rect.left, rect.top);
-    path.lineTo(rect.left + left.width, rect.top + top.width);
-    path.lineTo(rect.right - right.width, rect.top + top.width);
-    path.lineTo(rect.right, rect.top);
-    path.close();
-    canvas.drawPath(path, paint);
+    switch (right.style) {
+      case BorderStyle.solid:
+        paint.color = right.color;
+        path = new Path();
+        path.moveTo(rect.right, rect.top);
+        path.lineTo(rect.right, rect.bottom);
+        if (right.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+          path.lineTo(rect.right - right.width, rect.top + top.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
 
-    paint.color = right.color;
-    path = new Path();
-    path.moveTo(rect.right, rect.top);
-    path.lineTo(rect.right - right.width, rect.top + top.width);
-    path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
-    path.lineTo(rect.right, rect.bottom);
-    path.close();
-    canvas.drawPath(path, paint);
+    switch (bottom.style) {
+      case BorderStyle.solid:
+        paint.color = bottom.color;
+        path = new Path();
+        path.moveTo(rect.right, rect.bottom);
+        path.lineTo(rect.left, rect.bottom);
+        if (bottom.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+          path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
 
-    paint.color = bottom.color;
-    path = new Path();
-    path.moveTo(rect.right, rect.bottom);
-    path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
-    path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
-    path.lineTo(rect.left, rect.bottom);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    paint.color = left.color;
-    path = new Path();
-    path.moveTo(rect.left, rect.bottom);
-    path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
-    path.lineTo(rect.left + left.width, rect.top + top.width);
-    path.lineTo(rect.left, rect.top);
-    path.close();
-    canvas.drawPath(path, paint);
+    switch (left.style) {
+      case BorderStyle.solid:
+        paint.color = left.color;
+        path = new Path();
+        path.moveTo(rect.left, rect.bottom);
+        path.lineTo(rect.left, rect.top);
+        if (right.width == 0.0) {
+          paint.style = PaintingStyle.stroke;
+        } else {
+          paint.style = PaintingStyle.fill;
+          path.lineTo(rect.left + left.width, rect.top + top.width);
+          path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+        }
+        canvas.drawPath(path, paint);
+        break;
+      case BorderStyle.none: ;
+    }
   }
 
   void _paintBorderWithRadius(Canvas canvas, Rect rect, double borderRadius) {
     assert(isUniform);
-    Color color = top.color;
-    double width = top.width;
+    Paint paint = new Paint()
+      ..color = top.color;
     double radius = _getEffectiveBorderRadius(rect, borderRadius);
-    // TODO(ianh): Handle hairline borders by just drawing an RRect instead
     RRect outer = new RRect.fromRectXY(rect, radius, radius);
-    RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
-    canvas.drawDRRect(outer, inner, new Paint()..color = color);
+    double width = top.width;
+    if (width == 0.0) {
+      paint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.0;
+      canvas.drawRRect(outer, paint);
+    } else {
+      RRect inner = new RRect.fromRectXY(rect.deflate(width), radius - width, radius - width);
+      canvas.drawDRRect(outer, inner, paint);
+    }
   }
 
   void _paintBorderWithCircle(Canvas canvas, Rect rect) {

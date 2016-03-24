@@ -100,7 +100,7 @@ class StockSymbolBottomSheet extends StatelessWidget {
     return new Container(
       padding: new EdgeInsets.all(10.0),
       decoration: new BoxDecoration(
-        border: new Border(top: new BorderSide(color: Colors.black26, width: 1.0))
+        border: new Border(top: new BorderSide(color: Colors.black26))
       ),
       child: new StockSymbolView(stock: stock)
    );
