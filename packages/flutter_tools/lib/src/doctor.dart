@@ -189,12 +189,15 @@ class _FlutterValidator extends DoctorValidator {
 
     FlutterVersion version = FlutterVersion.getVersion();
 
-    messages.add(new ValidationMessage('Flutter root at ${version.flutterRoot}'));
-    messages.add(new ValidationMessage('Framework revision ${version.frameworkRevisionShort} '
-      '(${version.frameworkAge}, channel ${version.channel})'));
-    messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
+    messages.add(new ValidationMessage('Flutter at ${version.flutterRoot}'));
+    messages.add(new ValidationMessage(
+      'Framework revision ${version.frameworkRevisionShort} '
+      '(${version.frameworkAge}), '
+      'engine revision ${version.engineRevisionShort}'
+    ));
 
-    return new ValidationResult(ValidationType.installed, messages, statusInfo: osName());
+    return new ValidationResult(ValidationType.installed, messages,
+      statusInfo: 'on ${osName()}, channel ${version.channel}');
   }
 }
 
@@ -238,7 +241,7 @@ class _AtomValidator extends DoctorValidator {
         File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
         dynamic packageInfo = JSON.decode(packageFile.readAsStringSync());
         String version = packageInfo['version'];
-        messages.add(new ValidationMessage('Atom installed; flutter plugin version $version'));
+        messages.add(new ValidationMessage('Atom installed; Flutter plugin version $version'));
       } catch (error) {
         printTrace('Unable to read flutter plugin version: $error');
       }

@@ -45,11 +45,10 @@ class FlutterVersion {
 
   @override
   String toString() {
-    String from = repositoryUrl == null ? 'Flutter from unknown source' : 'Flutter from $repositoryUrl (on channel $channel)';
-    String flutterText = 'Framework: $frameworkRevisionShort ($frameworkAge)';
-    String engineText =  'Engine:    $engineRevisionShort';
+    String from = 'Flutter on channel $channel (from ${repositoryUrl == null ? 'unknown source' : repositoryUrl})';
+    String flutterText = 'Framework revision $frameworkRevisionShort ($frameworkAge); engine revision $engineRevisionShort';
 
-    return '$from\n\n$flutterText\n$engineText';
+    return '$from\n$flutterText';
   }
 
   static FlutterVersion getVersion([String flutterRoot]) {

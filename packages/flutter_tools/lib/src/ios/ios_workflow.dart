@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import '../base/os.dart';
 import '../base/process.dart';
 import '../doctor.dart';
 import 'mac.dart';
@@ -36,10 +37,11 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (xcode.isInstalled) {
       installCount++;
 
+      messages.add(new ValidationMessage('XCode at ${xcode.xcodeSelectPath}'));
+
       xcodeVersionInfo = xcode.xcodeVersionText;
       if (xcodeVersionInfo.contains(','))
         xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
-
       messages.add(new ValidationMessage(xcode.xcodeVersionText));
 
       if (!xcode.isInstalledAndMeetsVersionCheck) {
@@ -62,18 +64,14 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
 
     // brew installed
-    if (exitsHappy(<String>['brew', '-v'])) {
+    if (os.which('brew') != null) {
       installCount++;
-
-      List<String> installed = <String>[];
 
       if (!exitsHappy(<String>['ideviceinstaller', '-h'])) {
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
           'Install via \'brew install ideviceinstaller\'.'
         ));
-      } else {
-        installed.add('ideviceinstaller');
       }
 
       if (!hasIDeviceId) {
@@ -81,12 +79,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           'ios-deploy not available; this is used to deploy to connected iOS devices.\n'
           'Install via \'brew install ios-deploy\'.'
         ));
-      } else {
-        installed.add('ios-deploy');
       }
-
-      if (installed.isNotEmpty)
-          messages.add(new ValidationMessage(installed.join(', ') + ' installed'));
     } else {
       messages.add(new ValidationMessage.error(
         'Brew not installed; use this to install tools for iOS device development.\n'
