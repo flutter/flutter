@@ -86,7 +86,7 @@ class RunMojoCommand extends FlutterCommand {
     return result;
   }
 
-  Future<List<String>> _getShellConfig(String bundlePath) async {
+  Future<List<String>> _getShellConfig(String targetApp) async {
     List<String> args = <String>[];
 
     final bool useDevtools = _useDevtools();
@@ -109,9 +109,9 @@ class RunMojoCommand extends FlutterCommand {
       args.add('--android');
     }
 
-    final Uri appUri = Uri.parse(bundlePath);
+    final Uri appUri = Uri.parse(targetApp);
     if (appUri.scheme.isEmpty || appUri.scheme == 'file') {
-      final String appPath = _makePathAbsolute(bundlePath);
+      final String appPath = _makePathAbsolute(targetApp);
       if (argResults['android']) {
         final String appName = path.basename(appPath);
         final String appDir = path.dirname(appPath);
@@ -121,7 +121,7 @@ class RunMojoCommand extends FlutterCommand {
         args.add('mojo:launcher file://$appPath');
       }
     } else {
-      args.add('mojo:launcher $bundlePath');
+      args.add('mojo:launcher $targetApp');
     }
 
     // Add url-mapping for mojo:flutter.
@@ -164,21 +164,21 @@ class RunMojoCommand extends FlutterCommand {
 
     await downloadToolchain();
 
-    String bundlePath = argResults['app'];
-    if (bundlePath == null) {
-      bundlePath = _kDefaultBundlePath;
+    String targetApp = argResults['app'];
+    if (targetApp == null) {
+      targetApp = _kDefaultBundlePath;
 
       String mainPath = findMainDartFile(argResults['target']);
 
       int result = await flx.build(
         toolchain,
         mainPath: mainPath,
-        outputPath: bundlePath
+        outputPath: targetApp
       );
       if (result != 0)
         return result;
     }
 
-    return await runCommandAndStreamOutput(await _getShellConfig(bundlePath));
+    return await runCommandAndStreamOutput(await _getShellConfig(targetApp));
   }
 }
