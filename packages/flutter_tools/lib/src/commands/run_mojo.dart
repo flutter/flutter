@@ -86,7 +86,7 @@ class RunMojoCommand extends FlutterCommand {
     return result;
   }
 
-  Future<List<String>> _getShellConfig(String bundlePath) async {
+  Future<List<String>> _getShellConfig(String targetApp) async {
     List<String> args = <String>[];
 
     final bool useDevtools = _useDevtools();
@@ -94,7 +94,6 @@ class RunMojoCommand extends FlutterCommand {
     args.add(command);
 
     BuildConfiguration config = _getCurrentHostConfig();
-    final String appPath = _makePathAbsolute(bundlePath);
 
     String flutterPath;
     if (config == null || config.type == BuildType.prebuilt) {
@@ -108,17 +107,30 @@ class RunMojoCommand extends FlutterCommand {
 
     if (argResults['android']) {
       args.add('--android');
-      final String appName = path.basename(appPath);
-      final String appDir = path.dirname(appPath);
-      args.add('mojo:launcher http://app/$appName');
-      args.add('--map-origin=http://app/=$appDir');
+    }
 
+    final Uri appUri = Uri.parse(targetApp);
+    if (appUri.scheme.isEmpty || appUri.scheme == 'file') {
+      final String appPath = _makePathAbsolute(targetApp);
+      if (argResults['android']) {
+        final String appName = path.basename(appPath);
+        final String appDir = path.dirname(appPath);
+        args.add('mojo:launcher http://app/$appName');
+        args.add('--map-origin=http://app/=$appDir');
+      } else {
+        args.add('mojo:launcher file://$appPath');
+      }
+    } else {
+      args.add('mojo:launcher $targetApp');
+    }
+
+    // Add url-mapping for mojo:flutter.
+    if (argResults['android']) {
       final String flutterName = path.basename(flutterPath);
       final String flutterDir = path.dirname(flutterPath);
       args.add('--map-origin=http://flutter/=$flutterDir');
       args.add('--url-mappings=mojo:flutter=http://flutter/$flutterName');
     } else {
-      args.add('mojo:launcher file://$appPath');
       args.add('--url-mappings=mojo:flutter=file://$flutterPath');
     }
 
@@ -152,21 +164,21 @@ class RunMojoCommand extends FlutterCommand {
 
     await downloadToolchain();
 
-    String bundlePath = argResults['app'];
-    if (bundlePath == null) {
-      bundlePath = _kDefaultBundlePath;
+    String targetApp = argResults['app'];
+    if (targetApp == null) {
+      targetApp = _kDefaultBundlePath;
 
       String mainPath = findMainDartFile(argResults['target']);
 
       int result = await flx.build(
         toolchain,
         mainPath: mainPath,
-        outputPath: bundlePath
+        outputPath: targetApp
       );
       if (result != 0)
         return result;
     }
 
-    return await runCommandAndStreamOutput(await _getShellConfig(bundlePath));
+    return await runCommandAndStreamOutput(await _getShellConfig(targetApp));
   }
 }
