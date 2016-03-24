@@ -15,7 +15,7 @@
 
 #include "build/build_config.h"
 
-#if defined(OS_ANDROID) || defined(USE_X11)
+#if defined(OS_ANDROID) || defined(USE_X11) || defined(USE_GLFW)
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #endif
@@ -340,7 +340,10 @@ struct GL_EXPORT DriverOSMESA {
   static std::string GetPlatformExtensions();
 };
 
-#if !defined(OS_MACOSX)
+// TODO(dalyj): Clean up the conditionals here (there should be a generic
+// "USE_EGL"-type define for this, particularly since GLFW is happy to use
+// EGL in some configurations).
+#if !defined(OS_MACOSX) && !defined(USE_GLFW)
 struct GL_EXPORT DriverEGL {
   void InitializeStaticBindings();
   void InitializeDebugBindings();
