@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Flutter App</string>
     <string name="title">Flutter Application</string>
+    <string name="get_random">Get Random Number</string>
 </resources>
