@@ -49,8 +49,8 @@ class FlutterCommandRunner extends CommandRunner {
         hide: !verboseHelp,
         help: 'Path to your packages directory.$packagesHelp');
     argParser.addOption('flutter-root',
-        help: 'The root directory of the Flutter repository. Uses \$$kFlutterRootEnvironmentVariableName if set,\n'
-              'otherwise defaults to a value derived from the location of this tool.', defaultsTo: _defaultFlutterRoot);
+        help: 'The root directory of the Flutter repository (uses \$$kFlutterRootEnvironmentVariableName if set).',
+              defaultsTo: _defaultFlutterRoot);
 
     if (verboseHelp)
       argParser.addSeparator('Local build selection options (not normally required):');
@@ -126,9 +126,7 @@ class FlutterCommandRunner extends CommandRunner {
 
   @override
   String get usageFooter {
-    return 'Run "flutter -h -v" for verbose help output, including less commonly used options.\n'
-           '\n'
-           '${doctor.summaryText}';
+    return 'Run "flutter -h -v" for verbose help output, including less commonly used options.';
   }
 
   List<BuildConfiguration> get buildConfigurations {
