@@ -81,6 +81,23 @@ Map<_Asset, List<_Asset>> _parseAssets(Map<String, dynamic> manifestDescriptor, 
       }
     }
   }
+
+  // Add assets referenced in the fonts section of the manifest.
+  if (manifestDescriptor.containsKey('fonts')) {
+    for (Map<String, dynamic> family in manifestDescriptor['fonts']) {
+      List<Map<String, dynamic>> fonts = family['fonts'];
+      if (fonts == null) continue;
+
+      for (Map<String, dynamic> font in fonts) {
+        String asset = font['asset'];
+        if (asset == null) continue;
+
+        _Asset baseAsset = new _Asset(base: assetBase, key: asset);
+        result[baseAsset] = <_Asset>[];
+      }
+    }
+  }
+
   return result;
 }
 
