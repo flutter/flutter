@@ -109,19 +109,18 @@ class RunMojoCommand extends FlutterCommand {
       args.add('--android');
     }
 
-    try {
+    final Uri appUri = Uri.parse(bundlePath);
+    if (appUri.scheme.isEmpty || appUri.scheme == 'file') {
       final String appPath = _makePathAbsolute(bundlePath);
       if (argResults['android']) {
-	final String appName = path.basename(appPath);
-	final String appDir = path.dirname(appPath);
-	args.add('mojo:launcher http://app/$appName');
-	args.add('--map-origin=http://app/=$appDir');
+        final String appName = path.basename(appPath);
+        final String appDir = path.dirname(appPath);
+        args.add('mojo:launcher http://app/$appName');
+        args.add('--map-origin=http://app/=$appDir');
       } else {
         args.add('mojo:launcher file://$appPath');
       }
-    } catch(_) {
-      // This means that |bundlePath| is not on the file-system, so let us treat
-      // it as a URL.
+    } else {
       args.add('mojo:launcher $bundlePath');
     }
 
