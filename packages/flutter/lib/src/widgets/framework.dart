@@ -911,10 +911,9 @@ abstract class Element implements BuildContext {
 
   void activate(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
-    _reactivate();
     _parent = parent;
+    _reactivate();
     _updateDepth();
-    _updateInheritance();
     attachRenderObject(newSlot);
     assert(_debugLifecycleState == _ElementLifecycle.active);
   }
@@ -925,6 +924,7 @@ abstract class Element implements BuildContext {
     assert(depth != null);
     assert(!_active);
     _active = true;
+    _updateInheritance();
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
     visitChildren((Element child) => child._reactivate());
   }
@@ -939,6 +939,7 @@ abstract class Element implements BuildContext {
         dependency._dependents.remove(this);
       _dependencies.clear();
     }
+    _inheritedWidgets = null;
     _active = false;
     assert(() { _debugLifecycleState = _ElementLifecycle.inactive; return true; });
   }
@@ -981,6 +982,7 @@ abstract class Element implements BuildContext {
   }
 
   void _updateInheritance() {
+    assert(_active);
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
 
@@ -1545,6 +1547,7 @@ class InheritedElement extends _ProxyElement {
 
   @override
   void _updateInheritance() {
+    assert(_active);
     final Map<Type, InheritedElement> incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
       _inheritedWidgets = new Map<Type, InheritedElement>.from(incomingWidgets);
