@@ -560,8 +560,13 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 
 /// A box with a specified size.
 ///
-/// Forces its child to have a specific width and/or height and sizes itself to
-/// match the size of its child.
+/// If given a child, this widget forces its child to have a specific width
+/// and/or height (assuming values are permitted by this widget's parent). If
+/// either the width or height is null, this widget will size itself to match
+/// the child's size in that dimension.
+///
+/// If not given a child, this widget will size itself to the given width and
+/// height, treating nulls as zero.
 class SizedBox extends SingleChildRenderObjectWidget {
   SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
