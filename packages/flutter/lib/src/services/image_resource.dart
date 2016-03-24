@@ -73,7 +73,7 @@ class ImageResource {
 
   /// The first concrete [ImageInfo] object represented by this handle.
   ///
-  /// Instead of receivingly only the first image, most clients will want to
+  /// Instead of receiving only the first image, most clients will want to
   /// [addListener] to be notified whenever a a concrete image is available.
   Future<ImageInfo> get first => _futureImage;
 
