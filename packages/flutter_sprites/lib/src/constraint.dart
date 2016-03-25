@@ -66,6 +66,29 @@ class ConstraintRotationToMovement extends Constraint {
   }
 }
 
+/// A [Constraint] that copies a node's rotation, optionally with [dampening].
+class ConstraintRotationToNodeRotation extends Constraint {
+  /// Creates a new constraint that copies a node's rotation, optionally
+  /// with a [baseRotation] added and using [dampening].
+  ConstraintRotationToNodeRotation(this.targetNode, { this.baseRotation: 0.0, this.dampening });
+
+  /// The node to copy the rotation from
+  final Node targetNode;
+
+  /// The base rotation will be added to the rotation that copied from the targetNode
+  final double baseRotation;
+
+  /// The filter factor used when constraining the rotation of the node. Valid
+  /// values are in the range 0.0 to 1.0
+  final double dampening;
+
+  @override
+  void constrain(Node node, double dt) {
+    double target = targetNode.rotation + baseRotation;
+    node.rotation = _dampenRotation(node.rotation, target, dampening);
+  }
+}
+
 /// A [Constraint] that rotates a node to point towards another node. The target
 /// node is allowed to have a different parent, but they must be in the same
 /// [SpriteBox].

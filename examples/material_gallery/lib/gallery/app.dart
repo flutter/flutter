@@ -28,10 +28,20 @@ class GalleryAppState extends State<GalleryApp> {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Flutter Material Gallery',
-      theme: lightTheme ? new ThemeData.light() : new ThemeData.dark(),
+      theme: lightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
       routes: {
         '/': (BuildContext context) => new GalleryHome()
       }
     );
   }
 }
+
+ThemeData _kGalleryLightTheme = new ThemeData(
+  brightness: ThemeBrightness.light,
+  primarySwatch: Colors.purple
+);
+
+ThemeData _kGalleryDarkTheme = new ThemeData(
+  brightness: ThemeBrightness.dark,
+  primarySwatch: Colors.purple
+);

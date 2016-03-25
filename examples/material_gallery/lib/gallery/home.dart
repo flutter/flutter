@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'demo.dart';
 import 'drawer.dart';
-import 'section.dart';
+import 'header.dart';
+import 'item.dart';
 
 import '../demo/buttons_demo.dart';
 import '../demo/cards_demo.dart';
@@ -28,7 +28,6 @@ import '../demo/page_selector_demo.dart';
 import '../demo/persistent_bottom_sheet_demo.dart';
 import '../demo/progress_indicator_demo.dart';
 import '../demo/toggle_controls_demo.dart';
-import '../demo/scrolling_techniques_demo.dart';
 import '../demo/slider_demo.dart';
 import '../demo/snack_bar_demo.dart';
 import '../demo/scrollable_tabs_demo.dart';
@@ -41,6 +40,8 @@ import '../demo/two_level_list_demo.dart';
 import '../demo/typography_demo.dart';
 import '../demo/weather_demo.dart';
 
+const double _kFlexibleSpaceMaxHeight = 256.0;
+
 class GalleryHome extends StatefulWidget {
   GalleryHome({ Key key }) : super(key: key);
 
@@ -49,109 +50,75 @@ class GalleryHome extends StatefulWidget {
 }
 
 class GalleryHomeState extends State<GalleryHome> {
+  final Key _scrollableKey = new UniqueKey();
+
   @override
   Widget build(BuildContext context) {
-    final double appBarHeight = 128.0;
+    final double statusBarHight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+
     return new Scaffold(
       drawer: new GalleryDrawer(),
       appBar: new AppBar(
-        expandedHeight: appBarHeight,
-        flexibleSpace: (BuildContext context) {
-          return new Container(
-            padding: const EdgeInsets.only(left: 64.0),
-            height: appBarHeight,
-            child: new Align(
-              alignment: const FractionalOffset(0.0, 1.0),
-              child: new Text('Flutter Gallery', style: Typography.white.headline)
-            )
-          );
-        }
+        expandedHeight: _kFlexibleSpaceMaxHeight,
+        flexibleSpace: (BuildContext context) =>  new FlexibleSpaceBar(
+          image: new GalleryHeader(),
+          title: new Text("Flutter Gallery")
+        )
       ),
-      body: new Block(
-        padding: const EdgeInsets.all(4.0),
-        children: <Widget>[
-          new Row(
+      scrollableKey: _scrollableKey,
+      appBarBehavior: AppBarBehavior.under,
+      body: new TwoLevelList(
+        scrollablePadding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHight),
+        key: _scrollableKey,
+        type: MaterialListType.oneLine,
+        scrollableKey: _scrollableKey,
+        items: <Widget>[
+          new TwoLevelSublist(
+            leading: new Icon(icon: Icons.star),
+            title: new Text("Demos"),
             children: <Widget>[
-              new GallerySection(
-                title: 'Animation',
-                image: 'assets/section_animation.png',
-                colors: Colors.purple,
-                demos: <GalleryDemo>[
-                  new GalleryDemo(title: 'Weather', builder: () => new WeatherDemo()),
-                  new GalleryDemo(title: 'Fitness', builder: () => new FitnessDemo())
-                ]
-              ),
-              new GallerySection(
-                title: 'Style',
-                image: 'assets/section_style.png',
-                colors: Colors.green,
-                demos: <GalleryDemo>[
-                  new GalleryDemo(title: 'Colors', builder: () => new ColorsDemo()),
-                  new GalleryDemo(title: 'Typography', builder: () => new TypographyDemo())
-                ]
-              )
+              new GalleryItem(title: "Weather", builder: () => new WeatherDemo()),
+              new GalleryItem(title: "Fitness", builder: () => new FitnessDemo()),
             ]
           ),
-          new Row(
+          new TwoLevelSublist(
+            leading: new Icon(icon: Icons.extension),
+            title: new Text("Components"),
             children: <Widget>[
-              new GallerySection(
-                title: 'Layout',
-                image: 'assets/section_layout.png',
-                colors: Colors.pink
-              ),
-              new GallerySection(
-                title: 'Components',
-                image: 'assets/section_components.png',
-                colors: Colors.amber,
-                demos: <GalleryDemo>[
-                  new GalleryDemo(title: 'App Bar', builder: () => new FlexibleSpaceDemo()),
-                  new GalleryDemo(title: 'Buttons', builder: () => new ButtonsDemo()),
-                  new GalleryDemo(title: 'Buttons: Floating Action Button', builder: () => new TabsFabDemo()),
-                  new GalleryDemo(title: 'Cards', builder: () => new CardsDemo()),
-                  new GalleryDemo(title: 'Chips', builder: () => new ChipDemo()),
-                  new GalleryDemo(title: 'Date Picker', builder: () => new DatePickerDemo()),
-                  new GalleryDemo(title: 'Dialog', builder: () => new DialogDemo()),
-                  new GalleryDemo(title: 'Dropdown Button', builder: () => new DropDownDemo()),
-                  new GalleryDemo(title: 'Expand/Collapse List Control', builder: () => new TwoLevelListDemo()),
-                  new GalleryDemo(title: 'Grid', builder: () => new GridListDemo()),
-                  new GalleryDemo(title: 'Icons', builder: () => new IconsDemo()),
-                  new GalleryDemo(title: 'Leave-behind List Items', builder: () => new LeaveBehindDemo()),
-                  new GalleryDemo(title: 'List', builder: () => new ListDemo()),
-                  new GalleryDemo(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
-                  new GalleryDemo(title: 'Menus', builder: () => new MenuDemo()),
-                  new GalleryDemo(title: 'Page Selector', builder: () => new PageSelectorDemo()),
-                  new GalleryDemo(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
-                  new GalleryDemo(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
-                  new GalleryDemo(title: 'Scrollable Tabs', builder: () => new ScrollableTabsDemo()),
-                  new GalleryDemo(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
-                  new GalleryDemo(title: 'Sliders', builder: () => new SliderDemo()),
-                  new GalleryDemo(title: 'SnackBar', builder: () => new SnackBarDemo()),
-                  new GalleryDemo(title: 'Tabs', builder: () => new TabsDemo()),
-                  new GalleryDemo(title: 'Text Fields', builder: () => new TextFieldDemo()),
-                  new GalleryDemo(title: 'Time Picker', builder: () => new TimePickerDemo()),
-                  new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
-                ]
-              )
+              new GalleryItem(title: 'App Bar', builder: () => new FlexibleSpaceDemo()),
+              new GalleryItem(title: 'Buttons', builder: () => new ButtonsDemo()),
+              new GalleryItem(title: 'Buttons: Floating Action Button', builder: () => new TabsFabDemo()),
+              new GalleryItem(title: 'Cards', builder: () => new CardsDemo()),
+              new GalleryItem(title: 'Chips', builder: () => new ChipDemo()),
+              new GalleryItem(title: 'Date Picker', builder: () => new DatePickerDemo()),
+              new GalleryItem(title: 'Dialog', builder: () => new DialogDemo()),
+              new GalleryItem(title: 'Dropdown Button', builder: () => new DropDownDemo()),
+              new GalleryItem(title: 'Expand/Collapse List Control', builder: () => new TwoLevelListDemo()),
+              new GalleryItem(title: 'Grid', builder: () => new GridListDemo()),
+              new GalleryItem(title: 'Icons', builder: () => new IconsDemo()),
+              new GalleryItem(title: 'Leave-behind List Items', builder: () => new LeaveBehindDemo()),
+              new GalleryItem(title: 'List', builder: () => new ListDemo()),
+              new GalleryItem(title: 'Modal Bottom Sheet', builder: () => new ModalBottomSheetDemo()),
+              new GalleryItem(title: 'Menus', builder: () => new MenuDemo()),
+              new GalleryItem(title: 'Page Selector', builder: () => new PageSelectorDemo()),
+              new GalleryItem(title: 'Persistent Bottom Sheet', builder: () => new PersistentBottomSheetDemo()),
+              new GalleryItem(title: 'Progress Indicators', builder: () => new ProgressIndicatorDemo()),
+              new GalleryItem(title: 'Scrollable Tabs', builder: () => new ScrollableTabsDemo()),
+              new GalleryItem(title: 'Selection Controls', builder: () => new ToggleControlsDemo()),
+              new GalleryItem(title: 'Sliders', builder: () => new SliderDemo()),
+              new GalleryItem(title: 'SnackBar', builder: () => new SnackBarDemo()),
+              new GalleryItem(title: 'Tabs', builder: () => new TabsDemo()),
+              new GalleryItem(title: 'Text Fields', builder: () => new TextFieldDemo()),
+              new GalleryItem(title: 'Time Picker', builder: () => new TimePickerDemo()),
+              new GalleryItem(title: 'Tooltips', builder: () => new TooltipDemo()),
             ]
           ),
-          new Row(
+          new TwoLevelSublist(
+            leading: new Icon(icon: Icons.color_lens),
+            title: new Text("Style"),
             children: <Widget>[
-              new GallerySection(
-                title: 'Patterns',
-                image: 'assets/section_patterns.png',
-                colors: Colors.cyan,
-                demos: <GalleryDemo>[
-                  new GalleryDemo(title: 'Scrolling Techniques', builder: () => new ScrollingTechniquesDemo())
-                ]
-              ),
-              new GallerySection(
-                title: 'Usability',
-                image: 'assets/section_usability.png',
-                colors: Colors.lightGreen,
-                demos: <GalleryDemo>[
-                  new GalleryDemo(title: 'Tooltips', builder: () => new TooltipDemo())
-                ]
-              )
+              new GalleryItem(title: 'Colors', builder: () => new ColorsDemo()),
+              new GalleryItem(title: 'Typography', builder: () => new TypographyDemo()),
             ]
           )
         ]
