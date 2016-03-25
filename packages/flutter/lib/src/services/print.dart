@@ -14,6 +14,7 @@ import 'dart:collection';
 /// [debugDumpApp]) and to the Dart [print] method can result in out-of-order
 /// messages in the logs.
 void debugPrint(String message) {
+  print(message);
   _debugPrintBuffer.addAll(message.split('\n'));
   if (!_debugPrintScheduled)
     _debugPrintTask();
