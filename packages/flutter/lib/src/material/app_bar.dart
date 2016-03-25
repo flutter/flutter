@@ -134,16 +134,18 @@ class AppBar extends StatelessWidget {
     }
 
     final List<Widget> toolBarRow = <Widget>[];
-    if (leading != null)
-      toolBarRow.add(leading);
-    toolBarRow.add(
-      new Flexible(
-        child: new Padding(
-          padding: new EdgeInsets.only(left: 24.0),
-          child: title != null ? new DefaultTextStyle(style: centerStyle, child: title) : null
-        )
+    if (leading != null) {
+      toolBarRow.add(new Padding(
+        padding: new EdgeInsets.only(right: 16.0),
+        child: leading
+      ));
+    }
+    toolBarRow.add(new Flexible(
+      child: new Padding(
+        padding: new EdgeInsets.only(left: 8.0),
+        child: title != null ? new DefaultTextStyle(style: centerStyle, child: title) : null
       )
-    );
+    ));
     if (actions != null)
       toolBarRow.addAll(actions);
 
