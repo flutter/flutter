@@ -149,8 +149,14 @@ class MojoClient {
       ByteData data = await mojo.DataPipeDrainer.drainHandle(response.body);
       Uint8List bodyBytes = new Uint8List.view(data.buffer);
       return new Response(bodyBytes: bodyBytes, statusCode: response.statusCode);
-    } catch (e) {
-      print("NetworkService unavailable $e");
+    } catch (exception) {
+      assert(() {
+        debugPrint('-- EXCEPTION CAUGHT BY NETWORKING HTTP LIBRARY -------------------------');
+        debugPrint('An exception was raised while sending bytes to the Mojo network library:');
+        debugPrint('$exception');
+        debugPrint('------------------------------------------------------------------------');
+        return true;
+      });
       return new Response(statusCode: 500);
     } finally {
       loader.close();

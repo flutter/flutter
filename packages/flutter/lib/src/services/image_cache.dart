@@ -52,15 +52,14 @@ class _UrlFetcher implements ImageProvider {
 
   @override
   Future<ImageInfo> loadImage() async {
-    UrlResponse response = await fetchUrl(_url);
-    if (response.statusCode >= 400) {
-      print("Failed (${response.statusCode}) to load image $_url");
-      return null;
+    UrlResponse response = await fetchUrl(_url, require200: true);
+    if (response != null) {
+      return new ImageInfo(
+        image: await decodeImageFromDataPipe(response.body),
+        scale: _scale
+      );
     }
-    return new ImageInfo(
-      image: await decodeImageFromDataPipe(response.body),
-      scale: _scale
-    );
+    return null;
   }
 
   @override

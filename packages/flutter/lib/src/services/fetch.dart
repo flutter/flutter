@@ -4,32 +4,47 @@
 
 import 'dart:async';
 
-import 'package:mojo/mojo/url_request.mojom.dart';
-import 'package:mojo/mojo/url_response.mojom.dart';
-import 'package:mojo_services/mojo/url_loader.mojom.dart';
+import 'package:mojo/mojo/url_request.mojom.dart' as mojom;
+import 'package:mojo/mojo/url_response.mojom.dart' as mojom;
+import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojom;
 
 import '../http/mojo_client.dart';
+import 'print.dart';
 
 export 'package:mojo/mojo/url_response.mojom.dart' show UrlResponse;
 
-Future<UrlResponse> fetch(UrlRequest request) async {
-  UrlLoaderProxy loader = new UrlLoaderProxy.unbound();
+Future<mojom.UrlResponse> fetch(mojom.UrlRequest request, { bool require200: false }) async {
+  mojom.UrlLoaderProxy loader = new mojom.UrlLoaderProxy.unbound();
   try {
     MojoClient.networkService.ptr.createUrlLoader(loader);
-    UrlResponse response = (await loader.ptr.start(request)).response;
+    mojom.UrlResponse response = (await loader.ptr.start(request)).response;
+    if (require200 && (response.error != null || response.statusCode != 200)) {
+      StringBuffer message = new StringBuffer();
+      message.writeln('Could not ${request.method ?? "fetch"} ${request.url ?? "resource"}');
+      if (response.error != null)
+        message.writeln('Network error: ${response.error.code} ${response.error.description ?? "<unknown network error>"}');
+      if (response.statusCode != 200)
+        message.writeln('Protocol error: ${response.statusCode} ${response.statusLine ?? "<no server message>"}');
+      if (response.url != request.url)
+        message.writeln('Final URL after redirects was: ${response.url}');
+      throw message;
+    }
     return response;
-  } catch (e) {
-    print("NetworkService unavailable $e");
-    return new UrlResponse()..statusCode = 500;
+  } catch (exception) {
+    debugPrint('-- EXCEPTION CAUGHT BY NETWORKING HTTP LIBRARY -------------------------');
+    debugPrint('An exception was raised while sending bytes to the Mojo network library:');
+    debugPrint('$exception');
+    debugPrint('------------------------------------------------------------------------');
+    return null;
   } finally {
     loader.close();
   }
 }
 
-Future<UrlResponse> fetchUrl(String relativeUrl) {
+Future<mojom.UrlResponse> fetchUrl(String relativeUrl, { bool require200: false }) {
   String url = Uri.base.resolve(relativeUrl).toString();
-  UrlRequest request = new UrlRequest()
+  mojom.UrlRequest request = new mojom.UrlRequest()
     ..url = url
     ..autoFollowRedirects = true;
-  return fetch(request);
+  return fetch(request, require200: require200);
 }
