@@ -300,14 +300,12 @@ class _FocusState extends State<Focus> {
   @override
   Widget build(BuildContext context) {
     MediaQueryData data = MediaQuery.of(context);
-    if (data != null) {
-      Size newMediaSize = data.size;
-      EdgeInsets newMediaPadding = data.padding;
-      if (newMediaSize != _mediaSize || newMediaPadding != _mediaPadding) {
-        _mediaSize = newMediaSize;
-        _mediaPadding = newMediaPadding;
-        scheduleMicrotask(_ensureVisibleIfFocused);
-      }
+    Size newMediaSize = data.size;
+    EdgeInsets newMediaPadding = data.padding;
+    if (newMediaSize != _mediaSize || newMediaPadding != _mediaPadding) {
+      _mediaSize = newMediaSize;
+      _mediaPadding = newMediaPadding;
+      scheduleMicrotask(_ensureVisibleIfFocused);
     }
     return new Semantics(
       container: true,

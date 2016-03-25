@@ -20,7 +20,7 @@ class DrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(
       height: statusBarHeight + kMaterialDrawerHeight,
       decoration: new BoxDecoration(

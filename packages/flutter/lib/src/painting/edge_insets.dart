@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' as ui show lerpDouble, WindowPadding;
 
 import 'basic_types.dart';
 
@@ -23,20 +23,26 @@ class EdgeInsets {
 
   /// Constructs insets where all the offsets are value.
   const EdgeInsets.all(double value)
-      : top = value, right = value, bottom = value, left = value;
+      : left = value, top = value, right = value, bottom = value;
 
   /// Constructs insets with only the given values non-zero.
   const EdgeInsets.only({
+    this.left: 0.0,
     this.top: 0.0,
     this.right: 0.0,
-    this.bottom: 0.0,
-    this.left: 0.0
+    this.bottom: 0.0
   });
 
   /// Constructs insets with symmetrical vertical and horizontal offsets.
   const EdgeInsets.symmetric({ double vertical: 0.0,
                              double horizontal: 0.0 })
-    : top = vertical, left = horizontal, bottom = vertical, right = horizontal;
+    : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
+
+  EdgeInsets.fromWindowPadding(ui.WindowPadding padding)
+    : left = padding.left, top = padding.top, right = padding.right, bottom = padding.bottom;
+
+  /// The offset from the left.
+  final double left;
 
   /// The offset from the top.
   final double top;
@@ -47,11 +53,8 @@ class EdgeInsets {
   /// The offset from the bottom.
   final double bottom;
 
-  /// The offset from the left.
-  final double left;
-
   /// Whether every dimension is non-negative.
-  bool get isNonNegative => top >= 0.0 && right >= 0.0 && bottom >= 0.0 && left >= 0.0;
+  bool get isNonNegative => left >= 0.0 && top >= 0.0 && right >= 0.0 && bottom >= 0.0;
 
   /// The total offset in the vertical direction.
   double get horizontal => left + right;
@@ -151,15 +154,15 @@ class EdgeInsets {
     if (other is! EdgeInsets)
       return false;
     final EdgeInsets typedOther = other;
-    return top == typedOther.top &&
+    return left == typedOther.left &&
+           top == typedOther.top &&
            right == typedOther.right &&
-           bottom == typedOther.bottom &&
-           left == typedOther.left;
+           bottom == typedOther.bottom;
   }
 
   @override
-  int get hashCode => hashValues(top, left, bottom, right);
+  int get hashCode => hashValues(left, top, right, bottom);
 
   @override
-  String toString() => "EdgeInsets($top, $right, $bottom, $left)";
+  String toString() => "EdgeInsets($left, $top, $right, $bottom)";
 }

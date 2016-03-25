@@ -110,7 +110,7 @@ class AppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ThemeData theme = Theme.of(context);
 
     IconThemeData iconTheme = theme.primaryIconTheme;
