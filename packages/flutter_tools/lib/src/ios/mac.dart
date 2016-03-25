@@ -89,7 +89,8 @@ bool _xcodeVersionCheckValid(int major, int minor) {
   return false;
 }
 
-Future<bool> buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice }) async {
+Future<bool> buildIOSXcodeProject(ApplicationPackage app,
+    { bool buildForDevice, Directory buildDirectory }) async {
   String flutterProjectPath = Directory.current.path;
 
   if (xcodeProjectRequiresUpdate()) {
@@ -114,8 +115,22 @@ Future<bool> buildIOSXcodeProject(ApplicationPackage app, { bool buildForDevice 
   await _addServicesToBundle(new Directory(app.localPath));
 
   List<String> commands = <String>[
-    '/usr/bin/env', 'xcrun', 'xcodebuild', '-target', 'Runner', '-configuration', 'Release'
+    '/usr/bin/env',
+    'xcrun',
+    'xcodebuild',
+    '-target', 'Runner',
+    '-configuration', 'Release',
+    'ONLY_ACTIVE_ARCH=YES',
   ];
+
+  if (buildDirectory != null) {
+    if (!buildDirectory.existsSync()) {
+      printError('The specified build directory ${buildDirectory.path} does not exist');
+      return false;
+    }
+
+    commands.add('TARGET_BUILD_DIR=${buildDirectory.absolute.path}');
+  }
 
   if (buildForDevice) {
     commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);

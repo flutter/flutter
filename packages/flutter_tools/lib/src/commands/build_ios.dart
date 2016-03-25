@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import '../application_package.dart';
 import '../build_configuration.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart';
+
+import 'package:path/path.dart' as path;
 
 class BuildIOSCommand extends FlutterCommand {
   BuildIOSCommand() {
@@ -19,7 +22,7 @@ class BuildIOSCommand extends FlutterCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle.';
+  final String description = 'Build an iOS application bundle (Mac OSX host only).';
 
   @override
   Future<int> runInProject() async {
@@ -48,14 +51,20 @@ class BuildIOSCommand extends FlutterCommand {
 
     printStatus('Building the application for $logTarget.');
 
-    bool result = await buildIOSXcodeProject(app, buildForDevice: !forSimulator);
+    Directory buildDir = new Directory(path.join('build', 'ios_$logTarget'));
+
+    if (!buildDir.existsSync())
+      await buildDir.create();
+
+    bool result = await buildIOSXcodeProject(app,
+        buildForDevice: !forSimulator, buildDirectory: buildDir);
 
     if (!result) {
       printError('Encountered error while building for $logTarget.');
       return 1;
     }
 
-    printStatus('Done.');
+    printStatus('Built in ${buildDir.path}.');
 
     return 0;
   }
