@@ -24,11 +24,14 @@ class WindowImpl {
                      const std::string& bundle_path);
 
   void UpdateViewportMetrics(int width, int height);
+  void DispatchMouseButtonEvent(int button, int action, int mods);
+  void DispatchMouseMoveEvent(double x, double y);
 
  private:
   GLFWwindow* window_;
   std::unique_ptr<ShellView> shell_view_;
   sky::SkyEnginePtr engine_;
+  int buttons_;
 
   DISALLOW_COPY_AND_ASSIGN(WindowImpl);
 };
