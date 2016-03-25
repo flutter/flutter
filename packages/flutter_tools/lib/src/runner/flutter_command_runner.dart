@@ -167,8 +167,9 @@ class FlutterCommandRunner extends CommandRunner {
   @override
   Future<dynamic> run(Iterable<String> args) {
     return super.run(args).then((dynamic result) {
-      logger.flush();
       return result;
+    }).whenComplete(() {
+      logger.flush();
     });
   }
 

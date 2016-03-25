@@ -116,22 +116,28 @@ String _runWithLoggingSync(List<String> cmd, {
   printTrace(cmdText);
   ProcessResult results =
       Process.runSync(cmd[0], cmd.getRange(1, cmd.length).toList(), workingDirectory: workingDirectory);
-  if (results.exitCode != 0) {
-    String errorDescription = 'Error code ${results.exitCode} '
-        'returned when attempting to run command: ${cmd.join(' ')}';
-    printTrace(errorDescription);
-    if (results.stderr.length > 0) {
-      if (noisyErrors) {
-        printError(results.stderr.trim());
-      } else {
-        printTrace('Errors logged: ${results.stderr.trim()}');
-      }
-    }
-    if (checked)
-      throw errorDescription;
+
+  printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
+
+  if (results.stdout.isNotEmpty) {
+    if (results.exitCode != 0 && noisyErrors)
+      printStatus(results.stdout.trim());
+    else
+      printTrace(results.stdout.trim());
   }
-  if (results.stdout.trim().isNotEmpty)
-    printTrace(results.stdout.trim());
+
+  if (results.exitCode != 0) {
+    if (results.stderr.isNotEmpty) {
+      if (noisyErrors)
+        printError(results.stderr.trim());
+      else
+        printTrace(results.stderr.trim());
+    }
+
+    if (checked)
+      throw 'Exit code ${results.exitCode} from: ${cmd.join(' ')}';
+  }
+
   return results.stdout.trim();
 }
 

@@ -49,7 +49,7 @@ class TestCommand extends FlutterCommand {
     if (config.type == BuildType.prebuilt) {
       Artifact artifact = ArtifactStore.getArtifact(
         type: ArtifactType.shell, targetPlatform: config.targetPlatform);
-      return await ArtifactStore.getPath(artifact);
+      return ArtifactStore.getPath(artifact);
     } else {
       switch (config.targetPlatform) {
         case TargetPlatform.linux_x64:

@@ -223,9 +223,9 @@ class AndroidDevice extends Device {
     ServiceProtocolDiscovery serviceProtocolDiscovery =
         new ServiceProtocolDiscovery(logReader);
 
-    // We take this future here but do not wait for completion until *after*
-    // we start the bundle.
-    Future<int> serviceProtocolPort = serviceProtocolDiscovery.nextPort();
+    // We take this future here but do not wait for completion until *after* we
+    // start the bundle.
+    Future<int> scrapeServicePort = serviceProtocolDiscovery.nextPort();
 
     List<String> cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
@@ -250,13 +250,23 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    // Wait for the service protocol port here. This will complete once
-    // the device has printed "Observatory is listening on..."
-    int devicePort = await serviceProtocolPort;
-    printTrace('service protocol port = $devicePort');
-    await _forwardObservatoryPort(devicePort, debugPort);
+    // Wait for the service protocol port here. This will complete once the
+    // device has printed "Observatory is listening on...".
+    printTrace('Waiting for observatory port to be available...');
 
-    return true;
+    try {
+      int devicePort = await scrapeServicePort.timeout(new Duration(seconds: 12));
+      printTrace('service protocol port = $devicePort');
+      await _forwardObservatoryPort(devicePort, debugPort);
+      return true;
+    } catch (error) {
+      if (error is TimeoutException)
+        printError('Timed out while waiting for a debug connection.');
+      else
+        printError('Error waiting for a debug connection: $error');
+
+      return false;
+    }
   }
 
   @override
@@ -303,7 +313,7 @@ class AndroidDevice extends Device {
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
   }
 
-  // TODO(devoncarew): Return android_arm or android_x64 based on [isLocalEmulator].
+  // TODO(devoncarew): Use isLocalEmulator to return android_arm or android_x64.
   @override
   TargetPlatform get platform => TargetPlatform.android_arm;
 
@@ -533,7 +543,9 @@ class _AdbLogReader extends DeviceLogReader {
     String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
       args.addAll(<String>['-T', lastTimestamp]);
-    args.addAll(<String>['-s', 'flutter:V', 'ActivityManager:W', 'System.err:W', '*:F']);
+    args.addAll(<String>[
+      '-s', 'flutter:V', 'SkyMain:V', 'AndroidRuntime:W', 'ActivityManager:W', 'System.err:W', '*:F'
+    ]);
     _process = await runCommand(device.adbCommandForDevice(args));
     _stdoutSubscription =
         _process.stdout.transform(UTF8.decoder)
