@@ -14,6 +14,10 @@
 #include "sky/shell/switches.h"
 #include "sky/shell/testing/testing.h"
 
+#if defined(USE_GLFW)
+#include "sky/shell/platform/glfw/init_glfw.h"
+#endif
+
 int main(int argc, const char* argv[]) {
   base::AtExitManager exit_manager;
   base::CommandLine::Init(argc, argv);
@@ -26,12 +30,16 @@ int main(int argc, const char* argv[]) {
   }
 
   base::MessageLoop message_loop;
-
   mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
-
   sky::shell::Shell::InitStandalone();
 
-  if (!sky::shell::InitForTesting()) {
+  bool running = false;
+#if defined(USE_GLFW)
+  if (!command_line.HasSwitch(sky::shell::switches::kNonInteractive))
+    running = sky::shell::InitInteractive();
+#endif
+
+  if (!running && !sky::shell::InitForTesting()) {
     sky::shell::switches::PrintUsage("sky_shell");
     return 1;
   }

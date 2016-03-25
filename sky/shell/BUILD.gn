@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/ui.gni")
+
 source_set("common") {
   sources = [
     "gpu/picture_serializer.cc",
@@ -400,7 +402,6 @@ if (is_android) {
 
     sources = [
       "platform/linux/main_linux.cc",
-      "platform/linux/platform_view_linux.cc",
     ]
 
     deps = [
@@ -411,6 +412,21 @@ if (is_android) {
       ":gpu_direct",
       ":testing",
     ]
+
+    if (use_glfw) {
+      sources += [
+        "//sky/shell/platform/glfw/init_glfw.cc",
+        "//sky/shell/platform/glfw/init_glfw.h",
+        "//sky/shell/platform/glfw/platform_view_glfw.cc",
+        "//sky/shell/platform/glfw/platform_view_glfw.h",
+        "//sky/shell/platform/glfw/window_impl.cc",
+        "//sky/shell/platform/glfw/window_impl.h",
+      ]
+
+      deps += [ "//third_party/glfw" ]
+    } else {
+      sources += [ "platform/linux/platform_view_linux.cc" ]
+    }
   }
 } else if (is_mac) {
   import("//build/config/mac/rules.gni")
