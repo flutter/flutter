@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flx/bundle.dart';
 import 'package:flx/signing.dart';
+import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
@@ -108,6 +109,20 @@ dynamic _loadManifest(String manifestPath) {
   return loadYaml(manifestDescriptor);
 }
 
+Future<int> _validateManifest(Object manifest) async {
+  String schemaPath = path.join(path.absolute(ArtifactStore.flutterRoot),
+      'packages', 'flutter_tools', 'schema', 'flutter_yaml.json');
+  Schema schema = await Schema.createSchemaFromUrl('file://$schemaPath');
+
+  Validator validator = new Validator(schema);
+  if (validator.validate(manifest))
+    return 0;
+
+  printError('Error in flutter.yaml:');
+  printError(validator.errors.join('\n'));
+  return 1;
+}
+
 ZipEntry _createAssetEntry(_Asset asset) {
   String source = asset.source ?? asset.key;
   File file = new File('${asset.base}/$source');
@@ -184,7 +199,14 @@ Future<int> build(
   String workingDirPath: defaultWorkingDirPath,
   bool precompiledSnapshot: false
 }) async {
-  Map<String, dynamic> manifestDescriptor = _loadManifest(manifestPath);
+  Object manifest = _loadManifest(manifestPath);
+  if (manifest != null) {
+    int result = await _validateManifest(manifest);
+    if (result != 0)
+      return result;
+  }
+  Map<String, dynamic> manifestDescriptor = manifest;
+
   String assetBasePath = path.dirname(path.absolute(manifestPath));
 
   File snapshotFile;
