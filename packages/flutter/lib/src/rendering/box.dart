@@ -410,7 +410,7 @@ class BoxHitTestEntry extends HitTestEntry {
 
 /// Parent data used by [RenderBox] and its subclasses.
 class BoxParentData extends ParentData {
-  /// The offset at which to paint the child in the parent's coordinate system
+  /// The offset at which to paint the child in the parent's coordinate system.
   Offset offset = Offset.zero;
 
   @override
