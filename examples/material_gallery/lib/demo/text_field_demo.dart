@@ -11,14 +11,16 @@ class TextFieldDemo extends StatefulWidget {
   TextFieldDemoState createState() => new TextFieldDemoState();
 }
 
+class PersonData {
+  String name;
+  String phoneNumber;
+  String password;
+}
+
 class TextFieldDemoState extends State<TextFieldDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final List<InputValue> _inputs = <InputValue>[
-    InputValue.empty,
-    InputValue.empty,
-    InputValue.empty,
-    InputValue.empty,
-  ];
+
+  PersonData person = new PersonData();
 
   void showInSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
@@ -26,36 +28,30 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     ));
   }
 
-  void _handleInputChanged(InputValue value, int which) {
-    setState(() {
-      _inputs[which] = value;
-    });
+  void _handleSubmitted() {
+    showInSnackBar('${person.name}\'s phone number is ${person.phoneNumber}');
   }
 
-  void _handleInputSubmitted(InputValue value) {
-    showInSnackBar('${_inputs[0].text}\'s phone number is ${_inputs[1].text}');
-  }
-
-  String _validateName(InputValue value) {
-    if (value.text.isEmpty)
+  String _validateName(String value) {
+    if (value.isEmpty)
       return 'Name is required.';
     RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
-    if (!nameExp.hasMatch(value.text))
+    if (!nameExp.hasMatch(value))
       return 'Please enter only alphabetical characters.';
     return null;
   }
 
-  String _validatePhoneNumber(InputValue value) {
+  String _validatePhoneNumber(String value) {
     RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
-    if (!phoneExp.hasMatch(value.text))
+    if (!phoneExp.hasMatch(value))
       return '###-###-#### - Please enter a valid phone number.';
     return null;
   }
 
-  String _validatePassword(InputValue value1, InputValue value2) {
-    if (value1.text.isEmpty)
+  String _validatePassword(String value) {
+    if (person.password == null || person.password.isEmpty)
       return 'Please choose a password.';
-    if (value1.text != value2.text)
+    if (person.password != value)
       return 'Passwords don\'t match';
     return null;
   }
@@ -67,52 +63,55 @@ class TextFieldDemoState extends State<TextFieldDemo> {
       appBar: new AppBar(
         title: new Text('Text Fields')
       ),
-      body: new Block(
-        padding: const EdgeInsets.all(8.0),
-        children: <Widget>[
-          new Input(
-            hintText: 'What do people call you?',
-            labelText: 'Name',
-            errorText: _validateName(_inputs[0]),
-            value: _inputs[0],
-            onChanged: (InputValue value) { _handleInputChanged(value, 0); },
-            onSubmitted: _handleInputSubmitted
-          ),
-          new Input(
-            hintText: 'Where can we reach you?',
-            labelText: 'Phone Number',
-            errorText: _validatePhoneNumber(_inputs[1]),
-            value: _inputs[1],
-            onChanged: (InputValue value) { _handleInputChanged(value, 1); },
-            onSubmitted: _handleInputSubmitted
-          ),
-          new Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              new Flexible(
-                child: new Input(
-                  hintText: 'How do you log in?',
-                  labelText: 'New Password',
-                  hideText: true,
-                  value: _inputs[2],
-                  onChanged: (InputValue value) { _handleInputChanged(value, 2); },
-                  onSubmitted: _handleInputSubmitted
-                )
-              ),
-              new Flexible(
-                child: new Input(
-                  hintText: 'How do you log in?',
-                  labelText: 'Re-type Password',
-                  errorText: _validatePassword(_inputs[2], _inputs[3]),
-                  hideText: true,
-                  value: _inputs[3],
-                  onChanged: (InputValue value) { _handleInputChanged(value, 3); },
-                  onSubmitted: _handleInputSubmitted
-                )
+      body: new Form(
+        onSubmitted: _handleSubmitted,
+        child: new Block(
+          padding: const EdgeInsets.all(8.0),
+          children: <Widget>[
+            new Input(
+              hintText: 'What do people call you?',
+              labelText: 'Name',
+              formField: new FormField<String>(
+                // TODO(mpcomplete): replace with person#name=
+                setter:  (String val) { person.name = val; },
+                validator: _validateName
               )
-            ]
-          )
-        ]
+            ),
+            new Input(
+              hintText: 'Where can we reach you?',
+              labelText: 'Phone Number',
+              formField: new FormField<String>(
+                setter: (String val) { person.phoneNumber = val; },
+                validator: _validatePhoneNumber
+              )
+            ),
+            new Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Flexible(
+                  child: new Input(
+                    hintText: 'How do you log in?',
+                    labelText: 'New Password',
+                    hideText: true,
+                    formField: new FormField<String>(
+                      setter: (String val) { person.password = val; }
+                    )
+                  )
+                ),
+                new Flexible(
+                  child: new Input(
+                    hintText: 'How do you log in?',
+                    labelText: 'Re-type Password',
+                    hideText: true,
+                    formField: new FormField<String>(
+                      validator: _validatePassword
+                    )
+                  )
+                )
+              ]
+            )
+          ]
+        )
       )
     );
   }

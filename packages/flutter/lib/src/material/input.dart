@@ -17,7 +17,7 @@ export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
 class Input extends StatefulWidget {
   Input({
     Key key,
-    this.value: InputValue.empty,
+    this.value,
     this.keyboardType: KeyboardType.text,
     this.icon,
     this.labelText,
@@ -27,6 +27,7 @@ class Input extends StatefulWidget {
     this.hideText: false,
     this.isDense: false,
     this.autofocus: false,
+    this.formField,
     this.onChanged,
     this.onSubmitted
   }) : super(key: key);
@@ -61,6 +62,9 @@ class Input extends StatefulWidget {
   /// Whether this input field should focus itself is nothing else is already focused.
   final bool autofocus;
 
+  /// Form-specific data, required if this Input is part of a Form.
+  final FormField<String> formField;
+
   /// Called when the text being edited changes.
   final ValueChanged<InputValue> onChanged;
 
@@ -79,12 +83,24 @@ class _InputState extends State<Input> {
 
   GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputLineKey;
 
+  // Optional state to retain if we are inside a Form widget.
+  _FormFieldData _formData;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     BuildContext focusContext = focusKey.currentContext;
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
+    if (_formData == null)
+      _formData = _FormFieldData.maybeCreate(context, this);
+    InputValue value = config.value ?? _formData?.value ?? InputValue.empty;
+    ValueChanged<InputValue> onChanged = config.onChanged ?? _formData?.onChanged;
+    ValueChanged<InputValue> onSubmitted = config.onSubmitted ?? _formData?.onSubmitted;
+    String errorText = config.errorText;
+
+    if (errorText == null && config.formField != null && config.formField.validator != null)
+      errorText = config.formField.validator(value.text);
 
     TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
     Color activeColor = themeData.hintColor;
@@ -102,7 +118,7 @@ class _InputState extends State<Input> {
 
     List<Widget> stackChildren = <Widget>[];
 
-    bool hasInlineLabel = config.labelText != null && !focused && !config.value.text.isNotEmpty;
+    bool hasInlineLabel = config.labelText != null && !focused && !value.text.isNotEmpty;
 
     if (config.labelText != null) {
       TextStyle labelStyle = hasInlineLabel ?
@@ -125,7 +141,7 @@ class _InputState extends State<Input> {
       topPadding += topPaddingIncrement;
     }
 
-    if (config.hintText != null && config.value.text.isEmpty && !hasInlineLabel) {
+    if (config.hintText != null && value.text.isEmpty && !hasInlineLabel) {
       TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
       stackChildren.add(new Positioned(
         left: 0.0,
@@ -139,7 +155,7 @@ class _InputState extends State<Input> {
     Color borderColor = activeColor;
     double borderWidth = focused ? 2.0 : 1.0;
 
-    if (config.errorText != null) {
+    if (errorText != null) {
       borderColor = themeData.errorColor;
       borderWidth = 2.0;
       if (!config.isDense) {
@@ -163,24 +179,24 @@ class _InputState extends State<Input> {
       ),
       child: new RawInputLine(
         key: _rawInputLineKey,
-        value: config.value,
+        value: value,
         focusKey: focusKey,
         style: textStyle,
         hideText: config.hideText,
         cursorColor: themeData.selectionColor,
         selectionColor: themeData.selectionColor,
         keyboardType: config.keyboardType,
-        onChanged: config.onChanged,
-        onSubmitted: config.onSubmitted
+        onChanged: onChanged,
+        onSubmitted: onSubmitted
       )
     ));
 
-    if (config.errorText != null && !config.isDense) {
+    if (errorText != null && !config.isDense) {
       TextStyle errorStyle = themeData.textTheme.caption.copyWith(color: themeData.errorColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         bottom: 0.0,
-        child: new Text(config.errorText, style: errorStyle)
+        child: new Text(errorText, style: errorStyle)
       ));
     }
 
@@ -214,5 +230,38 @@ class _InputState extends State<Input> {
         child: child
       )
     );
+  }
+}
+
+class _FormFieldData {
+  _FormFieldData(this.inputState) {
+    assert(field != null);
+  }
+
+  InputValue value = new InputValue();
+  final _InputState inputState;
+  FormField<String> get field => inputState.config.formField;
+
+  static _FormFieldData maybeCreate(BuildContext context, _InputState inputState) {
+    // Only create a _FormFieldData if this Input is a descendent of a Form.
+    if (FormScope.of(context) != null)
+      return new _FormFieldData(inputState);
+    return null;
+  }
+
+  void onChanged(InputValue value) {
+    FormScope scope = FormScope.of(inputState.context);
+    assert(scope != null);
+    this.value = value;
+    if (field.setter != null)
+      field.setter(value.text);
+    scope.onFieldChanged();
+  }
+
+  void onSubmitted(InputValue value) {
+    FormScope scope = FormScope.of(inputState.context);
+    assert(scope != null);
+    scope.form.onSubmitted();
+    scope.onFieldChanged();
   }
 }
