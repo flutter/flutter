@@ -120,6 +120,15 @@ static NSString* NSStringFromVMType(VMType type) {
 
 - (void)runFromPrecompiledSourceInEngine:(sky::SkyEnginePtr&)engine
                                   result:(LaunchResult)result {
+  if (![_precompiledDartBundle load]) {
+    NSString* message = [NSString
+        stringWithFormat:
+            @"Could not load the framework ('%@') containing precompiled code.",
+            _precompiledDartBundle.bundleIdentifier];
+    result(NO, message);
+    return;
+  }
+
   NSString* path =
       [_precompiledDartBundle pathForResource:@"app" ofType:@"flx"];
 
@@ -160,6 +169,7 @@ static NSString* NSStringFromVMType(VMType type) {
 #pragma mark - Misc.
 
 - (void)dealloc {
+  [_precompiledDartBundle unload];
   [_precompiledDartBundle release];
   [_dartSource release];
 
