@@ -111,6 +111,12 @@ void IsolateShutdownCallback(void* callback_data) {
   delete dart_state;
 }
 
+void ThreadExitCallback() {
+#ifdef OS_ANDROID
+  DartJni::OnThreadExit();
+#endif
+}
+
 bool IsServiceIsolateURL(const char* url_name) {
   return url_name != nullptr &&
          String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
@@ -189,6 +195,13 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     dart_state->class_library().add_provider(
       "ui",
       WTF::MakeUnique<DartClassProvider>(dart_state, "dart:ui"));
+
+#ifdef OS_ANDROID
+    DartJni::InitForIsolate();
+    dart_state->class_library().add_provider(
+      "jni",
+      WTF::MakeUnique<DartClassProvider>(dart_state, "dart:jni"));
+#endif
 
     if (!snapshot_data.empty()) {
       CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(
@@ -424,7 +437,7 @@ void InitDartVM() {
                           nullptr,  // Isolate interrupt callback.
                           nullptr,
                           IsolateShutdownCallback,
-                          nullptr,
+                          ThreadExitCallback,
                           // File IO callbacks.
                           nullptr, nullptr, nullptr, nullptr,
                           // Entroy source
