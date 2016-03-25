@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 void main() {
   test('Drag and drop - control test', () {
     testWidgets((WidgetTester tester) {
-      List<dynamic> accepted = <dynamic>[];
+      List<int> accepted = <int>[];
 
       tester.pumpWidget(new MaterialApp(
         routes: <String, WidgetBuilder>{
@@ -62,7 +62,7 @@ void main() {
       gesture.up();
       tester.pump();
 
-      expect(accepted, equals([1]));
+      expect(accepted, equals(<int>[1]));
       expect(tester.findText('Source'), isNotNull);
       expect(tester.findText('Dragging'), isNull);
       expect(tester.findText('Target'), isNotNull);
@@ -551,6 +551,206 @@ void main() {
       expect(tester.getCenter(tester.findText('Target')).x, lessThan(0.0));
       events.clear();
 
+    });
+  });
+
+  test('Drag and drop - onDraggableDropped not called if dropped on accepting target', () {
+    testWidgets((WidgetTester tester) {
+      List<int> accepted = <int>[];
+      bool onDraggableCanceledCalled = false;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
+            children: <Widget>[
+              new Draggable<int>(
+                data: 1,
+                child: new Text('Source'),
+                feedback: new Text('Dragging'),
+                onDraggableCanceled: (Velocity velocity, Offset offset) {
+                  onDraggableCanceledCalled = true;
+                }
+              ),
+              new DragTarget<int>(
+                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                  return new Container(
+                    height: 100.0,
+                    child: new Text('Target')
+                  );
+                },
+                onAccept: (int data) {
+                  accepted.add(data);
+                }
+              ),
+            ]);
+          },
+        }
+      ));
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+
+      Point firstLocation = tester.getCenter(tester.findText('Source'));
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
+      tester.pump();
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNotNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+
+      Point secondLocation = tester.getCenter(tester.findText('Target'));
+      gesture.moveTo(secondLocation);
+      tester.pump();
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNotNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+
+      gesture.up();
+      tester.pump();
+
+      expect(accepted, equals(<int>[1]));
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+    });
+  });
+
+  test('Drag and drop - onDraggableDropped called if dropped on non-accepting target', () {
+    testWidgets((WidgetTester tester) {
+      List<int> accepted = <int>[];
+      bool onDraggableCanceledCalled = false;
+      Velocity onDraggableCanceledVelocity;
+      Offset onDraggableCanceledOffset;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
+            children: <Widget>[
+              new Draggable<int>(
+                data: 1,
+                child: new Text('Source'),
+                feedback: new Text('Dragging'),
+                onDraggableCanceled: (Velocity velocity, Offset offset) {
+                  onDraggableCanceledCalled = true;
+                  onDraggableCanceledVelocity = velocity;
+                  onDraggableCanceledOffset = offset;
+                }
+              ),
+              new DragTarget<int>(
+                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                  return new Container(
+                    height: 100.0,
+                    child: new Text('Target')
+                  );
+                },
+                onWillAccept: (int data) => false
+              ),
+            ]);
+          },
+        }
+      ));
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+
+      Point firstLocation = tester.getTopLeft(tester.findText('Source'));
+      TestGesture gesture = tester.startGesture(firstLocation, pointer: 7);
+      tester.pump();
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNotNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+
+      Point secondLocation = tester.getCenter(tester.findText('Target'));
+      gesture.moveTo(secondLocation);
+      tester.pump();
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNotNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+
+      gesture.up();
+      tester.pump();
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isTrue);
+      expect(onDraggableCanceledVelocity, equals(Velocity.zero));
+      expect(onDraggableCanceledOffset, equals(new Offset(secondLocation.x, secondLocation.y)));
+    });
+  });
+
+  test('Drag and drop - onDraggableDropped called if dropped on non-accepting target with correct velocity', () {
+    testWidgets((WidgetTester tester) {
+      List<int> accepted = <int>[];
+      bool onDraggableCanceledCalled = false;
+      Velocity onDraggableCanceledVelocity;
+      Offset onDraggableCanceledOffset;
+
+      tester.pumpWidget(new MaterialApp(
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) { return new Column(
+            children: <Widget>[
+              new Draggable<int>(
+                data: 1,
+                child: new Text('Source'),
+                feedback: new Text('Source'),
+                onDraggableCanceled: (Velocity velocity, Offset offset) {
+                  onDraggableCanceledCalled = true;
+                  onDraggableCanceledVelocity = velocity;
+                  onDraggableCanceledOffset = offset;
+                }
+              ),
+              new DragTarget<int>(
+                builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                  return new Container(
+                    height: 100.0,
+                    child: new Text('Target')
+                  );
+                },
+                onWillAccept: (int data) => false
+              ),
+            ]);
+          },
+        }
+      ));
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isFalse);
+
+      Point flingStart = tester.getTopLeft(tester.findText('Source'));
+      tester.flingFrom(flingStart, new Offset(0.0,100.0), 1000.0);
+      tester.pump();
+
+      expect(accepted, isEmpty);
+      expect(tester.findText('Source'), isNotNull);
+      expect(tester.findText('Dragging'), isNull);
+      expect(tester.findText('Target'), isNotNull);
+      expect(onDraggableCanceledCalled, isTrue);
+      expect(onDraggableCanceledVelocity.pixelsPerSecond.dx.abs(), lessThan(0.0000001));
+      expect((onDraggableCanceledVelocity.pixelsPerSecond.dy - 1000.0).abs(), lessThan(0.0000001));
+      expect(onDraggableCanceledOffset, equals(new Offset(flingStart.x, flingStart.y) + new Offset(0.0, 100.0)));
     });
   });
 }

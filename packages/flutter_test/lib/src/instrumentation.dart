@@ -190,7 +190,7 @@ class Instrumentation {
     final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
     double timeStamp = 0.0;
     dispatchEvent(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
-    for(int i = 0; i < kMoveCount; i++) {
+    for(int i = 0; i <= kMoveCount; i++) {
       final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
       dispatchEvent(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       timeStamp += timeStampDelta;
