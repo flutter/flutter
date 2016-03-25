@@ -35,7 +35,7 @@ class TabsDemoState extends State<TabsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new TabBarSelection<_Page>(
       values: _pages,
       onChanged: (_Page value) {

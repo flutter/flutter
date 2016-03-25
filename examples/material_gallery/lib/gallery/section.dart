@@ -25,7 +25,7 @@ class GallerySection extends StatelessWidget {
   }
 
   void showDemos(BuildContext context) {
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     final ThemeData theme = new ThemeData(
       brightness: Theme.of(context).brightness,
       primarySwatch: colors

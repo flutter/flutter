@@ -453,7 +453,7 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   Widget _buildScrollableAppBar(BuildContext context) {
-    final EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
     final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
     final double collapsedHeight = (config.appBar?.collapsedHeight ?? 0.0) + padding.top;
     final double minimumHeight = (config.appBar?.minimumHeight ?? 0.0) + padding.top;
@@ -500,7 +500,7 @@ class ScaffoldState extends State<Scaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final EdgeInsets padding = MediaQuery.of(context)?.padding ?? EdgeInsets.zero;
+    final EdgeInsets padding = MediaQuery.of(context).padding;
 
     if (_snackBars.length > 0) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);

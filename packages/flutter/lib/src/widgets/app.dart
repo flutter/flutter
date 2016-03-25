@@ -104,10 +104,6 @@ class WidgetsApp extends StatefulWidget {
   WidgetsAppState<WidgetsApp> createState() => new WidgetsAppState<WidgetsApp>();
 }
 
-EdgeInsets _getPadding(ui.WindowPadding padding) {
-  return new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, padding.bottom);
-}
-
 class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingObserver {
 
   GlobalObjectKey _navigator;
@@ -173,11 +169,7 @@ class WidgetsAppState<T extends WidgetsApp> extends State<T> implements BindingO
     }
 
     Widget result = new MediaQuery(
-      data: new MediaQueryData(
-        size: ui.window.size,
-        devicePixelRatio: ui.window.devicePixelRatio,
-        padding: _getPadding(ui.window.padding)
-      ),
+      data: new MediaQueryData.fromWindow(ui.window),
       child: new LocaleQuery(
         data: _localeData,
         child: new AssetVendor(

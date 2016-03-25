@@ -4,7 +4,6 @@
 
 import 'package:flutter/rendering.dart';
 
-import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 
@@ -17,7 +16,6 @@ class ChildView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMediaQuery(context));
     return new _ChildViewWidget(
       child: child,
       scale: MediaQuery.of(context).devicePixelRatio

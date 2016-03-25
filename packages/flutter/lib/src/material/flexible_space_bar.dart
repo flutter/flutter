@@ -25,7 +25,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasScaffold(context));
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     final Animation<double> animation = Scaffold.of(context).appBarAnimation;
     final double appBarHeight = Scaffold.of(context).appBarHeight + statusBarHeight;
     final double toolBarHeight = kToolBarHeight + statusBarHeight;

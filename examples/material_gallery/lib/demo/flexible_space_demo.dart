@@ -82,7 +82,7 @@ class FlexibleSpaceDemoState extends State<FlexibleSpaceDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Theme(
       data: new ThemeData(
         brightness: ThemeBrightness.light,
