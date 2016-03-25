@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 OS X - www.glfw.org
+// GLFW 3.2 OS X - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2002-2006 Marcus Geelnard
 // Copyright (c) 2006-2010 Camilla Berglund <elmindreda@elmindreda.org>
@@ -76,28 +76,28 @@ static char* getDisplayName(CGDirectDisplayID displayID)
 
 // Check whether the display mode should be included in enumeration
 //
-static GLboolean modeIsGood(CGDisplayModeRef mode)
+static GLFWbool modeIsGood(CGDisplayModeRef mode)
 {
     uint32_t flags = CGDisplayModeGetIOFlags(mode);
     if (!(flags & kDisplayModeValidFlag) || !(flags & kDisplayModeSafeFlag))
-        return GL_FALSE;
+        return GLFW_FALSE;
 
     if (flags & kDisplayModeInterlacedFlag)
-        return GL_FALSE;
+        return GLFW_FALSE;
 
     if (flags & kDisplayModeStretchedFlag)
-        return GL_FALSE;
+        return GLFW_FALSE;
 
     CFStringRef format = CGDisplayModeCopyPixelEncoding(mode);
     if (CFStringCompare(format, CFSTR(IO16BitDirectPixels), 0) &&
         CFStringCompare(format, CFSTR(IO32BitDirectPixels), 0))
     {
         CFRelease(format);
-        return GL_FALSE;
+        return GLFW_FALSE;
     }
 
     CFRelease(format);
-    return GL_TRUE;
+    return GLFW_TRUE;
 }
 
 // Convert Core Graphics display mode to GLFW video mode
@@ -166,7 +166,7 @@ static void endFadeReservation(CGDisplayFadeReservationToken token)
 
 // Change the current video mode
 //
-GLboolean _glfwSetVideoMode(_GLFWmonitor* monitor, const GLFWvidmode* desired)
+GLFWbool _glfwSetVideoModeNS(_GLFWmonitor* monitor, const GLFWvidmode* desired)
 {
     CFArrayRef modes;
     CFIndex count, i;
@@ -178,7 +178,7 @@ GLboolean _glfwSetVideoMode(_GLFWmonitor* monitor, const GLFWvidmode* desired)
     best = _glfwChooseVideoMode(monitor, desired);
     _glfwPlatformGetVideoMode(monitor, &current);
     if (_glfwCompareVideoModes(&current, best) == 0)
-        return GL_TRUE;
+        return GLFW_TRUE;
 
     CVDisplayLinkCreateWithCGDisplay(monitor->ns.displayID, &link);
 
@@ -216,15 +216,15 @@ GLboolean _glfwSetVideoMode(_GLFWmonitor* monitor, const GLFWvidmode* desired)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
                         "Cocoa: Monitor mode list changed");
-        return GL_FALSE;
+        return GLFW_FALSE;
     }
 
-    return GL_TRUE;
+    return GLFW_TRUE;
 }
 
 // Restore the previously saved (original) video mode
 //
-void _glfwRestoreVideoMode(_GLFWmonitor* monitor)
+void _glfwRestoreVideoModeNS(_GLFWmonitor* monitor)
 {
     if (monitor->ns.previousMode)
     {
@@ -283,7 +283,7 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
     return monitors;
 }
 
-GLboolean _glfwPlatformIsSameMonitor(_GLFWmonitor* first, _GLFWmonitor* second)
+GLFWbool _glfwPlatformIsSameMonitor(_GLFWmonitor* first, _GLFWmonitor* second)
 {
     // HACK: Compare unit numbers instead of display IDs to work around display
     //       replacement on machines with automatic graphics switching

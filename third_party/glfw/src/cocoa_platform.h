@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 OS X - www.glfw.org
+// GLFW 3.2 OS X - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2009-2010 Camilla Berglund <elmindreda@elmindreda.org>
 //
@@ -28,22 +28,29 @@
 #define _glfw3_cocoa_platform_h_
 
 #include <stdint.h>
+#include <dlfcn.h>
 
 #if defined(__OBJC__)
+#import <Carbon/Carbon.h>
 #import <Cocoa/Cocoa.h>
 #else
+#include <Carbon/Carbon.h>
 #include <ApplicationServices/ApplicationServices.h>
 typedef void* id;
 #endif
 
 #include "posix_tls.h"
-#include "iokit_joystick.h"
+#include "cocoa_joystick.h"
 
 #if defined(_GLFW_NSGL)
  #include "nsgl_context.h"
 #else
  #error "The Cocoa backend depends on NSGL platform support"
 #endif
+
+#define _glfw_dlopen(name) dlopen(name, RTLD_LAZY | RTLD_LOCAL)
+#define _glfw_dlclose(handle) dlclose(handle)
+#define _glfw_dlsym(handle, name) dlsym(handle, name)
 
 #define _GLFW_PLATFORM_WINDOW_STATE         _GLFWwindowNS  ns
 #define _GLFW_PLATFORM_LIBRARY_WINDOW_STATE _GLFWlibraryNS ns
@@ -59,7 +66,6 @@ typedef struct _GLFWwindowNS
     id              object;
     id              delegate;
     id              view;
-    unsigned int    modifierFlags;
 
     // The total sum of the distances the cursor has been warped
     // since the last cursor motion event was processed
@@ -73,13 +79,17 @@ typedef struct _GLFWwindowNS
 //
 typedef struct _GLFWlibraryNS
 {
-    CGEventSourceRef eventSource;
-    id              delegate;
-    id              autoreleasePool;
-    id              cursor;
+    CGEventSourceRef    eventSource;
+    id                  delegate;
+    id                  autoreleasePool;
+    id                  cursor;
+    TISInputSourceRef   inputSource;
+    id                  unicodeData;
 
-    short int       publicKeys[256];
-    char*           clipboardString;
+    char                keyName[64];
+    short int           publicKeys[256];
+    short int           nativeKeys[GLFW_KEY_LAST + 1];
+    char*               clipboardString;
 
 } _GLFWlibraryNS;
 
@@ -108,15 +118,14 @@ typedef struct _GLFWcursorNS
 //
 typedef struct _GLFWtimeNS
 {
-    double          base;
-    double          resolution;
+    GLFWuint64      frequency;
 
 } _GLFWtimeNS;
 
 
-void _glfwInitTimer(void);
+void _glfwInitTimerNS(void);
 
-GLboolean _glfwSetVideoMode(_GLFWmonitor* monitor, const GLFWvidmode* desired);
-void _glfwRestoreVideoMode(_GLFWmonitor* monitor);
+GLFWbool _glfwSetVideoModeNS(_GLFWmonitor* monitor, const GLFWvidmode* desired);
+void _glfwRestoreVideoModeNS(_GLFWmonitor* monitor);
 
 #endif // _glfw3_cocoa_platform_h_

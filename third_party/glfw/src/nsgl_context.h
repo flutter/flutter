@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 OS X - www.glfw.org
+// GLFW 3.2 OS X - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2009-2010 Camilla Berglund <elmindreda@elmindreda.org>
 //
@@ -37,7 +37,7 @@
 typedef struct _GLFWcontextNSGL
 {
     id           pixelFormat;
-    id	         context;
+    id	         object;
 
 } _GLFWcontextNSGL;
 
@@ -47,16 +47,16 @@ typedef struct _GLFWcontextNSGL
 typedef struct _GLFWlibraryNSGL
 {
     // dlopen handle for OpenGL.framework (for glfwGetProcAddress)
-    void*           framework;
+    CFBundleRef     framework;
 
 } _GLFWlibraryNSGL;
 
 
-int _glfwInitContextAPI(void);
-void _glfwTerminateContextAPI(void);
-int _glfwCreateContext(_GLFWwindow* window,
-                       const _GLFWctxconfig* ctxconfig,
-                       const _GLFWfbconfig* fbconfig);
-void _glfwDestroyContext(_GLFWwindow* window);
+GLFWbool _glfwInitNSGL(void);
+void _glfwTerminateNSGL(void);
+GLFWbool _glfwCreateContextNSGL(_GLFWwindow* window,
+                                const _GLFWctxconfig* ctxconfig,
+                                const _GLFWfbconfig* fbconfig);
+void _glfwDestroyContextNSGL(_GLFWwindow* window);
 
 #endif // _glfw3_nsgl_context_h_

@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 OS X - www.glfw.org
+// GLFW 3.2 OS X - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2009-2010 Camilla Berglund <elmindreda@elmindreda.org>
 //
@@ -29,27 +29,18 @@
 #include <mach/mach_time.h>
 
 
-// Return raw time
-//
-static uint64_t getRawTime(void)
-{
-    return mach_absolute_time();
-}
-
-
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW internal API                      //////
 //////////////////////////////////////////////////////////////////////////
 
 // Initialise timer
 //
-void _glfwInitTimer(void)
+void _glfwInitTimerNS(void)
 {
     mach_timebase_info_data_t info;
     mach_timebase_info(&info);
 
-    _glfw.ns_time.resolution = (double) info.numer / (info.denom * 1.0e9);
-    _glfw.ns_time.base = getRawTime();
+    _glfw.ns_time.frequency = (info.denom * 1e9) / info.numer;
 }
 
 
@@ -57,15 +48,13 @@ void _glfwInitTimer(void)
 //////                       GLFW platform API                      //////
 //////////////////////////////////////////////////////////////////////////
 
-double _glfwPlatformGetTime(void)
+GLFWuint64 _glfwPlatformGetTimerValue(void)
 {
-    return (double) (getRawTime() - _glfw.ns_time.base) *
-        _glfw.ns_time.resolution;
+    return mach_absolute_time();
 }
 
-void _glfwPlatformSetTime(double time)
+GLFWuint64 _glfwPlatformGetTimerFrequency(void)
 {
-    _glfw.ns_time.base = getRawTime() -
-        (uint64_t) (time / _glfw.ns_time.resolution);
+    return _glfw.ns_time.frequency;
 }
 

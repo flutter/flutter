@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 Mir - www.glfw.org
+// GLFW 3.2 Mir - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2014-2015 Brandon Schaefer <brandon.schaefer@canonical.com>
 //
@@ -29,8 +29,23 @@
 
 #include <sys/queue.h>
 #include <pthread.h>
+#include <dlfcn.h>
 
 #include <mir_toolkit/mir_client_library.h>
+
+typedef VkFlags VkMirSurfaceCreateFlagsKHR;
+
+typedef struct VkMirSurfaceCreateInfoKHR
+{
+    VkStructureType             sType;
+    const void*                 pNext;
+    VkMirSurfaceCreateFlagsKHR  flags;
+    MirConnection*              connection;
+    MirSurface*                 mirSurface;
+} VkMirSurfaceCreateInfoKHR;
+
+typedef VkResult (APIENTRY *PFN_vkCreateMirSurfaceKHR)(VkInstance,const VkMirSurfaceCreateInfoKHR*,const VkAllocationCallbacks*,VkSurfaceKHR*);
+typedef VkBool32 (APIENTRY *PFN_vkGetPhysicalDeviceMirPresentationSupportKHR)(VkPhysicalDevice,uint32_t,MirConnection*);
 
 #include "posix_tls.h"
 #include "posix_time.h"
@@ -43,8 +58,12 @@
  #error "The Mir backend depends on EGL platform support"
 #endif
 
-#define _GLFW_EGL_NATIVE_WINDOW  window->mir.window
-#define _GLFW_EGL_NATIVE_DISPLAY _glfw.mir.display
+#define _glfw_dlopen(name) dlopen(name, RTLD_LAZY | RTLD_LOCAL)
+#define _glfw_dlclose(handle) dlclose(handle)
+#define _glfw_dlsym(handle, name) dlsym(handle, name)
+
+#define _GLFW_EGL_NATIVE_WINDOW  ((EGLNativeWindowType) window->mir.window)
+#define _GLFW_EGL_NATIVE_DISPLAY ((EGLNativeDisplayType) _glfw.mir.display)
 
 #define _GLFW_PLATFORM_WINDOW_STATE         _GLFWwindowMir  mir
 #define _GLFW_PLATFORM_MONITOR_STATE        _GLFWmonitorMir mir
@@ -92,6 +111,8 @@ typedef struct _GLFWlibraryMir
     MirCursorConfiguration* default_conf;
     EventQueue* event_queue;
 
+    short int       publicKeys[256];
+
     pthread_mutex_t event_mutex;
     pthread_cond_t  event_cond;
 
@@ -108,7 +129,7 @@ typedef struct _GLFWcursorMir
 } _GLFWcursorMir;
 
 
-extern void _glfwInitEventQueue(EventQueue* queue);
-extern void _glfwDeleteEventQueue(EventQueue* queue);
+extern void _glfwInitEventQueueMir(EventQueue* queue);
+extern void _glfwDeleteEventQueueMir(EventQueue* queue);
 
 #endif // _glfw3_mir_platform_h_
