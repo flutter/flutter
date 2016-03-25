@@ -16,7 +16,42 @@
 
 #if defined(USE_GLFW)
 #include "sky/shell/platform/glfw/init_glfw.h"
+#include "sky/shell/platform/glfw/message_pump_glfw.h"
 #endif
+
+namespace {
+
+int RunNonInteractive() {
+  base::MessageLoop message_loop;
+  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
+  sky::shell::Shell::InitStandalone();
+
+  if (!sky::shell::InitForTesting()) {
+    sky::shell::switches::PrintUsage("sky_shell");
+    return 1;
+  }
+
+  message_loop.Run();
+  return 0;
+}
+
+#if defined(USE_GLFW)
+
+int RunInteractive() {
+  base::MessageLoop message_loop(sky::shell::MessagePumpGLFW::Create());
+  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
+  sky::shell::Shell::InitStandalone();
+
+  if (!sky::shell::InitInteractive())
+    return 1;
+
+  message_loop.Run();
+  return 0;
+}
+
+#endif // defined(USE_GLFW)
+
+} // namespace
 
 int main(int argc, const char* argv[]) {
   base::AtExitManager exit_manager;
@@ -29,21 +64,11 @@ int main(int argc, const char* argv[]) {
     return 0;
   }
 
-  base::MessageLoop message_loop;
-  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
-  sky::shell::Shell::InitStandalone();
-
-  bool running = false;
 #if defined(USE_GLFW)
-  if (!command_line.HasSwitch(sky::shell::switches::kNonInteractive))
-    running = sky::shell::InitInteractive();
+  if (command_line.HasSwitch(sky::shell::switches::kNonInteractive))
+    return RunNonInteractive();
+  return RunInteractive();
 #endif
 
-  if (!running && !sky::shell::InitForTesting()) {
-    sky::shell::switches::PrintUsage("sky_shell");
-    return 1;
-  }
-
-  message_loop.Run();
-  return 0;
+  return RunNonInteractive();
 }
