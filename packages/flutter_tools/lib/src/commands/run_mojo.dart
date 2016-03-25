@@ -99,7 +99,7 @@ class RunMojoCommand extends FlutterCommand {
     if (config == null || config.type == BuildType.prebuilt) {
       TargetPlatform targetPlatform = argResults['android'] ? TargetPlatform.android_arm : TargetPlatform.linux_x64;
       Artifact artifact = ArtifactStore.getArtifact(type: ArtifactType.mojo, targetPlatform: targetPlatform);
-      flutterPath = _makePathAbsolute(await ArtifactStore.getPath(artifact));
+      flutterPath = _makePathAbsolute(ArtifactStore.getPath(artifact));
     } else {
       String localPath = path.join(config.buildDir, 'flutter.mojo');
       flutterPath = _makePathAbsolute(localPath);

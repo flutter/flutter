@@ -459,9 +459,9 @@ class IOSSimulator extends Device {
     ServiceProtocolDiscovery serviceProtocolDiscovery =
         new ServiceProtocolDiscovery(logReader);
 
-    // We take this future here but do not wait for completion until *after*
-    // we start the application.
-    Future<int> serviceProtocolPort = serviceProtocolDiscovery.nextPort();
+    // We take this future here but do not wait for completion until *after* we
+    // start the application.
+    Future<int> scrapeServicePort = serviceProtocolDiscovery.nextPort();
 
     // Prepare launch arguments.
     List<String> args = <String>[
@@ -487,14 +487,23 @@ class IOSSimulator extends Device {
       return false;
     }
 
-    // Wait for the service protocol port here. This will complete once
-    // the device has printed "Observatory is listening on..."
-    int devicePort = await serviceProtocolPort;
-    printTrace('service protocol port = $devicePort');
-    printTrace('Successfully started ${app.name} on $id.');
-    printStatus('Observatory listening on http://127.0.0.1:$devicePort');
+    // Wait for the service protocol port here. This will complete once the
+    // device has printed "Observatory is listening on..."
+    printTrace('Waiting for observatory port to be available...');
 
-    return true;
+    try {
+      int devicePort = await scrapeServicePort.timeout(new Duration(seconds: 12));
+      printTrace('service protocol port = $devicePort');
+      printStatus('Observatory listening on http://127.0.0.1:$devicePort');
+      return true;
+    } catch (error) {
+      if (error is TimeoutException)
+        printError('Timed out while waiting for a debug connection.');
+      else
+        printError('Error waiting for a debug connection: $error');
+
+      return false;
+    }
   }
 
   bool _applicationIsInstalledAndRunning(ApplicationPackage app) {

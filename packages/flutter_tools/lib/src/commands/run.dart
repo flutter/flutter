@@ -182,8 +182,8 @@ Future<int> startApp(
 
   if (install) {
     printTrace('Running build command.');
-    int result = await buildAll(
-      <Device>[device], applicationPackages, toolchain, configs,
+    int result = await buildForDevice(
+      device, applicationPackages, toolchain, configs,
       enginePath: enginePath,
       target: target
     );
@@ -232,15 +232,8 @@ Future<int> startApp(
     platformArgs: platformArgs
   );
 
-  if (!result) {
+  if (!result)
     printError('Error running application on ${device.name}.');
-  } else {
-    // If the user specified --start-paused (and the device supports it) then
-    // wait for the observatory port to become available before returning from
-    // `startApp()`.
-    if (startPaused && device.supportsStartPaused)
-      await delayUntilObservatoryAvailable('localhost', debugPort);
-  }
 
   return result ? 0 : 2;
 }

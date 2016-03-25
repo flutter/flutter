@@ -245,8 +245,10 @@ Future<int> startApp(DriveCommand command) async {
   // TODO(devoncarew): We should remove the need to special case here.
   if (command.device is AndroidDevice) {
     printTrace('Building an APK.');
-    int result = await build_apk.build(command.toolchain, command.buildConfigurations,
-      enginePath: command.runner.enginePath, target: command.target);
+    int result = await build_apk.build(
+      command.device.platform, command.toolchain, command.buildConfigurations,
+      enginePath: command.runner.enginePath, target: command.target
+    );
 
     if (result != 0)
       return result;

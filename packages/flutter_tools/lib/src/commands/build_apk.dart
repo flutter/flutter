@@ -187,7 +187,10 @@ class BuildApkCommand extends FlutterCommand {
 
     await downloadToolchain();
 
+    // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
+
     return await buildAndroid(
+      TargetPlatform.android_arm,
       toolchain: toolchain,
       configs: buildConfigurations,
       enginePath: runner.enginePath,
@@ -212,6 +215,7 @@ Future<_ApkComponents> _findApkComponents(
 ) async {
   List<String> artifactPaths;
   if (enginePath != null) {
+    // TODO(devoncarew): Support x64.
     artifactPaths = [
       '$enginePath/third_party/icu/android/icudtl.dat',
       '${config.buildDir}/gen/sky/shell/shell/classes.dex.jar',
@@ -225,10 +229,13 @@ Future<_ApkComponents> _findApkComponents(
       ArtifactType.androidLibSkyShell,
       ArtifactType.androidKeystore,
     ];
-    Iterable<Future<String>> pathFutures = artifactTypes.map(
-        (ArtifactType type) => ArtifactStore.getPath(ArtifactStore.getArtifact(
-            type: type, targetPlatform: TargetPlatform.android_arm)));
-    artifactPaths = await Future.wait(pathFutures);
+    Iterable<String> pathFutures = artifactTypes.map((ArtifactType type) {
+      return ArtifactStore.getPath(ArtifactStore.getArtifact(
+        type: type,
+        targetPlatform: config.targetPlatform
+      ));
+    });
+    artifactPaths = pathFutures.toList();
   }
 
   _ApkComponents components = new _ApkComponents();
@@ -254,9 +261,14 @@ Future<_ApkComponents> _findApkComponents(
 }
 
 int _buildApk(
-  _ApkComponents components, String flxPath, ApkKeystoreInfo keystore, String outputFile
+  TargetPlatform platform,
+  _ApkComponents components,
+  String flxPath,
+  ApkKeystoreInfo keystore,
+  String outputFile
 ) {
   Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
+
   try {
     _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
 
@@ -273,7 +285,9 @@ int _buildApk(
 
     _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
     artifactBuilder.add(classesDex, 'classes.dex');
-    artifactBuilder.add(components.libSkyShell, 'lib/armeabi-v7a/libsky_shell.so');
+    // x86? x86_64?
+    String abiDir = platform == TargetPlatform.android_arm ? 'armeabi-v7a' : 'x86';
+    artifactBuilder.add(components.libSkyShell, 'lib/$abiDir/libsky_shell.so');
 
     File unalignedApk = new File('${tempDir.path}/app.apk.unaligned');
     builder.package(
@@ -359,7 +373,8 @@ bool _needsRebuild(String apkPath, String manifest) {
   return false;
 }
 
-Future<int> buildAndroid({
+Future<int> buildAndroid(
+  TargetPlatform platform, {
   Toolchain toolchain,
   List<BuildConfiguration> configs,
   String enginePath,
@@ -367,7 +382,7 @@ Future<int> buildAndroid({
   String manifest: _kDefaultAndroidManifestPath,
   String resources,
   String outputFile: _kDefaultOutputPath,
-  String target: '',
+  String target,
   String flxPath,
   ApkKeystoreInfo keystore
 }) async {
@@ -399,10 +414,9 @@ Future<int> buildAndroid({
       resources = _kDefaultResourcesPath;
   }
 
-  BuildConfiguration config = configs.firstWhere(
-    (BuildConfiguration bc) => bc.targetPlatform == TargetPlatform.android_arm
-  );
+  BuildConfiguration config = configs.firstWhere((BuildConfiguration bc) => bc.targetPlatform == platform);
   _ApkComponents components = await _findApkComponents(config, enginePath, manifest, resources);
+
   if (components == null) {
     printError('Failure building APK. Unable to find components.');
     return 1;
@@ -416,36 +430,34 @@ Future<int> buildAndroid({
       printError('(Omit the --flx option to build the FLX automatically)');
       return 1;
     }
-    return _buildApk(components, flxPath, keystore, outputFile);
+
+    return _buildApk(platform, components, flxPath, keystore, outputFile);
   } else {
     // Find the path to the main Dart file; build the FLX.
     String mainPath = findMainDartFile(target);
     String localBundlePath = await flx.buildFlx(toolchain, mainPath: mainPath);
 
-    return _buildApk(components, localBundlePath, keystore, outputFile);
+    return _buildApk(platform, components, localBundlePath, keystore, outputFile);
   }
 }
 
 // TODO(mpcomplete): move this to Device?
 /// This is currently Android specific.
-Future<int> buildAll(
-  List<Device> devices,
+Future<int> buildForDevice(
+  Device device,
   ApplicationPackageStore applicationPackages,
   Toolchain toolchain,
   List<BuildConfiguration> configs, {
   String enginePath,
   String target: ''
 }) async {
-  for (Device device in devices) {
-    ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
-    if (package == null)
-      continue;
+  ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
+  if (package == null)
+    return 0;
 
-    // TODO(mpcomplete): Temporary hack. We only support the apk builder atm.
-    if (package != applicationPackages.android)
-      continue;
-
-    int result = await build(toolchain, configs, enginePath: enginePath, target: target);
+  // TODO(mpcomplete): Temporary hack. We only support the apk builder atm.
+  if (package == applicationPackages.android) {
+    int result = await build(device.platform, toolchain, configs, enginePath: enginePath, target: target);
     if (result != 0)
       return result;
   }
@@ -454,10 +466,11 @@ Future<int> buildAll(
 }
 
 Future<int> build(
+  TargetPlatform platform,
   Toolchain toolchain,
   List<BuildConfiguration> configs, {
   String enginePath,
-  String target: ''
+  String target
 }) async {
   if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
     printError('Cannot build APK. Missing $_kDefaultAndroidManifestPath.');
@@ -465,6 +478,7 @@ Future<int> build(
   }
 
   int result = await buildAndroid(
+    platform,
     toolchain: toolchain,
     configs: configs,
     enginePath: enginePath,

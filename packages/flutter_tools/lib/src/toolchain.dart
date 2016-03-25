@@ -36,7 +36,7 @@ class SnapshotCompiler {
   }
 }
 
-Future<String> _getCompilerPath(BuildConfiguration config) async {
+String _getCompilerPath(BuildConfiguration config) {
   if (config.type != BuildType.prebuilt) {
     String compilerPath = path.join(config.buildDir, 'clang_x64', 'sky_snapshot');
     if (FileSystemEntity.isFileSync(compilerPath))
@@ -48,7 +48,7 @@ Future<String> _getCompilerPath(BuildConfiguration config) async {
   }
   Artifact artifact = ArtifactStore.getArtifact(
     type: ArtifactType.snapshot, hostPlatform: config.hostPlatform);
-  return await ArtifactStore.getPath(artifact);
+  return ArtifactStore.getPath(artifact);
 }
 
 class Toolchain {
@@ -58,7 +58,7 @@ class Toolchain {
 
   static Future<Toolchain> forConfigs(List<BuildConfiguration> configs) async {
     for (BuildConfiguration config in configs) {
-      String compilerPath = await _getCompilerPath(config);
+      String compilerPath = _getCompilerPath(config);
       if (compilerPath != null)
         return new Toolchain(compiler: new SnapshotCompiler(compilerPath));
     }

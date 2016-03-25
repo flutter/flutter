@@ -104,8 +104,8 @@ Future<int> setupXcodeProjectHarness(String flutterProjectPath) async {
     targetPlatform: TargetPlatform.ios
   );
 
-  String xcodeProjectPath = await ArtifactStore.getPath(xcodeProject);
-  List<int> archiveBytes = await new File(xcodeProjectPath).readAsBytes();
+  String xcodeProjectPath = ArtifactStore.getPath(xcodeProject);
+  List<int> archiveBytes = new File(xcodeProjectPath).readAsBytesSync();
 
   if (archiveBytes.isEmpty) {
     printError('Error: No archive bytes received.');
