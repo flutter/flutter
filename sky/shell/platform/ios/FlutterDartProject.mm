@@ -24,7 +24,7 @@
   self = [super init];
 
   if (self) {
-    _precompiledDartBundle = [bundle copy];
+    _precompiledDartBundle = [bundle retain];
 
     [self checkReadiness];
   }
@@ -108,7 +108,7 @@ static NSString* NSStringFromVMType(VMType type) {
       return;
     case VMTypePrecompilation:
       [self runFromPrecompiledSourceInEngine:engine result:result];
-      break;
+      return;
     case VMTypeInvalid:
       break;
   }

@@ -34,10 +34,13 @@ NSURL* URLForSwitch(const char* name) {
                 dartMain:URLForSwitch(sky::shell::switches::kMainDartFile)
              packageRoot:URLForSwitch(sky::shell::switches::kPackageRoot)];
 #else
-  FlutterDartProject* project = [[FlutterDartProject alloc]
-      initWithPrecompiledDartBundle:
-          [NSBundle bundleWithIdentifier:
-                        @"io.flutter.application.FlutterApplication"]];
+  NSString* bundlePath =
+      [[NSBundle mainBundle] pathForResource:@"FlutterApplication"
+                                      ofType:@"framework"
+                                 inDirectory:@"Frameworks"];
+  NSBundle* bundle = [NSBundle bundleWithPath:bundlePath];
+  FlutterDartProject* project =
+      [[FlutterDartProject alloc] initWithPrecompiledDartBundle:bundle];
 #endif
 
   CGRect frame = [UIScreen mainScreen].bounds;
