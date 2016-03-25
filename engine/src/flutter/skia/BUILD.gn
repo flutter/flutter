@@ -338,7 +338,7 @@ component("skia") {
     "//third_party/skia/src/fonts/SkGScalerContext.h",
   ]
 
-  if (is_ios || is_mac || is_android) {
+  if (is_ios || is_mac || is_android || use_glfw) {
     sources -= [
       "//third_party/skia/src/gpu/gl/GrGLCreateNativeInterface_none.cpp"
     ]
@@ -356,6 +356,10 @@ component("skia") {
     } else if (is_android) {
       sources += [
         "//third_party/skia/src/gpu/gl/android/GrGLCreateNativeInterface_android.cpp"
+      ]
+    } else if (use_glfw) {
+      sources += [
+        "//skia/ext/GrGLCreateNativeInterface_glfw.cpp"
       ]
     }
 
@@ -521,6 +525,10 @@ component("skia") {
   if (is_android && !is_debug) {
     configs -= [ "//build/config/compiler:optimize" ]
     configs += [ "//build/config/compiler:optimize_max" ]
+  }
+
+  if (use_glfw) {
+    deps += [ "//third_party/glfw" ]
   }
 }
 
