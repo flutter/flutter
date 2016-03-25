@@ -12,6 +12,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'src/base/context.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/base/utils.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/build.dart';
 import 'src/commands/create.dart';
@@ -25,6 +26,7 @@ import 'src/commands/logs.dart';
 import 'src/commands/refresh.dart';
 import 'src/commands/run.dart';
 import 'src/commands/run_mojo.dart';
+import 'src/commands/screenshot.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
@@ -63,6 +65,7 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new RefreshCommand())
     ..addCommand(new RunCommand())
     ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
+    ..addCommand(new ScreenshotCommand())
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
@@ -93,7 +96,7 @@ Future<Null> main(List<String> args) async {
     } else {
       // We've crashed; emit a log report.
       stderr.writeln();
-      stderr.writeln('Oops; flutter has crashed: "$error"');
+      stderr.writeln('Oops; flutter has exited unexpectedly: "$error"');
 
       File file = _createCrashReport(args, error, chain);
 
@@ -106,7 +109,7 @@ Future<Null> main(List<String> args) async {
 }
 
 File _createCrashReport(List<String> args, dynamic error, Chain chain) {
-  File crashFile = _createCrashFileName(Directory.current, 'flutter');
+  File crashFile = getUniqueFile(Directory.current, 'flutter', 'log');
 
   StringBuffer buf = new StringBuffer();
 
@@ -125,18 +128,6 @@ File _createCrashReport(List<String> args, dynamic error, Chain chain) {
   crashFile.writeAsStringSync(buf.toString());
 
   return crashFile;
-}
-
-File _createCrashFileName(Directory dir, String baseName) {
-  int i = 1;
-
-  while (true) {
-    String name = '${baseName}_${i.toString().padLeft(2, '0')}.log';
-    File file = new File(path.join(dir.path, name));
-    if (!file.existsSync())
-      return file;
-    i++;
-  }
 }
 
 String _doctorText() {

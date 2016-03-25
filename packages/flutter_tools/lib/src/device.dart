@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'android/android_device.dart';
@@ -190,6 +191,10 @@ abstract class Device {
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
+
+  bool get supportsScreenshot => false;
+
+  Future<bool> takeScreenshot(File outputFile) => new Future<bool>.error('unimplemented');
 
   @override
   int get hashCode => id.hashCode;

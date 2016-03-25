@@ -250,6 +250,18 @@ class IOSDevice extends Device {
   @override
   void clearLogs() {
   }
+
+  @override
+  bool get supportsScreenshot => false;
+
+  @override
+  Future<bool> takeScreenshot(File outputFile) {
+    // We could use idevicescreenshot here (installed along with the brew
+    // ideviceinstaller tools). It however requires a developer disk image on
+    // the device.
+
+    return new Future<bool>.value(false);
+  }
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
