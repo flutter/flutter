@@ -54,7 +54,7 @@ class BuildIOSCommand extends FlutterCommand {
     Directory buildDir = new Directory(path.join('build', 'ios_$logTarget'));
 
     if (!buildDir.existsSync())
-      await buildDir.create();
+      await buildDir.create(recursive: true);
 
     bool result = await buildIOSXcodeProject(app,
         buildForDevice: !forSimulator, buildDirectory: buildDir);
