@@ -5,6 +5,8 @@
 [DartPackage="sky_services"]
 module pointer;
 
+// See https://github.com/flutter/engine/blob/master/sky/specs/pointer.md
+
 enum PointerType {
   DOWN,
   UP,

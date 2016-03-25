@@ -417,6 +417,8 @@ if (is_android) {
       sources += [
         "//sky/shell/platform/glfw/init_glfw.cc",
         "//sky/shell/platform/glfw/init_glfw.h",
+        "//sky/shell/platform/glfw/message_pump_glfw.cc",
+        "//sky/shell/platform/glfw/message_pump_glfw.h",
         "//sky/shell/platform/glfw/platform_view_glfw.cc",
         "//sky/shell/platform/glfw/platform_view_glfw.h",
         "//sky/shell/platform/glfw/window_impl.cc",

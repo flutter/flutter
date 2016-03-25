@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 WinMM - www.glfw.org
+// GLFW 3.2 Win32 - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2006-2014 Camilla Berglund <elmindreda@elmindreda.org>
 //
@@ -24,24 +24,24 @@
 //
 //========================================================================
 
-#ifndef _glfw3_winmm_joystick_h_
-#define _glfw3_winmm_joystick_h_
+#ifndef _glfw3_win32_joystick_h_
+#define _glfw3_win32_joystick_h_
 
 #define _GLFW_PLATFORM_LIBRARY_JOYSTICK_STATE \
-    _GLFWjoystickWinMM winmm_js[GLFW_JOYSTICK_LAST + 1]
+    _GLFWjoystickWin32 win32_js[GLFW_JOYSTICK_LAST + 1]
 
 
-// WinMM-specific per-joystick data
+// Win32-specific per-joystick data
 //
-typedef struct _GLFWjoystickWinMM
+typedef struct _GLFWjoystickWin32
 {
     float           axes[6];
     unsigned char   buttons[36]; // 32 buttons plus one hat
     char*           name;
-} _GLFWjoystickWinMM;
+} _GLFWjoystickWin32;
 
 
-void _glfwInitJoysticks(void);
-void _glfwTerminateJoysticks(void);
+void _glfwInitJoysticksWin32(void);
+void _glfwTerminateJoysticksWin32(void);
 
-#endif // _glfw3_winmm_joystick_h_
+#endif // _glfw3_win32_joystick_h_

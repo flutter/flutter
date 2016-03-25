@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 IOKit - www.glfw.org
+// GLFW 3.2 Cocoa - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2006-2014 Camilla Berglund <elmindreda@elmindreda.org>
 //
@@ -24,23 +24,22 @@
 //
 //========================================================================
 
-#ifndef _glfw3_iokit_joystick_h_
-#define _glfw3_iokit_joystick_h_
+#ifndef _glfw3_cocoa_joystick_h_
+#define _glfw3_cocoa_joystick_h_
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOCFPlugIn.h>
 #include <IOKit/hid/IOHIDLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 
-#define _GLFW_PLATFORM_LIBRARY_JOYSTICK_STATE \
-    _GLFWjoystickIOKit iokit_js
+#define _GLFW_PLATFORM_LIBRARY_JOYSTICK_STATE _GLFWjoystickNS ns_js
 
 
-// IOKit-specific per-joystick data
+// Cocoa-specific per-joystick data
 //
-typedef struct _GLFWjoydevice
+typedef struct _GLFWjoydeviceNS
 {
-    int             present;
+    GLFWbool        present;
     char            name[256];
 
     IOHIDDeviceRef deviceRef;
@@ -51,18 +50,18 @@ typedef struct _GLFWjoydevice
 
     float*          axes;
     unsigned char*  buttons;
-} _GLFWjoydevice;
+} _GLFWjoydeviceNS;
 
-// IOKit-specific joystick API data
+// Cocoa-specific joystick API data
 //
-typedef struct _GLFWjoystickIOKit
+typedef struct _GLFWjoystickNS
 {
-    _GLFWjoydevice devices[GLFW_JOYSTICK_LAST + 1];
+    _GLFWjoydeviceNS devices[GLFW_JOYSTICK_LAST + 1];
 
     IOHIDManagerRef managerRef;
-} _GLFWjoystickIOKit;
+} _GLFWjoystickNS;
 
-void _glfwInitJoysticks(void);
-void _glfwTerminateJoysticks(void);
+void _glfwInitJoysticksNS(void);
+void _glfwTerminateJoysticksNS(void);
 
-#endif // _glfw3_iokit_joystick_h_
+#endif // _glfw3_cocoa_joystick_h_

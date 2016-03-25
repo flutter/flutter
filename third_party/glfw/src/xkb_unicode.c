@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 X11 - www.glfw.org
+// GLFW 3.2 X11 - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2002-2006 Marcus Geelnard
 // Copyright (c) 2006-2010 Camilla Berglund <elmindreda@elmindreda.org>
@@ -827,24 +827,24 @@ static const struct codepair {
   { 0x13be, 0x0178 },
   { 0x20ac, 0x20ac },
   // Numeric keypad with numlock on
-  { XK_KP_Space, ' ' },
-  { XK_KP_Equal, '=' },
-  { XK_KP_Multiply, '*' },
-  { XK_KP_Add, '+' },
-  { XK_KP_Separator, ',' },
-  { XK_KP_Subtract, '-' },
-  { XK_KP_Decimal, '.' },
-  { XK_KP_Divide, '/' },
-  { XK_KP_0, 0x0030 },
-  { XK_KP_1, 0x0031 },
-  { XK_KP_2, 0x0032 },
-  { XK_KP_3, 0x0033 },
-  { XK_KP_4, 0x0034 },
-  { XK_KP_5, 0x0035 },
-  { XK_KP_6, 0x0036 },
-  { XK_KP_7, 0x0037 },
-  { XK_KP_8, 0x0038 },
-  { XK_KP_9, 0x0039 }
+  { 0xff80 /*XKB_KEY_KP_Space*/,     ' ' },
+  { 0xffbd /*XKB_KEY_KP_Equal*/,     '=' },
+  { 0xffaa /*XKB_KEY_KP_Multiply*/,  '*' },
+  { 0xffab /*XKB_KEY_KP_Add*/,       '+' },
+  { 0xffac /*XKB_KEY_KP_Separator*/, ',' },
+  { 0xffad /*XKB_KEY_KP_Subtract*/,  '-' },
+  { 0xffae /*XKB_KEY_KP_Decimal*/,   '.' },
+  { 0xffaf /*XKB_KEY_KP_Divide*/,    '/' },
+  { 0xffb0 /*XKB_KEY_KP_0*/, 0x0030 },
+  { 0xffb1 /*XKB_KEY_KP_1*/, 0x0031 },
+  { 0xffb2 /*XKB_KEY_KP_2*/, 0x0032 },
+  { 0xffb3 /*XKB_KEY_KP_3*/, 0x0033 },
+  { 0xffb4 /*XKB_KEY_KP_4*/, 0x0034 },
+  { 0xffb5 /*XKB_KEY_KP_5*/, 0x0035 },
+  { 0xffb6 /*XKB_KEY_KP_6*/, 0x0036 },
+  { 0xffb7 /*XKB_KEY_KP_7*/, 0x0037 },
+  { 0xffb8 /*XKB_KEY_KP_8*/, 0x0038 },
+  { 0xffb9 /*XKB_KEY_KP_9*/, 0x0039 }
 };
 
 

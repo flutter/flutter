@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 - www.glfw.org
+// GLFW 3.2 - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2002-2006 Marcus Geelnard
 // Copyright (c) 2006-2010 Camilla Berglund <elmindreda@elmindreda.org>
@@ -39,7 +39,7 @@
 // Global state shared between compilation units of GLFW
 // These are documented in internal.h
 //
-GLboolean _glfwInitialized = GL_FALSE;
+GLFWbool _glfwInitialized = GLFW_FALSE;
 _GLFWlibrary _glfw;
 
 // This is outside of _glfw so it can be initialized and usable before
@@ -72,9 +72,11 @@ static const char* getErrorString(int error)
             return "A platform-specific error occurred";
         case GLFW_FORMAT_UNAVAILABLE:
             return "The requested format is unavailable";
+        case GLFW_NO_WINDOW_CONTEXT:
+            return "The specified window has no context";
+        default:
+            return "ERROR: UNKNOWN GLFW ERROR";
     }
-
-    return "ERROR: UNKNOWN ERROR TOKEN PASSED TO glfwErrorString";
 }
 
 
@@ -118,23 +120,27 @@ void _glfwInputError(int error, const char* format, ...)
 GLFWAPI int glfwInit(void)
 {
     if (_glfwInitialized)
-        return GL_TRUE;
+        return GLFW_TRUE;
 
     memset(&_glfw, 0, sizeof(_glfw));
 
     if (!_glfwPlatformInit())
     {
         _glfwPlatformTerminate();
-        return GL_FALSE;
+        return GLFW_FALSE;
     }
 
+    _glfwInitVulkan();
+
     _glfw.monitors = _glfwPlatformGetMonitors(&_glfw.monitorCount);
-    _glfwInitialized = GL_TRUE;
+    _glfwInitialized = GLFW_TRUE;
+
+    _glfw.timerOffset = _glfwPlatformGetTimerValue();
 
     // Not all window hints have zero as their default value
     glfwDefaultWindowHints();
 
-    return GL_TRUE;
+    return GLFW_TRUE;
 }
 
 GLFWAPI void glfwTerminate(void)
@@ -159,6 +165,8 @@ GLFWAPI void glfwTerminate(void)
             _glfwPlatformSetGammaRamp(monitor, &monitor->originalRamp);
     }
 
+    _glfwTerminateVulkan();
+
     _glfwFreeMonitors(_glfw.monitors, _glfw.monitorCount);
     _glfw.monitors = NULL;
     _glfw.monitorCount = 0;
@@ -166,7 +174,7 @@ GLFWAPI void glfwTerminate(void)
     _glfwPlatformTerminate();
 
     memset(&_glfw, 0, sizeof(_glfw));
-    _glfwInitialized = GL_FALSE;
+    _glfwInitialized = GLFW_FALSE;
 }
 
 GLFWAPI void glfwGetVersion(int* major, int* minor, int* rev)

@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 Wayland - www.glfw.org
+// GLFW 3.2 Wayland - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2014 Jonas Ådahl <jadahl@gmail.com>
 //
@@ -29,6 +29,21 @@
 
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
+#include <dlfcn.h>
+
+typedef VkFlags VkWaylandSurfaceCreateFlagsKHR;
+
+typedef struct VkWaylandSurfaceCreateInfoKHR
+{
+    VkStructureType                 sType;
+    const void*                     pNext;
+    VkWaylandSurfaceCreateFlagsKHR  flags;
+    struct wl_display*              display;
+    struct wl_surface*              surface;
+} VkWaylandSurfaceCreateInfoKHR;
+
+typedef VkResult (APIENTRY *PFN_vkCreateWaylandSurfaceKHR)(VkInstance,const VkWaylandSurfaceCreateInfoKHR*,const VkAllocationCallbacks*,VkSurfaceKHR*);
+typedef VkBool32 (APIENTRY *PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR)(VkPhysicalDevice,uint32_t,struct wl_display*);
 
 #include "posix_tls.h"
 #include "posix_time.h"
@@ -41,8 +56,15 @@
  #error "The Wayland backend depends on EGL platform support"
 #endif
 
-#define _GLFW_EGL_NATIVE_WINDOW         window->wl.native
-#define _GLFW_EGL_NATIVE_DISPLAY        _glfw.wl.display
+#include "wayland-relative-pointer-unstable-v1-client-protocol.h"
+#include "wayland-pointer-constraints-unstable-v1-client-protocol.h"
+
+#define _glfw_dlopen(name) dlopen(name, RTLD_LAZY | RTLD_LOCAL)
+#define _glfw_dlclose(handle) dlclose(handle)
+#define _glfw_dlsym(handle, name) dlsym(handle, name)
+
+#define _GLFW_EGL_NATIVE_WINDOW         ((EGLNativeWindowType) window->wl.native)
+#define _GLFW_EGL_NATIVE_DISPLAY        ((EGLNativeDisplayType) _glfw.wl.display)
 
 #define _GLFW_PLATFORM_WINDOW_STATE         _GLFWwindowWayland  wl
 #define _GLFW_PLATFORM_LIBRARY_WINDOW_STATE _GLFWlibraryWayland wl
@@ -60,13 +82,26 @@ typedef struct _GLFWvidmodeWayland _GLFWvidmodeWayland;
 typedef struct _GLFWwindowWayland
 {
     int                         width, height;
-    GLboolean                   visible;
+    GLFWbool                    visible;
     struct wl_surface*          surface;
     struct wl_egl_window*       native;
     struct wl_shell_surface*    shell_surface;
     struct wl_callback*         callback;
+
     _GLFWcursor*                currentCursor;
     double                      cursorPosX, cursorPosY;
+
+    // We need to track the monitors the window spans on to calculate the
+    // optimal scaling factor.
+    int                         scale;
+    _GLFWmonitor**              monitors;
+    int                         monitorsCount;
+    int                         monitorsSize;
+
+    struct {
+        struct zwp_relative_pointer_v1*    relativePointer;
+        struct zwp_locked_pointer_v1*      lockedPointer;
+    } pointerLock;
 } _GLFWwindowWayland;
 
 
@@ -82,15 +117,20 @@ typedef struct _GLFWlibraryWayland
     struct wl_seat*             seat;
     struct wl_pointer*          pointer;
     struct wl_keyboard*         keyboard;
+    struct zwp_relative_pointer_manager_v1* relativePointerManager;
+    struct zwp_pointer_constraints_v1*      pointerConstraints;
+
+    int                         wl_compositor_version;
 
     struct wl_cursor_theme*     cursorTheme;
-    struct wl_cursor*           defaultCursor;
     struct wl_surface*          cursorSurface;
     uint32_t                    pointerSerial;
 
     _GLFWmonitor**              monitors;
     int                         monitorsCount;
     int                         monitorsSize;
+
+    short int                   publicKeys[256];
 
     struct {
         struct xkb_context*     context;
@@ -118,11 +158,11 @@ typedef struct _GLFWmonitorWayland
     _GLFWvidmodeWayland*        modes;
     int                         modesCount;
     int                         modesSize;
-    GLboolean                   done;
+    GLFWbool                    done;
 
     int                         x;
     int                         y;
-
+    int                         scale;
 } _GLFWmonitorWayland;
 
 
@@ -130,12 +170,13 @@ typedef struct _GLFWmonitorWayland
 //
 typedef struct _GLFWcursorWayland
 {
+    struct wl_cursor_image*     image;
     struct wl_buffer*           buffer;
     int                         width, height;
     int                         xhot, yhot;
 } _GLFWcursorWayland;
 
 
-void _glfwAddOutput(uint32_t name, uint32_t version);
+void _glfwAddOutputWayland(uint32_t name, uint32_t version);
 
 #endif // _glfw3_wayland_platform_h_

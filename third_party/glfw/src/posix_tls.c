@@ -1,5 +1,5 @@
 //========================================================================
-// GLFW 3.1 POSIX - www.glfw.org
+// GLFW 3.2 POSIX - www.glfw.org
 //------------------------------------------------------------------------
 // Copyright (c) 2002-2006 Marcus Geelnard
 // Copyright (c) 2006-2010 Camilla Berglund <elmindreda@elmindreda.org>
@@ -32,32 +32,34 @@
 //////                       GLFW internal API                      //////
 //////////////////////////////////////////////////////////////////////////
 
-int _glfwCreateContextTLS(void)
+GLFWbool _glfwInitThreadLocalStoragePOSIX(void)
 {
     if (pthread_key_create(&_glfw.posix_tls.context, NULL) != 0)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
                         "POSIX: Failed to create context TLS");
-        return GL_FALSE;
+        return GLFW_FALSE;
     }
 
-    return GL_TRUE;
+    _glfw.posix_tls.allocated = GLFW_TRUE;
+    return GLFW_TRUE;
 }
 
-void _glfwDestroyContextTLS(void)
+void _glfwTerminateThreadLocalStoragePOSIX(void)
 {
-    pthread_key_delete(_glfw.posix_tls.context);
-}
-
-void _glfwSetContextTLS(_GLFWwindow* context)
-{
-    pthread_setspecific(_glfw.posix_tls.context, context);
+    if (_glfw.posix_tls.allocated)
+        pthread_key_delete(_glfw.posix_tls.context);
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW platform API                      //////
 //////////////////////////////////////////////////////////////////////////
+
+void _glfwPlatformSetCurrentContext(_GLFWwindow* context)
+{
+    pthread_setspecific(_glfw.posix_tls.context, context);
+}
 
 _GLFWwindow* _glfwPlatformGetCurrentContext(void)
 {

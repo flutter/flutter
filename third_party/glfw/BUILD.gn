@@ -21,6 +21,7 @@ source_set("glfw") {
     "src/posix_time.h",
     "src/posix_tls.c",
     "src/posix_tls.h",
+    "src/vulkan.c",
     "src/window.c",
     "src/x11_init.c",
     "src/x11_monitor.c",
