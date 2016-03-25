@@ -669,6 +669,14 @@ enum ImageFit {
   /// As small as possible while still covering the entire box.
   cover,
 
+  /// Make sure the full width of the image is shown, regardless of
+  /// whether this means the image overflows the box vertically.
+  fitWidth,
+
+  /// Make sure the full height of the image is shown, regardless of
+  /// whether this means the image overflows the box horizontally.
+  fitHeight,
+
   /// Center the image within the box and discard any portions of the image that
   /// lie outside the box.
   none,
@@ -772,6 +780,16 @@ void paintImage({
         sourcePosition = new Point((inputSize.width - sourceSize.width) * (alignment?.dx ?? 0.5), 0.0);
       }
       destinationSize = outputSize;
+      break;
+    case ImageFit.fitWidth:
+      sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
+      sourcePosition = new Point(0.0, (inputSize.height - sourceSize.height) * (alignment?.dy ?? 0.5));
+      destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
+      break;
+    case ImageFit.fitHeight:
+      sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+      sourcePosition = new Point((inputSize.width - sourceSize.width) * (alignment?.dx ?? 0.5), 0.0);
+      destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       break;
     case ImageFit.none:
       sourceSize = new Size(math.min(inputSize.width, outputSize.width),
