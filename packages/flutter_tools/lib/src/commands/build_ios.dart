@@ -51,20 +51,14 @@ class BuildIOSCommand extends FlutterCommand {
 
     printStatus('Building the application for $logTarget.');
 
-    Directory buildDir = new Directory(path.join('build', 'ios_$logTarget'));
-
-    if (!buildDir.existsSync())
-      await buildDir.create();
-
-    bool result = await buildIOSXcodeProject(app,
-        buildForDevice: !forSimulator, buildDirectory: buildDir);
+    bool result = await buildIOSXcodeProject(app, buildForDevice: !forSimulator);
 
     if (!result) {
       printError('Encountered error while building for $logTarget.');
       return 1;
     }
 
-    printStatus('Built in ${buildDir.path}.');
+    printStatus('Built in "ios/.generated/build"');
 
     return 0;
   }

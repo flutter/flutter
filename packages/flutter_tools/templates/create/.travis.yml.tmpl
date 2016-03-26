@@ -1,0 +1,11 @@
+os:
+  - osx
+osx_image: xcode7.2
+sudo: false
+before_script:
+  - git clone https://github.com/flutter/flutter.git /tmp/flutter
+  - export PATH=/tmp/flutter/bin:$PATH
+script:
+  - sed -i .orig "s/path:.*packages\/flutter/path:\ \/tmp\/flutter\/packages\/flutter/" pubspec.yaml
+  - flutter build ios --simulator --verbose
+  - flutter build ios --verbose
