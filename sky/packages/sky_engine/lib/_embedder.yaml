@@ -25,17 +25,32 @@ analyzer:
 
 linter:
   rules:
+    - avoid_empty_else
+    - always_declare_return_types
+    - always_specify_types
+    - annotate_overrides
+    # - avoid_as # https://github.com/dart-lang/linter/issues/195
+    - avoid_init_to_null
+    # - avoid_return_types_on_setters # https://github.com/dart-lang/linter/issues/202
     - camel_case_types
-    # Sometimes we have no choice (e.g. when matching other platforms).
-    # - constant_identifier_names
+    # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204 (and 203)
     - empty_constructor_bodies
-    # Disabled until regexp fix is pulled in (https://github.com/flutter/flutter/pull/1996).
-    # - library_names
+    - hash_and_equals
+    # - implementation_imports # https://github.com/dart-lang/linter/issues/203
+    - library_names
     - library_prefixes
     - non_constant_identifier_names
-    # Too many false-positives; code review should catch real instances.
-    # - one_member_abstracts
+    # - one_member_abstracts # https://github.com/dart-lang/linter/issues/203
+    - package_api_docs
+    - package_names
+    - package_prefixed_library_names
+    - prefer_is_not_empty
+    # - public_member_api_docs # still a lot of work to do before enabling this one
     - slash_for_doc_comments
+    - sort_constructors_first
+    - sort_unnamed_constructors_first
     - super_goes_last
+    - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     - unnecessary_brace_in_string_interp
+    - unnecessary_getters_setters
