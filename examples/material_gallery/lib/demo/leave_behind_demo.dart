@@ -13,7 +13,7 @@ enum LeaveBehindDemoAction {
   rightSwipe
 }
 
-class LeaveBehindItem {
+class LeaveBehindItem implements Comparable<LeaveBehindItem> {
   LeaveBehindItem({ this.index, this.name, this.subject, this.body });
 
   LeaveBehindItem.from(LeaveBehindItem item)
@@ -23,6 +23,9 @@ class LeaveBehindItem {
   final String name;
   final String subject;
   final String body;
+
+  @override
+  int compareTo(LeaveBehindItem other) => index.compareTo(other.index);
 }
 
 class LeaveBehindDemo extends StatefulWidget {
@@ -72,9 +75,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   }
 
   void handleUndo(LeaveBehindItem item) {
-    int insertionIndex = lowerBound(leaveBehindItems, item,
-      compare: (LeaveBehindItem a, LeaveBehindItem b) => a.index.compareTo(b.index)
-    );
+    int insertionIndex = lowerBound(leaveBehindItems, item);
     setState(() {
       leaveBehindItems.insert(insertionIndex, item);
     });
