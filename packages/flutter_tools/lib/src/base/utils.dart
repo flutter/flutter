@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:path/path.dart' as path;
 
 String hex(List<int> bytes) {
   StringBuffer result = new StringBuffer();
@@ -32,6 +33,18 @@ String camelCase(String str) {
 
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : word + 's';
+
+File getUniqueFile(Directory dir, String baseName, String ext) {
+  int i = 1;
+
+  while (true) {
+    String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    File file = new File(path.join(dir.path, name));
+    if (!file.existsSync())
+      return file;
+    i++;
+  }
+}
 
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is

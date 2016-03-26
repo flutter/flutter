@@ -615,6 +615,49 @@ class IOSSimulator extends Device {
     if (!logFile.existsSync())
       logFile.writeAsBytesSync(<int>[]);
   }
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  Future<bool> takeScreenshot(File outputFile) async {
+    String homeDirPath = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+    Directory desktopDir = new Directory(path.join(homeDirPath, 'Desktop'));
+
+    // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
+
+    Set<File> getScreenshots() {
+      return new Set<File>.from(desktopDir.listSync().where((FileSystemEntity entity) {
+        String name = path.basename(entity.path);
+        return entity is File && name.startsWith('Simulator') && name.endsWith('.png');
+      }));
+    };
+
+    Set<File> existingScreenshots = getScreenshots();
+
+    runSync(<String>[
+      'osascript',
+      '-e',
+      'activate application "Simulator"\n'
+        'tell application "System Events" to keystroke "s" using command down'
+    ]);
+
+    // There is some latency here from the applescript call.
+    await new Future<Null>.delayed(new Duration(seconds: 1));
+
+    Set<File> shots = getScreenshots().difference(existingScreenshots);
+
+    if (shots.isEmpty) {
+      printError('Unable to locate the screenshot file.');
+      return false;
+    }
+
+    File shot = shots.first;
+    outputFile.writeAsBytesSync(shot.readAsBytesSync());
+    shot.delete();
+
+    return true;
+  }
 }
 
 class _IOSSimulatorLogReader extends DeviceLogReader {
