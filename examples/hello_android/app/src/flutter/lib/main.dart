@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 final Random random = new Random();
 
@@ -43,7 +43,7 @@ class _HelloAndroidState extends State<HelloAndroid> {
               child: new Text('Get Location'),
               onPressed: _getLocation
             ),
-            new Text('Latitude: ${_latitude}, Longitude: ${_longitude}'),
+            new Text('Latitude: $_latitude, Longitude: $_longitude'),
           ]
         )
       )
